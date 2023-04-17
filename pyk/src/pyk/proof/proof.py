@@ -61,4 +61,7 @@ class Proof(ABC):
 
     @property
     def summary(self) -> Iterable[str]:
-        return [self.id]
+        return [
+            f'Proof: {self.id}',
+            f'    status: {self.status}',
+        ]

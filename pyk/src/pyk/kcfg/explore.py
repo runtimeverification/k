@@ -9,7 +9,7 @@ from ..kast.manip import flatten_label, free_vars
 from ..kore.rpc import KoreClient, KoreServer, StopReason
 from ..ktool.kprove import KoreExecLogFormat
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_bottom, is_top, mlEquals, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlTop
 from ..utils import shorten_hashes, single
 from .kcfg import KCFG
 
@@ -28,6 +28,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class KCFGExplore(ContextManager['KCFGExplore']):
     kprint: KPrint
+    id: str
     _port: int | None
     _kore_rpc_command: str | Iterable[str]
     _smt_timeout: int | None
@@ -42,6 +43,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         self,
         kprint: KPrint,
         *,
+        id: str | None = None,
         port: int | None = None,
         kore_rpc_command: str | Iterable[str] = 'kore-rpc',
         smt_timeout: int | None = None,
@@ -52,6 +54,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         log_axioms_file: Path | None = None,
     ):
         self.kprint = kprint
+        self.id = id if id is not None else 'NO ID'
         self._port = port
         self._kore_rpc_command = kore_rpc_command
         self._smt_timeout = smt_timeout
@@ -114,15 +117,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         depth = er.depth
         next_state = CTerm.from_kast(self.kprint.kore_to_kast(er.state.kore))
         _next_states = er.next_states if er.next_states is not None else []
-        # TODO: should not have to prune bottom branches, the backend should do this for us.
-        next_states = []
-        for ns in _next_states:
-            _LOGGER.info(f'Checking for bottom branch: {ns}')
-            _ns = self.cterm_simplify(CTerm.from_kast(self.kprint.kore_to_kast(ns.kore)))
-            if is_bottom(_ns):
-                _LOGGER.warning(f'Found bottom branch: {ns}')
-            else:
-                next_states.append(CTerm.from_kast(_ns))
+        next_states = [CTerm.from_kast(self.kprint.kore_to_kast(ns.kore)) for ns in _next_states]
         if len(next_states) == 1 and len(next_states) < len(_next_states):
             return depth + 1, next_states[0], []
         elif len(next_states) == 1:
@@ -192,40 +187,38 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
 
-    def remove_subgraph_from(self, cfgid: str, cfg: KCFG, node: str) -> KCFG:
+    def remove_subgraph_from(self, cfg: KCFG, node: str) -> None:
         for _node in cfg.reachable_nodes(node, traverse_covers=True):
             if not cfg.is_target(_node.id):
                 _LOGGER.info(f'Removing node: {shorten_hashes(_node.id)}')
                 cfg.remove_node(_node.id)
-        return cfg
 
-    def simplify(self, cfgid: str, cfg: KCFG) -> KCFG:
+    def simplify(self, cfg: KCFG) -> None:
         for node in cfg.nodes:
-            _LOGGER.info(f'Simplifying node {cfgid}: {shorten_hashes(node.id)}')
+            _LOGGER.info(f'Simplifying node {self.id}: {shorten_hashes(node.id)}')
             new_term = self.cterm_simplify(node.cterm)
             if is_top(new_term):
-                raise ValueError(f'Node simplified to #Top {cfgid}: {shorten_hashes(node.id)}')
+                raise ValueError(f'Node simplified to #Top {self.id}: {shorten_hashes(node.id)}')
             if is_bottom(new_term):
-                raise ValueError(f'Node simplified to #Bottom {cfgid}: {shorten_hashes(node.id)}')
+                raise ValueError(f'Node simplified to #Bottom {self.id}: {shorten_hashes(node.id)}')
             if new_term != node.cterm.kast:
                 cfg.replace_node(node.id, CTerm.from_kast(new_term))
-        return cfg
 
-    def step(self, cfgid: str, cfg: KCFG, node_id: str, depth: int = 1) -> tuple[KCFG, str]:
+    def step(self, cfg: KCFG, node_id: str, depth: int = 1) -> str:
         if depth <= 0:
             raise ValueError(f'Expected positive depth, got: {depth}')
         node = cfg.node(node_id)
         successors = list(cfg.successors(node.id))
         if len(successors) != 0 and type(successors[0]) is KCFG.Split:
-            raise ValueError(f'Cannot take step from split node {cfgid}: {shorten_hashes(node.id)}')
-        _LOGGER.info(f'Taking {depth} steps from node {cfgid}: {shorten_hashes(node.id)}')
+            raise ValueError(f'Cannot take step from split node {self.id}: {shorten_hashes(node.id)}')
+        _LOGGER.info(f'Taking {depth} steps from node {self.id}: {shorten_hashes(node.id)}')
         actual_depth, cterm, next_cterms = self.cterm_execute(node.cterm, depth=depth)
         if actual_depth != depth:
-            raise ValueError(f'Unable to take {depth} steps from node, got {actual_depth} steps {cfgid}: {node.id}')
+            raise ValueError(f'Unable to take {depth} steps from node, got {actual_depth} steps {self.id}: {node.id}')
         if len(next_cterms) > 0:
-            raise ValueError(f'Found branch within {depth} steps {cfgid}: {node.id}')
+            raise ValueError(f'Found branch within {depth} steps {self.id}: {node.id}')
         new_node = cfg.get_or_create_node(cterm)
-        _LOGGER.info(f'Found new node at depth {depth} {cfgid}: {shorten_hashes((node.id, new_node.id))}')
+        _LOGGER.info(f'Found new node at depth {depth} {self.id}: {shorten_hashes((node.id, new_node.id))}')
         out_edges = cfg.edges(source_id=node.id)
         if len(out_edges) == 0:
             cfg.create_edge(node.id, new_node.id, depth=depth)
@@ -233,29 +226,90 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             edge = out_edges[0]
             if depth > edge.depth:
                 raise ValueError(
-                    f'Step depth {depth} greater than original edge depth {edge.depth} {cfgid}: {shorten_hashes((edge.source.id, edge.target.id))}'
+                    f'Step depth {depth} greater than original edge depth {edge.depth} {self.id}: {shorten_hashes((edge.source.id, edge.target.id))}'
                 )
             cfg.remove_edge(edge.source.id, edge.target.id)
             cfg.create_edge(edge.source.id, new_node.id, depth=depth)
             cfg.create_edge(new_node.id, edge.target.id, depth=(edge.depth - depth))
-        return (cfg, new_node.id)
+        return new_node.id
 
-    def section_edge(
-        self, cfgid: str, cfg: KCFG, source_id: str, target_id: str, sections: int = 2
-    ) -> tuple[KCFG, tuple[str, ...]]:
+    def section_edge(self, cfg: KCFG, source_id: str, target_id: str, sections: int = 2) -> tuple[str, ...]:
         if sections <= 1:
-            raise ValueError(f'Cannot section an edge less than twice {cfgid}: {sections}')
+            raise ValueError(f'Cannot section an edge less than twice {self.id}: {sections}')
         edge = single(cfg.edges(source_id=source_id, target_id=target_id))
         section_depth = int(edge.depth / sections)
         if section_depth == 0:
-            raise ValueError(f'Too many sections, results in 0-length section {cfgid}: {sections}')
+            raise ValueError(f'Too many sections, results in 0-length section {self.id}: {sections}')
         orig_depth = edge.depth
         new_depth = section_depth
         new_nodes = []
         curr_node_id = edge.source.id
         while new_depth < orig_depth:
-            _LOGGER.info(f'Taking {section_depth} steps from node {cfgid}: {shorten_hashes(curr_node_id)}')
-            cfg, curr_node_id = self.step(cfgid, cfg, curr_node_id, depth=section_depth)
+            _LOGGER.info(f'Taking {section_depth} steps from node {self.id}: {shorten_hashes(curr_node_id)}')
+            curr_node_id = self.step(cfg, curr_node_id, depth=section_depth)
             new_nodes.append(curr_node_id)
             new_depth += section_depth
-        return (cfg, tuple(new_nodes))
+        return tuple(new_nodes)
+
+    def target_subsume(
+        self,
+        kcfg: KCFG,
+        node: KCFG.Node,
+    ) -> bool:
+        target_node = kcfg.get_unique_target()
+        _LOGGER.info(f'Checking subsumption into target state {self.id}: {shorten_hashes((node.id, target_node.id))}')
+        csubst = self.cterm_implies(node.cterm, target_node.cterm)
+        if csubst is not None:
+            kcfg.create_cover(node.id, target_node.id, csubst=csubst)
+            _LOGGER.info(f'Subsumed into target node {self.id}: {shorten_hashes((node.id, target_node.id))}')
+            return True
+        return False
+
+    def extend(
+        self,
+        kcfg: KCFG,
+        node: KCFG.Node,
+        execute_depth: int | None = None,
+        cut_point_rules: Iterable[str] = (),
+        terminal_rules: Iterable[str] = (),
+    ) -> None:
+        if not kcfg.is_frontier(node.id):
+            raise ValueError(f'Cannot extend non-frontier node {self.id}: {node.id}')
+
+        kcfg.add_expanded(node.id)
+
+        _LOGGER.info(f'Extending KCFG from node {self.id}: {shorten_hashes(node.id)}')
+        depth, cterm, next_cterms = self.cterm_execute(
+            node.cterm, depth=execute_depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules
+        )
+
+        # Basic block
+        if depth > 0:
+            next_node = kcfg.get_or_create_node(cterm)
+            kcfg.create_edge(node.id, next_node.id, depth)
+            _LOGGER.info(
+                f'Found basic block at depth {depth} for {self.id}: {shorten_hashes((node.id, next_node.id))}.'
+            )
+
+        # Stuck
+        elif len(next_cterms) == 0:
+            _LOGGER.info(f'Found stuck node {self.id}: {shorten_hashes(node.id)}')
+
+        # Cut Rule
+        elif len(next_cterms) == 1:
+            next_node = kcfg.get_or_create_node(next_cterms[0])
+            kcfg.create_edge(node.id, next_node.id, 1)
+            _LOGGER.info(
+                f'Inserted cut-rule basic block at depth 1 for {self.id}: {shorten_hashes((node.id, next_node.id))}'
+            )
+
+        # Branch
+        elif len(next_cterms) > 1:
+            branches = [mlAnd(c for c in s.constraints if c not in cterm.constraints) for s in next_cterms]
+            kcfg.split_on_constraints(node.id, branches)
+            _LOGGER.info(
+                f'Found {len(branches)} branches for node {self.id}: {shorten_hashes(node.id)}: {[self.kprint.pretty_print(bc) for bc in branches]}'
+            )
+
+        else:
+            raise ValueError('Unhandled case.')
