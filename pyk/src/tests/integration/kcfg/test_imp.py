@@ -10,7 +10,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
-from pyk.proof import AGProof, AGProver, ProofStatus
+from pyk.proof import AGBMCProof, AGBMCProver, AGProof, AGProver, ProofStatus
 
 from ..utils import KCFGExploreTest
 
@@ -211,6 +211,84 @@ APR_PROVE_TEST_DATA: Iterable[
 )
 
 
+APRBMC_PROVE_TEST_DATA: Iterable[
+    tuple[str, str, str, str, int | None, int | None, int, Iterable[str], Iterable[str], ProofStatus]
+] = (
+    (
+        'bmc-loop-concrete-1',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-loop-concrete',
+        20,
+        20,
+        1,
+        [],
+        ['IMP.while'],
+        ProofStatus.PASSED,
+    ),
+    (
+        'bmc-loop-concrete-2',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-loop-concrete',
+        20,
+        20,
+        2,
+        [],
+        ['IMP.while'],
+        ProofStatus.PASSED,
+    ),
+    (
+        'bmc-loop-concrete-3',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-loop-concrete',
+        20,
+        20,
+        3,
+        [],
+        ['IMP.while'],
+        ProofStatus.FAILED,
+    ),
+    (
+        'bmc-loop-symbolic-1',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-loop-symbolic',
+        20,
+        20,
+        1,
+        [],
+        ['IMP.while'],
+        ProofStatus.PASSED,
+    ),
+    (
+        'bmc-loop-symbolic-2',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-loop-symbolic',
+        20,
+        20,
+        2,
+        [],
+        ['IMP.while'],
+        ProofStatus.FAILED,
+    ),
+    (
+        'bmc-loop-symbolic-3',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-loop-symbolic',
+        20,
+        20,
+        3,
+        [],
+        ['IMP.while'],
+        ProofStatus.FAILED,
+    ),
+)
+
+
 class TestImpProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
 
@@ -226,6 +304,16 @@ class TestImpProof(KCFGExploreTest):
                 return True
             if len(k_cell) == 1 and type(k_cell[0]) is KVariable:
                 return True
+        if type(k_cell) is KVariable:
+            return True
+        return False
+
+    @staticmethod
+    def _same_loop(cterm1: CTerm, cterm2: CTerm) -> bool:
+        k_cell_1 = cterm1.cell('K_CELL')
+        k_cell_2 = cterm2.cell('K_CELL')
+        if k_cell_1 == k_cell_2 and type(k_cell_1) is KSequence and type(k_cell_1[0]) is KApply:
+            return k_cell_1[0].label.name == 'while(_)_'
         return False
 
     @staticmethod
@@ -359,6 +447,45 @@ class TestImpProof(KCFGExploreTest):
         kcfg = KCFG.from_claim(kprove.definition, claims[0])
         proof = AGProof(f'{spec_module}.{claim_id}', kcfg)
         prover = AGProver(proof, is_terminal=TestImpProof._is_terminal)
+        kcfg = prover.advance_proof(
+            kcfg_explore,
+            max_iterations=max_iterations,
+            execute_depth=max_depth,
+            cut_point_rules=cut_rules,
+            terminal_rules=terminal_rules,
+        )
+
+        assert proof.status == proof_status
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,bmc_depth,terminal_rules,cut_rules,proof_status',
+        APRBMC_PROVE_TEST_DATA,
+        ids=[test_id for test_id, *_ in APRBMC_PROVE_TEST_DATA],
+    )
+    def test_all_path_bmc_reachability_prove(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int,
+        max_depth: int,
+        bmc_depth: int,
+        terminal_rules: Iterable[str],
+        cut_rules: Iterable[str],
+        proof_status: ProofStatus,
+    ) -> None:
+        claims = kprove.get_claims(
+            Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+        )
+        assert len(claims) == 1
+
+        kcfg = KCFG.from_claim(kprove.definition, claims[0])
+        kcfg_explore.simplify(kcfg)
+        proof = AGBMCProof(f'{spec_module}.{claim_id}', kcfg, bmc_depth)
+        prover = AGBMCProver(proof, TestImpProof._same_loop, is_terminal=TestImpProof._is_terminal)
         kcfg = prover.advance_proof(
             kcfg_explore,
             max_iterations=max_iterations,
