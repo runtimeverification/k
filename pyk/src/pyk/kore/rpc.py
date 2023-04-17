@@ -98,6 +98,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         old_id = self._req_id
         self._req_id += 1
+        bug_report_id = str(id(self))
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
@@ -110,7 +111,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
         if self._bug_report:
-            bug_report_request = f'rpc/{old_id:03}_request.json'
+            bug_report_request = f'rpc_{bug_report_id}/{old_id:03}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
             self._bug_report.add_command(
                 [
@@ -122,7 +123,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
                     self._host,
                     str(self._port),
                     '>',
-                    f'rpc/{old_id:03}_actual.json',
+                    f'rpc_{bug_report_id}/{old_id:03}_actual.json',
                 ]
             )
 
@@ -133,10 +134,16 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
-            bug_report_response = f'rpc/{old_id:03}_response.json'
+            bug_report_response = f'rpc_{bug_report_id}/{old_id:03}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
             self._bug_report.add_command(
-                ['diff', '-b', '-s', f'rpc/{old_id:03}_actual.json', f'rpc/{old_id:03}_response.json']
+                [
+                    'diff',
+                    '-b',
+                    '-s',
+                    f'rpc_{bug_report_id}/{old_id:03}_actual.json',
+                    f'rpc_{bug_report_id}/{old_id:03}_response.json',
+                ]
             )
 
         data = json.loads(resp)
