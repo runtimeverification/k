@@ -41,10 +41,10 @@ def import_kllvm(target_dir: str | Path) -> ModuleType:
     return import_from_file(KLLVM_MODULE_NAME, module_file)
 
 
-def import_runtime(kompiled_dir: str | Path) -> ModuleType:
-    kompiled_dir = Path(kompiled_dir)
-    check_dir_path(kompiled_dir)
-    module_file = kompiled_dir / RUNTIME_MODULE_FILE_NAME
+def import_runtime(target_dir: str | Path) -> ModuleType:
+    target_dir = Path(target_dir)
+    check_dir_path(target_dir)
+    module_file = target_dir / RUNTIME_MODULE_FILE_NAME
     runtime = import_from_file(RUNTIME_MODULE_NAME, module_file)
     _patch_runtime(runtime)
     return runtime
