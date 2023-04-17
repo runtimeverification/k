@@ -49,7 +49,7 @@ module LESSON-01
   syntax Stmts ::= List{Stmt,""}
   syntax Exp ::= Bool
 
-  rule if ( E ) S => if ( E ) S else { }
+  rule if ( E ) S => if ( E ) S else { .Stmts }
 endmodule
 ```
 
