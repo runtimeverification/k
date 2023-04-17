@@ -28,4 +28,14 @@
 	Location(30,8,30,20)
 	30 |	  rule baz3(X) => 0 [concrete(X)]
 	   .	       ^~~~~~~~~~~~
-[Error] Compiler: Had 6 structural errors.
+[Error] Compiler: Rule cannot be both concrete and symbolic in the same variable: [A]
+	Source(concrete.k)
+	Location(33,8,33,32)
+	33 |	  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic(A, B), simplification]
+	   .	       ^~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Rule cannot be both concrete and symbolic in the same variable.
+	Source(concrete.k)
+	Location(34,8,34,32)
+	34 |	  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic, simplification]
+	   .	       ^~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 8 structural errors.
