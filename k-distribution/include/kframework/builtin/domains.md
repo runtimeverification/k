@@ -1678,7 +1678,7 @@ module STRING-KORE [kore, symbolic]
   imports private K-EQUAL
   imports STRING-COMMON
 
-  rule S1:String ==K S2:String => S1 ==String S2 [simplification, comm]
+  rule S1:String ==K S2:String => S1 ==String S2 [simplification]
 
 endmodule
 
