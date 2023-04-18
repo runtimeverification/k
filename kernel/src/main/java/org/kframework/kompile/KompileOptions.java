@@ -121,6 +121,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
     public long bisonStackMaxDepth = 10000;
 
+    @Parameter(names="--bison-parser-library", description="Generate a shared library rather than an executable for Bison parsers")
+    public boolean genBisonParserLibrary;
+
     public static final String DEFAULT_TRANSITION = "transition";
 
     @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
