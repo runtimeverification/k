@@ -87,7 +87,13 @@ def match_map(pattern: Pattern, *, cell: str | None = None) -> tuple[tuple[Patte
 
 def kore_bool(pattern: Pattern) -> bool:
     dv = match_dv(pattern, BOOL)
-    return bool(dv.value.value)
+    match dv.value.value:
+        case 'true':
+            return True
+        case 'false':
+            return False
+        case _:
+            raise ValueError(f'Invalid Boolean domain value: {dv.text}')
 
 
 def kore_int(pattern: Pattern) -> int:
