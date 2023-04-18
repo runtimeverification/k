@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import dataclasses
+from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, final
 
 import pytest
 
@@ -23,15 +25,36 @@ if TYPE_CHECKING:
     from pyk.ktool.kprint import SymbolTable
 
 
-class Target(NamedTuple):
+@final
+@dataclass(frozen=True)
+class Target:
     main_file: Path
     backend: KompileBackend
     main_module: str | None
     syntax_module: str | None
     include_dirs: tuple[Path, ...]
 
+    def __init__(
+        self,
+        main_file: str | Path,
+        *,
+        backend: str | KompileBackend | None = None,
+        main_module: str | None = None,
+        syntax_module: str | None = None,
+        include_dirs: Iterable[str | Path] = (),
+    ):
+        object.__setattr__(self, 'main_file', Path(main_file).resolve())
+        object.__setattr__(self, 'backend', KompileBackend(backend) if backend is not None else KompileBackend.LLVM)
+        object.__setattr__(self, 'main_module', main_module)
+        object.__setattr__(self, 'syntax_module', syntax_module)
+        object.__setattr__(
+            self,
+            'include_dirs',
+            tuple(sorted(Path(include_dir).resolve() for include_dir in include_dirs)),
+        )
+
     def as_dict(self) -> dict[str, Any]:
-        return self._asdict()
+        return dataclasses.asdict(self)
 
 
 class Kompiler:
@@ -52,11 +75,11 @@ class Kompiler:
         include_dirs: Iterable[str | Path] = (),
     ) -> Path:
         target = Target(
-            main_file=Path(main_file).resolve(),
-            backend=KompileBackend(backend) if backend is not None else KompileBackend.LLVM,
+            main_file=main_file,
+            backend=backend,
             main_module=main_module,
             syntax_module=syntax_module,
-            include_dirs=tuple(sorted(Path(include_dir).resolve() for include_dir in include_dirs)),
+            include_dirs=include_dirs,
         )
 
         if target not in self._cache:
