@@ -97,7 +97,6 @@ public class KoreBackend extends AbstractBackend {
     }
 
     public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
-        mainModule = new GenerateSortPredicateRules().gen(mainModule);
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         if (hasAnd) {
           mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
@@ -117,6 +116,7 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d)::moduleResolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer generateSortPredicateRules = DefinitionTransformer.from(new GenerateSortPredicateRules()::gen, "adding sort predicate rules");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         Function1<Definition, Definition> addCoolLikeAtt = d -> DefinitionTransformer.fromSentenceTransformer(new AddCoolLikeAtt(d.mainModule())::add, "add cool-like attribute").apply(d);
@@ -151,6 +151,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
                 .andThen(generateSortPredicateSyntax)
+                .andThen(generateSortPredicateRules)
                 .andThen(generateSortProjections)
                 .andThen(constantFolding)
                 .andThen(propagateMacroToRules)
