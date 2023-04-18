@@ -119,7 +119,7 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
           docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:~/.m2/settings.xml
-          docker exec k-package-docker-test-jammy-${GITHUB_SHA} /bin/bash -c "mvn deploy"
+          docker exec k-package-docker-test-jammy-${GITHUB_SHA} /bin/bash -c "mvn --batch-mode deploy"
 
       - name: 'Clean up Docker Container'
         if: always()
