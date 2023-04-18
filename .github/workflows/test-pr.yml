@@ -106,6 +106,7 @@ jobs:
           docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
           docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
           docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/2_intermediate && ./test_kompile.sh'
       - name: 'Tear down Docker'
         if: always()
         run: |
