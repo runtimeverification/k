@@ -365,21 +365,6 @@ jobs:
         with:
           path: k-homebrew-checkout
 
-      - name: Set up Java for publishing to GitHub Maven Packages
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-          overwrite-settings: true
-          server-id: runtime.verification
-          server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to GitHub Packages
-        run: mvn --batch-mode deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
