@@ -151,7 +151,6 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
                 .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortPredicateRules)
                 .andThen(generateSortProjections)
                 .andThen(constantFolding)
                 .andThen(propagateMacroToRules)
@@ -172,6 +171,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(addCoolLikeAtt)
                 .andThen(markExtraConcreteRules)
                 .andThen(removeAnywhereRules)
+                .andThen(generateSortPredicateRules)
                 .apply(def);
     }
 
