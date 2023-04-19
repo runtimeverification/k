@@ -10,7 +10,8 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
-from pyk.proof import AGBMCProof, AGBMCProver, AGProof, AGProver, ProofStatus
+from pyk.proof import AGBMCProof, AGBMCProver, AGProof, AGProver, EqualityProof, EqualityProver, ProofStatus
+from pyk.utils import single
 
 from ..utils import KCFGExploreTest
 
@@ -288,6 +289,16 @@ APRBMC_PROVE_TEST_DATA: Iterable[
     ),
 )
 
+FUNC_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, ProofStatus]] = (
+    (
+        'func-spec-concrete',
+        'k-files/imp-simple-spec.k',
+        'IMP-FUNCTIONAL-SPEC',
+        'concrete-addition',
+        ProofStatus.PASSED,
+    ),
+)
+
 
 class TestImpProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
@@ -439,12 +450,11 @@ class TestImpProof(KCFGExploreTest):
         cut_rules: Iterable[str],
         proof_status: ProofStatus,
     ) -> None:
-        claims = kprove.get_claims(
-            Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
-        assert len(claims) == 1
 
-        kcfg = KCFG.from_claim(kprove.definition, claims[0])
+        kcfg = KCFG.from_claim(kprove.definition, claim)
         proof = AGProof(f'{spec_module}.{claim_id}', kcfg)
         prover = AGProver(proof, is_terminal=TestImpProof._is_terminal)
         kcfg = prover.advance_proof(
@@ -477,12 +487,11 @@ class TestImpProof(KCFGExploreTest):
         cut_rules: Iterable[str],
         proof_status: ProofStatus,
     ) -> None:
-        claims = kprove.get_claims(
-            Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
-        assert len(claims) == 1
 
-        kcfg = KCFG.from_claim(kprove.definition, claims[0])
+        kcfg = KCFG.from_claim(kprove.definition, claim)
         kcfg_explore.simplify(kcfg)
         proof = AGBMCProof(f'{spec_module}.{claim_id}', kcfg, bmc_depth)
         prover = AGBMCProver(proof, TestImpProof._same_loop, is_terminal=TestImpProof._is_terminal)
@@ -495,3 +504,28 @@ class TestImpProof(KCFGExploreTest):
         )
 
         assert proof.status == proof_status
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,proof_status',
+        FUNC_PROVE_TEST_DATA,
+        ids=[test_id for test_id, *_ in FUNC_PROVE_TEST_DATA],
+    )
+    def test_functional_prove(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        proof_status: ProofStatus,
+    ) -> None:
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
+        )
+
+        equality_proof = EqualityProof.from_claim(claim, kprove.definition)
+        equality_prover = EqualityProver(equality_proof)
+        equality_prover.advance_proof(kcfg_explore)
+
+        assert equality_proof.status == proof_status
