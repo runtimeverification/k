@@ -21,9 +21,19 @@ module SIMPLE-PROOFS
     syntax BarHolder ::= hold ( Foo , Bar ) [klabel(barholder), symbol]
                        | hold2 ( Bar , Baz ) [klabel(barholder2), symbol]
 
-    rule <k> foo => bar ... </k>
+    rule [foo-to-bar]:
+         <k> foo => bar ... </k>
          <state> ... 3 |-> N ... </state>
       requires pred1(N)
+
+    rule [foo-to-bar-false]:
+         <k> (foo => bar) ~> _RestK </k>
+         <state> (3 |-> N) _RestState </state>
+      requires pred1(N) andBool false
+      [priority(30)]
+
+    rule [foo-to-baz-owise]:
+         <k> foo ~> foo ~> foo => baz ~> foo ~> foo ...</k> [owise]
 
     syntax KItem ::= Step
     syntax Step ::= "a" | "b" | "c" | "d" | "e"

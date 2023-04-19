@@ -4,7 +4,9 @@ import logging
 from functools import reduce
 from typing import TYPE_CHECKING
 
+from .cterm import CTerm
 from .kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
+from .kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
 from .kore.prelude import BYTES as KORE_BYTES
 from .kore.prelude import STRING as KORE_STRING
 from .kore.syntax import (
@@ -12,6 +14,7 @@ from .kore.syntax import (
     And,
     App,
     Assoc,
+    Axiom,
     Bottom,
     Ceil,
     Equals,
@@ -21,6 +24,7 @@ from .kore.syntax import (
     MLPattern,
     MLQuant,
     Not,
+    Rewrites,
     SortApp,
     String,
     Top,
@@ -36,7 +40,7 @@ if TYPE_CHECKING:
     from typing import Final
 
     from .kast import KInner
-    from .kast.outer import KDefinition
+    from .kast.outer import KDefinition, KRule
     from .kore.kompiled import KompiledKore
     from .kore.syntax import Pattern, Sort
 
@@ -87,6 +91,26 @@ def kast_to_kore(
     kast = kast_defn.add_cell_map_items(kast)
     kore = _kast_to_kore(kast)
     return kompiled_kore.add_injections(kore, _ksort_to_kore(sort))
+
+
+def krule_to_kore(krule: KRule) -> Axiom:
+    krule_body = krule.body
+    krule_lhs = CTerm(extract_lhs(krule_body), [bool_to_ml_pred(krule.requires)])
+    krule_rhs = CTerm(extract_rhs(krule_body), [bool_to_ml_pred(krule.ensures)])
+
+    kore_lhs = _kast_to_kore(krule_lhs.kast)
+    kore_rhs = _kast_to_kore(krule_rhs.kast)
+    prio = krule.priority
+    axiom = Axiom(
+        vars=(),
+        pattern=Rewrites(
+            sort=SortApp(name='SortGeneratedTopCell', sorts=()),
+            left=kore_lhs,
+            right=kore_rhs,
+        ),
+        attrs=(App(symbol='priority', sorts=(), args=(String(str(prio)),)),),
+    )
+    return axiom
 
 
 def _kast_to_kore(kast: KInner) -> Pattern:
