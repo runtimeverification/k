@@ -7,7 +7,7 @@ from ..utils import check_type
 from .syntax import DV, App, LeftAssoc, RightAssoc, SortApp, String, SymbolId
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterable, Iterator, Mapping
     from typing import Any, Final
 
     from .syntax import EVar, Pattern, Sort
@@ -52,11 +52,13 @@ def string_dv(val: str) -> DV:
 # K constructs
 # ------------
 
+# TODO auto injections
+
 SORT_K: Final = SortApp('SortK')
 SORT_K_ITEM: Final = SortApp('SortKItem')
 SORT_K_CONFIG_VAR: Final = SortApp('SortKConfigVar')
 
-
+LBL_INIT_GENERATED_TOP_CELL: Final = SymbolId('LblinitGeneratedTopCell')
 LBL_GENERATED_TOP: Final = SymbolId("Lbl'-LT-'generatedTop'-GT-'")
 LBL_GENERATED_COUNTER: Final = SymbolId("Lbl'-LT-'generatedCounter'-GT-'")
 LBL_K: Final = SymbolId("Lbl'-LT-'k'-GT-'")
@@ -64,6 +66,10 @@ INJ: Final = SymbolId('inj')
 KSEQ: Final = SymbolId('kseq')
 
 DOTK: Final = App('dotk', (), ())
+
+
+def init_generated_top_cell(pattern: Pattern) -> App:
+    return App(LBL_INIT_GENERATED_TOP_CELL, (), (pattern,))
 
 
 def generated_top(patterns: Iterable[Pattern]) -> App:
@@ -82,12 +88,29 @@ def inj(sort1: Sort, sort2: Sort, pattern: Pattern) -> App:
     return App(INJ, (sort1, sort2), (pattern,))
 
 
-# TODO auto injections
 def kseq(kitems: Iterable[Pattern], *, dotvar: EVar | None = None) -> RightAssoc:
     if dotvar and dotvar.sort != SORT_K:
         raise ValueError(f'Expected {SORT_K.text} as dotvar sort, got: {dotvar.sort.text}')
     tail = dotvar or DOTK
     return RightAssoc(App(KSEQ, (), chain(kitems, (tail,))))
+
+
+def k_config_var(var: str) -> DV:
+    return DV(SORT_K_CONFIG_VAR, String(var))
+
+
+def top_cell_initializer(config: Mapping[str, Pattern]) -> App:
+    return init_generated_top_cell(
+        kore_map(
+            *(
+                (
+                    inj(SORT_K_CONFIG_VAR, SORT_K_ITEM, k_config_var(key)),
+                    value,
+                )
+                for key, value in config.items()
+            )
+        )
+    )
 
 
 # -----------
