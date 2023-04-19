@@ -1,5 +1,12 @@
 requires "imp-verification.k"
 
+module IMP-FUNCTIONAL-SPEC
+    imports IMP-VERIFICATION
+
+    claim [concrete-addition]: 3 +Int 4 => 7
+
+endmodule
+
 module IMP-SIMPLE-SPEC
     imports IMP-VERIFICATION
 
