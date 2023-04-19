@@ -189,6 +189,25 @@ cells in a rule that are actually needed in order to accomplish its specific
 goal. By following this best practice, you can significantly increase the
 modularity of the definition and make it easier to maintain and modify.
 
+Note that unlike top-level rewrite rules, cells that appear inside function
+rules are not necessarily completed to the top of the configuration. They still
+participate in cell ccompletion in the sense that you can mention cell
+structure loosely inside a function rule and it will be completed into the
+correct cell structure specified by the configuration declaration. However,
+they do not complete all the way to the top, instead completing only up to
+the top-most cell mentioned in the rule.
+
+For example, if I write the following function rule in the above definition:
+
+```
+  rule doStuff(<first> FIRST </first>) => FIRST
+```
+
+The function will only match on the `first` cell, rather than the entire
+configuration. However, if we had mentioned a parent cell in the rule, it still
+would have completed the children of that parent cell as needed to ensure that
+the resulting term is well formed.
+
 ### Exercise
 
 Modify your definition from the previous exercise in this lesson to wrap the
