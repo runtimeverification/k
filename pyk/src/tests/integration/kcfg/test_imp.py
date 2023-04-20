@@ -8,6 +8,7 @@ import pytest
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kcfg import KCFG
+from pyk.prelude.kbool import BOOL, notBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
 from pyk.proof import AGBMCProof, AGBMCProver, APRProof, APRProver, EqualityProof, EqualityProver, ProofStatus
@@ -19,7 +20,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from pyk.kast import KInner
+    from pyk.kast.inner import KInner
+    from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
@@ -177,6 +179,17 @@ APR_PROVE_TEST_DATA: Iterable[
         ProofStatus.PASSED,
     ),
     (
+        'failing-if',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'failing-if',
+        10,
+        1,
+        [],
+        [],
+        ProofStatus.FAILED,
+    ),
+    (
         'imp-simple-sum-10',
         'k-files/imp-simple-spec.k',
         'IMP-SIMPLE-SPEC',
@@ -320,6 +333,19 @@ class TestImpProof(KCFGExploreTest):
         return False
 
     @staticmethod
+    def _extract_branches(defn: KDefinition, cterm: CTerm) -> list[KInner]:
+        k_cell = cterm.cell('K_CELL')
+        if type(k_cell) is KSequence and len(k_cell) > 0:
+            k_cell = k_cell[0]
+        if type(k_cell) is KApply and k_cell.label.name == 'if(_)_else_':
+            condition = k_cell.args[0]
+            if (type(condition) is KVariable and condition.sort == BOOL) or (
+                type(condition) is KApply and defn.return_sort(condition.label) == BOOL
+            ):
+                return [mlEqualsTrue(condition), mlEqualsTrue(notBool(condition))]
+        return []
+
+    @staticmethod
     def _same_loop(cterm1: CTerm, cterm2: CTerm) -> bool:
         k_cell_1 = cterm1.cell('K_CELL')
         k_cell_2 = cterm2.cell('K_CELL')
@@ -456,7 +482,11 @@ class TestImpProof(KCFGExploreTest):
 
         kcfg = KCFG.from_claim(kprove.definition, claim)
         proof = APRProof(f'{spec_module}.{claim_id}', kcfg)
-        prover = APRProver(proof, is_terminal=TestImpProof._is_terminal)
+        prover = APRProver(
+            proof,
+            is_terminal=TestImpProof._is_terminal,
+            extract_branches=lambda cterm: TestImpProof._extract_branches(kprove.definition, cterm),
+        )
         kcfg = prover.advance_proof(
             kcfg_explore,
             max_iterations=max_iterations,
