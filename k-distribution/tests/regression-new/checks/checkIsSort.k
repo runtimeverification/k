@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKISSORT-SYNTAX
   imports BOOL-SYNTAX
   imports BASIC-K
