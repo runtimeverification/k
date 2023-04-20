@@ -28,7 +28,7 @@ module TEST
   rule <k> 1 => 2 </k>
 ```
 
-```{.k .discard .numberLines startFrom="0"}
+```{.k .discard}
   rule <k> 2 => 3 </k>
 ```
 
