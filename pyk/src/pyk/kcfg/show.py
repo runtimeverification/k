@@ -133,7 +133,14 @@ class KCFGShow:
 
         return res_lines
 
-    def dump(self, cfgid: str, cfg: KCFG, dump_dir: Path, dot: bool = False) -> None:
+    def dump(
+        self,
+        cfgid: str,
+        cfg: KCFG,
+        dump_dir: Path,
+        dot: bool = False,
+        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
+    ) -> None:
         ensure_dir_path(dump_dir)
 
         cfg_file = dump_dir / f'{cfgid}.json'
@@ -141,9 +148,9 @@ class KCFGShow:
         _LOGGER.info(f'Wrote CFG file {cfgid}: {cfg_file}')
 
         if dot:
-            cfg_dot_lines = cfg.to_dot(self.kprint)
+            cfg_dot = cfg.to_dot(self.kprint, node_printer=node_printer)
             dot_file = dump_dir / f'{cfgid}.dot'
-            dot_file.write_text('\n'.join(cfg_dot_lines))
+            dot_file.write_text(cfg_dot)
             _LOGGER.info(f'Wrote DOT file {cfgid}: {dot_file}')
 
         nodes_dir = dump_dir / 'nodes'
