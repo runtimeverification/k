@@ -147,8 +147,8 @@ public class CheckAtt {
                 "The attribute 'functional' has been deprecated on symbols. Use the combination of attributes 'function' and 'total' instead.", prod);
         }
         if (prod.att().contains(Att.TOTAL()) && !prod.att().contains(Att.FUNCTION())) {
-            kem.registerCompilerWarning(ExceptionType.IGNORED_ATTRIBUTE, errors,
-                "The attribute 'total' was applied to a production which does not have the 'function' attribute; the attribute was ignored.", prod);
+            errors.add(KEMException.compilerError(
+                "The attribute 'total' was applied to a production which does not have the 'function' attribute; the attribute was ignored.", prod));
         }
     }
 
