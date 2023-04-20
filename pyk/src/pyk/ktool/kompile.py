@@ -56,6 +56,7 @@ def kompile(
     ccopts: Iterable[str] = (),
     no_llvm_kompile: bool = False,
     enable_search: bool = False,
+    enable_llvm_debug: bool = False,
     # Haskell backend
     concrete_rules: Iterable[str] = (),
     # ---
@@ -78,6 +79,7 @@ def kompile(
         _check_backend_param(not list(ccopts), 'ccopts', backend)
         _check_backend_param(not no_llvm_kompile, 'no_llvm_kompile', backend)
         _check_backend_param(not enable_search, 'enable_search', backend)
+        _check_backend_param(not enable_llvm_debug, 'enable_llvm_debug', backend)
 
     if backend != KompileBackend.HASKELL:
         _check_backend_param(not list(concrete_rules), 'concrete_rules', backend)
@@ -109,6 +111,7 @@ def kompile(
         ccopts=ccopts,
         no_llvm_kompile=no_llvm_kompile,
         concrete_rules=concrete_rules,
+        enable_llvm_debug=enable_llvm_debug,
     )
 
     try:
@@ -146,6 +149,7 @@ def llvm_kompile(
     ccopts: Iterable[str] = (),
     no_llvm_kompile: bool = False,
     enable_search: bool = False,
+    enable_llvm_debug: bool = False,
     # ---
     cwd: Path | None = None,
     check: bool = True,
@@ -170,6 +174,7 @@ def llvm_kompile(
         no_llvm_kompile=no_llvm_kompile,
         enable_search=enable_search,
         llvm_kompile_type=llvm_kompile_type,
+        enable_llvm_debug=enable_llvm_debug,
         cwd=cwd,
         check=check,
     )
@@ -245,6 +250,7 @@ def _build_arg_list(
     no_llvm_kompile: bool,
     enable_search: bool,
     concrete_rules: Iterable[str],
+    enable_llvm_debug: bool = False,
 ) -> list[str]:
     args = list(command) + [str(main_file)]
 
@@ -304,5 +310,8 @@ def _build_arg_list(
 
     if concrete_rules:
         args.extend(['--concrete-rules', ','.join(concrete_rules)])
+
+    if enable_llvm_debug:
+        args.append('--enable-llvm-debug')
 
     return args
