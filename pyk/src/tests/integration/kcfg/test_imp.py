@@ -10,7 +10,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
-from pyk.proof import AGBMCProof, AGBMCProver, AGProof, AGProver, EqualityProof, EqualityProver, ProofStatus
+from pyk.proof import AGBMCProof, AGBMCProver, APRProof, APRProver, EqualityProof, EqualityProver, ProofStatus
 from pyk.utils import single
 
 from ..utils import KCFGExploreTest
@@ -455,8 +455,8 @@ class TestImpProof(KCFGExploreTest):
         )
 
         kcfg = KCFG.from_claim(kprove.definition, claim)
-        proof = AGProof(f'{spec_module}.{claim_id}', kcfg)
-        prover = AGProver(proof, is_terminal=TestImpProof._is_terminal)
+        proof = APRProof(f'{spec_module}.{claim_id}', kcfg)
+        prover = APRProver(proof, is_terminal=TestImpProof._is_terminal)
         kcfg = prover.advance_proof(
             kcfg_explore,
             max_iterations=max_iterations,

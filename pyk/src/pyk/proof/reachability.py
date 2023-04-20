@@ -22,7 +22,14 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-class AGProof(Proof):
+class APRProof(Proof):
+    """APRProof and APRProver implement all-path reachability logic,
+    as introduced by A. Stefanescu and others in their paper 'All-Path Reachability Logic':
+    https://doi.org/10.23638/LMCS-15(2:5)2019
+    Note that reachability logic formula `phi =>A psi` has *not* the same meaning
+    as CTL/CTL*'s `phi -> AF psi`, since reachability logic ignores infinite traces.
+    """
+
     kcfg: KCFG
 
     def __init__(self, id: str, kcfg: KCFG, proof_dir: Path | None = None):
@@ -30,13 +37,13 @@ class AGProof(Proof):
         self.kcfg = kcfg
 
     @staticmethod
-    def read_proof(id: str, proof_dir: Path) -> AGProof:
+    def read_proof(id: str, proof_dir: Path) -> APRProof:
         proof_path = proof_dir / f'{hash_str(id)}.json'
-        if AGProof.proof_exists(id, proof_dir):
+        if APRProof.proof_exists(id, proof_dir):
             proof_dict = json.loads(proof_path.read_text())
-            _LOGGER.info(f'Reading AGProof from file {id}: {proof_path}')
-            return AGProof.from_dict(proof_dict, proof_dir=proof_dir)
-        raise ValueError(f'Could not load AGProof from file {id}: {proof_path}')
+            _LOGGER.info(f'Reading APRProof from file {id}: {proof_path}')
+            return APRProof.from_dict(proof_dict, proof_dir=proof_dir)
+        raise ValueError(f'Could not load APRProof from file {id}: {proof_path}')
 
     @property
     def status(self) -> ProofStatus:
@@ -48,19 +55,19 @@ class AGProof(Proof):
             return ProofStatus.PASSED
 
     @classmethod
-    def from_dict(cls: type[AGProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> AGProof:
+    def from_dict(cls: type[APRProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRProof:
         cfg = KCFG.from_dict(dct['cfg'])
         id = dct['id']
-        return AGProof(id, cfg, proof_dir=proof_dir)
+        return APRProof(id, cfg, proof_dir=proof_dir)
 
     @property
     def dict(self) -> dict[str, Any]:
-        return {'type': 'AGProof', 'id': self.id, 'cfg': self.kcfg.to_dict()}
+        return {'type': 'APRProof', 'id': self.id, 'cfg': self.kcfg.to_dict()}
 
     @property
     def summary(self) -> Iterable[str]:
         return [
-            f'AGProof: {self.id}',
+            f'APRProof: {self.id}',
             f'    status: {self.status}',
             f'    nodes: {len(self.kcfg.nodes)}',
             f'    frontier: {len(self.kcfg.frontier)}',
@@ -68,7 +75,7 @@ class AGProof(Proof):
         ]
 
 
-class AGBMCProof(AGProof):
+class AGBMCProof(APRProof):
     bmc_depth: int
     _bounded_states: list[str]
 
@@ -135,14 +142,14 @@ class AGBMCProof(AGProof):
         ]
 
 
-class AGProver:
-    proof: AGProof
+class APRProver:
+    proof: APRProof
     _is_terminal: Callable[[CTerm], bool] | None
     _extract_branches: Callable[[CTerm], Iterable[KInner]] | None
 
     def __init__(
         self,
-        proof: AGProof,
+        proof: APRProof,
         is_terminal: Callable[[CTerm], bool] | None = None,
         extract_branches: Callable[[CTerm], Iterable[KInner]] | None = None,
     ) -> None:
@@ -206,7 +213,7 @@ class AGProver:
         return self.proof.kcfg
 
 
-class AGBMCProver(AGProver):
+class AGBMCProver(APRProver):
     proof: AGBMCProof
     _same_loop: Callable[[CTerm, CTerm], bool]
     _checked_nodes: list[str]

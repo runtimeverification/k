@@ -8,7 +8,7 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
 from pyk.kcfg import KCFG
-from pyk.proof import AGProof, AGProver, ProofStatus
+from pyk.proof import APRProof, APRProver, ProofStatus
 
 from ..utils import KCFGExploreTest
 
@@ -134,8 +134,8 @@ class TestCellMapProof(KCFGExploreTest):
         init = kcfg.get_unique_init()
         new_init_term = kcfg_explore.cterm_assume_defined(init.cterm)
         kcfg.replace_node(init.id, new_init_term)
-        proof = AGProof(f'{spec_module}.{claim_id}', kcfg)
-        prover = AGProver(proof)
+        proof = APRProof(f'{spec_module}.{claim_id}', kcfg)
+        prover = APRProver(proof)
         kcfg = prover.advance_proof(
             kcfg_explore,
             max_iterations=max_iterations,
