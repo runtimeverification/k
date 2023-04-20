@@ -1365,8 +1365,7 @@ public class ModuleToKORE {
     }
 
     private void genSemanticsRuleLHSNoAlias(K requires, K left, List<KVariable> freeVars, String topCellSortStr,
-                                            String previousGroupName, StringBuilder sb)
-    {
+                                            String previousGroupName, StringBuilder sb) {
         sb.append(String.format("  \\and{%s} (\n        ", topCellSortStr));
         convert(left, sb);
         sb.append(",\n        ");
