@@ -148,7 +148,7 @@ public class CheckAtt {
         }
         if (prod.att().contains(Att.TOTAL()) && !prod.att().contains(Att.FUNCTION())) {
             errors.add(KEMException.compilerError(
-                "The attribute 'total' was applied to a production which does not have the 'function' attribute; the attribute was ignored.", prod));
+                "The attribute 'total' cannot be applied to a production which does not have the 'function' attribute.", prod));
         }
     }
 
