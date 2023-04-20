@@ -54,6 +54,7 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
+import scala.collection.Set$;
 
 import java.io.File;
 import java.io.IOException;
@@ -477,6 +478,8 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
+        checkIsSortPredicates(modules);
+
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
@@ -491,6 +494,29 @@ public class Kompile {
                 return Stream.empty();
             })).collect(Collectors.toSet()));
         }
+    }
+
+    private void checkIsSortPredicates(scala.collection.Set<Module> modules) {
+        Set<String> generatedIsSorts =
+                stream(modules)
+                        .flatMap(m -> stream(m.definedSorts()))
+                        .map(s -> "is" + s.toString())
+                        .collect(Collectors.toSet());
+
+        stream(modules)
+                .flatMap(m -> stream(m.productionsForSort().getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
+                .collect(Collectors.toSet())
+                .stream()
+                .filter(prod -> prod.items().nonEmpty() && prod.items().head() instanceof Terminal)
+                .forEach(prod -> {
+                    String firstTerminal = ((Terminal) prod.items().head()).value();
+                    if (generatedIsSorts.contains(firstTerminal)) {
+                        errors.add(
+                                KEMException.compilerError(
+                                        "Syntax declaration conflicts with automatically generated " +
+                                                firstTerminal + " predicate.", prod));
+                    }
+                });
     }
 
     public static Definition addSemanticsModule(Definition d) {
