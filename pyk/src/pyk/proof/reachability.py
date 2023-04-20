@@ -192,7 +192,7 @@ class APRProver:
             if self._check_terminal(curr_node):
                 continue
 
-            if self._extract_branches is not None:
+            if self._extract_branches is not None and len(self.proof.kcfg.splits(target_id=curr_node.id)) == 0:
                 branches = list(self._extract_branches(curr_node.cterm))
                 if len(branches) > 0:
                     self.proof.kcfg.split_on_constraints(curr_node.id, branches)
