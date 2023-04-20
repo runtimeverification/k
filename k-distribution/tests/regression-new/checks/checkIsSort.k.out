@@ -1,6 +1,6 @@
 [Error] Compiler: Syntax declaration conflicts with automatically generated isNonAddr predicate.
 	Source(checkIsSort.k)
-	Location(5,19,5,46)
-	5 |	  syntax Bool ::= isNonAddr(KItem) [function]
+	Location(6,19,6,46)
+	6 |	  syntax Bool ::= isNonAddr(KItem) [function]
 	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.
