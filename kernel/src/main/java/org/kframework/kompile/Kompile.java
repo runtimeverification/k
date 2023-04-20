@@ -54,6 +54,7 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
+import scala.collection.Seq;
 import scala.collection.Set$;
 
 import java.io.File;
@@ -507,14 +508,22 @@ public class Kompile {
                 .flatMap(m -> stream(m.productionsForSort().getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
                 .collect(Collectors.toSet())
                 .stream()
-                .filter(prod -> prod.items().nonEmpty() && prod.items().head() instanceof Terminal)
                 .forEach(prod -> {
-                    String firstTerminal = ((Terminal) prod.items().head()).value();
-                    if (generatedIsSorts.contains(firstTerminal)) {
+                    Seq<ProductionItem> items = prod.items();
+                    if (items.size() < 3) {
+                        return;
+                    }
+                    ProductionItem first = items.head();
+                    ProductionItem second = items.tail().head();
+                    ProductionItem last = items.last();
+                    // Check if the production is of the form isSort ( ... )
+                    if ((first instanceof Terminal) && (second instanceof Terminal) && (last instanceof Terminal) &&
+                            generatedIsSorts.contains(((Terminal) first).value()) &&
+                            ((Terminal) second).value().equals("(") && ((Terminal) last).value().equals(")")) {
                         errors.add(
                                 KEMException.compilerError(
                                         "Syntax declaration conflicts with automatically generated " +
-                                                firstTerminal + " predicate.", prod));
+                                                ((Terminal) first).value() + " predicate.", prod));
                     }
                 });
     }
