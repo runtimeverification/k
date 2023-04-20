@@ -49,6 +49,7 @@ def kompile(
     bison_parser_library: bool = False,
     debug: bool = False,
     post_process: str | None = None,
+    read_only: bool = False,
     # LLVM backend
     llvm_kompile_type: LLVMKompileType | None = None,
     llvm_kompile_output: str | None = None,
@@ -104,6 +105,7 @@ def kompile(
         bison_parser_library=bison_parser_library,
         debug=debug,
         post_process=post_process,
+        read_only=read_only,
         llvm_kompile_type=llvm_kompile_type,
         llvm_kompile_output=llvm_kompile_output,
         enable_search=enable_search,
@@ -144,6 +146,7 @@ def llvm_kompile(
     bison_parser_library: bool = False,
     debug: bool = False,
     post_process: str | None = None,
+    read_only: bool = False,
     llvm_kompile_type: LLVMKompileType | None = None,
     opt_level: int | None = None,
     ccopts: Iterable[str] = (),
@@ -169,6 +172,7 @@ def llvm_kompile(
         bison_parser_library=bison_parser_library,
         debug=debug,
         post_process=post_process,
+        read_only=read_only,
         opt_level=opt_level,
         ccopts=ccopts,
         no_llvm_kompile=no_llvm_kompile,
@@ -196,6 +200,7 @@ def haskell_kompile(
     bison_parser_library: bool = False,
     debug: bool = False,
     post_process: str | None = None,
+    read_only: bool = False,
     concrete_rules: Iterable[str] = (),
     # ---
     cwd: Path | None = None,
@@ -216,6 +221,7 @@ def haskell_kompile(
         bison_parser_library=bison_parser_library,
         debug=debug,
         post_process=post_process,
+        read_only=read_only,
         concrete_rules=concrete_rules,
         cwd=cwd,
         check=check,
@@ -243,6 +249,7 @@ def _build_arg_list(
     bison_parser_library: bool,
     debug: bool = False,
     post_process: str | None,
+    read_only: bool = False,
     llvm_kompile_type: LLVMKompileType | None = None,
     llvm_kompile_output: str | None = None,
     opt_level: int | None,
@@ -289,6 +296,9 @@ def _build_arg_list(
 
     if post_process:
         args.extend(['--post-process', shlex.quote(post_process)])
+
+    if read_only:
+        args.append('--read-only-kompiled-directory')
 
     if llvm_kompile_type is not None:
         args.extend(['--llvm-kompile-type', llvm_kompile_type.value])
