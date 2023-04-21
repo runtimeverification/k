@@ -44,4 +44,15 @@ module IMP-SIMPLE-SPEC
 
     claim [sum-1000]: <k> int $s, $n, .Ids ; $n = 1000 ; while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; } ~> #FINISH => . ... </k>
                       <state> .Map => $s |-> 500500 $n |-> -1 </state>
+    
+    claim [if-almost-same]:
+        <k> if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } ~> #FINISH => . ...</k>
+        <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N) $n |-> N) </state>
+    
+    // The vision is that the proof of `use-if-almost-same` will re-use the proof of `if-almost-same`
+    // and then it will be without branching.
+    claim [use-if-almost-same]:
+        <k> $n = $n + 1; if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } $s = $s + 1; ~> #FINISH => . ...</k>
+        <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N +Int 2) $n |-> N:Int +Int 1) </state>
+
 endmodule
