@@ -35,6 +35,7 @@ generatePagesFromMarkdownFiles({
     TOC: tocHTML,
   },
   displayCodeBlockSelectors: true,
+  displayCodeBlockLineNumbers: true,
 });
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "./pages/") + "/**/*.md",
@@ -50,6 +51,7 @@ generatePagesFromMarkdownFiles({
     TOC: tocHTML,
   },
   displayCodeBlockSelectors: true,
+  displayCodeBlockLineNumbers: true,
 });
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "../docs/") + "/*.md",
@@ -65,6 +67,7 @@ generatePagesFromMarkdownFiles({
     TOC: tocHTML,
   },
   displayCodeBlockSelectors: true,
+  displayCodeBlockLineNumbers: true,
 });
 
 fs.copyFileSync(
