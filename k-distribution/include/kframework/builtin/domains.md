@@ -482,7 +482,7 @@ module RANGEMAP
   imports private LIST
   imports private SET
 
-  syntax Range ::= range(rangeStart: KItem, rangeEnd: KItem)
+  syntax Range ::= range(rangeStart: KItem, rangeEnd: KItem)    [klabel(Rangemap:Range), symbol]
   
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
 ```
@@ -502,7 +502,7 @@ module RANGEMAP
 ### Range map elements
 
 ```k
-  syntax RangeMap ::= Range "|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
+  syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
 
   syntax priorities _r|->_ > _RangeMap_ .RangeMap
   syntax non-assoc _r|->_
