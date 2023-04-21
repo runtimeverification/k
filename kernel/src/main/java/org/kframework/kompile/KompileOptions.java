@@ -141,4 +141,7 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names={"--allow-anywhere-haskell"}, description="Disable error message for anywhere rules on the Haskell backend.")
     public boolean allowAnywhereRulesHaskell;
+
+    @Parameter(names="--disable-kore-antileft", description="[EXPERIMENTAL] Disable generation of antileft priority predicates ")
+    public boolean disableKoreAntileft;
 }
