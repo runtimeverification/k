@@ -3,7 +3,15 @@ module CHECKISSORT-SYNTAX
   imports BOOL-SYNTAX
   imports BASIC-K
 
-  syntax Bool ::= isNonAddr(KItem) [function]
+  syntax Foo ::= Blah(Bool)
+  
+  syntax Bool ::= isNonAddr(KItem)  [function]
+                | isNotASort(KItem) [function]
+		| isNonAddr(Foo)    [function]
+		| isnonaddr(KItem)  [function]
+		| isNonAddr ( KItem , KItem ) [function]
+		| isFoo(Foo) [function]
+		
   syntax NonAddr ::= nonAddr(KItem)
 endmodule
 
