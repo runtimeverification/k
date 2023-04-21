@@ -88,11 +88,22 @@ def inj(sort1: Sort, sort2: Sort, pattern: Pattern) -> App:
     return App(INJ, (sort1, sort2), (pattern,))
 
 
-def kseq(kitems: Iterable[Pattern], *, dotvar: EVar | None = None) -> RightAssoc:
+def kseq(kitems: Iterable[Pattern], *, dotvar: EVar | None = None) -> Pattern:
     if dotvar and dotvar.sort != SORT_K:
         raise ValueError(f'Expected {SORT_K.text} as dotvar sort, got: {dotvar.sort.text}')
+
     tail = dotvar or DOTK
-    return RightAssoc(App(KSEQ, (), chain(kitems, (tail,))))
+    args = tuple(chain(kitems, (tail,)))
+
+    if len(args) == 1:
+        return tail
+
+    app = App(KSEQ, (), args)
+
+    if len(args) == 2:
+        return app
+
+    return RightAssoc(app)
 
 
 def k_config_var(var: str) -> DV:
