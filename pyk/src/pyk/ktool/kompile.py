@@ -109,11 +109,11 @@ def kompile(
         llvm_kompile_type=llvm_kompile_type,
         llvm_kompile_output=llvm_kompile_output,
         enable_search=enable_search,
+        enable_llvm_debug=enable_llvm_debug,
         opt_level=opt_level,
         ccopts=ccopts,
         no_llvm_kompile=no_llvm_kompile,
         concrete_rules=concrete_rules,
-        enable_llvm_debug=enable_llvm_debug,
     )
 
     try:
@@ -177,8 +177,8 @@ def llvm_kompile(
         ccopts=ccopts,
         no_llvm_kompile=no_llvm_kompile,
         enable_search=enable_search,
-        llvm_kompile_type=llvm_kompile_type,
         enable_llvm_debug=enable_llvm_debug,
+        llvm_kompile_type=llvm_kompile_type,
         cwd=cwd,
         check=check,
     )
@@ -256,8 +256,8 @@ def _build_arg_list(
     ccopts: Iterable[str],
     no_llvm_kompile: bool,
     enable_search: bool,
-    concrete_rules: Iterable[str],
     enable_llvm_debug: bool = False,
+    concrete_rules: Iterable[str],
 ) -> list[str]:
     args = list(command) + [str(main_file)]
 
@@ -318,10 +318,10 @@ def _build_arg_list(
     if enable_search:
         args.append('--enable-search')
 
-    if concrete_rules:
-        args.extend(['--concrete-rules', ','.join(concrete_rules)])
-
     if enable_llvm_debug:
         args.append('--enable-llvm-debug')
+
+    if concrete_rules:
+        args.extend(['--concrete-rules', ','.join(concrete_rules)])
 
     return args
