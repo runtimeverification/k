@@ -88,6 +88,7 @@ class Target:
     ccopts: tuple[str, ...] | None
     no_llvm_kompile: bool | None
     enable_search: bool | None
+    enable_llvm_debug: bool | None
     llvm_kompile_type: LLVMKompileType | None
     llvm_kompile_output: str | None
     # Haskell backend
@@ -110,6 +111,7 @@ class Target:
         ccopts: Iterable[str] | None = None,
         no_llvm_kompile: bool | None = None,
         enable_search: bool | None = None,
+        enable_llvm_debug: bool | None = None,
         llvm_kompile_type: LLVMKompileType | None = None,
         llvm_kompile_output: str | None = None,
         concrete_rules: Iterable[str] | None = None,
@@ -130,6 +132,7 @@ class Target:
         object.__setattr__(self, 'ccopts', tuple(ccopts) if ccopts is not None else None)
         object.__setattr__(self, 'no_llvm_kompile', no_llvm_kompile)
         object.__setattr__(self, 'enable_search', enable_search)
+        object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
         object.__setattr__(self, 'llvm_kompile_type', llvm_kompile_type)
         object.__setattr__(self, 'llvm_kompile_output', llvm_kompile_output)
         object.__setattr__(self, 'concrete_rules', tuple(concrete_rules) if concrete_rules is not None else None)
@@ -151,6 +154,7 @@ class Target:
             ccopts=dct.get('ccopts'),
             no_llvm_kompile=dct.get('no-llvm-kompile'),
             enable_search=dct.get('enable-search'),
+            enable_llvm_debug=dct.get('enable-llvm-debug'),
             llvm_kompile_type=LLVMKompileType(dct['llvm-kompile-type']) if 'llvm-kompile-type' in dct else None,
             llvm_kompile_output=dct.get('llvm-kompile-output'),
             concrete_rules=dct.get('concrete-rules'),
