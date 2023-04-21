@@ -59,7 +59,7 @@ def _input_config(config: Mapping[str, int]) -> dict[str, Pattern]:
 def _expected(config: Mapping[str, int]) -> Pattern:
     return generated_top(
         (
-            k(kseq((inj(INT, SORT_K_ITEM, int_dv(config['$PGM'])),)).pattern),
+            k(kseq((inj(INT, SORT_K_ITEM, int_dv(config['$PGM'])),))),
             App("Lbl'-LT-'a'-GT-'", (), (int_dv(config['$A']),)),
             App("Lbl'-LT-'b'-GT-'", (), (int_dv(config['$B']),)),
             generated_counter(int_dv(0)),
