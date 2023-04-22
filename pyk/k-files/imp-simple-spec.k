@@ -24,14 +24,36 @@ module IMP-SIMPLE-SPEC
     claim [while-cut-rule-delayed]: <k> $n = 7 ; while (B:Bool) BB:Block => if (B) { BB while (B) BB } else {} ... </k>
                                     <state> $n |-> (_ => ?_) </state>
 
-    claim [bmc-loop-concrete]: <k> while (0 <= $n) { $n = $n + -1 ; } => . ... </k>
-                               <state> $n |-> (1 => ?N) </state>
-      ensures 0 <Int ?N
+    claim [bmc-loop-concrete]: <k> while (0 <= $n) { $n = $n + -1 ; }
+                                   $i = 1;
+                                 => . ...
+                               </k>
+                               <state> $n |-> (1 => ?N)
+                                       $i |-> (0 => ?I)
+                               </state>
+      ensures 0 <Int ?N andBool ?I ==Int 1
 
-    claim [bmc-loop-symbolic]: <k> while ($s <= $n) { $n = $n + -1 ; } => . ... </k>
-                               <state> ($n |-> (1 => ?N)) ($s |-> S) </state>
+    claim [bmc-loop-symbolic]: <k> while ($s <= $n) { $n = $n + -1 ; }
+                                   $i = 1;
+                                => . ...
+                                </k>
+                               <state> ($n |-> (1 => ?N)) ($s |-> S)
+                                       ($i |-> (0 => ?I))
+                               </state>
       requires 0 <=Int S
-       ensures 0 <Int ?N
+       ensures 0 <Int ?N andBool ?I ==Int 1
+
+    claim [bmc-two-loops-symbolic]: <k> while ($s <= $n) { $n = $n + -1 ; }
+                                        while ($k <= $m) { $m = $m + -1 ; }
+                                        $i = 1;
+                                     => . ...
+                                    </k>
+                                    <state> ($n |-> (1 => ?N)) ($s |-> S)
+                                            ($m |-> (1 => ?M)) ($k |-> K)
+                                            ($i |-> (0 => ?I))
+                                    </state>
+      requires 0 <=Int S andBool 0 <=Int K
+       ensures 0 <Int ?N andBool 0 <Int ?M andBool ?I ==Int 1
 
     claim [failing-if]: <k> if(B:Bool) { $n = 1 ; } else { $n = 2 ; } => . ... </k>
                         <state> $n |-> (0 => 1) </state>

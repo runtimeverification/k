@@ -11,7 +11,7 @@ from pyk.kcfg import KCFG
 from pyk.prelude.kbool import BOOL, notBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
-from pyk.proof import AGBMCProof, AGBMCProver, APRProof, APRProver, EqualityProof, EqualityProver, ProofStatus
+from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, EqualityProof, EqualityProver, ProofStatus
 from pyk.utils import single
 
 from ..utils import KCFGExploreTest
@@ -340,6 +340,32 @@ APRBMC_PROVE_TEST_DATA: Iterable[
         ProofStatus.FAILED,
         3,
     ),
+    (
+        'bmc-two-loops-symbolic-1',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-two-loops-symbolic',
+        20,
+        20,
+        1,
+        [],
+        ['IMP.while'],
+        ProofStatus.PASSED,
+        3,
+    ),
+    (
+        'bmc-two-loops-symbolic-2',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'bmc-two-loops-symbolic',
+        50,
+        20,
+        2,
+        [],
+        ['IMP.while'],
+        ProofStatus.FAILED,
+        7,
+    ),
 )
 
 FUNC_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, ProofStatus]] = (
@@ -578,8 +604,8 @@ class TestImpProof(KCFGExploreTest):
 
         kcfg = KCFG.from_claim(kprove.definition, claim)
         kcfg_explore.simplify(kcfg)
-        proof = AGBMCProof(f'{spec_module}.{claim_id}', kcfg, bmc_depth)
-        prover = AGBMCProver(proof, TestImpProof._same_loop, is_terminal=TestImpProof._is_terminal)
+        proof = APRBMCProof(f'{spec_module}.{claim_id}', kcfg, bmc_depth)
+        prover = APRBMCProver(proof, TestImpProof._same_loop, is_terminal=TestImpProof._is_terminal)
         kcfg = prover.advance_proof(
             kcfg_explore,
             max_iterations=max_iterations,
