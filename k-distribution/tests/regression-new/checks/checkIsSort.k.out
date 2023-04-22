@@ -5,17 +5,17 @@
 	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Syntax declaration conflicts with automatically generated isNonAddr predicate.
 	Source(checkIsSort.k)
-	Location(10,5,10,33)
-	10 |			| isNonAddr(Foo)    [function]
-	   .	    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(10,19,10,47)
+	10 |	                | isNonAddr(Foo)    [function]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Syntax declaration conflicts with automatically generated isNonAddr predicate.
 	Source(checkIsSort.k)
-	Location(12,5,12,43)
-	12 |			| isNonAddr ( KItem , KItem ) [function]
-	   .	    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(12,19,12,57)
+	12 |	                | isNonAddr ( KItem , KItem ) [function]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Syntax declaration conflicts with automatically generated isFoo predicate.
 	Source(checkIsSort.k)
-	Location(13,5,13,26)
-	13 |			| isFoo(Foo) [function]
-	   .	    ^~~~~~~~~~~~~~~~~~~~~
+	Location(13,19,13,40)
+	13 |	                | isFoo(Foo) [function]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 4 structural errors.

@@ -4,14 +4,14 @@ module CHECKISSORT-SYNTAX
   imports BASIC-K
 
   syntax Foo ::= Blah(Bool)
-  
+
   syntax Bool ::= isNonAddr(KItem)  [function]
                 | isNotASort(KItem) [function]
-		| isNonAddr(Foo)    [function]
-		| isnonaddr(KItem)  [function]
-		| isNonAddr ( KItem , KItem ) [function]
-		| isFoo(Foo) [function]
-		
+                | isNonAddr(Foo)    [function]
+                | isnonaddr(KItem)  [function]
+                | isNonAddr ( KItem , KItem ) [function]
+                | isFoo(Foo) [function]
+
   syntax NonAddr ::= nonAddr(KItem)
 endmodule
 
