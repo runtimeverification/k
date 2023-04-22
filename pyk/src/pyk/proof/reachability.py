@@ -75,7 +75,9 @@ class APRProof(Proof):
         ]
 
 
-class AGBMCProof(APRProof):
+class APRBMCProof(APRProof):
+    """APRBMCProof and APRBMCProver perform bounded model-checking of an all-path reachability logic claim."""
+
     bmc_depth: int
     _bounded_states: list[str]
 
@@ -92,13 +94,13 @@ class AGBMCProof(APRProof):
         self._bounded_states = list(bounded_states) if bounded_states is not None else []
 
     @staticmethod
-    def read_proof(id: str, proof_dir: Path) -> AGBMCProof:
+    def read_proof(id: str, proof_dir: Path) -> APRBMCProof:
         proof_path = proof_dir / f'{hash_str(id)}.json'
-        if AGBMCProof.proof_exists(id, proof_dir):
+        if APRBMCProof.proof_exists(id, proof_dir):
             proof_dict = json.loads(proof_path.read_text())
-            _LOGGER.info(f'Reading AGBMCProof from file {id}: {proof_path}')
-            return AGBMCProof.from_dict(proof_dict, proof_dir=proof_dir)
-        raise ValueError(f'Could not load AGBMCProof from file {id}: {proof_path}')
+            _LOGGER.info(f'Reading APRBMCProof from file {id}: {proof_path}')
+            return APRBMCProof.from_dict(proof_dict, proof_dir=proof_dir)
+        raise ValueError(f'Could not load APRBMCProof from file {id}: {proof_path}')
 
     @property
     def status(self) -> ProofStatus:
@@ -110,17 +112,17 @@ class AGBMCProof(APRProof):
             return ProofStatus.PASSED
 
     @classmethod
-    def from_dict(cls: type[AGBMCProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> AGBMCProof:
+    def from_dict(cls: type[APRBMCProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRBMCProof:
         cfg = KCFG.from_dict(dct['cfg'])
         id = dct['id']
         bounded_states = dct['bounded_states']
         bmc_depth = dct['bmc_depth']
-        return AGBMCProof(id, cfg, bmc_depth, bounded_states=bounded_states, proof_dir=proof_dir)
+        return APRBMCProof(id, cfg, bmc_depth, bounded_states=bounded_states, proof_dir=proof_dir)
 
     @property
     def dict(self) -> dict[str, Any]:
         return {
-            'type': 'AGBMCProof',
+            'type': 'APRBMCProof',
             'id': self.id,
             'cfg': self.kcfg.to_dict(),
             'bmc_depth': self.bmc_depth,
@@ -133,7 +135,7 @@ class AGBMCProof(APRProof):
     @property
     def summary(self) -> Iterable[str]:
         return [
-            f'AGBMCProof(depth={self.bmc_depth}): {self.id}',
+            f'APRBMCProof(depth={self.bmc_depth}): {self.id}',
             f'    status: {self.status}',
             f'    nodes: {len(self.kcfg.nodes)}',
             f'    frontier: {len(self.kcfg.frontier)}',
@@ -213,14 +215,14 @@ class APRProver:
         return self.proof.kcfg
 
 
-class AGBMCProver(APRProver):
-    proof: AGBMCProof
+class APRBMCProver(APRProver):
+    proof: APRBMCProof
     _same_loop: Callable[[CTerm, CTerm], bool]
     _checked_nodes: list[str]
 
     def __init__(
         self,
-        proof: AGBMCProof,
+        proof: APRBMCProof,
         same_loop: Callable[[CTerm, CTerm], bool],
         is_terminal: Callable[[CTerm], bool] | None = None,
         extract_branches: Callable[[CTerm], Iterable[KInner]] | None = None,
