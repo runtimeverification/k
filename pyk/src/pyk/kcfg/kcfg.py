@@ -19,7 +19,6 @@ from ..kast.manip import (
     ml_pred_to_bool,
     remove_source_attributes,
     rename_generated_vars,
-    simplify_bool,
 )
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import add_indent, compare_short_hashes, shorten_hash
@@ -986,7 +985,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 curr_constraint = mlAnd([csubst.subst.ml_pred, csubst.constraint, curr_constraint])
             if type(edge) is KCFG.Cover:
                 curr_constraint = mlAnd([edge.csubst.constraint, edge.csubst.subst.apply(curr_constraint)])
-        return simplify_bool(ml_pred_to_bool(mlAnd(flatten_label('#And', curr_constraint))))
+        return mlAnd(flatten_label('#And', curr_constraint))
 
     def paths_between(
         self, source_id: str, target_id: str, *, traverse_covers: bool = False

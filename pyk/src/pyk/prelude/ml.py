@@ -51,11 +51,11 @@ def mlNot(term: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KApply:  # no
 
 
 def mlAnd(conjuncts: Iterable[KInner], sort: str | KSort = GENERATED_TOP_CELL) -> KInner:  # noqa: N802
-    return build_assoc(mlTop(sort), KLabel('#And', sort), conjuncts)
+    return build_assoc(mlTop(sort), KLabel('#And', sort), filter(lambda x: not is_top(x), conjuncts))
 
 
 def mlOr(disjuncts: Iterable[KInner], sort: str | KSort = GENERATED_TOP_CELL) -> KInner:  # noqa: N802
-    return build_assoc(mlBottom(sort), KLabel('#Or', sort), disjuncts)
+    return build_assoc(mlBottom(sort), KLabel('#Or', sort), filter(lambda x: not is_bottom(x), disjuncts))
 
 
 def mlImplies(antecedent: KInner, consequent: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KApply:  # noqa: N802
