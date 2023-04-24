@@ -66,6 +66,9 @@ module IMP-SIMPLE-SPEC
 
     claim [sum-1000]: <k> int $s, $n, .Ids ; $n = 1000 ; while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; } ~> #FINISH => . ... </k>
                       <state> .Map => $s |-> 500500 $n |-> -1 </state>
+
+    claim [fail-branch]: <k> if ( $s <= 123) { $n = 1; } else { } ~> #FINISH => . ... </k>
+                         <state> $n |-> (0 => 1) $s |-> _S:Int </state>
     
     claim [if-almost-same]:
         <k> if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } ~> #FINISH => . ...</k>
