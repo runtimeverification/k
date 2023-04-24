@@ -275,7 +275,7 @@ PATH_CONSTRAINTS_TEST_DATA: Iterable[
         1,
         ['IMP-VERIFICATION.halt'],
         [],
-        'notBool _S:Int <=Int 123',
+        '{ false #Equals _S:Int <=Int 123 }',
     ),
 )
 
