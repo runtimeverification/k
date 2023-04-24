@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -7,6 +8,7 @@ import pytest
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
+from pyk.kast.manip import minimize_term
 from pyk.kcfg import KCFG
 from pyk.prelude.kbool import BOOL, notBool
 from pyk.prelude.kint import intToken
@@ -25,6 +27,9 @@ if TYPE_CHECKING:
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
+
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 PROVE_CTERM_TEST_DATA: Final = (
@@ -255,6 +260,22 @@ APR_PROVE_TEST_DATA: Iterable[
         [],
         ProofStatus.PASSED,
         2,  # Change this to 1 once we can reuse subproofs
+    ),
+)
+
+PATH_CONSTRAINTS_TEST_DATA: Iterable[
+    tuple[str, str, str, str, int | None, int | None, Iterable[str], Iterable[str], str]
+] = (
+    (
+        'imp-simple-fail-branch',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'fail-branch',
+        None,
+        1,
+        ['IMP-VERIFICATION.halt'],
+        [],
+        'notBool _S:Int <=Int 123',
     ),
 )
 
@@ -548,8 +569,8 @@ class TestImpProof(KCFGExploreTest):
         spec_file: str,
         spec_module: str,
         claim_id: str,
-        max_iterations: int,
-        max_depth: int,
+        max_iterations: int | None,
+        max_depth: int | None,
         terminal_rules: Iterable[str],
         cut_rules: Iterable[str],
         proof_status: ProofStatus,
@@ -578,6 +599,51 @@ class TestImpProof(KCFGExploreTest):
         assert leaf_number(kcfg) == expected_leaf_number
 
     @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',
+        PATH_CONSTRAINTS_TEST_DATA,
+        ids=[test_id for test_id, *_ in PATH_CONSTRAINTS_TEST_DATA],
+    )
+    def test_collect_path_constraints(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int | None,
+        max_depth: int | None,
+        terminal_rules: Iterable[str],
+        cut_rules: Iterable[str],
+        expected_constraint: str,
+    ) -> None:
+        def _node_printer(cterm: CTerm) -> list[str]:
+            _kast = minimize_term(cterm.kast)
+            return kcfg_explore.kprint.pretty_print(_kast).split('\n')
+
+        claims = kprove.get_claims(
+            Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+        )
+        assert len(claims) == 1
+
+        kcfg = KCFG.from_claim(kprove.definition, claims[0])
+        proof = APRProof(f'{spec_module}.{claim_id}', kcfg)
+        prover = APRProver(proof, is_terminal=TestImpProof._is_terminal)
+
+        kcfg = prover.advance_proof(
+            kcfg_explore,
+            max_iterations=max_iterations,
+            execute_depth=max_depth,
+            cut_point_rules=cut_rules,
+            terminal_rules=terminal_rules,
+        )
+
+        assert len(kcfg.stuck) == 1
+        path_constraint = kcfg.path_constraints(kcfg.stuck[0].id)
+        actual_constraint = kcfg_explore.kprint.pretty_print(path_constraint).replace('\n', ' ')
+        assert actual_constraint == expected_constraint
+
+    @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,bmc_depth,terminal_rules,cut_rules,proof_status,expected_leaf_number',
         APRBMC_PROVE_TEST_DATA,
         ids=[test_id for test_id, *_ in APRBMC_PROVE_TEST_DATA],
@@ -590,8 +656,8 @@ class TestImpProof(KCFGExploreTest):
         spec_file: str,
         spec_module: str,
         claim_id: str,
-        max_iterations: int,
-        max_depth: int,
+        max_iterations: int | None,
+        max_depth: int | None,
         bmc_depth: int,
         terminal_rules: Iterable[str],
         cut_rules: Iterable[str],
