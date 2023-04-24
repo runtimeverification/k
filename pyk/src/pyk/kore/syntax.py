@@ -284,6 +284,8 @@ class Pattern(Kore):
 
 
 class VarPattern(Pattern, WithSort):
+    __match_args__ = ('name', 'sort')
+
     name: str
     sort: Sort
 
