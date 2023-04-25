@@ -1,0 +1,1 @@
+removeAll(rangemap(4), SetItem(range(0, 2)) SetItem(range(3, 4)))
