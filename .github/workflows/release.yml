@@ -118,11 +118,10 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'apt-get install --yes maven'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:/tmp/settings.xml
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+          docker exec k-package-docker-test-jammy-${GITHUB_SHA} /bin/bash -c "mvn --batch-mode deploy"
 
       - name: 'Clean up Docker Container'
         if: always()
