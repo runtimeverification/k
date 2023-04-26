@@ -2047,7 +2047,7 @@ module K-EQUAL-SYNTAX
 
 endmodule
 
-module K-EQUAL-KORE [kore, symbolic]
+module K-EQUAL-KORE [kore, symbolic, haskell]
   import private BOOL
   import K-EQUAL-SYNTAX
 
@@ -2061,6 +2061,8 @@ module K-EQUAL-KORE [kore, symbolic]
   rule {K1 =/=K K2 #Equals false} => {K1 #Equals K2} [simplification]
   rule {false #Equals K1 =/=K K2} => {K1 #Equals K2} [simplification]
 
+  rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
+  rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 endmodule
 
 module K-EQUAL
@@ -2069,9 +2071,6 @@ module K-EQUAL
   import K-EQUAL-KORE
 
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
-
-  rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
-  rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 
 endmodule
 ```
