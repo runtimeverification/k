@@ -92,17 +92,7 @@ jobs:
           cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
 
-      - name: Set up Java for publishing to GitHub Maven Packages
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-          overwrite-settings: true
-          server-id: runtime.verification
-          server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 'Build, Test, Push Dockerhub Image, Push Mvn Packages'
+      - name: 'Build, Test, Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -118,16 +108,54 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'apt-get install --yes maven'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
-          docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:/tmp/settings.xml
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Clean up Docker Container'
         if: always()
         run: |
           docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
+
+  maven-deploy:
+    name: 'Deploy to Maven Repository'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Setup Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: k-package-mvn-deploy-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 14
+
+      - name: 'Set up Java for publishing to GitHub Maven Packages'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          overwrite-settings: true
+          server-id: runtime.verification
+          server-username: ${{ env.GITHUB_ACTOR }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Maven Deployment'
+        shell: bash {0}
+        run: |
+          set -euxo pipefail
+          version=$(cat package/version)
+          version_tag=ubuntu-jammy-${version}
+          user=$(id -un)
+          group=$(id -gn)
+          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "mkdir /home/${user}/.m2"
+          docker cp ~/.m2/settings.xml k-package-mvn-deploy-${GITHUB_SHA}:/home/${user}/.m2/settings.xml
+          docker cp ./ k-package-mvm-deploy-${GITHUB_SHA}:/home/${user}/k
+          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "chown ${user}:${group} -R /home/${user}"
+          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "cd k && mvn --batch-mode deploy"
+
+      - name: 'Clean up Docker Container'
+        if: always()
+        run: |
+          docker stop --time=0 k-package-mvn-deploy-${GITHUB_SHA}
 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
@@ -404,7 +432,7 @@ jobs:
     name: 'Publish Release'
     runs-on: ubuntu-20.04
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch, maven-deploy]
     steps:
       - name: Publish release
         uses: actions/github-script@v6.0.0
