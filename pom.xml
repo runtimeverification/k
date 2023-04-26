@@ -12,7 +12,6 @@
     <module>kore</module>
     <module>kernel</module>
     <module>k-distribution</module>
-    <module>java-backend</module>
     <module>haskell-backend</module>
     <module>llvm-backend</module>
     <module>llvm-backend/src/main/native/llvm-backend/matching</module>
@@ -61,12 +60,12 @@
     <repository>
       <id>runtime.verification</id>
       <name>Runtime Verification Repository</name>
-      <url>s3://runtimeverificationmaven/internal</url>
+      <url>https://maven.pkg.github.com/runtimeverification/rv-maven-public-release</url>
     </repository>
     <snapshotRepository>
       <id>runtime.verification.snapshots</id>
       <name>Runtime Verification Snapshot Repository</name>
-      <url>s3://runtimeverificationmaven/snapshots</url>
+      <url>https://maven.pkg.github.com/runtimeverification/rv-maven-public</url>
     </snapshotRepository>
   </distributionManagement>
 
@@ -214,7 +213,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,java-backend/src/main/java/org/kframework/backend/java/builtins/crypto/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</excludes>
+              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</excludes>
             </configuration>
           </execution>
           <execution>

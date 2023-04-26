@@ -1266,7 +1266,7 @@ ambiguity during parsing, so care should be taken to ensure that named
 nonterminals are sufficiently unique from one another to prevent such
 ambiguities. Of course, the compiler will generate a warning in this case.
 
-### `simplification` attribute (Haskell backend)
+### `simplification` attribute
 
 The simplification attribute identifies rules outside the main semantics that
 are used to simplify function patterns.
@@ -1285,12 +1285,16 @@ rule (X +Int Y) +Int Z => X +Int (Y +Int Z) [simplification]
 A simplification rule is only applied when the current side condition _implies_
 the `requires` clause of the rule, like function definition rules.
 
-**Order**: Simplification rules are applied after definition rules, if no
-definition rule did apply. The `simplification` attribute accepts an optional
-integer argument which is the rule's _priority_; if the optional argument is not
-specified, it is equivalent to a priority of 50. Simplification rules are
-applied in order of their priority. `simplification` rules may not have the
-`priority` attribute.
+**Order**: The `simplification` attribute accepts an optional integer argument
+which is the rule's _simplification priority_; if the optional argument is not
+specified, it is equivalent to a simplification priority of 50. Backends
+_should_ attempt simplification rules in order of their _simplification
+priority_, but are not required to do so; in fact, the backend is free to apply
+`simplification` rules at _any time_. Because of this, users must ensure that
+simplification rules are sound regardless of their order of application. This
+differs from the `priority` attribute in that rules with the `priority`
+attribute _must_ be applied in their priority order by the backend. It is an
+error to have the `priority` attribute on a `simplification` rule.
 
 For example, for the following definition:
 
@@ -1340,20 +1344,39 @@ warning if it encounters such a claim.
 
 ### `concrete` and `symbolic` attributes (Haskell backend)
 
-Sometimes you only want a rule to apply if some or all arguments are concrete
-(not symbolic). This is done with the `concrete` attribute. Conversely, the
-`symbolic` attribute will allow a rule to apply only when some arguments are not
-concrete. These attributes should only be given with the `simplification`
-attribute.
+Users can control the application of `simplification` rules using the `concrete`
+and the `symbolic` attributes by specifying the type of patterns the rule's
+arguments are to match.
 
-For example, the following will only re-associate terms when all arguments
+A concrete pattern is a pattern which does not contain variables or unevaluated
+functions, otherwise the pattern is symbolic.
+
+The semantics of the two attributes is defined as follows:
+- If a simplification rule is marked `concrete`, then _all_ arguments must be
+concrete for the rule to match.
+- If a simplification rule is marked `symbolic`, then _all_ arguments must be
+symbolic for the rule to match.
+- The following syntax `concrete(<variables>)` (resp. `symbolic(<variables>)`),
+where `<variables>` is a list of variable names separated by commas, can be used
+to specify the exact arguments the user expects to match concrete (resp. symbolic)
+patterns.
+
+For example, the following will only match when all arguments
 are concrete:
 
 ```k
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
 ```
 
-These rules will re-associate and commute terms to combine concrete arguments:
+Conversely, the following will only match when all arguments
+are symbolic:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, symbolic]
+```
+
+In practice, the following rules will re-associate and commute terms to combine
+concrete arguments:
 
 ```k
 rule (A +Int Y) +Int Z => A +Int (Y +Int Z)

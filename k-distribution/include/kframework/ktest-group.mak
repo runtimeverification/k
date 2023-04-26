@@ -3,12 +3,11 @@ SUBUPDATE=$(addsuffix .update,$(SUBDIRS))
 SUBKOMPILE=$(addsuffix .kompile,$(SUBDIRS))
 SUBKRUN=$(addsuffix .krun,$(SUBDIRS))
 SUBPROOFS=$(addsuffix .proofs,$(SUBDIRS))
-SUBBMC=$(addsuffix .bmc,$(SUBDIRS))
 SUBSEARCHES=$(addsuffix .searches,$(SUBDIRS))
 SUBSTRAT=$(addsuffix .strat,$(SUBDIRS))
 SUBKAST=$(addsuffix .kast,$(SUBDIRS))
 
-.PHONY: all update-results clean kompile krun proofs bmc searches strat kast $(SUBDIRS) $(SUBCLEAN) $(SUBUPDATE) $(SUBKOMPILE) $(SUBKRUN) $(SUBPROOFS) $(SUBBMC) $(SUBSEARCHES) $(SUBSTRAT) $(SUBKAST)
+.PHONY: all update-results clean kompile krun proofs searches strat kast $(SUBDIRS) $(SUBCLEAN) $(SUBUPDATE) $(SUBKOMPILE) $(SUBKRUN) $(SUBPROOFS) $(SUBSEARCHES) $(SUBSTRAT) $(SUBKAST)
 
 all: $(SUBDIRS)
 clean: $(SUBCLEAN)
@@ -16,7 +15,6 @@ update-results: $(SUBUPDATE)
 kompile: $(SUBKOMPILE)
 krun: $(SUBKRUN)
 proofs: $(SUBPROOFS)
-bmc: $(SUBBMC)
 searches: $(SUBSEARCHES)
 strat: $(SUBSTRAT)
 kast: $(SUBKAST)
@@ -38,9 +36,6 @@ $(SUBKRUN): %.krun:
 
 $(SUBPROOFS): %.proofs:
 	$(MAKE) -C $* proofs
-
-$(SUBBMC): %.bmc:
-	$(MAKE) -C $* bmc
 
 $(SUBSEARCHES): %.searches:
 	$(MAKE) -C $* searches

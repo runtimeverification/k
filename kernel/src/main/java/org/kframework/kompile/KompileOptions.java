@@ -49,7 +49,7 @@ public class KompileOptions implements Serializable {
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore]. Each creates the kompiled K definition.")
     public String backend = Backends.LLVM;
 
     @Parameter(names="--main-module", description="Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).")
@@ -100,10 +100,6 @@ public class KompileOptions implements Serializable {
             "rules marked with `[concrete]` attribute")
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
-    public boolean isKore() {
-        return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm") || backend.equals("maude");
-    }
-
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
 
@@ -125,8 +121,8 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
     public long bisonStackMaxDepth = 10000;
 
-    @Parameter(names="--transition", listConverter=StringListConverter.class, description="[DEPRECATED: java backend only] <string> is a whitespace-separated list of tags designating rules to become transitions.")
-    public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
+    @Parameter(names="--bison-parser-library", description="Generate a shared library rather than an executable for Bison parsers")
+    public boolean genBisonParserLibrary;
 
     public static final String DEFAULT_TRANSITION = "transition";
 
@@ -145,4 +141,7 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names={"--allow-anywhere-haskell"}, description="Disable error message for anywhere rules on the Haskell backend.")
     public boolean allowAnywhereRulesHaskell;
+
+    @Parameter(names="--disable-kore-antileft", description="[EXPERIMENTAL] Disable generation of antileft priority predicates ")
+    public boolean disableKoreAntileft;
 }

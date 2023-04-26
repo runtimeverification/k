@@ -31,7 +31,6 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.json.JsonParser;
@@ -39,6 +38,8 @@ import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
+import org.kframework.utils.OS;
+import org.kframework.utils.RunProcess;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -53,6 +54,8 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
+import scala.collection.Seq;
+import scala.collection.Set$;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,10 +192,10 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
+                String filename = getBisonParserFilename(def.programStartSymbol.name(), def.mainSyntaxModuleName());
                 File outputFile = files.resolveKompiled(filename);
                 File linkFile = files.resolveKompiled("parser_PGM");
-                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth, kompileOptions.genBisonParserLibrary);
                 try {
                     linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -215,10 +218,10 @@ public class Kompile {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
                         Sort sort = def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K());
-                        String filename = "parser_" + sort.name() + "_" + module;
+                        String filename = getBisonParserFilename(sort.name(), module);
                         File outputFile = files.resolveKompiled(filename);
                         File linkFile = files.resolveKompiled("parser_" + name);
-                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth, kompileOptions.genBisonParserLibrary);
                         try {
                             linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -231,6 +234,16 @@ public class Kompile {
         }
 
         return def;
+    }
+
+    private String getBisonParserFilename(String sort, String module) {
+        String baseName = "parser_" + sort + "_" + module;
+
+        if (kompileOptions.genBisonParserLibrary) {
+            return "lib" + baseName + OS.current().getSharedLibraryExtension();
+        } else {
+            return baseName;
+        }
     }
 
     private Definition postProcessJSON(Definition defn, String postProcess) {
@@ -303,61 +316,6 @@ public class Kompile {
     public static Function1<Definition, Definition> excludeModulesByTag(Set<String> excludedModuleTags) {
         DefinitionTransformer dt = DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
-    }
-
-    public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files) {
-        Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
-        DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
-        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(false)::resolve, "resolving or patterns");
-        DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
-        DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(false)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, false)::moduleResolve, "resolving functions with config context").apply(d);
-        DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
-        DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
-        Function1<Definition, Definition> propagateMacroToRules =
-                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
-        Function1<Definition, Definition> expandMacros = d -> {
-          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, false);
-          return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
-        };
-        GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
-        Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
-        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
-        Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
-        Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
-                    s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
-                            Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
-
-        return def -> resolveIO
-                .andThen(resolveFun)
-                .andThen(resolveFunctionWithConfig)
-                .andThen(resolveStrict)
-                .andThen(resolveAnonVars)
-                .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
-                .andThen(numberSentences)
-                .andThen(resolveHeatCoolAttribute)
-                .andThen(resolveSemanticCasts)
-                .andThen(subsortKItem)
-                .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortProjections)
-                .andThen(propagateMacroToRules)
-                .andThen(expandMacros)
-                .andThen(guardOrs)
-                .andThen(d -> Kompile.resolveFreshConstants(d, files))
-                .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortProjections)
-                .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-                .andThen(d -> ConcretizeCells.transformDefinition(d, false))
-                .andThen(genCoverage)
-                .andThen(Kompile::addSemanticsModule)
-                .andThen(resolveConfigVar)
-                .andThen(markExtraConcreteRules)
-                .apply(def);
     }
 
     public static Sentence removePolyKLabels(Sentence s) {
@@ -501,7 +459,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, kompileOptions.isKore(), files);
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -521,6 +479,8 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
+        checkIsSortPredicates(modules);
+
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
@@ -537,6 +497,37 @@ public class Kompile {
         }
     }
 
+    private void checkIsSortPredicates(scala.collection.Set<Module> modules) {
+        Set<String> generatedIsSorts =
+                stream(modules)
+                        .flatMap(m -> stream(m.definedSorts()))
+                        .map(s -> "is" + s.toString())
+                        .collect(Collectors.toSet());
+
+        stream(modules)
+                .flatMap(m -> stream(m.productionsForSort().getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
+                .collect(Collectors.toSet())
+                .stream()
+                .forEach(prod -> {
+                    Seq<ProductionItem> items = prod.items();
+                    if (items.size() < 3) {
+                        return;
+                    }
+                    ProductionItem first = items.head();
+                    ProductionItem second = items.tail().head();
+                    ProductionItem last = items.last();
+                    // Check if the production is of the form isSort ( ... )
+                    if ((first instanceof Terminal) && (second instanceof Terminal) && (last instanceof Terminal) &&
+                            generatedIsSorts.contains(((Terminal) first).value()) &&
+                            ((Terminal) second).value().equals("(") && ((Terminal) last).value().equals(")")) {
+                        errors.add(
+                                KEMException.compilerError(
+                                        "Syntax declaration conflicts with automatically generated " +
+                                                ((Terminal) first).value() + " predicate.", prod));
+                    }
+                });
+    }
+
     public static Definition addSemanticsModule(Definition d) {
         java.util.Set<Module> allModules = mutable(d.modules());
 
@@ -549,15 +540,10 @@ public class Kompile {
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    public static Definition resolveFreshConstants(Definition input, FileUtil files) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null, files).resolve(m)), "resolving !Var variables")
-                .apply(input);
-    }
-
     public Rule compileRule(Definition compiledDef, Rule parsedRule) {
         return (Rule) UnaryOperator.<Sentence>identity()
                 .andThen(new ResolveAnonVar()::resolve)
-                .andThen(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve)
+                .andThen(new ResolveSemanticCasts(false)::resolve)
                 .andThen(s -> concretizeSentence(s, compiledDef))
                 .apply(parsedRule);
     }
@@ -573,6 +559,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kompileOptions.isKore()).concretize(input.mainModule(), s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
     }
 }

@@ -2,6 +2,7 @@
 package org.kframework.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.collections4.CollectionUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
@@ -26,11 +27,7 @@ import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import scala.Tuple2;
 
@@ -45,13 +42,11 @@ import static org.kframework.Collections.*;
  */
 public class CheckKLabels {
     private final Set<KEMException> errors;
-    private final boolean kore;
     private final KExceptionManager kem;
     private final FileUtil files;
 
-    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, boolean kore, FileUtil files) {
+    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, FileUtil files) {
         this.errors = errors;
-        this.kore = kore;
         this.kem = kem;
         this.files = files;
     }
@@ -111,10 +106,7 @@ public class CheckKLabels {
             Production prod = (Production) sentence;
             if (prod.klabel().isDefined()) {
                 KLabel klabel = prod.klabel().get();
-                if (klabels.containsKey(klabel.name()) && !m.equals(klabels.get(klabel.name())) && !kore) {
-                    errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel.name()).name() + " and " + m.name() + ".", prod));
-                }
-                if (klabelProds.containsKey(klabel.name()) && kore && !internalDuplicates.contains(klabel.name())) {
+                if (klabelProds.containsKey(klabel.name()) && !internalDuplicates.contains(klabel.name())) {
                     errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
                 }
                 klabels.put(klabel.name(), m);
@@ -171,6 +163,9 @@ public class CheckKLabels {
                     allSymbolic = false;
                 }
             }
+            // If concrete or symbolic is used on the rule for a function, force all of them to have the same attribute
+            // to keep the soundness of the definition. Exception are simplification rules which need to be sound by themselves.
+            // https://github.com/runtimeverification/k/issues/1591
             for (Rule rule : iterable(mainMod.rulesFor().get(function).getOrElse(() -> Collections.<Rule>Set()))) {
                 if (rule.att().contains(Att.CONCRETE()) && !allConcrete && !rule.att().contains(Att.SIMPLIFICATION())) {
                     errors.add(KEMException.compilerError("Found concrete attribute without simplification attribute on function with one or more non-concrete rules.", rule));
@@ -178,6 +173,20 @@ public class CheckKLabels {
                 if (rule.att().contains(Att.SYMBOLIC()) && !allSymbolic && !rule.att().contains(Att.SIMPLIFICATION())) {
                     errors.add(KEMException.compilerError("Found symbolic attribute without simplification attribute on function with one or more non-symbolic rules.", rule));
                 }
+            }
+        }
+        for (Rule rule : iterable(mainMod.rules())) {
+            Att att = rule.att();
+            if (att.contains(Att.SIMPLIFICATION()) && att.contains(Att.CONCRETE()) && att.contains(Att.SYMBOLIC())) {
+                Collection<String> concreteVars = Arrays.stream(att.get(Att.CONCRETE()).split(","))
+                        .map(String::trim).collect(Collectors.toList());
+                Collection<String> symbolicVars = Arrays.stream(att.get(Att.SYMBOLIC()).split(","))
+                        .map(String::trim).collect(Collectors.toList());
+                if (concreteVars.isEmpty() || symbolicVars.isEmpty())
+                    errors.add(KEMException.compilerError("Rule cannot be both concrete and symbolic in the same variable.", rule));
+                Collection<String> intersection = CollectionUtils.intersection(concreteVars, symbolicVars);
+                if (!intersection.isEmpty())
+                    errors.add(KEMException.compilerError("Rule cannot be both concrete and symbolic in the same variable: " + intersection, rule));
             }
         }
     }

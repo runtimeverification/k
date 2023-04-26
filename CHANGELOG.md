@@ -332,7 +332,7 @@ K Framework 5.0.0
 Major changes since version 3.6, not all are documented here.
 In particular:
 
-- No longer user Maude backend for K.
+- No longer uses Maude backend for K.
 
 - OCaml backend was developed, but now is being deprecated in favor of LLVM
   backend for concrete execution.

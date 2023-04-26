@@ -35,12 +35,10 @@ public class AddTopCellToRules {
 
     private final ConfigurationInfo cfg;
     private final LabelInfo labelInfo;
-    private final boolean kore;
 
-    public AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo, boolean kore) {
+    public AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo) {
         this.cfg = cfg;
         this.labelInfo = labelInfo;
-        this.kore = kore;
     }
 
     public K addImplicitCells(K term, Module m) {
@@ -50,11 +48,7 @@ public class AddTopCellToRules {
 
     protected K addRootCell(K term) {
         KLabel root;
-        if (kore) {
-            root = KLabels.GENERATED_TOP_CELL;
-        } else {
-            root = cfg.getCellLabel(cfg.getRootCell());
-        }
+        root = KLabels.GENERATED_TOP_CELL;
 
         // KApply instance
         if (term instanceof KApply) {

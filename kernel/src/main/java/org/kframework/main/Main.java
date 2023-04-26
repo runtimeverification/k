@@ -14,12 +14,8 @@ import com.google.inject.spi.Message;
 import com.martiansoftware.nailgun.NGContext;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kast.KastFrontEnd;
-import org.kframework.kbmc.KBMCFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
-import org.kframework.keq.KEqFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
-import org.kframework.kprove.KProveFrontEnd;
-import org.kframework.krun.KRunFrontEnd;
 import org.kframework.ksearchpattern.KSearchPatternFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
 import org.kframework.utils.errorsystem.KEMException;
@@ -184,55 +180,10 @@ public class Main {
                 case "-k-compile-search-pattern":
                     modules = KSearchPatternFrontEnd.getModules();
                     break;
-                case "-krun":
-                    modules.addAll(KRunFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKRunModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kprove-legacy":
-                    modules.addAll(KProveFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKProveModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
                 case "-kprove":
-                    modules.addAll(org.kframework.kprovex.KProveFrontEnd.getModules());
+                    modules.addAll(org.kframework.kprove.KProveFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKProveModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kbmc":
-                    modules.addAll(KBMCFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKProveModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-keq":
-                    List<Module> definitionSpecificModules = new ArrayList<>();
-                    definitionSpecificModules.addAll(KEqFrontEnd.getDefinitionSpecificModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getDefinitionSpecificKEqModules();
-                        if (ms != null) {
-                            definitionSpecificModules.addAll(ms);
-                        }
-                    }
-
-                    modules.addAll(KEqFrontEnd.getModules(definitionSpecificModules));
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKEqModules(definitionSpecificModules);
                         if (ms != null) {
                             modules.addAll(ms);
                         }
@@ -251,7 +202,7 @@ public class Main {
     }
 
     private static void invalidJarArguments() {
-        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -kdep, -krun, -keq, -kserver, or -kpp.");
+        System.err.println("The first argument of the K java compiler not recognized. Try -kompile, -kast, -kdep, -kserver, or -klsp.");
         System.exit(1);
     }
 }
