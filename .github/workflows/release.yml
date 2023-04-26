@@ -41,7 +41,6 @@ jobs:
           version_tag=ubuntu-jammy-${version}
           user=$(id -un)
           group=$(id -gn)
-          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "mkdir /home/${user}/.m2"
           docker cp ~/.m2/settings.xml k-package-mvn-deploy-${GITHUB_SHA}:/home/${user}/.m2/settings.xml
           docker cp ./ k-package-mvn-deploy-${GITHUB_SHA}:/home/${user}/k
           docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "chown ${user}:${group} -R /home/${user}"
