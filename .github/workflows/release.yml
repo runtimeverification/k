@@ -42,9 +42,8 @@ jobs:
           user=$(id -un)
           group=$(id -gn)
           docker cp ~/.m2/settings.xml k-package-mvn-deploy-${GITHUB_SHA}:/home/${user}/.m2/settings.xml
-          docker cp ./ k-package-mvn-deploy-${GITHUB_SHA}:/home/${user}/k
-          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "chown ${user}:${group} -R /home/${user}"
-          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "cd k && mvn --batch-mode deploy"
+          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "chown ${user}:${group} -R /home/${user}/.m2"
+          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Clean up Docker Container'
         if: always()
