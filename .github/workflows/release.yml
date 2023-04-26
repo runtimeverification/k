@@ -11,18 +11,11 @@ jobs:
 
   maven-deploy:
     name: 'Deploy to Maven Repository'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: ubuntu-22.04
     timeout-minutes: 75
     steps:
-      - uses: actions/checkout@v3
-      - name: 'Setup Docker'
-        uses: ./.github/actions/with-docker
-        with:
-          tag: k-package-mvn-deploy-${{ github.sha }}
-          os: ubuntu
-          distro: jammy
-          llvm: 14
-
+      - name: 'Check out code'
+        uses: actions/checkout@v3
       - name: 'Set up Java for publishing to GitHub Maven Packages'
         uses: actions/setup-java@v3
         with:
@@ -30,22 +23,6 @@ jobs:
           distribution: 'adopt'
           overwrite-settings: true
           server-id: runtime.verification
-          server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.JENKINS_GITHUB_PAT }}
-
       - name: 'Maven Deployment'
         shell: bash {0}
-        run: |
-          set -euxo pipefail
-          version=$(cat package/version)
-          version_tag=ubuntu-jammy-${version}
-          user=$(id -un)
-          group=$(id -gn)
-          docker cp ~/.m2/settings.xml k-package-mvn-deploy-${GITHUB_SHA}:/home/${user}/.m2/settings.xml
-          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "chown ${user}:${group} -R /home/${user}/.m2"
-          docker exec -t k-package-mvn-deploy-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
-
-      - name: 'Clean up Docker Container'
-        if: always()
-        run: |
-          docker stop --time=0 k-package-mvn-deploy-${GITHUB_SHA}
+        run: mvn --batch-mode deploy
