@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 
 class TestTerm(RuntimeTest):
     KOMPILE_MAIN_FILE = 'k-files/ctor.k'
-    KOMPILE_SYNTAX_MODULE = 'CTOR'
+    KOMPILE_ARGS = {
+        'syntax_module': 'CTOR',
+    }
 
     @pytest.mark.parametrize('ctor', ('one', 'two', 'three'))
     def test_construct(self, runtime: ModuleType, ctor: str) -> None:
