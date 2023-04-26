@@ -31,7 +31,7 @@ jobs:
           overwrite-settings: true
           server-id: runtime.verification
           server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-password: ${{ secrets.JENKINS_GITHUB_PAT }}
 
       - name: 'Maven Deployment'
         shell: bash {0}
