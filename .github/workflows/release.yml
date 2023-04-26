@@ -121,7 +121,7 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:/tmp/settings.xml
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec k-package-docker-test-jammy-${GITHUB_SHA} /bin/bash -c "mvn --batch-mode deploy"
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Clean up Docker Container'
         if: always()
