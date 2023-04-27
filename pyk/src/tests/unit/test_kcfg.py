@@ -6,7 +6,7 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KVariable
-from pyk.kcfg import KCFG
+from pyk.kcfg import KCFG, KCFGShow
 from pyk.prelude.ml import mlEquals, mlTop
 from pyk.prelude.utils import token
 from pyk.utils import shorten_hash
@@ -641,8 +641,9 @@ def test_pretty_print() -> None:
     )
 
     # When
-    actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
-    actual_short_info = '\n'.join(cfg.pretty(MockKPrint(), node_printer=node_short_info)) + '\n'
+    kcfg_show = KCFGShow(MockKPrint())
+    actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
+    actual_short_info = '\n'.join(kcfg_show.pretty(cfg, node_printer=node_short_info)) + '\n'
 
     # Then
     assert actual == expected

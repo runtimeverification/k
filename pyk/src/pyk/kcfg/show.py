@@ -3,13 +3,16 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from graphviz import Digraph
+
 from ..cli_utils import ensure_dir_path
 from ..cterm import CTerm, build_claim, build_rule
 from ..kast.inner import KApply, KRewrite, top_down
-from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
+from ..kast.manip import flatten_label, minimize_term, ml_pred_to_bool, push_down_rewrites
 from ..kast.outer import KFlatModule
 from ..prelude.k import DOTS
 from ..prelude.ml import mlAnd
+from ..utils import add_indent
 from .kcfg import KCFG
 
 if TYPE_CHECKING:
@@ -17,6 +20,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
+    from ..cterm import CSubst
     from ..kast import KInner
     from ..kast.outer import KRuleLike
     from ..ktool.kprint import KPrint
@@ -33,6 +37,216 @@ class KCFGShow:
     ):
         self.kprint = kprint
 
+    def pretty_segments(
+        self,
+        kcfg: KCFG,
+        minimize: bool = True,
+        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
+        omit_node_hash: bool = False,
+    ) -> Iterable[tuple[str, Iterable[str]]]:
+        """Return a pretty version of the KCFG in segments.
+
+        Each segment is a tuple of an identifier and a list of lines to be printed for that segment (Tuple[str, Iterable[str]).
+        The identifier tells you whether that segment is for a given node, edge, or just pretty spacing ('unknown').
+        This is useful for applications which want to pretty print in chunks, so that they can know which printed region corresponds to each node/edge.
+        """
+
+        processed_nodes: list[KCFG.Node] = []
+        ret_lines: list[tuple[str, list[str]]] = []
+
+        def _bold(text: str) -> str:
+            return '\033[1m' + text + '\033[0m'
+
+        def _green(text: str) -> str:
+            return '\033[32m' + text + '\033[0m'
+
+        def _print_node(node: KCFG.Node) -> list[str]:
+            short_info = kcfg.node_short_info(node, node_printer=node_printer, omit_node_hash=omit_node_hash)
+            if kcfg.is_frontier(node.id):
+                short_info[0] = _bold(short_info[0])
+            return short_info
+
+        def _print_edge(edge: KCFG.Edge) -> list[str]:
+            if edge.depth == 1:
+                return ['(' + str(edge.depth) + ' step)']
+            else:
+                return ['(' + str(edge.depth) + ' steps)']
+
+        def _print_cover(cover: KCFG.Cover) -> Iterable[str]:
+            subst_strs = [f'{k} <- {self.kprint.pretty_print(v)}' for k, v in cover.csubst.subst.items()]
+            subst_str = ''
+            if len(subst_strs) == 0:
+                subst_str = '.Subst'
+            if len(subst_strs) == 1:
+                subst_str = subst_strs[0]
+            if len(subst_strs) > 1 and minimize:
+                subst_str = 'OMITTED SUBST'
+            if len(subst_strs) > 1 and not minimize:
+                subst_str = '{\n    ' + '\n    '.join(subst_strs) + '\n}'
+            constraint_str = self.kprint.pretty_print(ml_pred_to_bool(cover.csubst.constraint, unsafe=True))
+            if len(constraint_str) > 78:
+                constraint_str = 'OMITTED CONSTRAINT'
+            return [
+                f'constraint: {constraint_str}',
+                f'subst: {subst_str}',
+            ]
+
+        def _print_split_edge(csubst: CSubst) -> list[str]:
+            ret_split_lines: list[str] = []
+            substs = csubst.subst.items()
+            constraints = csubst.constraints
+            if len(constraints) == 1:
+                first_line, *rest_lines = self.kprint.pretty_print(constraints[0]).split('\n')
+                ret_split_lines.append(f'constraint: {first_line}')
+                ret_split_lines.extend(f'              {line}' for line in rest_lines)
+            elif len(constraints) > 1:
+                ret_split_lines.append('constraints:')
+                for constraint in constraints:
+                    first_line, *rest_lines = self.kprint.pretty_print(constraint).split('\n')
+                    ret_split_lines.append(f'    {first_line}')
+                    ret_split_lines.extend(f'      {line}' for line in rest_lines)
+            if len(substs) == 1:
+                vname, term = list(substs)[0]
+                ret_split_lines.append(f'subst: {vname} <- {self.kprint.pretty_print(term)}')
+            elif len(substs) > 1:
+                ret_split_lines.append('substs:')
+                ret_split_lines.extend(f'    {vname} <- {self.kprint.pretty_print(term)}' for vname, term in substs)
+            return ret_split_lines
+
+        def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: list[KCFG.Node]) -> None:
+            processed = curr_node in processed_nodes
+            processed_nodes.append(curr_node)
+            successors = list(kcfg.successors(curr_node.id))
+
+            curr_node_strs = _print_node(curr_node)
+
+            ret_node_lines = []
+            suffix = []
+            elbow = '├─'
+            node_indent = '│   '
+            if kcfg.is_init(curr_node.id):
+                elbow = '┌─'
+            elif processed or kcfg.is_target(curr_node.id) or not successors:
+                elbow = '└─'
+                node_indent = '    '
+                if curr_node in prior_on_trace:
+                    suffix = ['(looped back)', '']
+                elif processed and not kcfg.is_target(curr_node.id):
+                    suffix = ['(continues as previously)', '']
+                elif kcfg.is_stuck(curr_node.id):
+                    suffix = ['(stuck)', '']
+                else:
+                    suffix = ['']
+            ret_node_lines.append(indent + elbow + ' ' + curr_node_strs[0])
+            ret_node_lines.extend(add_indent(indent + node_indent, curr_node_strs[1:]))
+            ret_node_lines.extend(add_indent(indent + '   ', suffix))
+            ret_lines.append((f'node_{curr_node.id}', ret_node_lines))
+
+            if processed or kcfg.is_target(curr_node.id):
+                return
+
+            if not successors:
+                return
+            successor = successors[0]
+
+            if type(successor) is KCFG.Split:
+                ret_lines.append(('unknown', [f'{indent}┃']))
+
+                for target, csubst in successor.targets[:-1]:
+                    ret_edge_lines = _print_split_edge(csubst)
+                    ret_edge_lines = [indent + '┣━━┓ ' + ret_edge_lines[0]] + add_indent(
+                        indent + '┃  ┃ ', ret_edge_lines[1:]
+                    )
+                    ret_edge_lines.append(indent + '┃  │')
+                    ret_lines.append((f'split_{curr_node.id}_{target.id}', ret_edge_lines))
+                    _print_subgraph(indent + '┃  ', target, prior_on_trace + [curr_node])
+                target, csubst = successor.targets[-1]
+                ret_edge_lines = _print_split_edge(csubst)
+                ret_edge_lines = [indent + '┗━━┓ ' + ret_edge_lines[0]] + add_indent(
+                    indent + '   ┃ ', ret_edge_lines[1:]
+                )
+                ret_edge_lines.append(indent + '   │')
+                ret_lines.append((f'split_{curr_node.id}_{target.id}', ret_edge_lines))
+                _print_subgraph(indent + '   ', target, prior_on_trace + [curr_node])
+
+            elif isinstance(successor, KCFG.EdgeLike):
+                ret_lines.append(('unknown', [f'{indent}│']))
+
+                if type(successor) is KCFG.Edge:
+                    ret_edge_lines = []
+                    ret_edge_lines.extend(add_indent(indent + '│  ', _print_edge(successor)))
+                    ret_lines.append((f'edge_{successor.source.id}_{successor.target.id}', ret_edge_lines))
+
+                elif type(successor) is KCFG.Cover:
+                    ret_edge_lines = []
+                    ret_edge_lines.extend(add_indent(indent + '┊  ', _print_cover(successor)))
+                    ret_lines.append((f'cover_{successor.source.id}_{successor.target.id}', ret_edge_lines))
+
+                _print_subgraph(indent, successor.target, prior_on_trace + [curr_node])
+
+        def _sorted_init_nodes() -> tuple[list[KCFG.Node], list[KCFG.Node]]:
+            sorted_init_nodes = sorted(node for node in kcfg.nodes if node not in processed_nodes)
+            init_expanded_nodes = []
+            init_unexpanded_nodes = []
+            target_nodes = []
+            remaining_nodes = []
+            for node in sorted_init_nodes:
+                if kcfg.is_init(node.id):
+                    if kcfg.is_expanded(node.id):
+                        init_expanded_nodes.append(node)
+                    else:
+                        init_unexpanded_nodes.append(node)
+                elif kcfg.is_target(node.id):
+                    target_nodes.append(node)
+                else:
+                    remaining_nodes.append(node)
+            return (init_expanded_nodes + init_unexpanded_nodes + target_nodes, remaining_nodes)
+
+        init, _ = _sorted_init_nodes()
+        while init:
+            ret_lines.append(('unknown', ['']))
+            _print_subgraph('', init[0], [])
+            init, _ = _sorted_init_nodes()
+        if kcfg.frontier or kcfg.stuck:
+            ret_lines.append(('unknown', ['', 'Target Nodes:']))
+            for target in kcfg.target:
+                ret_node_lines = [''] + _print_node(target)
+                ret_lines.append((f'node_{target.id}', ret_node_lines))
+        _, remaining = _sorted_init_nodes()
+        if remaining:
+            ret_lines.append(('unknown', ['', 'Remaining Nodes:']))
+            for node in remaining:
+                ret_node_lines = [''] + _print_node(node)
+                ret_lines.append((f'node_{node.id}', ret_node_lines))
+
+        _ret_lines = []
+        used_ids = []
+        for id, seg_lines in ret_lines:
+            suffix = ''
+            counter = 0
+            while f'{id}{suffix}' in used_ids:
+                suffix = f'_{counter}'
+                counter += 1
+            new_id = f'{id}{suffix}'
+            used_ids.append(new_id)
+            _ret_lines.append((f'{new_id}', [l.rstrip() for l in seg_lines]))
+        return _ret_lines
+
+    def pretty(
+        self,
+        kcfg: KCFG,
+        minimize: bool = True,
+        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
+        omit_node_hash: bool = False,
+    ) -> Iterable[str]:
+        return (
+            line
+            for _, seg_lines in self.pretty_segments(
+                kcfg, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash
+            )
+            for line in seg_lines
+        )
+
     def show(
         self,
         cfgid: str,
@@ -46,9 +260,7 @@ class KCFGShow:
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
         res_lines: list[str] = []
-        res_lines += cfg.pretty(
-            self.kprint, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash
-        )
+        res_lines += self.pretty(cfg, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash)
 
         def hide_cells(term: KInner) -> KInner:
             def _hide_cells(_k: KInner) -> KInner:
@@ -133,6 +345,53 @@ class KCFGShow:
 
         return res_lines
 
+    def dot(self, kcfg: KCFG, node_printer: Callable[[CTerm], Iterable[str]] | None = None) -> str:
+        def _short_label(label: str) -> str:
+            return '\n'.join(
+                [
+                    label_line if len(label_line) < 100 else (label_line[0:100] + ' ...')
+                    for label_line in label.split('\n')
+                ]
+            )
+
+        graph = Digraph()
+
+        for node in kcfg.nodes:
+            label = '\n'.join(kcfg.node_short_info(node, node_printer=node_printer))
+            class_attrs = ' '.join(kcfg.node_attrs(node.id))
+            attrs = {'class': class_attrs} if class_attrs else {}
+            graph.node(name=node.id, label=label, **attrs)
+
+        for edge in kcfg.edges():
+            depth = edge.depth
+            label = f'{depth} steps'
+            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ')
+
+        for split in kcfg.splits():
+            for target, csubst in split.targets:
+                label = '\n#And'.join(
+                    f'{self.kprint.pretty_print(v)}' for v in split.source.cterm.constraints + csubst.constraints
+                )
+                graph.edge(tail_name=split.source.id, head_name=target.id, label=f'  {label}        ')
+
+        for cover in kcfg.covers():
+            label = ', '.join(
+                f'{k} |-> {self.kprint.pretty_print(v)}' for k, v in cover.csubst.subst.minimize().items()
+            )
+            label = _short_label(label)
+            attrs = {'class': 'abstraction', 'style': 'dashed'}
+            graph.edge(tail_name=cover.source.id, head_name=cover.target.id, label=f'  {label}        ', **attrs)
+
+        for target_id in kcfg._target:
+            for node in kcfg.frontier:
+                attrs = {'class': 'target', 'style': 'solid'}
+                graph.edge(tail_name=node.id, head_name=target_id, label='  ???', **attrs)
+            for node in kcfg.stuck:
+                attrs = {'class': 'target', 'style': 'solid'}
+                graph.edge(tail_name=node.id, head_name=target_id, label='  false', **attrs)
+
+        return graph.source
+
     def dump(
         self,
         cfgid: str,
@@ -148,7 +407,7 @@ class KCFGShow:
         _LOGGER.info(f'Wrote CFG file {cfgid}: {cfg_file}')
 
         if dot:
-            cfg_dot = cfg.to_dot(self.kprint, node_printer=node_printer)
+            cfg_dot = self.dot(cfg, node_printer=node_printer)
             dot_file = dump_dir / f'{cfgid}.dot'
             dot_file.write_text(cfg_dot)
             _LOGGER.info(f'Wrote DOT file {cfgid}: {dot_file}')
