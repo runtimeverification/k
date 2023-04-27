@@ -11,7 +11,7 @@ from textual.widgets import Footer, Static
 from ..cterm import CTerm
 from ..kast.inner import KApply, KRewrite
 from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
-from ..kcfg import KCFG
+from ..kcfg import KCFG, KCFGShow
 from ..prelude.kbool import TRUE
 from ..utils import shorten_hashes, single
 
@@ -75,8 +75,9 @@ class BehaviorView(Widget):
         self._minimize = minimize
         self._node_printer = node_printer
         self._nodes = []
-        for lseg_id, node_lines in self._kcfg.pretty_segments(
-            self._kprint, minimize=self._minimize, node_printer=self._node_printer
+        kcfg_show = KCFGShow(kprint)
+        for lseg_id, node_lines in kcfg_show.pretty_segments(
+            self._kcfg, minimize=self._minimize, node_printer=self._node_printer
         ):
             self._nodes.append(GraphChunk(lseg_id, node_lines))
 
