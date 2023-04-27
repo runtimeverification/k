@@ -115,7 +115,7 @@ $ git remote rm temp-k-fork
 [issue]: https://github.com/runtimeverification/k/issues/new?assignees=&labels=k-bug%2Ck&template=bug-report.yaml&title=%5BK-Bug%5D+%3CTITLE%3E
 [k-repo]: https://github.com/runtimeverification/k
 [license]: https://github.com/runtimeverification/k/blob/master/LICENSE.md
-[matrix]: https://riot.im/app/#/room/#k:matrix.org
+[matrix]: https://matrix.to/#/#k:matrix.org
 [pr]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests
 [readme]: https://github.com/runtimeverification/k/blob/master/README.md
 [rebase]: https://docs.github.com/en/get-started/using-git/about-git-rebase

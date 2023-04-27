@@ -3,7 +3,7 @@ copyright: Copyright (c) K Team. All Rights Reserved.
 permalink: README.html
 ---
 
-[Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
+[Join the chat on Matrix](https://matrix.to/#/#k:matrix.org)
 
 # Introduction
 
