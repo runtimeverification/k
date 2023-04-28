@@ -56,7 +56,7 @@ def split(i: int, js: Iterable[int]) -> KCFG.Split:
         csubst = term(i).match_with_constraint(term(j))
         assert csubst is not None
         split_substs.append(csubst)
-    return KCFG.Split(node(i), zip(map(node, js), split_substs, strict=True))
+    return KCFG.Split(node(i), zip((node(j) for j in js), split_substs, strict=True))
 
 
 def node_dicts(n: int, start: int = 0) -> list[dict[str, Any]]:
