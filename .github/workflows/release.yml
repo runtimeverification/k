@@ -350,7 +350,7 @@ jobs:
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-          BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path }}
+          BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path_remote }}
         run: |
           set -x
           version=$(cat k-homebrew-checkout/package/version)
