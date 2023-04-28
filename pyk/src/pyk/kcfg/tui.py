@@ -201,9 +201,9 @@ class NodeView(Widget):
 
             elif type(self._element) is KCFG.Split:
                 term_strs = [f'split: {shorten_hashes(self._element.source.id)}']
-                for target, csubst in self._element.targets:
+                for target_id, csubst in self._element.splits.items():
                     term_strs.append('')
-                    term_strs.append(f'  - {shorten_hashes(target.id)}')
+                    term_strs.append(f'  - {shorten_hashes(target_id)}')
                     if len(csubst.subst) > 0:
                         subst_equalities = map(_boolify, flatten_label('#And', csubst.subst.ml_pred))
                         term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in subst_equalities)
@@ -213,7 +213,11 @@ class NodeView(Widget):
                 term_str = '\n'.join(term_strs)
 
             if self._custom_view is not None:
-                custom_str = '\n'.join(self._custom_view(self._element))
+                # To appease the type-checker
+                if type(self._element) is KCFG.Node:
+                    custom_str = '\n'.join(self._custom_view(self._element))
+                elif type(self._element) is KCFG.Successor:
+                    custom_str = '\n'.join(self._custom_view(self._element))
 
         self.query_one('#info', Static).update(self._info_text())
         self.query_one('#term', Static).update(term_str)
