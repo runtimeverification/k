@@ -27,6 +27,7 @@ def kompile(
     *,
     command: Iterable[str] = ('kompile',),
     output_dir: str | Path | None = None,
+    debug: bool = False,
     cwd: Path | None = None,
     check: bool = True,
     **kwargs: Any,
@@ -36,6 +37,7 @@ def kompile(
     return kompiler(
         command=command,
         output_dir=output_dir,
+        debug=debug,
         cwd=cwd,
         check=check,
     )
@@ -97,6 +99,7 @@ class Kompile(ABC):
         command: Iterable[str] | None = None,
         *,
         output_dir: str | Path | None = None,
+        debug: bool = False,
         cwd: Path | None = None,
         check: bool = True,
     ) -> Path:
@@ -110,6 +113,9 @@ class Kompile(ABC):
         if output_dir is not None:
             output_dir = Path(output_dir)
             args += ['--output-definition', str(output_dir)]
+
+        if debug:
+            args += ['--debug']
 
         try:
             run_process(args, logger=_LOGGER, cwd=cwd, check=check)
@@ -249,7 +255,6 @@ class KompileArgs:
     emit_json: bool
     gen_bison_parser: bool
     bison_parser_library: bool
-    debug: bool
     post_process: str | None
     read_only: bool
 
@@ -265,7 +270,6 @@ class KompileArgs:
         emit_json: bool = True,
         gen_bison_parser: bool = False,
         bison_parser_library: bool = False,
-        debug: bool = False,
         post_process: str | None = None,
         read_only: bool = False,
     ):
@@ -282,7 +286,6 @@ class KompileArgs:
         object.__setattr__(self, 'emit_json', emit_json)
         object.__setattr__(self, 'gen_bison_parser', gen_bison_parser)
         object.__setattr__(self, 'bison_parser_library', bison_parser_library)
-        object.__setattr__(self, 'debug', debug)
         object.__setattr__(self, 'post_process', post_process)
         object.__setattr__(self, 'read_only', read_only)
 
@@ -312,9 +315,6 @@ class KompileArgs:
 
         if self.bison_parser_library:
             args += ['--bison-parser-library']
-
-        if self.debug:
-            args += ['--debug']
 
         if self.post_process:
             args += ['--post-process', shlex.quote(self.post_process)]
