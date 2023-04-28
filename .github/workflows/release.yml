@@ -350,11 +350,13 @@ jobs:
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-          BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path_remote }}
+          BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path }}
+          REMOTE_BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path_remote }}
         run: |
           set -x
           version=$(cat k-homebrew-checkout/package/version)
-          gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${BOTTLE_NAME}
+          mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
+          gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
 
       - name: 'Add ssh key'
         uses: shimataro/ssh-key-action@v2
