@@ -69,6 +69,7 @@ class Att private (val att: Map[(String, String), Any]) extends AttributesToStri
   private def add(key: String, clsStr: String, value: String): Att = Att(att + ((key, clsStr) -> value))
   private def add(key: String, clsStr: String, value: Int): Att = Att(att + ((key, clsStr) -> value))
   def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
+  def addGroup(key: String): Att = add(key, Att.groupMarkerClassName, Att.GroupMarker())
 
   def remove(key: String): Att = remove(key, Att.stringClassName)
   def remove(key: Class[_]): Att = remove(key.getName, key.getName)
@@ -84,47 +85,72 @@ object Att {
   val ALIAS_REC = "alias-rec"
   val ALL_PATH = "all-path"
   val ANYWHERE = "anywhere"
+  val APPLY_PRIORITY = "applyPriority"
   val ASSOC = "assoc"
+  val AVOID = "avoid"
   val BAG = "bag"
+  val BINDER = "binder"
   val BITWIDTH = "bitwidth"
   val BRACKET = "bracket"
+  val BRACKET_LABEL = "bracketLabel"
   val CELL = "cell"
   val CELL_FRAGMENT = "cellFragment"
   val CELL_OPT_ABSENT = "cellOptAbsent"
+  val COLOR = "color"
+  val COLORS = "colors"
   val COMM = "comm"
   val CONCRETE = "concrete"
+  val CONTEXT = "context"
   val COOL = "cool"
   val DIGEST = "digest"
+  val ELEMENT = "element"
   val EXPONENT = "exponent"
+  val FORMAT = "format"
+  val FRESH_GENERATOR = "freshGenerator"
   val FUNCTION = "function"
   val FUNCTIONAL = "functional"
   val GENERATED_BY_LIST_SUBSORTING = "generatedByListSubsorting"
   val HEAT = "heat"
+  val HYBRID = "hybrid"
   val HOOK = "hook"
   val IDEM = "idem"
   val IMPURE = "impure"
+  val INJECTIVE = "injective"
+  val INTERNAL = "internal"
+  val KAST = "kast"
+  val KLABEL = "klabel"
   val KORE = "kore"
   val LABEL = "label"
+  val LATEX = "latex"
+  val LEFT = "left"
   val LEMMA = "lemma"
   val LOCATION = "org.kframework.attributes.Location"
+  val LOCATIONS = "locations"
   val MACRO = "macro"
   val MACRO_REC = "macro-rec"
   val MAINCELL = "maincell"
   val MATCHING = "matching"
+  val MEMO = "memo"
+  val NON_ASSOC = "non-assoc"
   val NON_EXECUTABLE = "non-executable"
   val ONE_PATH = "one-path"
   val ORIGINAL_PRD = "originalPrd"
   val OWISE = "owise"
   val PATTERN = "pattern"
   val PATTERN_FOLDING = "pattern-folding"
+  val PREC = "prec"
   val PREDICATE = "predicate"
+  val PREFER = "prefer"
   val PRIORITY = "priority"
   val PRIVATE = "private"
+  val PRODUCTION = "org.kframework.definition.Production"
   val PROJ = "proj"
   val PUBLIC = "public"
   val RECORD_PRD = "recordPrd"
   val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
-  val REFERS_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION";
+  val REFERS_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
+  val RESULT = "result"
+  val RIGHT = "right"
   val SEQSTRICT = "seqstrict"
   val SIGNIFICAND = "significand"
   val SIMPLIFICATION = "simplification"
@@ -135,6 +161,7 @@ object Att {
   val SOURCE = "org.kframework.attributes.Source"
   val SPECIFICATION = "specification"
   val STRICT = "strict"
+  val SYMBOL = "symbol"
   val SYMBOLIC = "symbolic"
   val SYNTAX_MODULE = "syntaxModule"
   val TAG = "tag"
@@ -146,10 +173,22 @@ object Att {
   val UNBOUND_VARIABLES = "unboundVariables"
   val UNIT = "unit"
   val UNIQUE_ID = "UNIQUE_ID"
+  val UNUSED = "unused"
   val USER_LIST = "userList"
 
   private val stringClassName = classOf[String].getName
   private val intClassName = classOf[java.lang.Integer].getName
+
+  // Marker for group(...) attributes
+  case class GroupMarker() extends AttValue
+  private val groupMarkerClassName = classOf[GroupMarker].getName
+
+  // Any string val declared above with ALL_CAPS naming is presumed to be a valid attribute key
+  val whitelist: Set[String] =
+    Att.getClass.getDeclaredFields
+      .filter(f => f.getType.equals(classOf[String]) && f.getName.matches("[A-Z]+(_[A-Z]+)*"))
+      .map(f => f.get(this).asInstanceOf[String])
+      .toSet
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)

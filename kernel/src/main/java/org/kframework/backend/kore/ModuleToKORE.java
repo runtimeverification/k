@@ -1660,7 +1660,7 @@ public class ModuleToKORE {
             String name = attribute._1._1;
             Object val = attribute._2;
             String strVal = val.toString();
-            if (strVal.equals("")) {
+            if (strVal.equals("") || val instanceof Att.GroupMarker) {
                 if (!attributes.containsKey(name)) {
                     attributes.put(name, false);
                 }

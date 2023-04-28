@@ -1,0 +1,6 @@
+[Error] Compiler: Unrecognized attributes: [badAtt]
+	Source(pedanticAttributes.k)
+	Location(3,18,3,68)
+	3 |	  syntax Int ::= Int "+" Int [group(badAttButOkay),badAtt,function]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.
