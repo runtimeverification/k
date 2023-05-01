@@ -69,7 +69,7 @@ class Att private (val att: Map[(String, String), Any]) extends AttributesToStri
   private def add(key: String, clsStr: String, value: String): Att = Att(att + ((key, clsStr) -> value))
   private def add(key: String, clsStr: String, value: Int): Att = Att(att + ((key, clsStr) -> value))
   def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
-
+  def addGroup(key: String): Att = add(key, Att.groupMarkerClassName, Att.GroupMarker())
   def remove(key: String): Att = remove(key, Att.stringClassName)
   def remove(key: Class[_]): Att = remove(key.getName, key.getName)
   def remove(key: String, cls: Class[_]): Att = remove(key, cls.getName)
@@ -150,6 +150,10 @@ object Att {
 
   private val stringClassName = classOf[String].getName
   private val intClassName = classOf[java.lang.Integer].getName
+
+  // Marker for group(...) attributes
+  case class GroupMarker() extends AttValue
+  private val groupMarkerClassName = classOf[GroupMarker].getName
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)

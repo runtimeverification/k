@@ -30,6 +30,11 @@ public class Context implements Serializable {
     public KompileOptions kompileOptions;
 
     public void addProduction(Production p) {
+        if (p.containsAttribute("group")) {
+            throw new AssertionError(
+                    "Must call ExpandGroupAttribute.apply(Definition) before creating a Context.");
+        }
+
         if (p.getKLabel(false) != null) {
             tags.put(p.getKLabel(false), p);
         } else if (p.getAttributes().contains(Att.BRACKET())) {

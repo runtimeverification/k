@@ -123,6 +123,15 @@ public abstract class ASTNode implements Serializable, HasLocation {
         return att;
     }
 
+    /**
+     * Sets the attributes to the provided Att
+     *
+     * @param att - the new attributes
+     */
+    public void setAttributes(Att att) {
+        this.att = att;
+    }
+
     public abstract void toString(StringBuilder sb);
 
     @Override
