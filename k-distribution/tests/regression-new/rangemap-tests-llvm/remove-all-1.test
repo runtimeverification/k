@@ -1,1 +1,1 @@
-removeAll(rangemap(4), SetItem(range(2, 3)))
+removeAll(rangemap(0), SetItem(range(0, 2)))

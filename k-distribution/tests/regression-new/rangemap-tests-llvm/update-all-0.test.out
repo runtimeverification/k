@@ -1,5 +1,3 @@
 <k>
-  range ( 0 , 1 ) r|-> 45
-  range ( 1 , 2 ) r|-> 50
-  range ( 3 , 5 ) r|-> 53 ~> .
+  .RangeMap ~> .
 </k>

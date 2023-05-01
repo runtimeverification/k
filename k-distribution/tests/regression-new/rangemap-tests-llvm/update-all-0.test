@@ -1,1 +1,1 @@
-updateRangeMap(rangemap(2), rangemap(3))
+updateRangeMap(rangemap(0), rangemap(0))

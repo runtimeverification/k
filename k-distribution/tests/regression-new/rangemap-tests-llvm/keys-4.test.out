@@ -1,0 +1,6 @@
+<k>
+  SetItem ( range ( 1 , 3 ) )
+  SetItem ( range ( 4 , 6 ) )
+  SetItem ( range ( 8 , 9 ) )
+  SetItem ( range ( 12 , 15 ) ) ~> .
+</k>

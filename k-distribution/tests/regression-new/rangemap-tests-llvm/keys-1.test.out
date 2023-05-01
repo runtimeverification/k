@@ -1,0 +1,3 @@
+<k>
+  SetItem ( range ( 2 , 3 ) ) ~> .
+</k>

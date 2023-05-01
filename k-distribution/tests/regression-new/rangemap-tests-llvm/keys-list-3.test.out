@@ -1,0 +1,5 @@
+<k>
+  ListItem ( range ( 0 , 2 ) )
+  ListItem ( range ( 3 , 8 ) )
+  ListItem ( range ( 9 , 12 ) ) ~> .
+</k>

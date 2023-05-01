@@ -1,1 +1,1 @@
-removeAll(rangemap(4), .Set)
+removeAll(rangemap(0), SetItem(range(0, 2)) SetItem(range(3, 4)))
