@@ -30,6 +30,9 @@ public class Context implements Serializable {
     public KompileOptions kompileOptions;
 
     public void addProduction(Production p) {
+        assert ! p.containsAttribute("group") :
+                "Must call ExpandGroupAttribute.apply(Definition) before creating a Context.";
+
         if (p.getKLabel(false) != null) {
             tags.put(p.getKLabel(false), p);
         } else if (p.getAttributes().contains(Att.BRACKET())) {
@@ -39,4 +42,5 @@ public class Context implements Serializable {
             tags.put(a._1, p);
         }
     }
+
 }

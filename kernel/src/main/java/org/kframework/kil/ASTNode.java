@@ -97,15 +97,6 @@ public abstract class ASTNode implements Serializable, HasLocation {
     }
 
     /**
-     * Appends a group to the list of attributes.
-     *
-     * @param key
-     */
-    public void addGroup(String key) {
-        att = att.addGroup(key);
-    }
-
-    /**
      * @param key
      * @return whether the attribute key occurs in the list of attributes.
      */
@@ -130,6 +121,15 @@ public abstract class ASTNode implements Serializable, HasLocation {
      */
     public Att getAttributes() {
         return att;
+    }
+
+    /**
+     * Sets the attributes to the provided Att
+     *
+     * @param att the new attributes
+     */
+    public void setAttributes(Att att) {
+        this.att = att;
     }
 
     public abstract void toString(StringBuilder sb);

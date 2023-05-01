@@ -64,7 +64,7 @@ public class CheckAtt {
         if (!badAtts.isEmpty()) {
             // TODO: Check edit distance from built-ins to offer better suggestions
             errors.add(KEMException.compilerError("Unrecognized attributes: " + badAtts.toString() +
-                    "\nHint: User defined attributes can be added with `group(att1,...,attN)`.", sentence));
+                    "\nHint: User defined attributes can be added with 'group(att1,...,attN)'.", sentence));
         }
     }
 

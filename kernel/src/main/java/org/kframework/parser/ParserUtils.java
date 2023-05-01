@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ExpandGroupAttribute;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -79,6 +80,7 @@ public class ParserUtils {
         def.setMainModule(mainModule);
         def.setMainSyntaxModule(mainModule);
 
+        ExpandGroupAttribute.apply(def);
         Context context = new Context();
         new CollectProductionsVisitor(context).visit(def);
 
@@ -199,6 +201,7 @@ public class ParserUtils {
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
+        ExpandGroupAttribute.apply(def);
         new CollectProductionsVisitor(context).visit(def);
 
         // Tuple4 of moduleName, Source, Location, digest
