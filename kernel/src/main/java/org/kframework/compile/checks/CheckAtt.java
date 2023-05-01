@@ -45,13 +45,7 @@ public class CheckAtt {
 
     public void check(Sentence sentence) {
         if (checkWhitelist) {
-            List<String> badAtts = stream(sentence.att().att())
-                    .filter((p) -> ! (p._2 instanceof Att.GroupMarker || Att.whitelist().contains(p._1._1)))
-                    .map((p) -> p._1._1)
-                    .collect(Collectors.toList());
-            if (!badAtts.isEmpty()) {
-                errors.add(KEMException.compilerError("Unrecognized attributes: " + badAtts.toString(), sentence));
-            }
+            checkWhitelist(sentence);
         }
 
         if (sentence instanceof Rule) {
@@ -59,6 +53,18 @@ public class CheckAtt {
             check((Rule) sentence);
         } else if (sentence instanceof Production) {
             check((Production) sentence);
+        }
+    }
+
+    private void checkWhitelist(Sentence sentence) {
+        List<String> badAtts = stream(sentence.att().att())
+                .filter((p) -> ! (p._2 instanceof Att.GroupMarker || Att.whitelist().contains(p._1._1)))
+                .map((p) -> p._1._1)
+                .collect(Collectors.toList());
+        if (!badAtts.isEmpty()) {
+            // TODO: Check edit distance from built-ins to offer better suggestions
+            errors.add(KEMException.compilerError("Unrecognized attributes: " + badAtts.toString() +
+                    "\nHint: User defined attributes can be added with `group(att1,...,attN)`.", sentence));
         }
     }
 
