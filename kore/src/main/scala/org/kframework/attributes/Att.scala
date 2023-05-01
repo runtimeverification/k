@@ -81,6 +81,7 @@ object Att {
 
   val empty: Att = Att(Map.empty)
 
+  // Note: Adding an UPPER_CASE String field here will add it to the whitelist of Attributes
   val ALIAS = "alias"
   val ALIAS_REC = "alias-rec"
   val ALL_PATH = "all-path"
@@ -95,6 +96,7 @@ object Att {
   val BRACKET_LABEL = "bracketLabel"
   val CELL = "cell"
   val CELL_FRAGMENT = "cellFragment"
+  val CELL_NAME = "cellName"
   val CELL_OPT_ABSENT = "cellOptAbsent"
   val COLOR = "color"
   val COLORS = "colors"
@@ -115,6 +117,7 @@ object Att {
   val HOOK = "hook"
   val IDEM = "idem"
   val IMPURE = "impure"
+  val INITIALIZER = "initializer"
   val INJECTIVE = "injective"
   val INTERNAL = "internal"
   val KAST = "kast"
@@ -133,6 +136,7 @@ object Att {
   val MEMO = "memo"
   val NON_ASSOC = "non-assoc"
   val NON_EXECUTABLE = "non-executable"
+  val NO_THREAD = "noThread"
   val ONE_PATH = "one-path"
   val ORIGINAL_PRD = "originalPrd"
   val OWISE = "owise"
@@ -150,6 +154,7 @@ object Att {
   val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
   val REFERS_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
   val RESULT = "result"
+  val RETURNS_UNIT = "returnsUnit"
   val RIGHT = "right"
   val SEQSTRICT = "seqstrict"
   val SIGNIFICAND = "significand"
@@ -160,19 +165,23 @@ object Att {
   val SMT_PRELUDE = "smt-prelude"
   val SOURCE = "org.kframework.attributes.Source"
   val SPECIFICATION = "specification"
+  val STREAM = "stream"
   val STRICT = "strict"
   val SYMBOL = "symbol"
   val SYMBOLIC = "symbolic"
   val SYNTAX_MODULE = "syntaxModule"
   val TAG = "tag"
   val TOKEN = "token"
+  val TOP_CELL = "topcell"
   val TOP_RULE = "topRule"
   val TOTAL = "total"
   val TRANSITION = "transition"
   val TRUSTED = "trusted"
+  val UNBLOCK = "unblock"
   val UNBOUND_VARIABLES = "unboundVariables"
   val UNIT = "unit"
   val UNIQUE_ID = "UNIQUE_ID"
+  val UNPARSE_AVOID = "unparseAvoid"
   val UNUSED = "unused"
   val USER_LIST = "userList"
 
@@ -183,7 +192,7 @@ object Att {
   case class GroupMarker() extends AttValue
   private val groupMarkerClassName = classOf[GroupMarker].getName
 
-  // Any string val declared above with ALL_CAPS naming is presumed to be a valid attribute key
+  // Any string field declared with UPPER_CASE naming is presumed to be a valid attribute key
   val whitelist: Set[String] =
     Att.getClass.getDeclaredFields
       .filter(f => f.getType.equals(classOf[String]) && f.getName.matches("[A-Z]+(_[A-Z]+)*"))
