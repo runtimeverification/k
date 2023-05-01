@@ -80,6 +80,8 @@ object Att {
 
   val empty: Att = Att(Map.empty)
 
+  // Note: Any String field Att.UPPER_CASE_NAME is automatically added to the
+  // whitelist of attribute keys (through reflection).
   val ALIAS = "alias"
   val ALIAS_REC = "alias-rec"
   val ALL_PATH = "all-path"
@@ -154,6 +156,13 @@ object Att {
   // Marker for group(...) attributes
   case class GroupMarker() extends AttValue
   private val groupMarkerClassName = classOf[GroupMarker].getName
+
+  // Set of built-in attribute keys. Consists of all UPPER_CASE named String fields in Att.
+  val whitelist: Set[String] =
+    Att.getClass.getDeclaredFields
+      .filter(f => f.getType.equals(classOf[String]) && f.getName.matches("[A-Z]+(_[A-Z]+)*"))
+      .map(f => f.get(this).asInstanceOf[String])
+      .toSet
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)

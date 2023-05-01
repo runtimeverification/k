@@ -15,7 +15,9 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 
@@ -28,16 +30,21 @@ public class CheckAtt {
     private final KExceptionManager kem;
     private final Module m;
     private final boolean isSymbolicKast;
+    private final boolean checkWhitelist;
 
-    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast) {
+    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast, boolean checkWhitelist) {
         this.errors = errors;
         this.kem = kem;
         this.m = m;
         this.isSymbolicKast = isSymbolicKast;
         this.macros = m.macroKLabels();
+        this.checkWhitelist = checkWhitelist;
     }
 
     public void check(Sentence sentence) {
+        if (checkWhitelist) {
+            checkAllAttsGroupOrWhitelist(sentence);
+        }
         if (sentence instanceof Rule) {
             check(((Rule) sentence).att(), sentence);
             check((Rule) sentence);
@@ -46,6 +53,17 @@ public class CheckAtt {
         }
     }
 
+    private void checkAllAttsGroupOrWhitelist(Sentence sentence) {
+        List<String> badAtts = stream(sentence.att().att())
+                .filter((p) -> ! (p._2 instanceof Att.GroupMarker || Att.whitelist().contains(p._1._1)))
+                .map((p) -> p._1._1)
+                .collect(Collectors.toList());
+        if (!badAtts.isEmpty()) {
+            // TODO: Check edit distance from built-ins to offer better suggestions
+            errors.add(KEMException.compilerError("Unrecognized attributes: " + badAtts +
+                    "\nHint: User-defined groups can be added with 'group(att1,...,attN)'.", sentence));
+        }
+    }
     private void check(Production prod) {
         if (!prod.sort().equals(Sorts.KItem())) {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
