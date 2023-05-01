@@ -635,7 +635,6 @@ List<Tag> KLabels() :
 | "]" { matchedToken.kind = RSQUARE; }
 | "(" { matchedToken.kind = LPAREN; }
 | ")" { matchedToken.kind = RPAREN; }
-| <GROUP: "group">
 | <KEY: ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9"])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?>
 }
 
@@ -666,29 +665,15 @@ void Attributes(ASTNode node) : {}
 
 /** Parses a single attribute and adds it to 'node' */
 void Tag(ASTNode node) :
-{ Location loc = startLoc();  }
+{ Location loc = startLoc(); String key; String val = "";
+  StringBuilder sb = new StringBuilder(); }
 {
-  (
-    { List<String> groups = new ArrayList<String>(); }
-    <GROUP> "(" <KEY> { groups.add(image()); } ("," <KEY> { groups.add(image()); })* ")"
-    {
-      for (String group : groups ) {
-        node.addGroup(group);
-      }
-    }
-  )
-  |
-  (
-    { String key; String val = ""; StringBuilder sb = new StringBuilder(); }
-    <KEY> { key = image(); }
-    ( "(" { SwitchTo(TAG_STATE); }
-      ( val = String() ")"
-      | TagContent(sb) ")" { val = sb.toString() + special(); }
-      )
-      { SwitchTo(ATTR_STATE); }
-    )?
-    { node.addAttribute(key, val); }
-  )
+  <KEY> { key = image(); }
+  ( "(" { SwitchTo(TAG_STATE); }
+    ( val = String() ")"
+    | TagContent(sb) ")" { val = sb.toString() + special(); } )
+    { SwitchTo(ATTR_STATE); })?
+  { node.addAttribute(key, val); }
 }
 
 /** Parses the value of an attribute and appends it to 'sb' */
