@@ -149,24 +149,37 @@ class KCFGShow:
                 return
             successor = successors[0]
 
-            if type(successor) is KCFG.Split:
+            if isinstance(successor, KCFG.MultiEdge):
                 ret_lines.append(('unknown', [f'{indent}┃']))
+                multiedge_label = '1 step' if type(successor) is KCFG.NDBranch else 'branch'
+                multiedge_id = 'ndbranch' if type(successor) is KCFG.NDBranch else 'split'
+                ret_lines.append(('unknown', [f'{indent}┃ ({multiedge_label})']))
 
                 for target in successor.targets[:-1]:
-                    ret_edge_lines = _print_split_edge(successor, target.id)
-                    ret_edge_lines = [indent + '┣━━┓ ' + ret_edge_lines[0]] + add_indent(
-                        indent + '┃  ┃ ', ret_edge_lines[1:]
-                    )
+                    if type(successor) is KCFG.Split:
+                        ret_edge_lines = _print_split_edge(successor, target.id)
+                        ret_edge_lines = [indent + '┣━━┓ ' + ret_edge_lines[0]] + add_indent(
+                            indent + '┃  ┃ ', ret_edge_lines[1:]
+                        )
+                    elif type(successor) is KCFG.NDBranch:
+                        ret_edge_lines = [indent + '┣━━┓ ']
+                    else:
+                        raise AssertionError()
                     ret_edge_lines.append(indent + '┃  │')
-                    ret_lines.append((f'split_{curr_node.id}_{target.id}', ret_edge_lines))
+                    ret_lines.append((f'{multiedge_id}_{curr_node.id}_{target.id}', ret_edge_lines))
                     _print_subgraph(indent + '┃  ', target, prior_on_trace + [curr_node])
                 target = successor.targets[-1]
-                ret_edge_lines = _print_split_edge(successor, target.id)
-                ret_edge_lines = [indent + '┗━━┓ ' + ret_edge_lines[0]] + add_indent(
-                    indent + '   ┃ ', ret_edge_lines[1:]
-                )
+                if type(successor) is KCFG.Split:
+                    ret_edge_lines = _print_split_edge(successor, target.id)
+                    ret_edge_lines = [indent + '┗━━┓ ' + ret_edge_lines[0]] + add_indent(
+                        indent + '   ┃ ', ret_edge_lines[1:]
+                    )
+                elif type(successor) is KCFG.NDBranch:
+                    ret_edge_lines = [indent + '┗━━┓ ']
+                else:
+                    raise AssertionError()
                 ret_edge_lines.append(indent + '   │')
-                ret_lines.append((f'split_{curr_node.id}_{target.id}', ret_edge_lines))
+                ret_lines.append((f'{multiedge_id}_{curr_node.id}_{target.id}', ret_edge_lines))
                 _print_subgraph(indent + '   ', target, prior_on_trace + [curr_node])
 
             elif isinstance(successor, KCFG.EdgeLike):
@@ -336,10 +349,15 @@ class KCFGShow:
                     rule, _ = build_rule(sentence_id, init_cterm, target_cterm, priority=35)
                 return rule
 
-            rules = [to_rule(e) for e in cfg.edges() if e.depth > 0]
+            rules = [to_rule(e) for e in cfg.edges()]
+            nd_steps = [
+                to_rule(KCFG.Edge(ndbranch.source, target, 1))
+                for ndbranch in cfg.ndbranches()
+                for target in ndbranch.targets
+            ]
             claims = [to_rule(KCFG.Edge(nd, cfg.get_unique_target(), -1), claim=True) for nd in cfg.frontier]
             cfg_module_name = cfgid.upper().replace('.', '-').replace('_', '-')
-            new_module = KFlatModule(f'SUMMARY-{cfg_module_name}', rules + claims)
+            new_module = KFlatModule(f'SUMMARY-{cfg_module_name}', rules + nd_steps + claims)
             res_lines.append(self.kprint.pretty_print(new_module))
             res_lines.append('')
 
@@ -367,14 +385,6 @@ class KCFGShow:
             label = f'{depth} steps'
             graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ')
 
-        for split in kcfg.splits():
-            for target in split.targets:
-                csubst = split.splits[target.id]
-                label = '\n#And'.join(
-                    f'{self.kprint.pretty_print(v)}' for v in split.source.cterm.constraints + csubst.constraints
-                )
-                graph.edge(tail_name=split.source.id, head_name=target.id, label=f'  {label}        ')
-
         for cover in kcfg.covers():
             label = ', '.join(
                 f'{k} |-> {self.kprint.pretty_print(v)}' for k, v in cover.csubst.subst.minimize().items()
@@ -382,6 +392,18 @@ class KCFGShow:
             label = _short_label(label)
             attrs = {'class': 'abstraction', 'style': 'dashed'}
             graph.edge(tail_name=cover.source.id, head_name=cover.target.id, label=f'  {label}        ', **attrs)
+
+        for split in kcfg.splits():
+            for target_id, csubst in split.splits.items():
+                label = '\n#And'.join(
+                    f'{self.kprint.pretty_print(v)}' for v in split.source.cterm.constraints + csubst.constraints
+                )
+                graph.edge(tail_name=split.source.id, head_name=target_id, label=f'  {label}        ')
+
+        for ndbranch in kcfg.ndbranches():
+            for target in ndbranch.target_ids:
+                label = '1 step'
+                graph.edge(tail_name=ndbranch.source.id, head_name=target, label=f'  {label}        ')
 
         for target_id in kcfg._target:
             for node in kcfg.frontier:
