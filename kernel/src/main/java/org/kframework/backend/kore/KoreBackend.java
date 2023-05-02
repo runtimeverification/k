@@ -128,7 +128,7 @@ public class KoreBackend extends AbstractBackend {
         };
         Function1<Definition, Definition> checkSimplificationRules = d -> DefinitionTransformer.from(m -> { m.localRules().foreach(r -> checkSimpIsFunc(m, r)); return m;}, "Check simplification rules").apply(d);
         DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
-        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, kompileOptions.topCell, files).resolve(m)), "resolving !Var variables").apply(d);
+        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> new ResolveFreshConstants(d, kompileOptions.topCell, files).resolve(m), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
@@ -159,6 +159,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
+                .andThen(d -> DefinitionTransformer.from(GeneratedTopFormat::resolve, "Fix GeneratedCounterCell format").apply(d))
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(subsortKItem)
