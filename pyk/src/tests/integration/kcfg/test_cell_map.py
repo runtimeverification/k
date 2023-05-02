@@ -73,8 +73,8 @@ class TestCellMapProof(KCFGExploreTest):
                 '<generatedTop>',
                 KApply('<k>', KSequence(_k_parsed)),
                 KApply('<activeAccounts>', _active_accounts),
-                KVariable('GENERATED_COUNTER_CELL'),
                 KApply('<accounts>', _accounts),
+                KVariable('GENERATED_COUNTER_CELL'),
             ),
             (),
         )
