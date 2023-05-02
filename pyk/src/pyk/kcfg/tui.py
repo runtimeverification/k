@@ -212,6 +212,14 @@ class NodeView(Widget):
                         term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in constraints)
                 term_str = '\n'.join(term_strs)
 
+            elif type(self._element) is KCFG.NDBranch:
+                term_strs = [f'ndbranch: {shorten_hashes(self._element.source.id)}']
+                for target in self._element.targets:
+                    term_strs.append('')
+                    term_strs.append(f'  - {shorten_hashes(target.id)}')
+                    term_strs.append('    (1 step)')
+                term_str = '\n'.join(term_strs)
+
             if self._custom_view is not None:
                 # To appease the type-checker
                 if type(self._element) is KCFG.Node:
@@ -289,6 +297,12 @@ class KCFGViewer(App):
             node_source, node_target, *_ = message.chunk_id[6:].split('_')
             split = single(self._kcfg.splits(source_id=node_source, target_id=node_target))
             self.query_one('#node-view', NodeView).update(split)
+
+        elif message.chunk_id.startswith('ndbranch_'):
+            self._selected_chunk = None
+            node_source, node_target, *_ = message.chunk_id[8:].split('_')
+            ndbranch = single(self._kcfg.ndbranches(source_id=node_source, target_id=node_target))
+            self.query_one('#node-view', NodeView).update(ndbranch)
 
     BINDINGS = [
         ('h', 'keystroke("h")', 'Hide selected node.'),
