@@ -62,7 +62,7 @@ def _expected(config: Mapping[str, int]) -> Pattern:
             k(kseq((inj(INT, SORT_K_ITEM, int_dv(config['$PGM'])),))),
             App("Lbl'-LT-'a'-GT-'", (), (int_dv(config['$A']),)),
             App("Lbl'-LT-'b'-GT-'", (), (int_dv(config['$B']),)),
-            generated_counter(int_dv(0)),
             App("Lbl'-LT-'c'-GT-'", (), (int_dv(config['$C']),)),
+            generated_counter(int_dv(0)),
         )
     )
