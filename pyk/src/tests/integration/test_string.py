@@ -86,8 +86,8 @@ def kore_config(kval: str | None, sval: str) -> Pattern:
     return generated_top(
         (
             k(kseq(kitems)),
-            generated_counter(int_dv(0)),
             s(string_dv(sval)),
+            generated_counter(int_dv(0)),
         )
     )
 
