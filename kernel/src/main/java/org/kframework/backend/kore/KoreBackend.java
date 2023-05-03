@@ -36,7 +36,7 @@ public class KoreBackend extends AbstractBackend {
     protected final FileUtil files;
     private final KExceptionManager kem;
     private final EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions;
-    private final boolean heatCoolEquations;
+    protected final boolean heatCoolEquations;
     private final Tool tool;
 
     @Inject
