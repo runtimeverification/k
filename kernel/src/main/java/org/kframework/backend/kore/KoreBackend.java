@@ -173,6 +173,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(markExtraConcreteRules)
                 .andThen(removeAnywhereRules)
                 .andThen(generateSortPredicateRules)
+                .andThen(numberSentences)
                 .apply(def);
     }
 
@@ -220,6 +221,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
                 .andThen(restoreDefinitionModulesTransformer(def))
+                .andThen(numberSentences)
                 .apply(m);
     }
 
