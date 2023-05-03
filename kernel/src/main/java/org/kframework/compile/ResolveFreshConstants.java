@@ -167,15 +167,10 @@ public class ResolveFreshConstants {
     private Production resolve(Production prod) {
         if (prod.klabel().isDefined() && prod.klabel().get().equals(KLabels.GENERATED_TOP_CELL)) {
             List<ProductionItem> pis = stream(prod.items()).collect(Collectors.toCollection(ArrayList::new));
-            int idx = 0;
-            int i = 0;
-            for (ProductionItem pi : pis) {
-                if (pi instanceof NonTerminal) {
-                    idx = i;
-                }
-                i++;
-            }
-            pis.add(idx, NonTerminal(Sorts.GeneratedCounterCell()));
+            // expecting a production of the form <generatedTop> C1 C2 Cx.. </generatedTop>
+            // insert the GeneratedCounterCell as the last cell
+            // fixing the format gets resolved later in GeneratedTopFormat.java
+            pis.add(prod.items().size() - 1, NonTerminal(Sorts.GeneratedCounterCell()));
             return Production(prod.klabel().get(), prod.sort(), immutable(pis), prod.att());
         }
         return prod;
