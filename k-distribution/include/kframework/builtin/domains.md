@@ -612,7 +612,7 @@ range in the set, all or any part of it that is present in the range map will
 be removed.
 
 ```k
-  syntax RangeMap ::= removeAll(RangeMap, Set)            [function, total, hook(RANGEMAP.removeAll)]
+  syntax RangeMap ::= removeAll(RangeMap, Set)            [function, hook(RANGEMAP.removeAll)]
 ```
 
 ### Range map keys (as `Set`)
