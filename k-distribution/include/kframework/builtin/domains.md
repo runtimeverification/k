@@ -469,11 +469,11 @@ Range maps
 ----
 
 Provided here is the syntax of an implementation of immutable, associative,
-commutative range maps from `KItem` to `KItem`. This type is hooked to an
+commutative range maps from `Int` to `KItem`. This type is hooked to an
 implementation of range maps provided by the backend.
-The current implementation fully supports only SortInt keys due to limitations
-of the defined ordering. To support an additional key sort, implement the
-corresponding ordering between elements of that sort.
+Although the underlying range map data structure supports any key sort, the
+current implementation by the backend only supports `Int` keys due to
+limitations of the underlying ordering function.
 
 ```k
 module RANGEMAP
@@ -482,6 +482,11 @@ module RANGEMAP
   imports private LIST
   imports private SET
 
+```
+
+### Range, bounded inclusively below and exclusively above.
+
+```k
   syntax Range ::= range(rangeStart: KItem, rangeEnd: KItem)    [klabel(Rangemap:Range), symbol]
   
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
@@ -489,17 +494,31 @@ module RANGEMAP
 
 ### Range map concatenation
 
+The `RangeMap` sort represents a map whose keys are stored as ranges, bounded
+inclusively below and exclusively above. Contiguous or overlapping ranges that
+map to the same value are merged into a single range.
+
+You can construct a new `RangeMap` consisting of range/value pairs of two
+RangeMaps. If the RangeMaps have overlapping ranges an exception will be
+thrown during concrete execution. This operation is O(N*log(M)) (where N is
+the size of the smaller map and M is the size of the larger map).
+
 ```k
   syntax RangeMap ::= RangeMap RangeMap                        [left, function, hook(RANGEMAP.concat), klabel(_RangeMap_), symbol, assoc, comm, unit(.RangeMap), element(_r|->_), index(0), format(%1%n%2)]
 ```
 
 ### Range map unit
 
+The `RangeMap` with zero elements is represented by `.RangeMap`.
+
 ```k
   syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol, latex(\dotCt{RangeMap})]
 ```
 
 ### Range map elements
+
+An element of a `RangeMap` is constructed via the `r|->` operator. The range
+of keys is on the left, and the value is on the right.
 
 ```k
   syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
@@ -510,11 +529,20 @@ module RANGEMAP
 
 ### Range map lookup
 
+You can look up the value associated with a key of a `RangeMap` in O(log(N))
+time (where N is the size of the `RangeMap`). This will yield an exception
+during concrete execution if the key is not in the range map.
+
 ```k
   syntax KItem ::= RangeMap "[" KItem "]"                    [function, hook(RANGEMAP.lookup), klabel(RangeMap:lookup), symbol]
 ```
 
 ### Range map lookup with default
+
+You can also look up the value associated with a key of a `RangeMap` using a
+total function that assigns a specific default value if the key is not present
+in the `RangeMap`. This operation is also O(log(N)) (where N is the size of
+the range map).
 
 ```k
   syntax KItem ::= RangeMap "[" KItem "]" "orDefault" KItem      [function, total, hook(RANGEMAP.lookupOrDefault), klabel(RangeMap:lookupOrDefault)]
@@ -522,11 +550,19 @@ module RANGEMAP
 
 ### Range map lookup for range of key
 
+You can look up for the range that a key of a `RangeMap` is stored in in
+O(log(N)) time (where N is the size of the `RangeMap`). This will yield an
+exception during concrete execution if the key is not in the range map.
+
 ```k
   syntax Range ::= "find_range" "(" RangeMap "," KItem ")"                    [function, hook(RANGEMAP.find_range), klabel(RangeMap:find_range)]
 ```
 
 ### Range map update
+
+You can insert a range/value pair into a `RangeMap` in O(log(N)) time (where N
+is the size of the `RangeMap`). Any ranges adjacent to or overlapping with the
+range to be inserted will be updated accordingly.
 
 ```k
   syntax RangeMap ::= RangeMap "[" keyRange: Range "<-" value: KItem "]"           [function, klabel(RangeMap:update), symbol, hook(RANGEMAP.updateRng), prefer]
@@ -534,11 +570,21 @@ module RANGEMAP
 
 ### Range map delete
 
+You can remove a range/value pair from a `RangeMap` in O(log(N)) time (where N
+is the size of the `RangeMap`). If all or any part of the range is present in
+the range map, it will be removed.
+
 ```k
   syntax RangeMap ::= RangeMap "[" Range "<-" "undef" "]"     [function, hook(RANGEMAP.removeRng), klabel(_r[_<-undef]), symbol]
 ```
 
 ### Range map difference
+
+You can remove the range/value pairs in a `RangeMap` that are also present in
+another `RangeMap` in O(max{M,N}*log(M)) time (where M is the size of the
+first `RangeMap` and N is the size of the second `RangeMap`). Note that only
+the parts of overlapping ranges whose value is the same in both range maps
+will be removed.
 
 ```k
   syntax RangeMap ::= RangeMap "-RangeMap" RangeMap                 [function, total, hook(RANGEMAP.difference), latex({#1}-_{\it RangeMap}{#2})]
@@ -546,11 +592,24 @@ module RANGEMAP
 
 ### Multiple range map update
 
+You can update a `RangeMap` by adding all the range/value pairs in the second
+`RangeMap` in O(N*log(M+N)) time (where M is the size of the first `RangeMap`
+and N is the size of the second `RangeMap`). If any ranges are overlapping,
+the value from the second range map overwrites the value in the first for the
+parts where ranges are overlapping. This function is total, which is distinct
+from range map concatenation, a partial function only defined on range maps
+with non overlapping ranges.
+
 ```k
   syntax RangeMap ::= updateRangeMap(RangeMap, RangeMap)            [function, total, hook(RANGEMAP.updateAll)]
 ```
 
 ### Multiple range map removal
+
+You can remove a `Set` of ranges from a `RangeMap` in O(N*log(M)) time (where
+M is the size of the `RangeMap` and N is the size of the `Set`). For every
+range in the set, all or any part of it that is present in the range map will
+be removed.
 
 ```k
   syntax RangeMap ::= removeAll(RangeMap, Set)            [function, total, hook(RANGEMAP.removeAll)]
@@ -558,11 +617,17 @@ module RANGEMAP
 
 ### Range map keys (as `Set`)
 
+You can get a `Set` of all the ranges in a `RangeMap` in O(N) time (where N
+is the size of the `RangeMap`).
+
 ```k
   syntax Set ::= keys(RangeMap)                      [function, total, hook(RANGEMAP.keys)]
 ```
 
 ### Range map keys (as `List`)
+
+You can get a `List` of all the ranges in a `RangeMap` in O(N) time (where N
+is the size of the `RangeMap`).
 
 ```k
   syntax List ::= "keys_list" "(" RangeMap ")"       [function, hook(RANGEMAP.keys_list)]
@@ -570,11 +635,17 @@ module RANGEMAP
 
 ### Range map key membership
 
+You can check whether a key is present in a `RangeMap` in O(log(N)) time (where
+N is the size of the `RangeMap`).
+
 ```k
   syntax Bool ::= KItem "in_keys" "(" RangeMap ")"       [function, total, hook(RANGEMAP.in_keys)]
 ```
 
 ### Range map values (as `List`)
+
+You can get a `List` of all values in a `RangeMap` in O(N) time (where N is the
+size of the `RangeMap`).
 
 ```k
   syntax List ::= values(RangeMap)                   [function, hook(RANGEMAP.values)]
@@ -582,17 +653,29 @@ module RANGEMAP
 
 ### Range map size
 
+You can get the number of range/value pairs in a `RangeMap` in O(1) time.
+
 ```k
   syntax Int ::= size(RangeMap)                      [function, total, hook(RANGEMAP.size), klabel(sizeRangeMap)]
 ```
 
 ### Range map inclusion
 
+You can determine whether a `RangeMap` is a strict subset of another `RangeMap`
+in O(M+N) time (where M is the size of the first `RangeMap` and N is the size
+of the second `RangeMap`). Only keys within equal or overlapping ranges that
+are bound to the same value are considered equal.
+
 ```k
   syntax Bool ::= RangeMap "<=RangeMap" RangeMap               [function, total, hook(RANGEMAP.inclusion)]
 ```
 
 ### Range map choice
+
+You can get an arbitrarily chosen key of a `RangeMap` in O(1) time. The same
+key will always be returned for the same range map, but no guarantee is given
+that two different range maps will return the same element, even if they are
+similar.
 
 ```k
   syntax KItem ::= choice(RangeMap)                      [function, hook(RANGEMAP.choice), klabel(RangeMap:choice)]
