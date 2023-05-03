@@ -2,6 +2,7 @@
 package org.kframework.compile.checks;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -43,7 +44,7 @@ public class CheckAtt {
 
     public void check(Sentence sentence) {
         if (checkWhitelist) {
-            checkAllAttsGroupOrWhitelist(sentence);
+            checkForUnrecognizedAtts(sentence);
         }
         if (sentence instanceof Rule) {
             check(((Rule) sentence).att(), sentence);
@@ -53,33 +54,30 @@ public class CheckAtt {
         }
     }
 
-    private void checkAllAttsGroupOrWhitelist(Sentence sentence) {
-        List<String> badAtts = stream(sentence.att().att())
-                .filter((p) -> ! (p._2 instanceof Att.GroupMarker || Att.whitelist().contains(p._1._1)))
-                .map((p) -> p._1._1)
-                .collect(Collectors.toList());
-        if (!badAtts.isEmpty()) {
-            // TODO: Check edit distance from built-ins to offer better suggestions
-            errors.add(KEMException.compilerError("Unrecognized attributes: " + badAtts +
-                    "\nHint: User-defined groups can be added with 'group(att1,...,attN)'.", sentence));
+    private void checkForUnrecognizedAtts(Sentence sentence) {
+        if (!sentence.att().unrecognizedAtts().isEmpty()) {
+            errors.add(KEMException.compilerError("Unrecognized attributes: " +
+                    sentence.att().unrecognizedAtts().mkString("[", ",", "]") +
+                    "\nHint: User-defined groups can be added with the group(_) attribute.", sentence));
         }
     }
+
     private void check(Production prod) {
         if (!prod.sort().equals(Sorts.KItem())) {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
             if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array") && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) &&
-                    !prod.att().contains("token") && !prod.att().contains("macro") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
+                    !prod.att().contains(Att.TOKEN()) && !prod.att().contains(Att.MACRO()) && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
-                        if (!(sortAtt.contains("cellCollection") && prod.isSubsort())) {
+                        if (!(sortAtt.contains(Att.CELL_COLLECTION()) && prod.isSubsort())) {
                             errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
                         }
                     }
                 }
             }
         }
-        if (prod.att().contains("binder") && !isSymbolicKast) {
-            if (!prod.att().get("binder").equals("")) {
+        if (prod.att().contains(Att.BINDER()) && !isSymbolicKast) {
+            if (!prod.att().get(Att.BINDER()).equals("")) {
                 errors.add(KEMException.compilerError("Attribute value for 'binder' attribute is not supported.", prod));
             }
             if (prod.nonterminals().size() < 2) {
@@ -90,14 +88,14 @@ public class CheckAtt {
         }
         boolean hasColors = false;
         int ncolors = 0;
-        if (prod.att().contains("colors")) {
+        if (prod.att().contains(Att.COLORS())) {
           hasColors = true;
-          ncolors = prod.att().get("colors").split(",").length;
+          ncolors = prod.att().get(Att.COLORS()).split(",").length;
         }
         int nterminals = prod.items().size() - prod.nonterminals().size();
         int nescapes = 0;
-        if (prod.att().contains("format")) {
-            String format = prod.att().get("format");
+        if (prod.att().contains(Att.FORMAT())) {
+            String format = prod.att().get(Att.FORMAT());
             for (int i = 0; i < format.length(); i++) {
                 char c = format.charAt(i);
                 if (c == '%') {
@@ -144,7 +142,7 @@ public class CheckAtt {
                     }
                 }
             }
-        } else if (!prod.att().contains("token") && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
+        } else if (!prod.att().contains(Att.TOKEN()) && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
             for (ProductionItem pi : iterable(prod.items())) {
                 if (pi instanceof RegexTerminal) {
                     if (prod.items().size() == 1)  {

@@ -228,7 +228,7 @@ public class KoreBackend extends AbstractBackend {
         if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
             KLabel kl = m.matchKLabel((Rule) s);
             Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
-            if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
+            if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains(Att.ML_OP())))
                 throw  KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s);
         }
         return s;
@@ -260,7 +260,7 @@ public class KoreBackend extends AbstractBackend {
     }
 
     @Override
-    public Set<String> excludedModuleTags() {
-        return Collections.singleton("symbolic");
+    public Set<Att.Key> excludedModuleTags() {
+        return Collections.singleton(Att.SYMBOLIC());
     }
 }

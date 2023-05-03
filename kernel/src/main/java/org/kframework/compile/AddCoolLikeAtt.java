@@ -68,7 +68,7 @@ public class AddCoolLikeAtt {
                 return a || b;
             }
         }.apply(RewriteToTop.toLeft(body))) {
-          return att.add("cool-like");
+          return att.add(Att.COOL_LIKE());
         }
         return att;
     }

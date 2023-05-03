@@ -6,6 +6,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.kore.KLabel;
@@ -43,7 +44,7 @@ public class SortInfo {
     public static SortInfo fromModule(Module module) {
         Multimap<Sort, KLabel> joinOps = HashMultimap.create();
         Collections.stream(module.productionsFor()).forEach(x -> {
-            if (Collections.stream(x._2()).anyMatch(p -> p.att().contains("assoc")
+            if (Collections.stream(x._2()).anyMatch(p -> p.att().contains(Att.ASSOC())
                     && Collections.stream(p.items()).filter(i -> i instanceof NonTerminal).count() == 2)) {
                 joinOps.put(x._2().head().sort(), x._1());
             }
