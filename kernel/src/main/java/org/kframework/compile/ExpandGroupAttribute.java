@@ -19,7 +19,8 @@ public class ExpandGroupAttribute {
         }
         String groups = att.get(Att.GROUP()).trim();
         if (groups.isEmpty()) {
-            throw KEMException.compilerError("group(_) attribute expects a comma-separated list of arguments.");
+            throw KEMException.compilerError(
+                    "group(_) attribute expects a comma-separated list of arguments.", node);
         }
         KEMException badCommaException =
                 KEMException.compilerError("Extraneous ',' in group(_) attribute.", node);
@@ -32,7 +33,7 @@ public class ExpandGroupAttribute {
             }
             if (Att.getWhitelistedOptional(group).isPresent()) {
                 throw KEMException.compilerError("User-defined group '" + group +
-                        "' conflicts with built-in attribute.");
+                        "' conflicts with built-in attribute.", node);
             }
             if (!group.matches("[a-z][a-zA-Z0-9-]*")) {
                 throw KEMException.compilerError("Invalid argument '" + group + "' in group(_) attribute. " +
