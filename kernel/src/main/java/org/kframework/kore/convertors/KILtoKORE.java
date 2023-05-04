@@ -120,7 +120,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         String label = sentence.getLabel();
         if (!label.isEmpty()) {
-            attrs = attrs.add(Att.LABEL(), sentence.getType().equals(Att.ALIAS()) ? label : moduleName + "." + label);
+            attrs = attrs.add(Att.LABEL(), sentence.getType().equals(Att.ALIAS().toString()) ? label : moduleName + "." + label);
         }
 
         return Bubble(sentence.getType(), sentence.getContent(), attrs);
