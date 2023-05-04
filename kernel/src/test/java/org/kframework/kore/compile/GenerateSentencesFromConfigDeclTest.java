@@ -67,7 +67,7 @@ public class GenerateSentencesFromConfigDeclTest {
         Module m1 = Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att());
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
         Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true, files).getExtensionModule();
-        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
+        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m, false);
         Att initializerAtts = Att().add(Att.INITIALIZER());
         Att productionAtts = initializerAtts.add(Att.FUNCTION()).add(Att.NO_THREAD());
         Set<Sentence> reference = Set(Production(KLabel("<threads>"), Sort("ThreadsCell"),

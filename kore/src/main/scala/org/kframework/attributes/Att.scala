@@ -16,7 +16,25 @@ import scala.collection.Set
 trait AttValue
 
 /**
- * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
+ * Conceptually, attributes are a mapping from String keys to values of any type.
+ *
+ * However, there are two caveats:
+ * - We store the type of the value in the key. That is, a key is a pair (s1, s2) where the corresponding value must
+ *   have type class.forName(s2).
+ * - We use a wrapper-class Att.Key rather than a raw String. This helps to enforce a whitelist and allows for easier
+ *   IDE navigation to where each attribute is used.
+ *
+ * New attributes should be added as a field Att.MY_NEW_ATT in the object below.
+ *
+ * To obtain an appropriate Att.Key, use
+ * - Att.MY_ATT, if you statically know the key you want
+ * - Att.getWhitelistedOptional(myAttStr), if checking a user-supplied attribute string. Be sure to report an error
+ *   if the lookup fails and --pedantic-attributes is enabled.
+ *
+ * In rare circumstances, you may also use Att.unsafeRawAttKey(myAttStr) if either
+ * - you have checked that --pedantic-attributes is disabled, or
+ * - you pinky-promise to check the keys are valid elsewhere (e.g. during parsing to allow us to report multiple errors)
+ *
  */
 class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToString with Serializable {
 
@@ -47,7 +65,7 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
     None
   }
 
-  def contains(cls: Class[_]): Boolean = att.contains((Att.getWhitelisted(cls.getName), cls.getName))
+  def contains(cls: Class[_]): Boolean = att.contains((Att.getWhitelistedOrAssert(cls.getName), cls.getName))
   def contains(key: Att.Key): Boolean = att.contains((key, Att.stringClassName))
   def contains(key: Att.Key, cls: Class[_]): Boolean = att.contains((key, cls.getName))
 
@@ -55,7 +73,7 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
   def get(key: Att.Key): String = getOption(key).get
   def get[T](key: Att.Key, cls: Class[T]): T = getOption(key, cls).get
   def getOption(key: Att.Key): Option[String] = att.get((key, Att.stringClassName)).asInstanceOf[Option[String]]
-  def getOption[T](key: Class[T]): Option[T] = att.get((Att.getWhitelisted(key.getName), key.getName)).asInstanceOf[Option[T]]
+  def getOption[T](key: Class[T]): Option[T] = att.get((Att.getWhitelistedOrAssert(key.getName), key.getName)).asInstanceOf[Option[T]]
   def getOption[T](key: Att.Key, cls: Class[T]): Option[T] = att.get((key, cls.getName)).asInstanceOf[Option[T]]
   def getOptional(key: Att.Key): Optional[String] = optionToOptional(getOption(key))
   def getOptional[T](key: Class[T]): Optional[T] = optionToOptional(getOption(key))
@@ -67,7 +85,7 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
   def add(key: Att.Key): Att = add(key, "")
   def add(key: Att.Key, value: String): Att = add(key, Att.stringClassName, value)
   def add(key: Att.Key, value: Int): Att = add(key, Att.intClassName, value)
-  def add[T <: AttValue](key: Class[T], value: T): Att = add(Att.getWhitelisted(key.getName), key.getName, value)
+  def add[T <: AttValue](key: Class[T], value: T): Att = add(Att.getWhitelistedOrAssert(key.getName), key.getName, value)
   def add[T <: AttValue](key: Att.Key, cls: Class[T], value: T): Att = add(key, cls.getName, value)
   private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
   private def add(key: Att.Key, clsStr: String, value: String): Att = Att(att + ((key, clsStr) -> value))
@@ -75,17 +93,9 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
   def addAll(thatAtt: Att): Att = Att(att ++ thatAtt.att)
   def addGroup(key: String): Att = add(Att.Key(key), Att.groupMarkerClassName, Att.GroupMarker())
   def remove(key: Att.Key): Att = remove(key, Att.stringClassName)
-  def remove(key: Class[_]): Att = remove(Att.getWhitelisted(key.getName), key.getName)
+  def remove(key: Class[_]): Att = remove(Att.getWhitelistedOrAssert(key.getName), key.getName)
   def remove(key: Att.Key, cls: Class[_]): Att = remove(key, cls.getName)
   private def remove(key: Att.Key, clsStr: String): Att = Att(att - ((key, clsStr)))
-
-  /**
-   * NOTE: Do not use this function except during parsing!
-   *
-   * This is only used so that we can delay error checking until after parsing finishes, allowing us to report multiple
-   * errors rather than exiting immediately.
-   */
-  def unsafeAddAttributeToBeErrorCheckedElsewhere(key: String, value: String): Att = add(Att.Key(key), value)
 }
 
 
@@ -93,13 +103,18 @@ object Att {
   // The Key constructor is private, enforcing that attributes can only be defined within this object
   case class Key private[Att](private[Att] val key: String) extends Serializable {
     override def toString: String = this.key
-    // goodKey.copy(key="bad-att") would be the same as constructing Att.Key("bad-att"),
-    // so manually declare to make private
+    // Att.GOOD_KEY.copy(key="bad-att") would be the same as constructing Att.Key("bad-att"),
+    // so we manually declare copy() to make it private
     private[Key] def copy(): Unit = ()
   }
   object Key {
     private[Att] def apply(key: String): Key = new Key(key)
   }
+
+  /*
+   * WARNING: Only use this in exceptional circumstances!
+   */
+  def unsafeRawAttKey(key: String): Att.Key = Att.Key(key)
 
   val empty: Att = Att(Map.empty)
 
@@ -262,17 +277,16 @@ object Att {
       .map(f => f.get(this).asInstanceOf[Key])
       .toSet
 
-  // Get the corresponding Att.Key if key is a whitelisted attribute
   def getWhitelistedOptional(key: String): Optional[Key] =
     if (whitelist.contains(Att.Key(key))) {
       Optional.of(Att.Key(key))
     } else {
       Optional.empty()
     }
-  def getWhitelisted(key: String): Key =
+  private def getWhitelistedOrAssert(key: String): Key =
     getWhitelistedOptional(key).orElseThrow(() =>
        new AssertionError(
-        "Called getWhitelisted(" + key + "), but " + key + " was not found in the attribute whitelist.\n" +
+        "Key '" + key + "' was not found in the attribute whitelist.\n" +
           "To add a new attribute key, create a field `final val MY_ATT = Key(\"my-att\")` in the Att object."))
 
   def from(thatAtt: java.util.Map[Key, String]): Att =

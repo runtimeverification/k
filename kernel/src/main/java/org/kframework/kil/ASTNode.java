@@ -96,7 +96,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @param val
      */
     public void unsafeAddAttribute(String key, String val) {
-        att = att.unsafeAddAttributeToBeErrorCheckedElsewhere(key, val);
+        att = att.add(Att.unsafeRawAttKey(key), val);
     }
 
     /**

@@ -319,7 +319,7 @@ public class JsonParser {
             } else if (key.equals(Att.SORT_PARAMS().toString())) {
                 newAtt = newAtt.add(Att.SORT_PARAMS(), Sort.class, toSort(attMap.getJsonObject(key)));
             } else
-                newAtt = newAtt.unsafeAddAttributeToBeErrorCheckedElsewhere(key, attMap.getString(key));
+                newAtt = newAtt.add(Att.unsafeRawAttKey(key), attMap.getString(key));
         }
         return newAtt;
     }
