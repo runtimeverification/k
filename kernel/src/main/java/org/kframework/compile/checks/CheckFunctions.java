@@ -38,18 +38,27 @@ public class CheckFunctions {
         } else if (sentence instanceof Claim) {
             // functions are allowed on LHS of claims
             Claim c = (Claim) sentence;
-            if (c.att().contains("macro") || c.att().contains("macro-rec") || c.att().contains("alias") || c.att().contains("alias-rec"))
-                errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on claims.", c));
+            if (c.att().contains(Att.MACRO()) || c.att().contains(Att.MACRO_REC())
+                    || c.att().contains(Att.ALIAS()) || c.att().contains(Att.ALIAS_REC()))
+                errors.add(KEMException.compilerError(
+                        "Attributes " + Att.MACRO() + "|" + Att.MACRO_REC() + "|"
+                                + Att.ALIAS() + "|" + Att.ALIAS_REC() + " are not allowed on claims.", c));
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;
             check(ctx.body());
-            if (ctx.att().contains("macro") || ctx.att().contains("macro-rec") || ctx.att().contains("alias") || ctx.att().contains("alias-rec"))
-                errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on contexts.", ctx));
+            if (ctx.att().contains(Att.MACRO()) || ctx.att().contains(Att.MACRO_REC())
+                    || ctx.att().contains(Att.ALIAS()) || ctx.att().contains(Att.ALIAS_REC()))
+                errors.add(KEMException.compilerError(
+                        "Attributes " + Att.MACRO() + "|" + Att.MACRO_REC() + "|"
+                                + Att.ALIAS() + "|" + Att.ALIAS_REC() + " are not allowed on contexts.", ctx));
         } else if (sentence instanceof ContextAlias) {
             ContextAlias ctx = (ContextAlias) sentence;
             check(ctx.body());
-            if (ctx.att().contains("macro") || ctx.att().contains("macro-rec") || ctx.att().contains("alias") || ctx.att().contains("alias-rec"))
-                errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on contexts.", ctx));
+            if (ctx.att().contains(Att.MACRO()) || ctx.att().contains(Att.MACRO_REC())
+                    || ctx.att().contains(Att.ALIAS()) || ctx.att().contains(Att.ALIAS_REC()))
+                errors.add(KEMException.compilerError(
+                        "Attributes " + Att.MACRO() + "|" + Att.MACRO_REC() + "|"
+                                + Att.ALIAS() + "|" + Att.ALIAS_REC() + " are not allowed on contexts.", ctx));
         }
     }
 
@@ -68,8 +77,8 @@ public class CheckFunctions {
                   return;
                 }
                 Att attributes = m.attributesFor().apply(k.klabel());
-                String hook = attributes.getOptional("hook").orElse("");
-                if (attributes.contains("function")
+                String hook = attributes.getOptional(Att.HOOK()).orElse("");
+                if (attributes.contains(Att.FUNCTION())
                     && isLHS()
                     && !atTop
                     && !(hook.equals("LIST.element") || hook.equals("LIST.concat") || hook.equals("LIST.unit")
@@ -102,11 +111,13 @@ public class CheckFunctions {
                     return;
                 }
                 Att attributes = m.attributesFor().apply(k.klabel());
-                if (attributes.contains("function") && (r.att().contains("macro")
-                                                     || r.att().contains("macro-rec")
-                                                     || r.att().contains("alias")
-                                                     || r.att().contains("alias-rec"))) {
-                    errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.", r));
+                if (attributes.contains(Att.FUNCTION()) && (r.att().contains(Att.MACRO())
+                                                     || r.att().contains(Att.MACRO_REC())
+                                                     || r.att().contains(Att.ALIAS())
+                                                     || r.att().contains(Att.ALIAS_REC()))) {
+                    errors.add(KEMException.compilerError(
+                            "Attributes " + Att.MACRO() + "|" + Att.MACRO_REC() + "|"
+                                    + Att.ALIAS() + "|" + Att.ALIAS_REC() + " are not allowed on function rules.", r));
                 }
             }
         }.apply(r.body());

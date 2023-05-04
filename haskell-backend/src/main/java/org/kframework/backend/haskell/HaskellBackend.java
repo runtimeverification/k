@@ -81,7 +81,7 @@ public class HaskellBackend extends KoreBackend {
     }
 
     @Override
-    public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList(Att.CONCRETE(), "kast"));
+    public Set<Att.Key> excludedModuleTags() {
+        return new HashSet<>(Arrays.asList(Att.CONCRETE(), Att.KAST()));
     }
 }

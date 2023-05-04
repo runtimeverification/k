@@ -308,18 +308,18 @@ public class JsonParser {
                 newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
             } else if (key.equals(Sort.class.getName())) {
                 newAtt = newAtt.add(Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("bracketLabel")) {
-                newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
-            } else if (key.equals(Att.PREDICATE())) {
+            } else if (key.equals(Att.BRACKET_LABEL().toString())) {
+                newAtt = newAtt.add(Att.BRACKET_LABEL(), KLabel.class, toKLabel(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.PREDICATE().toString())) {
                 newAtt = newAtt.add(Att.PREDICATE(), Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellOptAbsent")) {
-                newAtt = newAtt.add("cellOptAbsent", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellFragment")) {
-                newAtt = newAtt.add("cellFragment", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("sortParams")) {
-                newAtt = newAtt.add("sortParams", Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.CELL_OPT_ABSENT().toString())) {
+                newAtt = newAtt.add(Att.CELL_OPT_ABSENT(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.CELL_FRAGMENT().toString())) {
+                newAtt = newAtt.add(Att.CELL_FRAGMENT(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.SORT_PARAMS().toString())) {
+                newAtt = newAtt.add(Att.SORT_PARAMS(), Sort.class, toSort(attMap.getJsonObject(key)));
             } else
-                newAtt = newAtt.add(key, attMap.getString(key));
+                newAtt = newAtt.add(Att.unsafeRawAttKey(key), attMap.getString(key));
         }
         return newAtt;
     }

@@ -118,7 +118,7 @@ class KoreToK (sortAtt : Map[String, String]) {
     case kore.Application(head, args) => head.ctr match {
       case "inj" =>
         apply(args.head) match {
-          case KVariable(name, att) => KORE.KVariable(name, att.add("prettyPrintWithSortAnnotation"))
+          case KVariable(name, att) => KORE.KVariable(name, att.add(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
           case body => body
         }
       case "kseq" =>
