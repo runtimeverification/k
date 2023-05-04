@@ -232,7 +232,7 @@ object Att {
   final val TEMPORARY_CELL_SORT_DECL = Key("temporary-cell-sort-decl")
   final val TERMINALS = Key("terminals")
   final val TOKEN = Key("token")
-  final val TOPCELL = Key("token")
+  final val TOPCELL = Key("topcell")
   final val TOTAL = Key("total")
   final val TRANSITION = Key("transition")
   final val TRUSTED = Key("trusted")
