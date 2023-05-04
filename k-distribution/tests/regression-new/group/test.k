@@ -4,11 +4,11 @@ module TEST-SYNTAX
 
   syntax Int ::=
       "(" Int ")" [bracket]
-    | "-" Int     [function, unmin]
-    | Int "*" Int [function, muldiv]
-    | Int "/" Int [function, muldiv]
+    | "-" Int     [function, group(unmin)]
+    | Int "*" Int [function, group(muldiv)]
+    | Int "/" Int [function, group(muldiv)]
     | Int "+" Int [function, group(plusmin,lefty)]
-    | Int "-" Int [function, plusmin,group(lefty)]
+    | Int "-" Int [function, group(plusmin,lefty)]
 
   syntax priority unmin > muldiv > plusmin
   syntax left lefty
