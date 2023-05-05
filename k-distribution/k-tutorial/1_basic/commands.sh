@@ -5,7 +5,7 @@ kompile 02_basics/README.md --md-selector "k & ! exclude" --main-module LESSON-0
 kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-A --syntax-module LESSON-03-A --output-definition build/03a
 kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-B --syntax-module LESSON-03-B --output-definition build/03b
 kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-C --syntax-module LESSON-03-C --output-definition build/03c
-kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-D --syntax-module LESSON-03-D --output-definition build/03d --gen-bison-parser
+kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-D --syntax-module LESSON-03-D --output-definition build/03d
 kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module LESSON-04-A --syntax-module LESSON-04-A --output-definition build/04a
 kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module LESSON-04-B --syntax-module LESSON-04-B --output-definition build/04b
 kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module LESSON-04-C --syntax-module LESSON-04-C --output-definition build/04c

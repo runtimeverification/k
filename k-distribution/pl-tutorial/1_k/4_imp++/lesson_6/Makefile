@@ -1,7 +1,7 @@
 DEF=imp
 EXT=imp
 KRUN_FLAGS=--output none
-KOMPILE_FLAGS=--gen-glr-bison-parser --enable-search
+KOMPILE_FLAGS=--enable-search
 
 include ../../../find-k.mak
 include ${K_HOME}/include/kframework/ktest.mak

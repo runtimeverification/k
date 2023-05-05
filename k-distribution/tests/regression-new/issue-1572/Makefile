@@ -1,3 +1,3 @@
-KOMPILE_FLAGS=-w2e -w all --gen-bison-parser
+KOMPILE_FLAGS=-w2e -w all
 
 include ../../../include/kframework/ktest-fail.mak

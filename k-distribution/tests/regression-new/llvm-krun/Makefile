@@ -1,6 +1,5 @@
 DEF=test
 KOMPILE_BACKEND=llvm
-KOMPILE_FLAGS+=--gen-glr-bison-parser
 
 CHECK=| diff - test.out
 LLVM_KRUN_FLAGS=-p -d ./test-kompiled

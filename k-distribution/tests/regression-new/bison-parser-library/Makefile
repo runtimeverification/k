@@ -1,7 +1,7 @@
 DEF=test
 EXT=test
 TESTDIR=.
-KOMPILE_FLAGS=--syntax-module TEST --gen-glr-bison-parser --bison-parser-library --llvm-kompile-type c --llvm-kompile-output libfoo
+KOMPILE_FLAGS=--syntax-module TEST --bison-parser-library --llvm-kompile-type c --llvm-kompile-output libfoo
 
 UNAME := $(shell uname)
 ifeq ($(UNAME),Darwin)

@@ -1,7 +1,6 @@
 DEF=test
 EXT=foo
 TESTDIR=.
-KOMPILE_FLAGS+=--gen-glr-bison-parser
 
 test: test.kore
 	$(KPRINT) test-kompiled test.kore | diff - test.ref
