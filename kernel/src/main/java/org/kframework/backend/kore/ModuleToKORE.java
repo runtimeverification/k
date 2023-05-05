@@ -1816,7 +1816,9 @@ public class ModuleToKORE {
     private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
-        for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
+        for (Tuple2<Tuple2<String, String>, ?> attribute :
+            // Sort to stabilize error messages
+            stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).collect(Collectors.toList())) {
             String name = attribute._1._1;
             String clsName = attribute._1._2;
             Object val = attribute._2;
