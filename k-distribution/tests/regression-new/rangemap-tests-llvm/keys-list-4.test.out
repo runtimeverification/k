@@ -1,6 +1,0 @@
-<k>
-  ListItem ( range ( 1 , 3 ) )
-  ListItem ( range ( 4 , 6 ) )
-  ListItem ( range ( 8 , 9 ) )
-  ListItem ( range ( 12 , 15 ) ) ~> .
-</k>
