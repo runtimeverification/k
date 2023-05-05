@@ -36,7 +36,7 @@ public class KoreBackend extends AbstractBackend {
     protected final FileUtil files;
     private final KExceptionManager kem;
     private final EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions;
-    private final boolean heatCoolEquations;
+    protected final boolean heatCoolEquations;
     private final Tool tool;
 
     @Inject
@@ -173,6 +173,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(markExtraConcreteRules)
                 .andThen(removeAnywhereRules)
                 .andThen(generateSortPredicateRules)
+                .andThen(numberSentences)
                 .apply(def);
     }
 
@@ -220,6 +221,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
                 .andThen(restoreDefinitionModulesTransformer(def))
+                .andThen(numberSentences)
                 .apply(m);
     }
 
