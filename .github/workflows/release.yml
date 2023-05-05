@@ -102,7 +102,7 @@ jobs:
           server-username: ${{ env.GITHUB_ACTOR }}
           server-password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 'Build, Test, Push Dockerhub Image, Push Mvn Packages'
+      - name: 'Build, Test, Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -118,6 +118,9 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
+      - name: 'Push Maven Packages'
+        continue-on-error: true
+        shell: bash {0}
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'apt-get install --yes maven'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:/tmp/settings.xml
