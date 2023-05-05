@@ -32,13 +32,11 @@ public class CheckAtt {
     private final Set<KEMException> errors;
     private final KExceptionManager kem;
     private final Module m;
-    private final boolean isSymbolicKast;
 
-    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast) {
+    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m) {
         this.errors = errors;
         this.kem = kem;
         this.m = m;
-        this.isSymbolicKast = isSymbolicKast;
         this.macros = m.macroKLabels();
     }
 
@@ -95,7 +93,7 @@ public class CheckAtt {
     private void check(Production prod) {
         if (!prod.sort().equals(Sorts.KItem())) {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
-            if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array") && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
+            if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) &&
                     !prod.att().contains(Att.TOKEN()) && !prod.att().contains(Att.MACRO()) && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
@@ -106,7 +104,7 @@ public class CheckAtt {
                 }
             }
         }
-        if (prod.att().contains(Att.BINDER()) && !isSymbolicKast) {
+        if (prod.att().contains(Att.BINDER())) {
             if (!prod.att().get(Att.BINDER()).equals("")) {
                 errors.add(KEMException.compilerError("Attribute value for 'binder' attribute is not supported.", prod));
             }
