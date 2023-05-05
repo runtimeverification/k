@@ -218,7 +218,7 @@ line of code containing the function or rule.
 
 For example, consider the following K definition (`lesson-19-b.k`):
 
-```{.k .numberLines .line-anchors startFrom="1"}
+```k
 module LESSON-19-B
   imports BOOL
 
@@ -361,7 +361,7 @@ Sometimes it is inconvenient to set the breakpoint based on a line number.
 It is also possible to set a breakpoint based on the rule label of a particular
 rule. Consider the following definition (`lesson-19-c.k`):
 
-```{.k .numberLines .line-anchors startFrom="1"}
+```k
 module LESSON-19-C
   imports INT
   imports BOOL
