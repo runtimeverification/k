@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..kast import kast_term
 from ..kast.inner import KApply, KAs, KAtt, KInner, KRewrite, KSequence, KSort, KToken, KVariable
-from ..kast.manip import flatten_label
+from ..kast.manip import flatten_label, undo_aliases
 from ..kast.outer import (
     KBubble,
     KClaim,
@@ -303,7 +303,9 @@ class KPrint:
             )
         return App('inj', [SortApp('Sort' + isort.name), SortApp('Sort' + osort.name)], [pat])
 
-    def pretty_print(self, kast: KAst) -> str:
+    def pretty_print(self, kast: KAst, *, unalias: bool = True) -> str:
+        if unalias and isinstance(kast, KInner):
+            kast = undo_aliases(self.definition, kast)
         return pretty_print_kast(kast, self.symbol_table)
 
     def _expression_kast(
