@@ -137,18 +137,18 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         return kast_simplified
 
     def cterm_implies(
-        self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True
+        self,
+        antecedent: CTerm,
+        consequent: CTerm,
     ) -> CSubst | None:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
-        if bind_consequent_variables:
-            _consequent = consequent.kast
-            fv_antecedent = free_vars(antecedent.kast)
-            unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
-            if len(unbound_consequent) > 0:
-                _LOGGER.debug(f'Binding variables in consequent: {unbound_consequent}')
-                for uc in unbound_consequent:
-                    _consequent = KApply(KLabel('#Exists', [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
+        fv_antecedent = free_vars(antecedent.kast)
+        unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
+        if len(unbound_consequent) > 0:
+            _LOGGER.debug(f'Binding variables in consequent: {unbound_consequent}')
+            for uc in unbound_consequent:
+                _consequent = KApply(KLabel('#Exists', [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
         antecedent_kore = self.kprint.kast_to_kore(antecedent.kast, GENERATED_TOP_CELL)
         consequent_kore = self.kprint.kast_to_kore(_consequent, GENERATED_TOP_CELL)
         _, kore_client = self._kore_rpc
