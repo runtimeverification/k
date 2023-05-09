@@ -6,6 +6,7 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -19,6 +20,8 @@ import org.kframework.utils.options.DefinitionLoadingOptions;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Map;
+
+import static org.kframework.utils.errorsystem.KException.ExceptionType.*;
 
 public class DefinitionLoadingModule extends AbstractModule {
 
@@ -72,6 +75,9 @@ public class DefinitionLoadingModule extends AbstractModule {
                     whereDir = workingDir;
                 }
             } else {
+                KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+                kem.registerCriticalWarning(DEPRECATED_DIRECTORY_FLAG, "Using --directory is deprecated. Use --definition instead.");
+                kem.print();
                 File f = new File(options.directory);
                 if (f.isAbsolute()) {
                     whereDir = f;
