@@ -8,11 +8,13 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable
 from pyk.kast.manip import remove_attrs
 from pyk.ktool.kprint import assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kint import INT, intToken
+from pyk.prelude.kbool import andBool
+from pyk.prelude.kint import INT, intToken, leInt, ltInt
 
 from .utils import KPrintTest
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from typing import Final
 
     from pyk.kast import KInner
@@ -155,17 +157,10 @@ INIT_CONFIG_TEST_DATA: Final = (
 )
 
 
-class TestDefn(KPrintTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp.k'
-
-    @staticmethod
-    def _update_symbol_table(symbol_table: SymbolTable) -> None:
-        symbol_table['_,_'] = assoc_with_unit(' , ', '')
-        symbol_table['.List{"_,_"}'] = lambda: ''
-
-    def test_pretty_print(self, kprint: KPrint) -> None:
-        # Given
-        config = KApply(
+PRETTY_PRINT_IMP_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
+    (
+        'imp-config',
+        KApply(
             '<T>',
             KApply(
                 '<k>',
@@ -183,25 +178,25 @@ class TestDefn(KPrintTest):
                 ),
             ),
             KApply('<state>', KApply('.Map')),
-        )
+        ),
+        ('<T>\n  <k>\n    int x , y ;\n  </k>\n  <state>\n    .Map\n  </state>\n</T>'),
+    ),
+)
 
-        # fmt: off
-        expected = (
-            '<T>\n'
-            '  <k>\n'
-            '    int x , y ;\n'
-            '  </k>\n'
-            '  <state>\n'
-            '    .Map\n'
-            '  </state>\n'
-            '</T>'
-        )
-        # fmt: on
 
-        # When
-        actual = kprint.pretty_print(config)
+class TestImpDefn(KPrintTest):
+    KOMPILE_MAIN_FILE = 'k-files/imp.k'
 
-        # Then
+    @staticmethod
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
+        symbol_table['_,_'] = assoc_with_unit(' , ', '')
+        symbol_table['.List{"_,_"}'] = lambda: ''
+
+    @pytest.mark.parametrize(
+        'test_id,kast,expected', PRETTY_PRINT_IMP_TEST_DATA, ids=[test_id for test_id, *_ in PRETTY_PRINT_IMP_TEST_DATA]
+    )
+    def test_pretty_print(self, kprint: KPrint, test_id: str, kast: KInner, expected: str) -> None:
+        actual = kprint.pretty_print(kast)
         assert actual == expected
 
     @pytest.mark.parametrize(
@@ -224,4 +219,45 @@ class TestDefn(KPrintTest):
         actual = kprint.pretty_print(init_config)
 
         # Then
+        assert actual == expected
+
+
+PRETTY_PRINT_ALIAS_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
+    (
+        'simple-int',
+        KToken('100', 'Int'),
+        'hundred',
+    ),
+    (
+        'ac-bool-pred-simple',
+        andBool([leInt(intToken(0), KVariable('X')), ltInt(KVariable('X'), intToken(100))]),
+        'rangeHundred ( X )',
+    ),
+    (
+        'ac-bool-pred-reversed',
+        andBool([ltInt(KVariable('X'), intToken(100)), leInt(intToken(0), KVariable('X'))]),
+        # TODO: Actually want 'rangeHundred ( X )'
+        'X <Int hundred andBool 0 <=Int X',
+    ),
+    (
+        'ac-bool-pred-separated',
+        andBool(
+            [leInt(intToken(0), KVariable('X')), ltInt(intToken(3), intToken(4)), ltInt(KVariable('X'), intToken(100))]
+        ),
+        # TODO: Actually want 'rangeHundred ( X ) andBool 3 <Int 4'
+        '0 <=Int X andBool 3 <Int 4 andBool X <Int hundred',
+    ),
+)
+
+
+class TestAliasDefn(KPrintTest):
+    KOMPILE_MAIN_FILE = 'k-files/aliases.k'
+
+    @pytest.mark.parametrize(
+        'test_id,kast,expected',
+        PRETTY_PRINT_ALIAS_TEST_DATA,
+        ids=[test_id for test_id, *_ in PRETTY_PRINT_ALIAS_TEST_DATA],
+    )
+    def test_pretty_print(self, kprint: KPrint, test_id: str, kast: KInner, expected: str) -> None:
+        actual = kprint.pretty_print(kast)
         assert actual == expected
