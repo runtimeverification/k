@@ -14,7 +14,7 @@ from pyk.ktool.kprint import paren
 from pyk.ktool.kprove import _kprove
 from pyk.prelude.ml import is_top
 
-from ..utils import KProveTest
+from ..utils import K_FILES, KProveTest
 
 if TYPE_CHECKING:
     from pyk.kast.outer import KFlatModule
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 class TestEmitJsonSpec(KProveTest):
     MAIN_FILE_NAME = 'imp-verification.k'
-    KOMPILE_MAIN_FILE = f'k-files/{MAIN_FILE_NAME}'
+    KOMPILE_MAIN_FILE = K_FILES / MAIN_FILE_NAME
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
@@ -32,7 +32,7 @@ class TestEmitJsonSpec(KProveTest):
 
     @pytest.fixture(scope='class')
     def spec_module(self, definition_dir: Path) -> KFlatModule:
-        spec_file = Path('k-files/looping-spec.k')
+        spec_file = K_FILES / 'looping-spec.k'
         spec_json_file = definition_dir / 'looping-spec.json'
         _kprove(spec_file, kompiled_dir=definition_dir, emit_json_spec=spec_json_file, dry_run=True)
         kfml = kast_term(json.loads(spec_json_file.read_text()), KFlatModuleList)

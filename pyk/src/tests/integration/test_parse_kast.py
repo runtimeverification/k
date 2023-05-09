@@ -6,13 +6,15 @@ from pyk.kast.inner import KApply, KAs, KRewrite, KSort
 from pyk.kast.outer import KRegexTerminal, KSortSynonym, read_kast_definition
 from pyk.utils import single
 
+from .utils import K_FILES
+
 if TYPE_CHECKING:
     from .utils import Kompiler
 
 
 def test_sort_synonym(kompile: Kompiler) -> None:
     # Given
-    definition_dir = kompile('k-files/sort-synonym.k')
+    definition_dir = kompile(K_FILES / 'sort-synonym.k')
     definition = read_kast_definition(definition_dir / 'compiled.json')
     module = definition.module('SORT-SYNONYM-SYNTAX')
 
@@ -26,7 +28,7 @@ def test_sort_synonym(kompile: Kompiler) -> None:
 
 def test_kas(kompile: Kompiler) -> None:
     # Given
-    definition_dir = kompile('k-files/contextual-function.k')
+    definition_dir = kompile(K_FILES / 'contextual-function.k')
     definition = read_kast_definition(definition_dir / 'compiled.json')
     module = definition.module('CONTEXTUAL-FUNCTION')
 
@@ -44,7 +46,7 @@ def test_kas(kompile: Kompiler) -> None:
 
 def test_regex_terminal(kompile: Kompiler) -> None:
     # Given
-    definition_dir = kompile('k-files/regex-terminal.k')
+    definition_dir = kompile(K_FILES / 'regex-terminal.k')
     definition = read_kast_definition(definition_dir / 'compiled.json')
     module = definition.module('REGEX-TERMINAL-SYNTAX')
     expected = [

@@ -17,6 +17,8 @@ from pyk.ktool.kprint import _kast, pretty_print_kast
 from pyk.ktool.krun import KRun
 from pyk.prelude.bytes import bytesToken
 
+from .utils import K_FILES
+
 if TYPE_CHECKING:
     from pathlib import Path
     from types import ModuleType
@@ -41,7 +43,7 @@ TEST_DATA: Final = (
 )
 
 
-KOMPILE_MAIN_FILE = 'k-files/bytes-rewrite.k'
+KOMPILE_MAIN_FILE = K_FILES / 'bytes-rewrite.k'
 KOMPILE_MAIN_MODULE = 'BYTES-REWRITE'
 
 

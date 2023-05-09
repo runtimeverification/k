@@ -15,7 +15,7 @@ from pyk.prelude.ml import mlBottom, mlImplies, mlTop
 from pyk.prelude.string import STRING, stringToken
 from pyk.utils import single
 
-from ..utils import KompiledTest
+from ..utils import K_FILES, KompiledTest
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -328,7 +328,7 @@ KRULE_TO_KORE_DATA: Final = (
 
 
 class TestKonvertSimpleProofs(KompiledTest):
-    KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
 
     @pytest.fixture(scope='class')
     def kompiled_kore(self, definition_dir: Path) -> KompiledKore:

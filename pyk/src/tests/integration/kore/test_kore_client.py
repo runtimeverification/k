@@ -19,6 +19,7 @@ from pyk.kore.rpc import (
 )
 from pyk.kore.syntax import And, Equals, EVar, Implies, Module, Top
 
+from ..utils import K_FILES
 from .utils import KoreClientTest
 
 if TYPE_CHECKING:
@@ -115,7 +116,7 @@ ADD_MODULE_TEST_DATA: Final = (('empty-module', Module('HELLO')),)
 
 
 class TestKoreClient(KoreClientTest):
-    KOMPILE_MAIN_FILE = 'k-files/kore-rpc-test.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'kore-rpc-test.k'
     KORE_MODULE_NAME = 'KORE-RPC-TEST'
 
     @pytest.mark.parametrize(
