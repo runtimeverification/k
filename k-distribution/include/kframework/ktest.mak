@@ -75,7 +75,7 @@ all: kompile krun proofs searches strat kast kast-bison kparse
 kompile: $(KOMPILED_DIR)/timestamp
 
 $(KOMPILED_DIR)/timestamp: $(DEF).$(SOURCE_EXT)
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR)
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< --output-definition $(KOMPILED_DIR)
 
 krun: $(TESTS)
 
@@ -100,62 +100,62 @@ update-results: CHECK=>
 # specified in the makefile prior to including ktest.mak.
 %.$(EXT): kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) (cat $@.in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	$(PIPEFAIL) (cat $@.in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 else
-	$(PIPEFAIL) (cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(PIPEFAIL) (cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 krun.nopgm: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) (cat $@.in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	$(PIPEFAIL) (cat $@.in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 else
-	$(PIPEFAIL) (cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(PIPEFAIL) (cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-broken-spec.k %-broken-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.search: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 else
-	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.strat: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) $(KRUN_OR_LEGACY) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
+	$(PIPEFAIL) $(KRUN_OR_LEGACY) $@.input $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
 else
-	$(PIPEFAIL) $(KRUN_OR_LEGACY) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
+	$(PIPEFAIL) $(KRUN_OR_LEGACY) $@.input $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
 endif
 
 %.kast: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) $(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	$(PIPEFAIL) $(KAST) $@ $(KAST_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 else
-	$(PIPEFAIL) $(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(PIPEFAIL) $(KAST) $@ $(KAST_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.kparse: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) $(KPARSE) $@ $(KPARSE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	$(PIPEFAIL) $(KPARSE) $@ $(KPARSE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 else
-	$(PIPEFAIL) $(KPARSE) $@ $(KPARSE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(PIPEFAIL) $(KPARSE) $@ $(KPARSE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.kast-bison: kompile
-	$(KAST) $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) bison_parser
+	$(KAST) $(KAST_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) bison_parser
 ifeq ($(TESTDIR),$(RESULTDIR))
 	$(PIPEFAIL) ./bison_parser $@ $(CHECK) $@.out
 else

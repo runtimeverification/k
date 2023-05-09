@@ -28,7 +28,7 @@ kompile: $(TESTS)
 dummy:
 
 %.k %.md: dummy
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG_FAIL) $@ -d $(DEFDIR) 2>&1 | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out $(CHECK2)
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG_FAIL) $@ --output-definition $(DEFDIR)/$(basename $@)-kompiled 2>&1 | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out $(CHECK2)
 
 # run all tests and regenerate output files
 update-results: kompile
