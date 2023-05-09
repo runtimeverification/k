@@ -42,7 +42,7 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         'domain-value-bytes',
         KSort('Bytes'),
         r'\dv{SortBytes{}}("\x00<`\xf5")',
-        bytesToken(chr(0) + chr(60) + chr(96) + chr(245)),
+        bytesToken(b'\x00\x3c\x60\xf5'),
     ),
     (
         'domain-value-other',
