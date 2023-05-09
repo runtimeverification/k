@@ -76,7 +76,7 @@ public class DefinitionLoadingModule extends AbstractModule {
                 }
             } else {
                 KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-                kem.registerCriticalWarning(DEPRECATED_DIRECTORY_FLAG, "Using --directory is deprecated. Use --definition instead.");
+                kem.registerCriticalWarning(DEPRECATED_DIRECTORY_FLAG, "Using --directory is deprecated. Use --output-definition instead.");
                 kem.print();
                 File f = new File(options.directory);
                 if (f.isAbsolute()) {
@@ -103,7 +103,7 @@ public class DefinitionLoadingModule extends AbstractModule {
 
             if (directory == null) {
                 throw KEMException.criticalError("Could not find a compiled definition. " +
-                        "Use --directory or --definition to specify one.");
+                        "Use --definition to specify one.");
             }
         }
         if (!directory.isDirectory()) {
