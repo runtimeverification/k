@@ -3,6 +3,7 @@ from __future__ import annotations
 from itertools import chain
 from typing import TYPE_CHECKING
 
+from ..dequote import bytes_decode
 from ..utils import check_type
 from .syntax import DV, App, LeftAssoc, RightAssoc, SortApp, String, SymbolId
 
@@ -26,11 +27,13 @@ TRUE: Final = DV(BOOL, String('true'))
 FALSE: Final = DV(BOOL, String('false'))
 
 
-def dv(val: bool | int | str) -> DV:
+def dv(val: bool | int | bytes | str) -> DV:
     if type(val) is bool:
         return bool_dv(val)
     if type(val) is int:
         return int_dv(val)
+    if type(val) is bytes:
+        return bytes_dv(val)
     if type(val) is str:
         return string_dv(val)
     raise TypeError(f'Illegal type: {type(val)}')
@@ -42,6 +45,10 @@ def bool_dv(val: bool) -> DV:
 
 def int_dv(val: int) -> DV:
     return DV(INT, String(str(val)))
+
+
+def bytes_dv(val: bytes) -> DV:
+    return DV(BYTES, String(bytes_decode(val)))
 
 
 def string_dv(val: str) -> DV:

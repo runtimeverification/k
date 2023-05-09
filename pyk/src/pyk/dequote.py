@@ -7,12 +7,28 @@ if TYPE_CHECKING:
     from typing import Final
 
 
-def enquote_str(s: str) -> str:
+def enquote_string(s: str) -> str:
     return ''.join(enquoted(s))
 
 
-def dequote_str(s: str) -> str:
+def dequote_string(s: str) -> str:
     return ''.join(dequoted(s))
+
+
+def enquote_bytes(s: str) -> str:
+    return ''.join(enquoted(s, allow_unicode=False))
+
+
+def dequote_bytes(s: str) -> str:
+    return ''.join(dequoted(s, allow_unicode=False))
+
+
+def bytes_encode(s: str) -> bytes:
+    return s.encode('latin-1')
+
+
+def bytes_decode(b: bytes) -> str:
+    return b.decode('latin-1')
 
 
 NORMAL = 1
@@ -37,7 +53,7 @@ CPOINT_TABLE: Final = {
 HEX_TABLE = {c: int(c, 16) for c in '0123456789abcdefABCDEF'}
 
 
-def dequoted(it: Iterable[str]) -> Iterator[str]:
+def dequoted(it: Iterable[str], *, allow_unicode: bool = True) -> Iterator[str]:
     acc = 0
     cnt = 0
     state = NORMAL
@@ -56,6 +72,8 @@ def dequoted(it: Iterable[str]) -> Iterator[str]:
 
         elif state == ESCAPE:
             if c in CPOINT_TABLE:
+                if not allow_unicode and c != 'x':
+                    raise ValueError(fr'Unicode escape sequence not allowed: \{c}')
                 cnt = CPOINT_TABLE[c]
                 state = CPOINT
             elif c in ESCAPE_TABLE:
@@ -86,7 +104,7 @@ ENQUOTE_TABLE: Final = {
 }
 
 
-def enquoted(it: Iterable[str]) -> Iterator[str]:
+def enquoted(it: Iterable[str], *, allow_unicode: bool = True) -> Iterator[str]:
     for c in it:
         code = ord(c)
         if code in ENQUOTE_TABLE:
@@ -95,6 +113,8 @@ def enquoted(it: Iterable[str]) -> Iterator[str]:
             yield c
         elif code <= 0xFF:
             yield fr'\x{code:02x}'
+        elif not allow_unicode:
+            raise ValueError(f"Unicode character not allowed: '{c}' ({code})")
         elif code <= 0xFFFF:
             yield fr'\u{code:04x}'
         elif code <= 0xFFFFFFFF:

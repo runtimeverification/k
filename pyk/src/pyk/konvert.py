@@ -29,7 +29,7 @@ from .kore.syntax import (
     String,
     Top,
 )
-from .prelude.bytes import BYTES, bytesToken, pretty_bytes
+from .prelude.bytes import BYTES, bytesToken_from_str, pretty_bytes_str
 from .prelude.k import K
 from .prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
 from .prelude.string import STRING, pretty_string, stringToken
@@ -132,7 +132,7 @@ def _ktoken_to_kore(ktoken: KToken) -> DV:
     if ktoken.sort == STRING:
         value = String(pretty_string(ktoken))
     elif ktoken.sort == BYTES:
-        value = String(pretty_bytes(ktoken))
+        value = String(pretty_bytes_str(ktoken))
     else:
         value = String(ktoken.token)
 
@@ -225,7 +225,7 @@ def _kore_to_kast(kore: Pattern) -> KInner:
         if kore.sort == KORE_STRING:
             return stringToken(kore.value.value)
         if kore.sort == KORE_BYTES:
-            return bytesToken(kore.value.value)
+            return bytesToken_from_str(kore.value.value)  # noqa: N802(kore.value.value)
         return KToken(kore.value.value, KSort(kore.sort.name[4:]))
 
     elif type(kore) is EVar:

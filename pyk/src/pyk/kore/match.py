@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, overload
 
+from ..dequote import bytes_encode
 from ..utils import case, check_type
-from .prelude import BOOL, INT, STRING
+from .prelude import BOOL, BYTES, INT, STRING
 from .syntax import DV, App, LeftAssoc
 
 if TYPE_CHECKING:
@@ -99,6 +100,11 @@ def kore_bool(pattern: Pattern) -> bool:
 def kore_int(pattern: Pattern) -> int:
     dv = match_dv(pattern, INT)
     return int(dv.value.value)
+
+
+def kore_bytes(pattern: Pattern) -> bytes:
+    dv = match_dv(pattern, BYTES)
+    return bytes_encode(dv.value.value)
 
 
 def kore_str(pattern: Pattern) -> str:
