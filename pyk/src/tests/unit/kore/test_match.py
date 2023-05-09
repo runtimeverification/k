@@ -5,7 +5,19 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kore.match import app, arg, args, case_symbol, inj, kore_int, kore_list_of, kore_map_of, kore_set_of, kore_str
+from pyk.kore.match import (
+    app,
+    arg,
+    args,
+    case_symbol,
+    inj,
+    kore_bytes,
+    kore_int,
+    kore_list_of,
+    kore_map_of,
+    kore_set_of,
+    kore_str,
+)
 from pyk.kore.prelude import dv, kore_list, kore_map, kore_set
 from pyk.kore.syntax import App
 
@@ -28,6 +40,7 @@ a, b, c, INJ = (mk_app(symbol) for symbol in ('a', 'b', 'c', 'inj'))
 
 EXTRACT_TEST_DATA = (
     (dv(1), kore_int, 1),
+    (dv(b'\f\n\r\t\x00\x80'), kore_bytes, b'\f\n\r\t\x00\x80'),
     (a(), kore_int, None),
     (a(), app(), a()),
     (a(), app('a'), a()),
