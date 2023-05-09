@@ -31,21 +31,17 @@ public class CheckAtt {
     private final KExceptionManager kem;
     private final Module m;
     private final boolean isSymbolicKast;
-    private final boolean checkWhitelist;
 
-    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast, boolean checkWhitelist) {
+    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast) {
         this.errors = errors;
         this.kem = kem;
         this.m = m;
         this.isSymbolicKast = isSymbolicKast;
         this.macros = m.macroKLabels();
-        this.checkWhitelist = checkWhitelist;
     }
 
     public void check(Sentence sentence) {
-        if (checkWhitelist) {
-            checkForUnrecognizedAtts(sentence);
-        }
+        checkUnrecognizedAtts(sentence);
         if (sentence instanceof Rule) {
             check(((Rule) sentence).att(), sentence);
             check((Rule) sentence);
@@ -54,10 +50,20 @@ public class CheckAtt {
         }
     }
 
-    private void checkForUnrecognizedAtts(Sentence sentence) {
-        if (!sentence.att().unrecognizedAtts().isEmpty()) {
+    private void checkUnrecognizedAtts(Sentence sentence) {
+        /* When a Definition is created, the following occurs:
+         * - the parser inserts a raw key for anything which is not recognized as a built-in attribute
+         * - if --pedantic-attributes is disabled, ProcessGroupAttributes replaces all raw keys with user group keys
+         *
+         * Thus, if a raw key still exists at this point, we know both of the following:
+         * - the --pedantic-attributes option is enabled
+         * - the raw key was not a recognized built-in
+         *
+         * so we must report an error.
+         */
+        if (!sentence.att().rawKeys().isEmpty()) {
             errors.add(KEMException.compilerError("Unrecognized attributes: " +
-                    sentence.att().unrecognizedAtts().mkString("[", ",", "]") +
+                    sentence.att().rawKeys().mkString("[", ",", "]") +
                     "\nHint: User-defined groups can be added with the group(_) attribute.", sentence));
         }
     }

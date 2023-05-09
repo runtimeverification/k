@@ -41,7 +41,7 @@ public class Context implements Serializable {
             tags.put(p.getBracketLabel(false), p);
         }
         for (Tuple2<Att.Key, String> a : iterable(p.getAttributes().att().keys())) {
-            tags.put(a._1.toString(), p);
+            tags.put(a._1.key(), p);
         }
     }
 }

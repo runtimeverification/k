@@ -390,7 +390,7 @@ public class DefinitionParsing {
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
                       .flatMap(configDecl ->
-                              stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, options.pedanticAttributes)))
+                              stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, outerParsingOptions.pedanticAttributes)))
                       .collect(toSet());
 
             Set<Sentence> stc = m.localSentences()

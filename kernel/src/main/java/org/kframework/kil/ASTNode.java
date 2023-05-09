@@ -87,16 +87,18 @@ public abstract class ASTNode implements Serializable, HasLocation {
      */
 
     /**
-     * Unsafely appends an attribute to the list of attributes without doing any checks against the attribute whitelist.
+     * Append an attribute to the list of attributes. In particular,
+     * - inserting a key from the attribute whitelist if the attribute is recognized as a built-in
+     * - otherwise, inserting an unsafe raw key to be processed later (see ProcessGroupAttributes)
      *
-     * NOTE: This function should only be used during parsing! It allows us to proceed with parsing and report multiple
-     * errors rather than immediately error out if the attribute is not whitelisted.
+     * WARNING: This function should only be used during parsing! It allows us to proceed with parsing and report
+     * multiple errors rather than immediately error out if the attribute is not whitelisted.
      *
      * @param key
      * @param val
      */
-    public void unsafeAddAttribute(String key, String val) {
-        att = att.add(Att.unsafeRawAttKey(key), val);
+    public void unsafeAddBuiltInOrRawAttribute(String key, String val) {
+        att = att.add(Att.getBuiltinKeyOptional(key).orElse(Att.unsafeRawKey(key)), val);
     }
 
     /**

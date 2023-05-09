@@ -1661,7 +1661,7 @@ public class ModuleToKORE {
             Att.Key name = attribute._1._1;
             Object val = attribute._2;
             String strVal = val.toString();
-            if (strVal.equals("") || val instanceof Att.GroupMarker) {
+            if (strVal.equals("")) {
                 if (!attributes.containsKey(name)) {
                     attributes.put(name, false);
                 }
@@ -1820,7 +1820,7 @@ public class ModuleToKORE {
             // Sort to stabilize error messages
             stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).collect(Collectors.toList())) {
             Att.Key key = attribute._1._1;
-            String strKey = key.toString();
+            String strKey = key.key();
             String clsName = attribute._1._2;
             Object val = attribute._2;
             String strVal = val.toString();

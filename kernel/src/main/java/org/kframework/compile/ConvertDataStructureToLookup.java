@@ -478,11 +478,9 @@ public class ConvertDataStructureToLookup {
                     for (Map.Entry<K, K> element : elements.entrySet()) {
                         // TODO(dwightguth): choose better between lookup and choice.
                         if (element.getKey() instanceof KVariable && varConstraints.count(element.getKey()) == 1) {
-                            KLabel choice = KLabel(m.attributesFor().apply(collectionLabel).getOptional(Att.CHOICE()).orElse("#mapChoice"));
-                            state.add(KApply(choice, element.getKey(), map));
+                            state.add(KApply(KLabel("#mapChoice"), element.getKey(), map));
                         }
-                        KLabel lookup = KLabel(m.attributesFor().apply(collectionLabel).getOptional(Att.LOOKUP()).orElse("Map:lookup"));
-                        state.add(KApply(KLabel("#match"), element.getValue(), KApply(lookup, map, element.getKey())));
+                        state.add(KApply(KLabel("#match"), element.getValue(), KApply(KLabel("Map:lookup"), map, element.getKey())));
                     }
                     if (lhsOf == null) {
                         if (!hasRewrite(k)) {

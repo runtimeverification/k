@@ -139,33 +139,33 @@ public class ToJson {
         jatt.add("node", JsonParser.KATT);
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
-        for (Tuple2<Att.Key,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            if (key._1().toString().equals(Location.class.getName())) {
+        for (Tuple2<Att.Key,String> attKeyPair: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+            if (attKeyPair._1().key().equals(Location.class.getName())) {
                 JsonArrayBuilder locarr = Json.createArrayBuilder();
                 Location loc = att.get(Location.class);
                 locarr.add(loc.startLine());
                 locarr.add(loc.startColumn());
                 locarr.add(loc.endLine());
                 locarr.add(loc.endColumn());
-                jattKeys.add(key._1().toString(), locarr.build());
-            } else if (key._1().toString().equals(Source.class.getName())){
-                jattKeys.add(key._1().toString(), att.get(Source.class).source());
-            } else if (key._1().toString().equals(Production.class.getName())){
-                jattKeys.add(key._1().toString(), toJson(att.get(Production.class)));
-            } else if (key._1().toString().equals(Sort.class.getName())){
-                jattKeys.add(key._1().toString(), toJson(att.get(Sort.class)));
-            } else if (key._1().equals(Att.BRACKET_LABEL())) {
-                jattKeys.add(key._1().toString(), toJson(att.get(Att.BRACKET_LABEL(), KLabel.class)));
-            } else if (key._1().equals(Att.PREDICATE())) {
-                jattKeys.add(key._1().toString(), toJson(att.get(Att.PREDICATE(), Sort.class)));
-            } else if (key._1().equals(Att.CELL_OPT_ABSENT())) {
-                jattKeys.add(key._1().toString(), toJson(att.get(Att.CELL_OPT_ABSENT(), Sort.class)));
-            } else if (key._1().equals(Att.CELL_FRAGMENT())) {
-                jattKeys.add(key._1().toString(), toJson(att.get(Att.CELL_FRAGMENT(), Sort.class)));
-            } else if (key._1().equals(Att.SORT_PARAMS())) {
-                jattKeys.add(key._1().toString(), toJson(att.get(Att.SORT_PARAMS(), Sort.class)));
+                jattKeys.add(attKeyPair._1().key(), locarr.build());
+            } else if (attKeyPair._1().key().equals(Source.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), att.get(Source.class).source());
+            } else if (attKeyPair._1().key().equals(Production.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Production.class)));
+            } else if (attKeyPair._1().key().equals(Sort.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Sort.class)));
+            } else if (attKeyPair._1().equals(Att.BRACKET_LABEL())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.BRACKET_LABEL(), KLabel.class)));
+            } else if (attKeyPair._1().equals(Att.PREDICATE())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.PREDICATE(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.CELL_OPT_ABSENT())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.CELL_OPT_ABSENT(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.CELL_FRAGMENT())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.CELL_FRAGMENT(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.SORT_PARAMS())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.SORT_PARAMS(), Sort.class)));
             } else
-                jattKeys.add(key._1().toString(), att.att().get(key).get().toString());
+                jattKeys.add(attKeyPair._1().key(), att.att().get(attKeyPair).get().toString());
         }
         jatt.add("att", jattKeys.build());
 

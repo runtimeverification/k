@@ -4,7 +4,6 @@ package org.kframework.compile;
 import com.google.common.collect.Lists;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -593,7 +592,11 @@ public class GenerateSentencesFromConfigDecl {
             } else if (kapp.klabel().name().equals("#cellPropertyList")) {
                 if (kapp.klist().size() == 2) {
                     Tuple2<Att.Key, String> attribute = getCellProperty(kapp.klist().items().get(0), pedanticAttributes);
-                    return Att().add(attribute._1(), attribute._2()).addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1), pedanticAttributes));
+                    return ProcessGroupAttributes.getProcessedAtt(
+                            Att().add(attribute._1(), attribute._2())
+                                    .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1), pedanticAttributes)),
+                            k,
+                            pedanticAttributes);
                 }
             }
         }
@@ -608,13 +611,20 @@ public class GenerateSentencesFromConfigDecl {
                     if (kapp.klist().items().get(0) instanceof KToken) {
                         KToken keyToken = (KToken) kapp.klist().items().get(0);
                         if (keyToken.sort().equals(Sort("#CellName"))) {
-                            Att.Key key = Att.getWhitelistedOptional(keyToken.s())
-                                    .orElseGet(() -> {
-                                        if (pedanticAttributes) {
-                                            throw KEMException.compilerError("Unrecognized attribute: " + keyToken.s(), k);
+                            Att.Key key = Att.getBuiltinKeyOptional(keyToken.s())
+                                    .or(() -> {
+                                        if (Att.getInternalKeyOptional(keyToken.s()).isPresent()) {
+                                            throw KEMException.compilerError(
+                                                    "User-defined attribute '" + keyToken.s() + "' conflicts with an internal attribute.", k);
                                         }
-                                        return Att.unsafeRawAttKey(keyToken.s());
-                                    });
+                                        if (pedanticAttributes) {
+                                            throw KEMException.compilerError("Unrecognized attribute: " + keyToken.s() +
+                                                    "\nHint: User-defined groups can be added with the group=\"...\" attribute.", k);
+                                        }
+                                        return Att.getUserGroupOptional(keyToken.s());
+                                    }).orElseThrow(() ->
+                                            new AssertionError("Attribute '" + keyToken.s() + "' is not a built-in or internal, " +
+                                                    "yet Att.getUserGroupOptional(\"" + keyToken.s() + "\") failed."));
                             if (kapp.klist().items().get(0) instanceof KToken) {
                                 KToken valueToken = (KToken) kapp.klist().items().get(1);
                                 if (valueToken.sort().equals(Sorts.KString())) {
