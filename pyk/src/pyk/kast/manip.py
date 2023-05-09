@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr
+from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr
 from ..utils import find_common_items, hash_str
 from .inner import KApply, KRewrite, KSequence, KToken, KVariable, Subst, bottom_up, top_down, var_occurrences
 from .kast import EMPTY_ATT, KAtt, WithKAtt
 from .outer import KDefinition, KFlatModule, KRuleLike
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Collection, Iterable, Sequence
+    from collections.abc import Callable, Collection, Iterable
     from typing import Any, Final, TypeVar
 
     from .inner import KInner
@@ -605,25 +605,6 @@ def anti_unify_with_constraints(
     return mlAnd([state] + constraints)
 
 
-# TODO Iterable[KInner]
-def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave: bool = False) -> KInner:
-    if len(constrained_terms) == 0:
-        return mlBottom()
-    new_constrained_term = constrained_terms[0]
-    for constrained_term in constrained_terms[1:]:
-        new_constrained_term = anti_unify_with_constraints(
-            new_constrained_term, constrained_term, implications=concave, disjunct=concave
-        )
-    return new_constrained_term
-
-
-def remove_disjuncts(constrained_term: KInner) -> KInner:
-    clauses = flatten_label('#And', constrained_term)
-    clauses = [c for c in clauses if not (type(c) is KApply and c.label.name == '#Or')]
-    constrained_term = mlAnd(clauses)
-    return constrained_term
-
-
 def apply_existential_substitutions(constrained_term: KInner) -> KInner:
     state, constraint = split_config_and_constraints(constrained_term)
     constraints = flatten_label('#And', constraint)
@@ -639,45 +620,57 @@ def apply_existential_substitutions(constrained_term: KInner) -> KInner:
     return Subst(subst)(mlAnd([state] + new_constraints))
 
 
-def constraint_subsume(constraint1: KInner, constraint2: KInner) -> bool:
-    if is_top(constraint1) or constraint1 == constraint2:
-        return True
-    elif type(constraint1) is KApply and constraint1.label.name == '#And':
-        constraints1 = flatten_label('#And', constraint1)
-        if all([constraint_subsume(c, constraint2) for c in constraints1]):
-            return True
-    elif type(constraint1) is KApply and constraint1.label.name == '#Or':
-        constraints1 = flatten_label('#Or', constraint1)
-        if any([constraint_subsume(c, constraint2) for c in constraints1]):
-            return True
-    elif type(constraint2) is KApply and constraint2.label.name == '#And':
-        constraints2 = flatten_label('#And', constraint2)
-        if any([constraint_subsume(constraint1, c) for c in constraints2]):
-            return True
-    elif type(constraint2) is KApply and constraint2.label.name == '#Or':
-        constraints2 = flatten_label('#Or', constraint2)
-        if all([constraint_subsume(constraint1, c) for c in constraints2]):
-            return True
-    return False
+def indexed_rewrite(kast: KInner, rewrites: Iterable[KRewrite]) -> KInner:
+    token_rewrites: list[KRewrite] = []
+    apply_rewrites: dict[str, list[KRewrite]] = {}
+    other_rewrites: list[KRewrite] = []
+    for r in rewrites:
+        if type(r.lhs) is KToken:
+            token_rewrites.append(r)
+        elif type(r.lhs) is KApply:
+            if r.lhs.label.name in token_rewrites:
+                apply_rewrites[r.lhs.label.name].append(r)
+            else:
+                apply_rewrites[r.lhs.label.name] = [r]
+        else:
+            other_rewrites.append(r)
 
+    def _apply_rewrites(_kast: KInner) -> KInner:
+        if type(_kast) is KToken:
+            for tr in token_rewrites:
+                _kast = tr.apply_top(_kast)
+        elif type(_kast) is KApply:
+            if _kast.label.name in apply_rewrites:
+                for ar in apply_rewrites[_kast.label.name]:
+                    _kast = ar.apply_top(_kast)
+        else:
+            for _or in other_rewrites:
+                _kast = _or.apply_top(_kast)
+        return _kast
 
-def match_with_constraint(constrained_term_1: KInner, constrained_term_2: KInner) -> Subst | None:
-    state1, constraint1 = split_config_and_constraints(constrained_term_1)
-    state2, constraint2 = split_config_and_constraints(constrained_term_2)
-    subst = state1.match(state2)
-    if subst is not None and constraint_subsume(Subst(subst)(constraint1), constraint2):
-        return subst
-    return None
+    orig_kast: KInner = kast
+    new_kast: KInner | None = None
+    while orig_kast != new_kast:
+        if new_kast is None:
+            new_kast = orig_kast
+        else:
+            orig_kast = new_kast
+        new_kast = bottom_up(_apply_rewrites, new_kast)
+    return new_kast
 
 
 def undo_aliases(definition: KDefinition, kast: KInner) -> KInner:
-    aliases = (rule for module in definition for rule in module.rules if 'alias' in rule.att)
-    for rule in aliases:
+    aliases = []
+    for rule in definition.alias_rules:
         rewrite = rule.body
         if type(rewrite) is not KRewrite:
             raise ValueError(f'Expected KRewrite as alias body, found: {rewrite}')
-        kast = rewrite(kast)
-    return kast
+        if rule.requires is not None and rule.requires != TRUE:
+            raise ValueError(f'Expended empty requires clause on alias, found: {rule.requires}')
+        if rule.ensures is not None and rule.ensures != TRUE:
+            raise ValueError(f'Expended empty ensures clause on alias, found: {rule.ensures}')
+        aliases.append(KRewrite(rewrite.rhs, rewrite.lhs))
+    return indexed_rewrite(kast, aliases)
 
 
 def rename_generated_vars(term: KInner) -> KInner:
