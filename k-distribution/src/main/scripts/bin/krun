@@ -532,7 +532,7 @@ else
   fi
   abs_kompiled_dir=`echo "$(cd "$(dirname "$kompiledDir")"; pwd -P)/$(basename "$kompiledDir")"`
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
-  (cd $tempDir; execute llvm-krun $configVars --definition "$abs_kompiled_dir" $llvm_krun_flags --dry-run -nm -o "$(basename $input_file)")
+  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $llvm_krun_flags --dry-run -nm -o "$(basename $input_file)")
 fi
 
 # Expand macros
