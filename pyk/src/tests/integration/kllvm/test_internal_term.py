@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.parser import Parser
 
+from ..utils import K_FILES
 from .utils import RuntimeTest
 
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class TestInternalTerm(RuntimeTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
     def test_str_llvm_backend_issue_724(self, runtime: ModuleType) -> None:
         for _ in range(10000):

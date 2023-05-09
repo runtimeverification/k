@@ -17,6 +17,8 @@ from pyk.ktool.kprint import _kast, pretty_print_kast
 from pyk.ktool.krun import KRun
 from pyk.prelude.string import stringToken
 
+from .utils import K_FILES
+
 if TYPE_CHECKING:
     from pathlib import Path
     from types import ModuleType
@@ -38,7 +40,7 @@ TEST_DATA: Final = (
     '🙂',
 )
 
-KOMPILE_MAIN_FILE = 'k-files/string-rewrite.k'
+KOMPILE_MAIN_FILE = K_FILES / 'string-rewrite.k'
 KOMPILE_MAIN_MODULE = 'STRING-REWRITE'
 
 

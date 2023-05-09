@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.__main__ import main
 
-from .utils import KompiledTest
+from .utils import K_FILES, KompiledTest
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
 
     from pytest import MonkeyPatch
 
@@ -32,7 +32,7 @@ def assume_argv(monkeypatch: MonkeyPatch) -> AssumeArgv:
 
 
 class TestGraphImports(KompiledTest):
-    KOMPILE_MAIN_FILE = 'k-files/d.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'd.k'
     KOMPILE_BACKEND = 'haskell'
 
     def test_graph_imports(self, assume_argv: AssumeArgv, definition_dir: Path) -> None:
@@ -69,11 +69,11 @@ class TestGraphImports(KompiledTest):
 
 
 class TestMinimizeTerm(KompiledTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
     KOMPILE_BACKEND = 'haskell'
 
     def test_minimize_term(self, assume_argv: AssumeArgv, tmp_path: Path, definition_dir: Path) -> None:
-        expected_file = Path('k-files/imp-unproveable-spec.k.expected')
+        expected_file = K_FILES / 'imp-unproveable-spec.k.expected'
         prove_res_file = tmp_path / 'term.json'
         actual_file = tmp_path / 'imp-unproveable-spec.k.out'
 
@@ -82,8 +82,8 @@ class TestMinimizeTerm(KompiledTest):
                 'pyk',
                 'prove',
                 str(definition_dir),
-                'k-files/imp-verification.k',
-                'k-files/imp-unproveable-spec.k',
+                str(K_FILES / 'imp-verification.k'),
+                str(K_FILES / 'imp-unproveable-spec.k'),
                 'IMP-UNPROVEABLE-SPEC',
                 '--output-file',
                 str(prove_res_file),

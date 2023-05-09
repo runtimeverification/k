@@ -10,7 +10,7 @@ from pyk.kore.kompiled import KompiledKore
 from pyk.kore.parser import KoreParser
 from pyk.prelude.kint import INT, intToken
 
-from ..utils import KompiledTest
+from ..utils import K_FILES, KompiledTest
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -93,7 +93,7 @@ KORE_TO_KAST_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
 
 
 class TestKonvertCellMap(KompiledTest):
-    KOMPILE_MAIN_FILE = 'k-files/cell-map.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'cell-map.k'
 
     @pytest.fixture(scope='class')
     def kompiled_kore(self, definition_dir: Path) -> KompiledKore:

@@ -6,6 +6,7 @@ import pytest
 
 from pyk.kllvm.ast import CompositePattern
 
+from ..utils import K_FILES
 from .utils import RuntimeTest
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class TestTerm(RuntimeTest):
-    KOMPILE_MAIN_FILE = 'k-files/ctor.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'ctor.k'
     KOMPILE_ARGS = {
         'syntax_module': 'CTOR',
     }

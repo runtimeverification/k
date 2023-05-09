@@ -7,14 +7,14 @@ from pyk.kast.outer import KClaim, KRule
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.ml import is_top
 
-from ..utils import KProveTest
+from ..utils import K_FILES, KProveTest
 
 if TYPE_CHECKING:
     from pyk.ktool.kprove import KProve
 
 
 class TestSimpleProof(KProveTest):
-    KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
 
     def test_prove_claim_with_lemmas(self, kprove: KProve) -> None:
         # Given

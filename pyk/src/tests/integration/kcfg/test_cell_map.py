@@ -10,7 +10,7 @@ from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
 from pyk.kcfg import KCFG
 from pyk.proof import APRProof, APRProver, ProofStatus
 
-from ..utils import KCFGExploreTest
+from ..utils import K_FILES, KCFGExploreTest
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -40,13 +40,13 @@ EXECUTE_TEST_DATA: Final[Iterable[tuple[str, int, State, int, State, Iterable[St
 )
 
 
-APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str]]] = (
-    ('cell-map-no-branch', 'k-files/cell-map-spec.k', 'CELL-MAP-SPEC', 'cell-map-no-branch', 2, 1, []),
+APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None, Iterable[str]]] = (
+    ('cell-map-no-branch', K_FILES / 'cell-map-spec.k', 'CELL-MAP-SPEC', 'cell-map-no-branch', 2, 1, []),
 )
 
 
 class TestCellMapProof(KCFGExploreTest):
-    KOMPILE_MAIN_FILE = 'k-files/cell-map.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'cell-map.k'
 
     @staticmethod
     def config(kprint: KPrint, k: str, active_accounts: str, accounts: Iterable[tuple[str, str]]) -> CTerm:
