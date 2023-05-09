@@ -46,7 +46,7 @@ $(k_util_usage)
 
 $KPARSE options:
 
-  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
@@ -74,6 +74,7 @@ do
   else
     case "$arg" in
       -d|--directory)
+      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
       dir="$2"
       shift
       ;;
@@ -171,7 +172,7 @@ else
 fi
 
 if ! $hasKompiledDir; then
-  error 1 'Could not find a compiled definition. Use --directory or --definition to specify one.'
+  error 1 'Could not find a compiled definition. Use --definition to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
