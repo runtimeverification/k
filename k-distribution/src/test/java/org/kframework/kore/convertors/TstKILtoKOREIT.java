@@ -53,7 +53,7 @@ public class TstKILtoKOREIT extends BaseTest {
     }
 
     protected String convert(DefinitionWithContext defWithContext) {
-        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context, false, false);
+        KILtoKORE kilToKore = new KILtoKORE(defWithContext.context, false, false, false);
         org.kframework.definition.Definition koreDef = kilToKore.apply(defWithContext.definition);
         String koreDefString = koreDef.toString();
         return koreDefString;
