@@ -7,6 +7,8 @@ import pytest
 from pyk.kore.parser import KoreParser
 from pyk.kore.tools import PrintOutput, kore_print
 
+from ..utils import K_FILES
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope='module')
 def imp_kompiled(kompile: Kompiler) -> Path:
-    return kompile(main_file='k-files/imp.k')
+    return kompile(main_file=K_FILES / 'imp.k')
 
 
 KORE_PRINT_TEST_DATA = (

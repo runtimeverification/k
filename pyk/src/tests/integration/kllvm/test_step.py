@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.parser import Parser
 
+from ..utils import K_FILES
 from .utils import RuntimeTest
 
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class TestStep(RuntimeTest):
-    KOMPILE_MAIN_FILE = 'k-files/steps.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'steps.k'
 
     def test_steps_1(self, runtime: ModuleType) -> None:
         term = runtime.Term(start_pattern())

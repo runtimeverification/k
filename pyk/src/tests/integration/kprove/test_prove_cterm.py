@@ -8,7 +8,7 @@ from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KToken
 from pyk.kast.manip import get_cell
 
-from ..utils import KProveTest
+from ..utils import K_FILES, KProveTest
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -31,7 +31,7 @@ PROVE_CTERM_TEST_DATA: Final = (
 
 
 class TestImpProof(KProveTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:

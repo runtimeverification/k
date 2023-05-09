@@ -9,7 +9,7 @@ from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
 from pyk.prelude.ml import mlEqualsTrue, mlTop
 
-from ..utils import KCFGExploreTest
+from ..utils import K_FILES, KCFGExploreTest
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -37,7 +37,7 @@ SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90
 
 
 class TestSimpleProof(KCFGExploreTest):
-    KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
 
     @staticmethod
     def config(kprint: KPrint, k: str, state: str, constraint: str | None = None) -> CTerm:

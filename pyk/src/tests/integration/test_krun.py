@@ -10,7 +10,7 @@ from pyk.kore.prelude import int_dv
 from pyk.kore.syntax import App
 from pyk.prelude.kint import intToken
 
-from .utils import KRunTest
+from .utils import K_FILES, KRunTest
 
 if TYPE_CHECKING:
     from pyk.kast import KInner
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class TestImpRun(KRunTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
     KOMPILE_BACKEND = 'haskell'
 
     def test_run(self, krun: KRun) -> None:
@@ -77,7 +77,7 @@ class TestImpRun(KRunTest):
 
 
 class TestConfigRun(KRunTest):
-    KOMPILE_MAIN_FILE = 'k-files/config.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'config.k'
 
     def test_run_kore_config(self, krun: KRun) -> None:
         # Given
@@ -111,7 +111,7 @@ class TestConfigRun(KRunTest):
 
 
 class TestReturnCodeRun(KRunTest):
-    KOMPILE_MAIN_FILE = 'k-files/return-code.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'return-code.k'
 
     @staticmethod
     def _input(value: int) -> KToken:

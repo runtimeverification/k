@@ -7,16 +7,14 @@ from pyk.kast.manip import push_down_rewrites
 from pyk.kast.outer import KClaim
 from pyk.prelude.ml import is_top
 
-from ..utils import KProveTest
+from ..utils import K_FILES, KProveTest
 
 if TYPE_CHECKING:
-    pass
-
     from pyk.ktool.kprove import KProve
 
 
 class TestPrintProveRewrite(KProveTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     def test_print_prove_rewrite(self, kprove: KProve) -> None:
         # Given

@@ -11,7 +11,7 @@ from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kbool import andBool
 from pyk.prelude.kint import INT, intToken, leInt, ltInt
 
-from .utils import KPrintTest
+from .utils import K_FILES, KPrintTest
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -65,7 +65,7 @@ PARSE_TOKEN_TEST_DATA: Final = (
 
 
 class TestParseToken(KPrintTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
     @pytest.mark.parametrize(
         'test_id,as_rule,token,expected',
@@ -185,7 +185,7 @@ PRETTY_PRINT_IMP_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
 
 
 class TestImpDefn(KPrintTest):
-    KOMPILE_MAIN_FILE = 'k-files/imp.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
@@ -251,7 +251,7 @@ PRETTY_PRINT_ALIAS_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
 
 
 class TestAliasDefn(KPrintTest):
-    KOMPILE_MAIN_FILE = 'k-files/aliases.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'aliases.k'
 
     @pytest.mark.parametrize(
         'test_id,kast,expected',

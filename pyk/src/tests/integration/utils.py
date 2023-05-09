@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -13,7 +14,6 @@ from pyk.ktool.krun import KRun
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from pathlib import Path
     from typing import Any, ClassVar
 
     from pytest import TempPathFactory
@@ -21,6 +21,9 @@ if TYPE_CHECKING:
     from pyk.cli_utils import BugReport
     from pyk.kast.outer import KDefinition
     from pyk.ktool.kprint import SymbolTable
+
+
+K_FILES = (Path(__file__).parent / 'k-files').resolve(strict=True)
 
 
 class Kompiler:
@@ -45,7 +48,7 @@ class Kompiler:
 
 
 class KompiledTest:
-    KOMPILE_MAIN_FILE: ClassVar[str]
+    KOMPILE_MAIN_FILE: ClassVar[str | Path]
     KOMPILE_BACKEND: ClassVar[str | None] = None
     KOMPILE_ARGS: ClassVar[dict[str, Any]] = {}
 

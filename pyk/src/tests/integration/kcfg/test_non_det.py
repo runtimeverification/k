@@ -8,7 +8,7 @@ import pytest
 from pyk.kcfg import KCFG
 from pyk.proof import APRProof, APRProver, ProofStatus
 
-from ..utils import KCFGExploreTest
+from ..utils import K_FILES, KCFGExploreTest
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -17,13 +17,13 @@ if TYPE_CHECKING:
     from pyk.ktool.kprove import KProve
 
 
-APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str]]] = (
-    ('test-nondet', 'k-files/non-det-spec.k', 'NON-DET-SPEC', 'non-det', 8, 1, []),
+APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None, Iterable[str]]] = (
+    ('test-nondet', K_FILES / 'non-det-spec.k', 'NON-DET-SPEC', 'non-det', 8, 1, []),
 )
 
 
 class TestImpProof(KCFGExploreTest):
-    KOMPILE_MAIN_FILE = 'k-files/non-det.k'
+    KOMPILE_MAIN_FILE = K_FILES / 'non-det.k'
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules',
