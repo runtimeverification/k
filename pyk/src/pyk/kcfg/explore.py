@@ -4,13 +4,24 @@ import logging
 from typing import TYPE_CHECKING, ContextManager
 
 from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KVariable, Subst
-from ..kast.manip import flatten_label, free_vars
+from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
+from ..kast.manip import (
+    abstract_term_safely,
+    bottom_up,
+    extract_lhs,
+    extract_rhs,
+    flatten_label,
+    free_vars,
+    minimize_term,
+    ml_pred_to_bool,
+    push_down_rewrites,
+)
 from ..kore.rpc import KoreClient, KoreServer, StopReason
 from ..ktool.kprove import KoreExecLogFormat
+from ..prelude import k
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import notBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot, mlTop
 from ..utils import shorten_hashes, single
 from .kcfg import KCFG
 
@@ -190,6 +201,84 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             else:
                 raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
         return CSubst(subst=Subst(_subst), constraints=ml_preds)
+
+    def implication_failure_reason(self, antecedent: CTerm, consequent: CTerm) -> tuple[bool, str]:
+        def no_cell_rewrite_to_dots(term: KInner) -> KInner:
+            def _no_cell_rewrite_to_dots(_term: KInner) -> KInner:
+                if type(_term) is KApply and _term.is_cell:
+                    lhs = extract_lhs(_term)
+                    rhs = extract_rhs(_term)
+                    if lhs == rhs:
+                        return KApply(_term.label, [abstract_term_safely(lhs, base_name=_term.label.name)])
+                return _term
+
+            return bottom_up(_no_cell_rewrite_to_dots, term)
+
+        def _is_cell_subst(csubst: KInner) -> bool:
+            if type(csubst) is KApply and csubst.label.name == '_==K_':
+                csubst_arg = csubst.args[0]
+                if type(csubst_arg) is KVariable and csubst_arg.name.endswith('_CELL'):
+                    return True
+            return False
+
+        def _is_negative_cell_subst(constraint: KInner) -> bool:
+            constraint_bool = ml_pred_to_bool(constraint)
+            if type(constraint_bool) is KApply and constraint_bool.label.name == 'notBool_':
+                negative_constraint = constraint_bool.args[0]
+                if type(negative_constraint) is KApply and negative_constraint.label.name == '_andBool_':
+                    constraints = flatten_label('_andBool_', negative_constraint)
+                    cell_constraints = list(filter(_is_cell_subst, constraints))
+                    if len(cell_constraints) > 0:
+                        return True
+            return False
+
+        def replace_rewrites_with_implies(kast: KInner) -> KInner:
+            def _replace_rewrites_with_implies(_kast: KInner) -> KInner:
+                if type(_kast) is KRewrite:
+                    return mlImplies(_kast.lhs, _kast.rhs)
+                return _kast
+
+            return bottom_up(_replace_rewrites_with_implies, kast)
+
+        config_match = self.cterm_implies(CTerm.from_kast(antecedent.config), CTerm.from_kast(consequent.config))
+        if config_match is None:
+            failing_cells = []
+            curr_cell_match = Subst({})
+            for cell in antecedent.cells:
+                antecedent_cell = antecedent.cell(cell)
+                consequent_cell = consequent.cell(cell)
+                cell_match = consequent_cell.match(antecedent_cell)
+                if cell_match is not None:
+                    _curr_cell_match = curr_cell_match.union(cell_match)
+                    if _curr_cell_match is not None:
+                        curr_cell_match = _curr_cell_match
+                        continue
+                failing_cell = push_down_rewrites(KRewrite(antecedent_cell, consequent_cell))
+                failing_cell = no_cell_rewrite_to_dots(failing_cell)
+                failing_cell = replace_rewrites_with_implies(failing_cell)
+                failing_cells.append((cell, failing_cell))
+            failing_cells_str = '\n'.join(
+                f'{cell}: {self.kprint.pretty_print(minimize_term(rew))}' for cell, rew in failing_cells
+            )
+            return (
+                False,
+                f'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n{failing_cells_str}',
+            )
+        else:
+            consequent_constraints = list(
+                filter(lambda x: not CTerm._is_spurious_constraint(x), map(config_match.subst, consequent.constraints))
+            )
+            impl = CTerm._ml_impl(antecedent.constraints, consequent_constraints)
+            if impl != mlTop(k.GENERATED_TOP_CELL):
+                fail_str = self.kprint.pretty_print(impl)
+                negative_cell_constraints = list(filter(_is_negative_cell_subst, antecedent.constraints))
+                if len(negative_cell_constraints) > 0:
+                    fail_str = (
+                        f'{fail_str}\n\nNegated cell substitutions found (consider using _ => ?_):\n'
+                        + '\n'.join([self.kprint.pretty_print(cc) for cc in negative_cell_constraints])
+                    )
+                return (False, f'Implication check failed, the following is the remaining implication:\n{fail_str}')
+        return (True, '')
 
     def cterm_assume_defined(self, cterm: CTerm) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
