@@ -81,7 +81,7 @@ EXECUTE_TEST_DATA: Final = (
             'depth': 1,
             'reason': 'stuck',
         },
-        StuckResult(State(int_dv(2), int_top, int_top), 1),
+        StuckResult(State(int_dv(2), int_top, int_top), 1, logs=()),
     ),
 )
 
@@ -112,7 +112,7 @@ IMPLIES_TEST_DATA: Final = (
         int_top,
         {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
         {'satisfiable': True, 'implication': kore(int_top)},
-        ImpliesResult(True, int_top, None, None),
+        ImpliesResult(True, int_top, None, None, ()),
     ),
 )
 
@@ -161,7 +161,7 @@ def test_simplify(
     rpc_client.assume_response(response)
 
     # When
-    actual = kore_client.simplify(pattern)
+    actual, _logs = kore_client.simplify(pattern)
 
     # Then
     rpc_client.assert_request('simplify', **params)
