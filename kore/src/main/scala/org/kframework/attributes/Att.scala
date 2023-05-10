@@ -169,6 +169,7 @@ object Att {
   final val HOOK = Key("hook", KeyType.BuiltIn)
   final val IDEM = Key("idem", KeyType.BuiltIn)
   final val IMPURE = Key("impure", KeyType.BuiltIn)
+  final val INDEX = Key("index", KeyType.BuiltIn)
   final val INITIAL = Key("initial", KeyType.BuiltIn)
   final val INITIALIZER = Key("initializer", KeyType.BuiltIn)
   final val INJECTIVE = Key("injective", KeyType.BuiltIn)

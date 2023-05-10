@@ -237,7 +237,7 @@ other words, one unbound variable is linear, two is quadratic, three is cubic,
 etc.
 
 ```k
-  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), symbol, assoc, comm, unit(.Map), element(_|->_), format(%1%n%2)]
+  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), symbol, assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
 ```
 
 ### Map unit
