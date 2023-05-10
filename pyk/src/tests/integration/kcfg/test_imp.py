@@ -71,6 +71,91 @@ EXECUTE_TEST_DATA: Final = (
     ),
 )
 
+IMPLICATION_FAILURE_TEST_DATA: Final = (
+    (
+        'different-cell',
+        ('int $n ; $n = 0 ;', '.Map'),
+        ('int $n ; $n = 1 ;', '.Map'),
+        (
+            'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n'
+            'K_CELL: int $n , .Ids ; $n = 0 ; #Implies int $n , .Ids ; $n = 1 ;'
+        ),
+    ),
+    (
+        'different-cell-2',
+        ('int $n ; $n = X:Int ;', '.Map'),
+        ('int $n ; $n = 1 ;', '.Map'),
+        (
+            'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n'
+            'K_CELL: int $n , .Ids ; $n = X:Int ; #Implies int $n , .Ids ; $n = 1 ;'
+        ),
+    ),
+    (
+        'different-constraint',
+        (
+            'int $n ; $n = 0 ;',
+            '1 |-> A:Int 2 |-> B:Int',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('1', 'Int')])),
+                ]
+            ),
+        ),
+        (
+            'int $n ; $n = 0 ;',
+            '1 |-> A:Int 2 |-> B:Int',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('2', 'Int')])),
+                ]
+            ),
+        ),
+        (
+            'Implication check failed, the following is the remaining implication:\n'
+            '{ true #Equals A:Int <Int 1 }\n'
+            '#And { true #Equals B:Int <Int 1 } #Implies { true #Equals B:Int <Int 2 }'
+        ),
+    ),
+    (
+        'different-constraint-with-match',
+        (
+            'int $n ; $n = 0 ;',
+            '1 |-> A:Int 2 |-> B:Int',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('1', 'Int')])),
+                ]
+            ),
+        ),
+        (
+            'int $n ; $n = X:Int ;',
+            '1 |-> A:Int 2 |-> B:Int',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('2', 'Int')])),
+                ]
+            ),
+        ),
+        (
+            'Implication check failed, the following is the remaining implication:\n'
+            '{ true #Equals A:Int <Int 1 }\n'
+            '#And { true #Equals B:Int <Int 1 } #Implies { true #Equals B:Int <Int 2 }'
+        ),
+    ),
+    (
+        'substitution',
+        ('int $n ; $n = 5 ;', '3 |-> 6'),
+        ('int $n ; $n = X:Int ;', '3 |-> X:Int'),
+        (
+            'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n'
+            'STATE_CELL: 3 |-> 6 #Implies X:Int'
+        ),
+    ),
+)
 
 IMPLIES_TEST_DATA: Final = (
     (
@@ -711,3 +796,27 @@ class TestImpProof(KCFGExploreTest):
         equality_prover.advance_proof(kcfg_explore)
 
         assert equality_proof.status == proof_status
+
+    @pytest.mark.parametrize(
+        'test_id,antecedent,consequent,expected',
+        IMPLICATION_FAILURE_TEST_DATA,
+        ids=[test_id for test_id, *_ in IMPLICATION_FAILURE_TEST_DATA],
+    )
+    def test_implication_failure_reason(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprove: KProve,
+        test_id: str,
+        antecedent: tuple[str, str] | tuple[str, str, KInner],
+        consequent: tuple[str, str] | tuple[str, str, KInner],
+        expected: str,
+    ) -> None:
+        antecedent_term = self.config(kcfg_explore.kprint, *antecedent)
+        consequent_term = self.config(kcfg_explore.kprint, *consequent)
+
+        failed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
+
+        print(actual)
+
+        assert failed == False
+        assert actual == expected
