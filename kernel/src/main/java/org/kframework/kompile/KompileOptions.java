@@ -144,8 +144,4 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--enable-kore-antileft", description="Enable generation of legacy antileft priority predicates ")
     public boolean enableKoreAntileft;
-
-    @Parameter(names="--pedantic-attributes", description="Require that all attributes are known built-ins. " +
-            "User-defined groups must be added through the group(_) attribute.")
-    public boolean pedanticAttributes = false;
 }
