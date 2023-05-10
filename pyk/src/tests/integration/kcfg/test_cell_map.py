@@ -99,7 +99,7 @@ class TestCellMapProof(KCFGExploreTest):
         expected_k, _, _ = expected_post
 
         # When
-        actual_depth, actual_post_term, _ = kcfg_explore.cterm_execute(
+        actual_depth, actual_post_term, _, _logs = kcfg_explore.cterm_execute(
             self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth
         )
         actual_k = kcfg_explore.kprint.pretty_print(actual_post_term.cell('K_CELL'))
@@ -134,7 +134,7 @@ class TestCellMapProof(KCFGExploreTest):
         init = kcfg.get_unique_init()
         new_init_term = kcfg_explore.cterm_assume_defined(init.cterm)
         kcfg.replace_node(init.id, new_init_term)
-        proof = APRProof(f'{spec_module}.{claim_id}', kcfg)
+        proof = APRProof(f'{spec_module}.{claim_id}', kcfg, {})
         prover = APRProver(proof)
         kcfg = prover.advance_proof(
             kcfg_explore,
