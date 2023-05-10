@@ -24,6 +24,7 @@ term=false
 literal=false
 outputMode=pretty
 statistics=false
+executeToBranch=false
 smtPrelude=
 smt=
 llvm_krun_flags=
@@ -159,6 +160,8 @@ $KRUN options:
                            execution.
       --statistics         Print number of steps executed. Currently only
                            supported on LLVM backend.
+      --execute-to-branch  Execute until the proof branches. Specific to LLVM
+                           backend.
       --term               Use the value that would otherwise be considered the
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
@@ -390,6 +393,10 @@ do
       statistics=true
       ;;
 
+      --execute-to-branch)
+      executeToBranch=true
+      ;;
+
       --)
       literal=true
       ;;
@@ -544,10 +551,14 @@ fi
 backendName=$(cat "$kompiledDir"/backend.txt)
 # Invoke backend
 if [ "$backendName" = "llvm" ]; then
+  interpreter_flags=
+
   if $statistics; then
     interpreter_flags=--statistics
-  else
-    interpreter_flags=
+  fi
+
+  if $executeToBranch; then
+    interpreter_flags+=" --execute-to-branch"
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
