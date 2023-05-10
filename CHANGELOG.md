@@ -2,6 +2,31 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+K Framework 6.0.0
+=================
+
+Features
+--------
+- Removed the Java backend. From now on, all symbolic execution will be handled by the
+  haskell backend and concrete execution by the llvm backend. Alongside that we also
+  removed the `kprove-legacy` and the `kbmc` tool. Bounded model checking capabilities
+  have been added to the pyk library.
+
+- Deprecated the `--directory` option. Use `--output-definition` instead.
+
+Misc/Bug Fixes
+--------------
+- Fix some issues related to unicode characters  not being parsed correctly.
+
+- Total attribute is allowed only on function symbols.
+
+- Added more checks and warning messages.
+
+- Fix inconsistencies around the `comm` attribute.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3403
+
 K Framework 5.6.0
 =================
 
