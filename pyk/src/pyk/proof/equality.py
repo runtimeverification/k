@@ -151,7 +151,7 @@ class EqualityProver:
 
         kore = kcfg_explore.kprint.kast_to_kore(self.proof.equality)
         _, kore_client = kcfg_explore._kore_rpc
-        kore_simplified = kore_client.simplify(kore)
+        kore_simplified, _logs = kore_client.simplify(kore)
         kast_simplified = kcfg_explore.kprint.kore_to_kast(kore_simplified)
         self.proof.set_simplified(kast_simplified)
 

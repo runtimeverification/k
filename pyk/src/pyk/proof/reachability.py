@@ -4,6 +4,8 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
+from pyk.kore.rpc import LogEntry
+
 from ..kcfg import KCFG
 from ..utils import hash_str, shorten_hashes
 from .proof import Proof, ProofStatus
@@ -31,10 +33,12 @@ class APRProof(Proof):
     """
 
     kcfg: KCFG
+    logs: dict[str, tuple[LogEntry, ...]]
 
-    def __init__(self, id: str, kcfg: KCFG, proof_dir: Path | None = None):
+    def __init__(self, id: str, kcfg: KCFG, logs: dict[str, tuple[LogEntry, ...]], proof_dir: Path | None = None):
         super().__init__(id, proof_dir=proof_dir)
         self.kcfg = kcfg
+        self.logs = logs
 
     @staticmethod
     def read_proof(id: str, proof_dir: Path) -> APRProof:
@@ -58,11 +62,17 @@ class APRProof(Proof):
     def from_dict(cls: type[APRProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRProof:
         cfg = KCFG.from_dict(dct['cfg'])
         id = dct['id']
-        return APRProof(id, cfg, proof_dir=proof_dir)
+        if 'logs' in dct:
+            logs = {k: tuple(LogEntry.from_dict(l) for l in ls) for k, ls in dct['logs'].items()}
+        else:
+            logs = {}
+
+        return APRProof(id, cfg, logs, proof_dir=proof_dir)
 
     @property
     def dict(self) -> dict[str, Any]:
-        return {'type': 'APRProof', 'id': self.id, 'cfg': self.kcfg.to_dict()}
+        logs = {k: [l.to_dict() for l in ls] for k, ls in self.logs.items()}
+        return {'type': 'APRProof', 'id': self.id, 'cfg': self.kcfg.to_dict(), 'logs': logs}
 
     @property
     def summary(self) -> Iterable[str]:
@@ -85,11 +95,12 @@ class APRBMCProof(APRProof):
         self,
         id: str,
         kcfg: KCFG,
+        logs: dict[str, tuple[LogEntry, ...]],
         bmc_depth: int,
         bounded_states: Iterable[str] | None = None,
         proof_dir: Path | None = None,
     ):
-        super().__init__(id, kcfg, proof_dir=proof_dir)
+        super().__init__(id, kcfg, logs, proof_dir=proof_dir)
         self.bmc_depth = bmc_depth
         self._bounded_states = list(bounded_states) if bounded_states is not None else []
 
@@ -117,14 +128,20 @@ class APRBMCProof(APRProof):
         id = dct['id']
         bounded_states = dct['bounded_states']
         bmc_depth = dct['bmc_depth']
-        return APRBMCProof(id, cfg, bmc_depth, bounded_states=bounded_states, proof_dir=proof_dir)
+        if 'logs' in dct:
+            logs = {k: tuple(LogEntry.from_dict(l) for l in ls) for k, ls in dct['logs'].items()}
+        else:
+            logs = {}
+        return APRBMCProof(id, cfg, logs, bmc_depth, bounded_states=bounded_states, proof_dir=proof_dir)
 
     @property
     def dict(self) -> dict[str, Any]:
+        logs = {k: [l.to_dict() for l in ls] for k, ls in self.logs.items()}
         return {
             'type': 'APRBMCProof',
             'id': self.id,
             'cfg': self.kcfg.to_dict(),
+            'logs': logs,
             'bmc_depth': self.bmc_depth,
             'bounded_states': self._bounded_states,
         }
@@ -206,6 +223,7 @@ class APRProver:
             kcfg_explore.extend(
                 self.proof.kcfg,
                 curr_node,
+                self.proof.logs,
                 execute_depth=execute_depth,
                 cut_point_rules=cut_point_rules,
                 terminal_rules=terminal_rules,
