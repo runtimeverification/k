@@ -50,7 +50,7 @@
     <pluginRepository>
       <id>runtime.verification.snapshots</id>
       <name>Runtime Verification Snapshot Repository</name>
-      <url>https://maven.pkg.github.com/runtimeverification/test-maven-deployment</url>
+      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/snapshots</url>
       <snapshots><enabled>true</enabled></snapshots>
       <releases><enabled>false</enabled></releases>
     </pluginRepository>
@@ -65,7 +65,7 @@
     <snapshotRepository>
       <id>runtime.verification.snapshots</id>
       <name>Runtime Verification Snapshot Repository</name>
-      <url>s3://runtimeverificationmaven/snapshots</url>
+      <url>https://maven.pkg.github.com/runtimeverification/test-maven-deployment</url>
     </snapshotRepository>
   </distributionManagement>
 
