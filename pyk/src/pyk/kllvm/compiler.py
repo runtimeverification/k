@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from ..cli_utils import check_dir_path, check_file_path, run_process
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from typing import Final
 
 
@@ -49,13 +50,21 @@ RUNTIME_MODULE_NAME: Final = '_kllvm_runtime'
 RUNTIME_MODULE_FILE_NAME: Final = f'{RUNTIME_MODULE_NAME}{PYTHON_EXTENSION_SUFFIX}'
 
 
-def compile_runtime(definition_dir: str | Path, target_dir: str | Path | None = None, *, verbose: bool = False) -> Path:
+def compile_runtime(
+    definition_dir: str | Path,
+    target_dir: str | Path | None = None,
+    *,
+    ccopts: Iterable[str] = (),
+    verbose: bool = False,
+) -> Path:
     definition_dir = Path(definition_dir).resolve()
     check_dir_path(definition_dir)
 
     if target_dir is not None:
         target_dir = Path(target_dir).resolve()
         check_dir_path(target_dir)
+
+    ccopts = list(ccopts)
 
     defn_file = definition_dir / 'definition.kore'
     check_file_path(defn_file)
@@ -70,6 +79,9 @@ def compile_runtime(definition_dir: str | Path, target_dir: str | Path | None = 
         args += ['--python-output-dir', str(target_dir)]
     if verbose:
         args += ['--verbose']
+    if ccopts:
+        args += ['--']
+        args += ccopts
 
     _LOGGER.info(f'Compiling python extension: {module_file.name}')
     run_process(args, logger=_LOGGER)
