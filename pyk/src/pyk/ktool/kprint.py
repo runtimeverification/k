@@ -306,7 +306,7 @@ class KPrint:
     def pretty_print(self, kast: KAst, *, unalias: bool = True) -> str:
         if unalias and isinstance(kast, KInner):
             kast = undo_aliases(self.definition, kast)
-        return pretty_print_kast(kast, self.symbol_table)
+        return PrettyPrinter(self.symbol_table).print(kast)
 
     def _expression_kast(
         self,
@@ -343,6 +343,10 @@ class KPrint:
             sort=sort,
             check=check,
         )
+
+
+def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:
+    return PrettyPrinter(symbol_table).print(kast)
 
 
 def unparser_for_production(prod: KProduction) -> Callable[..., str]:
@@ -387,172 +391,8 @@ def build_symbol_table(
     return symbol_table
 
 
-def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:
-    """Print out KAST terms/outer syntax.
-
-    -   Input: KAST term.
-    -   Output: Best-effort string representation of KAST term.
-    """
-    _LOGGER.debug(f'pretty_print_kast: {kast}')
-    if type(kast) is KVariable:
-        sort = kast.sort
-        if not sort:
-            return kast.name
-        return kast.name + ':' + pretty_print_kast(sort, symbol_table)
-    if type(kast) is KSort:
-        return kast.name
-    if type(kast) is KToken:
-        return kast.token
-    if type(kast) is KApply:
-        label = kast.label.name
-        args = kast.args
-        unparsed_args = [pretty_print_kast(arg, symbol_table) for arg in args]
-        if kast.is_cell:
-            cell_contents = '\n'.join(unparsed_args).rstrip()
-            cell_str = label + '\n' + indent(cell_contents) + '\n</' + label[1:]
-            return cell_str.rstrip()
-        unparser = applied_label_str(label) if label not in symbol_table else symbol_table[label]
-        return unparser(*unparsed_args)
-    if type(kast) is KAs:
-        pattern_str = pretty_print_kast(kast.pattern, symbol_table)
-        alias_str = pretty_print_kast(kast.alias, symbol_table)
-        return pattern_str + ' #as ' + alias_str
-    if type(kast) is KRewrite:
-        lhs_str = pretty_print_kast(kast.lhs, symbol_table)
-        rhs_str = pretty_print_kast(kast.rhs, symbol_table)
-        return '( ' + lhs_str + ' => ' + rhs_str + ' )'
-    if type(kast) is KSequence:
-        if kast.arity == 0:
-            return pretty_print_kast(EMPTY_K, symbol_table)
-        if kast.arity == 1:
-            return pretty_print_kast(kast.items[0], symbol_table)
-        unparsed_k_seq = '\n~> '.join([pretty_print_kast(item, symbol_table) for item in kast.items[0:-1]])
-        if kast.items[-1] == DOTS:
-            unparsed_k_seq = unparsed_k_seq + '\n' + pretty_print_kast(DOTS, symbol_table)
-        else:
-            unparsed_k_seq = unparsed_k_seq + '\n~> ' + pretty_print_kast(kast.items[-1], symbol_table)
-        return unparsed_k_seq
-    if type(kast) is KTerminal:
-        return '"' + kast.value + '"'
-    if type(kast) is KRegexTerminal:
-        return 'r"' + kast.regex + '"'
-    if type(kast) is KNonTerminal:
-        return pretty_print_kast(kast.sort, symbol_table)
-    if type(kast) is KProduction:
-        if 'klabel' not in kast.att and kast.klabel:
-            kast = kast.update_atts({'klabel': kast.klabel.name})
-        syntax_str = 'syntax ' + pretty_print_kast(kast.sort, symbol_table)
-        if kast.items:
-            syntax_str += ' ::= ' + ' '.join([pretty_print_kast(pi, symbol_table) for pi in kast.items])
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        if att_str:
-            syntax_str += ' ' + att_str
-        return syntax_str
-    if type(kast) is KSyntaxSort:
-        sort_str = pretty_print_kast(kast.sort, symbol_table)
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        return 'syntax ' + sort_str + ' ' + att_str
-    if type(kast) is KSortSynonym:
-        new_sort_str = pretty_print_kast(kast.new_sort, symbol_table)
-        old_sort_str = pretty_print_kast(kast.old_sort, symbol_table)
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        return 'syntax ' + new_sort_str + ' = ' + old_sort_str + ' ' + att_str
-    if type(kast) is KSyntaxLexical:
-        name_str = kast.name
-        regex_str = kast.regex
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        # todo: proper escaping
-        return 'syntax lexical ' + name_str + ' = r"' + regex_str + '" ' + att_str
-    if type(kast) is KSyntaxAssociativity:
-        assoc_str = kast.assoc.value
-        tags_str = ' '.join(kast.tags)
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        return 'syntax associativity ' + assoc_str + ' ' + tags_str + ' ' + att_str
-    if type(kast) is KSyntaxPriority:
-        priorities_str = ' > '.join([' '.join(group) for group in kast.priorities])
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        return 'syntax priority ' + priorities_str + ' ' + att_str
-    if type(kast) is KBubble:
-        body = '// KBubble(' + kast.sentence_type + ', ' + kast.content + ')'
-        att_str = pretty_print_kast(kast.att, symbol_table)
-        return body + ' ' + att_str
-    if type(kast) is KRule or type(kast) is KClaim:
-        body = '\n     '.join(pretty_print_kast(kast.body, symbol_table).split('\n'))
-        rule_str = 'rule ' if type(kast) is KRule else 'claim '
-        if 'label' in kast.att:
-            rule_str = rule_str + '[' + kast.att['label'] + ']:'
-        rule_str = rule_str + ' ' + body
-        atts_str = pretty_print_kast(kast.att, symbol_table)
-        if kast.requires != TRUE:
-            requires_str = 'requires ' + '\n  '.join(pretty_print_kast_bool(kast.requires, symbol_table).split('\n'))
-            rule_str = rule_str + '\n  ' + requires_str
-        if kast.ensures != TRUE:
-            ensures_str = 'ensures ' + '\n  '.join(pretty_print_kast_bool(kast.ensures, symbol_table).split('\n'))
-            rule_str = rule_str + '\n   ' + ensures_str
-        return rule_str + '\n  ' + atts_str
-    if type(kast) is KContext:
-        body = indent(pretty_print_kast(kast.body, symbol_table))
-        context_str = 'context alias ' + body
-        requires_str = ''
-        atts_str = pretty_print_kast(kast.att, symbol_table)
-        if kast.requires != TRUE:
-            requires_str = pretty_print_kast(kast.requires, symbol_table)
-            requires_str = 'requires ' + indent(requires_str)
-        return context_str + '\n  ' + requires_str + '\n  ' + atts_str
-    if type(kast) is KAtt:
-        return kast.pretty
-    if type(kast) is KImport:
-        return ' '.join(['imports', ('public' if kast.public else 'private'), kast.name])
-    if type(kast) is KFlatModule:
-        name = kast.name
-        imports = '\n'.join([pretty_print_kast(kimport, symbol_table) for kimport in kast.imports])
-        sentences = '\n\n'.join([pretty_print_kast(sentence, symbol_table) for sentence in kast.sentences])
-        contents = imports + '\n\n' + sentences
-        return 'module ' + name + '\n    ' + '\n    '.join(contents.split('\n')) + '\n\nendmodule'
-    if type(kast) is KRequire:
-        return 'requires "' + kast.require + '"'
-    if type(kast) is KDefinition:
-        requires = '\n'.join([pretty_print_kast(require, symbol_table) for require in kast.requires])
-        modules = '\n\n'.join([pretty_print_kast(module, symbol_table) for module in kast.all_modules])
-        return requires + '\n\n' + modules
-
-    raise ValueError(f'Error unparsing: {kast}')
-
-
-def pretty_print_kast_bool(kast: KAst, symbol_table: SymbolTable) -> str:
-    """Print out KAST requires/ensures clause.
-
-    -   Input: KAST Bool for requires/ensures clause.
-    -   Output: Best-effort string representation of KAST term.
-    """
-    _LOGGER.debug(f'pretty_print_kast_bool: {kast}')
-    if type(kast) is KApply and kast.label.name in ['_andBool_', '_orBool_']:
-        clauses = [pretty_print_kast_bool(c, symbol_table) for c in flatten_label(kast.label.name, kast)]
-        head = kast.label.name.replace('_', ' ')
-        if head == ' orBool ':
-            head = '  orBool '
-        separator = ' ' * (len(head) - 7)
-        spacer = ' ' * len(head)
-
-        def join_sep(s: str) -> str:
-            return ('\n' + separator).join(s.split('\n'))
-
-        clauses = (
-            ['( ' + join_sep(clauses[0])]
-            + [head + '( ' + join_sep(c) for c in clauses[1:]]
-            + [spacer + (')' * len(clauses))]
-        )
-        return '\n'.join(clauses)
-    else:
-        return pretty_print_kast(kast, symbol_table)
-
-
 def paren(printer: Callable[..., str]) -> Callable[..., str]:
     return lambda *args: '( ' + printer(*args) + ' )'
-
-
-def applied_label_str(symbol: str) -> Callable[..., str]:
-    return lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )'
 
 
 def indent(text: str, size: int = 2) -> str:
@@ -564,3 +404,260 @@ def assoc_with_unit(assoc_join: str, unit: str) -> Callable[..., str]:
         return assoc_join.join(arg for arg in args if arg != unit)
 
     return _assoc_with_unit
+
+
+class PrettyPrinter:
+    symbol_table: SymbolTable
+
+    def __init__(self, symbol_table: SymbolTable):
+        self.symbol_table = symbol_table
+
+    def print(self, kast: KAst) -> str:
+        """Print out KAST terms/outer syntax.
+        -   Input: KAST term.
+        -   Output: Best-effort string representation of KAST term.
+        """
+        _LOGGER.debug(f'pretty_print_kast: {kast}')
+        match kast:
+            case KVariable():
+                return self._print_kvariable(kast)
+            case KSort():
+                return self._print_ksort(kast)
+            case KToken():
+                return self._print_ktoken(kast)
+            case KApply():
+                return self._print_kapply(kast)
+            case KAs():
+                return self._print_kas(kast)
+            case KRewrite():
+                return self._print_krewrite(kast)
+            case KSequence():
+                return self._print_ksequence(kast)
+            case KTerminal():
+                return self._print_kterminal(kast)
+            case KRegexTerminal():
+                return self._print_kregexterminal(kast)
+            case KNonTerminal():
+                return self._print_knonterminal(kast)
+            case KProduction():
+                return self._print_kproduction(kast)
+            case KSyntaxSort():
+                return self._print_ksyntaxsort(kast)
+            case KSortSynonym():
+                return self._print_ksortsynonym(kast)
+            case KSyntaxLexical():
+                return self._print_ksyntaxlexical(kast)
+            case KSyntaxAssociativity():
+                return self._print_ksyntaxassociativity(kast)
+            case KSyntaxPriority():
+                return self._print_ksyntaxpriority(kast)
+            case KBubble():
+                return self._print_kbubble(kast)
+            case KRule():
+                return self._print_krule(kast)
+            case KClaim():
+                return self._print_kclaim(kast)
+            case KContext():
+                return self._print_kcontext(kast)
+            case KAtt():
+                return self._print_katt(kast)
+            case KImport():
+                return self._print_kimport(kast)
+            case KFlatModule():
+                return self._print_kflatmodule(kast)
+            case KRequire():
+                return self._print_krequire(kast)
+            case KDefinition():
+                return self._print_kdefinition(kast)
+            case _:
+                raise AssertionError(f'Error unparsing: {kast}')
+
+    def _print_kvariable(self, kvariable: KVariable) -> str:
+        sort = kvariable.sort
+        if not sort:
+            return kvariable.name
+        return kvariable.name + ':' + self.print(sort)
+
+    def _print_ksort(self, ksort: KSort) -> str:
+        return ksort.name
+
+    def _print_ktoken(self, ktoken: KToken) -> str:
+        return ktoken.token
+
+    def _print_kapply(self, kapply: KApply) -> str:
+        label = kapply.label.name
+        args = kapply.args
+        unparsed_args = [self.print(arg) for arg in args]
+        if kapply.is_cell:
+            cell_contents = '\n'.join(unparsed_args).rstrip()
+            cell_str = label + '\n' + indent(cell_contents) + '\n</' + label[1:]
+            return cell_str.rstrip()
+        unparser = self._applied_label_str(label) if label not in self.symbol_table else self.symbol_table[label]
+        return unparser(*unparsed_args)
+
+    def _print_kas(self, kas: KAs) -> str:
+        pattern_str = self.print(kas.pattern)
+        alias_str = self.print(kas.alias)
+        return pattern_str + ' #as ' + alias_str
+
+    def _print_krewrite(self, krewrite: KRewrite) -> str:
+        lhs_str = self.print(krewrite.lhs)
+        rhs_str = self.print(krewrite.rhs)
+        return '( ' + lhs_str + ' => ' + rhs_str + ' )'
+
+    def _print_ksequence(self, ksequence: KSequence) -> str:
+        if ksequence.arity == 0:
+            return self.print(EMPTY_K)
+        if ksequence.arity == 1:
+            return self.print(ksequence.items[0])
+        unparsed_k_seq = '\n~> '.join([self.print(item) for item in ksequence.items[0:-1]])
+        if ksequence.items[-1] == DOTS:
+            unparsed_k_seq = unparsed_k_seq + '\n' + self.print(DOTS)
+        else:
+            unparsed_k_seq = unparsed_k_seq + '\n~> ' + self.print(ksequence.items[-1])
+        return unparsed_k_seq
+
+    def _print_kterminal(self, kterminal: KTerminal) -> str:
+        return '"' + kterminal.value + '"'
+
+    def _print_kregexterminal(self, kregexterminal: KRegexTerminal) -> str:
+        return 'r"' + kregexterminal.regex + '"'
+
+    def _print_knonterminal(self, knonterminal: KNonTerminal) -> str:
+        return self.print(knonterminal.sort)
+
+    def _print_kproduction(self, kproduction: KProduction) -> str:
+        if 'klabel' not in kproduction.att and kproduction.klabel:
+            kproduction = kproduction.update_atts({'klabel': kproduction.klabel.name})
+        syntax_str = 'syntax ' + self.print(kproduction.sort)
+        if kproduction.items:
+            syntax_str += ' ::= ' + ' '.join([self.print(pi) for pi in kproduction.items])
+        att_str = self.print(kproduction.att)
+        if att_str:
+            syntax_str += ' ' + att_str
+        return syntax_str
+
+    def _print_ksyntaxsort(self, ksyntaxsort: KSyntaxSort) -> str:
+        sort_str = self.print(ksyntaxsort.sort)
+        att_str = self.print(ksyntaxsort.att)
+        return 'syntax ' + sort_str + ' ' + att_str
+
+    def _print_ksortsynonym(self, ksortsynonym: KSortSynonym) -> str:
+        new_sort_str = self.print(ksortsynonym.new_sort)
+        old_sort_str = self.print(ksortsynonym.old_sort)
+        att_str = self.print(ksortsynonym.att)
+        return 'syntax ' + new_sort_str + ' = ' + old_sort_str + ' ' + att_str
+
+    def _print_ksyntaxlexical(self, ksyntaxlexical: KSyntaxLexical) -> str:
+        name_str = ksyntaxlexical.name
+        regex_str = ksyntaxlexical.regex
+        att_str = self.print(ksyntaxlexical.att)
+        # todo: proper escaping
+        return 'syntax lexical ' + name_str + ' = r"' + regex_str + '" ' + att_str
+
+    def _print_ksyntaxassociativity(self, ksyntaxassociativity: KSyntaxAssociativity) -> str:
+        assoc_str = ksyntaxassociativity.assoc.value
+        tags_str = ' '.join(ksyntaxassociativity.tags)
+        att_str = self.print(ksyntaxassociativity.att)
+        return 'syntax associativity ' + assoc_str + ' ' + tags_str + ' ' + att_str
+
+    def _print_ksyntaxpriority(self, ksyntaxpriority: KSyntaxPriority) -> str:
+        priorities_str = ' > '.join([' '.join(group) for group in ksyntaxpriority.priorities])
+        att_str = self.print(ksyntaxpriority.att)
+        return 'syntax priority ' + priorities_str + ' ' + att_str
+
+    def _print_kbubble(self, kbubble: KBubble) -> str:
+        body = '// KBubble(' + kbubble.sentence_type + ', ' + kbubble.content + ')'
+        att_str = self.print(kbubble.att)
+        return body + ' ' + att_str
+
+    def _print_krule(self, kterm: KRule) -> str:
+        body = '\n     '.join(self.print(kterm.body).split('\n'))
+        rule_str = 'rule '
+        if 'label' in kterm.att:
+            rule_str = rule_str + '[' + kterm.att['label'] + ']:'
+        rule_str = rule_str + ' ' + body
+        atts_str = self.print(kterm.att)
+        if kterm.requires != TRUE:
+            requires_str = 'requires ' + '\n  '.join(self._print_kast_bool(kterm.requires).split('\n'))
+            rule_str = rule_str + '\n  ' + requires_str
+        if kterm.ensures != TRUE:
+            ensures_str = 'ensures ' + '\n  '.join(self._print_kast_bool(kterm.ensures).split('\n'))
+            rule_str = rule_str + '\n   ' + ensures_str
+        return rule_str + '\n  ' + atts_str
+
+    def _print_kclaim(self, kterm: KClaim) -> str:
+        body = '\n     '.join(self.print(kterm.body).split('\n'))
+        rule_str = 'claim '
+        if 'label' in kterm.att:
+            rule_str = rule_str + '[' + kterm.att['label'] + ']:'
+        rule_str = rule_str + ' ' + body
+        atts_str = self.print(kterm.att)
+        if kterm.requires != TRUE:
+            requires_str = 'requires ' + '\n  '.join(self._print_kast_bool(kterm.requires).split('\n'))
+            rule_str = rule_str + '\n  ' + requires_str
+        if kterm.ensures != TRUE:
+            ensures_str = 'ensures ' + '\n  '.join(self._print_kast_bool(kterm.ensures).split('\n'))
+            rule_str = rule_str + '\n   ' + ensures_str
+        return rule_str + '\n  ' + atts_str
+
+    def _print_kcontext(self, kcontext: KContext) -> str:
+        body = indent(self.print(kcontext.body))
+        context_str = 'context alias ' + body
+        requires_str = ''
+        atts_str = self.print(kcontext.att)
+        if kcontext.requires != TRUE:
+            requires_str = self.print(kcontext.requires)
+            requires_str = 'requires ' + indent(requires_str)
+        return context_str + '\n  ' + requires_str + '\n  ' + atts_str
+
+    def _print_katt(self, katt: KAtt) -> str:
+        return katt.pretty
+
+    def _print_kimport(self, kimport: KImport) -> str:
+        return ' '.join(['imports', ('public' if kimport.public else 'private'), kimport.name])
+
+    def _print_kflatmodule(self, kflatmodule: KFlatModule) -> str:
+        name = kflatmodule.name
+        imports = '\n'.join([self.print(kimport) for kimport in kflatmodule.imports])
+        sentences = '\n\n'.join([self.print(sentence) for sentence in kflatmodule.sentences])
+        contents = imports + '\n\n' + sentences
+        return 'module ' + name + '\n    ' + '\n    '.join(contents.split('\n')) + '\n\nendmodule'
+
+    def _print_krequire(self, krequire: KRequire) -> str:
+        return 'requires "' + krequire.require + '"'
+
+    def _print_kdefinition(self, kdefinition: KDefinition) -> str:
+        requires = '\n'.join([self.print(require) for require in kdefinition.requires])
+        modules = '\n\n'.join([self.print(module) for module in kdefinition.all_modules])
+        return requires + '\n\n' + modules
+
+    def _print_kast_bool(self, kast: KAst) -> str:
+        """Print out KAST requires/ensures clause.
+
+        -   Input: KAST Bool for requires/ensures clause.
+        -   Output: Best-effort string representation of KAST term.
+        """
+        _LOGGER.debug(f'_print_kast_bool: {kast}')
+        if type(kast) is KApply and kast.label.name in ['_andBool_', '_orBool_']:
+            clauses = [self._print_kast_bool(c) for c in flatten_label(kast.label.name, kast)]
+            head = kast.label.name.replace('_', ' ')
+            if head == ' orBool ':
+                head = '  orBool '
+            separator = ' ' * (len(head) - 7)
+            spacer = ' ' * len(head)
+
+            def join_sep(s: str) -> str:
+                return ('\n' + separator).join(s.split('\n'))
+
+            clauses = (
+                ['( ' + join_sep(clauses[0])]
+                + [head + '( ' + join_sep(c) for c in clauses[1:]]
+                + [spacer + (')' * len(clauses))]
+            )
+            return '\n'.join(clauses)
+        else:
+            return self.print(kast)
+
+    def _applied_label_str(self, symbol: str) -> Callable[..., str]:
+        return lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )'
