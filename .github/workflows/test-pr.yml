@@ -143,6 +143,7 @@ jobs:
 
       - name: 'Push Maven Packages'
         shell: bash {0}
+        run: |
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
