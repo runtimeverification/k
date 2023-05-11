@@ -82,7 +82,6 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -91,18 +90,7 @@ jobs:
           version=$(cat package/version)
           cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
-
-      - name: Set up Java for publishing to GitHub Maven Packages
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-          overwrite-settings: true
-          server-id: runtime.verification
-          server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 'Build, Test, Push Dockerhub Image, Push Mvn Packages'
+      - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -118,12 +106,6 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'apt-get install --yes maven'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
-          docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:/tmp/settings.xml
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
-
       - name: 'Clean up Docker Container'
         if: always()
         run: |
@@ -144,7 +126,6 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_focal.deb
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -189,7 +170,6 @@ jobs:
           pkg-name: kframework_amd64_debian_bullseye.deb
           build-package: package/debian/build-package bullseye
           test-package: package/debian/test-package
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -214,7 +194,6 @@ jobs:
           build-package: package/arch/build-package
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
