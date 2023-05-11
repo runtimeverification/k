@@ -436,6 +436,7 @@ class KCFGShow:
             _LOGGER.info(f'Wrote DOT file {cfgid}: {dot_file}')
 
         nodes_dir = dump_dir / 'nodes'
+        ensure_dir_path(nodes_dir)
         for node in cfg.nodes:
             node_file = nodes_dir / f'config_{node.id}.txt'
             node_minimized_file = nodes_dir / f'config_minimized_{node.id}.txt'
@@ -455,6 +456,7 @@ class KCFGShow:
                 _LOGGER.info(f'Wrote node file {cfgid}: {node_constraint_file}')
 
         edges_dir = dump_dir / 'edges'
+        ensure_dir_path(edges_dir)
         for edge in cfg.edges():
             edge_file = edges_dir / f'config_{edge.source.id}_{edge.target.id}.txt'
             edge_minimized_file = edges_dir / f'config_minimized_{edge.source.id}_{edge.target.id}.txt'
@@ -469,6 +471,7 @@ class KCFGShow:
                 _LOGGER.info(f'Wrote edge file {cfgid}: {edge_minimized_file}')
 
         covers_dir = dump_dir / 'covers'
+        ensure_dir_path(covers_dir)
         for cover in cfg.covers():
             cover_file = covers_dir / f'config_{cover.source.id}_{cover.target.id}.txt'
             cover_constraint_file = covers_dir / f'constraint_{cover.source.id}_{cover.target.id}.txt'
