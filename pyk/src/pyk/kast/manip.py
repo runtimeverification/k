@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
     from typing import Any, Final, TypeVar
 
-    from .inner import KInner
+    from .inner import KInner, KSort
 
     KI = TypeVar('KI', bound=KInner)
     W = TypeVar('W', bound=WithKAtt)
@@ -553,10 +553,12 @@ def remove_constraints_for(var_names: Collection[str], constrained_term: KInner)
     return mlAnd([state, constraint])
 
 
-def abstract_term_safely(kast: KInner, base_name: str = 'V', existing_var_names: set[str] | None = None) -> KVariable:
+def abstract_term_safely(
+    kast: KInner, base_name: str = 'V', sort: KSort | None = None, existing_var_names: set[str] | None = None
+) -> KVariable:
     def _abstract(k: KInner) -> KVariable:
         vname = hash_str(k)[0:8]
-        return KVariable(base_name + '_' + vname)
+        return KVariable(base_name + '_' + vname, sort=sort)
 
     new_var = _abstract(kast)
     if existing_var_names is not None:
@@ -688,7 +690,7 @@ def rename_generated_vars(term: KInner) -> KInner:
             if not cell_stack:
                 return k
             cell_name = cell_stack[-1]
-            new_var = abstract_term_safely(k, base_name=cell_name, existing_var_names=vars)
+            new_var = abstract_term_safely(k, base_name=cell_name, sort=k.sort, existing_var_names=vars)
             vars.add(new_var.name)
             return new_var
 
