@@ -1,11 +1,16 @@
-ARG K_DISTRO=focal
+ARG K_DISTRO=jammy
 ARG K_VERSION
 FROM runtimeverificationinc/kframework-k:ubuntu-${K_DISTRO}-${K_VERSION}
 
-RUN    apt-get update     \
-    && apt-get install -y \
-         curl             \
-         graphviz
+ARG PYTHON_VERSION=3.10
+
+RUN    apt-get -y update           \
+    && apt-get -y install          \
+         curl                      \
+         graphviz                  \
+         python$PYTHON_VERSION     \
+         python$PYTHON_VERSION-dev \
+    && apt-get -y clean
 
 RUN    curl -sSL https://install.python-poetry.org | POETRY_HOME=/usr python3 - \
     && poetry --version
