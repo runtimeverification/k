@@ -129,7 +129,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
           overwrite-settings: true
-          server-id: runtime.verification
+          server-id: runtime.verification.snapshots
           server-username: rv-jenkins
           server-password: ${{ secrets.JENKINS_GITHUB_PAT }}
 
