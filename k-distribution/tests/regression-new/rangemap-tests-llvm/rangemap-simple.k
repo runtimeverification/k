@@ -1,7 +1,7 @@
 requires "domains.md"
 requires "json.md"
 
-module TEST-SYNTAX
+module RANGEMAP-SIMPLE-SYNTAX
   imports COLLECTIONS
   imports RANGEMAP
   imports INT
@@ -26,8 +26,8 @@ module TEST-SYNTAX
   rule rangemap(10) => range(1, 3) r|-> 45 range(4, 6) r|-> 50 range(8, 9) r|-> 40 range(12, 15) r|-> 45
 endmodule
 
-module TEST
-  imports TEST-SYNTAX
+module RANGEMAP-SIMPLE
+  imports RANGEMAP-SIMPLE-SYNTAX
 
   configuration <k> $PGM:KItem </k>
 endmodule
