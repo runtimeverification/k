@@ -42,9 +42,6 @@ public class ProcessGroupAttributes {
         for (Att.Key group : newGroups) {
             att = att.remove(Att.unsafeRawKey(group.key())).add(group);
         }
-        if (!att.rawKeys().isEmpty()) {
-            throw new AssertionError("Raw keys!");
-        }
         return att;
     }
 
