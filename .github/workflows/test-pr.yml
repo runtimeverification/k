@@ -130,8 +130,8 @@ jobs:
           distribution: 'adopt'
           overwrite-settings: true
           server-id: runtime.verification
-          server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-username: rv-jenkins
+          server-password: ${{ secrets.JENKINS_GITHUB_PAT }}
 
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
