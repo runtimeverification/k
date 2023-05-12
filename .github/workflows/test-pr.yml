@@ -131,7 +131,7 @@ jobs:
           overwrite-settings: true
           server-id: runtime.verification.snapshots
           server-username: JENKINS_USERNAME
-          server-password: JENKINS_GITHUB_PAT
+          server-password: RV_JENKINS_DEPLOY_TOKEN
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
@@ -144,7 +144,7 @@ jobs:
         shell: bash {0}
         run: |
           echo "JENKINS_USERNAME=rv-jenkins" > rv-jenkins.env
-          echo "JENKINS_GITHUB_PAT=$JENKINS_GITHUB_PAT" >> rv-jenkins.env
+          echo "RV_JENKINS_DEPLOY_TOKEN=$RV_JENKINS_DEPLOY_TOKEN" >> rv-jenkins.env
           cat ~/.m2/settings.xml
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
