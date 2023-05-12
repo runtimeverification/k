@@ -60,12 +60,12 @@
     <repository>
       <id>runtime.verification</id>
       <name>Runtime Verification Repository</name>
-      <url>s3://runtimeverificationmaven/internal</url>
+      <url>https://maven.pkg.github.com/runtimeverification/rv-maven-public-release</url>
     </repository>
     <snapshotRepository>
       <id>runtime.verification.snapshots</id>
       <name>Runtime Verification Snapshot Repository</name>
-      <url>https://maven.pkg.github.com/runtimeverification/test-maven-deployment</url>
+      <url>https://maven.pkg.github.com/runtimeverification/rv-maven-public</url>
     </snapshotRepository>
   </distributionManagement>
 
