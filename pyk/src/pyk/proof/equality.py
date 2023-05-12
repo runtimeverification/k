@@ -4,10 +4,12 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from ..kast.inner import KApply, KInner, KSort
+from ..cterm import CSubst, CTerm
+from ..kast.inner import KApply, KInner, KSort, Subst
 from ..kast.manip import extract_lhs, extract_rhs, flatten_label
+from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, TRUE
-from ..prelude.ml import is_top, mlAnd, mlEquals
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals
 from ..utils import hash_str
 from .proof import Proof, ProofStatus
 
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KClaim, KDefinition
     from ..kcfg import KCFGExplore
+    from ..ktool.kprint import KPrint
 
     T = TypeVar('T', bound='Proof')
 
@@ -28,9 +31,8 @@ class EqualityProof(Proof):
     lhs_body: KInner
     rhs_body: KInner
     sort: KSort
-    lhs_constraints: tuple[KInner, ...]
-    rhs_constraints: tuple[KInner, ...]
-    simplified_equality: KInner | None
+    constraints: tuple[KInner, ...]
+    csubst: CSubst | None
 
     def __init__(
         self,
@@ -38,8 +40,9 @@ class EqualityProof(Proof):
         lhs_body: KInner,
         rhs_body: KInner,
         sort: KSort,
-        lhs_constraints: Iterable[KInner] = (),
-        rhs_constraints: Iterable[KInner] = (),
+        constraints: Iterable[KInner] = (),
+        csubst: CSubst | None = None,
+        simplified_constraints: KInner | None = None,
         simplified_equality: KInner | None = None,
         proof_dir: Path | None = None,
     ):
@@ -47,35 +50,39 @@ class EqualityProof(Proof):
         self.lhs_body = lhs_body
         self.rhs_body = rhs_body
         self.sort = sort
-        self.lhs_constraints = tuple(lhs_constraints)
-        self.rhs_constraints = tuple(rhs_constraints)
+        self.constraints = tuple(constraints)
+        self.csubst = csubst
+        self.simplified_constraints = simplified_constraints
         self.simplified_equality = simplified_equality
 
     @staticmethod
     def from_claim(claim: KClaim, defn: KDefinition) -> EqualityProof:
         lhs_body = extract_lhs(claim.body)
         rhs_body = extract_rhs(claim.body)
+        if not (claim.ensures is None or claim.ensures == TRUE):
+            raise ValueError(f'Cannot convert claim to EqualityProof due to non-trival ensures clause {claim.ensures}')
         assert type(lhs_body) is KApply
         sort = defn.return_sort(lhs_body.label)
-        lhs_constraints = flatten_label('_andBool_', claim.requires)
-        rhs_constraints = flatten_label('_andBool_', claim.ensures)
-        return EqualityProof(
-            claim.label, lhs_body, rhs_body, sort, lhs_constraints=lhs_constraints, rhs_constraints=rhs_constraints
-        )
+        constraints = [mlEquals(TRUE, c, arg_sort=BOOL) for c in flatten_label('_andBool_', claim.requires)]
+        return EqualityProof(claim.label, lhs_body, rhs_body, sort, constraints=constraints)
 
     @property
     def equality(self) -> KInner:
-        lhs_ml_constraints: list[KInner] = [
-            mlEquals(TRUE, c, arg_sort=BOOL, sort=self.sort) for c in self.lhs_constraints
-        ]
-        rhs_ml_constraints: list[KInner] = [
-            mlEquals(TRUE, c, arg_sort=BOOL, sort=self.sort) for c in self.rhs_constraints
-        ]
-        lhs = mlAnd([self.lhs_body] + lhs_ml_constraints, sort=self.sort)
-        rhs = mlAnd([self.rhs_body] + rhs_ml_constraints, sort=self.sort)
-        return mlEquals(lhs, rhs, arg_sort=self.sort, sort=self.sort)
+        return mlEquals(self.lhs_body, self.rhs_body, arg_sort=self.sort, sort=GENERATED_TOP_CELL)
 
-    def set_simplified(self, simplified: KInner) -> None:
+    def add_constraint(self, new_constraint: KInner) -> None:
+        self.constraints = (*self.constraints, new_constraint)
+
+    def set_satisfiable(self, satisfiable: bool) -> None:
+        self.satisfiable = satisfiable
+
+    def set_csubst(self, csubst: CSubst) -> None:
+        self.csubst = csubst
+
+    def set_simplified_constraints(self, simplified: KInner) -> None:
+        self.simplified_constraints = simplified
+
+    def set_simplified_equality(self, simplified: KInner) -> None:
         self.simplified_equality = simplified
 
     @staticmethod
@@ -89,12 +96,12 @@ class EqualityProof(Proof):
 
     @property
     def status(self) -> ProofStatus:
-        if self.simplified_equality is None:
+        if self.simplified_constraints is None or self.simplified_equality is None:
             return ProofStatus.PENDING
-        elif is_top(self.simplified_equality):
-            return ProofStatus.PASSED
-        else:
+        elif self.csubst is None:
             return ProofStatus.FAILED
+        else:
+            return ProofStatus.PASSED
 
     @classmethod
     def from_dict(cls: type[EqualityProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> EqualityProof:
@@ -102,16 +109,20 @@ class EqualityProof(Proof):
         lhs_body = KInner.from_dict(dct['lhs_body'])
         rhs_body = KInner.from_dict(dct['rhs_body'])
         sort = KSort.from_dict(dct['sort'])
-        lhs_constraints = [KInner.from_dict(c) for c in dct['lhs_constraints']]
-        rhs_constraints = [KInner.from_dict(c) for c in dct['rhs_constraints']]
+        constraints = [KInner.from_dict(c) for c in dct['constraints']]
+        simplified_constraints = (
+            KInner.from_dict(dct['simplified_constraints']) if 'simplified_constraints' in dct else None
+        )
         simplified_equality = KInner.from_dict(dct['simplified_equality']) if 'simplified_equality' in dct else None
+        csubst = CSubst.from_dict(dct['csubst']) if 'csubst' in dct else None
         return EqualityProof(
             id,
             lhs_body,
             rhs_body,
             sort,
-            lhs_constraints=lhs_constraints,
-            rhs_constraints=rhs_constraints,
+            constraints=constraints,
+            csubst=csubst,
+            simplified_constraints=simplified_constraints,
             simplified_equality=simplified_equality,
             proof_dir=proof_dir,
         )
@@ -124,18 +135,37 @@ class EqualityProof(Proof):
             'lhs_body': self.lhs_body.to_dict(),
             'rhs_body': self.rhs_body.to_dict(),
             'sort': self.sort.to_dict(),
-            'lhs_constraints': [c.to_dict() for c in self.lhs_constraints],
-            'rhs_constraints': [c.to_dict() for c in self.rhs_constraints],
+            'constraints': [c.to_dict() for c in self.constraints],
         }
+        if self.simplified_constraints is not None:
+            dct['simplified_constraints'] = self.simplified_constraints.to_dict()
         if self.simplified_equality is not None:
             dct['simplified_equality'] = self.simplified_equality.to_dict()
+        if self.csubst is not None:
+            dct['csubst'] = self.csubst.to_dict()
         return dct
+
+    def pretty(self, kprint: KPrint) -> Iterable[str]:
+        lines = [
+            f'LHS: {kprint.pretty_print(self.lhs_body)}',
+            f'RHS: {kprint.pretty_print(self.rhs_body)}',
+            f'Constraints: {kprint.pretty_print(mlAnd(self.constraints))}',
+            f'Equality: {kprint.pretty_print(self.equality)}',
+        ]
+        if self.simplified_constraints:
+            lines.append(f'Simplified constraints: {kprint.pretty_print(self.simplified_constraints)}')
+        if self.simplified_equality:
+            lines.append(f'Simplified equality: {kprint.pretty_print(self.simplified_equality)}')
+        if self.csubst is not None:
+            lines.append(f'Implication csubst: {self.csubst}')
+        lines.append(f'Status: {self.status}')
+        return lines
 
     @property
     def summary(self) -> Iterable[str]:
         return [
             f'EqualityProof: {self.id}',
-            f'    status: {self.status}',
+            f'  status: {self.status}',
         ]
 
 
@@ -146,13 +176,53 @@ class EqualityProver:
         self.proof = proof
 
     def advance_proof(self, kcfg_explore: KCFGExplore) -> None:
-        if not self.proof.status == ProofStatus.PENDING:
+        if self.proof.status is not ProofStatus.PENDING:
             return
 
-        kore = kcfg_explore.kprint.kast_to_kore(self.proof.equality)
-        _, kore_client = kcfg_explore._kore_rpc
-        kore_simplified, _logs = kore_client.simplify(kore)
-        kast_simplified = kcfg_explore.kprint.kore_to_kast(kore_simplified)
-        self.proof.set_simplified(kast_simplified)
+        # to prove the equality, we check the implication of the form `constraints #Implies LHS #Equals RHS`, i.e.
+        # "LHS equals RHS under these constraints"
+        antecedent_kast = mlAnd(self.proof.constraints)
+        consequent_kast = self.proof.equality
 
+        _, kore_client = kcfg_explore._kore_rpc
+
+        _LOGGER.info(f'Attempting EqualityProof {self.proof.id}')
+
+        proof_passed_trivially = False
+        # first, simplify the antecedent to make sure it is not #Bottom
+        antecedent_simplified_kore, _ = kore_client.simplify(kcfg_explore.kprint.kast_to_kore(antecedent_kast))
+        antecedent_simplified_kast = kcfg_explore.kprint.kore_to_kast(antecedent_simplified_kore)
+        _LOGGER.info(f'Simplified antecedent: {kcfg_explore.kprint.pretty_print(antecedent_simplified_kast)}')
+        self.proof.set_simplified_constraints(antecedent_simplified_kast)
+        if is_bottom(antecedent_simplified_kast):
+            _LOGGER.warning(
+                'Antecedent of implication (proof constraints) simplifies to #Bottom. The proof holds trivially, the implication will not be checked.'
+            )
+            proof_passed_trivially = True
+            self.proof.set_csubst(CSubst(Subst({}), ()))
+
+        # second, simplify the consequent
+        consequent_simplified_kore, _ = kore_client.simplify(kcfg_explore.kprint.kast_to_kore(consequent_kast))
+        consequent_simplified_kast = kcfg_explore.kprint.kore_to_kast(consequent_simplified_kore)
+        _LOGGER.info(f'Simplified consequent: {kcfg_explore.kprint.pretty_print(consequent_simplified_kast)}')
+        self.proof.set_simplified_equality(consequent_simplified_kast)
+        if is_top(consequent_simplified_kast):
+            _LOGGER.warning(
+                'Consequent of implication (proof equality) simplifies to #Top. The proof holds trivially, the implication will not be checked.'
+            )
+            proof_passed_trivially = True
+            self.proof.set_csubst(CSubst(Subst({}), ()))
+
+        if not proof_passed_trivially:
+            # third, check implication from antecedent to consequent
+            # TODO: we should not be forced to include the dummy configuration in the antecedent and consequent
+            dummy_config = kcfg_explore.kprint.definition.empty_config(sort=GENERATED_TOP_CELL)
+            result = kcfg_explore.cterm_implies(
+                antecedent=CTerm(config=dummy_config, constraints=[antecedent_kast]),
+                consequent=CTerm(config=dummy_config, constraints=[consequent_kast]),
+            )
+            if result is None:
+                _LOGGER.warning('cterm_implies returned None, the implication is unsatisfiable')
+            else:
+                self.proof.set_csubst(result)
         self.proof.write_proof()
