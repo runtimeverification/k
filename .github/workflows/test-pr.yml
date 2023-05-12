@@ -130,9 +130,8 @@ jobs:
           distribution: 'adopt'
           overwrite-settings: true
           server-id: runtime.verification.snapshots
-          server-username: rv-jenkins
-          server-password: ${{ secrets.JENKINS_GITHUB_PAT }}
-
+          server-username: JENKINS_USERNAME
+          server-password: JENKINS_GITHUB_PAT
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
@@ -144,10 +143,12 @@ jobs:
       - name: 'Push Maven Packages'
         shell: bash {0}
         run: |
+          echo "JENKINS_USERNAME=rv-jenkins" > rv-jenkins.env
+          echo "JENKINS_GITHUB_PAT=$JENKINS_GITHUB_PAT" >> rv-jenkins.env
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+          docker exec --env-file rv-jenkins.env -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Tear down Docker'
         if: always()
