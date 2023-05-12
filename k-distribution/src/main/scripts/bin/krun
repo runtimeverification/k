@@ -122,6 +122,8 @@ $KRUN options:
                                      Haskell backend
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
+      --execute-to-branch  Execute until the proof branches. Specific to LLVM
+                           backend.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -160,8 +162,6 @@ $KRUN options:
                            execution.
       --statistics         Print number of steps executed. Currently only
                            supported on LLVM backend.
-      --execute-to-branch  Execute until the proof branches. Specific to LLVM
-                           backend.
       --term               Use the value that would otherwise be considered the
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
