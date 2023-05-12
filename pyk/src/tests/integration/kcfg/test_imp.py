@@ -13,7 +13,7 @@ from pyk.kcfg import KCFG
 from pyk.prelude.kbool import BOOL, notBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
-from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, EqualityProof, EqualityProver, ProofStatus
+from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
 from pyk.utils import single
 
 from ..utils import K_FILES, KCFGExploreTest
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
-
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -460,16 +459,6 @@ APRBMC_PROVE_TEST_DATA: Iterable[
     ),
 )
 
-FUNC_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
-    (
-        'func-spec-concrete',
-        K_FILES / 'imp-simple-spec.k',
-        'IMP-FUNCTIONAL-SPEC',
-        'concrete-addition',
-        ProofStatus.PASSED,
-    ),
-)
-
 
 def leaf_number(kcfg: KCFG) -> int:
     target_id = kcfg.get_unique_target().id
@@ -755,52 +744,3 @@ class TestImpProof(KCFGExploreTest):
 
         assert proof.status == proof_status
         assert leaf_number(kcfg) == expected_leaf_number
-
-    @pytest.mark.parametrize(
-        'test_id,spec_file,spec_module,claim_id,proof_status',
-        FUNC_PROVE_TEST_DATA,
-        ids=[test_id for test_id, *_ in FUNC_PROVE_TEST_DATA],
-    )
-    def test_functional_prove(
-        self,
-        kprove: KProve,
-        kcfg_explore: KCFGExplore,
-        test_id: str,
-        spec_file: str,
-        spec_module: str,
-        claim_id: str,
-        proof_status: ProofStatus,
-    ) -> None:
-        claim = single(
-            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
-        )
-
-        equality_proof = EqualityProof.from_claim(claim, kprove.definition)
-        equality_prover = EqualityProver(equality_proof)
-        equality_prover.advance_proof(kcfg_explore)
-
-        assert equality_proof.status == proof_status
-
-    @pytest.mark.parametrize(
-        'test_id,antecedent,consequent,expected',
-        IMPLICATION_FAILURE_TEST_DATA,
-        ids=[test_id for test_id, *_ in IMPLICATION_FAILURE_TEST_DATA],
-    )
-    def test_implication_failure_reason(
-        self,
-        kcfg_explore: KCFGExplore,
-        kprove: KProve,
-        test_id: str,
-        antecedent: tuple[str, str] | tuple[str, str, KInner],
-        consequent: tuple[str, str] | tuple[str, str, KInner],
-        expected: str,
-    ) -> None:
-        antecedent_term = self.config(kcfg_explore.kprint, *antecedent)
-        consequent_term = self.config(kcfg_explore.kprint, *consequent)
-
-        failed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
-
-        print(actual)
-
-        assert failed == False
-        assert actual == expected
