@@ -130,8 +130,8 @@ jobs:
           distribution: 'adopt'
           overwrite-settings: true
           server-id: runtime.verification.snapshots
-          server-username: JENKINS_USERNAME
-          server-password: RV_JENKINS_DEPLOY_TOKEN
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
@@ -142,9 +142,11 @@ jobs:
 
       - name: 'Push Maven Packages'
         shell: bash {0}
+        env:
+          MAVEN_PASSWORD: ${{ secrets.RV_JENKINS_DEPLOY_TOKEN }}
         run: |
-          echo "JENKINS_USERNAME=rv-jenkins" > rv-jenkins.env
-          echo "RV_JENKINS_DEPLOY_TOKEN=$RV_JENKINS_DEPLOY_TOKEN" >> rv-jenkins.env
+          echo "MAVEN_USERNAME=rv-jenkins" > rv-jenkins.env
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> rv-jenkins.env
           cat ~/.m2/settings.xml
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
