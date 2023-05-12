@@ -122,8 +122,7 @@ $KRUN options:
                                      Haskell backend
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
-      --execute-to-branch  Execute until the proof branches. Specific to LLVM
-                           backend.
+      --execute-to-branch  Execute until the proof branches.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -619,6 +618,9 @@ elif [ "$backendName" = "haskell" ] ; then
   fi
   if [ -n "$smt" ]; then
     koreExecFlags="$koreExecFlags --smt $smt"
+  fi
+    if $executeToBranch; then
+    koreExecFlags="$koreExecFlags --execute-to-branch"
   fi
   if $search || [ -n "$pattern" ]; then
     patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
