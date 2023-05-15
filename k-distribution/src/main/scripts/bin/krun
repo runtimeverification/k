@@ -122,7 +122,9 @@ $KRUN options:
                                      Haskell backend
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
-      --execute-to-branch  Execute until the proof branches.
+      --execute-to-branch  Execute until a non-deterministic state is reached, then exit.
+                           Requires the --enable-search option to have been passed to kompile
+                           on the LLVM backend.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
