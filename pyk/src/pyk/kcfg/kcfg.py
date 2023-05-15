@@ -529,6 +529,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         if len(list(self.successors(source_id))) > 0:
             raise ValueError(f'Node already has successors: {source_id} -> {self.successors(source_id)}')
 
+    def _check_no_zero_loops(self, source_id: str, target_ids: Iterable[str]) -> None:
+        for target_id in target_ids:
+            path = self.shortest_path_between(target_id, source_id)
+            if path is not None and path_length(path) == 0:
+                raise ValueError(
+                    f'Adding successor would create zero-length loop with backedge: {source_id} -> {target_id}'
+                )
+
     def edge(self, source_id: str, target_id: str) -> Edge | None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
@@ -553,6 +561,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     def create_edge(self, source_id: str, target_id: str, depth: int) -> Edge:
         self._check_no_successors(source_id)
+        self._check_no_zero_loops(source_id, [target_id])
 
         if depth <= 0:
             raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {depth}')
@@ -603,6 +612,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     def create_cover(self, source_id: str, target_id: str, csubst: CSubst | None = None) -> Cover:
         self._check_no_successors(source_id)
+        self._check_no_zero_loops(source_id, [target_id])
 
         source = self.node(source_id)
         target = self.node(target_id)
@@ -659,9 +669,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return split in self._splits
 
     def create_split(self, source_id: str, splits: Iterable[tuple[str, CSubst]]) -> None:
-        self._check_no_successors(source_id)
-
         splits = list(splits)
+        self._check_no_successors(source_id)
+        self._check_no_zero_loops(source_id, [id for id, _ in splits])
 
         if len(splits) <= 1:
             raise ValueError(f'Cannot create split node with less than 2 targets: {source_id} -> {splits}')
@@ -681,9 +691,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return ndbranch in self._ndbranches
 
     def create_ndbranch(self, source_id: str, ndbranches: Iterable[str]) -> None:
-        self._check_no_successors(source_id)
-
         ndbranches = list(ndbranches)
+        self._check_no_successors(source_id)
+        self._check_no_zero_loops(source_id, ndbranches)
 
         if len(ndbranches) <= 1:
             raise ValueError(
@@ -817,7 +827,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     def shortest_path_between(self, source_node_id: str, target_node_id: str) -> tuple[Successor, ...] | None:
         paths = self.paths_between(source_node_id, target_node_id)
-        return sorted(paths, key=(lambda path: len(path)))[0]
+        if len(paths) == 0:
+            return None
+        return sorted(paths, key=(lambda path: path_length(path)))[0]
 
     def path_constraints(self, final_node_id: str) -> KInner:
         path = self.shortest_path_between(self.get_unique_init().id, final_node_id)
@@ -917,3 +929,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 worklist.extend(succ.source for succ in self.predecessors(target_id=node.id, covers=traverse_covers))
 
         return visited
+
+
+def path_length(_path: Iterable[KCFG.Successor]) -> int:
+    _path = tuple(_path)
+    if len(_path) == 0:
+        return 0
+    if type(_path[0]) is KCFG.Split or type(_path[0]) is KCFG.Cover:
+        return path_length(_path[1:])
+    elif type(_path[0]) is KCFG.NDBranch:
+        return 1 + path_length(_path[1:])
+    elif type(_path[0]) is KCFG.Edge:
+        return _path[0].depth + path_length(_path[1:])
+    raise ValueError(f'Cannot handle Successor type: {type(_path[0])}')
