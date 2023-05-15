@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * <p>
  * <pre>
  *     .depend:
- *             kdep definition.k -d "directory" -I includes > .depend
+ *             kdep definition.k --output-directory "kompiled directory" -I includes > .depend
  *
  *     include .depend
  * </pre>
