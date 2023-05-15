@@ -51,7 +51,10 @@ class TestEmitJsonSpec(KProveTest):
     def test_prove(self, kprove: KProve, spec_module: KFlatModule) -> None:
         # Given
         spec_name = 'looping-2-spec'
+
+        assert kprove.use_directory is not None
         spec_file = kprove.use_directory / f'{spec_name}.k'
+
         spec_module_name = spec_name.upper()
         include_dir = Path(self.KOMPILE_MAIN_FILE).parent
 
