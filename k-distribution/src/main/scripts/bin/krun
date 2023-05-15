@@ -113,7 +113,7 @@ $KRUN options:
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
-  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR.
       --dry-run            Do not execute backend, but instead print the
                            command that would be executed to stdout.
@@ -228,6 +228,7 @@ do
       ;;
 
       -d|--directory)
+      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
       dir="$2"
       shift
       ;;
@@ -444,7 +445,7 @@ else
 fi
 
 if ! $hasKompiledDir; then
-  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --definition to specify one.'
 fi
 
 # Process configuration variables
