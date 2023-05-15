@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable
+from contextlib import contextmanager
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from subprocess import CalledProcessError
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
@@ -42,8 +43,9 @@ from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Iterator
     from subprocess import CompletedProcess
+    from tempfile import _TemporaryFileWrapper
     from typing import Any, Final
 
     from ..cli_utils import BugReport
@@ -184,12 +186,10 @@ def _build_arg_list(
 
 class KPrint:
     definition_dir: Path
-    use_directory: Path
+    use_directory: Path | None
     main_module: str
     backend: str
     _extra_unparsing_modules: Iterable[KFlatModule]
-
-    _temp_dir: TemporaryDirectory | None = None
 
     _bug_report: BugReport | None
 
@@ -200,13 +200,12 @@ class KPrint:
         bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
     ) -> None:
-        self.definition_dir = Path(definition_dir)
+        self.definition_dir = definition_dir
+
         if use_directory:
-            self.use_directory = use_directory
-        else:
-            self._temp_dir = TemporaryDirectory()
-            self.use_directory = Path(self._temp_dir.name)
-        check_dir_path(self.use_directory)
+            check_dir_path(use_directory)
+
+        self.use_directory = use_directory
         self._definition = None
         self._symbol_table = None
         with open(self.definition_dir / 'mainModule.txt') as mm:
@@ -218,9 +217,16 @@ class KPrint:
         if self._bug_report:
             self._bug_report.add_definition(self.definition_dir)
 
-    def __del__(self) -> None:
-        if self._temp_dir is not None:
-            self._temp_dir.cleanup()
+    @contextmanager
+    def _temp_file(self, suffix: str | None = None) -> Iterator[_TemporaryFileWrapper]:
+        with NamedTemporaryFile(
+            'w',
+            dir=self.use_directory,
+            delete=not self.use_directory,
+            suffix=suffix,
+        ) as ntf:
+            _LOGGER.info(f'Created temporary file: {ntf.name}')
+            yield ntf
 
     @cached_property
     def definition(self) -> KDefinition:
@@ -331,18 +337,21 @@ class KPrint:
                 sort=sort,
                 check=check,
             )
-        file_path = self.use_directory / 'kast.input'
-        file_path.write_text(expression)
-        return _kast(
-            file_path,
-            command=command,
-            definition_dir=self.definition_dir,
-            input=input,
-            output=output,
-            module=module,
-            sort=sort,
-            check=check,
-        )
+
+        with self._temp_file() as ntf:
+            ntf.write(expression)
+            ntf.flush()
+
+            return _kast(
+                ntf.name,
+                command=command,
+                definition_dir=self.definition_dir,
+                input=input,
+                output=output,
+                module=module,
+                sort=sort,
+                check=check,
+            )
 
 
 def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:

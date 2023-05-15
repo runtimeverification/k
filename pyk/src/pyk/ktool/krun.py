@@ -5,7 +5,6 @@ import logging
 from enum import Enum
 from pathlib import Path
 from subprocess import CalledProcessError
-from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
@@ -62,7 +61,7 @@ class KRun(KPrint):
             raise ValueError('Cannot supply both pgm and config with PGM variable.')
         pmap = {k: 'cat' for k in config} if config is not None else None
         cmap = {k: self.kast_to_kore(v).text for k, v in config.items()} if config is not None else None
-        with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
+        with self._temp_file() as ntf:
             ntf.write(self.pretty_print(pgm))
             ntf.flush()
 
@@ -94,7 +93,7 @@ class KRun(KPrint):
         expect_rc: int | Iterable[int] = 0,
     ) -> CTerm:
         kore_pgm = self.kast_to_kore(pgm, sort=sort)
-        with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
+        with self._temp_file() as ntf:
             kore_pgm.write(ntf)
             ntf.write('\n')
             ntf.flush()
@@ -128,14 +127,14 @@ class KRun(KPrint):
         bug_report: BugReport | None = None,
         expect_rc: int | Iterable[int] = 0,
     ) -> Pattern:
-        with NamedTemporaryFile('w', dir=self.use_directory) as f:
-            pattern.write(f)
-            f.write('\n')
-            f.flush()
+        with self._temp_file() as ntf:
+            pattern.write(ntf)
+            ntf.write('\n')
+            ntf.flush()
 
             proc_res = _krun(
                 command=self.command,
-                input_file=Path(f.name),
+                input_file=Path(ntf.name),
                 definition_dir=self.definition_dir,
                 output=KRunOutput.KORE,
                 parser='cat',
