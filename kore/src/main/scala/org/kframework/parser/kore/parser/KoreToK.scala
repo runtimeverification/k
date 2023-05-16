@@ -35,7 +35,6 @@ class KoreToK (sortAtt : Map[String, String]) {
     "Star" -> "*",
     "Plus" -> "+",
     "Comm" -> ",",
-    "Hyph" -> "-",
     "Stop" -> ".",
     "Slsh" -> "/",
     "Coln" -> ":",
