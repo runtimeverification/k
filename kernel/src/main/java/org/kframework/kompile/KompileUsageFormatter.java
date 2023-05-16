@@ -8,9 +8,13 @@ import java.util.*;
 import java.util.ResourceBundle;
 
 /**
- * Customized `usage` for kompile based on DefaultUsageFormatter.
- * The only changes are related to printing hidden options when
- * --help-hidden is provided.
+ * NOTICE:
+ * JCommander Copyright Notices
+ * Copyright 2010 Cedric Beust cedric@beust.com
+ *
+ * This is a customized `usage` for kompile based on DefaultUsageFormatter
+ * from the JCommander library. The only changes are related to printing
+ * hidden options when --help-hidden is provided.
  */
 public class KompileUsageFormatter implements IUsageFormatter {
 
