@@ -10,13 +10,8 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
-import org.kframework.kore.TransformK;
-import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
-import java.util.EnumSet;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -25,21 +20,15 @@ import static org.kframework.kore.KORE.*;
 
 public class ResolveHeatCoolAttribute {
 
-    private Set<String> transitions;
-    private EnumSet<Mode> modes;
+    private final Set<String> unrestrictedRules;
 
-    public static enum Mode {
-        HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION
-    }
-
-    public ResolveHeatCoolAttribute(Set<String> transitions, EnumSet<Mode> modes) {
-        this.transitions = transitions;
-        this.modes = modes;
+    public ResolveHeatCoolAttribute(Set<String> unrestrictedRules) {
+        this.unrestrictedRules = unrestrictedRules;
     }
 
     private Rule resolve(Module m, Rule rule) {
         return Rule(
-                transformBody(rule.body(), rule.att()),
+                rule.body(),
                 transform(m, rule.requires(), rule.att()),
                 rule.ensures(),
                 rule.att());
@@ -47,50 +36,35 @@ public class ResolveHeatCoolAttribute {
 
     private Context resolve(Module m, Context context) {
         return new Context(
-                transformBody(context.body(), context.att()),
+                context.body(),
                 transform(m, context.requires(), context.att()),
                 context.att());
     }
 
-    private K transformBody(K body, Att att) {
-        if (att.contains("cool") && modes.contains(Mode.COOL_RESULT_INJECTION)) {
-            return new TransformK() {
-                public K apply(KVariable var) {
-                    if (var.name(). equals("HOLE") && transitions.stream().noneMatch(att::contains)) {
-                        return KVariable(var.name(), var.att().add(Sort.class, Outer.parseSort(att.getOptional("result").orElse("KResult"))));
-                    }
-                    return super.apply(var);
-                }
-            }.apply(body);
-        }
-        return body;
-    }
-
     private K transform(Module m, K requires, Att att) {
-        if (att.contains("cool") && !modes.contains(Mode.COOL_RESULT_CONDITION)) {
-            return requires;
-        }
-        String sort = att.<String>getOptional("result").orElse("KResult");
+        String sort = att.getOptional("result").orElse("KResult");
         KLabel lbl = KLabel("is" + sort);
-        if (!m.productionsFor().contains(lbl) && !stream(m.allSorts()).filter(s -> s.toString().equals(sort)).findAny().isPresent()) {
-            throw KEMException.compilerError("Definition is missing function " + lbl.name() + " required for strictness. Please either declare sort " + sort + " or declare 'syntax Bool ::= " + lbl.name() + "(K) [symbol, function]'", requires);
+        if (!m.productionsFor().contains(lbl) && stream(m.allSorts()).noneMatch(s -> s.toString().equals(sort))) {
+            throw KEMException.compilerError("Definition is missing function " + lbl.name() +
+                    " required for strictness. Please either declare sort " + sort +
+                    " or declare 'syntax Bool ::= " + lbl.name() + "(K) [symbol, function]'", requires);
         }
         KApply predicate = KApply(lbl, KVariable("HOLE"));
-        if (att.contains("heat")) {
+        if (att.contains(Att.HEAT())) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
-        } else if (att.contains("cool")) {
-            if (transitions.stream().anyMatch(att::contains)) {
-                // if the cooling rule is a super strict, then tag the isKResult predicate and drop it during search
-                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add(Att.TRANSITION()));
+        }
+        if (att.contains(Att.COOL())) {
+            if (unrestrictedRules.stream().anyMatch(att::contains)) {
+                return requires;
             }
             return BooleanUtils.and(requires, predicate);
         }
-        throw new AssertionError("unreachable");
+        throw new AssertionError("Called ResolveHeatCoolAttribute::transform on rule without " +
+                "heat or cool attribute");
     }
 
     public Sentence resolve(Module m, Sentence s) {
-        if (!((modes.contains(Mode.HEAT_RESULT) && s.att().contains("heat"))
-                || ((modes.contains(Mode.COOL_RESULT_INJECTION) || modes.contains(Mode.COOL_RESULT_CONDITION)) && s.att().contains("cool")))) {
+        if (!s.att().contains(Att.HEAT()) && !s.att().contains(Att.COOL())) {
             return s;
         }
         if (s instanceof Rule) {
