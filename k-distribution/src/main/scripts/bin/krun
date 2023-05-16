@@ -24,6 +24,7 @@ term=false
 literal=false
 outputMode=pretty
 statistics=false
+executeToBranch=false
 smtPrelude=
 smt=
 llvm_krun_flags=
@@ -121,6 +122,9 @@ $KRUN options:
                                      Haskell backend
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
+      --execute-to-branch  Execute until a non-deterministic state is reached, then exit.
+                           Requires the --enable-search option to have been passed to kompile
+                           on the LLVM backend.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -390,6 +394,10 @@ do
       statistics=true
       ;;
 
+      --execute-to-branch)
+      executeToBranch=true
+      ;;
+
       --)
       literal=true
       ;;
@@ -544,10 +552,14 @@ fi
 backendName=$(cat "$kompiledDir"/backend.txt)
 # Invoke backend
 if [ "$backendName" = "llvm" ]; then
+  interpreter_flags=
+
   if $statistics; then
     interpreter_flags=--statistics
-  else
-    interpreter_flags=
+  fi
+
+  if $executeToBranch; then
+    interpreter_flags+=" --execute-to-branch"
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
@@ -608,6 +620,9 @@ elif [ "$backendName" = "haskell" ] ; then
   fi
   if [ -n "$smt" ]; then
     koreExecFlags="$koreExecFlags --smt $smt"
+  fi
+    if $executeToBranch; then
+    koreExecFlags="$koreExecFlags --execute-to-branch"
   fi
   if $search || [ -n "$pattern" ]; then
     patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
