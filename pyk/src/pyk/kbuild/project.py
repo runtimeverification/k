@@ -93,6 +93,7 @@ class Target:
     llvm_kompile_output: str | None
     # Haskell backend
     concrete_rules: tuple[str, ...] | None
+    haskell_binary: bool | None
 
     def __init__(
         self,
@@ -115,6 +116,7 @@ class Target:
         llvm_kompile_type: LLVMKompileType | None = None,
         llvm_kompile_output: str | None = None,
         concrete_rules: Iterable[str] | None = None,
+        haskell_binary: bool | None = None,
     ):
         main_file = Path(main_file)
         check_relative_path(main_file)
@@ -136,6 +138,7 @@ class Target:
         object.__setattr__(self, 'llvm_kompile_type', llvm_kompile_type)
         object.__setattr__(self, 'llvm_kompile_output', llvm_kompile_output)
         object.__setattr__(self, 'concrete_rules', tuple(concrete_rules) if concrete_rules is not None else None)
+        object.__setattr__(self, 'haskell_binary', haskell_binary if haskell_binary is not None else None)
 
     @staticmethod
     def from_dict(name: str, dct: Mapping[str, Any]) -> Target:
@@ -158,6 +161,7 @@ class Target:
             llvm_kompile_type=LLVMKompileType(dct['llvm-kompile-type']) if 'llvm-kompile-type' in dct else None,
             llvm_kompile_output=dct.get('llvm-kompile-output'),
             concrete_rules=dct.get('concrete-rules'),
+            haskell_binary=dct.get('haskell-binary'),
         )
 
     @property

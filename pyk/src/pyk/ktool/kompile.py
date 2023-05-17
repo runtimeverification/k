@@ -141,11 +141,13 @@ class Kompile(ABC):
 class HaskellKompile(Kompile):
     base_args: KompileArgs
     concrete_rules: tuple[str, ...]
+    haskell_binary: bool
 
-    def __init__(self, base_args: KompileArgs, *, concrete_rules: Iterable[str] = ()):
+    def __init__(self, base_args: KompileArgs, *, concrete_rules: Iterable[str] = (), haskell_binary: bool = True):
         concrete_rules = tuple(concrete_rules)
         object.__setattr__(self, 'base_args', base_args)
         object.__setattr__(self, 'concrete_rules', concrete_rules)
+        object.__setattr__(self, 'haskell_binary', haskell_binary)
 
     @property
     def backend(self) -> Literal[KompileBackend.HASKELL]:
@@ -157,6 +159,9 @@ class HaskellKompile(Kompile):
 
         if self.concrete_rules:
             args += ['--concrete-rules', ','.join(self.concrete_rules)]
+
+        if not self.haskell_binary:
+            args += ['--no-haskell-binary']
 
         return args
 
