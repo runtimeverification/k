@@ -10,6 +10,6 @@ public class HaskellKompileOptions {
     @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.", hidden = true)
     public String haskellBackendCommand = "kore-exec";
 
-    @Parameter(names="--no-haskell-binary", description="Do not force the haskell backend to use the binary format. Use the textual format instead. This is a development option. Sometime the binary format can cause issues.", hidden = true)
+    @Parameter(names="--no-haskell-binary", description="Do not force the haskell backend to use the binary format. Use the textual format instead. This is a development option. Sometime the binary format can cause issues especially on MacOS.")
     public boolean noHaskellBinary = false;
 }
