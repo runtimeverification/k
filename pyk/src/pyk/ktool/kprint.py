@@ -242,7 +242,11 @@ class KPrint:
 
     @cached_property
     def symbol_table(self) -> SymbolTable:
-        symb_table = build_symbol_table(self.definition, extra_modules=self._extra_unparsing_modules, opinionated=True)
+        symb_table = build_symbol_table(
+            self.definition,
+            extra_modules=self._extra_unparsing_modules,
+            opinionated=True,
+        )
         self._patch_symbol_table(symb_table)
         return symb_table
 
@@ -362,10 +366,16 @@ def unparser_for_production(prod: KProduction) -> Callable[..., str]:
     def _unparser(*args: Any) -> str:
         index = 0
         result = []
+        num_nonterm = len([item for item in prod.items if type(item) is KNonTerminal])
+        num_named_nonterm = len([item for item in prod.items if type(item) is KNonTerminal and item.name != None])
         for item in prod.items:
             if type(item) is KTerminal:
                 result.append(item.value)
             elif type(item) is KNonTerminal and index < len(args):
+                if num_nonterm == num_named_nonterm:
+                    if index == 0:
+                        result.append('...')
+                    result.append(f'{item.name}:')
                 result.append(args[index])
                 index += 1
         return ' '.join(result)
@@ -374,7 +384,9 @@ def unparser_for_production(prod: KProduction) -> Callable[..., str]:
 
 
 def build_symbol_table(
-    definition: KDefinition, extra_modules: Iterable[KFlatModule] = (), opinionated: bool = False
+    definition: KDefinition,
+    extra_modules: Iterable[KFlatModule] = (),
+    opinionated: bool = False,
 ) -> SymbolTable:
     """Build the unparsing symbol table given a JSON encoded definition.
 
