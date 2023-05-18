@@ -548,7 +548,7 @@ public class StringUtil {
             "Star",// 2a
             "Plus",// 2b
             "Comm",// 2c
-            "Hyph",// 2d
+            "-",// 2d
             "Stop",// 2e
             "Slsh",// 2f
             "0",// 30
