@@ -771,9 +771,6 @@ of the language need to insert runtime checks for downcasting to be safe.
                               +String "\" and \"" +String Id2String(C2)
                               +String "\" are incompatible!\n") </output>
     when notBool(C1 in S2) andBool notBool(C2 in S1)
-    [transition]
-    // ugly solution to avoid non-confluence (rule may apply before
-    // extendsAll is populated); strategies will solve the problem nicely.
 ```
 
 ## Cleanup tasks
