@@ -184,21 +184,28 @@ class KRegexTerminal(KProductionItem):
 @dataclass(frozen=True)
 class KNonTerminal(KProductionItem):
     sort: KSort
+    name: str | None
 
-    def __init__(self, sort: KSort):
+    def __init__(self, sort: KSort, name: str | None = None):
         object.__setattr__(self, 'sort', sort)
+        object.__setattr__(self, 'name', name)
 
     @classmethod
     def from_dict(cls: type[KNonTerminal], d: Mapping[str, Any]) -> KNonTerminal:
         cls._check_node(d)
-        return KNonTerminal(sort=KSort.from_dict(d['sort']))
+        name = d['name'] if 'name' in d else None
+        return KNonTerminal(sort=KSort.from_dict(d['sort']), name=name)
 
     def to_dict(self) -> dict[str, Any]:
-        return {'node': 'KNonTerminal', 'sort': self.sort.to_dict()}
+        d = {'node': 'KNonTerminal', 'sort': self.sort.to_dict()}
+        if self.name is not None:
+            d['name'] = self.name
+        return d
 
-    def let(self, *, sort: KSort | None = None) -> KNonTerminal:
+    def let(self, *, sort: KSort | None = None, name: str | None = None) -> KNonTerminal:
         sort = sort or self.sort
-        return KNonTerminal(sort=sort)
+        name = name or self.name
+        return KNonTerminal(sort=sort, name=name)
 
 
 @final
