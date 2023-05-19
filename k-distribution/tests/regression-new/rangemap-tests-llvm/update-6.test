@@ -1,1 +1,1 @@
-rangemap(5)[range(2, 3) <- 55]
+rangemap(5)[[2, 3) <- 55]

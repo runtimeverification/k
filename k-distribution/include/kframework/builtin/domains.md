@@ -487,7 +487,7 @@ module RANGEMAP
 ### Range, bounded inclusively below and exclusively above.
 
 ```k
-  syntax Range ::= range(rangeStart: KItem, rangeEnd: KItem)    [klabel(Rangemap:Range), symbol]
+  syntax Range ::= "[" KItem "," KItem ")"    [klabel(Rangemap:Range), symbol]
   
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
 ```

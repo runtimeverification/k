@@ -1,1 +1,1 @@
-rangemap(3)[range(19, 20) <- 55]
+rangemap(3)[[19, 20) <- 55]

@@ -1,1 +1,1 @@
-rangemap(1)[range(1, 4) <- undef]
+rangemap(1)[[1, 4) <- undef]
