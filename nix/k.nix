@@ -104,4 +104,7 @@ in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
   done
 
   ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
+  ln -sf ${haskell-backend}/bin/kore-exec $out/bin/kore-exec
+  ln -sf ${haskell-backend}/bin/kore-parser $out/bin/kore-parser
+  ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
 ''
