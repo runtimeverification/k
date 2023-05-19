@@ -8,13 +8,32 @@ import java.util.*;
 import java.util.ResourceBundle;
 
 /**
+ * This is a customized `usage` for kompile based on DefaultUsageFormatter
+ * https://github.com/cbeust/jcommander/blob/master/src/main/java/com/beust/jcommander/DefaultUsageFormatter.java
+ * from the JCommander library. The only changes are related to printing
+ * hidden options when --help-hidden is provided.
+ *
+ * Original licence:
+ *
+ * Copyright (C) 2010 the original author or authors.
+ * See the notice.md file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  * NOTICE:
  * JCommander Copyright Notices
  * Copyright 2010 Cedric Beust cedric@beust.com
- *
- * This is a customized `usage` for kompile based on DefaultUsageFormatter
- * from the JCommander library. The only changes are related to printing
- * hidden options when --help-hidden is provided.
  */
 public class KompileUsageFormatter implements IUsageFormatter {
 
