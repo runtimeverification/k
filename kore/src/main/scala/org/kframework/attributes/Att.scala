@@ -251,7 +251,7 @@ object Att {
   final val ORIGINAL_NAME = Key("originalName", KeyType.Internal)
   final val ORIGINAL_PRD = Key("originalPrd", KeyType.Internal)
   final val PATTERN = Key("pattern", KeyType.Internal)
-  final val PATTERN_FOLDING = Key("pattern-unfolding", KeyType.Internal)
+  final val PATTERN_FOLDING = Key("pattern-folding", KeyType.Internal)
   final val PREDICATE = Key("predicate", KeyType.Internal)
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION = Key("prettyPrintWithSortAnnotation", KeyType.Internal)
   final val PRIORITIES = Key("priorities", KeyType.Internal)
