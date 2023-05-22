@@ -277,7 +277,6 @@ object Att {
   final val SYNTAX_MODULE = Key("syntaxModule", KeyType.Internal)
   final val TEMPORARY_CELL_SORT_DECL = Key("temporary-cell-sort-decl", KeyType.Internal)
   final val TERMINALS = Key("terminals", KeyType.Internal)
-  final val TRANSITION = Key("transition", KeyType.Internal)
   final val UNIQUE_ID = Key("UNIQUE_ID", KeyType.Internal)
   final val USER_LIST = Key("userList", KeyType.Internal)
   final val USER_LIST_TERMINATOR = Key("userListTerminator", KeyType.Internal)
