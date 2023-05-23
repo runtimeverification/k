@@ -1536,6 +1536,7 @@ public class ModuleToKORE {
         int nt = 1;
         boolean hasFormat = true;
         boolean printName = true;
+        boolean printEllipses = false;
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal && ((NonTerminal) prod.items().apply(i)).name().isEmpty()) {
             printName = false;
@@ -1546,10 +1547,12 @@ public class ModuleToKORE {
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
             String replacement;
-            if (printName)
+            if (printName) {
               replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
-            else
+              printEllipses = true;
+            } else {
               replacement = "%" + (nt++);
+            }
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", replacement);
           } else if (prod.items().apply(i) instanceof Terminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
@@ -1557,7 +1560,7 @@ public class ModuleToKORE {
             hasFormat = false;
           }
         }
-        if (printName && format.contains("(")) {
+        if (printEllipses && format.contains("(")) {
           int idxLParam = format.indexOf("(") + 1;
           format = format.substring(0, idxLParam) + "... " + format.substring(idxLParam);
         }
