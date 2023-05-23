@@ -1535,9 +1535,22 @@ public class ModuleToKORE {
         String format = att.getOptional("format").orElse(Formatter.defaultFormat(prod.items().size()));
         int nt = 1;
         boolean hasFormat = true;
+        boolean printName = true;
+        for (int i = 0; i < prod.items().size(); i++) {
+          if (prod.items().apply(i) instanceof NonTerminal && ((NonTerminal) prod.items().apply(i)).name().isEmpty()) {
+            printName = false;
+            break;
+          }
+        }
+
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
+            String replacement;
+            if (printName)
+              replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
+            else
+              replacement = "%" + (nt++);
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", replacement);
           } else if (prod.items().apply(i) instanceof Terminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
           } else {
