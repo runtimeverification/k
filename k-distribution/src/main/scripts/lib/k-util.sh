@@ -9,7 +9,7 @@
 # You can use this script by adding the following line (minus the comment) to
 # your script:
 #
-# ktool=TOOL_NAME
+# KTOOL=TOOL_NAME
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 # initialize flags
