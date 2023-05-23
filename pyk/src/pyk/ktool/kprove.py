@@ -203,10 +203,8 @@ class KProve(KPrint):
             ','.join(haskell_log_entries),
         ]
 
-        kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
-        _LOGGER.debug(f'export KORE_EXEC_OPTS={kore_exec_opts!r}')
-        env = os.environ.copy()
-        env['KORE_EXEC_OPTS'] = kore_exec_opts
+        haskell_backend_command = f'kore-exec {" ".join(list(haskell_args) + haskell_log_args)}'
+        _LOGGER.debug(f'haskell_backend_command={haskell_backend_command}')
 
         proc_result = _kprove(
             spec_file=spec_file,
@@ -216,9 +214,10 @@ class KProve(KPrint):
             include_dirs=include_dirs,
             md_selector=md_selector,
             output=KProveOutput.JSON,
+            haskell_backend_command=haskell_backend_command,
             dry_run=dry_run,
             args=self.prover_args + list(args),
-            env=env,
+            env=os.environ.copy(),
             check=False,
             depth=depth,
         )
