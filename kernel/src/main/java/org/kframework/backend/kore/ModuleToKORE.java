@@ -1557,6 +1557,10 @@ public class ModuleToKORE {
             hasFormat = false;
           }
         }
+        if (printName && format.contains("(")) {
+          int idxLParam = format.indexOf("(") + 1;
+          format = format.substring(0, idxLParam) + "... " + format.substring(idxLParam);
+        }
         if (hasFormat) {
           att = att.add("format", format);
           if (att.contains("color")) {
