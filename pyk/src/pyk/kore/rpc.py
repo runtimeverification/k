@@ -41,7 +41,7 @@ class JsonRpcError(Exception):
     code: int
     data: Any
 
-    def __init__(self, message: str, code: int, data: Any):
+    def __init__(self, message: str, code: int, data: Any = None):
         object.__setattr__(self, 'message', message)
         object.__setattr__(self, 'code', code)
         object.__setattr__(self, 'data', data)
@@ -171,7 +171,7 @@ class KoreClientError(Exception):  # TODO refine
     code: int
     data: Any
 
-    def __init__(self, message: str, code: int, data: Any):
+    def __init__(self, message: str, code: int, data: Any = None):
         object.__setattr__(self, 'code', code)
         object.__setattr__(self, 'message', message)
         object.__setattr__(self, 'data', data)
