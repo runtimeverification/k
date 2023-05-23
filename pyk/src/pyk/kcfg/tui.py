@@ -278,30 +278,39 @@ class KCFGViewer(App):
         if message.chunk_id.startswith('node_'):
             self._selected_chunk = message.chunk_id
             node, *_ = message.chunk_id[5:].split('_')
-            self.query_one('#node-view', NodeView).update(self._kcfg.node(node))
+            node_id = int(node)
+            self.query_one('#node-view', NodeView).update(self._kcfg.node(node_id))
 
         elif message.chunk_id.startswith('edge_'):
             self._selected_chunk = None
             node_source, node_target, *_ = message.chunk_id[5:].split('_')
-            edge = single(self._kcfg.edges(source_id=node_source, target_id=node_target))
+            source_id = int(node_source)
+            target_id = int(node_target)
+            edge = single(self._kcfg.edges(source_id=source_id, target_id=target_id))
             self.query_one('#node-view', NodeView).update(edge)
 
         elif message.chunk_id.startswith('cover_'):
             self._selected_chunk = None
             node_source, node_target, *_ = message.chunk_id[6:].split('_')
-            cover = single(self._kcfg.covers(source_id=node_source, target_id=node_target))
+            source_id = int(node_source)
+            target_id = int(node_target)
+            cover = single(self._kcfg.covers(source_id=source_id, target_id=target_id))
             self.query_one('#node-view', NodeView).update(cover)
 
         elif message.chunk_id.startswith('split_'):
             self._selected_chunk = None
             node_source, node_target, *_ = message.chunk_id[6:].split('_')
-            split = single(self._kcfg.splits(source_id=node_source, target_id=node_target))
+            source_id = int(node_source)
+            target_id = int(node_target)
+            split = single(self._kcfg.splits(source_id=source_id, target_id=target_id))
             self.query_one('#node-view', NodeView).update(split)
 
         elif message.chunk_id.startswith('ndbranch_'):
             self._selected_chunk = None
             node_source, node_target, *_ = message.chunk_id[8:].split('_')
-            ndbranch = single(self._kcfg.ndbranches(source_id=node_source, target_id=node_target))
+            source_id = int(node_source)
+            target_id = int(node_target)
+            ndbranch = single(self._kcfg.ndbranches(source_id=source_id, target_id=target_id))
             self.query_one('#node-view', NodeView).update(ndbranch)
 
     BINDINGS = [
