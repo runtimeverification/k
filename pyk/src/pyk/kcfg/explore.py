@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from ..kast import KInner
     from ..kore.rpc import LogEntry
     from ..ktool.kprint import KPrint
+    from .kcfg import NodeIdLike
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -290,13 +291,13 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
 
-    def remove_subgraph_from(self, cfg: KCFG, node: str) -> None:
+    def remove_subgraph_from(self, cfg: KCFG, node: NodeIdLike) -> None:
         for _node in cfg.reachable_nodes(node, traverse_covers=True):
             if not cfg.is_target(_node.id):
                 _LOGGER.info(f'Removing node: {shorten_hashes(_node.id)}')
                 cfg.remove_node(_node.id)
 
-    def simplify(self, cfg: KCFG, logs: dict[str, tuple[LogEntry, ...]]) -> None:
+    def simplify(self, cfg: KCFG, logs: dict[int, tuple[LogEntry, ...]]) -> None:
         for node in cfg.nodes:
             _LOGGER.info(f'Simplifying node {self.id}: {shorten_hashes(node.id)}')
             new_term, next_node_logs = self.cterm_simplify(node.cterm)
@@ -311,7 +312,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 else:
                     logs[node.id] = next_node_logs
 
-    def step(self, cfg: KCFG, node_id: str, logs: dict[str, tuple[LogEntry, ...]], depth: int = 1) -> str:
+    def step(self, cfg: KCFG, node_id: NodeIdLike, logs: dict[int, tuple[LogEntry, ...]], depth: int = 1) -> int:
         if depth <= 0:
             raise ValueError(f'Expected positive depth, got: {depth}')
         node = cfg.node(node_id)
@@ -324,7 +325,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             raise ValueError(f'Unable to take {depth} steps from node, got {actual_depth} steps {self.id}: {node.id}')
         if len(next_cterms) > 0:
             raise ValueError(f'Found branch within {depth} steps {self.id}: {node.id}')
-        new_node = cfg.get_or_create_node(cterm)
+        new_node = cfg.create_node(cterm)
         _LOGGER.info(f'Found new node at depth {depth} {self.id}: {shorten_hashes((node.id, new_node.id))}')
         logs[new_node.id] = next_node_logs
         out_edges = cfg.edges(source_id=node.id)
@@ -342,8 +343,13 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         return new_node.id
 
     def section_edge(
-        self, cfg: KCFG, source_id: str, target_id: str, logs: dict[str, tuple[LogEntry, ...]], sections: int = 2
-    ) -> tuple[str, ...]:
+        self,
+        cfg: KCFG,
+        source_id: NodeIdLike,
+        target_id: NodeIdLike,
+        logs: dict[int, tuple[LogEntry, ...]],
+        sections: int = 2,
+    ) -> tuple[int, ...]:
         if sections <= 1:
             raise ValueError(f'Cannot section an edge less than twice {self.id}: {sections}')
         edge = single(cfg.edges(source_id=source_id, target_id=target_id))
@@ -379,7 +385,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         self,
         kcfg: KCFG,
         node: KCFG.Node,
-        logs: dict[str, tuple[LogEntry, ...]],
+        logs: dict[int, tuple[LogEntry, ...]],
         execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
@@ -396,7 +402,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
         # Basic block
         if depth > 0:
-            next_node = kcfg.get_or_create_node(cterm)
+            next_node = kcfg.create_node(cterm)
             logs[next_node.id] = next_node_logs
             kcfg.create_edge(node.id, next_node.id, depth)
             _LOGGER.info(
@@ -409,7 +415,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
         # Cut Rule
         elif len(next_cterms) == 1:
-            next_node = kcfg.get_or_create_node(next_cterms[0])
+            next_node = kcfg.create_node(next_cterms[0])
             logs[next_node.id] = next_node_logs
             kcfg.create_edge(node.id, next_node.id, 1)
             _LOGGER.info(
@@ -438,7 +444,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
             # NDBranch on successor nodes
             else:
-                next_ids = [kcfg.get_or_create_node(ct).id for ct in next_cterms]
+                next_ids = [kcfg.create_node(ct).id for ct in next_cterms]
                 for i in next_ids:
                     logs[i] = next_node_logs
                 kcfg.create_ndbranch(node.id, next_ids)
