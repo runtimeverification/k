@@ -8,7 +8,7 @@ ALLOW_FAIL=
 .PHONY: all clean update-results
 all:
 	$(KOMPILE) $(CHECK) no-flags.out $(ALLOW_FAIL)
-	$(KOMPILE) $(KOMPILE_FLAGS) --badflag --extra --backend $(KOMPILE_BACKEND) $(DEBUG) $(DEF).$(SOURCE_EXT) -d $(DEFDIR) $(CHECK) extra-flags.out $(ALLOW_FAIL)
+	$(KOMPILE) $(KOMPILE_FLAGS) --badflag --extra --backend $(KOMPILE_BACKEND) $(DEBUG) $(DEF).$(SOURCE_EXT) ---output-definition $(DEF)-kompiled $(CHECK) extra-flags.out $(ALLOW_FAIL)
 
 include ../../../include/kframework/ktest.mak
 

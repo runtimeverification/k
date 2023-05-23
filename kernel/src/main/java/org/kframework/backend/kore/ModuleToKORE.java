@@ -302,7 +302,7 @@ public class ModuleToKORE {
             ruleIndex++;
         }
 
-        if (!options.disableKoreAntileft) {
+        if (options.enableKoreAntileft) {
             semantics.append("\n// priority groups\n");
             genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, semantics);
         }
@@ -1175,7 +1175,7 @@ public class ModuleToKORE {
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
 
-                if (!options.disableKoreAntileft) {
+                if (options.enableKoreAntileft) {
                     genAliasForSemanticsRuleLHS(requires, left, ruleAliasName, freeVars, topCellSortStr,
                             priority, priorityToAlias, sb);
                     sb.append("\n");
@@ -1184,13 +1184,13 @@ public class ModuleToKORE {
                 sb.append("  axiom{} ");
                 sb.append(String.format("\\rewrites{%s} (\n    ", topCellSortStr));
 
-                if (options.disableKoreAntileft) {
-                    genSemanticsRuleLHSNoAlias(requires, left, freeVars, topCellSortStr, priorityToPreviousGroup.get(priority), sb);
-                    sb.append(",\n      ");
-                } else {
+                if (options.enableKoreAntileft) {
                     genSemanticsRuleLHSWithAlias(ruleAliasName, freeVars, topCellSortStr,
                             priorityToPreviousGroup.get(priority), sb);
                     sb.append(",\n    ");
+                } else {
+                    genSemanticsRuleLHSNoAlias(requires, left, freeVars, topCellSortStr, priorityToPreviousGroup.get(priority), sb);
+                    sb.append(",\n      ");
                 }
             } else {
                 // LHS for claims
@@ -1219,14 +1219,15 @@ public class ModuleToKORE {
             }
             sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
 
-            if (options.disableKoreAntileft) {
-                convert(right, sb);
-                sb.append(", ");
+            if (options.enableKoreAntileft) {
                 convertSideCondition(ensures, topCellSortStr, sb);
+                sb.append(", ");
+                convert(right, sb);
             } else {
-                convertSideCondition(ensures, topCellSortStr, sb);
-                sb.append(", ");
                 convert(right, sb);
+                sb.append(", ");
+                convertSideCondition(ensures, topCellSortStr, sb);
+
             }
 
             sb.append(')');
@@ -1815,7 +1816,9 @@ public class ModuleToKORE {
     private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
-        for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
+        for (Tuple2<Tuple2<String, String>, ?> attribute :
+            // Sort to stabilize error messages
+            stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).collect(Collectors.toList())) {
             String name = attribute._1._1;
             String clsName = attribute._1._2;
             Object val = attribute._2;
@@ -1885,7 +1888,6 @@ public class ModuleToKORE {
     private static String[] asciiReadableEncodingKoreCalc() {
         String[] koreEncoder = Arrays.copyOf(StringUtil.asciiReadableEncodingDefault, StringUtil.asciiReadableEncodingDefault.length);
         koreEncoder[0x26] = "And-";
-        koreEncoder[0x2d] = "-";
         koreEncoder[0x3c] = "-LT-";
         koreEncoder[0x3e] = "-GT-";
         koreEncoder[0x40] = "-AT-";

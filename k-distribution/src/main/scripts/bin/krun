@@ -24,6 +24,7 @@ term=false
 literal=false
 outputMode=pretty
 statistics=false
+executeToBranch=false
 smtPrelude=
 smt=
 llvm_krun_flags=
@@ -113,7 +114,7 @@ $KRUN options:
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
-  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR.
       --dry-run            Do not execute backend, but instead print the
                            command that would be executed to stdout.
@@ -121,6 +122,9 @@ $KRUN options:
                                      Haskell backend
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
+      --execute-to-branch  Execute until a non-deterministic state is reached, then exit.
+                           Requires the --enable-search option to have been passed to kompile
+                           on the LLVM backend.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -228,6 +232,7 @@ do
       ;;
 
       -d|--directory)
+      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
       dir="$2"
       shift
       ;;
@@ -389,6 +394,10 @@ do
       statistics=true
       ;;
 
+      --execute-to-branch)
+      executeToBranch=true
+      ;;
+
       --)
       literal=true
       ;;
@@ -444,7 +453,7 @@ else
 fi
 
 if ! $hasKompiledDir; then
-  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --definition to specify one.'
 fi
 
 # Process configuration variables
@@ -543,10 +552,14 @@ fi
 backendName=$(cat "$kompiledDir"/backend.txt)
 # Invoke backend
 if [ "$backendName" = "llvm" ]; then
+  interpreter_flags=
+
   if $statistics; then
     interpreter_flags=--statistics
-  else
-    interpreter_flags=
+  fi
+
+  if $executeToBranch; then
+    interpreter_flags+=" --execute-to-branch"
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
@@ -607,6 +620,9 @@ elif [ "$backendName" = "haskell" ] ; then
   fi
   if [ -n "$smt" ]; then
     koreExecFlags="$koreExecFlags --smt $smt"
+  fi
+    if $executeToBranch; then
+    koreExecFlags="$koreExecFlags --execute-to-branch"
   fi
   if $search || [ -n "$pattern" ]; then
     patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
