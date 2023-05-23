@@ -37,10 +37,10 @@ public class CommonModule extends AbstractModule {
     }
 
     @Provides @TempDir @RequestScoped
-    File tempDir(@WorkingDir File workingDir, Tool tool, GlobalOptions go) {
+    File tempDir(Tool tool, GlobalOptions go) {
         if (go.tempDir != null)
-            return new File(go.tempDir);
-        return new File(workingDir, FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
+            return new File(go.tempDir, FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
+        return new File(System.getProperty("java.io.tmpdir"), FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
     }
 
     @Provides
