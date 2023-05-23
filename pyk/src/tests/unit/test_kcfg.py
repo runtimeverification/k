@@ -9,7 +9,6 @@ from pyk.kast.inner import KApply, KVariable
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.prelude.ml import mlEquals, mlTop
 from pyk.prelude.utils import token
-from pyk.utils import shorten_hash
 
 from .mock_kprint import MockKPrint
 
@@ -17,11 +16,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Any
 
+    from pyk.cterm import CSubst
     from pyk.kast import KInner
-
-
-def nid(i: int, with_cond: bool = False) -> str:
-    return node(i, with_cond).id
 
 
 # over 10 is variables
@@ -39,7 +35,7 @@ def node_short_info(ct: CTerm) -> Iterable[str]:
 
 
 def node(i: int, with_cond: bool = False) -> KCFG.Node:
-    return KCFG.Node(term(i, with_cond))
+    return KCFG.Node(i, term(i, with_cond))
 
 
 def edge(i: int, j: int) -> KCFG.Edge:
@@ -65,17 +61,17 @@ def ndbranch(i: int, js: Iterable[int]) -> KCFG.NDBranch:
     return KCFG.NDBranch(node(i), tuple(node(j) for j in js))
 
 
-def node_dicts(n: int, start: int = 0) -> list[dict[str, Any]]:
-    return [node(i).to_dict() for i in range(start, n)]
+def node_dicts(n: int, start: int = 1) -> list[dict[str, Any]]:
+    return [node(i).to_dict() for i in range(start, start + n)]
 
 
-def predicate_node_dicts(n: int, start: int = 0) -> list[dict[str, Any]]:
-    return [node(i, True).to_dict() for i in range(start, n)]
+def predicate_node_dicts(n: int, start: int = 1) -> list[dict[str, Any]]:
+    return [node(i, True).to_dict() for i in range(start, start + n)]
 
 
 def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
     def _make_edge_dict(i: int, j: int, depth: int = 1) -> dict[str, Any]:
-        return {'source': nid(i), 'target': nid(j), 'depth': depth}
+        return {'source': i, 'target': j, 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
 
@@ -85,79 +81,91 @@ def cover_dicts(*edges: tuple[int, int]) -> list[dict[str, Any]]:
     for i, j in edges:
         csubst = term(j).match_with_constraint(term(i))
         assert csubst is not None
-        covers.append({'source': nid(i), 'target': nid(j), 'csubst': csubst.to_dict()})
+        covers.append({'source': i, 'target': j, 'csubst': csubst.to_dict()})
     return covers
 
 
-def split_dicts(*edges: tuple[int, Iterable[tuple[int, KInner]]]) -> dict[str, Any]:
-    splits = {}
-    for s, ts in edges:
-        targets = {}
-        for t, constraint in ts:
-            csubst = term(s).match_with_constraint(term(t))
-            assert csubst is not None
-            csubst = csubst.add_constraint(constraint)
-            targets[nid(t)] = csubst.to_dict()
-        splits[nid(s)] = {'source': nid(s), 'targets': targets}
-    return splits
+def split_dicts(*edges: tuple[int, Iterable[tuple[int, KInner]]]) -> list[dict[str, Any]]:
+    def to_csubst(source_id: int, target_id: int, constraint: KInner) -> CSubst:
+        csubst = term(source_id).match_with_constraint(term(target_id))
+        assert csubst is not None
+        csubst = csubst.add_constraint(constraint)
+        return csubst
+
+    return [
+        {
+            'source': source_id,
+            'targets': [
+                {
+                    'target': target_id,
+                    'csubst': to_csubst(source_id, target_id, constraint).to_dict(),
+                }
+                for target_id, constraint in targets
+            ],
+        }
+        for source_id, targets in edges
+    ]
 
 
-def ndbranch_dicts(*edges: tuple[int, Iterable[tuple[int, bool]]]) -> dict[str, Any]:
-    ndbranches = {}
-    for s, ts in edges:
-        target_ids = [nid(t, b) for t, b in ts]
-        ndbranches[nid(s)] = {'source': nid(s), 'targets': target_ids}
-    return ndbranches
+def ndbranch_dicts(*edges: tuple[int, Iterable[tuple[int, bool]]]) -> list[dict[str, Any]]:
+    return [
+        {
+            'source': source_id,
+            'targets': [target_id for target_id, _ in target_ids],
+        }
+        for source_id, target_ids in edges
+    ]
 
 
 def test_from_dict_single_node() -> None:
     # Given
-    d = {'nodes': node_dicts(1)}
+    d = {'next': 2, 'nodes': node_dicts(1)}
 
     # When
     cfg = KCFG.from_dict(d)
 
     # Then
-    assert set(cfg.nodes) == {node(0)}
+    assert set(cfg.nodes) == {node(1)}
     assert cfg.to_dict() == d
 
 
 def test_from_dict_two_nodes() -> None:
     # Given
-    d = {'nodes': node_dicts(2)}
+    d = {'next': 3, 'nodes': node_dicts(2)}
 
     # When
     cfg = KCFG.from_dict(d)
 
     # Then
-    assert set(cfg.nodes) == {node(0), node(1)}
+    assert set(cfg.nodes) == {node(1), node(2)}
+    assert cfg.to_dict() == d
 
 
 def test_from_dict_loop_edge() -> None:
     # Given
-    d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
+    d = {'next': 2, 'nodes': node_dicts(1), 'edges': edge_dicts((1, 1))}
 
     # When
     cfg = KCFG.from_dict(d)
 
     # Then
-    assert set(cfg.nodes) == {node(0)}
-    assert set(cfg.edges()) == {edge(0, 0)}
-    assert cfg.edge(nid(0), nid(0)) == edge(0, 0)
+    assert set(cfg.nodes) == {node(1)}
+    assert set(cfg.edges()) == {edge(1, 1)}
+    assert cfg.edge(1, 1) == edge(1, 1)
     assert cfg.to_dict() == d
 
 
 def test_from_dict_simple_edge() -> None:
     # Given
-    d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
+    d = {'nodes': node_dicts(2), 'edges': edge_dicts((1, 2))}
 
     # When
     cfg = KCFG.from_dict(d)
 
     # Then
-    assert set(cfg.nodes) == {node(0), node(1)}
-    assert set(cfg.edges()) == {edge(0, 1)}
-    assert cfg.edge(nid(0), nid(1)) == edge(0, 1)
+    assert set(cfg.nodes) == {node(1), node(2)}
+    assert set(cfg.edges()) == {edge(1, 2)}
+    assert cfg.edge(1, 2) == edge(1, 2)
 
 
 def test_create_node() -> None:
@@ -165,11 +173,11 @@ def test_create_node() -> None:
     cfg = KCFG()
 
     # When
-    new_node = cfg.create_node(term(0))
+    new_node = cfg.create_node(term(1))
 
     # Then
-    assert new_node == node(0)
-    assert set(cfg.nodes) == {node(0)}
+    assert new_node == node(1)
+    assert set(cfg.nodes) == {node(1)}
     assert not cfg.is_expanded(new_node.id)
 
 
@@ -180,29 +188,29 @@ def test_remove_unknown_node() -> None:
     # Then
     with pytest.raises(ValueError):
         # When
-        cfg.remove_node(nid(0))
+        cfg.remove_node(0)
 
 
 def test_remove_node() -> None:
     # Given
-    d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (1, 2))}
+    d = {'nodes': node_dicts(3), 'edges': edge_dicts((1, 2), (2, 3))}
     cfg = KCFG.from_dict(d)
-    cfg.add_expanded(node(0).id)
     cfg.add_expanded(node(1).id)
+    cfg.add_expanded(node(2).id)
 
     # When
-    cfg.remove_node(nid(1))
+    cfg.remove_node(2)
 
     # Then
-    assert set(cfg.nodes) == {node(0), node(2)}
+    assert set(cfg.nodes) == {node(1), node(3)}
     assert set(cfg.edges()) == set()
-    assert not cfg.is_expanded(nid(0))
+    assert not cfg.is_expanded(1)
     with pytest.raises(ValueError):
-        cfg.node(nid(1))
+        cfg.node(2)
     with pytest.raises(ValueError):
-        cfg.edge(nid(0), nid(1))
+        cfg.edge(1, 2)
     with pytest.raises(ValueError):
-        cfg.edge(nid(1), nid(2))
+        cfg.edge(2, 3)
 
 
 def test_cover_then_remove() -> None:
@@ -239,13 +247,13 @@ def test_insert_loop_edge() -> None:
     cfg = KCFG.from_dict(d)
 
     # When
-    new_edge = cfg.create_edge(nid(0), nid(0), 1)
+    new_edge = cfg.create_edge(1, 1, 1)
 
     # Then
-    assert new_edge == edge(0, 0)
-    assert set(cfg.nodes) == {node(0)}
-    assert set(cfg.edges()) == {edge(0, 0)}
-    assert cfg.edge(nid(0), nid(0)) == edge(0, 0)
+    assert new_edge == edge(1, 1)
+    assert set(cfg.nodes) == {node(1)}
+    assert set(cfg.edges()) == {edge(1, 1)}
+    assert cfg.edge(1, 1) == edge(1, 1)
 
 
 def test_insert_simple_edge() -> None:
@@ -254,16 +262,17 @@ def test_insert_simple_edge() -> None:
     cfg = KCFG.from_dict(d)
 
     # When
-    new_edge = cfg.create_edge(nid(0), nid(1), 1)
+    new_edge = cfg.create_edge(1, 2, 1)
 
     # Then
-    assert new_edge == edge(0, 1)
-    assert set(cfg.nodes) == {node(0), node(1)}
-    assert set(cfg.edges()) == {edge(0, 1)}
+    assert new_edge == edge(1, 2)
+    assert set(cfg.nodes) == {node(1), node(2)}
+    assert set(cfg.edges()) == {edge(1, 2)}
 
 
 def test_get_successors() -> None:
     d = {
+        'next': 19,
         'nodes': node_dicts(18),
         'edges': edge_dicts((11, 12)),
         'splits': split_dicts((12, [(13, mlTop()), (14, mlTop())])),
@@ -273,86 +282,87 @@ def test_get_successors() -> None:
     cfg = KCFG.from_dict(d)
 
     # When
-    edges = set(cfg.edges(source_id=nid(11)))
-    covers = set(cfg.covers(source_id=nid(14)))
-    splits = sorted(cfg.splits(source_id=nid(12)))
-    ndbranches = set(cfg.ndbranches(source_id=nid(13)))
+    edges = set(cfg.edges(source_id=11))
+    covers = set(cfg.covers(source_id=14))
+    splits = sorted(cfg.splits(source_id=12))
+    ndbranches = set(cfg.ndbranches(source_id=13))
 
     # Then
     assert edges == {edge(11, 12)}
     assert covers == {cover(14, 11)}
     assert splits == [split(12, [13, 14])]
     assert ndbranches == {ndbranch(13, [16, 17])}
+    assert cfg.to_dict() == d
 
 
 def test_get_predecessors() -> None:
-    d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 2), (1, 2))}
+    d = {'nodes': node_dicts(3), 'edges': edge_dicts((1, 3), (2, 3))}
     cfg = KCFG.from_dict(d)
 
     # When
-    preds = set(cfg.edges(target_id=nid(2)))
+    preds = set(cfg.edges(target_id=3))
 
     # Then
-    assert preds == {edge(0, 2), edge(1, 2)}
+    assert preds == {edge(1, 3), edge(2, 3)}
 
 
 def test_reachable_nodes() -> None:
     # Given
     d = {
         'nodes': node_dicts(20),
-        'edges': edge_dicts((12, 14), (13, 14), (14, 11)),
-        'covers': cover_dicts((11, 12)),
+        'edges': edge_dicts((13, 15), (14, 15), (15, 12)),
+        'covers': cover_dicts((12, 13)),
         'splits': split_dicts(
-            (15, [(11, mlTop()), (12, mlTop()), (16, mlTop())]), (16, [(11, mlTop()), (17, mlTop())])
+            (16, [(12, mlTop()), (13, mlTop()), (17, mlTop())]), (17, [(12, mlTop()), (18, mlTop())])
         ),
-        'ndbranches': ndbranch_dicts((17, [(18, False), (19, False)])),
+        'ndbranches': ndbranch_dicts((18, [(19, False), (20, False)])),
     }
     cfg = KCFG.from_dict(d)
 
     # When
-    nodes_1 = cfg.reachable_nodes(nid(11))
-    nodes_2 = cfg.reachable_nodes(nid(11), traverse_covers=True)
-    nodes_3 = cfg.reachable_nodes(nid(15), traverse_covers=True)
-    nodes_4 = cfg.reachable_nodes(nid(12), traverse_covers=True, reverse=True)
-    nodes_5 = cfg.reachable_nodes(nid(18), reverse=True)
+    nodes_1 = cfg.reachable_nodes(12)
+    nodes_2 = cfg.reachable_nodes(12, traverse_covers=True)
+    nodes_3 = cfg.reachable_nodes(16, traverse_covers=True)
+    nodes_4 = cfg.reachable_nodes(13, traverse_covers=True, reverse=True)
+    nodes_5 = cfg.reachable_nodes(19, reverse=True)
 
     # Then
-    assert nodes_1 == {node(11)}
-    assert nodes_2 == {node(11), node(12), node(14)}
-    assert nodes_3 == {node(15), node(11), node(12), node(16), node(17), node(14), node(18), node(19)}
-    assert nodes_4 == {node(12), node(15), node(11), node(14), node(16), node(13)}
-    assert nodes_5 == {node(18), node(17), node(16), node(15)}
+    assert nodes_1 == {node(12)}
+    assert nodes_2 == {node(12), node(13), node(15)}
+    assert nodes_3 == {node(16), node(12), node(13), node(17), node(18), node(15), node(19), node(20)}
+    assert nodes_4 == {node(13), node(16), node(12), node(15), node(17), node(14)}
+    assert nodes_5 == {node(19), node(18), node(17), node(16)}
 
 
 def test_paths_between() -> None:
     # Given
     d = {
         'nodes': node_dicts(20),
-        'edges': edge_dicts((12, 14), (13, 14), (14, 11)),
-        'covers': cover_dicts((11, 12)),
+        'edges': edge_dicts((13, 15), (14, 15), (15, 12)),
+        'covers': cover_dicts((12, 13)),
         'splits': split_dicts(
-            (15, [(11, mlTop()), (12, mlTop()), (16, mlTop())]), (16, [(11, mlTop()), (17, mlTop())])
+            (16, [(12, mlTop()), (13, mlTop()), (17, mlTop())]), (17, [(12, mlTop()), (18, mlTop())])
         ),
-        'ndbranches': ndbranch_dicts((17, [(18, False), (19, False)])),
+        'ndbranches': ndbranch_dicts((18, [(19, False), (20, False)])),
     }
     cfg = KCFG.from_dict(d)
 
     # When
-    paths = sorted(cfg.paths_between(nid(15), nid(14)))
+    paths = sorted(cfg.paths_between(16, 15))
 
     # Then
     assert paths == [
-        (split(15, [12]), edge(12, 14)),
-        (split(15, [16]), split(16, [11]), cover(11, 12), edge(12, 14)),
-        (split(15, [11]), cover(11, 12), edge(12, 14)),
+        (split(16, [12]), cover(12, 13), edge(13, 15)),
+        (split(16, [13]), edge(13, 15)),
+        (split(16, [17]), split(17, [12]), cover(12, 13), edge(13, 15)),
     ]
 
     # When
-    paths = sorted(cfg.paths_between(nid(16), nid(19)))
+    paths = sorted(cfg.paths_between(17, 20))
 
     # Then
     assert paths == [
-        (split(16, [17]), ndbranch(17, [19])),
+        (split(17, [18]), ndbranch(18, [20])),
     ]
 
 
@@ -363,58 +373,42 @@ def test_resolve() -> None:
     }
     cfg = KCFG.from_dict(d)
 
-    assert node(1) == cfg.node('d33..d8')
-    assert node(1) == cfg.node(node(1).id)
-
-    # Matches no nodes
-    with pytest.raises(ValueError, match='Unknown node: deadbeef..d8'):
-        cfg.node('deadbeef..d8')
-
-    # Matches all nodes
-    with pytest.raises(ValueError, match='Multiple nodes for pattern: ...'):
-        cfg.node('..')
-
-    # Matches node(0) and node(2)
-    with pytest.raises(ValueError, match='Multiple nodes for pattern: ...'):
-        cfg.node('3..')
+    assert node(1) == cfg.node(1)
 
 
 def test_aliases() -> None:
     # Given
     d = {
-        'init': [nid(0)],
-        'target': [nid(3)],
+        'init': [1],
+        'target': [4],
         'nodes': node_dicts(4),
-        'edges': edge_dicts((0, 1), (1, 2)),
-        'aliases': {'foo': nid(1)},
+        'edges': edge_dicts((1, 2), (2, 3)),
+        'aliases': {'foo': 2},
     }
 
     cfg = KCFG.from_dict(d)
-    assert cfg.node('@foo'), node(1)
+    assert cfg.node('@foo'), node(2)
 
-    assert cfg.node('#init'), node(0)
-    assert cfg.node('#target'), node(3)
-    cfg.add_expanded(nid(0))
-    cfg.add_expanded(nid(1))
-    assert cfg.node('#frontier'), node(2)
+    assert cfg.node('#init'), node(1)
+    assert cfg.node('#target'), node(4)
+    cfg.add_expanded(1)
+    cfg.add_expanded(2)
+    assert cfg.node('#frontier'), node(3)
 
-    cfg.add_alias('bar', node(0).id)
-    cfg.add_alias('bar2', node(0).id)
-    assert cfg.node('@bar'), node(0)
-    assert cfg.node('@bar2'), node(0)
+    cfg.add_alias('bar', 1)
+    cfg.add_alias('bar2', 1)
+    assert cfg.node('@bar'), node(1)
+    assert cfg.node('@bar2'), node(1)
     cfg.remove_alias('bar')
     with pytest.raises(ValueError, match='Unknown alias: @bar'):
         cfg.node('@bar')
 
     with pytest.raises(ValueError, match='Duplicate alias: bar2'):
-        cfg.add_alias('bar2', node(1).id)
+        cfg.add_alias('bar2', 2)
     with pytest.raises(ValueError, match='Alias may not contain "@"'):
-        cfg.add_alias('@buzz', node(1).id)
-    with pytest.raises(ValueError, match=f'Unknown node: {nid(9)}'):
-        cfg.add_alias('buzz', node(9).id)
-
-    cfg.remove_node(nid(1))
-    cfg.create_node(term(1))
+        cfg.add_alias('@buzz', 2)
+    with pytest.raises(ValueError, match='Unknown node: 10'):
+        cfg.add_alias('buzz', 10)
 
 
 def test_pretty_print() -> None:
@@ -422,275 +416,272 @@ def test_pretty_print() -> None:
         return mlEquals(KVariable('x'), token(i))
 
     d = {
-        'init': [nid(20)],
-        'target': [nid(16)],
-        'nodes': node_dicts(24, start=9) + predicate_node_dicts(25, start=24),
-        'aliases': {'foo': nid(13), 'bar': nid(13)},
-        'edges': edge_dicts((20, 11), (11, 12, 5), (12, 13), (14, 15), (15, 12), (17, 16), (21, 18)),
-        'covers': cover_dicts((18, 21)),
+        'init': [21],
+        'target': [17],
+        'nodes': node_dicts(15, start=10) + predicate_node_dicts(1, start=25),
+        'aliases': {'foo': 14, 'bar': 14},
+        'edges': edge_dicts((21, 12), (12, 13, 5), (13, 14), (15, 16), (16, 13), (18, 17), (22, 19)),
+        'covers': cover_dicts((19, 22)),
         'splits': split_dicts(
             (
-                13,
+                14,
                 [
-                    (14, _x_equals(14)),
                     (15, _x_equals(15)),
                     (16, _x_equals(16)),
                     (17, _x_equals(17)),
-                    (19, _x_equals(19)),
+                    (18, _x_equals(18)),
+                    (20, _x_equals(20)),
+                    (23, _x_equals(23)),
                     (22, _x_equals(22)),
-                    (21, _x_equals(21)),
                 ],
             )
         ),
-        'ndbranches': ndbranch_dicts((19, [(23, False), (24, True)])),
-        'expanded': [nid(i) for i in [20, 11, 12, 13, 14, 15, 17, 19, 21, 22]],
+        'ndbranches': ndbranch_dicts((20, [(24, False), (25, True)])),
+        'expanded': [21, 12, 13, 14, 15, 16, 18, 20, 22, 23],
     }
     cfg = KCFG.from_dict(d)
 
-    def _short_hash(i: int, with_cond: bool = False) -> str:
-        return shorten_hash(nid(i, with_cond))
-
     expected = (
-        f'\n'
-        f'┌─ {_short_hash(20)} (init, expanded)\n'
-        f'│\n'
-        f'│  (1 step)\n'
-        f'├─ {_short_hash(11)} (expanded)\n'
-        f'│\n'
-        f'│  (5 steps)\n'
-        f'├─ {_short_hash(12)} (expanded)\n'
-        f'│\n'
-        f'│  (1 step)\n'
-        f'├─ {_short_hash(13)} (expanded, split, @bar, @foo)\n'
-        f'┃\n'
-        f'┃ (branch)\n'
-        f'┣━━┓ constraint: #Equals ( x , 14 )\n'
-        f'┃  ┃ subst: V13 <- V14\n'
-        f'┃  │\n'
-        f'┃  ├─ {_short_hash(14)} (expanded)\n'
-        f'┃  │\n'
-        f'┃  │  (1 step)\n'
-        f'┃  ├─ {_short_hash(15)} (expanded)\n'
-        f'┃  │\n'
-        f'┃  │  (1 step)\n'
-        f'┃  └─ {_short_hash(12)} (expanded)\n'
-        f'┃     (looped back)\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 15 )\n'
-        f'┃  ┃ subst: V13 <- V15\n'
-        f'┃  │\n'
-        f'┃  └─ {_short_hash(15)} (expanded)\n'
-        f'┃     (continues as previously)\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 16 )\n'
-        f'┃  ┃ subst: V13 <- V16\n'
-        f'┃  │\n'
-        f'┃  └─ {_short_hash(16)} (target, leaf)\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 17 )\n'
-        f'┃  ┃ subst: V13 <- V17\n'
-        f'┃  │\n'
-        f'┃  ├─ {_short_hash(17)} (expanded)\n'
-        f'┃  │\n'
-        f'┃  │  (1 step)\n'
-        f'┃  └─ {_short_hash(16)} (target, leaf)\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 19 )\n'
-        f'┃  ┃ subst: V13 <- V19\n'
-        f'┃  │\n'
-        f'┃  ├─ {_short_hash(19)} (expanded)\n'
-        f'┃  ┃\n'
-        f'┃  ┃ (1 step)\n'
-        f'┃  ┣━━┓\n'
-        f'┃  ┃  │\n'
-        f'┃  ┃  └─ \033[1m{_short_hash(23)} (frontier, leaf)\033[0m\n'
-        f'┃  ┃\n'
-        f'┃  ┗━━┓\n'
-        f'┃     │\n'
-        f'┃     └─ \033[1m{_short_hash(24, True)} (frontier, leaf)\033[0m\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 22 )\n'
-        f'┃  ┃ subst: V13 <- V22\n'
-        f'┃  │\n'
-        f'┃  └─ {_short_hash(22)} (expanded, stuck, leaf)\n'
-        f'┃     (stuck)\n'
-        f'┃\n'
-        f'┗━━┓ constraint: #Equals ( x , 21 )\n'
-        f'   ┃ subst: V13 <- V21\n'
-        f'   │\n'
-        f'   ├─ {_short_hash(21)} (expanded)\n'
-        f'   │\n'
-        f'   │  (1 step)\n'
-        f'   ├─ {_short_hash(18)} (leaf)\n'
-        f'   │\n'
-        f'   ┊  constraint: true\n'
-        f'   ┊  subst: V21 <- V18\n'
-        f'   └─ {_short_hash(21)} (expanded)\n'
-        f'      (looped back)\n'
-        f'\n'
-        f'\n'
-        f'Target Nodes:\n'
-        f'\n'
-        f'{_short_hash(16)} (target, leaf)\n'
-        f'\n'
-        f'Remaining Nodes:\n'
-        f'\n'
-        f'\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n'
-        f'\n'
-        f'\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n'
+        '\n'
+        '┌─ 21 (init, expanded)\n'
+        '│\n'
+        '│  (1 step)\n'
+        '├─ 12 (expanded)\n'
+        '│\n'
+        '│  (5 steps)\n'
+        '├─ 13 (expanded)\n'
+        '│\n'
+        '│  (1 step)\n'
+        '├─ 14 (expanded, split, @bar, @foo)\n'
+        '┃\n'
+        '┃ (branch)\n'
+        '┣━━┓ constraint: #Equals ( x , 15 )\n'
+        '┃  ┃ subst: V14 <- V15\n'
+        '┃  │\n'
+        '┃  ├─ 15 (expanded)\n'
+        '┃  │\n'
+        '┃  │  (1 step)\n'
+        '┃  ├─ 16 (expanded)\n'
+        '┃  │\n'
+        '┃  │  (1 step)\n'
+        '┃  └─ 13 (expanded)\n'
+        '┃     (looped back)\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 16 )\n'
+        '┃  ┃ subst: V14 <- V16\n'
+        '┃  │\n'
+        '┃  └─ 16 (expanded)\n'
+        '┃     (continues as previously)\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 17 )\n'
+        '┃  ┃ subst: V14 <- V17\n'
+        '┃  │\n'
+        '┃  └─ 17 (target, leaf)\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 18 )\n'
+        '┃  ┃ subst: V14 <- V18\n'
+        '┃  │\n'
+        '┃  ├─ 18 (expanded)\n'
+        '┃  │\n'
+        '┃  │  (1 step)\n'
+        '┃  └─ 17 (target, leaf)\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 20 )\n'
+        '┃  ┃ subst: V14 <- V20\n'
+        '┃  │\n'
+        '┃  ├─ 20 (expanded)\n'
+        '┃  ┃\n'
+        '┃  ┃ (1 step)\n'
+        '┃  ┣━━┓\n'
+        '┃  ┃  │\n'
+        '┃  ┃  └─ \033[1m24 (frontier, leaf)\033[0m\n'
+        '┃  ┃\n'
+        '┃  ┗━━┓\n'
+        '┃     │\n'
+        '┃     └─ \033[1m25 (frontier, leaf)\033[0m\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 23 )\n'
+        '┃  ┃ subst: V14 <- V23\n'
+        '┃  │\n'
+        '┃  └─ 23 (expanded, stuck, leaf)\n'
+        '┃     (stuck)\n'
+        '┃\n'
+        '┗━━┓ constraint: #Equals ( x , 22 )\n'
+        '   ┃ subst: V14 <- V22\n'
+        '   │\n'
+        '   ├─ 22 (expanded)\n'
+        '   │\n'
+        '   │  (1 step)\n'
+        '   ├─ 19 (leaf)\n'
+        '   │\n'
+        '   ┊  constraint: true\n'
+        '   ┊  subst: V22 <- V19\n'
+        '   └─ 22 (expanded)\n'
+        '      (looped back)\n'
+        '\n'
+        '\n'
+        'Target Nodes:\n'
+        '\n'
+        '17 (target, leaf)\n'
+        '\n'
+        'Remaining Nodes:\n'
+        '\n'
+        '\033[1m10 (frontier, leaf)\033[0m\n'
+        '\n'
+        '\033[1m11 (frontier, leaf)\033[0m\n'
     )
 
     expected_short_info = (
-        f'\n'
-        f'┌─ {_short_hash(20)} (init, expanded)\n'
-        f'│    <top>\n'
-        f'│      V20\n'
-        f'│    </top>\n'
-        f'│\n'
-        f'│  (1 step)\n'
-        f'├─ {_short_hash(11)} (expanded)\n'
-        f'│    <top>\n'
-        f'│      V11\n'
-        f'│    </top>\n'
-        f'│\n'
-        f'│  (5 steps)\n'
-        f'├─ {_short_hash(12)} (expanded)\n'
-        f'│    <top>\n'
-        f'│      V12\n'
-        f'│    </top>\n'
-        f'│\n'
-        f'│  (1 step)\n'
-        f'├─ {_short_hash(13)} (expanded, split, @bar, @foo)\n'
-        f'│    <top>\n'
-        f'│      V13\n'
-        f'│    </top>\n'
-        f'┃\n'
-        f'┃ (branch)\n'
-        f'┣━━┓ constraint: #Equals ( x , 14 )\n'
-        f'┃  ┃ subst: V13 <- V14\n'
-        f'┃  │\n'
-        f'┃  ├─ {_short_hash(14)} (expanded)\n'
-        f'┃  │    <top>\n'
-        f'┃  │      V14\n'
-        f'┃  │    </top>\n'
-        f'┃  │\n'
-        f'┃  │  (1 step)\n'
-        f'┃  ├─ {_short_hash(15)} (expanded)\n'
-        f'┃  │    <top>\n'
-        f'┃  │      V15\n'
-        f'┃  │    </top>\n'
-        f'┃  │\n'
-        f'┃  │  (1 step)\n'
-        f'┃  └─ {_short_hash(12)} (expanded)\n'
-        f'┃       <top>\n'
-        f'┃         V12\n'
-        f'┃       </top>\n'
-        f'┃     (looped back)\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 15 )\n'
-        f'┃  ┃ subst: V13 <- V15\n'
-        f'┃  │\n'
-        f'┃  └─ {_short_hash(15)} (expanded)\n'
-        f'┃       <top>\n'
-        f'┃         V15\n'
-        f'┃       </top>\n'
-        f'┃     (continues as previously)\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 16 )\n'
-        f'┃  ┃ subst: V13 <- V16\n'
-        f'┃  │\n'
-        f'┃  └─ {_short_hash(16)} (target, leaf)\n'
-        f'┃       <top>\n'
-        f'┃         V16\n'
-        f'┃       </top>\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 17 )\n'
-        f'┃  ┃ subst: V13 <- V17\n'
-        f'┃  │\n'
-        f'┃  ├─ {_short_hash(17)} (expanded)\n'
-        f'┃  │    <top>\n'
-        f'┃  │      V17\n'
-        f'┃  │    </top>\n'
-        f'┃  │\n'
-        f'┃  │  (1 step)\n'
-        f'┃  └─ {_short_hash(16)} (target, leaf)\n'
-        f'┃       <top>\n'
-        f'┃         V16\n'
-        f'┃       </top>\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 19 )\n'
-        f'┃  ┃ subst: V13 <- V19\n'
-        f'┃  │\n'
-        f'┃  ├─ {_short_hash(19)} (expanded)\n'
-        f'┃  │    <top>\n'
-        f'┃  │      V19\n'
-        f'┃  │    </top>\n'
-        f'┃  ┃\n'
-        f'┃  ┃ (1 step)\n'
-        f'┃  ┣━━┓\n'
-        f'┃  ┃  │\n'
-        f'┃  ┃  └─ \033[1m{_short_hash(23)} (frontier, leaf)\033[0m\n'
-        f'┃  ┃       <top>\n'
-        f'┃  ┃         V23\n'
-        f'┃  ┃       </top>\n'
-        f'┃  ┃\n'
-        f'┃  ┗━━┓\n'
-        f'┃     │\n'
-        f'┃     └─ \033[1m{_short_hash(24, True)} (frontier, leaf)\033[0m\n'
-        f'┃          #And ( <top>\n'
-        f'┃            V24\n'
-        f'┃          </top> , #Equals ( x , 24 ) )\n'
-        f'┃\n'
-        f'┣━━┓ constraint: #Equals ( x , 22 )\n'
-        f'┃  ┃ subst: V13 <- V22\n'
-        f'┃  │\n'
-        f'┃  └─ {_short_hash(22)} (expanded, stuck, leaf)\n'
-        f'┃       <top>\n'
-        f'┃         V22\n'
-        f'┃       </top>\n'
-        f'┃     (stuck)\n'
-        f'┃\n'
-        f'┗━━┓ constraint: #Equals ( x , 21 )\n'
-        f'   ┃ subst: V13 <- V21\n'
-        f'   │\n'
-        f'   ├─ {_short_hash(21)} (expanded)\n'
-        f'   │    <top>\n'
-        f'   │      V21\n'
-        f'   │    </top>\n'
-        f'   │\n'
-        f'   │  (1 step)\n'
-        f'   ├─ {_short_hash(18)} (leaf)\n'
-        f'   │    <top>\n'
-        f'   │      V18\n'
-        f'   │    </top>\n'
-        f'   │\n'
-        f'   ┊  constraint: true\n'
-        f'   ┊  subst: V21 <- V18\n'
-        f'   └─ {_short_hash(21)} (expanded)\n'
-        f'        <top>\n'
-        f'          V21\n'
-        f'        </top>\n'
-        f'      (looped back)\n'
-        f'\n'
-        f'\n'
-        f'Target Nodes:\n'
-        f'\n'
-        f'{_short_hash(16)} (target, leaf)\n'
-        f' <top>\n'
-        f'   V16\n'
-        f' </top>\n'
-        f'\n'
-        f'Remaining Nodes:\n'
-        f'\n'
-        f'\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n'
-        f' <top>\n'
-        f'   10\n'
-        f' </top>\n'
-        f'\n'
-        f'\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n'
-        f' <top>\n'
-        f'   9\n'
-        f' </top>\n'
+        '\n'
+        '┌─ 21 (init, expanded)\n'
+        '│    <top>\n'
+        '│      V21\n'
+        '│    </top>\n'
+        '│\n'
+        '│  (1 step)\n'
+        '├─ 12 (expanded)\n'
+        '│    <top>\n'
+        '│      V12\n'
+        '│    </top>\n'
+        '│\n'
+        '│  (5 steps)\n'
+        '├─ 13 (expanded)\n'
+        '│    <top>\n'
+        '│      V13\n'
+        '│    </top>\n'
+        '│\n'
+        '│  (1 step)\n'
+        '├─ 14 (expanded, split, @bar, @foo)\n'
+        '│    <top>\n'
+        '│      V14\n'
+        '│    </top>\n'
+        '┃\n'
+        '┃ (branch)\n'
+        '┣━━┓ constraint: #Equals ( x , 15 )\n'
+        '┃  ┃ subst: V14 <- V15\n'
+        '┃  │\n'
+        '┃  ├─ 15 (expanded)\n'
+        '┃  │    <top>\n'
+        '┃  │      V15\n'
+        '┃  │    </top>\n'
+        '┃  │\n'
+        '┃  │  (1 step)\n'
+        '┃  ├─ 16 (expanded)\n'
+        '┃  │    <top>\n'
+        '┃  │      V16\n'
+        '┃  │    </top>\n'
+        '┃  │\n'
+        '┃  │  (1 step)\n'
+        '┃  └─ 13 (expanded)\n'
+        '┃       <top>\n'
+        '┃         V13\n'
+        '┃       </top>\n'
+        '┃     (looped back)\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 16 )\n'
+        '┃  ┃ subst: V14 <- V16\n'
+        '┃  │\n'
+        '┃  └─ 16 (expanded)\n'
+        '┃       <top>\n'
+        '┃         V16\n'
+        '┃       </top>\n'
+        '┃     (continues as previously)\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 17 )\n'
+        '┃  ┃ subst: V14 <- V17\n'
+        '┃  │\n'
+        '┃  └─ 17 (target, leaf)\n'
+        '┃       <top>\n'
+        '┃         V17\n'
+        '┃       </top>\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 18 )\n'
+        '┃  ┃ subst: V14 <- V18\n'
+        '┃  │\n'
+        '┃  ├─ 18 (expanded)\n'
+        '┃  │    <top>\n'
+        '┃  │      V18\n'
+        '┃  │    </top>\n'
+        '┃  │\n'
+        '┃  │  (1 step)\n'
+        '┃  └─ 17 (target, leaf)\n'
+        '┃       <top>\n'
+        '┃         V17\n'
+        '┃       </top>\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 20 )\n'
+        '┃  ┃ subst: V14 <- V20\n'
+        '┃  │\n'
+        '┃  ├─ 20 (expanded)\n'
+        '┃  │    <top>\n'
+        '┃  │      V20\n'
+        '┃  │    </top>\n'
+        '┃  ┃\n'
+        '┃  ┃ (1 step)\n'
+        '┃  ┣━━┓\n'
+        '┃  ┃  │\n'
+        '┃  ┃  └─ \033[1m24 (frontier, leaf)\033[0m\n'
+        '┃  ┃       <top>\n'
+        '┃  ┃         V24\n'
+        '┃  ┃       </top>\n'
+        '┃  ┃\n'
+        '┃  ┗━━┓\n'
+        '┃     │\n'
+        '┃     └─ \033[1m25 (frontier, leaf)\033[0m\n'
+        '┃          #And ( <top>\n'
+        '┃            V25\n'
+        '┃          </top> , #Equals ( x , 25 ) )\n'
+        '┃\n'
+        '┣━━┓ constraint: #Equals ( x , 23 )\n'
+        '┃  ┃ subst: V14 <- V23\n'
+        '┃  │\n'
+        '┃  └─ 23 (expanded, stuck, leaf)\n'
+        '┃       <top>\n'
+        '┃         V23\n'
+        '┃       </top>\n'
+        '┃     (stuck)\n'
+        '┃\n'
+        '┗━━┓ constraint: #Equals ( x , 22 )\n'
+        '   ┃ subst: V14 <- V22\n'
+        '   │\n'
+        '   ├─ 22 (expanded)\n'
+        '   │    <top>\n'
+        '   │      V22\n'
+        '   │    </top>\n'
+        '   │\n'
+        '   │  (1 step)\n'
+        '   ├─ 19 (leaf)\n'
+        '   │    <top>\n'
+        '   │      V19\n'
+        '   │    </top>\n'
+        '   │\n'
+        '   ┊  constraint: true\n'
+        '   ┊  subst: V22 <- V19\n'
+        '   └─ 22 (expanded)\n'
+        '        <top>\n'
+        '          V22\n'
+        '        </top>\n'
+        '      (looped back)\n'
+        '\n'
+        '\n'
+        'Target Nodes:\n'
+        '\n'
+        '17 (target, leaf)\n'
+        ' <top>\n'
+        '   V17\n'
+        ' </top>\n'
+        '\n'
+        'Remaining Nodes:\n'
+        '\n'
+        '\033[1m10 (frontier, leaf)\033[0m\n'
+        ' <top>\n'
+        '   10\n'
+        ' </top>\n'
+        '\n'
+        '\033[1m11 (frontier, leaf)\033[0m\n'
+        ' <top>\n'
+        '   V11\n'
+        ' </top>\n'
     )
 
     # When

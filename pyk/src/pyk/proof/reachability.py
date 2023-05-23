@@ -33,9 +33,9 @@ class APRProof(Proof):
     """
 
     kcfg: KCFG
-    logs: dict[str, tuple[LogEntry, ...]]
+    logs: dict[int, tuple[LogEntry, ...]]
 
-    def __init__(self, id: str, kcfg: KCFG, logs: dict[str, tuple[LogEntry, ...]], proof_dir: Path | None = None):
+    def __init__(self, id: str, kcfg: KCFG, logs: dict[int, tuple[LogEntry, ...]], proof_dir: Path | None = None):
         super().__init__(id, proof_dir=proof_dir)
         self.kcfg = kcfg
         self.logs = logs
@@ -89,15 +89,15 @@ class APRBMCProof(APRProof):
     """APRBMCProof and APRBMCProver perform bounded model-checking of an all-path reachability logic claim."""
 
     bmc_depth: int
-    _bounded_states: list[str]
+    _bounded_states: list[int]
 
     def __init__(
         self,
         id: str,
         kcfg: KCFG,
-        logs: dict[str, tuple[LogEntry, ...]],
+        logs: dict[int, tuple[LogEntry, ...]],
         bmc_depth: int,
-        bounded_states: Iterable[str] | None = None,
+        bounded_states: Iterable[int] | None = None,
         proof_dir: Path | None = None,
     ):
         super().__init__(id, kcfg, logs, proof_dir=proof_dir)
@@ -146,7 +146,7 @@ class APRBMCProof(APRProof):
             'bounded_states': self._bounded_states,
         }
 
-    def bound_state(self, nid: str) -> None:
+    def bound_state(self, nid: int) -> None:
         self._bounded_states.append(nid)
 
     @property
@@ -236,7 +236,7 @@ class APRProver:
 class APRBMCProver(APRProver):
     proof: APRBMCProof
     _same_loop: Callable[[CTerm, CTerm], bool]
-    _checked_nodes: list[str]
+    _checked_nodes: list[int]
 
     def __init__(
         self,

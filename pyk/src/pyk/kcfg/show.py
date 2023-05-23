@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from ..kast import KInner
     from ..kast.outer import KRuleLike
     from ..ktool.kprint import KPrint
+    from .kcfg import NodeIdLike
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -41,7 +42,6 @@ class KCFGShow:
         kcfg: KCFG,
         minimize: bool = True,
         node_printer: Callable[[CTerm], Iterable[str]] | None = None,
-        omit_node_hash: bool = False,
     ) -> Iterable[tuple[str, Iterable[str]]]:
         """Return a pretty version of the KCFG in segments.
 
@@ -60,7 +60,7 @@ class KCFGShow:
             return '\033[32m' + text + '\033[0m'
 
         def _print_node(node: KCFG.Node) -> list[str]:
-            short_info = kcfg.node_short_info(node, node_printer=node_printer, omit_node_hash=omit_node_hash)
+            short_info = kcfg.node_short_info(node, node_printer=node_printer)
             if kcfg.is_frontier(node.id):
                 short_info[0] = _bold(short_info[0])
             return short_info
@@ -90,7 +90,7 @@ class KCFGShow:
                 f'subst: {subst_str}',
             ]
 
-        def _print_split_edge(split: KCFG.Split, target_id: str) -> list[str]:
+        def _print_split_edge(split: KCFG.Split, target_id: int) -> list[str]:
             csubst = split.splits[target_id]
             ret_split_lines: list[str] = []
             substs = csubst.subst.items()
@@ -250,12 +250,13 @@ class KCFGShow:
         kcfg: KCFG,
         minimize: bool = True,
         node_printer: Callable[[CTerm], Iterable[str]] | None = None,
-        omit_node_hash: bool = False,
     ) -> Iterable[str]:
         return (
             line
             for _, seg_lines in self.pretty_segments(
-                kcfg, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash
+                kcfg,
+                minimize=minimize,
+                node_printer=node_printer,
             )
             for line in seg_lines
         )
@@ -264,16 +265,15 @@ class KCFGShow:
         self,
         cfgid: str,
         cfg: KCFG,
-        nodes: Iterable[str] = (),
-        node_deltas: Iterable[tuple[str, str]] = (),
+        nodes: Iterable[NodeIdLike] = (),
+        node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
         to_module: bool = False,
         minimize: bool = True,
         node_printer: Callable[[CTerm], Iterable[str]] | None = None,
-        omit_node_hash: bool = False,
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
         res_lines: list[str] = []
-        res_lines += self.pretty(cfg, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash)
+        res_lines += self.pretty(cfg, minimize=minimize, node_printer=node_printer)
 
         def hide_cells(term: KInner) -> KInner:
             def _hide_cells(_k: KInner) -> KInner:
@@ -295,10 +295,7 @@ class KCFGShow:
                 kast = minimize_term(kast)
             res_lines.append('')
             res_lines.append('')
-            if omit_node_hash:
-                res_lines.append('Node OMITTED HASH:')
-            else:
-                res_lines.append(f'Node {node_id}:')
+            res_lines.append(f'Node {node_id}:')
             res_lines.append('')
             res_lines.append(self.kprint.pretty_print(kast))
             res_lines.append('')
