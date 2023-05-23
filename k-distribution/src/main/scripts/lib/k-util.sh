@@ -23,8 +23,8 @@ result=0
 error () {
   local result
   result="$1" ; shift
-  printf "[Error] ${ktool}: $*\n" | ${fold_lines} 1>&2
-  exit ${result}
+  printf "[Error] ${KTOOL}: $*\n" | ${fold_lines} 1>&2
+  exit "${result}"
 }
 
 k_util_usage() {

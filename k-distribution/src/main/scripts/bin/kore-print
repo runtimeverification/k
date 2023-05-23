@@ -24,7 +24,7 @@ trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 KORE_PRINT=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
 
-export ktool="${KORE_PRINT}"
+export KTOOL="${KORE_PRINT}"
 source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 print_usage () {
@@ -141,7 +141,7 @@ do
       ;;
 
       -v| --verbose)
-      verboseFlag=" --verbose"
+      verboseFlag="--verbose"
       verbose=1
       shift
       ;;
@@ -207,7 +207,7 @@ fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
   (
-  if [ -n "$verbose" ]; then
+  if [ "$verbose" = true ]; then
     set -x
   fi
   execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}" "$verboseFlag"
@@ -226,7 +226,7 @@ if [ "$outputFile" = "-" ]; then
 fi
 
 (
-if [ -n "$verbose" ]; then
+if [ "$verbose" = true ]; then
   set -x
 fi
 case "$outputMode" in
