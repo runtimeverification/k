@@ -441,7 +441,8 @@ public class ModuleToKORE {
         if (prod.arity() != 2) {
             throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
         }
-        if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
+        if (!(module.subsorts().lessThanEq(prod.sort(), prod.nonterminal(0).sort()) &&
+                module.subsorts().lessThanEq(prod.sort(), prod.nonterminal(1).sort()))) {
             throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
         }
         sb.append("  axiom");

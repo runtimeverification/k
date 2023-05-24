@@ -10,6 +10,7 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAssoc;
 import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -450,6 +451,8 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSyntaxGroups(errors, m, kem)::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
