@@ -1712,7 +1712,7 @@ module STRING-BUFFER-IN-K [symbolic]
   imports STRING
 
   syntax StringBuffer ::= ".StringBuffer" [function, total]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, avoid]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, avoid]
   syntax StringBuffer ::= String
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, total]
 
@@ -1727,7 +1727,7 @@ module STRING-BUFFER-HOOKED [concrete]
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
   syntax StringBuffer ::= ".StringBuffer" [function, total, hook(BUFFER.empty), impure]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, hook(BUFFER.concat), avoid]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, hook(BUFFER.concat), avoid]
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, total, hook(BUFFER.toString)]
 endmodule
 
