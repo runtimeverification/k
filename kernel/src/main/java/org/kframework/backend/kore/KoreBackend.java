@@ -22,20 +22,17 @@ import scala.Function1;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
 import static org.kframework.Collections.*;
-import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 public class KoreBackend extends AbstractBackend {
 
     private final KompileOptions kompileOptions;
     protected final FileUtil files;
     private final KExceptionManager kem;
-    private final EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions;
     protected final boolean heatCoolEquations;
     private final Tool tool;
 
@@ -45,14 +42,13 @@ public class KoreBackend extends AbstractBackend {
             FileUtil files,
             KExceptionManager kem,
             Tool tool) {
-        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false, tool);
+        this(kompileOptions, files, kem, false, tool);
     }
 
-    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations, Tool tool) {
+    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean heatCoolEquations, Tool tool) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
-        this.heatCoolConditions = heatCoolConditions;
         this.heatCoolEquations = heatCoolEquations;
         this.tool = tool;
     }
@@ -108,7 +104,7 @@ public class KoreBackend extends AbstractBackend {
     public Function<Definition, Definition> steps() {
         DefinitionTransformer resolveComm = DefinitionTransformer.from(new ResolveComm(kem)::resolve, "resolve comm simplification rules");
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(), heatCoolConditions)::resolve, "resolving heat and cool attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>())::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns()::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =
