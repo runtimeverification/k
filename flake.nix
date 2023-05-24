@@ -169,10 +169,12 @@
             };
         };
         defaultPackage = packages.k;
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework haskell-backend-bins);
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlay;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
+
       };
 }

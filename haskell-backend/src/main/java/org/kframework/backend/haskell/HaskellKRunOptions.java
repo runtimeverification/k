@@ -9,10 +9,10 @@ import org.kframework.utils.options.BaseEnumConverter;
 @RequestScoped
 public class HaskellKRunOptions {
 
-    @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.")
+    @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.", hidden = true)
     public String haskellBackendCommand = "kore-exec";
 
-    @Parameter(names="--haskell-backend-home", description="Directory where the Haskell backend source installation resides.")
+    @Parameter(names="--haskell-backend-home", description="Directory where the Haskell backend source installation resides.", hidden = true)
     public String haskellBackendHome = System.getenv("KORE_HOME");
 
     @Parameter(names="--default-claim-type", converter = SentenceTypeConverter.class, description="Default type for claims. Values: [all-path|one-path].")

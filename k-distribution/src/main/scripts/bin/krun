@@ -74,7 +74,7 @@ keepTempsIfDryRun () {
 
 KRUN=$(basename "$0")
 
-ktool="${KRUN}"
+export KTOOL="${KRUN}"
 source "$(dirname "$0")/../lib/kframework/k-util.sh"
 if ${verbose}; then
   llvm_krun_flags="${llvm_krun_flags} -v"
