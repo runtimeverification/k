@@ -1535,14 +1535,8 @@ public class ModuleToKORE {
         String format = att.getOptional("format").orElse(Formatter.defaultFormat(prod.items().size()));
         int nt = 1;
         boolean hasFormat = true;
-        boolean printName = true;
+        boolean printName = stream(prod.items()).noneMatch(pi -> pi instanceof NonTerminal && ((NonTerminal) pi).name().isEmpty());
         boolean printEllipses = false;
-        for (int i = 0; i < prod.items().size(); i++) {
-          if (prod.items().apply(i) instanceof NonTerminal && ((NonTerminal) prod.items().apply(i)).name().isEmpty()) {
-            printName = false;
-            break;
-          }
-        }
 
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
