@@ -4,6 +4,9 @@ copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 # Projects using K
 
+A list of projects using the K framework. If you are working on something interesting, and you want to share it with the community,
+let us know on our [socials](https://kframework.org/#support), and we will feature you on this list.
+
 <br>
 
 ## Featured
