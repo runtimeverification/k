@@ -10,7 +10,7 @@ module IMP-SYNTAX
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
-                 > AExp "+" AExp              [left, strict, transition]
+                 > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
