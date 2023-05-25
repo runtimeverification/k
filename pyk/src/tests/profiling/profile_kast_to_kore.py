@@ -12,7 +12,7 @@ from pyk.kore.kompiled import KompiledKore
 from .utils import TEST_DATA_DIR
 
 if TYPE_CHECKING:
-    from .utils import Profiler
+    from pyk.testing import Profiler
 
 
 def test_kast_to_kore(profile: Profiler) -> None:

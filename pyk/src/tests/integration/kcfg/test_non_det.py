@@ -7,8 +7,9 @@ import pytest
 
 from pyk.kcfg import KCFG
 from pyk.proof import APRProof, APRProver, ProofStatus
+from pyk.testing import KCFGExploreTest
 
-from ..utils import K_FILES, KCFGExploreTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

@@ -4,10 +4,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.ast import CompositePattern
+from pyk.testing import RuntimeTest
 
 from ..utils import K_FILES
-from .utils import RuntimeTest
 
 if TYPE_CHECKING:
     from types import ModuleType

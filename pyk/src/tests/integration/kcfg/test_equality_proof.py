@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.proof import EqualityProof, EqualityProver, ProofStatus
+from pyk.testing import KCFGExploreTest
 from pyk.utils import single
 
-from ..utils import K_FILES, KCFGExploreTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.parser import Parser
+from pyk.testing import RuntimeTest
 
 from ..utils import K_FILES
-from .utils import RuntimeTest
 
 if TYPE_CHECKING:
     from types import ModuleType

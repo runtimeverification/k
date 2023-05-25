@@ -18,9 +18,9 @@ from pyk.kore.rpc import (
     TerminalResult,
 )
 from pyk.kore.syntax import And, Equals, EVar, Implies, Module, Top
+from pyk.testing import KoreClientTest
 
 from ..utils import K_FILES
-from .utils import KoreClientTest
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

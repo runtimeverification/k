@@ -13,8 +13,9 @@ from pyk.kast.outer import KDefinition, KFlatModuleList, KRequire
 from pyk.ktool.kprint import paren
 from pyk.ktool.kprove import _kprove
 from pyk.prelude.ml import is_top
+from pyk.testing import KProveTest
 
-from ..utils import K_FILES, KProveTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from pyk.kast.outer import KFlatModule
