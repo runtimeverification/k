@@ -32,7 +32,7 @@ You can:
 
 ```k
   syntax Rat ::= left:
-                 Rat "^Rat" Int [function, total, klabel(_^Rat_), symbol, left, smtlib(ratpow), hook(RAT.pow)]
+                 Rat "^Rat" Int [function, total, klabel(_^Rat_), symbol, smtlib(ratpow), hook(RAT.pow)]
                > left:
                  Rat "*Rat" Rat [function, total, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
                | Rat "/Rat" Rat [function,             klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
