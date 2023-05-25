@@ -106,21 +106,21 @@ public class ConvertDataStructureToLookup {
 
     public static Map<KLabel, KLabel> collectionFor(Module m) {
         return stream(m.productions())
-                .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains("element"))
+                .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains(Att.ELEMENT()))
                 .flatMap(p -> {
                     Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
                     set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
                     if (p.att().contains(Att.UNIT())) {
                         set.add(Tuple2.apply(KLabel(p.att().get(Att.UNIT())), p.klabel().get()));
                     }
-                    if (p.att().contains("element")) {
-                        set.add(Tuple2.apply(KLabel(p.att().get("element")), p.klabel().get()));
+                    if (p.att().contains(Att.ELEMENT())) {
+                        set.add(Tuple2.apply(KLabel(p.att().get(Att.ELEMENT())), p.klabel().get()));
                     }
-                    if (p.att().contains("filterElement")) {
-                        set.add(Tuple2.apply(KLabel(p.att().get("filterElement")), p.klabel().get()));
+                    if (p.att().contains(Att.FILTER_ELEMENT())) {
+                        set.add(Tuple2.apply(KLabel(p.att().get(Att.FILTER_ELEMENT())), p.klabel().get()));
                     }
-                    if (p.att().contains("wrapElement")) {
-                        set.add(Tuple2.apply(KLabel(p.att().get("wrapElement")), p.klabel().get()));
+                    if (p.att().contains(Att.WRAP_ELEMENT())) {
+                        set.add(Tuple2.apply(KLabel(p.att().get(Att.WRAP_ELEMENT())), p.klabel().get()));
                     }
                     return set.stream();
                 }).distinct().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
@@ -128,7 +128,7 @@ public class ConvertDataStructureToLookup {
 
     public static Set<KLabel> filteredMapConstructors(Module m) {
         return stream(m.productions())
-                .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains("filterElement"))
+                .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains(Att.FILTER_ELEMENT()))
                 .map(p -> p.klabel().get())
                 .distinct()
                 .collect(Collectors.toSet());
@@ -246,10 +246,10 @@ public class ConvertDataStructureToLookup {
             @Override
             public K apply(KApply k) {
                 for (KLabel collectionLabel : collectionFor.keySet()) {
-                    Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).getOptional("wrapElement");
+                    Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).getOptional(Att.WRAP_ELEMENT());
                     if (wrapElement.isPresent()) {
                         KLabel wrappedLabel = KLabel(wrapElement.get());
-                        KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get("element"));
+                        KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get(Att.ELEMENT()));
                         if (k.klabel().equals(elementLabel)) {
                             return k;
                         }
@@ -344,7 +344,7 @@ public class ConvertDataStructureToLookup {
                     KVariable frame = null;
                     List<K> elementsLeft = new ArrayList<K>();
                     List<K> elementsRight = new ArrayList<K>();
-                    KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get("element"));
+                    KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get(Att.ELEMENT()));
                     boolean isRight = false; // true for components later than the frame variable.
                     //build the components of the list from the flattened KApply.
                     for (K component : components) {
@@ -396,7 +396,7 @@ public class ConvertDataStructureToLookup {
                                     KToken(Integer.toString(elementsLeft.size()), Sorts.Int()),
                                     KToken(Integer.toString(elementsRight.size()), Sorts.Int()))));
                         } else {
-                            KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).get("unit"));
+                            KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).get(Att.UNIT()));
                             // Ctx[.List] => Ctx[L] requires L ==K range(L, 0, 0)
                             state.add(KApply(KLabel("_==K_"), KApply(unit), KApply(KLabel("List:range"), list,
                                     KToken(Integer.toString(elementsLeft.size()), Sorts.Int()),
@@ -448,7 +448,7 @@ public class ConvertDataStructureToLookup {
 
                             boolean needsWrapper = false;
                             KApply kapp = (KApply) component;
-                            if (kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).get("element")))
+                            if (kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).get(Att.ELEMENT())))
                                     || (needsWrapper = kapp.klabel().equals(getWrapElement(collectionLabel)))) {
                                 if (kapp.klist().size() != 2 && !needsWrapper) {
                                     throw KEMException.internalError("Unexpected arity of map element: " + kapp.klist().size(), kapp);
@@ -468,21 +468,19 @@ public class ConvertDataStructureToLookup {
                     }
                     KVariable map = newDotVariable();
                     // K1,Ctx[K1 |-> K2 K3] => K1,Ctx[M] requires K3 := M[K1<-undef] andBool K1 := choice(M) andBool K2 := M[K1]
-                    KLabel remove = KLabel(m.attributesFor().apply(collectionLabel).getOptional("remove").orElse("_[_<-undef]"));
+                    KLabel remove = KLabel(m.attributesFor().apply(collectionLabel).getOptional(Att.REMOVE()).orElse("_[_<-undef]"));
                     if (frame != null) {
                         state.add(KApply(KLabel("#match"), frame, elements.keySet().stream().reduce(map, (a1, a2) -> KApply(remove, a1, a2))));
                     } else {
-                        KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).get("unit"));
+                        KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).get(Att.UNIT()));
                         state.add(KApply(KLabel("_==K_"), KApply(unit), elements.keySet().stream().reduce(map, (a1, a2) -> KApply(remove, a1, a2))));
                     }
                     for (Map.Entry<K, K> element : elements.entrySet()) {
                         // TODO(dwightguth): choose better between lookup and choice.
                         if (element.getKey() instanceof KVariable && varConstraints.count(element.getKey()) == 1) {
-                            KLabel choice = KLabel(m.attributesFor().apply(collectionLabel).getOptional("choice").orElse("#mapChoice"));
-                            state.add(KApply(choice, element.getKey(), map));
+                            state.add(KApply(KLabel("#mapChoice"), element.getKey(), map));
                         }
-                        KLabel lookup = KLabel(m.attributesFor().apply(collectionLabel).getOptional("lookup").orElse("Map:lookup"));
-                        state.add(KApply(KLabel("#match"), element.getValue(), KApply(lookup, map, element.getKey())));
+                        state.add(KApply(KLabel("#match"), element.getValue(), KApply(KLabel("Map:lookup"), map, element.getKey())));
                     }
                     if (lhsOf == null) {
                         if (!hasRewrite(k)) {
@@ -500,7 +498,7 @@ public class ConvertDataStructureToLookup {
             }
 
             private KLabel getWrapElement(KLabel collectionLabel) {
-                return KLabel(m.attributesFor().apply(collectionLabel).get("wrapElement"));
+                return KLabel(m.attributesFor().apply(collectionLabel).get(Att.WRAP_ELEMENT()));
             }
 
 
@@ -514,7 +512,7 @@ public class ConvertDataStructureToLookup {
                     //left hand side
                     KVariable frame = null;
                     Set<K> elements = new LinkedHashSet<>();
-                    KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get("element"));
+                    KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get(Att.ELEMENT()));
                     //build the components of the set from the flattened KApply.
                     for (K component : components) {
                         if (component instanceof KVariable) {
@@ -560,7 +558,7 @@ public class ConvertDataStructureToLookup {
                         }
                         accum = KApply(KLabel("Set:difference"), accum, KApply(elementLabel, element));
                     }
-                    KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).get("unit"));
+                    KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).get(Att.UNIT()));
                     if (frame != null) {
                         state.add(KApply(KLabel("#match"), frame, accum));
                     } else {

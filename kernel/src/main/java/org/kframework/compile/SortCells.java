@@ -197,12 +197,12 @@ public class SortCells {
                             var.name(),
                             var.att().add(Sort.class, getPredicateSort(s))));
                 } else {
-                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().add(Sort.class, s).add("cellSort")));
+                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().add(Sort.class, s).add(Att.CELL_SORT())));
                 }
             } else {
                 split = new HashMap<>();
                 for (Sort cell : remainingCells) {
-                    split.put(cell, newDotVariable(var.att().add(Sort.class, cell).add("cellSort")));
+                    split.put(cell, newDotVariable(var.att().add(Sort.class, cell).add(Att.CELL_SORT())));
                 }
             }
             return split;
@@ -828,7 +828,7 @@ public class SortCells {
                                     if (cellFragmentSort.name().endsWith("Fragment")) {
                                         Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
                                         KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
-                                        klist0.set(idx, KApply(cellLabel, KList(item0), Att().add("dummy_cell")));
+                                        klist0.set(idx, KApply(cellLabel, KList(item0), Att().add(Att.DUMMY_CELL())));
                                     }
                                 }
                             }
@@ -851,7 +851,7 @@ public class SortCells {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-                if (k.att().contains("dummy_cell")) {
+                if (k.att().contains(Att.DUMMY_CELL())) {
                     KLabel klabel = KLabel(k.klabel().name() + "-fragment");
                     return KApply(klabel, k.klist(), k.att());
                 }

@@ -204,7 +204,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
-      .collect({ case p if p.att.contains("token") => p })
+      .collect({ case p if p.att.contains(Att.TOKEN) => p })
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
@@ -212,7 +212,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     if (tokenProductionsFor.contains(s))
       tokenProductionsFor.apply(s).head
     else
-      Production(None, Seq(), s, Seq(), Att.empty.add("token"))
+      Production(None, Seq(), s, Seq(), Att.empty.add(Att.TOKEN))
   }
 
   lazy val allModuleNames : Set[String] = importedModuleNames + name
@@ -313,7 +313,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
   }
 
-  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(_, _, srt, _, att1) if att1.contains("userList") =>
+  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(_, _, srt, _, att1) if att1.contains(Att.USER_LIST) =>
     srt
   })
 
@@ -346,7 +346,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   }
 
   @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
-    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")))
+    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains(Att.FRESH_GENERATOR)))
       .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
       if (set.size > 1)
         throw KEMException.compilerError("Found more than one fresh generator for sort " + sortFor(set.head)
@@ -406,7 +406,7 @@ trait Sentence extends HasLocation with HasAtt with AttValue {
   def withAtt(att: Att): Sentence
   def location: Optional[Location] = att.getOptional(classOf[Location])
   def source: Optional[Source] = att.getOptional(classOf[Source])
-  def label: Optional[String] = att.getOptional("label")
+  def label: Optional[String] = att.getOptional(Att.LABEL)
 }
 
 // deprecated
@@ -516,13 +516,13 @@ case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty) exte
 case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
 
-  lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
-  lazy val parseLabel: KLabel = klabel.getOrElse(att.get("bracketLabel", classOf[KLabel]))
+  lazy val klabelAtt: Option[String] = att.getOption(Att.KLABEL).orElse(klabel.map(_.name))
+  lazy val parseLabel: KLabel = klabel.getOrElse(att.get(Att.BRACKET_LABEL, classOf[KLabel]))
 
   override def equals(that: Any): Boolean = that match {
     case p@Production(`klabel`, `params`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt
-                                                      && this.att.getOption("function") == p.att.getOption("function")
-                                                      && this.att.getOption("symbol") == p.att.getOption("symbol")
+                                                      && this.att.getOption(Att.FUNCTION) == p.att.getOption(Att.FUNCTION)
+                                                      && this.att.getOption(Att.SYMBOL) == p.att.getOption(Att.SYMBOL)
                                                        )
     case _ => false
   }
@@ -611,19 +611,19 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
     val suffix = items.last
     val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], this)
     if (namedNts.isEmpty) // if it doesn't contain named NTs, don't generate the extra list productions
-      Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero")))
+      Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add(Att.RECORD_PRD_ZERO)))
     else if(namedNts.size == 1) {
-      val main = Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero"))
-      val one = Production(klabel, params, sort, prefix :+ Terminal(namedNts.head.name.get) :+ Terminal(":") :+ namedNts.head :+ suffix, newAtt.add("recordPrd-one", namedNts.head.name.get))
+      val main = Production(klabel, params, sort, prefix :+ suffix, newAtt.add(Att.RECORD_PRD_ZERO))
+      val one = Production(klabel, params, sort, prefix :+ Terminal(namedNts.head.name.get) :+ Terminal(":") :+ namedNts.head :+ suffix, newAtt.add(Att.RECORD_PRD_ONE, namedNts.head.name.get))
       Set(main, one)
     } else {
       val baseName = items.head.asInstanceOf[Terminal].value + "-" + uid
-      val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
-      val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add("recordPrd-empty"))
-      val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add("recordPrd-subsort"))
-      val repeat = Production(klabel, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Ne"), None), Terminal(","), NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-repeat"))
-      val subsort2 = Production(None, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-subsort"))
-      val namedItems: Set[Production] = namedNts.map(nt => Production(klabel, Seq(), Sort(baseName + "Item"), Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)), newAtt.add("recordPrd-item", nt.name.get))).toSet
+      val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add(Att.RECORD_PRD_MAIN))
+      val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add(Att.RECORD_PRD_EMPTY))
+      val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add(Att.RECORD_PRD_SUBSORT))
+      val repeat = Production(klabel, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Ne"), None), Terminal(","), NonTerminal(Sort(baseName + "Item"), None)), newAtt.add(Att.RECORD_PRD_REPEAT))
+      val subsort2 = Production(None, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Item"), None)), newAtt.add(Att.RECORD_PRD_SUBSORT))
+      val namedItems: Set[Production] = namedNts.map(nt => Production(klabel, Seq(), Sort(baseName + "Item"), Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)), newAtt.add(Att.RECORD_PRD_ITEM, nt.name.get))).toSet
       namedItems + main + empty + subsort + repeat + subsort2
     }
   }
@@ -643,14 +643,12 @@ object Production {
     Production(Some(klabel), params, sort, items, att)
   }
   def apply(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att): Production = {
-    if (att.contains(kLabelAttribute)) {
-      Production(Some(KORE.KLabel(att.get(kLabelAttribute))), params, sort, items, att)
+    if (att.contains(Att.KLABEL)) {
+      Production(Some(KORE.KLabel(att.get(Att.KLABEL))), params, sort, items, att)
     } else {
       Production(None, params, sort, items, att)
     }
   }
-
-  val kLabelAttribute = "klabel"
 }
 
 // a way to deterministically generate unique IDs dependent on module name

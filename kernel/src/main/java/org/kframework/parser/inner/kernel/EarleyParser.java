@@ -175,7 +175,7 @@ public class EarleyParser {
     public boolean isToken() {
       Boolean isToken = this.isToken;
       if (isToken == null) {
-        isToken = prod.att().contains("token");
+        isToken = prod.att().contains(Att.TOKEN());
         this.isToken = isToken;
       }
       return isToken;

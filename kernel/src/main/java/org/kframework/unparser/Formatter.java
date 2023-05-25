@@ -40,7 +40,7 @@ public class Formatter {
             resetColor(indenter, c.production(), colorize);
         } else if (term instanceof TermCons) {
             TermCons tc = (TermCons) term;
-            String format = tc.production().att().getOptional("format").orElse(defaultFormat(tc.production().items().size()));
+            String format = tc.production().att().getOptional(Att.FORMAT()).orElse(defaultFormat(tc.production().items().size()));
             for (int i = 0; i < format.length(); i++) {
                 char c = format.charAt(i);
                 if (c == '%') {
@@ -99,7 +99,7 @@ public class Formatter {
                                 TermCons innerTc = (TermCons)inner;
                                 Production origProd = tc.production().att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(tc.production());
                                 Production innerOrigProd = innerTc.production().att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(innerTc.production());
-                                if (innerOrigProd.equals(origProd) && origProd.att().contains("assoc")) {
+                                if (innerOrigProd.equals(origProd) && origProd.att().contains(Att.ASSOC())) {
                                     assoc = true;
                                 }
                             }
@@ -138,12 +138,12 @@ public class Formatter {
     }
 
     private static void color(Indenter indenter, Production p, int offset, ColorSetting colorize) {
-        if (p.att().contains("color")) {
-            indenter.append(ColorUtil.RgbToAnsi(p.att().get("color"), colorize));
+        if (p.att().contains(Att.COLOR())) {
+            indenter.append(ColorUtil.RgbToAnsi(p.att().get(Att.COLOR()), colorize));
         }
-        if (p.att().contains("colors")) {
+        if (p.att().contains(Att.COLORS())) {
             try {
-                String color = p.att().get("colors").split(",")[offset].trim();
+                String color = p.att().get(Att.COLORS()).split(",")[offset].trim();
                 indenter.append(ColorUtil.RgbToAnsi(color, colorize));
             } catch (ArrayIndexOutOfBoundsException e) {
                 throw KEMException.compilerError("Invalid colors attribute. Must be a comma separated list with exactly one element per terminal.", e, p);
@@ -152,7 +152,7 @@ public class Formatter {
     }
 
     private static void resetColor(Indenter indenter, Production p, ColorSetting colorize) {
-        if ((p.att().contains("color") || p.att().contains("colors"))  && colorize != ColorSetting.OFF) {
+        if ((p.att().contains(Att.COLOR()) || p.att().contains(Att.COLORS()))  && colorize != ColorSetting.OFF) {
             indenter.append(ColorUtil.ANSI_NORMAL);
         }
     }

@@ -879,13 +879,13 @@ and `orBool` may be short-circuited in concrete backends, but in symbolic
 ackends, both arguments will be evaluated.
 
 ```k
-  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), group(boolOperation), latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), group(boolOperation), hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), group(boolOperation), latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), group(boolOperation), hook(BOOL.implies)]
                 > left:
                   Bool "==Bool" Bool      [function, total, klabel(_==Bool_), symbol, left, comm, smt-hook(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, total, klabel(_=/=Bool_), symbol, left, comm, smt-hook(distinct), hook(BOOL.ne)]
@@ -2038,8 +2038,8 @@ module K-EQUAL-SYNTAX
   imports private BASIC-K
 
   syntax Bool ::= left:
-                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), group(equalEqualK)]
+                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), group(notEqualEqualK)]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
 
