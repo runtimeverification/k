@@ -23,8 +23,8 @@ from pyk.kore.prelude import (
     k,
     kore_to_json,
     kseq,
+    str_dv,
     string2json,
-    string_dv,
 )
 from pyk.testing import KRunTest
 from pyk.utils import chain
@@ -91,7 +91,7 @@ class TestJsonToKore(KRunTest):
     def test_kore_to_json(self, krun: KRun, json_data: Any) -> None:
         # When
         json_text = json.dumps(json_data)
-        string_pattern = string_dv(json_text)
+        string_pattern = str_dv(json_text)
         init_config = _config((inj(SORT_JSON, SORT_K_ITEM, string2json(string_pattern)),))
         final_config = krun.run_kore_term(init_config)
         json_pattern = _extract(final_config)
