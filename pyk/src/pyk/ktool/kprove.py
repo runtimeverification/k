@@ -180,6 +180,7 @@ class KProve(KPrint):
         include_dirs: Iterable[Path] = (),
         md_selector: str | None = None,
         haskell_args: Iterable[str] = (),
+        haskell_rts_args: Iterable[str] = (),
         haskell_log_entries: Iterable[str] = (),
         log_axioms_file: Path | None = None,
         allow_zero_step: bool = False,
@@ -203,8 +204,15 @@ class KProve(KPrint):
             ','.join(haskell_log_entries),
         ]
 
-        haskell_backend_command = f'kore-exec {" ".join(list(haskell_args) + haskell_log_args)}'
-        _LOGGER.debug(f'haskell_backend_command={haskell_backend_command}')
+        env = os.environ.copy()
+        kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
+        _LOGGER.debug(f'export KORE_EXEC_OPTS={kore_exec_opts!r}')
+        env['KORE_EXEC_OPTS'] = kore_exec_opts
+
+        if haskell_rts_args:
+            ghc_rts = ' '.join(list(haskell_rts_args))
+            _LOGGER.debug(f'export GHCRTS={ghc_rts!r}')
+            env['GHCRTS'] = ghc_rts
 
         proc_result = _kprove(
             spec_file=spec_file,
@@ -214,10 +222,9 @@ class KProve(KPrint):
             include_dirs=include_dirs,
             md_selector=md_selector,
             output=KProveOutput.JSON,
-            haskell_backend_command=haskell_backend_command,
             dry_run=dry_run,
             args=self.prover_args + list(args),
-            env=os.environ.copy(),
+            env=env,
             check=False,
             depth=depth,
         )
