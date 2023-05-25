@@ -10,7 +10,7 @@ from pyk.kllvm.compiler import compile_runtime
 from pyk.kllvm.importer import import_runtime
 from pyk.konvert import _kast_to_kore, _kore_to_kast
 from pyk.kore.parser import KoreParser
-from pyk.kore.prelude import SORT_K_ITEM, STRING, generated_counter, generated_top, inj, int_dv, k, kseq, string_dv
+from pyk.kore.prelude import SORT_K_ITEM, STRING, generated_counter, generated_top, inj, int_dv, k, kseq, str_dv
 from pyk.kore.rpc import KoreClient, KoreServer, StuckResult
 from pyk.kore.syntax import App
 from pyk.ktool.kprint import _kast, pretty_print_kast
@@ -83,11 +83,11 @@ def kore_config(kval: str | None, sval: str) -> Pattern:
     def s(pattern: Pattern) -> App:
         return App("Lbl'-LT-'s'-GT-'", (), (pattern,))
 
-    kitems = (inj(STRING, SORT_K_ITEM, string_dv(kval)),) if kval is not None else ()
+    kitems = (inj(STRING, SORT_K_ITEM, str_dv(kval)),) if kval is not None else ()
     return generated_top(
         (
             k(kseq(kitems)),
-            s(string_dv(sval)),
+            s(str_dv(sval)),
             generated_counter(int_dv(0)),
         )
     )
@@ -102,13 +102,13 @@ def test_kast_to_kore(text: str) -> None:  # TODO turn into unit test
     kore = _kast_to_kore(kast)
 
     # Then
-    assert kore == string_dv(text)
+    assert kore == str_dv(text)
 
 
 @pytest.mark.parametrize('text', TEST_DATA, ids=TEST_DATA)
 def test_kore_to_kast(text: str) -> None:  # TODO turn into unit test
     # Given
-    kore = string_dv(text)
+    kore = str_dv(text)
 
     # When
     kast = _kore_to_kast(kore)
@@ -135,13 +135,13 @@ def test_cli_kast_to_kore(llvm_dir: Path, text: str) -> None:
     kore = KoreParser(kore_text).dv()
 
     # Then
-    assert kore == string_dv(text)
+    assert kore == str_dv(text)
 
 
 @pytest.mark.parametrize('text', TEST_DATA, ids=TEST_DATA)
 def test_cli_kore_to_kast(llvm_dir: Path, text: str) -> None:
     # Given
-    kore = string_dv(text)
+    kore = str_dv(text)
     kore_text = kore.text
 
     # When

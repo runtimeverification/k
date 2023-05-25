@@ -18,7 +18,7 @@ from pyk.kore.match import (
     kore_set_of,
     kore_str,
 )
-from pyk.kore.prelude import dv, kore_list, kore_map, kore_set
+from pyk.kore.prelude import dv, list_pattern, map_pattern, set_pattern
 from pyk.kore.syntax import App
 
 if TYPE_CHECKING:
@@ -65,20 +65,20 @@ EXTRACT_TEST_DATA = (
     (a(b(), c()), args('b', 'c', 'c'), (b(), c(), c())),
     (a(b(), c()), args('b', 'c', 'd'), None),
     (INJ(a()), inj, a()),
-    (kore_list(), kore_list_of(kore_int), ()),
-    (kore_list(dv(0), dv(1), dv(2)), kore_list_of(kore_int), (0, 1, 2)),
-    (kore_set(), kore_set_of(kore_int), ()),
-    (kore_set(dv(0), dv(1), dv(2)), kore_set_of(kore_int), (0, 1, 2)),
-    (kore_set(), kore_set_of(kore_int), ()),
-    (kore_map(), kore_map_of(kore_int, kore_str), ()),
+    (list_pattern(), kore_list_of(kore_int), ()),
+    (list_pattern(dv(0), dv(1), dv(2)), kore_list_of(kore_int), (0, 1, 2)),
+    (set_pattern(), kore_set_of(kore_int), ()),
+    (set_pattern(dv(0), dv(1), dv(2)), kore_set_of(kore_int), (0, 1, 2)),
+    (set_pattern(), kore_set_of(kore_int), ()),
+    (map_pattern(), kore_map_of(kore_int, kore_str), ()),
     (
-        kore_map((dv(0), dv('a')), (dv(1), dv('b')), (dv(2), dv('c'))),
+        map_pattern((dv(0), dv('a')), (dv(1), dv('b')), (dv(2), dv('c'))),
         kore_map_of(kore_int, kore_str),
         ((0, 'a'), (1, 'b'), (2, 'c')),
     ),
-    (kore_map(cell='ACell'), kore_map_of(kore_int, kore_str, cell='ACell'), ()),
+    (map_pattern(cell='ACell'), kore_map_of(kore_int, kore_str, cell='ACell'), ()),
     (
-        kore_map((dv(0), dv('a')), (dv(1), dv('b')), (dv(2), dv('c')), cell='ACell'),
+        map_pattern((dv(0), dv('a')), (dv(1), dv('b')), (dv(2), dv('c')), cell='ACell'),
         kore_map_of(kore_int, kore_str, cell='ACell'),
         ((0, 'a'), (1, 'b'), (2, 'c')),
     ),

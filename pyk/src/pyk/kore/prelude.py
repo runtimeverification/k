@@ -35,7 +35,7 @@ def dv(val: bool | int | bytes | str) -> DV:
     if type(val) is bytes:
         return bytes_dv(val)
     if type(val) is str:
-        return string_dv(val)
+        return str_dv(val)
     raise TypeError(f'Illegal type: {type(val)}')
 
 
@@ -51,7 +51,7 @@ def bytes_dv(val: bytes) -> DV:
     return DV(BYTES, String(bytes_decode(val)))
 
 
-def string_dv(val: str) -> DV:
+def str_dv(val: str) -> DV:
     return DV(STRING, String(val))
 
 
@@ -119,7 +119,7 @@ def k_config_var(var: str) -> DV:
 
 def top_cell_initializer(config: Mapping[str, Pattern]) -> App:
     return init_generated_top_cell(
-        kore_map(
+        map_pattern(
             *(
                 (
                     inj(SORT_K_CONFIG_VAR, SORT_K_ITEM, k_config_var(key)),
@@ -140,7 +140,7 @@ LBL_LIST: Final = SymbolId("Lbl'Unds'List'Unds'")
 LBL_LIST_ITEM: Final = SymbolId('LblListItem')
 
 
-def kore_list(*args: Pattern) -> Pattern:
+def list_pattern(*args: Pattern) -> Pattern:
     if not args:
         return STOP_LIST
     return LeftAssoc(App(LBL_LIST, args=(App(LBL_LIST_ITEM, args=(arg,)) for arg in args)))
@@ -151,7 +151,7 @@ LBL_SET: Final = SymbolId("Lbl'Unds'Set'Unds'")
 LBL_SET_ITEM: Final = SymbolId('LblSetItem')
 
 
-def kore_set(*args: Pattern) -> Pattern:
+def set_pattern(*args: Pattern) -> Pattern:
     if not args:
         return STOP_SET
     return LeftAssoc(App(LBL_SET, args=(App(LBL_SET_ITEM, args=(arg,)) for arg in args)))
@@ -162,7 +162,7 @@ LBL_MAP: Final = SymbolId("Lbl'Unds'Map'Unds'")
 LBL_MAP_ITEM: Final = SymbolId("Lbl'UndsPipe'-'-GT-Unds'")
 
 
-def kore_map(*args: tuple[Pattern, Pattern], cell: str | None = None) -> Pattern:
+def map_pattern(*args: tuple[Pattern, Pattern], cell: str | None = None) -> Pattern:
     if not args:
         return App(f"Lbl'Stop'{cell}Map") if cell else STOP_MAP
 
@@ -211,7 +211,7 @@ def jsons(patterns: Iterable[Pattern]) -> RightAssoc:
 
 
 def json_key(key: str) -> App:
-    return inj(STRING, SORT_JSON_KEY, string_dv(key))
+    return inj(STRING, SORT_JSON_KEY, str_dv(key))
 
 
 def json_entry(key: Pattern, value: Pattern) -> App:
@@ -227,7 +227,7 @@ def json_to_kore(data: Any) -> Pattern:
         case int():
             return inj(INT, SORT_JSON, int_dv(data))
         case str():
-            return inj(STRING, SORT_JSON, string_dv(data))
+            return inj(STRING, SORT_JSON, str_dv(data))
         case list():
             return json_list(jsons(json_to_kore(elem) for elem in data))
         case dict():
