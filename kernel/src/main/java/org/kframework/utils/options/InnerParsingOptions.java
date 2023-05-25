@@ -18,6 +18,6 @@ public class InnerParsingOptions implements Serializable {
     @Inject
     public InnerParsingOptions(Void v) {}
 
-    @Parameter(names="--profile-rule-parsing", description="Generate time in milliseconds to parse each rule in the semantics.")
+    @Parameter(names="--profile-rule-parsing", description="Generate time in milliseconds to parse each rule in the semantics.", hidden = true)
     public String profileRules;
 }
