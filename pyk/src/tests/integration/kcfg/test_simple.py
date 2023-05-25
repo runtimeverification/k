@@ -8,8 +8,9 @@ from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
 from pyk.prelude.ml import mlEqualsTrue, mlTop
+from pyk.testing import KCFGExploreTest
 
-from ..utils import K_FILES, KCFGExploreTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

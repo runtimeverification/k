@@ -9,8 +9,9 @@ from pyk.kast.manip import flatten_label
 from pyk.kore.prelude import int_dv
 from pyk.kore.syntax import App
 from pyk.prelude.kint import intToken
+from pyk.testing import KRunTest
 
-from .utils import K_FILES, KRunTest
+from .utils import K_FILES
 
 if TYPE_CHECKING:
     from pyk.kast import KInner

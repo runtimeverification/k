@@ -26,9 +26,10 @@ from pyk.kore.prelude import (
     string2json,
     string_dv,
 )
+from pyk.testing import KRunTest
 from pyk.utils import chain
 
-from ..utils import K_FILES, KRunTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

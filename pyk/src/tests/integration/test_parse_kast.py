@@ -9,7 +9,7 @@ from pyk.utils import single
 from .utils import K_FILES
 
 if TYPE_CHECKING:
-    from .utils import Kompiler
+    from pyk.testing import Kompiler
 
 
 def test_sort_synonym(kompile: Kompiler) -> None:
