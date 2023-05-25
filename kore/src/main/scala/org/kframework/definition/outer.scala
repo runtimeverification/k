@@ -360,8 +360,8 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   def checkSorts (): Unit = localSentences foreach {
     case p@Production(_, params, _, items, _) =>
       val res = items collect
-      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
-        case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
+      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt.sort
+        case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt.sort
       }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)

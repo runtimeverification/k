@@ -304,15 +304,15 @@ public class KILtoKORE extends KILTransformation<Object> {
         String kilProductionId = "" + System.identityHashCode(p);
         org.kframework.definition.Production prod1, prod3;
 
-        // Es ::= E "," Es
+
         if (bisonLists) {
-          prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
-                  Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)),
-                  attrs.add(Att.LEFT()));
+            // Es ::= Es "," E
+            prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
+                    Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)), attrs);
         } else {
-          prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
-                  Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                  attrs.add(Att.RIGHT()));
+            // Es ::= E "," Es
+            prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
+                    Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)), attrs);
         }
 
 

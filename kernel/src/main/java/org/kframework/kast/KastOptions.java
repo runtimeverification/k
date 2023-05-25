@@ -101,10 +101,10 @@ public final class KastOptions {
         return files.get().resolveWorkingDirectory(parameters.get(0));
     }
 
-    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
+    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.", hidden = true)
     public String bisonFile;
 
-    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
+    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).", hidden = true)
     public long bisonStackMaxDepth = 10000;
 
     @Parameter(names={"--expression", "-e"}, description="An expression to parse passed on the command " +
