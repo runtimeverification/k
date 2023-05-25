@@ -13,6 +13,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -43,7 +44,7 @@ public class ResolveHeatCoolAttribute {
     }
 
     private K transform(Module m, K requires, Att att) {
-        String sort = att.getOptional("result").orElse("KResult");
+        String sort = att.getOptional(Att.RESULT()).orElse("KResult");
         KLabel lbl = KLabel("is" + sort);
         if (!m.productionsFor().contains(lbl) && stream(m.allSorts()).noneMatch(s -> s.toString().equals(sort))) {
             throw KEMException.compilerError("Definition is missing function " + lbl.name() +
@@ -55,7 +56,8 @@ public class ResolveHeatCoolAttribute {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         }
         if (att.contains(Att.COOL())) {
-            if (unrestrictedRules.stream().anyMatch(att::contains)) {
+            if (unrestrictedRules.stream()
+                    .map(Att::getUserGroupOptional).flatMap(Optional::stream).anyMatch(att::contains)) {
                 return requires;
             }
             return BooleanUtils.and(requires, predicate);
