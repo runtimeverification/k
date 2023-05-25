@@ -42,7 +42,7 @@ public class AddEmptyListsTest {
     @Before
     public void setUp() throws Exception {
         RuleGrammarGenerator gen = makeRuleGrammarGenerator();
-        Module test = ParserUtils.parseMainModuleOuterSyntax(DEF, Source.apply("AddEmptyListsTest test definition"), "TEST");
+        Module test = ParserUtils.parseMainModuleOuterSyntax(DEF, Source.apply("AddEmptyListsTest test definition"), "TEST", true);
         parser = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(test), true, files);
     }
 

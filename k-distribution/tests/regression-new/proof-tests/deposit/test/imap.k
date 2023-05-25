@@ -1,9 +1,9 @@
 // Copyright (c) K Team. All Rights Reserved.
 module IMAP-SYNTAX
     imports INT
-    syntax IMap [smt-prelude] // (define-sort IMap () (Array Int Int))
-    syntax IMap ::= IMap "[" Int "<-" Int "]" [function, total, no-evaluators, klabel(store),  smtlib(store),  smt-prelude] //, hook(MAP.update)]
-    syntax Int  ::= IMap "[" Int "]"          [function, klabel(select), smtlib(select), smt-prelude] //, hook(MAP.lookup)]
+    syntax IMap // (define-sort IMap () (Array Int Int))
+    syntax IMap ::= IMap "[" Int "<-" Int "]" [function, total, no-evaluators, klabel(store),  smtlib(store)] //, hook(MAP.update)]
+    syntax Int  ::= IMap "[" Int "]"          [function, klabel(select), smtlib(select)] //, hook(MAP.lookup)]
     syntax IMap ::= ".IMap"
 endmodule
 

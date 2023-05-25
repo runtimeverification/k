@@ -79,7 +79,7 @@ public class CompiledDefinition implements Serializable {
 
     private Rule getExitCodeRule(Definition parsedDefinition) {
         Module mainMod = parsedDefinition.mainModule();
-        Set<Production> exitProds = stream(mainMod.productions()).filter(p -> p.att().contains("exit")).collect(Collectors.toSet());
+        Set<Production> exitProds = stream(mainMod.productions()).filter(p -> p.att().contains(Att.EXIT())).collect(Collectors.toSet());
         if (exitProds.size() == 0) {
             return null;
         } else if (exitProds.size() > 1) {
@@ -126,8 +126,8 @@ public class CompiledDefinition implements Serializable {
         sb.append(")\n");
 
         for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
-            if (prod.att().contains("cell") && prod.att().contains("parser")) {
-                String att = prod.att().get("parser");
+            if (prod.att().contains(Att.CELL()) && prod.att().contains(Att.PARSER())) {
+                String att = prod.att().get(Att.PARSER());
                 String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
                 for (String[] part : parts) {
                     if (part.length != 2) {
@@ -157,7 +157,7 @@ public class CompiledDefinition implements Serializable {
         return kompiledDefinition.mainModule();
     }
 
-    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.SYNTAX_MODULE()).get(); }
+    public String mainSyntaxModuleName() { return parsedDefinition.att().getOptional(Att.SYNTAX_MODULE()).get(); }
 
     /**
      * @return the module used for generating the program (i.e. ground) parser for the module named moduleName

@@ -120,7 +120,7 @@ public class MinimizeTermConstruction {
                 if (k.klabel().head().equals(KLabels.ML_OR)) {
                   return;
                 }
-                String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("");
+                String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("");
                 if (hook.equals("SET.element")
                         || hook.equals("LIST.element")
                         || hook.equals("LIST.concat")
@@ -175,7 +175,7 @@ public class MinimizeTermConstruction {
                 if (k.klabel().head().equals(KLabels.ML_OR)) {
                     inBad = true;
                 }
-                String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("");
+                String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("");
                 if (hook.equals("SET.element")
                         || hook.equals("LIST.element")
                         || hook.equals("LIST.concat")
