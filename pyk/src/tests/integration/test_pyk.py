@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.__main__ import main
+from pyk.testing import KompiledTest
 
-from .utils import K_FILES, KompiledTest
+from .utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

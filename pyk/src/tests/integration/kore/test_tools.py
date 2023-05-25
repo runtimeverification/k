@@ -12,7 +12,7 @@ from ..utils import K_FILES
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ..utils import Kompiler
+    from pyk.testing import Kompiler
 
 
 @pytest.fixture(scope='module')

@@ -7,8 +7,9 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KToken
 from pyk.kast.manip import get_cell
+from pyk.testing import KProveTest
 
-from ..utils import K_FILES, KProveTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

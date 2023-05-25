@@ -13,9 +13,10 @@ from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlBottom, mlImplies, mlTop
 from pyk.prelude.string import STRING, stringToken
+from pyk.testing import KompiledTest
 from pyk.utils import single
 
-from ..utils import K_FILES, KompiledTest
+from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from pathlib import Path

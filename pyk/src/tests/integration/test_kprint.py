@@ -10,8 +10,9 @@ from pyk.ktool.kprint import assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kbool import andBool
 from pyk.prelude.kint import INT, intToken, leInt, ltInt
+from pyk.testing import KPrintTest
 
-from .utils import K_FILES, KPrintTest
+from .utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
