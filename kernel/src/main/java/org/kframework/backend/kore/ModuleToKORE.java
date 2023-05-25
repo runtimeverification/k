@@ -1488,6 +1488,49 @@ public class ModuleToKORE {
         return (!prod.klabel().isEmpty());
     }
 
+    boolean isPrefixProduction(Seq<ProductionItem> items) {
+        int state = 0;
+        for (int i = 0; i < items.size(); i++) {
+            ProductionItem item = items.apply(i);
+            if (state == 0) {
+                // some sequence of terminals ending in an open parens
+                if (item instanceof Terminal && ((Terminal) item).value().equals("(")) {
+                    state = 1;
+                } else if (!(item instanceof Terminal)) {
+                    return false;
+                }
+            } else if (state == 1) {
+                // a nonterminal or a close paren
+                if (item instanceof NonTerminal) {
+                    state = 2;
+                } else if (item instanceof Terminal && ((Terminal) item).value().equals(")")) {
+                    state = 4;
+                } else {
+                    return false;
+                }
+            } else if (state == 2) {
+                // a close paren or a comma
+                if (item instanceof Terminal && ((Terminal) item).value().equals(")")) {
+                    state = 4;
+                } else if (item instanceof Terminal && ((Terminal) item).value().equals(",")) {
+                    state = 3;
+                } else {
+                    return false;
+                }
+            } else if (state == 3) {
+                // a nonterminal
+                if (item instanceof NonTerminal) {
+                    state = 2;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return state == 4;
+    }
+
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
         boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
         boolean isConstructor = !isFunction(prod);
@@ -1541,7 +1584,7 @@ public class ModuleToKORE {
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
             String replacement;
-            if (printName) {
+            if (printName && isPrefixProduction(prod.items())) {
               replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
               printEllipses = true;
             } else {
