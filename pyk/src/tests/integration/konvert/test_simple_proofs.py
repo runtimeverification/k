@@ -283,6 +283,49 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
         'kseq{}(VarELEM1 : SortKItem{}, kseq{}(VarELEM2 : SortKItem{}, dotk{}()))',
         KSequence([KVariable('ELEM1', sort=KSort('KItem')), KVariable('ELEM2', sort=KSort('KItem'))]),
     ),
+    (
+        'if-then-else-no-sort-param-k',
+        KSort('K'),
+        r"""
+        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortK{}}(
+            VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {}
+        )
+        """,
+        KApply(
+            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+            [
+                KVariable('C', sort=KSort('Bool')),
+                KVariable('B1', sort=KSort('K')),
+                KVariable('B2', sort=KSort('K')),
+            ],
+        ),
+    ),
+    (
+        'if-then-else-no-sort-param-int',
+        KSort('Int'),
+        r"""
+        Lbl'UndsPlus'Int'Unds'{}(
+            VarA : SortInt{},
+            Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortInt{}}(
+                VarC : SortBool{}, VarI1 : SortInt{}, VarI2 : SortInt {}
+            )
+        )
+        """,
+        KApply(
+            '_+Int_',
+            [
+                KVariable('A', sort=KSort('Int')),
+                KApply(
+                    KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+                    [
+                        KVariable('C', sort=KSort('Bool')),
+                        KVariable('I1', sort=KSort('Int')),
+                        KVariable('I2', sort=KSort('Int')),
+                    ],
+                ),
+            ],
+        ),
+    ),
 )
 
 KORE_TO_KAST_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (

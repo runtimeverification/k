@@ -1078,6 +1078,30 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 _subsorts.extend([_subsort] + self.subsorts(prod.items[0].sort))
         return list(set(_subsorts))
 
+    def sort(self, kast: KInner) -> KSort | None:
+        match kast:
+            case KToken(_, sort) | KVariable(_, sort):
+                return sort
+            case KRewrite(lhs, rhs):
+                sort = self.sort(lhs)
+                return sort if sort == self.sort(rhs) else None
+            case KSequence(_):
+                return KSort('K')
+            case KApply(label, _):
+                prod = self.production_for_klabel(label)
+                return prod.sort if prod.sort not in prod.params else None
+            case _:
+                return None
+
+    def greatest_common_subsort(self, sort1: KSort, sort2: KSort) -> KSort | None:
+        if sort1 == sort2:
+            return sort1
+        if sort1 in self.subsorts(sort2):
+            return sort1
+        if sort2 in self.subsorts(sort1):
+            return sort2
+        return None
+
     def sort_vars_subst(self, kast: KInner) -> Subst:
         _var_sort_occurrences = var_occurrences(kast)
         subst = {}
@@ -1100,21 +1124,14 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         collect(_sort_contexts, kast)
 
         for vname, _voccurrences in _var_sort_occurrences.items():
-            voccurrences = list(unique(_voccurrences))
-            if len(voccurrences) > 0:
-                vsort = voccurrences[0].sort
-                if len(voccurrences) > 1:
-                    for v in voccurrences[1:]:
-                        if vsort is None and v.sort is not None:
-                            vsort = v.sort
-                        elif vsort is not None and v.sort is not None:
-                            if vsort != v.sort:
-                                if v.sort in self.subsorts(vsort):
-                                    vsort = v.sort
-                                elif vsort not in self.subsorts(v.sort):
-                                    raise ValueError(
-                                        f'Could not find common subsort among variable occurrences: {voccurrences}'
-                                    )
+            vsorts = list(unique(v.sort for v in _voccurrences if v.sort is not None))
+            if len(vsorts) > 0:
+                vsort = vsorts[0]
+                for s in vsorts[1:]:
+                    _vsort = self.greatest_common_subsort(vsort, s)
+                    if _vsort is None:
+                        raise ValueError(f'Cannot compute greatest common subsort of {vname}: {(vsort, s)}')
+                    vsort = _vsort
                 subst[vname] = KVariable(vname, sort=vsort)
 
         return Subst(subst)
@@ -1125,6 +1142,33 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
         subst = self.sort_vars_subst(kast)
         return subst(kast)
+
+    # Best-effort addition of sort parameters to klabels, context insensitive
+    def add_sort_params(self, kast: KInner) -> KInner:
+        def _add_sort_params(_k: KInner) -> KInner:
+            if type(_k) is KApply:
+                prod = self.production_for_klabel(_k.label)
+                if len(_k.label.params) == 0 and len(prod.params) > 0:
+                    sort_dict: dict[KSort, KSort] = {}
+                    for psort, asort in zip(prod.argument_sorts, map(self.sort, _k.args), strict=True):
+                        if asort is None:
+                            _LOGGER.warning(
+                                f'Failed to add sort parameter, unable to determine sort for argument in production: {(prod, psort, asort)}'
+                            )
+                            return _k
+                        if psort in prod.params:
+                            if psort in sort_dict and sort_dict[psort] != asort:
+                                _LOGGER.warning(
+                                    f'Failed to add sort parameter, sort mismatch between different occurances of sort parameter: {(prod, psort, sort_dict[psort], asort)}'
+                                )
+                                return _k
+                            elif psort not in sort_dict:
+                                sort_dict[psort] = asort
+                    if all(p in sort_dict for p in prod.params):
+                        return _k.let(label=KLabel(_k.label.name, [sort_dict[p] for p in prod.params]))
+            return _k
+
+        return bottom_up(_add_sort_params, kast)
 
     def add_cell_map_items(self, kast: KInner) -> KInner:
         # example:
