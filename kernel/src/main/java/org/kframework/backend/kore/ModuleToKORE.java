@@ -1536,14 +1536,28 @@ public class ModuleToKORE {
         String format = att.getOptional(Att.FORMAT()).orElse(Formatter.defaultFormat(prod.items().size()));
         int nt = 1;
         boolean hasFormat = true;
+        boolean printName = stream(prod.items()).noneMatch(pi -> pi instanceof NonTerminal && ((NonTerminal) pi).name().isEmpty());
+        boolean printEllipses = false;
+
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
+            String replacement;
+            if (printName && prod.isPrefixProduction()) {
+              replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
+              printEllipses = true;
+            } else {
+              replacement = "%" + (nt++);
+            }
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", replacement);
           } else if (prod.items().apply(i) instanceof Terminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
           } else {
             hasFormat = false;
           }
+        }
+        if (printEllipses && format.contains("(")) {
+          int idxLParam = format.indexOf("(") + 1;
+          format = format.substring(0, idxLParam) + "... " + format.substring(idxLParam);
         }
         if (hasFormat) {
           att = att.add(Att.FORMAT(), format);
