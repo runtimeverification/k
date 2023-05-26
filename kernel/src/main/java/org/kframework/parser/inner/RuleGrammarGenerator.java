@@ -3,7 +3,6 @@ package org.kframework.parser.inner;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
@@ -13,7 +12,6 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
-import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -24,7 +22,6 @@ import org.kframework.definition.UidProvider;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
-import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -247,7 +244,7 @@ public class RuleGrammarGenerator {
 
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
-            if (m.att().contains("not-lr1")) {
+            if (m.att().contains(Att.NOT_LR1())) {
               return Module(m.name(), m.imports(), Set(), m.att());
             }
             return m;
@@ -381,7 +378,7 @@ public class RuleGrammarGenerator {
         boolean addRuleCells;
         if (mod.importedModuleNames().contains(RULE_CELLS)) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
-            addRuleCells = mod.sentences().exists(p -> p instanceof Production && ((Production) p).att().contains("cell"));
+            addRuleCells = mod.sentences().exists(p -> p instanceof Production && ((Production) p).att().contains(Att.CELL()));
         } else {
             addRuleCells = false;
         }
@@ -390,10 +387,10 @@ public class RuleGrammarGenerator {
         if (addRuleCells) {
             ConfigurationInfo cfgInfo = new ConfigurationInfoFromModule(mod);
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).flatMap(s -> {
-                if (s instanceof Production && s.att().contains("cellCollection")) {
+                if (s instanceof Production && s.att().contains(Att.CELL_COLLECTION())) {
                     return Stream.empty();
                 }
-                if (s instanceof Production && (s.att().contains("cell"))) {
+                if (s instanceof Production && (s.att().contains(Att.CELL()))) {
                     Production p = (Production) s;
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
                     assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
@@ -410,7 +407,7 @@ public class RuleGrammarGenerator {
                     Production p2 = Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())));
                     return Stream.of(p1, p2);
                 }
-                if (s instanceof Production && (s.att().contains("cellFragment", Sort.class))) {
+                if (s instanceof Production && (s.att().contains(Att.CELL_FRAGMENT(), Sort.class))) {
                     Production p = (Production) s;
                     Production p1 = Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())));
                     return Stream.of(p, p1);
@@ -429,7 +426,7 @@ public class RuleGrammarGenerator {
             for (Sentence prod : iterable(mod.productions())) {
                 addCellNameProd(prods, prod);
             }
-            parseProds = Stream.concat(prods.stream(), stream(mod.sentences()).filter(s -> !s.att().contains("cell"))).collect(Collectors.toSet());
+            parseProds = Stream.concat(prods.stream(), stream(mod.sentences()).filter(s -> !s.att().contains(Att.CELL()))).collect(Collectors.toSet());
         } else
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collectors.toSet());
 
@@ -473,22 +470,22 @@ public class RuleGrammarGenerator {
             for (UserList ul : UserList.getLists(prods3)) {
                 org.kframework.definition.Production prod1, prod2, prod3 = null, prod4 = null, prod5 = null;
 
-                Att newAtts = ul.attrs.remove("userList");
+                Att newAtts = ul.attrs.remove(Att.USER_LIST());
                 if (ul.leftAssoc && ul.nonEmpty) {
                   prod1 = Production(ul.klabel, ul.sort,
                           Seq(NonTerminal(ul.sort), Terminal(ul.separator), NonTerminal(ul.childSort)),
                           newAtts.add(Att.ORIGINAL_PRD(), Production.class, ul.pList));
                   prod2 = Production(Seq(), ul.sort,
                           Seq(NonTerminal(ul.childSort)),
-                          newAtts.add(Att.ORIGINAL_PRD(), Production.class, ul.pList).add("userList", ul.klabel.name()).add("userListTerminator", ul.terminatorKLabel.name()));
+                          newAtts.add(Att.ORIGINAL_PRD(), Production.class, ul.pList).add(Att.USER_LIST(), ul.klabel.name()).add(Att.USER_LIST_TERMINATOR(), ul.terminatorKLabel.name()));
                   prod3 = Production(ul.terminatorKLabel, Sort(ul.sort.name() + "#Terminator", ul.sort.params()), Seq(Terminal("")),
-                        newAtts.remove("format").add(Att.ORIGINAL_PRD(), Production.class, ul.pTerminator));
+                        newAtts.remove(Att.FORMAT()).add(Att.ORIGINAL_PRD(), Production.class, ul.pTerminator));
                 } else if (ul.leftAssoc) {
                   throw KEMException.compilerError("Cannot use List with --bison-lists", ul.pList);
                 } else {
                   // Es#Terminator ::= "" [klabel('.Es)]
                   prod1 = Production(ul.terminatorKLabel, Sort(ul.sort.name() + "#Terminator", ul.sort.params()), Seq(Terminal("")),
-                        newAtts.remove("format").add(Att.ORIGINAL_PRD(), Production.class, ul.pTerminator));
+                        newAtts.remove(Att.FORMAT()).add(Att.ORIGINAL_PRD(), Production.class, ul.pTerminator));
                   // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
                   prod2 = Production(ul.klabel, Sort("Ne#" + ul.sort.name(), ul.sort.params()),
                           Seq(NonTerminal(ul.childSort), Terminal(ul.separator), NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))),
@@ -498,9 +495,9 @@ public class RuleGrammarGenerator {
                           Seq(NonTerminal(ul.childSort), Terminal(""), NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))),
                           newAtts.add(Att.ORIGINAL_PRD(), Production.class, ul.pList));
                   // Es ::= Ne#Es
-                  prod4 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))), Att().add(NOT_INJECTION));
+                  prod4 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))), Att().add(Att.NOT_INJECTION()));
                   // Es ::= Es#Terminator // if the list is *
-                  prod5 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))), Att().add(NOT_INJECTION));
+                  prod5 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))), Att().add(Att.NOT_INJECTION()));
                 }
 
                 res.add(prod1);
@@ -534,9 +531,9 @@ public class RuleGrammarGenerator {
 
         parseProds.addAll(recordProds);
         Att att = mod.att();
-        List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains("not-lr1")).map(Module::name).collect(Collectors.toList());
+        List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains(Att.NOT_LR1())).map(Module::name).collect(Collectors.toList());
         if (!notLrModules.isEmpty()) {
-          att = att.add("not-lr1", notLrModules.toString());
+          att = att.add(Att.NOT_LR1(), notLrModules.toString());
         }
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(Import(origMod, true)), immutable(extensionProds), att);
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
@@ -552,7 +549,7 @@ public class RuleGrammarGenerator {
             if (pi instanceof Terminal) {
               Terminal t = (Terminal)pi;
               if (alphaNum.matcher(t.value()).matches()) {
-                prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add("token")));
+                prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add(Att.TOKEN())));
               }
             }
           }
@@ -562,10 +559,10 @@ public class RuleGrammarGenerator {
     private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort, Sort labelSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add(Sort.class, castSort);
-        prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(labelSort), Terminal("::" + castSort.toString())), attrs1.add("format", "%1%2")));
-        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()), labelSort, Seq(NonTerminal(labelSort), Terminal(":"  + castSort.toString())), attrs1.add("format", "%1%2")));
-        prods.add(Production(KLabel("#InnerCast"), castSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
-        prods.add(Production(KLabel("#OuterCast"), labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
+        prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(labelSort), Terminal("::" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1%2")));
+        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()), labelSort, Seq(NonTerminal(labelSort), Terminal(":"  + castSort.toString())), attrs1.add(Att.FORMAT(), "%1%2")));
+        prods.add(Production(KLabel("#InnerCast"), castSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
+        prods.add(Production(KLabel("#OuterCast"), labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
         return prods;
     }
 }

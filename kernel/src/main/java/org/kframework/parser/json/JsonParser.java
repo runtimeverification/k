@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.json;
 
+import org.checkerframework.checker.nullness.Opt;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -44,6 +45,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -308,18 +310,30 @@ public class JsonParser {
                 newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
             } else if (key.equals(Sort.class.getName())) {
                 newAtt = newAtt.add(Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("bracketLabel")) {
-                newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
-            } else if (key.equals(Att.PREDICATE())) {
+            } else if (key.equals(Att.BRACKET_LABEL().key())) {
+                newAtt = newAtt.add(Att.BRACKET_LABEL(), KLabel.class, toKLabel(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.PREDICATE().key())) {
                 newAtt = newAtt.add(Att.PREDICATE(), Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellOptAbsent")) {
-                newAtt = newAtt.add("cellOptAbsent", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellFragment")) {
-                newAtt = newAtt.add("cellFragment", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("sortParams")) {
-                newAtt = newAtt.add("sortParams", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else
-                newAtt = newAtt.add(key, attMap.getString(key));
+            } else if (key.equals(Att.CELL_OPT_ABSENT().key())) {
+                newAtt = newAtt.add(Att.CELL_OPT_ABSENT(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.CELL_FRAGMENT().key())) {
+                newAtt = newAtt.add(Att.CELL_FRAGMENT(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.SORT_PARAMS().key())) {
+                newAtt = newAtt.add(Att.SORT_PARAMS(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else {
+                Att.Key attKey =
+                        Att.getBuiltinKeyOptional(key)
+                                .or(() -> Att.getInternalKeyOptional(key))
+                                // The JSON may have been produced with group attributes already expanded.
+                                // As a result, we can't distinguish between intended user groups vs misspelled
+                                // built-ins or internals, so we have to assume everything is a user group.
+                                .or(() -> Att.getUserGroupOptional(key))
+                                .orElseThrow(() ->
+                                        new AssertionError("Attribute '" + key +
+                                                "' is not a built-in or internal, yet Att.getUserGroupOptional(\"" +
+                                                key + "\") failed."));
+                newAtt = newAtt.add(attKey, attMap.getString(key));
+            }
         }
         return newAtt;
     }

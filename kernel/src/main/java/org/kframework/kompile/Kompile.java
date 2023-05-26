@@ -3,13 +3,14 @@ package org.kframework.kompile;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
-import org.kframework.Strategy;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAssoc;
 import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -64,7 +65,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -146,7 +146,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<Att.Key> excludedModuleTags) {
         files.resolveKompiled(".").mkdirs();
 
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
@@ -203,8 +203,8 @@ public class Kompile {
                 }
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
-                if (prod.att().contains("cell") && prod.att().contains("parser")) {
-                    String att = prod.att().get("parser");
+                if (prod.att().contains(Att.CELL()) && prod.att().contains(Att.PARSER())) {
+                    String att = prod.att().get(Att.PARSER());
                     String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
                     for (String[] part : parts) {
                         if (part.length != 2) {
@@ -289,7 +289,7 @@ public class Kompile {
         return String.join("\n", ruleLocs);
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<Att.Key> excludedModuleTags) {
         return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
     }
 
@@ -306,13 +306,13 @@ public class Kompile {
                 .apply(d);
     }
 
-    private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
+    private static Module excludeModulesByTag(Set<Att.Key> excludedModuleTags, Module mod) {
         Predicate<Import> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.module().att().contains(tag));
         Set<Import> newImports = stream(mod.imports()).filter(f).collect(Collectors.toSet());
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
-    public static Function1<Definition, Definition> excludeModulesByTag(Set<String> excludedModuleTags) {
+    public static Function1<Definition, Definition> excludeModulesByTag(Set<Att.Key> excludedModuleTags) {
         DefinitionTransformer dt = DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
     }
@@ -356,7 +356,7 @@ public class Kompile {
         return definitionParsing.parseRule(compiledDef, contents, source);
     }
 
-    private void checkDefinition(Definition parsedDef, Set<String> excludedModuleTags) {
+    private void checkDefinition(Definition parsedDef, Set<Att.Key> excludedModuleTags) {
         scala.collection.Set<Module> modules = parsedDef.modules();
         Module mainModule = parsedDef.mainModule();
         Option<Module> kModule = parsedDef.getModule("K");
@@ -418,7 +418,7 @@ public class Kompile {
         mt.apply(specModule);
     }
 
-    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
+    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<Att.Key> excludedModuleTags) {
         checkAnywhereRules(modules);
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
@@ -449,6 +449,8 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSyntaxGroups(errors, m, kem)::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
@@ -547,8 +549,8 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache, useCachedScanner);
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<Att.Key> excludedModuleTags, boolean readOnlyCache, boolean useCachedScanner) {
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludedModuleTags, readOnlyCache, useCachedScanner);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
         return modules;

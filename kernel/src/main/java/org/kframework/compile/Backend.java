@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -32,7 +33,7 @@ public interface Backend {
 
     Function<Module, Module> specificationSteps(Definition def);
 
-    Set<String> excludedModuleTags();
+    Set<Att.Key> excludedModuleTags();
 
     default ModuleTransformer restoreDefinitionModulesTransformer(Definition kompiledDefinition) {
         return ModuleTransformer.from(mod -> kompiledDefinition.getModule(mod.name()).isDefined()

@@ -283,7 +283,7 @@ public class KPrint {
           return Optional.of(term);
         }
         Set<KVariable> leftVars = vars(kapp.items().get(0));
-        if (leftVars.stream().filter(v -> !v.att().contains("anonymous")).findAny().isPresent()) {
+        if (leftVars.stream().filter(v -> !v.att().contains(Att.ANONYMOUS())).findAny().isPresent()) {
           return Optional.of(term);
         }
         for (KVariable var : leftVars) {
@@ -306,8 +306,8 @@ public class KPrint {
                     return super.apply(k);
                 }
                 Att att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
-                if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
-                    List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
+                if (att.contains(Att.COMM()) && att.contains(Att.ASSOC()) && att.contains(Att.UNIT())) {
+                    List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get(Att.UNIT()))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
                         String s = unparseInternal(unparsingModule, apply(item), ColorSetting.OFF);
@@ -315,7 +315,7 @@ public class KPrint {
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
                     items = printed.stream().map(Tuple2::_2).map(this::apply).collect(Collectors.toList());
-                    return items.stream().reduce((k1, k2) -> KApply(k.klabel(), k1, k2)).orElse(KApply(KLabel(att.get("unit"))));
+                    return items.stream().reduce((k1, k2) -> KApply(k.klabel(), k1, k2)).orElse(KApply(KLabel(att.get(Att.UNIT()))));
                 }
                 return super.apply(k);
             }
@@ -329,7 +329,7 @@ public class KPrint {
 
             @Override
             public K apply(KVariable k) {
-                if (k.att().contains("anonymous")) {
+                if (k.att().contains(Att.ANONYMOUS())) {
                     return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
                 }
                 return k;
@@ -341,8 +341,8 @@ public class KPrint {
         return new TransformK() {
             @Override
             public K apply(KVariable k) {
-                if (k.att().contains("originalName")) {
-                    return KVariable(k.att().get("originalName"), k.att());
+                if (k.att().contains(Att.ORIGINAL_NAME())) {
+                    return KVariable(k.att().get(Att.ORIGINAL_NAME()), k.att());
                 }
                 return k;
             }
@@ -411,8 +411,8 @@ public class KPrint {
     private static K flattenTerm(Module mod, KApply kapp) {
         List<K> items = new ArrayList<>();
         Att att = mod.attributesFor().apply(KLabel(kapp.klabel().name()));
-        if (att.contains("assoc") && att.contains("unit")) {
-            items = Assoc.flatten(kapp.klabel(), kapp.klist().items(), KLabel(att.get("unit")));
+        if (att.contains(Att.ASSOC()) && att.contains(Att.UNIT())) {
+            items = Assoc.flatten(kapp.klabel(), kapp.klist().items(), KLabel(att.get(Att.UNIT())));
         } else {
             items = kapp.klist().items();
         }

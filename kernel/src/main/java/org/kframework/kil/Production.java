@@ -101,18 +101,18 @@ public class Production extends ASTNode {
      * @return
      */
     public String getKLabel(boolean kore) {
-        String klabel = getAttribute("klabel");
-        if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute(Att.BRACKET()))) {
+        String klabel = getAttribute(Att.KLABEL());
+        if (klabel == null && (isSyntacticSubsort() || containsAttribute(Att.TOKEN()) || containsAttribute(Att.BRACKET()))) {
             return null;
-        } else if (klabel == null || (kore && getAttribute("symbol") == null)) {
+        } else if (klabel == null || (kore && getAttribute(Att.SYMBOL()) == null)) {
             klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
     }
 
     public String getBracketLabel(boolean kore) {
-        String klabel = getAttribute("klabel");
-        if (klabel == null || (kore && getAttribute("symbol") == null)) {
+        String klabel = getAttribute(Att.KLABEL());
+        if (klabel == null || (kore && getAttribute(Att.SYMBOL()) == null)) {
             klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
@@ -210,10 +210,10 @@ public class Production extends ASTNode {
                 return false;
         } else if (!items.equals(other.items))
             return false;
-        if (getAttribute("klabel") == null) {
-            if (other.getAttribute("klabel") != null)
+        if (getAttribute(Att.KLABEL()) == null) {
+            if (other.getAttribute(Att.KLABEL()) != null)
                 return false;
-        } else if (!getAttribute("klabel").equals(other.getAttribute("klabel")))
+        } else if (!getAttribute(Att.KLABEL()).equals(other.getAttribute(Att.KLABEL())))
             return false;
         if (sort == null) {
             if (other.sort != null)
@@ -234,7 +234,7 @@ public class Production extends ASTNode {
         int result = 1;
         result = prime * result + ((items == null) ? 0 : items.hashCode());
         result = prime * result
-                + ((getAttribute("klabel") == null) ? 0 : getAttribute("klabel").hashCode());
+                + ((getAttribute(Att.KLABEL()) == null) ? 0 : getAttribute(Att.KLABEL()).hashCode());
         result = prime * result + ((sort == null) ? 0 : sort.hashCode());
         result = prime * result + ((binderMap == null) ? 0 : binderMap.hashCode());
         return result;

@@ -51,6 +51,7 @@ public class ResolveFreshConstants {
     private java.util.Set<KVariable> freshVars = new HashSet<>();
     private Map<KVariable, Integer> offsets = new HashMap<>();
     private final String manualTopCell;
+    private final Boolean pedanticAttributes;
 
     private void reset() {
         freshVars.clear();
@@ -68,7 +69,7 @@ public class ResolveFreshConstants {
                 transform(rule.requires()),
                 transform(rule.ensures()),
                 rule.att());
-        if (rule.att().contains("initializer")) {
+        if (rule.att().contains(Att.INITIALIZER())) {
             K left = RewriteToTop.toLeft(withFresh.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
@@ -187,10 +188,11 @@ public class ResolveFreshConstants {
         return s;
     }
 
-    public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files) {
+    public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files, boolean pedanticAttributes) {
         this.def = def;
         this.manualTopCell = manualTopCell;
         this.files = files;
+        this.pedanticAttributes = pedanticAttributes;
     }
 
     public Module resolve(Module m) {
@@ -200,7 +202,7 @@ public class ResolveFreshConstants {
         KApply freshCell = KApply(KLabel("#configCell"), counterCellLabel, KApply(KLabel("#cellPropertyListTerminator")), KToken("0", Sorts.Int()), counterCellLabel);
 
         java.util.Set<Sentence> counterSentences = new HashSet<>();
-        counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function")));
+        counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add(Att.FUNCTION())));
         counterSentences.add(Rule(KRewrite(KApply(KLabel("getGeneratedCounterCell"), IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell())), true)), KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell()))), BooleanUtils.TRUE, BooleanUtils.TRUE));
 
         if (m.name().equals(def.mainModule().name())) {
@@ -220,11 +222,11 @@ public class ResolveFreshConstants {
                 }
                 KLabel topCellLabel = configInfo.getCellLabel(topCellSort);
                 Production prod = m.productionsFor().apply(topCellLabel).head();
-                KToken cellName = KToken(prod.att().get("cellName"), Sort("#CellName"));
+                KToken cellName = KToken(prod.att().get(Att.CELL_NAME()), Sort("#CellName"));
 
                 KToken topCellToken = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                 K generatedTop = KApply(KLabel("#configCell"), topCellToken, KApply(KLabel("#cellPropertyListTerminator")), KApply(KLabels.CELLS, KApply(KLabel("#externalCell"), cellName), freshCell), topCellToken);
-                Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
+                Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), pedanticAttributes);
                 sentences = (Set<Sentence>) sentences.$bar(newSentences);
                 sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
             }
@@ -232,7 +234,7 @@ public class ResolveFreshConstants {
         if (m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
             ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true, files);
-            Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
+            Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), pedanticAttributes);
             sentences = (Set<Sentence>) sentences.$bar(newSentences);
             sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
         }
