@@ -5,6 +5,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.kil.Production;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
@@ -19,9 +20,8 @@ import static org.kframework.Collections.*;
 public class Context implements Serializable {
 
     /**
-     * Represents a map from all Klabels in string representation
+     * Represents a map from all Klabels or attributes in string representation
      * to sets of corresponding productions.
-     * why?
      */
     public SetMultimap<String, Production> tags = HashMultimap.create();
 
@@ -30,13 +30,18 @@ public class Context implements Serializable {
     public KompileOptions kompileOptions;
 
     public void addProduction(Production p) {
+        if (p.containsAttribute(Att.GROUP())) {
+            throw new AssertionError(
+                    "Must call ExpandGroupAttribute.apply(Definition) before creating a Context.");
+        }
+
         if (p.getKLabel(false) != null) {
             tags.put(p.getKLabel(false), p);
         } else if (p.getAttributes().contains(Att.BRACKET())) {
             tags.put(p.getBracketLabel(false), p);
         }
-        for (Tuple2<String, String> a : iterable(p.getAttributes().att().keys())) {
-            tags.put(a._1, p);
+        for (Tuple2<Att.Key, String> a : iterable(p.getAttributes().att().keys())) {
+            tags.put(a._1.key(), p);
         }
     }
 }

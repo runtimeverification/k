@@ -2,7 +2,6 @@
 package org.kframework.compile
 
 import java.util
-
 import org.kframework.POSet
 import org.kframework.kore.KORE.{KApply, KLabel}
 
@@ -11,8 +10,8 @@ import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production, Rule}
 import org.kframework.kore._
 import org.kframework.TopologicalSort._
+import org.kframework.attributes.Att
 import org.kframework.utils.errorsystem.KEMException
-
 import org.kframework.builtin.Sorts
 
 import collection._
@@ -21,8 +20,8 @@ object ConfigurationInfoFromModule
 
 class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
-  private val cellProductionsSet:    Set[(Sort, Production)] = m.productions.filter(_.att.contains("cell"))          .map(p => (p.sort, p))
-  private val cellBagProductionsSet: Set[(Sort, Production)] = m.productions.filter(_.att.contains("cellCollection")).map(p => (p.sort, p))
+  private val cellProductionsSet:    Set[(Sort, Production)] = m.productions.filter(_.att.contains(Att.CELL))          .map(p => (p.sort, p))
+  private val cellBagProductionsSet: Set[(Sort, Production)] = m.productions.filter(_.att.contains(Att.CELL_COLLECTION)).map(p => (p.sort, p))
 
   private val cellSorts:    Set[Sort] = cellProductionsSet   .map({sp => sp._1})
   private val cellBagSorts: Set[Sort] = cellBagProductionsSet.map({sp => sp._1})
@@ -32,7 +31,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
       if (_cells.size == 0)
         return _cellMap
       val (s, p) = _cells.head
-      if (p.att.contains("internal"))
+      if (p.att.contains(Att.INTERNAL))
         return buildCellProductionMap(_cells.tail, _cellMap)
       if (_cellMap.contains(s))
         throw KEMException.compilerError("Too many productions for cell sort: " + s)
@@ -49,15 +48,15 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
 
   private val cellFragmentLabel: Map[Sort,KLabel] =
-    m.productions.filter(_.att.contains("cellFragment", classOf[Sort]))
-      .map(p => (p.att.get("cellFragment", classOf[Sort]),p.klabel.get)).toMap
+    m.productions.filter(_.att.contains(Att.CELL_FRAGMENT, classOf[Sort]))
+      .map(p => (p.att.get(Att.CELL_FRAGMENT, classOf[Sort]),p.klabel.get)).toMap
   private val cellAbsentLabel: Map[Sort,KLabel] =
-    m.productions.filter(_.att.contains("cellOptAbsent", classOf[Sort]))
-      .map (p => (p.att.get("cellOptAbsent", classOf[Sort]),p.klabel.get)).toMap
+    m.productions.filter(_.att.contains(Att.CELL_OPT_ABSENT, classOf[Sort]))
+      .map (p => (p.att.get(Att.CELL_OPT_ABSENT, classOf[Sort]),p.klabel.get)).toMap
 
 
   private val cellInitializer: Map[Sort, KApply] =
-    m.productions.filter(p => (cellSorts(p.sort) || cellBagSorts(p.sort)) && p.att.contains("initializer"))
+    m.productions.filter(p => (cellSorts(p.sort) || cellBagSorts(p.sort)) && p.att.contains(Att.INITIALIZER))
       .map(p => (p.sort, KApply(p.klabel.get))).flatMap({ case (s, app) => if (cellBagSorts(s)) getCellSortsOfCellBag(s).map((_, app)) else Seq((s, app))}).toMap
 
   private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
@@ -87,7 +86,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   }
 
   private lazy val mainCell = {
-    val mainCells = cellProductions.filter(x => x._2.att.contains("maincell")).map(_._1)
+    val mainCells = cellProductions.filter(x => x._2.att.contains(Att.MAINCELL)).map(_._1)
     if (mainCells.size > 1)
       throw KEMException.compilerError("Too many main cells:" + mainCells)
     if (mainCells.isEmpty)
@@ -101,7 +100,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getMultiplicity(k: Sort): Multiplicity =
     if (cellBagSubsorts.values.flatten.toSet.contains(k))
       Multiplicity.STAR
-    else if (cellProductions(k).att.contains("unit"))
+    else if (cellProductions(k).att.contains(Att.UNIT))
       Multiplicity.OPTIONAL
     else
       Multiplicity.ONE
@@ -144,11 +143,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def getUnit(k: Sort): KApply = {
     if (getMultiplicity(k) == Multiplicity.OPTIONAL)
-      KApply(KLabel(cellProductions(k).att.get("unit")))
+      KApply(KLabel(cellProductions(k).att.get(Att.UNIT)))
     else {
       val sorts = getCellBagSortsOfCell(k)
       assert(sorts.size == 1, "Too many cell bags found for cell sort: " + k + ", " + sorts)
-      KApply(KLabel(cellBagProductions(sorts.head).att.get("unit")))
+      KApply(KLabel(cellBagProductions(sorts.head).att.get(Att.UNIT)))
     }
   }
 
@@ -170,13 +169,13 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     cellSorts
       .map(s => (s, getCellBagSortsOfCell(s)))
       .filter(_._2.size == 1)
-      .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get("unit"))).equals(unit))
+      .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get(Att.UNIT))).equals(unit))
       .map(_._1)
       .headOption
   }
 
 
-  lazy val initRules: Set[Rule] = m.rules.collect({ case r if r.att.contains("initializer") => r })
+  lazy val initRules: Set[Rule] = m.rules.collect({ case r if r.att.contains(Att.INITIALIZER) => r })
 
   lazy val configVars: Set[KToken] = {
     val transformer = new FoldK[Set[KToken]] {
@@ -192,7 +191,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   lazy val cellProductionsFor: Map[Sort, Set[Production]] =
     m.productions
-      .collect({ case p if p.att.contains("cell") => p })
+      .collect({ case p if p.att.contains(Att.CELL) => p })
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 

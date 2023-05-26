@@ -26,7 +26,7 @@ public class KoreParser {
 
     public KoreParser(Map<SortHead, Att> sortAttMap) {
         textToKore = new TextToKore();
-        koreToK = new org.kframework.parser.kore.parser.KoreToK(stream(sortAttMap).map(t -> Tuple2.apply(t._1().name(), t._2().getOptional("hook").orElse(""))).collect(Collections.toMap()));
+        koreToK = new org.kframework.parser.kore.parser.KoreToK(stream(sortAttMap).map(t -> Tuple2.apply(t._1().name(), t._2().getOptional(Att.HOOK()).orElse(""))).collect(Collections.toMap()));
     }
 
     public K parseString(String koreString) {

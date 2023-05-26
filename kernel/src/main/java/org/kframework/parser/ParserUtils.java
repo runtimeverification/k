@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -53,7 +54,7 @@ public class ParserUtils {
     private final GlobalOptions options;
     private final FileUtil files;
     private final ExtractFencedKCodeFromMarkdown mdExtractor;
-
+    private final boolean pedanticAttributes;
     public ParserUtils(FileUtil files, KExceptionManager kem) {
         this(files, kem, new GlobalOptions(), new OuterParsingOptions());
     }
@@ -62,7 +63,8 @@ public class ParserUtils {
         this.kem = kem;
         this.options = options;
         this.files = files;
-        mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
+        this.mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
+        this.pedanticAttributes = outerParsingOptions.pedanticAttributes;
     }
 
     /**
@@ -73,16 +75,17 @@ public class ParserUtils {
      * @param mainModule     main module name.
      * @return KORE representation of the main module.
      */
-    public static Module parseMainModuleOuterSyntax(String definitionText, Source source, String mainModule) {
+    public static Module parseMainModuleOuterSyntax(String definitionText, Source source, String mainModule, boolean pedanticAttributes) {
         Definition def = new Definition();
         def.setItems(Outer.parse(source, definitionText, null));
         def.setMainModule(mainModule);
         def.setMainSyntaxModule(mainModule);
 
+        ProcessGroupAttributes.apply(def, pedanticAttributes);
         Context context = new Context();
         new CollectProductionsVisitor(context).visit(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, false);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, false, pedanticAttributes);
         return kilToKore.apply(def).getModule(mainModule).get();
     }
 
@@ -113,6 +116,9 @@ public class ParserUtils {
             }
         }
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
+        items.stream().filter((d) -> d instanceof org.kframework.kil.Module)
+                .forEach((m) -> ProcessGroupAttributes.apply((org.kframework.kil.Module) m, pedanticAttributes));
+
         if (options.verbose) {
             System.out.println("Importing: " + source);
         }
@@ -199,6 +205,7 @@ public class ParserUtils {
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
+        ProcessGroupAttributes.apply(def, pedanticAttributes);
         new CollectProductionsVisitor(context).visit(def);
 
         // Tuple4 of moduleName, Source, Location, digest
@@ -246,7 +253,7 @@ public class ParserUtils {
           System.out.println(def.toString());
         }
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc, pedanticAttributes);
         // Order modules by name to stabilize the error message for circular imports
         java.util.List<FlatModule> flatModules = kilModules.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
         Set<Module> finalModules = mutable(FlatModule.toModules(immutable(flatModules), immutable(previousModules)));

@@ -164,9 +164,6 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
@@ -302,7 +299,7 @@ public class Outer {
   Returns 'node' (which simplifies many uses of this function).
   */
   private <T extends ASTNode> T tokenLoc(T node) {
-    return markLoc(new Location(beginLine + token.beginLine, 
+    return markLoc(new Location(beginLine + token.beginLine,
                                 beginColumn + token.beginColumn, 0, 0), node);
   }
 
@@ -673,7 +670,7 @@ void Tag(ASTNode node) :
     ( val = String() ")"
     | TagContent(sb) ")" { val = sb.toString() + special(); } )
     { SwitchTo(ATTR_STATE); })?
-  { node.addAttribute(key, val); }
+  { node.unsafeAddBuiltInOrRawAttribute(key, val); }
 }
 
 /** Parses the value of an attribute and appends it to 'sb' */
@@ -717,7 +714,7 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 }
 
 /** Parses an Import and adds it to module */
-void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute("private") == null; }
+void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute(Att.PRIVATE()) == null; }
 {
   ("imports" | "import") ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME>
   { module.appendModuleItem(markLoc(loc, new Import(image(), isPublic))); }
@@ -799,8 +796,8 @@ void Production(List<Production> prods) :
 | (ProductionItem(items))+
 ) { Production prod = new Production(new NonTerminal(Sort(""), Optional.empty()), items); }
   (Attributes(prod))?
-  { if (klabel != null && prod.getAttribute("klabel") == null) {
-      prod.addAttribute("klabel", klabel);
+  { if (klabel != null && prod.getAttribute(Att.KLABEL()) == null) {
+      prod.addAttribute(Att.KLABEL(), klabel);
     }
     prods.add(markLoc(loc, prod)); }
 }
