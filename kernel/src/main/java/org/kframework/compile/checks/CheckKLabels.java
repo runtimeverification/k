@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -14,7 +15,6 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
-import org.kframework.kore.Sort;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
@@ -31,7 +31,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import scala.Tuple2;
 
-import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 
 /**
@@ -115,7 +114,7 @@ public class CheckKLabels {
         }
     }
 
-    private boolean hasAttWithNoArg(Att att, String attName) {
+    private boolean hasAttWithNoArg(Att att, Att.Key attName) {
       return att.contains(attName) && att.get(attName).equals("");
     }
 
@@ -136,10 +135,10 @@ public class CheckKLabels {
             Production prod = klabelProds.get(symbol);
             Optional<Source> s = prod.source();
             if (prod.att().contains(Att.MAINCELL()) ||
-                prod.att().contains("unused") ||
+                prod.att().contains(Att.UNUSED()) ||
                 symbol.equals("<generatedTop>") ||
                 !s.isPresent() ||
-                (prod.att().contains(Att.CELL()) && stream(prod.nonterminals()).filter(nt -> klabels.get(symbol).sortAttributesFor().get(nt.sort().head()).getOrElse(() -> Att.empty()).contains("cellCollection")).findAny().isPresent())) {
+                (prod.att().contains(Att.CELL()) && stream(prod.nonterminals()).filter(nt -> klabels.get(symbol).sortAttributesFor().get(nt.sort().head()).getOrElse(() -> Att.empty()).contains(Att.CELL_COLLECTION())).findAny().isPresent())) {
                 continue;
             }
             if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {

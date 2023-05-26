@@ -879,13 +879,13 @@ and `orBool` may be short-circuited in concrete backends, but in symbolic
 ackends, both arguments will be evaluated.
 
 ```k
-  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), group(boolOperation), latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), group(boolOperation), hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), group(boolOperation), latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), group(boolOperation), hook(BOOL.implies)]
                 > left:
                   Bool "==Bool" Bool      [function, total, klabel(_==Bool_), symbol, left, comm, smt-hook(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, total, klabel(_=/=Bool_), symbol, left, comm, smt-hook(distinct), hook(BOOL.ne)]
@@ -1083,12 +1083,12 @@ You can compute whether two integers are less than or equal to, less than,
 greater than or equal to, greater than, equal, or unequal to another integer.
 
 ```k
-  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, left, comm, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
-                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, left, comm, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, comm, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, comm, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
 ```
 
 ### Divides
@@ -1398,12 +1398,12 @@ is true, because `NaN` compares unequal to all values, including itself, in
 IEEE 754 arithmetic. `0.0 ==Float -0.0` is also true.
 
 ```k
-  syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
-                | Float "<Float" Float        [function, left, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
-                | Float ">=Float" Float       [function, left, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
-                | Float ">Float" Float        [function, left, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, left, comm, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
-                | Float "=/=Float" Float      [function, left, comm, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+  syntax Bool ::= Float "<=Float" Float       [function, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
+                | Float "<Float" Float        [function, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
+                | Float ">=Float" Float       [function, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
+                | Float ">Float" Float        [function, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
+                | Float "==Float" Float       [function, comm, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "=/=Float" Float      [function, comm, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
 ```
@@ -1622,8 +1622,8 @@ is less than, less than or equal to, greater than, or greater than or equal to
 another according to the natural lexicographic ordering of strings.
 
 ```k
-  syntax Bool ::= String "==String" String [function, total, left, comm, hook(STRING.eq)]
-                | String "=/=String" String      [function, total, left, comm, hook(STRING.ne)]
+  syntax Bool ::= String "==String" String  [function, total, comm, hook(STRING.eq)]
+                | String "=/=String" String [function, total, comm, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
 
   syntax Bool ::= String  "<String" String [function, total, hook(STRING.lt)]
@@ -1712,7 +1712,7 @@ module STRING-BUFFER-IN-K [symbolic]
   imports STRING
 
   syntax StringBuffer ::= ".StringBuffer" [function, total]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, avoid]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, avoid]
   syntax StringBuffer ::= String
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, total]
 
@@ -1727,7 +1727,7 @@ module STRING-BUFFER-HOOKED [concrete]
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
   syntax StringBuffer ::= ".StringBuffer" [function, total, hook(BUFFER.empty), impure]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, hook(BUFFER.concat), avoid]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, hook(BUFFER.concat), avoid]
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, total, hook(BUFFER.toString)]
 endmodule
 
@@ -2038,8 +2038,8 @@ module K-EQUAL-SYNTAX
   imports private BASIC-K
 
   syntax Bool ::= left:
-                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), group(equalEqualK)]
+                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), group(notEqualEqualK)]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
 

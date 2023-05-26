@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import com.google.common.collect.Sets;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.RuleOrClaim;
@@ -90,9 +91,9 @@ public class CloseCells {
         KVariable newLabel;
         do {
             if (s == null) {
-                newLabel = KVariable("_DotVar" + (counter++), Att().add("anonymous"));
+                newLabel = KVariable("_DotVar" + (counter++), Att().add(Att.ANONYMOUS()));
             } else {
-                newLabel = KVariable("_DotVar" + (counter++), Att().add("anonymous").add(Sort.class, s));
+                newLabel = KVariable("_DotVar" + (counter++), Att().add(Att.ANONYMOUS()).add(Sort.class, s));
             }
         } while (vars.contains(newLabel));
         vars.add(newLabel);

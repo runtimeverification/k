@@ -117,8 +117,8 @@ public class KSyntax2Bison {
   }
 
   public static void writeParser(Module module, Module disambModule, Scanner scanner, Sort start, File path, boolean glr, long stackDepth, KExceptionManager kem) {
-    if (module.att().contains("not-lr1")) {
-        kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Skipping modules " + module.att().get("not-lr1") + " tagged as not-lr1 which are not supported by Bison.");
+    if (module.att().contains(Att.NOT_LR1())) {
+        kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Skipping modules " + module.att().get(Att.NOT_LR1()) + " tagged as " + Att.NOT_LR1() + " which are not supported by Bison.");
     }
     module = transformByPriorityAndAssociativity(module);
     StringBuilder bison = new StringBuilder();
@@ -279,7 +279,7 @@ public class KSyntax2Bison {
         bison.append("\";\n" +
             "    n->sort = \"");
         encodeKore(lesser.sort(), bison);
-        boolean hasLesserLocation = module.sortAttributesFor().get(lesser.sort().head()).getOrElse(() -> Att.empty()).contains("locations");
+        boolean hasLesserLocation = module.sortAttributesFor().get(lesser.sort().head()).getOrElse(() -> Att.empty()).contains(Att.LOCATIONS());
         bison.append("\";\n" +
             "    n->hasLocation = " + (hasLesserLocation ? "1" : "0") + ";\n");
         for (int i = 0; i < nts.size(); i++) {
@@ -348,19 +348,19 @@ public class KSyntax2Bison {
       i++;
     }
     prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
-    if (!prod.att().contains("userListTerminator")) {
+    if (!prod.att().contains(Att.USER_LIST_TERMINATOR())) {
       // further adjustment to get back original production in case of user lists.
       // don't apply this adjustment to the production that handles the last element of the
       // list
       prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
     }
-    boolean hasLocation = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).contains("locations");
-    if (prod.att().contains("token") && !prod.isSubsort()) {
+    boolean hasLocation = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).contains(Att.LOCATIONS());
+    if (prod.att().contains(Att.TOKEN()) && !prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node));\n" +
           "  n->symbol = ");
-      boolean isString = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String");
-      boolean isBytes  = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("BYTES.Bytes");
+      boolean isString = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("STRING.String");
+      boolean isBytes  = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("BYTES.Bytes");
       if (!isString && !isBytes) {
         bison.append("enquote(");
       }
@@ -391,7 +391,7 @@ public class KSyntax2Bison {
           "  value_type result = {.nterm = n2};\n" +
           "  $$ = result;\n" +
           "}\n");
-    } else if (!prod.att().contains("token") && prod.isSubsort() && !prod.att().contains(RuleGrammarGenerator.NOT_INJECTION)) {
+    } else if (!prod.att().contains(Att.TOKEN()) && prod.isSubsort() && !prod.att().contains(Att.NOT_INJECTION())) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
           "  n->str = false;\n" +
@@ -413,9 +413,9 @@ public class KSyntax2Bison {
       bison.append("}\";\n" +
           "    n->children[0] = $1.nterm;\n" +
           "  }\n");
-      if (prod.att().contains("userListTerminator")) {
-        KLabel nil = KLabel(prod.att().get("userListTerminator"));
-        KLabel cons = KLabel(prod.att().get("userList"));
+      if (prod.att().contains(Att.USER_LIST_TERMINATOR())) {
+        KLabel nil = KLabel(prod.att().get(Att.USER_LIST_TERMINATOR()));
+        KLabel cons = KLabel(prod.att().get(Att.USER_LIST()));
         bison.append(
           "  node *n2 = malloc(sizeof(node));\n" +
           "  n2->symbol = \"");
@@ -450,7 +450,7 @@ public class KSyntax2Bison {
           "}\n");
       }
 
-    } else if (prod.att().contains("token") && prod.isSubsort()) {
+    } else if (prod.att().contains(Att.TOKEN()) && prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
           "  n->symbol = \"\\\\dv{");
@@ -498,9 +498,9 @@ public class KSyntax2Bison {
     }
     if (glr) {
       bison.append("%merge <mergeAmb> ");
-      if (prod.att().contains("prefer")) {
+      if (prod.att().contains(Att.PREFER())) {
         bison.append("%dprec 3\n");
-      } else if (prod.att().contains("avoid")) {
+      } else if (prod.att().contains(Att.AVOID())) {
         bison.append("%dprec 1\n");
       } else {
         bison.append("%dprec 2\n");

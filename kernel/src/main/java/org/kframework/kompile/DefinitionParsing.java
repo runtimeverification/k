@@ -7,6 +7,7 @@ import org.apache.commons.collections15.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -132,7 +133,7 @@ public class DefinitionParsing {
         this.sw = sw;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<Att.Key> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -204,7 +205,7 @@ public class DefinitionParsing {
         }
     }
 
-    public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule, java.util.Set<String> excludedModuleTags) {
+    public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule, java.util.Set<Att.Key> excludedModuleTags) {
         Definition parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
         Stream<Module> modules = Stream.of(parsedDefinition.mainModule());
         modules = Stream.concat(modules, stream(parsedDefinition.mainModule().importedModules()));
@@ -373,11 +374,11 @@ public class DefinitionParsing {
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration
-                    || (s instanceof SyntaxSort && s.att().contains("temporary-cell-sort-decl"))))
+                    || (s instanceof SyntaxSort && s.att().contains(Att.TEMPORARY_CELL_SORT_DECL()))))
               return m;
 
             Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(m.productions())
-                  .filter(p -> p.att().contains("cell"))
+                  .filter(p -> p.att().contains(Att.CELL()))
                   .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(toSet());
 
             Module module = Module(m.name(), m.imports(),
@@ -388,13 +389,14 @@ public class DefinitionParsing {
             Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
-                      .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod)))
+                      .flatMap(configDecl ->
+                              stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, outerParsingOptions.pedanticAttributes)))
                       .collect(toSet());
 
             Set<Sentence> stc = m.localSentences()
                     .$bar(configDeclProductions)
                     .filter(s -> !(s instanceof Configuration))
-                    .filter(s -> !(s instanceof SyntaxSort && s.att().contains("temporary-cell-sort-decl"))).seq();
+                    .filter(s -> !(s instanceof SyntaxSort && s.att().contains(Att.TEMPORARY_CELL_SORT_DECL()))).seq();
             Module newM = Module(m.name(), m.imports(), stc, m.att());
             newM.checkSorts(); // ensure all the Cell sorts are defined
             return newM;
@@ -476,7 +478,7 @@ public class DefinitionParsing {
                         if (cache.getCache().containsKey(b.contents()) && cache.getCache().get(b.contents()).getParse() != null) {
                             ParsedSentence parse = updateLocation(cache.getCache().get(b.contents()), b);
                             Att termAtt = parse.getParse().att().remove(Source.class).remove(Location.class).remove(Production.class);
-                            Att bubbleAtt = b.att().remove(Source.class).remove(Location.class).remove("contentStartLine", Integer.class).remove("contentStartColumn", Integer.class);
+                            Att bubbleAtt = b.att().remove(Source.class).remove(Location.class).remove(Att.CONTENT_START_LINE(), Integer.class).remove(Att.CONTENT_START_COLUMN(), Integer.class);
                             if (!termAtt.equals(bubbleAtt)) // invalidate cache if attributes changed
                                 return Stream.of();
                             cachedBubbles.getAndIncrement();
@@ -498,8 +500,8 @@ public class DefinitionParsing {
     }
 
     public static ParsedSentence updateLocation(ParsedSentence parse, Bubble b) {
-        int newStartLine = b.att().get("contentStartLine", Integer.class);
-        int newStartColumn = b.att().get("contentStartColumn", Integer.class);
+        int newStartLine = b.att().get(Att.CONTENT_START_LINE(), Integer.class);
+        int newStartColumn = b.att().get(Att.CONTENT_START_COLUMN(), Integer.class);
         int oldStartLine = parse.getStartLine();
         int oldStartColumn = parse.getStartColumn();
         if (oldStartLine != newStartLine || oldStartColumn != newStartColumn || !parse.getSource().equals(b.source().get())) {
@@ -551,8 +553,8 @@ public class DefinitionParsing {
                 .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files, options.debugTypeInference)) {
             parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
-                    new Bubble(rule, contents, Att().add("contentStartLine", 1)
-                            .add("contentStartColumn", 1).add(Source.class, source)))
+                    new Bubble(rule, contents, Att().add(Att.CONTENT_START_LINE(), 1)
+                            .add(Att.CONTENT_START_COLUMN(), 1).add(Source.class, source)))
                     .collect(Collectors.toSet());
             if (!errors.isEmpty()) {
                 throw errors.iterator().next();
@@ -663,8 +665,8 @@ public class DefinitionParsing {
     }
 
     private Stream<? extends K> parseBubble(ParseInModule pim, Map<String, ParsedSentence> cache, Bubble b) {
-        int startLine = b.att().get("contentStartLine", Integer.class);
-        int startColumn = b.att().get("contentStartColumn", Integer.class);
+        int startLine = b.att().get(Att.CONTENT_START_LINE(), Integer.class);
+        int startColumn = b.att().get(Att.CONTENT_START_COLUMN(), Integer.class);
         Source source = b.att().get(Source.class);
         boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
         Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
@@ -673,8 +675,8 @@ public class DefinitionParsing {
         registerWarnings(result._2());
         if (result._1().isRight()) {
             KApply k = (KApply) result._1().right().get();
-            k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine", Integer.class)
-                    .remove("contentStartColumn", Integer.class).remove(Source.class).remove(Location.class)));
+            k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove(Att.CONTENT_START_LINE(), Integer.class)
+                    .remove(Att.CONTENT_START_COLUMN(), Integer.class).remove(Source.class).remove(Location.class)));
             cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2()), new HashSet<>(), startLine, startColumn, source));
             k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(k);
             return Stream.of(k);

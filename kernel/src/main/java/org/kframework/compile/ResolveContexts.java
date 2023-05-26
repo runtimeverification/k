@@ -201,8 +201,8 @@ public class ResolveContexts {
         Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
-                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
-                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, context.att().add(Att.HEAT())),
+                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, context.att().add(Att.COOL())));
     }
 
     private K insert(K body, K rewrite, Module mod) {

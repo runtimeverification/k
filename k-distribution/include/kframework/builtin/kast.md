@@ -102,7 +102,7 @@ module KSEQ
              | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
-  syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, defaultBracket, applyPriority(1)]
+  syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, group(defaultBracket), applyPriority(1)]
 endmodule
 ```
 
@@ -138,26 +138,26 @@ The correspondance between K symbols and KORE symbols is as follows:
 module ML-SYNTAX [not-lr1]
   imports SORT-K
 
-  syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, mlUnary]
-                       | "#Bottom" [klabel(#Bottom), symbol, mlUnary]
-                       | "#True" [klabel(#Top), symbol, mlUnary, unparseAvoid]
-                       | "#False" [klabel(#Bottom), symbol, mlUnary, unparseAvoid]
-                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, mlUnary]
+  syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, group(mlUnary)]
+                       | "#Bottom" [klabel(#Bottom), symbol, group(mlUnary)]
+                       | "#True" [klabel(#Top), symbol, group(mlUnary), unparseAvoid]
+                       | "#False" [klabel(#Bottom), symbol, group(mlUnary), unparseAvoid]
+                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary)]
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, mlUnary]
-                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, mlUnary]
-                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, mlEquals, comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary)]
+                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary)]
+                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
 
   syntax priorities mlUnary > mlEquals > mlAnd
 
-  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, mlAnd, format(%i%1%d%n%2%n%i%3%d)]
+  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd), format(%i%1%d%n%2%n%i%3%d)]
                        > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, mlImplies, format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies), format(%i%1%d%n%2%n%i%3%d)]
 
   syntax priorities mlImplies > mlQuantifier
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, mlQuantifier]
-                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, mlQuantifier]
+  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier)]
+                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier)]
 
   syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp]
                        | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp]
@@ -484,8 +484,8 @@ module K
       change in the future).*/
 
   syntax Bool ::= left:
-                  K ":=K" K           [function, total, klabel(_:=K_), symbol, equalEqualK]
-                | K ":/=K" K          [function, total, klabel(_:/=K_), symbol, notEqualEqualK]
+                  K ":=K" K           [function, total, klabel(_:=K_), symbol, group(equalEqualK)]
+                | K ":/=K" K          [function, total, klabel(_:/=K_), symbol, group(notEqualEqualK)]
 endmodule
 
 // To be used to parse terms in full K
