@@ -4,11 +4,11 @@ imports A
 
 rule (X +Int Y) +Int Z => Z +Int (X +Int Y) [simplification, symbolic(X), concrete(Y, Z)]
 
-rule (X +Int Y) +Int Z => Y +Int (X +Int Z) [simplification, concrete(X), symbolic(Y), concrete(Z)]
+rule (X +Int Y) +Int Z => Y +Int (X +Int Z) [simplification, concrete(X, Z), symbolic(Y)]
 
 rule X +Int (Y +Int Z) => Z +Int (X +Int Y) [simplification, concrete(X, Y), symbolic(Z)]
 
-rule X +Int (Y +Int Z) => Y +Int (X +Int Z) [simplification, concrete(X), symbolic(Y), concrete(Z)]
+rule X +Int (Y +Int Z) => Y +Int (X +Int Z) [simplification, concrete(X, Z), symbolic(Y)]
 
 rule final(n +Int _M:Int) => 0 [simplification, concrete(_M)]
 
