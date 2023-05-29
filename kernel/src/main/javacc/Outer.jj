@@ -366,8 +366,8 @@ public class Outer {
       parser.source = this.source;
       parser.module = this.module;
       parser.items = this.items;
-      parser.beginLine = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
-      parser.beginColumn = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
+      parser.beginLine = 0;
+      parser.beginColumn = 0;
       try {
         StringSentence ss = new StringSentence(content.substring(0, i), startLine, startColumn, type, label);
         parser.AttributesEOF(ss);
@@ -376,6 +376,19 @@ public class Outer {
         /* Our guess was wrong. Try another position. */
       } catch (TokenMgrException e) {
         /* Our guess was wrong. Try another position. */
+      } catch (KEMException e) {
+          // if we found an exception inside attributes, adjust the location
+          // information according to the start position of the attributes
+          Location loc = e.exception.getLocation();
+          int beginLine = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i) - 1;
+          int beginColumn = offsetColumn(str, sentenceBeginLine, sentenceBeginColumn, offset + i) - 1;
+          Location newLoc = Location.apply(
+                          loc.startLine() + beginLine,
+                          loc.startLine() == 1 ? loc.startColumn() + beginColumn : beginColumn,
+                          loc.endLine() + beginLine,
+                          loc.endLine() == 1 ? loc.endColumn() + beginColumn : loc.endColumn()
+                          );
+          throw e.withLocation(newLoc, source);
       }
     }
     return new StringSentence(content, startLine, startColumn, type, label);
@@ -670,7 +683,7 @@ void Tag(ASTNode node) :
     ( val = String() ")"
     | TagContent(sb) ")" { val = sb.toString() + special(); } )
     { SwitchTo(ATTR_STATE); })?
-  { node.unsafeAddBuiltInOrRawAttribute(key, val); }
+  { node.unsafeAddBuiltInOrRawAttribute(key, val, source, Location.apply(loc.startLine(), loc.startColumn(), token.endLine, token.endColumn + 1)); }
 }
 
 /** Parses the value of an attribute and appends it to 'sb' */
