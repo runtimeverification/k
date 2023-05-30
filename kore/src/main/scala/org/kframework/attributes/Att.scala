@@ -201,6 +201,7 @@ object Att {
   final val PARSER = Key("parser", KeyType.BuiltIn)
   final val PREC = Key("prec", KeyType.BuiltIn)
   final val PREFER = Key("prefer", KeyType.BuiltIn)
+  final val PRESERVES_DEFINEDNESS = Key("preserves-definedness", KeyType.BuiltIn)
   final val PRIORITY = Key("priority", KeyType.BuiltIn)
   final val PRIVATE = Key("private", KeyType.BuiltIn)
   final val PUBLIC = Key("public", KeyType.BuiltIn)
