@@ -875,6 +875,7 @@ public class ModuleToKORE {
         HashMap<Att.Key, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
+        consideredAttributes.put(Att.GROUP(), true);
         consideredAttributes.put(Att.SOURCE(), true);
         consideredAttributes.put(Att.LOCATION(), true);
         consideredAttributes.put(Att.UNIQUE_ID(), true);
@@ -1658,7 +1659,7 @@ public class ModuleToKORE {
 
 
     private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
-        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.att())) {
+        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.withUserGroupsAsGroupAtt().att())) {
             Att.Key name = attribute._1._1;
             Object val = attribute._2;
             String strVal = val.toString();
@@ -1817,6 +1818,10 @@ public class ModuleToKORE {
     private void convert(Map<Att.Key, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
+
+        // Emit user groups as group(_) to prevent conflicts between user groups and internals
+        att = att.withUserGroupsAsGroupAtt();
+
         for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
             // Sort to stabilize error messages
             stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).collect(Collectors.toList())) {

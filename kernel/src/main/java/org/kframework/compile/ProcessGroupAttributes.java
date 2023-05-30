@@ -8,6 +8,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Syntax;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.util.Either;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,20 +23,20 @@ import java.util.stream.Collectors;
  */
 public class ProcessGroupAttributes {
 
-    private static Att processRawKeys(Att att, HasLocation node) {
-        // During parsing, attributes my-att are inserted as either
+    private static Att convertRawKeysToUserGroups(Att att, HasLocation node) {
+        // During parsing, an attribute my-att is inserted as either
         // - Key("my-att", KeyType.BuiltIn) if a recognized built-in
         // - Key("my-att", KeyType.RawKey) otherwise
         //
         // Thus, if --pedantic-attributes is disabled, we should replace every Key(..., KeyType.Raw) with
-        // Key(..., KeyType.UserGroup), unless that raw key happens to conflict with an internal attribute.
+        // Key(..., KeyType.UserGroup).
         List<Att.Key> newGroups = Collections.stream(att.rawKeys())
                 .map((k) -> {
                     Optional<Att.Key> groupKey = Att.getUserGroupOptional(k.key());
                     if (groupKey.isEmpty()) {
-                        throw KEMException.compilerError(
-                                "User-defined attribute '" + k.key() + "' conflicts with an " +
-                                        "internal attribute.", node);
+                        throw new AssertionError("Found Att.Key(" + k.key() + ", KeyType.RawKey), " +
+                                "but outer parsing should have produced Att.Key(" + k.key() + ", KeyType.BuiltIn) " +
+                                "instead");
                     }
                     return groupKey.get();
                 }).collect(Collectors.toList());
@@ -45,44 +46,17 @@ public class ProcessGroupAttributes {
         return att;
     }
 
-    private static Att expandGroupAttribute(Att att, HasLocation node) {
-        if (!att.contains(Att.GROUP(), String.class)) {
-            return att;
-        }
-        String groups = att.get(Att.GROUP()).trim();
-        if (groups.isEmpty()) {
-            throw KEMException.compilerError(
-                    "group(_) attribute expects a comma-separated list of arguments.", node);
-        }
-        KEMException badCommaException =
-                KEMException.compilerError("Extraneous ',' in group(_) attribute.", node);
-        if (groups.startsWith(",") || groups.endsWith(",")) {
-            throw badCommaException;
-        }
-        for (String group : groups.split("\\s*,\\s*")) {
-            if (group.isEmpty()) {
-                throw badCommaException;
-            }
-            Optional<Att.Key> groupKey = Att.getUserGroupOptional(group);
-            if (groupKey.isEmpty()) {
-                throw KEMException.compilerError("User-defined group '" + group +
-                        "' conflicts with built-in or internal attribute.", node);
-            }
-            if (!group.matches("[a-z][a-zA-Z0-9-]*")) {
-                throw KEMException.compilerError("Invalid argument '" + group + "' in group(_) attribute. " +
-                        "Expected a lower case letter followed by any number of alphanumeric or '-' characters.", node);
-            }
-            att = att.add(groupKey.get());
-        }
-        return att.remove(Att.GROUP());
-    }
-
     public static Att getProcessedAtt(Att att, HasLocation node, boolean pedanticAttributes) {
-        Att newAtts = expandGroupAttribute(att, node);
-        if (!pedanticAttributes) {
-            newAtts = processRawKeys(newAtts, node);
+        Either<String, Att> newAttOrError = att.withGroupAttAsUserGroups();
+        if (newAttOrError.isLeft()) {
+            throw KEMException.compilerError(newAttOrError.left().get(), node);
         }
-        return newAtts;
+        Att newAtt = newAttOrError.right().get();
+
+        if (!pedanticAttributes) {
+            newAtt = convertRawKeysToUserGroups(newAtt, node);
+        }
+        return newAtt;
     }
 
     public static void apply(Module m, boolean pedanticAttributes) {
@@ -90,9 +64,7 @@ public class ProcessGroupAttributes {
                 .filter((modItem) -> modItem instanceof Syntax)
                 .flatMap((s) -> ((Syntax) s).getPriorityBlocks().stream())
                 .flatMap((pb) -> pb.getProductions().stream())
-                .forEach((p) -> {
-                   p.setAttributes(getProcessedAtt(p.getAttributes(), p, pedanticAttributes));
-                });
+                .forEach((p) -> p.setAttributes(getProcessedAtt(p.getAttributes(), p, pedanticAttributes)));
     }
 
     public static void apply(Definition d, boolean pedanticAttributes) {
