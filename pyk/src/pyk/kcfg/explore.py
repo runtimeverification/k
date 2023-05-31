@@ -299,12 +299,6 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
 
-    def remove_subgraph_from(self, cfg: KCFG, node: NodeIdLike) -> None:
-        for _node in cfg.reachable_nodes(node, traverse_covers=True):
-            if not cfg.is_target(_node.id):
-                _LOGGER.info(f'Removing node: {shorten_hashes(_node.id)}')
-                cfg.remove_node(_node.id)
-
     def simplify(self, cfg: KCFG, logs: dict[int, tuple[LogEntry, ...]]) -> None:
         for node in cfg.nodes:
             _LOGGER.info(f'Simplifying node {self.id}: {shorten_hashes(node.id)}')

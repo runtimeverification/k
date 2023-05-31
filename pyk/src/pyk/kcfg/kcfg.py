@@ -824,14 +824,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return attrs
 
     def prune(self, node_id: NodeIdLike, keep_init: bool = True, keep_target: bool = True) -> list[int]:
-        nodes = self.reachable_nodes(node_id, traverse_covers=True)
+        nodes = self.reachable_nodes(node_id)
+        pruned_nodes = []
         for node in nodes:
             if self.is_init(node.id) and keep_init:
                 continue
             if self.is_target(node.id) and keep_target:
                 continue
             self.remove_node(node.id)
-        return [node.id for node in nodes]
+            pruned_nodes.append(node.id)
+        return pruned_nodes
 
     def shortest_path_between(
         self, source_node_id: NodeIdLike, target_node_id: NodeIdLike
@@ -855,9 +857,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 curr_constraint = mlAnd([edge.csubst.constraint, edge.csubst.subst.apply(curr_constraint)])
         return mlAnd(flatten_label('#And', curr_constraint))
 
-    def paths_between(
-        self, source_id: NodeIdLike, target_id: NodeIdLike, *, traverse_covers: bool = False
-    ) -> list[tuple[Successor, ...]]:
+    def paths_between(self, source_id: NodeIdLike, target_id: NodeIdLike) -> list[tuple[Successor, ...]]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
 
@@ -918,7 +918,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return paths
 
     def reachable_nodes(
-        self, source_id: NodeIdLike, *, reverse: bool = False, traverse_covers: bool = False
+        self,
+        source_id: NodeIdLike,
+        *,
+        reverse: bool = False,
+        edges: bool = True,
+        covers: bool = True,
+        splits: bool = True,
+        ndbranches: bool = True,
     ) -> set[Node]:
         visited: set[KCFG.Node] = set()
         worklist: list[KCFG.Node] = [self.node(source_id)]
@@ -934,11 +941,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             if not reverse:
                 worklist.extend(
                     target
-                    for succ in self.successors(source_id=node.id, covers=traverse_covers)
+                    for succ in self.successors(
+                        source_id=node.id, edges=edges, covers=covers, splits=splits, ndbranches=ndbranches
+                    )
                     for target in succ.targets
                 )
             else:
-                worklist.extend(succ.source for succ in self.predecessors(target_id=node.id, covers=traverse_covers))
+                worklist.extend(
+                    succ.source
+                    for succ in self.predecessors(
+                        target_id=node.id, edges=edges, covers=covers, splits=splits, ndbranches=ndbranches
+                    )
+                )
 
         return visited
 

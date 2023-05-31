@@ -273,7 +273,7 @@ class APRBMCProver(APRProver):
                     self._checked_nodes.append(f.id)
                     prior_loops = [
                         nd.id
-                        for nd in self.proof.kcfg.reachable_nodes(f.id, reverse=True, traverse_covers=True)
+                        for nd in self.proof.kcfg.reachable_nodes(f.id, reverse=True)
                         if nd.id != f.id and self._same_loop(nd.cterm, f.cterm)
                     ]
                     if len(prior_loops) >= self.proof.bmc_depth:
