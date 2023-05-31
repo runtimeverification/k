@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast import KInner, kast_term
+from pyk.kast.outer import read_kast_definition
+from pyk.kast.pretty import PrettyPrinter
 from pyk.kllvm.compiler import compile_runtime
 from pyk.kllvm.importer import import_runtime
 from pyk.konvert import _kast_to_kore, _kore_to_kast
@@ -13,7 +15,7 @@ from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import SORT_K_ITEM, STRING, generated_counter, generated_top, inj, int_dv, k, kseq, str_dv
 from pyk.kore.rpc import KoreClient, KoreServer, StuckResult
 from pyk.kore.syntax import App
-from pyk.ktool.kprint import _kast, pretty_print_kast
+from pyk.ktool.kprint import _kast
 from pyk.ktool.krun import KRun
 from pyk.prelude.string import stringToken
 
@@ -161,8 +163,9 @@ def test_cli_kore_to_kast(llvm_dir: Path, text: str) -> None:
 @pytest.mark.parametrize('text', TEST_DATA, ids=TEST_DATA)
 def test_cli_rule_to_kast(llvm_dir: Path, text: str) -> None:
     # Given
+    pretty_printer = PrettyPrinter(read_kast_definition(llvm_dir / 'compiled.json'))
     input_kast = stringToken(text)
-    rule_text = pretty_print_kast(input_kast, {})
+    rule_text = pretty_printer.print(input_kast)
 
     # When
     proc_res = _kast(

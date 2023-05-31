@@ -74,8 +74,11 @@ class KompiledTest:
 class KPrintTest(KompiledTest):
     @pytest.fixture
     def kprint(self, definition_dir: Path, tmp_path_factory: TempPathFactory) -> KPrint:
-        kprint = KPrint(definition_dir, use_directory=tmp_path_factory.mktemp('kprint'))
-        self._update_symbol_table(kprint.symbol_table)
+        kprint = KPrint(
+            definition_dir,
+            use_directory=tmp_path_factory.mktemp('kprint'),
+            patch_symbol_table=self._update_symbol_table,
+        )
         return kprint
 
     @staticmethod
@@ -86,8 +89,11 @@ class KPrintTest(KompiledTest):
 class KRunTest(KompiledTest):
     @pytest.fixture
     def krun(self, definition_dir: Path, tmp_path_factory: TempPathFactory) -> KRun:
-        krun = KRun(definition_dir, use_directory=tmp_path_factory.mktemp('krun'))
-        self._update_symbol_table(krun.symbol_table)
+        krun = KRun(
+            definition_dir,
+            use_directory=tmp_path_factory.mktemp('krun'),
+            patch_symbol_table=self._update_symbol_table,
+        )
         return krun
 
     @staticmethod
@@ -100,8 +106,12 @@ class KProveTest(KompiledTest):
 
     @pytest.fixture
     def kprove(self, definition_dir: Path, tmp_path_factory: TempPathFactory, bug_report: BugReport | None) -> KProve:
-        kprove = KProve(definition_dir, use_directory=tmp_path_factory.mktemp('kprove'), bug_report=bug_report)
-        self._update_symbol_table(kprove.symbol_table)
+        kprove = KProve(
+            definition_dir,
+            use_directory=tmp_path_factory.mktemp('kprove'),
+            bug_report=bug_report,
+            patch_symbol_table=self._update_symbol_table,
+        )
         return kprove
 
     @staticmethod

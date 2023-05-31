@@ -21,13 +21,14 @@ from ..utils import unique
 from .kprint import KPrint
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping
+    from collections.abc import Callable, Iterable, Iterator, Mapping
     from subprocess import CompletedProcess
     from typing import Final
 
     from ..cli_utils import BugReport
     from ..cterm import CTerm
     from ..kast.outer import KClaim, KRule, KRuleLike
+    from ..kast.pretty import SymbolTable
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -160,12 +161,14 @@ class KProve(KPrint):
         command: str = 'kprove',
         bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
+        patch_symbol_table: Callable[[SymbolTable], None] | None = None,
     ):
         super().__init__(
             definition_dir,
             use_directory=use_directory,
             bug_report=bug_report,
             extra_unparsing_modules=extra_unparsing_modules,
+            patch_symbol_table=patch_symbol_table,
         )
         # TODO: we should not have to supply main_file, it should be read
         self.main_file = main_file

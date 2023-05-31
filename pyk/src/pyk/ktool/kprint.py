@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Callable
 from contextlib import contextmanager
 from enum import Enum
 from functools import cached_property
@@ -13,48 +12,28 @@ from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..kast import kast_term
-from ..kast.inner import KApply, KAs, KAtt, KInner, KRewrite, KSequence, KSort, KToken, KVariable
-from ..kast.manip import flatten_label, undo_aliases
-from ..kast.outer import (
-    KBubble,
-    KClaim,
-    KContext,
-    KDefinition,
-    KFlatModule,
-    KImport,
-    KNonTerminal,
-    KProduction,
-    KRegexTerminal,
-    KRequire,
-    KRule,
-    KSortSynonym,
-    KSyntaxAssociativity,
-    KSyntaxLexical,
-    KSyntaxPriority,
-    KSyntaxSort,
-    KTerminal,
-    read_kast_definition,
-)
+from ..kast.inner import KInner
+from ..kast.outer import read_kast_definition
+from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
 from ..kore.syntax import App, SortApp
-from ..prelude.k import DOTS, EMPTY_K
-from ..prelude.kbool import TRUE
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
     from subprocess import CompletedProcess
     from tempfile import _TemporaryFileWrapper
-    from typing import Any, Final
+    from typing import Final
 
     from ..cli_utils import BugReport
     from ..kast import KAst
+    from ..kast.inner import KSort, KToken
+    from ..kast.outer import KDefinition, KFlatModule
+    from ..kast.pretty import SymbolTable
     from ..kore.syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
-
-SymbolTable = dict[str, Callable[..., str]]
 
 
 class KAstInput(Enum):
@@ -190,6 +169,7 @@ class KPrint:
     main_module: str
     backend: str
     _extra_unparsing_modules: Iterable[KFlatModule]
+    _patch_symbol_table: Callable[[SymbolTable], None] | None
 
     _bug_report: BugReport | None
 
@@ -199,6 +179,7 @@ class KPrint:
         use_directory: Path | None = None,
         bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
+        patch_symbol_table: Callable[[SymbolTable], None] | None = None,
     ) -> None:
         self.definition_dir = definition_dir
 
@@ -213,6 +194,7 @@ class KPrint:
         with open(self.definition_dir / 'backend.txt') as ba:
             self.backend = ba.read()
         self._extra_unparsing_modules = extra_unparsing_modules
+        self._patch_symbol_table = patch_symbol_table
         self._bug_report = bug_report
         if self._bug_report:
             self._bug_report.add_definition(self.definition_dir)
@@ -239,20 +221,6 @@ class KPrint:
     @property
     def definition_hash(self) -> str:
         return self.definition.hash
-
-    @cached_property
-    def symbol_table(self) -> SymbolTable:
-        symb_table = build_symbol_table(
-            self.definition,
-            extra_modules=self._extra_unparsing_modules,
-            opinionated=True,
-        )
-        self._patch_symbol_table(symb_table)
-        return symb_table
-
-    @classmethod
-    def _patch_symbol_table(cls, symbol_table: SymbolTable) -> None:
-        pass
 
     def parse_token(self, ktoken: KToken, *, as_rule: bool = False) -> KInner:
         input = KAstInput('rule' if as_rule else 'program')
@@ -314,9 +282,12 @@ class KPrint:
         return App('inj', [SortApp('Sort' + isort.name), SortApp('Sort' + osort.name)], [pat])
 
     def pretty_print(self, kast: KAst, *, unalias: bool = True) -> str:
-        if unalias and isinstance(kast, KInner):
-            kast = undo_aliases(self.definition, kast)
-        return PrettyPrinter(self.symbol_table).print(kast)
+        return PrettyPrinter(
+            self.definition,
+            extra_unparsing_modules=self._extra_unparsing_modules,
+            patch_symbol_table=self._patch_symbol_table,
+            unalias=unalias,
+        ).print(kast)
 
     def _expression_kast(
         self,
@@ -356,329 +327,3 @@ class KPrint:
                 sort=sort,
                 check=check,
             )
-
-
-def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:
-    return PrettyPrinter(symbol_table).print(kast)
-
-
-def unparser_for_production(prod: KProduction) -> Callable[..., str]:
-    def _unparser(*args: Any) -> str:
-        index = 0
-        result = []
-        num_nonterm = len([item for item in prod.items if type(item) is KNonTerminal])
-        num_named_nonterm = len([item for item in prod.items if type(item) is KNonTerminal and item.name != None])
-        for item in prod.items:
-            if type(item) is KTerminal:
-                result.append(item.value)
-            elif type(item) is KNonTerminal and index < len(args):
-                if num_nonterm == num_named_nonterm:
-                    if index == 0:
-                        result.append('...')
-                    result.append(f'{item.name}:')
-                result.append(args[index])
-                index += 1
-        return ' '.join(result)
-
-    return _unparser
-
-
-def build_symbol_table(
-    definition: KDefinition,
-    extra_modules: Iterable[KFlatModule] = (),
-    opinionated: bool = False,
-) -> SymbolTable:
-    """Build the unparsing symbol table given a JSON encoded definition.
-
-    -   Input: JSON encoded K definition.
-    -   Return: Python dictionary mapping klabels to automatically generated unparsers.
-    """
-    symbol_table = {}
-    all_modules = list(definition.all_modules) + ([] if extra_modules is None else list(extra_modules))
-    for module in all_modules:
-        for prod in module.syntax_productions:
-            assert prod.klabel
-            label = prod.klabel.name
-            unparser = unparser_for_production(prod)
-
-            symbol_table[label] = unparser
-            if 'symbol' in prod.att and 'klabel' in prod.att:
-                symbol_table[prod.att['klabel']] = unparser
-
-    if opinionated:
-        symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2
-        symbol_table['#Or'] = lambda c1, c2: c1 + '\n#Or\n' + indent(c2, size=4)
-
-    return symbol_table
-
-
-def paren(printer: Callable[..., str]) -> Callable[..., str]:
-    return lambda *args: '( ' + printer(*args) + ' )'
-
-
-def indent(text: str, size: int = 2) -> str:
-    return '\n'.join([(' ' * size) + line for line in text.split('\n')])
-
-
-def assoc_with_unit(assoc_join: str, unit: str) -> Callable[..., str]:
-    def _assoc_with_unit(*args: str) -> str:
-        return assoc_join.join(arg for arg in args if arg != unit)
-
-    return _assoc_with_unit
-
-
-class PrettyPrinter:
-    symbol_table: SymbolTable
-
-    def __init__(self, symbol_table: SymbolTable):
-        self.symbol_table = symbol_table
-
-    def print(self, kast: KAst) -> str:
-        """Print out KAST terms/outer syntax.
-        -   Input: KAST term.
-        -   Output: Best-effort string representation of KAST term.
-        """
-        _LOGGER.debug(f'pretty_print_kast: {kast}')
-        match kast:
-            case KVariable():
-                return self._print_kvariable(kast)
-            case KSort():
-                return self._print_ksort(kast)
-            case KToken():
-                return self._print_ktoken(kast)
-            case KApply():
-                return self._print_kapply(kast)
-            case KAs():
-                return self._print_kas(kast)
-            case KRewrite():
-                return self._print_krewrite(kast)
-            case KSequence():
-                return self._print_ksequence(kast)
-            case KTerminal():
-                return self._print_kterminal(kast)
-            case KRegexTerminal():
-                return self._print_kregexterminal(kast)
-            case KNonTerminal():
-                return self._print_knonterminal(kast)
-            case KProduction():
-                return self._print_kproduction(kast)
-            case KSyntaxSort():
-                return self._print_ksyntaxsort(kast)
-            case KSortSynonym():
-                return self._print_ksortsynonym(kast)
-            case KSyntaxLexical():
-                return self._print_ksyntaxlexical(kast)
-            case KSyntaxAssociativity():
-                return self._print_ksyntaxassociativity(kast)
-            case KSyntaxPriority():
-                return self._print_ksyntaxpriority(kast)
-            case KBubble():
-                return self._print_kbubble(kast)
-            case KRule():
-                return self._print_krule(kast)
-            case KClaim():
-                return self._print_kclaim(kast)
-            case KContext():
-                return self._print_kcontext(kast)
-            case KAtt():
-                return self._print_katt(kast)
-            case KImport():
-                return self._print_kimport(kast)
-            case KFlatModule():
-                return self._print_kflatmodule(kast)
-            case KRequire():
-                return self._print_krequire(kast)
-            case KDefinition():
-                return self._print_kdefinition(kast)
-            case _:
-                raise AssertionError(f'Error unparsing: {kast}')
-
-    def _print_kvariable(self, kvariable: KVariable) -> str:
-        sort = kvariable.sort
-        if not sort:
-            return kvariable.name
-        return kvariable.name + ':' + self.print(sort)
-
-    def _print_ksort(self, ksort: KSort) -> str:
-        return ksort.name
-
-    def _print_ktoken(self, ktoken: KToken) -> str:
-        return ktoken.token
-
-    def _print_kapply(self, kapply: KApply) -> str:
-        label = kapply.label.name
-        args = kapply.args
-        unparsed_args = [self.print(arg) for arg in args]
-        if kapply.is_cell:
-            cell_contents = '\n'.join(unparsed_args).rstrip()
-            cell_str = label + '\n' + indent(cell_contents) + '\n</' + label[1:]
-            return cell_str.rstrip()
-        unparser = self._applied_label_str(label) if label not in self.symbol_table else self.symbol_table[label]
-        return unparser(*unparsed_args)
-
-    def _print_kas(self, kas: KAs) -> str:
-        pattern_str = self.print(kas.pattern)
-        alias_str = self.print(kas.alias)
-        return pattern_str + ' #as ' + alias_str
-
-    def _print_krewrite(self, krewrite: KRewrite) -> str:
-        lhs_str = self.print(krewrite.lhs)
-        rhs_str = self.print(krewrite.rhs)
-        return '( ' + lhs_str + ' => ' + rhs_str + ' )'
-
-    def _print_ksequence(self, ksequence: KSequence) -> str:
-        if ksequence.arity == 0:
-            return self.print(EMPTY_K)
-        if ksequence.arity == 1:
-            return self.print(ksequence.items[0])
-        unparsed_k_seq = '\n~> '.join([self.print(item) for item in ksequence.items[0:-1]])
-        if ksequence.items[-1] == DOTS:
-            unparsed_k_seq = unparsed_k_seq + '\n' + self.print(DOTS)
-        else:
-            unparsed_k_seq = unparsed_k_seq + '\n~> ' + self.print(ksequence.items[-1])
-        return unparsed_k_seq
-
-    def _print_kterminal(self, kterminal: KTerminal) -> str:
-        return '"' + kterminal.value + '"'
-
-    def _print_kregexterminal(self, kregexterminal: KRegexTerminal) -> str:
-        return 'r"' + kregexterminal.regex + '"'
-
-    def _print_knonterminal(self, knonterminal: KNonTerminal) -> str:
-        return self.print(knonterminal.sort)
-
-    def _print_kproduction(self, kproduction: KProduction) -> str:
-        if 'klabel' not in kproduction.att and kproduction.klabel:
-            kproduction = kproduction.update_atts({'klabel': kproduction.klabel.name})
-        syntax_str = 'syntax ' + self.print(kproduction.sort)
-        if kproduction.items:
-            syntax_str += ' ::= ' + ' '.join([self.print(pi) for pi in kproduction.items])
-        att_str = self.print(kproduction.att)
-        if att_str:
-            syntax_str += ' ' + att_str
-        return syntax_str
-
-    def _print_ksyntaxsort(self, ksyntaxsort: KSyntaxSort) -> str:
-        sort_str = self.print(ksyntaxsort.sort)
-        att_str = self.print(ksyntaxsort.att)
-        return 'syntax ' + sort_str + ' ' + att_str
-
-    def _print_ksortsynonym(self, ksortsynonym: KSortSynonym) -> str:
-        new_sort_str = self.print(ksortsynonym.new_sort)
-        old_sort_str = self.print(ksortsynonym.old_sort)
-        att_str = self.print(ksortsynonym.att)
-        return 'syntax ' + new_sort_str + ' = ' + old_sort_str + ' ' + att_str
-
-    def _print_ksyntaxlexical(self, ksyntaxlexical: KSyntaxLexical) -> str:
-        name_str = ksyntaxlexical.name
-        regex_str = ksyntaxlexical.regex
-        att_str = self.print(ksyntaxlexical.att)
-        # todo: proper escaping
-        return 'syntax lexical ' + name_str + ' = r"' + regex_str + '" ' + att_str
-
-    def _print_ksyntaxassociativity(self, ksyntaxassociativity: KSyntaxAssociativity) -> str:
-        assoc_str = ksyntaxassociativity.assoc.value
-        tags_str = ' '.join(ksyntaxassociativity.tags)
-        att_str = self.print(ksyntaxassociativity.att)
-        return 'syntax associativity ' + assoc_str + ' ' + tags_str + ' ' + att_str
-
-    def _print_ksyntaxpriority(self, ksyntaxpriority: KSyntaxPriority) -> str:
-        priorities_str = ' > '.join([' '.join(group) for group in ksyntaxpriority.priorities])
-        att_str = self.print(ksyntaxpriority.att)
-        return 'syntax priority ' + priorities_str + ' ' + att_str
-
-    def _print_kbubble(self, kbubble: KBubble) -> str:
-        body = '// KBubble(' + kbubble.sentence_type + ', ' + kbubble.content + ')'
-        att_str = self.print(kbubble.att)
-        return body + ' ' + att_str
-
-    def _print_krule(self, kterm: KRule) -> str:
-        body = '\n     '.join(self.print(kterm.body).split('\n'))
-        rule_str = 'rule '
-        if 'label' in kterm.att:
-            rule_str = rule_str + '[' + kterm.att['label'] + ']:'
-        rule_str = rule_str + ' ' + body
-        atts_str = self.print(kterm.att)
-        if kterm.requires != TRUE:
-            requires_str = 'requires ' + '\n  '.join(self._print_kast_bool(kterm.requires).split('\n'))
-            rule_str = rule_str + '\n  ' + requires_str
-        if kterm.ensures != TRUE:
-            ensures_str = 'ensures ' + '\n  '.join(self._print_kast_bool(kterm.ensures).split('\n'))
-            rule_str = rule_str + '\n   ' + ensures_str
-        return rule_str + '\n  ' + atts_str
-
-    def _print_kclaim(self, kterm: KClaim) -> str:
-        body = '\n     '.join(self.print(kterm.body).split('\n'))
-        rule_str = 'claim '
-        if 'label' in kterm.att:
-            rule_str = rule_str + '[' + kterm.att['label'] + ']:'
-        rule_str = rule_str + ' ' + body
-        atts_str = self.print(kterm.att)
-        if kterm.requires != TRUE:
-            requires_str = 'requires ' + '\n  '.join(self._print_kast_bool(kterm.requires).split('\n'))
-            rule_str = rule_str + '\n  ' + requires_str
-        if kterm.ensures != TRUE:
-            ensures_str = 'ensures ' + '\n  '.join(self._print_kast_bool(kterm.ensures).split('\n'))
-            rule_str = rule_str + '\n   ' + ensures_str
-        return rule_str + '\n  ' + atts_str
-
-    def _print_kcontext(self, kcontext: KContext) -> str:
-        body = indent(self.print(kcontext.body))
-        context_str = 'context alias ' + body
-        requires_str = ''
-        atts_str = self.print(kcontext.att)
-        if kcontext.requires != TRUE:
-            requires_str = self.print(kcontext.requires)
-            requires_str = 'requires ' + indent(requires_str)
-        return context_str + '\n  ' + requires_str + '\n  ' + atts_str
-
-    def _print_katt(self, katt: KAtt) -> str:
-        return katt.pretty
-
-    def _print_kimport(self, kimport: KImport) -> str:
-        return ' '.join(['imports', ('public' if kimport.public else 'private'), kimport.name])
-
-    def _print_kflatmodule(self, kflatmodule: KFlatModule) -> str:
-        name = kflatmodule.name
-        imports = '\n'.join([self.print(kimport) for kimport in kflatmodule.imports])
-        sentences = '\n\n'.join([self.print(sentence) for sentence in kflatmodule.sentences])
-        contents = imports + '\n\n' + sentences
-        return 'module ' + name + '\n    ' + '\n    '.join(contents.split('\n')) + '\n\nendmodule'
-
-    def _print_krequire(self, krequire: KRequire) -> str:
-        return 'requires "' + krequire.require + '"'
-
-    def _print_kdefinition(self, kdefinition: KDefinition) -> str:
-        requires = '\n'.join([self.print(require) for require in kdefinition.requires])
-        modules = '\n\n'.join([self.print(module) for module in kdefinition.all_modules])
-        return requires + '\n\n' + modules
-
-    def _print_kast_bool(self, kast: KAst) -> str:
-        """Print out KAST requires/ensures clause.
-
-        -   Input: KAST Bool for requires/ensures clause.
-        -   Output: Best-effort string representation of KAST term.
-        """
-        _LOGGER.debug(f'_print_kast_bool: {kast}')
-        if type(kast) is KApply and kast.label.name in ['_andBool_', '_orBool_']:
-            clauses = [self._print_kast_bool(c) for c in flatten_label(kast.label.name, kast)]
-            head = kast.label.name.replace('_', ' ')
-            if head == ' orBool ':
-                head = '  orBool '
-            separator = ' ' * (len(head) - 7)
-            spacer = ' ' * len(head)
-
-            def join_sep(s: str) -> str:
-                return ('\n' + separator).join(s.split('\n'))
-
-            clauses = (
-                ['( ' + join_sep(clauses[0])]
-                + [head + '( ' + join_sep(c) for c in clauses[1:]]
-                + [spacer + (')' * len(clauses))]
-            )
-            return '\n'.join(clauses)
-        else:
-            return self.print(kast)
-
-    def _applied_label_str(self, symbol: str) -> Callable[..., str]:
-        return lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )'

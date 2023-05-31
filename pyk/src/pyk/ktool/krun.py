@@ -17,13 +17,14 @@ from ..kore.syntax import DV, App, SortApp, String
 from .kprint import KPrint
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Callable, Iterable, Mapping
     from logging import Logger
     from subprocess import CompletedProcess
     from typing import Final
 
     from ..cli_utils import BugReport
     from ..kast.outer import KFlatModule
+    from ..kast.pretty import SymbolTable
     from ..kore.syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -39,12 +40,14 @@ class KRun(KPrint):
         command: str = 'krun',
         bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
+        patch_symbol_table: Callable[[SymbolTable], None] | None = None,
     ) -> None:
         super().__init__(
             definition_dir,
             use_directory=use_directory,
             bug_report=bug_report,
             extra_unparsing_modules=extra_unparsing_modules,
+            patch_symbol_table=patch_symbol_table,
         )
         self.command = command
 
