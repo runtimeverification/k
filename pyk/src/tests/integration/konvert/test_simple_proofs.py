@@ -326,6 +326,34 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
             ],
         ),
     ),
+    (
+        'if-then-else-no-sort-param-nested',
+        KSort('Int'),
+        r"""
+        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortInt{}}(
+            VarC1 : SortBool{},
+            Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortInt{}}(
+                VarC2 : SortBool{}, VarI1 : SortInt{} , VarI2 : SortInt{}
+            ),
+            VarI3 : SortInt{}
+        )
+        """,
+        KApply(
+            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+            [
+                KVariable('C1', sort=KSort('Bool')),
+                KApply(
+                    KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+                    [
+                        KVariable('C2', sort=KSort('Bool')),
+                        KVariable('I1', sort=KSort('Int')),
+                        KVariable('I2', sort=KSort('Int')),
+                    ],
+                ),
+                KVariable('I3', sort=KSort('Int')),
+            ],
+        ),
+    ),
 )
 
 KORE_TO_KAST_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
