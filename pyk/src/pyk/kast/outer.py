@@ -1093,6 +1093,12 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             case _:
                 return None
 
+    def sort_strict(self, kast: KInner) -> KSort:
+        sort = self.sort(kast)
+        if sort is None:
+            raise ValueError(f'Could not determine sort of term: {kast}')
+        return sort
+
     def greatest_common_subsort(self, sort1: KSort, sort2: KSort) -> KSort | None:
         if sort1 == sort2:
             return sort1
