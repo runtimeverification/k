@@ -14,9 +14,10 @@ from .cterm import split_config_and_constraints
 from .kast.inner import KInner
 from .kast.manip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
 from .kast.outer import read_kast_definition
+from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
 from .kore.syntax import Pattern
-from .ktool.kprint import KPrint, build_symbol_table, pretty_print_kast
+from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
@@ -113,14 +114,14 @@ def exec_graph_imports(args: Namespace) -> None:
 
 def exec_coverage(args: Namespace) -> None:
     kompiled_dir: Path = args.definition_dir
-    json_definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
-    symbol_table = build_symbol_table(json_definition)
+    definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
+    pretty_printer = PrettyPrinter(definition)
     for rid in args.coverage_file:
-        rule = minimize_rule(strip_coverage_logger(get_rule_by_id(json_definition, rid.strip())))
+        rule = minimize_rule(strip_coverage_logger(get_rule_by_id(definition, rid.strip())))
         args.output.write('\n\n')
         args.output.write('Rule: ' + rid.strip())
         args.output.write('\nUnparsed:\n')
-        args.output.write(pretty_print_kast(rule, symbol_table))
+        args.output.write(pretty_printer.print(rule))
     _LOGGER.info(f'Wrote file: {args.output.name}')
 
 
