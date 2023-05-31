@@ -10,7 +10,7 @@ from pyk.kast import kast_term
 from pyk.kast.inner import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
 from pyk.kast.outer import KDefinition, KFlatModuleList, KRequire
-from pyk.ktool.kprint import paren
+from pyk.kast.pretty import paren
 from pyk.ktool.kprove import _kprove
 from pyk.prelude.ml import is_top
 from pyk.testing import KProveTest

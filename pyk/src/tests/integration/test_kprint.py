@@ -6,7 +6,7 @@ import pytest
 
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable
 from pyk.kast.manip import remove_attrs
-from pyk.ktool.kprint import assoc_with_unit
+from pyk.kast.pretty import assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kbool import andBool
 from pyk.prelude.kint import INT, intToken, leInt, ltInt
