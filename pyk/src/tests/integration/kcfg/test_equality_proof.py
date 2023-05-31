@@ -66,14 +66,13 @@ FUNC_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
         'concrete-requires-nontrivial-false-identity',
         ProofStatus.PASSED,
     ),
-    # TODO: this should be trivially passing but it fails because cterm_implies returns None
-    # (
-    #     'func-spec-concrete-requires-trivial-false-nonsense',
-    #     K_FILES / 'imp-simple-spec.k',
-    #     'IMP-FUNCTIONAL-SPEC',
-    #     'concrete-requires-trivial-false-nonsense',
-    #     ProofStatus.PASSED,
-    # ),
+    (
+        'func-spec-concrete-requires-trivial-false-nonsense',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-FUNCTIONAL-SPEC',
+        'concrete-requires-trivial-false-nonsense',
+        ProofStatus.PASSED,
+    ),
     (
         'func-spec-concrete-requires-trivial-false-nonsense-undecided',
         K_FILES / 'imp-simple-spec.k',

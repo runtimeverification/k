@@ -161,6 +161,14 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         kast_simplified = self.kprint.kore_to_kast(kore_simplified)
         return kast_simplified, logs
 
+    def kast_simplify(self, kast: KInner) -> tuple[KInner, tuple[LogEntry, ...]]:
+        _LOGGER.debug(f'Simplifying: {kast}')
+        kore = self.kprint.kast_to_kore(kast, GENERATED_TOP_CELL)
+        _, kore_client = self._kore_rpc
+        kore_simplified, logs = kore_client.simplify(kore)
+        kast_simplified = self.kprint.kore_to_kast(kore_simplified)
+        return kast_simplified, logs
+
     def cterm_implies(
         self,
         antecedent: CTerm,
