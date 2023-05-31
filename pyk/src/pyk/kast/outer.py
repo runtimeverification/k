@@ -1089,7 +1089,18 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 return KSort('K')
             case KApply(label, _):
                 prod = self.production_for_klabel(label)
-                return prod.sort if prod.sort not in prod.params else None
+                if prod.sort not in prod.params:
+                    return prod.sort
+                elif len(prod.params) == len(label.params):
+                    param_dict: dict[KSort, KSort] = {}
+                    for pparam, lparam in zip(prod.params, label.params, strict=True):
+                        if pparam not in param_dict:
+                            param_dict[pparam] = lparam
+                        elif param_dict[pparam] != lparam:
+                            return None
+                    if prod.sort in param_dict and param_dict[prod.sort] not in prod.params:
+                        return param_dict[prod.sort]
+                return None
             case _:
                 return None
 
