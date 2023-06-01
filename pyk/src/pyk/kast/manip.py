@@ -37,6 +37,36 @@ def flatten_label(label: str, kast: KInner) -> list[KInner]:
     return [kast]
 
 
+def sort_assoc_label(label: str, kast: KInner) -> KInner:
+    res: KInner | None = None
+    if type(kast) is KApply and kast.label.name == label:
+        terms = sorted(flatten_label(label, kast))
+        for term in reversed(terms):
+            if not res:
+                res = term
+            else:
+                res = kast.label(term, res)
+        assert res is not None
+        return res
+    return kast
+
+
+def sort_ac_collections(definition: KDefinition, kast: KInner) -> KInner:
+    ac_hooks = {'MAP.concat', 'SET.concat', 'BAG.concat'}
+    ac_collections = [
+        prod.klabel.name
+        for prod in definition.productions
+        if prod.klabel is not None and 'hook' in prod.att and prod.att['hook'] in ac_hooks
+    ]
+
+    def _sort_ac_collections(_kast: KInner) -> KInner:
+        if type(_kast) is KApply and _kast.label.name in ac_collections:
+            return sort_assoc_label(_kast.label.name, _kast)
+        return _kast
+
+    return top_down(_sort_ac_collections, kast)
+
+
 def if_ktype(ktype: type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner], KInner]:
     def fun(term: KInner) -> KInner:
         if isinstance(term, ktype):

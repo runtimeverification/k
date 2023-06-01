@@ -8,6 +8,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, Subst
 from pyk.kast.manip import flatten_label
 from pyk.kore.prelude import int_dv
 from pyk.kore.syntax import App
+from pyk.prelude.collections import map_item
 from pyk.prelude.kint import intToken
 from pyk.testing import KRunTest
 
@@ -30,8 +31,8 @@ class TestImpRun(KRunTest):
 
         expected_k = KSequence([])
         expected_map_items = [
-            KApply('_|->_', [KToken('s', 'Id'), intToken(3)]),
-            KApply('_|->_', [KToken('n', 'Id'), intToken(-1)]),
+            map_item(KToken('s', 'Id'), intToken(3)),
+            map_item(KToken('n', 'Id'), intToken(-1)),
         ]
 
         # When
