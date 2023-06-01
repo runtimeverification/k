@@ -8,7 +8,14 @@ from graphviz import Digraph
 from ..cli_utils import ensure_dir_path
 from ..cterm import CTerm, build_claim, build_rule
 from ..kast.inner import KApply, KRewrite, top_down
-from ..kast.manip import flatten_label, minimize_term, ml_pred_to_bool, push_down_rewrites
+from ..kast.manip import (
+    flatten_label,
+    inline_cell_maps,
+    minimize_term,
+    ml_pred_to_bool,
+    push_down_rewrites,
+    sort_ac_collections,
+)
 from ..kast.outer import KFlatModule
 from ..prelude.k import DOTS
 from ..prelude.ml import mlAnd
@@ -269,6 +276,7 @@ class KCFGShow:
         node_deltas: Iterable[tuple[NodeIdLike, NodeIdLike]] = (),
         to_module: bool = False,
         minimize: bool = True,
+        sort_collections: bool = False,
         node_printer: Callable[[CTerm], Iterable[str]] | None = None,
         omit_cells: Iterable[str] = (),
     ) -> list[str]:
@@ -285,6 +293,15 @@ class KCFGShow:
                 return top_down(_hide_cells, term)
             return term
 
+        def simplify_config(config: KInner) -> KInner:
+            config = inline_cell_maps(config)
+            config = sort_ac_collections(self.kprint.definition, config)
+            config = hide_cells(config)
+            return config
+
+        def is_ceil_condition(kast: KInner) -> bool:
+            return type(kast) is KApply and kast.label.name == '#Ceil'
+
         nodes_printed = False
 
         for node_id in nodes:
@@ -297,15 +314,13 @@ class KCFGShow:
             res_lines.append('')
             res_lines.append(f'Node {node_id}:')
             res_lines.append('')
-            res_lines.append(self.kprint.pretty_print(kast))
+            res_lines.append(self.kprint.pretty_print(kast, sort_collections=sort_collections))
             res_lines.append('')
 
         for node_id_1, node_id_2 in node_deltas:
             nodes_printed = True
-            config_1 = cfg.node(node_id_1).cterm.config
-            config_2 = cfg.node(node_id_2).cterm.config
-            config_1 = hide_cells(config_1)
-            config_2 = hide_cells(config_2)
+            config_1 = simplify_config(cfg.node(node_id_1).cterm.config)
+            config_2 = simplify_config(cfg.node(node_id_2).cterm.config)
             config_delta = push_down_rewrites(KRewrite(config_1, config_2))
             if minimize:
                 config_delta = minimize_term(config_delta)
@@ -313,7 +328,7 @@ class KCFGShow:
             res_lines.append('')
             res_lines.append(f'State Delta {node_id_1} => {node_id_2}:')
             res_lines.append('')
-            res_lines.append(self.kprint.pretty_print(config_delta))
+            res_lines.append(self.kprint.pretty_print(config_delta, sort_collections=sort_collections))
             res_lines.append('')
 
         if not (nodes_printed):
@@ -325,20 +340,10 @@ class KCFGShow:
 
             def to_rule(edge: KCFG.Edge, *, claim: bool = False) -> KRuleLike:
                 sentence_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
-                init_cterm = CTerm(hide_cells(edge.source.cterm.config), ())
-                for c in edge.source.cterm.constraints:
-                    assert type(c) is KApply
-                    if c.label.name == '#Ceil':
-                        _LOGGER.warning(f'Ignoring Ceil condition: {c}')
-                    else:
-                        init_cterm.add_constraint(c)
-                target_cterm = CTerm(hide_cells(edge.target.cterm.config), ())
-                for c in edge.source.cterm.constraints:
-                    assert type(c) is KApply
-                    if c.label.name == '#Ceil':
-                        _LOGGER.warning(f'Ignoring Ceil condition: {c}')
-                    else:
-                        target_cterm.add_constraint(c)
+                init_constraints = [c for c in edge.source.cterm.constraints if not is_ceil_condition(c)]
+                init_cterm = CTerm(simplify_config(edge.source.cterm.config), init_constraints)
+                target_constraints = [c for c in edge.target.cterm.constraints if not is_ceil_condition(c)]
+                target_cterm = CTerm(simplify_config(edge.target.cterm.config), target_constraints)
                 rule: KRuleLike
                 if claim:
                     rule, _ = build_claim(sentence_id, init_cterm, target_cterm)
@@ -355,7 +360,7 @@ class KCFGShow:
             claims = [to_rule(KCFG.Edge(nd, cfg.get_unique_target(), -1), claim=True) for nd in cfg.frontier]
             cfg_module_name = cfgid.upper().replace('.', '-').replace('_', '-')
             new_module = KFlatModule(f'SUMMARY-{cfg_module_name}', rules + nd_steps + claims)
-            res_lines.append(self.kprint.pretty_print(new_module))
+            res_lines.append(self.kprint.pretty_print(new_module, sort_collections=sort_collections))
             res_lines.append('')
 
         return res_lines
