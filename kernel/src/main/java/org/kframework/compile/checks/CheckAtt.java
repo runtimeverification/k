@@ -63,7 +63,7 @@ public class CheckAtt {
          */
         if (!sentence.att().rawKeys().isEmpty()) {
             errors.add(KEMException.compilerError("Unrecognized attributes: " +
-                    sentence.att().rawKeys().mkString("[", ",", "]") +
+                    sentence.att().rawKeys().mkString("[", ", ", "]") +
                     "\nHint: User-defined groups can be added with the group(_) attribute.", sentence));
         }
     }
