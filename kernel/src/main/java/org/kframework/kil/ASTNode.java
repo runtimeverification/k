@@ -5,6 +5,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -97,7 +98,9 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @param key
      * @param val
      */
-    public void unsafeAddBuiltInOrRawAttribute(String key, String val) {
+    public void unsafeAddBuiltInOrRawAttribute(String key, String val, Source source, Location loc) {
+        if (att.contains(Att.getBuiltinKeyOptional(key).orElse(Att.unsafeRawKey(key))))
+            throw KEMException.outerParserError("Duplicate attribute: " + key, source, loc);
         att = att.add(Att.getBuiltinKeyOptional(key).orElse(Att.unsafeRawKey(key)), val);
     }
 
