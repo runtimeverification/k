@@ -56,14 +56,14 @@ class EqualityProof(Proof):
         self.simplified_equality = simplified_equality
 
     @staticmethod
-    def from_claim(claim: KClaim, defn: KDefinition) -> EqualityProof:
+    def from_claim(claim: KClaim, defn: KDefinition, proof_dir: Path | None = None) -> EqualityProof:
         sort = defn.sort_strict(claim.body)
         lhs_body = extract_lhs(claim.body)
         rhs_body = extract_rhs(claim.body)
         if not (claim.ensures is None or claim.ensures == TRUE):
             raise ValueError(f'Cannot convert claim to EqualityProof due to non-trival ensures clause {claim.ensures}')
         constraints = [mlEquals(TRUE, c, arg_sort=BOOL) for c in flatten_label('_andBool_', claim.requires)]
-        return EqualityProof(claim.label, lhs_body, rhs_body, sort, constraints=constraints)
+        return EqualityProof(claim.label, lhs_body, rhs_body, sort, constraints=constraints, proof_dir=proof_dir)
 
     @property
     def equality(self) -> KInner:
