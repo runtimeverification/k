@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kore
 
+import org.kframework.attributes.Att
 import org.kframework.definition.Module
 
 import scala.collection.JavaConverters._
@@ -11,7 +12,7 @@ import scala.collection.JavaConverters._
 object Assoc extends {
 
   def flatten(label: KLabel, list: java.util.List[K], m: Module): java.util.List[K] = {
-    flatten(label, list.asScala, ADT.KLabel(m.attributesFor(label).get("unit"))).asJava
+    flatten(label, list.asScala, ADT.KLabel(m.attributesFor(label).get(Att.UNIT))).asJava
   }
 
   def flatten(label: KLabel, list: java.util.List[K], unit: KToken) : java.util.List[K] = {

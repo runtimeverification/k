@@ -38,7 +38,7 @@ public abstract class FrontEnd {
     public int main() {
         int retval;
         try {
-            if (globalOptions.help) {
+            if (globalOptions.help || globalOptions.helpHidden) {
                 System.out.print(usage);
                 retval = 0;
             } else if (globalOptions.version) {

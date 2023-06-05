@@ -9,7 +9,7 @@
 # You can use this script by adding the following line (minus the comment) to
 # your script:
 #
-# ktool=TOOL_NAME
+# KTOOL=TOOL_NAME
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 # initialize flags
@@ -24,8 +24,8 @@ result=0
 error () {
   local result
   result="$1" ; shift
-  printf "[Error] ${ktool}: $*\n" | ${fold_lines} 1>&2
-  exit ${result}
+  printf "[Error] ${KTOOL}: $*\n" | ${fold_lines} 1>&2
+  exit "${result}"
 }
 
 k_util_usage() {

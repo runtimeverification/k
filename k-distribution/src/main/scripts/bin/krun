@@ -76,6 +76,7 @@ keepTempsIfDryRun () {
   fi
 }
 
+
 print_usage () {
 cat <<HERE
 Usage: $KRUN [PROGRAM] [-cNAME=VALUE] [-d DIR]
