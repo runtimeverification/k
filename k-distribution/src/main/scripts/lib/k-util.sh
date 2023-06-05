@@ -16,6 +16,7 @@
 fold_lines='fold -s'
 profile=false
 verbose=false
+tempDirParent=/tmp
 
 # initialize state
 result=0
@@ -32,6 +33,7 @@ k_util_usage() {
   --no-exc-wrap     Do not wrap messages to 80 chars (keep long lines).
   --profile         Print coarse process timing information. Format printed:
                     exit-code wall-time user-time system-time command args*
+  --temp-dir        Put temp files in this location. Default: /tmp/.<tool>-xxx
   -v, --verbose     Print significant sub-commands executed.
 HERE
 }
@@ -53,6 +55,11 @@ do
       profile=true
       ;;
 
+      --temp-dir)
+      tempDirParent="$1"
+      shift
+      ;;
+
       -v|--verbose)
       verbose=true
       ;;
@@ -70,6 +77,13 @@ done
 if [[ "${#args[@]}" -gt 0 ]]; then
   set -- "${args[@]}"
 fi
+
+# setup temp files
+now="$(date +"%Y-%m-%d-%H-%M-%S")"
+tempDir="$(mktemp -d "$tempDirParent/.${ktool}-${now}-XXXXXXXXXX")"
+tempFiles=("$tempDir")
+trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
+
 
 execute () {
   (
