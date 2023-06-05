@@ -2,6 +2,7 @@ requires "imp-verification.k"
 
 module IMP-FUNCTIONAL-SPEC
     imports IMP-VERIFICATION
+    imports K-EQUAL-SYNTAX
 
     claim [concrete-addition]: 3 +Int 4 => 7
 
@@ -30,6 +31,8 @@ module IMP-FUNCTIONAL-SPEC
       requires 0 ==Int 1
 
     claim [symbolic-addition-commutativity]: N +Int M => M +Int N
+
+    claim [ite-sort-param]: (#if false #then 1 #else 2 #fi) => 2
 
 endmodule
 
