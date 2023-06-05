@@ -412,7 +412,6 @@ jobs:
 
       - name: 'Push Maven Packages'
         shell: bash {0}
-        continue-on-error: true
         env:
           MAVEN_PASSWORD: ${{ secrets.RV_JENKINS_DEPLOY_TOKEN }}
         run: |
