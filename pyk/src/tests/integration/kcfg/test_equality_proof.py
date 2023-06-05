@@ -101,6 +101,13 @@ FUNC_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
         'symbolic-addition-commutativity',
         ProofStatus.PASSED,
     ),
+    (
+        'ite-sort-param',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-FUNCTIONAL-SPEC',
+        'ite-sort-param',
+        ProofStatus.PASSED,
+    ),
 )
 
 

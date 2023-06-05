@@ -57,9 +57,10 @@ class EqualityProof(Proof):
 
     @staticmethod
     def from_claim(claim: KClaim, defn: KDefinition, proof_dir: Path | None = None) -> EqualityProof:
-        sort = defn.sort_strict(claim.body)
-        lhs_body = extract_lhs(claim.body)
-        rhs_body = extract_rhs(claim.body)
+        claim_body = defn.add_sort_params(claim.body)
+        sort = defn.sort_strict(claim_body)
+        lhs_body = extract_lhs(claim_body)
+        rhs_body = extract_rhs(claim_body)
         if not (claim.ensures is None or claim.ensures == TRUE):
             raise ValueError(f'Cannot convert claim to EqualityProof due to non-trival ensures clause {claim.ensures}')
         constraints = [mlEquals(TRUE, c, arg_sort=BOOL) for c in flatten_label('_andBool_', claim.requires)]
