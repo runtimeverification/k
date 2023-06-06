@@ -126,7 +126,7 @@ of statements surrounded by curly brackets.
                  | "read" "(" ")"
                  | "-" AExp                   [strict]
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
@@ -312,7 +312,7 @@ them is chosen first.
 ```k
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [group(lookup)]
 ```
 
 ### Arithmetic constructs
@@ -343,7 +343,7 @@ semantics of the two constructs:
   rule _:Int; => .
   rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>  [assignment]
+       <store>... N |-> (_ => I) ...</store>  [group(assignment)]
 ```
 
 ### Sequential composition
@@ -400,7 +400,7 @@ Without abstraction, you would have to also include the `thread` and
 ```k
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [group(increment)]
 ```
 
 ### Read
@@ -414,7 +414,7 @@ for the next transition can lead to different behaviors.
 
 ```k
   rule <k> read() => I ...</k>
-       <input> ListItem(I:Int) => .List ...</input>  [read]
+       <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 ```
 
 ### Print
@@ -444,7 +444,7 @@ count as a computational step.
   context print(HOLE:AExp, _AEs:AExps);
 
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <output>... .List => ListItem(P) </output>  [print]
+       <output>... .List => ListItem(P) </output>  [group(print)]
   rule print(.AExps); => .  [structural]
 ```
 
