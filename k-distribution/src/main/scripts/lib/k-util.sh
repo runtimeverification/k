@@ -80,7 +80,7 @@ fi
 
 # setup temp files
 now="$(date +"%Y-%m-%d-%H-%M-%S")"
-tempDir="$(mktemp -d "$tempDirParent/.${ktool}-${now}-XXXXXXXXXX")"
+tempDir="$(mktemp -d "$tempDirParent/.${KTOOL}-${now}-XXXXXXXXXX")"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
