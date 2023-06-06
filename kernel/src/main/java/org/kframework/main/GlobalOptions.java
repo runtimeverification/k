@@ -155,6 +155,6 @@ public final class GlobalOptions {
         return debug || debugWarnings;
     }
 
-    @Parameter(names={"--temp-dir"}, description="Put temp files in this location. Default is ./.<tool>-xxx")
+    @Parameter(names={"--temp-dir"}, description="Put temp files in this location. Default is /tmp/.<tool>-xxx")
     public String tempDir = null;
 }
