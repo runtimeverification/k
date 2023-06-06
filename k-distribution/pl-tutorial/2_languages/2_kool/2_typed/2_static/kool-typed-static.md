@@ -646,7 +646,7 @@ checks for cycles.
         ...</T> => .Bag)
        <output>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </output>
-    [inheritance-cycle, priority(25)]
+    [group(inheritance-cycle), priority(25)]
 ```
 
 ## New
