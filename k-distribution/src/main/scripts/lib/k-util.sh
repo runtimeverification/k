@@ -16,7 +16,7 @@
 fold_lines='fold -s'
 profile=false
 verbose=false
-tempDirParent=/tmp
+tempDirParent=$(dirname "$(mktemp -u)")
 
 # initialize state
 result=0
