@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Hashable, Iterable, Iterator
+    from pathlib import Path
     from typing import Any, Final
 
     P1 = TypeVar('P1')
@@ -296,6 +297,14 @@ def hash_str(x: Any) -> str:
     hash = hashlib.sha256()
     hash.update(str(x).encode('utf-8'))
     return str(hash.hexdigest())
+
+
+def hash_file(file: Path, chunk_num_blocks: int = 128) -> str:
+    h = hashlib.sha256()
+    with open(str(file), 'rb') as f:
+        while chunk := f.read(chunk_num_blocks * h.block_size):
+            h.update(chunk)
+    return str(h.hexdigest())
 
 
 def is_hash(x: Any) -> bool:
