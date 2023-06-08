@@ -168,6 +168,31 @@ def test_from_dict_simple_edge() -> None:
     assert cfg.edge(1, 2) == edge(1, 2)
 
 
+def test_to_dict() -> None:
+    # Given
+    d = {'nodes': node_dicts(2), 'edges': edge_dicts((1, 2)), 'next': 3}
+
+    # When
+    cfg = KCFG.from_dict(d)
+    cfg_dict = cfg.to_dict()
+
+    # Then
+    assert cfg_dict == d
+
+
+def test_to_dict_repeated() -> None:
+    # Given
+    d = {'nodes': node_dicts(2), 'edges': edge_dicts((1, 2)), 'next': 3}
+
+    # When
+    cfg = KCFG.from_dict(d)
+    cfg_dict1 = cfg.to_dict()
+    cfg_dict2 = cfg.to_dict()
+
+    # Then
+    assert cfg_dict1 == cfg_dict2
+
+
 def test_create_node() -> None:
     # Given
     cfg = KCFG()
