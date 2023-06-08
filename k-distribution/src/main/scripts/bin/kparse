@@ -13,12 +13,6 @@ inputMode=program
 literal=false
 outputFile=-
 
-# setup temp files
-now=`date +"%Y-%m-%d-%H-%M-%S"`
-tempDir="$(mktemp -d .kparse-${now}-XXXXXXXXXX)"
-tempFiles=("$tempDir")
-trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
-
 KPARSE=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
 
