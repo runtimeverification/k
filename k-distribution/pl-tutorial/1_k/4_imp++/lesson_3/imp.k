@@ -7,7 +7,7 @@ module IMP-SYNTAX
                  | "read" "(" ")"
                  | "-" Int
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -47,10 +47,10 @@ module IMP
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [group(lookup)]
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [group(increment)]
   rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
   rule - I => 0 -Int I
