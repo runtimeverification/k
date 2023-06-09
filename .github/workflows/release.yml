@@ -383,7 +383,7 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, linux, normal-ephemeral]
     environment: production
     needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
