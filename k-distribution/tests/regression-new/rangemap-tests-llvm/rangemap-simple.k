@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 requires "domains.md"
 requires "json.md"
 
