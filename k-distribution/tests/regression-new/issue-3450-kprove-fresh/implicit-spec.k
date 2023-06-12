@@ -1,6 +1,6 @@
 require "test.k"
 
-module TEST-SPEC
+module IMPLICIT-SPEC
     imports TEST
 
     claim <k> quux => . </k>
