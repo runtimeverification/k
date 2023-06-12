@@ -7,37 +7,38 @@ import pytest
 
 from pyk.ktool.krun import KRunOutput, _build_arg_list
 
-# fmt: off
-required_args: dict[str, Any] = OrderedDict([
-    ('command', 'krun'),
-    ('input_file', None),
-    ('definition_dir', None),
-    ('output', None),
-    ('parser', None),
-    ('depth', None),
-    ('pmap', None),
-    ('cmap', None),
-    ('term', False),
-    ('no_expand_macros', False),
-    ('search_final', False),
-    ('no_pattern', False),
-])
+required_args: dict[str, Any] = OrderedDict(
+    [
+        ('command', 'krun'),
+        ('input_file', None),
+        ('definition_dir', None),
+        ('output', None),
+        ('parser', None),
+        ('depth', None),
+        ('pmap', None),
+        ('cmap', None),
+        ('term', False),
+        ('temp_dir', None),
+        ('no_expand_macros', False),
+        ('search_final', False),
+        ('no_pattern', False),
+    ]
+)
+
 optional_args: dict[str, tuple[Any, list[str]]] = {
-    'input_file':       (Path('input/path'),    ['input/path']),
-    'definition_dir':   (Path('def/path'),      ['--definition', 'def/path']),
-    'output':           (KRunOutput.JSON,       ['--output', 'json']),
-    'parser':           ('cat',                 ['--parser', 'cat']),
-    'depth':            (1234,                  ['--depth', '1234']),
-    'pmap':             ({'FOO': 'bar', 'BUZZ': 'kill'},
-                                                ['-pFOO=bar', '-pBUZZ=kill']),
-    'cmap':             ({'COO': 'car', 'FUZZ': 'bill'},
-                                                ['-cCOO=car', '-cFUZZ=bill']),
-    'term':             (True,                  ['--term']),
-    'no_expand_macros': (True,                  ['--no-expand-macros']),
-    'search_final':     (True,                  ['--search-final']),
-    'no_pattern':       (True,                  ['--no-pattern']),
+    'input_file': (Path('input/path'), ['input/path']),
+    'definition_dir': (Path('def/path'), ['--definition', 'def/path']),
+    'output': (KRunOutput.JSON, ['--output', 'json']),
+    'parser': ('cat', ['--parser', 'cat']),
+    'depth': (1234, ['--depth', '1234']),
+    'pmap': ({'FOO': 'bar', 'BUZZ': 'kill'}, ['-pFOO=bar', '-pBUZZ=kill']),
+    'cmap': ({'COO': 'car', 'FUZZ': 'bill'}, ['-cCOO=car', '-cFUZZ=bill']),
+    'term': (True, ['--term']),
+    'temp_dir': (Path('/tmp/path'), ['--temp-dir', '/tmp/path']),
+    'no_expand_macros': (True, ['--no-expand-macros']),
+    'search_final': (True, ['--search-final']),
+    'no_pattern': (True, ['--no-pattern']),
 }
-# fmt: on
 
 
 def make_kwargs(test_id: str, keys: list[str]) -> tuple[str, dict[str, Any], list[str]]:

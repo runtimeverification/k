@@ -74,9 +74,10 @@ class KRun(KPrint):
                 definition_dir=self.definition_dir,
                 output=KRunOutput.JSON,
                 depth=depth,
-                no_expand_macros=not expand_macros,
                 cmap=cmap,
                 pmap=pmap,
+                temp_dir=self.use_directory,
+                no_expand_macros=not expand_macros,
                 bug_report=self._bug_report,
                 check=(expect_rc == 0),
             )
@@ -108,6 +109,7 @@ class KRun(KPrint):
                 output=KRunOutput.KORE,
                 parser='cat',
                 depth=depth,
+                temp_dir=self.use_directory,
                 no_expand_macros=not expand_macros,
                 bug_report=self._bug_report,
                 check=(expect_rc == 0),
@@ -143,6 +145,7 @@ class KRun(KPrint):
                 parser='cat',
                 term=True,
                 depth=depth,
+                temp_dir=self.use_directory,
                 no_expand_macros=not expand_macros,
                 search_final=search_final,
                 no_pattern=no_pattern,
@@ -236,6 +239,7 @@ def _krun(
     pmap: Mapping[str, str] | None = None,
     cmap: Mapping[str, str] | None = None,
     term: bool = False,
+    temp_dir: Path | None = None,
     no_expand_macros: bool = False,
     search_final: bool = False,
     no_pattern: bool = False,
@@ -264,6 +268,7 @@ def _krun(
         pmap=pmap,
         cmap=cmap,
         term=term,
+        temp_dir=temp_dir,
         no_expand_macros=no_expand_macros,
         search_final=search_final,
         no_pattern=no_pattern,
@@ -296,6 +301,7 @@ def _build_arg_list(
     pmap: Mapping[str, str] | None,
     cmap: Mapping[str, str] | None,
     term: bool,
+    temp_dir: Path | None,
     no_expand_macros: bool,
     search_final: bool,
     no_pattern: bool,
@@ -317,6 +323,8 @@ def _build_arg_list(
         args += [f'-c{name}={value}']
     if term:
         args += ['--term']
+    if temp_dir:
+        args += ['--temp-dir', str(temp_dir)]
     if no_expand_macros:
         args += ['--no-expand-macros']
     if search_final:
