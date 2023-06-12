@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 require "test.k"
 
 module IMPLICIT-SPEC

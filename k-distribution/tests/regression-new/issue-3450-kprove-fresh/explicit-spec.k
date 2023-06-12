@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 require "test.k"
 
 module EXPLICIT-SPEC
@@ -6,5 +8,5 @@ module EXPLICIT-SPEC
     claim <k> quux => . </k>
         <c1> . => ?C </c1>
         <c2> . => ?C </c2>
-        <generatedCounter> 0 => 1 </generatedCounter>
+        <generatedCounter> GC => GC +Int 1 </generatedCounter>
 endmodule

@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 module TEST-SYNTAX
     syntax Pgm ::= "quux"
 endmodule
