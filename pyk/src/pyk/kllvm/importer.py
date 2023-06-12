@@ -73,8 +73,17 @@ def _make_term_class(mod: ModuleType) -> type:
         def pattern(self) -> Pattern:
             return self._block.to_pattern()
 
-        def __str__(self) -> str:
-            return str(self._block)
+        @staticmethod
+        def deserialize(bs: bytes) -> Term | None:
+            block = mod.InternalTerm.deserialize(bs)
+            if block is None:
+                return None
+            term = object.__new__(Term)
+            term._block = block
+            return term
+
+        def serialize(self) -> bytes:
+            return self._block.serialize()
 
         def step(self, n: int = 1) -> None:
             self._block = self._block.step(n)
@@ -86,5 +95,8 @@ def _make_term_class(mod: ModuleType) -> type:
             other = self
             other._block = self._block.step(0)
             return other
+
+        def __str__(self) -> str:
+            return str(self._block)
 
     return Term
