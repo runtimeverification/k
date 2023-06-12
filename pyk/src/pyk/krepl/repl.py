@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 from cmd2 import Cmd, with_argparser, with_category
 
-from ..cli_utils import check_dir_path, check_file_path, file_path
+from ..cli.utils import check_dir_path, check_file_path, file_path
 from ..kore.parser import KoreParser
 from ..ktool.kprint import KPrint
 from ..ktool.krun import KRun, KRunOutput, _krun

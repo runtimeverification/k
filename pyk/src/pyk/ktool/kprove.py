@@ -10,14 +10,14 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
-from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
+from ..cli.utils import check_dir_path, check_file_path
 from ..cterm import build_claim
 from ..kast import kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
 from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
-from ..utils import unique
+from ..utils import gen_file_timestamp, run_process, unique
 from .kprint import KPrint
 
 if TYPE_CHECKING:
@@ -25,10 +25,10 @@ if TYPE_CHECKING:
     from subprocess import CompletedProcess
     from typing import Final
 
-    from ..cli_utils import BugReport
     from ..cterm import CTerm
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
+    from ..utils import BugReport
 
 _LOGGER: Final = logging.getLogger(__name__)
 

@@ -15,16 +15,15 @@ from typing import TYPE_CHECKING, ContextManager, final
 
 from psutil import Process
 
-from ..cli_utils import check_dir_path, check_file_path
 from ..ktool.kprove import KoreExecLogFormat
-from ..utils import filter_none
+from ..utils import check_dir_path, check_file_path, filter_none
 from .syntax import And, Pattern, SortApp, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from typing import Any, ClassVar, Final, TextIO, TypeVar
 
-    from ..cli_utils import BugReport
+    from ..utils import BugReport
     from .syntax import Module
 
     ER = TypeVar('ER', bound='ExecuteResult')

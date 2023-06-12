@@ -6,7 +6,8 @@ import sysconfig
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..cli_utils import check_dir_path, check_file_path, run_process
+from ..cli.utils import check_dir_path, check_file_path
+from ..utils import run_process
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

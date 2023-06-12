@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cli_utils import run_process
+from pyk.utils import run_process
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
