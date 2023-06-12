@@ -28,4 +28,7 @@ class TestTerm(RuntimeTest):
         term = runtime.Term(pattern)
 
         # Then
-        assert str(pattern) == str(term)
+        assert str(term) == str(pattern)
+        assert str(term.pattern) == str(pattern)
+        assert term.serialize() == pattern.serialize()
+        assert str(runtime.Term.deserialize(pattern.serialize())) == str(term)
