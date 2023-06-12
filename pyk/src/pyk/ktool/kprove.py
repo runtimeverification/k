@@ -61,6 +61,7 @@ def _kprove(
     output: KProveOutput | None = None,
     depth: int | None = None,
     claims: Iterable[str] = (),
+    temp_dir: Path | None = None,
     haskell_backend_command: str | None = None,
     dry_run: bool = False,
     # --
@@ -86,6 +87,7 @@ def _kprove(
         output=output,
         depth=depth,
         claims=claims,
+        temp_dir=temp_dir,
         haskell_backend_command=haskell_backend_command,
         dry_run=dry_run,
     )
@@ -109,6 +111,7 @@ def _build_arg_list(
     output: KProveOutput | None,
     depth: int | None,
     claims: Iterable[str],
+    temp_dir: Path | None,
     haskell_backend_command: str | None,
     dry_run: bool,
 ) -> list[str]:
@@ -135,6 +138,9 @@ def _build_arg_list(
     claims = list(claims)
     if claims:
         args += ['--claims', ','.join(claims)]
+
+    if temp_dir:
+        args += ['--temp-dir', str(temp_dir)]
 
     if haskell_backend_command:
         args += ['--haskell-backend-command', haskell_backend_command]
@@ -225,6 +231,7 @@ class KProve(KPrint):
             include_dirs=include_dirs,
             md_selector=md_selector,
             output=KProveOutput.JSON,
+            temp_dir=self.use_directory,
             dry_run=dry_run,
             args=self.prover_args + list(args),
             env=env,
