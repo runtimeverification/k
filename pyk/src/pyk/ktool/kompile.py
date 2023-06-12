@@ -27,6 +27,7 @@ def kompile(
     *,
     command: Iterable[str] = ('kompile',),
     output_dir: str | Path | None = None,
+    temp_dir: str | Path | None = None,
     debug: bool = False,
     cwd: Path | None = None,
     check: bool = True,
@@ -37,6 +38,7 @@ def kompile(
     return kompiler(
         command=command,
         output_dir=output_dir,
+        temp_dir=temp_dir,
         debug=debug,
         cwd=cwd,
         check=check,
@@ -99,6 +101,7 @@ class Kompile(ABC):
         command: Iterable[str] | None = None,
         *,
         output_dir: str | Path | None = None,
+        temp_dir: str | Path | None = None,
         debug: bool = False,
         cwd: Path | None = None,
         check: bool = True,
@@ -113,6 +116,10 @@ class Kompile(ABC):
         if output_dir is not None:
             output_dir = Path(output_dir)
             args += ['--output-definition', str(output_dir)]
+
+        if temp_dir is not None:
+            temp_dir = Path(temp_dir)
+            args += ['--temp-dir', str(temp_dir)]
 
         if debug:
             args += ['--debug']
