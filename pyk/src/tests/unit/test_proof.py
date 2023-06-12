@@ -11,7 +11,7 @@ from pyk.proof.equality import EqualityProof
 from pyk.proof.proof import Proof
 from pyk.proof.reachability import APRBMCProof, APRProof
 
-from .test_kcfg import node_dicts
+from .test_kcfg import node, node_dicts
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,6 +31,8 @@ PROOF_TEST_DATA: list[tuple[str, str, Proof]] = [
         APRProof(
             id='apr_proof_1',
             kcfg=KCFG.from_dict({'nodes': node_dicts(1)}),
+            init=node(1).id,
+            target=node(1).id,
             logs={},
         ),
     ),
@@ -41,6 +43,8 @@ PROOF_TEST_DATA: list[tuple[str, str, Proof]] = [
             id='aprbmc_proof_1',
             bmc_depth=1,
             kcfg=KCFG.from_dict({'nodes': node_dicts(1)}),
+            init=node(1).id,
+            target=node(1).id,
             logs={},
         ),
     ),

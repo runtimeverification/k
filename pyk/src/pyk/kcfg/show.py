@@ -44,6 +44,37 @@ class KCFGShow:
     ):
         self.kprint = kprint
 
+    @staticmethod
+    def node_attrs(kcfg: KCFG, node: KCFG.Node) -> list[str]:
+        attrs = []
+        if kcfg.is_init(node.id):
+            attrs.append('init')
+        if kcfg.is_target(node.id):
+            attrs.append('target')
+        if kcfg.is_expanded(node.id):
+            attrs.append('expanded')
+        if kcfg.is_stuck(node.id):
+            attrs.append('stuck')
+        if kcfg.is_frontier(node.id):
+            attrs.append('frontier')
+        if kcfg.is_leaf(node.id):
+            attrs.append('leaf')
+        if kcfg.is_split(node.id):
+            attrs.append('split')
+        return attrs
+
+    @staticmethod
+    def node_short_info(
+        kcfg: KCFG, node: KCFG.Node, node_printer: Callable[[CTerm], Iterable[str]] | None = None
+    ) -> list[str]:
+        attrs = KCFGShow.node_attrs(kcfg, node) + ['@' + alias for alias in sorted(kcfg.aliases(node.id))]
+        attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
+        node_header = str(node.id) + attr_string
+        node_strs = [node_header]
+        if node_printer:
+            node_strs.extend(f' {nl}' for nl in node_printer(node.cterm))
+        return node_strs
+
     def pretty_segments(
         self,
         kcfg: KCFG,
@@ -67,7 +98,7 @@ class KCFGShow:
             return '\033[32m' + text + '\033[0m'
 
         def _print_node(node: KCFG.Node) -> list[str]:
-            short_info = kcfg.node_short_info(node, node_printer=node_printer)
+            short_info = KCFGShow.node_short_info(kcfg, node, node_printer=node_printer)
             if kcfg.is_frontier(node.id):
                 short_info[0] = _bold(short_info[0])
             return short_info
@@ -377,8 +408,8 @@ class KCFGShow:
         graph = Digraph()
 
         for node in kcfg.nodes:
-            label = '\n'.join(kcfg.node_short_info(node, node_printer=node_printer))
-            class_attrs = ' '.join(kcfg.node_attrs(node.id))
+            label = '\n'.join(KCFGShow.node_short_info(kcfg, node, node_printer=node_printer))
+            class_attrs = ' '.join(KCFGShow.node_attrs(kcfg, node))
             attrs = {'class': class_attrs} if class_attrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
