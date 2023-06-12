@@ -4,7 +4,8 @@ from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from ..cli_utils import check_dir_path, run_process
+from ..cli.utils import check_dir_path
+from ..utils import run_process
 from .syntax import Pattern
 
 

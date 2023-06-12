@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any
 
-from ..cli_utils import check_dir_path, dir_path
+from ..cli.utils import check_dir_path, dir_path
 from .config import KBUILD_DIR, PROJECT_FILE_NAME
 from .kbuild import KBuild
 from .package import Package

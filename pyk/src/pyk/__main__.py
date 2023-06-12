@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
-from .cli_utils import dir_path
+from .cli.args import KCLIArgs
+from .cli.utils import LOG_FORMAT, dir_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import split_config_and_constraints
 from .kast.inner import KInner
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
     from typing import Any, Final
 
 
-_LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 
@@ -40,12 +40,7 @@ def main() -> None:
     cli_parser = create_argument_parser()
     args = cli_parser.parse_args()
 
-    if not args.verbose:
-        logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
-    elif args.verbose == 1:
-        logging.basicConfig(level=logging.INFO, format=_LOG_FORMAT)
-    elif args.verbose > 1:
-        logging.basicConfig(level=logging.DEBUG, format=_LOG_FORMAT)
+    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
 
     executor_name = 'exec_' + args.command.lower().replace('-', '_')
     if executor_name not in globals():
@@ -77,7 +72,7 @@ def exec_print(args: Namespace) -> None:
                     minimized = minimize_term(disjunct, abstract_labels=abstract_labels, keep_cells=keep_cells)
                     config, constraint = split_config_and_constraints(minimized)
                 except ValueError as err:
-                    raise ValueError('The minified term does not contain a config cell.') from err
+                    raise ValueError('The minimized term does not contain a config cell.') from err
 
                 if not is_top(constraint):
                     minimized_disjuncts.append(mlAnd([config, constraint], sort=GENERATED_TOP_CELL))
@@ -139,10 +134,7 @@ def exec_json_to_kore(args: dict[str, Any]) -> None:
 
 
 def create_argument_parser() -> ArgumentParser:
-    logging_args = ArgumentParser(add_help=False)
-    logging_args.add_argument(
-        '-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity (up to two times).'
-    )
+    k_cli_args = KCLIArgs()
 
     definition_args = ArgumentParser(add_help=False)
     definition_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
@@ -151,22 +143,11 @@ def create_argument_parser() -> ArgumentParser:
     pyk_args_command = pyk_args.add_subparsers(dest='command', required=True)
 
     print_args = pyk_args_command.add_parser(
-        'print', help='Pretty print a term.', parents=[logging_args, definition_args]
+        'print',
+        help='Pretty print a term.',
+        parents=[k_cli_args.logging_args, definition_args, k_cli_args.display_args],
     )
     print_args.add_argument('term', type=FileType('r'), help='Input term (in JSON).')
-    print_args.add_argument(
-        '--minimize',
-        dest='minimize',
-        default=True,
-        action='store_true',
-        help='Minimize the JSON configuration before printing.',
-    )
-    print_args.add_argument(
-        '--no-minimize',
-        dest='minimize',
-        action='store_false',
-        help='Do not minimize the JSON configuration before printing.',
-    )
     print_args.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
     print_args.add_argument(
         '--keep-cells', default='', nargs='?', help='List of cells with primitive values to keep in output.'
@@ -174,7 +155,9 @@ def create_argument_parser() -> ArgumentParser:
     print_args.add_argument('--output-file', type=FileType('w'), default='-')
 
     prove_args = pyk_args_command.add_parser(
-        'prove', help='Prove an input specification (using kprovex).', parents=[logging_args, definition_args]
+        'prove',
+        help='Prove an input specification (using kprovex).',
+        parents=[k_cli_args.logging_args, definition_args],
     )
     prove_args.add_argument('main_file', type=str, help='Main file used for kompilation.')
     prove_args.add_argument('spec_file', type=str, help='File with the specification module.')
@@ -183,18 +166,22 @@ def create_argument_parser() -> ArgumentParser:
     prove_args.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
 
     pyk_args_command.add_parser(
-        'graph-imports', help='Graph the imports of a given definition.', parents=[logging_args, definition_args]
+        'graph-imports',
+        help='Graph the imports of a given definition.',
+        parents=[k_cli_args.logging_args, definition_args],
     )
 
     coverage_args = pyk_args_command.add_parser(
-        'coverage', help='Convert coverage file to human readable log.', parents=[logging_args, definition_args]
+        'coverage',
+        help='Convert coverage file to human readable log.',
+        parents=[k_cli_args.logging_args, definition_args],
     )
     coverage_args.add_argument('coverage_file', type=FileType('r'), help='Coverage file to build log for.')
     coverage_args.add_argument('-o', '--output', type=FileType('w'), default='-')
 
-    pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[logging_args])
+    pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[k_cli_args.logging_args])
 
-    pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[logging_args])
+    pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args])
 
     return pyk_args
 

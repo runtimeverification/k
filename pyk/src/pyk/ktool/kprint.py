@@ -10,7 +10,7 @@ from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
-from ..cli_utils import check_dir_path, check_file_path, run_process
+from ..cli.utils import check_dir_path, check_file_path
 from ..kast import kast_term
 from ..kast.inner import KInner
 from ..kast.outer import read_kast_definition
@@ -19,6 +19,7 @@ from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
 from ..kore.syntax import App, SortApp
+from ..utils import run_process
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
@@ -26,12 +27,12 @@ if TYPE_CHECKING:
     from tempfile import _TemporaryFileWrapper
     from typing import Final
 
-    from ..cli_utils import BugReport
     from ..kast import KAst
     from ..kast.inner import KSort, KToken
     from ..kast.outer import KDefinition, KFlatModule
     from ..kast.pretty import SymbolTable
     from ..kore.syntax import Pattern
+    from ..utils import BugReport
 
 _LOGGER: Final = logging.getLogger(__name__)
 

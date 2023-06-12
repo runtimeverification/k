@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import coloredlogs
 
-from ..cli_utils import dir_path, file_path
+from ..cli.utils import dir_path, file_path
 from ..kast.outer import read_kast_definition
 from .kore_exec_covr import HaskellLogEntry, build_rule_dict, parse_rule_applications
 

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from _kllvm.parser import Parser  # type: ignore
 
-from ..cli_utils import check_file_path
+from ..cli.utils import check_file_path
 
 if TYPE_CHECKING:
     from .ast import Pattern
