@@ -4,7 +4,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..cli_utils import check_dir_path, check_file_path
+from ..cli.utils import check_dir_path, check_file_path
 from .compiler import KLLVM_MODULE_FILE_NAME, KLLVM_MODULE_NAME, RUNTIME_MODULE_FILE_NAME, RUNTIME_MODULE_NAME
 
 if TYPE_CHECKING:

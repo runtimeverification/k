@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from ..cli_utils import dir_path
+from ..cli.utils import dir_path
 from .repl import KRepl
 
 

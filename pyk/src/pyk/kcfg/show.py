@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
-from ..cli_utils import ensure_dir_path
 from ..cterm import CTerm, build_claim, build_rule
 from ..kast.inner import KApply, KRewrite, top_down
 from ..kast.manip import (
@@ -19,7 +18,7 @@ from ..kast.manip import (
 from ..kast.outer import KFlatModule
 from ..prelude.k import DOTS
 from ..prelude.ml import mlAnd
-from ..utils import add_indent
+from ..utils import add_indent, ensure_dir_path
 from .kcfg import KCFG
 
 if TYPE_CHECKING:

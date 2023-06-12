@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .cli_utils import dir_path, file_path
+from .cli.utils import dir_path, file_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping

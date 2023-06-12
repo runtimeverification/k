@@ -6,7 +6,7 @@ from functools import cached_property, reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, final
 
-from ..cli_utils import check_dir_path, check_file_path
+from ..cli.utils import check_dir_path, check_file_path
 from ..utils import FrozenDict
 from .parser import KoreParser
 from .syntax import App, SortApp
