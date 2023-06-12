@@ -16,11 +16,10 @@ from ..kast.manip import (
     remove_source_attributes,
     rename_generated_vars,
 )
-from ..prelude.ml import mlAnd, mlTop
 from ..utils import single
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping
+    from collections.abc import Iterable, Mapping
     from types import TracebackType
     from typing import Any
 
@@ -253,21 +252,21 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return [node for node in self.nodes if self.is_stuck(node.id)]
 
     @staticmethod
-    def from_claim(defn: KDefinition, claim: KClaim) -> KCFG:
+    def from_claim(defn: KDefinition, claim: KClaim) -> tuple[KCFG, NodeIdLike, NodeIdLike]:
         cfg = KCFG()
         claim_body = claim.body
         claim_body = defn.instantiate_cell_vars(claim_body)
         claim_body = rename_generated_vars(claim_body)
 
         claim_lhs = CTerm.from_kast(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
-        init_state = cfg.create_node(claim_lhs)
-        cfg.add_init(init_state.id)
+        init_node = cfg.create_node(claim_lhs)
+        cfg.add_init(init_node.id)
 
         claim_rhs = CTerm.from_kast(extract_rhs(claim_body)).add_constraint(bool_to_ml_pred(claim.ensures))
-        target_state = cfg.create_node(claim_rhs)
-        cfg.add_target(target_state.id)
+        target_node = cfg.create_node(claim_rhs)
+        cfg.add_target(target_node.id)
 
-        return cfg
+        return cfg, init_node.id, target_node.id
 
     def to_dict(self) -> dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
@@ -358,15 +357,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     @staticmethod
     def from_json(s: str) -> KCFG:
         return KCFG.from_dict(json.loads(s))
-
-    def node_short_info(self, node: Node, node_printer: Callable[[CTerm], Iterable[str]] | None = None) -> list[str]:
-        attrs = self.node_attrs(node.id) + ['@' + alias for alias in sorted(self.aliases(node.id))]
-        attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        node_header = str(node.id) + attr_string
-        node_strs = [node_header]
-        if node_printer:
-            node_strs.extend(f' {nl}' for nl in node_printer(node.cterm))
-        return node_strs
 
     def get_unique_init(self) -> Node:
         return single(self.init)
@@ -466,40 +456,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
             self.remove_alias(alias)
 
-    def replace_node(self, node_id: NodeIdLike, new_cterm: CTerm) -> int:
-        # Remove old node, record data
-        node = self.node(node_id)
-        in_edges = self.edges(target_id=node.id)
-        out_edges = self.edges(source_id=node.id)
-        in_covers = self.covers(target_id=node.id)
-        out_covers = self.covers(source_id=node.id)
-        init = self.is_init(node.id)
-        target = self.is_target(node.id)
-        expanded = self.is_expanded(node.id)
-        in_expanded = {edge.source.id: self.is_expanded(edge.source.id) for edge in in_edges}
-        self.remove_node(node.id)
-
-        # Add the new, update data
-        new_node = self.create_node(new_cterm)
-        for in_edge in in_edges:
-            self.create_edge(in_edge.source.id, new_node.id, in_edge.depth)
-        for out_edge in out_edges:
-            self.create_edge(new_node.id, out_edge.target.id, out_edge.depth)
-        for in_cover in in_covers:
-            self.create_cover(in_cover.source.id, new_node.id, csubst=in_cover.csubst)
-        for out_cover in out_covers:
-            self.create_cover(new_node.id, out_cover.target.id, csubst=out_cover.csubst)
-        if init:
-            self.add_init(new_node.id)
-        if target:
-            self.add_target(new_node.id)
-        if expanded:
-            self.add_expanded(new_node.id)
-        for nid in in_expanded:
-            if in_expanded[nid]:
-                self.add_expanded(nid)
-
-        return new_node.id
+    def replace_node(self, node_id: NodeIdLike, cterm: CTerm) -> None:
+        term = cterm.kast
+        term = remove_source_attributes(term)
+        cterm = CTerm.from_kast(term)
+        node_id = self._resolve(node_id)
+        node = KCFG.Node(node_id, cterm)
+        self._nodes[node_id] = node
 
     def successors(
         self,
@@ -805,24 +768,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         node_id = self._resolve(node_id)
         return self.is_expanded(node_id) and self.is_leaf(node_id)
 
-    def node_attrs(self, node_id: NodeIdLike) -> list[str]:
-        attrs = []
-        if self.is_init(node_id):
-            attrs.append('init')
-        if self.is_target(node_id):
-            attrs.append('target')
-        if self.is_expanded(node_id):
-            attrs.append('expanded')
-        if self.is_stuck(node_id):
-            attrs.append('stuck')
-        if self.is_frontier(node_id):
-            attrs.append('frontier')
-        if self.is_leaf(node_id):
-            attrs.append('leaf')
-        if self.is_split(node_id):
-            attrs.append('split')
-        return attrs
-
     def prune(self, node_id: NodeIdLike, keep_init: bool = True, keep_target: bool = True) -> list[int]:
         nodes = self.reachable_nodes(node_id)
         pruned_nodes = []
@@ -842,20 +787,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         if len(paths) == 0:
             return None
         return sorted(paths, key=(lambda path: path_length(path)))[0]
-
-    def path_constraints(self, final_node_id: NodeIdLike) -> KInner:
-        path = self.shortest_path_between(self.get_unique_init().id, final_node_id)
-        if path is None:
-            raise ValueError(f'No path found to specified node: {final_node_id}')
-        curr_constraint: KInner = mlTop()
-        for edge in reversed(path):
-            if type(edge) is KCFG.Split:
-                assert len(edge.targets) == 1
-                csubst = edge.splits[edge.targets[0].id]
-                curr_constraint = mlAnd([csubst.subst.ml_pred, csubst.constraint, curr_constraint])
-            if type(edge) is KCFG.Cover:
-                curr_constraint = mlAnd([edge.csubst.constraint, edge.csubst.subst.apply(curr_constraint)])
-        return mlAnd(flatten_label('#And', curr_constraint))
 
     def paths_between(self, source_id: NodeIdLike, target_id: NodeIdLike) -> list[tuple[Successor, ...]]:
         source_id = self._resolve(source_id)
