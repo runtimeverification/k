@@ -383,7 +383,7 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, linux, normal-ephemeral]
     environment: production
     needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
@@ -414,9 +414,9 @@ jobs:
         shell: bash {0}
         continue-on-error: true
         env:
-          MAVEN_PASSWORD: ${{ secrets.RV_JENKINS_DEPLOY_TOKEN }}
+          MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
         run: |
-          echo "MAVEN_USERNAME=rv-jenkins" > rv-jenkins.env
+          echo "MAVEN_USERNAME=devops@runtimeverification.com" > rv-jenkins.env
           echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> rv-jenkins.env
           cat ~/.m2/settings.xml
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
