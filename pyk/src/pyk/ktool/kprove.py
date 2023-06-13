@@ -308,15 +308,13 @@ class KProve(KPrint):
         next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) for ns in next_states]
         return next_states if len(next_states) > 0 else [mlTop()]
 
-    def get_claims(
+    def get_claim_modules(
         self,
         spec_file: Path,
         spec_module_name: str | None = None,
         include_dirs: Iterable[Path] = (),
         md_selector: str | None = None,
-        claim_labels: Iterable[str] | None = None,
-        exclude_claim_labels: Iterable[str] | None = None,
-    ) -> list[KClaim]:
+    ) -> KFlatModuleList:
         with self._temp_file() as ntf:
             self.prove(
                 spec_file,
@@ -326,10 +324,25 @@ class KProve(KPrint):
                 dry_run=True,
                 args=['--emit-json-spec', ntf.name],
             )
-            flat_module_list = kast_term(json.loads(Path(ntf.name).read_text()), KFlatModuleList)
+            return kast_term(json.loads(Path(ntf.name).read_text()), KFlatModuleList)
+
+    def get_claims(
+        self,
+        spec_file: Path,
+        spec_module_name: str | None = None,
+        include_dirs: Iterable[Path] = (),
+        md_selector: str | None = None,
+        claim_labels: Iterable[str] | None = None,
+        exclude_claim_labels: Iterable[str] | None = None,
+    ) -> list[KClaim]:
+        flat_module_list = self.get_claim_modules(
+            spec_file=spec_file,
+            spec_module_name=spec_module_name,
+            include_dirs=include_dirs,
+            md_selector=md_selector,
+        )
 
         all_claims = {c.label: c for m in flat_module_list.modules for c in m.claims}
-
         unfound_labels = []
         claim_labels = list(all_claims.keys()) if claim_labels is None else claim_labels
         exclude_claim_labels = [] if exclude_claim_labels is None else exclude_claim_labels
