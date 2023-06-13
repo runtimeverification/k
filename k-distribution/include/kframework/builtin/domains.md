@@ -470,7 +470,8 @@ Range Maps
 
 Provided here is the syntax of an implementation of immutable, associative,
 commutative range maps from `Int` to `KItem`. This type is hooked to an
-implementation of range maps provided by the backend.
+implementation of range maps provided by the LLVM backend.
+Currently, this type is not supported by other backends.
 Although the underlying range map data structure supports any key sort, the
 current implementation by the backend only supports `Int` keys due to
 limitations of the underlying ordering function.
