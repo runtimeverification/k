@@ -17,8 +17,8 @@ def test_kast_json(profile: Profiler) -> None:
     with json_file.open() as f:
         json_data = json.load(f)
 
-    with profile('profile-json-kast.txt', sort_keys=('cumtime',), limit=20):
+    with profile('json-to-kast.prof', sort_keys=('cumtime',), limit=20):
         kast: KAst = kast_term(json_data)
 
-    with profile('profile-kast-json.txt', sort_keys=('cumtime',), limit=20):
+    with profile('kast-to-json.prof', sort_keys=('cumtime',), limit=20):
         kast.to_dict()
