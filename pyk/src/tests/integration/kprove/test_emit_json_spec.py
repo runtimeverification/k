@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast import kast_term
 from pyk.kast.inner import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
-from pyk.kast.outer import KDefinition, KFlatModuleList, KRequire
+from pyk.kast.outer import KDefinition, KRequire
 from pyk.kast.pretty import paren
-from pyk.ktool.kprove import _kprove
 from pyk.prelude.ml import is_top
 from pyk.testing import KProveTest
 
@@ -31,12 +28,10 @@ class TestEmitJsonSpec(KProveTest):
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['_+Int_'] = paren(symbol_table['_+Int_'])
 
-    @pytest.fixture(scope='class')
-    def spec_module(self, definition_dir: Path) -> KFlatModule:
+    @pytest.fixture
+    def spec_module(self, kprove: KProve) -> KFlatModule:
         spec_file = K_FILES / 'looping-spec.k'
-        spec_json_file = definition_dir / 'looping-spec.json'
-        _kprove(spec_file, kompiled_dir=definition_dir, emit_json_spec=spec_json_file, dry_run=True)
-        kfml = kast_term(json.loads(spec_json_file.read_text()), KFlatModuleList)
+        kfml = kprove.get_claim_modules(spec_file)
         module = kfml.modules[0]
         claim = module.claims[0]
         claim = claim.let(body=remove_generated_cells(claim.body), att=EMPTY_ATT)
