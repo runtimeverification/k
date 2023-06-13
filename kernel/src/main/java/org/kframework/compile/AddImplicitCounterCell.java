@@ -43,8 +43,8 @@ public class AddImplicitCounterCell {
         }
 
         KRewrite rew = KRewrite(
-                KApply(KLabel("#SemanticCastToInt"), KVariable("_")),
-                KApply(KLabel("#SemanticCastToInt"), KVariable("?_")));
+                KApply(KLabel("#SemanticCastToInt"), ResolveAnonVar.ANON_VAR),
+                KApply(KLabel("#SemanticCastToInt"), ResolveAnonVar.FRESH_ANON_VAR));
         items.add(IncompleteCellUtils.make(
                 KLabels.GENERATED_COUNTER_CELL, false, Collections.singletonList(rew), false));
         return IncompleteCellUtils.makeBody(items);
