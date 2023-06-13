@@ -465,7 +465,7 @@ module MAP-SYMBOLIC
 endmodule
 ```
 
-Range maps
+Range Maps
 ----
 
 Provided here is the syntax of an implementation of immutable, associative,
