@@ -73,13 +73,15 @@ class KompiledTest:
 
 class KPrintTest(KompiledTest):
     @pytest.fixture
-    def kprint(self, definition_dir: Path, tmp_path_factory: TempPathFactory) -> KPrint:
-        kprint = KPrint(
+    def kprint(self, definition_dir: Path, tmp_path: Path) -> KPrint:
+        use_directory = tmp_path / 'kprint'
+        use_directory.mkdir()
+
+        return KPrint(
             definition_dir,
-            use_directory=tmp_path_factory.mktemp('kprint'),
+            use_directory=use_directory,
             patch_symbol_table=self._update_symbol_table,
         )
-        return kprint
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
@@ -88,13 +90,15 @@ class KPrintTest(KompiledTest):
 
 class KRunTest(KompiledTest):
     @pytest.fixture
-    def krun(self, definition_dir: Path, tmp_path_factory: TempPathFactory) -> KRun:
-        krun = KRun(
+    def krun(self, definition_dir: Path, tmp_path: Path) -> KRun:
+        use_directory = tmp_path / 'krun'
+        use_directory.mkdir()
+
+        return KRun(
             definition_dir,
-            use_directory=tmp_path_factory.mktemp('krun'),
+            use_directory=use_directory,
             patch_symbol_table=self._update_symbol_table,
         )
-        return krun
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
@@ -105,14 +109,16 @@ class KProveTest(KompiledTest):
     KOMPILE_BACKEND = 'haskell'
 
     @pytest.fixture
-    def kprove(self, definition_dir: Path, tmp_path_factory: TempPathFactory, bug_report: BugReport | None) -> KProve:
-        kprove = KProve(
+    def kprove(self, definition_dir: Path, tmp_path: Path, bug_report: BugReport | None) -> KProve:
+        use_directory = tmp_path / 'kprove'
+        use_directory.mkdir()
+
+        return KProve(
             definition_dir,
-            use_directory=tmp_path_factory.mktemp('kprove'),
+            use_directory=use_directory,
             bug_report=bug_report,
             patch_symbol_table=self._update_symbol_table,
         )
-        return kprove
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
