@@ -94,8 +94,8 @@ example, consider the following definition:
 module LESSON-11-C
   imports INT
 
-  syntax Exp ::= Int | Exp "+" Exp [exp]
-  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [exp2]
+  syntax Exp ::= Int | Exp "+" Exp [group(exp)]
+  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [group(exp2)]
 endmodule
 ```
 
