@@ -680,13 +680,6 @@ similar.
 
 ```k
   syntax KItem ::= choice(RangeMap)                      [function, hook(RANGEMAP.choice), klabel(RangeMap:choice)]
-```
-
-### Implementation of range maps
-
-TBD
-
-```k
 endmodule
 ```
 
