@@ -58,16 +58,28 @@ jobs:
   profile:
     needs: code-quality-checks
     name: 'Profiling'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, normal-ephemeral]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
+      - name: 'Install Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
       - name: 'Install Poetry'
         uses: Gr1N/setup-poetry@v8
+      - name: 'Install K'
+        run: |
+          K_VERSION=$(cat deps/k_release)
+          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
+          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
+          sudo apt-get update
+          sudo apt-get -y install ./${DEB_PACKAGE_NAME}
+          kompile --version
       - name: 'Run profiling'
         run: |
           make profile
-          find /tmp/pytest-of-${USER}/pytest-current/ -type f | sort | xargs tail -n +1
+          find /tmp/pytest-of-${USER}/pytest-current/ -type f -name '*.prof' | sort | xargs tail -n +1
 
   integration-tests:
     needs: code-quality-checks
