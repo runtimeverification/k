@@ -19,7 +19,7 @@ class Profiler:
     @contextmanager
     def __call__(
         self,
-        file_name: str = 'profile.txt',
+        file_name: str = 'profile.prof',
         *,
         sort_keys: Iterable[str | SortKey] = (),
         patterns: Iterable[str] = (),

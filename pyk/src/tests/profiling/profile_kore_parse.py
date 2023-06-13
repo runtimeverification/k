@@ -18,5 +18,5 @@ def test_kore_parse(profile: Profiler) -> None:
 
     sys.setrecursionlimit(10**8)
 
-    with profile(sort_keys=('cumtime',), limit=50):
+    with profile('parse_kore.prof', sort_keys=('cumtime',), limit=50):
         parser.definition()
