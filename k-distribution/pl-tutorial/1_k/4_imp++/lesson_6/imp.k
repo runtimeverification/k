@@ -7,7 +7,7 @@ module IMP-SYNTAX
                  | "read" "(" ")"
                  | "-" Int
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -54,12 +54,12 @@ module IMP
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [group(lookup)]
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [group(increment)]
   rule <k> read() => I ...</k>
-       <input> ListItem(I:Int) => .List ...</input>  [read]
+       <input> ListItem(I:Int) => .List ...</input>  [group(read)]
   rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
   rule - I => 0 -Int I
@@ -76,7 +76,7 @@ module IMP
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>  [assignment]
+       <store>... N |-> (_ => I) ...</store>  [group(assignment)]
   rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
@@ -93,7 +93,7 @@ module IMP
   syntax AExp ::= Printable
   context print(HOLE:AExp, _AEs:AExps);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <output>... .List => ListItem(P) </output>  [print]
+       <output>... .List => ListItem(P) </output>  [group(print)]
   rule print(.AExps); => .  [structural]
 
   rule <k> halt; ~> _ => . </k>
