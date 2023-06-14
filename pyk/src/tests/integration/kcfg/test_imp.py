@@ -533,7 +533,6 @@ class TestImpProof(KCFGExploreTest):
                 ),
                 KVariable('GENERATED_COUNTER_CELL'),
             ),
-            (),
         )
         if constraint is not None:
             _config = _config.add_constraint(constraint)
