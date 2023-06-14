@@ -34,7 +34,7 @@ class CTerm:
     config: KInner  # TODO Optional?
     constraints: tuple[KInner, ...]
 
-    def __init__(self, config: KInner, constraints: Iterable[KInner]) -> None:
+    def __init__(self, config: KInner, constraints: Iterable[KInner] = ()) -> None:
         self._check_config(config)
         constraints = self._normalize_constraints(constraints)
         object.__setattr__(self, 'config', config)

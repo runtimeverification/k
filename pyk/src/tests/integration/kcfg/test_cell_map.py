@@ -85,7 +85,6 @@ class TestCellMapProof(KCFGExploreTest):
                 KApply('<accounts>', _accounts),
                 KVariable('GENERATED_COUNTER_CELL'),
             ),
-            (),
         )
 
     @pytest.mark.parametrize(
