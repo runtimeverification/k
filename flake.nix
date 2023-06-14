@@ -3,6 +3,13 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
     haskell-backend.url = "github:runtimeverification/haskell-backend";
+    booster-backend = {
+      url = "github:runtimeverification/hs-backend-booster";
+      inputs.k-framework.follows = "";
+      inputs.haskell-backend.follows = "haskell-backend";
+      inputs.haskell-nix.follows = "haskell-backend/haskell-nix";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+    };
     llvm-backend.url = "github:runtimeverification/llvm-backend";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
@@ -15,7 +22,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
     , llvm-backend, mavenix, flake-compat }:
     let
       allOverlays = [
@@ -24,6 +31,7 @@
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
+        # booster-backend.overlays.default
         haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
         (final: prev:
           let
@@ -55,6 +63,7 @@
             k-framework = haskell-backend-bins:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
+                booster = booster-backend.packages.${prev.system}.booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;

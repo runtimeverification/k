@@ -1,5 +1,5 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
+, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster
 , prelude-kore, llvm-backend, debugger, version }:
 
 let
@@ -50,6 +50,7 @@ let
       ln -sf ${llvm-backend}/include/kllvm-c $out/include/
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
+      ln -sf ${booster}/bin/* $out/bin/
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
