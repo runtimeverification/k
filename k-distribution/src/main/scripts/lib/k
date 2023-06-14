@@ -2,19 +2,14 @@
 source "$(dirname "$0")/setenv"
 ulimit -s "$(ulimit -H -s)"
 
-KERNEL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../../../kernel" && pwd)"
 K_BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
-SNAPSHOT_JAR="$(find "${KERNEL_DIR}"/target/ -name '*-SNAPSHOT.jar')"
-
-if [[ -z "${SNAPSHOT_JAR}" ]]; then
-    echo "Could not find the kernel jar file. Please run 'mvn package' in the K source directory." 1>&2
-    exit 1
-fi
+GIT_DESCRIBE="${K_BASE}/kframework/git-describe.out"
+TIMESTAMP="${K_BASE}/kframework/timestamp.out"
 
 for flag in "$@"; do
-    if [[ "$flag" == "--version" || "$flag" == "-v" ]]; then
-        version=$(unzip -p "${SNAPSHOT_JAR}" META-INF/MANIFEST.MF | grep 'Implementation-Git-Describe' | awk -v RS='\r' '{print $2}')
-        versionTimestamp=$(unzip -q -c "${SNAPSHOT_JAR}"| grep "Implementation-Date:" | awk -v RS='\r' '{print $2}')
+    if [[ "$flag" == "--version" ]]; then
+        version="$(cat "${GIT_DESCRIBE}")"
+        versionTimestamp="$(cat "${TIMESTAMP}")"
         versionTimestampInMilliseconds=$(echo "${versionTimestamp} / 1000" | bc)
 
         if [ "$(uname)" = 'Darwin' ]; then
@@ -24,7 +19,7 @@ for flag in "$@"; do
         fi
 
         if [[ -z "${version}" ]]; then
-            version="v"$(cat "${K_BASE}"/lib/version)
+            version="v"$(cat "${K_BASE}"/version)
         fi
 
         echo "K version:    ${version}"
