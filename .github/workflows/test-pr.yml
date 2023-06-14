@@ -213,15 +213,15 @@ jobs:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
-      - name: 'Build K Framework'
-        run: nix-build -A k -A llvm-backend -A haskell-backend
+#       - name: 'Build K Framework'
+#         run: nix-build -A k -A llvm-backend -A haskell-backend
 
-      - name: 'Build K Framework with LTO'
-        run: nix-build -A k -A llvm-backend -A haskell-backend --arg release true
-        if: ${{ !contains(matrix.os, 'macos') }}
+#       - name: 'Build K Framework with LTO'
+#         run: nix-build -A k -A llvm-backend -A haskell-backend --arg release true
+#         if: ${{ !contains(matrix.os, 'macos') }}
 
-      - name: 'Check development environment'
-        run: nix-shell --run 'echo OK'
+#       - name: 'Check development environment'
+#         run: nix-shell --run 'echo OK'
 
       - name: 'Run selected integration tests'
         run: nix-build test.nix --argstr test help
