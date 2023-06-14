@@ -70,7 +70,7 @@ jobs:
                    $(find nix -name '*.nix')                                            \
                    llvm-backend/src/main/native/llvm-backend                            \
                    haskell-backend/src/main/native/haskell-backend; then
-            ./nix/update-maven.sh
+            nix run .#update-maven
           fi
           if git add nix/ && git commit -m 'Update Nix lock files'; then
             git push
