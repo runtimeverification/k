@@ -8,7 +8,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN    apt-get update        \
     && apt-get upgrade --yes \
     && apt-get install --yes \
-            curl
+            curl libtinfo-dev
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
