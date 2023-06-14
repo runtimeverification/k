@@ -54,7 +54,7 @@ public class CheckConfigurationCells {
                     }
                 }
             }
-            if (p.att().getOptional("multiplicity").orElse("").equals("*") && p.att().getOptional("type").orElse("Bag").equals("Bag")) {
+            if (p.att().getOptional(Att.MULTIPLICITY()).orElse("").equals("*") && p.att().getOptional(Att.TYPE()).orElse("Bag").equals("Bag")) {
                 if (!isSymbolicKast) {
                     errors.add(KEMException.compilerError("Cell bags are only supported on the Java backend. If you want "
                           + "this feature, comment on https://github.com/runtimeverification/k/issues/1419 . As a workaround, you can add the attribute "

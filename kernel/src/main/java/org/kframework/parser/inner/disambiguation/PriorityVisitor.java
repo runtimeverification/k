@@ -4,6 +4,7 @@ package org.kframework.parser.inner.disambiguation;
 import com.google.common.collect.Sets;
 import org.kframework.Collections;
 import org.kframework.POSet;
+import org.kframework.attributes.Att;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Tag;
 import org.kframework.parser.SetsTransformerWithErrors;
@@ -77,8 +78,8 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (!tc.production().isSyntacticSubsort()) {
             // match only on the outermost elements
-            if (tc.production().att().contains("applyPriority")) {
-              String[] pieces = StringUtil.splitOneDimensionalAtt(tc.production().att().get("applyPriority"));
+            if (tc.production().att().contains(Att.APPLY_PRIORITY())) {
+              String[] pieces = StringUtil.splitOneDimensionalAtt(tc.production().att().get(Att.APPLY_PRIORITY()));
               java.util.Set<Integer> applyAt = new HashSet<>();
               for (String piece : pieces) {
                   try {

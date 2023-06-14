@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
@@ -34,7 +35,7 @@ public class CheckStreams {
     }
 
     private void check(Production p) {
-        if (p.att().contains("cell") && p.att().contains("stream")) {
+        if (p.att().contains(Att.CELL()) && p.att().contains(Att.STREAM())) {
             ProductionItem i = mutable(p.items()).get(1);
             if (i instanceof NonTerminal) {
                 Sort sort = ((NonTerminal) i).sort();

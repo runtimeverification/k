@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
@@ -72,7 +73,7 @@ public class ResolveIOStreams {
             }
             // Step 2.
             for (Production p : streamProductions) {
-                if (p.att().get("stream").equals("stdin")) {
+                if (p.att().get(Att.STREAM()).equals("stdin")) {
                     sentences.addAll(getStdinStreamUnblockingRules(p, sentences));
                 }
             }
@@ -95,8 +96,8 @@ public class ResolveIOStreams {
         for (Sentence s : mutable(sentences)) {
             if (s instanceof Production) {
                 Production p = (Production) s;
-                if (p.att().getOption("stream").isDefined()) {
-                    checkStreamName(p.att().get("stream"));
+                if (p.att().getOption(Att.STREAM()).isDefined()) {
+                    checkStreamName(p.att().get(Att.STREAM()));
                     productions.add(p);
                 }
             }
@@ -157,7 +158,7 @@ public class ResolveIOStreams {
 
     // Get an initializer rule from the built-in *-STREAM module
     private KList getContentsOfInitRule(Production streamProduction) {
-        String streamName = streamProduction.att().get("stream"); // stdin, stdout
+        String streamName = streamProduction.att().get(Att.STREAM()); // stdin, stdout
         String initLabel = GenerateSentencesFromConfigDecl.getInitLabel(
                 Sort(GenerateSentencesFromConfigDecl.getSortOfCell(streamName))); // initStdinCell, initStdoutCell
         String cellLabel = "<" + streamName + ">"; // <stdin>, <stdout>
@@ -180,7 +181,7 @@ public class ResolveIOStreams {
     // - productions whose sort is `Stream`
     // - rules that have `stream` attribute, but changing cell names according to user-defined one.
     private java.util.Set<Sentence> getStreamModuleSentences(Production streamProduction) {
-        String streamName = streamProduction.att().get("stream"); // stdin, stdout
+        String streamName = streamProduction.att().get(Att.STREAM()); // stdin, stdout
         String builtinCellLabel = "<" + streamName + ">"; // <stdin>, <stdout>
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>, <out>
 
@@ -188,7 +189,7 @@ public class ResolveIOStreams {
         for (Sentence s : mutable(getStreamModule(streamName).localSentences())) {
             if (s instanceof Rule) {
                 Rule rule = (Rule) s;
-                if (rule.att().contains("stream")) {
+                if (rule.att().contains(Att.STREAM())) {
                     // Update cell names
                     K body = new TransformK() {
                         @Override
@@ -208,12 +209,12 @@ public class ResolveIOStreams {
 
                     rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
                     sentences.add(rule);
-                } else if (rule.att().contains("projection")) {
+                } else if (rule.att().contains(Att.PROJECTION())) {
                     sentences.add(rule);
                 }
             } else if (s instanceof Production) {
                 Production production = (Production) s;
-                if (production.sort().toString().equals("Stream") || production.att().contains("projection")) {
+                if (production.sort().toString().equals("Stream") || production.att().contains(Att.PROJECTION())) {
                     sentences.add(production);
                 }
             }
@@ -385,13 +386,13 @@ public class ResolveIOStreams {
      *      </in>
      */
     private K getUnblockRuleBody(Production streamProduction, String sort) {
-        String streamName = streamProduction.att().get("stream");
+        String streamName = streamProduction.att().get(Att.STREAM());
         assert streamName.equals("stdin"); // stdin
         String builtinCellLabel = "<" + streamName + ">"; // <stdin>
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         java.util.List<Sentence> unblockRules = stream(getStreamModule(streamName).localSentences())
-                .filter(s -> s instanceof Rule && s.att().contains("unblock"))
+                .filter(s -> s instanceof Rule && s.att().contains(Att.UNBLOCK()))
                 .collect(Collectors.toList());
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);

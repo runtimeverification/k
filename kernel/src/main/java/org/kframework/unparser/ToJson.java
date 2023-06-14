@@ -2,11 +2,10 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
-import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
@@ -44,24 +43,16 @@ import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
-
 import javax.json.Json;
-import javax.json.stream.JsonGenerator;
-import javax.json.JsonWriterFactory;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 import javax.json.JsonStructure;
 
-import scala.Enumeration;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
-import scala.collection.Seq;
 import scala.collection.Set;
 
 import static org.kframework.Collections.*;
@@ -148,33 +139,33 @@ public class ToJson {
         jatt.add("node", JsonParser.KATT);
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
-        for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            if (key._1().equals(Location.class.getName())) {
+        for (Tuple2<Att.Key,String> attKeyPair: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+            if (attKeyPair._1().key().equals(Location.class.getName())) {
                 JsonArrayBuilder locarr = Json.createArrayBuilder();
                 Location loc = att.get(Location.class);
                 locarr.add(loc.startLine());
                 locarr.add(loc.startColumn());
                 locarr.add(loc.endLine());
                 locarr.add(loc.endColumn());
-                jattKeys.add(key._1(), locarr.build());
-            } else if (key._1().equals(Source.class.getName())){
-                jattKeys.add(key._1(), att.get(Source.class).source());
-            } else if (key._1().equals(Production.class.getName())){
-                jattKeys.add(key._1(), toJson(att.get(Production.class)));
-            } else if (key._1().equals(Sort.class.getName())){
-                jattKeys.add(key._1(), toJson(att.get(Sort.class)));
-            } else if (key._1().equals("bracketLabel")) {
-                jattKeys.add(key._1(), toJson(att.get("bracketLabel", KLabel.class)));
-            } else if (key._1().equals(Att.PREDICATE())) {
-                jattKeys.add(key._1(), toJson(att.get(Att.PREDICATE(), Sort.class)));
-            } else if (key._1().equals("cellOptAbsent")) {
-                jattKeys.add(key._1(), toJson(att.get("cellOptAbsent", Sort.class)));
-            } else if (key._1().equals("cellFragment")) {
-                jattKeys.add(key._1(), toJson(att.get("cellFragment", Sort.class)));
-            } else if (key._1().equals("sortParams")) {
-                jattKeys.add(key._1(), toJson(att.get("sortParams", Sort.class)));
+                jattKeys.add(attKeyPair._1().key(), locarr.build());
+            } else if (attKeyPair._1().key().equals(Source.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), att.get(Source.class).source());
+            } else if (attKeyPair._1().key().equals(Production.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Production.class)));
+            } else if (attKeyPair._1().key().equals(Sort.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Sort.class)));
+            } else if (attKeyPair._1().equals(Att.BRACKET_LABEL())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.BRACKET_LABEL(), KLabel.class)));
+            } else if (attKeyPair._1().equals(Att.PREDICATE())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.PREDICATE(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.CELL_OPT_ABSENT())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.CELL_OPT_ABSENT(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.CELL_FRAGMENT())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.CELL_FRAGMENT(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.SORT_PARAMS())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.SORT_PARAMS(), Sort.class)));
             } else
-                jattKeys.add(key._1(), att.att().get(key).get().toString());
+                jattKeys.add(attKeyPair._1().key(), att.att().get(attKeyPair).get().toString());
         }
         jatt.add("att", jattKeys.build());
 

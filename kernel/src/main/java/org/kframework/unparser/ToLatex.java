@@ -102,7 +102,7 @@ public class ToLatex {
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
 
-            Optional<String> origName = var.att().getOptional("originalName");
+            Optional<String> origName = var.att().getOptional(Att.ORIGINAL_NAME());
             if (origName.isPresent()) {
                 writeString(out, origName.get());
             } else {

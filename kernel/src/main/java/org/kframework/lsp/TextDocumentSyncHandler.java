@@ -4,6 +4,7 @@ package org.kframework.lsp;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.KViz;
@@ -251,7 +252,7 @@ public class TextDocumentSyncHandler {
                                         if (parsedSent.containsKey(ss.getContent())) {
                                             Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                     .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
-                                                    .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                                    .add(Att.CONTENT_START_LINE(), ss.getContentStartLine()).add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                                             ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(ss.getContent()), b);
                                             AtomicReference<K> x = new AtomicReference<>();
                                             KViz.from(t -> {
@@ -330,7 +331,7 @@ public class TextDocumentSyncHandler {
                                     if (parsedSent.containsKey(ss.getContent())) {
                                         Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                 .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
-                                                .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                                .add(Att.CONTENT_START_LINE(), ss.getContentStartLine()).add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                                         ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(b.contents()), b);
                                         parse.getErrors().forEach(err -> {
                                             Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
@@ -413,7 +414,7 @@ public class TextDocumentSyncHandler {
                                                         if (ps.getParse() != null) {
                                                             Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                                     .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
-                                                                    .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                                                    .add(Att.CONTENT_START_LINE(), ss.getContentStartLine()).add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                                                             ps = DefinitionParsing.updateLocation(ps, b);
                                                             KViz.from(t -> {
                                                                 // the two production elements are not compatible so compare location information which should match
@@ -484,7 +485,7 @@ public class TextDocumentSyncHandler {
                                             if (parsedSent.containsKey(ss.getContent())) {
                                                 Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                         .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
-                                                        .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                                        .add(Att.CONTENT_START_LINE(), ss.getContentStartLine()).add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                                                 ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(ss.getContent()), b);
                                                 KViz.from(t -> {
                                                     if (isPositionOverLocation(pos, t.location().get())) {

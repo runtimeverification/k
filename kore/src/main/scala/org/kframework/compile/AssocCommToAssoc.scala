@@ -22,7 +22,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
 
   private def apply(s: Sentence)(implicit m: Module): List[Sentence] = s match {
     //TODO(AndreiS): handle AC in requires and ensures
-    case r: Rule if !r.att.contains("pattern-folding") =>
+    case r: Rule if !r.att.contains(Att.PATTERN_FOLDING) =>
       val newBodies = apply(r.body)
       val substitutionOfVariables: Map[KVariable, K] = new FoldK[Map[KVariable, K]]() {
         type E = Map[KVariable, K]
@@ -76,7 +76,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
     }
 
     assert(nonElements.size <= 1)
-    assert(nonElements.headOption forall { case v: KVariable => v.name.equals("THE_VARIABLE") || v.name.startsWith("_DotVar") || v.att.contains("anonymous") })
+    assert(nonElements.headOption forall { case v: KVariable => v.name.equals("THE_VARIABLE") || v.name.startsWith("_DotVar") || v.att.contains(Att.ANONYMOUS) })
     val frameOption = nonElements.headOption
 
     val convertedChildren: List[List[K]] = frameOption match {
@@ -85,7 +85,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
           _.foldRight(List(anonymousVariable(opSort))) { (e, l) => anonymousVariable(opSort) :: e :: l }
         }
       //TODO(AndreiS): check the variable is free (not constrained elsewhere by the rule)
-      case Some(v: KVariable) if v.name.startsWith("_DotVar") || v.att.contains("anonymous") =>
+      case Some(v: KVariable) if v.name.startsWith("_DotVar") || v.att.contains(Att.ANONYMOUS) =>
         elements.permutations.toList map {
           _.foldRight(List(dotVariable(opSort, 0))) { (e, l) => dotVariable(opSort, (l.size + 1) / 2) :: e :: l }
         }
@@ -105,11 +105,11 @@ class AssocCommToAssoc extends Function[Module, Module] {
     }
 
     assert(nonElements.size <= 1)
-    assert(nonElements.headOption forall { case v: KVariable => v.name.equals("THE_VARIABLE") || v.name.startsWith("_DotVar") || v.att.contains("anonymous") })
+    assert(nonElements.headOption forall { case v: KVariable => v.name.equals("THE_VARIABLE") || v.name.startsWith("_DotVar") || v.att.contains(Att.ANONYMOUS) })
     val frameOption = nonElements.headOption
 
     frameOption match {
-      case Some(v: KVariable) if v.name.startsWith("_DotVar") || v.att.contains("anonymous") =>
+      case Some(v: KVariable) if v.name.startsWith("_DotVar") || v.att.contains(Att.ANONYMOUS) =>
         Map(v -> KApply(label,((0 to elements.size) map {dotVariable(opSort, _)}: _*)))
       case _ => Map()
     }

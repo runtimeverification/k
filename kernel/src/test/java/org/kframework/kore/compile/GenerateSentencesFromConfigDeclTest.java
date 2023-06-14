@@ -67,35 +67,35 @@ public class GenerateSentencesFromConfigDeclTest {
         Module m1 = Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att());
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
         Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true, files).getExtensionModule();
-        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
-        Att initializerAtts = Att().add("initializer");
-        Att productionAtts = initializerAtts.add("function").add("noThread");
+        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m, false);
+        Att initializerAtts = Att().add(Att.INITIALIZER());
+        Att productionAtts = initializerAtts.add(Att.FUNCTION()).add(Att.NO_THREAD());
         Set<Sentence> reference = Set(Production(KLabel("<threads>"), Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>")),
-                        Att().add("cell").add("cellName", "threads").add("topcell").add("format", "%1%i%n%2%d%n%3")),
-                SyntaxSort(Seq(), Sort("ThreadCellBag"), Att().add("hook", "BAG.Bag").add("cellCollection")),
+                        Att().add(Att.CELL()).add(Att.CELL_NAME(), "threads").add(Att.TOPCELL()).add(Att.FORMAT(), "%1%i%n%2%d%n%3")),
+                SyntaxSort(Seq(), Sort("ThreadCellBag"), Att().add(Att.HOOK(), "BAG.Bag").add(Att.CELL_COLLECTION())),
                 Production(KLabel("_ThreadCellBag_"), Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),
-                        Att().add("assoc","").add("comm","").add("unit",".ThreadCellBag")
-                                .add("element","ThreadCellBagItem").add("wrapElement","<thread>")
-                                .add("function").add("avoid").add("bag").add("cellCollection").add("hook","BAG.concat")),
+                        Att().add(Att.ASSOC(),"").add(Att.COMM(),"").add(Att.UNIT(),".ThreadCellBag")
+                                .add(Att.ELEMENT(),"ThreadCellBagItem").add(Att.WRAP_ELEMENT(),"<thread>")
+                                .add(Att.FUNCTION()).add(Att.AVOID()).add(Att.BAG()).add(Att.CELL_COLLECTION()).add(Att.HOOK(),"BAG.concat")),
                 Production(KLabel(".ThreadCellBag"), Sort("ThreadCellBag"),
                         Seq(Terminal(".ThreadCellBag")),
-                        Att().add("function").add("hook","BAG.unit")),
+                        Att().add(Att.FUNCTION()).add(Att.HOOK(),"BAG.unit")),
                 Production(Seq(), Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCell")))),
                 Production(KLabel("ThreadCellBagItem"), Sort("ThreadCellBag"),
                         Seq(Terminal("ThreadCellBagItem"), Terminal("("), NonTerminal(Sort("ThreadCell")), Terminal(")")),
-                        Att().add("function").add("hook","BAG.element").add("format", "%3")),
+                        Att().add(Att.FUNCTION()).add(Att.HOOK(),"BAG.element").add(Att.FORMAT(), "%3")),
                 Production(KLabel("<thread>"), Sort("ThreadCell"),
                         Seq(Terminal("<thread>"), NonTerminal(Sort("KCell")), NonTerminal(Sort("OptCell")), Terminal("</thread>")),
-                        Att().add("cell").add("cellName", "thread").add("multiplicity","*").add("format", "%1%i%n%2%n%3%d%n%4")),
+                        Att().add(Att.CELL()).add(Att.CELL_NAME(), "thread").add(Att.MULTIPLICITY(),"*").add(Att.FORMAT(), "%1%i%n%2%n%3%d%n%4")),
                 Production(KLabel("<k>"), Sort("KCell"),
                         Seq(Terminal("<k>"), NonTerminal(Sort("K")), Terminal("</k>")),
-                        Att().add("cell").add("cellName", "k").add(Att.MAINCELL()).add("format", "%1%i%n%2%d%n%3")),
+                        Att().add(Att.CELL()).add(Att.CELL_NAME(), "k").add(Att.MAINCELL()).add(Att.FORMAT(), "%1%i%n%2%d%n%3")),
                 Production(KLabel("<opt>"), Sort("OptCell"),
                         Seq(Terminal("<opt>"), NonTerminal(Sort("OptCellContent")), Terminal("</opt>")),
-                        Att().add("cell").add("cellName", "opt").add("multiplicity","?").add("unit",".OptCell").add("format", "%1%i%n%2%d%n%3")),
+                        Att().add(Att.CELL()).add(Att.CELL_NAME(), "opt").add(Att.MULTIPLICITY(),"?").add(Att.UNIT(),".OptCell").add(Att.FORMAT(), "%1%i%n%2%d%n%3")),
                 Production(KLabel(".OptCell"), Sort("OptCell"),
                         Seq(Terminal(".OptCell"))),
                 Production(KLabel("initThreadsCell"), Sort("ThreadsCell"),
