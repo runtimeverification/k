@@ -148,35 +148,36 @@
             let
               k-version =
                 lib.removeSuffix "\n" (builtins.readFile ./package/version);
-            in stdenv.mkDerivation {
-              name = "k-${k-version}-${self.rev or "dirty"}-test";
-              src = lib.cleanSource
-                (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
-                  ./k-distribution);
-              preferLocalBuild = true;
-              buildInputs = [ fmt gmp mpfr k ];
-              postPatch = ''
-                patchShebangs tests/regression-new/*
-                substituteInPlace tests/regression-new/append/kparse-twice \
-                  --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
-              '';
-              buildFlags = [
-                "K_BIN=${k}/bin"
-                "KLLVMLIB=${k}/lib/kllvm"
-                "PACKAGE_VERSION=${k-version}"
-                "--output-sync"
-              ];
-              enableParallelBuilding = true;
-              preBuild = ''
-                cd tests/regression-new
-              '';
-              installPhase = ''
-                runHook preInstall
-                touch "$out"
-                runHook postInstall
-              '';
-            };
-        };
+              mkTest = {test ? null }: stdenv.mkDerivation {
+                name = "k-${k-version}-${self.rev or "dirty"}-test";
+                src = lib.cleanSource
+                  (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
+                    ./k-distribution);
+                preferLocalBuild = true;
+                buildInputs = [ fmt gmp mpfr k ];
+                postPatch = ''
+                  patchShebangs tests/regression-new/*
+                  substituteInPlace tests/regression-new/append/kparse-twice \
+                    --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
+                '';
+                buildFlags = [
+                  "K_BIN=${k}/bin"
+                  "KLLVMLIB=${k}/lib/kllvm"
+                  "PACKAGE_VERSION=${k-version}"
+                  "--output-sync"
+                ] ++ lib.optional (test != null) "-C ${test}";
+                enableParallelBuilding = true;
+                preBuild = ''
+                  cd tests/regression-new
+                '';
+                installPhase = ''
+                  runHook preInstall
+                  touch "$out"
+                  runHook postInstall
+                '';
+              };
+            in 
+              mkTest {};
         defaultPackage = packages.k;
         devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework haskell-backend-bins);
       }) // {
