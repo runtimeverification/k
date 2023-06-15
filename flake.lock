@@ -33,11 +33,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686322919,
-        "narHash": "sha256-CrnY2wqOPwK2/OcFK9HgACnypKU3sgZmfLvx+aS1Wes=",
+        "lastModified": 1686751232,
+        "narHash": "sha256-ZNSYB85CLP7gspIg1qLc6ntpNOnSGhSmtnge839Dwbs=",
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "63bc29f0f0ef8933fd657cf94909fce72f253fc8",
+        "rev": "f0f779e334b5140e2aa1eaf14ee2787814d9e915",
         "type": "github"
       },
       "original": {
