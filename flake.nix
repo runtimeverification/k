@@ -55,6 +55,7 @@
             k-framework = haskell-backend-bins:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
+                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;

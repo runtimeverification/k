@@ -18,11 +18,11 @@
     },
     "blank": {
       "locked": {
-        "lastModified": 1625557891,
-        "narHash": "sha256-O8/MWsPBGhhyPoPLHZAuoZiiHo9q6FLlEeIDEXuj6T4=",
-        "owner": "divnix",
-        "repo": "blank",
-        "rev": "5a5d2684073d9f563072ed07c871d577a6c614a8",
+        "lastModified": 1686751232,
+        "narHash": "sha256-ZNSYB85CLP7gspIg1qLc6ntpNOnSGhSmtnge839Dwbs=",
+        "owner": "runtimeverification",
+        "repo": "hs-backend-booster",
+        "rev": "f0f779e334b5140e2aa1eaf14ee2787814d9e915",
         "type": "github"
       },
       "original": {
