@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -19,7 +18,6 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
-import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -43,11 +41,12 @@ public class CheckKLabels {
     private final Set<KEMException> errors;
     private final KExceptionManager kem;
     private final FileUtil files;
-
-    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, FileUtil files) {
+    private final List<String> extraConcreteRules;
+    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, FileUtil files, List<String> extraConcreteRules) {
         this.errors = errors;
         this.kem = kem;
         this.files = files;
+        this.extraConcreteRules = extraConcreteRules;
     }
 
     private final Map<String, Module> klabels = new HashMap<>();
@@ -114,8 +113,20 @@ public class CheckKLabels {
         }
     }
 
-    private boolean hasAttWithNoArg(Att att, Att.Key attName) {
-      return att.contains(attName) && att.get(attName).equals("");
+    private boolean isExtraConcreteRule(Rule r) {
+        return r.label().isPresent() && extraConcreteRules.contains(r.label().get());
+    }
+
+    private boolean hasSymbolicAttWithNoArg(Rule r) {
+        return r.att().contains(Att.SYMBOLIC()) && r.att().get(Att.SYMBOLIC()).equals("");
+    }
+
+    private boolean hasConcreteAttWithNoArg(Rule r) {
+        return isExtraConcreteRule(r) || (r.att().contains(Att.CONCRETE()) && r.att().get(Att.CONCRETE()).equals(""));
+    }
+
+    private boolean hasConcreteAtt(Rule r) {
+        return isExtraConcreteRule(r) || r.att().contains(Att.CONCRETE());
     }
 
     public void check(Module mainMod) {
@@ -149,16 +160,14 @@ public class CheckKLabels {
             boolean allConcrete = true;
             boolean allSymbolic = true;
             for (Rule rule : iterable(mainMod.rulesFor().get(function).getOrElse(() -> Collections.<Rule>Set()))) {
-                if ((hasAttWithNoArg(rule.att(), Att.CONCRETE()) &&
-                    rule.att().contains(Att.SYMBOLIC())) ||
-                    (hasAttWithNoArg(rule.att(), Att.SYMBOLIC()) &&
-                    rule.att().contains(Att.CONCRETE()))) {
+                if ((hasConcreteAttWithNoArg(rule) && rule.att().contains(Att.SYMBOLIC())) ||
+                    (hasSymbolicAttWithNoArg(rule) && hasConcreteAtt(rule))) {
                     errors.add(KEMException.compilerError("Rule cannot be both concrete and symbolic in the same variable.", rule));
                 }
-                if (!hasAttWithNoArg(rule.att(), Att.CONCRETE()) && !rule.att().contains(Att.SIMPLIFICATION())) {
+                if (!hasConcreteAttWithNoArg(rule) && !rule.att().contains(Att.SIMPLIFICATION())) {
                     allConcrete = false;
                 }
-                if (!hasAttWithNoArg(rule.att(), Att.SYMBOLIC()) && !rule.att().contains(Att.SIMPLIFICATION())) {
+                if (!hasSymbolicAttWithNoArg(rule) && !rule.att().contains(Att.SIMPLIFICATION())) {
                     allSymbolic = false;
                 }
             }
@@ -166,7 +175,7 @@ public class CheckKLabels {
             // to keep the soundness of the definition. Exception are simplification rules which need to be sound by themselves.
             // https://github.com/runtimeverification/k/issues/1591
             for (Rule rule : iterable(mainMod.rulesFor().get(function).getOrElse(() -> Collections.<Rule>Set()))) {
-                if (rule.att().contains(Att.CONCRETE()) && !allConcrete && !rule.att().contains(Att.SIMPLIFICATION())) {
+                if (hasConcreteAtt(rule) && !allConcrete && !rule.att().contains(Att.SIMPLIFICATION())) {
                     errors.add(KEMException.compilerError("Found concrete attribute without simplification attribute on function with one or more non-concrete rules.", rule));
                 }
                 if (rule.att().contains(Att.SYMBOLIC()) && !allSymbolic && !rule.att().contains(Att.SIMPLIFICATION())) {
@@ -176,8 +185,8 @@ public class CheckKLabels {
         }
         for (Rule rule : iterable(mainMod.rules())) {
             Att att = rule.att();
-            if (att.contains(Att.SIMPLIFICATION()) && att.contains(Att.CONCRETE()) && att.contains(Att.SYMBOLIC())) {
-                Collection<String> concreteVars = Arrays.stream(att.get(Att.CONCRETE()).split(","))
+            if (att.contains(Att.SIMPLIFICATION()) && hasConcreteAtt(rule) && att.contains(Att.SYMBOLIC())) {
+                Collection<String> concreteVars = Arrays.stream(att.getOptional(Att.CONCRETE()).orElse("").split(","))
                         .map(String::trim).collect(Collectors.toList());
                 Collection<String> symbolicVars = Arrays.stream(att.get(Att.SYMBOLIC()).split(","))
                         .map(String::trim).collect(Collectors.toList());
