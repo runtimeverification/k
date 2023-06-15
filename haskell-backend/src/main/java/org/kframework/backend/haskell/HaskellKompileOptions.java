@@ -7,9 +7,9 @@ import org.kframework.utils.inject.RequestScoped;
 @RequestScoped
 public class HaskellKompileOptions {
 
-    @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.")
+    @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.", hidden = true)
     public String haskellBackendCommand = "kore-exec";
 
-    @Parameter(names="--no-haskell-binary", description="Do not force the haskell backend to use the binary format. Use the textual format instead. This is a development option. Sometime the binary format can cause issues.")
+    @Parameter(names="--no-haskell-binary", description="Use the textual KORE format in the haskell backend instead of the binary KORE format. This is a development option, but may be necessary on MacOS due to known issues with the binary format.")
     public boolean noHaskellBinary = false;
 }

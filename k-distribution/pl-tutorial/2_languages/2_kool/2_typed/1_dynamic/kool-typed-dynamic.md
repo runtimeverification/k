@@ -280,12 +280,12 @@ KOOL).
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [group(increment)]
 
 
   rule I1 + I2 => I1 +Int I2
@@ -322,7 +322,7 @@ KOOL).
     [structural]
 
 
-  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 
 
   context (HOLE => lvalue(HOLE)) = _
@@ -346,7 +346,7 @@ KOOL).
 
 
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    requires typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
+    requires typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
   rule print(.Vals); => .  [structural]
 
 
@@ -360,7 +360,7 @@ KOOL).
   rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy (.Set => SetItem(V)) </busy>
-    requires (notBool(V in Busy:Set))  [acquire]
+    requires (notBool(V in Busy:Set))  [group(acquire)]
 
   rule <k> acquire V; => . ...</k>
        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
@@ -373,7 +373,7 @@ KOOL).
        <busy>... SetItem(V) => .Set ...</busy>
 
   rule <k> rendezvous V:Val; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [rendezvous]
+       <k> rendezvous V; => . ...</k>  [group(rendezvous)]
 ```
 
 ## Unchanged auxiliary operations from dynamically typed SIMPLE
@@ -385,7 +385,7 @@ KOOL).
   rule mkDecls(.Params,.Vals) => {}
 
   syntax Exp ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   syntax KItem ::= setEnv(Map)
   rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
@@ -518,7 +518,7 @@ values are allowed to be stored in each location.
            => subtype(typeOf(V),typeOf(V')) ~> true?
               ~> unsafeCast(V, typeOf(V')) ...</k>
        <store>... L |-> (V' => unsafeCast(V, typeOf(V'))) ...</store>
-    [assignment]
+    [group(assignment)]
 ```
 
 ## Typed exceptions
@@ -714,7 +714,7 @@ The method lookup is the same as in untyped KOOL.
 ```k
   rule <k> (X:Id => V)(_:Exps) ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   rule <k> (X:Id => this . X)(_:Exps) ...</k>
        <env> Env </env>
@@ -751,7 +751,7 @@ The method lookup is the same as in untyped KOOL.
   */
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
-    [lookup]
+    [group(lookup)]
 ```
 
 ## Instance of

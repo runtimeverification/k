@@ -21,13 +21,13 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
 
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source)
-      .add(classOf[Production], c.production.att.getOption("originalPrd", classOf[Production]).getOrElse(c.production)))
+      .add(classOf[Production], c.production.att.getOption(Att.ORIGINAL_PRD, classOf[Production]).getOrElse(c.production)))
     case t@TermCons(_, _) => termConsToKApply(t)
     case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att.empty)
   }
 
   def termConsToKApply(t: TermCons): K = {
-    val realProd = if (t.production.att.contains("originalPrd", classOf[Production])) t.production.att.get("originalPrd", classOf[Production]) else t.production
+    val realProd = if (t.production.att.contains(Att.ORIGINAL_PRD, classOf[Production])) t.production.att.get(Att.ORIGINAL_PRD, classOf[Production]) else t.production
     if (t.production.att.contains(Att.BRACKET))
       return apply(t.items.get(0))
     if (t.production.klabel.isEmpty)

@@ -200,12 +200,12 @@ will express the exact same grammar as `lesson-04-b.k`
 ```k
 module LESSON-04-D
 
-  syntax Boolean ::= "true" [literal] | "false" [literal]
-                   | "(" Boolean ")" [atom, bracket]
-                   | "!" Boolean [not, function]
-                   | Boolean "&&" Boolean [and, function]
-                   | Boolean "^" Boolean [xor, function]
-                   | Boolean "||" Boolean [or, function]
+  syntax Boolean ::= "true" [group(literal)] | "false" [group(literal)]
+                   | "(" Boolean ")" [group(atom), bracket]
+                   | "!" Boolean [group(not), function]
+                   | Boolean "&&" Boolean [group(and), function]
+                   | Boolean "^" Boolean [group(xor), function]
+                   | Boolean "||" Boolean [group(or), function]
 
   syntax priorities literal atom > not > and > xor > or
   syntax left and

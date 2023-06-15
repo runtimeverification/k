@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
@@ -36,8 +37,10 @@ public class CommonModule extends AbstractModule {
     }
 
     @Provides @TempDir @RequestScoped
-    File tempDir(@WorkingDir File workingDir, Tool tool) {
-        return new File(workingDir, FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
+    File tempDir(Tool tool, GlobalOptions go) {
+        if (go.tempDir != null)
+            return new File(go.tempDir, FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
+        return new File(System.getProperty("java.io.tmpdir"), FileUtil.generateUniqueFolderName("." + tool.name().toLowerCase()));
     }
 
     @Provides

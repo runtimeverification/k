@@ -123,9 +123,9 @@ public class ResolveAnonVar {
     private int counter = 0;
     KVariable newDotVariable(String prefix) {
         KVariable newLabel;
-        Att att = Att().add("anonymous");
+        Att att = Att().add(Att.ANONYMOUS());
         if (prefix.equals("?")) {
-            att = att.add("fresh");
+            att = att.add(Att.FRESH());
         }
         do {
             newLabel = KVariable(prefix + "_Gen" + (counter++), att);

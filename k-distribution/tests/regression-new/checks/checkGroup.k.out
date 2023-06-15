@@ -1,0 +1,5 @@
+[Error] Compiler: User-defined group 'function' conflicts with built-in or internal attribute.
+	Source(checkGroup.k)
+	Location(4,18,4,47)
+	4 |	               | Int "+" Int [group(function)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
