@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST
   imports K-EQUAL
   syntax Thing ::= "a" [token]
