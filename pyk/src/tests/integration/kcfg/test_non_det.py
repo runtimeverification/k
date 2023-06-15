@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kcfg import KCFGShow
+from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
+from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest
 from pyk.utils import single
 
@@ -17,9 +18,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from pyk.cterm import CTerm
     from pyk.kcfg import KCFGExplore
-    from pyk.ktool.kprint import KPrint
     from pyk.ktool.kprove import KProve
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -31,10 +30,6 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None,
 
 class TestNonDetProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = K_FILES / 'non-det.k'
-
-    @staticmethod
-    def node_printer(kprint: KPrint, cterm: CTerm) -> list[str]:
-        return kprint.pretty_print(cterm.kast).split('\n')
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules',
@@ -66,10 +61,10 @@ class TestNonDetProof(KCFGExploreTest):
             terminal_rules=terminal_rules,
         )
 
-        kcfg_show = KCFGShow(kcfg_explore.kprint)
-        cfg_lines = kcfg_show.show(
-            'test', proof.kcfg, node_printer=lambda k: TestNonDetProof.node_printer(kcfg_explore.kprint, k)
+        kcfg_show = KCFGShow(
+            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
         )
+        cfg_lines = kcfg_show.show('test', proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 
         # We expect this graph, in which all splits are non-deterministic:

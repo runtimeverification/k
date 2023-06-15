@@ -9,11 +9,12 @@ import pytest
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term
-from pyk.kcfg import KCFGShow
+from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import BOOL, notBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
 from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
+from pyk.proof.show import APRBMCProofNodePrinter, APRProofNodePrinter
 from pyk.testing import KCFGExploreTest
 from pyk.utils import single
 
@@ -477,10 +478,6 @@ class TestImpProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     @staticmethod
-    def node_printer(kprint: KPrint, cterm: CTerm) -> list[str]:
-        return kprint.pretty_print(cterm.kast).split('\n')
-
-    @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
 
@@ -656,10 +653,10 @@ class TestImpProof(KCFGExploreTest):
             cut_point_rules=cut_rules,
         )
 
-        kcfg_show = KCFGShow(kcfg_explore.kprint)
-        cfg_lines = kcfg_show.show(
-            'test', proof.kcfg, node_printer=lambda k: TestImpProof.node_printer(kcfg_explore.kprint, k)
+        kcfg_show = KCFGShow(
+            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
         )
+        cfg_lines = kcfg_show.show('test', proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 
         assert proof.status == proof_status
@@ -748,10 +745,10 @@ class TestImpProof(KCFGExploreTest):
             terminal_rules=terminal_rules,
         )
 
-        kcfg_show = KCFGShow(kcfg_explore.kprint)
-        cfg_lines = kcfg_show.show(
-            'test', proof.kcfg, node_printer=lambda k: TestImpProof.node_printer(kcfg_explore.kprint, k)
+        kcfg_show = KCFGShow(
+            kcfg_explore.kprint, node_printer=APRBMCProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
         )
+        cfg_lines = kcfg_show.show('test', proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 
         assert proof.status == proof_status

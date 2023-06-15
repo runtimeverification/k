@@ -71,6 +71,12 @@ class APRProof(Proof):
             if nd not in self.terminal + self.kcfg.target and not self.kcfg.is_covered(nd.id)
         ]
 
+    def is_terminal(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg._resolve(node_id) in (nd.id for nd in self.terminal)
+
+    def is_pending(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg._resolve(node_id) in (nd.id for nd in self.pending)
+
     @staticmethod
     def read_proof(id: str, proof_dir: Path) -> APRProof:
         proof_path = proof_dir / f'{hash_str(id)}.json'
@@ -190,6 +196,9 @@ class APRBMCProof(APRProof):
             for nd in self.kcfg.leaves
             if nd not in self.terminal + self.kcfg.target + self.bounded and not self.kcfg.is_covered(nd.id)
         ]
+
+    def is_bounded(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg._resolve(node_id) in (nd.id for nd in self.bounded)
 
     @property
     def status(self) -> ProofStatus:

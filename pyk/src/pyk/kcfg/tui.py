@@ -76,9 +76,7 @@ class BehaviorView(Widget):
         self._node_printer = node_printer
         self._nodes = []
         kcfg_show = KCFGShow(kprint)
-        for lseg_id, node_lines in kcfg_show.pretty_segments(
-            self._kcfg, minimize=self._minimize, node_printer=self._node_printer
-        ):
+        for lseg_id, node_lines in kcfg_show.pretty_segments(self._kcfg, minimize=self._minimize):
             self._nodes.append(GraphChunk(lseg_id, node_lines))
 
     def compose(self) -> ComposeResult:
