@@ -223,7 +223,7 @@ public class KException implements Serializable, HasLocation {
         sourceText.append("\n\t");
         sourceText.append(String.valueOf(location.startLine()) + " |\t");
         Stream lines = Files.lines(Paths.get(getSource().source()));
-        sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().get());
+        sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().orElse(""));
 
         /* generate a line below the source file that underlines the location of the error */
 
