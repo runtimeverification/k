@@ -13,8 +13,8 @@ jobs:
         include:
           - runner: ubuntu-20.04
             os: ubuntu-20.04
-          - runner: macos-12
-            os: macos-12
+          - runner: macos-13
+            os: macos-13
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
@@ -29,7 +29,7 @@ jobs:
 
       - name: 'Install Nix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v21
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
