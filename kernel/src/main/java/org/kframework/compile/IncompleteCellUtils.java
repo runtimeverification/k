@@ -65,7 +65,7 @@ public class IncompleteCellUtils {
     private static KApply makeDots(boolean isOpen) {
         return isOpen ? dots : noDots;
     }
-    public static K makeBody(List<K> children) {
+    static K makeBody(List<K> children) {
         if (children.size() == 1) {
             return children.get(0);
         } else {
