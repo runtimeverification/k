@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
     from textual.app import ComposeResult
     from textual.events import Click
-    from textual.message import MessageTarget
 
     from ..kast import KInner
     from ..ktool.kprint import KPrint
@@ -35,9 +34,9 @@ class GraphChunk(Static):
     class Selected(Message):
         chunk_id: str
 
-        def __init__(self, sender: MessageTarget, chunk_id: str) -> None:
+        def __init__(self, chunk_id: str) -> None:
             self.chunk_id = chunk_id
-            super().__init__(sender)
+            super().__init__()
 
     def __init__(self, id: str, node_text: Iterable[str] = ()) -> None:
         self._node_text = '\n'.join(node_text)
@@ -49,8 +48,8 @@ class GraphChunk(Static):
     def on_leave(self) -> None:
         self.styles.border_left = None  # type: ignore
 
-    async def on_click(self, click: Click) -> None:
-        await self.emit(GraphChunk.Selected(self, self.id or ''))
+    def on_click(self, click: Click) -> None:
+        self.post_message(GraphChunk.Selected(self.id or ''))
         click.stop()
 
 
@@ -59,7 +58,7 @@ class BehaviorView(Widget):
     _kprint: KPrint
     _minimize: bool
     _node_printer: Callable[[CTerm], Iterable[str]] | None
-    _nodes: Iterable[GraphChunk]
+    _kcfg_nodes: Iterable[GraphChunk]
 
     def __init__(
         self,
@@ -74,13 +73,13 @@ class BehaviorView(Widget):
         self._kprint = kprint
         self._minimize = minimize
         self._node_printer = node_printer
-        self._nodes = []
+        self._kcfg_nodes = []
         kcfg_show = KCFGShow(kprint)
         for lseg_id, node_lines in kcfg_show.pretty_segments(self._kcfg, minimize=self._minimize):
-            self._nodes.append(GraphChunk(lseg_id, node_lines))
+            self._kcfg_nodes.append(GraphChunk(lseg_id, node_lines))
 
     def compose(self) -> ComposeResult:
-        return self._nodes
+        return self._kcfg_nodes
 
 
 class NodeView(Widget):
