@@ -201,12 +201,16 @@ public class KoreBackend extends AbstractBackend {
                 "concretizing configuration");
         Function1<Module, Module> resolveFreshConstants = d ->
                 ModuleTransformer.from(new ResolveFreshConstants(def, kompileOptions.topCell, files, kompileOptions.outerParsing.pedanticAttributes)::resolve, "resolving !Var variables").apply(d);
+        Function1<Module, Module> addImplicitCounterCell = ModuleTransformer.fromSentenceTransformer(
+                new AddImplicitCounterCell()::apply,
+                "adding <generatedCounter> to claims if necessary");
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
                 "concretizing configuration");
         ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
         return m -> resolveComm
+                .andThen(addImplicitCounterCell)
                 .andThen(resolveAnonVars)
                 .andThen(numberSentences)
                 .andThen(resolveSemanticCasts)
