@@ -6,9 +6,7 @@
     </k>
     ...
   </T>
-  <generatedCounter>
-    _DotVar3:Int
-  </generatedCounter>
+  ...
 </generatedTop>
 #And #Not ( #Exists _DotVar3:K . #Exists K0:AExp . { _DotVar2:K #Equals #freezer_+_1_ ( K0:AExp )
 ~> _DotVar3:K } )
