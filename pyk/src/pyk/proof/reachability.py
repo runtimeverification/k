@@ -257,16 +257,19 @@ class APRProver:
     proof: APRProof
     _is_terminal: Callable[[CTerm], bool] | None
     _extract_branches: Callable[[CTerm], Iterable[KInner]] | None
+    _abstract_node: Callable[[CTerm], CTerm] | None
 
     def __init__(
         self,
         proof: APRProof,
         is_terminal: Callable[[CTerm], bool] | None = None,
         extract_branches: Callable[[CTerm], Iterable[KInner]] | None = None,
+        abstract_node: Callable[[CTerm], CTerm] | None = None,
     ) -> None:
         self.proof = proof
         self._is_terminal = is_terminal
         self._extract_branches = extract_branches
+        self._abstract_node = abstract_node
 
     def _check_terminal(self, curr_node: KCFG.Node) -> bool:
         if self._is_terminal is not None:
@@ -289,6 +292,18 @@ class APRProver:
             _LOGGER.info(f'Subsumed into target node {self.proof.id}: {shorten_hashes((node.id, target_node.id))}')
             return True
         return False
+
+    def _check_abstract(self, node: KCFG.Node) -> bool:
+        if self._abstract_node is None:
+            return False
+
+        new_cterm = self._abstract_node(node.cterm)
+        if new_cterm == node.cterm:
+            return False
+
+        new_node = self.proof.kcfg.create_node(new_cterm)
+        self.proof.kcfg.create_cover(node.id, new_node.id)
+        return True
 
     def advance_proof(
         self,
@@ -314,6 +329,9 @@ class APRProver:
                 continue
 
             if self._check_terminal(curr_node):
+                continue
+
+            if self._check_abstract(curr_node):
                 continue
 
             if self._extract_branches is not None and len(self.proof.kcfg.splits(target_id=curr_node.id)) == 0:
@@ -349,8 +367,9 @@ class APRBMCProver(APRProver):
         same_loop: Callable[[CTerm, CTerm], bool],
         is_terminal: Callable[[CTerm], bool] | None = None,
         extract_branches: Callable[[CTerm], Iterable[KInner]] | None = None,
+        abstract_node: Callable[[CTerm], CTerm] | None = None,
     ) -> None:
-        super().__init__(proof, is_terminal=is_terminal, extract_branches=extract_branches)
+        super().__init__(proof, is_terminal=is_terminal, extract_branches=extract_branches, abstract_node=abstract_node)
         self._same_loop = same_loop
         self._checked_nodes = []
 
