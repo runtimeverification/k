@@ -2,7 +2,7 @@
 module IELE-SYNTAX
   imports IELE-COMMON
   syntax IeleNameToken  ::=
-    r"(?<![A-Za-z0-9\\_\\.\\-\\$])[a-zA-Z\\.\\_\\$][0-9a-zA-Z\\.\\_\\-\\$]*" [notInRules, prec(3), token]
+    r"(?<![A-Za-z0-9\\_\\.\\-\\$])[a-zA-Z\\.\\_\\$][0-9a-zA-Z\\.\\_\\-\\$]*" [prec(3), token]
   syntax Keyword  ::=
     "load" [token]
   | "store" [token]
@@ -321,7 +321,7 @@ module IELE-COMMON
     List{LabeledBlock,""} [klabel(labeledBlockList)]
   syntax UnlabeledBlock  ::=
     Instructions
-  syntax Blocks [flatPredicate]
+  syntax Blocks
   syntax Blocks  ::=
     UnlabeledBlock LabeledBlocks [avoid]
   | LabeledBlocks

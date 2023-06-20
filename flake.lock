@@ -16,6 +16,36 @@
         "type": "github"
       }
     },
+    "booster-backend": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "haskell-backend": [
+          "haskell-backend"
+        ],
+        "haskell-nix": [
+          "haskell-backend",
+          "haskell-nix"
+        ],
+        "k-framework": [],
+        "nixpkgs": [
+          "haskell-backend",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1687263736,
+        "narHash": "sha256-hd9ASCeswd4W9zOKGsKowHORf0MIkATdyggAnZ2IMp4=",
+        "owner": "runtimeverification",
+        "repo": "hs-backend-booster",
+        "rev": "2a681f1b7f8e09102c8279c19c72e71922d5cfde",
+        "type": "github"
+      },
+      "original": {
+        "owner": "runtimeverification",
+        "repo": "hs-backend-booster",
+        "type": "github"
+      }
+    },
     "cabal-32": {
       "flake": false,
       "locked": {
@@ -118,6 +148,22 @@
     "flake-compat_3": {
       "flake": false,
       "locked": {
+        "lastModified": 1673956053,
+        "narHash": "sha256-4gtG9iQuiKITOjNQQeQIpoIB6b16fm+504Ch3sNKLd8=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "35bb57c0c8d8b62bbfd284272c928ceb64ddbde9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_4": {
+      "flake": false,
+      "locked": {
         "lastModified": 1672831974,
         "narHash": "sha256-z9k3MfslLjWQfnjBtEtJZdq3H7kyi2kQtUThfTgdRk0=",
         "owner": "input-output-hk",
@@ -137,11 +183,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1685518550,
-        "narHash": "sha256-o2d0KcvaXzTrPRIo0kOLV0/QXHhDQ5DTi+OxcjO8xqY=",
+        "lastModified": 1687171271,
+        "narHash": "sha256-BJlq+ozK2B1sJDQXS3tzJM5a+oVZmi1q0FlBK/Xqv7M=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "a1720a10a6cfe8234c0e93907ffe81be440f4cef",
+        "rev": "abfb11bd1aec8ced1c9bb9adfe68018230f4fb3c",
         "type": "github"
       },
       "original": {
@@ -233,7 +279,7 @@
     },
     "haskell-backend": {
       "inputs": {
-        "flake-compat": "flake-compat_2",
+        "flake-compat": "flake-compat_3",
         "haskell-nix": "haskell-nix",
         "mach-nix": "mach-nix",
         "nixpkgs": [
@@ -244,11 +290,11 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1685530502,
-        "narHash": "sha256-r2Bb9nmYCdBchFWK5jDj1b2YO0IC7YxlyYYN5JYuz3A=",
+        "lastModified": 1687174698,
+        "narHash": "sha256-+sKUmVh88rgWqcrZXgfKbreeLOCQ7MxsXbw67oDt86M=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "740a60ee231ad63b811f0ca023cbf747ae0aa82d",
+        "rev": "06c9515d802093b7e3267e2d3e7460f4a2cf8ede",
         "type": "github"
       },
       "original": {
@@ -264,7 +310,7 @@
         "cabal-34": "cabal-34",
         "cabal-36": "cabal-36",
         "cardano-shell": "cardano-shell",
-        "flake-compat": "flake-compat_3",
+        "flake-compat": "flake-compat_4",
         "flake-utils": "flake-utils_2",
         "ghc-8.6.5-iohk": "ghc-8.6.5-iohk",
         "hackage": "hackage",
@@ -405,11 +451,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1685467494,
-        "narHash": "sha256-/81C6WDh8FaDqK5kkUvuiDcu9CXQNBOyQxzzF8DUzpc=",
+        "lastModified": 1686877299,
+        "narHash": "sha256-tJxHujW3BuCR/kjBwAXyYaoSlXCGVcFzyWoJgPEBr4s=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "7d31ae2774dad892172cbe2c7698a056887b3657",
+        "rev": "b67589c6f4c572d7183382932aeaff6594402b93",
         "type": "github"
       },
       "original": {
@@ -686,11 +732,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1682600000,
-        "narHash": "sha256-ha4BehR1dh8EnXSoE1m/wyyYVvHI9txjW4w5/oxsW5Y=",
+        "lastModified": 1685573264,
+        "narHash": "sha256-Zffu01pONhs/pqH07cjlF10NnMDLok8ix5Uk4rhOnZQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "50fc86b75d2744e1ab3837ef74b53f103a9b55a0",
+        "rev": "380be19fbd2d9079f677978361792cb25e8a3635",
         "type": "github"
       },
       "original": {
@@ -768,7 +814,8 @@
     },
     "root": {
       "inputs": {
-        "flake-compat": "flake-compat",
+        "booster-backend": "booster-backend",
+        "flake-compat": "flake-compat_2",
         "flake-utils": "flake-utils",
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",
