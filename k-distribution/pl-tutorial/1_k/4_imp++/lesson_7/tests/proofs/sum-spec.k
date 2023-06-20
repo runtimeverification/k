@@ -3,9 +3,6 @@
 module SUM-SPEC
   imports IMP
 
-rule {I #Equals I +Int 1} => #Bottom [simplification]
-rule {I #Equals I +Int 2} => #Bottom [simplification]
-
 claim
   <threads><thread>...
     <k>
@@ -35,6 +32,7 @@ claim
     LN   |-> (N:Int => 0)
     LSUM |-> (S:Int => S +Int ((N +Int 1) *Int N /Int 2))
   ...</store>
+  <generatedCounter> _ </generatedCounter>
 requires N >=Int 0
 
 claim

@@ -31,7 +31,6 @@
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
-        # booster-backend.overlays.default
         haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
         (final: prev:
           let
@@ -63,7 +62,7 @@
             k-framework = haskell-backend-bins:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
-                booster = booster-backend.packages.${prev.system}.booster;
+                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
