@@ -200,7 +200,7 @@ def test_create_node() -> None:
     # Then
     assert new_node == node(1)
     assert set(cfg.nodes) == {node(1)}
-    assert not cfg.is_expanded(new_node.id)
+    assert not cfg.is_stuck(new_node.id)
 
 
 def test_remove_unknown_node() -> None:
@@ -217,8 +217,6 @@ def test_remove_node() -> None:
     # Given
     d = {'nodes': node_dicts(3), 'edges': edge_dicts((1, 2), (2, 3))}
     cfg = KCFG.from_dict(d)
-    cfg.add_expanded(node(1).id)
-    cfg.add_expanded(node(2).id)
 
     # When
     cfg.remove_node(2)
@@ -226,7 +224,7 @@ def test_remove_node() -> None:
     # Then
     assert set(cfg.nodes) == {node(1), node(3)}
     assert set(cfg.edges()) == set()
-    assert not cfg.is_expanded(1)
+    assert not cfg.is_stuck(1)
     with pytest.raises(ValueError):
         cfg.node(2)
     with pytest.raises(ValueError):
@@ -247,8 +245,6 @@ def test_cover_then_remove() -> None:
     # Then
     assert cfg.is_covered(node1.id)
     assert not cfg.is_covered(node2.id)
-    assert not cfg.is_expanded(node1.id)
-    assert not cfg.is_expanded(node2.id)
     assert dict(cover.csubst.subst) == {'X': token(1)}
     assert cfg.covers() == [cover]
 
@@ -258,8 +254,6 @@ def test_cover_then_remove() -> None:
     # Then
     assert not cfg.is_covered(node1.id)
     assert not cfg.is_covered(node2.id)
-    assert not cfg.is_expanded(node1.id)
-    assert not cfg.is_expanded(node2.id)
     assert cfg.covers() == []
 
 
@@ -401,8 +395,6 @@ def test_resolve() -> None:
 def test_aliases() -> None:
     # Given
     d = {
-        'init': [1],
-        'target': [4],
         'nodes': node_dicts(4),
         'edges': edge_dicts((1, 2), (2, 3)),
         'aliases': {'foo': 2},
@@ -410,12 +402,6 @@ def test_aliases() -> None:
 
     cfg = KCFG.from_dict(d)
     assert cfg.node('@foo'), node(2)
-
-    assert cfg.node('#init'), node(1)
-    assert cfg.node('#target'), node(4)
-    cfg.add_expanded(1)
-    cfg.add_expanded(2)
-    assert cfg.node('#frontier'), node(3)
 
     cfg.add_alias('bar', 1)
     cfg.add_alias('bar2', 1)
@@ -438,8 +424,6 @@ def test_pretty_print() -> None:
         return mlEquals(KVariable('x'), token(i))
 
     d = {
-        'init': [21],
-        'target': [17],
         'nodes': node_dicts(15, start=10) + predicate_node_dicts(1, start=25),
         'aliases': {'foo': 14, 'bar': 14},
         'edges': edge_dicts((21, 12), (12, 13, 5), (13, 14), (15, 16), (16, 13), (18, 17), (22, 19)),
@@ -459,250 +443,235 @@ def test_pretty_print() -> None:
             )
         ),
         'ndbranches': ndbranch_dicts((20, [(24, False), (25, True)])),
-        'expanded': [21, 12, 13, 14, 15, 16, 18, 20, 22, 23],
+        'stuck': [23],
     }
     cfg = KCFG.from_dict(d)
 
     expected = (
         '\n'
-        '┌─ 21 (init, expanded)\n'
+        '┌─ 21 (root)\n'
         '│\n'
         '│  (1 step)\n'
-        '├─ 12 (expanded)\n'
+        '├─ 12\n'
         '│\n'
         '│  (5 steps)\n'
-        '├─ 13 (expanded)\n'
+        '├─ 13\n'
         '│\n'
         '│  (1 step)\n'
-        '├─ 14 (expanded, split, @bar, @foo)\n'
+        '├─ 14 (split, @bar, @foo)\n'
         '┃\n'
         '┃ (branch)\n'
         '┣━━┓ constraint: #Equals ( x , 15 )\n'
         '┃  ┃ subst: V14 <- V15\n'
         '┃  │\n'
-        '┃  ├─ 15 (expanded)\n'
+        '┃  ├─ 15\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  ├─ 16 (expanded)\n'
+        '┃  ├─ 16\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  └─ 13 (expanded)\n'
+        '┃  └─ 13\n'
         '┃     (looped back)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 16 )\n'
         '┃  ┃ subst: V14 <- V16\n'
         '┃  │\n'
-        '┃  └─ 16 (expanded)\n'
+        '┃  └─ 16\n'
         '┃     (continues as previously)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 17 )\n'
         '┃  ┃ subst: V14 <- V17\n'
         '┃  │\n'
-        '┃  └─ 17 (target, leaf)\n'
+        '┃  └─ 17 (leaf)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 18 )\n'
         '┃  ┃ subst: V14 <- V18\n'
         '┃  │\n'
-        '┃  ├─ 18 (expanded)\n'
+        '┃  ├─ 18\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  └─ 17 (target, leaf)\n'
+        '┃  └─ 17 (leaf)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 20 )\n'
         '┃  ┃ subst: V14 <- V20\n'
         '┃  │\n'
-        '┃  ├─ 20 (expanded)\n'
+        '┃  ├─ 20\n'
         '┃  ┃\n'
         '┃  ┃ (1 step)\n'
         '┃  ┣━━┓\n'
         '┃  ┃  │\n'
-        '┃  ┃  └─ 24 (frontier, leaf)\n'
+        '┃  ┃  └─ 24 (leaf)\n'
         '┃  ┃\n'
         '┃  ┗━━┓\n'
         '┃     │\n'
-        '┃     └─ 25 (frontier, leaf)\n'
+        '┃     └─ 25 (leaf)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 23 )\n'
         '┃  ┃ subst: V14 <- V23\n'
         '┃  │\n'
-        '┃  └─ 23 (expanded, stuck, leaf)\n'
+        '┃  └─ 23 (stuck, leaf)\n'
         '┃\n'
         '┗━━┓ constraint: #Equals ( x , 22 )\n'
         '   ┃ subst: V14 <- V22\n'
         '   │\n'
-        '   ├─ 22 (expanded)\n'
+        '   ├─ 22\n'
         '   │\n'
         '   │  (1 step)\n'
-        '   ├─ 19 (leaf)\n'
+        '   ├─ 19\n'
         '   │\n'
         '   ┊  constraint: true\n'
         '   ┊  subst: V22 <- V19\n'
-        '   └─ 22 (expanded)\n'
+        '   └─ 22\n'
         '      (looped back)\n'
         '\n'
         '\n'
-        'Target Nodes:\n'
+        '┌─ 10 (root, leaf)\n'
         '\n'
-        '17 (target, leaf)\n'
-        '\n'
-        'Remaining Nodes:\n'
-        '\n'
-        '10 (frontier, leaf)\n'
-        '\n'
-        '11 (frontier, leaf)\n'
+        '┌─ 11 (root, leaf)\n'
     )
 
     expected_full_printer = (
         '\n'
-        '┌─ 21 (init, expanded)\n'
-        '│    <top>\n'
-        '│      V21\n'
-        '│    </top>\n'
+        '┌─ 21 (root)\n'
+        '│     <top>\n'
+        '│       V21\n'
+        '│     </top>\n'
         '│\n'
         '│  (1 step)\n'
-        '├─ 12 (expanded)\n'
-        '│    <top>\n'
-        '│      V12\n'
-        '│    </top>\n'
+        '├─ 12\n'
+        '│     <top>\n'
+        '│       V12\n'
+        '│     </top>\n'
         '│\n'
         '│  (5 steps)\n'
-        '├─ 13 (expanded)\n'
-        '│    <top>\n'
-        '│      V13\n'
-        '│    </top>\n'
+        '├─ 13\n'
+        '│     <top>\n'
+        '│       V13\n'
+        '│     </top>\n'
         '│\n'
         '│  (1 step)\n'
-        '├─ 14 (expanded, split, @bar, @foo)\n'
-        '│    <top>\n'
-        '│      V14\n'
-        '│    </top>\n'
+        '├─ 14 (split, @bar, @foo)\n'
+        '│     <top>\n'
+        '│       V14\n'
+        '│     </top>\n'
         '┃\n'
         '┃ (branch)\n'
         '┣━━┓ constraint: #Equals ( x , 15 )\n'
         '┃  ┃ subst: V14 <- V15\n'
         '┃  │\n'
-        '┃  ├─ 15 (expanded)\n'
-        '┃  │    <top>\n'
-        '┃  │      V15\n'
-        '┃  │    </top>\n'
+        '┃  ├─ 15\n'
+        '┃  │     <top>\n'
+        '┃  │       V15\n'
+        '┃  │     </top>\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  ├─ 16 (expanded)\n'
-        '┃  │    <top>\n'
-        '┃  │      V16\n'
-        '┃  │    </top>\n'
+        '┃  ├─ 16\n'
+        '┃  │     <top>\n'
+        '┃  │       V16\n'
+        '┃  │     </top>\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  └─ 13 (expanded)\n'
-        '┃       <top>\n'
-        '┃         V13\n'
-        '┃       </top>\n'
+        '┃  └─ 13\n'
+        '┃        <top>\n'
+        '┃          V13\n'
+        '┃        </top>\n'
         '┃     (looped back)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 16 )\n'
         '┃  ┃ subst: V14 <- V16\n'
         '┃  │\n'
-        '┃  └─ 16 (expanded)\n'
-        '┃       <top>\n'
-        '┃         V16\n'
-        '┃       </top>\n'
+        '┃  └─ 16\n'
+        '┃        <top>\n'
+        '┃          V16\n'
+        '┃        </top>\n'
         '┃     (continues as previously)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 17 )\n'
         '┃  ┃ subst: V14 <- V17\n'
         '┃  │\n'
-        '┃  └─ 17 (target, leaf)\n'
-        '┃       <top>\n'
-        '┃         V17\n'
-        '┃       </top>\n'
+        '┃  └─ 17 (leaf)\n'
+        '┃        <top>\n'
+        '┃          V17\n'
+        '┃        </top>\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 18 )\n'
         '┃  ┃ subst: V14 <- V18\n'
         '┃  │\n'
-        '┃  ├─ 18 (expanded)\n'
-        '┃  │    <top>\n'
-        '┃  │      V18\n'
-        '┃  │    </top>\n'
+        '┃  ├─ 18\n'
+        '┃  │     <top>\n'
+        '┃  │       V18\n'
+        '┃  │     </top>\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  └─ 17 (target, leaf)\n'
-        '┃       <top>\n'
-        '┃         V17\n'
-        '┃       </top>\n'
+        '┃  └─ 17 (leaf)\n'
+        '┃        <top>\n'
+        '┃          V17\n'
+        '┃        </top>\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 20 )\n'
         '┃  ┃ subst: V14 <- V20\n'
         '┃  │\n'
-        '┃  ├─ 20 (expanded)\n'
-        '┃  │    <top>\n'
-        '┃  │      V20\n'
-        '┃  │    </top>\n'
+        '┃  ├─ 20\n'
+        '┃  │     <top>\n'
+        '┃  │       V20\n'
+        '┃  │     </top>\n'
         '┃  ┃\n'
         '┃  ┃ (1 step)\n'
         '┃  ┣━━┓\n'
         '┃  ┃  │\n'
-        '┃  ┃  └─ 24 (frontier, leaf)\n'
-        '┃  ┃       <top>\n'
-        '┃  ┃         V24\n'
-        '┃  ┃       </top>\n'
+        '┃  ┃  └─ 24 (leaf)\n'
+        '┃  ┃        <top>\n'
+        '┃  ┃          V24\n'
+        '┃  ┃        </top>\n'
         '┃  ┃\n'
         '┃  ┗━━┓\n'
         '┃     │\n'
-        '┃     └─ 25 (frontier, leaf)\n'
-        '┃          <top>\n'
-        '┃            V25\n'
-        '┃          </top>\n'
-        '┃          #And #Equals ( x , 25 )\n'
+        '┃     └─ 25 (leaf)\n'
+        '┃           <top>\n'
+        '┃             V25\n'
+        '┃           </top>\n'
+        '┃           #And #Equals ( x , 25 )\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 23 )\n'
         '┃  ┃ subst: V14 <- V23\n'
         '┃  │\n'
-        '┃  └─ 23 (expanded, stuck, leaf)\n'
-        '┃       <top>\n'
-        '┃         V23\n'
-        '┃       </top>\n'
+        '┃  └─ 23 (stuck, leaf)\n'
+        '┃        <top>\n'
+        '┃          V23\n'
+        '┃        </top>\n'
         '┃\n'
         '┗━━┓ constraint: #Equals ( x , 22 )\n'
         '   ┃ subst: V14 <- V22\n'
         '   │\n'
-        '   ├─ 22 (expanded)\n'
-        '   │    <top>\n'
-        '   │      V22\n'
-        '   │    </top>\n'
+        '   ├─ 22\n'
+        '   │     <top>\n'
+        '   │       V22\n'
+        '   │     </top>\n'
         '   │\n'
         '   │  (1 step)\n'
-        '   ├─ 19 (leaf)\n'
-        '   │    <top>\n'
-        '   │      V19\n'
-        '   │    </top>\n'
+        '   ├─ 19\n'
+        '   │     <top>\n'
+        '   │       V19\n'
+        '   │     </top>\n'
         '   │\n'
         '   ┊  constraint: true\n'
         '   ┊  subst: V22 <- V19\n'
-        '   └─ 22 (expanded)\n'
-        '        <top>\n'
-        '          V22\n'
-        '        </top>\n'
+        '   └─ 22\n'
+        '         <top>\n'
+        '           V22\n'
+        '         </top>\n'
         '      (looped back)\n'
         '\n'
         '\n'
-        'Target Nodes:\n'
+        '┌─ 10 (root, leaf)\n'
+        '│     <top>\n'
+        '│       10\n'
+        '│     </top>\n'
         '\n'
-        '17 (target, leaf)\n'
-        ' <top>\n'
-        '   V17\n'
-        ' </top>\n'
-        '\n'
-        'Remaining Nodes:\n'
-        '\n'
-        '10 (frontier, leaf)\n'
-        ' <top>\n'
-        '   10\n'
-        ' </top>\n'
-        '\n'
-        '11 (frontier, leaf)\n'
-        ' <top>\n'
-        '   V11\n'
-        ' </top>\n'
+        '┌─ 11 (root, leaf)\n'
+        '│     <top>\n'
+        '│       V11\n'
+        '│     </top>\n'
     )
 
     # When
