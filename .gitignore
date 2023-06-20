@@ -28,3 +28,5 @@ result*
 .envrc
 flake.lock
 .DS_Store
+git-describe.out
+timestamp.out
