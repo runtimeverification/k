@@ -142,7 +142,7 @@
                 "haskell-backend/src/main/native/haskell-backend";
               llvm-backend.submodule =
                 "llvm-backend/src/main/native/llvm-backend";
-              hs-backend-booster =
+              hs-backend-booster.submodule =
                 "hs-backend-booster/src/main/native/hs-backend-booster";
             };
 
