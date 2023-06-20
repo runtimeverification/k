@@ -46,6 +46,7 @@
                   "nix/"
                   "*.nix"
                   "haskell-backend/src/main/native/haskell-backend/*"
+                  "hs-backend-booster/src/main/native/hs-backend-booster/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
                 ] ./.);
@@ -132,7 +133,7 @@
           '';
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
-            inherit llvm-backend haskell-backend;
+            inherit llvm-backend haskell-backend hs-backend-booster;
           };
 
           update-from-submodules =
@@ -141,6 +142,8 @@
                 "haskell-backend/src/main/native/haskell-backend";
               llvm-backend.submodule =
                 "llvm-backend/src/main/native/llvm-backend";
+              hs-backend-booster =
+                "hs-backend-booster/src/main/native/hs-backend-booster";
             };
 
           test = with pkgs;

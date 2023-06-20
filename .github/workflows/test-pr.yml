@@ -69,7 +69,8 @@ jobs:
                 -- $(find . -name pom.xml)                                              \
                    $(find nix -name '*.nix')                                            \
                    llvm-backend/src/main/native/llvm-backend                            \
-                   haskell-backend/src/main/native/haskell-backend; then
+                   haskell-backend/src/main/native/haskell-backend                      \
+                   hs-backend-booster/src/main/native/hs-backend-booster; then
             nix run .#update-maven
           fi
           if git add nix/ && git commit -m 'Update Nix lock files'; then
