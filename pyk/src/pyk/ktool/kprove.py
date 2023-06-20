@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from contextlib import contextmanager
 from enum import Enum
 from itertools import chain
@@ -363,6 +364,7 @@ class KProve(KPrint):
         with self._temp_file(suffix='-spec.k') as ntf:
             tmp_claim_file = Path(ntf.name)
             tmp_module_name = tmp_claim_file.stem.removesuffix('-spec').rstrip('_').replace('_', '-').upper() + '-SPEC'
+            tmp_module_name = re.sub(r'-+', '-', tmp_module_name)
 
             sentences: list[KRuleLike] = []
             sentences += lemmas
