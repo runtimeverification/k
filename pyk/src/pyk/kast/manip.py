@@ -51,16 +51,9 @@ def sort_assoc_label(label: str, kast: KInner) -> KInner:
     return kast
 
 
-def sort_ac_collections(definition: KDefinition, kast: KInner) -> KInner:
-    ac_hooks = {'MAP.concat', 'SET.concat', 'BAG.concat'}
-    ac_collections = [
-        prod.klabel.name
-        for prod in definition.productions
-        if prod.klabel is not None and 'hook' in prod.att and prod.att['hook'] in ac_hooks
-    ]
-
+def sort_ac_collections(kast: KInner) -> KInner:
     def _sort_ac_collections(_kast: KInner) -> KInner:
-        if type(_kast) is KApply and _kast.label.name in ac_collections:
+        if type(_kast) is KApply and (_kast.label.name in {'_Set_', '_Map_'} or _kast.label.name.endswith('CellMap_')):
             return sort_assoc_label(_kast.label.name, _kast)
         return _kast
 
