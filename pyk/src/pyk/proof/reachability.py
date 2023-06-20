@@ -67,17 +67,28 @@ class APRProof(Proof):
 
     @property
     def pending(self) -> list[KCFG.Node]:
-        return [
-            nd
-            for nd in self.kcfg.leaves
-            if nd not in self.terminal + self.kcfg.target and not self.kcfg.is_covered(nd.id)
-        ]
+        return [nd for nd in self.kcfg.leaves if self.is_pending(nd.id)]
+
+    @property
+    def failing(self) -> list[KCFG.Node]:
+        return [nd for nd in self.kcfg.leaves if self.is_failing(nd.id)]
 
     def is_terminal(self, node_id: NodeIdLike) -> bool:
-        return self.kcfg._resolve(node_id) in (nd.id for nd in self.terminal)
+        return self.kcfg._resolve(node_id) in (self.kcfg._resolve(nid) for nid in self._terminal_nodes)
 
     def is_pending(self, node_id: NodeIdLike) -> bool:
-        return self.kcfg._resolve(node_id) in (nd.id for nd in self.pending)
+        return self.kcfg.is_leaf(node_id) and not (
+            self.is_terminal(node_id) or self.kcfg.is_stuck(node_id) or self.is_target(node_id)
+        )
+
+    def is_init(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg._resolve(node_id) == self.kcfg._resolve(self.init)
+
+    def is_target(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg._resolve(node_id) == self.kcfg._resolve(self.target)
+
+    def is_failing(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg.is_leaf(node_id) and not (self.is_pending(node_id) or self.is_target(node_id))
 
     @staticmethod
     def read_proof(id: str, proof_dir: Path) -> APRProof:
@@ -90,15 +101,12 @@ class APRProof(Proof):
 
     @property
     def status(self) -> ProofStatus:
-        if len(self.terminal) > 0:
+        if len(self.failing) > 0 or self.subproofs_status == ProofStatus.FAILED:
             return ProofStatus.FAILED
         elif len(self.pending) > 0 or self.subproofs_status == ProofStatus.PENDING:
             return ProofStatus.PENDING
         else:
-            if self.subproofs_status == ProofStatus.PASSED:
-                return ProofStatus.PASSED
-            else:
-                return ProofStatus.FAILED
+            return ProofStatus.PASSED
 
     @classmethod
     def from_dict(cls: type[APRProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRProof:
@@ -164,11 +172,11 @@ class APRProof(Proof):
             f'APRProof: {self.id}',
             f'    status: {self.status}',
             f'    nodes: {len(self.kcfg.nodes)}',
-            f'    frontier: {len(self.kcfg.frontier)}',
-            f'    stuck: {len(self.kcfg.stuck)}',
-            'Subproofs:' if len(self.subproof_ids) else '',
             f'    pending: {len(self.pending)}',
+            f'    failing: {len(self.failing)}',
+            f'    stuck: {len(self.kcfg.stuck)}',
             f'    terminal: {len(self.terminal)}',
+            f'Subproofs: {len(self.subproof_ids)}',
         ]
         for summary in subproofs_summaries:
             yield from summary
@@ -207,30 +215,23 @@ class APRBMCProof(APRProof):
 
     @property
     def bounded(self) -> list[KCFG.Node]:
-        return [self.kcfg.node(nid) for nid in self._bounded_nodes]
-
-    @property
-    def pending(self) -> list[KCFG.Node]:
-        return [
-            nd
-            for nd in self.kcfg.leaves
-            if nd not in self.terminal + self.kcfg.target + self.bounded and not self.kcfg.is_covered(nd.id)
-        ]
+        return [nd for nd in self.kcfg.leaves if self.is_bounded(nd.id)]
 
     def is_bounded(self, node_id: NodeIdLike) -> bool:
-        return self.kcfg._resolve(node_id) in (nd.id for nd in self.bounded)
+        return self.kcfg._resolve(node_id) in (self.kcfg._resolve(nid) for nid in self._bounded_nodes)
 
-    @property
-    def status(self) -> ProofStatus:
-        if (
-            any(nd.id not in self._bounded_nodes for nd in self.kcfg.stuck)
-            or self.subproofs_status == ProofStatus.FAILED
-        ):
-            return ProofStatus.FAILED
-        elif len(self.pending) > 0 or self.subproofs_status == ProofStatus.PENDING:
-            return ProofStatus.PENDING
-        else:
-            return ProofStatus.PASSED
+    def is_failing(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg.is_leaf(node_id) and not (
+            self.is_pending(node_id) or self.is_target(node_id) or self.is_bounded(node_id)
+        )
+
+    def is_pending(self, node_id: NodeIdLike) -> bool:
+        return self.kcfg.is_leaf(node_id) and not (
+            self.is_terminal(node_id)
+            or self.kcfg.is_stuck(node_id)
+            or self.is_bounded(node_id)
+            or self.is_target(node_id)
+        )
 
     @classmethod
     def from_dict(cls: type[APRBMCProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRBMCProof:
@@ -282,13 +283,12 @@ class APRBMCProof(APRProof):
             f'APRBMCProof(depth={self.bmc_depth}): {self.id}',
             f'    status: {self.status}',
             f'    nodes: {len(self.kcfg.nodes)}',
-            f'    frontier: {len(self.kcfg.frontier)}',
-            f'    stuck: {len([nd for nd in self.kcfg.stuck if nd.id not in self._bounded_nodes])}',
-            f'    bmc-depth-bounded: {len(self._bounded_nodes)}',
-            'Subproofs' if len(self.subproof_ids) else '',
             f'    pending: {len(self.pending)}',
+            f'    failing: {len(self.failing)}',
+            f'    stuck: {len(self.kcfg.stuck)}',
             f'    terminal: {len(self.terminal)}',
             f'    bounded: {len(self.bounded)}',
+            f'Subproofs: {len(self.subproof_ids)}',
         ]
         for summary in subproofs_summaries:
             yield from summary
@@ -318,7 +318,6 @@ class APRProver:
             if self._is_terminal(curr_node.cterm):
                 _LOGGER.info(f'Terminal node {self.proof.id}: {shorten_hashes(curr_node.id)}.')
                 self.proof.add_terminal(curr_node.id)
-                self.proof.kcfg.add_expanded(curr_node.id)
                 return True
         return False
 
@@ -442,7 +441,6 @@ class APRBMCProver(APRProver):
                         if nd.id != f.id and self._same_loop(nd.cterm, f.cterm)
                     ]
                     if len(prior_loops) >= self.proof.bmc_depth:
-                        self.proof.kcfg.add_expanded(f.id)
                         self.proof.add_bounded(f.id)
 
             super().advance_proof(

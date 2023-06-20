@@ -90,7 +90,7 @@ class PrettyPrinter:
             if self._unalias:
                 kast = undo_aliases(self.definition, kast)
             if self._sort_collections:
-                kast = sort_ac_collections(self.definition, kast)
+                kast = sort_ac_collections(kast)
             return self._print_kinner(kast)
         raise AssertionError(f'Error unparsing: {kast}')
 
