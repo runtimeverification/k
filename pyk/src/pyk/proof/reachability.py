@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from itertools import chain
 from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
@@ -51,8 +52,9 @@ class APRProof(Proof):
         logs: dict[int, tuple[LogEntry, ...]],
         terminal_nodes: Iterable[NodeIdLike] | None = None,
         proof_dir: Path | None = None,
+        subproof_ids: Iterable[str] = (),
     ):
-        super().__init__(id, proof_dir=proof_dir)
+        super().__init__(id, proof_dir=proof_dir, subproof_ids=subproof_ids)
         self.kcfg = kcfg
         self.init = init
         self.target = target
@@ -90,24 +92,36 @@ class APRProof(Proof):
     def status(self) -> ProofStatus:
         if len(self.terminal) > 0:
             return ProofStatus.FAILED
-        elif len(self.pending) > 0:
+        elif len(self.pending) > 0 or self.subproofs_status == ProofStatus.PENDING:
             return ProofStatus.PENDING
         else:
-            return ProofStatus.PASSED
+            if self.subproofs_status == ProofStatus.PASSED:
+                return ProofStatus.PASSED
+            else:
+                return ProofStatus.FAILED
 
     @classmethod
     def from_dict(cls: type[APRProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRProof:
         cfg = KCFG.from_dict(dct['cfg'])
-        terminal_nodes = dct['terminal_nodes']
         init_node = dct['init']
+        terminal_nodes = dct['terminal_nodes']
         target_node = dct['target']
         id = dct['id']
+        subproof_ids = dct['subproof_ids'] if 'subproof_ids' in dct else []
         if 'logs' in dct:
             logs = {k: tuple(LogEntry.from_dict(l) for l in ls) for k, ls in dct['logs'].items()}
         else:
             logs = {}
-
-        return APRProof(id, cfg, init_node, target_node, logs, terminal_nodes=terminal_nodes, proof_dir=proof_dir)
+        return APRProof(
+            id,
+            cfg,
+            init_node,
+            target_node,
+            logs,
+            terminal_nodes=terminal_nodes,
+            proof_dir=proof_dir,
+            subproof_ids=subproof_ids,
+        )
 
     @staticmethod
     def from_claim(defn: KDefinition, claim: KClaim, *args: Any, **kwargs: Any) -> APRProof:
@@ -130,29 +144,34 @@ class APRProof(Proof):
 
     @property
     def dict(self) -> dict[str, Any]:
+        dct = super().dict
+        dct['type'] = 'APRProof'
+        dct['cfg'] = self.kcfg.to_dict()
+        dct['init'] = self.init
+        dct['target'] = self.target
+        dct['terminal_nodes'] = self._terminal_nodes
         logs = {k: [l.to_dict() for l in ls] for k, ls in self.logs.items()}
-        return {
-            'type': 'APRProof',
-            'id': self.id,
-            'cfg': self.kcfg.to_dict(),
-            'init': self.init,
-            'target': self.target,
-            'terminal_nodes': self._terminal_nodes,
-            'logs': logs,
-        }
+        dct['logs'] = logs
+        return dct
 
     def add_terminal(self, nid: NodeIdLike) -> None:
         self._terminal_nodes.append(self.kcfg._resolve(nid))
 
     @property
     def summary(self) -> Iterable[str]:
-        return [
+        subproofs_summaries = chain(subproof.summary for subproof in self.subproofs)
+        yield from [
             f'APRProof: {self.id}',
             f'    status: {self.status}',
             f'    nodes: {len(self.kcfg.nodes)}',
+            f'    frontier: {len(self.kcfg.frontier)}',
+            f'    stuck: {len(self.kcfg.stuck)}',
+            'Subproofs:' if len(self.subproof_ids) else '',
             f'    pending: {len(self.pending)}',
             f'    terminal: {len(self.terminal)}',
         ]
+        for summary in subproofs_summaries:
+            yield from summary
 
 
 class APRBMCProof(APRProof):
@@ -171,8 +190,9 @@ class APRBMCProof(APRProof):
         bmc_depth: int,
         bounded_nodes: Iterable[int] | None = None,
         proof_dir: Path | None = None,
+        subproof_ids: Iterable[str] = (),
     ):
-        super().__init__(id, kcfg, init, target, logs, proof_dir=proof_dir)
+        super().__init__(id, kcfg, init, target, logs, proof_dir=proof_dir, subproof_ids=subproof_ids)
         self.bmc_depth = bmc_depth
         self._bounded_nodes = list(bounded_nodes) if bounded_nodes is not None else []
 
@@ -202,9 +222,12 @@ class APRBMCProof(APRProof):
 
     @property
     def status(self) -> ProofStatus:
-        if len(self.terminal) > 0:
+        if (
+            any(nd.id not in self._bounded_nodes for nd in self.kcfg.stuck)
+            or self.subproofs_status == ProofStatus.FAILED
+        ):
             return ProofStatus.FAILED
-        elif len(self.pending) > 0:
+        elif len(self.pending) > 0 or self.subproofs_status == ProofStatus.PENDING:
             return ProofStatus.PENDING
         else:
             return ProofStatus.PASSED
@@ -212,16 +235,27 @@ class APRBMCProof(APRProof):
     @classmethod
     def from_dict(cls: type[APRBMCProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRBMCProof:
         cfg = KCFG.from_dict(dct['cfg'])
-        id = dct['id']
         init = dct['init']
         target = dct['target']
         bounded_nodes = dct['bounded_nodes']
         bmc_depth = dct['bmc_depth']
+        id = dct['id']
+        subproof_ids = dct['subproof_ids'] if 'subproof_ids' in dct else []
         if 'logs' in dct:
             logs = {k: tuple(LogEntry.from_dict(l) for l in ls) for k, ls in dct['logs'].items()}
         else:
             logs = {}
-        return APRBMCProof(id, cfg, init, target, logs, bmc_depth, bounded_nodes=bounded_nodes, proof_dir=proof_dir)
+        return APRBMCProof(
+            id,
+            cfg,
+            init,
+            target,
+            logs,
+            bmc_depth,
+            bounded_nodes=bounded_nodes,
+            proof_dir=proof_dir,
+            subproof_ids=subproof_ids,
+        )
 
     @staticmethod
     def from_claim_with_bmc_depth(defn: KDefinition, claim: KClaim, bmc_depth: int) -> APRBMCProof:
@@ -243,14 +277,21 @@ class APRBMCProof(APRProof):
 
     @property
     def summary(self) -> Iterable[str]:
-        return [
+        subproofs_summaries = chain(subproof.summary for subproof in self.subproofs)
+        yield from [
             f'APRBMCProof(depth={self.bmc_depth}): {self.id}',
             f'    status: {self.status}',
             f'    nodes: {len(self.kcfg.nodes)}',
+            f'    frontier: {len(self.kcfg.frontier)}',
+            f'    stuck: {len([nd for nd in self.kcfg.stuck if nd.id not in self._bounded_nodes])}',
+            f'    bmc-depth-bounded: {len(self._bounded_nodes)}',
+            'Subproofs' if len(self.subproof_ids) else '',
             f'    pending: {len(self.pending)}',
             f'    terminal: {len(self.terminal)}',
             f'    bounded: {len(self.bounded)}',
         ]
+        for summary in subproofs_summaries:
+            yield from summary
 
 
 class APRProver:
