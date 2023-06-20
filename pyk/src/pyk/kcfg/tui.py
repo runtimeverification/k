@@ -11,9 +11,10 @@ from textual.widgets import Footer, Static
 from ..cterm import CTerm
 from ..kast.inner import KApply, KRewrite
 from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
-from ..kcfg import KCFG, KCFGShow
 from ..prelude.kbool import TRUE
 from ..utils import shorten_hashes, single
+from .kcfg import KCFG
+from .show import KCFGShow
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
 
     from ..kast import KInner
     from ..ktool.kprint import KPrint
+    from .show import NodePrinter
 
 
 KCFGElem = Union[KCFG.Node, KCFG.Successor]
@@ -57,7 +59,7 @@ class BehaviorView(Widget):
     _kcfg: KCFG
     _kprint: KPrint
     _minimize: bool
-    _node_printer: Callable[[CTerm], Iterable[str]] | None
+    _node_printer: NodePrinter | None
     _kcfg_nodes: Iterable[GraphChunk]
 
     def __init__(
@@ -65,7 +67,7 @@ class BehaviorView(Widget):
         kcfg: KCFG,
         kprint: KPrint,
         minimize: bool = True,
-        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
+        node_printer: NodePrinter | None = None,
         id: str = '',
     ):
         super().__init__(id=id)
@@ -74,7 +76,7 @@ class BehaviorView(Widget):
         self._minimize = minimize
         self._node_printer = node_printer
         self._kcfg_nodes = []
-        kcfg_show = KCFGShow(kprint)
+        kcfg_show = KCFGShow(kprint, node_printer=node_printer)
         for lseg_id, node_lines in kcfg_show.pretty_segments(self._kcfg, minimize=self._minimize):
             self._kcfg_nodes.append(GraphChunk(lseg_id, node_lines))
 
@@ -236,7 +238,7 @@ class KCFGViewer(App):
     _kcfg: KCFG
     _kprint: KPrint
 
-    _node_printer: Callable[[CTerm], Iterable[str]] | None
+    _node_printer: NodePrinter | None
     _custom_view: Callable[[KCFGElem], Iterable[str]] | None
 
     _minimize: bool
@@ -248,7 +250,7 @@ class KCFGViewer(App):
         self,
         kcfg: KCFG,
         kprint: KPrint,
-        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
+        node_printer: NodePrinter | None = None,
         custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
         minimize: bool = True,
     ) -> None:
