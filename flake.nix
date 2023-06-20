@@ -133,7 +133,7 @@
           '';
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
-            inherit llvm-backend haskell-backend hs-backend-booster;
+            inherit llvm-backend haskell-backend booster-backend;
           };
 
           update-from-submodules =
@@ -142,7 +142,7 @@
                 "haskell-backend/src/main/native/haskell-backend";
               llvm-backend.submodule =
                 "llvm-backend/src/main/native/llvm-backend";
-              hs-backend-booster.submodule =
+              booster-backend.submodule =
                 "hs-backend-booster/src/main/native/hs-backend-booster";
             };
 
