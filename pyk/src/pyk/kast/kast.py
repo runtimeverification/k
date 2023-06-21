@@ -88,7 +88,7 @@ class KAtt(KAst, Mapping[str, Any]):
             if isinstance(m, (int, str, tuple, FrozenDict, frozenset)):
                 return m
             elif isinstance(m, list):
-                return tuple(v for v in m)
+                return tuple(_freeze(v) for v in m)
             elif isinstance(m, dict):
                 return FrozenDict((k, _freeze(v)) for (k, v) in m.items())
             raise ValueError(f"Don't know how to freeze attribute value {m} of type {type(m)}.")
@@ -132,6 +132,10 @@ class KAtt(KAst, Mapping[str, Any]):
 
     def remove(self, atts: Iterable[str]) -> KAtt:
         return KAtt({k: v for k, v in self.atts.items() if k not in atts})
+
+    def drop_source(self) -> KAtt:
+        new_atts = {key: value for key, value in self.atts.items() if key != self.SOURCE and key != self.LOCATION}
+        return KAtt(atts=new_atts)
 
     @property
     def pretty(self) -> str:

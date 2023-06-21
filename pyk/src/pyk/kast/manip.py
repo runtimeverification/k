@@ -493,15 +493,7 @@ def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
 
 
 def remove_source_map(definition: KDefinition) -> KDefinition:
-    def _remove_source_map(att: KAtt) -> KAtt:
-        atts = att.atts
-        new_atts = {}
-        for att_key in atts:
-            if att_key != 'org.kframework.attributes.Source' and att_key != 'org.kframework.attributes.Location':
-                new_atts[att_key] = atts[att_key]
-        return KAtt(atts=new_atts)
-
-    return on_attributes(definition, _remove_source_map)
+    return on_attributes(definition, lambda att: att.drop_source())
 
 
 def remove_attrs(term: KInner) -> KInner:
