@@ -56,6 +56,83 @@ def str_dv(val: str) -> DV:
 
 
 # ------------
+# Bool
+# ------------
+
+LBL_NOT_BOOL: Final = SymbolId("LblnotBool'Unds'")
+LBL_AND_BOOL: Final = SymbolId("Lbl'Unds'andBool'Unds'")
+LBL_OR_BOOL: Final = SymbolId("Lbl'Unds'orBool'Unds'")
+LBL_IMPLIES_BOOL: Final = SymbolId("Lbl'Unds'impliesBool'Unds'")
+LBL_XOR_BOOL: Final = SymbolId("Lbl'Unds'xorBool'Unds'")
+LBL_EQ_BOOL: Final = SymbolId("Lbl'UndsEqlsEqls'Bool'Unds'")
+LBL_NE_BOOL: Final = SymbolId("Lbl'UndsEqlsSlshEqls'Bool'Unds'")
+
+
+def not_bool(pattern: Pattern) -> Pattern:
+    return App(LBL_NOT_BOOL, (), (pattern,))
+
+
+def and_bool(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_AND_BOOL, (), (left, right))
+
+
+def or_bool(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_OR_BOOL, (), (left, right))
+
+
+def implies_bool(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_IMPLIES_BOOL, (), (left, right))
+
+
+def xor_bool(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_XOR_BOOL, (), (left, right))
+
+
+def eq_bool(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_EQ_BOOL, (), (left, right))
+
+
+def ne_bool(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_NE_BOOL, (), (left, right))
+
+
+# ------------
+# Int
+# ------------
+
+LBL_EQ_INT: Final = SymbolId("Lbl'UndsEqlsEqls'Int'Unds'")
+LBL_NE_INT: Final = SymbolId("Lbl'UndsEqlsSlshEqls'Int'Unds'")
+LBL_GT_INT: Final = SymbolId("Lbl'Unds-GT-'Int'Unds'")
+LBL_GE_INT: Final = SymbolId("Lbl'Unds-GT-Eqls'Int'Unds'")
+LBL_LT_INT: Final = SymbolId("Lbl'Unds-LT-'Int'Unds'")
+LBL_LE_INT: Final = SymbolId("Lbl'Unds-LT-Eqls'Int'Unds'")
+
+
+def eq_int(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_EQ_INT, (), (left, right))
+
+
+def ne_int(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_NE_INT, (), (left, right))
+
+
+def gt_int(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_GT_INT, (), (left, right))
+
+
+def ge_int(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_GE_INT, (), (left, right))
+
+
+def lt_int(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_LT_INT, (), (left, right))
+
+
+def le_int(left: Pattern, right: Pattern) -> Pattern:
+    return App(LBL_LE_INT, (), (left, right))
+
+
+# ------------
 # K constructs
 # ------------
 

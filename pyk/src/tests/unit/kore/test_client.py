@@ -7,7 +7,16 @@ from unittest.mock import patch
 import pytest
 
 from pyk.kore.prelude import INT, int_dv
-from pyk.kore.rpc import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
+from pyk.kore.rpc import (
+    ImpliesResult,
+    JsonRpcClient,
+    KoreClient,
+    SatResult,
+    State,
+    StuckResult,
+    UnknownResult,
+    UnsatResult,
+)
 from pyk.kore.syntax import And, App, Bottom, Module, Top
 
 if TYPE_CHECKING:
@@ -165,6 +174,59 @@ def test_simplify(
 
     # Then
     rpc_client.assert_request('simplify', **params)
+    assert actual == expected
+
+
+GET_MODEL_TEST_DATA: Final = (
+    (
+        int_dv(0),
+        None,
+        {'state': kore(int_dv(0))},
+        {'satisfiable': 'Unknown'},
+        UnknownResult(),
+    ),
+    (
+        int_dv(1),
+        'TEST-MODULE',
+        {'state': kore(int_dv(1)), 'module': 'TEST-MODULE'},
+        {'satisfiable': 'Unknown'},
+        UnknownResult(),
+    ),
+    (
+        int_dv(2),
+        None,
+        {'state': kore(int_dv(2))},
+        {'satisfiable': 'Unsat'},
+        UnsatResult(),
+    ),
+    (
+        int_dv(3),
+        None,
+        {'state': kore(int_dv(3))},
+        {'satisfiable': 'Sat', 'substitution': kore(int_dv(0))},
+        SatResult(int_dv(0)),
+    ),
+)
+
+
+@pytest.mark.parametrize('pattern,module_name,params,response,expected', GET_MODEL_TEST_DATA, ids=count())
+def test_get_model(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    pattern: Pattern,
+    module_name: str | None,
+    params: dict[str, Any],
+    response: dict[str, Any],
+    expected: Pattern,
+) -> None:
+    # Given
+    rpc_client.assume_response(response)
+
+    # When
+    actual = kore_client.get_model(pattern, module_name)
+
+    # Then
+    rpc_client.assert_request('get-model', **params)
     assert actual == expected
 
 

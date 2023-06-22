@@ -5,6 +5,7 @@ endmodule
 
 module KORE-RPC-TEST
     imports KORE-RPC-TEST-SYNTAX
+    imports INT
 
     rule [r01]: 0 => 1
     rule [r12]: 1 => 2
