@@ -489,6 +489,39 @@ class ImpliesResult:
         )
 
 
+class GetModelResult(ABC):  # noqa: B024
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> GetModelResult:
+        status = dct['satisfiable']
+        match status:
+            case 'Unknown':
+                return UnknownResult()
+            case 'Unsat':
+                return UnsatResult()
+            case 'Sat':
+                return SatResult(model=kore_term(dct['substitution'], Pattern))  # type: ignore
+            case _:
+                raise ValueError(f'Unknown status: {status}')
+
+
+@final
+@dataclass(frozen=True)
+class UnknownResult(GetModelResult):
+    ...
+
+
+@final
+@dataclass(frozen=True)
+class UnsatResult(GetModelResult):
+    ...
+
+
+@final
+@dataclass(frozen=True)
+class SatResult(GetModelResult):
+    model: Pattern
+
+
 class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
@@ -585,6 +618,17 @@ class KoreClient(ContextManager['KoreClient']):
         result = self._request('simplify', **params)
         logs = tuple(LogEntry.from_dict(l) for l in result['logs']) if 'logs' in result else ()
         return kore_term(result['state'], Pattern), logs  # type: ignore # https://github.com/python/mypy/issues/4717
+
+    def get_model(self, pattern: Pattern, module_name: str | None = None) -> GetModelResult:
+        params = filter_none(
+            {
+                'state': self._state(pattern),
+                'module': module_name,
+            }
+        )
+
+        result = self._request('get-model', **params)
+        return GetModelResult.from_dict(result)
 
     def add_module(self, module: Module) -> None:
         result = self._request('add-module', module=module.text)
