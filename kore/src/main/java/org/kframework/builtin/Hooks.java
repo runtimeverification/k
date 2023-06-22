@@ -20,6 +20,7 @@ public class Hooks {
     public static final String KREFLECTION = "KREFLECTION";
     public static final String LIST = "LIST";
     public static final String MAP = "MAP";
+    public static final String RANGEMAP = "RANGEMAP";
     public static final String MINT = "MINT";
     public static final String SET = "SET";
     public static final String STRING = "STRING";
@@ -27,5 +28,5 @@ public class Hooks {
     public static final String UNIFICATION = "UNIFICATION";
     public static final String JSON = "JSON";
 
-    public static final Set<String> namespaces = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ARRAY, BOOL, BUFFER, BYTES, FFI, FLOAT, INT, IO, KEQUAL, KREFLECTION, LIST, MAP, MINT, SET, STRING, SUBSTITUTION, UNIFICATION, JSON)));
+    public static final Set<String> namespaces = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ARRAY, BOOL, BUFFER, BYTES, FFI, FLOAT, INT, IO, KEQUAL, KREFLECTION, LIST, MAP, RANGEMAP, MINT, SET, STRING, SUBSTITUTION, UNIFICATION, JSON)));
 }

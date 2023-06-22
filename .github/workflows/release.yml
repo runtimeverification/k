@@ -54,7 +54,7 @@ jobs:
           submodules: recursive
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
@@ -419,9 +419,9 @@ jobs:
           echo "MAVEN_USERNAME=devops@runtimeverification.com" > rv-jenkins.env
           echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> rv-jenkins.env
           cat ~/.m2/settings.xml
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p /home/github-runner/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
           docker exec --env-file rv-jenkins.env -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Tear down Docker'
