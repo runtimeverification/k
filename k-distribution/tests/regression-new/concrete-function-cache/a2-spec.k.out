@@ -2,18 +2,18 @@ kore-exec: [] Warning (WarnStuckClaimState):
     The configuration's term unifies with the destination's term, but the implication check between the conditions has failed. Location: a2-spec.k:7:1-8:18
 Context:
     (InfoReachability) while checking the implication
-  #Ceil ( bar1 ( X ) )
+  #Ceil ( bar ( X ) )
 #And
-  #Not ( #Ceil ( bar3 ( X ) )
+  #Not ( #Ceil ( baz ( X ) )
   #And
     {
-      bar1 ( X )
+      bar ( X )
     #Equals
-      bar3 ( X )
+      baz ( X )
     } )
 #And
   <k>
-    end ( bar1 ( X ) ) ~> .
+    end ( bar ( X ) ) ~> .
   </k>
 #And
   {
