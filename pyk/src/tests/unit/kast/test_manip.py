@@ -38,6 +38,8 @@ GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL]
 
 PUSH_REWRITES_TEST_DATA: Final = (
     (KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),
+    (KRewrite(KSequence([a, b]), KSequence([b])), KSequence([KRewrite(KSequence([a]), KSequence([])), b])),
+    (KRewrite(KSequence([a, x]), x), KSequence([KRewrite(KSequence([a]), KSequence([])), x])),
 )
 
 

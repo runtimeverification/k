@@ -4,7 +4,7 @@ import logging
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from ..prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
+from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
 from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr
 from ..utils import find_common_items, hash_str
@@ -334,7 +334,7 @@ def push_down_rewrites(kast: KInner) -> KInner:
                 and type(rhs) is KVariable
                 and lhs.items[-1] == rhs
             ):
-                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), EMPTY_K), rhs])
+                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KSequence([])), rhs])
         return _kast
 
     return top_down(_push_down_rewrites, kast)
