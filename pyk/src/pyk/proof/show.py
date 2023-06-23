@@ -30,6 +30,10 @@ class APRProofNodePrinter(NodePrinter):
 
     def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
         attrs = super().node_attrs(kcfg, node)
+        if self.proof.is_init(node.id):
+            attrs.append('init')
+        if self.proof.is_target(node.id):
+            attrs.append('target')
         if self.proof.is_pending(node.id):
             attrs.append('pending')
         if self.proof.is_terminal(node.id):
