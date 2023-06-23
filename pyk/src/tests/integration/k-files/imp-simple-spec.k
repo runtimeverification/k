@@ -36,8 +36,19 @@ module IMP-FUNCTIONAL-SPEC
 
 endmodule
 
+
+module IMP-SIMPLE-SPEC-DEPENDENCIES
+    imports IMP-VERIFICATION
+
+    claim [if-almost-same-plus]:
+        <k> if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } => . ...</k>
+        <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N) $n |-> N) </state>
+
+endmodule
+
 module IMP-SIMPLE-SPEC
     imports IMP-VERIFICATION
+    imports IMP-SIMPLE-SPEC-DEPENDENCIES
 
     claim [addition-1]: <k> 3 + 4 => 7 ... </k>
 
@@ -99,14 +110,40 @@ module IMP-SIMPLE-SPEC
     claim [fail-branch]: <k> if ( $s <= 123) { $n = 1; } else { } => . ... </k>
                          <state> $n |-> (0 => 1) $s |-> _S:Int </state>
     
-    claim [if-almost-same]:
-        <k> if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } => . ...</k>
-        <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N) $n |-> N) </state>
-    
-    // The vision is that the proof of `use-if-almost-same` will re-use the proof of `if-almost-same`
-    // and then it will be without branching.
     claim [use-if-almost-same]:
         <k> $n = $n + 1; if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } $s = $s + 1; => . ...</k>
         <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N +Int 2) $n |-> N:Int +Int 1) </state>
+        [depends(IMP-SIMPLE-SPEC-DEPENDENCIES.if-almost-same-plus)]
+
+    claim [if-almost-same-times]:
+        <k> if (_B:Bool) {$s = $n * $s; } else {$s = $s * $n; } => . ...</k>
+        <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S *Int N) $n |-> N) </state>
+
+    claim [use-if-almost-same-twice]:
+        <k> $n = $n + 1;
+            if (_B1:Bool) {$s = $n + $s; } else {$s = $s + $n; }
+            if (_B2:Bool) {$s = $n * $s; } else {$s = $s * $n; }
+            $s = $s + 1; => .
+        ...</k>
+        <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (((S +Int N +Int 1) *Int (N:Int +Int 1)) +Int 1) $n |-> N:Int +Int 1) </state>
+        [depends(IMP-SIMPLE-SPEC-DEPENDENCIES.if-almost-same-plus,if-almost-same-times)]
+
+
+
+    claim [sum-loop]: <k> while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; }  => . ... </k>
+                      <state> $s |-> (S => S +Int ((N *Int (N +Int 1)) /Int 2)) $n |-> (N => -1) </state>
+                      requires 0 <=Int N
+      [circularity]
+
+    claim [sum-N]: <k> int $s, $n, .Ids ; $n = N:Int ; while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; } => . ... </k>
+                      <state> .Map => $s |-> ((N *Int (N +Int 1)) /Int 2) $n |-> -1 </state>
+                    requires 0 <=Int N
+                    [depends(sum-loop)]
+
+
+    claim [failing-circularity]: <k> $n = $n + 1; => . ... </k>
+                                 <state> $n |-> N => $n |-> N </state>
+                                 requires 0 <=Int N
+                                 [circularity]
 
 endmodule

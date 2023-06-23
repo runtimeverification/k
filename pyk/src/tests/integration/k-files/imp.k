@@ -7,6 +7,7 @@ module IMP-SYNTAX
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [klabel(_/_), symbol, left, seqstrict, color(pink)]
+                 | AExp "*" AExp              [klabel(_*_), symbol, left, seqstrict, color(pink)]
                  > AExp "+" AExp              [klabel(_+_), symbol, left, seqstrict, color(pink)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
@@ -46,6 +47,7 @@ module IMP
   rule <k> X:Id => STATE[X] ... </k> <state> STATE </state> requires X in_keys(STATE)
 
   rule <k> I1 / I2 => I1 /Int I2 ... </k>  requires I2 =/=Int 0
+  rule <k> I1 * I2 => I1 *Int I2 ... </k>
   rule <k> I1 + I2 => I1 +Int I2 ... </k>
 
   rule <k> I1 <= I2   => I1 <=Int I2 ... </k>

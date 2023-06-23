@@ -31,9 +31,17 @@ class Proof(ABC):
     id: str
     proof_dir: Path | None
     _subproofs: dict[str, Proof]
+    admitted: bool
 
-    def __init__(self, id: str, proof_dir: Path | None = None, subproof_ids: Iterable[str] = ()) -> None:
+    def __init__(
+        self,
+        id: str,
+        proof_dir: Path | None = None,
+        subproof_ids: Iterable[str] = (),
+        admitted: bool = False,
+    ) -> None:
         self.id = id
+        self.admitted = admitted
         self.proof_dir = proof_dir
         self._subproofs = {}
         if self.proof_dir is None and len(list(subproof_ids)) > 0:
@@ -41,6 +49,9 @@ class Proof(ABC):
         if len(list(subproof_ids)) > 0:
             for proof_id in subproof_ids:
                 self.fetch_subproof(proof_id, force_reread=True)
+
+    def admit(self) -> None:
+        self.admitted = True
 
     @property
     def subproof_ids(self) -> list[str]:
@@ -129,11 +140,12 @@ class Proof(ABC):
         return {
             'id': self.id,
             'subproof_ids': self.subproof_ids,
+            'admitted': self.admitted,
         }
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: type[Proof], dct: Mapping[str, Any]) -> Proof:
+    def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> Proof:
         ...
 
     @classmethod
@@ -146,6 +158,7 @@ class Proof(ABC):
         if Proof.proof_exists(id, proof_dir):
             proof_dict = json.loads(proof_path.read_text())
             proof_type = proof_dict['type']
+            admitted = proof_dict.get('admitted', False)
             _LOGGER.info(f'Reading {proof_type} from file {id}: {proof_path}')
             if proof_type in Proof._PROOF_TYPES:
                 return locals()[proof_type].from_dict(proof_dict, proof_dir)

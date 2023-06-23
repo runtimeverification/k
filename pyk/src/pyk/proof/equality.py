@@ -45,8 +45,9 @@ class EqualityProof(Proof):
         simplified_constraints: KInner | None = None,
         simplified_equality: KInner | None = None,
         proof_dir: Path | None = None,
+        admitted: bool = False,
     ):
-        super().__init__(id, proof_dir=proof_dir)
+        super().__init__(id, proof_dir=proof_dir, admitted=admitted)
         self.lhs_body = lhs_body
         self.rhs_body = rhs_body
         self.sort = sort
@@ -100,6 +101,8 @@ class EqualityProof(Proof):
 
     @property
     def status(self) -> ProofStatus:
+        if self.admitted:
+            return ProofStatus.PASSED
         if self.simplified_constraints is None or self.simplified_equality is None:
             return ProofStatus.PENDING
         elif self.csubst is None:
@@ -114,6 +117,7 @@ class EqualityProof(Proof):
         rhs_body = KInner.from_dict(dct['rhs_body'])
         sort = KSort.from_dict(dct['sort'])
         constraints = [KInner.from_dict(c) for c in dct['constraints']]
+        admitted = dct.get('admitted', False)
         simplified_constraints = (
             KInner.from_dict(dct['simplified_constraints']) if 'simplified_constraints' in dct else None
         )
@@ -129,18 +133,18 @@ class EqualityProof(Proof):
             simplified_constraints=simplified_constraints,
             simplified_equality=simplified_equality,
             proof_dir=proof_dir,
+            admitted=admitted,
         )
 
     @property
     def dict(self) -> dict[str, Any]:
-        dct = {
-            'type': 'EqualityProof',
-            'id': self.id,
-            'lhs_body': self.lhs_body.to_dict(),
-            'rhs_body': self.rhs_body.to_dict(),
-            'sort': self.sort.to_dict(),
-            'constraints': [c.to_dict() for c in self.constraints],
-        }
+        dct = super().dict
+        dct['type'] = 'EqualityProof'
+        dct['lhs_body'] = self.lhs_body.to_dict()
+        dct['rhs_body'] = self.rhs_body.to_dict()
+        dct['sort'] = self.sort.to_dict()
+        dct['constraints'] = [c.to_dict() for c in self.constraints]
+
         if self.simplified_constraints is not None:
             dct['simplified_constraints'] = self.simplified_constraints.to_dict()
         if self.simplified_equality is not None:
@@ -170,6 +174,7 @@ class EqualityProof(Proof):
         return [
             f'EqualityProof: {self.id}',
             f'  status: {self.status}',
+            f'    admitted: {self.admitted}',
         ]
 
 

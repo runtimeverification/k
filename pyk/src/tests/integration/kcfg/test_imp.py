@@ -24,6 +24,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
+    from pytest import TempPathFactory
+
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
@@ -312,10 +314,21 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None,
         1,
     ),
     (
-        'imp-if-almost-same',
+        'imp-if-almost-same-plus',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC-DEPENDENCIES',
+        'if-almost-same-plus',
+        None,
+        None,
+        [],
+        ProofStatus.PASSED,
+        2,
+    ),
+    (
+        'imp-if-almost-same-times',
         K_FILES / 'imp-simple-spec.k',
         'IMP-SIMPLE-SPEC',
-        'if-almost-same',
+        'if-almost-same-times',
         None,
         None,
         [],
@@ -331,7 +344,51 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None,
         None,
         [],
         ProofStatus.PASSED,
-        2,  # Change this to 1 once we can reuse subproofs
+        1,  # We can reuse subproofs.
+    ),
+    (
+        'imp-use-if-almost-same-twice',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'use-if-almost-same-twice',
+        None,
+        None,
+        [],
+        ProofStatus.PASSED,
+        1,  # We can reuse subproofs.
+    ),
+    (
+        'imp-simple-sum-loop',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'sum-loop',
+        None,
+        None,
+        ['IMP.while'],  # If we do not include `IMP.while` in this list, we get 4 branches instead of 2
+        ProofStatus.PASSED,
+        2,
+    ),
+    (
+        'imp-simple-sum-N',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'sum-N',
+        None,
+        None,
+        [],
+        ProofStatus.PASSED,
+        1,
+    ),
+    (
+        'imp-failing-circularity',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'failing-circularity',
+        None,
+        None,
+        [],
+        ProofStatus.FAILED,
+        1,
     ),
 )
 
@@ -628,32 +685,72 @@ class TestImpProof(KCFGExploreTest):
         cut_rules: Iterable[str],
         proof_status: ProofStatus,
         expected_leaf_number: int,
+        tmp_path_factory: TempPathFactory,
     ) -> None:
-        claim = single(
-            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
-        )
+        with tmp_path_factory.mktemp('apr_tmp_proofs') as proof_dir:
+            claim = single(
+                kprove.get_claims(
+                    Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+                )
+            )
 
-        proof = APRProof.from_claim(kprove.definition, claim)
-        prover = APRProver(
-            proof,
-            is_terminal=TestImpProof._is_terminal,
-            extract_branches=lambda cterm: TestImpProof._extract_branches(kprove.definition, cterm),
-        )
-        prover.advance_proof(
-            kcfg_explore,
-            max_iterations=max_iterations,
-            execute_depth=max_depth,
-            cut_point_rules=cut_rules,
-        )
+            deps = claim.dependencies
 
-        kcfg_show = KCFGShow(
-            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
-        )
-        cfg_lines = kcfg_show.show(proof.kcfg)
-        _LOGGER.info('\n'.join(cfg_lines))
+            def qualify(module: str, label: str) -> str:
+                if '.' in label:
+                    return label
+                return f'{module}.{label}'
 
-        assert proof.status == proof_status
-        assert leaf_number(proof) == expected_leaf_number
+            subproof_ids = [qualify(spec_module, dep_id) for dep_id in deps]
+
+            # < Admit all the dependencies >
+            # We create files for all the subproofs, all tagged as `admitted`.
+            # Later, when creating the proof for the main claim, these get loaded
+            # and their status will be `PASSED`. This is similar to how Coq handles admitted lemmas.
+            # We do all this in order to decouple the tests of "main theorems" from tests of its dependencies.
+            deps_claims = kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=subproof_ids)
+
+            deps_proofs = [
+                APRProof.from_claim(kprove.definition, c, subproof_ids=[], logs={}, proof_dir=proof_dir)
+                for c in deps_claims
+            ]
+            for dp in deps_proofs:
+                dp.admit()
+                dp.write_proof()
+            # </Admit all the dependencies >
+
+            proof = APRProof.from_claim(
+                kprove.definition,
+                claim,
+                subproof_ids=subproof_ids,
+                circularity=claim.is_circularity,
+                logs={},
+                proof_dir=proof_dir,
+            )
+            _msg_suffix = ' (and is a circularity)' if claim.is_circularity else ''
+            _LOGGER.info(f"The claim '{spec_module}.{claim_id}' has {len(subproof_ids)} dependencies{_msg_suffix}")
+
+            prover = APRProver(
+                proof,
+                kcfg_explore=kcfg_explore,
+                is_terminal=TestImpProof._is_terminal,
+                extract_branches=lambda cterm: TestImpProof._extract_branches(kprove.definition, cterm),
+            )
+
+            prover.advance_proof(
+                max_iterations=max_iterations,
+                execute_depth=max_depth,
+                cut_point_rules=cut_rules,
+            )
+
+            kcfg_show = KCFGShow(
+                kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
+            )
+            cfg_lines = kcfg_show.show(proof.kcfg)
+            _LOGGER.info('\n'.join(cfg_lines))
+
+            assert proof.status == proof_status
+            assert leaf_number(proof) == expected_leaf_number
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',
@@ -682,15 +779,15 @@ class TestImpProof(KCFGExploreTest):
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
 
-        proof = APRProof.from_claim(kprove.definition, claim)
+        proof = APRProof.from_claim(kprove.definition, claim, logs={})
         prover = APRProver(
             proof,
+            kcfg_explore=kcfg_explore,
             is_terminal=TestImpProof._is_terminal,
             extract_branches=lambda cterm: TestImpProof._extract_branches(kprove.definition, cterm),
         )
 
         prover.advance_proof(
-            kcfg_explore,
             max_iterations=max_iterations,
             execute_depth=max_depth,
             cut_point_rules=cut_rules,
@@ -729,9 +826,13 @@ class TestImpProof(KCFGExploreTest):
 
         proof = APRBMCProof.from_claim_with_bmc_depth(kprove.definition, claim, bmc_depth)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRBMCProver(proof, TestImpProof._same_loop, is_terminal=TestImpProof._is_terminal)
+        prover = APRBMCProver(
+            proof,
+            kcfg_explore=kcfg_explore,
+            same_loop=TestImpProof._same_loop,
+            is_terminal=TestImpProof._is_terminal,
+        )
         prover.advance_proof(
-            kcfg_explore,
             max_iterations=max_iterations,
             execute_depth=max_depth,
             cut_point_rules=cut_rules,
