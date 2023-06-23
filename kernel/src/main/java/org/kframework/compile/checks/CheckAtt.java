@@ -42,7 +42,7 @@ public class CheckAtt {
 
     public void checkUnrecognizedModuleAtts() {
         if (!m.att().rawKeys().isEmpty()) {
-            errors.add(KEMException.compilerError("Unrecognized attributes on module '" + m.name() + "': " +
+            errors.add(KEMException.compilerError("Unrecognized attributes on module " + m.name() + ": " +
                     m.att().rawKeys().mkString("[", ", ", "]") +
                     "\nHint: User-defined groups can be added with the group(_) attribute."));
         }
