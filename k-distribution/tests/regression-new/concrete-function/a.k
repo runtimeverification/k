@@ -39,12 +39,11 @@ syntax Pgm ::= begin(Int) | end(Int)
 
 rule begin(X) => end(X)
 
-syntax Int ::= bar1(Int) [function, smtlib(bar1)]
-             | bar2(Int) [function, smtlib(bar2), no-evaluators]
-             | bar3(Int) [function, smtlib(bar3), no-evaluators]
+syntax Int ::= barConcrete(Int) [function, smtlib(barConcrete)]
+             | bar(Int)         [function, smtlib(bar)]
+             | baz(Int)         [function, smtlib(baz), no-evaluators]
 
-rule [f1]: bar1(X) => bar2(X) requires X >Int 0
-
-rule [f2]: bar1(X) => bar3(X) requires X <Int 0
+rule [f1]: barConcrete(X) => baz(X) requires X >Int 0
+rule [f2]: bar(X)         => baz(X) requires X <Int 0
 
 endmodule
