@@ -134,13 +134,12 @@ class TestCellMapProof(KCFGExploreTest):
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
 
-        proof = APRProof.from_claim(kprove.definition, claim)
+        proof = APRProof.from_claim(kprove.definition, claim, logs={})
         init = proof.kcfg.node(proof.init)
         new_init_term = kcfg_explore.cterm_assume_defined(init.cterm)
         proof.kcfg.replace_node(init.id, new_init_term)
-        prover = APRProver(proof)
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(
-            kcfg_explore,
             max_iterations=max_iterations,
             execute_depth=max_depth,
             terminal_rules=terminal_rules,
