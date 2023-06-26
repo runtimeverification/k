@@ -140,15 +140,16 @@ def test_from_dict_two_nodes() -> None:
 
 def test_from_dict_loop_edge() -> None:
     # Given
-    d = {'next': 2, 'nodes': node_dicts(1), 'edges': edge_dicts((1, 1))}
+    d = {'next': 3, 'nodes': node_dicts(2), 'edges': edge_dicts((1, 2), (2, 1))}
 
     # When
     cfg = KCFG.from_dict(d)
 
     # Then
-    assert set(cfg.nodes) == {node(1)}
-    assert set(cfg.edges()) == {edge(1, 1)}
-    assert cfg.edge(1, 1) == edge(1, 1)
+    assert set(cfg.nodes) == {node(1), node(2)}
+    assert set(cfg.edges()) == {edge(1, 2), edge(2, 1)}
+    assert cfg.edge(1, 2) == edge(1, 2)
+    assert cfg.edge(2, 1) == edge(2, 1)
     assert cfg.to_dict() == d
 
 
@@ -255,21 +256,6 @@ def test_cover_then_remove() -> None:
     assert not cfg.is_covered(node1.id)
     assert not cfg.is_covered(node2.id)
     assert cfg.covers() == []
-
-
-def test_insert_loop_edge() -> None:
-    # Given
-    d = {'nodes': node_dicts(1)}
-    cfg = KCFG.from_dict(d)
-
-    # When
-    new_edge = cfg.create_edge(1, 1, 1)
-
-    # Then
-    assert new_edge == edge(1, 1)
-    assert set(cfg.nodes) == {node(1)}
-    assert set(cfg.edges()) == {edge(1, 1)}
-    assert cfg.edge(1, 1) == edge(1, 1)
 
 
 def test_insert_simple_edge() -> None:

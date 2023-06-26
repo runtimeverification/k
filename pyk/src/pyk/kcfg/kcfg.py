@@ -743,9 +743,28 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return None
         return sorted(paths, key=(lambda path: KCFG.path_length(path)))[0]
 
+    def shortest_distance_between(self, node_1_id: NodeIdLike, node_2_id: NodeIdLike) -> int | None:
+        path_1 = self.shortest_path_between(node_1_id, node_2_id)
+        path_2 = self.shortest_path_between(node_2_id, node_1_id)
+        distance: int | None = None
+        if path_1 is not None:
+            distance = KCFG.path_length(path_1)
+        if path_2 is not None:
+            distance_2 = KCFG.path_length(path_2)
+            if distance is None or distance_2 < distance:
+                distance = distance_2
+        return distance
+
+    def zero_depth_between(self, node_1_id: NodeIdLike, node_2_id: NodeIdLike) -> bool:
+        shortest_distance = self.shortest_distance_between(node_1_id, node_2_id)
+        return shortest_distance is not None and shortest_distance == 0
+
     def paths_between(self, source_id: NodeIdLike, target_id: NodeIdLike) -> list[tuple[Successor, ...]]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
+
+        if source_id == target_id:
+            return [()]
 
         source_successors = list(self.successors(source_id))
         assert len(source_successors) <= 1
