@@ -14,6 +14,27 @@ Features
 
 - Deprecated the `--directory` option. Use `--output-definition` instead.
 
+- Introduced `--execute-to-branch` to `krun` when using the LLVM backend.
+
+- Created a hidden category for advanced options: `--help-hidden`. This should make it
+  easier to read the help menu for `kompile`.
+
+- Added attribute validation. From now on, you will have to use `group(_)` to tag a
+  production. This can be enabled with `--pedantic-attributes` but it will soon become
+  the default.
+
+- Add `--temp-dir` option to specify where to store all the temp files created at
+  runtime. This can avoid some issues with accumulating files and readonly restrictions.
+
+- Added a new builtin type `RangeMap`, a map whose keys are stored as ranges, bounded
+  inclusively below and exclusively above. Contiguous or overlapping ranges that
+  map to the same value are merged into a single range.
+
+- Added a new, experimental backend for faster symbolic execution, called the **booster**.
+  This works by invoking the faster parts of the concrete backend and only rely on the
+  haskell backend when needed for symbolic steps.
+
+
 Misc/Bug Fixes
 --------------
 - Fix some issues related to unicode characters  not being parsed correctly.
@@ -23,6 +44,8 @@ Misc/Bug Fixes
 - Added more checks and warning messages.
 
 - Fix inconsistencies around the `comm` attribute.
+
+- Fix KLabel checks to consider `--concrete-rules` option.
 
 A more detailed list of changes can be found here:
 https://github.com/runtimeverification/k/issues/3403
