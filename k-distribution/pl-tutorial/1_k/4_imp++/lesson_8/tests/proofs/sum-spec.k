@@ -32,6 +32,7 @@ claim
     LN   |-> (N:Int => 0)
     LSUM |-> (S:Int => S +Int ((N +Int 1) *Int N /Int 2))
   ...</store>
+  <generatedCounter> _ </generatedCounter>
 requires N >=Int 0
 
 endmodule

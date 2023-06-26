@@ -164,6 +164,9 @@ endif
 
 clean:
 	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz
+ifeq ($(KOMPILE_BACKEND),kore)
+	rm -f $(DEF).kore
+endif
 
 .depend:
 	@$(KDEP) $(KDEP_FLAGS) $(DEF).$(SOURCE_EXT) > .depend-tmp

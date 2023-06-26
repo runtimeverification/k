@@ -230,9 +230,12 @@
               <target>
                 <exec executable="../scripts/get-version-string.sh"
                       outputproperty="git.describe.out"
+                      output="${project.basedir}/../k-distribution/src/main/scripts/lib/git-describe.out"
                       errorproperty="git.describe.err"
                       failifexecutionfails="false">
                 </exec>
+                <echo message="${timestamp}"
+                      output="${project.basedir}/../k-distribution/src/main/scripts/lib/timestamp.out" />
               </target>
             </configuration>
             <goals>
@@ -243,7 +246,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>3.0.2</version>
         <configuration>
           <forceCreation> true </forceCreation>
           <archive>

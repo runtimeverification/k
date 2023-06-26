@@ -2,6 +2,7 @@
 package org.kframework.parser.inner.disambiguation;
 
 import org.kframework.POSet;
+import org.kframework.attributes.Att;
 import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
@@ -36,9 +37,9 @@ public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
         List<Term> avoid = new ArrayList<>();
         for (Term t : amb.items()) {
             if (t instanceof ProductionReference) {
-                if (((ProductionReference) t).production().att().contains("prefer")) {
+                if (((ProductionReference) t).production().att().contains(Att.PREFER())) {
                     prefer.add(t);
-                } else if (((ProductionReference) t).production().att().contains("avoid")) {
+                } else if (((ProductionReference) t).production().att().contains(Att.AVOID())) {
                     avoid.add(t);
                 }
             }

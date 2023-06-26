@@ -106,6 +106,9 @@ public final class GlobalOptions {
     @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
     public boolean help = false;
 
+    @Parameter(names={"--help-hidden", "-hh"}, description="Print advanced options help message", help = true)
+    public boolean helpHidden = false;
+
     @Parameter(names="--version", description="Print version information")
     public boolean version = false;
 
@@ -136,19 +139,22 @@ public final class GlobalOptions {
                     "The wait time is the argument of this option, in format like 10ms/10s/10m/10h. " +
                     "Useful if K is interrupted by Ctrl+C, because it allows the backend to detect " +
                     "interruption and print diagnostics information. Currently interruption detection is implemented " +
-                    "in Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.")
+                    "in Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.", hidden = true)
     public Duration shutdownWaitTime;
 
     @Parameter(names = {"--timeout"}, converter = DurationConverter.class,
             description = "If option is set, timeout for this process, in format like 10ms/10s/10m/10h. " +
                     "Using this option is preferred compared to bash timeout command, which has known limitations " +
-                    "when invoked from scripts.")
+                    "when invoked from scripts.", hidden = true)
     public Duration timeout;
 
-    @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.")
+    @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.", hidden = true)
     public boolean noExcWrap = false;
 
     public boolean debug() {
         return debug || debugWarnings;
     }
+
+    @Parameter(names={"--temp-dir"}, description="Put temp files in this location. Default is /tmp/.<tool>-xxx")
+    public String tempDir = null;
 }

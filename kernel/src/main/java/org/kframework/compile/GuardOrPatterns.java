@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
@@ -101,7 +102,7 @@ public class GuardOrPatterns {
         }
         KVariable newLabel;
         do {
-            newLabel = KVariable("_Gen" + (counter++), Att().add("anonymous").add(Sort.class, s));
+            newLabel = KVariable("_Gen" + (counter++), Att().add(Att.ANONYMOUS()).add(Sort.class, s));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

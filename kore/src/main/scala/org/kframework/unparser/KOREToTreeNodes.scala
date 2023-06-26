@@ -4,7 +4,7 @@ package org.kframework.unparser
 import java.util
 
 import org.kframework.POSet
-import org.kframework.attributes.{Location, Source}
+import org.kframework.attributes.{Att, Location, Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
@@ -17,10 +17,10 @@ import JavaConverters._
 
 object KOREToTreeNodes {
 
-  import org.kframework.kore.KORE._
+  import org.kframework.kore.KORE.{Att => _, _}
 
   def wellTyped(args: Seq[Sort], p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
-    val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
+    val origP = p.att.getOptional(Att.ORIGINAL_PRD, classOf[Production]).orElse(p)
     val subst = origP.substitute(args)
     val rightPoly = (args.isEmpty && origP.params.nonEmpty) || (p.sort == subst.sort && p.items == subst.items)
     return rightPoly && p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
@@ -33,9 +33,9 @@ object KOREToTreeNodes {
       val children = ConsPStack.from(scalaChildren.reverse asJava)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
-      val p = mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains("unparseAvoid")).head
+      val p = mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains(Att.UNPARSE_AVOID)).head
       val subst = if (a.klabel.params.nonEmpty) {
-        val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
+        val origP = p.att.getOptional(Att.ORIGINAL_PRD, classOf[Production]).orElse(p)
         origP.substitute(a.klabel.params)
       } else {
         p
@@ -45,7 +45,7 @@ object KOREToTreeNodes {
 
   def up(mod: Module)(t: K): K = t match {
     case v: KVariable =>
-      if (v.att.contains("prettyPrintWithSortAnnotation"))
+      if (v.att.contains(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
         KORE.KApply(KORE.KLabel("#SemanticCastTo" + v.att.get(classOf[org.kframework.kore.Sort])), KToken(v.name, Sorts.KVariable, v.att))
       else
         KToken(v.name, Sorts.KVariable, v.att)

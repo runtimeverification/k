@@ -3,6 +3,7 @@ package org.kframework.backend.kore
 
 import org.junit.Assert._
 import org.junit.Test
+import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
 import org.kframework.parser.kore._
 
@@ -19,7 +20,7 @@ class ClaimAttributes extends KoreTest {
     var one_path = 0
     var all_path = 0
     for (claim <- claims)  {
-      if (this.hasAttribute(claim.att, "one-path")) {
+      if (this.hasAttribute(claim.att, Att.ONE_PATH.key)) {
         one_path=one_path+1;
         assertEquals(KLabels.RL_wEF.name, claim.pattern.asInstanceOf[Implies]._2.asInstanceOf[Application].head.ctr);
       } else {

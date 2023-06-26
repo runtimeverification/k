@@ -54,7 +54,7 @@ jobs:
           submodules: recursive
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
@@ -383,10 +383,53 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, linux, normal-ephemeral]
     environment: production
     needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Java for publishing to GitHub Maven Packages
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          overwrite-settings: true
+          server-id: runtime.verification.snapshots
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: k-release-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 14
+
+      - name: 'Push Maven Packages'
+        shell: bash {0}
+        continue-on-error: true
+        env:
+          MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
+        run: |
+          echo "MAVEN_USERNAME=devops@runtimeverification.com" > rv-jenkins.env
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> rv-jenkins.env
+          cat ~/.m2/settings.xml
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p /home/github-runner/.m2'
+          docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
+          docker exec --env-file rv-jenkins.env -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-release-ci-${GITHUB_SHA}
+          docker container rm --force k-release-ci-${GITHUB_SHA} || true
+
       - name: Publish release
         uses: actions/github-script@v6.0.0
         with:

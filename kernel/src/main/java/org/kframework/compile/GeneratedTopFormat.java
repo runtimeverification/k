@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -47,7 +48,7 @@ public class GeneratedTopFormat {
                 }
                 format.append("%d%n%").append(cellPositions.get(j - 1) + 2);
             }
-            return prod.withAtt(prod.att().add("format", format.toString()));
+            return prod.withAtt(prod.att().add(Att.FORMAT(), format.toString()));
         }
         return prod;
     }

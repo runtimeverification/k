@@ -46,22 +46,22 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
 
             // find all named items
             while (iterator != null && iterator.production().att().contains(Att.RECORD_PRD(), Production.class)) {
-                if (iterator.production().att().contains("recordPrd-main"))
+                if (iterator.production().att().contains(Att.RECORD_PRD_MAIN()))
                     iterator = (TermCons) iterator.get(0);
-                else if (iterator.production().att().contains("recordPrd-one")) {
-                    String key = iterator.production().att().get("recordPrd-one");
+                else if (iterator.production().att().contains(Att.RECORD_PRD_ONE())) {
+                    String key = iterator.production().att().get(Att.RECORD_PRD_ONE());
                     children.put(key, iterator.get(0));
                     iterator = null;
-                } else if (iterator.production().att().contains("recordPrd-item")) {
-                    String key = iterator.production().att().get("recordPrd-item");
+                } else if (iterator.production().att().contains(Att.RECORD_PRD_ITEM())) {
+                    String key = iterator.production().att().get(Att.RECORD_PRD_ITEM());
                     if (children.containsKey(key))
                         return Left.apply(Sets.newHashSet(KEMException.innerParserError("Duplicate record production key: " + key, tc)));
                     else
                         children.put(key, iterator.get(0));
                     iterator = null;
-                } else if (iterator.production().att().contains("recordPrd-repeat")) {
+                } else if (iterator.production().att().contains(Att.RECORD_PRD_REPEAT())) {
                     TermCons item = (TermCons) iterator.get(1);
-                    String key = item.production().att().get("recordPrd-item");
+                    String key = item.production().att().get(Att.RECORD_PRD_ITEM());
                     if (children.containsKey(key))
                         return Left.apply(Sets.newHashSet(KEMException.innerParserError("Duplicate record production key: " + key, tc)));
                     else

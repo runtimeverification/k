@@ -15,7 +15,7 @@ import collection._
 /**
   * Compiler pass for merging the rules as expected by FastRuleMatcher
   */
-class MergeRules(val automatonAttribute: String, filterAttribute: String) extends Function[Module, Module] {
+class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key) extends Function[Module, Module] {
 
 
   object ML {

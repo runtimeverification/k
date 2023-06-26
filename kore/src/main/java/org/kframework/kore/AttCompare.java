@@ -13,9 +13,9 @@ import java.util.List;
  */
 public class AttCompare {
     private K k;
-    private List<String> attNames;
+    private List<Att.Key> attNames;
 
-    public AttCompare(K k, String... attNames) {
+    public AttCompare(K k, Att.Key... attNames) {
         this.k = k;
         this.attNames = Arrays.asList(attNames);
     }
@@ -66,7 +66,7 @@ public class AttCompare {
         return true;
     }
 
-    private Map<Tuple2<String, String>, Object> filterAtt(Att att) {
+    private Map<Tuple2<Att.Key, String>, Object> filterAtt(Att att) {
         return att.att().filterKeys(tuple -> attNames.contains(tuple._1()));
     }
 

@@ -1,0 +1,5 @@
+[Error] Outer Parser: Duplicate attribute: left
+	Source(duplicateAttSyntax.k)
+	Location(4,30,4,34)
+	4 |	  syntax Foo  ::= a() [left, left]
+	  .	                             ^~~~

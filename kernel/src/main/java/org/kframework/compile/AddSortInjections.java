@@ -75,7 +75,7 @@ public class AddSortInjections {
         K ensures = internalAddSortInjections(roc.ensures(), Sorts.Bool());
         Att att = roc.att();
         if (!sortParams.isEmpty()) {
-            att = att.add("sortParams", Sort.class, Sort("", sortParams.stream().map(s -> Sort(s)).collect(Collections.toList())));
+            att = att.add(Att.SORT_PARAMS(), Sort.class, Sort("", sortParams.stream().map(s -> Sort(s)).collect(Collections.toList())));
         }
         return roc.newInstance(body, requires, ensures, att);
     }
@@ -134,13 +134,13 @@ public class AddSortInjections {
                 return KSequence(KApply(KLabel("inj", actualSort, Sorts.KItem()), KList(visitChildren(term, actualSort, expectedSort)), Att.empty().add(Sort.class, Sorts.KItem())));
             }
         } else {
-            String hookAtt = mod.sortAttributesFor().get(expectedSort.head()).getOrElse(() -> Att()).getOptional("hook").orElse("");
+            String hookAtt = mod.sortAttributesFor().get(expectedSort.head()).getOrElse(() -> Att()).getOptional(Att.HOOK()).orElse("");
             if ((hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List")) && term instanceof KApply) {
                 for (KLabel collectionLabel : collectionFor.keySet()) {
-                    Optional<String> wrapElement = mod.attributesFor().apply(collectionLabel).getOptional("wrapElement");
+                    Optional<String> wrapElement = mod.attributesFor().apply(collectionLabel).getOptional(Att.WRAP_ELEMENT());
                     if (wrapElement.isPresent()) {
                         KLabel wrappedLabel = KLabel(wrapElement.get());
-                        KLabel elementLabel = KLabel(mod.attributesFor().apply(collectionLabel).get("element"));
+                        KLabel elementLabel = KLabel(mod.attributesFor().apply(collectionLabel).get(Att.ELEMENT()));
                         KApply k = (KApply)term;
                         if (configurationInfo.getCellSort(wrappedLabel).equals(actualSort)) {
                             if (collectionIsMap(collectionLabel)) {
