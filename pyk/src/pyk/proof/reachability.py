@@ -97,6 +97,11 @@ class APRProof(Proof):
     def is_failing(self, node_id: NodeIdLike) -> bool:
         return self.kcfg.is_leaf(node_id) and not (self.is_pending(node_id) or self.is_target(node_id))
 
+    def shortest_path_to(self, node_id: NodeIdLike) -> tuple[KCFG.Successor, ...]:
+        spb = self.kcfg.shortest_path_between(self.init, node_id)
+        assert spb is not None
+        return spb
+
     @staticmethod
     def read_proof(id: str, proof_dir: Path) -> APRProof:
         proof_path = proof_dir / f'{hash_str(id)}.json'
@@ -165,9 +170,7 @@ class APRProof(Proof):
         return kc
 
     def path_constraints(self, final_node_id: NodeIdLike) -> KInner:
-        path = self.kcfg.shortest_path_between(self.init, final_node_id)
-        if path is None:
-            raise ValueError(f'No path found to specified node: {final_node_id}')
+        path = self.shortest_path_to(final_node_id)
         curr_constraint: KInner = mlTop()
         for edge in reversed(path):
             if type(edge) is KCFG.Split:
@@ -404,11 +407,7 @@ class APRProver:
         return False
 
     def nonzero_depth(self, node: KCFG.Node) -> bool:
-        init = self.proof.kcfg.node(self.proof.init)
-        p = self.proof.kcfg.shortest_path_between(init.id, node.id)
-        if p is None:
-            return False
-        return KCFG.path_length(p) > 0
+        return not self.proof.kcfg.zero_depth_between(self.proof.init, node.id)
 
     def _check_subsume(self, node: KCFG.Node) -> bool:
         target_node = self.proof.kcfg.node(self.proof.target)
@@ -532,12 +531,21 @@ class APRBMCProver(APRProver):
 
             for f in self.proof.pending:
                 if f.id not in self._checked_nodes:
+                    _LOGGER.info(f'Checking bmc depth for node {self.proof.id}: {f.id}')
                     self._checked_nodes.append(f.id)
-                    prior_loops = [
-                        nd.id
-                        for nd in self.proof.kcfg.reachable_nodes(f.id, reverse=True)
-                        if nd.id != f.id and self._same_loop(nd.cterm, f.cterm)
+                    _prior_loops = [
+                        succ.source.id
+                        for succ in self.proof.shortest_path_to(f.id)
+                        if self._same_loop(succ.source.cterm, f.cterm)
                     ]
+                    prior_loops: list[NodeIdLike] = []
+                    for _pl in _prior_loops:
+                        if not (
+                            self.proof.kcfg.zero_depth_between(_pl, f.id)
+                            or any(self.proof.kcfg.zero_depth_between(_pl, pl) for pl in prior_loops)
+                        ):
+                            prior_loops.append(_pl)
+                    _LOGGER.info(f'Prior loop heads for node {self.proof.id}: {(f.id, prior_loops)}')
                     if len(prior_loops) > self.proof.bmc_depth:
                         self.proof.add_bounded(f.id)
 
