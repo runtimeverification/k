@@ -8,9 +8,16 @@ from .kbool import BOOL, FALSE, TRUE
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from typing import Final
 
     from ..kast import KInner
     from ..kast.inner import KSort, KVariable
+
+
+ML_QUANTIFIERS: Final = {
+    '#Exists',
+    '#Forall',
+}
 
 
 def is_top(term: KInner) -> bool:

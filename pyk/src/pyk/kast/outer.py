@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from abc import abstractmethod
+from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
@@ -10,6 +11,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, final
 
 from ..prelude.kbool import TRUE
+from ..prelude.ml import ML_QUANTIFIERS
 from ..utils import filter_none, single, unique
 from .inner import (
     KApply,
@@ -22,9 +24,8 @@ from .inner import (
     KVariable,
     Subst,
     bottom_up,
-    collect,
+    bottom_up_with_summary,
     top_down,
-    var_occurrences,
 )
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt, kast_term
 
@@ -1136,29 +1137,36 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             return sort2
         return None
 
-    def sort_vars_subst(self, kast: KInner) -> Subst:
-        _var_sort_occurrences = var_occurrences(kast)
-        subst = {}
+    def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
+        if type(kast) is KVariable and kast.sort is None and sort is not None:
+            return kast.let(sort=sort)
 
-        def _sort_contexts(_kast: KInner) -> None:
-            if type(_kast) is KApply:
-                prod = self.production_for_klabel(_kast.label)
-                if len(prod.params) == 0:
-                    for t, a in zip(prod.argument_sorts, _kast.args, strict=True):
-                        if type(a) is KVariable:
-                            _var_sort_occurrences[a.name].append(a.let_sort(t))
-            if type(_kast) is KSequence and _kast.arity > 0:
-                for a in _kast.items[0:-1]:
-                    if type(a) is KVariable:
-                        _var_sort_occurrences[a.name].append(a.let_sort(KSort('KItem')))
-                last_a = _kast.items[-1]
-                if type(last_a) is KVariable:
-                    _var_sort_occurrences[last_a.name].append(last_a.let_sort(KSort('K')))
+        def get_quantifier_variable(q: KApply) -> KVariable:
+            if q.arity != 2:
+                raise ValueError(f'Expected a quantifier to have 2 children, got {q.arity}.')
+            var = q.args[0]
+            if not isinstance(var, KVariable):
+                raise ValueError(f"Expected a quantifier's first child to be a variable, got {type(var)}.")
+            return var
 
-        collect(_sort_contexts, kast)
+        def merge_variables(
+            term: KInner, occurrences_list: list[dict[str, list[KVariable]]]
+        ) -> dict[str, list[KVariable]]:
+            result: dict[str, list[KVariable]] = defaultdict(list)
+            for occurrences in occurrences_list:
+                assert isinstance(occurrences, dict), type(occurrences)
+                for key, value in occurrences.items():
+                    result[key] += value
+            if isinstance(term, KVariable):
+                result[term.name].append(term)
+            elif isinstance(term, KApply):
+                if term.label.name in ML_QUANTIFIERS:
+                    var = get_quantifier_variable(term)
+                    result[var.name].append(var)
+            return result
 
-        for vname, _voccurrences in _var_sort_occurrences.items():
-            vsorts = list(unique(v.sort for v in _voccurrences if v.sort is not None))
+        def add_var_to_subst(vname: str, vars: list[KVariable], subst: dict[str, KVariable]) -> None:
+            vsorts = list(unique(v.sort for v in vars if v.sort is not None))
             if len(vsorts) > 0:
                 vsort = vsorts[0]
                 for s in vsorts[1:]:
@@ -1168,14 +1176,40 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                     vsort = _vsort
                 subst[vname] = KVariable(vname, sort=vsort)
 
-        return Subst(subst)
+        def transform(
+            term: KInner, child_variables: list[dict[str, list[KVariable]]]
+        ) -> tuple[KInner, dict[str, list[KVariable]]]:
+            occurrences = merge_variables(term, child_variables)
 
-    def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
-        if type(kast) is KVariable and kast.sort is None and sort is not None:
-            return kast.let(sort=sort)
+            if isinstance(term, KApply):
+                if term.label.name in ML_QUANTIFIERS:
+                    var = get_quantifier_variable(term)
+                    subst: dict[str, KVariable] = {}
+                    add_var_to_subst(var.name, occurrences[var.name], subst)
+                    del occurrences[var.name]
+                    return (Subst(subst)(term), occurrences)
+                else:
+                    prod = self.production_for_klabel(term.label)
+                    if len(prod.params) == 0:
+                        for t, a in zip(prod.argument_sorts, term.args, strict=True):
+                            if type(a) is KVariable:
+                                occurrences[a.name].append(a.let_sort(t))
+            elif isinstance(term, KSequence) and term.arity > 0:
+                for a in term.items[0:-1]:
+                    if type(a) is KVariable:
+                        occurrences[a.name].append(a.let_sort(KSort('KItem')))
+                last_a = term.items[-1]
+                if type(last_a) is KVariable:
+                    occurrences[last_a.name].append(last_a.let_sort(KSort('K')))
+            return (term, occurrences)
 
-        subst = self.sort_vars_subst(kast)
-        return subst(kast)
+        (new_term, var_occurrences) = bottom_up_with_summary(transform, kast)
+
+        subst: dict[str, KVariable] = {}
+        for vname, occurrences in var_occurrences.items():
+            add_var_to_subst(vname, occurrences, subst)
+
+        return Subst(subst)(new_term)
 
     # Best-effort addition of sort parameters to klabels, context insensitive
     def add_sort_params(self, kast: KInner) -> KInner:
