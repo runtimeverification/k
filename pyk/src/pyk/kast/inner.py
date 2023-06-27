@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     T = TypeVar('T', bound='KAst')
     W = TypeVar('W', bound='WithKAtt')
     KI = TypeVar('KI', bound='KInner')
+    A = TypeVar('A', bound='Any')
+    B = TypeVar('B', bound='Any')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -640,6 +642,19 @@ class KSequence(KInner, Sequence[KInner]):
                 return _subst
         _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
         return None
+
+
+def bottom_up_with_summary(f: Callable[[KInner, list[A]], tuple[KInner, A]], kinner: KInner) -> tuple[KInner, A]:
+    child_summaries = []
+
+    def map_child(child: KInner) -> KInner:
+        nonlocal child_summaries
+        (mapped_child, summarized_child) = bottom_up_with_summary(f, child)
+        child_summaries.append(summarized_child)
+        return mapped_child
+
+    mapped = kinner.map_inner(map_child)
+    return f(mapped, child_summaries)
 
 
 # TODO make method of KInner
