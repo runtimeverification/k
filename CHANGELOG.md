@@ -30,14 +30,9 @@ Features
   inclusively below and exclusively above. Contiguous or overlapping ranges that
   map to the same value are merged into a single range.
 
-- Added a new, experimental backend for faster symbolic execution, called the **booster**.
-  This works by invoking the faster parts of the concrete backend and only rely on the
-  haskell backend when needed for symbolic steps.
-
-
 Misc/Bug Fixes
 --------------
-- Fix some issues related to unicode characters  not being parsed correctly.
+- Fix some issues related to unicode characters not being parsed correctly.
 
 - Total attribute is allowed only on function symbols.
 
