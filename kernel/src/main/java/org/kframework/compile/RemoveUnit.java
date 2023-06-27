@@ -42,6 +42,14 @@ public class RemoveUnit {
       @Override
       public K apply(KApply k) {
         Att att = m.attributesFor().getOrElse(k.klabel(), () -> Att.empty());
+
+        // Ignore optional cells, which have a unit attribute but no assoc
+        if (   att.contains(Att.CELL())
+            && att.contains(Att.MULTIPLICITY())
+            && att.get(Att.MULTIPLICITY()).equals("?")) {
+          return super.apply(k);
+        }
+
         if (att.contains(Att.UNIT())) {
           if (!att.contains(Att.ASSOC())) {
             throw KEMException.internalError("unimplemented case in RemoveUnit: unit but no assoc");
