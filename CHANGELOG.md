@@ -12,16 +12,16 @@ Features
   removed the `kprove-legacy` and the `kbmc` tool. Bounded model checking capabilities
   have been added to the pyk library.
 
-- Deprecated the `--directory` option. Use `--output-definition` instead.
+- Deprecated the `--directory` option. Use `--output-definition` to store a definition
+  and `--definition` to load one.
 
 - Introduced `--execute-to-branch` to `krun` when using the LLVM backend.
 
 - Created a hidden category for advanced options: `--help-hidden`. This should make it
-  easier to read the help menu for `kompile`.
+  easier to read the help menu for `kompile` and `kprove`.
 
 - Added attribute validation. From now on, you will have to use `group(_)` to tag a
-  production. This can be enabled with `--pedantic-attributes` but it will soon become
-  the default.
+  production. You can still get the old behavior by providing `--no-pedantic-attributes`.
 
 - Add `--temp-dir` option to specify where to store all the temp files created at
   runtime. This can avoid some issues with accumulating files and readonly restrictions.
