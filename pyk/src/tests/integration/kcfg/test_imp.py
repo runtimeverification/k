@@ -12,7 +12,7 @@ from pyk.kast.manip import minimize_term
 from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import BOOL, notBool
 from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
+from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRBMCProofNodePrinter, APRProofNodePrinter
 from pyk.testing import KCFGExploreTest
@@ -183,6 +183,67 @@ IMPLIES_TEST_DATA: Final = (
         'consequent-constraint',
         ('int $n , $s ; $n = 3 ;', '.Map'),
         ('int $n , $s ; $n = X ;', '.Map', mlEqualsTrue(KApply('_<Int_', [KVariable('X'), intToken(3)]))),
+        None,
+    ),
+    (
+        'refutation-1',
+        ('int $n ; $n = 0 ;', '.Map', mlTop()),
+        (
+            'int $n ; $n = 0 ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<=Int_', [intToken(0), KVariable('X')])),
+                    mlEqualsTrue(KApply('_<=Int_', [intToken(3), KVariable('X')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('X'), intToken(100)])),
+                ]
+            ),
+        ),
+        CSubst(Subst({})),
+    ),
+    (
+        'refutation-2',
+        ('int $n ; $n = 0 ;', '.Map', mlTop()),
+        (
+            'int $n ; $n = 0 ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<=Int_', [intToken(0), KVariable('X')])),
+                    mlEqualsTrue(KApply('_>Int_', [intToken(0), KVariable('Y')])),
+                ]
+            ),
+        ),
+        CSubst(Subst({})),
+    ),
+    (
+        'refutation-3',
+        ('int $n ; $n = 0 ;', '.Map', mlTop()),
+        (
+            'int $n ; $n = 0 ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<=Int_', [KVariable('Y'), KVariable('X')])),
+                ]
+            ),
+        ),
+        CSubst(Subst({})),
+    ),
+    (
+        'refutation-4',
+        ('int $n ; $n = 0 ;', '.Map', mlTop()),
+        (
+            'int $n ; $n = 0 ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('X'), KVariable('Y')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('Y'), KVariable('Z')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('Z'), KVariable('X')])),
+                ]
+            ),
+        ),
         None,
     ),
     (
@@ -638,6 +699,9 @@ class TestImpProof(KCFGExploreTest):
         consequent: tuple[str, str] | tuple[str, str, KInner],
         expected: CSubst | None,
     ) -> None:
+        if test_id in ['refutation-2']:
+            pytest.skip()
+
         # Given
         antecedent_term = self.config(kcfg_explore.kprint, *antecedent)
         consequent_term = self.config(kcfg_explore.kprint, *consequent)

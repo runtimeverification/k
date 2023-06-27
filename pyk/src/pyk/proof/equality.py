@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 from typing import TYPE_CHECKING
 
@@ -9,8 +8,7 @@ from ..kast.inner import KInner, KSort, Subst
 from ..kast.manip import extract_lhs, extract_rhs, flatten_label
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, TRUE
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals
-from ..utils import hash_str
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse
 from .proof import Proof, ProofStatus
 
 if TYPE_CHECKING:
@@ -55,6 +53,9 @@ class EqualityProof(Proof):
         self.csubst = csubst
         self.simplified_constraints = simplified_constraints
         self.simplified_equality = simplified_equality
+        _LOGGER.warning(
+            'Building an EqualityProof that has known soundness issues: See https://github.com/runtimeverification/haskell-backend/issues/3605.'
+        )
 
     @staticmethod
     def from_claim(claim: KClaim, defn: KDefinition, proof_dir: Path | None = None) -> EqualityProof:
@@ -89,15 +90,6 @@ class EqualityProof(Proof):
 
     def set_simplified_equality(self, simplified: KInner) -> None:
         self.simplified_equality = simplified
-
-    @staticmethod
-    def read_proof(id: str, proof_dir: Path) -> EqualityProof:
-        proof_path = proof_dir / f'{hash_str(id)}.json'
-        if EqualityProof.proof_exists(id, proof_dir):
-            proof_dict = json.loads(proof_path.read_text())
-            _LOGGER.info(f'Reading EqualityProof from file {id}: {proof_path}')
-            return EqualityProof.from_dict(proof_dict, proof_dir=proof_dir)
-        raise ValueError(f'Could not load EqualityProof from file {id}: {proof_path}')
 
     @property
     def status(self) -> ProofStatus:
@@ -173,9 +165,102 @@ class EqualityProof(Proof):
     def summary(self) -> Iterable[str]:
         return [
             f'EqualityProof: {self.id}',
-            f'  status: {self.status}',
+            f'    status: {self.status}',
             f'    admitted: {self.admitted}',
         ]
+
+
+class RefutationProof(Proof):
+    sort: KSort
+    pre_constraints: Iterable[KInner]
+    last_constraint: KInner
+    csubst: CSubst | None
+    simplified_constraints: KInner | None
+
+    def __init__(
+        self,
+        id: str,
+        sort: KSort,
+        pre_constraints: Iterable[KInner],
+        last_constraint: KInner,
+        csubst: CSubst | None = None,
+        simplified_constraints: KInner | None = None,
+        proof_dir: Path | None = None,
+    ):
+        super().__init__(id, proof_dir=proof_dir)
+        self.sort = sort
+        self.pre_constraints = tuple(pre_constraints)
+        self.last_constraint = last_constraint
+        self.csubst = csubst
+        self.simplified_constraints = simplified_constraints
+        _LOGGER.warning(
+            'Building a RefutationProof that has known soundness issues: See https://github.com/runtimeverification/haskell-backend/issues/3605.'
+        )
+
+    def set_simplified_constraints(self, simplified: KInner) -> None:
+        self.simplified_constraints = simplified
+
+    def set_csubst(self, csubst: CSubst) -> None:
+        self.csubst = csubst
+
+    @property
+    def status(self) -> ProofStatus:
+        if self.simplified_constraints is None:
+            return ProofStatus.PENDING
+        elif self.csubst is None:
+            return ProofStatus.FAILED
+        else:
+            return ProofStatus.PASSED
+
+    @property
+    def dict(self) -> dict[str, Any]:
+        dct = super().dict
+        dct['type'] = 'RefutationProof'
+        dct['sort'] = self.sort.to_dict()
+        dct['pre_constraints'] = [c.to_dict() for c in self.pre_constraints]
+        dct['last_constraint'] = self.last_constraint.to_dict()
+        if self.simplified_constraints is not None:
+            dct['simplified_constraints'] = self.simplified_constraints.to_dict()
+        if self.csubst is not None:
+            dct['csubst'] = self.csubst.to_dict()
+        return dct
+
+    @classmethod
+    def from_dict(cls: type[RefutationProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> RefutationProof:
+        id = dct['id']
+        sort = KSort.from_dict(dct['sort'])
+        pre_constraints = [KInner.from_dict(c) for c in dct['pre_constraints']]
+        last_constraint = KInner.from_dict(dct['last_constraint'])
+        simplified_constraints = (
+            KInner.from_dict(dct['simplified_constraints']) if 'simplified_constraints' in dct else None
+        )
+        csubst = CSubst.from_dict(dct['csubst']) if 'csubst' in dct else None
+        return RefutationProof(
+            id=id,
+            sort=sort,
+            pre_constraints=pre_constraints,
+            last_constraint=last_constraint,
+            csubst=csubst,
+            simplified_constraints=simplified_constraints,
+            proof_dir=proof_dir,
+        )
+
+    @property
+    def summary(self) -> Iterable[str]:
+        return [
+            f'RefutationProof: {self.id}',
+            f'    status: {self.status}',
+        ]
+
+    def pretty(self, kprint: KPrint) -> Iterable[str]:
+        lines = [
+            f'Constraints: {kprint.pretty_print(mlAnd(self.pre_constraints))}',
+            f'Last constraint: {kprint.pretty_print(self.last_constraint)}',
+        ]
+        if self.csubst is not None:
+            lines.append(f'Implication csubst: {self.csubst}')
+        lines.append(f'Status: {self.status}')
+        return lines
 
 
 class EqualityProver:
@@ -222,4 +307,42 @@ class EqualityProver:
                 self.proof.set_csubst(result)
 
         _LOGGER.info(f'EqualityProof finished {self.proof.id}: {self.proof.status}')
+        self.proof.write_proof()
+
+
+class RefutationProver:
+    proof: RefutationProof
+
+    def __init__(self, proof: RefutationProof) -> None:
+        self.proof = proof
+
+    def advance_proof(self, kcfg_explore: KCFGExplore) -> None:
+        _LOGGER.info(f'Attempting RefutationProof {self.proof.id}')
+
+        if self.proof.status is not ProofStatus.PENDING:
+            _LOGGER.info(f'RefutationProof finished {self.proof.id}: {self.proof.status}')
+            return
+
+        antecedent_kast = mlAnd(self.proof.pre_constraints)
+        consequent_kast = mlEqualsFalse(self.proof.last_constraint)
+
+        antecedent_simplified_kast, _ = kcfg_explore.kast_simplify(antecedent_kast)
+        consequent_simplified_kast, _ = kcfg_explore.kast_simplify(consequent_kast)
+        self.proof.set_simplified_constraints(consequent_simplified_kast)
+        _LOGGER.info(f'Simplified constraints: {kcfg_explore.kprint.pretty_print(consequent_simplified_kast)}')
+
+        if is_top(consequent_simplified_kast):
+            _LOGGER.warning(f'Consequent of implication (proof equality) simplifies to #Top {self.proof.id}')
+            self.proof.set_csubst(CSubst(Subst({}), ()))
+        else:
+            # TODO: we should not be forced to include the dummy configuration in the antecedent and consequent
+            dummy_config = kcfg_explore.kprint.definition.empty_config(sort=GENERATED_TOP_CELL)
+            result = kcfg_explore.cterm_implies(
+                antecedent=CTerm(config=dummy_config, constraints=[antecedent_simplified_kast]),
+                consequent=CTerm(config=dummy_config, constraints=[consequent_simplified_kast]),
+            )
+            if result is not None:
+                self.proof.set_csubst(result)
+
+        _LOGGER.info(f'RefutationProof finished {self.proof.id}: {self.proof.status}')
         self.proof.write_proof()

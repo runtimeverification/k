@@ -22,3 +22,11 @@ def ltInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
 
 def leInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
     return KApply('_<=Int_', i1, i2)
+
+
+def gtInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
+    return KApply('_>Int_', i1, i2)
+
+
+def eqInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
+    return KApply('_==Int_', i1, i2)
