@@ -260,6 +260,30 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
         KApply(KLabel('#Exists', [KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
     ),
     (
+        'ml-multiple-exists-var-inference',
+        KSort('Foo'),
+        r"""\and{SortFoo{}}(
+          \exists{SortFoo{}}(VarX : SortK{}, \equals{SortK{}, SortFoo{}}(VarX : SortK{}, VarX:SortK{})),
+          \exists{SortFoo{}}(VarX : SortBar{}, Lblfoo{}(VarX : SortBar{}))
+        )""",
+        KApply(
+            KLabel('#And', [KSort('Foo')]),
+            [
+                KApply(
+                    KLabel('#Exists', [KSort('Foo')]),
+                    [
+                        KVariable('X'),
+                        KApply(
+                            KLabel('#Equals', [KSort('K'), KSort('Foo')]),
+                            [KVariable('X'), KSequence([KVariable('X')])],
+                        ),
+                    ],
+                ),
+                KApply(KLabel('#Exists', [KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
+            ],
+        ),
+    ),
+    (
         'ksequence-empty',
         KSort('K'),
         'dotk{}()',
