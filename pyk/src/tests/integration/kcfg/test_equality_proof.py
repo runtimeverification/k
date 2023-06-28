@@ -138,7 +138,7 @@ class TestImpEqualityProof(KCFGExploreTest):
         )
 
         equality_proof = EqualityProof.from_claim(claim, kprove.definition)
-        equality_prover = EqualityProver(equality_proof)
-        equality_prover.advance_proof(kcfg_explore)
+        equality_prover = EqualityProver(equality_proof, kcfg_explore)
+        equality_prover.advance_proof()
 
         assert equality_proof.status == proof_status
