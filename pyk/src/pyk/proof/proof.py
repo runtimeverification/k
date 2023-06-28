@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
+    from pyk.kcfg.explore import KCFGExplore
+
     T = TypeVar('T', bound='Proof')
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -176,3 +178,10 @@ class Proof(ABC):
     def summary(self) -> Iterable[str]:
         subproofs_summaries = [subproof.summary for subproof in self.subproofs]
         return chain([f'Proof: {self.id}', f'    status: {self.status}'], *subproofs_summaries)
+
+
+class Prover:
+    kcfg_explore: KCFGExplore
+
+    def __init__(self, kcfg_explore: KCFGExplore):
+        self.kcfg_explore = kcfg_explore

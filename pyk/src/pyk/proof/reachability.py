@@ -14,7 +14,7 @@ from ..kcfg import KCFG
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import mlAnd, mlEquals, mlTop
 from ..utils import hash_str, shorten_hashes, single
-from .equality import RefutationProof
+from .equality import Prover, RefutationProof
 from .proof import Proof, ProofStatus
 
 if TYPE_CHECKING:
@@ -382,9 +382,8 @@ class APRBMCProof(APRProof):
             yield from summary
 
 
-class APRProver:
+class APRProver(Prover):
     proof: APRProof
-    kcfg_explore: KCFGExplore
     _is_terminal: Callable[[CTerm], bool] | None
     _extract_branches: Callable[[CTerm], Iterable[KInner]] | None
     _abstract_node: Callable[[CTerm], CTerm] | None
@@ -401,6 +400,7 @@ class APRProver:
         extract_branches: Callable[[CTerm], Iterable[KInner]] | None = None,
         abstract_node: Callable[[CTerm], CTerm] | None = None,
     ) -> None:
+        super().__init__(kcfg_explore)
         self.proof = proof
         self.kcfg_explore = kcfg_explore
         self._is_terminal = is_terminal
@@ -522,11 +522,7 @@ class APRProver:
         self.proof.write_proof()
         return self.proof.kcfg
 
-    def refute_node(
-        self,
-        kcfg_explore: KCFGExplore,
-        node: KCFG.Node,
-    ) -> RefutationProof | None:
+    def refute_node(self, node: KCFG.Node) -> RefutationProof | None:
         _LOGGER.info(f'Attempting to refute node {node.id}')
         refutation = self.construct_node_refutation(node)
         if refutation is None:
