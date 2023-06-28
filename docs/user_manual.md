@@ -743,25 +743,26 @@ For this purpose, we introduce the equivalent `syntax priorities`,
 example, the above grammar can be written equivalently as:
 
 ```k
-syntax Exp ::= Exp "*" Exp [mult]
-             | Exp "/" Exp [div]
-             | Exp "+" Exp [add]
-             | Exp "-" Exp [sub]
+syntax Exp ::= Exp "*" Exp [group(mult)]
+             | Exp "/" Exp [group(div)]
+             | Exp "+" Exp [group(add)]
+             | Exp "-" Exp [group(sub)]
 
 syntax priorities mult div > add sub
 syntax left mult div
 syntax right add sub
 ```
 
-Here we use user-defined attributes to refer to a group of sentences
-collectively. The sets are flattened together. We could equivalently have
-written:
+Here, the `group(_)` attribute is used to create user-defined groups of
+sentences. A particular group name collectively refers to the whole set of
+sentences within that group. The sets are flattened together, so we could
+equivalently have written:
 
 ```k
-syntax Exp ::= Exp "*" Exp [mult]
-             | Exp "/" Exp [mult]
-             | Exp "+" Exp [add]
-             | Exp "-" Exp [add]
+syntax Exp ::= Exp "*" Exp [group(mult)]
+             | Exp "/" Exp [group(mult)]
+             | Exp "+" Exp [group(add)]
+             | Exp "-" Exp [group(add)]
 
 syntax priorities mult > add
 syntax left mult
@@ -2867,10 +2868,10 @@ Attributes Reference
 
 ### Attribute Syntax Overview
 
-In K, many different syntactic categories accept _attributes_, an optional
-trailing list of keywords or user-defined identifiers. Attribute lists have two
-different syntaxes, depending on where they occur. Each attribute also has a
-type which describes where it may occur.
+In K, many different syntactic categories accept an optional trailing list of
+keywords known as _attributes_. Attribute lists have two different syntaxes,
+depending on where they occur. Each attribute also has a type which describes
+where it may occur.
 
 The first syntax is a square-bracketed (`[]`) list of words. This syntax is
 available for following attribute types:
@@ -2893,8 +2894,7 @@ available for the following attribute types:
 1.  `cell` attributes - may appear inside of the cell start tag in
     configuration declarations
 
-Note that, currently, *unknown* attributes are *ignored*. Essentially, this
-means that there is no such thing as an *invalid* attribute. When we talk about
+Unrecognized attributes are reported as an error. When we talk about
 the *type* of an attribute, we mean a syntactic category to which an attribute
 can be attached where the attribute has some semantic effect.
 
@@ -2925,6 +2925,7 @@ arguments. A legend describing how to interpret the index follows.
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
 | `function`            | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
+| `group(_)`            | all   | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
