@@ -2,6 +2,49 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+K Framework 6.0.0
+=================
+
+Features
+--------
+- Removed the Java backend. From now on, all symbolic execution will be handled by the
+  haskell backend and concrete execution by the llvm backend. Alongside that we also
+  removed the `kprove-legacy` and the `kbmc` tool. Bounded model checking capabilities
+  have been added to the pyk library.
+
+- Deprecated the `--directory` option. Use `--output-definition` to store a definition
+  and `--definition` to load one.
+
+- Introduced `--execute-to-branch` to `krun` when using the LLVM backend.
+
+- Created a hidden category for advanced options: `--help-hidden`. This should make it
+  easier to read the help menu for `kompile` and `kprove`.
+
+- Added attribute validation. From now on, you will have to use `group(_)` to tag a
+  production. You can still get the old behavior by providing `--no-pedantic-attributes`.
+
+- Add `--temp-dir` option to specify where to store all the temp files created at
+  runtime. This can avoid some issues with accumulating files and readonly restrictions.
+
+- Added a new builtin type `RangeMap`, a map whose keys are stored as ranges, bounded
+  inclusively below and exclusively above. Contiguous or overlapping ranges that
+  map to the same value are merged into a single range.
+
+Misc/Bug Fixes
+--------------
+- Fix some issues related to unicode characters not being parsed correctly.
+
+- Total attribute is allowed only on function symbols.
+
+- Added more checks and warning messages.
+
+- Fix inconsistencies around the `comm` attribute.
+
+- Fix KLabel checks to consider `--concrete-rules` option.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3403
+
 K Framework 5.6.0
 =================
 
