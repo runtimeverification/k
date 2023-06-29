@@ -7,7 +7,6 @@
       url = "github:runtimeverification/hs-backend-booster";
       inputs.k-framework.follows = "";
       inputs.haskell-backend.follows = "haskell-backend";
-      inputs.haskell-nix.follows = "haskell-backend/haskell-nix";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     };
     llvm-backend.url = "github:runtimeverification/llvm-backend";
