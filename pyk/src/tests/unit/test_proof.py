@@ -9,7 +9,7 @@ from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import intToken
 from pyk.proof.equality import EqualityProof
 from pyk.proof.proof import Proof
-from pyk.proof.reachability import APRBMCProof, APRProof
+from pyk.proof.reachability import APRBMCProof, APRFailureInfo, APRProof
 
 from .test_kcfg import node, node_dicts
 
@@ -240,3 +240,42 @@ def test_aprbmc_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None
 
     # Then
     assert proof.dict == proof_from_disk.dict
+
+
+def test_print_failure_info() -> None:
+    failing_nodes: dict[int, tuple[str, str]] = {}
+    failing_nodes[3] = (
+        'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 2 #Implies 1',
+        'true #Equals X <=Int 100',
+    )
+    failing_nodes[5] = (
+        'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 5 #Implies 6',
+        '#Top',
+    )
+    pending_nodes = [6, 7, 8]
+    failure_info = APRFailureInfo(failing_nodes=failing_nodes, pending_nodes=pending_nodes)
+
+    actual_output = '\n'.join(failure_info.print())
+    expected_output = r"""5 Failure nodes. (3 pending and 2 failing)
+
+Pending nodes: [6, 7, 8]
+
+Failing nodes:
+
+  Node id: 3
+  Failure reason:
+    Structural matching failed, the following cells failed individually (antecedent #Implies consequent):
+    STATE_CELL: $n |-> 2 #Implies 1
+  Path condition:
+    true #Equals X <=Int 100
+
+  Node id: 5
+  Failure reason:
+    Structural matching failed, the following cells failed individually (antecedent #Implies consequent):
+    STATE_CELL: $n |-> 5 #Implies 6
+  Path condition:
+    #Top
+
+Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN"""
+
+    assert actual_output == expected_output
