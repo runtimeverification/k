@@ -42,7 +42,7 @@ endmodule
 A module with some attributes:
 
 ```k
-module LESSON-05-B [attr1, attr2, attr3(value)]
+module LESSON-05-B [group(attr1,attr2), private]
 
 endmodule
 ```
