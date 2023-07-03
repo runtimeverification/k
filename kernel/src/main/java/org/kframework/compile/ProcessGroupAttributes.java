@@ -86,6 +86,7 @@ public class ProcessGroupAttributes {
     }
 
     public static void apply(Module m, boolean pedanticAttributes) {
+        m.setAttributes(getProcessedAtt(m.getAttributes(), m, pedanticAttributes));
         m.getItems().stream()
                 .filter((modItem) -> modItem instanceof Syntax)
                 .flatMap((s) -> ((Syntax) s).getPriorityBlocks().stream())

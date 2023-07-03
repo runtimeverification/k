@@ -40,6 +40,14 @@ public class CheckAtt {
         this.macros = m.macroKLabels();
     }
 
+    public void checkUnrecognizedModuleAtts() {
+        if (!m.att().rawKeys().isEmpty()) {
+            errors.add(KEMException.compilerError("Unrecognized attributes on module " + m.name() + ": " +
+                    m.att().rawKeys().mkString("[", ", ", "]") +
+                    "\nHint: User-defined groups can be added with the group(_) attribute."));
+        }
+    }
+
     public void check(Sentence sentence) {
         checkUnrecognizedAtts(sentence);
         if (sentence instanceof Rule) {

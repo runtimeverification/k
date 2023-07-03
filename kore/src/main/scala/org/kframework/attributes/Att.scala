@@ -166,6 +166,7 @@ object Att {
   final val FUNCTION = Key("function", KeyType.BuiltIn)
   final val FUNCTIONAL = Key("functional", KeyType.BuiltIn)
   final val GROUP = Key("group", KeyType.BuiltIn)
+  final val HASKELL = Key("haskell", KeyType.BuiltIn)
   final val HEAT = Key("heat", KeyType.BuiltIn)
   final val HYBRID = Key("hybrid", KeyType.BuiltIn)
   final val HOOK = Key("hook", KeyType.BuiltIn)
