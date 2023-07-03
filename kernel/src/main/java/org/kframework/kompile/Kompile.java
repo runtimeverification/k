@@ -425,7 +425,11 @@ public class Kompile {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
+        stream(modules).forEach(m -> {
+            CheckAtt checkAtt = new CheckAtt(errors, kem, m, isSymbolic && isKast);
+            checkAtt.checkUnrecognizedModuleAtts();
+            stream(m.localSentences()).forEach(checkAtt::check);
+        });
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
@@ -460,7 +464,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files);
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files, kompileOptions.extraConcreteRuleLabels);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
