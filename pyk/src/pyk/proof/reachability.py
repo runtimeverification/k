@@ -2,18 +2,20 @@ from __future__ import annotations
 
 import json
 import logging
+from dataclasses import dataclass
 from itertools import chain
 from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
 
+from ..cterm import CTerm
 from ..kast.inner import KRewrite, KSort
 from ..kast.manip import flatten_label, ml_pred_to_bool
 from ..kast.outer import KClaim
 from ..kcfg import KCFG
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import mlAnd, mlEquals, mlTop
-from ..utils import hash_str, shorten_hashes, single
+from ..utils import FrozenDict, hash_str, shorten_hashes, single
 from .equality import Prover, RefutationProof
 from .proof import Proof, ProofStatus
 
@@ -22,7 +24,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
-    from ..cterm import CTerm
     from ..kast.inner import KInner
     from ..kast.outer import KDefinition
     from ..kcfg import KCFGExplore
@@ -586,6 +587,67 @@ class APRProver(Prover):
 
         self.proof.add_subproof(refutation)
         return refutation
+
+    def failure_info(self) -> APRFailureInfo:
+        return APRFailureInfo.from_proof(self.proof, self.kcfg_explore)
+
+
+@dataclass(frozen=True)
+class APRFailureInfo:
+    failing_nodes: FrozenDict[int, tuple[str, str]]
+    pending_nodes: frozenset[int]
+
+    def __init__(self, failing_nodes: Mapping[int, tuple[str, str]], pending_nodes: Iterable[int]):
+        object.__setattr__(self, 'failing_nodes', FrozenDict(failing_nodes))
+        object.__setattr__(self, 'pending_nodes', frozenset(pending_nodes))
+
+    @staticmethod
+    def from_proof(proof: APRProof, kcfg_explore: KCFGExplore) -> APRFailureInfo:
+        target = proof.kcfg.node(proof.target)
+        pending_nodes = {node.id for node in proof.pending}
+        failing_nodes = {}
+        for node in proof.failing:
+            simplified_node, _ = kcfg_explore.cterm_simplify(node.cterm)
+            simplified_target, _ = kcfg_explore.cterm_simplify(target.cterm)
+            node_cterm = CTerm.from_kast(simplified_node)
+            target_cterm = CTerm.from_kast(simplified_target)
+            _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
+            path_condition = kcfg_explore.kprint.pretty_print(proof.path_constraints(node.id))
+            failing_nodes[node.id] = (reason, path_condition)
+        return APRFailureInfo(failing_nodes=failing_nodes, pending_nodes=pending_nodes)
+
+    def print(self) -> list[str]:
+        res_lines: list[str] = []
+
+        num_pending = len(self.pending_nodes)
+        num_failing = len(self.failing_nodes)
+        res_lines.append(
+            f'{num_pending + num_failing} Failure nodes. ({num_pending} pending and {num_failing} failing)'
+        )
+
+        if num_pending > 0:
+            res_lines.append('')
+            res_lines.append(f'Pending nodes: {sorted(self.pending_nodes)}')
+
+        if num_failing > 0:
+            res_lines.append('')
+            res_lines.append('Failing nodes:')
+            print(self.failing_nodes)
+            for node_id, info in self.failing_nodes.items():
+                print(info)
+                (reason, path_condition) = info
+                res_lines.append('')
+                res_lines.append(f'  Node id: {str(node_id)}')
+
+                res_lines.append('  Failure reason:')
+                res_lines += [f'    {line}' for line in reason.split('\n')]
+
+                res_lines.append('  Path condition:')
+                res_lines += [f'    {path_condition}']
+
+            res_lines.append('')
+            res_lines.append('Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN')
+        return res_lines
 
 
 class APRBMCProver(APRProver):

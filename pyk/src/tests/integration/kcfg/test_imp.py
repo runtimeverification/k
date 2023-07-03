@@ -579,6 +579,27 @@ APRBMC_PROVE_TEST_DATA: Iterable[
     ),
 )
 
+FAILURE_INFO_TEST_DATA: Iterable[tuple[str, Path, str, str, int, int, tuple[KInner]]] = (
+    (
+        'failing-if',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'failing-if',
+        0,
+        1,
+        (mlTop(),),
+    ),
+    (
+        'fail-branch',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'fail-branch',
+        0,
+        1,
+        (mlEqualsFalse(KApply('_<=Int_', [KVariable('_S', 'Int'), KToken('123', '')])),),
+    ),
+)
+
 
 def leaf_number(proof: APRProof) -> int:
     non_target_leaves = [nd for nd in proof.kcfg.leaves if not proof.is_target(nd.id)]
@@ -911,3 +932,46 @@ class TestImpProof(KCFGExploreTest):
 
         assert proof.status == proof_status
         assert leaf_number(proof) == expected_leaf_number
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,expected_pending,expected_failing,path_conditions',
+        FAILURE_INFO_TEST_DATA,
+        ids=[test_id for test_id, *_ in FAILURE_INFO_TEST_DATA],
+    )
+    def test_failure_info(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        expected_pending: int,
+        expected_failing: int,
+        path_conditions: tuple[KInner],
+    ) -> None:
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
+        )
+
+        proof = APRProof.from_claim(kprove.definition, claim, logs={})
+        kcfg_explore.simplify(proof.kcfg, {})
+        prover = APRProver(
+            proof,
+            kcfg_explore=kcfg_explore,
+            is_terminal=TestImpProof._is_terminal,
+        )
+        prover.advance_proof()
+
+        failure_info = prover.failure_info()
+
+        actual_pending = len(failure_info.pending_nodes)
+        actual_failing = len(failure_info.failing_nodes)
+
+        assert expected_pending == actual_pending
+        assert expected_failing == actual_failing
+
+        actual_path_conds = set({path_condition for _, (_, path_condition) in failure_info.failing_nodes.items()})
+        expected_path_conds = set({kprove.pretty_print(condition) for condition in path_conditions})
+
+        assert actual_path_conds == expected_path_conds
