@@ -18,7 +18,7 @@ from ..kast.manip import (
 )
 from ..kast.outer import KRule
 from ..konvert import krule_to_kore
-from ..kore.rpc import KoreClient, KoreServer, StopReason
+from ..kore.rpc import KoreClient, KoreServer, SatResult, StopReason, UnknownResult, UnsatResult
 from ..kore.syntax import Import, Module
 from ..ktool.kprove import KoreExecLogFormat
 from ..prelude import k
@@ -175,6 +175,32 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         kore_simplified, logs = kore_client.simplify(kore)
         kast_simplified = self.kprint.kore_to_kast(kore_simplified)
         return kast_simplified, logs
+
+    def cterm_get_model(self, cterm: CTerm, module_name: str | None = None) -> Subst | None:
+        _LOGGER.info(f'Getting model: {cterm}')
+        kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
+        _, kore_client = self._kore_rpc
+        result = kore_client.get_model(kore, module_name=module_name)
+        if type(result) is UnknownResult:
+            _LOGGER.debug('Result is Unknown')
+            return None
+        elif type(result) is UnsatResult:
+            _LOGGER.debug('Result is UNSAT')
+            return None
+        elif type(result) is SatResult:
+            _LOGGER.debug('Result is SAT')
+            model_subst = self.kprint.kore_to_kast(result.model)
+            _subst: dict[str, KInner] = {}
+            for subst_pred in flatten_label('#And', model_subst):
+                subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
+                m = subst_pattern.match(subst_pred)
+                if m is not None and type(m['###VAR']) is KVariable:
+                    _subst[m['###VAR'].name] = m['###TERM']
+                else:
+                    raise AssertionError(f'Received a non-substitution from get-model endpoint: {subst_pred}')
+            return Subst(_subst)
+        else:
+            raise AssertionError('Received an invalid response from get-model endpoint')
 
     def cterm_implies(
         self,
