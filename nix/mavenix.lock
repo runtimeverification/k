@@ -8249,13 +8249,6 @@
       "version": "1.0-SNAPSHOT"
     },
     {
-      "artifactId": "hs-backend-booster",
-      "groupId": "com.runtimeverification.k",
-      "name": "hs-backend-booster-1.0-SNAPSHOT",
-      "path": "./hs-backend-booster",
-      "version": "1.0-SNAPSHOT"
-    },
-    {
       "artifactId": "llvm-backend-matching",
       "groupId": "com.runtimeverification.k",
       "name": "llvm-backend-matching-1.0-SNAPSHOT",
@@ -8274,6 +8267,13 @@
       "groupId": "com.runtimeverification.k",
       "name": "k-distribution-1.0-SNAPSHOT",
       "path": "./k-distribution",
+      "version": "1.0-SNAPSHOT"
+    },
+    {
+      "artifactId": "hs-backend-booster",
+      "groupId": "com.runtimeverification.k",
+      "name": "hs-backend-booster-1.0-SNAPSHOT",
+      "path": "./hs-backend-booster",
       "version": "1.0-SNAPSHOT"
     }
   ],
