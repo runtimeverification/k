@@ -263,6 +263,36 @@ IMPLIES_TEST_DATA: Final = (
     ),
 )
 
+GET_MODEL_TEST_DATA: Final = (
+    (
+        'get-model-sat',
+        (
+            'int $n ; $n = X ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_==Int_', [KVariable('X'), intToken(3)])),
+                ]
+            ),
+        ),
+        Subst({'X': intToken(3)}),
+    ),
+    (
+        'get-model-unsat',
+        (
+            'int $n ; $n = X ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('X'), intToken(4)])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X'), intToken(4)])),
+                ]
+            ),
+        ),
+        None,
+    ),
+)
+
 APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None, Iterable[str], ProofStatus, int]] = (
     (
         'imp-simple-addition-1',
@@ -706,6 +736,27 @@ class TestImpProof(KCFGExploreTest):
         assert actual_state == expected_state
         assert actual_depth == expected_depth
         assert set(actual_next_states) == set(expected_next_states)
+
+    @pytest.mark.parametrize(
+        'test_id,cterm,expected',
+        GET_MODEL_TEST_DATA,
+        ids=[test_id for test_id, *_ in GET_MODEL_TEST_DATA],
+    )
+    def test_get_model(
+        self,
+        kcfg_explore: KCFGExplore,
+        cterm: CTerm,
+        test_id: str,
+        expected: Subst | None,
+    ) -> None:
+        # Given
+        cterm_term = self.config(kcfg_explore.kprint, *cterm)
+
+        # When
+        actual = kcfg_explore.cterm_get_model(cterm_term)
+
+        # Then
+        assert actual == expected
 
     @pytest.mark.parametrize(
         'test_id,antecedent,consequent,expected',
