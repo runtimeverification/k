@@ -7,11 +7,12 @@ module TEST-SYNTAX
     | "-" Int     [function, group(unmin)]
     | Int "*" Int [function, group(muldiv)]
     | Int "/" Int [function, group(muldiv)]
-    | Int "+" Int [function, group(plusmin,lefty)]
-    | Int "-" Int [function, group(plusmin,lefty)]
+    // digest is an attribute, but it's internal only, so it should be fine to use as a group
+    | Int "+" Int [function, group(plusmin,digest)]
+    | Int "-" Int [function, group(plusmin,digest)]
 
   syntax priority unmin > muldiv > plusmin
-  syntax left lefty
+  syntax left digest
   syntax left muldiv
 endmodule
 
