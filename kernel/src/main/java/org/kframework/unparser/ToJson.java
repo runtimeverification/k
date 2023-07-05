@@ -135,11 +135,14 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Att att) {
+        // Emit user groups as group(_) to prevent conflicts between user groups and internals
+        att = att.withUserGroupsAsGroupAtt();
+
         JsonObjectBuilder jatt = Json.createObjectBuilder();
         jatt.add("node", JsonParser.KATT);
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
-        for (Tuple2<Att.Key,String> attKeyPair: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+        for (Tuple2<Att.Key,String> attKeyPair : JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
             if (attKeyPair._1().key().equals(Location.class.getName())) {
                 JsonArrayBuilder locarr = Json.createArrayBuilder();
                 Location loc = att.get(Location.class);
