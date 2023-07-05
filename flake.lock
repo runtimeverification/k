@@ -451,11 +451,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1687987442,
-        "narHash": "sha256-7HKTO5BV7hyQpTiaH7ODMsBrbnGLrgjLQbg+lb73+4Q=",
+        "lastModified": 1688589774,
+        "narHash": "sha256-7RoDM+d+6a3M3dEOtXOmF1wW4nTYgbj2kf+2mE/pITs=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "2fe2ebd05f542fe5d8f1c636e6883c70301ad548",
+        "rev": "f679d3f637bd5098179aad6257d75aa609e7d57b",
         "type": "github"
       },
       "original": {
