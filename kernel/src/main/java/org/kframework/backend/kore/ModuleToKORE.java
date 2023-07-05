@@ -2001,10 +2001,10 @@ public class ModuleToKORE {
                 sb.append("\\dv{");
                 convert(k.sort(), sb);
                 sb.append("}(");
-                if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("STRING.String")) {
-                    sb.append(k.s());
-                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("BYTES.Bytes")) {
-                    sb.append(k.s().substring(1)); // remove the leading `b`
+                if (module.sortAttributesFor().get(k.sort().head()).getOrElse(Att::empty).getOptional(Att.HOOK()).orElse("").equals("STRING.String")) {
+                    sb.append(StringUtil.escapeNonASCII(k.s()));
+                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(Att::empty).getOptional(Att.HOOK()).orElse("").equals("BYTES.Bytes")) {
+                    sb.append(StringUtil.escapeNonASCII(k.s().substring(1))); // remove the leading `b`
                 } else {
                     sb.append(StringUtil.enquoteKString(k.s()));
                 }
