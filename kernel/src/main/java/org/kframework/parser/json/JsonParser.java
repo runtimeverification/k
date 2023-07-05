@@ -5,6 +5,7 @@ import org.checkerframework.checker.nullness.Opt;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -37,6 +38,7 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.collection.JavaConverters;
+import scala.util.Either;
 
 import javax.json.*;
 import java.io.IOException;
@@ -323,19 +325,23 @@ public class JsonParser {
             } else {
                 Att.Key attKey =
                         Att.getBuiltinKeyOptional(key)
+                                // The JSON is emitted after we may have added internal attributes
                                 .or(() -> Att.getInternalKeyOptional(key))
-                                // The JSON may have been produced with group attributes already expanded.
-                                // As a result, we can't distinguish between intended user groups vs misspelled
-                                // built-ins or internals, so we have to assume everything is a user group.
-                                .or(() -> Att.getUserGroupOptional(key))
                                 .orElseThrow(() ->
-                                        new AssertionError("Attribute '" + key +
-                                                "' is not a built-in or internal, yet Att.getUserGroupOptional(\"" +
-                                                key + "\") failed."));
+                                        KEMException.criticalError("Unrecognized attribute " + key +
+                                                " found in KAST Json term when unparsing KATT: " +
+                                                attMap +
+                                                "\nHint: User-defined groups can be added with the group(_) attribute.")
+                                );
                 newAtt = newAtt.add(attKey, attMap.getString(key));
             }
         }
-        return newAtt;
+        Either<String, Att> newAttOrError = newAtt.withGroupAttAsUserGroups();
+        if (newAttOrError.isLeft()) {
+            throw KEMException.criticalError(newAttOrError.left().get() +
+                    "\nOccurred in KAST Json term when unparsing KATT: " + attMap);
+        }
+        return newAttOrError.right().get();
     }
 
 ////////////////////

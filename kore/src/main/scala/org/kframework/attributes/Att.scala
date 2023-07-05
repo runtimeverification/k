@@ -3,8 +3,8 @@ package org.kframework.attributes
 
 import java.util.Optional
 import org.kframework.Collections._
+import org.kframework.utils.errorsystem.KEMException
 
-import java.lang.Enum
 import scala.collection.Set
 
 /**
@@ -33,7 +33,7 @@ trait AttValue
  * - Att.getBuiltInKeyOptional(myAttStr), if checking a user-supplied attribute string. Be sure to report an error
  *   if the lookup fails and --pedantic-attributes is enabled.
  * - Att.getInternalKeyOptional(myAttStr), if expecting an internal key
- * - Att.getUserGroupOptional(myAttStr), if expecting a user-group, enforcing that it is neither a built-in nor internal
+ * - Att.getUserGroupOptional(myAttStr), if expecting a user-group, enforcing that it is not a built-in
  * 
  * In rare circumstances, you may also use Att.unsafeRawKey(myAttStr) if you pinky-promise to check the keys are valid
  * and categorize them elsewhere (e.g. during parsing to allow us to report multiple errors)
@@ -45,6 +45,42 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
     case a: Att => a.att == att
     case _ => false
   }
+
+  // Remove all UserGroups and replace them with a group(_) attribute
+  def withUserGroupsAsGroupAtt: Att = {
+    val groups = att.keys.filter(_._1.keyType.equals(Att.KeyType.UserGroup)).toSet;
+    if (groups.isEmpty)
+      this
+    else
+      Att(att -- groups).add(Att.GROUP, groups.map(_._1.key).mkString(","))
+  }
+
+  // Remove the group(_) attribute and insert each of its arguments as a UserGroup
+  // Returns either Left of an error message or Right of the result
+  def withGroupAttAsUserGroups: Either[String, Att] = {
+    if (!contains(Att.GROUP, classOf[String]))
+      return Right(this)
+    val groups = get(Att.GROUP).trim
+    if (groups.isEmpty)
+      return Left("group(_) attribute expects a comma-separated list of arguments.")
+    val badComma = Left("Extraneous ',' in group(_) attribute.")
+    if (groups.startsWith(",") || groups.endsWith(","))
+      return badComma
+    var att = this
+    for (group <- groups.split("\\s*,\\s*")) {
+      if (group.isEmpty)
+        return badComma
+      val groupKey = Att.getUserGroupOptional(group)
+      if (groupKey.isEmpty)
+        return Left("User-defined group '" + group + "' conflicts with a built-in attribute.")
+      if (!group.matches("[a-z][a-zA-Z0-9-]*"))
+        return Left("Invalid argument '" + group + "' in group(_) attribute. " +
+          "Expected a lower case letter followed by any number of alphanumeric or '-' characters.")
+      att = att.add(groupKey.get)
+    }
+    Right(att.remove(Att.GROUP))
+  }
+
 
   // All those raw keys which are not categorized
   val rawKeys: Set[Att.Key] =
@@ -106,7 +142,11 @@ object Att {
     case object BuiltIn extends KeyType;
     // Attributes which are compiler-internal and cannot appear in user source code
     case object Internal extends KeyType;
-    // Attributes which represent user-defined groups via group(_)
+    // Attributes which represent user-defined groups via group(_).
+    //
+    // WARNING: Although we treat the arguments to group(_) as individual attributes internally,
+    // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the group(_) attribute,
+    // else there will be conflicts when a user group has the same name as an internal attribute.
     case object UserGroup extends KeyType;
     // Attributes which may be a BuiltIn/Internal/UserGroup, but have not been checked or categorized
     // This is mainly used during parsing to delay error checking, allowing us to report multiple errors
@@ -166,6 +206,7 @@ object Att {
   final val FUNCTION = Key("function", KeyType.BuiltIn)
   final val FUNCTIONAL = Key("functional", KeyType.BuiltIn)
   final val GROUP = Key("group", KeyType.BuiltIn)
+  final val HASKELL = Key("haskell", KeyType.BuiltIn)
   final val HEAT = Key("heat", KeyType.BuiltIn)
   final val HYBRID = Key("hybrid", KeyType.BuiltIn)
   final val HOOK = Key("hook", KeyType.BuiltIn)
@@ -312,7 +353,7 @@ object Att {
     }
 
   def getUserGroupOptional(group: String) : Optional[Key] =
-    if (!keys.contains(Key(group, KeyType.BuiltIn)) && !keys.contains(Key(group, KeyType.Internal))) {
+    if (!keys.contains(Key(group, KeyType.BuiltIn))) {
       Optional.of(Key(group, KeyType.UserGroup))
     } else {
       Optional.empty()
