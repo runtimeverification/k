@@ -613,10 +613,6 @@ public class GenerateSentencesFromConfigDecl {
                         if (keyToken.sort().equals(Sort("#CellName"))) {
                             Att.Key key = Att.getBuiltinKeyOptional(keyToken.s())
                                     .or(() -> {
-                                        if (Att.getInternalKeyOptional(keyToken.s()).isPresent()) {
-                                            throw KEMException.compilerError(
-                                                    "User-defined attribute '" + keyToken.s() + "' conflicts with an internal attribute.", k);
-                                        }
                                         if (pedanticAttributes) {
                                             throw KEMException.compilerError("Unrecognized attribute: " + keyToken.s() +
                                                     "\nHint: User-defined groups can be added with the group=\"...\" attribute.", k);
