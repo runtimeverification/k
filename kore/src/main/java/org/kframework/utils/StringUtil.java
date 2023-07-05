@@ -213,6 +213,28 @@ public class StringUtil {
     }
 
     /**
+     * Get the escaped string for a Unicode codepoint:
+     * Codepoints less than 127 are stored directly as the character
+     * Codepoints between 127 and 255 are stored as \xFF
+     * Codepoints between 256 and 65535 are stored as \uFFFF
+     * Codepoints above 65536 are stored as \u0010FFFF
+     * @param value a Unicode codepoint
+     * @return representation of the codepoint as an escaped string
+     */
+    public static String getUnicodeEscape(int codepoint) {
+        if (codepoint < 127) {
+            return String.valueOf((char) codepoint);
+        }
+        if (codepoint <= 0xff) {
+            return "\\x" + String.format("%02x", codepoint);
+        }
+        if (codepoint <= 0xffff) {
+            return "\\u" + String.format("%04x", codepoint);
+        }
+        return "\\U" + String.format("%08x", codepoint);
+    }
+
+    /**
      * Adds double-quote at the beginning and end of the string and escapes special characters
      * with backslash: newline, carriage return, line feed, tab and backslash.
      * Characters between 127 and 255 are stored as \xFF
@@ -239,20 +261,29 @@ public class StringUtil {
                 result.append("\\r");
             } else if (codepoint == '\f') {
                 result.append("\\f");
-            } else if (codepoint >= 32 && codepoint < 127) {
-                result.append((char)codepoint);
-            } else if (codepoint <= 0xff) {
-                result.append("\\x");
-                result.append(String.format("%02x", codepoint));
-            } else if (codepoint <= 0xffff) {
-                result.append("\\u");
-                result.append(String.format("%04x", codepoint));
             } else {
-                result.append("\\U");
-                result.append(String.format("%08x", codepoint));
+                result.append(StringUtil.getUnicodeEscape(codepoint));
             }
         }
         result.append("\"");
+        return result.toString();
+    }
+
+    /**
+     * Escapes all non-ASCII characters as follows:
+     * Characters between 127 and 255 are stored as \xFF
+     * Characters between 256 and 65535 are stored as \uFFFF
+     * Characters above 65536 are stored as \u0010FFFF
+     * @param value any string
+     * @return representation of the string with non-ASCII characters escaped
+     */
+    public static String escapeNonASCII(String value) {
+        final int length = value.length();
+        StringBuilder result = new StringBuilder();
+        for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
+            codepoint = value.codePointAt(offset);
+            result.append(StringUtil.getUnicodeEscape(codepoint));
+        }
         return result.toString();
     }
 
