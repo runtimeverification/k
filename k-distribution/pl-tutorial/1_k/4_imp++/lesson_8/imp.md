@@ -97,19 +97,17 @@ example, the syntax of the previous "statement" assignment which
 is now obtained by composing the new assignment expression, and the
 new expression statement constructs); go the last lesson of
 Tutorial 2 if you are interested in IMP's constructs. For execution
-purposes, we tag the addition and division operations with the
-`addition` and `division` tags. These attributes have
-no theoretical significance, in that they do not affect the semantics
-of the language in any way. They only have practical relevance,
-specific to our implementation of the **K** tool. Specifically, we can
-tell the **K** tool (using its `superheat` and `supercool`
+purposes, we tag the addition and division operations as members of the
+`addition` and `division` groups. These groups have no theoretical significance,
+in that they do not affect the semantics of the language in any way. They only
+have practical relevance, specific to our implementation of the **K** tool.
+Specifically, we can tell the **K** tool (using its `superheat` and `supercool`
 options) that we want to exhaustively explore all the non-deterministic
 behaviors (due to strictness) of these language constructs. For performance
 reasons, by default the **K** tool chooses an arbitrary but fixed order to
-evaluate the arguments of the strict language constructs, thus possibly
-losing behaviors due to missed interleavings. This aspect was irrelevant in
-IMP, because its expressions had no side effects, but it becomes relevant
-in IMP++.
+evaluate the arguments of the strict language constructs, thus possibly losing
+behaviors due to missed interleavings. This aspect was irrelevant in IMP,
+because its expressions had no side effects, but it becomes relevant in IMP++.
 
 The syntax of the IMP++ constructs is self-explanatory. Note that assignment
 is now an expression construct. Also, `print` is variadic, taking a
@@ -293,7 +291,7 @@ configuration.
 Below we list the semantics of the old IMP constructs, referring the
 reader to the **K** semantics of IMP for their meaning. Like we tagged the
 addition and the division rules above in the syntax, we also tag the lookup
-and the assignment rules below (with tags `lookup` and
+and the assignment rules below (as members of the groups `lookup` and
 `assignment`), because we want to refer to them when we generate the
 language model (with the `kompile` tool), basically to allow them to
 generate (possibly non-deterministic) transitions. Indeed, these two rules,
@@ -405,7 +403,7 @@ Without abstraction, you would have to also include the `thread` and
 
 ### Read
 The `read()` construct evaluates to the first integer in the
-input buffer, which it consumes. Note that this rule is tagged
+input buffer, which it consumes. Note that this rule is put in the group
 `increment`. This is because we will include it in the set of
 potentially non-deterministic transitions when we kompile the definition;
 we want to do that because two or more threads can "compete" on
@@ -587,7 +585,7 @@ with the command:
 kompile imp.k --transition="addition division lookup assignment increment read print"
 ```
 
-As already mentioned, the syntax and rule tags play no theoretical or
+As already mentioned, the syntax and rule groups play no theoretical or
 foundational role in **K**. They are only a means to allow `kompile` to
 refer to them in its options, like we did above. By default, `kompile`'s
 transition option is empty, because this yields the fastest language model when
