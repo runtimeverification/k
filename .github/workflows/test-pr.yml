@@ -32,7 +32,7 @@ jobs:
 
   nix-maven:
     name: 'Nix: Maven'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: ubuntu-20.04
     needs: version-sync
     steps:
 
@@ -67,7 +67,7 @@ jobs:
           git checkout ${GITHUB_HEAD_REF}
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
                 -- $(find . -name pom.xml); then
-            nix run .
+            nix run .#update-maven
           fi
           if git add nix/ && git commit -m 'Update Nix lock files'; then
             git push
