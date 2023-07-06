@@ -876,6 +876,7 @@ public class ModuleToKORE {
         HashMap<Att.Key, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
+        consideredAttributes.put(Att.GROUP(), true);
         consideredAttributes.put(Att.SOURCE(), true);
         consideredAttributes.put(Att.LOCATION(), true);
         consideredAttributes.put(Att.UNIQUE_ID(), true);
@@ -1673,7 +1674,7 @@ public class ModuleToKORE {
 
 
     private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
-        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.att())) {
+        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.withUserGroupsAsGroupAtt().att())) {
             Att.Key name = attribute._1._1;
             Object val = attribute._2;
             String strVal = val.toString();
@@ -1832,6 +1833,10 @@ public class ModuleToKORE {
     private void convert(Map<Att.Key, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
+
+        // Emit user groups as group(_) to prevent conflicts between user groups and internals
+        att = att.withUserGroupsAsGroupAtt();
+
         for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
             // Sort to stabilize error messages
             stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).collect(Collectors.toList())) {
@@ -2001,10 +2006,10 @@ public class ModuleToKORE {
                 sb.append("\\dv{");
                 convert(k.sort(), sb);
                 sb.append("}(");
-                if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("STRING.String")) {
-                    sb.append(k.s());
-                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("BYTES.Bytes")) {
-                    sb.append(k.s().substring(1)); // remove the leading `b`
+                if (module.sortAttributesFor().get(k.sort().head()).getOrElse(Att::empty).getOptional(Att.HOOK()).orElse("").equals("STRING.String")) {
+                    sb.append(StringUtil.escapeNonASCII(k.s()));
+                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(Att::empty).getOptional(Att.HOOK()).orElse("").equals("BYTES.Bytes")) {
+                    sb.append(StringUtil.escapeNonASCII(k.s().substring(1))); // remove the leading `b`
                 } else {
                     sb.append(StringUtil.enquoteKString(k.s()));
                 }
