@@ -21,6 +21,7 @@ let
       "-DskipKTest=true"
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
+      "-Dhaskell.backend.booster.skip=true"
     ];
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
     # hooks can also be set here.
