@@ -43,6 +43,7 @@
         ],
         "k-framework": [],
         "nixpkgs": [
+          "haskell-backend",
           "nixpkgs"
         ]
       },
@@ -505,7 +506,6 @@
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "a623014",
         "repo": "haskell-backend",
         "type": "github"
       }
