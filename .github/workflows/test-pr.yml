@@ -66,10 +66,7 @@ jobs:
           set -x
           git checkout ${GITHUB_HEAD_REF}
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
-                -- $(find . -name pom.xml)                                              \
-                   $(find nix -name '*.nix')                                            \
-                   llvm-backend/src/main/native/llvm-backend                            \
-                   haskell-backend/src/main/native/haskell-backend; then
+                -- $(find . -name pom.xml); then
             nix run .#update-maven
           fi
           if git add nix/ && git commit -m 'Update Nix lock files'; then
