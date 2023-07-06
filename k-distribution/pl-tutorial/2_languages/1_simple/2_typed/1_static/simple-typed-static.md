@@ -509,7 +509,7 @@ Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes:
 ```k
 // NOTE:
-// We used to need parentheses in the RHS, to avoid capturing Ts as rule tag.
+// We used to need parentheses in the RHS, to avoid capturing Ts as an attribute
 // Let's hope that is not a problem anymore.
 
   rule (T[])[int, Ts:Types] => T[Ts]
