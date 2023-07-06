@@ -29,6 +29,7 @@ def kompile(
     output_dir: str | Path | None = None,
     temp_dir: str | Path | None = None,
     debug: bool = False,
+    verbose: bool = False,
     cwd: Path | None = None,
     check: bool = True,
     **kwargs: Any,
@@ -40,6 +41,7 @@ def kompile(
         output_dir=output_dir,
         temp_dir=temp_dir,
         debug=debug,
+        verbose=verbose,
         cwd=cwd,
         check=check,
     )
@@ -103,6 +105,7 @@ class Kompile(ABC):
         output_dir: str | Path | None = None,
         temp_dir: str | Path | None = None,
         debug: bool = False,
+        verbose: bool = False,
         cwd: Path | None = None,
         check: bool = True,
     ) -> Path:
@@ -124,8 +127,11 @@ class Kompile(ABC):
         if debug:
             args += ['--debug']
 
+        if verbose:
+            args += ['--verbose']
+
         try:
-            run_process(args, logger=_LOGGER, cwd=cwd, check=check)
+            proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
         except CalledProcessError as err:
             raise RuntimeError(
                 f'Command kompile exited with code {err.returncode} for: {self.base_args.main_file}',
@@ -133,6 +139,9 @@ class Kompile(ABC):
                 err.stderr,
                 err.returncode,
             ) from err
+
+        if proc_res.stdout:
+            print(proc_res.stdout.rstrip())
 
         definition_dir = output_dir if output_dir else Path(self.base_args.main_file.stem + '-kompiled')
         assert definition_dir.is_dir()
