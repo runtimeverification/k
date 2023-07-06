@@ -9,7 +9,7 @@
       # but the two are not necessarily the same (different more often than not).
       # We get two transitive dependencies on haskell-nix.
       inputs.k-framework.follows = "";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     };
     llvm-backend.url = "github:runtimeverification/llvm-backend";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
