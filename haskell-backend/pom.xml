@@ -11,7 +11,7 @@
   <artifactId>haskell-backend</artifactId>
   <packaging>jar</packaging>
 
-  <name>K Framework Haskell Backend</name>
+  <name>K Framework Old Haskell Backend</name>
 
   <dependencies>
     <dependency>
