@@ -41,9 +41,9 @@ public class CheckAtt {
     }
 
     public void checkUnrecognizedModuleAtts() {
-        if (!m.att().rawKeys().isEmpty()) {
+        if (!m.att().unrecognizedKeys().isEmpty()) {
             errors.add(KEMException.compilerError("Unrecognized attributes on module " + m.name() + ": " +
-                    m.att().rawKeys().mkString("[", ", ", "]") +
+                    m.att().unrecognizedKeys().mkString("[", ", ", "]") +
                     "\nHint: User-defined groups can be added with the group(_) attribute."));
         }
     }
@@ -59,19 +59,9 @@ public class CheckAtt {
     }
 
     private void checkUnrecognizedAtts(Sentence sentence) {
-        /* When a Definition is created, the following occurs:
-         * - the parser inserts a raw key for anything which is not recognized as a built-in attribute
-         * - if --pedantic-attributes is disabled, ProcessGroupAttributes replaces all raw keys with user group keys
-         *
-         * Thus, if a raw key still exists at this point, we know both of the following:
-         * - the --pedantic-attributes option is enabled
-         * - the raw key was not a recognized built-in
-         *
-         * so we must report an error.
-         */
-        if (!sentence.att().rawKeys().isEmpty()) {
+        if (!sentence.att().unrecognizedKeys().isEmpty()) {
             errors.add(KEMException.compilerError("Unrecognized attributes: " +
-                    sentence.att().rawKeys().mkString("[", ", ", "]") +
+                    sentence.att().unrecognizedKeys().mkString("[", ", ", "]") +
                     "\nHint: User-defined groups can be added with the group(_) attribute.", sentence));
         }
     }
