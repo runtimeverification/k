@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr
+from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr, mlTop
 from ..utils import find_common_items, hash_str
 from .inner import KApply, KRewrite, KSequence, KToken, KVariable, Subst, bottom_up, top_down, var_occurrences
 from .kast import EMPTY_ATT, KAtt, WithKAtt
@@ -598,8 +598,17 @@ def anti_unify(state1: KInner, state2: KInner) -> tuple[KInner, Subst, Subst]:
 
 
 def anti_unify_with_constraints(
-    constrained_term_1: KInner, constrained_term_2: KInner, implications: bool = False, disjunct: bool = False
+    constrained_term_1: KInner,
+    constrained_term_2: KInner,
+    implications: bool = False,
+    constraint_disjunct: bool = False,
+    abstracted_disjunct: bool = False,
 ) -> KInner:
+    def disjunction_from_substs(subst1: Subst, subst2: Subst) -> KInner:
+        if KToken('true', 'Bool') in [subst1.pred, subst2.pred]:
+            return mlTop()
+        return mlEqualsTrue(orBool([subst1.pred, subst2.pred]))
+
     state1, constraint1 = split_config_and_constraints(constrained_term_1)
     state2, constraint2 = split_config_and_constraints(constrained_term_2)
     constraints1 = flatten_label('#And', constraint1)
@@ -612,11 +621,14 @@ def anti_unify_with_constraints(
     implication1 = mlImplies(constraint1, subst1.ml_pred)
     implication2 = mlImplies(constraint2, subst2.ml_pred)
 
+    if abstracted_disjunct:
+        constraints.append(disjunction_from_substs(subst1, subst2))
+
     if implications:
         constraints.append(implication1)
         constraints.append(implication2)
 
-    if disjunct:
+    if constraint_disjunct:
         constraints.append(mlOr([constraint1, constraint2]))
 
     return mlAnd([state] + constraints)
