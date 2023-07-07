@@ -136,6 +136,18 @@ class Subst(Mapping[str, KInner]):
             ml_term = KApply('#And', [ml_term, _i])
         return ml_term
 
+    @property
+    def pred(self) -> KInner:
+        conjuncts = [
+            KApply('_==K_', KVariable(name), val)
+            for name, val in self.items()
+            if type(val) is not KVariable or val.name != name
+        ]
+        if not conjuncts:
+            return KToken('true', 'Bool')
+
+        return reduce(KLabel('_andBool_'), conjuncts)
+
 
 @final
 @dataclass(frozen=True)
