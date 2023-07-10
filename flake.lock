@@ -359,21 +359,6 @@
         "type": "github"
       }
     },
-    "flake-utils_5": {
-      "locked": {
-        "lastModified": 1642700792,
-        "narHash": "sha256-XqHrk7hFb+zBvRg6Ghl+AZDq03ov6OshJLiSWOoX5es=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "846b2ae0fc4cc943637d3d1def4454213e203cba",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "fmt-src": {
       "flake": false,
       "locked": {
@@ -488,7 +473,6 @@
       "inputs": {
         "flake-compat": "flake-compat_5",
         "haskell-nix": "haskell-nix_2",
-        "mach-nix": "mach-nix_2",
         "nixpkgs": [
           "haskell-backend",
           "haskell-nix",
@@ -497,11 +481,11 @@
         "z3-src": "z3-src_2"
       },
       "locked": {
-        "lastModified": 1688483898,
-        "narHash": "sha256-Y4AUxocbScrL44BekC2dLfAYoT+syRN+Sq/TqIIoyg8=",
+        "lastModified": 1689002764,
+        "narHash": "sha256-fXyq+eh7iAtUecGaSgTCx1SQIxDeMwg0mEnDDkDfLhc=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "a6230144a37ee9ebf0f6dffc849faf5ce10df380",
+        "rev": "b44422b948f8c3bf364e24b662d6f7ea33d3a3f3",
         "type": "github"
       },
       "original": {
@@ -880,29 +864,9 @@
         "type": "github"
       }
     },
-    "mach-nix_2": {
-      "inputs": {
-        "flake-utils": "flake-utils_5",
-        "nixpkgs": "nixpkgs_4",
-        "pypi-deps-db": "pypi-deps-db_2"
-      },
-      "locked": {
-        "lastModified": 1681814846,
-        "narHash": "sha256-IMQ1Twf/ozE53CwrunXNlYD3D31xqgz/mZyZG38Ov/Y=",
-        "owner": "DavHau",
-        "repo": "mach-nix",
-        "rev": "8d903072c7b5426d90bc42a008242c76590af916",
-        "type": "github"
-      },
-      "original": {
-        "owner": "DavHau",
-        "repo": "mach-nix",
-        "type": "github"
-      }
-    },
     "mavenix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_4",
         "utils": "utils"
       },
       "locked": {
@@ -921,7 +885,7 @@
     },
     "mavenix_2": {
       "inputs": {
-        "nixpkgs": "nixpkgs_6",
+        "nixpkgs": "nixpkgs_5",
         "utils": "utils_3"
       },
       "locked": {
@@ -1285,16 +1249,15 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1643805626,
-        "narHash": "sha256-AXLDVMG+UaAGsGSpOtQHPIKB+IZ0KSd9WS77aanGzgc=",
+        "lastModified": 1621552131,
+        "narHash": "sha256-AD/AEXv+QOYAg0PIqMYv2nbGOGTIwfOGKtz3rE+y+Tc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "554d2d8aa25b6e583575459c297ec23750adb6cb",
+        "rev": "d42cd445dde587e9a993cd9434cb43da07c4c5de",
         "type": "github"
       },
       "original": {
         "id": "nixpkgs",
-        "ref": "nixos-unstable",
         "type": "indirect"
       }
     },
@@ -1313,20 +1276,6 @@
       }
     },
     "nixpkgs_6": {
-      "locked": {
-        "lastModified": 1621552131,
-        "narHash": "sha256-AD/AEXv+QOYAg0PIqMYv2nbGOGTIwfOGKtz3rE+y+Tc=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "d42cd445dde587e9a993cd9434cb43da07c4c5de",
-        "type": "github"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "nixpkgs_7": {
       "locked": {
         "lastModified": 1688939073,
         "narHash": "sha256-jYhYjeK5s6k8QS3i+ovq9VZqBJaWbxm7awTKNhHL9d0=",
@@ -1408,22 +1357,6 @@
         "type": "github"
       }
     },
-    "pypi-deps-db_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1678051695,
-        "narHash": "sha256-kFFP8TN8pEKARtjK9loGdH+TU23ZbHdVLCUdNcufKPs=",
-        "owner": "DavHau",
-        "repo": "pypi-deps-db",
-        "rev": "e00b22ead9d3534ba1c448e1af3076af6b234acf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "DavHau",
-        "repo": "pypi-deps-db",
-        "type": "github"
-      }
-    },
     "rapidjson-src": {
       "flake": false,
       "locked": {
@@ -1449,7 +1382,7 @@
         "haskell-backend": "haskell-backend_2",
         "llvm-backend": "llvm-backend",
         "mavenix": "mavenix_2",
-        "nixpkgs": "nixpkgs_7",
+        "nixpkgs": "nixpkgs_6",
         "rv-utils": "rv-utils"
       }
     },
