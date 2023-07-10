@@ -214,15 +214,15 @@ public class StringUtil {
 
     /**
      * Get the escaped string for a Unicode codepoint:
-     * Codepoints less than 127 are stored directly as the character
-     * Codepoints between 127 and 255 are stored as \xFF
+     * Codepoints between 32 and 126 are stored directly as the character
+     * Codepoints between 0 and 31 and between 127 and 255 are stored as \xFF
      * Codepoints between 256 and 65535 are stored as \uFFFF
      * Codepoints above 65536 are stored as \u0010FFFF
      * @param value a Unicode codepoint
      * @return representation of the codepoint as an escaped string
      */
     public static String getUnicodeEscape(int codepoint) {
-        if (codepoint < 127) {
+        if (32 <= codepoint && codepoint < 127) {
             return String.valueOf((char) codepoint);
         }
         if (codepoint <= 0xff) {
@@ -271,7 +271,8 @@ public class StringUtil {
 
     /**
      * Escapes all non-ASCII characters as follows:
-     * Characters between 127 and 255 are stored as \xFF
+     * Characters between 32 and 126 are stored directly as the character
+     * Characters between 0 and 31 and between 127 and 255 are stored as \xFF
      * Characters between 256 and 65535 are stored as \uFFFF
      * Characters above 65536 are stored as \u0010FFFF
      * @param value any string
