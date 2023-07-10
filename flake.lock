@@ -925,11 +925,11 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1656435814,
-        "narHash": "sha256-Gx4QoWB9eI437/66iqTr6AUjxGgN6WslqrQ57s+sL6A=",
+        "lastModified": 1689016945,
+        "narHash": "sha256-1v5XL1eKSJVI1FBD5q0f+BZ643yiJYEN+eqyjAqGuqk=",
         "owner": "goodlyrottenapple",
         "repo": "mavenix",
-        "rev": "0cbd57b2494d52909b27f57d03580acc66bf0298",
+        "rev": "1abd087787791e6609a116d8f49aed5fdc71d024",
         "type": "github"
       },
       "original": {
