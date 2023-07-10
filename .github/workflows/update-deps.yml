@@ -48,6 +48,6 @@ jobs:
           sed -i 's!      url = "github:runtimeverification/hs-backend-booster/[0-9a-f]*";!      url = "github:runtimeverification/hs-backend-booster/'${booster_version}'";!' flake.nix
           nix flake update
           GC_DONT_GC=1 nix run .#update-from-submodules
-          if git add 'flake.lock' && git commit -m 'Sync flake inputs to submodules'; then
+          if git add flake.nix flake.lock && git commit -m 'Sync flake inputs to submodules'; then
             git push
           fi
