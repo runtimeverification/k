@@ -166,8 +166,8 @@ the list is on a position which can be evaluated:
 ```
 We next define the syntax of arithmetic constructs, together with
 their relative priorities and left-/non-associativities.  We also
-tag all these rules with a new tag, "arith", so we can more easily
-define global syntax priirities later (at the end of the syntax module).
+tag all these rules as members of a new group, "arith", so we can more easily
+define global syntax priorities later (at the end of the syntax module).
 ```k
   syntax Exp ::= left:
                  Exp "*" Exp                       [strict, group(arith)]
