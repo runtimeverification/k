@@ -57,8 +57,8 @@
       },
       "original": {
         "owner": "runtimeverification",
-        "ref": "ef20c45",
         "repo": "hs-backend-booster",
+        "rev": "ef20c4501e04c0e998170030bcce06470cd13d26",
         "type": "github"
       }
     },
