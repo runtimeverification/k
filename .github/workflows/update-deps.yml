@@ -4,6 +4,7 @@ on:
     branches:
       - '_update-deps/runtimeverification/haskell-backend'
       - '_update-deps/runtimeverification/llvm-backend'
+      - '_update-deps/runtimeverification/hs-backend-booster'
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
@@ -40,8 +41,11 @@ jobs:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
-      - name: 'Update Nix flake inputs from submodules'
+      - name: 'Update Nix flake inputs from submodules/release-tags'
         run: |
+          set -euxo pipefail
+          booster_version=$(cat deps/hs-backend-booster_release)
+          sed -i 's!      url = "github:runtimeverification/hs-backend-booster/[0-9a-f]*";!      url = "github:runtimeverification/hs-backend-booster/'${booster_version}'";!' flake.nix
           nix flake update
           GC_DONT_GC=1 nix run .#update-from-submodules
           if git add 'flake.lock' && git commit -m 'Sync flake inputs to submodules'; then
