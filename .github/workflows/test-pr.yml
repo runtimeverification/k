@@ -125,6 +125,22 @@ jobs:
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
 
+  test-package-ubuntu-debian-bookworm:
+    name: 'K Debian Bookworm Package'
+    runs-on: [self-hosted, linux, normal]
+    needs: version-sync
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
+        with:
+          os: debian
+          distro: bookworm
+          llvm: 14
+          pkg-name: kframework_amd64_debian_bookworm.deb
+          build-package: package/debian/build-package bookworm
+          test-package: package/debian/test-package
+
   compile-nix-flake:
     name: 'Nix flake'
     strategy:
