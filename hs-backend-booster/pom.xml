@@ -56,7 +56,7 @@
             <id>build-haskell-booster</id>
             <phase>compile</phase>
             <configuration>
-              <skip>${haskell.backend.booster.skip}</skip>
+              <skip>${booster.skip}</skip>
               <target>
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/hs-backend-booster" failonerror="true">
@@ -74,7 +74,7 @@
             <id>clean-haskell-booster</id>
             <phase>clean</phase>
             <configuration>
-              <skip>${haskell.backend.booster.skip}</skip>
+              <skip>${booster.skip}</skip>
               <target>
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/hs-backend-booster" failonerror="true">
