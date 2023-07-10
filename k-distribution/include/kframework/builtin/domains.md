@@ -814,7 +814,7 @@ The following lemmas are simplifications that the Haskell backend can
 apply to simplify expressions of sort `Set`.
 
 ```k
-module SET-KORE-SYMBOLIC [kore,symbolic]
+module SET-KORE-SYMBOLIC [kore,symbolic,haskell]
   imports SET
   imports private K-EQUAL
   imports private BOOL
