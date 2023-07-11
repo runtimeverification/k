@@ -53,7 +53,7 @@ RUN    apt-get update              \
         llvm-${LLVM_VERSION}-tools \
         locales                    \
         maven                      \
-        openjdk-11-jdk             \
+        openjdk-17-jdk             \
         parallel                   \
         pkg-config                 \
         python3                    \
