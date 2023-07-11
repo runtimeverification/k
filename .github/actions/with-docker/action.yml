@@ -83,6 +83,4 @@ runs:
           --workdir /opt/workspace/${SUBDIR} \
           --user ${USER}:${GROUP}            \
           -v "$(pwd):/opt/workspace"         \
-          -v "/etc/passwd:/etc/passwd:ro"    \
-          -v "/etc/group:/etc/group:ro"      \
           runtimeverification/${TAG_NAME}
