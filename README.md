@@ -76,7 +76,7 @@ On Ubuntu Linux 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-14 lld-14 llvm-14-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-14 lld-14 llvm-14-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -86,7 +86,7 @@ On Ubuntu Linux 20.04 (Focal):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
