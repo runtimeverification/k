@@ -4,7 +4,7 @@
     nixpkgs.url = "nixpkgs/nixos-23.05";
     haskell-backend.url = "github:runtimeverification/haskell-backend";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/ef20c45";
+      url = "github:runtimeverification/hs-backend-booster/09692d6ebd8f4a4c6fd39aab4b7ce3286d724aca";
       # NB booster-backend will bring in another dependency on haskell-backend,
       # but the two are not necessarily the same (different more often than not).
       # We get two transitive dependencies on haskell-nix.
@@ -47,6 +47,7 @@
                   "nix/"
                   "*.nix"
                   "haskell-backend/src/main/native/haskell-backend/*"
+                  "hs-backend-booster/src/main/native/hs-backend-booster/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
                 ] ./.);
@@ -133,7 +134,7 @@
           '';
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
-            inherit llvm-backend haskell-backend;
+            inherit llvm-backend haskell-backend booster-backend;
           };
 
           update-from-submodules =
@@ -142,6 +143,8 @@
                 "haskell-backend/src/main/native/haskell-backend";
               llvm-backend.submodule =
                 "llvm-backend/src/main/native/llvm-backend";
+              booster-backend.submodule =
+                "hs-backend-booster/src/main/native/hs-backend-booster";
             };
 
           test = with pkgs;
