@@ -13,6 +13,7 @@
     <module>kernel</module>
     <module>k-distribution</module>
     <module>haskell-backend</module>
+    <module>hs-backend-booster</module>
     <module>llvm-backend</module>
     <module>llvm-backend/src/main/native/llvm-backend/matching</module>
   </modules>
@@ -213,7 +214,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</excludes>
+              <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</excludes>
             </configuration>
           </execution>
           <execution>
@@ -229,7 +230,7 @@
               <includeResources>false</includeResources>
               <includeTestResources>false</includeTestResources>
               <includes>**/*.k</includes>
-              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,**/.kompile-*/**</excludes>
+              <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,**/.kompile-*/**</excludes>
               <configLocation>src/main/config/checkstyle-k.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
