@@ -51,7 +51,7 @@ public class Module extends DefinitionItem {
 
     @Override
     public void toString(StringBuilder sb) {
-        sb.append("module ").append(name).append(" ").append(getAttributes()).append("\n");
+        sb.append("module ").append(name).append(" ").append(getAttributes().withUserGroupsAsGroupAtt()).append("\n");
         for (ModuleItem i : items) {
             i.toString(sb);
             sb.append("\n");

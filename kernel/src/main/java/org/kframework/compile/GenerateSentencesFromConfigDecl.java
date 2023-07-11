@@ -59,11 +59,10 @@ public class GenerateSentencesFromConfigDecl {
      * @param ensures The ensures clause of the configuration declaration.
      * @param att The attributes of the configuration declaration.
      * @param m The module the configuration declaration exists in.
-     * @param pedanticAttributes Whether to error check that cell properties are in the attribute whitelist.
      * @return A set of sentences representing the configuration declaration.
      */
-    public static Set<Sentence> gen(K body, K ensures, Att att, Module m, boolean pedanticAttributes) {
-        return genInternal(body, ensures, att, m, pedanticAttributes)._1();
+    public static Set<Sentence> gen(K body, K ensures, Att att, Module m) {
+        return genInternal(body, ensures, att, m)._1();
     }
 
     /**
@@ -77,10 +76,9 @@ public class GenerateSentencesFromConfigDecl {
      *                it is not the top cell of a configuration declaration.
      * @param cfgAtt The attributes of the configuration declaration. Appended to all cell productions generated.
      * @param m The module the configuration declaration is in. Used to get the sort of leaf cells.
-     * @param pedanticAttributes Whether to error check that cell properties are in the attribute whitelist.
      * @return A tuple of the sentences generated, a list of the sorts of the children of the cell, and the body of the initializer.
      */
-    private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(K term, K ensures, Att cfgAtt, Module m, boolean pedanticAttributes) {
+    private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(K term, K ensures, Att cfgAtt, Module m) {
         if (term instanceof KApply) {
             KApply kapp = (KApply) term;
             if (kapp.klabel().name().equals("#configCell")) {
@@ -93,7 +91,7 @@ public class GenerateSentencesFromConfigDecl {
                             KToken label = (KToken) startLabel;
                             if (label.sort().equals(Sort("#CellName"))) {
                                 String cellName = label.s();
-                                Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures, pedanticAttributes);
+                                Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
                                 Multiplicity multiplicity = convertStringMultiplicity(
                                         cellProperties.getOption(Att.MULTIPLICITY()), term);
                                 boolean isStream = cellProperties.getOption(Att.STREAM()).isDefined();
@@ -103,7 +101,7 @@ public class GenerateSentencesFromConfigDecl {
                                 if (kapp.att().contains(Location.class))
                                     att = cfgAtt.add(Location.class, kapp.att().get(Location.class));
                                 Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(
-                                        cellContents, null, att, m, pedanticAttributes);
+                                        cellContents, null, att, m);
 
                                 boolean isLeafCell = childResult._4();
                                 Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, att, m, cellName, cellProperties,
@@ -147,7 +145,7 @@ public class GenerateSentencesFromConfigDecl {
                     //top level cell, therefore, should be the children of the generatedTop cell
                     KToken cellLabel = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                     K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), term, cellLabel);
-                    return genInternal(generatedTop, ensures, cfgAtt, m, pedanticAttributes);
+                    return genInternal(generatedTop, ensures, cfgAtt, m);
                 }
                 List<K> cells = Assoc.flatten(kapp.klabel(), kapp.klist().items(), m);
                 Set<Sentence> accumSentences = Set();
@@ -155,7 +153,7 @@ public class GenerateSentencesFromConfigDecl {
                 List<K> initializers = Lists.newArrayList();
                 for (K cell : cells) {
                     //for each cell, generate the child and inform the parent of the children it contains
-                    Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(cell, null, cfgAtt, m, pedanticAttributes);
+                    Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(cell, null, cfgAtt, m);
                     accumSentences = (Set<Sentence>)accumSentences.$bar(childResult._1());
                     sorts.addAll(childResult._2());
                     initializers.add(childResult._3());
@@ -572,7 +570,7 @@ public class GenerateSentencesFromConfigDecl {
         }
     }
 
-    private static Att getCellPropertiesAsAtt(K k, String cellName, K ensures, boolean pedanticAttributes) {
+    private static Att getCellPropertiesAsAtt(K k, String cellName, K ensures) {
         Att att = Att();
         if (cellName.equals("k")) {
             att = att.add(Att.MAINCELL());
@@ -581,29 +579,28 @@ public class GenerateSentencesFromConfigDecl {
             att = att.add(Att.TOPCELL());
         }
         att = att.add(Att.CELL()).add(Att.CELL_NAME(), cellName);
-        return att.addAll(getCellPropertiesAsAtt(k, pedanticAttributes));
+        return att.addAll(getCellPropertiesAsAtt(k));
     }
 
-    private static Att getCellPropertiesAsAtt(K k, boolean pedanticAttributes) {
+    private static Att getCellPropertiesAsAtt(K k) {
         if (k instanceof KApply) {
             KApply kapp = (KApply) k;
             if (kapp.klabel().name().equals("#cellPropertyListTerminator")) {
                 return Att();
             } else if (kapp.klabel().name().equals("#cellPropertyList")) {
                 if (kapp.klist().size() == 2) {
-                    Tuple2<Att.Key, String> attribute = getCellProperty(kapp.klist().items().get(0), pedanticAttributes);
+                    Tuple2<Att.Key, String> attribute = getCellProperty(kapp.klist().items().get(0));
                     return ProcessGroupAttributes.getProcessedAtt(
                             Att().add(attribute._1(), attribute._2())
-                                    .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1), pedanticAttributes)),
-                            k,
-                            pedanticAttributes);
+                                    .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1))),
+                            k);
                 }
             }
         }
         throw KEMException.compilerError("Malformed cell properties", k);
     }
 
-    private static Tuple2<Att.Key, String> getCellProperty(K k, boolean pedanticAttributes) {
+    private static Tuple2<Att.Key, String> getCellProperty(K k) {
         if (k instanceof KApply) {
             KApply kapp = (KApply) k;
             if (kapp.klabel().name().equals("#cellProperty")) {
@@ -612,15 +609,9 @@ public class GenerateSentencesFromConfigDecl {
                         KToken keyToken = (KToken) kapp.klist().items().get(0);
                         if (keyToken.sort().equals(Sort("#CellName"))) {
                             Att.Key key = Att.getBuiltinKeyOptional(keyToken.s())
-                                    .or(() -> {
-                                        if (pedanticAttributes) {
-                                            throw KEMException.compilerError("Unrecognized attribute: " + keyToken.s() +
-                                                    "\nHint: User-defined groups can be added with the group=\"...\" attribute.", k);
-                                        }
-                                        return Att.getUserGroupOptional(keyToken.s());
-                                    }).orElseThrow(() ->
-                                            new AssertionError("Attribute '" + keyToken.s() + "' is not a built-in or internal, " +
-                                                    "yet Att.getUserGroupOptional(\"" + keyToken.s() + "\") failed."));
+                                    .orElseThrow(() ->
+                                            KEMException.compilerError("Unrecognized attribute: " + keyToken.s() +
+                                                    "\nHint: User-defined groups can be added with the group=\"...\" attribute.", k));
                             if (kapp.klist().items().get(0) instanceof KToken) {
                                 KToken valueToken = (KToken) kapp.klist().items().get(1);
                                 if (valueToken.sort().equals(Sorts.KString())) {
