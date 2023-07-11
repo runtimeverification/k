@@ -155,8 +155,8 @@ jobs:
         run: |
           docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
 
-  debian-bullseye:
-    name: 'K Debian Bullseye Package'
+  debian-bookworm:
+    name: 'K Debian Bookworm Package'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 60
     steps:
@@ -165,10 +165,10 @@ jobs:
         uses: ./.github/actions/test-package
         with:
           os: debian
-          distro: bullseye
-          llvm: 11
-          pkg-name: kframework_amd64_debian_bullseye.deb
-          build-package: package/debian/build-package bullseye
+          distro: bookworm
+          llvm: 14
+          pkg-name: kframework_amd64_debian_bookworm.deb
+          build-package: package/debian/build-package bookworm
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
         env:
@@ -176,8 +176,8 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye.deb
-          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bullseye.deb
+          cp kframework_amd64_debian_bookworm.deb kframework_${version}_amd64_debian_bookworm.deb
+          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bookworm.deb
 
   arch:
     name: 'Arch Linux Package'
@@ -385,7 +385,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal-ephemeral]
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bookworm, set-release-id, arch]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
