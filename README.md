@@ -148,7 +148,7 @@ See the notes below.
 1.  Java Development Kit (required JDK11 or higher)
 
     *   Linux: Download from package manager
-        (e.g. `sudo apt-get install openjdk-17-jdk`).
+        (e.g. `sudo apt-get install openjdk-11-jdk`).
 
     *   macOS/brew: Download from package manager
         (e.g. `brew install java`).
