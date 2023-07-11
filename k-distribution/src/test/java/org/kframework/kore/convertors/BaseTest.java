@@ -98,7 +98,7 @@ public abstract class BaseTest {
         def.setMainModule("TEST");
         def.setMainSyntaxModule("TEST");
 
-        ProcessGroupAttributes.apply(def, true);
+        ProcessGroupAttributes.apply(def);
         Context context = new Context();
         return new DefinitionWithContext(def, context);
     }

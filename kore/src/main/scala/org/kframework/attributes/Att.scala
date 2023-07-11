@@ -23,20 +23,19 @@ trait AttValue
  * However, there are two caveats:
  * - We store the type of the value in the key. That is, a key is a pair (s1, s2) where the corresponding value must
  *   have type class.forName(s2).
- * - We use a wrapper Att.Key(String,KeyType) than a raw String key. This helps to enforce access controls and allows 
- *   for easier IDE navigation to where each attribute is used.
+ * - We use a wrapper Att.Key(String,KeyType) rather than a raw String key. This helps to enforce access controls and
+ *   allows for easier IDE navigation to where each attribute is used.
  *
  * New attributes should be added as a Key field Att.MY_NEW_ATT in the object below.
  *
  * To obtain an appropriate Key, use
  * - Att.MY_ATT, if you statically know the key you want
  * - Att.getBuiltInKeyOptional(myAttStr), if checking a user-supplied attribute string. Be sure to report an error
- *   if the lookup fails and --pedantic-attributes is enabled.
+ *   if the lookup fails
  * - Att.getInternalKeyOptional(myAttStr), if expecting an internal key
  * - Att.getUserGroupOptional(myAttStr), if expecting a user-group, enforcing that it is not a built-in
  * 
- * In rare circumstances, you may also use Att.unsafeRawKey(myAttStr) if you pinky-promise to check the keys are valid
- * and categorize them elsewhere (e.g. during parsing to allow us to report multiple errors)
+ * During parsing, you may also use Att.unrecognizedKey(myAttStr) to delay error reporting on an unrecognized attribute
  */
 class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToString with Serializable {
 
@@ -80,11 +79,8 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
     }
     Right(att.remove(Att.GROUP))
   }
-
-
-  // All those raw keys which are not categorized
-  val rawKeys: Set[Att.Key] =
-    att.map(_._1._1).filter(_.keyType.equals(Att.KeyType.Raw)).toSet
+  val unrecognizedKeys: Set[Att.Key] =
+    att.map(_._1._1).filter(_.keyType.equals(Att.KeyType.Unrecognized)).toSet
 
   def getMacro: Option[Att.Key] = {
     if (contains(Att.MACRO)){
@@ -148,9 +144,9 @@ object Att {
     // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the group(_) attribute,
     // else there will be conflicts when a user group has the same name as an internal attribute.
     case object UserGroup extends KeyType;
-    // Attributes which may be a BuiltIn/Internal/UserGroup, but have not been checked or categorized
-    // This is mainly used during parsing to delay error checking, allowing us to report multiple errors
-    case object Raw extends KeyType;
+    // Attributes from user source code which are not recognized as built-ins
+    // This is only used to delay error reporting until after parsing, allowing us to report multiple errors
+    case object Unrecognized extends KeyType;
   }
 
   /* The Key class can only be constructed within Att. To enforce this, we must
@@ -166,11 +162,8 @@ object Att {
     private[Att] def apply(key: String, keyType: KeyType): Key = new Key(key, keyType)
   }
 
-  /*
-   * WARNING: Only use this in exceptional circumstances (e.g. during parsing)!
-   */
-  def unsafeRawKey(key: String): Att.Key =
-    Att.Key(key, KeyType.Raw)
+  def unrecognizedKey(key: String): Att.Key =
+    Att.Key(key, KeyType.Unrecognized)
 
   val empty: Att = Att(Map.empty)
 

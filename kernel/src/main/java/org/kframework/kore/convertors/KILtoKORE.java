@@ -40,13 +40,11 @@ public class KILtoKORE extends KILTransformation<Object> {
     private final boolean syntactic;
     private String moduleName;
     private final boolean bisonLists;
-    private final boolean pedanticAttributes;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean bisonLists, boolean pedanticAttributes) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean bisonLists) {
         this.context = context;
         this.syntactic = syntactic;
         this.bisonLists = bisonLists;
-        this.pedanticAttributes = pedanticAttributes;
     }
 
     public FlatModule toFlatModule(Module m) {
@@ -74,14 +72,14 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .map(imp -> apply((Import)imp))
                 .collect(Collectors.toSet());
 
-        Att att = convertAttributes(m, pedanticAttributes);
+        Att att = convertAttributes(m);
         att = att.add(Att.DIGEST(), m.digest());
 
         return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
     }
 
     public org.kframework.definition.FlatImport apply(Import imp) {
-        return org.kframework.definition.FlatImport.apply(imp.getName(), imp.isPublic(), convertAttributes(imp, pedanticAttributes));
+        return org.kframework.definition.FlatImport.apply(imp.getName(), imp.isPublic(), convertAttributes(imp));
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -107,17 +105,17 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Sentence apply(SortSynonym synonym) {
-      return new org.kframework.definition.SortSynonym(synonym.newSort, synonym.oldSort, convertAttributes(synonym, pedanticAttributes));
+      return new org.kframework.definition.SortSynonym(synonym.newSort, synonym.oldSort, convertAttributes(synonym));
     }
 
     public org.kframework.definition.Sentence apply(SyntaxLexical lexical) {
-      return new org.kframework.definition.SyntaxLexical(lexical.name, lexical.regex, convertAttributes(lexical, pedanticAttributes));
+      return new org.kframework.definition.SyntaxLexical(lexical.name, lexical.regex, convertAttributes(lexical));
     }
 
 
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
         org.kframework.attributes.Att attrs =
-            convertAttributes(sentence, pedanticAttributes)
+            convertAttributes(sentence)
             .add(Att.CONTENT_START_LINE(), sentence.getContentStartLine())
             .add(Att.CONTENT_START_COLUMN(), sentence.getContentStartColumn());
 
@@ -133,7 +131,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         scala.collection.Set<Tag> tags = toTags(ii.getTags(), ii);
         String assocOrig = ii.getAssoc();
         Associativity assoc = applyAssoc(assocOrig);
-        return SyntaxAssociativity(assoc, tags, convertAttributes(ii, pedanticAttributes));
+        return SyntaxAssociativity(assoc, tags, convertAttributes(ii));
     }
 
     public Associativity applyAssoc(String assocOrig) {
@@ -180,7 +178,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
-            res.add(SyntaxSort(immutable(s.getParams()), sort, convertAttributes(s, pedanticAttributes)));
+            res.add(SyntaxSort(immutable(s.getParams()), sort, convertAttributes(s)));
             return res;
         }
 
@@ -232,7 +230,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                         }
                     }
 
-                    org.kframework.attributes.Att attrs = convertAttributes(p, pedanticAttributes);
+                    org.kframework.attributes.Att attrs = convertAttributes(p);
                     if (attrs.contains(Att.BRACKET())) {
                       attrs = attrs.add(Att.BRACKET_LABEL(), KLabel.class, KLabel(p.getBracketLabel(true), immutable(p.getParams())));
                     }
@@ -300,7 +298,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
         org.kframework.kore.Sort elementSort = userList.getSort();
 
-        org.kframework.attributes.Att attrs = convertAttributes(p, pedanticAttributes).add(Att.USER_LIST(), userList.getListType());
+        org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.USER_LIST(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
         org.kframework.definition.Production prod1, prod3;
 
@@ -324,8 +322,8 @@ public class KILtoKORE extends KILTransformation<Object> {
         res.add(prod3);
     }
 
-    public static org.kframework.attributes.Att convertAttributes(ASTNode t, boolean pedanticAttributes) {
-        Att attributes = ProcessGroupAttributes.getProcessedAtt(t.getAttributes(), t, pedanticAttributes);
+    public static org.kframework.attributes.Att convertAttributes(ASTNode t) {
+        Att attributes = ProcessGroupAttributes.getProcessedAtt(t.getAttributes(), t);
 
         return attributes
                 .addAll(attributesFromLocation(t.getLocation()))
