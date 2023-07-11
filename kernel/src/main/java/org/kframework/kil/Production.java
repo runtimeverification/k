@@ -246,7 +246,7 @@ public class Production extends ASTNode {
             i.toString(sb);
             sb.append(" ");
         }
-        sb.append(getAttributes());
+        sb.append(getAttributes().withUserGroupsAsGroupAtt());
     }
 
     public void setOwnerModuleName(String ownerModuleName) {
