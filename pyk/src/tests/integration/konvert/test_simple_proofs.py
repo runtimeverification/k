@@ -4,12 +4,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
+from pyk.kast.outer import KRule
 from pyk.konvert import kast_to_kore, kore_to_kast, krule_to_kore
 from pyk.kore.kompiled import KompiledKore
 from pyk.kore.parser import KoreParser
 from pyk.prelude.bytes import bytesToken
-from pyk.prelude.kbool import TRUE
+from pyk.prelude.kbool import BOOL, TRUE
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlBottom, mlImplies, mlTop
 from pyk.prelude.string import STRING, stringToken
@@ -422,6 +423,40 @@ KRULE_TO_KORE_DATA: Final = (
     ),
 )
 
+KRULE_TO_KORE_EXPLICIT_DATA: Final = (
+    (
+        'unsorted variable in requires',
+        KRule(
+            body=KRewrite(
+                KApply(
+                    '<generatedTop>',
+                    (
+                        KApply('<k>', (KSequence([KApply('pred1', (KVariable('U', INT),))]),)),
+                        KApply('<state>', (KApply('.Map', ()),)),
+                        KVariable('Counter', KSort('GeneratedCounterCell')),
+                    ),
+                ),
+                KApply(
+                    '<generatedTop>',
+                    (
+                        KApply('<k>', (KSequence([]),)),
+                        KApply('<state>', (KApply('.Map', ()),)),
+                        KVariable('Counter', KSort('GeneratedCounterCell')),
+                    ),
+                ),
+            ),
+            requires=KApply(
+                KLabel('#And', params=(BOOL,)),
+                (
+                    TRUE,
+                    KApply(KLabel('#Equals', params=(BOOL, BOOL)), (TRUE, KApply('pred1', KVariable('V')))),
+                ),
+            ),
+        ),
+        r"""axiom{} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortBool{}, SortKItem{}}(Lblpred1{}(VarU : SortInt{})), dotk{}())), Lbl'-LT-'state'-GT-'{}(Lbl'Stop'Map{}()), VarCounter : SortGeneratedCounterCell{}), \equals{SortBool{}, SortGeneratedTopCell{}}(\dv{SortBool{}}("true"), \and{SortBool{}}(\dv{SortBool{}}("true"), \equals{SortBool{}, SortBool{}}(\dv{SortBool{}}("true"), Lblpred1{}(VarV : SortInt{}))))), Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()), Lbl'-LT-'state'-GT-'{}(Lbl'Stop'Map{}()), VarCounter : SortGeneratedCounterCell{})) [priority{}("50")]""",
+    ),
+)
+
 
 class TestKonvertSimpleProofs(KompiledTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
@@ -491,7 +526,26 @@ class TestKonvertSimpleProofs(KompiledTest):
         rule = single(r for r in main_module.rules if 'label' in r.att and r.att['label'] == rule_id)
 
         # When
-        actual_kore_text = krule_to_kore(kompiled_kore, rule).text
+        actual_kore_text = krule_to_kore(definition, kompiled_kore, rule).text
+
+        # Then
+        assert actual_kore_text == kore_text
+
+    @pytest.mark.parametrize(
+        'test_id,rule,kore_text',
+        KRULE_TO_KORE_EXPLICIT_DATA,
+        ids=[test_id for test_id, *_ in KRULE_TO_KORE_EXPLICIT_DATA],
+    )
+    def test_explicit_krule_to_kore(
+        self,
+        definition: KDefinition,
+        kompiled_kore: KompiledKore,
+        test_id: str,
+        rule: KRule,
+        kore_text: str,
+    ) -> None:
+        # When
+        actual_kore_text = krule_to_kore(definition, kompiled_kore, rule).text
 
         # Then
         assert actual_kore_text == kore_text
