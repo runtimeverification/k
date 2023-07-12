@@ -18,6 +18,10 @@ inputs:
     description: 'LLVM version to use.'
     required: false
     default: 15
+  jdk:
+    description: 'JDK version to use.'
+    required: false
+    default: 17
   dockerfile:
     description: 'Hardcode the path of the dockerfile to use.'
     required: false
@@ -33,6 +37,7 @@ runs:
       BASE_OS: ${{ inputs.os }}
       BASE_DISTRO: ${{ inputs.distro }}
       LLVM_VERSION: ${{ inputs.llvm }}
+      JDK_VERSION: ${{ inputs.jdk }}
       DOCKERFILE: ${{ inputs.dockerfile }}
     run: |
       set -euxo pipefail
@@ -73,6 +78,7 @@ runs:
           --build-arg Z3_VERSION=${Z3_VERSION}                        \
           --build-arg K_VERSION=${K_VERSION}                          \
           --build-arg LLVM_VERSION=${LLVM_VERSION}                    \
+          --build-arg JDK_VERSION=${JDK_VERSION}                      \
           --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
           --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID}
 

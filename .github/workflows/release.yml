@@ -123,6 +123,7 @@ jobs:
           os: ubuntu
           distro: focal
           llvm: 12
+          jdk: 11
           pkg-name: kframework_amd64_ubuntu_focal.deb
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
