@@ -59,8 +59,7 @@ jobs:
           git checkout ${hs_backend_version}
           cd -
           sed -i 's!    haskell-backend.url = "github:runtimeverification/haskell-backend/[0-9a-f]*";!    haskell-backend.url = "github:runtimeverification/haskell-backend/'${hs_backend_version}'";!' flake.nix
-          if git add flake.nix haskell-backend/src/main/native/haskell-backend; then
-            git commit -m "flake.nix, haskell-backend/src/main/native/haskell-backend: update to version ${hs_backend_version}"
+          if git add flake.nix haskell-backend/src/main/native/haskell-backend && git commit -m "flake.nix, haskell-backend/src/main/native/haskell-backend: update to version ${hs_backend_version}"; then
             changed=true
           fi
 
@@ -69,15 +68,13 @@ jobs:
           git checkout ${booster_version}
           cd -
           sed -i 's!      url = "github:runtimeverification/hs-backend-booster/[0-9a-f]*";!      url = "github:runtimeverification/hs-backend-booster/'${booster_version}'";!' flake.nix
-          if git add flake.nix hs-backend-booster/src/main/native/hs-backend-booster; then
-            git commit -m "flake.nix, hs-backend-booster/src/main/native/hs-backend-booster: update to version ${booster_version}"
+          if git add flake.nix hs-backend-booster/src/main/native/hs-backend-booster && git commit -m "flake.nix, hs-backend-booster/src/main/native/hs-backend-booster: update to version ${booster_version}"; then
             changed=true
           fi
 
           nix flake update
           GC_DONT_GC=1 nix run .#update-from-submodules
-          if git add flake.nix flake.lock; then
-            git commit -m 'flake.nix, flake.lock: update'
+          if git add flake.nix flake.lock && git commit -m 'flake.nix, flake.lock: update'; then
             changed=true
           fi
 
