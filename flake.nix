@@ -139,12 +139,8 @@
 
           update-from-submodules =
             rv-utils.lib.update-from-submodules pkgs ./flake.lock {
-              haskell-backend.submodule =
-                "haskell-backend/src/main/native/haskell-backend";
               llvm-backend.submodule =
                 "llvm-backend/src/main/native/llvm-backend";
-              booster-backend.submodule =
-                "hs-backend-booster/src/main/native/hs-backend-booster";
             };
 
           test = with pkgs;
