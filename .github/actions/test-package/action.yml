@@ -11,6 +11,10 @@ inputs:
   llvm:
     description: 'LLVM version to use.'
     required: true
+  jdk:
+    description: 'JDK version to use.'
+    required: false
+    default: 17
   dockerfile:
     description: 'Hardcode the path of the dockerfile to use.'
     required: false
@@ -45,6 +49,7 @@ runs:
       os: ${{ inputs.os }}
       distro: ${{ inputs.distro }}
       llvm: ${{ inputs.llvm }}
+      jdk: ${{ inputs.jdk }}
       dockerfile: ${{ inputs.dockerfile }}
 
   - name: 'Build Package: ${{ inputs.distro }}'
