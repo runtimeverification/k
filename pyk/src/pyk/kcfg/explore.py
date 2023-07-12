@@ -498,7 +498,9 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             KRule(body=c.body, requires=c.requires, ensures=c.ensures, att=c.att.update({'priority': priority}))
             for c in dependencies
         ]
-        kore_axioms: list[Sentence] = [krule_to_kore(self.kprint.kompiled_kore, r) for r in kast_rules]
+        kore_axioms: list[Sentence] = [
+            krule_to_kore(self.kprint.definition, self.kprint.kompiled_kore, r) for r in kast_rules
+        ]
         _, kore_client = self._kore_rpc
         sentences: list[Sentence] = [Import(module_name=old_module_name, attrs=())]
         sentences = sentences + kore_axioms
