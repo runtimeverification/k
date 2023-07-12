@@ -22,6 +22,7 @@ ENV TZ America/Chicago
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG LLVM_VERSION
+ARG JDK_VERSION
 
 RUN    apt-get update              \
     && apt-get install --yes       \
@@ -53,7 +54,7 @@ RUN    apt-get update              \
         llvm-${LLVM_VERSION}-tools \
         locales                    \
         maven                      \
-        openjdk-17-jdk             \
+        openjdk-${JDK_VERSION}-jdk \
         parallel                   \
         pkg-config                 \
         python3                    \
