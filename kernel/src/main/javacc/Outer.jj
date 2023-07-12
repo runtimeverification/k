@@ -683,7 +683,7 @@ void Tag(ASTNode node) :
     ( val = String() ")"
     | TagContent(sb) ")" { val = sb.toString() + special(); } )
     { SwitchTo(ATTR_STATE); })?
-  { node.unsafeAddBuiltInOrRawAttribute(key, val, source, Location.apply(loc.startLine(), loc.startColumn(), token.endLine, token.endColumn + 1)); }
+  { node.addBuiltInOrUnrecognizedAttribute(key, val, source, Location.apply(loc.startLine(), loc.startColumn(), token.endLine, token.endColumn + 1)); }
 }
 
 /** Parses the value of an attribute and appends it to 'sb' */

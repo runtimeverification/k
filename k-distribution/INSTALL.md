@@ -41,7 +41,7 @@ Install through packages
 We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
--   Debian Bullseye
+-   Debian Bookworm
 -   Arch Linux
 -   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
 -   Docker Images
@@ -122,10 +122,10 @@ sudo apt install ./kframework_amd64_ubuntu_focal.deb
 sudo apt install ./kframework_amd64_ubuntu_jammy.deb
 ```
 
-### Debian Bullseye
+### Debian Bookworm
 
 ```sh
-sudo apt install ./kframework_amd64_debian_bullseye.deb
+sudo apt install ./kframework_amd64_debian_bookworm.deb
 ```
 
 ### Arch Linux

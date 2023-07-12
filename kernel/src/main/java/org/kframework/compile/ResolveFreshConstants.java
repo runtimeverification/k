@@ -51,7 +51,6 @@ public class ResolveFreshConstants {
     private java.util.Set<KVariable> freshVars = new HashSet<>();
     private Map<KVariable, Integer> offsets = new HashMap<>();
     private final String manualTopCell;
-    private final Boolean pedanticAttributes;
 
     private void reset() {
         freshVars.clear();
@@ -188,11 +187,10 @@ public class ResolveFreshConstants {
         return s;
     }
 
-    public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files, boolean pedanticAttributes) {
+    public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files) {
         this.def = def;
         this.manualTopCell = manualTopCell;
         this.files = files;
-        this.pedanticAttributes = pedanticAttributes;
     }
 
     public Module resolve(Module m) {
@@ -226,7 +224,7 @@ public class ResolveFreshConstants {
 
                 KToken topCellToken = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                 K generatedTop = KApply(KLabel("#configCell"), topCellToken, KApply(KLabel("#cellPropertyListTerminator")), KApply(KLabels.CELLS, KApply(KLabel("#externalCell"), cellName), freshCell), topCellToken);
-                Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), pedanticAttributes);
+                Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
                 sentences = (Set<Sentence>) sentences.$bar(newSentences);
                 sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
             }
@@ -234,7 +232,7 @@ public class ResolveFreshConstants {
         if (m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
             ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true, files);
-            Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), pedanticAttributes);
+            Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
             sentences = (Set<Sentence>) sentences.$bar(newSentences);
             sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
         }
