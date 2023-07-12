@@ -77,9 +77,10 @@ jobs:
           nix flake update
           GC_DONT_GC=1 nix run .#update-from-submodules
           if git add flake.nix flake.lock; then
-            git commit -m 'Sync flake inputs to submodules'
+            git commit -m 'flake.nix, flake.lock: update'
             changed=true
           fi
+
           if ${changed}; then
             git push
           fi
