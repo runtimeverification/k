@@ -29,7 +29,7 @@ jobs:
         run: echo "BOOSTER_VERSION=$(cat deps/hs-backend-booster_release)" >> ${GITHUB_ENV}
       - uses: actions/checkout@v3
         with:
-          token: ${{ secretes.JENKINS_GITHUB_PAT }}
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           repository: runtimeverification/hs-backend-booster
           ref: ${{ env.BOOSTER_VERSION }}
           path: deps/hs-backend-booster
