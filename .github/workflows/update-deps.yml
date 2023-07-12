@@ -21,6 +21,7 @@ jobs:
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
+          fetch-depth: 0
       - run: |
           git config --global user.name rv-jenkins
           git config --global user.email devops@runtimeverification.com
