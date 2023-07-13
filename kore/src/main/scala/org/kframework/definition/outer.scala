@@ -111,6 +111,12 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     _.importedModules
   })
 
+  lazy val moduleAxioms: mutable.Set[String] = mutable.Set[String]()
+
+  def setAxioms(axioms: Set[String]): Unit = { moduleAxioms.clear(); moduleAxioms ++= axioms }
+  def addAxiom(axiom: String): Unit = { moduleAxioms += axiom }
+  def getAxioms: Set[String] = moduleAxioms.toSet
+
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }

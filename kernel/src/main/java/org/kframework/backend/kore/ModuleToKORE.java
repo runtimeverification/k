@@ -244,10 +244,10 @@ public class ModuleToKORE {
 
         syntax.append("endmodule []\n");
 
-        semantics.append("\n// generated axioms\n");
+        //semantics.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.sortedProductions())) {
-            if (isBuiltinProduction(prod)) {
+            /*if (isBuiltinProduction(prod)) {
                 continue;
             }
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
@@ -274,10 +274,10 @@ public class ModuleToKORE {
             }
             if (isConstructor(prod, functionRules)) {
                 genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
-            }
+            }*/
         }
 
-        for (Sort sort : iterable(module.sortedAllSorts())) {
+        /*for (Sort sort : iterable(module.sortedAllSorts())) {
             genNoJunkAxiom(sort, semantics);
         }
 
@@ -285,7 +285,7 @@ public class ModuleToKORE {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
                 genOverloadedAxiom(lesser, greater, semantics);
             }
-        }
+        }*/
 
         semantics.append("\n// rules\n");
 

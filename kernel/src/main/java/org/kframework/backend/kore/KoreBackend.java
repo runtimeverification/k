@@ -135,7 +135,7 @@ public class KoreBackend extends AbstractBackend {
         Function1<Definition, Definition> removeAnywhereRules =
                 d -> DefinitionTransformer.from(this::removeAnywhereRules,
                         "removing anywhere rules for the Haskell backend").apply(d);
-
+        DefinitionTransformer generateAxioms = DefinitionTransformer.from(new GenerateAxioms(kompileOptions.mainModule(files), kompileOptions)::gen, "generating axioms");
         return def -> resolveComm
                 .andThen(resolveIO)
                 .andThen(resolveFun)
@@ -171,6 +171,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(removeAnywhereRules)
                 .andThen(generateSortPredicateRules)
                 .andThen(numberSentences)
+                .andThen(generateAxioms)
                 .apply(def);
     }
 
@@ -208,6 +209,7 @@ public class KoreBackend extends AbstractBackend {
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
                 "concretizing configuration");
         ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
+        ModuleTransformer generateAxioms = ModuleTransformer.from(new GenerateAxioms(kompileOptions.mainModule(files), kompileOptions)::gen, "generating axioms");
 
         return m -> resolveComm
                 .andThen(addImplicitCounterCell)
@@ -224,6 +226,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(subsortKItem)
                 .andThen(restoreDefinitionModulesTransformer(def))
                 .andThen(numberSentences)
+                .andThen(generateAxioms)
                 .apply(m);
     }
 
