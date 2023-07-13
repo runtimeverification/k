@@ -491,7 +491,8 @@ class GetModelResult(ABC):  # noqa: B024
             case 'Unsat':
                 return UnsatResult()
             case 'Sat':
-                return SatResult(model=kore_term(dct['substitution'], Pattern))  # type: ignore
+                substitution = dct.get('substitution')
+                return SatResult(model=kore_term(substitution, Pattern) if substitution else None)  # type: ignore
             case _:
                 raise ValueError(f'Unknown status: {status}')
 
@@ -511,7 +512,7 @@ class UnsatResult(GetModelResult):
 @final
 @dataclass(frozen=True)
 class SatResult(GetModelResult):
-    model: Pattern
+    model: Pattern | None
 
 
 class KoreClient(ContextManager['KoreClient']):
