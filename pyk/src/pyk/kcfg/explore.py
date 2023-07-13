@@ -189,6 +189,8 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             return None
         elif type(result) is SatResult:
             _LOGGER.debug('Result is SAT')
+            if not result.model:
+                return Subst({})
             model_subst = self.kprint.kore_to_kast(result.model)
             _subst: dict[str, KInner] = {}
             for subst_pred in flatten_label('#And', model_subst):
