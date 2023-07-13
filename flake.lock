@@ -817,11 +817,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1689004098,
-        "narHash": "sha256-SnX4rIr2UXVDL08Ykgt6vLxX24qqd/kfezrqUwsfgx0=",
+        "lastModified": 1689244978,
+        "narHash": "sha256-L/l35AarVO1TdvKS3xXEthk+Ivk5YbM6bPzzKlE5UOg=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "5fe154ce040ed8482b8d9be490934a41ab7bd05f",
+        "rev": "9dd2eacc1f6a081d2190d65f69b544efb8e692a8",
         "type": "github"
       },
       "original": {
