@@ -117,6 +117,10 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     kore_lhs = kompiled_kore.add_injections(kore_lhs0, sort=top_level_kore_sort)
     kore_rhs = kompiled_kore.add_injections(kore_rhs0, sort=top_level_kore_sort)
     prio = krule.priority
+    attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
+    if 'label' in krule.att:
+        label = krule.att['label']
+        attrs.append(App(symbol='label', sorts=(), args=(String(label),)))
     axiom = Axiom(
         vars=(),
         pattern=Rewrites(
@@ -124,7 +128,7 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
             left=kore_lhs,
             right=kore_rhs,
         ),
-        attrs=(App(symbol='priority', sorts=(), args=(String(str(prio)),)),),
+        attrs=attrs,
     )
     return axiom
 
