@@ -413,7 +413,8 @@ public class ModuleToKORE {
         sb.append(") : ");
         convert(prod.sort(), prod, sb);
         sb.append(" ");
-        Att koreAtt = addKoreAttributes(prod, functionRules, overloads);
+        Att koreAtt = prod.att();//addKoreAttributes(prod, functionRules, overloads);
+        //System.out.println("koreAtt: " + koreAtt);
         convert(attributes, koreAtt, sb, null, null);
         sb.append("\n");
     }
@@ -1475,12 +1476,12 @@ public class ModuleToKORE {
     }
 
     private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-        Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
+        Att att = prod.att();//addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
         return att.contains(Att.CONSTRUCTOR());
     }
 
     private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-        Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
+        Att att = prod.att();//addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
         return att.contains(Att.FUNCTIONAL());
     }
 

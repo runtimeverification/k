@@ -68,7 +68,7 @@ public class KoreBackend extends AbstractBackend {
      * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
      */
     protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
-        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
+        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd, def.kompileOptions);
         ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
         return getKompiledString(converter, files, heatCoolEquations, tool);
     }
@@ -92,11 +92,25 @@ public class KoreBackend extends AbstractBackend {
         return semantics.toString();
     }
 
-    public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
+    public static Module getKompiledModule(Module mainModule, boolean hasAnd, KompileOptions kompileOptions) {
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         if (hasAnd) {
           mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
         }
+
+        // mainModule = ModuleTransformer.fromSentenceTransformer(new AddKoreAttributes(mainModule, kompileOptions)::add, "add attributes").apply(mainModule);
+        mainModule =  ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            AddKoreAttributes addKoreAttributes = new AddKoreAttributes(m, kompileOptions);
+            if (s instanceof Production) {
+                //System.err.println("Before: " + s.att());
+                Sentence newSentence = addKoreAttributes.add(s);
+                //System.err.println("After: " + newSentence.att());
+                return newSentence;
+            } else {
+                return s;
+            }
+        }, "add attributes").apply(mainModule);
+
         return mainModule;
     }
 
