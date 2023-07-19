@@ -403,7 +403,6 @@ class APRProver(Prover):
     ) -> None:
         super().__init__(kcfg_explore)
         self.proof = proof
-        self.kcfg_explore = kcfg_explore
         self._is_terminal = is_terminal
         self._extract_branches = extract_branches
         self._abstract_node = abstract_node
