@@ -269,10 +269,10 @@ public class ModuleToKORE {
             if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
                 genUnitAxiom(prod, semantics);
             }
-            if (isFunctional(prod, functionRules)) {
+            if (prod.att().contains(Att.FUNCTIONAL())) {
                 genFunctionalAxiom(prod, semantics);
             }
-            if (isConstructor(prod, functionRules)) {
+            if (prod.att().contains(Att.CONSTRUCTOR())) {
                 genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
             }
         }
@@ -413,9 +413,7 @@ public class ModuleToKORE {
         sb.append(") : ");
         convert(prod.sort(), prod, sb);
         sb.append(" ");
-        Att koreAtt = prod.att();//addKoreAttributes(prod, functionRules, overloads);
-        //System.out.println("koreAtt: " + koreAtt);
-        convert(attributes, koreAtt, sb, null, null);
+        convert(attributes, prod.att(), sb, null, null);
         sb.append("\n");
     }
 
@@ -676,7 +674,7 @@ public class ModuleToKORE {
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort().head()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
-                    || !isConstructor(prod2, functionRulesMap) || isBuiltinProduction(prod2)) {
+                    || !prod2.att().contains(Att.CONSTRUCTOR()) || isBuiltinProduction(prod2)) {
                 // TODO (traiansf): add no confusion axioms for constructor vs inj.
                 continue;
             }
@@ -1475,16 +1473,6 @@ public class ModuleToKORE {
         sb.append("}");
     }
 
-    private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-        Att att = prod.att();//addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
-        return att.contains(Att.CONSTRUCTOR());
-    }
-
-    private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-        Att att = prod.att();//addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
-        return att.contains(Att.FUNCTIONAL());
-    }
-
     private boolean isGeneratedInKeysOp(Production prod) {
         Option<String> hook = prod.att().getOption(Att.HOOK());
         if (hook.isEmpty()) return false;
@@ -1492,138 +1480,8 @@ public class ModuleToKORE {
         return (!prod.klabel().isEmpty());
     }
 
-    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
-        boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
-        boolean isConstructor = !isFunction(prod);
-        isConstructor &= !prod.att().contains(Att.ASSOC());
-        isConstructor &= !prod.att().contains(Att.COMM());
-        isConstructor &= !prod.att().contains(Att.IDEM());
-        isConstructor &= !(prod.att().contains(Att.FUNCTION()) && prod.att().contains(Att.UNIT()));
-
-        // Later we might set !isConstructor because there are anywhere rules,
-        // but if a symbol is a constructor at this point, then it is still
-        // injective.
-        boolean isInjective = isConstructor;
-
-        boolean isMacro = false;
-        boolean isAnywhere = overloads.contains(prod);
-        if (prod.klabel().isDefined()) {
-            for (Rule r : functionRules.get(prod.klabel().get())) {
-                isMacro |= ExpandMacros.isMacro(r);
-                isAnywhere |= r.att().contains(Att.ANYWHERE());
-            }
-        }
-        isConstructor &= !isMacro;
-        isConstructor &= !isAnywhere;
-
-        Att att = prod.att().remove(Att.CONSTRUCTOR());
-        if (att.contains(Att.HOOK()) && !isRealHook(att)) {
-            att = att.remove(Att.HOOK());
-        }
-        if (isConstructor) {
-            att = att.add(Att.CONSTRUCTOR());
-        }
-        if (isFunctional) {
-            att = att.add(Att.FUNCTIONAL());
-        }
-        if (isAnywhere) {
-            att = att.add(Att.ANYWHERE());
-        }
-        if (isInjective) {
-            att = att.add(Att.INJECTIVE());
-        }
-        if (isMacro) {
-            att = att.add(Att.MACRO());
-        }
-        // update format attribute with structure expected by backend
-        String format = att.getOptional(Att.FORMAT()).orElse(Formatter.defaultFormat(prod.items().size()));
-        int nt = 1;
-        boolean hasFormat = true;
-        boolean printName = stream(prod.items()).noneMatch(pi -> pi instanceof NonTerminal && ((NonTerminal) pi).name().isEmpty());
-        boolean printEllipses = false;
-
-        for (int i = 0; i < prod.items().size(); i++) {
-          if (prod.items().apply(i) instanceof NonTerminal) {
-            String replacement;
-            if (printName && prod.isPrefixProduction()) {
-              replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
-              printEllipses = true;
-            } else {
-              replacement = "%" + (nt++);
-            }
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", replacement);
-          } else if (prod.items().apply(i) instanceof Terminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
-          } else {
-            hasFormat = false;
-          }
-        }
-        if (printEllipses && format.contains("(")) {
-          int idxLParam = format.indexOf("(") + 1;
-          format = format.substring(0, idxLParam) + "... " + format.substring(idxLParam);
-        }
-        if (hasFormat) {
-          att = att.add(Att.FORMAT(), format);
-          if (att.contains(Att.COLOR())) {
-            boolean escape = false;
-            StringBuilder colors = new StringBuilder();
-            String conn = "";
-            for (int i = 0; i < format.length(); i++) {
-              if (escape && format.charAt(i) == 'c') {
-                colors.append(conn).append(att.get(Att.COLOR()));
-                conn = ",";
-              }
-              if (format.charAt(i) == '%') {
-                escape = true;
-              } else {
-                escape = false;
-              }
-            }
-            att = att.add(Att.COLORS(), colors.toString());
-          }
-          StringBuilder sb = new StringBuilder();
-          for (ProductionItem pi : iterable(prod.items())) {
-            if (pi instanceof NonTerminal) {
-              sb.append('0');
-            } else {
-              sb.append('1');
-            }
-          }
-          att = att.add(Att.TERMINALS(), sb.toString());
-          if (prod.klabel().isDefined()) {
-              List<K> lessThanK = new ArrayList<>();
-              Option<scala.collection.Set<Tag>> lessThan = module.priorities().relations().get(Tag(prod.klabel().get().name()));
-              if (lessThan.isDefined()) {
-                  for (Tag t : iterable(lessThan.get())) {
-                    if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
-                        continue;
-                    }
-                    lessThanK.add(KApply(KLabel(t.name())));
-                  }
-              }
-              att = att.add(Att.PRIORITIES(), KList.class, KList(lessThanK));
-              att = att.remove(Att.LEFT());
-              att = att.remove(Att.RIGHT());
-              att = att.add(Att.LEFT(), KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
-              att = att.add(Att.RIGHT(), KList.class, getAssoc(module.rightAssoc(), prod.klabel().get()));
-          }
-        } else {
-          att = att.remove(Att.FORMAT());
-        }
-        // This attribute is a frontend attribute only and is removed from the kore
-        // Since it has no meaning outside the frontend
-        return att.remove(Att.ORIGINAL_PRD(), Production.class);
-    }
-
-    private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
-      return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
-    }
-
     private boolean isFunction(Production prod) {
-        if (!prod.att().contains(Att.FUNCTION())) {
-            return false;
-        }
-        return true;
+        return prod.att().contains(Att.FUNCTION());
     }
 
     // Assume that there is no quantifiers
