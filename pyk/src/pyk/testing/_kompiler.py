@@ -10,7 +10,7 @@ from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime
 from ..kllvm.importer import import_runtime
 from ..kore.pool import KoreServerPool
-from ..kore.rpc import KoreClient, KoreServer
+from ..kore.rpc import BoosterServer, KoreClient, KoreServer
 from ..ktool.kompile import Kompile
 from ..ktool.kprint import KPrint
 from ..ktool.kprove import KProve
@@ -146,6 +146,39 @@ class KoreClientTest(KompiledTest):
     @pytest.fixture
     def kore_client(self, definition_dir: Path, bug_report: BugReport) -> Iterator[KoreClient]:
         server = KoreServer(definition_dir, self.KORE_MODULE_NAME, bug_report=bug_report)
+        client = KoreClient('localhost', server.port, timeout=self.KORE_CLIENT_TIMEOUT, bug_report=bug_report)
+        yield client
+        client.close()
+        server.close()
+
+
+class BoosterClientTest:
+    MAIN_FILE: ClassVar[str | Path]
+    MODULE_NAME: ClassVar[str]
+    HASKELL_ARGS: ClassVar[dict[str, Any]] = {}
+    LLVM_ARGS: ClassVar[dict[str, Any]] = {}
+    KORE_CLIENT_TIMEOUT: ClassVar = 1000
+
+    @pytest.fixture(scope='class')
+    def haskell_dir(self, kompile: Kompiler) -> Path:
+        kwargs = self.HASKELL_ARGS
+        kwargs['main_file'] = self.MAIN_FILE
+        kwargs['backend'] = 'haskell'
+        return kompile(**kwargs)
+
+    @pytest.fixture(scope='class')
+    def llvm_dir(self, kompile: Kompiler) -> Path:
+        kwargs = self.LLVM_ARGS
+        kwargs['main_file'] = self.MAIN_FILE
+        kwargs['backend'] = 'llvm'
+        kwargs['llvm_kompile_type'] = 'c'
+        return kompile(**kwargs)
+
+    @pytest.fixture
+    def booster_client(
+        self, haskell_dir: Path, llvm_dir: Path, bug_report: BugReport | None = None
+    ) -> Iterator[KoreClient]:
+        server = BoosterServer(haskell_dir, llvm_dir, self.MODULE_NAME, bug_report=bug_report, command=None)
         client = KoreClient('localhost', server.port, timeout=self.KORE_CLIENT_TIMEOUT, bug_report=bug_report)
         yield client
         client.close()
