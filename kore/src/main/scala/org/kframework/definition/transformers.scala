@@ -16,18 +16,17 @@ object ModuleTransformer {
 
   def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
-      val newSentences = m.localSentences map { s =>
-        try {
-          f(m, s)
-        } catch {
-          case e: KEMException =>
-            e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
-              + "\n\t" + s.att.getOption(classOf[Source]).map(_.toString).getOrElse("<none>")
-              + "\n\t" + s.att.getOption(classOf[Location]).map(_.toString).getOrElse("<none>"))
-            throw e
-        }
-      }
-      if (newSentences != m.localSentences || !m.checkAtts(newSentences))
+      val newSentences = map(m.localSentences.toSet)(f, m, name)
+      if (newSentences != m.localSentences)
+        Module(m.name, m.imports, newSentences, m.att)
+      else
+        m
+    }, name)
+
+  def fromSentenceTransformerAtt(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
+    ModuleTransformer(m => {
+      val newSentences = map(m.localSentences.toSet)(f, m, name)
+      if (newSentences != m.localSentences || m.checkAtts(newSentences))
         Module(m.name, m.imports, newSentences, m.att)
       else
         m
@@ -59,6 +58,19 @@ object ModuleTransformer {
     case f: ModuleTransformer => f
     case _ => new ModuleTransformer(f, name)
   }
+
+  def map(sentences: Set[Sentence])(f: (Module, Sentence) => Sentence, m: Module, name: String): Set[Sentence] =
+    sentences.map { s =>
+      try {
+        f(m, s)
+      } catch {
+        case e: KEMException =>
+          e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
+            + "\n\t" + s.att.getOption(classOf[Source]).map(_.toString).getOrElse("<none>")
+            + "\n\t" + s.att.getOption(classOf[Location]).map(_.toString).getOrElse("<none>"))
+          throw e
+      }
+    }
 }
 
 /**
