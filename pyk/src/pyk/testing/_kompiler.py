@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 import pytest
@@ -8,6 +9,7 @@ from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime
 from ..kllvm.importer import import_runtime
+from ..kore.pool import KoreServerPool
 from ..kore.rpc import KoreClient, KoreServer
 from ..ktool.kompile import Kompile
 from ..ktool.kprint import KPrint
@@ -15,7 +17,7 @@ from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
     from pathlib import Path
     from types import ModuleType
     from typing import Any, ClassVar
@@ -148,6 +150,25 @@ class KoreClientTest(KompiledTest):
         yield client
         client.close()
         server.close()
+
+
+class KoreServerPoolTest(KompiledTest, ABC):
+    KOMPILE_BACKEND = 'haskell'
+
+    POOL_MODULE_NAME: ClassVar[str]
+    POOL_MAX_WORKERS: ClassVar[int | None] = None
+
+    @pytest.fixture
+    def create_server(self, definition_dir: Path) -> Callable[[], KoreServer]:
+        def _create_server() -> KoreServer:
+            return KoreServer(definition_dir, self.POOL_MODULE_NAME)
+
+        return _create_server
+
+    @pytest.fixture
+    def server_pool(self, create_server: Callable[[], KoreServer]) -> Iterator[KoreServerPool]:
+        with KoreServerPool(create_server, max_workers=self.POOL_MAX_WORKERS) as pool:
+            yield pool
 
 
 class RuntimeTest(KompiledTest):
