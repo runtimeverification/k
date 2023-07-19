@@ -368,6 +368,13 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     case _ =>
   }
 
+  def checkAtts (other: Set[Sentence]) : Boolean = {
+    val atts = sentences.collect({ case p: Production => p.att }).toSet
+    val otherAtts = other.collect({ case p: Production => p.att }).toSet
+    val diff = atts -- otherAtts
+    diff.isEmpty
+  }
+
   def checkUserLists(): Unit = localSentences foreach {
     case p@Production(_, _, srt, _, atts) =>
       if (atts.contains(Att.USER_LIST)) {
