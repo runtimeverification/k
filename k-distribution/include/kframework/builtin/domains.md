@@ -1205,6 +1205,7 @@ module INT-COMMON
 You can:
 
 * Compute the bitwise complement `~Int` of an integer value in twos-complement.
+* Compute the negation `--Int` of an integer.
 * Compute the exponentiation `^Int` of two integers.
 * Compute the exponentiation of two integers modulo another integer (`^%Int`).
   `A ^%Int B C` is equal in value to `(A ^Int B) %Int C`, but has a better
@@ -1226,6 +1227,7 @@ You can:
 
 ```k
   syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, total, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
+               | "--Int" Int                    [function, klabel(--Int_), symbol, total, hook(INT.neg), smt-hook(-)]
                > left:
                  Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
@@ -1372,6 +1374,7 @@ module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
   rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
 
   // Arithmetic Normalization
+  rule --Int I => 0 -Int I
   rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
   rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), simplification(51)]
 
