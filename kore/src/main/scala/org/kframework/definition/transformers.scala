@@ -26,7 +26,7 @@ object ModuleTransformer {
   def fromSentenceTransformerAtt(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
       val newSentences = map(m.localSentences.toSet)(f, m, name)
-      if (newSentences != m.localSentences || m.checkAtts(newSentences))
+      if (newSentences != m.localSentences || !m.checkAtts(newSentences))
         Module(m.name, m.imports, newSentences, m.att)
       else
         m
