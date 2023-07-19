@@ -97,19 +97,7 @@ public class KoreBackend extends AbstractBackend {
         if (hasAnd) {
           mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
         }
-
-        // mainModule = ModuleTransformer.fromSentenceTransformer(new AddKoreAttributes(mainModule, kompileOptions)::add, "add attributes").apply(mainModule);
-        mainModule =  ModuleTransformer.fromSentenceTransformer((m, s) -> {
-            AddKoreAttributes addKoreAttributes = new AddKoreAttributes(m, kompileOptions);
-            if (s instanceof Production) {
-                //System.err.println("Before: " + s.att());
-                Sentence newSentence = addKoreAttributes.add(s);
-                //System.err.println("After: " + newSentence.att());
-                return newSentence;
-            } else {
-                return s;
-            }
-        }, "add attributes").apply(mainModule);
+        mainModule =  ModuleTransformer.fromSentenceTransformerAtt((m, s) -> { return new AddKoreAttributes(m, kompileOptions).add(s); }, "Add kore attributes").apply(mainModule);
 
         return mainModule;
     }

@@ -166,6 +166,9 @@ public class AddKoreAttributes {
     }
 
     public synchronized Sentence add(Sentence s) {
+        if (!(s instanceof Production))
+            return s;
+
         Production prod = (Production) s;
 
         List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
