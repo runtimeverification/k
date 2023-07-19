@@ -207,8 +207,6 @@ class KPrint:
         self._extra_unparsing_modules = extra_unparsing_modules
         self._patch_symbol_table = patch_symbol_table
         self._bug_report = bug_report
-        if self._bug_report:
-            self._bug_report.add_definition(self.definition_dir)
 
     @contextmanager
     def _temp_file(self, suffix: str | None = None) -> Iterator[_TemporaryFileWrapper]:
