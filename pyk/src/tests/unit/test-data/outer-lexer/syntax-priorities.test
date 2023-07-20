@@ -1,0 +1,22 @@
+syntax priorities foo bar > baz
+===
+KW_SYNTAX
+syntax
+
+KW_PRIORITIES
+priorities
+
+KLABEL
+foo
+
+KLABEL
+bar
+
+GT
+>
+
+KLABEL
+baz
+
+EOF
+

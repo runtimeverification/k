@@ -1,0 +1,10 @@
+rule program text
+===
+KW_RULE
+rule
+
+BUBBLE
+program text
+
+EOF
+
