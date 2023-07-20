@@ -368,17 +368,14 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     case _ =>
   }
 
-  def checkAtts (other: Set[Sentence]) : Boolean = {
-    val sortedSentences = sentences.toSeq.sortBy(_.source.get)
-    val sortedOther = other.toSeq.sortBy(_.source.get)
+  def checkAtts(other: Set[Sentence]): Boolean = {
+    if (sentences != other)
+      return false
 
-    sortedSentences.zip(sortedOther).forall {
-      case (s1, s2) => if (s1.att != s2.att) return false
-                       else true
-      case        _ => false
-    }
-
-    true
+    val atts = sentences.collect({ case p: Production => p.att }).toSet
+    val otherAtts = other.collect({ case p: Production => p.att }).toSet
+    val diff = atts -- otherAtts
+    diff.isEmpty
   }
 
   def checkUserLists(): Unit = localSentences foreach {

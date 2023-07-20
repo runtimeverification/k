@@ -16,7 +16,7 @@ object ModuleTransformer {
 
   def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
-      val newSentences = applyFunctionToSentences(m.localSentences.toSet)(f, m, name)
+      val newSentences = mapWithTrace(m.localSentences.toSet)(f, m, name)
       if (newSentences != m.localSentences)
         Module(m.name, m.imports, newSentences, m.att)
       else
@@ -25,7 +25,7 @@ object ModuleTransformer {
 
   def fromSentenceTransformerAtt(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
-      val newSentences = applyFunctionToSentences(m.localSentences.toSet)(f, m, name)
+      val newSentences = mapWithTrace(m.localSentences.toSet)(f, m, name)
       if (newSentences != m.localSentences || !m.checkAtts(newSentences))
         Module(m.name, m.imports, newSentences, m.att)
       else
@@ -59,7 +59,7 @@ object ModuleTransformer {
     case _ => new ModuleTransformer(f, name)
   }
 
-  def applyFunctionToSentences(sentences: Set[Sentence])(f: (Module, Sentence) => Sentence, m: Module, name: String): Set[Sentence] =
+  def mapWithTrace(sentences: Set[Sentence])(f: (Module, Sentence) => Sentence, m: Module, name: String): Set[Sentence] =
     sentences.map { s =>
       try {
         f(m, s)
