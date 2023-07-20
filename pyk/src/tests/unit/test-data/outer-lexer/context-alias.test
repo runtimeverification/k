@@ -1,0 +1,13 @@
+context alias foo
+===
+KW_CONTEXT
+context
+
+KW_ALIAS
+alias
+
+BUBBLE
+foo
+
+EOF
+

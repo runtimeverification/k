@@ -1,0 +1,77 @@
+module IMP
+
+  rule [while]:
+    <k>
+      while (B)
+         S
+    =>
+      if (B) {
+        S
+        while (B)
+          S
+      } else {
+      }
+      ...
+    </k>
+  [priority(50)]
+
+endmodule
+===
+KW_MODULE
+module
+
+MODNAME
+IMP
+
+KW_RULE
+rule
+
+LBRACK
+[
+
+RULE_LABEL
+while
+
+RBRACK
+]
+
+COLON
+:
+
+BUBBLE
+<k>
+      while (B)
+         S
+    =>
+      if (B) {
+        S
+        while (B)
+          S
+      } else {
+      }
+      ...
+    </k>
+
+LBRACK
+[
+
+ATTR_KEY
+priority
+
+LPAREN
+(
+
+ATTR_CONTENT
+50
+
+RPAREN
+)
+
+RBRACK
+]
+
+KW_ENDMODULE
+endmodule
+
+EOF
+

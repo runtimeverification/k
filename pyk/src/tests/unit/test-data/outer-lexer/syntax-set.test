@@ -1,0 +1,145 @@
+syntax Set ::= Set Set
+  [ left
+  , function
+  , hook(SET.concat)
+  , klabel(_Set_)
+  , symbol
+  , assoc
+  , comm
+  , unit(.Set)
+  , idem
+  , element(SetItem)
+  , format(%1%n%2)
+  ]
+===
+KW_SYNTAX
+syntax
+
+ID_UPPER
+Set
+
+DCOLONEQ
+::=
+
+ID_UPPER
+Set
+
+ID_UPPER
+Set
+
+LBRACK
+[
+
+ATTR_KEY
+left
+
+COMMA
+,
+
+ATTR_KEY
+function
+
+COMMA
+,
+
+ATTR_KEY
+hook
+
+LPAREN
+(
+
+ATTR_CONTENT
+SET.concat
+
+RPAREN
+)
+
+COMMA
+,
+
+ATTR_KEY
+klabel
+
+LPAREN
+(
+
+ATTR_CONTENT
+_Set_
+
+RPAREN
+)
+
+COMMA
+,
+
+ATTR_KEY
+symbol
+
+COMMA
+,
+
+ATTR_KEY
+assoc
+
+COMMA
+,
+
+ATTR_KEY
+comm
+
+COMMA
+,
+
+ATTR_KEY
+unit
+
+LPAREN
+(
+
+ATTR_CONTENT
+.Set
+
+RPAREN
+)
+
+COMMA
+,
+
+ATTR_KEY
+idem
+
+COMMA
+,
+
+ATTR_KEY
+element
+
+LPAREN
+(
+
+ATTR_CONTENT
+SetItem
+
+RPAREN
+)
+
+COMMA
+,
+
+ATTR_KEY
+format
+
+LPAREN
+(
+
+ATTR_CONTENT
+%1%n%2
+
+RPAREN
+)
+
+RBRACK
+]
+
+EOF
+
