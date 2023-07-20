@@ -1,0 +1,14 @@
+module TEST
+endmodule
+===
+KW_MODULE
+module
+
+MODNAME
+TEST
+
+KW_ENDMODULE
+endmodule
+
+EOF
+

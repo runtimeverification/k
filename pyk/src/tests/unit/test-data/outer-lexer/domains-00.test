@@ -1,0 +1,148 @@
+require "kast.md"
+
+
+module DOMAINS-SYNTAX
+  imports SORT-K
+  imports ID-SYNTAX
+  imports UNSIGNED-INT-SYNTAX
+  imports BOOL-SYNTAX
+  imports STRING-SYNTAX
+endmodule
+
+
+module DOMAINS
+  imports DOMAINS-SYNTAX
+  imports INT
+  imports BOOL
+  imports STRING
+  imports BASIC-K
+  imports LIST
+  imports K-IO
+  imports MAP
+  imports SET
+  imports ID
+  imports K-EQUAL
+endmodule
+===
+KW_REQUIRE
+require
+
+STRING
+"kast.md"
+
+KW_MODULE
+module
+
+MODNAME
+DOMAINS-SYNTAX
+
+KW_IMPORTS
+imports
+
+MODNAME
+SORT-K
+
+KW_IMPORTS
+imports
+
+MODNAME
+ID-SYNTAX
+
+KW_IMPORTS
+imports
+
+MODNAME
+UNSIGNED-INT-SYNTAX
+
+KW_IMPORTS
+imports
+
+MODNAME
+BOOL-SYNTAX
+
+KW_IMPORTS
+imports
+
+MODNAME
+STRING-SYNTAX
+
+KW_ENDMODULE
+endmodule
+
+KW_MODULE
+module
+
+MODNAME
+DOMAINS
+
+KW_IMPORTS
+imports
+
+MODNAME
+DOMAINS-SYNTAX
+
+KW_IMPORTS
+imports
+
+MODNAME
+INT
+
+KW_IMPORTS
+imports
+
+MODNAME
+BOOL
+
+KW_IMPORTS
+imports
+
+MODNAME
+STRING
+
+KW_IMPORTS
+imports
+
+MODNAME
+BASIC-K
+
+KW_IMPORTS
+imports
+
+MODNAME
+LIST
+
+KW_IMPORTS
+imports
+
+MODNAME
+K-IO
+
+KW_IMPORTS
+imports
+
+MODNAME
+MAP
+
+KW_IMPORTS
+imports
+
+MODNAME
+SET
+
+KW_IMPORTS
+imports
+
+MODNAME
+ID
+
+KW_IMPORTS
+imports
+
+MODNAME
+K-EQUAL
+
+KW_ENDMODULE
+endmodule
+
+EOF
+

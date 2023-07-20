@@ -1,0 +1,10 @@
+rule /* 1 */ program /* 2 */ text /* 3 */ /* 4 */ // 5
+===
+KW_RULE
+rule
+
+BUBBLE
+program /* 2 */ text
+
+EOF
+

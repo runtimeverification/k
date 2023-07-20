@@ -1,0 +1,60 @@
+rule [stdinGetc]:
+     <stdin>
+     ListItem(#parseInput(_:String, Delimiters:String))
+     ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
+     ListItem("on")
+     ListItem(#istream(N:Int))
+     </stdin>
+  requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
+     [stream, priority(200)]
+===
+KW_RULE
+rule
+
+LBRACK
+[
+
+RULE_LABEL
+stdinGetc
+
+RBRACK
+]
+
+COLON
+:
+
+BUBBLE
+<stdin>
+     ListItem(#parseInput(_:String, Delimiters:String))
+     ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
+     ListItem("on")
+     ListItem(#istream(N:Int))
+     </stdin>
+  requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
+
+LBRACK
+[
+
+ATTR_KEY
+stream
+
+COMMA
+,
+
+ATTR_KEY
+priority
+
+LPAREN
+(
+
+ATTR_CONTENT
+200
+
+RPAREN
+)
+
+RBRACK
+]
+
+EOF
+

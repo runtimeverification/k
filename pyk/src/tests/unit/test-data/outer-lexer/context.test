@@ -1,0 +1,10 @@
+context foo
+===
+KW_CONTEXT
+context
+
+BUBBLE
+foo
+
+EOF
+
