@@ -7,7 +7,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -187,19 +186,8 @@ public class ModuleToKORE {
         }
         translateSorts(tokenSorts, attributes, collectionSorts, semantics);
 
-        List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
-        if (options.backend.equals("haskell")) {
-            module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
-                    prod -> {
-                        if (!options.disableCeilSimplificationRules) {
-                            genMapCeilAxioms(prod, sortedRules);
-                        }
-                        return prod;
-                    }
-            );
-        }
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : sortedRules) {
+        for (Rule rule: iterable(module.sortedRules())) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
@@ -292,7 +280,7 @@ public class ModuleToKORE {
         macros.append("// macros\n");
         int ruleIndex = 0;
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
-        for (Rule rule : sortedRules) {
+        for (Rule rule : iterable(module.sortedRules())) {
             if (ExpandMacros.isMacro(rule)) {
                 convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
                         priorityToPreviousGroup, priorityToAlias, sentenceType, macros);
