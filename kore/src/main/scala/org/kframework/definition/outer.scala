@@ -372,10 +372,20 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     if (sentences != other)
       return false
 
-    val atts = sentences.collect({ case p: Production => p.att }).toSet
-    val otherAtts = other.collect({ case p: Production => p.att }).toSet
-    val diff = atts -- otherAtts
-    diff.isEmpty
+    val productionsSorted = sentences.collect({ case p: Production => p }).toSeq.sorted
+    val otherProductionSorted = other.collect({ case p: Production => p }).toSeq.sorted
+
+    if (productionsSorted != otherProductionSorted)
+      return false
+
+    for (i <- productionsSorted.indices) {
+      val p1 = productionsSorted(i)
+      val p2 = otherProductionSorted(i)
+      if (!p1.att.equals(p2.att))
+        return false
+    }
+
+    true
   }
 
   def checkUserLists(): Unit = localSentences foreach {

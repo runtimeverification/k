@@ -59,7 +59,7 @@ object ModuleTransformer {
     case _ => new ModuleTransformer(f, name)
   }
 
-  def mapWithTrace(sentences: Set[Sentence])(f: (Module, Sentence) => Sentence, m: Module, name: String): Set[Sentence] =
+  private def mapWithTrace(sentences: Set[Sentence])(f: (Module, Sentence) => Sentence, m: Module, name: String): Set[Sentence] =
     sentences.map { s =>
       try {
         f(m, s)
