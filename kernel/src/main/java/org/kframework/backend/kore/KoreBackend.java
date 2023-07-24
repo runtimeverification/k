@@ -95,7 +95,7 @@ public class KoreBackend extends AbstractBackend {
     public static Module getKompiledModule(Module mainModule, boolean hasAnd, KompileOptions kompileOptions) {
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         if (hasAnd) {
-          mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule, hasAnd)::resolve, "Minimize term construction").apply(mainModule);
+          mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
         }
         mainModule = ModuleTransformer.from(new GenerateMapCeilAxioms(mainModule, kompileOptions)::gen, "Generate map ceil axioms").apply(mainModule);
         
