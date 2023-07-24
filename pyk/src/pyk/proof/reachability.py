@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
-from itertools import chain
 from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
@@ -16,8 +15,8 @@ from ..kcfg import KCFG
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import mlAnd, mlEquals, mlTop
 from ..utils import FrozenDict, hash_str, shorten_hashes, single
-from .equality import Prover, RefutationProof
-from .proof import Proof, ProofStatus
+from .equality import ProofSummary, RefutationProof
+from .proof import CompositeSummary, Proof, ProofStatus, Prover
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
@@ -233,22 +232,25 @@ class APRProof(Proof):
         self._terminal_nodes.remove(self.kcfg._resolve(nid))  # TODO remove
 
     @property
-    def summary(self) -> Iterable[str]:
-        subproofs_summaries = chain(subproof.summary for subproof in self.subproofs)
-        yield from [
-            f'APRProof: {self.id}',
-            f'    status: {self.status}',
-            f'    admitted: {self.admitted}',
-            f'    nodes: {len(self.kcfg.nodes)}',
-            f'    pending: {len(self.pending)}',
-            f'    failing: {len(self.failing)}',
-            f'    stuck: {len(self.kcfg.stuck)}',
-            f'    terminal: {len(self.terminal)}',
-            f'    refuted: {len(self.node_refutations)}',
-            f'Subproofs: {len(self.subproof_ids)}',
-        ]
-        for summary in subproofs_summaries:
-            yield from summary
+    def summary(self) -> CompositeSummary:
+        subproofs_summaries = [subproof.summary for subproof in self.subproofs]
+        return CompositeSummary(
+            [
+                APRSummary(
+                    self.id,
+                    self.status,
+                    self.admitted,
+                    len(self.kcfg.nodes),
+                    len(self.pending),
+                    len(self.failing),
+                    len(self.kcfg.stuck),
+                    len(self.terminal),
+                    len(self.node_refutations),
+                    len(self.subproof_ids),
+                ),
+                *subproofs_summaries,
+            ]
+        )
 
     def get_refutation_id(self, node_id: int) -> str:
         return f'{self.id}.node-infeasible-{node_id}'
@@ -365,22 +367,26 @@ class APRBMCProof(APRProof):
         self._bounded_nodes.append(self.kcfg._resolve(nid))
 
     @property
-    def summary(self) -> Iterable[str]:
-        subproofs_summaries = chain(subproof.summary for subproof in self.subproofs)
-        yield from [
-            f'APRBMCProof(depth={self.bmc_depth}): {self.id}',
-            f'    status: {self.status}',
-            f'    nodes: {len(self.kcfg.nodes)}',
-            f'    pending: {len(self.pending)}',
-            f'    failing: {len(self.failing)}',
-            f'    stuck: {len(self.kcfg.stuck)}',
-            f'    terminal: {len(self.terminal)}',
-            f'    refuted: {len(self.node_refutations.keys())}',
-            f'    bounded: {len(self.bounded)}',
-            f'Subproofs: {len(self.subproof_ids)}',
-        ]
-        for summary in subproofs_summaries:
-            yield from summary
+    def summary(self) -> CompositeSummary:
+        subproofs_summaries = [subproof.summary for subproof in self.subproofs]
+        return CompositeSummary(
+            [
+                APRBMCSummary(
+                    self.id,
+                    self.bmc_depth,
+                    self.status,
+                    len(self.kcfg.nodes),
+                    len(self.pending),
+                    len(self.failing),
+                    len(self.kcfg.stuck),
+                    len(self.terminal),
+                    len(self.node_refutations),
+                    len(self._bounded_nodes),
+                    len(self.subproof_ids),
+                ),
+                *subproofs_summaries,
+            ]
+        )
 
 
 class APRProver(Prover):
@@ -593,6 +599,35 @@ class APRProver(Prover):
 
 
 @dataclass(frozen=True)
+class APRSummary(ProofSummary):
+    id: str
+    status: ProofStatus
+    admitted: bool
+    nodes: int
+    pending: int
+    failing: int
+    stuck: int
+    terminal: int
+    refuted: int
+    subproofs: int
+
+    @property
+    def lines(self) -> list[str]:
+        return [
+            f'APRProof: {self.id}',
+            f'    status: {self.status}',
+            f'    admitted: {self.admitted}',
+            f'    nodes: {self.nodes}',
+            f'    pending: {self.pending}',
+            f'    failing: {self.failing}',
+            f'    stuck: {self.stuck}',
+            f'    terminal: {self.terminal}',
+            f'    refuted: {self.refuted}',
+            f'Subproofs: {self.subproofs}',
+        ]
+
+
+@dataclass(frozen=True)
 class APRFailureInfo:
     failing_nodes: FrozenDict[int, tuple[str, str]]
     pending_nodes: frozenset[int]
@@ -722,3 +757,33 @@ class APRBMCProver(APRProver):
 
         self.proof.write_proof()
         return self.proof.kcfg
+
+
+@dataclass(frozen=True)
+class APRBMCSummary(ProofSummary):
+    id: str
+    bmc_depth: int
+    status: ProofStatus
+    nodes: int
+    pending: int
+    failing: int
+    stuck: int
+    terminal: int
+    refuted: int
+    bounded: int
+    subproofs: int
+
+    @property
+    def lines(self) -> list[str]:
+        return [
+            f'APRBMCProof(depth={self.bmc_depth}): {self.id}',
+            f'    status: {self.status}',
+            f'    nodes: {self.nodes}',
+            f'    pending: {self.pending}',
+            f'    failing: {self.failing}',
+            f'    stuck: {self.stuck}',
+            f'    terminal: {self.terminal}',
+            f'    refuted: {self.refuted}',
+            f'    bounded: {self.bounded}',
+            f'Subproofs: {self.subproofs}',
+        ]
