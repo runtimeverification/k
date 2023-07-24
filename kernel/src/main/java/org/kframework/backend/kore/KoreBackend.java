@@ -97,6 +97,8 @@ public class KoreBackend extends AbstractBackend {
         if (hasAnd) {
           mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule, hasAnd)::resolve, "Minimize term construction").apply(mainModule);
         }
+        mainModule = ModuleTransformer.from(new GenerateMapCeilAxioms(mainModule, kompileOptions)::gen, "Generate map ceil axioms").apply(mainModule);
+        
         Module finalMainModule = mainModule;
         mainModule =  ModuleTransformer.fromSentenceTransformerAtt((m, s) -> new AddKoreAttributes(finalMainModule, kompileOptions).add(s), "Add kore attributes").apply(mainModule);
 
