@@ -95,9 +95,10 @@ public class KoreBackend extends AbstractBackend {
     public static Module getKompiledModule(Module mainModule, boolean hasAnd, KompileOptions kompileOptions) {
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         if (hasAnd) {
-          mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+          mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule, hasAnd)::resolve, "Minimize term construction").apply(mainModule);
         }
-        mainModule =  ModuleTransformer.fromSentenceTransformerAtt((m, s) -> new AddKoreAttributes(m, kompileOptions).add(s), "Add kore attributes").apply(mainModule);
+        Module finalMainModule = mainModule;
+        mainModule =  ModuleTransformer.fromSentenceTransformerAtt((m, s) -> new AddKoreAttributes(finalMainModule, kompileOptions).add(s), "Add kore attributes").apply(mainModule);
 
         return mainModule;
     }
