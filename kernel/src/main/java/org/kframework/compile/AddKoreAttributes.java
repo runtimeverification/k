@@ -172,20 +172,8 @@ public class AddKoreAttributes {
 
         Production prod = (Production) s;
 
-        List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
-        if (options.backend.equals("haskell")) {
-            module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).toStream().foreach(
-                    p -> {
-                        if (!options.disableCeilSimplificationRules) {
-                            genMapCeilAxioms(p, sortedRules);
-                        }
-                        return p;
-                    }
-            );
-        }
-
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : sortedRules) {
+        for (Rule rule : iterable(module.sortedRules())) {
             K left = RewriteToTop.toLeft(rule.body());
 
             if (left instanceof KApply) {

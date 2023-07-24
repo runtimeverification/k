@@ -23,6 +23,8 @@ object ModuleTransformer {
         m
     }, name)
 
+  def fromSentenceTransformerAtt(f: java.util.function.UnaryOperator[Sentence], name: String): ModuleTransformer =
+    fromSentenceTransformerAtt((m: Module, s: Sentence) => f(s), name)
   def fromSentenceTransformerAtt(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
       val newSentences = mapWithTrace(m.localSentences.toSet)(f, m, name)
