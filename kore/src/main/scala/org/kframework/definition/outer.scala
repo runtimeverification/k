@@ -261,10 +261,6 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
-  def replaceSortedRules(newSortedRules: Seq[Rule]): Module = {
-    Module(name, imports, localSentences.filterNot(_.isInstanceOf[Rule]) ++ newSortedRules, att)
-  }
-
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
   lazy val localClaims: Set[Claim] = localSentences collect { case r: Claim => r }
   lazy val localRulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(localClaims).++(localRules)
