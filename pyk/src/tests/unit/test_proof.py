@@ -7,9 +7,9 @@ import pytest
 from pyk.kcfg.kcfg import KCFG
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import intToken
-from pyk.proof.equality import EqualityProof
-from pyk.proof.proof import Proof
-from pyk.proof.reachability import APRBMCProof, APRFailureInfo, APRProof
+from pyk.proof.equality import EqualityProof, EqualitySummary
+from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
+from pyk.proof.reachability import APRBMCProof, APRBMCSummary, APRFailureInfo, APRProof, APRSummary
 
 from .test_kcfg import node, node_dicts
 
@@ -279,3 +279,103 @@ Failing nodes:
 Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN"""
 
     assert actual_output == expected_output
+
+
+def test_apr_proof_summary(proof_dir: Path) -> None:
+    proof = apr_proof(1, proof_dir)
+
+    assert len(proof.summary.summaries) == 1
+    assert proof.summary == CompositeSummary(
+        [
+            APRSummary(
+                id='apr_proof_1',
+                status=ProofStatus.PASSED,
+                admitted=False,
+                nodes=1,
+                pending=0,
+                failing=0,
+                stuck=0,
+                terminal=0,
+                refuted=0,
+                subproofs=0,
+            )
+        ]
+    )
+
+
+def test_aprbmc_proof_summary(proof_dir: Path) -> None:
+    proof = aprbmc_proof(1, proof_dir)
+
+    assert len(proof.summary.summaries) == 1
+    assert proof.summary == CompositeSummary(
+        [
+            APRBMCSummary(
+                id='aprbmc_proof_1',
+                status=ProofStatus.PASSED,
+                bmc_depth=1,
+                nodes=1,
+                pending=0,
+                failing=0,
+                stuck=0,
+                terminal=0,
+                refuted=0,
+                subproofs=0,
+                bounded=0,
+            )
+        ]
+    )
+
+
+def test_apr_proof_summary_subproofs(proof_dir: Path) -> None:
+    # Given
+    eq_proof = equality_proof(1, proof_dir)
+    subproof = apr_proof(2, proof_dir)
+    proof = apr_proof(1, proof_dir)
+
+    # When
+    eq_proof.write_proof()
+    subproof.read_subproof(eq_proof.id)
+    subproof.write_proof()
+    proof.read_subproof(subproof.id)
+    proof.write_proof()
+    assert proof.proof_dir
+    proof_from_disk = Proof.read_proof(proof.id, proof_dir=proof.proof_dir)
+
+    # Then
+    comp_summary = proof_from_disk.summary
+    assert isinstance(comp_summary, CompositeSummary)
+    assert len(comp_summary.summaries) == 2
+    assert comp_summary.summaries[0] == APRSummary(
+        id='apr_proof_1',
+        status=ProofStatus.PENDING,
+        admitted=False,
+        nodes=1,
+        pending=0,
+        failing=0,
+        stuck=0,
+        terminal=0,
+        refuted=0,
+        subproofs=1,
+    )
+
+    assert comp_summary.summaries[1] == CompositeSummary(
+        [
+            APRSummary(
+                id='apr_proof_2',
+                status=ProofStatus.PENDING,
+                admitted=False,
+                nodes=2,
+                pending=1,
+                failing=0,
+                stuck=0,
+                terminal=0,
+                refuted=0,
+                subproofs=1,
+            ),
+            EqualitySummary(
+                id='equality_proof_1',
+                status=ProofStatus.PENDING,
+                admitted=False,
+            ),
+        ]
+    )
