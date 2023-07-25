@@ -2,10 +2,9 @@
 
 package org.kframework.definition
 
-import java.util.function.BiFunction
 import org.kframework.attributes.{Location, Source}
 import org.kframework.definition
-import org.kframework.kore.{AttCompare, K, KApply, KToken}
+import org.kframework.kore.{K, KApply, KToken}
 import org.kframework.utils.errorsystem.KEMException
 
 object ModuleTransformer {

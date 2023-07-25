@@ -1,15 +1,9 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ConstructorChecks;
-import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.Hooks;
-import org.kframework.builtin.KLabels;
-import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -20,21 +14,14 @@ import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
-import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KList;
 import org.kframework.kore.KORE;
-import org.kframework.kore.KVariable;
-import org.kframework.kore.Sort;
 import org.kframework.unparser.Formatter;
-import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.JavaConverters;
-import scala.collection.Seq;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,8 +41,8 @@ public class AddKoreAttributes {
         this.options = kompileOptions;
     }
 
-    private boolean isFunction(Production prod) {
-        return prod.att().contains(Att.FUNCTION());
+    private boolean isNotFunction(Production prod) {
+        return !prod.att().contains(Att.FUNCTION());
     }
 
     private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
@@ -75,8 +62,8 @@ public class AddKoreAttributes {
             }
         }
 
-        boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
-        boolean isConstructor = !isFunction(prod);
+        boolean isFunctional = isNotFunction(prod) || prod.att().contains(Att.TOTAL());
+        boolean isConstructor = isNotFunction(prod);
         isConstructor &= !prod.att().contains(Att.ASSOC());
         isConstructor &= !prod.att().contains(Att.COMM());
         isConstructor &= !prod.att().contains(Att.IDEM());
@@ -155,11 +142,7 @@ public class AddKoreAttributes {
                         colors.append(conn).append(att.get(Att.COLOR()));
                         conn = ",";
                     }
-                    if (format.charAt(i) == '%') {
-                        escape = true;
-                    } else {
-                        escape = false;
-                    }
+                    escape = format.charAt(i) == '%';
                 }
                 att = att.add(Att.COLORS(), colors.toString());
             }
