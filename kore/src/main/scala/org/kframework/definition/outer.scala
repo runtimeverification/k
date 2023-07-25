@@ -309,6 +309,20 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }
     functionRules
   }
+
+
+  val hasAttributesMap: mutable.Map[Att.Key, java.lang.Boolean] = mutable.Map[Att.Key, java.lang.Boolean]()
+
+  def addAttToAttributesMap(key: Att.Key, isPresent: java.lang.Boolean): Unit = hasAttributesMap.put(key, isPresent)
+
+  def removeAttFromAttributesMap(key: Att.Key): Unit = hasAttributesMap.remove(key)
+
+  def hasAtt(key: Att.Key): java.lang.Boolean = hasAttributesMap.getOrElse(key, false)
+
+  def hasAttributesMapAsJava: java.util.Map[Att.Key, java.lang.Boolean] = hasAttributesMap.asJava
+
+
+
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
 
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
