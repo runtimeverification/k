@@ -171,8 +171,10 @@ public class Kompile {
 
         if (kompileOptions.emitJson) {
             try {
+                Stopwatch sw = new Stopwatch(globalOptions);
                 files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef),          "UTF-8"));
                 files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), "UTF-8"));
+                sw.printIntermediate("  Emit parsed & compiled JSON");
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
             }
@@ -425,7 +427,11 @@ public class Kompile {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
+        stream(modules).forEach(m -> {
+            CheckAtt checkAtt = new CheckAtt(errors, kem, m, isSymbolic && isKast);
+            checkAtt.checkUnrecognizedModuleAtts();
+            stream(m.localSentences()).forEach(checkAtt::check);
+        });
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 

@@ -123,8 +123,8 @@ public class KException implements Serializable, HasLocation {
         IGNORED_ATTRIBUTE,
         REMOVED_ANYWHERE,
         DEPRECATED_DIRECTORY_FLAG,
+        MISSING_HOOK,
         FIRST_HIDDEN, // warnings below here are hidden by default
-        MISSING_HOOK_JAVA,
         USELESS_RULE,
         UNRESOLVED_FUNCTION_SYMBOL,
         MALFORMED_MARKDOWN,

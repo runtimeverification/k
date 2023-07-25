@@ -814,7 +814,7 @@ The following lemmas are simplifications that the Haskell backend can
 apply to simplify expressions of sort `Set`.
 
 ```k
-module SET-KORE-SYMBOLIC [kore,symbolic]
+module SET-KORE-SYMBOLIC [kore,symbolic,haskell]
   imports SET
   imports private K-EQUAL
   imports private BOOL
@@ -1370,23 +1370,6 @@ module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
   rule #Ceil(@I1:Int modInt @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
   rule #Ceil(@I1:Int >>Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
   rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
-
-  // Arithmetic Normalization
-  rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
-  rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), simplification(51)]
-
-  rule (A +Int I2) +Int I3 => A +Int (I2 +Int I3) [concrete(I2, I3), symbolic(A), simplification]
-  rule I1 +Int (B +Int I3) => B +Int (I1 +Int I3) [concrete(I1, I3), symbolic(B), simplification]
-  rule I1 -Int (B +Int I3) => (I1 -Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
-  rule I1 +Int (I2 +Int C) => (I1 +Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule I1 +Int (I2 -Int C) => (I1 +Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule (I1 -Int B) +Int I3 => (I1 +Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
-  rule I1 -Int (I2 +Int C) => (I1 -Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
-
-  rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
-
 endmodule
 
 module INT-KORE [kore, symbolic]
@@ -1404,6 +1387,21 @@ module INT-KORE [kore, symbolic]
   rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
   rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
 
+  // Arithmetic Normalization
+  rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
+  rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), simplification(51)]
+
+  rule (A +Int I2) +Int I3 => A +Int (I2 +Int I3) [concrete(I2, I3), symbolic(A), simplification]
+  rule I1 +Int (B +Int I3) => B +Int (I1 +Int I3) [concrete(I1, I3), symbolic(B), simplification]
+  rule I1 -Int (B +Int I3) => (I1 -Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
+  rule I1 +Int (I2 +Int C) => (I1 +Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule I1 +Int (I2 -Int C) => (I1 +Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule (I1 -Int B) +Int I3 => (I1 +Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
+  rule I1 -Int (I2 +Int C) => (I1 -Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
+
+  rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
 endmodule
 
 module INT

@@ -22,3 +22,6 @@ import kllvm
 sort_int = kllvm.ast.CompositeSort("SortInt")
 assert str(sort_int) == "SortInt{}"
 HERE
+
+# Make sure that the Haskell Backend Booster has been installed properly.
+kore-rpc-booster --help

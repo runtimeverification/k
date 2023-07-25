@@ -21,6 +21,7 @@ let
       "-DskipKTest=true"
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
+      "-Dbooster.skip=true"
     ];
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
     # hooks can also be set here.
@@ -49,6 +50,7 @@ let
       ln -sf ${llvm-backend}/include/kllvm $out/include/
       ln -sf ${llvm-backend}/include/kllvm-c $out/include/
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
+      ln -sf ${llvm-backend}/lib/scripts $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
       ${lib.optionalString (booster != null ) "ln -sf ${booster}/bin/* $out/bin/"}
 

@@ -261,6 +261,10 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
+  def replaceSortedRules(newSortedRules: Seq[Rule]): Module = {
+    Module(name, imports, localSentences.filterNot(_.isInstanceOf[Rule]) ++ newSortedRules, att)
+  }
+
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
   lazy val localClaims: Set[Claim] = localSentences collect { case r: Claim => r }
   lazy val localRulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(localClaims).++(localRules)
@@ -366,6 +370,26 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
     case _ =>
+  }
+
+  def checkAtts(other: Set[Sentence]): Boolean = {
+    if (sentences != other)
+      return false
+
+    val productionsSorted = sentences.collect({ case p: Production => p }).toSeq.sorted
+    val otherProductionSorted = other.collect({ case p: Production => p }).toSeq.sorted
+
+    if (productionsSorted != otherProductionSorted)
+      return false
+
+    for (i <- productionsSorted.indices) {
+      val p1 = productionsSorted(i)
+      val p2 = otherProductionSorted(i)
+      if (!p1.att.equals(p2.att))
+        return false
+    }
+
+    true
   }
 
   def checkUserLists(): Unit = localSentences foreach {

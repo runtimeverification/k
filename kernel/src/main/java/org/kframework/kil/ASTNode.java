@@ -90,18 +90,17 @@ public abstract class ASTNode implements Serializable, HasLocation {
     /**
      * Append an attribute to the list of attributes. In particular,
      * - inserting a key from the attribute whitelist if the attribute is recognized as a built-in
-     * - otherwise, inserting an unsafe raw key to be processed later (see ProcessGroupAttributes)
-     *
-     * WARNING: This function should only be used during parsing! It allows us to proceed with parsing and report
-     * multiple errors rather than immediately error out if the attribute is not whitelisted.
+     * - otherwise, inserting an unrecognized key to be errored on later
      *
      * @param key
      * @param val
      */
-    public void unsafeAddBuiltInOrRawAttribute(String key, String val, Source source, Location loc) {
-        if (att.contains(Att.getBuiltinKeyOptional(key).orElse(Att.unsafeRawKey(key))))
+    public void addBuiltInOrUnrecognizedAttribute(String key, String val, Source source, Location loc) {
+        Att.Key attKey = Att.getBuiltinKeyOptional(key).orElse(Att.unrecognizedKey(key));
+        if (att.contains(attKey)) {
             throw KEMException.outerParserError("Duplicate attribute: " + key, source, loc);
-        att = att.add(Att.getBuiltinKeyOptional(key).orElse(Att.unsafeRawKey(key)), val);
+        }
+        att = att.add(attKey, val);
     }
 
     /**
