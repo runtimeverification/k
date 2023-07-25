@@ -785,11 +785,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1689842576,
-        "narHash": "sha256-8CwpP7YXx021KK/cbEzwnUzOuO+uzUCL4dLrWOpfduE=",
+        "lastModified": 1690303772,
+        "narHash": "sha256-9jY7BnCraCg4d0o0Xm0l5NEKASDLMIIj5wfSmNPGBrw=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "b1f1e9c41322a7e3303eb8b973f379f82462d05c",
+        "rev": "9778ec9745ccf54524de3afc82d1671baf1ecd46",
         "type": "github"
       },
       "original": {
@@ -1228,11 +1228,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1689680872,
-        "narHash": "sha256-brNix2+ihJSzCiKwLafbyejrHJZUP0Fy6z5+xMOC27M=",
+        "lastModified": 1690148897,
+        "narHash": "sha256-l/j/AX1d2K79EWslwgWR2+htkzCbtjKZsS5NbWXnhz4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "08700de174bc6235043cb4263b643b721d936bdb",
+        "rev": "ac1acba43b2f9db073943ff5ed883ce7e8a40a2c",
         "type": "github"
       },
       "original": {
