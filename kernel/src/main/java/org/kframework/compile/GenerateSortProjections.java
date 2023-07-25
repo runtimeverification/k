@@ -63,14 +63,14 @@ public class GenerateSortProjections {
         }
         KLabel lbl = getProjectLbl(sort, mod);
         KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
-        Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection"));
+        Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.PROJECTION()));
         if (mod.definedKLabels().contains(lbl)) {
             return Stream.empty();
         }
-        Production prod = Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection"));
+        Production prod = Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add(Att.FUNCTION()).add(Att.PROJECTION()));
         if (cover) {
             KLabel sideEffectLbl = KLabel("sideEffect:" + sort.toString());
-            Production sideEffect = Production(sideEffectLbl, sort, Seq(Terminal(sideEffectLbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(","), NonTerminal(sort), Terminal(")")), Att().add("function"));
+            Production sideEffect = Production(sideEffectLbl, sort, Seq(Terminal(sideEffectLbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(","), NonTerminal(sort), Terminal(")")), Att().add(Att.FUNCTION()));
             Rule sideEffectR = Rule(KRewrite(KApply(sideEffectLbl, KVariable("K2", Att.empty().add(Sort.class, Sorts.K())), var), var), BooleanUtils.TRUE, BooleanUtils.TRUE);
             return stream(Set(prod, r, sideEffect, sideEffectR));
         } else {
@@ -100,7 +100,7 @@ public class GenerateSortProjections {
           if (mod.definedKLabels().contains(lbl)) {
               return Stream.empty();
           }
-          sentences.add(Production(lbl, nt.sort(), Seq(Terminal(nt.name().get()), Terminal("("), NonTerminal(prod.sort()), Terminal(")")), Att().add("function")));
+          sentences.add(Production(lbl, nt.sort(), Seq(Terminal(nt.name().get()), Terminal("("), NonTerminal(prod.sort()), Terminal(")")), Att().add(Att.FUNCTION())));
           sentences.add(Rule(KRewrite(KApply(lbl, KApply(prod.klabel().get(), KList(vars))), vars.get(i)), BooleanUtils.TRUE, BooleanUtils.TRUE));
         }
         i++;

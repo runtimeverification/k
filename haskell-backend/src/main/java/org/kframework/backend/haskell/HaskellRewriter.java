@@ -12,7 +12,6 @@ import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.kbmc.KBMCOptions;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -62,7 +61,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     private final SMTOptions smtOptions;
     private final KompileOptions kompileOptions;
     private final KProveOptions kProveOptions;
-    private final KBMCOptions kbmcOptions;
     private final HaskellKRunOptions haskellKRunOptions;
     private final BackendOptions backendOptions;
     private final FileUtil files;
@@ -77,7 +75,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             SMTOptions smtOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
-            KBMCOptions kbmcOptions,
             HaskellKRunOptions haskellKRunOptions,
             BackendOptions backendOptions,
             FileUtil files,
@@ -91,7 +88,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.backendOptions = backendOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
-        this.kbmcOptions = kbmcOptions;
         this.files = files;
         this.def = def;
         this.kem = kem;
@@ -352,7 +348,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             @Override
             public RewriterResult prove(Module rules, Boolean reuseDef) {
-                Module kompiledModule = KoreBackend.getKompiledModule(module, true);
+                Module kompiledModule = KoreBackend.getKompiledModule(module, true, kompileOptions);
                 ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions, kem);
                 String defPath = reuseDef ? files.resolveKompiled("definition.kore").getAbsolutePath() : saveKoreDefinitionToTemp(converter);
                 String specPath = saveKoreSpecToTemp(converter, rules);
@@ -360,8 +356,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
                 String koreDirectory = haskellKRunOptions.haskellBackendHome;
 
-                String defModuleName =
-                        kProveOptions.defModule == null ? def.executionModule().name() : kProveOptions.defModule;
+                String defModuleName = def.executionModule().name();
                 String specModuleName = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
 
                 List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
@@ -375,47 +370,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--breadth");
                     args.add(String.valueOf(kProveOptions.branchingAllowed));
                 }
-                String[] koreCommand = args.toArray(new String[args.size()]);
-                if (backendOptions.dryRun) {
-                    globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
-                    System.out.println(String.join(" ", koreCommand));
-                    kprint.options.output = OutputModes.NONE;
-                    return new RewriterResult(Optional.empty(), Optional.of(0),KORE.KApply(KLabels.ML_FALSE));
-                }
-                if (globalOptions.verbose) {
-                    System.err.println("Executing " + args);
-                }
-
-                RewriterResult result = executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
-                return result;
-            }
-
-            public RewriterResult bmc (Module rules) {
-                Module kompiledModule = KoreBackend.getKompiledModule(module, true);
-                ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions);
-                String defPath = saveKoreDefinitionToTemp(converter);
-                String specPath = saveKoreSpecToTemp(converter, rules);
-                File koreOutputFile = files.resolveTemp("result.kore");
-
-                String koreDirectory = haskellKRunOptions.haskellBackendHome;
-
-                String defModuleName =
-                        kbmcOptions.defModule == null ? def.executionModule().name() : kbmcOptions.defModule;
-                String specModuleName = kbmcOptions.specModule == null ? rules.name() : kbmcOptions.specModule;
-
-                List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
-                        defModuleName, specModuleName);
-
-                if (kbmcOptions.depth != null) {
-                    args.addAll(Arrays.asList(
-                            "--depth", kbmcOptions.depth.toString()));
-                }
-                if (kbmcOptions.graphSearch != null) {
-                    args.addAll(Arrays.asList(
-                            "--graph-search", kbmcOptions.graphSearch.toString()));
-                }
-                args.add("--bmc");
-
                 String[] koreCommand = args.toArray(new String[args.size()]);
                 if (backendOptions.dryRun) {
                     globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.

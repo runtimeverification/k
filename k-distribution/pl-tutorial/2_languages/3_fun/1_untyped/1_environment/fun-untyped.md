@@ -166,31 +166,31 @@ the list is on a position which can be evaluated:
 ```
 We next define the syntax of arithmetic constructs, together with
 their relative priorities and left-/non-associativities.  We also
-tag all these rules with a new tag, "arith", so we can more easily
-define global syntax priirities later (at the end of the syntax module).
+tag all these rules as members of a new group, "arith", so we can more easily
+define global syntax priorities later (at the end of the syntax module).
 ```k
   syntax Exp ::= left:
-                 Exp "*" Exp                       [strict, arith]
-               | Exp "/" Exp                       [strict, arith]
-               | Exp "%" Exp                       [strict, arith]
+                 Exp "*" Exp                       [strict, group(arith)]
+               | Exp "/" Exp                       [strict, group(arith)]
+               | Exp "%" Exp                       [strict, group(arith)]
                > left:
-                 Exp "+" Exp                       [strict, left, arith]
-               | Exp "^" Exp                       [strict, left, arith]
+                 Exp "+" Exp                       [strict, left, group(arith)]
+               | Exp "^" Exp                       [strict, left, group(arith)]
 // left attribute should not be necessary; currently a parsing bug
-               | Exp "-" Exp                       [strict, prefer, arith]
+               | Exp "-" Exp                       [strict, prefer, group(arith)]
 // the "prefer" attribute above is to not parse x-1 as x(-1)
 // Due to some parsing problems, we currently cannot add unary minus:
-               | "-" Exp                           [strict, arith]
+               | "-" Exp                           [strict, group(arith)]
                > non-assoc:
-                 Exp "<" Exp                       [strict, arith]
-               | Exp "<=" Exp                      [strict, arith]
-               | Exp ">" Exp                       [strict, arith]
-               | Exp ">=" Exp                      [strict, arith]
-               | Exp "==" Exp                      [strict, arith]
-               | Exp "!=" Exp                      [strict, arith]
-               > "!" Exp                           [strict, arith]
-               > Exp "&&" Exp                      [strict(1), left, arith]
-               > Exp "||" Exp                      [strict(1), left, arith]
+                 Exp "<" Exp                       [strict, group(arith)]
+               | Exp "<=" Exp                      [strict, group(arith)]
+               | Exp ">" Exp                       [strict, group(arith)]
+               | Exp ">=" Exp                      [strict, group(arith)]
+               | Exp "==" Exp                      [strict, group(arith)]
+               | Exp "!=" Exp                      [strict, group(arith)]
+               > "!" Exp                           [strict, group(arith)]
+               > Exp "&&" Exp                      [strict(1), left, group(arith)]
+               > Exp "||" Exp                      [strict(1), left, group(arith)]
 ```
 The conditional construct has the expected evaluation strategy,
 stating that only the first argument is evaluate:

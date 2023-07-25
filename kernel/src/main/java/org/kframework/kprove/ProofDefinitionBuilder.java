@@ -92,8 +92,8 @@ public class ProofDefinitionBuilder {
             }
             specModule = new ModuleTransformer((m -> {
                 Set<Sentence> filtered = stream(m.localSentences()).flatMap(s -> {
-                    if (s instanceof Claim && s.att().getOptional("label").isPresent()) {
-                        String label = s.att().getOptional("label").get();
+                    if (s instanceof Claim && s.att().getOptional(Att.LABEL()).isPresent()) {
+                        String label = s.att().getOptional(Att.LABEL()).get();
                         Claim c = (Claim) s;
                         if (proveOptions.trusted != null && proveOptions.trusted.contains(label)) {
                             s = c.newInstance(c.body(), c.requires(), c.ensures(), c.att().add(Att.TRUSTED()));

@@ -23,6 +23,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -174,7 +175,7 @@ public class EarleyParser {
     public boolean isToken() {
       Boolean isToken = this.isToken;
       if (isToken == null) {
-        isToken = prod.att().contains("token");
+        isToken = prod.att().contains(Att.TOKEN());
         this.isToken = isToken;
       }
       return isToken;
@@ -320,6 +321,8 @@ public class EarleyParser {
    * @param data The {@link ParserMetadata} about the current sentence being parsed.
    */
   private static void wrapState(Set<Term> parses, Set<PStack<Term>> parseTree, EarleyProduction eprod, int start, int end, ParserMetadata data) {
+    byte[] utf8Input = StringUtils.getBytesUtf8(data.input);
+
     for (PStack<Term> children : parseTree) {
       Production prod = eprod.prod;
       Term result;
@@ -340,7 +343,8 @@ public class EarleyParser {
 
       if (eprod.isToken()) {
         // it's a token, so create a Constant.
-        String value = data.input.substring(startLoc, endLoc);
+        // Note that startLoc and endLoc refer to indices into the UTF-8 encoded byte array
+        String value = StringUtils.newStringUtf8(Arrays.copyOfRange(utf8Input, startLoc, endLoc));
         if (eprod.isMInt()) {
           // it's an MInt token, so make sure to add the correct bit-length to the production before creating the
           // Constant

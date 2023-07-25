@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 
+/**
+ * Fix the format attribute for <generatedTop> when GeneratedCounterCell was added
+ */
 public class GeneratedTopFormat {
 
     private static Production resolve(Production prod) {
@@ -42,9 +46,9 @@ public class GeneratedTopFormat {
                 for (j = 0; j < cellPositions.size(); j++) {
                     format.append("%n%").append(cellPositions.get(j));
                 }
-                format.append("%d%n%").append(cellPositions.get(j - 1) + 1);
+                format.append("%d%n%").append(cellPositions.get(j - 1) + 2);
             }
-            return prod.withAtt(prod.att().add("format", format.toString()));
+            return prod.withAtt(prod.att().add(Att.FORMAT(), format.toString()));
         }
         return prod;
     }

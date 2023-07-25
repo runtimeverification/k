@@ -197,7 +197,7 @@ public class ResolveFun {
         pis.add(Terminal(")"));
         return Production(fun, rhs,
                 immutable(pis),
-                Att().add("function"));
+                Att().add(Att.FUNCTION()));
     }
 
     private Sort sort(K k) {

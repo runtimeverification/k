@@ -1,5 +1,5 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
+, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
 , prelude-kore, llvm-backend, debugger, version }:
 
 let
@@ -21,6 +21,7 @@ let
       "-DskipKTest=true"
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
+      "-Dbooster.skip=true"
     ];
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
     # hooks can also be set here.
@@ -49,7 +50,9 @@ let
       ln -sf ${llvm-backend}/include/kllvm $out/include/
       ln -sf ${llvm-backend}/include/kllvm-c $out/include/
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
+      ln -sf ${llvm-backend}/lib/scripts $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
+      ${lib.optionalString (booster != null ) "ln -sf ${booster}/bin/* $out/bin/"}
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
@@ -104,4 +107,8 @@ in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
   done
 
   ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
+  ln -sf ${haskell-backend}/bin/kore-exec $out/bin/kore-exec
+  ln -sf ${haskell-backend}/bin/kore-parser $out/bin/kore-parser
+  ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
+  ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
 ''

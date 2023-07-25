@@ -125,8 +125,8 @@ public class ResolveStrict {
                     public K apply(KVariable var) {
                       if (var.name().equals("HERE")) {
                         K thisHole = hole;
-                        if (alias.att().contains("context")) {
-                            KLabel contextLabel = KLabel(alias.att().get("context"));
+                        if (alias.att().contains(Att.CONTEXT())) {
+                            KLabel contextLabel = KLabel(alias.att().get(Att.CONTEXT()));
                             thisHole = KRewrite(hole, KApply(contextLabel, hole));
                         }
                         items.set(strictnessPosition, thisHole);
@@ -136,7 +136,7 @@ public class ResolveStrict {
                     }
                 }.apply(alias.body());
 
-                Sort result = Outer.parseSort(alias.att().getOptional("result").orElse("KResult"));
+                Sort result = Outer.parseSort(alias.att().getOptional(Att.RESULT()).orElse("KResult"));
 
                 // is seqstrict the elements before the argument should be KResult
                 Optional<KApply> sideCondition = Stream.concat(allPositions.stream(), strictnessPositions.subList(0, i).stream()).map(j -> KApply(KLabel("is" + result.toString()), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
@@ -147,7 +147,7 @@ public class ResolveStrict {
                     requires = sideCondition.get();
                 }
 
-                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove("label"));
+                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove(Att.LABEL()));
                 sentences.add(ctx);
             }
         }
@@ -200,10 +200,10 @@ public class ResolveStrict {
             }
         }
 
-        if (production.att().contains("hybrid")) {
+        if (production.att().contains(Att.HYBRID())) {
             List<KLabel> results = new ArrayList<>();
-            if (!production.att().get("hybrid").equals("")) {
-              String[] sorts = StringUtil.splitOneDimensionalAtt(production.att().get("hybrid"));
+            if (!production.att().get(Att.HYBRID()).equals("")) {
+              String[] sorts = StringUtil.splitOneDimensionalAtt(production.att().get(Att.HYBRID()));
               for (String sort : sorts) {
                 results.add(KLabel("is" + sort));
               }
@@ -235,7 +235,7 @@ public class ResolveStrict {
         Set<Sentence> contextsToAdd = resolve(stream(input.localSentences())
                 .filter(s -> s instanceof Production)
                 .map(s -> (Production) s)
-                .filter(p -> p.att().contains("strict") || p.att().contains("seqstrict")).collect(Collectors.toSet()));
+                .filter(p -> p.att().contains(Att.STRICT()) || p.att().contains(Att.SEQSTRICT())).collect(Collectors.toSet()));
         scala.collection.Set<Import> imports = input.imports();
         // strictness makes use _andBool_ found in the BOOL module. Make sure it's imported
         if (!contextsToAdd.isEmpty() && !input.importedModuleNames().contains(Hooks.BOOL))

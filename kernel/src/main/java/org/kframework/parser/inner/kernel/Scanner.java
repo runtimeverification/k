@@ -5,6 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
@@ -65,8 +66,8 @@ public class Scanner implements AutoCloseable {
                     TerminalLike lx = (TerminalLike) pi;
                     if (tokens.containsKey(lx)) {
                         int prec;
-                        if (p.att().contains("prec")) {
-                            prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                        if (p.att().contains(Att.PREC())) {
+                            prec = Integer.valueOf(p.att().getOptional(Att.PREC()).get());
                         } else if (lx instanceof Terminal) {
                             prec = Integer.MAX_VALUE;
                         } else {
@@ -83,8 +84,8 @@ public class Scanner implements AutoCloseable {
                             tokens.put(lx, Integer.MAX_VALUE);
                         } else {
                             int prec;
-                            if (p.att().contains("prec")) {
-                                prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                            if (p.att().contains(Att.PREC())) {
+                                prec = Integer.valueOf(p.att().getOptional(Att.PREC()).get());
                             } else {
                                 prec = 0;
                             }

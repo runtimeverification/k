@@ -42,12 +42,7 @@ import static org.kframework.kore.KORE.*;
  */
 public class GenerateSortPredicateRules {
 
-    private Module mod;
-    private java.util.Set<Rule> predicateRules;
-
     public Module gen(Module mod) {
-        this.mod = mod;
-        predicateRules = stream(mod.rules()).filter(this::isPredicate).collect(Collectors.toSet());
         return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(stream(mod.allSorts())
                 .flatMap(this::gen).collect(Collections.toSet())), mod.att());
     }
@@ -63,49 +58,4 @@ public class GenerateSortPredicateRules {
         }
     }
 
-    private boolean isTruePredicate(Rule r) {
-        return RewriteToTop.toRight(r.body()).equals(BooleanUtils.TRUE);
-    }
-
-    private boolean isPredicateFor(Rule r, Sort s) {
-        Optional<Sort> sort = getPredicateSort(r);
-        return sort.isPresent() && sort.get().equals(s);
-    }
-
-    private boolean isPredicate(Rule r) {
-        return getPredicateSort(r).isPresent();
-    }
-
-    private Optional<Sort> getPredicateSort(Rule r) {
-        KLabel topKLabel;
-        Optional<Sort> sort;
-        if (r.body() instanceof KApply) {
-            topKLabel = ((KApply) r.body()).klabel();
-            sort = mod.attributesFor().apply(topKLabel).getOptional(Att.PREDICATE(), Sort.class);
-        } else if (r.body() instanceof KRewrite) {
-            KRewrite rw = (KRewrite) r.body();
-            if (rw.left() instanceof KApply) {
-                topKLabel = ((KApply) rw.left()).klabel();
-                sort = mod.attributesFor().apply(topKLabel).getOptional(Att.PREDICATE(), Sort.class);
-            } else {
-                sort = Optional.empty();
-            }
-        } else
-            sort = Optional.empty();
-        return sort;
-    }
-
-    /**
-     * Takes a rule representing a predicate of one sort and promotes it to a rule representing a predicate for one of its supersorts
-     */
-    private Rule promotePredicate(Rule r, Sort s) {
-        K left = RewriteToTop.toLeft(r.body());
-        K right = RewriteToTop.toRight(r.body());
-        if (left instanceof KApply) {
-            // the case where a rewrite applies unconditionally may be dependent on the klabel, so we hoist the rhs into the side condition
-            return Rule(KRewrite(KApply(KLabel("is" + s.toString()), ((KApply) left).klist()), BooleanUtils.TRUE), BooleanUtils.and(r.requires(), right), r.ensures(), r.att());
-        } else {
-            throw new IllegalArgumentException("not a predicate rule");
-        }
-    }
 }

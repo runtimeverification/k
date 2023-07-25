@@ -5,6 +5,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -87,12 +88,28 @@ public abstract class ASTNode implements Serializable, HasLocation {
      */
 
     /**
+     * Append an attribute to the list of attributes. In particular,
+     * - inserting a key from the attribute whitelist if the attribute is recognized as a built-in
+     * - otherwise, inserting an unrecognized key to be errored on later
+     *
+     * @param key
+     * @param val
+     */
+    public void addBuiltInOrUnrecognizedAttribute(String key, String val, Source source, Location loc) {
+        Att.Key attKey = Att.getBuiltinKeyOptional(key).orElse(Att.unrecognizedKey(key));
+        if (att.contains(attKey)) {
+            throw KEMException.outerParserError("Duplicate attribute: " + key, source, loc);
+        }
+        att = att.add(attKey, val);
+    }
+
+    /**
      * Appends an attribute to the list of attributes.
      *
      * @param key
      * @param val
      */
-    public void addAttribute(String key, String val) {
+    public void addAttribute(Att.Key key, String val) {
         att = att.add(key, val);
     }
 
@@ -100,7 +117,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @param key
      * @return whether the attribute key occurs in the list of attributes.
      */
-    public boolean containsAttribute(String key) {
+    public boolean containsAttribute(Att.Key key) {
         return att.contains(key);
     }
 
@@ -111,7 +128,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @param key
      * @return a value for key in the list of attributes or the default value.
      */
-    public String getAttribute(String key) {
+    public String getAttribute(Att.Key key) {
         return att.getOptional(key).orElse(null);
     }
 
@@ -121,6 +138,15 @@ public abstract class ASTNode implements Serializable, HasLocation {
      */
     public Att getAttributes() {
         return att;
+    }
+
+    /**
+     * Sets the attributes to the provided Att
+     *
+     * @param att - the new attributes
+     */
+    public void setAttributes(Att att) {
+        this.att = att;
     }
 
     public abstract void toString(StringBuilder sb);

@@ -94,8 +94,8 @@ example, consider the following definition:
 module LESSON-11-C
   imports INT
 
-  syntax Exp ::= Int | Exp "+" Exp [exp]
-  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [exp2]
+  syntax Exp ::= Int | Exp "+" Exp [group(exp)]
+  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [group(exp2)]
 endmodule
 ```
 
@@ -103,7 +103,7 @@ This grammar is a little ambiguous and contrived, but it serves to demonstrate
 how a semantic cast might be insufficient to disambiguate a term. If we were
 to write the term `(I1:Int + I2:Int):Exp2`, the term would be ambiguous,
 because the cast is not sufficiently strict to determine whether you mean
-to derive the "+" production tagged `exp`, or the one tagged `exp2`.
+to derive the "+" production in the group `exp` or the one in the group `exp2`.
 
 In this situation, there is a solution: the **strict cast**. For every sort
 `S` in your grammar, K also defines the following production:

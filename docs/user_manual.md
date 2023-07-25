@@ -743,25 +743,26 @@ For this purpose, we introduce the equivalent `syntax priorities`,
 example, the above grammar can be written equivalently as:
 
 ```k
-syntax Exp ::= Exp "*" Exp [mult]
-             | Exp "/" Exp [div]
-             | Exp "+" Exp [add]
-             | Exp "-" Exp [sub]
+syntax Exp ::= Exp "*" Exp [group(mult)]
+             | Exp "/" Exp [group(div)]
+             | Exp "+" Exp [group(add)]
+             | Exp "-" Exp [group(sub)]
 
 syntax priorities mult div > add sub
 syntax left mult div
 syntax right add sub
 ```
 
-Here we use user-defined attributes to refer to a group of sentences
-collectively. The sets are flattened together. We could equivalently have
-written:
+Here, the `group(_)` attribute is used to create user-defined groups of
+sentences. A particular group name collectively refers to the whole set of
+sentences within that group. The sets are flattened together, so we could
+equivalently have written:
 
 ```k
-syntax Exp ::= Exp "*" Exp [mult]
-             | Exp "/" Exp [mult]
-             | Exp "+" Exp [add]
-             | Exp "-" Exp [add]
+syntax Exp ::= Exp "*" Exp [group(mult)]
+             | Exp "/" Exp [group(mult)]
+             | Exp "+" Exp [group(add)]
+             | Exp "-" Exp [group(add)]
 
 syntax priorities mult > add
 syntax left mult
@@ -1344,20 +1345,39 @@ warning if it encounters such a claim.
 
 ### `concrete` and `symbolic` attributes (Haskell backend)
 
-Sometimes you only want a rule to apply if some or all arguments are concrete
-(not symbolic). This is done with the `concrete` attribute. Conversely, the
-`symbolic` attribute will allow a rule to apply only when some arguments are not
-concrete. These attributes should only be given with the `simplification`
-attribute.
+Users can control the application of `simplification` rules using the `concrete`
+and the `symbolic` attributes by specifying the type of patterns the rule's
+arguments are to match.
 
-For example, the following will only re-associate terms when all arguments
+A concrete pattern is a pattern which does not contain variables or unevaluated
+functions, otherwise the pattern is symbolic.
+
+The semantics of the two attributes is defined as follows:
+- If a simplification rule is marked `concrete`, then _all_ arguments must be
+concrete for the rule to match.
+- If a simplification rule is marked `symbolic`, then _all_ arguments must be
+symbolic for the rule to match.
+- The following syntax `concrete(<variables>)` (resp. `symbolic(<variables>)`),
+where `<variables>` is a list of variable names separated by commas, can be used
+to specify the exact arguments the user expects to match concrete (resp. symbolic)
+patterns.
+
+For example, the following will only match when all arguments
 are concrete:
 
 ```k
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
 ```
 
-These rules will re-associate and commute terms to combine concrete arguments:
+Conversely, the following will only match when all arguments
+are symbolic:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, symbolic]
+```
+
+In practice, the following rules will re-associate and commute terms to combine
+concrete arguments:
 
 ```k
 rule (A +Int Y) +Int Z => A +Int (Y +Int Z)
@@ -2848,10 +2868,10 @@ Attributes Reference
 
 ### Attribute Syntax Overview
 
-In K, many different syntactic categories accept _attributes_, an optional
-trailing list of keywords or user-defined identifiers. Attribute lists have two
-different syntaxes, depending on where they occur. Each attribute also has a
-type which describes where it may occur.
+In K, many different syntactic categories accept an optional trailing list of
+keywords known as _attributes_. Attribute lists have two different syntaxes,
+depending on where they occur. Each attribute also has a type which describes
+where it may occur.
 
 The first syntax is a square-bracketed (`[]`) list of words. This syntax is
 available for following attribute types:
@@ -2874,8 +2894,7 @@ available for the following attribute types:
 1.  `cell` attributes - may appear inside of the cell start tag in
     configuration declarations
 
-Note that, currently, *unknown* attributes are *ignored*. Essentially, this
-means that there is no such thing as an *invalid* attribute. When we talk about
+Unrecognized attributes are reported as an error. When we talk about
 the *type* of an attribute, we mean a syntactic category to which an attribute
 can be attached where the attribute has some semantic effect.
 
@@ -2906,6 +2925,7 @@ arguments. A legend describing how to interpret the index follows.
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
 | `function`            | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
+| `group(_)`            | all   | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |

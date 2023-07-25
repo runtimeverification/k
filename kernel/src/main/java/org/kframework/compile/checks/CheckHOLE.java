@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ResolveStrict;
 import org.kframework.definition.Context;
@@ -37,11 +38,11 @@ public class CheckHOLE {
     }
 
     private void check(Production prod) {
-        if (prod.att().contains("strict")) {
-            check(prod, prod.att().get("strict"));
+        if (prod.att().contains(Att.STRICT())) {
+            check(prod, prod.att().get(Att.STRICT()));
         }
-        if (prod.att().contains("seqstrict")) {
-            check(prod, prod.att().get("seqstrict"));
+        if (prod.att().contains(Att.SEQSTRICT())) {
+            check(prod, prod.att().get(Att.SEQSTRICT()));
         }
     }
 

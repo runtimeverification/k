@@ -122,8 +122,9 @@ public class KException implements Serializable, HasLocation {
         NON_LR_GRAMMAR,
         IGNORED_ATTRIBUTE,
         REMOVED_ANYWHERE,
+        DEPRECATED_DIRECTORY_FLAG,
+        MISSING_HOOK,
         FIRST_HIDDEN, // warnings below here are hidden by default
-        MISSING_HOOK_JAVA,
         USELESS_RULE,
         UNRESOLVED_FUNCTION_SYMBOL,
         MALFORMED_MARKDOWN,
@@ -222,7 +223,7 @@ public class KException implements Serializable, HasLocation {
         sourceText.append("\n\t");
         sourceText.append(String.valueOf(location.startLine()) + " |\t");
         Stream lines = Files.lines(Paths.get(getSource().source()));
-        sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().get());
+        sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().orElse(""));
 
         /* generate a line below the source file that underlines the location of the error */
 

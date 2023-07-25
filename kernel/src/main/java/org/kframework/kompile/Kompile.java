@@ -3,13 +3,14 @@ package org.kframework.kompile;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
-import org.kframework.Strategy;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAssoc;
 import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -38,6 +39,7 @@ import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
+import org.kframework.utils.OS;
 import org.kframework.utils.RunProcess;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -53,6 +55,8 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
+import scala.collection.Seq;
+import scala.collection.Set$;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +65,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +81,6 @@ import java.util.stream.Stream;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
-import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -144,7 +146,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<Att.Key> excludedModuleTags) {
         files.resolveKompiled(".").mkdirs();
 
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
@@ -169,8 +171,10 @@ public class Kompile {
 
         if (kompileOptions.emitJson) {
             try {
+                Stopwatch sw = new Stopwatch(globalOptions);
                 files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef),          "UTF-8"));
                 files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), "UTF-8"));
+                sw.printIntermediate("  Emit parsed & compiled JSON");
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
             }
@@ -189,10 +193,10 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
+                String filename = getBisonParserFilename(def.programStartSymbol.name(), def.mainSyntaxModuleName());
                 File outputFile = files.resolveKompiled(filename);
                 File linkFile = files.resolveKompiled("parser_PGM");
-                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth, kompileOptions.genBisonParserLibrary);
                 try {
                     linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -201,8 +205,8 @@ public class Kompile {
                 }
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
-                if (prod.att().contains("cell") && prod.att().contains("parser")) {
-                    String att = prod.att().get("parser");
+                if (prod.att().contains(Att.CELL()) && prod.att().contains(Att.PARSER())) {
+                    String att = prod.att().get(Att.PARSER());
                     String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
                     for (String[] part : parts) {
                         if (part.length != 2) {
@@ -215,10 +219,10 @@ public class Kompile {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
                         Sort sort = def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K());
-                        String filename = "parser_" + sort.name() + "_" + module;
+                        String filename = getBisonParserFilename(sort.name(), module);
                         File outputFile = files.resolveKompiled(filename);
                         File linkFile = files.resolveKompiled("parser_" + name);
-                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth, kompileOptions.genBisonParserLibrary);
                         try {
                             linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -231,6 +235,16 @@ public class Kompile {
         }
 
         return def;
+    }
+
+    private String getBisonParserFilename(String sort, String module) {
+        String baseName = "parser_" + sort + "_" + module;
+
+        if (kompileOptions.genBisonParserLibrary) {
+            return "lib" + baseName + OS.current().getSharedLibraryExtension();
+        } else {
+            return baseName;
+        }
     }
 
     private Definition postProcessJSON(Definition defn, String postProcess) {
@@ -277,7 +291,7 @@ public class Kompile {
         return String.join("\n", ruleLocs);
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<Att.Key> excludedModuleTags) {
         return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
     }
 
@@ -294,13 +308,13 @@ public class Kompile {
                 .apply(d);
     }
 
-    private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
+    private static Module excludeModulesByTag(Set<Att.Key> excludedModuleTags, Module mod) {
         Predicate<Import> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.module().att().contains(tag));
         Set<Import> newImports = stream(mod.imports()).filter(f).collect(Collectors.toSet());
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
-    public static Function1<Definition, Definition> excludeModulesByTag(Set<String> excludedModuleTags) {
+    public static Function1<Definition, Definition> excludeModulesByTag(Set<Att.Key> excludedModuleTags) {
         DefinitionTransformer dt = DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
     }
@@ -344,7 +358,7 @@ public class Kompile {
         return definitionParsing.parseRule(compiledDef, contents, source);
     }
 
-    private void checkDefinition(Definition parsedDef, Set<String> excludedModuleTags) {
+    private void checkDefinition(Definition parsedDef, Set<Att.Key> excludedModuleTags) {
         scala.collection.Set<Module> modules = parsedDef.modules();
         Module mainModule = parsedDef.mainModule();
         Option<Module> kModule = parsedDef.getModule("K");
@@ -406,14 +420,18 @@ public class Kompile {
         mt.apply(specModule);
     }
 
-    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
+    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<Att.Key> excludedModuleTags) {
         checkAnywhereRules(modules);
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
+        stream(modules).forEach(m -> {
+            CheckAtt checkAtt = new CheckAtt(errors, kem, m, isSymbolic && isKast);
+            checkAtt.checkUnrecognizedModuleAtts();
+            stream(m.localSentences()).forEach(checkAtt::check);
+        });
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
@@ -438,6 +456,8 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSyntaxGroups(errors, m, kem)::check));
 
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
+
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
             if (moduleNames.contains(m.name())) {
@@ -446,7 +466,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files);
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files, kompileOptions.extraConcreteRuleLabels);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -466,6 +486,8 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
+        checkIsSortPredicates(modules);
+
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
@@ -480,6 +502,37 @@ public class Kompile {
                 return Stream.empty();
             })).collect(Collectors.toSet()));
         }
+    }
+
+    private void checkIsSortPredicates(scala.collection.Set<Module> modules) {
+        Set<String> generatedIsSorts =
+                stream(modules)
+                        .flatMap(m -> stream(m.definedSorts()))
+                        .map(s -> "is" + s.toString())
+                        .collect(Collectors.toSet());
+
+        stream(modules)
+                .flatMap(m -> stream(m.productionsForSort().getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
+                .collect(Collectors.toSet())
+                .stream()
+                .forEach(prod -> {
+                    Seq<ProductionItem> items = prod.items();
+                    if (items.size() < 3) {
+                        return;
+                    }
+                    ProductionItem first = items.head();
+                    ProductionItem second = items.tail().head();
+                    ProductionItem last = items.last();
+                    // Check if the production is of the form isSort ( ... )
+                    if ((first instanceof Terminal) && (second instanceof Terminal) && (last instanceof Terminal) &&
+                            generatedIsSorts.contains(((Terminal) first).value()) &&
+                            ((Terminal) second).value().equals("(") && ((Terminal) last).value().equals(")")) {
+                        errors.add(
+                                KEMException.compilerError(
+                                        "Syntax declaration conflicts with automatically generated " +
+                                                ((Terminal) first).value() + " predicate.", prod));
+                    }
+                });
     }
 
     public static Definition addSemanticsModule(Definition d) {
@@ -502,8 +555,8 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache, useCachedScanner);
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<Att.Key> excludedModuleTags, boolean readOnlyCache, boolean useCachedScanner) {
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludedModuleTags, readOnlyCache, useCachedScanner);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
         return modules;
