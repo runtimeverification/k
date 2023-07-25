@@ -3,23 +3,18 @@
 package org.kframework.definition
 
 import com.google.common.collect.{HashMultimap, SetMultimap}
-
 import java.util.Optional
-import java.lang.Comparable
 import javax.annotation.Nonnull
-import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
+import dk.brics.automaton.{RegExp, RunAutomaton, SpecialOperations}
+
 import org.kframework.POSet
 import org.kframework.attributes.{Att, AttValue, HasLocation, Location, Source}
-import org.kframework.definition.Constructors._
-import org.kframework.kore.Unapply.{KApply, KLabel}
-import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
 import org.kframework.builtin.{Hooks, Sorts}
 import org.kframework.compile.RewriteToTop
 
-import java.util
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 import collection._
