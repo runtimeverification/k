@@ -148,13 +148,13 @@ public class ModuleToKORE {
 
         Set<SortHead> tokenSorts = new HashSet<>();
         // Map attribute name to whether the attribute has a value
-        Map<Att.Key, Boolean> attributes = new HashMap<>();
-        attributes.put(Att.NAT(), true);
-        attributes.put(Att.TERMINALS(), true);
-        attributes.put(Att.COLORS(), true);
-        attributes.put(Att.PRIORITY(), true);
+        module.addAttToAttributesMap(Att.NAT(), true);
+        module.addAttToAttributesMap(Att.TERMINALS(), true);
+        module.addAttToAttributesMap(Att.COLORS(), true);
+        module.addAttToAttributesMap(Att.PRIORITY(), true);
+
         Set<Integer> priorities = new HashSet<>();
-        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
+        collectTokenSortsAndAttributes(tokenSorts, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
         List<Integer> priorityList = new ArrayList<>(priorities);
         java.util.Collections.sort(priorityList);
@@ -173,11 +173,11 @@ public class ModuleToKORE {
         collectionSorts.add("LIST.List");
         collectionSorts.add("ARRAY.Array");
         collectionSorts.add("RANGEMAP.RangeMap");
-        attributes.remove(Att.HAS_DOMAIN_VALUES());
-        if (attributes.containsKey(Att.TOKEN())) {
-            attributes.put(Att.HAS_DOMAIN_VALUES(), false);
+        module.removeAttFromAttributesMap(Att.HAS_DOMAIN_VALUES());
+        if (module.hasAttributesMap().contains(Att.TOKEN())) {
+            module.addAttToAttributesMap(Att.HAS_DOMAIN_VALUES(), false);
         }
-        translateSorts(tokenSorts, attributes, collectionSorts, semantics);
+        translateSorts(tokenSorts, collectionSorts, semantics);
 
         SetMultimap<KLabel, Rule> functionRules = module.getFunctionRules();
 
@@ -188,13 +188,13 @@ public class ModuleToKORE {
                 overloads.add(greater);
             }
         }
-        translateSymbols(attributes, semantics);
+        translateSymbols(semantics);
 
         // print syntax definition
         syntax.append(semantics);
         for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(module.bracketProductionsFor())) {
             for (Production prod : iterable(sort._2())) {
-                translateSymbol(attributes, prod.att().get(Att.BRACKET_LABEL(), KLabel.class), prod, syntax);
+                translateSymbol(prod.att().get(Att.BRACKET_LABEL(), KLabel.class), prod, syntax);
             }
         }
         for (Production prod : iterable(module.sortedProductions())) {
@@ -265,10 +265,10 @@ public class ModuleToKORE {
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
         for (Rule rule : iterable(module.sortedRules())) {
             if (ExpandMacros.isMacro(rule)) {
-                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
+                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, module.hasAttributesMapAsJava(), functionRules,
                         priorityToPreviousGroup, priorityToAlias, sentenceType, macros);
             } else {
-                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
+                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, module.hasAttributesMapAsJava(), functionRules,
                         priorityToPreviousGroup, priorityToAlias, sentenceType, semantics);
             }
             ruleIndex++;
@@ -280,29 +280,29 @@ public class ModuleToKORE {
         }
 
         semantics.append("endmodule ");
-        convert(attributes, module.att().remove(Att.DIGEST()), semantics, null, null);
+        convert(module.hasAttributesMapAsJava(), module.att().remove(Att.DIGEST()), semantics, null, null);
         semantics.append("\n");
     }
 
-    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<Att.Key, Boolean> attributes,
+    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts,
                                                 Set<Integer> priorities, boolean heatCoolEq, String topCellSortStr) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains(Att.TOKEN())) {
                 tokenSorts.add(sort);
             }
-            collectAttributes(attributes, att);
+            collectAttributes(att);
         }
         for (Production prod : iterable(module.sortedProductions())) {
             Att att = prod.att();
             if (att.contains(Att.TOKEN())) {
                 tokenSorts.add(prod.sort().head());
             }
-            collectAttributes(attributes, att);
+            collectAttributes(att);
         }
         for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
-            collectAttributes(attributes, att);
+            collectAttributes(att);
             RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
             // only collect priorities of semantics rules
             if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
@@ -311,8 +311,7 @@ public class ModuleToKORE {
         }
     }
 
-    private void translateSorts(Set<SortHead> tokenSorts, Map<Att.Key, Boolean> attributes,
-                                Set<String> collectionSorts, StringBuilder sb) {
+    private void translateSorts(Set<SortHead> tokenSorts, Set<String> collectionSorts, StringBuilder sb) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             if (sort.equals(Sorts.K().head()) || sort.equals(Sorts.KItem().head())) {
                 continue;
@@ -346,12 +345,12 @@ public class ModuleToKORE {
             sb.append("sort ");
             convert(sort, sb);
             sb.append(" ");
-            convert(attributes, att, sb, null, null);
+            convert(module.hasAttributesMapAsJava(), att, sb, null, null);
             sb.append("\n");
         }
     }
 
-    private void translateSymbols(Map<Att.Key, Boolean> attributes, StringBuilder sb) {
+    private void translateSymbols(StringBuilder sb) {
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
@@ -359,12 +358,11 @@ public class ModuleToKORE {
             if (prod.klabel().isEmpty()) {
                 continue;
             }
-            translateSymbol(attributes, prod.klabel().get(), prod, sb);
+            translateSymbol(prod.klabel().get(), prod, sb);
         }
     }
 
-    private void translateSymbol(Map<Att.Key, Boolean> attributes,
-                                 KLabel label, Production prod, StringBuilder sb) {
+    private void translateSymbol(KLabel label, Production prod, StringBuilder sb) {
         sb.append("  ");
         if (isFunction(prod) && prod.att().contains(Att.HOOK()) && module.isRealHook(prod.att(), immutable(options.hookNamespaces))) {
             sb.append("hooked-");
@@ -383,7 +381,7 @@ public class ModuleToKORE {
         sb.append(") : ");
         convert(prod.sort(), prod, sb);
         sb.append(" ");
-        convert(attributes, prod.att(), sb, null, null);
+        convert(module.hasAttributesMapAsJava(), prod.att(), sb, null, null);
         sb.append("\n");
     }
 
@@ -1412,17 +1410,17 @@ public class ModuleToKORE {
     }
 
 
-    private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
+    private void collectAttributes(Att att) {
         for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.withUserGroupsAsGroupAtt().att())) {
             Att.Key name = attribute._1._1;
             Object val = attribute._2;
             String strVal = val.toString();
             if (strVal.equals("")) {
-                if (!attributes.containsKey(name)) {
-                    attributes.put(name, false);
+                if (!module.hasAttributesMap().contains(name)) {
+                    module.addAttToAttributesMap(name, false);
                 }
             } else {
-                attributes.put(name, true);
+                module.addAttToAttributesMap(name, true);
             }
         }
     }
