@@ -62,77 +62,6 @@ public class AddKoreAttributes {
         return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
     }
 
-    static boolean hasHookValue(Att atts, String value) {
-        return atts.contains(Att.HOOK()) &&
-                atts.get(Att.HOOK()).equals(value);
-    }
-
-    private void genMapCeilAxioms(Production prod, Collection<Rule> rules) {
-        Sort mapSort = prod.nonterminal(1).sort();
-        scala.collection.Set<Production> mapProds = module.productionsForSort().apply(mapSort.head());
-        Production concatProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.concat")).get();
-        Production elementProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.element")).get();
-        Seq<NonTerminal> nonterminals = elementProd.nonterminals();
-        Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
-
-        // rule
-        //   #Ceil(MapItem(K1, K2, ..., Kn) Rest:Map)
-        // =>
-        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@K2) #And ... #And #Ceil(@Kn)
-        // Note: The {_ in_keys(_) #Equals false} condition implies
-        // #Ceil(@K1) and #Ceil(@Rest).
-        // [simplification]
-
-        K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
-        KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
-        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
-
-        // arguments of MapItem and their #Ceils
-        List<K> setArgs = new ArrayList<>();
-        K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
-        for (int i = 0; i < nonterminals.length(); i++) {
-            Sort sort = nonterminals.apply(i).sort();
-            KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
-            setArgs.add(setVar);
-            if (i > 0) {
-                KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
-                setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceil, setVar));
-            }
-        }
-        Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
-
-        KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
-        Rule ceilMapRule =
-                Rule(
-                        KRewrite(
-                                KApply(ceilMapLabel,
-                                        KApply(concatProd.klabel().get(),
-                                                KApply(elementProd.klabel().get(),
-                                                        setArgsSeq,
-                                                        Att.empty()
-                                                ),
-                                                restMapSet
-                                        )
-                                )
-                                ,
-                                KApply(andLabel,
-                                        KApply(equalsLabel,
-                                                KApply(prod.klabel().get(),
-                                                        setArgs.get(0),
-                                                        restMapSet
-                                                ),
-                                                BooleanUtils.FALSE
-                                        ),
-                                        setArgsCeil
-                                )
-                        )
-                        , BooleanUtils.TRUE
-                        , BooleanUtils.TRUE
-                        , Att.empty().add(Att.SIMPLIFICATION())
-                );
-        rules.add(ceilMapRule);
-    }
-
     private boolean isRealHook(Att att) {
         String hook = att.get(Att.HOOK());
         if (hook.startsWith("ARRAY.")) {
@@ -157,13 +86,6 @@ public class AddKoreAttributes {
         if (!(prods.nonEmpty() && prods.get().size() == 1))
             throw KEMException.compilerError("Expected to find exactly one production for KLabel: " + klabel + " found: " + prods.getOrElse(Collections::Set).size());
         return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
-    }
-
-    private boolean isGeneratedInKeysOp(Production prod) {
-        Option<String> hook = prod.att().getOption(Att.HOOK());
-        if (hook.isEmpty()) return false;
-        if (!hook.get().equals("MAP.in_keys")) return false;
-        return (!prod.klabel().isEmpty());
     }
 
     public synchronized Sentence add(Sentence s) {
