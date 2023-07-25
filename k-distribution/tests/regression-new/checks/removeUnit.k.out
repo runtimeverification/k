@@ -1,0 +1,5 @@
+[Error] Internal: unimplemented case in RemoveUnit: unit but no assoc
+	Source(removeUnit.k)
+	Location(6,18,6,120)
+	6 |	  syntax Foo ::= Foo Foo        [left, function, total, hook(LIST.concat), klabel(_Foo_), unit(.Foo), element(FooItem)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
