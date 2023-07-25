@@ -130,10 +130,10 @@ public class ModuleToKORE {
         convert(topCellInitializer, semantics);
         semantics.append("()), ");
         StringBuilder sb = new StringBuilder();
-        HashMap<Att.Key, Boolean> considerSource = new HashMap<>();
-        considerSource.put(Att.SOURCE(), true);
+        module.addAttToAttributesMap(Att.SOURCE(), true);
         // insert the location of the main module so the backend can provide better error location
-        convert(considerSource, Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
+        convert(Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
+        module.clearAttributesMap();
         semantics.append(sb.subSequence(1, sb.length() - 1));
         semantics.append("]\n\n");
 
@@ -265,10 +265,10 @@ public class ModuleToKORE {
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
         for (Rule rule : iterable(module.sortedRules())) {
             if (ExpandMacros.isMacro(rule)) {
-                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, module.hasAttributesMapAsJava(), functionRules,
+                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, functionRules,
                         priorityToPreviousGroup, priorityToAlias, sentenceType, macros);
             } else {
-                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, module.hasAttributesMapAsJava(), functionRules,
+                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, functionRules,
                         priorityToPreviousGroup, priorityToAlias, sentenceType, semantics);
             }
             ruleIndex++;
@@ -280,7 +280,7 @@ public class ModuleToKORE {
         }
 
         semantics.append("endmodule ");
-        convert(module.hasAttributesMapAsJava(), module.att().remove(Att.DIGEST()), semantics, null, null);
+        convert(module.att().remove(Att.DIGEST()), semantics, null, null);
         semantics.append("\n");
     }
 
@@ -345,7 +345,7 @@ public class ModuleToKORE {
             sb.append("sort ");
             convert(sort, sb);
             sb.append(" ");
-            convert(module.hasAttributesMapAsJava(), att, sb, null, null);
+            convert(att, sb, null, null);
             sb.append("\n");
         }
     }
@@ -381,7 +381,7 @@ public class ModuleToKORE {
         sb.append(") : ");
         convert(prod.sort(), prod, sb);
         sb.append(" ");
-        convert(module.hasAttributesMapAsJava(), prod.att(), sb, null, null);
+        convert(prod.att(), sb, null, null);
         sb.append("\n");
     }
 
@@ -746,9 +746,9 @@ public class ModuleToKORE {
         sb.setLength(0); // reset string writer
         Sort topCellSort = Sorts.GeneratedTopCell();
         String topCellSortStr = getSortStr(topCellSort);
-        HashMap<Att.Key, Boolean> considerSource = new HashMap<>();
-        considerSource.put(Att.SOURCE(), true);
-        convert(considerSource, Att.empty().add(Source.class, spec.att().get(Source.class)), sb, null, null);
+        module.addAttToAttributesMap(Att.SOURCE(), true);
+        convert(Att.empty().add(Source.class, spec.att().get(Source.class)), sb, null, null);
+        module.clearAttributesMap();
         sb.append("\n");
         sb.append("module ");
         convert(spec.name(), sb);
@@ -757,23 +757,25 @@ public class ModuleToKORE {
         convert(definition.name(), sb);
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
-        HashMap<Att.Key, Boolean> consideredAttributes = new HashMap<>();
-        consideredAttributes.put(Att.PRIORITY(), true);
-        consideredAttributes.put(Att.LABEL(), true);
-        consideredAttributes.put(Att.GROUP(), true);
-        consideredAttributes.put(Att.SOURCE(), true);
-        consideredAttributes.put(Att.LOCATION(), true);
-        consideredAttributes.put(Att.UNIQUE_ID(), true);
+
+        // We can replace the attributes here as we already generated the KORE definition and saved it to `definition.kore`
+        module.clearAttributesMap();
+
+        module.addAttToAttributesMap(Att.PRIORITY(), true);
+        module.addAttToAttributesMap(Att.LABEL(), true);
+        module.addAttToAttributesMap(Att.GROUP(), true);
+        module.addAttToAttributesMap(Att.SOURCE(), true);
+        module.addAttToAttributesMap(Att.LOCATION(), true);
+        module.addAttToAttributesMap(Att.UNIQUE_ID(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             if (sentence instanceof Claim || (sentence instanceof Rule && sentence.att().contains(Att.SIMPLIFICATION()))) {
                 convertRule((RuleOrClaim) sentence, 0, false, topCellSortStr,
-                        consideredAttributes, HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
-                        sentenceType, sb);
+                        HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(), sentenceType, sb);
             }
         }
         sb.append("endmodule ");
-        convert(consideredAttributes, spec.att().remove(Att.DIGEST()), sb, null, null);
+        convert(spec.att().remove(Att.DIGEST()), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
@@ -830,8 +832,7 @@ public class ModuleToKORE {
                 productionSortStr, productionSorts, productionLabel, leftChildren);
     }
 
-    private void convertRule(RuleOrClaim rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
-                             Map<Att.Key, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+    private void convertRule(RuleOrClaim rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr, SetMultimap<KLabel, Rule> functionRules,
                              Map<Integer, String> priorityToPreviousGroup,
                              ListMultimap<Integer, String> priorityToAlias,
                              SentenceType defaultSentenceType, StringBuilder sb) {
@@ -975,7 +976,7 @@ public class ModuleToKORE {
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
                 sb.append(")))\n  ");
-                convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+                convert(rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
             } else if (rule.att().contains(Att.SIMPLIFICATION()) || rule instanceof Claim) {
                 sb.append("\\implies{R} (\n    ");
@@ -991,7 +992,7 @@ public class ModuleToKORE {
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
                 sb.append(")))\n  ");
-                convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+                convert(rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
 
             } else {
@@ -1038,7 +1039,7 @@ public class ModuleToKORE {
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
                 sb.append(")))\n  ");
-                convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+                convert(rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
             }
         } else if (ruleInfo.isKore) {
@@ -1050,7 +1051,7 @@ public class ModuleToKORE {
             }
             convert(left, sb);
             sb.append("\n  ");
-            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+            convert(rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
             // generate rule LHS
@@ -1126,7 +1127,7 @@ public class ModuleToKORE {
             }
             sb.append(')');
             sb.append("\n  ");
-            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+            convert(rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         } else {
             assertNoExistentials(rule, existentials);
@@ -1145,7 +1146,7 @@ public class ModuleToKORE {
             sb.append(",\n    ");
             convert(right, sb);
             sb.append(")\n  ");
-            convert(consideredAttributes, rule.att().add(Att.PRIORITY(), Integer.toString(getPriority(rule.att()))), sb, freeVarsMap, rule);
+            convert(rule.att().add(Att.PRIORITY(), Integer.toString(getPriority(rule.att()))), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
     }
@@ -1550,7 +1551,7 @@ public class ModuleToKORE {
         return strBuilder.toString();
     }
 
-    private void convert(Map<Att.Key, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
+    private void convert(Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
 
@@ -1581,7 +1582,7 @@ public class ModuleToKORE {
                   conn2 = ",";
                 }
                 sb.append(")");
-            } else if (attributes.get(key) != null && attributes.get(key)) {
+            } else if (module.hasAtt(key)) {
                 convert(strKey, sb);
                 sb.append("{}(");
                 if (isListOfVarsAttribute(key)) {

@@ -321,6 +321,8 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   def hasAttributesMapAsJava: java.util.Map[Att.Key, java.lang.Boolean] = hasAttributesMap.asJava
 
+  def clearAttributesMap(): Unit = hasAttributesMap.clear()
+
 
 
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
