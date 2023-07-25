@@ -186,17 +186,7 @@ public class ModuleToKORE {
         }
         translateSorts(tokenSorts, attributes, collectionSorts, semantics);
 
-        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule: iterable(module.sortedRules())) {
-            K left = RewriteToTop.toLeft(rule.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
-                Production prod = production(kapp);
-                if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
-                    functionRules.put(kapp.klabel(), rule);
-                }
-            }
-        }
+        SetMultimap<KLabel, Rule> functionRules = module.getFunctionRules();
 
         semantics.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
@@ -205,13 +195,13 @@ public class ModuleToKORE {
                 overloads.add(greater);
             }
         }
-        translateSymbols(attributes, functionRules, overloads, semantics);
+        translateSymbols(attributes, semantics);
 
         // print syntax definition
         syntax.append(semantics);
         for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(module.bracketProductionsFor())) {
             for (Production prod : iterable(sort._2())) {
-                translateSymbol(attributes, functionRules, overloads, prod.att().get(Att.BRACKET_LABEL(), KLabel.class), prod, syntax);
+                translateSymbol(attributes, prod.att().get(Att.BRACKET_LABEL(), KLabel.class), prod, syntax);
             }
         }
         for (Production prod : iterable(module.sortedProductions())) {
@@ -261,7 +251,7 @@ public class ModuleToKORE {
                 genFunctionalAxiom(prod, semantics);
             }
             if (prod.att().contains(Att.CONSTRUCTOR())) {
-                genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
+                genNoConfusionAxioms(prod, noConfusion, semantics);
             }
         }
 
@@ -368,8 +358,7 @@ public class ModuleToKORE {
         }
     }
 
-    private void translateSymbols(Map<Att.Key, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules,
-                                  Set<Production> overloads, StringBuilder sb) {
+    private void translateSymbols(Map<Att.Key, Boolean> attributes, StringBuilder sb) {
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
@@ -377,11 +366,11 @@ public class ModuleToKORE {
             if (prod.klabel().isEmpty()) {
                 continue;
             }
-            translateSymbol(attributes, functionRules, overloads, prod.klabel().get(), prod, sb);
+            translateSymbol(attributes, prod.klabel().get(), prod, sb);
         }
     }
 
-    private void translateSymbol(Map<Att.Key, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads,
+    private void translateSymbol(Map<Att.Key, Boolean> attributes,
                                  KLabel label, Production prod, StringBuilder sb) {
         sb.append("  ");
         if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
@@ -557,8 +546,7 @@ public class ModuleToKORE {
         sb.append(" [functional{}()] // functional\n");
     }
 
-    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion,
-                                      SetMultimap<KLabel, Rule> functionRulesMap, StringBuilder sb) {
+    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion, StringBuilder sb) {
         // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
         if (prod.arity() > 0) {
             sb.append("  axiom");
@@ -837,7 +825,7 @@ public class ModuleToKORE {
             leftPattern = ((KAs)leftPattern).pattern();
         }
         if (leftPattern instanceof KApply) {
-            production = production((KApply) leftPattern, true);
+            production = module.production((KApply) leftPattern, true);
             productionSort = production.sort();
             productionSortStr = getSortStr(productionSort);
             productionSorts = stream(production.items())
@@ -1457,23 +1445,6 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("S1"), Sort("S2")), Sort("S2"), Seq(NonTerminal(Sort("S1"))), Att());
-
-
-    private Production production(KApply term) {
-        return production(term, false);
-    }
-
-    private Production production(KApply term, boolean instantiatePolySorts) {
-        KLabel klabel = term.klabel();
-        if (klabel.name().equals(KLabels.INJ))
-            return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
-        if (!(prods.nonEmpty() && prods.get().size() == 1))
-            throw KEMException.compilerError("Expected to find exactly one production for KLabel: " + klabel + " found: " + prods.getOrElse(Collections::Set).size());
-        return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
-    }
-
     private static String convertBuiltinLabel(String klabel) {
       switch(klabel) {
       case "#Bottom":
@@ -1639,7 +1610,7 @@ public class ModuleToKORE {
                     switch (strKey) {
                         case "unit":
                         case "element":
-                            Production prod = production(KApply(KLabel(strVal)));
+                            Production prod = module.production(KApply(KLabel(strVal)));
                             convert(prod.klabel().get(), prod.params(), sb);
                             sb.append("()");
                             break;

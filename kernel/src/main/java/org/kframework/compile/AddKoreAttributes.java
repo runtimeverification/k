@@ -73,40 +73,11 @@ public class AddKoreAttributes {
         return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
     }
 
-    public static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("S1"), Sort("S2")), Sort("S2"), Seq(NonTerminal(Sort("S1"))), Att());
-
-    private Production production(KApply term) {
-        return production(term, false);
-    }
-    private Production production(KApply term, boolean instantiatePolySorts) {
-        KLabel klabel = term.klabel();
-        if (klabel.name().equals(KLabels.INJ))
-            return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
-        if (!(prods.nonEmpty() && prods.get().size() == 1))
-            throw KEMException.compilerError("Expected to find exactly one production for KLabel: " + klabel + " found: " + prods.getOrElse(Collections::Set).size());
-        return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
-    }
-
     public synchronized Sentence add(Sentence s) {
         if (!(s instanceof Production))
             return s;
 
         Production prod = (Production) s;
-
-        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : iterable(module.sortedRules())) {
-            K left = RewriteToTop.toLeft(rule.body());
-
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
-                    Production prod2 = production(kapp);
-                    if (prod2.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE())
-                            || ExpandMacros.isMacro(rule)) {
-                        functionRules.put(kapp.klabel(), rule);
-                    }
-            }
-        }
 
         Set<Production> overloads = new HashSet<>();
         for (Production lesser : iterable(module.overloads().elements())) {
@@ -130,7 +101,7 @@ public class AddKoreAttributes {
         boolean isMacro = false;
         boolean isAnywhere = overloads.contains(prod);
         if (prod.klabel().isDefined()) {
-            for (Rule r : functionRules.get(prod.klabel().get())) {
+            for (Rule r : module.getFunctionRules().get(prod.klabel().get())) {
                 isMacro |= ExpandMacros.isMacro(r);
                 isAnywhere |= r.att().contains(Att.ANYWHERE());
             }
