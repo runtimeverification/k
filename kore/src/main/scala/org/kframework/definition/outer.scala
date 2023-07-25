@@ -17,7 +17,7 @@ import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.builtin.Sorts
+import org.kframework.builtin.{Sorts,Hooks}
 import org.kframework.compile.RewriteToTop
 
 import scala.annotation.meta.param
@@ -278,6 +278,13 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   //      if (ps.groupBy(_.att).size != 1)
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
+
+  def isRealHook(att: Att, hookNamespaces: Seq[String]): Boolean = {
+    val hook = att.get(Att.HOOK)
+    if (hook.startsWith("ARRAY.")) return false
+    if (hookNamespaces.exists(ns => hook.startsWith(ns + "."))) return true
+    Hooks.namespaces.stream.anyMatch((ns: String) => hook.startsWith(ns + "."))
+  }
 
   private val INJ_PROD = Constructors.Production(KORE.KLabel("inj", Sort("S1"), Sort("S2")), Sort("S2"), Seq(Constructors.NonTerminal(Sort("S1"))))
 

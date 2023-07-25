@@ -62,17 +62,6 @@ public class AddKoreAttributes {
         return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
     }
 
-    private boolean isRealHook(Att att) {
-        String hook = att.get(Att.HOOK());
-        if (hook.startsWith("ARRAY.")) {
-            return false;
-        }
-        if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
-            return true;
-        }
-        return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
-    }
-
     public synchronized Sentence add(Sentence s) {
         if (!(s instanceof Production))
             return s;
@@ -110,7 +99,7 @@ public class AddKoreAttributes {
         isConstructor &= !isAnywhere;
 
         Att att = prod.att().remove(Att.CONSTRUCTOR());
-        if (att.contains(Att.HOOK()) && !isRealHook(att)) {
+        if (att.contains(Att.HOOK()) && !module.isRealHook(att, immutable(options.hookNamespaces))) {
             att = att.remove(Att.HOOK());
         }
         if (isConstructor) {

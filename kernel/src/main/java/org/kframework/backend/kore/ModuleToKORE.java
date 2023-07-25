@@ -373,7 +373,7 @@ public class ModuleToKORE {
     private void translateSymbol(Map<Att.Key, Boolean> attributes,
                                  KLabel label, Production prod, StringBuilder sb) {
         sb.append("  ");
-        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && module.isRealHook(prod.att(), immutable(options.hookNamespaces))) {
             sb.append("hooked-");
         }
         sb.append("symbol ");
@@ -744,17 +744,6 @@ public class ModuleToKORE {
         sb.append("(), ");
         convert(lesser.klabel().get(), lesser, sb);
         sb.append("())] // overloaded production\n");
-    }
-
-    private boolean isRealHook(Att att) {
-      String hook = att.get(Att.HOOK());
-      if (hook.startsWith("ARRAY.")) {
-        return false;
-      }
-      if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
-        return true;
-      }
-      return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
     }
 
     private static boolean isBuiltinProduction(Production prod) {
