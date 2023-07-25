@@ -7,7 +7,6 @@ import com.google.common.collect.{HashMultimap, SetMultimap}
 import java.util.Optional
 import java.lang.Comparable
 import javax.annotation.Nonnull
-
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.{Att, AttValue, HasLocation, Location, Source}
@@ -17,9 +16,10 @@ import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.builtin.{Sorts,Hooks}
+import org.kframework.builtin.{Hooks, Sorts}
 import org.kframework.compile.RewriteToTop
 
+import java.util
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 import collection._
@@ -283,7 +283,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     val hook = att.get(Att.HOOK)
     if (hook.startsWith("ARRAY.")) return false
     if (hookNamespaces.exists(ns => hook.startsWith(ns + "."))) return true
-    Hooks.namespaces.stream.anyMatch((ns: String) => hook.startsWith(ns + "."))
+    Hooks.namespaces.asScala.exists((ns: String) => hook.startsWith(ns + "."))
   }
 
   private val INJ_PROD = Constructors.Production(KORE.KLabel("inj", Sort("S1"), Sort("S2")), Sort("S2"), Seq(Constructors.NonTerminal(Sort("S1"))))
