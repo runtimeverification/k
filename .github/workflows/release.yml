@@ -417,7 +417,6 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 14
-          subdir: k/
 
       - name: 'Push Maven Packages'
         shell: bash {0}
