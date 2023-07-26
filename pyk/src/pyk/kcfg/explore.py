@@ -67,8 +67,8 @@ class KCFGExplore(ContextManager['KCFGExplore']):
     def __init__(
         self,
         kprint: KPrint,
-        kcfg_semantics: KCFGSemantics | None,
         *,
+        kcfg_semantics: KCFGSemantics | None = None,
         id: str | None = None,
         port: int | None = None,
         kore_rpc_command: str | Iterable[str] | None = None,
