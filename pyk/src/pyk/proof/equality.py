@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final
@@ -10,6 +11,7 @@ from ..kast.manip import extract_lhs, extract_rhs, flatten_label
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse
+from ..utils import ensure_dir_path
 from .proof import Proof, ProofStatus, ProofSummary, Prover
 
 if TYPE_CHECKING:
@@ -42,6 +44,18 @@ class ImpliesProof(Proof):
     def set_csubst(self, csubst: CSubst) -> None:
         self.csubst = csubst
 
+    def write_proof_data(self, subproofs: bool = False) -> None:
+        super().write_proof_data()
+        if not self.proof_dir:
+            return
+        ensure_dir_path(self.proof_dir)
+        ensure_dir_path(self.proof_dir / self.id)
+        proof_path = self.proof_dir / self.id / 'proof.json'
+        if not self.up_to_date:
+            proof_json = json.dumps(self.dict)
+            proof_path.write_text(proof_json)
+            _LOGGER.info(f'Updated proof file {self.id}: {proof_path}')
+
 
 class EqualityProof(ImpliesProof):
     lhs_body: KInner
@@ -73,6 +87,15 @@ class EqualityProof(ImpliesProof):
         _LOGGER.warning(
             'Building an EqualityProof that has known soundness issues: See https://github.com/runtimeverification/haskell-backend/issues/3605.'
         )
+
+    @staticmethod
+    def read_proof_data(proof_dir: Path, id: str) -> EqualityProof:
+        proof_path = proof_dir / id / 'proof.json'
+        if Proof.proof_data_exists(id, proof_dir):
+            proof_dict = json.loads(proof_path.read_text())
+            return EqualityProof.from_dict(proof_dict, proof_dir)
+
+        raise ValueError(f'Could not load Proof from file {id}: {proof_path}')
 
     @staticmethod
     def from_claim(claim: KClaim, defn: KDefinition, proof_dir: Path | None = None) -> EqualityProof:
@@ -224,6 +247,15 @@ class RefutationProof(ImpliesProof):
     def set_simplified_constraints(self, simplified: KInner) -> None:
         self.simplified_constraints = simplified
 
+    @staticmethod
+    def read_proof_data(proof_dir: Path, id: str) -> RefutationProof:
+        proof_path = proof_dir / id / 'proof.json'
+        if Proof.proof_data_exists(id, proof_dir):
+            proof_dict = json.loads(proof_path.read_text())
+            return RefutationProof.from_dict(proof_dict, proof_dir)
+
+        raise ValueError(f'Could not load Proof from file {id}: {proof_path}')
+
     @property
     def status(self) -> ProofStatus:
         if self.simplified_constraints is None:
@@ -341,7 +373,7 @@ class ImpliesProver(Prover):
                 self.proof.set_csubst(result)
 
         _LOGGER.info(f'{proof_type} finished {self.proof.id}: {self.proof.status}')
-        self.proof.write_proof()
+        self.proof.write_proof_data()
 
 
 class EqualityProver(ImpliesProver):
