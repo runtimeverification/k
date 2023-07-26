@@ -7,6 +7,7 @@ import pytest
 
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg import KCFG
+from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ProofStatus
@@ -24,26 +25,37 @@ if TYPE_CHECKING:
 
     from pyk.cterm import CTerm
     from pyk.kast.inner import KInner
+    from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprove import KProve
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]
 
-REFUTE_NODE_TEST_DATA: Iterable[tuple[str, Iterable[KInner], ProofStatus]] = (
-    ('refute-node-fail', (mlEqualsTrue(leInt(KVariable('N'), intToken(0))),), ProofStatus.FAILED),
-)
 
+class RefuteSemantics(KCFGSemantics):
+    def is_terminal(self, c: CTerm) -> bool:
+        k_cell = c.cell('K_CELL')
+        if type(k_cell) is KSequence:
+            if len(k_cell) == 0:
+                return True
+            if len(k_cell) == 1 and type(k_cell[0]) is KVariable:
+                return True
+            if (
+                len(k_cell) == 2
+                and type(k_cell[1]) is KVariable
+                and type(k_cell[0]) is KApply
+                and (
+                    k_cell[0].label.name == 'e(_)_REFUTE-NODE-SYNTAX_A_Int'
+                    or k_cell[0].label.name == 'f(_)_REFUTE-NODE-SYNTAX_A_Int'
+                )
+            ):
+                return True
+        if type(k_cell) is KVariable:
+            return True
+        return False
 
-class TestAPRProof(KCFGExploreTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'refute-node.k'
-
-    @pytest.fixture(scope='function')
-    def proof_dir(self, tmp_path_factory: TempPathFactory) -> Path:
-        return tmp_path_factory.mktemp('proofs')
-
-    @staticmethod
-    def _extract_branches(cterm: CTerm) -> list[KInner]:
-        k_cell = cterm.cell('K_CELL')
+    def extract_branches(self, c: CTerm) -> list[KInner]:
+        k_cell = c.cell('K_CELL')
         if type(k_cell) is KSequence and len(k_cell) > 0:
             k_cell = k_cell[0]
         if type(k_cell) is KApply and k_cell.label.name in [
@@ -53,6 +65,28 @@ class TestAPRProof(KCFGExploreTest):
             discriminant = k_cell.args[0]
             return [mlEqualsTrue(gtInt(discriminant, intToken(0))), mlEqualsTrue(leInt(discriminant, intToken(0)))]
         return []
+
+    def abstract_node(self, c: CTerm) -> CTerm:
+        return c
+
+    def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
+        return False
+
+
+REFUTE_NODE_TEST_DATA: Iterable[tuple[str, Iterable[KInner], ProofStatus]] = (
+    ('refute-node-fail', (mlEqualsTrue(leInt(KVariable('N'), intToken(0))),), ProofStatus.FAILED),
+)
+
+
+class TestAPRProof(KCFGExploreTest):
+    KOMPILE_MAIN_FILE = K_FILES / 'refute-node.k'
+
+    def semantics(self, definition: KDefinition) -> KCFGSemantics:
+        return RefuteSemantics()
+
+    @pytest.fixture(scope='function')
+    def proof_dir(self, tmp_path_factory: TempPathFactory) -> Path:
+        return tmp_path_factory.mktemp('proofs')
 
     def test_apr_proof_unrefute_node(
         self,
@@ -72,7 +106,7 @@ class TestAPRProof(KCFGExploreTest):
         proof = APRProof(
             f'{spec_module}.{claim_id}', kcfg_pre, init=init_node, target=target_node, logs={}, proof_dir=proof_dir
         )
-        prover = APRProver(proof, kcfg_explore, extract_branches=TestAPRProof._extract_branches)
+        prover = APRProver(proof, kcfg_explore)
 
         # When
         prover.advance_proof(max_iterations=1)
@@ -116,7 +150,8 @@ class TestAPRProof(KCFGExploreTest):
             f'{spec_module}.{claim_id}', kcfg_pre, init=init_node, target=target_node, logs={}, proof_dir=proof_dir
         )
         prover = APRProver(
-            proof, kcfg_explore, is_terminal=TestAPRProof._is_terminal, extract_branches=TestAPRProof._extract_branches
+            proof,
+            kcfg_explore,
         )
 
         # When
@@ -124,8 +159,8 @@ class TestAPRProof(KCFGExploreTest):
 
         assert prover.proof.status == ProofStatus.FAILED
 
-        stuck_node = single(prover.proof.terminal)
-        refutation = prover.refute_node(stuck_node)
+        failing_node = single(prover.proof.failing)
+        refutation = prover.refute_node(failing_node)
         assert refutation is not None
         refutation_prover = RefutationProver(refutation, kcfg_explore)
         refutation_prover.advance_proof()
@@ -149,25 +184,3 @@ class TestAPRProof(KCFGExploreTest):
 
         # Then
         assert prover.proof.status == expected_status
-
-    @staticmethod
-    def _is_terminal(cterm1: CTerm) -> bool:
-        k_cell = cterm1.cell('K_CELL')
-        if type(k_cell) is KSequence:
-            if len(k_cell) == 0:
-                return True
-            if len(k_cell) == 1 and type(k_cell[0]) is KVariable:
-                return True
-            if (
-                len(k_cell) == 2
-                and type(k_cell[1]) is KVariable
-                and type(k_cell[0]) is KApply
-                and (
-                    k_cell[0].label.name == 'e(_)_REFUTE-NODE-SYNTAX_A_Int'
-                    or k_cell[0].label.name == 'f(_)_REFUTE-NODE-SYNTAX_A_Int'
-                )
-            ):
-                return True
-        if type(k_cell) is KVariable:
-            return True
-        return False

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 import pytest
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from pytest import TempPathFactory
 
     from ..kast.outer import KDefinition
+    from ..kcfg.semantics import KCFGSemantics
     from ..ktool.kprint import SymbolTable
     from ..utils import BugReport
 
@@ -128,10 +129,15 @@ class KProveTest(KompiledTest):
 
 
 class KCFGExploreTest(KProveTest):
+    @abstractmethod
+    def semantics(self, definition: KDefinition) -> KCFGSemantics:
+        ...
+
     @pytest.fixture
     def kcfg_explore(self, kprove: KProve) -> Iterator[KCFGExplore]:
         with KCFGExplore(
             kprove,
+            kcfg_semantics=self.semantics(kprove.definition),
             bug_report=kprove._bug_report,
         ) as kcfg_explore:
             yield kcfg_explore
