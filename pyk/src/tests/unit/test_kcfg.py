@@ -15,7 +15,10 @@ from .mock_kprint import MockKPrint
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
     from typing import Any
+
+    from pytest import MonkeyPatch
 
     from pyk.cterm import CSubst
     from pyk.kast import KInner
@@ -403,6 +406,49 @@ def test_aliases() -> None:
         cfg.add_alias('@buzz', 2)
     with pytest.raises(ValueError, match='Unknown node: 10'):
         cfg.add_alias('buzz', 10)
+
+
+def test_write_cfg_data(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    written_nodes = set()
+    deleted_nodes = set()
+
+    def write_node_data(node: KCFG.Node) -> None:
+        written_nodes.add(node.id)
+
+    def delete_node_data(node_id: int) -> None:
+        deleted_nodes.add(node_id)
+
+    kcfg = KCFG(cfg_dir=tmp_path)
+    monkeypatch.setattr(kcfg, '_write_node_data', write_node_data)
+    monkeypatch.setattr(kcfg, '_delete_node_data', delete_node_data)
+
+    kcfg.add_node(node(1))
+    kcfg.add_node(node(2))
+    kcfg.add_node(node(3))
+
+    assert written_nodes == set()
+    assert deleted_nodes == set()
+
+    kcfg.write_cfg_data()
+
+    assert written_nodes == {1, 2, 3}
+    assert deleted_nodes == set()
+
+    written_nodes.clear()
+
+    kcfg.add_node(node(4))
+    kcfg.remove_node(1)
+    kcfg.remove_node(2)
+    kcfg.replace_node(3, node(3).cterm)
+    kcfg.add_node(node(2))
+
+    assert written_nodes == set()
+    assert deleted_nodes == set()
+
+    kcfg.write_cfg_data()
+
+    assert written_nodes == {2, 3, 4}
+    assert deleted_nodes == {1, 2}
 
 
 def test_pretty_print() -> None:
