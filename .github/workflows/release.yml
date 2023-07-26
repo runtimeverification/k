@@ -4,7 +4,7 @@ on:
   # release:
   #   types:
   #     - prereleased
-  pull_request:
+  push:
     branches:
       - hotfix/maven-deploy
 
