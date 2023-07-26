@@ -95,7 +95,7 @@ module IMP-SIMPLE-SPEC
       requires 0 <=Int S andBool 0 <=Int K
        ensures 0 <Int ?N andBool 0 <Int ?M andBool ?I ==Int 1
 
-    claim [failing-if]: <k> if(_:Bool) { $n = 1 ; } else { $n = 2 ; } => . ... </k>
+    claim [failing-if]: <k> if(_B:Bool) { $n = 1 ; } else { $n = 2 ; } => . ... </k>
                         <state> $n |-> (0 => 1) </state>
 
     claim [sum-10]: <k> int $s, $n, .Ids ; $n = 10 ; while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; } => . ... </k>
@@ -109,7 +109,7 @@ module IMP-SIMPLE-SPEC
 
     claim [fail-branch]: <k> if ( $s <= 123) { $n = 1; } else { } => . ... </k>
                          <state> $n |-> (0 => 1) $s |-> _S:Int </state>
-    
+
     claim [use-if-almost-same]:
         <k> $n = $n + 1; if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } $s = $s + 1; => . ...</k>
         <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N +Int 2) $n |-> N:Int +Int 1) </state>
