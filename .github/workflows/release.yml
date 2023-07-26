@@ -1,9 +1,9 @@
 name: 'Release'
 run-name: K Framework Release ${{ github.ref_name }}
 on:
-  release:
-    types:
-      - prereleased
+  # release:
+  #   types:
+  #     - prereleased
   pull_request:
     branches:
       - hotfix/maven-deploy
