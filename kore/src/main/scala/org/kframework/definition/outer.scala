@@ -2,20 +2,18 @@
 
 package org.kframework.definition
 
+import com.google.common.collect.{HashMultimap, SetMultimap}
 import java.util.Optional
-import java.lang.Comparable
 import javax.annotation.Nonnull
+import dk.brics.automaton.{RegExp, RunAutomaton, SpecialOperations}
 
-import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.{Att, AttValue, HasLocation, Location, Source}
-import org.kframework.definition.Constructors._
-import org.kframework.kore.Unapply.{KApply, KLabel}
-import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.builtin.Sorts
+import org.kframework.builtin.{Hooks, Sorts}
+import org.kframework.compile.RewriteToTop
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
@@ -276,6 +274,41 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
 
+  def isRealHook(att: Att, hookNamespaces: Seq[String]): Boolean = {
+    val hook = att.get(Att.HOOK)
+    if (hook.startsWith("ARRAY.")) return false
+    if (hookNamespaces.exists(ns => hook.startsWith(ns + "."))) return true
+    Hooks.namespaces.asScala.exists((ns: String) => hook.startsWith(ns + "."))
+  }
+
+  private val INJ_PROD = Constructors.Production(KORE.KLabel("inj", Sort("S1"), Sort("S2")), Sort("S2"), Seq(Constructors.NonTerminal(Sort("S1"))))
+
+  def production(term: KApply): Production = {
+    production(term, instantiatePolySorts = false)
+  }
+  def production(term: KApply, instantiatePolySorts: Boolean): Production = {
+    val klabel = term.klabel
+    if (klabel.name == "inj") return if (instantiatePolySorts) INJ_PROD.substitute(term.klabel.params)
+    else INJ_PROD
+    val prods = productionsFor.get(klabel.head)
+    if (!(prods.nonEmpty && prods.get.size == 1)) throw KEMException.compilerError("Expected to find exactly one production for KLabel: " + klabel + " found: " + prods.getOrElse(Set()).size)
+    if (instantiatePolySorts) prods.get.head.substitute(term.klabel.params)
+    else prods.get.head
+  }
+
+  def getFunctionRules: SetMultimap[KLabel, Rule] = {
+    val functionRules = HashMultimap.create[KLabel, Rule]()
+    for (rule: Rule <- sortedRules) {
+      val left = RewriteToTop.toLeft(rule.body)
+      left match {
+        case kapp: KApply =>
+          val prod: Production = production(kapp)
+          if (prod.att.contains(Att.FUNCTION) || rule.att.contains(Att.ANYWHERE) || rule.isMacro) functionRules.put(kapp.klabel, rule)
+        case _ =>
+      }
+    }
+    functionRules
+  }
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
 
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =

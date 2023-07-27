@@ -2,10 +2,9 @@
 
 package org.kframework.definition
 
-import java.util.function.BiFunction
 import org.kframework.attributes.{Location, Source}
 import org.kframework.definition
-import org.kframework.kore.{AttCompare, K, KApply, KToken}
+import org.kframework.kore.{K, KApply, KToken}
 import org.kframework.utils.errorsystem.KEMException
 
 object ModuleTransformer {
@@ -23,6 +22,8 @@ object ModuleTransformer {
         m
     }, name)
 
+  def fromSentenceTransformerAtt(f: java.util.function.UnaryOperator[Sentence], name: String): ModuleTransformer =
+    fromSentenceTransformerAtt((m: Module, s: Sentence) => f(s), name)
   def fromSentenceTransformerAtt(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
       val newSentences = mapWithTrace(m.localSentences.toSet)(f, m, name)
