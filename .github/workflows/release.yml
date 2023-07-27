@@ -384,7 +384,7 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: [self-hosted, linux, normal-ephemeral]
+    runs-on: [self-hosted, linux, normal]
     environment: production
     needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bookworm, set-release-id, arch]
     steps:
