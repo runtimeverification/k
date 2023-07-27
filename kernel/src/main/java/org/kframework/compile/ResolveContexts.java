@@ -207,9 +207,28 @@ public class ResolveContexts {
         items.add(Terminal(")"));
         Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
+
+        Att heatAtt = addSuffixToLabel(context.att().add("heat"), "-heat");
+        Att coolAtt = addSuffixToLabel(context.att().add("cool"), "-cool");
+        String errormsg = "The generated label for a context rule conflicts with a user-defined label. Please consider renaming.";
+
+        if (heatAtt.contains(Att.LABEL())) {
+            String label = heatAtt.get(Att.LABEL());
+            if (input.labeled().contains(label)) {
+                throw KEMException.compilerError(errormsg, KEMException.compilerError("", context), input.labeled().get(label).get().head());
+            }
+        }
+
+        if (coolAtt.contains(Att.LABEL())) {
+            String label = coolAtt.get(Att.LABEL());
+            if (input.labeled().contains(label)) {
+                throw KEMException.compilerError(errormsg, KEMException.compilerError("", context), input.labeled().get(label).get().head());
+            }
+        }
+
         return Stream.of(freezer,
-                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, addSuffixToLabel(context.att().add("heat"), "-heat")),
-                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, addSuffixToLabel(context.att().add("cool"), "-cool")));
+                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, heatAtt),
+                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, coolAtt));
     }
 
     private K insert(K body, K rewrite, Module mod) {
