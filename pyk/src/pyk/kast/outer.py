@@ -1373,4 +1373,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
 def read_kast_definition(path: str | PathLike) -> KDefinition:
     with open(path) as f:
-        return kast_term(json.loads(f.read()), KDefinition)
+        _LOGGER.info(f'Loading JSON definition: {path}')
+        json_defn = json.load(f)
+        _LOGGER.info(f'Converting JSON definition to Kast: {path}')
+        return kast_term(json_defn, KDefinition)

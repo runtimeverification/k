@@ -250,9 +250,8 @@ class KPrint:
         return proc_res.stdout
 
     def kore_to_kast(self, kore: Pattern) -> KInner:
-        _LOGGER.debug(f'kore_to_kast: {kore.text}')
-
         try:
+            _LOGGER.info('Invoking kore_to_kast')
             return kore_to_kast(self.definition, kore)
         except ValueError as err:
             _LOGGER.warning(err)
@@ -267,6 +266,7 @@ class KPrint:
 
     def kast_to_kore(self, kast: KInner, sort: KSort | None = None) -> Pattern:
         try:
+            _LOGGER.info('Invoking kast_to_kore')
             return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
         except ValueError as ve:
             _LOGGER.warning(ve)
