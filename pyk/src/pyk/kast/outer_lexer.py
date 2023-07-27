@@ -36,9 +36,7 @@ class TokenType(Enum):
     KW_IMPORTS = auto()
     KW_LEFT = auto()
     KW_LEXICAL = auto()
-    KW_LIST = auto()
     KW_MODULE = auto()
-    KW_NELIST = auto()
     KW_NONASSOC = auto()
     KW_PRIORITIES = auto()
     KW_PRIORITY = auto()
@@ -104,9 +102,7 @@ _KEYWORDS: Final = {
     'imports': Token('imports', TokenType.KW_IMPORTS),
     'left': Token('left', TokenType.KW_LEFT),
     'lexical': Token('lexical', TokenType.KW_LEXICAL),
-    'List': Token('List', TokenType.KW_LIST),
     'module': Token('module', TokenType.KW_MODULE),
-    'NeList': Token('NeList', TokenType.KW_NELIST),
     'non-assoc': Token('non-assoc', TokenType.KW_NONASSOC),
     'priorities': Token('priorities', TokenType.KW_PRIORITIES),
     'priority': Token('priority', TokenType.KW_PRIORITY),
@@ -218,9 +214,7 @@ _DEFAULT_KEYWORDS: Final = {
     'import',
     'imports',
     'left',
-    'List',
     'module',
-    'NeList',
     'non-assoc',
     'require',
     'requires',
@@ -304,7 +298,7 @@ def _id_or_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
         token_type = TokenType.ID_UPPER
 
     consumed = []
-    while la in _ALNUM:
+    while la in _ALNUM or la == '-':
         consumed.append(la)
         la = next(it, '')
     text = ''.join(consumed)

@@ -342,7 +342,7 @@ Int
 COMMA
 ,
 
-KW_LIST
+ID_UPPER
 List
 
 RPAREN
@@ -654,7 +654,7 @@ arr
 LPAREN
 (
 
-KW_LIST
+ID_UPPER
 List
 
 COMMA
@@ -714,7 +714,7 @@ ensureOffsetList
 LPAREN
 (
 
-KW_LIST
+ID_UPPER
 List
 
 COMMA
