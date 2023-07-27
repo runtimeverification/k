@@ -1,0 +1,22 @@
+syntax Foo ::= non-assoc: "foo"
+===
+KW_SYNTAX
+syntax
+
+ID_UPPER
+Foo
+
+DCOLONEQ
+::=
+
+KW_NONASSOC
+non-assoc
+
+COLON
+:
+
+STRING
+"foo"
+
+EOF
+
