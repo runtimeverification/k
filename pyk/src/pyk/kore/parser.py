@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from ..dequote import dequote_string
 from .lexer import TokenType, kore_lexer
@@ -44,7 +44,7 @@ from .syntax import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
-    from typing import Final, Union
+    from typing import Final, TypeVar, Union
 
     from .lexer import KoreToken
     from .syntax import (
@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     BP = TypeVar('BP', bound=BinaryPred)
     AS = TypeVar('AS', bound=Assoc)
 
-T = TypeVar('T')
+    T = TypeVar('T')
 
 
 class KoreParser:

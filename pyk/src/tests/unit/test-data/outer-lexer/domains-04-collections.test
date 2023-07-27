@@ -1337,10 +1337,10 @@ List
 DCOLONEQ
 ::=
 
-KW_LIST
+ID_UPPER
 List
 
-KW_LIST
+ID_UPPER
 List
 
 LBRACK
@@ -1655,7 +1655,7 @@ KItem
 DCOLONEQ
 ::=
 
-KW_LIST
+ID_UPPER
 List
 
 STRING
@@ -1721,7 +1721,7 @@ List
 DCOLONEQ
 ::=
 
-KW_LIST
+ID_UPPER
 List
 
 STRING
@@ -1874,7 +1874,7 @@ dest
 COLON
 :
 
-KW_LIST
+ID_UPPER
 List
 
 COMMA
@@ -1898,7 +1898,7 @@ src
 COLON
 :
 
-KW_LIST
+ID_UPPER
 List
 
 RPAREN
@@ -1943,7 +1943,7 @@ fillList
 LPAREN
 (
 
-KW_LIST
+ID_UPPER
 List
 
 COMMA
@@ -2024,7 +2024,7 @@ range
 LPAREN
 (
 
-KW_LIST
+ID_UPPER
 List
 
 COMMA
@@ -2114,7 +2114,7 @@ KItem
 STRING
 "in"
 
-KW_LIST
+ID_UPPER
 List
 
 LBRACK
@@ -2177,7 +2177,7 @@ size
 LPAREN
 (
 
-KW_LIST
+ID_UPPER
 List
 
 RPAREN
@@ -2336,7 +2336,7 @@ List2Set
 LPAREN
 (
 
-KW_LIST
+ID_UPPER
 List
 
 RPAREN
