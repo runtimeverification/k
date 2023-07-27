@@ -8,7 +8,7 @@ from functools import reduce
 from itertools import chain
 from typing import TYPE_CHECKING, final, overload
 
-from ..utils import EMPTY_FROZEN_DICT, FrozenDict, some
+from ..utils import EMPTY_FROZEN_DICT, FrozenDict
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
 if TYPE_CHECKING:
@@ -243,25 +243,6 @@ class KVariable(KInner):
             sort = KSort.from_dict(att[KAtt.SORT])
         else:
             sort = None
-
-        ignored_atts = {
-            KAtt.SORT,
-            KAtt.LOCATION,
-            KAtt.SOURCE,
-            'org.kframework.definition.Production',
-            'anonymous',
-            'cellSort',
-            'withConfig',
-            'prettyPrintWithSortAnnotation',
-            'fresh',
-        }
-
-        problem_att = some(a for a in att if a not in ignored_atts)
-        if problem_att:
-            raise ValueError(f'Attribute other than {KAtt.SORT} attached to KVariable: {problem_att}')
-
-        if att:
-            _LOGGER.debug(f'Removing attributes: {list(att)} from KVariable: {d}')
 
         return KVariable(name=d['name'], sort=sort)
 

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property, reduce
 from pathlib import Path
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING, Final, final
 
 from ..cli.utils import check_dir_path, check_file_path
 from ..utils import FrozenDict
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .syntax import Definition, Pattern, Sort
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 @final
@@ -39,7 +42,10 @@ class KompiledKore:
 
     @cached_property
     def definition(self) -> Definition:
-        return KoreParser(self.path.read_text()).definition()
+        _LOGGER.info(f'Loading kore definition: {self.path}')
+        kore_text = self.path.read_text()
+        _LOGGER.info(f'Parsing kore definition: {self.path}')
+        return KoreParser(kore_text).definition()
 
     @cached_property
     def _subsort_table(self) -> FrozenDict[Sort, frozenset[Sort]]:

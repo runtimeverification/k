@@ -134,7 +134,6 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
 
 
 def _kast_to_kore(kast: KInner) -> Pattern:
-    _LOGGER.debug(f'_kast_to_kore: {kast}')
     if type(kast) is KToken:
         return _ktoken_to_kore(kast)
     elif type(kast) is KVariable:
