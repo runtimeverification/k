@@ -53,7 +53,7 @@ public class ResolveFunctionWithConfig {
       ConfigurationInfoFromModule info = new ConfigurationInfoFromModule(mod);
       topCell = Sorts.GeneratedTopCell();
       topCellLabel = KLabels.GENERATED_TOP_CELL;
-      CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add("withConfig"));
+      CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add(Att.WITH_CONFIG()));
     }
 
     private boolean ruleNeedsConfig(RuleOrClaim r) {
@@ -110,7 +110,7 @@ public class ResolveFunctionWithConfig {
       return new TransformK() {
         @Override
         public K apply(KApply kapp) {
-          if (!kapp.items().isEmpty() && kapp.items().get(kapp.items().size() - 1).att().contains("withConfig")) {
+          if (!kapp.items().isEmpty() && kapp.items().get(kapp.items().size() - 1).att().contains(Att.WITH_CONFIG())) {
             return super.apply(kapp);
           }
           if (withConfigFunctions.contains(kapp.klabel())) {
@@ -151,7 +151,7 @@ public class ResolveFunctionWithConfig {
           } else {
             secondChild = IncompleteCellUtils.make(topCellLabel, true, cell, true);
           }
-          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
+          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add(Att.WITH_CONFIG())))).collect(Collections.toList());
           K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
           if (rhs == null) {
             return result;

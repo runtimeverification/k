@@ -208,8 +208,8 @@ public class ResolveContexts {
         Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
 
-        Att heatAtt = addSuffixToLabel(context.att().add("heat"), "-heat");
-        Att coolAtt = addSuffixToLabel(context.att().add("cool"), "-cool");
+        Att heatAtt = addSuffixToLabel(context.att().add(Att.HEAT()), "-heat");
+        Att coolAtt = addSuffixToLabel(context.att().add(Att.COOL()), "-cool");
         String errormsg = "The generated label for a context rule conflicts with a user-defined label. Please consider renaming.";
 
         if (heatAtt.contains(Att.LABEL())) {

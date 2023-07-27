@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.compile.checks.CheckBracket;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
@@ -62,7 +63,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .flatMap(p -> stream(p.items()).filter(itm -> itm instanceof org.kframework.definition.NonTerminal)
                                 .map(i -> (org.kframework.definition.NonTerminal) i)
                                 .flatMap(nt -> nt.sort().name().endsWith("Cell") || nt.sort().name().endsWith("CellFragment") ?
-                                        Stream.of(SyntaxSort.apply(Seq(), nt.sort(), Att.empty().add("temporary-cell-sort-decl"))) : Stream.of())
+                                        Stream.of(SyntaxSort.apply(Seq(), nt.sort(), Att.empty().add(Att.TEMPORARY_CELL_SORT_DECL()))) : Stream.of())
                                 ).collect(Collectors.toSet());
         items.addAll(tempCellSorts);
 
@@ -115,12 +116,12 @@ public class KILtoKORE extends KILTransformation<Object> {
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
         org.kframework.attributes.Att attrs =
             convertAttributes(sentence)
-            .add("contentStartLine", sentence.getContentStartLine())
-            .add("contentStartColumn", sentence.getContentStartColumn());
+            .add(Att.CONTENT_START_LINE(), sentence.getContentStartLine())
+            .add(Att.CONTENT_START_COLUMN(), sentence.getContentStartColumn());
 
         String label = sentence.getLabel();
         if (!label.isEmpty()) {
-            attrs = attrs.add("label", sentence.getType().equals("alias") ? label : moduleName + "." + label);
+            attrs = attrs.add(Att.LABEL(), sentence.getType().equals(Att.ALIAS().key()) ? label : moduleName + "." + label);
         }
 
         return Bubble(sentence.getType(), sentence.getContent(), attrs);
@@ -199,7 +200,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             }
 
             for (Production p : b.getProductions()) {
-                if (p.containsAttribute("reject")) // skip productions of the old reject type
+                if (p.containsAttribute(Att.REJECT())) // skip productions of the old reject type
                     continue;
                 // Handle a special case first: List productions have only
                 // one item.
@@ -215,8 +216,8 @@ public class KILtoKORE extends KILTransformation<Object> {
                             throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
                             String regex;
-                            if (p.containsAttribute("regex"))
-                                regex = p.getAttribute("regex");
+                            if (p.containsAttribute(Att.REGEX()))
+                                regex = p.getAttribute(Att.REGEX());
                             else
                                 regex = ((Lexical) it).getLexicalRule();
                             RegexTerminal regexTerminal = getRegexTerminal(regex);
@@ -231,7 +232,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
                     org.kframework.attributes.Att attrs = convertAttributes(p);
                     if (attrs.contains(Att.BRACKET())) {
-                      attrs = attrs.add("bracketLabel", KLabel.class, KLabel(p.getBracketLabel(true), immutable(p.getParams())));
+                      attrs = attrs.add(Att.BRACKET_LABEL(), KLabel.class, KLabel(p.getBracketLabel(true), immutable(p.getParams())));
                     }
 
                     org.kframework.definition.Production prod;
@@ -250,11 +251,11 @@ public class KILtoKORE extends KILTransformation<Object> {
 
                     res.add(prod);
                     // handle associativity for the production
-                    if (p.containsAttribute("left"))
+                    if (p.containsAttribute(Att.LEFT()))
                         res.add(SyntaxAssociativity(applyAssoc("left"), Set(Tag(p.getKLabel(true)))));
-                    else if (p.containsAttribute("right"))
+                    else if (p.containsAttribute(Att.RIGHT()))
                         res.add(SyntaxAssociativity(applyAssoc("right"), Set(Tag(p.getKLabel(true)))));
-                    else if (p.containsAttribute("non-assoc"))
+                    else if (p.containsAttribute(Att.NON_ASSOC()))
                         res.add(SyntaxAssociativity(applyAssoc("non-assoc"), Set(Tag(p.getKLabel(true)))));
                 }
             }
@@ -301,28 +302,28 @@ public class KILtoKORE extends KILTransformation<Object> {
         String kilProductionId = "" + System.identityHashCode(p);
         org.kframework.definition.Production prod1, prod3;
 
-        // Es ::= E "," Es
+
         if (bisonLists) {
-          prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
-                  Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)),
-                  attrs.add("left"));
+            // Es ::= Es "," E
+            prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
+                    Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)), attrs);
         } else {
-          prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
-                  Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                  attrs.add("right"));
+            // Es ::= E "," Es
+            prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
+                    Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)), attrs);
         }
 
 
         // Es ::= ".Es"
         prod3 = Production(KLabel(p.getTerminatorKLabel(true), immutable(p.getParams())), sort, Seq(Terminal("." + sort.toString())),
-                attrs.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
+                attrs.remove(Att.FORMAT()).remove(Att.STRICT()).add(Att.KLABEL(), p.getTerminatorKLabel(false)));
 
         res.add(prod1);
         res.add(prod3);
     }
 
     public static org.kframework.attributes.Att convertAttributes(ASTNode t) {
-        Att attributes = t.getAttributes();
+        Att attributes = ProcessGroupAttributes.getProcessedAtt(t.getAttributes(), t);
 
         return attributes
                 .addAll(attributesFromLocation(t.getLocation()))

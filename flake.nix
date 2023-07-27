@@ -1,8 +1,16 @@
 {
   description = "K Framework";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-22.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend";
+    nixpkgs.url = "nixpkgs/nixos-23.05";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/3ac2c87da44ed9e8fe4ba4583fb5860a4680d821";
+    booster-backend = {
+      url = "github:runtimeverification/hs-backend-booster/a258fe8932da8c5cffab1c1bfbe18b99730cacd8";
+      # NB booster-backend will bring in another dependency on haskell-backend,
+      # but the two are not necessarily the same (different more often than not).
+      # We get two transitive dependencies on haskell-nix.
+      inputs.k-framework.follows = "";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+    };
     llvm-backend.url = "github:runtimeverification/llvm-backend";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
@@ -15,7 +23,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
     , llvm-backend, mavenix, flake-compat }:
     let
       allOverlays = [
@@ -39,6 +47,7 @@
                   "nix/"
                   "*.nix"
                   "haskell-backend/src/main/native/haskell-backend/*"
+                  "hs-backend-booster/src/main/native/hs-backend-booster/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
                 ] ./.);
@@ -55,6 +64,7 @@
             k-framework = haskell-backend-bins:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
+                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
@@ -109,12 +119,12 @@
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
-          # interface, i.e. we have `update-maven` in k and 
+          # interface, i.e. we have `update-maven` in k and
           # `update-cabal` in the haskell-backend.
-          # The first `nix-build` command below ensures k source is loaded into the Nix store. 
-          # This command will fail, but only after loading the source. 
-          # mavenix will not do this automatically because we it uses restrict-eval, 
-          # and we are using filterSource, which is disabled under restrict-eval. 
+          # The first `nix-build` command below ensures k source is loaded into the Nix store.
+          # This command will fail, but only after loading the source.
+          # mavenix will not do this automatically because we it uses restrict-eval,
+          # and we are using filterSource, which is disabled under restrict-eval.
           update-maven = pkgs.writeShellScriptBin "update-maven" ''
             #!/bin/sh
             ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
@@ -124,13 +134,11 @@
           '';
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
-            inherit llvm-backend haskell-backend;
+            inherit llvm-backend haskell-backend booster-backend;
           };
 
           update-from-submodules =
             rv-utils.lib.update-from-submodules pkgs ./flake.lock {
-              haskell-backend.submodule =
-                "haskell-backend/src/main/native/haskell-backend";
               llvm-backend.submodule =
                 "llvm-backend/src/main/native/llvm-backend";
             };
@@ -169,10 +177,12 @@
             };
         };
         defaultPackage = packages.k;
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework haskell-backend-bins);
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlay;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
+
       };
 }

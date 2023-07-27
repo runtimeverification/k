@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
@@ -71,7 +72,7 @@ public class RefreshRules {
         return new TransformK() {
             @Override
             public K apply(KVariable var) {
-                if (var.att().contains("refreshed"))
+                if (var.att().contains(Att.REFRESHED()))
                     return var;
                 if (!vars.containsKey(var)) {
                     String newVarName;
@@ -80,7 +81,7 @@ public class RefreshRules {
                     } while (avoidVars.contains(newVarName));
                     vars.put(var, newVarName);
                 }
-                return KVariable(vars.get(var), var.att().add("refreshed", var.name()));
+                return KVariable(vars.get(var), var.att().add(Att.REFRESHED(), var.name()));
             }
         }.apply(term);
     }

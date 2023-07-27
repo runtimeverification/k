@@ -465,6 +465,224 @@ module MAP-SYMBOLIC
 endmodule
 ```
 
+Range Maps
+----
+
+Provided here is the syntax of an implementation of immutable, associative,
+commutative range maps from `Int` to `KItem`. This type is hooked to an
+implementation of range maps provided by the LLVM backend.
+Currently, this type is not supported by other backends.
+Although the underlying range map data structure supports any key sort, the
+current implementation by the backend only supports `Int` keys due to
+limitations of the underlying ordering function.
+
+```k
+module RANGEMAP
+  imports private BOOL-SYNTAX
+  imports private INT-SYNTAX
+  imports private LIST
+  imports private SET
+
+```
+
+### Range, bounded inclusively below and exclusively above.
+
+```k
+  syntax Range ::= "[" KItem "," KItem ")"    [klabel(Rangemap:Range), symbol]
+  
+  syntax RangeMap [hook(RANGEMAP.RangeMap)]
+```
+
+### Range map concatenation
+
+The `RangeMap` sort represents a map whose keys are stored as ranges, bounded
+inclusively below and exclusively above. Contiguous or overlapping ranges that
+map to the same value are merged into a single range.
+
+You can construct a new `RangeMap` consisting of range/value pairs of two
+RangeMaps. If the RangeMaps have overlapping ranges an exception will be
+thrown during concrete execution. This operation is O(N*log(M)) (where N is
+the size of the smaller map and M is the size of the larger map).
+
+```k
+  syntax RangeMap ::= RangeMap RangeMap                        [left, function, hook(RANGEMAP.concat), klabel(_RangeMap_), symbol, assoc, comm, unit(.RangeMap), element(_r|->_), index(0), format(%1%n%2)]
+```
+
+### Range map unit
+
+The `RangeMap` with zero elements is represented by `.RangeMap`.
+
+```k
+  syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol, latex(\dotCt{RangeMap})]
+```
+
+### Range map elements
+
+An element of a `RangeMap` is constructed via the `r|->` operator. The range
+of keys is on the left, and the value is on the right.
+
+```k
+  syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
+
+  syntax priorities _r|->_ > _RangeMap_ .RangeMap
+  syntax non-assoc _r|->_
+```
+
+### Range map lookup
+
+You can look up the value associated with a key of a `RangeMap` in O(log(N))
+time (where N is the size of the `RangeMap`). This will yield an exception
+during concrete execution if the key is not in the range map.
+
+```k
+  syntax KItem ::= RangeMap "[" KItem "]"                    [function, hook(RANGEMAP.lookup), klabel(RangeMap:lookup), symbol]
+```
+
+### Range map lookup with default
+
+You can also look up the value associated with a key of a `RangeMap` using a
+total function that assigns a specific default value if the key is not present
+in the `RangeMap`. This operation is also O(log(N)) (where N is the size of
+the range map).
+
+```k
+  syntax KItem ::= RangeMap "[" KItem "]" "orDefault" KItem      [function, total, hook(RANGEMAP.lookupOrDefault), klabel(RangeMap:lookupOrDefault)]
+```
+
+### Range map lookup for range of key
+
+You can look up for the range that a key of a `RangeMap` is stored in in
+O(log(N)) time (where N is the size of the `RangeMap`). This will yield an
+exception during concrete execution if the key is not in the range map.
+
+```k
+  syntax Range ::= "find_range" "(" RangeMap "," KItem ")"                    [function, hook(RANGEMAP.find_range), klabel(RangeMap:find_range)]
+```
+
+### Range map update
+
+You can insert a range/value pair into a `RangeMap` in O(log(N)) time (where N
+is the size of the `RangeMap`). Any ranges adjacent to or overlapping with the
+range to be inserted will be updated accordingly.
+
+```k
+  syntax RangeMap ::= RangeMap "[" keyRange: Range "<-" value: KItem "]"           [function, klabel(RangeMap:update), symbol, hook(RANGEMAP.updateRng), prefer]
+```
+
+### Range map delete
+
+You can remove a range/value pair from a `RangeMap` in O(log(N)) time (where N
+is the size of the `RangeMap`). If all or any part of the range is present in
+the range map, it will be removed.
+
+```k
+  syntax RangeMap ::= RangeMap "[" Range "<-" "undef" "]"     [function, hook(RANGEMAP.removeRng), klabel(_r[_<-undef]), symbol]
+```
+
+### Range map difference
+
+You can remove the range/value pairs in a `RangeMap` that are also present in
+another `RangeMap` in O(max{M,N}*log(M)) time (where M is the size of the
+first `RangeMap` and N is the size of the second `RangeMap`). Note that only
+the parts of overlapping ranges whose value is the same in both range maps
+will be removed.
+
+```k
+  syntax RangeMap ::= RangeMap "-RangeMap" RangeMap                 [function, total, hook(RANGEMAP.difference), latex({#1}-_{\it RangeMap}{#2})]
+```
+
+### Multiple range map update
+
+You can update a `RangeMap` by adding all the range/value pairs in the second
+`RangeMap` in O(N*log(M+N)) time (where M is the size of the first `RangeMap`
+and N is the size of the second `RangeMap`). If any ranges are overlapping,
+the value from the second range map overwrites the value in the first for the
+parts where ranges are overlapping. This function is total, which is distinct
+from range map concatenation, a partial function only defined on range maps
+with non overlapping ranges.
+
+```k
+  syntax RangeMap ::= updateRangeMap(RangeMap, RangeMap)            [function, total, hook(RANGEMAP.updateAll)]
+```
+
+### Multiple range map removal
+
+You can remove a `Set` of ranges from a `RangeMap` in O(N*log(M)) time (where
+M is the size of the `RangeMap` and N is the size of the `Set`). For every
+range in the set, all or any part of it that is present in the range map will
+be removed.
+
+```k
+  syntax RangeMap ::= removeAll(RangeMap, Set)            [function, hook(RANGEMAP.removeAll)]
+```
+
+### Range map keys (as `Set`)
+
+You can get a `Set` of all the ranges in a `RangeMap` in O(N) time (where N
+is the size of the `RangeMap`).
+
+```k
+  syntax Set ::= keys(RangeMap)                      [function, total, hook(RANGEMAP.keys)]
+```
+
+### Range map keys (as `List`)
+
+You can get a `List` of all the ranges in a `RangeMap` in O(N) time (where N
+is the size of the `RangeMap`).
+
+```k
+  syntax List ::= "keys_list" "(" RangeMap ")"       [function, hook(RANGEMAP.keys_list)]
+```
+
+### Range map key membership
+
+You can check whether a key is present in a `RangeMap` in O(log(N)) time (where
+N is the size of the `RangeMap`).
+
+```k
+  syntax Bool ::= KItem "in_keys" "(" RangeMap ")"       [function, total, hook(RANGEMAP.in_keys)]
+```
+
+### Range map values (as `List`)
+
+You can get a `List` of all values in a `RangeMap` in O(N) time (where N is the
+size of the `RangeMap`).
+
+```k
+  syntax List ::= values(RangeMap)                   [function, hook(RANGEMAP.values)]
+```
+
+### Range map size
+
+You can get the number of range/value pairs in a `RangeMap` in O(1) time.
+
+```k
+  syntax Int ::= size(RangeMap)                      [function, total, hook(RANGEMAP.size), klabel(sizeRangeMap)]
+```
+
+### Range map inclusion
+
+You can determine whether a `RangeMap` is a strict subset of another `RangeMap`
+in O(M+N) time (where M is the size of the first `RangeMap` and N is the size
+of the second `RangeMap`). Only keys within equal or overlapping ranges that
+are bound to the same value are considered equal.
+
+```k
+  syntax Bool ::= RangeMap "<=RangeMap" RangeMap               [function, total, hook(RANGEMAP.inclusion)]
+```
+
+### Range map choice
+
+You can get an arbitrarily chosen key of a `RangeMap` in O(1) time. The same
+key will always be returned for the same range map, but no guarantee is given
+that two different range maps will return the same element, even if they are
+similar.
+
+```k
+  syntax KItem ::= choice(RangeMap)                      [function, hook(RANGEMAP.choice), klabel(RangeMap:choice)]
+endmodule
+```
+
 Sets
 ----
 
@@ -596,7 +814,7 @@ The following lemmas are simplifications that the Haskell backend can
 apply to simplify expressions of sort `Set`.
 
 ```k
-module SET-KORE-SYMBOLIC [kore,symbolic]
+module SET-KORE-SYMBOLIC [kore,symbolic,haskell]
   imports SET
   imports private K-EQUAL
   imports private BOOL
@@ -879,13 +1097,13 @@ and `orBool` may be short-circuited in concrete backends, but in symbolic
 ackends, both arguments will be evaluated.
 
 ```k
-  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), group(boolOperation), latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), group(boolOperation), hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), group(boolOperation), latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), group(boolOperation), hook(BOOL.implies)]
                 > left:
                   Bool "==Bool" Bool      [function, total, klabel(_==Bool_), symbol, left, comm, smt-hook(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, total, klabel(_=/=Bool_), symbol, left, comm, smt-hook(distinct), hook(BOOL.ne)]
@@ -1083,12 +1301,12 @@ You can compute whether two integers are less than or equal to, less than,
 greater than or equal to, greater than, equal, or unequal to another integer.
 
 ```k
-  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, left, comm, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
-                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, left, comm, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, comm, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, comm, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
 ```
 
 ### Divides
@@ -1152,23 +1370,6 @@ module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
   rule #Ceil(@I1:Int modInt @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
   rule #Ceil(@I1:Int >>Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
   rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
-
-  // Arithmetic Normalization
-  rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
-  rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), simplification(51)]
-
-  rule (A +Int I2) +Int I3 => A +Int (I2 +Int I3) [concrete(I2, I3), symbolic(A), simplification]
-  rule I1 +Int (B +Int I3) => B +Int (I1 +Int I3) [concrete(I1, I3), symbolic(B), simplification]
-  rule I1 -Int (B +Int I3) => (I1 -Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
-  rule I1 +Int (I2 +Int C) => (I1 +Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule I1 +Int (I2 -Int C) => (I1 +Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule (I1 -Int B) +Int I3 => (I1 +Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
-  rule I1 -Int (I2 +Int C) => (I1 -Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
-  rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
-
-  rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
-
 endmodule
 
 module INT-KORE [kore, symbolic]
@@ -1186,6 +1387,21 @@ module INT-KORE [kore, symbolic]
   rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
   rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
 
+  // Arithmetic Normalization
+  rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
+  rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), simplification(51)]
+
+  rule (A +Int I2) +Int I3 => A +Int (I2 +Int I3) [concrete(I2, I3), symbolic(A), simplification]
+  rule I1 +Int (B +Int I3) => B +Int (I1 +Int I3) [concrete(I1, I3), symbolic(B), simplification]
+  rule I1 -Int (B +Int I3) => (I1 -Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
+  rule I1 +Int (I2 +Int C) => (I1 +Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule I1 +Int (I2 -Int C) => (I1 +Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule (I1 -Int B) +Int I3 => (I1 +Int I3) -Int B [concrete(I1, I3), symbolic(B), simplification]
+  rule I1 -Int (I2 +Int C) => (I1 -Int I2) -Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
+  rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
+
+  rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
 endmodule
 
 module INT
@@ -1398,12 +1614,12 @@ is true, because `NaN` compares unequal to all values, including itself, in
 IEEE 754 arithmetic. `0.0 ==Float -0.0` is also true.
 
 ```k
-  syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
-                | Float "<Float" Float        [function, left, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
-                | Float ">=Float" Float       [function, left, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
-                | Float ">Float" Float        [function, left, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, left, comm, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
-                | Float "=/=Float" Float      [function, left, comm, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+  syntax Bool ::= Float "<=Float" Float       [function, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
+                | Float "<Float" Float        [function, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
+                | Float ">=Float" Float       [function, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
+                | Float ">Float" Float        [function, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
+                | Float "==Float" Float       [function, comm, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "=/=Float" Float      [function, comm, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
 ```
@@ -1622,8 +1838,8 @@ is less than, less than or equal to, greater than, or greater than or equal to
 another according to the natural lexicographic ordering of strings.
 
 ```k
-  syntax Bool ::= String "==String" String [function, total, left, comm, hook(STRING.eq)]
-                | String "=/=String" String      [function, total, left, comm, hook(STRING.ne)]
+  syntax Bool ::= String "==String" String  [function, total, comm, hook(STRING.eq)]
+                | String "=/=String" String [function, total, comm, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
 
   syntax Bool ::= String  "<String" String [function, total, hook(STRING.lt)]
@@ -1712,7 +1928,7 @@ module STRING-BUFFER-IN-K [symbolic]
   imports STRING
 
   syntax StringBuffer ::= ".StringBuffer" [function, total]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, avoid]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, avoid]
   syntax StringBuffer ::= String
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, total]
 
@@ -1727,7 +1943,7 @@ module STRING-BUFFER-HOOKED [concrete]
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
   syntax StringBuffer ::= ".StringBuffer" [function, total, hook(BUFFER.empty), impure]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, hook(BUFFER.concat), avoid]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, hook(BUFFER.concat), avoid]
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, total, hook(BUFFER.toString)]
 endmodule
 
@@ -1754,7 +1970,7 @@ module BYTES-SYNTAX
   imports private STRING-SYNTAX
 
   syntax Bytes [hook(BYTES.Bytes)]
-  syntax Bytes ::= r"b[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
+  syntax Bytes ::= r"b[\\\"](([\\x20\\x21\\x23-\\x5B\\x5D-\\x7E])|([\\\\][tnfr\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2}))*[\\\"]"      [token]
 endmodule
 ```
 
@@ -2038,8 +2254,8 @@ module K-EQUAL-SYNTAX
   imports private BASIC-K
 
   syntax Bool ::= left:
-                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), group(equalEqualK)]
+                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), group(notEqualEqualK)]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
 

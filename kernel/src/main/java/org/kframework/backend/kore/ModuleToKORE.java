@@ -10,7 +10,6 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
@@ -21,12 +20,9 @@ import org.kframework.definition.Claim;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
-import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
-import org.kframework.definition.Tag;
-import org.kframework.definition.Terminal;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -42,14 +38,12 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.kore.VisitK;
-import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
 import java.util.ArrayList;
@@ -67,7 +61,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 class RuleInfo {
@@ -104,7 +97,6 @@ public class ModuleToKORE {
 
     public static final String ONE_PATH_OP = KLabels.RL_wEF.name();
     public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
-    public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
     private final AddSortInjections addSortInjections;
     private final KLabel topCellInitializer;
@@ -124,7 +116,7 @@ public class ModuleToKORE {
         this.topCellInitializer = topCellInitializer;
         this.options = options;
         for (Production prod : iterable(module.sortedProductions())) {
-            if (prod.att().contains("mlBinder")) {
+            if (prod.att().contains(Att.ML_BINDER())) {
                 mlBinders.add(prod.klabel().get().name());
             }
         }
@@ -138,7 +130,7 @@ public class ModuleToKORE {
         convert(topCellInitializer, semantics);
         semantics.append("()), ");
         StringBuilder sb = new StringBuilder();
-        HashMap<String, Boolean> considerSource = new HashMap<>();
+        HashMap<Att.Key, Boolean> considerSource = new HashMap<>();
         considerSource.put(Att.SOURCE(), true);
         // insert the location of the main module so the backend can provide better error location
         convert(considerSource, Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
@@ -156,10 +148,10 @@ public class ModuleToKORE {
 
         Set<SortHead> tokenSorts = new HashSet<>();
         // Map attribute name to whether the attribute has a value
-        Map<String, Boolean> attributes = new HashMap<>();
-        attributes.put("nat", true);
-        attributes.put("terminals", true);
-        attributes.put("colors", true);
+        Map<Att.Key, Boolean> attributes = new HashMap<>();
+        attributes.put(Att.NAT(), true);
+        attributes.put(Att.TERMINALS(), true);
+        attributes.put(Att.COLORS(), true);
         attributes.put(Att.PRIORITY(), true);
         Set<Integer> priorities = new HashSet<>();
         collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
@@ -180,34 +172,14 @@ public class ModuleToKORE {
         collectionSorts.add("MAP.Map");
         collectionSorts.add("LIST.List");
         collectionSorts.add("ARRAY.Array");
-        attributes.remove(HAS_DOMAIN_VALUES);
-        if (attributes.containsKey("token")) {
-            attributes.put(HAS_DOMAIN_VALUES, false);
+        collectionSorts.add("RANGEMAP.RangeMap");
+        attributes.remove(Att.HAS_DOMAIN_VALUES());
+        if (attributes.containsKey(Att.TOKEN())) {
+            attributes.put(Att.HAS_DOMAIN_VALUES(), false);
         }
         translateSorts(tokenSorts, attributes, collectionSorts, semantics);
 
-        List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
-        if (options.backend.equals("haskell")) {
-            module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
-                    prod -> {
-                        if (!options.disableCeilSimplificationRules) {
-                            genMapCeilAxioms(prod, sortedRules);
-                        }
-                        return prod;
-                    }
-            );
-        }
-        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : sortedRules) {
-            K left = RewriteToTop.toLeft(rule.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
-                Production prod = production(kapp);
-                if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
-                    functionRules.put(kapp.klabel(), rule);
-                }
-            }
-        }
+        SetMultimap<KLabel, Rule> functionRules = module.getFunctionRules();
 
         semantics.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
@@ -216,13 +188,13 @@ public class ModuleToKORE {
                 overloads.add(greater);
             }
         }
-        translateSymbols(attributes, functionRules, overloads, semantics);
+        translateSymbols(attributes, semantics);
 
         // print syntax definition
         syntax.append(semantics);
         for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(module.bracketProductionsFor())) {
             for (Production prod : iterable(sort._2())) {
-                translateSymbol(attributes, functionRules, overloads, prod.att().get("bracketLabel", KLabel.class), prod, syntax);
+                translateSymbol(attributes, prod.att().get(Att.BRACKET_LABEL(), KLabel.class), prod, syntax);
             }
         }
         for (Production prod : iterable(module.sortedProductions())) {
@@ -268,11 +240,11 @@ public class ModuleToKORE {
             if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
                 genUnitAxiom(prod, semantics);
             }
-            if (isFunctional(prod, functionRules)) {
+            if (prod.att().contains(Att.FUNCTIONAL())) {
                 genFunctionalAxiom(prod, semantics);
             }
-            if (isConstructor(prod, functionRules)) {
-                genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
+            if (prod.att().contains(Att.CONSTRUCTOR())) {
+                genNoConfusionAxioms(prod, noConfusion, semantics);
             }
         }
 
@@ -291,7 +263,7 @@ public class ModuleToKORE {
         macros.append("// macros\n");
         int ruleIndex = 0;
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
-        for (Rule rule : sortedRules) {
+        for (Rule rule : iterable(module.sortedRules())) {
             if (ExpandMacros.isMacro(rule)) {
                 convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
                         priorityToPreviousGroup, priorityToAlias, sentenceType, macros);
@@ -302,7 +274,7 @@ public class ModuleToKORE {
             ruleIndex++;
         }
 
-        if (!options.disableKoreAntileft) {
+        if (options.enableKoreAntileft) {
             semantics.append("\n// priority groups\n");
             genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, semantics);
         }
@@ -312,18 +284,18 @@ public class ModuleToKORE {
         semantics.append("\n");
     }
 
-    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
+    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<Att.Key, Boolean> attributes,
                                                 Set<Integer> priorities, boolean heatCoolEq, String topCellSortStr) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (att.contains("token")) {
+            if (att.contains(Att.TOKEN())) {
                 tokenSorts.add(sort);
             }
             collectAttributes(attributes, att);
         }
         for (Production prod : iterable(module.sortedProductions())) {
             Att att = prod.att();
-            if (att.contains("token")) {
+            if (att.contains(Att.TOKEN())) {
                 tokenSorts.add(prod.sort().head());
             }
             collectAttributes(attributes, att);
@@ -339,7 +311,7 @@ public class ModuleToKORE {
         }
     }
 
-    private void translateSorts(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
+    private void translateSorts(Set<SortHead> tokenSorts, Map<Att.Key, Boolean> attributes,
                                 Set<String> collectionSorts, StringBuilder sb) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             if (sort.equals(Sorts.K().head()) || sort.equals(Sorts.KItem().head())) {
@@ -350,26 +322,26 @@ public class ModuleToKORE {
             if (att.contains(Att.HOOK())) {
                 if (collectionSorts.contains(att.get(Att.HOOK()))) {
                     if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
-                        att = att.remove("element");
-                        att = att.remove("unit");
+                        att = att.remove(Att.ELEMENT());
+                        att = att.remove(Att.UNIT());
                         att = att.remove(Att.HOOK());
                     } else {
-                        Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
-                        att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
-                        att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
-                        att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                        Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains(Att.ELEMENT())).findAny().get();
+                        att = att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
+                        att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
+                        att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
                         sb.append("hooked-");
                     }
                 } else {
                     sb.append("hooked-");
                 }
             }
-            att = att.remove(HAS_DOMAIN_VALUES);
+            att = att.remove(Att.HAS_DOMAIN_VALUES());
             if (tokenSorts.contains(sort)) {
-                att = att.add(HAS_DOMAIN_VALUES);
+                att = att.add(Att.HAS_DOMAIN_VALUES());
             }
             if (sort.params() == 0 && Sort(sort).isNat()) {
-              att = att.add("nat", sort.name());
+              att = att.add(Att.NAT(), sort.name());
             }
             sb.append("sort ");
             convert(sort, sb);
@@ -379,8 +351,7 @@ public class ModuleToKORE {
         }
     }
 
-    private void translateSymbols(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules,
-                                  Set<Production> overloads, StringBuilder sb) {
+    private void translateSymbols(Map<Att.Key, Boolean> attributes, StringBuilder sb) {
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
@@ -388,14 +359,14 @@ public class ModuleToKORE {
             if (prod.klabel().isEmpty()) {
                 continue;
             }
-            translateSymbol(attributes, functionRules, overloads, prod.klabel().get(), prod, sb);
+            translateSymbol(attributes, prod.klabel().get(), prod, sb);
         }
     }
 
-    private void translateSymbol(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads,
+    private void translateSymbol(Map<Att.Key, Boolean> attributes,
                                  KLabel label, Production prod, StringBuilder sb) {
         sb.append("  ");
-        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && module.isRealHook(prod.att(), immutable(options.hookNamespaces))) {
             sb.append("hooked-");
         }
         sb.append("symbol ");
@@ -412,8 +383,7 @@ public class ModuleToKORE {
         sb.append(") : ");
         convert(prod.sort(), prod, sb);
         sb.append(" ");
-        Att koreAtt = addKoreAttributes(prod, functionRules, overloads);
-        convert(attributes, koreAtt, sb, null, null);
+        convert(attributes, prod.att(), sb, null, null);
         sb.append("\n");
     }
 
@@ -441,7 +411,8 @@ public class ModuleToKORE {
         if (prod.arity() != 2) {
             throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
         }
-        if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
+        if (!(module.subsorts().lessThanEq(prod.sort(), prod.nonterminal(0).sort()) &&
+                module.subsorts().lessThanEq(prod.sort(), prod.nonterminal(1).sort()))) {
             throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
         }
         sb.append("  axiom");
@@ -561,77 +532,6 @@ public class ModuleToKORE {
         sb.append(") [unit{}()] // left unit\n");
     }
 
-    private void genMapCeilAxioms(Production prod, Collection<Rule> rules) {
-        Sort mapSort = prod.nonterminal(1).sort();
-        scala.collection.Set<Production> mapProds = module.productionsForSort().apply(mapSort.head());
-        Production concatProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.concat")).get();
-        Production elementProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.element")).get();
-        Seq<NonTerminal> nonterminals = elementProd.nonterminals();
-        Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
-
-        // rule
-        //   #Ceil(MapItem(K1, K2, ..., Kn) Rest:Map)
-        // =>
-        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@K2) #And ... #And #Ceil(@Kn)
-        // Note: The {_ in_keys(_) #Equals false} condition implies
-        // #Ceil(@K1) and #Ceil(@Rest).
-        // [simplification]
-
-        K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
-        KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
-        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
-
-        // arguments of MapItem and their #Ceils
-        List<K> setArgs = new ArrayList<>();
-        K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
-        for (int i = 0; i < nonterminals.length(); i++) {
-            Sort sort = nonterminals.apply(i).sort();
-            KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
-            setArgs.add(setVar);
-            if (i > 0) {
-                KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
-                setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceil, setVar));
-            }
-        }
-        Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
-
-        KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
-        Rule ceilMapRule =
-                Rule(
-                        KRewrite(
-                                KApply(ceilMapLabel,
-                                        KApply(concatProd.klabel().get(),
-                                                KApply(elementProd.klabel().get(),
-                                                        setArgsSeq,
-                                                        Att.empty()
-                                                ),
-                                                restMapSet
-                                        )
-                                )
-                                ,
-                                KApply(andLabel,
-                                        KApply(equalsLabel,
-                                                KApply(prod.klabel().get(),
-                                                        setArgs.get(0),
-                                                        restMapSet
-                                                ),
-                                                BooleanUtils.FALSE
-                                        ),
-                                        setArgsCeil
-                                )
-                        )
-                        , BooleanUtils.TRUE
-                        , BooleanUtils.TRUE
-                        , Att.empty().add(Att.SIMPLIFICATION())
-                );
-        rules.add(ceilMapRule);
-    }
-
-    static boolean hasHookValue(Att atts, String value) {
-        return atts.contains(Att.HOOK()) &&
-                atts.get(Att.HOOK()).equals(value);
-    }
-
     private void genFunctionalAxiom(Production prod, StringBuilder sb) {
         // exists y . f(...) = y
         Production finalProd = prod;
@@ -639,8 +539,7 @@ public class ModuleToKORE {
         sb.append(" [functional{}()] // functional\n");
     }
 
-    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion,
-                                      SetMultimap<KLabel, Rule> functionRulesMap, StringBuilder sb) {
+    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion, StringBuilder sb) {
         // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
         if (prod.arity() > 0) {
             sb.append("  axiom");
@@ -673,7 +572,7 @@ public class ModuleToKORE {
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort().head()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
-                    || !isConstructor(prod2, functionRulesMap) || isBuiltinProduction(prod2)) {
+                    || !prod2.att().contains(Att.CONSTRUCTOR()) || isBuiltinProduction(prod2)) {
                 // TODO (traiansf): add no confusion axioms for constructor vs inj.
                 continue;
             }
@@ -715,14 +614,14 @@ public class ModuleToKORE {
             if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                 continue;
             }
-            if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
+            if (prod.klabel().isEmpty() && !((prod.att().contains(Att.TOKEN()) && !hasToken) || prod.isSubsort())) {
                 continue;
             }
             numTerms++;
             sbTemp.append("\\or{");
             convert(sort, sbTemp);
             sbTemp.append("} (");
-            if (prod.att().contains("token") && !hasToken) {
+            if (prod.att().contains(Att.TOKEN()) && !hasToken) {
                 convertTokenProd(sort, sbTemp);
                 hasToken = true;
             } else if (prod.klabel().isDefined()) {
@@ -769,7 +668,7 @@ public class ModuleToKORE {
             }
         }
         Att sortAtt = module.sortAttributesFor().get(sort.head()).getOrElse(() -> KORE.Att());
-        if (!hasToken && sortAtt.contains("token")) {
+        if (!hasToken && sortAtt.contains(Att.TOKEN())) {
             numTerms++;
             sbTemp.append("\\or{");
             convert(sort, sbTemp);
@@ -840,17 +739,6 @@ public class ModuleToKORE {
         sb.append("())] // overloaded production\n");
     }
 
-    private boolean isRealHook(Att att) {
-      String hook = att.get(Att.HOOK());
-      if (hook.startsWith("ARRAY.")) {
-        return false;
-      }
-      if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
-        return true;
-      }
-      return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
-    }
-
     private static boolean isBuiltinProduction(Production prod) {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
@@ -860,7 +748,7 @@ public class ModuleToKORE {
         sb.setLength(0); // reset string writer
         Sort topCellSort = Sorts.GeneratedTopCell();
         String topCellSortStr = getSortStr(topCellSort);
-        HashMap<String, Boolean> considerSource = new HashMap<>();
+        HashMap<Att.Key, Boolean> considerSource = new HashMap<>();
         considerSource.put(Att.SOURCE(), true);
         convert(considerSource, Att.empty().add(Source.class, spec.att().get(Source.class)), sb, null, null);
         sb.append("\n");
@@ -871,9 +759,10 @@ public class ModuleToKORE {
         convert(definition.name(), sb);
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
-        HashMap<String, Boolean> consideredAttributes = new HashMap<>();
+        HashMap<Att.Key, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
+        consideredAttributes.put(Att.GROUP(), true);
         consideredAttributes.put(Att.SOURCE(), true);
         consideredAttributes.put(Att.LOCATION(), true);
         consideredAttributes.put(Att.UNIQUE_ID(), true);
@@ -918,7 +807,7 @@ public class ModuleToKORE {
             leftPattern = ((KAs)leftPattern).pattern();
         }
         if (leftPattern instanceof KApply) {
-            production = production((KApply) leftPattern, true);
+            production = module.production((KApply) leftPattern, true);
             productionSort = production.sort();
             productionSortStr = getSortStr(productionSort);
             productionSorts = stream(production.items())
@@ -932,7 +821,7 @@ public class ModuleToKORE {
             if (isFunction(production) || rule.att().contains(Att.SIMPLIFICATION()) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
-            } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
+            } else if ((rule.att().contains(Att.HEAT()) || rule.att().contains(Att.COOL())) && heatCoolEq) {
                 equation = true;
                 productionSortStr = topCellSortStr;
             }
@@ -944,7 +833,7 @@ public class ModuleToKORE {
     }
 
     private void convertRule(RuleOrClaim rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
-                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             Map<Att.Key, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
                              Map<Integer, String> priorityToPreviousGroup,
                              ListMultimap<Integer, String> priorityToAlias,
                              SentenceType defaultSentenceType, StringBuilder sb) {
@@ -978,7 +867,7 @@ public class ModuleToKORE {
             } else {
                 sb.append("  axiom{R");
             }
-            Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
+            Option<Sort> sortParamsWrapper = rule.att().getOption(Att.SORT_PARAMS(), Sort.class);
             Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
                 for (Object sortParamName : sortParams.get())
@@ -1175,7 +1064,7 @@ public class ModuleToKORE {
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
 
-                if (!options.disableKoreAntileft) {
+                if (options.enableKoreAntileft) {
                     genAliasForSemanticsRuleLHS(requires, left, ruleAliasName, freeVars, topCellSortStr,
                             priority, priorityToAlias, sb);
                     sb.append("\n");
@@ -1184,13 +1073,13 @@ public class ModuleToKORE {
                 sb.append("  axiom{} ");
                 sb.append(String.format("\\rewrites{%s} (\n    ", topCellSortStr));
 
-                if (options.disableKoreAntileft) {
-                    genSemanticsRuleLHSNoAlias(requires, left, freeVars, topCellSortStr, priorityToPreviousGroup.get(priority), sb);
-                    sb.append(",\n      ");
-                } else {
+                if (options.enableKoreAntileft) {
                     genSemanticsRuleLHSWithAlias(ruleAliasName, freeVars, topCellSortStr,
                             priorityToPreviousGroup.get(priority), sb);
                     sb.append(",\n    ");
+                } else {
+                    genSemanticsRuleLHSNoAlias(requires, left, freeVars, topCellSortStr, priorityToPreviousGroup.get(priority), sb);
+                    sb.append(",\n      ");
                 }
             } else {
                 // LHS for claims
@@ -1219,14 +1108,15 @@ public class ModuleToKORE {
             }
             sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
 
-            if (options.disableKoreAntileft) {
-                convert(right, sb);
-                sb.append(", ");
+            if (options.enableKoreAntileft) {
                 convertSideCondition(ensures, topCellSortStr, sb);
+                sb.append(", ");
+                convert(right, sb);
             } else {
-                convertSideCondition(ensures, topCellSortStr, sb);
-                sb.append(", ");
                 convert(right, sb);
+                sb.append(", ");
+                convertSideCondition(ensures, topCellSortStr, sb);
+
             }
 
             sb.append(')');
@@ -1243,7 +1133,7 @@ public class ModuleToKORE {
         } else {
             assertNoExistentials(rule, existentials);
             sb.append("  axiom{R");
-            Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
+            Option<Sort> sortParamsWrapper = rule.att().getOption(Att.SORT_PARAMS(), Sort.class);
             Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
                 for (Object sortParamName : sortParams.get())
@@ -1282,7 +1172,7 @@ public class ModuleToKORE {
         VisitK visitor = new VisitK() {
             @Override
             public void apply(KVariable k) {
-                if (k.name().startsWith("?") || k.att().contains("fresh"))
+                if (k.name().startsWith("?") || k.att().contains(Att.FRESH()))
                     res.add(k);
             }
         };
@@ -1470,141 +1360,8 @@ public class ModuleToKORE {
         sb.append("}");
     }
 
-    private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-        Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
-        return att.contains("constructor");
-    }
-
-    private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-        Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
-        return att.contains(Att.FUNCTIONAL());
-    }
-
-    private boolean isGeneratedInKeysOp(Production prod) {
-        Option<String> hook = prod.att().getOption(Att.HOOK());
-        if (hook.isEmpty()) return false;
-        if (!hook.get().equals("MAP.in_keys")) return false;
-        return (!prod.klabel().isEmpty());
-    }
-
-    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
-        boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
-        boolean isConstructor = !isFunction(prod);
-        isConstructor &= !prod.att().contains(Att.ASSOC());
-        isConstructor &= !prod.att().contains(Att.COMM());
-        isConstructor &= !prod.att().contains(Att.IDEM());
-        isConstructor &= !(prod.att().contains(Att.FUNCTION()) && prod.att().contains(Att.UNIT()));
-
-        // Later we might set !isConstructor because there are anywhere rules,
-        // but if a symbol is a constructor at this point, then it is still
-        // injective.
-        boolean isInjective = isConstructor;
-
-        boolean isMacro = false;
-        boolean isAnywhere = overloads.contains(prod);
-        if (prod.klabel().isDefined()) {
-            for (Rule r : functionRules.get(prod.klabel().get())) {
-                isMacro |= ExpandMacros.isMacro(r);
-                isAnywhere |= r.att().contains(Att.ANYWHERE());
-            }
-        }
-        isConstructor &= !isMacro;
-        isConstructor &= !isAnywhere;
-
-        Att att = prod.att().remove("constructor");
-        if (att.contains(Att.HOOK()) && !isRealHook(att)) {
-            att = att.remove("hook");
-        }
-        if (isConstructor) {
-            att = att.add("constructor");
-        }
-        if (isFunctional) {
-            att = att.add(Att.FUNCTIONAL());
-        }
-        if (isAnywhere) {
-            att = att.add("anywhere");
-        }
-        if (isInjective) {
-            att = att.add("injective");
-        }
-        if (isMacro) {
-            att = att.add("macro");
-        }
-        // update format attribute with structure expected by backend
-        String format = att.getOptional("format").orElse(Formatter.defaultFormat(prod.items().size()));
-        int nt = 1;
-        boolean hasFormat = true;
-        for (int i = 0; i < prod.items().size(); i++) {
-          if (prod.items().apply(i) instanceof NonTerminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
-          } else if (prod.items().apply(i) instanceof Terminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
-          } else {
-            hasFormat = false;
-          }
-        }
-        if (hasFormat) {
-          att = att.add("format", format);
-          if (att.contains("color")) {
-            boolean escape = false;
-            StringBuilder colors = new StringBuilder();
-            String conn = "";
-            for (int i = 0; i < format.length(); i++) {
-              if (escape && format.charAt(i) == 'c') {
-                colors.append(conn).append(att.get("color"));
-                conn = ",";
-              }
-              if (format.charAt(i) == '%') {
-                escape = true;
-              } else {
-                escape = false;
-              }
-            }
-            att = att.add("colors", colors.toString());
-          }
-          StringBuilder sb = new StringBuilder();
-          for (ProductionItem pi : iterable(prod.items())) {
-            if (pi instanceof NonTerminal) {
-              sb.append('0');
-            } else {
-              sb.append('1');
-            }
-          }
-          att = att.add("terminals", sb.toString());
-          if (prod.klabel().isDefined()) {
-              List<K> lessThanK = new ArrayList<>();
-              Option<scala.collection.Set<Tag>> lessThan = module.priorities().relations().get(Tag(prod.klabel().get().name()));
-              if (lessThan.isDefined()) {
-                  for (Tag t : iterable(lessThan.get())) {
-                    if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
-                        continue;
-                    }
-                    lessThanK.add(KApply(KLabel(t.name())));
-                  }
-              }
-              att = att.add("priorities", KList.class, KList(lessThanK));
-              att = att.remove("left");
-              att = att.remove("right");
-              att = att.add("left", KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
-              att = att.add("right", KList.class, getAssoc(module.rightAssoc(), prod.klabel().get()));
-          }
-        } else {
-          att = att.remove("format");
-        }
-        // This attribute is a frontend attribute only and is removed from the kore
-        // Since it has no meaning outside the frontend
-        return att.remove(Att.ORIGINAL_PRD(), Production.class);
-    }
-
-    private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
-      return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
-    }
-
     private boolean isFunction(Production prod) {
-        if (!prod.att().contains(Att.FUNCTION())) {
-            return false;
-        }
-        return true;
+        return prod.att().contains(Att.FUNCTION());
     }
 
     // Assume that there is no quantifiers
@@ -1655,9 +1412,9 @@ public class ModuleToKORE {
     }
 
 
-    private void collectAttributes(Map<String, Boolean> attributes, Att att) {
-        for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
-            String name = attribute._1._1;
+    private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
+        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.withUserGroupsAsGroupAtt().att())) {
+            Att.Key name = attribute._1._1;
             Object val = attribute._2;
             String strVal = val.toString();
             if (strVal.equals("")) {
@@ -1668,23 +1425,6 @@ public class ModuleToKORE {
                 attributes.put(name, true);
             }
         }
-    }
-
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("S1"), Sort("S2")), Sort("S2"), Seq(NonTerminal(Sort("S1"))), Att());
-
-
-    private Production production(KApply term) {
-        return production(term, false);
-    }
-
-    private Production production(KApply term, boolean instantiatePolySorts) {
-        KLabel klabel = term.klabel();
-        if (klabel.name().equals(KLabels.INJ))
-            return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
-        if (!(prods.nonEmpty() && prods.get().size() == 1))
-            throw KEMException.compilerError("Expected to find exactly one production for KLabel: " + klabel + " found: " + prods.getOrElse(Collections::Set).size());
-        return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
     private static String convertBuiltinLabel(String klabel) {
@@ -1812,22 +1552,29 @@ public class ModuleToKORE {
         return strBuilder.toString();
     }
 
-    private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
+    private void convert(Map<Att.Key, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
-        for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
-            String name = attribute._1._1;
+
+        // Emit user groups as group(_) to prevent conflicts between user groups and internals
+        att = att.withUserGroupsAsGroupAtt();
+
+        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
+            // Sort to stabilize error messages
+            stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).collect(Collectors.toList())) {
+            Att.Key key = attribute._1._1;
+            String strKey = key.key();
             String clsName = attribute._1._2;
             Object val = attribute._2;
             String strVal = val.toString();
             sb.append(conn);
             if (clsName.equals(K.class.getName())) {
-                convert(name, sb);
+                convert(strKey, sb);
                 sb.append("{}(");
                 convert((K) val, sb);
                 sb.append(")");
             } else if (clsName.equals(KList.class.getName())) {
-                convert(name, sb);
+                convert(strKey, sb);
                 sb.append("{}(");
                 String conn2 = "";
                 for (K item : ((KList)val).items()) {
@@ -1836,16 +1583,16 @@ public class ModuleToKORE {
                   conn2 = ",";
                 }
                 sb.append(")");
-            } else if (attributes.get(name) != null && attributes.get(name)) {
-                convert(name, sb);
+            } else if (attributes.get(key) != null && attributes.get(key)) {
+                convert(strKey, sb);
                 sb.append("{}(");
-                if (isListOfVarsAttribute(name)) {
+                if (isListOfVarsAttribute(key)) {
                     convertStringVarList(location, freeVarsMap, strVal, sb);
                 } else {
-                    switch (name) {
+                    switch (strKey) {
                         case "unit":
                         case "element":
-                            Production prod = production(KApply(KLabel(strVal)));
+                            Production prod = module.production(KApply(KLabel(strVal)));
                             convert(prod.klabel().get(), prod.params(), sb);
                             sb.append("()");
                             break;
@@ -1855,7 +1602,7 @@ public class ModuleToKORE {
                 }
                 sb.append(")");
             } else {
-                convert(name, sb);
+                convert(strKey, sb);
                 sb.append("{}()");
             }
             conn = ", ";
@@ -1878,14 +1625,13 @@ public class ModuleToKORE {
         }
     }
 
-    private boolean isListOfVarsAttribute(String name) {
+    private boolean isListOfVarsAttribute(Att.Key name) {
         return name.equals(Att.CONCRETE()) || name.equals(Att.SYMBOLIC());
     }
 
     private static String[] asciiReadableEncodingKoreCalc() {
         String[] koreEncoder = Arrays.copyOf(StringUtil.asciiReadableEncodingDefault, StringUtil.asciiReadableEncodingDefault.length);
         koreEncoder[0x26] = "And-";
-        koreEncoder[0x2d] = "-";
         koreEncoder[0x3c] = "-LT-";
         koreEncoder[0x3e] = "-GT-";
         koreEncoder[0x40] = "-AT-";
@@ -1920,7 +1666,7 @@ public class ModuleToKORE {
         new VisitK() {
             @Override
             public void apply(KApply k) {
-                if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
+                if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains(Att.ANONYMOUS())){
                     throw KEMException.internalError("Nested quantifier over anonymous variables.");
                 }
                 for (K item : k.items()) {
@@ -1930,7 +1676,7 @@ public class ModuleToKORE {
 
             @Override
             public void apply(KVariable k) {
-                if (k.att().contains("anonymous")) {
+                if (k.att().contains(Att.ANONYMOUS())) {
                     anonymousVariables.add(k);
                 }
             }
@@ -1945,7 +1691,7 @@ public class ModuleToKORE {
             public void apply(KApply k) {
                 KLabel label = computePolyKLabel(k);
                 String conn = "";
-                if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
+                if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains(Att.ANONYMOUS())){
                     // Handle #Forall _ / #Exists _
                     Set<K> anonymousVariables = collectAnonymousVariables(k.items().get(1));
 
@@ -1982,10 +1728,10 @@ public class ModuleToKORE {
                 sb.append("\\dv{");
                 convert(k.sort(), sb);
                 sb.append("}(");
-                if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String")) {
-                    sb.append(k.s());
-                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("BYTES.Bytes")) {
-                    sb.append(k.s().substring(1)); // remove the leading `b`
+                if (module.sortAttributesFor().get(k.sort().head()).getOrElse(Att::empty).getOptional(Att.HOOK()).orElse("").equals("STRING.String")) {
+                    sb.append(StringUtil.escapeNonASCII(k.s()));
+                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(Att::empty).getOptional(Att.HOOK()).orElse("").equals("BYTES.Bytes")) {
+                    sb.append(StringUtil.escapeNonASCII(k.s().substring(1))); // remove the leading `b`
                 } else {
                     sb.append(StringUtil.enquoteKString(k.s()));
                 }

@@ -2,11 +2,10 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
-import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
@@ -43,25 +42,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
+import javax.json.*;
 
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
-import javax.json.JsonWriterFactory;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
-import javax.json.JsonStructure;
-
-import scala.Enumeration;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
-import scala.collection.Seq;
 import scala.collection.Set;
 
 import static org.kframework.Collections.*;
@@ -77,13 +64,15 @@ public class ToJson {
 // ToJson Definition Objects //
 ///////////////////////////////
 
+    private static final JsonBuilderFactory factory = Json.createBuilderFactory(Collections.emptyMap());
+
     public static byte[] apply(Definition def) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             DataOutputStream data = new DataOutputStream(out);
             JsonWriter jsonWriter = Json.createWriter(data);
 
-            JsonObjectBuilder term = Json.createObjectBuilder();
+            JsonObjectBuilder term = factory.createObjectBuilder();
             term.add("format", "KAST");
             term.add("version", version);
             term.add("term", toJson(def));
@@ -103,15 +92,15 @@ public class ToJson {
             DataOutputStream data = new DataOutputStream(out);
             JsonWriter jsonWriter = Json.createWriter(data);
 
-            JsonObjectBuilder term = Json.createObjectBuilder();
+            JsonObjectBuilder term = factory.createObjectBuilder();
             term.add("format", "KAST");
             term.add("version", version);
-            JsonObjectBuilder jmodlist = Json.createObjectBuilder();
+            JsonObjectBuilder jmodlist = factory.createObjectBuilder();
 
             jmodlist.add("node", JsonParser.KFLATMODULELIST);
             jmodlist.add("mainModule", mainSpecModule);
 
-            JsonArrayBuilder jmods = Json.createArrayBuilder();
+            JsonArrayBuilder jmods = factory.createArrayBuilder();
             for (Module m : mods) {
                 jmods.add(toJson(m));
             }
@@ -128,9 +117,9 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Definition def) {
-        JsonObjectBuilder jdef = Json.createObjectBuilder();
+        JsonObjectBuilder jdef = factory.createObjectBuilder();
 
-        JsonArrayBuilder mods = Json.createArrayBuilder();
+        JsonArrayBuilder mods = factory.createArrayBuilder();
         for (Module m : JavaConverters.setAsJavaSet(def.modules())) {
             mods.add(toJson(m));
         }
@@ -144,37 +133,40 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Att att) {
-        JsonObjectBuilder jatt = Json.createObjectBuilder();
+        // Emit user groups as group(_) to prevent conflicts between user groups and internals
+        att = att.withUserGroupsAsGroupAtt();
+
+        JsonObjectBuilder jatt = factory.createObjectBuilder();
         jatt.add("node", JsonParser.KATT);
 
-        JsonObjectBuilder jattKeys = Json.createObjectBuilder();
-        for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            if (key._1().equals(Location.class.getName())) {
-                JsonArrayBuilder locarr = Json.createArrayBuilder();
+        JsonObjectBuilder jattKeys = factory.createObjectBuilder();
+        for (Tuple2<Att.Key,String> attKeyPair : JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+            if (attKeyPair._1().key().equals(Location.class.getName())) {
+                JsonArrayBuilder locarr = factory.createArrayBuilder();
                 Location loc = att.get(Location.class);
                 locarr.add(loc.startLine());
                 locarr.add(loc.startColumn());
                 locarr.add(loc.endLine());
                 locarr.add(loc.endColumn());
-                jattKeys.add(key._1(), locarr.build());
-            } else if (key._1().equals(Source.class.getName())){
-                jattKeys.add(key._1(), att.get(Source.class).source());
-            } else if (key._1().equals(Production.class.getName())){
-                jattKeys.add(key._1(), toJson(att.get(Production.class)));
-            } else if (key._1().equals(Sort.class.getName())){
-                jattKeys.add(key._1(), toJson(att.get(Sort.class)));
-            } else if (key._1().equals("bracketLabel")) {
-                jattKeys.add(key._1(), toJson(att.get("bracketLabel", KLabel.class)));
-            } else if (key._1().equals(Att.PREDICATE())) {
-                jattKeys.add(key._1(), toJson(att.get(Att.PREDICATE(), Sort.class)));
-            } else if (key._1().equals("cellOptAbsent")) {
-                jattKeys.add(key._1(), toJson(att.get("cellOptAbsent", Sort.class)));
-            } else if (key._1().equals("cellFragment")) {
-                jattKeys.add(key._1(), toJson(att.get("cellFragment", Sort.class)));
-            } else if (key._1().equals("sortParams")) {
-                jattKeys.add(key._1(), toJson(att.get("sortParams", Sort.class)));
+                jattKeys.add(attKeyPair._1().key(), locarr.build());
+            } else if (attKeyPair._1().key().equals(Source.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), att.get(Source.class).source());
+            } else if (attKeyPair._1().key().equals(Production.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Production.class)));
+            } else if (attKeyPair._1().key().equals(Sort.class.getName())){
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Sort.class)));
+            } else if (attKeyPair._1().equals(Att.BRACKET_LABEL())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.BRACKET_LABEL(), KLabel.class)));
+            } else if (attKeyPair._1().equals(Att.PREDICATE())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.PREDICATE(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.CELL_OPT_ABSENT())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.CELL_OPT_ABSENT(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.CELL_FRAGMENT())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.CELL_FRAGMENT(), Sort.class)));
+            } else if (attKeyPair._1().equals(Att.SORT_PARAMS())) {
+                jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.SORT_PARAMS(), Sort.class)));
             } else
-                jattKeys.add(key._1(), att.att().get(key).get().toString());
+                jattKeys.add(attKeyPair._1().key(), att.att().get(attKeyPair).get().toString());
         }
         jatt.add("att", jattKeys.build());
 
@@ -190,20 +182,20 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(FlatModule mod) {
-        JsonObjectBuilder jmod = Json.createObjectBuilder();
+        JsonObjectBuilder jmod = factory.createObjectBuilder();
 
         jmod.add("node", JsonParser.KFLATMODULE);
 
-        JsonArrayBuilder imports = Json.createArrayBuilder();
+        JsonArrayBuilder imports = factory.createArrayBuilder();
         stream(mod.imports()).forEach(i -> {
-          JsonObjectBuilder jimp = Json.createObjectBuilder();
+          JsonObjectBuilder jimp = factory.createObjectBuilder();
           jimp.add("node", JsonParser.KIMPORT);
           jimp.add("name", i.name());
           jimp.add("isPublic", i.isPublic());
           imports.add(jimp.build());
         });
 
-        JsonArrayBuilder sentences = Json.createArrayBuilder();
+        JsonArrayBuilder sentences = factory.createArrayBuilder();
         mod.localSentences().foreach(s -> sentences.add(toJson(s)));
 
         jmod.add("name", mod.name());
@@ -230,13 +222,13 @@ public class ToJson {
         if (sen instanceof SyntaxLexical)       return toJson((SyntaxLexical) sen);
         if (sen instanceof Production)          return toJson((Production) sen);
 
-        JsonObjectBuilder jsen = Json.createObjectBuilder();
+        JsonObjectBuilder jsen = factory.createObjectBuilder();
         jsen.add("node", "badsentence");
         return jsen.build();
     }
 
     public static JsonStructure toJson(Context con) {
-        JsonObjectBuilder jcon = Json.createObjectBuilder();
+        JsonObjectBuilder jcon = factory.createObjectBuilder();
 
         jcon.add("node", JsonParser.KCONTEXT);
         jcon.add("body", toJson(con.body()));
@@ -247,7 +239,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(RuleOrClaim rule) {
-        JsonObjectBuilder jrule = Json.createObjectBuilder();
+        JsonObjectBuilder jrule = factory.createObjectBuilder();
 
         jrule.add("node", rule instanceof Rule ? JsonParser.KRULE : JsonParser.KCLAIM);
         jrule.add("body", toJson(rule.body()));
@@ -259,13 +251,13 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(SyntaxPriority syn) {
-        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+        JsonObjectBuilder jsyn = factory.createObjectBuilder();
 
         jsyn.add("node", JsonParser.KSYNTAXPRIORITY);
 
-        JsonArrayBuilder priArray = Json.createArrayBuilder();
+        JsonArrayBuilder priArray = factory.createArrayBuilder();
         for (Set<Tag> pri : JavaConverters.seqAsJavaList(syn.priorities())) {
-            JsonArrayBuilder tagArray = Json.createArrayBuilder();
+            JsonArrayBuilder tagArray = factory.createArrayBuilder();
             pri.foreach(t -> tagArray.add(t.name()));
             priArray.add(tagArray);
         }
@@ -277,12 +269,12 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(SyntaxAssociativity syn) {
-        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+        JsonObjectBuilder jsyn = factory.createObjectBuilder();
 
         jsyn.add("node", JsonParser.KSYNTAXASSOCIATIVITY);
         jsyn.add("assoc", syn.assoc().toString());
 
-        JsonArrayBuilder tagArray = Json.createArrayBuilder();
+        JsonArrayBuilder tagArray = factory.createArrayBuilder();
         syn.tags().foreach(t -> tagArray.add(t.name()));
         jsyn.add("tags", tagArray);
 
@@ -292,7 +284,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Configuration con) {
-        JsonObjectBuilder jcon = Json.createObjectBuilder();
+        JsonObjectBuilder jcon = factory.createObjectBuilder();
 
         jcon.add("node", JsonParser.KCONFIGURATION);
         jcon.add("body", toJson(con.body()));
@@ -303,7 +295,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Bubble bub) {
-        JsonObjectBuilder jbub = Json.createObjectBuilder();
+        JsonObjectBuilder jbub = factory.createObjectBuilder();
 
         jbub.add("node", JsonParser.KBUBBLE);
         jbub.add("sentenceType", bub.sentenceType());
@@ -314,12 +306,12 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(SyntaxSort syn) {
-        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+        JsonObjectBuilder jsyn = factory.createObjectBuilder();
 
         jsyn.add("node", JsonParser.KSYNTAXSORT);
         jsyn.add("sort", toJson(syn.sort()));
 
-        JsonArrayBuilder params = Json.createArrayBuilder();
+        JsonArrayBuilder params = factory.createArrayBuilder();
         JavaConverters.seqAsJavaList(syn.params()).forEach(p -> params.add(toJson(p)));
         jsyn.add("params", params.build());
 
@@ -329,7 +321,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(SortSynonym syn) {
-        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+        JsonObjectBuilder jsyn = factory.createObjectBuilder();
 
         jsyn.add("node", JsonParser.KSORTSYNONYM);
         jsyn.add("newSort", toJson(syn.newSort()));
@@ -340,7 +332,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(SyntaxLexical syn) {
-        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+        JsonObjectBuilder jsyn = factory.createObjectBuilder();
 
         jsyn.add("node", JsonParser.KSYNTAXLEXICAL);
         jsyn.add("name", syn.name());
@@ -351,7 +343,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Production pro) {
-        JsonObjectBuilder jpro = Json.createObjectBuilder();
+        JsonObjectBuilder jpro = factory.createObjectBuilder();
 
         jpro.add("node", JsonParser.KPRODUCTION);
 
@@ -360,11 +352,11 @@ public class ToJson {
             jpro.add("klabel", toJson(klabel.get()));
         }
 
-        JsonArrayBuilder productionItems = Json.createArrayBuilder();
+        JsonArrayBuilder productionItems = factory.createArrayBuilder();
         JavaConverters.seqAsJavaList(pro.items()).forEach(p -> productionItems.add(toJson(p)));
         jpro.add("productionItems", productionItems.build());
 
-        JsonArrayBuilder params = Json.createArrayBuilder();
+        JsonArrayBuilder params = factory.createArrayBuilder();
         JavaConverters.seqAsJavaList(pro.params()).forEach(p -> params.add(toJson(p)));
         jpro.add("params", params.build());
 
@@ -375,7 +367,7 @@ public class ToJson {
     }
 
     public static JsonObject toJson(ProductionItem prod) {
-        JsonObjectBuilder jsonProduction = Json.createObjectBuilder();
+        JsonObjectBuilder jsonProduction = factory.createObjectBuilder();
 
         if (prod instanceof NonTerminal) {
             NonTerminal t = (NonTerminal) prod;
@@ -400,7 +392,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(Sort sort) {
-        JsonObjectBuilder jsort = Json.createObjectBuilder();
+        JsonObjectBuilder jsort = factory.createObjectBuilder();
 
         jsort.add("node", JsonParser.KSORT);
         // store sort and its parameters as a flat string
@@ -418,7 +410,7 @@ public class ToJson {
             DataOutputStream data = new DataOutputStream(out);
             JsonWriter jsonWriter = Json.createWriter(data);
 
-            JsonObjectBuilder kterm = Json.createObjectBuilder();
+            JsonObjectBuilder kterm = factory.createObjectBuilder();
             kterm.add("format", "KAST");
             kterm.add("version", version);
             kterm.add("term", toJson(k));
@@ -438,7 +430,7 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(K k) {
-        JsonObjectBuilder knode = Json.createObjectBuilder();
+        JsonObjectBuilder knode = factory.createObjectBuilder();
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
 
@@ -453,7 +445,7 @@ public class ToJson {
             knode.add("node", JsonParser.KAPPLY);
             knode.add("label", toJson(((KApply) k).klabel()));
 
-            JsonArrayBuilder args = Json.createArrayBuilder();
+            JsonArrayBuilder args = factory.createArrayBuilder();
             for (K item : app.klist().asIterable()) {
                 args.add(toJson(item));
             }
@@ -467,7 +459,7 @@ public class ToJson {
 
             knode.add("node", JsonParser.KSEQUENCE);
 
-            JsonArrayBuilder items = Json.createArrayBuilder();
+            JsonArrayBuilder items = factory.createArrayBuilder();
             for (K item : seq.asIterable()) {
                 items.add(toJson(item));
             }
@@ -512,10 +504,10 @@ public class ToJson {
     }
 
     public static JsonStructure toJson(KLabel kl) {
-        JsonObjectBuilder jkl = Json.createObjectBuilder();
+        JsonObjectBuilder jkl = factory.createObjectBuilder();
         jkl.add("node", "KLabel");
         jkl.add("name", kl.name());
-        JsonArrayBuilder params = Json.createArrayBuilder();
+        JsonArrayBuilder params = factory.createArrayBuilder();
         for (Sort s : mutable(kl.params()))
             params.add(toJson(s));
         jkl.add("params", params.build());

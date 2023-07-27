@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -25,12 +26,12 @@ public class NormalizeVariables {
     private int counter = 0;
     private Map<KVariable, String> vars = new HashMap<>();
     private KVariable normalize(KVariable var) {
-        if (var.att().contains("denormal"))
+        if (var.att().contains(Att.DENORMAL()))
             return var;
         if (!vars.containsKey(var)) {
             vars.put(var, "_" + counter++);
         }
-        return KVariable(vars.get(var), var.att().add("denormal", var.name()));
+        return KVariable(vars.get(var), var.att().add(Att.DENORMAL(), var.name()));
     }
 
     /**
@@ -51,7 +52,7 @@ public class NormalizeVariables {
             @Override
             public K apply(KVariable k) {
                 if (normalization.containsKey(k)) {
-                    return KVariable(normalization.get(k), k.att().add("denormal", k.name()));
+                    return KVariable(normalization.get(k), k.att().add(Att.DENORMAL(), k.name()));
                 }
                 return super.apply(k);
             }
@@ -64,8 +65,8 @@ public class NormalizeVariables {
             new VisitK() {
                 @Override
                 public void apply(KVariable k) {
-                    if (k.att().contains("denormal")) {
-                        normalization.put(KVariable(k.att().get("denormal")), k.name());
+                    if (k.att().contains(Att.DENORMAL())) {
+                        normalization.put(KVariable(k.att().get(Att.DENORMAL())), k.name());
                     }
                 }
             }.apply(normal);

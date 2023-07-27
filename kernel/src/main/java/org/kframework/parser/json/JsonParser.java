@@ -1,9 +1,11 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.json;
 
+import org.checkerframework.checker.nullness.Opt;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -36,6 +38,7 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.collection.JavaConverters;
+import scala.util.Either;
 
 import javax.json.*;
 import java.io.IOException;
@@ -44,6 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -308,20 +312,36 @@ public class JsonParser {
                 newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
             } else if (key.equals(Sort.class.getName())) {
                 newAtt = newAtt.add(Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("bracketLabel")) {
-                newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
-            } else if (key.equals(Att.PREDICATE())) {
+            } else if (key.equals(Att.BRACKET_LABEL().key())) {
+                newAtt = newAtt.add(Att.BRACKET_LABEL(), KLabel.class, toKLabel(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.PREDICATE().key())) {
                 newAtt = newAtt.add(Att.PREDICATE(), Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellOptAbsent")) {
-                newAtt = newAtt.add("cellOptAbsent", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellFragment")) {
-                newAtt = newAtt.add("cellFragment", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("sortParams")) {
-                newAtt = newAtt.add("sortParams", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else
-                newAtt = newAtt.add(key, attMap.getString(key));
+            } else if (key.equals(Att.CELL_OPT_ABSENT().key())) {
+                newAtt = newAtt.add(Att.CELL_OPT_ABSENT(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.CELL_FRAGMENT().key())) {
+                newAtt = newAtt.add(Att.CELL_FRAGMENT(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.SORT_PARAMS().key())) {
+                newAtt = newAtt.add(Att.SORT_PARAMS(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else {
+                Att.Key attKey =
+                        Att.getBuiltinKeyOptional(key)
+                                // The JSON is emitted after we may have added internal attributes
+                                .or(() -> Att.getInternalKeyOptional(key))
+                                .orElseThrow(() ->
+                                        KEMException.criticalError("Unrecognized attribute " + key +
+                                                " found in KAST Json term when unparsing KATT: " +
+                                                attMap +
+                                                "\nHint: User-defined groups can be added with the group(_) attribute.")
+                                );
+                newAtt = newAtt.add(attKey, attMap.getString(key));
+            }
         }
-        return newAtt;
+        Either<String, Att> newAttOrError = newAtt.withGroupAttAsUserGroups();
+        if (newAttOrError.isLeft()) {
+            throw KEMException.criticalError(newAttOrError.left().get() +
+                    "\nOccurred in KAST Json term when unparsing KATT: " + attMap);
+        }
+        return newAttOrError.right().get();
     }
 
 ////////////////////

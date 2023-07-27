@@ -572,7 +572,7 @@ store, then we rewrite `X` into `V`:
 ```k
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 ```
 Note that the rule above excludes reading `⊥`, because `⊥` is not
 a value and `V` is checked at runtime to be a value.
@@ -591,7 +591,7 @@ integers.
 ```k
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I => I +Int 1) ...</store>  [group(increment)]
 ```
 
 ## Arithmetic operators
@@ -739,7 +739,7 @@ input value, at the same time discarding the input value from the
 `in` cell.
 
 ```k
-  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 ```
 
 ## Assignment
@@ -757,7 +757,7 @@ resulting location:
   context (HOLE => lvalue(HOLE)) = _
 
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
-    [assignment]
+    [group(assignment)]
 ```
 
 ## Statements
@@ -876,7 +876,7 @@ its evaluated arguments to the output buffer, and discard the residual
 `print` statement with an empty list of arguments.
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    [print]
+    [group(print)]
   rule print(.Vals); => .  [structural]
 ```
 
@@ -1010,7 +1010,7 @@ by the two rules below:
   rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy (.Set => SetItem(V)) </busy>
-    requires (notBool(V in Busy))  [acquire]
+    requires (notBool(V in Busy))  [group(acquire)]
 
   rule <k> acquire V; => . ...</k>
        <holds>... V:Val |-> (N => N +Int 1) ...</holds>
@@ -1052,7 +1052,7 @@ actual configuration of SIMPLE is to include each `k` cell in a
 `thread` cell.
 ```k
   rule <k> rendezvous V:Val; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [rendezvous]
+       <k> rendezvous V; => . ...</k>  [group(rendezvous)]
 ```
 
 ## Auxiliary declarations and operations
@@ -1073,13 +1073,13 @@ declarations.
 
 ## Location lookup
 
-The operation below is straightforward.  Note that we tag it with the same
-`lookup` tag as the variable lookup rule defined above.  This way,
+The operation below is straightforward.  Note that we place it in the same
+`lookup` group as the variable lookup rule defined above.  This way,
 both rules will be considered transitions when we include the `lookup`
 tag in the transition option of `kompile`.
 ```k
   syntax Exp ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 ```
 
 ## Environment recovery
@@ -1170,7 +1170,7 @@ definition with the right options in order to generate the desired model.
 No kompile options are needed if you only only want to execute the definition
 (and thus get an interpreter), but if you want to search for a different
 program behaviors then you need to kompile with the transition option
-including rule tags such as lookup, increment, acquire, etc.  See the
+including rule groups such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it.
 ```k
 endmodule

@@ -72,15 +72,23 @@ must first be installed.
 
 ## The Short Version
 
-On Ubuntu Linux 20.04 (Focal) or 22.04 (Jammy):
+On Ubuntu Linux 22.04 (Jammy):
+
+```shell
+git submodule update --init --recursive
+sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-14 lld-14 llvm-14-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+curl -sSL https://get.haskellstack.org/ | sh
+```
+
+On Ubuntu Linux 20.04 (Focal):
+
+**Note**: the installation process is very similar to the above, the only difference is that clang, lld and llvm-tools have to be version 12.
 
 ```shell
 git submodule update --init --recursive
 sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
-
-Note: we require a version between 10 and 15 for clang, lld, and llvm-tools.
 
 On Arch Linux:
 
@@ -92,10 +100,13 @@ sudo pacman -S git maven jdk-openjdk cmake boost fmt libyaml jemalloc clang llvm
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
 
 On macOS using [Homebrew](https://brew.sh/):
+
 ```shell
 git submodule update --init --recursive
 brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
 ```
+
+**Note**: in this case llvm@15 is required.
 
 ## The Long Version
 
@@ -176,6 +187,10 @@ See the notes below.
     You can test if it works by calling `mvn -version` in a terminal.
     This will provide the information about the JDK Maven is using, in case
     it is the wrong one.
+
+    Note that on Ubuntu Focal, the default Maven version is not compatible with
+    newer versions of the JDK; for K's Maven build to work, please ensure you
+    have version 11 installed.
 
 5.   Haskell Stack
 

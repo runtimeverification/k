@@ -54,7 +54,7 @@ jobs:
           submodules: recursive
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
@@ -82,7 +82,6 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -91,18 +90,7 @@ jobs:
           version=$(cat package/version)
           cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
-
-      - name: Set up Java for publishing to GitHub Maven Packages
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-          overwrite-settings: true
-          server-id: runtime.verification
-          server-username: ${{ env.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 'Build, Test, Push Dockerhub Image, Push Mvn Packages'
+      - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -118,11 +106,6 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
-          docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:/tmp/settings.xml
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec k-package-docker-test-jammy-${GITHUB_SHA} /bin/bash -c "mvn --batch-mode deploy"
-
       - name: 'Clean up Docker Container'
         if: always()
         run: |
@@ -140,10 +123,10 @@ jobs:
           os: ubuntu
           distro: focal
           llvm: 12
+          jdk: 11
           pkg-name: kframework_amd64_ubuntu_focal.deb
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -173,8 +156,8 @@ jobs:
         run: |
           docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
 
-  debian-bullseye:
-    name: 'K Debian Bullseye Package'
+  debian-bookworm:
+    name: 'K Debian Bookworm Package'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 60
     steps:
@@ -183,25 +166,24 @@ jobs:
         uses: ./.github/actions/test-package
         with:
           os: debian
-          distro: bullseye
-          llvm: 11
-          pkg-name: kframework_amd64_debian_bullseye.deb
-          build-package: package/debian/build-package bullseye
+          distro: bookworm
+          llvm: 14
+          pkg-name: kframework_amd64_debian_bookworm.deb
+          build-package: package/debian/build-package bookworm
           test-package: package/debian/test-package
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye.deb
-          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bullseye.deb
+          cp kframework_amd64_debian_bookworm.deb kframework_${version}_amd64_debian_bookworm.deb
+          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bookworm.deb
 
   arch:
     name: 'Arch Linux Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -213,7 +195,6 @@ jobs:
           build-package: package/arch/build-package
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
-
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -371,10 +352,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
           BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path }}
+          REMOTE_BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path_remote }}
         run: |
           set -x
           version=$(cat k-homebrew-checkout/package/version)
-          gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${BOTTLE_NAME}
+          mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
+          gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
 
       - name: 'Add ssh key'
         uses: shimataro/ssh-key-action@v2
@@ -401,10 +384,52 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, linux, normal-ephemeral]
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bookworm, set-release-id, arch]
     steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Java for publishing to GitHub Maven Packages
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          overwrite-settings: true
+          server-id: runtime.verification.snapshots
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: k-release-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 14
+
+      - name: 'Push Maven Packages'
+        shell: bash {0}
+        continue-on-error: true
+        env:
+          MAVEN_USERNAME: devops@runtimeverification.com
+          MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
+        run: |
+          cat ~/.m2/settings.xml
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p /home/github-runner/.m2'
+          docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
+          docker exec -e MAVEN_USERNAME -e MAVEN_PASSWORD -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-release-ci-${GITHUB_SHA}
+          docker container rm --force k-release-ci-${GITHUB_SHA} || true
+
       - name: Publish release
         uses: actions/github-script@v6.0.0
         with:

@@ -68,7 +68,7 @@ public class ResolveFreshConstants {
                 transform(rule.requires()),
                 transform(rule.ensures()),
                 rule.att());
-        if (rule.att().contains("initializer")) {
+        if (rule.att().contains(Att.INITIALIZER())) {
             K left = RewriteToTop.toLeft(withFresh.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
@@ -167,15 +167,10 @@ public class ResolveFreshConstants {
     private Production resolve(Production prod) {
         if (prod.klabel().isDefined() && prod.klabel().get().equals(KLabels.GENERATED_TOP_CELL)) {
             List<ProductionItem> pis = stream(prod.items()).collect(Collectors.toCollection(ArrayList::new));
-            int idx = 0;
-            int i = 0;
-            for (ProductionItem pi : pis) {
-                if (pi instanceof NonTerminal) {
-                    idx = i;
-                }
-                i++;
-            }
-            pis.add(idx, NonTerminal(Sorts.GeneratedCounterCell()));
+            // expecting a production of the form <generatedTop> C1 C2 Cx.. </generatedTop>
+            // insert the GeneratedCounterCell as the last cell
+            // fixing the format gets resolved later in GeneratedTopFormat.java
+            pis.add(prod.items().size() - 1, NonTerminal(Sorts.GeneratedCounterCell()));
             return Production(prod.klabel().get(), prod.sort(), immutable(pis), prod.att());
         }
         return prod;
@@ -205,7 +200,7 @@ public class ResolveFreshConstants {
         KApply freshCell = KApply(KLabel("#configCell"), counterCellLabel, KApply(KLabel("#cellPropertyListTerminator")), KToken("0", Sorts.Int()), counterCellLabel);
 
         java.util.Set<Sentence> counterSentences = new HashSet<>();
-        counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function")));
+        counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add(Att.FUNCTION())));
         counterSentences.add(Rule(KRewrite(KApply(KLabel("getGeneratedCounterCell"), IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell())), true)), KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell()))), BooleanUtils.TRUE, BooleanUtils.TRUE));
 
         if (m.name().equals(def.mainModule().name())) {
@@ -225,7 +220,7 @@ public class ResolveFreshConstants {
                 }
                 KLabel topCellLabel = configInfo.getCellLabel(topCellSort);
                 Production prod = m.productionsFor().apply(topCellLabel).head();
-                KToken cellName = KToken(prod.att().get("cellName"), Sort("#CellName"));
+                KToken cellName = KToken(prod.att().get(Att.CELL_NAME()), Sort("#CellName"));
 
                 KToken topCellToken = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                 K generatedTop = KApply(KLabel("#configCell"), topCellToken, KApply(KLabel("#cellPropertyListTerminator")), KApply(KLabels.CELLS, KApply(KLabel("#externalCell"), cellName), freshCell), topCellToken);

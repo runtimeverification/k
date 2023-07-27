@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-K_VERSION=5.6.51
+K_VERSION=6.0.0
 
 if [ `id -u` -ne 0 ]; then
   echo "$0: error: This script must be run as root."
@@ -22,8 +22,8 @@ case $ID in
 		;;
 	debian)
 		case $VERSION_ID in
-			10)
-				CODENAME=bullseye
+			12)
+				CODENAME=bookworm
 				;;
 			*)
 				echo "Unsupported Debian version, try building from source."
