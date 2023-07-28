@@ -1,0 +1,9 @@
+[Error] Compiler: The generated label for a context rule conflicts with a user-defined label. Please consider renaming. (KEMException: [Error] Compiler: 
+	Source(duplicateContextLabels.k)
+	Location(9,24,9,41)
+	9 |	  context [foo-left]:  foo( HOLE,    _ )
+	  .	                       ^~~~~~~~~~~~~~~~~)
+	Source(duplicateContextLabels.k)
+	Location(12,25,12,31)
+	12 |	  rule [foo-left-cool]: a => 1
+	   .	                        ^~~~~~
