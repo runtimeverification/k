@@ -336,6 +336,16 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   def addRulePriority(p: Integer): Unit = rulePriorities.add(p)
 
+  def getPriority(att: Att): Int = {
+    if (att.contains(Att.PRIORITY)) try return att.get(Att.PRIORITY).toInt
+    catch {
+      case e: NumberFormatException =>
+        throw KEMException.compilerError("Invalid value for priority attribute: " + att.get(Att.PRIORITY) + ". Must be an integer.", e)
+    }
+    else if (att.contains(Att.OWISE)) return 200
+    50
+  }
+
 
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
 

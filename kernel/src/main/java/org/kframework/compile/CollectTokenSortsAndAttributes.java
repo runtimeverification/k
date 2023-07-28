@@ -64,7 +64,7 @@ public class CollectTokenSortsAndAttributes {
             RuleInfo ruleInfo = RuleInfo.getRuleInfo(r, heatCoolEq, topCellSortStr, module, null);
             // only collect priorities of semantics rules
             if (!ruleInfo.isEquation() && !ruleInfo.isKore() && !ExpandMacros.isMacro(r)) {
-                module.addRulePriority(getPriority(att));
+                module.addRulePriority(module.getPriority(att));
             }
         }
 
@@ -84,18 +84,5 @@ public class CollectTokenSortsAndAttributes {
                 module.addAttToAttributesMap(name, true);
             }
         }
-    }
-
-    public static int getPriority(Att att) {
-        if (att.contains(Att.PRIORITY())) {
-            try {
-                return Integer.parseInt(att.get(Att.PRIORITY()));
-            } catch (NumberFormatException e) {
-                throw KEMException.compilerError("Invalid value for priority attribute: " + att.get(Att.PRIORITY()) + ". Must be an integer.", e);
-            }
-        } else if (att.contains(Att.OWISE())) {
-            return 200;
-        }
-        return 50;
     }
 }

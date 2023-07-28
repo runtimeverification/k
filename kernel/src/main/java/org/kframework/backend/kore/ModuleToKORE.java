@@ -528,19 +528,6 @@ public class ModuleToKORE {
         }
     }
 
-    public static int getPriority(Att att) {
-        if (att.contains(Att.PRIORITY())) {
-            try {
-                return Integer.parseInt(att.get(Att.PRIORITY()));
-            } catch (NumberFormatException e) {
-                throw KEMException.compilerError("Invalid value for priority attribute: " + att.get(Att.PRIORITY()) + ". Must be an integer.", e);
-            }
-        } else if (att.contains(Att.OWISE())) {
-            return 200;
-        }
-        return 50;
-    }
-
     private void genNoJunkAxiom(Sort sort, StringBuilder sb) {
         StringBuilder sbTemp = new StringBuilder();
         sbTemp.append("  axiom{} ");
@@ -953,7 +940,7 @@ public class ModuleToKORE {
             if (!(rule instanceof Claim)) {
                 // LHS for semantics rules
                 String ruleAliasName = String.format("rule%dLHS", ruleIndex);
-                int priority = getPriority(rule.att());
+                int priority = module.getPriority(rule.att());
                 List<KVariable> freeVars = new ArrayList<>(freeVariables);
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
@@ -1041,7 +1028,7 @@ public class ModuleToKORE {
             sb.append(",\n    ");
             convert(right, sb);
             sb.append(")\n  ");
-            convert(rule.att().add(Att.PRIORITY(), Integer.toString(getPriority(rule.att()))), sb, freeVarsMap, rule);
+            convert(rule.att().add(Att.PRIORITY(), Integer.toString(module.getPriority(rule.att()))), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
     }
