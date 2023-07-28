@@ -1,0 +1,5 @@
+[Error] Internal: Unimplemented case when removing unit applications: unit attribute but no assoc
+	Source(removeUnit.k)
+	Location(7,18,7,120)
+	7 |	  syntax Foo ::= Foo Foo        [left, function, total, hook(LIST.concat), klabel(_Foo_), unit(.Foo), element(FooItem)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
