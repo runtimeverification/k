@@ -63,31 +63,6 @@ import java.util.stream.Collectors;
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
-class RuleInfo {
-    boolean isEquation;
-    boolean isOwise;
-    boolean isKore;
-    boolean isCeil;
-    Production production;
-    String productionSortStr;
-    List<Sort> prodChildrenSorts;
-    KLabel productionLabel;
-    List<K> leftChildren;
-
-    public RuleInfo(boolean equation, boolean owise, boolean kore, boolean ceil, Production production,
-                    String prodSortStr, List<Sort> prodChildrenSorts, KLabel prodLabel, List<K> leftChildren) {
-        this.isEquation = equation;
-        this.isOwise = owise;
-        this.isKore = kore;
-        this.isCeil = ceil;
-        this.production = production;
-        this.productionSortStr = prodSortStr;
-        this.prodChildrenSorts = prodChildrenSorts;
-        this.productionLabel = prodLabel;
-        this.leftChildren = leftChildren;
-    }
-}
-
 public class ModuleToKORE {
     public enum SentenceType {
         REWRITE_RULE,
@@ -133,7 +108,6 @@ public class ModuleToKORE {
         module.addAttToAttributesMap(Att.SOURCE(), true);
         // insert the location of the main module so the backend can provide better error location
         convert(Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
-        module.clearAttributesMap();
         semantics.append(sb.subSequence(1, sb.length() - 1));
         semantics.append("]\n\n");
 
@@ -146,17 +120,8 @@ public class ModuleToKORE {
         semantics.append("\n\n// imports\n");
         semantics.append("  import K []\n\n// sorts\n");
 
-        Set<SortHead> tokenSorts = new HashSet<>();
-        // Map attribute name to whether the attribute has a value
-        module.addAttToAttributesMap(Att.NAT(), true);
-        module.addAttToAttributesMap(Att.TERMINALS(), true);
-        module.addAttToAttributesMap(Att.COLORS(), true);
-        module.addAttToAttributesMap(Att.PRIORITY(), true);
-
-        Set<Integer> priorities = new HashSet<>();
-        collectTokenSortsAndAttributes(tokenSorts, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
-        List<Integer> priorityList = new ArrayList<>(priorities);
+        List<Integer> priorityList = new ArrayList<>(module.getRulePriorities());
         java.util.Collections.sort(priorityList);
         if (priorityList.size() > 0 ) {
             priorityToPreviousGroup.put(priorityList.get(0), "");
@@ -177,7 +142,7 @@ public class ModuleToKORE {
         if (module.hasAttributesMap().contains(Att.TOKEN())) {
             module.addAttToAttributesMap(Att.HAS_DOMAIN_VALUES(), false);
         }
-        translateSorts(tokenSorts, collectionSorts, semantics);
+        translateSorts(collectionSorts, semantics);
 
         SetMultimap<KLabel, Rule> functionRules = module.getFunctionRules();
 
@@ -284,34 +249,7 @@ public class ModuleToKORE {
         semantics.append("\n");
     }
 
-    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts,
-                                                Set<Integer> priorities, boolean heatCoolEq, String topCellSortStr) {
-        for (SortHead sort : iterable(module.sortedDefinedSorts())) {
-            Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (att.contains(Att.TOKEN())) {
-                tokenSorts.add(sort);
-            }
-            collectAttributes(att);
-        }
-        for (Production prod : iterable(module.sortedProductions())) {
-            Att att = prod.att();
-            if (att.contains(Att.TOKEN())) {
-                tokenSorts.add(prod.sort().head());
-            }
-            collectAttributes(att);
-        }
-        for (Rule r : iterable(module.sortedRules())) {
-            Att att = r.att();
-            collectAttributes(att);
-            RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
-            // only collect priorities of semantics rules
-            if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
-                priorities.add(getPriority(att));
-            }
-        }
-    }
-
-    private void translateSorts(Set<SortHead> tokenSorts, Set<String> collectionSorts, StringBuilder sb) {
+    private void translateSorts(Set<String> collectionSorts, StringBuilder sb) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             if (sort.equals(Sorts.K().head()) || sort.equals(Sorts.KItem().head())) {
                 continue;
@@ -336,7 +274,7 @@ public class ModuleToKORE {
                 }
             }
             att = att.remove(Att.HAS_DOMAIN_VALUES());
-            if (tokenSorts.contains(sort)) {
+            if (module.getTokenSorts().contains(sort)) {
                 att = att.add(Att.HAS_DOMAIN_VALUES());
             }
             if (sort.params() == 0 && Sort(sort).isNat()) {
@@ -789,49 +727,6 @@ public class ModuleToKORE {
         return Optional.empty();
     }
 
-    private RuleInfo getRuleInfo(RuleOrClaim rule, boolean heatCoolEq, String topCellSortStr) {
-        boolean equation = false;
-        boolean owise = false;
-        boolean kore = rule.att().contains(Att.KORE());
-        boolean ceil = false;
-        Production production = null;
-        Sort productionSort = null;
-        String productionSortStr = null;
-        List<Sort> productionSorts = null;
-        KLabel productionLabel = null;
-        List<K> leftChildren = null;
-
-        K left = RewriteToTop.toLeft(rule.body());
-        K leftPattern = left;
-        while (leftPattern instanceof KAs) {
-            leftPattern = ((KAs)leftPattern).pattern();
-        }
-        if (leftPattern instanceof KApply) {
-            production = module.production((KApply) leftPattern, true);
-            productionSort = production.sort();
-            productionSortStr = getSortStr(productionSort);
-            productionSorts = stream(production.items())
-                    .filter(i -> i instanceof NonTerminal)
-                    .map(i -> (NonTerminal) i)
-                    .map(NonTerminal::sort).collect(Collectors.toList());
-            productionLabel = production.klabel().get();
-            if (productionLabel.name().equals("#Ceil") && rule.att().contains(Att.SIMPLIFICATION())) {
-                ceil = true;
-            }
-            if (isFunction(production) || rule.att().contains(Att.SIMPLIFICATION()) || rule.att().contains(Att.ANYWHERE()) && !kore) {
-                leftChildren = ((KApply) leftPattern).items();
-                equation = true;
-            } else if ((rule.att().contains(Att.HEAT()) || rule.att().contains(Att.COOL())) && heatCoolEq) {
-                equation = true;
-                productionSortStr = topCellSortStr;
-            }
-            owise = rule.att().contains(Att.OWISE());
-        }
-
-        return new RuleInfo(equation, owise, kore, ceil, production,
-                productionSortStr, productionSorts, productionLabel, leftChildren);
-    }
-
     private void convertRule(RuleOrClaim rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr, SetMultimap<KLabel, Rule> functionRules,
                              Map<Integer, String> priorityToPreviousGroup,
                              ListMultimap<Integer, String> priorityToAlias,
@@ -847,7 +742,7 @@ public class ModuleToKORE {
         K right =  RewriteToTop.toRight(rule.body());
         K ensures = rule.ensures();
         boolean constructorBased = constructorChecks.isConstructorBased(left);
-        RuleInfo ruleInfo = getRuleInfo(rule, heatCoolEq, topCellSortStr);
+        RuleInfo ruleInfo = RuleInfo.getRuleInfo(rule, heatCoolEq, topCellSortStr, module, this::getSortStr);
         sb.append("// ");
         sb.append(rule.toString());
         sb.append("\n");
@@ -1407,22 +1302,6 @@ public class ModuleToKORE {
             return KLabel(labelName, immutable(params));
         } else {
             return k.klabel();
-        }
-    }
-
-
-    private void collectAttributes(Att att) {
-        for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.withUserGroupsAsGroupAtt().att())) {
-            Att.Key name = attribute._1._1;
-            Object val = attribute._2;
-            String strVal = val.toString();
-            if (strVal.equals("")) {
-                if (!module.hasAttributesMap().contains(name)) {
-                    module.addAttToAttributesMap(name, false);
-                }
-            } else {
-                module.addAttToAttributesMap(name, true);
-            }
         }
     }
 

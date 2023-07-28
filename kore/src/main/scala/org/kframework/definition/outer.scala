@@ -6,7 +6,6 @@ import com.google.common.collect.{HashMultimap, SetMultimap}
 import java.util.Optional
 import javax.annotation.Nonnull
 import dk.brics.automaton.{RegExp, RunAutomaton, SpecialOperations}
-
 import org.kframework.POSet
 import org.kframework.attributes.{Att, AttValue, HasLocation, Location, Source}
 import org.kframework.kore.KORE.Sort
@@ -323,6 +322,19 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   def clearAttributesMap(): Unit = hasAttributesMap.clear()
 
+
+  private val tokenSorts: java.util.Set[SortHead] = new java.util.HashSet[SortHead]()
+
+  def getTokenSorts: java.util.Set[SortHead] = tokenSorts
+
+  def addTokenSort(sort: SortHead): Unit = tokenSorts.add(sort)
+
+
+  private val rulePriorities: java.util.Set[Integer] =  new java.util.HashSet[Integer]()
+
+  def getRulePriorities: java.util.Set[Integer] = rulePriorities
+
+  def addRulePriority(p: Integer): Unit = rulePriorities.add(p)
 
 
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
