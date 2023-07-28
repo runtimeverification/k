@@ -1,6 +1,7 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
-, prelude-kore, llvm-backend, debugger, version }:
+, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
+, booster ? null, prelude-kore, llvm-backend, debugger, version
+, llvm-kompile-libs ? null }:
 
 let
   unwrapped = mavenix.buildMaven {
@@ -52,7 +53,8 @@ let
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
       ln -sf ${llvm-backend}/lib/scripts $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
-      ${lib.optionalString (booster != null ) "ln -sf ${booster}/bin/* $out/bin/"}
+      ${lib.optionalString (booster != null)
+      "ln -sf ${booster}/bin/* $out/bin/"}
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
@@ -97,7 +99,11 @@ in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
   # Wrap bin/ to augment PATH.
   for prog in $unwrapped/bin/*
   do
-    makeWrapper $prog $out/bin/$(basename $prog) --prefix PATH : ${hostPATH}
+    makeWrapper $prog $out/bin/$(basename $prog) \
+      --prefix PATH : ${hostPATH} ${
+        lib.optionalString (llvm-kompile-libs != null)
+        ''--set NIX_LLVM_KOMPILE_LIBS "${llvm-kompile-libs}"''
+      }
   done
 
   # Link each top-level package directory, for dependents that need that.

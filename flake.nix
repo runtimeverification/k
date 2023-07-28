@@ -23,13 +23,14 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
-    , llvm-backend, mavenix, flake-compat }:
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+    , booster-backend, llvm-backend, mavenix, flake-compat }:
     let
       allOverlays = [
         (_: _: {
           llvm-version = 13;
-          llvm-backend-build-type = "Release"; })
+          llvm-backend-build-type = "Release";
+        })
         mavenix.overlay
         llvm-backend.overlays.default
         haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
@@ -61,10 +62,11 @@
               '';
             };
           in {
-            k-framework = haskell-backend-bins:
+            k-framework = { haskell-backend-bins, llvm-kompile-libs ? null }:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
-                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
+                booster =
+                  booster-backend.packages.${prev.system}.kore-rpc-booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
@@ -76,6 +78,7 @@
                 else
                   prev.gdb;
                 version = "${k-version}-${self.rev or "dirty"}";
+                inherit llvm-kompile-libs;
               };
           })
       ];
@@ -92,7 +95,8 @@
           # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
           # https://github.com/NixOS/nixpkgs/pull/172397
           config.allowBroken = system == "aarch64-darwin";
-          overlays = [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
+          overlays =
+            [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
             ++ allOverlays;
         };
 
@@ -115,7 +119,12 @@
       in rec {
 
         packages = rec {
-          k = pkgs.k-framework haskell-backend-bins;
+          k = pkgs.k-framework { inherit haskell-backend-bins; };
+          k-with-crypto-deps = pkgs.k-framework {
+            inherit haskell-backend-bins;
+            llvm-kompile-libs = with pkgs;
+              "-I${procps}/include -L${procps}/lib -I${openssl.dev}/include -L${openssl.out}/lib";
+          };
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
@@ -177,7 +186,8 @@
             };
         };
         defaultPackage = packages.k;
-        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework haskell-backend-bins);
+        devShells.kore-integration-tests =
+          pkgs.kore-tests (pkgs.k-framework haskell-backend-bins);
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlay;
