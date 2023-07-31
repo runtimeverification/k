@@ -1354,6 +1354,10 @@
       "sha1": "08ee21458c04474f97a3e499d5618c01cd2991db"
     },
     {
+      "path": "com/google/guava/guava-parent/19.0/guava-parent-19.0.pom",
+      "sha1": "21fa0d898121cc408c19b74e4305403c6cc45b23"
+    },
+    {
       "path": "com/google/guava/guava-parent/26.0-android/guava-parent-26.0-android.pom",
       "sha1": "a2c0df489614352b7e8e503e274bd1dee5c42a64"
     },
@@ -1372,6 +1376,10 @@
     {
       "path": "com/google/guava/guava/16.0.1/guava-16.0.1.pom",
       "sha1": "52f16cd93f1ee1f0d1e1e55f46fa21c35f829f85"
+    },
+    {
+      "path": "com/google/guava/guava/19.0/guava-19.0.pom",
+      "sha1": "65a43a21dbddcc19aa3ca50a63a4b33166bfbc77"
     },
     {
       "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.jar",
@@ -2690,24 +2698,24 @@
       "sha1": "5343c954d21549d039feebe5fadef023cdfc1388"
     },
     {
-      "path": "net/sf/jung/jung-api/2.0.1/jung-api-2.0.1.jar",
-      "sha1": "843d5ccb44dd310ed0e36cb9b776baa0391515a2"
+      "path": "net/sf/jung/jung-api/2.1.1/jung-api-2.1.1.jar",
+      "sha1": "e47ee4efdfacce12f0af620747d9d0e44bf2eaa4"
     },
     {
-      "path": "net/sf/jung/jung-api/2.0.1/jung-api-2.0.1.pom",
-      "sha1": "99e51d2e900e035cb9a2abc4a2306be77b0df8f1"
+      "path": "net/sf/jung/jung-api/2.1.1/jung-api-2.1.1.pom",
+      "sha1": "24fd12ad4c0a3d67a9f91e817eef64b6efb22203"
     },
     {
-      "path": "net/sf/jung/jung-graph-impl/2.0.1/jung-graph-impl-2.0.1.jar",
-      "sha1": "37e4cbe198ca7ffd2238ebfee8c5d84d6d79e1c2"
+      "path": "net/sf/jung/jung-graph-impl/2.1.1/jung-graph-impl-2.1.1.jar",
+      "sha1": "8293acb2ab4c00a3939cb99a8751e5d38a4299dc"
     },
     {
-      "path": "net/sf/jung/jung-graph-impl/2.0.1/jung-graph-impl-2.0.1.pom",
-      "sha1": "77d09f95d1921d5ca5f50f61fcf371b9a2fa52f5"
+      "path": "net/sf/jung/jung-graph-impl/2.1.1/jung-graph-impl-2.1.1.pom",
+      "sha1": "2f5a96fa78b0d7137373d48605a565f588b2c231"
     },
     {
-      "path": "net/sf/jung/jung2/2.0.1/jung2-2.0.1.pom",
-      "sha1": "7c04b0fc9048e65c1bb8109fda805ea4cfee2bb1"
+      "path": "net/sf/jung/jung-parent/2.1.1/jung-parent-2.1.1.pom",
+      "sha1": "99803d26d102ec357c80a64b1e905e981a5a1287"
     },
     {
       "path": "net/sf/saxon/Saxon-HE/10.6/Saxon-HE-10.6.jar",
@@ -2716,14 +2724,6 @@
     {
       "path": "net/sf/saxon/Saxon-HE/10.6/Saxon-HE-10.6.pom",
       "sha1": "ba8bb059ca776ff5e0b2cc6aaa25949f74fc1e97"
-    },
-    {
-      "path": "net/sourceforge/collections/collections-generic/4.01/collections-generic-4.01.jar",
-      "sha1": "12dddecd8e8c24f5c9453a6d3ecb13b38e59db52"
-    },
-    {
-      "path": "net/sourceforge/collections/collections-generic/4.01/collections-generic-4.01.pom",
-      "sha1": "abbc30cb102336779372ab1b84d3b56b7be0b34f"
     },
     {
       "path": "org/antlr/antlr-master/3.1.3/antlr-master-3.1.3.pom",
