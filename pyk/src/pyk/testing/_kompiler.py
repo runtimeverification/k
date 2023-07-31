@@ -11,7 +11,7 @@ from ..kllvm.compiler import compile_runtime
 from ..kllvm.importer import import_runtime
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
-from ..ktool.kompile import Kompile
+from ..ktool.kompile import DefinitionInfo, Kompile
 from ..ktool.kprint import KPrint
 from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
@@ -72,6 +72,10 @@ class KompiledTest:
     @pytest.fixture(scope='class')
     def definition(self, definition_dir: Path) -> KDefinition:
         return read_kast_definition(definition_dir / 'compiled.json')
+
+    @pytest.fixture(scope='class')
+    def definition_info(self, definition_dir: Path) -> DefinitionInfo:
+        return DefinitionInfo(definition_dir)
 
 
 class KPrintTest(KompiledTest):

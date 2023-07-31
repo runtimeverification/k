@@ -20,6 +20,7 @@ from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
 from ..kore.syntax import App, SortApp
 from ..utils import run_process
+from .kompile import DefinitionInfo
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
@@ -200,10 +201,11 @@ class KPrint:
         self.use_directory = use_directory
         self._definition = None
         self._symbol_table = None
-        with open(self.definition_dir / 'mainModule.txt') as mm:
-            self.main_module = mm.read()
-        with open(self.definition_dir / 'backend.txt') as ba:
-            self.backend = ba.read()
+
+        info = DefinitionInfo(self.definition_dir)
+        self.main_module = info.main_module_name
+        self.backend = info.backend.value
+
         self._extra_unparsing_modules = extra_unparsing_modules
         self._patch_symbol_table = patch_symbol_table
         self._bug_report = bug_report

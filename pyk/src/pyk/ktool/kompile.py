@@ -347,3 +347,31 @@ class KompileArgs:
 
 
 COMMON_ARGS: Final = frozenset(field.name for field in dataclasses.fields(KompileArgs))
+
+
+@final
+@dataclass(frozen=True)
+class DefinitionInfo:
+    path: Path
+
+    def __init__(self, path: str | Path):
+        path = Path(path)
+        check_dir_path(path)
+        object.__setattr__(self, 'path', path)
+
+    @cached_property
+    def backend(self) -> KompileBackend:
+        backend = (self.path / 'backend.txt').read_text()
+        return KompileBackend(backend)
+
+    @cached_property
+    def main_module_name(self) -> str:
+        return (self.path / 'mainModule.txt').read_text()
+
+    @cached_property
+    def syntax_module_name(self) -> str:
+        return (self.path / 'mainSyntaxModule.txt').read_text()
+
+    @cached_property
+    def timestamp(self) -> int:
+        return (self.path / 'timestamp').stat().st_mtime_ns
