@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "context.k"
 
 module CONTEXT-SPEC

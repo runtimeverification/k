@@ -1,5 +1,5 @@
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.foo1-heat ] at location: context.k:7:16-7:52 was applied
+    The rule with label [ CONTEXT.foo1-heat ] at location: context.k:8:16-8:52 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -34,7 +34,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [  ] at location: context.k:14:8-14:14 was applied
+    The rule with label [  ] at location: context.k:15:8-15:14 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -80,7 +80,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.foo1-cool ] at location: context.k:7:16-7:52 was applied
+    The rule with label [ CONTEXT.foo1-cool ] at location: context.k:8:16-8:52 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -126,7 +126,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.foo2-heat ] at location: context.k:7:16-7:52 was applied
+    The rule with label [ CONTEXT.foo2-heat ] at location: context.k:8:16-8:52 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -164,7 +164,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [  ] at location: context.k:14:8-14:14 was applied
+    The rule with label [  ] at location: context.k:15:8-15:14 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -209,7 +209,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.foo2-cool ] at location: context.k:7:16-7:52 was applied
+    The rule with label [ CONTEXT.foo2-cool ] at location: context.k:8:16-8:52 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -254,7 +254,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.bar1-heat ] at location: context.k:11:19-11:36 was applied
+    The rule with label [ CONTEXT.bar1-heat ] at location: context.k:12:19-12:36 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -289,7 +289,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [  ] at location: context.k:14:8-14:14 was applied
+    The rule with label [  ] at location: context.k:15:8-15:14 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -335,7 +335,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.bar1-cool ] at location: context.k:11:19-11:36 was applied
+    The rule with label [ CONTEXT.bar1-cool ] at location: context.k:12:19-12:36 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -381,7 +381,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.bar2-heat ] at location: context.k:12:19-12:36 was applied
+    The rule with label [ CONTEXT.bar2-heat ] at location: context.k:13:19-13:36 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -419,7 +419,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [  ] at location: context.k:14:8-14:14 was applied
+    The rule with label [  ] at location: context.k:15:8-15:14 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -464,7 +464,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.bar2-cool ] at location: context.k:12:19-12:36 was applied
+    The rule with label [ CONTEXT.bar2-cool ] at location: context.k:13:19-13:36 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -509,7 +509,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.baz2-heat ] at location: context.k:9:16-9:52 was applied
+    The rule with label [ CONTEXT.baz2-heat ] at location: context.k:10:16-10:52 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -544,7 +544,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [  ] at location: context.k:14:8-14:14 was applied
+    The rule with label [  ] at location: context.k:15:8-15:14 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
@@ -590,7 +590,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
 Context:
     (InfoReachability) while applying axioms
 kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
-    The rule with label [ CONTEXT.baz2-cool ] at location: context.k:9:16-9:52 was applied
+    The rule with label [ CONTEXT.baz2-cool ] at location: context.k:10:16-10:52 was applied
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
