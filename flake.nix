@@ -61,7 +61,7 @@
               '';
             };
           in {
-            k-framework = haskell-backend-bins:
+            k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
                 booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
@@ -76,6 +76,7 @@
                 else
                   prev.gdb;
                 version = "${k-version}-${self.rev or "dirty"}";
+                inherit llvm-kompile-libs;
               };
           })
       ];
@@ -115,7 +116,13 @@
       in rec {
 
         packages = rec {
-          k = pkgs.k-framework haskell-backend-bins;
+          k = pkgs.k-framework {
+            inherit haskell-backend-bins;
+            llvm-kompile-libs = with pkgs; {
+              procps = [ "-I${procps}/include" "-L${procps}/lib" ];
+              openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
+            };
+          };
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
