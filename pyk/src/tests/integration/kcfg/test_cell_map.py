@@ -11,7 +11,7 @@ from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
-from pyk.testing import KCFGExploreTest
+from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
 from ..utils import K_FILES
@@ -51,7 +51,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None]
 )
 
 
-class TestCellMapProof(KCFGExploreTest):
+class TestCellMapProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'cell-map.k'
 
     @staticmethod
