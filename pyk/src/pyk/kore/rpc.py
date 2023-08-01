@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import socket
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -16,7 +17,7 @@ from typing import TYPE_CHECKING, ContextManager, final
 from psutil import Process
 
 from ..ktool.kprove import KoreExecLogFormat
-from ..utils import Kernel, check_dir_path, check_file_path, filter_none, run_process
+from ..utils import check_dir_path, check_file_path, filter_none, run_process
 from .syntax import And, Pattern, SortApp, kore_term
 
 if TYPE_CHECKING:
@@ -784,8 +785,14 @@ class BoosterServer(KoreServer):
         llvm_kompiled_dir = Path(llvm_kompiled_dir)
         check_dir_path(llvm_kompiled_dir)
 
-        kernel = Kernel.get()
-        ext = 'so' if kernel == Kernel.LINUX else 'dylib'
+        ext: str
+        match sys.platform:
+            case 'linux':
+                ext = 'so'
+            case 'darwin':
+                ext = 'dylib'
+            case _:
+                raise ValueError('Unsupported platform: {sys.platform}')
 
         dylib = llvm_kompiled_dir / f'interpreter.{ext}'
         check_file_path(dylib)
