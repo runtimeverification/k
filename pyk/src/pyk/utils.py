@@ -10,10 +10,9 @@ import tarfile
 import time
 from collections.abc import Mapping
 from datetime import datetime
-from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, ClassVar, Generic, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Hashable, Iterable, Iterator
@@ -506,17 +505,3 @@ class BugReport:
         shebang = '#!/usr/bin/env bash\nset -euxo pipefail\n'
         self.add_file_contents(shebang + ' '.join(remapped_args) + '\n', arcname)
         self._command_id += 1
-
-
-class Kernel(Enum):
-    LINUX = 'Linux'
-    DARWIN = 'Darwin'
-
-    _cached: ClassVar[Kernel]
-
-    @classmethod
-    def get(cls) -> Kernel:
-        if not hasattr(cls, '_cached'):
-            uname = run_process(('uname', '-s'), pipe_stderr=True, logger=_LOGGER).stdout.strip()
-            cls._cached = Kernel(uname)
-        return cls._cached
