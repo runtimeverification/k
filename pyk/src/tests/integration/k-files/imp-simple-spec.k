@@ -146,4 +146,22 @@ module IMP-SIMPLE-SPEC
                                  requires 0 <=Int N
                                  [circularity]
 
+    claim [fail-early]: <k> if ($n <= 1) {
+                              $s = 1;
+                            } 
+                            else {
+                              while ($k <= 9) {
+                                $k = ($k + 1);
+                              }
+                              $s = 1;
+                            } => .
+                            ...
+                        </k>
+                        <state>
+                          $s |-> (0 => 2)
+                          $n |-> N:Int
+                          $k |-> (0 => 10)
+                        </state>
+                      requires 0 <=Int N
+
 endmodule
