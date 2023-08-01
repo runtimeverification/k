@@ -18,7 +18,7 @@ from ..kast.manip import (
 )
 from ..kast.outer import KRule
 from ..konvert import krule_to_kore
-from ..kore.rpc import BoosterServer, KoreClient, KoreServer, SatResult, StopReason, UnknownResult, UnsatResult
+from ..kore.rpc import KoreClient, SatResult, StopReason, UnknownResult, UnsatResult, kore_server
 from ..kore.syntax import Import, Module
 from ..ktool.kprove import KoreExecLogFormat
 from ..prelude import k
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
     from ..kast import KInner
     from ..kast.outer import KClaim
-    from ..kore.rpc import LogEntry
+    from ..kore.rpc import KoreServer, LogEntry
     from ..kore.syntax import Sentence
     from ..ktool.kprint import KPrint
     from ..utils import BugReport
@@ -109,33 +109,19 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         if self._rpc_closed:
             raise ValueError('RPC server already closed!')
         if not self._kore_server:
-            if self._llvm_definition_dir:
-                self._kore_server = BoosterServer(
-                    self.kprint.definition_dir,
-                    self._llvm_definition_dir,
-                    self.kprint.main_module,
-                    port=self._port,
-                    bug_report=self._bug_report,
-                    command=self._kore_rpc_command,
-                    smt_timeout=self._smt_timeout,
-                    smt_retry_limit=self._smt_retry_limit,
-                    haskell_log_format=self._haskell_log_format,
-                    haskell_log_entries=self._haskell_log_entries,
-                    log_axioms_file=self._log_axioms_file,
-                )
-            else:
-                self._kore_server = KoreServer(
-                    self.kprint.definition_dir,
-                    self.kprint.main_module,
-                    port=self._port,
-                    bug_report=self._bug_report,
-                    command=self._kore_rpc_command,
-                    smt_timeout=self._smt_timeout,
-                    smt_retry_limit=self._smt_retry_limit,
-                    haskell_log_format=self._haskell_log_format,
-                    haskell_log_entries=self._haskell_log_entries,
-                    log_axioms_file=self._log_axioms_file,
-                )
+            self._kore_server = kore_server(
+                definition_dir=self.kprint.definition_dir,
+                llvm_definition_dir=self._llvm_definition_dir,
+                module_name=self.kprint.main_module,
+                port=self._port,
+                command=self._kore_rpc_command,
+                bug_report=self._bug_report,
+                smt_timeout=self._smt_timeout,
+                smt_retry_limit=self._smt_retry_limit,
+                haskell_log_format=self._haskell_log_format,
+                haskell_log_entries=self._haskell_log_entries,
+                log_axioms_file=self._log_axioms_file,
+            )
         if not self._kore_client:
             self._kore_client = KoreClient('localhost', self._kore_server._port, bug_report=self._bug_report)
         return (self._kore_server, self._kore_client)

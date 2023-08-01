@@ -822,3 +822,46 @@ class BoosterServer(KoreServer):
             haskell_log_entries=haskell_log_entries,
             log_axioms_file=log_axioms_file,
         )
+
+
+def kore_server(
+    definition_dir: str | Path,
+    module_name: str,
+    *,
+    llvm_definition_dir: Path | None = None,
+    port: int | None = None,
+    command: str | Iterable[str] | None = None,
+    bug_report: BugReport | None = None,
+    smt_timeout: int | None = None,
+    smt_retry_limit: int | None = None,
+    haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+    haskell_log_entries: Iterable[str] = (),
+    log_axioms_file: Path | None = None,
+) -> KoreServer:
+    if llvm_definition_dir:
+        return BoosterServer(
+            kompiled_dir=definition_dir,
+            llvm_kompiled_dir=llvm_definition_dir,
+            module_name=module_name,
+            port=port,
+            command=command,
+            bug_report=bug_report,
+            smt_timeout=smt_timeout,
+            smt_retry_limit=smt_retry_limit,
+            haskell_log_format=haskell_log_format,
+            haskell_log_entries=haskell_log_entries,
+            log_axioms_file=log_axioms_file,
+        )
+
+    return KoreServer(
+        kompiled_dir=definition_dir,
+        module_name=module_name,
+        port=port,
+        command=command,
+        bug_report=bug_report,
+        smt_timeout=smt_timeout,
+        smt_retry_limit=smt_retry_limit,
+        haskell_log_format=haskell_log_format,
+        haskell_log_entries=haskell_log_entries,
+        log_axioms_file=log_axioms_file,
+    )
