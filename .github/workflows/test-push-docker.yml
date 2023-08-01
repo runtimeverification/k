@@ -1,0 +1,32 @@
+name: Publish Private Build Image
+on:
+  workflow_dispatch:
+
+jobs:
+  test-package-ubuntu-jammy:
+    name: 'K Ubuntu Jammy Package'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
+        with:
+          os: ubuntu
+          distro: jammy
+          llvm: 14
+          build-package: package/debian/build-package jammy
+          test-package: package/debian/test-package
+
+      - name: 'Publish PRIVATE Build Image'
+        shell: bash {0}
+        env: 
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD}}
+          DOCKERHUB_REPO: rvdockerhub/infrastructure
+        run: |
+          set -euxo pipefail
+          version=$(cat package/version)
+          version_tag=ubuntu-jammy-${version}-${{ github.ref_name }}
+          docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
+          docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag ${DOCKERHUB_REPO}:${version_tag}
+          docker image push ${DOCKERHUB_REPO}:${version_tag}
+            
