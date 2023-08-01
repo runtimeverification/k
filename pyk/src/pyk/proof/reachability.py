@@ -636,6 +636,7 @@ class APRProver(Prover):
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         implication_every_block: bool = True,
+        fail_fast: bool = False,
     ) -> KCFG:
         iterations = 0
 
@@ -655,6 +656,15 @@ class APRProver(Prover):
                 terminal_rules=terminal_rules,
                 implication_every_block=implication_every_block,
             )
+            if (
+                fail_fast
+                and not self.proof.kcfg.is_covered(curr_node.id)
+                and self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
+            ):
+                _LOGGER.warning(
+                    f'Terminating proof early because fail_fast is set and a failing terminal node was reached: {curr_node.id}'
+                )
+                break
 
         self.proof.write_proof_data()
         return self.proof.kcfg
