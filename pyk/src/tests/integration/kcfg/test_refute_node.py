@@ -12,7 +12,7 @@ from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.equality import RefutationProof, RefutationProver
-from pyk.testing import KCFGExploreTest
+from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
 from ..utils import K_FILES
@@ -78,7 +78,7 @@ REFUTE_NODE_TEST_DATA: Iterable[tuple[str, Iterable[KInner], ProofStatus]] = (
 )
 
 
-class TestAPRProof(KCFGExploreTest):
+class TestAPRProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'refute-node.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:

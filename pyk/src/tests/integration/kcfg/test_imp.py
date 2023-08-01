@@ -16,7 +16,7 @@ from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRBMCProofNodePrinter, APRProofNodePrinter
-from pyk.testing import KCFGExploreTest
+from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
 from ..utils import K_FILES
@@ -686,7 +686,7 @@ def leaf_number(proof: APRProof) -> int:
     return len(non_target_leaves) + len(proof.kcfg.predecessors(proof.target))
 
 
-class TestImpProof(KCFGExploreTest):
+class TestImpProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:

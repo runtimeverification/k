@@ -132,19 +132,19 @@ class KProveTest(KompiledTest):
         pass
 
 
-class KCFGExploreTest(KProveTest):
+class KCFGExploreTest(KPrintTest):
     @abstractmethod
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
         ...
 
     @pytest.fixture
-    def kcfg_explore(self, kprove: KProve) -> Iterator[KCFGExplore]:
-        with KCFGExplore(
-            kprove,
-            kcfg_semantics=self.semantics(kprove.definition),
-            bug_report=kprove._bug_report,
-        ) as kcfg_explore:
-            yield kcfg_explore
+    def kcfg_explore(self, kprint: KProve, bug_report: BugReport) -> Iterator[KCFGExplore]:
+        definition_dir = kprint.definition_dir
+        main_module_name = kprint.main_module
+        semantics = self.semantics(kprint.definition)
+        with KoreServer(definition_dir, main_module_name, bug_report=bug_report) as server:
+            with KoreClient('localhost', server.port, bug_report=bug_report) as client:
+                yield KCFGExplore(kprint, client, kcfg_semantics=semantics)
 
 
 class KoreClientTest(KompiledTest):
