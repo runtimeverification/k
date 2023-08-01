@@ -13,7 +13,7 @@ from pyk.prelude.ml import mlEqualsTrue
 from pyk.prelude.utils import token
 from pyk.proof import APRBMCProof, APRBMCProver, ProofStatus
 from pyk.proof.show import APRBMCProofNodePrinter
-from pyk.testing import KCFGExploreTest
+from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
 from ..utils import K_FILES
@@ -84,7 +84,7 @@ def leaf_number(proof: APRProof) -> int:
     return len(non_target_leaves) + len(proof.kcfg.predecessors(proof.target))
 
 
-class TestGoToProof(KCFGExploreTest):
+class TestGoToProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'goto.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:

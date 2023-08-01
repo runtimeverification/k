@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.proof import EqualityProof, EqualityProver, ProofStatus
-from pyk.testing import KCFGExploreTest
+from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
 from ..utils import K_FILES
@@ -111,7 +111,7 @@ FUNC_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
 )
 
 
-class TestImpEqualityProof(KCFGExploreTest):
+class TestImpEqualityProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     @staticmethod
