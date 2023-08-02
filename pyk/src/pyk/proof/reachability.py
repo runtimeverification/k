@@ -46,7 +46,7 @@ class APRProof(Proof):
     node_refutations: dict[NodeIdLike, RefutationProof]  # TODO _node_refutatations
     init: NodeIdLike
     target: NodeIdLike
-    _terminal_nodes: list[NodeIdLike]
+    _terminal_nodes: set[NodeIdLike]
     logs: dict[int, tuple[LogEntry, ...]]
     circularity: bool
 
@@ -70,7 +70,7 @@ class APRProof(Proof):
         self.target = target
         self.logs = logs
         self.circularity = circularity
-        self._terminal_nodes = list(terminal_nodes) if terminal_nodes is not None else []
+        self._terminal_nodes = set(terminal_nodes) if terminal_nodes is not None else set()
         self.node_refutations = {}
         self.kcfg.cfg_dir = self.proof_subdir / 'kcfg' if self.proof_subdir else None
 
@@ -129,13 +129,19 @@ class APRProof(Proof):
         )
 
     def add_terminal(self, node_id: NodeIdLike) -> None:
-        self._terminal_nodes.append(self.kcfg._resolve(node_id))
+        self._terminal_nodes.add(self.kcfg._resolve(node_id))
 
     def remove_terminal(self, node_id: NodeIdLike) -> None:
         node_id = self.kcfg._resolve(node_id)
         if node_id not in self._terminal_nodes:
             raise ValueError(f'Node is not terminal: {node_id}')
         self._terminal_nodes.remove(node_id)
+
+    def prune_from(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike]) -> list[NodeIdLike]:
+        pruned_nodes = self.kcfg.prune(node_id, keep_nodes=list(keep_nodes) + [self.target, self.init])
+        for nid in pruned_nodes:
+            self._terminal_nodes.discard(nid)
+        return pruned_nodes
 
     def shortest_path_to(self, node_id: NodeIdLike) -> tuple[KCFG.Successor, ...]:
         spb = self.kcfg.shortest_path_between(self.init, node_id)
@@ -244,7 +250,7 @@ class APRProof(Proof):
         dct['cfg'] = self.kcfg.to_dict()
         dct['init'] = self.init
         dct['target'] = self.target
-        dct['terminal_nodes'] = self._terminal_nodes
+        dct['terminal_nodes'] = list(self._terminal_nodes)
         dct['node_refutations'] = {node_id: proof.id for (node_id, proof) in self.node_refutations.items()}
         dct['circularity'] = self.circularity
         logs = {int(k): [l.to_dict() for l in ls] for k, ls in self.logs.items()}
@@ -337,7 +343,7 @@ class APRBMCProof(APRProof):
     """APRBMCProof and APRBMCProver perform bounded model-checking of an all-path reachability logic claim."""
 
     bmc_depth: int
-    _bounded_nodes: list[NodeIdLike]
+    _bounded_nodes: set[NodeIdLike]
 
     def __init__(
         self,
@@ -367,7 +373,7 @@ class APRBMCProof(APRProof):
             admitted=admitted,
         )
         self.bmc_depth = bmc_depth
-        self._bounded_nodes = list(bounded_nodes) if bounded_nodes is not None else []
+        self._bounded_nodes = set(bounded_nodes) if bounded_nodes is not None else set()
 
     @staticmethod
     def read_proof_data(proof_dir: Path, id: str) -> APRBMCProof:
@@ -449,6 +455,12 @@ class APRBMCProof(APRProof):
             or self.is_target(node_id)
         )
 
+    def prune_from(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike]) -> list[NodeIdLike]:
+        pruned_nodes = super().prune_from(node_id, keep_nodes=keep_nodes)
+        for nid in pruned_nodes:
+            self._bounded_nodes.discard(nid)
+        return pruned_nodes
+
     @classmethod
     def from_dict(cls: type[APRBMCProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRBMCProof:
         cfg = KCFG.from_dict(dct['cfg'])
@@ -489,7 +501,7 @@ class APRBMCProof(APRProof):
         dct = super().dict
         dct['type'] = 'APRBMCProof'
         dct['bmc_depth'] = self.bmc_depth
-        dct['bounded_nodes'] = self._bounded_nodes
+        dct['bounded_nodes'] = list(self._bounded_nodes)
         logs = {int(k): [l.to_dict() for l in ls] for k, ls in self.logs.items()}
         dct['logs'] = logs
         dct['circularity'] = self.circularity
@@ -513,7 +525,7 @@ class APRBMCProof(APRProof):
         return aprbmc_proof
 
     def add_bounded(self, nid: NodeIdLike) -> None:
-        self._bounded_nodes.append(self.kcfg._resolve(nid))
+        self._bounded_nodes.add(self.kcfg._resolve(nid))
 
     @property
     def summary(self) -> CompositeSummary:
