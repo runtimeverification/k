@@ -1,0 +1,37 @@
+<generatedTop>
+  <k>
+    8 ~> .
+  </k>
+  <fresh0>
+    7
+  </fresh0>
+  <fresh1>
+    6
+  </fresh1>
+  <fresh2>
+    5
+  </fresh2>
+  <fresh3>
+    5
+  </fresh3>
+  <fresh4>
+    4
+  </fresh4>
+  <freshGroup>
+    <freshMember0>
+      2
+    </freshMember0>
+    <freshMember1>
+      0
+    </freshMember1>
+    <freshMember2>
+      3
+    </freshMember2>
+    <freshMember3>
+      3
+    </freshMember3>
+    <freshMember4>
+      1
+    </freshMember4>
+  </freshGroup>
+</generatedTop>
