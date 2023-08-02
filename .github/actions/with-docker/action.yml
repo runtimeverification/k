@@ -21,7 +21,7 @@ inputs:
   jdk:
     description: 'JDK version to use.'
     required: false
-    default: 17
+    default: 11
   dockerfile:
     description: 'Hardcode the path of the dockerfile to use.'
     required: false
