@@ -654,6 +654,11 @@ class APRProver(Prover):
 
         while self.proof.pending:
             self.proof.write_proof_data()
+            if fail_fast and self.proof.failed:
+                _LOGGER.warning(
+                    f'Terminating proof early because fail_fast is set {self.proof.id}, failing nodes: {[nd.id for nd in self.proof.failing]}'
+                )
+                break
 
             if max_iterations is not None and max_iterations <= iterations:
                 _LOGGER.warning(f'Reached iteration bound {self.proof.id}: {max_iterations}')
@@ -668,15 +673,6 @@ class APRProver(Prover):
                 terminal_rules=terminal_rules,
                 implication_every_block=implication_every_block,
             )
-            if (
-                fail_fast
-                and not self.proof.kcfg.is_covered(curr_node.id)
-                and self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
-            ):
-                _LOGGER.warning(
-                    f'Terminating proof early because fail_fast is set and a failing terminal node was reached: {curr_node.id}'
-                )
-                break
 
         self.proof.write_proof_data()
         return self.proof.kcfg
