@@ -2,17 +2,19 @@
 
 package org.kframework.definition
 
-import com.google.common.collect.{HashMultimap, SetMultimap}
 import java.util.Optional
+import java.lang.Comparable
 import javax.annotation.Nonnull
 import dk.brics.automaton.{RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.{Att, AttValue, HasLocation, Location, Source}
+import org.kframework.definition.Constructors._
+import org.kframework.kore.Unapply.{KApply, KLabel}
+import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.builtin.{Hooks, Sorts}
-import org.kframework.compile.RewriteToTop
+import org.kframework.builtin.Sorts
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
@@ -401,7 +403,6 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     else if (att.contains(Att.OWISE)) return 200
     50
   }
-
 
   @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
 

@@ -10,6 +10,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
@@ -20,9 +21,12 @@ import org.kframework.definition.Claim;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.Tag;
+import org.kframework.definition.Terminal;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -38,12 +42,14 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.kore.VisitK;
+import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
+import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
 import java.util.ArrayList;
@@ -61,6 +67,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ModuleToKORE {
@@ -139,7 +146,17 @@ public class ModuleToKORE {
         collectionSorts.add("RANGEMAP.RangeMap");
         translateSorts(collectionSorts, semantics);
 
-        SetMultimap<KLabel, Rule> functionRules = module.getFunctionRules();
+        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
+        for (Rule rule: iterable(module.sortedRules())) {
+            K left = RewriteToTop.toLeft(rule.body());
+            if (left instanceof KApply) {
+                KApply kapp = (KApply) left;
+                Production prod = production(kapp);
+                if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
+                    functionRules.put(kapp.klabel(), rule);
+                }
+            }
+        }
 
         semantics.append("\n// symbols\n");
         translateSymbols(semantics);
@@ -193,11 +210,11 @@ public class ModuleToKORE {
             if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
                 genUnitAxiom(prod, semantics);
             }
-            if (prod.att().contains(Att.FUNCTIONAL())) {
+            if (isFunctional(prod, functionRules)) {
                 genFunctionalAxiom(prod, semantics);
             }
-            if (prod.att().contains(Att.CONSTRUCTOR())) {
-                genNoConfusionAxioms(prod, noConfusion, semantics);
+            if (isConstructor(prod, functionRules)) {
+                genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
             }
         }
 
@@ -290,7 +307,7 @@ public class ModuleToKORE {
 
     private void translateSymbol(KLabel label, Production prod, StringBuilder sb) {
         sb.append("  ");
-        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && module.isRealHook(prod.att(), immutable(options.hookNamespaces))) {
+        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
             sb.append("hooked-");
         }
         sb.append("symbol ");
@@ -463,7 +480,8 @@ public class ModuleToKORE {
         sb.append(" [functional{}()] // functional\n");
     }
 
-    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion, StringBuilder sb) {
+    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion,
+                                      SetMultimap<KLabel, Rule> functionRulesMap, StringBuilder sb) {
         // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
         if (prod.arity() > 0) {
             sb.append("  axiom");
@@ -496,7 +514,7 @@ public class ModuleToKORE {
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort().head()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
-                    || !prod2.att().contains(Att.CONSTRUCTOR()) || isBuiltinProduction(prod2)) {
+                    || !isConstructor(prod2, functionRulesMap) || isBuiltinProduction(prod2)) {
                 // TODO (traiansf): add no confusion axioms for constructor vs inj.
                 continue;
             }
@@ -648,6 +666,17 @@ public class ModuleToKORE {
         sb.append("(), ");
         convert(lesser.klabel().get(), lesser, sb);
         sb.append("())] // overloaded production\n");
+    }
+
+    private boolean isRealHook(Att att) {
+      String hook = att.get(Att.HOOK());
+      if (hook.startsWith("ARRAY.")) {
+        return false;
+      }
+      if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
+        return true;
+      }
+      return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
     }
 
     private static boolean isBuiltinProduction(Production prod) {
@@ -1217,8 +1246,148 @@ public class ModuleToKORE {
         sb.append("}");
     }
 
+    private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
+        Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
+        return att.contains(Att.CONSTRUCTOR());
+    }
+
+    private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules) {
+        Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
+        return att.contains(Att.FUNCTIONAL());
+    }
+
+    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
+        boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
+        boolean isConstructor = !isFunction(prod);
+        isConstructor &= !prod.att().contains(Att.ASSOC());
+        isConstructor &= !prod.att().contains(Att.COMM());
+        isConstructor &= !prod.att().contains(Att.IDEM());
+        isConstructor &= !(prod.att().contains(Att.FUNCTION()) && prod.att().contains(Att.UNIT()));
+
+        // Later we might set !isConstructor because there are anywhere rules,
+        // but if a symbol is a constructor at this point, then it is still
+        // injective.
+        boolean isInjective = isConstructor;
+
+        boolean isMacro = false;
+        boolean isAnywhere = overloads.contains(prod);
+        if (prod.klabel().isDefined()) {
+            for (Rule r : functionRules.get(prod.klabel().get())) {
+                isMacro |= ExpandMacros.isMacro(r);
+                isAnywhere |= r.att().contains(Att.ANYWHERE());
+            }
+        }
+        isConstructor &= !isMacro;
+        isConstructor &= !isAnywhere;
+
+        Att att = prod.att().remove(Att.CONSTRUCTOR());
+        if (att.contains(Att.HOOK()) && !isRealHook(att)) {
+            att = att.remove(Att.HOOK());
+        }
+        if (isConstructor) {
+            att = att.add(Att.CONSTRUCTOR());
+        }
+        if (isFunctional) {
+            att = att.add(Att.FUNCTIONAL());
+        }
+        if (isAnywhere) {
+            att = att.add(Att.ANYWHERE());
+        }
+        if (isInjective) {
+            att = att.add(Att.INJECTIVE());
+        }
+        if (isMacro) {
+            att = att.add(Att.MACRO());
+        }
+        // update format attribute with structure expected by backend
+        String format = att.getOptional(Att.FORMAT()).orElse(Formatter.defaultFormat(prod.items().size()));
+        int nt = 1;
+        boolean hasFormat = true;
+        boolean printName = stream(prod.items()).noneMatch(pi -> pi instanceof NonTerminal && ((NonTerminal) pi).name().isEmpty());
+        boolean printEllipses = false;
+
+        for (int i = 0; i < prod.items().size(); i++) {
+          if (prod.items().apply(i) instanceof NonTerminal) {
+            String replacement;
+            if (printName && prod.isPrefixProduction()) {
+              replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
+              printEllipses = true;
+            } else {
+              replacement = "%" + (nt++);
+            }
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", replacement);
+          } else if (prod.items().apply(i) instanceof Terminal) {
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
+          } else {
+            hasFormat = false;
+          }
+        }
+        if (printEllipses && format.contains("(")) {
+          int idxLParam = format.indexOf("(") + 1;
+          format = format.substring(0, idxLParam) + "... " + format.substring(idxLParam);
+        }
+        if (hasFormat) {
+          att = att.add(Att.FORMAT(), format);
+          if (att.contains(Att.COLOR())) {
+            boolean escape = false;
+            StringBuilder colors = new StringBuilder();
+            String conn = "";
+            for (int i = 0; i < format.length(); i++) {
+              if (escape && format.charAt(i) == 'c') {
+                colors.append(conn).append(att.get(Att.COLOR()));
+                conn = ",";
+              }
+              if (format.charAt(i) == '%') {
+                escape = true;
+              } else {
+                escape = false;
+              }
+            }
+            att = att.add(Att.COLORS(), colors.toString());
+          }
+          StringBuilder sb = new StringBuilder();
+          for (ProductionItem pi : iterable(prod.items())) {
+            if (pi instanceof NonTerminal) {
+              sb.append('0');
+            } else {
+              sb.append('1');
+            }
+          }
+          att = att.add(Att.TERMINALS(), sb.toString());
+          if (prod.klabel().isDefined()) {
+              List<K> lessThanK = new ArrayList<>();
+              Option<scala.collection.Set<Tag>> lessThan = module.priorities().relations().get(Tag(prod.klabel().get().name()));
+              if (lessThan.isDefined()) {
+                  for (Tag t : iterable(lessThan.get())) {
+                    if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
+                        continue;
+                    }
+                    lessThanK.add(KApply(KLabel(t.name())));
+                  }
+              }
+              att = att.add(Att.PRIORITIES(), KList.class, KList(lessThanK));
+              att = att.remove(Att.LEFT());
+              att = att.remove(Att.RIGHT());
+              att = att.add(Att.LEFT(), KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
+              att = att.add(Att.RIGHT(), KList.class, getAssoc(module.rightAssoc(), prod.klabel().get()));
+          }
+        } else {
+          att = att.remove(Att.FORMAT());
+        }
+        // This attribute is a frontend attribute only and is removed from the kore
+        // Since it has no meaning outside the frontend
+        return att.remove(Att.ORIGINAL_PRD(), Production.class);
+    }
+
+    private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
+      return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
+    }
+
     private boolean isFunction(Production prod) {
-        return prod.att().contains(Att.FUNCTION());
+        if (!prod.att().contains(Att.FUNCTION())) {
+            return false;
+        }
+        return true;
     }
 
     // Assume that there is no quantifiers
@@ -1433,7 +1602,7 @@ public class ModuleToKORE {
                     switch (strKey) {
                         case "unit":
                         case "element":
-                            Production prod = module.production(KApply(KLabel(strVal)));
+                            Production prod = production(KApply(KLabel(strVal)));
                             convert(prod.klabel().get(), prod.params(), sb);
                             sb.append("()");
                             break;
