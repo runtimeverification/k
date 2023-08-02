@@ -162,19 +162,25 @@ class Proof(ABC):
 
     @property
     def subproofs_status(self) -> ProofStatus:
-        any_subproof_failed = any([p.status == ProofStatus.FAILED for p in self.subproofs])
-        any_subproof_pending = any([p.status == ProofStatus.PENDING for p in self.subproofs])
-        if any_subproof_failed:
+        if any([p.failed for p in self.subproofs]):
             return ProofStatus.FAILED
-        elif any_subproof_pending:
-            return ProofStatus.PENDING
-        else:
+        elif all([p.passed for p in self.subproofs]):
             return ProofStatus.PASSED
+        else:
+            return ProofStatus.PENDING
 
     @property
     @abstractmethod
     def status(self) -> ProofStatus:
         ...
+
+    @property
+    def failed(self) -> bool:
+        return self.status == ProofStatus.FAILED
+
+    @property
+    def passed(self) -> bool:
+        return self.status == ProofStatus.PASSED
 
     @property
     def dict(self) -> dict[str, Any]:
