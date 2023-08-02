@@ -75,7 +75,7 @@ jobs:
 
   test-k:
     name: 'K Tests'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: ubuntu-20.04
     needs: version-sync
     steps:
       - name: 'Check out code'
@@ -112,7 +112,7 @@ jobs:
 
   test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: ubuntu-20.04
     needs: version-sync
     steps:
       - uses: actions/checkout@v3
