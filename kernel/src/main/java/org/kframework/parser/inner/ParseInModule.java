@@ -314,9 +314,12 @@ public class ParseInModule implements Serializable, AutoCloseable {
         if (scanner != null) {
             scanner.close();
         }
+        int infCount = 0;
         for (TypeInferencer inferencer : inferencers) {
             inferencer.close();
+            infCount++;
         }
+        //System.out.println("-z3 closing: " + infCount);
         inferencers.clear();
     }
 

@@ -95,7 +95,7 @@ public class TypeInferencer implements AutoCloseable {
           throw KEMException.criticalError("Could not start z3 process, tried " + noTries + " times.", e);
       }
     }
-    System.out.println("-new z3 thread: " + Thread.currentThread().getId() + " z3# " + z3Count.getAndIncrement());
+    //System.out.println("-new z3 thread: " + Thread.currentThread().getId() + " z3# " + z3Count.getAndIncrement());
     z3 = new PrintStream(process.getOutputStream());
     output = new BufferedReader(new InputStreamReader(process.getInputStream()));
   }
