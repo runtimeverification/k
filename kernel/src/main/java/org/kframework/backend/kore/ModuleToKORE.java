@@ -105,7 +105,6 @@ public class ModuleToKORE {
         convert(topCellInitializer, semantics);
         semantics.append("()), ");
         StringBuilder sb = new StringBuilder();
-        module.addAttToAttributesMap(Att.SOURCE(), true);
         // insert the location of the main module so the backend can provide better error location
         convert(Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
         semantics.append(sb.subSequence(1, sb.length() - 1));
@@ -138,21 +137,11 @@ public class ModuleToKORE {
         collectionSorts.add("LIST.List");
         collectionSorts.add("ARRAY.Array");
         collectionSorts.add("RANGEMAP.RangeMap");
-        module.removeAttFromAttributesMap(Att.HAS_DOMAIN_VALUES());
-        if (module.hasAttributesMap().contains(Att.TOKEN())) {
-            module.addAttToAttributesMap(Att.HAS_DOMAIN_VALUES(), false);
-        }
         translateSorts(collectionSorts, semantics);
 
         SetMultimap<KLabel, Rule> functionRules = module.getFunctionRules();
 
         semantics.append("\n// symbols\n");
-        Set<Production> overloads = new HashSet<>();
-        for (Production lesser : iterable(module.overloads().elements())) {
-            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(Collections::<Production>Set))) {
-                overloads.add(greater);
-            }
-        }
         translateSymbols(semantics);
 
         // print syntax definition
@@ -168,7 +157,6 @@ public class ModuleToKORE {
             }
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
                 genSubsortAxiom(prod, syntax);
-                continue;
             }
         }
 
@@ -671,9 +659,7 @@ public class ModuleToKORE {
         sb.setLength(0); // reset string writer
         Sort topCellSort = Sorts.GeneratedTopCell();
         String topCellSortStr = getSortStr(topCellSort);
-        module.addAttToAttributesMap(Att.SOURCE(), true);
         convert(Att.empty().add(Source.class, spec.att().get(Source.class)), sb, null, null);
-        module.clearAttributesMap();
         sb.append("\n");
         sb.append("module ");
         convert(spec.name(), sb);
@@ -682,16 +668,6 @@ public class ModuleToKORE {
         convert(definition.name(), sb);
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
-
-        // We can replace the attributes here as we already generated the KORE definition and saved it to `definition.kore`
-        module.clearAttributesMap();
-
-        module.addAttToAttributesMap(Att.PRIORITY(), true);
-        module.addAttToAttributesMap(Att.LABEL(), true);
-        module.addAttToAttributesMap(Att.GROUP(), true);
-        module.addAttToAttributesMap(Att.SOURCE(), true);
-        module.addAttToAttributesMap(Att.LOCATION(), true);
-        module.addAttToAttributesMap(Att.UNIQUE_ID(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             if (sentence instanceof Claim || (sentence instanceof Rule && sentence.att().contains(Att.SIMPLIFICATION()))) {

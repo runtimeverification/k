@@ -18,6 +18,7 @@ import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 import collection._
 import scala.collection.Set
+import scala.collection.immutable.Map
 
 trait OuterKORE
 
@@ -309,32 +310,87 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     functionRules
   }
 
+  lazy val (attributesMap, tokenSorts, rulePriorities) = collect();
 
-  val hasAttributesMap: mutable.Map[Att.Key, java.lang.Boolean] = mutable.Map[Att.Key, java.lang.Boolean]()
+  def collect(): (Map[Att.Key, java.lang.Boolean], Set[SortHead], Set[Integer]) = {
+    val newAtts = mutable.Map[Att.Key, java.lang.Boolean]()
+    val tokenSorts = mutable.HashSet[SortHead]()
+    val rulePriorities = mutable.HashSet[Integer]()
 
-  def addAttToAttributesMap(key: Att.Key, isPresent: java.lang.Boolean): Unit = hasAttributesMap.put(key, isPresent)
+    newAtts.put(Att.SOURCE, true)
+    newAtts.put(Att.NAT, true)
+    newAtts.put(Att.TERMINALS, true)
+    newAtts.put(Att.COLORS, true)
+    newAtts.put(Att.PRIORITY, true)
 
-  def removeAttFromAttributesMap(key: Att.Key): Unit = hasAttributesMap.remove(key)
+    newAtts.put(Att.LABEL, true)
+    newAtts.put(Att.GROUP, true)
+    newAtts.put(Att.LOCATION, true)
+    newAtts.put(Att.UNIQUE_ID, true)
 
-  def hasAtt(key: Att.Key): java.lang.Boolean = hasAttributesMap.getOrElse(key, false)
+    for (sort <- sortedDefinedSorts) {
+      val att = sortAttributesFor.getOrElse(sort, KORE.Att)
+      if (att.contains(Att.TOKEN)) tokenSorts.add(sort)
+      collectAttributes(att, newAtts)
+    }
 
-  def hasAttributesMapAsJava: java.util.Map[Att.Key, java.lang.Boolean] = hasAttributesMap.asJava
+    for (prod <- sortedProductions) {
+      val att = prod.att
+      if (att.contains(Att.TOKEN)) tokenSorts.add(prod.sort.head)
+      collectAttributes(att, newAtts)
+    }
+    for (r <- sortedRules) {
+      val att = r.att
+      collectAttributes(att, newAtts)
+      for (r <- sortedRules) {
+        val att = r.att
+        collectAttributes(att, newAtts)
+        // Emulates ruleInfo.isEquation and ruleInfo.isKore, but without the overhead of instantiating the ruleInfo
+        val isKore = r.att.contains(Att.KORE)
+        val left = RewriteToTop.toLeft(r.body)
+        var leftPattern = left
+        var isEquation = false
+        while (leftPattern.isInstanceOf[KAs]) leftPattern = leftPattern.asInstanceOf[KAs].pattern
+        leftPattern match {
+          case apply: KApply =>
+            val ruleProduction: Production = production(apply, instantiatePolySorts = true)
+            val isFunction = ruleProduction.att.contains(Att.FUNCTION)
+            val isSimplification = r.att.contains(Att.SIMPLIFICATION)
+            val isAnywhere = r.att.contains(Att.ANYWHERE)
+            val isHeat = r.att.contains(Att.HEAT)
+            val isCool = r.att.contains(Att.COOL)
+            if ((isFunction || isSimplification || isAnywhere && !isKore) || (isHeat || isCool)) {
+              isEquation = true
+            }
+        }
+        // only collect priorities of semantics rules
+        if (!isEquation && !isKore && !r.isMacro) rulePriorities.add(getPriority(att))
+      }
+    }
 
-  def clearAttributesMap(): Unit = hasAttributesMap.clear()
+    newAtts.remove(Att.HAS_DOMAIN_VALUES)
+    if (newAtts.contains(Att.TOKEN)) newAtts.put(Att.HAS_DOMAIN_VALUES, false)
 
+    (newAtts.toMap, tokenSorts.toSet, rulePriorities.toSet)
+  }
 
-  private val tokenSorts: java.util.Set[SortHead] = new java.util.HashSet[SortHead]()
+  private def collectAttributes(att: Att, newAtts: mutable.Map[Att.Key, java.lang.Boolean]): Unit = {
+    for (attribute <- att.withUserGroupsAsGroupAtt.att) {
+      val name = attribute._1._1
+      val `val` = attribute._2
+      val strVal = `val`.toString
+      if (strVal == "") {
+        if (!newAtts.contains(name))
+          newAtts.put(name, false)
+      } else {
+          newAtts.put(name, true)
+      }
+    }
+  }
 
-  def getTokenSorts: java.util.Set[SortHead] = tokenSorts
-
-  def addTokenSort(sort: SortHead): Unit = tokenSorts.add(sort)
-
-
-  private val rulePriorities: java.util.Set[Integer] =  new java.util.HashSet[Integer]()
-
-  def getRulePriorities: java.util.Set[Integer] = rulePriorities
-
-  def addRulePriority(p: Integer): Unit = rulePriorities.add(p)
+  def getTokenSorts: java.util.Set[SortHead] = tokenSorts.asJava
+  def getRulePriorities: java.util.Set[Integer] = rulePriorities.asJava
+  def hasAtt(key: Att.Key): java.lang.Boolean = attributesMap.getOrElse(key, false)
 
   def getPriority(att: Att): Int = {
     if (att.contains(Att.PRIORITY)) try return att.get(Att.PRIORITY).toInt
@@ -763,7 +819,6 @@ sealed trait TerminalLike extends ProductionItem with Comparable[TerminalLike] {
 
 case class NonTerminal(sort: Sort, name: Option[String]) extends ProductionItem
   with NonTerminalToString
-
 case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String) extends TerminalLike with
   RegexTerminalToString {
   lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)

@@ -100,7 +100,6 @@ public class KoreBackend extends AbstractBackend {
         }
         mainModule = ModuleTransformer.from(new GenerateMapCeilAxioms(mainModule, kompileOptions)::gen, "Generate map ceil axioms").apply(mainModule);
         mainModule = ModuleTransformer.fromSentenceTransformerAtt(new AddKoreAttributes(mainModule, kompileOptions)::add, "Add kore attributes").apply(mainModule);
-        mainModule = ModuleTransformer.from(new CollectTokenSortsAndAttributes(mainModule, heatCoolEquations)::collect, "Collect token sorts and attributes").apply(mainModule);
 
         return mainModule;
     }

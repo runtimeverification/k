@@ -91,13 +91,5 @@ public class RuleInfo {
                 productionSortStr, productionSorts, productionLabel, leftChildren);
     }
 
-    public boolean isEquation() {
-        return isEquation;
-    }
-
-    public boolean isKore() {
-        return isKore;
-    }
-
 }
 
