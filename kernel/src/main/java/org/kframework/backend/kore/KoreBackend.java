@@ -94,6 +94,7 @@ public class KoreBackend extends AbstractBackend {
 
     public static Module getKompiledModule(Module mainModule, boolean hasAnd, KompileOptions kompileOptions, boolean heatCoolEquations) {
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
+        mainModule = ModuleTransformer.from(new RemoveUnit()::apply, "Remove unit applications for collections").apply(mainModule);
         if (hasAnd) {
           mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
         }
