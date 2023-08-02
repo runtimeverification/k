@@ -40,6 +40,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
@@ -75,13 +76,26 @@ public class TypeInferencer implements AutoCloseable {
 
   private final boolean destroyOnReset;
 
+  static AtomicInteger z3Count = new AtomicInteger(1);
+
   private void initProcess() {
-    try {
-      File NULL = new File(OS.current() == OS.WINDOWS ? "NUL" : "/dev/null");
-      process = new ProcessBuilder().command("z3", "-in").redirectError(NULL).start();
-    } catch (IOException e) {
-      throw KEMException.criticalError("Could not start z3 process", e);
+    int noTries = 5;
+    for (int i = 1; ; i++) {
+      try {
+        File NULL = new File(OS.current() == OS.WINDOWS ? "NUL" : "/dev/null");
+        process = new ProcessBuilder().command("z3", "-in").redirectError(NULL).start();
+        break;
+      } catch (IOException e) {
+        try {
+          Thread.sleep(i*i*i);
+        } catch (InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
+        if (i == noTries)
+          throw KEMException.criticalError("Could not start z3 process, tried " + noTries + " times.", e);
+      }
     }
+    System.out.println("-new z3 thread: " + Thread.currentThread().getId() + " z3# " + z3Count.getAndIncrement());
     z3 = new PrintStream(process.getOutputStream());
     output = new BufferedReader(new InputStreamReader(process.getInputStream()));
   }
@@ -933,6 +947,11 @@ public class TypeInferencer implements AutoCloseable {
   public void close() {
     reset();
     z3.close();
+    try {
+      output.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     process.destroy();
   }
 
@@ -952,6 +971,11 @@ public class TypeInferencer implements AutoCloseable {
     nextId = 0;
     if (destroyOnReset) {
       z3.close();
+      try {
+        output.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
       process.destroy();
       initProcess();
       println(PRELUDE1);
