@@ -5,6 +5,7 @@ __all__ = ['KompileBackend', 'kompile']
 import dataclasses
 import logging
 import shlex
+import shutil
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
@@ -20,6 +21,11 @@ if TYPE_CHECKING:
     from typing import Any, Final, Literal
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+class KompileNotFoundError(RuntimeError):
+    def __init__(self, kompile_command: str):
+        super().__init__(f'Kompile command not found: {str}')
 
 
 def kompile(
@@ -114,6 +120,8 @@ class Kompile(ABC):
             check_dir_path(abs_or_rel_to(include_dir, cwd or Path()))
 
         command = list(command) if command is not None else ['kompile']
+        if not shutil.which(command[0]):
+            raise KompileNotFoundError(command[0])
         args = command + self.args()
 
         if output_dir is not None:
