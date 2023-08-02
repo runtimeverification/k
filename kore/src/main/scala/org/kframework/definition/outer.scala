@@ -2,6 +2,8 @@
 
 package org.kframework.definition
 
+import com.google.common.collect.{HashMultimap, SetMultimap}
+
 import java.util.Optional
 import java.lang.Comparable
 import javax.annotation.Nonnull
@@ -14,7 +16,8 @@ import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.builtin.Sorts
+import org.kframework.builtin.{Hooks, Sorts}
+import org.kframework.compile.RewriteToTop
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._

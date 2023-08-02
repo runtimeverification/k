@@ -151,7 +151,7 @@ public class ModuleToKORE {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
-                Production prod = production(kapp);
+                Production prod = module.production(kapp);
                 if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
                     functionRules.put(kapp.klabel(), rule);
                 }
@@ -1602,7 +1602,7 @@ public class ModuleToKORE {
                     switch (strKey) {
                         case "unit":
                         case "element":
-                            Production prod = production(KApply(KLabel(strVal)));
+                            Production prod = module.production(KApply(KLabel(strVal)));
                             convert(prod.klabel().get(), prod.params(), sb);
                             sb.append("()");
                             break;
