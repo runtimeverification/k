@@ -131,7 +131,7 @@ public class KoreBackend extends AbstractBackend {
         Function1<Definition, Definition> resolveFreshConfigConstants = d ->
             DefinitionTransformer.from(m -> freshConfigResolver.resolve(m), "resolving !Var config variables").apply(d);
         Function1<Definition, Definition> resolveFreshConstants = d ->
-                DefinitionTransformer.from(m -> new ResolveFreshConstants(d, kompileOptions.topCell, files).resolve(m), "resolving !Var variables").apply(d);
+                DefinitionTransformer.from(m -> new ResolveFreshConstants(d, kompileOptions.topCell, files, freshConfigResolver.getCurrentFresh()).resolve(m), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
