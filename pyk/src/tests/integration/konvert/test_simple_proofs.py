@@ -232,6 +232,96 @@ BIDIRECTIONAL_TEST_DATA: Final = (
 
 KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
     (
+        'equals-k-encoding',
+        KSort('KItem'),
+        """
+        inj{SortBool{}, SortKItem{}}(
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+          kseq{}(
+            inj{SortInt{}, SortKItem{}}(VarX:SortInt{}),
+            dotk{}()
+          ),
+          kseq{}(
+            inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("0")),
+            dotk{}()
+          )
+        ))
+        """,
+        KApply('_==K_', [KVariable('X', 'Int'), KToken('0', 'Int')]),
+    ),
+    (
+        'ksequence-under-kequal-not-reapplied',
+        KSort('KItem'),
+        """
+        inj{SortBool{}, SortKItem{}}(
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+          kseq{}(
+            inj{SortInt{}, SortKItem{}}(VarX:SortInt{}),
+            dotk{}()
+          ),
+          kseq{}(
+            inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("0")),
+            dotk{}()
+          )
+        ))
+        """,
+        KApply('_==K_', [KSequence((KVariable('X', 'Int'),)), KSequence((KToken('0', 'Int'),))]),
+    ),
+    (
+        'k-under-kequal',
+        KSort('KItem'),
+        """
+        inj{SortBool{}, SortKItem{}}(
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+            VarX:SortK{},
+            VarY:SortK{},
+        ))
+        """,
+        KApply('_==K_', [KVariable('X', 'K'), KVariable('Y', 'K')]),
+    ),
+    (
+        'empty-ksequence-under-kequal',
+        KSort('KItem'),
+        """
+        inj{SortBool{}, SortKItem{}}(
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+            dotk{}(),
+            dotk{}(),
+        ))
+        """,
+        KApply('_==K_', [KSequence([]), KSequence([])]),
+    ),
+    (
+        'multi-ksequence-under-kequal',
+        KSort('KItem'),
+        """
+        inj{SortBool{}, SortKItem{}}(
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+          kseq{}(
+            inj{SortInt{}, SortKItem{}}(VarX:SortInt{}),
+            kseq{}(
+              inj{SortInt{}, SortKItem{}}(VarY:SortInt{}),
+              dotk{}()
+            )
+          ),
+          kseq{}(
+            inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("0")),
+            kseq{}(
+              inj{SortInt{}, SortKItem{}}(\\dv{SortInt{}}("1")),
+              dotk{}()
+            )
+          )
+        ))
+        """,
+        KApply(
+            '_==K_',
+            [
+                KSequence((KVariable('X', 'Int'), KVariable('Y', 'Int'))),
+                KSequence((KToken('0', 'Int'), KToken('1', 'Int'))),
+            ],
+        ),
+    ),
+    (
         'variable-without-sort',
         KSort('Bar'),
         'VarX : SortBar{}',
