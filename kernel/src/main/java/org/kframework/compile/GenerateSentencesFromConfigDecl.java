@@ -362,6 +362,7 @@ public class GenerateSentencesFromConfigDecl {
         Sentence initializer;
         Rule initializerRule;
         Sort initSort = sort;
+        Att initializerAtt = configAtt.remove(Att.PRODUCTION());
 
         if (multiplicity == Multiplicity.STAR) {
             String type = cellProperties.getOptional(Att.TYPE()).orElse("Bag");
@@ -369,11 +370,11 @@ public class GenerateSentencesFromConfigDecl {
         }
 
         if (hasConfigurationOrRegularVariable || isStream) {
-            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.NO_THREAD()));
-            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add(Att.INITIALIZER()));
+            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), initializerAtt.add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.NO_THREAD()));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, initializerAtt.add(Att.INITIALIZER()));
         } else {
-            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), Att().add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.NO_THREAD()));
-            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add(Att.INITIALIZER()));
+            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), initializerAtt.add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.NO_THREAD()));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, initializerAtt.add(Att.INITIALIZER()));
         }
         if (!m.definedKLabels().contains(KLabel(initLabel))) {
             sentences.add(initializer);
