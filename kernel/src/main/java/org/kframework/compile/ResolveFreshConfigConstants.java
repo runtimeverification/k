@@ -11,7 +11,9 @@ import org.kframework.kore.K;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +50,9 @@ public class ResolveFreshConfigConstants {
             @Override
             public K apply(KVariable k) {
                 if (k.name().startsWith("!")) {
+                    if (!k.att().get(Sort.class).equals(Sorts.Int())) {
+                        throw KEMException.compilerError("Can't resolve fresh configuration variable not of sort Int", k);
+                    }
                     if (k.att().contains(Att.ANONYMOUS())) {
                         return KToken(Integer.toString(currentFresh++), Sorts.Int());
                     }
@@ -67,7 +72,7 @@ public class ResolveFreshConfigConstants {
     }
 
     public Module resolve(Module m) {
-        return ModuleTransformer.fromRuleBodyTransformerWithRule((r, body) -> transform(r, body), "").apply(m);
+        return ModuleTransformer.fromRuleBodyTransformerWithRule((r, body) -> transform(r, body), "Resolve fresh variables in cell initializers").apply(m);
     }
 
     /**
