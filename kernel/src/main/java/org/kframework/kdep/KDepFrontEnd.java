@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
-import org.apache.commons.collections15.ListUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.kframework.attributes.Source;
 import org.kframework.kompile.Kompile;
 import org.kframework.main.FrontEnd;
