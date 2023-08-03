@@ -122,6 +122,7 @@
               procps = [ "-I${procps}/include" "-L${procps}/lib" ];
               openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
               gmp = [ "-I${gmp.dev}/include" "-L${gmp}/lib" ];
+              mpfr = [ "-I${mpfr.dev}/include" "-L${mpfr}/lib" ];
             };
           };
 
