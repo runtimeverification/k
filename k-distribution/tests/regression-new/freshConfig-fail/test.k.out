@@ -1,4 +1,4 @@
 [Error] Compiler: Can't resolve fresh configuration variable not of sort Int
   while executing phase "Resolve fresh variables in cell initializers" on sentence at
-	Source(test.k)
-	Location(15,3,15,32)
+	<none>
+	<none>
