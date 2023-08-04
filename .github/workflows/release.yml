@@ -395,13 +395,16 @@ jobs:
 
       - name: Set up Java for publishing to GitHub Maven Packages
         uses: actions/setup-java@v3
+        env:
+          MAVEN_USERNAME: devops@runtimeverification.com
+          MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
         with:
           java-version: '11'
           distribution: 'adopt'
           overwrite-settings: true
           server-id: runtime.verification.snapshots
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+          server-username: $MAVEN_USERNAME
+          server-password: $MAVEN_PASSWORD
 
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
@@ -422,7 +425,7 @@ jobs:
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p /home/github-runner/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
           docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
-          docker exec -e MAVEN_USERNAME -e MAVEN_PASSWORD -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+          docker exec -e ${MAVEN_USERNAME} -e ${MAVEN_PASSWORD} -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Tear down Docker'
         if: always()
