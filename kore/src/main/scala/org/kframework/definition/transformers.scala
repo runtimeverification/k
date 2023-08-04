@@ -16,17 +16,19 @@ object ModuleTransformer {
 
   def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
     ModuleTransformer(m => {
-      val newSentences = mapWithTrace(m.localSentences.toSet)(f, m, name)
+      val newSentences = m.localSentences map { s =>
+        try {
+          f(m, s)
+        } catch {
+          case e: KEMException =>
+            e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
+              + "\n\t" + s.att.getOption(classOf[Source]).map(_.toString).getOrElse("<none>")
+              + "\n\t" + s.att.getOption(classOf[Location]).map(_.toString).getOrElse("<none>"))
+            throw e
+        }
+      }
+      //TODO(compare attributes)
       if (newSentences != m.localSentences)
-        Module(m.name, m.imports, newSentences, m.att)
-      else
-        m
-    }, name)
-
-  def fromSentenceTransformerAtt(f: (Module, Sentence) => Sentence, name: String): ModuleTransformer =
-    ModuleTransformer(m => {
-      val newSentences = mapWithTrace(m.localSentences.toSet)(f, m, name)
-      if (newSentences != m.localSentences || !m.checkAtts(newSentences))
         Module(m.name, m.imports, newSentences, m.att)
       else
         m
@@ -58,19 +60,6 @@ object ModuleTransformer {
     case f: ModuleTransformer => f
     case _ => new ModuleTransformer(f, name)
   }
-
-  private def mapWithTrace(sentences: Set[Sentence])(f: (Module, Sentence) => Sentence, m: Module, name: String): Set[Sentence] =
-    sentences.map { s =>
-      try {
-        f(m, s)
-      } catch {
-        case e: KEMException =>
-          e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
-            + "\n\t" + s.att.getOption(classOf[Source]).map(_.toString).getOrElse("<none>")
-            + "\n\t" + s.att.getOption(classOf[Location]).map(_.toString).getOrElse("<none>"))
-          throw e
-      }
-    }
 }
 
 /**
@@ -83,15 +72,7 @@ class ModuleTransformer(f: Module => Module, name: String) extends (Module => Mo
   override def apply(input: Module): Module = {
     memoization.getOrElseUpdate(input, {
       var newImports = input.imports map (i => Import(this(i.module), i.isPublic))
-      var checkModuleAtts = input.imports.seq.map(i => i.module).zip(newImports).foldLeft(true)((acc, pair) => {
-        var inputModule = pair._1
-        var newImport = pair._2
-
-        var checkAttsResult = inputModule.checkAtts(newImport.module.localSentences)
-
-        acc && checkAttsResult
-      })
-      if (newImports != input.imports || !checkModuleAtts)
+      if (newImports != input.imports)
         f(Module(input.name, newImports, input.localSentences, input.att))
       else
         f(input)
