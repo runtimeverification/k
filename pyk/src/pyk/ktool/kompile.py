@@ -57,6 +57,7 @@ class KompileBackend(Enum):
     LLVM = 'llvm'
     HASKELL = 'haskell'
     KORE = 'kore'
+    MAUDE = 'maude'
 
     @cached_property
     def args(self) -> frozenset[str]:
@@ -96,6 +97,8 @@ class Kompile(ABC):
                 return HaskellKompile(base_args, **backend_args)
             case KompileBackend.LLVM:
                 return LLVMKompile(base_args, **backend_args)
+            case KompileBackend.MAUDE:
+                return MaudeKompile(base_args, **backend_args)
             case _:
                 raise ValueError(f'Unsupported backend: {backend.value}')
 
@@ -186,6 +189,25 @@ class HaskellKompile(Kompile):
 
         if not self.haskell_binary:
             args += ['--no-haskell-binary']
+
+        return args
+
+
+@final
+@dataclass(frozen=True)
+class MaudeKompile(Kompile):
+    base_args: KompileArgs
+
+    def __init__(self, base_args: KompileArgs):
+        object.__setattr__(self, 'base_args', base_args)
+
+    @property
+    def backend(self) -> Literal[KompileBackend.MAUDE]:
+        return KompileBackend.MAUDE
+
+    def args(self) -> list[str]:
+        args = self.base_args.args()
+        args += ['--backend', 'maude']
 
         return args
 
