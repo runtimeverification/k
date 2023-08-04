@@ -123,6 +123,19 @@ class Subst(Mapping[str, KInner]):
             new_term = KRewrite(lhs, rhs).replace(new_term)
         return new_term
 
+    @staticmethod
+    def from_pred(pred: KInner) -> Subst:
+        from .manip import flatten_label
+
+        subst: dict[str, KInner] = {}
+        for conjunct in flatten_label('#And', pred):
+            match conjunct:
+                case KApply(KLabel('#Equals'), [KVariable(var), term]):
+                    subst[var] = term
+                case _:
+                    raise ValueError(f'Invalid substitution predicate: {conjunct}')
+        return Subst(subst)
+
     @property
     def ml_pred(self) -> KInner:
         items = []
