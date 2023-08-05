@@ -161,7 +161,7 @@ public class DefinitionParsing {
                 stream(def.entryModules()).filter(m -> stream(m.sentences()).noneMatch(s -> s instanceof Bubble)));
         def = Definition(def.mainModule(), modules.collect(Collections.toSet()), def.att());
 
-        def = Kompile.excludeModulesByTag(excludeModules).apply(def);
+        def = Kompile.excludeModulesByTag(excludeModules, entryPointModule).apply(def);
         sw.printIntermediate("Outer parsing [" + def.modules().size() + " modules]");
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
@@ -222,7 +222,7 @@ public class DefinitionParsing {
                 stream(parsedDefinition.entryModules()).filter(m -> stream(m.sentences()).noneMatch(s -> s instanceof Bubble)));
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
-        trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
+        trimmed = Kompile.excludeModulesByTag(excludedModuleTags, mainProgramsModule).apply(trimmed);
         sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
         if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
             files.resolveTemp(".");
