@@ -314,9 +314,27 @@ public class Kompile {
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
-    public static Function1<Definition, Definition> excludeModulesByTag(Set<Att.Key> excludedModuleTags) {
-        DefinitionTransformer dt = DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
-        return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
+    private static Definition excludeModulesByTag(Set<Att.Key> excludedModuleTags, String syntaxModule, Definition d) {
+        for (Att.Key k : excludedModuleTags) {
+            if (d.mainModule().att().contains(k)) {
+                throw KEMException.compilerError("Main module " + d.mainModule().name() + " has excluded attribute [" + k + "].");
+            }
+            d.getModule(syntaxModule).map(m -> {
+                if (m.att().contains(k)) {
+                    throw KEMException.compilerError("Syntax module " + m.name() + " has excluded attribute [" + k + "].");
+                }
+                return null;
+            });
+        }
+
+        return Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att());
+    }
+
+    public static Function1<Definition, Definition> excludeModulesByTag(Set<Att.Key> excludedModuleTags, String syntaxModule) {
+        Function1<Definition, Definition> excludeModules = d -> excludeModulesByTag(excludedModuleTags, syntaxModule, d);
+        DefinitionTransformer walkModules = DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
+
+        return excludeModules.andThen(walkModules);
     }
 
     public static Sentence removePolyKLabels(Sentence s) {
