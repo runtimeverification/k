@@ -1,5 +1,5 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
+, git, gmp, jdk17, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
 , prelude-kore, llvm-backend, debugger, version, llvm-kompile-libs }:
 
 let
@@ -75,7 +75,7 @@ in let
     flex
     (if stdenv.isDarwin then clang else gcc)
     gmp
-    jdk
+    jdk17
     mpfr
     ncurses
     pkgconfig
