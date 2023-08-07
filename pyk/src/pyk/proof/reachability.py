@@ -557,6 +557,8 @@ class APRProver(Prover):
     dependencies_module_name: str
     circularities_module_name: str
 
+    _target_is_terminal: bool
+
     def __init__(
         self,
         proof: APRProof,
@@ -591,6 +593,10 @@ class APRProver(Prover):
             priority=1,
         )
 
+        self._target_is_terminal = kcfg_explore.kcfg_semantics.is_terminal(
+            self.proof.kcfg.node(self.proof.target).cterm
+        )
+
     def nonzero_depth(self, node: KCFG.Node) -> bool:
         return not self.proof.kcfg.zero_depth_between(self.proof.init, node.id)
 
@@ -620,13 +626,12 @@ class APRProver(Prover):
         execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
-        implication_every_block: bool = True,
     ) -> None:
         if self._check_terminal(node):
             _ = self._check_subsume(node)
             return
 
-        if implication_every_block:
+        if not self._target_is_terminal:
             if self._check_subsume(node):
                 return
 
@@ -647,7 +652,6 @@ class APRProver(Prover):
         execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
-        implication_every_block: bool = True,
         fail_fast: bool = False,
     ) -> KCFG:
         iterations = 0
@@ -671,7 +675,6 @@ class APRProver(Prover):
                 execute_depth=execute_depth,
                 cut_point_rules=cut_point_rules,
                 terminal_rules=terminal_rules,
-                implication_every_block=implication_every_block,
             )
 
         self.proof.write_proof_data()
@@ -855,7 +858,6 @@ class APRBMCProver(APRProver):
         execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
-        implication_every_block: bool = True,
     ) -> None:
         if node.id not in self._checked_nodes:
             _LOGGER.info(f'Checking bmc depth for node {self.proof.id}: {node.id}')
@@ -881,7 +883,6 @@ class APRBMCProver(APRProver):
             execute_depth=execute_depth,
             cut_point_rules=cut_point_rules,
             terminal_rules=terminal_rules,
-            implication_every_block=implication_every_block,
         )
 
 
