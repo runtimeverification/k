@@ -70,7 +70,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 75
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -114,7 +114,7 @@ jobs:
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 75
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -159,7 +159,7 @@ jobs:
   debian-bookworm:
     name: 'K Debian Bookworm Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
