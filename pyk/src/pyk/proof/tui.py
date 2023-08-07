@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from textual.containers import Horizontal, Vertical
-from textual.widget import Widget
+from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.widgets import Footer
 
 from ..kcfg.tui import GraphChunk, KCFGViewer, NodeView
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
     from .reachability import APRProof
 
 
-class APRProofBehaviorView(Widget):
+class APRProofBehaviorView(ScrollableContainer, can_focus=True):
     _proof: APRProof
     _kprint: KPrint
     _minimize: bool
@@ -50,8 +49,6 @@ class APRProofBehaviorView(Widget):
 
 
 class APRProofViewer(KCFGViewer):
-    CSS_PATH = 'style.css'
-
     _proof: APRProof
 
     def __init__(
@@ -64,6 +61,9 @@ class APRProofViewer(KCFGViewer):
     ) -> None:
         super().__init__(proof.kcfg, kprint, node_printer=node_printer, custom_view=custom_view, minimize=minimize)
         self._proof = proof
+
+    def on_mount(self) -> None:
+        self.query_one('#behavior', APRProofBehaviorView).focus(scroll_visible=False)
 
     def compose(self) -> ComposeResult:
         yield Horizontal(

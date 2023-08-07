@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import shlex
 import string
 import subprocess
@@ -39,6 +40,8 @@ K = TypeVar('K')
 V = TypeVar('V')
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+ROOT: Final = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Based on: https://stackoverflow.com/a/2704866
