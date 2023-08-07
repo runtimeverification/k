@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -210,21 +211,28 @@ public class ResolveContexts {
 
         Att heatAtt = addSuffixToLabel(context.att().add(Att.HEAT()), "-heat");
         Att coolAtt = addSuffixToLabel(context.att().add(Att.COOL()), "-cool");
-        String errormsg = "The generated label for a context rule conflicts with a user-defined label. Please consider renaming.";
+
+        Function<String, Void> throwException = label -> {
+            Sentence loc = input.labeled().get(label).get().head();
+            throw KEMException.compilerError("The generated label for a context rule conflicts with a user-defined label at "
+                + loc.source().get() + " and "
+                + loc.location().get() + ". Please consider renaming.", context);
+        };
 
         if (heatAtt.contains(Att.LABEL())) {
             String label = heatAtt.get(Att.LABEL());
             if (input.labeled().contains(label)) {
-                throw KEMException.compilerError(errormsg, KEMException.compilerError("", context), input.labeled().get(label).get().head());
+                throwException.apply(label);
             }
         }
 
         if (coolAtt.contains(Att.LABEL())) {
             String label = coolAtt.get(Att.LABEL());
             if (input.labeled().contains(label)) {
-                throw KEMException.compilerError(errormsg, KEMException.compilerError("", context), input.labeled().get(label).get().head());
+                throwException.apply(label);
             }
         }
+
 
         return Stream.of(freezer,
                 Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, heatAtt),
