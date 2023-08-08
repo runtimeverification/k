@@ -2,6 +2,7 @@
 
 package org.kframework.definition
 
+import java.util.Optional
 import java.util.function.BiFunction
 import org.kframework.attributes.{Location, Source}
 import org.kframework.definition
@@ -21,9 +22,11 @@ object ModuleTransformer {
           f(m, s)
         } catch {
           case e: KEMException =>
-            e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
-              + "\n\t" + s.att.getOption(classOf[Source]).map(_.toString).getOrElse("<none>")
-              + "\n\t" + s.att.getOption(classOf[Location]).map(_.toString).getOrElse("<none>"))
+            val extraInfo = Optional.of(" on sentence at")
+              .flatMap[String](prefix => s.source.map[String](src => prefix + "\n\t" + src.toString))
+              .flatMap[String](prefix => s.location.map[String](loc => prefix + "\n\t" + loc.toString)).orElse("")
+
+            e.exception.addTraceFrame("while executing phase \"" + name + "\"" + extraInfo)
             throw e
         }
       }
