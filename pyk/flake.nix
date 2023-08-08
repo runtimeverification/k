@@ -18,33 +18,6 @@
               groups = [ ];
               # We remove `"dev"` from `checkGroups`, so that poetry2nix does not try to resolve dev dependencies.
               checkGroups = [ ];
-              overrides = prev.poetry2nix.overrides.withDefaults
-                (finalPython: prevPython:
-                  let
-                    markdown-it-py-wo-mdit-py-plugins =
-                      prevPython.markdown-it-py.overridePythonAttrs (oldAttrs: {
-                        propagatedBuildInputs =
-                          builtins.filter (p: p.pname != "mdit-py-plugins")
-                          oldAttrs.propagatedBuildInputs;
-                        buildInputs = (oldAttrs.buildInputs or [ ])
-                          ++ [ finalPython.flit-core ];
-                      });
-                  in {
-                    nanoid = prevPython.nanoid.overridePythonAttrs (oldAttrs: {
-                      buildInputs = (oldAttrs.buildInputs or [ ])
-                        ++ [ prevPython.setuptools ];
-                    });
-
-                    mdit-py-plugins =
-                      prevPython.mdit-py-plugins.overridePythonAttrs
-                      (oldAttrs: {
-                        propagatedBuildInputs =
-                          builtins.filter (p: p.pname != "markdown-it-py")
-                          oldAttrs.propagatedBuildInputs;
-                        buildInputs = (oldAttrs.buildInputs or [ ])
-                          ++ [ markdown-it-py-wo-mdit-py-plugins ];
-                      });
-                  });
             };
         in rec {
           pyk = pyk-python310;
