@@ -162,9 +162,9 @@ class Proof(ABC):
 
     @property
     def subproofs_status(self) -> ProofStatus:
-        if any([p.failed for p in self.subproofs]):
+        if any(p.failed for p in self.subproofs):
             return ProofStatus.FAILED
-        elif all([p.passed for p in self.subproofs]):
+        elif all(p.passed for p in self.subproofs):
             return ProofStatus.PASSED
         else:
             return ProofStatus.PENDING

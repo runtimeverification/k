@@ -183,7 +183,7 @@ def remove_useless_constraints(cterm: CTerm, keep_vars: Iterable[str] = ()) -> C
         for c in cterm.constraints:
             if c not in new_constraints:
                 new_vars = free_vars(c)
-                if any([v in used_vars for v in new_vars]):
+                if any(v in used_vars for v in new_vars):
                     new_constraints.append(c)
                     used_vars.extend(new_vars)
         used_vars = list(set(used_vars))
