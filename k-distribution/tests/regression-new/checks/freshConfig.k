@@ -1,8 +1,8 @@
 // Copyright (c) K Team. All Rights Reserved.
-module TEST-SYNTAX
+module FRESHCONFIG-SYNTAX
 endmodule
 
-module TEST
+module FRESHCONFIG
   imports INT
 
   syntax Foo ::= foo(Int)
