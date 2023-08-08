@@ -2,3 +2,7 @@
   while executing phase "Resolve fresh variables in cell initializers" on sentence at
 	<none>
 	<none>
+	Source(freshConfig.k)
+	Location(15,14,15,16)
+	15 |	  <freshFoo> !_:Foo </freshFoo>
+	   .	             ^~
