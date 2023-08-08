@@ -137,7 +137,7 @@ class APRProof(Proof):
             raise ValueError(f'Node is not terminal: {node_id}')
         self._terminal_nodes.remove(node_id)
 
-    def prune_from(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike]) -> list[NodeIdLike]:
+    def prune_from(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[NodeIdLike]:
         pruned_nodes = self.kcfg.prune(node_id, keep_nodes=list(keep_nodes) + [self.target, self.init])
         for nid in pruned_nodes:
             self._terminal_nodes.discard(nid)
@@ -455,7 +455,7 @@ class APRBMCProof(APRProof):
             or self.is_target(node_id)
         )
 
-    def prune_from(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike]) -> list[NodeIdLike]:
+    def prune_from(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[NodeIdLike]:
         pruned_nodes = super().prune_from(node_id, keep_nodes=keep_nodes)
         for nid in pruned_nodes:
             self._bounded_nodes.discard(nid)
