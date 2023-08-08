@@ -371,12 +371,12 @@ Running tests - kserver
 --------------------------
 
 The `kserver` is a front-end tool based on [Nailgun](https://github.com/facebookarchive/nailgun)
-and it helps a lot with reducing the startup time of the JVM. Calling `kserver` in a terminal
-window will wait for all kompile/kprove calls and force them to run in the same process,
-and share the same threads. This also reduces significantly the thread contention. `kompile`
+which helps to reduce the startup time of the JVM. Calling `kserver` in a terminal
+window will wait for all kompile/kprove calls and force them to run in the same process
+and share the same threads. This also reduces the thread contention significantly. `kompile`
 uses all the threads available to do rule parsing. Another benefit is that it saves caches,
 and each time you call kprove/kast, you can access those directly w/o extra disk usage.
-Running the `regression-new` integration tests on a powerful machine (32threads) takes 8m,
+Running the `regression-new` integration tests on a powerful machine (32 threads) takes 8m,
 with the kserver active it takes 2m. You can start the kserver in two ways.
 - blocking: call `kserver` in the command line. Close it after you are done testing. Useful for quick testing.
 - non-blocking: call `spawn-kserver <log.flie>` and close it with `stop-kserver` - this is used for automation on CI
