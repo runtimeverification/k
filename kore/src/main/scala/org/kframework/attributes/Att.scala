@@ -120,9 +120,24 @@ class Att private (val att: Map[(Att.Key, String), Any]) extends AttributesToStr
   def add(key: Att.Key, value: Int): Att = add(key, Att.intClassName, value)
   def add[T <: AttValue](key: Class[T], value: T): Att = add(Att.getInternalKeyOrAssert(key.getName), key.getName, value)
   def add[T <: AttValue](key: Att.Key, cls: Class[T], value: T): Att = add(key, cls.getName, value)
-  private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
-  private def add(key: Att.Key, clsStr: String, value: String): Att = Att(att + ((key, clsStr) -> value))
-  private def add(key: Att.Key, clsStr: String, value: Int): Att = Att(att + ((key, clsStr) -> value))
+
+  private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = key.keyParam match {
+    case Att.KeyParameter.Forbidden => throwForbidden(key)
+    case _ => Att(att + ((key, clsStr) -> value))
+  }
+  private def add(key: Att.Key, clsStr: String, value: String): Att = key.keyParam match {
+    case Att.KeyParameter.Forbidden if value != "" => throwForbidden(key)
+    case Att.KeyParameter.Required  if value == "" => throwRequired(key)
+    case _ => Att(att + ((key, clsStr) -> value))
+  }
+  private def add(key: Att.Key, clsStr: String, value: Int): Att = key.keyParam match {
+    case Att.KeyParameter.Forbidden => throwForbidden(key)
+    case _ => Att(att + ((key, clsStr) -> value))
+  }
+
+  private def throwRequired(key: Att.Key) = throw KEMException.compilerError("Parameters for the attribute '" + key + "' are required.")
+  private def throwForbidden(key: Att.Key) = throw KEMException.compilerError("Parameters for the attribute '" + key + "' are forbidden.")
+
   def addAll(thatAtt: Att): Att = Att(att ++ thatAtt.att)
   def remove(key: Att.Key): Att = remove(key, Att.stringClassName)
   def remove(key: Class[_]): Att = remove(Att.getInternalKeyOrAssert(key.getName), key.getName)
@@ -149,17 +164,25 @@ object Att {
     case object Unrecognized extends KeyType;
   }
 
+  sealed trait KeyParameter
+  private object KeyParameter extends Serializable {
+    case object Required extends KeyParameter;
+    case object Optional extends KeyParameter;
+    case object Forbidden extends KeyParameter;
+  }
+
   /* The Key class can only be constructed within Att. To enforce this, we must
    * - Make the constructor private
    * - Manually declare apply() and make it private, lest a public one is generated
    * - Manually declare copy() and make it private, preventing constructions like Att.GOOD_KEY.copy(key="bad-att")
    */
-  case class Key private[Att](key: String, keyType: KeyType) extends Serializable {
+  case class Key private[Att](key: String, keyType: KeyType, keyParam: KeyParameter) extends Serializable {
     override def toString: String = key
     private[Key] def copy(): Unit = ()
   }
   object Key {
-    private[Att] def apply(key: String, keyType: KeyType): Key = new Key(key, keyType)
+    private[Att] def apply(key: String, keyType: KeyType): Key = new Key(key, keyType, KeyParameter.Optional)
+    private[Att] def apply(key: String, keyType: KeyType, keyParam: KeyParameter): Key = new Key(key, keyType, keyParam)
   }
 
   def unrecognizedKey(key: String): Att.Key =
@@ -321,29 +344,33 @@ object Att {
   private val intClassName = classOf[java.lang.Integer].getName
 
   // All Key fields with UPPER_CASE naming
-  private val keys: Set[Key] =
+  private val keys: Map[String, Key] =
     Att.getClass.getDeclaredFields
       .filter(f => f.getType.equals(classOf[Key]) && f.getName.matches("[A-Z]+(_[A-Z0-9]+)*"))
       .map(f => f.get(this).asInstanceOf[Key])
-      .toSet
+      .map(k => (k.key, k))
+      .toMap
+
+  private val builtinKeys: Set[String] = keys.filter(_._2.keyType == KeyType.BuiltIn).keySet
+  private val internalKeys: Set[String] = keys.filter(_._2.keyType == KeyType.Internal).keySet
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
-    if (keys.contains(Key(key, KeyType.BuiltIn))) {
-      Optional.of(Key(key, KeyType.BuiltIn))
+    if (builtinKeys.contains(key)) {
+      Optional.of(keys.get(key).get)
     } else {
       Optional.empty()
     }
 
   def getInternalKeyOptional(key: String): Optional[Key] =
-    if (keys.contains(Key(key, KeyType.Internal))) {
-      Optional.of(Key(key, KeyType.Internal))
+    if (internalKeys.contains(key)) {
+      Optional.of(keys.get(key).get)
     } else {
       Optional.empty()
     }
 
   def getUserGroupOptional(group: String) : Optional[Key] =
-    if (!keys.contains(Key(group, KeyType.BuiltIn))) {
-      Optional.of(Key(group, KeyType.UserGroup))
+    if (!builtinKeys.contains(group)) {
+      Optional.of(Key(group, KeyType.UserGroup, KeyParameter.Optional))
     } else {
       Optional.empty()
     }
