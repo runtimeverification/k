@@ -1663,23 +1663,26 @@ For example:
 
 ```k
 syntax AExp ::= Int
-              | AExp "+" AExp [strict]
+              | AExp "+" AExp [strict, klabel(addExp)]
 ```
 
 This generates two heating rules (where the hole syntaxes `"[]" "+" AExp` and
 `AExp "+" "[]"` is automatically added to create an evaluation context):
 
 ```k
-rule <k> HOLE:AExp +  AE2:AExp => HOLE ~>  [] + AE2 ... </k> [heat]
-rule <k>  AE1:AExp + HOLE:AExp => HOLE ~> AE1 +  [] ... </k> [heat]
+rule [addExp1-heat]: <k> HOLE:AExp +  AE2:AExp => HOLE ~>  [] + AE2 ... </k> [heat]
+rule [addExp2-heat]: <k>  AE1:AExp + HOLE:AExp => HOLE ~> AE1 +  [] ... </k> [heat]
 ```
 
 And two corresponding cooling rules:
 
 ```k
-rule <k> HOLE:AExp ~>  [] + AE2 => HOLE +  AE2 ... </k> [cool]
-rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
+rule [addExp1-cool]: <k> HOLE:AExp ~>  [] + AE2 => HOLE +  AE2 ... </k> [cool]
+rule [addExp2-cool]: <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
 ```
+
+Note that the rules are given labels based on the klabel of the production, which
+nonterminal is the hole, and whether it's the heating or the cooling rule.
 
 You will note that these rules can apply one after another infinitely. In
 practice, the `KResult` sort is used to break this cycle by ensuring that only
@@ -1766,10 +1769,10 @@ unnecessarily verbose to write heating and cooling rules directly.
 
 For example, if the user wants to heat a term if it exists under a `foo`
 constructor if the term to be heated is of sort `bar`, one might write the
-following context:
+following context (with the optional label):
 
 ```k
-context foo(HOLE:Bar)
+context [foo]: foo(HOLE:Bar)
 ```
 
 Once again, note that `HOLE` is just a variable, but one that has special
@@ -1779,8 +1782,8 @@ be heated or cooled.
 This will automatically generate the following sentences:
 
 ```k
-rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> [heat]
-rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
+rule [foo-heat]: <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> [heat]
+rule [foo-cool]: <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
 ```
 
 The user may also write the K cell explicitly in the context declaration
