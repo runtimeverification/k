@@ -39,6 +39,8 @@ public class ResolveStrict {
     private final KompileOptions kompileOptions;
     private final Definition d;
 
+    private Module currentModule;
+
     public ResolveStrict(KompileOptions kompileOptions, Definition d) {
         this.kompileOptions = kompileOptions;
         this.d = d;
@@ -147,7 +149,9 @@ public class ResolveStrict {
                     requires = sideCondition.get();
                 }
 
-                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove(Att.LABEL()));
+                String label = currentModule.name() + "." + production.klabelAtt().get() + (strictnessPosition+1);
+
+                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).add(Att.LABEL(), label));
                 sentences.add(ctx);
             }
         }
@@ -232,6 +236,7 @@ public class ResolveStrict {
     }
 
     public Module resolve(Module input) {
+        currentModule = input;
         Set<Sentence> contextsToAdd = resolve(stream(input.localSentences())
                 .filter(s -> s instanceof Production)
                 .map(s -> (Production) s)
