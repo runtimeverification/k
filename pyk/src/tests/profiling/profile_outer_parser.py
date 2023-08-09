@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pyk.kast.markdown import select_code_blocks
 from pyk.kast.outer_lexer import outer_lexer
 from pyk.kast.outer_parser import OuterParser
 
@@ -14,8 +15,11 @@ if TYPE_CHECKING:
 
 
 def test_outer_parser(profile: Profiler, mocker: MockerFixture) -> None:
-    k_file = TEST_DATA_DIR / 'domains.k'
-    k_text = k_file.read_text()
+    md_file = TEST_DATA_DIR / 'domains.md'
+    md_text = md_file.read_text()
+
+    with profile('markdown.prof', sort_keys=('cumtime', 'tottime'), limit=20):
+        k_text = select_code_blocks(md_text, 'k')
 
     with profile('lexer.prof', sort_keys=('cumtime', 'tottime'), limit=30):
         tokens = list(outer_lexer(k_text))
