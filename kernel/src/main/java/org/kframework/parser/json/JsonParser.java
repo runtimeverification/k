@@ -396,7 +396,7 @@ public class JsonParser {
             case KVARIABLE:
                 Att varAtt = Att.empty();
                 if (data.containsKey("sort")) {
-                    varAtt.add(Sort.class, toSort(data.getJsonObject("sort")));
+                    varAtt = varAtt.add(Sort.class, toSort(data.getJsonObject("sort")));
                 }
                 return KVariable(data.getString("name"), varAtt);
 
