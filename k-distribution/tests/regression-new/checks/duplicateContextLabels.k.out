@@ -1,0 +1,5 @@
+[Error] Compiler: The generated label for a context rule conflicts with a user-defined label at Source(duplicateContextLabels.k) and Location(12,25,12,31). Please consider renaming.
+	Source(duplicateContextLabels.k)
+	Location(9,24,9,41)
+	9 |	  context [foo-left]:  foo( HOLE,    _ )
+	  .	                       ^~~~~~~~~~~~~~~~~
