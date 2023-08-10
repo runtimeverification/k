@@ -394,7 +394,11 @@ public class JsonParser {
                 return KSequence(items);
 
             case KVARIABLE:
-                return KVariable(data.getString("name"), toAtt(data.getJsonObject("att")));
+                Att varAtt = Att.empty();
+                if (data.containsKey("sort")) {
+                    varAtt.add(Sort.class, toSort(data.getJsonObject("sort")));
+                }
+                return KVariable(data.getString("name"), varAtt);
 
             case KREWRITE:
                 K lhs = toK(data.getJsonObject("lhs"));

@@ -472,7 +472,9 @@ public class ToJson {
 
             knode.add("node", JsonParser.KVARIABLE);
             knode.add("name", var.name());
-            knode.add("att", toJson(k.att()));
+            if (k.att().contains(Sort.class)) {
+                knode.add("sort", toJson(k.att().get(Sort.class)));
+            }
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
