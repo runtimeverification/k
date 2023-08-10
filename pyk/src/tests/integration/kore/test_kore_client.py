@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import asdict
 from string import Template
 from typing import TYPE_CHECKING
 
@@ -211,6 +212,19 @@ GET_MODEL_WITH_SMT_TEST_DATA: Final = (
 )
 
 
+def assert_execute_result_equals(actual: ExecuteResult, expected: ExecuteResult) -> None:
+    assert type(actual) == type(expected)
+
+    actual_dict = asdict(actual)  # type: ignore
+    expected_dict = asdict(expected)  # type: ignore
+    if 'next_states' in actual_dict and actual.next_states is not None:
+        actual_dict['next_states'] = set(actual.next_states)
+    if 'next_states' in expected_dict and expected.next_states is not None:
+        expected_dict['next_states'] = set(expected.next_states)
+
+    assert actual_dict == expected_dict
+
+
 class TestBooster(BoosterClientTest):
     MAIN_FILE = K_FILES / 'kore-rpc-test.k'
     MODULE_NAME = 'KORE-RPC-TEST'
@@ -231,15 +245,7 @@ class TestBooster(BoosterClientTest):
         # When
         actual = booster_client.execute(term(n), **params)
         # Then
-        assert actual.__class__ == expected.__class__
-        assert actual.reason == expected.reason
-        assert actual.state == expected.state
-        assert actual.depth == expected.depth
-        assert actual.rule == expected.rule
-        if actual.next_states is not None and expected.next_states is not None:
-            assert set(actual.next_states) == set(expected.next_states)
-        else:
-            assert actual.next_states == expected.next_states
+        assert_execute_result_equals(actual, expected)
 
 
 class TestKoreClient(KoreClientTest):
@@ -263,7 +269,7 @@ class TestKoreClient(KoreClientTest):
         actual = kore_client.execute(term(n), **params)
 
         # Then
-        assert actual == expected
+        assert_execute_result_equals(actual, expected)
 
     @pytest.mark.parametrize(
         'test_id,antecedent,consequent,expected',
