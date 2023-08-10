@@ -437,7 +437,6 @@ public class ToJson {
             knode.add("node", JsonParser.KTOKEN);
             knode.add("sort", toJson(tok.sort()));
             knode.add("token", tok.s());
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
@@ -452,7 +451,6 @@ public class ToJson {
 
             knode.add("arity", app.klist().size());
             knode.add("args", args.build());
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KSequence) {
             KSequence seq = (KSequence) k;
@@ -497,7 +495,6 @@ public class ToJson {
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
             knode.add("label", toJson(inj.klabel()));
-            knode.add("att", toJson(k.att()));
 
         } else {
             throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);
