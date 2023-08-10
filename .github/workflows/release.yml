@@ -402,7 +402,8 @@ jobs:
           server-id: runtime.verification.snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-
+      
+      # Build and Run Tests in Docker
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
