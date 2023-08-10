@@ -395,9 +395,6 @@ jobs:
 
       - name: Set up Java for publishing to GitHub Maven Packages
         uses: actions/setup-java@v3
-        env:
-          MAVEN_USERNAME: devops@runtimeverification.com
-          MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
         with:
           java-version: '11'
           distribution: 'adopt'
@@ -405,7 +402,8 @@ jobs:
           server-id: runtime.verification.snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-
+      
+      # Build and Run Tests in Docker
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
