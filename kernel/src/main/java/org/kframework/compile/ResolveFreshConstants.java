@@ -51,6 +51,7 @@ public class ResolveFreshConstants {
     private java.util.Set<KVariable> freshVars = new HashSet<>();
     private Map<KVariable, Integer> offsets = new HashMap<>();
     private final String manualTopCell;
+    private int initialFresh;
 
     private void reset() {
         freshVars.clear();
@@ -188,16 +189,21 @@ public class ResolveFreshConstants {
     }
 
     public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files) {
+        this(def, manualTopCell, files, 0);
+    }
+
+    public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files, int initialFresh) {
         this.def = def;
         this.manualTopCell = manualTopCell;
         this.files = files;
+        this.initialFresh = initialFresh;
     }
 
     public Module resolve(Module m) {
         this.m = m;
         Set<Sentence> sentences = map(this::resolve, m.localSentences());
         KToken counterCellLabel = KToken("generatedCounter", Sort("#CellName"));
-        KApply freshCell = KApply(KLabel("#configCell"), counterCellLabel, KApply(KLabel("#cellPropertyListTerminator")), KToken("0", Sorts.Int()), counterCellLabel);
+        KApply freshCell = KApply(KLabel("#configCell"), counterCellLabel, KApply(KLabel("#cellPropertyListTerminator")), KToken(Integer.toString(initialFresh), Sorts.Int()), counterCellLabel);
 
         java.util.Set<Sentence> counterSentences = new HashSet<>();
         counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add(Att.FUNCTION())));

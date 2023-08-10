@@ -68,7 +68,7 @@ public class KoreBackend extends AbstractBackend {
      * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
      */
     protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
-        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd, def.kompileOptions);
+        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
         ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
         return getKompiledString(converter, files, heatCoolEquations, tool);
     }
@@ -92,14 +92,12 @@ public class KoreBackend extends AbstractBackend {
         return semantics.toString();
     }
 
-    public static Module getKompiledModule(Module mainModule, boolean hasAnd, KompileOptions kompileOptions) {
+    public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         mainModule = ModuleTransformer.from(new RemoveUnit()::apply, "Remove unit applications for collections").apply(mainModule);
         if (hasAnd) {
           mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
         }
-        mainModule = ModuleTransformer.from(new GenerateMapCeilAxioms(mainModule, kompileOptions)::gen, "Generate map ceil axioms").apply(mainModule);
-
         return mainModule;
     }
 
@@ -127,8 +125,11 @@ public class KoreBackend extends AbstractBackend {
         };
         Function1<Definition, Definition> checkSimplificationRules = d -> DefinitionTransformer.from(m -> { m.localRules().foreach(r -> checkSimpIsFunc(m, r)); return m;}, "Check simplification rules").apply(d);
         DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
+        ResolveFreshConfigConstants freshConfigResolver = new ResolveFreshConfigConstants();
+        Function1<Definition, Definition> resolveFreshConfigConstants = d ->
+            DefinitionTransformer.from(m -> freshConfigResolver.resolve(m), "resolving !Var config variables").apply(d);
         Function1<Definition, Definition> resolveFreshConstants = d ->
-                DefinitionTransformer.from(m -> new ResolveFreshConstants(d, kompileOptions.topCell, files).resolve(m), "resolving !Var variables").apply(d);
+                DefinitionTransformer.from(m -> new ResolveFreshConstants(d, kompileOptions.topCell, files, freshConfigResolver.getCurrentFresh()).resolve(m), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
@@ -158,6 +159,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(checkSimplificationRules)
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
+                .andThen(resolveFreshConfigConstants)
                 .andThen(resolveFreshConstants)
                 .andThen(d -> DefinitionTransformer.from(GeneratedTopFormat::resolve, "Fix GeneratedCounterCell format").apply(d))
                 .andThen(generateSortPredicateSyntax)
