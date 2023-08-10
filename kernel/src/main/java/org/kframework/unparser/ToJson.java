@@ -480,7 +480,6 @@ public class ToJson {
             knode.add("node", JsonParser.KREWRITE);
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
@@ -488,7 +487,6 @@ public class ToJson {
             knode.add("node", JsonParser.KAS);
             knode.add("pattern", toJson(alias.pattern()));
             knode.add("alias",   toJson(alias.alias()));
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;

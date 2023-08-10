@@ -403,12 +403,12 @@ public class JsonParser {
             case KREWRITE:
                 K lhs = toK(data.getJsonObject("lhs"));
                 K rhs = toK(data.getJsonObject("rhs"));
-                return KRewrite(lhs, rhs, toAtt(data.getJsonObject("att")));
+                return KRewrite(lhs, rhs, Att.empty());
 
             case KAS:
                 K pattern = toK(data.getJsonObject("pattern"));
                 K alias   = toK(data.getJsonObject("alias"));
-                return KORE.KAs(pattern, alias, toAtt(data.getJsonObject("att")));
+                return KORE.KAs(pattern, alias, Att.empty());
 
             case INJECTEDKLABEL:
                 klabel    = toKLabel(data.getJsonObject("label"));
