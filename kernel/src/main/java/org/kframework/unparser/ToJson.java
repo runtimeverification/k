@@ -58,7 +58,7 @@ import static org.kframework.Collections.*;
  */
 public class ToJson {
 
-    public static final int version = 2;
+    public static final int version = 3;
 
 ///////////////////////////////
 // ToJson Definition Objects //
