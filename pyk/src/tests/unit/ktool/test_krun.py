@@ -22,6 +22,7 @@ required_args: dict[str, Any] = OrderedDict(
         ('no_expand_macros', False),
         ('search_final', False),
         ('no_pattern', False),
+        ('debugger', False),
     ]
 )
 
@@ -38,6 +39,7 @@ optional_args: dict[str, tuple[Any, list[str]]] = {
     'no_expand_macros': (True, ['--no-expand-macros']),
     'search_final': (True, ['--search-final']),
     'no_pattern': (True, ['--no-pattern']),
+    'debugger': (True, ['--debugger']),
 }
 
 

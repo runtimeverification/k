@@ -72,6 +72,7 @@ class KRun(KPrint):
         output: KRunOutput | None = KRunOutput.PRETTY,
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
+        debugger: bool = False,
     ) -> CompletedProcess:
         with self._temp_file() as ntf:
             pgm.write(ntf)
@@ -94,6 +95,7 @@ class KRun(KPrint):
                 bug_report=self._bug_report,
                 check=False,
                 pipe_stderr=pipe_stderr,
+                debugger=debugger,
             )
 
     def run_kore(
@@ -111,6 +113,7 @@ class KRun(KPrint):
         check: bool = False,
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
+        debugger: bool = False,
     ) -> None:
         result = self.run_kore_process(
             pgm,
@@ -124,6 +127,7 @@ class KRun(KPrint):
             output=output,
             pipe_stderr=pipe_stderr,
             bug_report=bug_report,
+            debugger=debugger,
         )
 
         if output != KRunOutput.NONE:
@@ -152,6 +156,7 @@ class KRun(KPrint):
         pipe_stderr: bool = True,
         check: bool = False,
         bug_report: BugReport | None = None,
+        debugger: bool = False,
     ) -> Pattern:
         proc_res = self.run_kore_process(
             pattern,
@@ -163,6 +168,7 @@ class KRun(KPrint):
             output=KRunOutput.NONE,
             pipe_stderr=pipe_stderr,
             bug_report=bug_report,
+            debugger=debugger,
         )
 
         if check:
@@ -194,6 +200,7 @@ def _krun(
     pipe_stderr: bool = True,
     logger: Logger | None = None,
     bug_report: BugReport | None = None,
+    debugger: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -221,6 +228,7 @@ def _krun(
         no_expand_macros=no_expand_macros,
         search_final=search_final,
         no_pattern=no_pattern,
+        debugger=debugger,
     )
 
     if bug_report is not None:
@@ -232,7 +240,7 @@ def _krun(
             bug_report.add_command(args)
 
     try:
-        return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER)
+        return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, exec_process=debugger)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
@@ -254,6 +262,7 @@ def _build_arg_list(
     no_expand_macros: bool,
     search_final: bool,
     no_pattern: bool,
+    debugger: bool,
 ) -> list[str]:
     args = [command]
     if input_file:
@@ -280,4 +289,6 @@ def _build_arg_list(
         args += ['--search-final']
     if no_pattern:
         args += ['--no-pattern']
+    if debugger:
+        args += ['--debugger']
     return args
