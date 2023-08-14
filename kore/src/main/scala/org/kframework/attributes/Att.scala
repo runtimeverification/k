@@ -253,7 +253,6 @@ object Att {
   final val TOTAL = Key("total", KeyType.BuiltIn)
   final val TRUSTED = Key("trusted", KeyType.BuiltIn)
   final val TYPE = Key("type", KeyType.BuiltIn)
-  final val UNBLOCK = Key("unblock", KeyType.BuiltIn)
   final val UNBOUND_VARIABLES = Key("unboundVariables", KeyType.BuiltIn)
   final val UNIT = Key("unit", KeyType.BuiltIn)
   final val UNPARSE_AVOID = Key("unparseAvoid", KeyType.BuiltIn)

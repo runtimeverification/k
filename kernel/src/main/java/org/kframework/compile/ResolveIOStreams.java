@@ -392,7 +392,7 @@ public class ResolveIOStreams {
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         java.util.List<Sentence> unblockRules = stream(getStreamModule(streamName).localSentences())
-                .filter(s -> s instanceof Rule && s.att().contains(Att.UNBLOCK()))
+                .filter(s -> s instanceof Rule && s.att().getOptional(Att.LABEL()).map(lbl -> lbl.equals("STDIN-STREAM.stdinUnblock")).orElse(false))
                 .collect(Collectors.toList());
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);
