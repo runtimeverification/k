@@ -9,14 +9,13 @@ from itertools import chain
 from typing import TYPE_CHECKING, final, overload
 
 from ..utils import EMPTY_FROZEN_DICT, FrozenDict
-from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
+from .kast import KAst
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from typing import Any, Final, TypeVar
 
     T = TypeVar('T', bound='KAst')
-    W = TypeVar('W', bound='WithKAtt')
     KI = TypeVar('KI', bound='KInner')
     A = TypeVar('A', bound='Any')
     B = TypeVar('B', bound='Any')
@@ -249,21 +248,16 @@ class KVariable(KInner):
     @classmethod
     def from_dict(cls: type[KVariable], d: Mapping[str, Any]) -> KVariable:
         cls._check_node(d)
-        att = KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT
-
-        sort: KSort | None
-        if KAtt.SORT in att:
-            sort = KSort.from_dict(att[KAtt.SORT])
-        else:
-            sort = None
-
+        sort = None
+        if 'sort' in d:
+            sort = KSort.from_dict(d['sort'])
         return KVariable(name=d['name'], sort=sort)
 
     def to_dict(self) -> dict[str, Any]:
-        _att = KAtt({})
+        _d: dict[str, Any] = {'node': 'KVariable', 'name': self.name}
         if self.sort is not None:
-            _att = _att.update({KAtt.SORT: self.sort.to_dict()})
-        return {'node': 'KVariable', 'name': self.name, 'att': _att.to_dict()}
+            _d['sort'] = self.sort.to_dict()
+        return _d
 
     def let(self, *, name: str | None = None, sort: str | KSort | None = None) -> KVariable:
         name = name if name is not None else self.name
@@ -456,7 +450,7 @@ class KAs(KInner):
     def to_dict(self) -> dict[str, Any]:
         return {'node': 'KAs', 'pattern': self.pattern.to_dict(), 'alias': self.alias.to_dict()}
 
-    def let(self, *, pattern: KInner | None = None, alias: KInner | None = None, att: KAtt | None = None) -> KAs:
+    def let(self, *, pattern: KInner | None = None, alias: KInner | None = None) -> KAs:
         pattern = pattern if pattern is not None else self.pattern
         alias = alias if alias is not None else self.alias
         return KAs(pattern=pattern, alias=alias)
@@ -470,14 +464,13 @@ class KAs(KInner):
 
 @final
 @dataclass(frozen=True)
-class KRewrite(KInner, WithKAtt):
+class KRewrite(KInner):
     lhs: KInner
     rhs: KInner
 
-    def __init__(self, lhs: KInner, rhs: KInner, att: KAtt = EMPTY_ATT):
+    def __init__(self, lhs: KInner, rhs: KInner):
         object.__setattr__(self, 'lhs', lhs)
         object.__setattr__(self, 'rhs', rhs)
-        object.__setattr__(self, 'att', att)
 
     def __iter__(self) -> Iterator[KInner]:
         return iter([self.lhs, self.rhs])
@@ -494,7 +487,6 @@ class KRewrite(KInner, WithKAtt):
         return KRewrite(
             lhs=KInner.from_dict(d['lhs']),
             rhs=KInner.from_dict(d['rhs']),
-            att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -502,7 +494,6 @@ class KRewrite(KInner, WithKAtt):
             'node': 'KRewrite',
             'lhs': self.lhs.to_dict(),
             'rhs': self.rhs.to_dict(),
-            'att': self.att.to_dict(),
         }
 
     def let(
@@ -510,15 +501,10 @@ class KRewrite(KInner, WithKAtt):
         *,
         lhs: KInner | None = None,
         rhs: KInner | None = None,
-        att: KAtt | None = None,
     ) -> KRewrite:
         lhs = lhs if lhs is not None else self.lhs
         rhs = rhs if rhs is not None else self.rhs
-        att = att if att is not None else self.att
-        return KRewrite(lhs=lhs, rhs=rhs, att=att)
-
-    def let_att(self, att: KAtt) -> KRewrite:
-        return self.let(att=att)
+        return KRewrite(lhs=lhs, rhs=rhs)
 
     def map_inner(self: KRewrite, f: Callable[[KInner], KInner]) -> KRewrite:
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))

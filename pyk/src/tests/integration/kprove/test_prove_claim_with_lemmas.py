@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.kast.inner import KAtt, KToken
+from pyk.kast import KAtt
+from pyk.kast.inner import KToken
 from pyk.kast.outer import KClaim, KRule
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.ml import is_top

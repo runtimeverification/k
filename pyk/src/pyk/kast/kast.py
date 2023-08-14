@@ -21,6 +21,10 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class KAst(ABC):
+    @staticmethod
+    def version() -> int:
+        return 3
+
     @classmethod
     def from_dict(cls: type[T], d: Mapping[str, Any]) -> T:
         from . import inner, outer
@@ -175,7 +179,7 @@ def kast_term(dct: Mapping[str, Any], cls: type[T] = KAst) -> T:  # type: ignore
     if dct['format'] != 'KAST':
         raise ValueError(f"Invalid format: {dct['format']}")
 
-    if dct['version'] != 2:
+    if dct['version'] != KAst.version():
         raise ValueError(f"Invalid version: {dct['version']}")
 
     return cls.from_dict(dct['term'])
