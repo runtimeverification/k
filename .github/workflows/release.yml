@@ -116,7 +116,7 @@ jobs:
         with:
           name: kore-exec.tar.gz
           path: |
-            **/kore-exec.tar.gz
+            **/*/kore-exec.tar.gz
  
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
@@ -168,7 +168,7 @@ jobs:
         with:
           name: kore-exec.tar.gz
           path: |
-            **/kore-exec.tar.gz
+            **/*/kore-exec.tar.gz
    
   debian-bookworm:
     name: 'K Debian Bookworm Package'
@@ -217,6 +217,14 @@ jobs:
           version=$(cat package/version)
           cp kframework_arch_x86_64.pkg.tar.zst kframework_${version}_arch_x86_64.pkg.tar.zst
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_arch_x86_64.pkg.tar.zst
+          
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/*/kore-exec.tar.gz
 
   macos-build:
     name: 'Build MacOS Package'

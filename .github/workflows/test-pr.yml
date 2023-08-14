@@ -109,6 +109,13 @@ jobs:
         run: |
           docker stop --time=0 k-ci-${GITHUB_SHA}
           docker container rm --force k-ci-${GITHUB_SHA} || true
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/*/kore-exec.tar.gz
 
   test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
@@ -130,8 +137,8 @@ jobs:
         with:
           name: kore-exec.tar.gz
           path: |
-            **/kore-exec.tar.gz
-
+            **/*/kore-exec.tar.gz
+            
   compile-nix-flake:
     name: 'Nix flake'
     strategy:
