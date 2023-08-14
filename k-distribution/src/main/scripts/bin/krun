@@ -27,6 +27,7 @@ statistics=false
 executeToBranch=false
 smtPrelude=
 smt=
+smtTimeout=
 llvm_krun_flags=
 configVars=
 dryRun=false
@@ -158,6 +159,8 @@ $KRUN options:
       --smt [none|z3]      Enable/disable SMT solver for symbolic execution.
       --smt-prelude FILE   Prepend FILE to all SMT queries during symbolic
                            execution.
+      --smt-timeout SMT_TIMEOUT
+                           Timeout for calls to the SMT solver, in milliseconds
       --statistics         Print number of steps executed. Currently only
                            supported on LLVM backend.
       --term               Use the value that would otherwise be considered the
@@ -366,6 +369,11 @@ do
 
       --smt-prelude)
       smtPrelude="$2"
+      shift
+      ;;
+
+      --smt-timeout)
+      smtTimeout="$2"
       shift
       ;;
 
@@ -618,7 +626,10 @@ elif [ "$backendName" = "haskell" ] ; then
   if [ -n "$smt" ]; then
     koreExecFlags="$koreExecFlags --smt $smt"
   fi
-    if $executeToBranch; then
+  if [ -n "$smtTimeout" ]; then
+    koreExecFlags="$koreExecFlags --smt-timeout $smtTimeout"
+  fi
+  if $executeToBranch; then
     koreExecFlags="$koreExecFlags --execute-to-branch"
   fi
   if $search || [ -n "$pattern" ]; then
