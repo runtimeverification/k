@@ -374,10 +374,10 @@ variable.
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
-  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
+  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];
 // I want to write the rule below as _:Type (E:Exp[.Types] => E),
 // but the list completion seems to not work well with that.
-  rule T:Type E:Exp[.Types]; => T E;          [structural]
+  rule T:Type E:Exp[.Types]; => T E;
 ```
 
 ## Function declarations
@@ -404,7 +404,6 @@ entire code of the function body needs to type anyway.
        (.Bag => <task>
                <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <returnType> T </returnType>
              </task>)
-    [structural]
 ```
 
 ## Checking if `main()` exists}
@@ -418,7 +417,6 @@ types (remove this task creation if you do not want your type system
 to reject programs without a `main` function).
 ```k
   rule <task> <k> stmt => main(.Exps); </k> (.Bag => <tenv> .Map </tenv>) </task>
-    [structural]
 ```
 
 ## Collecting the terminated tasks
@@ -599,8 +597,8 @@ any try-catch block (with the currently unchecked ‒also for
 simplicity‒ expectation that the caller functions would catch those
 exceptions).
 ```k
-  rule try block catch(int X:Id) {S} => {int X; S}  [structural]
-  rule try block catch(int X:Id) {} => {int X;}  [structural]
+  rule try block catch(int X:Id) {S} => {int X; S}
+  rule try block catch(int X:Id) {} => {int X;}
   rule throw int; => stmt
 ```
 
