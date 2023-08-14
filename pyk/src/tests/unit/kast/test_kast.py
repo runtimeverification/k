@@ -23,14 +23,14 @@ if TYPE_CHECKING:
 
 
 KVARIABLE_TEST_DATA: Final = (
-    ('no-sort', KVariable('Foo'), {'node': 'KVariable', 'name': 'Foo', 'att': {'node': 'KAtt', 'att': {}}}),
+    ('no-sort', KVariable('Foo'), {'node': 'KVariable', 'name': 'Foo'}),
     (
         'sort',
         KVariable('Foo', sort=KSort('Int')),
         {
             'node': 'KVariable',
             'name': 'Foo',
-            'att': {'node': 'KAtt', 'att': {'org.kframework.kore.Sort': {'node': 'KSort', 'name': 'Int'}}},
+            'sort': {'node': 'KSort', 'name': 'Int'},
         },
     ),
 )
