@@ -890,7 +890,6 @@
         "immer-src": "immer-src",
         "mavenix": "mavenix",
         "nixpkgs": [
-          "haskell-backend",
           "nixpkgs"
         ],
         "pybind11-src": "pybind11-src",

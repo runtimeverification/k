@@ -12,7 +12,7 @@
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     };
     llvm-backend.url = "github:runtimeverification/llvm-backend";
-    llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+    llvm-backend.inputs.nixpkgs.follows = "nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
     mavenix.url = "github:goodlyrottenapple/mavenix";
