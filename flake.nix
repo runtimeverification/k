@@ -32,7 +32,7 @@
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
-        haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
+        haskell-backend.overlays.z3 # used only to override the z3 version to the same one as used by the haskell backend.
         (final: prev:
           let
             k-version =
@@ -187,7 +187,7 @@
         devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework { inherit haskell-backend-bins; llvm-kompile-libs = []; });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
-        overlays.z3 = haskell-backend.overlay;
+        overlays.z3 = haskell-backend.overlays.z3;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
 
