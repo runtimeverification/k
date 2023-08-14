@@ -41,7 +41,7 @@ public class SMTOptions implements Serializable {
     @Parameter(names={"--smt-prelude", "--smt_prelude"}, description="Path to the SMT prelude file.", hidden = true)
     public String smtPrelude;
 
-    @Parameter(names="--smt-timeout", description="Timeout for calls to the SMT solver, in milliseconds", hidden = true)
+    @Parameter(names="--smt-timeout", description="Timeout for calls to the SMT solver, in milliseconds.", hidden = true)
     public Integer smtTimeout = null;
 
     @Parameter(names="--z3-jni", description="Invokes Z3 as JNI library. Default is external process. " +
