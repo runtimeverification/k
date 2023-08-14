@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast import KInner, kast_term
+from pyk.kast.inner import KInner
+from pyk.kast.kast import KAst, kast_term
 from pyk.kast.outer import read_kast_definition
 from pyk.kast.pretty import PrettyPrinter
 from pyk.kllvm.compiler import compile_runtime
@@ -123,7 +124,7 @@ def test_kore_to_kast(text: str) -> None:  # TODO turn into unit test
 def test_cli_kast_to_kore(llvm_dir: Path, text: str) -> None:
     # Given
     kast = stringToken(text)
-    kast_dict = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}  # TODO extract function
+    kast_dict = {'format': 'KAST', 'version': KAst.version(), 'term': kast.to_dict()}  # TODO extract function
     kast_json = json.dumps(kast_dict)
 
     # When
