@@ -1033,7 +1033,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert expected_pending == actual_pending
         assert expected_failing == actual_failing
 
-        actual_path_conds = set({path_condition for _, (_, path_condition) in failure_info.failing_nodes.items()})
+        actual_path_conds = set({path_condition for _, path_condition in failure_info.path_conditions.items()})
         expected_path_conds = set({kprove.pretty_print(condition) for condition in path_conditions})
 
         assert actual_path_conds == expected_path_conds

@@ -270,17 +270,31 @@ def test_aprbmc_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None
 
 
 def test_print_failure_info() -> None:
-    failing_nodes: dict[int, tuple[str, str]] = {}
-    failing_nodes[3] = (
-        'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 2 #Implies 1',
-        'true #Equals X <=Int 100',
-    )
-    failing_nodes[5] = (
-        'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 5 #Implies 6',
-        '#Top',
-    )
+    failing_nodes = [3, 5]
     pending_nodes = [6, 7, 8]
-    failure_info = APRFailureInfo(failing_nodes=failing_nodes, pending_nodes=pending_nodes)
+
+    path_conditions = {}
+    path_conditions[3] = 'true #Equals X <=Int 100'
+    path_conditions[5] = '#Top'
+
+    failure_reasons = {}
+    failure_reasons[
+        3
+    ] = 'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 2 #Implies 1'
+    failure_reasons[
+        5
+    ] = 'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 5 #Implies 6'
+
+    models: dict[int, list[tuple[str, str]]] = {}
+    models[5] = [('X', '101')]
+
+    failure_info = APRFailureInfo(
+        failing_nodes=failing_nodes,
+        pending_nodes=pending_nodes,
+        failure_reasons=failure_reasons,
+        path_conditions=path_conditions,
+        models=models,
+    )
 
     actual_output = '\n'.join(failure_info.print())
     expected_output = r"""5 Failure nodes. (3 pending and 2 failing)
@@ -295,6 +309,7 @@ Failing nodes:
     STATE_CELL: $n |-> 2 #Implies 1
   Path condition:
     true #Equals X <=Int 100
+  Failed to generate a model.
 
   Node id: 5
   Failure reason:
@@ -302,6 +317,8 @@ Failing nodes:
     STATE_CELL: $n |-> 5 #Implies 6
   Path condition:
     #Top
+  Model:
+    X = 101
 
 Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN"""
 
