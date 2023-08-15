@@ -3,6 +3,8 @@ package org.kframework.attributes
 
 import java.util.Optional
 import org.kframework.Collections._
+import org.kframework.definition.Production
+import org.kframework.kore.Sort
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.Set
@@ -303,7 +305,7 @@ object Att {
   final val FRESH = Key("fresh", KeyType.Internal, KeyParameter.Forbidden)
   final val GENERATED_BY_LIST_SUBSORTING = Key("generatedByListSubsorting", KeyType.Internal, KeyParameter.Forbidden)
   final val HAS_DOMAIN_VALUES = Key("hasDomainValues", KeyType.Internal, KeyParameter.Forbidden)
-  final val LOCATION = Key("org.kframework.attributes.Location", KeyType.Internal, KeyParameter.Required)
+  final val LOCATION = Key(classOf[Location].getName, KeyType.Internal, KeyParameter.Required)
   final val NAT = Key("nat", KeyType.Internal, KeyParameter.Required)
   final val NOT_INJECTION = Key("notInjection", KeyType.Internal, KeyParameter.Forbidden)
   final val ORIGINAL_NAME = Key("originalName", KeyType.Internal, KeyParameter.Forbidden)
@@ -313,7 +315,7 @@ object Att {
   final val PREDICATE = Key("predicate", KeyType.Internal, KeyParameter.Required)
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION = Key("prettyPrintWithSortAnnotation", KeyType.Internal, KeyParameter.Forbidden)
   final val PRIORITIES = Key("priorities", KeyType.Internal, KeyParameter.Required)
-  final val PRODUCTION = Key("org.kframework.definition.Production", KeyType.Internal, KeyParameter.Required)
+  final val PRODUCTION = Key(classOf[Production].getName, KeyType.Internal, KeyParameter.Required)
   final val PRODUCTION_ID = Key("productionId", KeyType.Internal, KeyParameter.Forbidden)
   final val PROJECTION = Key("projection", KeyType.Internal, KeyParameter.Forbidden)
   final val RECORD_PRD = Key("recordPrd", KeyType.Internal, KeyParameter.Required)
@@ -329,9 +331,9 @@ object Att {
   final val REJECT = Key("reject", KeyType.Internal, KeyParameter.Forbidden)
   final val REMOVE = Key("remove", KeyType.Internal, KeyParameter.Forbidden)
   final val SMT_PRELUDE = Key("smt-prelude", KeyType.Internal, KeyParameter.Forbidden)
-  final val SORT = Key("org.kframework.kore.Sort", KeyType.Internal, KeyParameter.Required)
+  final val SORT = Key(classOf[Sort].getName, KeyType.Internal, KeyParameter.Required)
   final val SORT_PARAMS = Key("sortParams", KeyType.Internal, KeyParameter.Required)
-  final val SOURCE = Key("org.kframework.attributes.Source", KeyType.Internal, KeyParameter.Required)
+  final val SOURCE = Key(classOf[Source].getName, KeyType.Internal, KeyParameter.Required)
   final val SYNTAX_MODULE = Key("syntaxModule", KeyType.Internal, KeyParameter.Required)
   final val TEMPORARY_CELL_SORT_DECL = Key("temporary-cell-sort-decl", KeyType.Internal, KeyParameter.Forbidden)
   final val TERMINALS = Key("terminals", KeyType.Internal, KeyParameter.Required)
