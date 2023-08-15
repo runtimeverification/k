@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from pyk.kore.rpc import LogEntry
 
 from ..cterm import CTerm
-from ..kast.inner import KRewrite, KSort
+from ..kast.inner import KInner, KRewrite, KSort, Subst
 from ..kast.manip import flatten_label, ml_pred_to_bool
 from ..kast.outer import KClaim
 from ..kcfg import KCFG
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
-    from ..kast.inner import KInner
     from ..kast.outer import KDefinition
     from ..kcfg import KCFGExplore
     from ..kcfg.kcfg import NodeIdLike
@@ -781,18 +780,36 @@ class APRSummary(ProofSummary):
 
 @dataclass(frozen=True)
 class APRFailureInfo:
-    failing_nodes: FrozenDict[int, tuple[str, str]]
     pending_nodes: frozenset[int]
+    failing_nodes: frozenset[int]
+    path_conditions: FrozenDict[int, str]
+    failure_reasons: FrozenDict[int, str]
+    models: FrozenDict[int, frozenset[tuple[str, str]]]
 
-    def __init__(self, failing_nodes: Mapping[int, tuple[str, str]], pending_nodes: Iterable[int]):
-        object.__setattr__(self, 'failing_nodes', FrozenDict(failing_nodes))
+    def __init__(
+        self,
+        failing_nodes: Iterable[int],
+        pending_nodes: Iterable[int],
+        path_conditions: Mapping[int, str],
+        failure_reasons: Mapping[int, str],
+        models: Mapping[int, Iterable[tuple[str, str]]],
+    ):
+        object.__setattr__(self, 'failing_nodes', frozenset(failing_nodes))
         object.__setattr__(self, 'pending_nodes', frozenset(pending_nodes))
+        object.__setattr__(self, 'path_conditions', FrozenDict(path_conditions))
+        object.__setattr__(self, 'failure_reasons', FrozenDict(failure_reasons))
+        object.__setattr__(
+            self, 'models', FrozenDict({node_id: frozenset(model) for (node_id, model) in models.items()})
+        )
 
     @staticmethod
-    def from_proof(proof: APRProof, kcfg_explore: KCFGExplore) -> APRFailureInfo:
+    def from_proof(proof: APRProof, kcfg_explore: KCFGExplore, counterexample_info: bool = False) -> APRFailureInfo:
         target = proof.kcfg.node(proof.target)
         pending_nodes = {node.id for node in proof.pending}
-        failing_nodes = {}
+        failing_nodes = {node.id for node in proof.failing}
+        path_conditions = {}
+        failure_reasons = {}
+        models = {}
         for node in proof.failing:
             simplified_node, _ = kcfg_explore.cterm_simplify(node.cterm)
             simplified_target, _ = kcfg_explore.cterm_simplify(target.cterm)
@@ -800,8 +817,24 @@ class APRFailureInfo:
             target_cterm = CTerm.from_kast(simplified_target)
             _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
             path_condition = kcfg_explore.kprint.pretty_print(proof.path_constraints(node.id))
-            failing_nodes[node.id] = (reason, path_condition)
-        return APRFailureInfo(failing_nodes=failing_nodes, pending_nodes=pending_nodes)
+            failure_reasons[node.id] = reason
+            path_conditions[node.id] = path_condition
+            if counterexample_info:
+                model_subst = kcfg_explore.cterm_get_model(node.cterm)
+                if type(model_subst) is Subst:
+                    model: list[tuple[str, str]] = []
+                    for var, term in model_subst.to_dict().items():
+                        term_kast = KInner.from_dict(term)
+                        term_pretty = kcfg_explore.kprint.pretty_print(term_kast)
+                        model.append((var, term_pretty))
+                    models[node.id] = model
+        return APRFailureInfo(
+            failing_nodes=failing_nodes,
+            pending_nodes=pending_nodes,
+            path_conditions=path_conditions,
+            failure_reasons=failure_reasons,
+            models=models,
+        )
 
     def print(self) -> list[str]:
         res_lines: list[str] = []
@@ -819,10 +852,9 @@ class APRFailureInfo:
         if num_failing > 0:
             res_lines.append('')
             res_lines.append('Failing nodes:')
-            print(self.failing_nodes)
-            for node_id, info in self.failing_nodes.items():
-                print(info)
-                (reason, path_condition) = info
+            for node_id in self.failing_nodes:
+                reason = self.failure_reasons[node_id]
+                path_condition = self.path_conditions[node_id]
                 res_lines.append('')
                 res_lines.append(f'  Node id: {str(node_id)}')
 
@@ -831,6 +863,13 @@ class APRFailureInfo:
 
                 res_lines.append('  Path condition:')
                 res_lines += [f'    {path_condition}']
+
+                if node_id in self.models:
+                    res_lines.append('  Model:')
+                    for var, term in self.models[node_id]:
+                        res_lines.append(f'    {var} = {term}')
+                else:
+                    res_lines.append('  Failed to generate a model.')
 
             res_lines.append('')
             res_lines.append('Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN')
