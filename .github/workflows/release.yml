@@ -110,7 +110,14 @@ jobs:
         if: always()
         run: |
           docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
-
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
+ 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
@@ -155,7 +162,14 @@ jobs:
         if: always()
         run: |
           docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
-
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
+   
   debian-bookworm:
     name: 'K Debian Bookworm Package'
     runs-on: [self-hosted, linux, normal]
@@ -402,7 +416,8 @@ jobs:
           server-id: runtime.verification.snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-
+      
+      # Build and Run Tests in Docker
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:

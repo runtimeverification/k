@@ -41,15 +41,12 @@ public class SMTOptions implements Serializable {
     @Parameter(names={"--smt-prelude", "--smt_prelude"}, description="Path to the SMT prelude file.", hidden = true)
     public String smtPrelude;
 
+    @Parameter(names="--smt-timeout", description="Timeout for calls to the SMT solver, in milliseconds.", hidden = true)
+    public Integer smtTimeout = null;
+
     @Parameter(names="--z3-jni", description="Invokes Z3 as JNI library. Default is external process. " +
             "JNI is slightly faster, but can potentially lead to JVM crash.", hidden = true)
     public boolean z3JNI = false;
-
-    @Parameter(names="--z3-cnstr-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking constraint satisfiability.", hidden = true)
-    public int z3CnstrTimeout = 50;
-
-    @Parameter(names="--z3-impl-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking implication.", hidden = true)
-    public int z3ImplTimeout = 5000;
 
     @Parameter(names="--z3-tactic", description="The solver tactic to use to check satisfiability in Z3.", hidden = true)
     public String z3Tactic;

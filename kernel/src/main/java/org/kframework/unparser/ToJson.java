@@ -58,7 +58,7 @@ import static org.kframework.Collections.*;
  */
 public class ToJson {
 
-    public static final int version = 2;
+    public static final int version = 3;
 
 ///////////////////////////////
 // ToJson Definition Objects //
@@ -437,7 +437,6 @@ public class ToJson {
             knode.add("node", JsonParser.KTOKEN);
             knode.add("sort", toJson(tok.sort()));
             knode.add("token", tok.s());
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
@@ -452,7 +451,6 @@ public class ToJson {
 
             knode.add("arity", app.klist().size());
             knode.add("args", args.build());
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KSequence) {
             KSequence seq = (KSequence) k;
@@ -472,7 +470,9 @@ public class ToJson {
 
             knode.add("node", JsonParser.KVARIABLE);
             knode.add("name", var.name());
-            knode.add("att", toJson(k.att()));
+            if (k.att().contains(Sort.class)) {
+                knode.add("sort", toJson(k.att().get(Sort.class)));
+            }
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
@@ -480,7 +480,6 @@ public class ToJson {
             knode.add("node", JsonParser.KREWRITE);
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
@@ -488,14 +487,12 @@ public class ToJson {
             knode.add("node", JsonParser.KAS);
             knode.add("pattern", toJson(alias.pattern()));
             knode.add("alias",   toJson(alias.alias()));
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
             knode.add("label", toJson(inj.klabel()));
-            knode.add("att", toJson(k.att()));
 
         } else {
             throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);

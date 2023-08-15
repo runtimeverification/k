@@ -129,6 +129,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--smt-prelude");
                     args.add(smtOptions.smtPrelude);
                 }
+                if (smtOptions.smtTimeout != null) {
+                    args.add("--smt-timeout");
+                    args.add(Integer.toString(smtOptions.smtTimeout));
+                }
                 koreCommand = args.toArray(koreCommand);
                 if (backendOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
@@ -222,6 +226,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--smt-prelude");
                     args.add(smtOptions.smtPrelude);
                 }
+                if (smtOptions.smtTimeout != null) {
+                    args.add("--smt-timeout");
+                    args.add(Integer.toString(smtOptions.smtTimeout));
+                }
                 koreCommand = args.toArray(koreCommand);
                 if (backendOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
@@ -312,6 +320,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
                     args.add(smtOptions.smtPrelude);
+                }
+                if (smtOptions.smtTimeout != null) {
+                    args.add("--smt-timeout");
+                    args.add(Integer.toString(smtOptions.smtTimeout));
                 }
                 if (kProveOptions.debugScript != null) {
                     if (!kProveOptions.debugger) {
