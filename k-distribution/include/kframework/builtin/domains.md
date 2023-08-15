@@ -2723,7 +2723,6 @@ module STDIN-STREAM
          ListItem(#buffer(_:String))
          ...
        </stdin>
-       [unblock]
 
   /*
   syntax Stream ::= "#noIO"
