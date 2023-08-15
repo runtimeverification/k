@@ -122,6 +122,11 @@ jobs:
     runs-on: [self-hosted, linux, normal]
     needs: version-sync
     steps:
+      - name: Workflow Telemetry
+        uses: runforesight/workflow-telemetry-action@v1.8.0
+        with:
+          theme: 'dark'
+          comment_on_pr: true
       - uses: actions/checkout@v3
       - name: 'Build and Test'
         uses: ./.github/actions/test-package
