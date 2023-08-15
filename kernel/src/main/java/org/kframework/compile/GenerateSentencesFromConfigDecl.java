@@ -369,10 +369,10 @@ public class GenerateSentencesFromConfigDecl {
         }
 
         if (hasConfigurationOrRegularVariable || isStream) {
-            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.NO_THREAD()));
+            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add(Att.INITIALIZER()).add(Att.FUNCTION()));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add(Att.INITIALIZER()));
         } else {
-            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), Att().add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.NO_THREAD()));
+            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), Att().add(Att.INITIALIZER()).add(Att.FUNCTION()));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add(Att.INITIALIZER()));
         }
         if (!m.definedKLabels().contains(KLabel(initLabel))) {
@@ -574,9 +574,6 @@ public class GenerateSentencesFromConfigDecl {
         Att att = Att();
         if (cellName.equals("k")) {
             att = att.add(Att.MAINCELL());
-        }
-        if (ensures != null) {
-            att = att.add(Att.TOPCELL());
         }
         att = att.add(Att.CELL()).add(Att.CELL_NAME(), cellName);
         return att.addAll(getCellPropertiesAsAtt(k));
