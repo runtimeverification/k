@@ -5,9 +5,10 @@ from functools import cached_property
 from itertools import chain
 from typing import TYPE_CHECKING
 
-from .kast.inner import KApply, KInner, KRewrite, KVariable, Subst
+from .kast.inner import KApply, KInner, KRewrite, KToken, KVariable, Subst, bottom_up
 from .kast.kast import KAtt
 from .kast.manip import (
+    abstract_term_safely,
     apply_existential_substitutions,
     count_vars,
     flatten_label,
@@ -22,12 +23,15 @@ from .kast.manip import (
 )
 from .kast.outer import KClaim, KRule
 from .prelude.k import GENERATED_TOP_CELL
-from .prelude.ml import is_top, mlAnd, mlImplies, mlTop
+from .prelude.kbool import orBool
+from .prelude.ml import is_top, mlAnd, mlEqualsTrue, mlImplies, mlTop
 from .utils import unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from typing import Any
+
+    from .kast.outer import KDefinition
 
 
 @dataclass(frozen=True, order=True)
@@ -56,7 +60,7 @@ class CTerm:
     @staticmethod
     def _check_config(config: KInner) -> None:
         if not isinstance(config, KApply) or not config.is_cell:
-            raise ValueError('Expected cell label, found: {config.label.name}')
+            raise ValueError(f'Expected cell label, found: {config}')
 
     @staticmethod
     def _normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
@@ -137,6 +141,59 @@ class CTerm:
 
     def add_constraint(self, new_constraint: KInner) -> CTerm:
         return CTerm(self.config, [new_constraint] + list(self.constraints))
+
+    def anti_unify(
+        self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
+    ) -> tuple[CTerm, CSubst, CSubst]:
+        def disjunction_from_substs(subst1: Subst, subst2: Subst) -> KInner:
+            if KToken('true', 'Bool') in [subst1.pred, subst2.pred]:
+                return mlTop()
+            return mlEqualsTrue(orBool([subst1.pred, subst2.pred]))
+
+        new_config, self_subst, other_subst = anti_unify(self.config, other.config, kdef=kdef)
+        common_constraints = [constraint for constraint in self.constraints if constraint in other.constraints]
+
+        new_cterm = CTerm(
+            config=new_config, constraints=([disjunction_from_substs(self_subst, other_subst)] if keep_values else [])
+        )
+
+        new_constraints = []
+        fvs = free_vars(new_cterm.kast)
+        len_fvs = 0
+        while len_fvs < len(fvs):
+            len_fvs = len(fvs)
+            for constraint in common_constraints:
+                if constraint not in new_constraints:
+                    constraint_fvs = free_vars(constraint)
+                    if any(fv in fvs for fv in constraint_fvs):
+                        new_constraints.append(constraint)
+                        fvs.extend(constraint_fvs)
+
+        for constraint in new_constraints:
+            new_cterm = new_cterm.add_constraint(constraint)
+        self_csubst = new_cterm.match_with_constraint(self)
+        other_csubst = new_cterm.match_with_constraint(other)
+        if self_csubst is None or other_csubst is None:
+            raise ValueError(
+                f'Anti-unification failed to produce a more general state: {(new_cterm, (self, self_csubst), (other, other_csubst))}'
+            )
+        return (new_cterm, self_csubst, other_csubst)
+
+
+def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
+    def _rewrites_to_abstractions(_kast: KInner) -> KInner:
+        if type(_kast) is KRewrite:
+            sort = kdef.sort(_kast) if kdef else None
+            return abstract_term_safely(_kast, sort=sort)
+        return _kast
+
+    minimized_rewrite = push_down_rewrites(KRewrite(state1, state2))
+    abstracted_state = bottom_up(_rewrites_to_abstractions, minimized_rewrite)
+    subst1 = abstracted_state.match(state1)
+    subst2 = abstracted_state.match(state2)
+    if subst1 is None or subst2 is None:
+        raise ValueError('Anti-unification failed to produce a more general state!')
+    return (abstracted_state, subst1, subst2)
 
 
 @dataclass(frozen=True, order=True)

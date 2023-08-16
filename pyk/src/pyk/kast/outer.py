@@ -1101,8 +1101,11 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             case KToken(_, sort) | KVariable(_, sort):
                 return sort
             case KRewrite(lhs, rhs):
-                sort = self.sort(lhs)
-                return sort if sort == self.sort(rhs) else None
+                lhs_sort = self.sort(lhs)
+                rhs_sort = self.sort(rhs)
+                if lhs_sort and rhs_sort:
+                    return self.least_common_supersort(lhs_sort, rhs_sort)
+                return None
             case KSequence(_):
                 return KSort('K')
             case KApply(label, _):
@@ -1128,6 +1131,17 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             raise ValueError(f'Could not determine sort of term: {kast}')
         return sort
 
+    def least_common_supersort(self, sort1: KSort, sort2: KSort) -> KSort | None:
+        if sort1 == sort2:
+            return sort1
+        if sort1 in self.subsorts(sort2):
+            return sort2
+        if sort2 in self.subsorts(sort1):
+            return sort1
+        # Computing least common supersort is not currently supported if sort1 is not a subsort of sort2 or
+        # vice versa. In that case there may be more than one LCS.
+        return None
+
     def greatest_common_subsort(self, sort1: KSort, sort2: KSort) -> KSort | None:
         if sort1 == sort2:
             return sort1
@@ -1135,6 +1149,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             return sort1
         if sort2 in self.subsorts(sort1):
             return sort2
+        # Computing greatest common subsort is not currently supported if sort1 is not a subsort of sort2 or
+        # vice versa. In that case there may be more than one GCS.
         return None
 
     # Sorts like Int cannot be injected directly into sort K so they are embedded in a KSequence.
