@@ -2,6 +2,7 @@
 package org.kframework.attributes
 
 import java.util.Optional
+import java.util.regex.Pattern
 import org.kframework.Collections._
 import org.kframework.definition.Production
 import org.kframework.kore.Sort
@@ -346,9 +347,10 @@ object Att {
   private val intClassName = classOf[java.lang.Integer].getName
 
   // All Key fields with UPPER_CASE naming
+  private val pat = Pattern.compile("[A-Z]+(_[A-Z0-9]+)*")
   private val keys: Map[String, Key] =
     Att.getClass.getDeclaredFields
-      .filter(f => f.getType.equals(classOf[Key]) && f.getName.matches("[A-Z]+(_[A-Z0-9]+)*"))
+      .filter(f => f.getType.equals(classOf[Key]) && pat.matcher(f.getName).matches())
       .map(f => f.get(this).asInstanceOf[Key])
       .map(k => (k.key, k))
       .toMap
