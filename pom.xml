@@ -27,14 +27,14 @@
     <repository>
       <id>runtime.verification</id>
       <name>Runtime Verification Repository</name>
-      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/internal</url>
+      <url>https://runtimeverification.mycloudrepo.io/repositories/runtimeverification</url>
       <snapshots><enabled>false</enabled></snapshots>
       <releases><enabled>true</enabled></releases>
     </repository>
     <repository>
       <id>runtime.verification.snapshots</id>
       <name>Runtime Verification Snapshot Repository</name>
-      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/snapshots</url>
+      <url>https://runtimeverification.mycloudrepo.io/repositories/runtimeverification</url>
       <snapshots><enabled>true</enabled></snapshots>
       <releases><enabled>false</enabled></releases>
     </repository>
@@ -44,14 +44,14 @@
     <pluginRepository>
       <id>runtime.verification</id>
       <name>Runtime Verification Repository</name>
-      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/internal</url>
+      <url>https://runtimeverification.mycloudrepo.io/repositories/runtimeverification</url>
       <snapshots><enabled>false</enabled></snapshots>
       <releases><enabled>true</enabled></releases>
     </pluginRepository>
     <pluginRepository>
       <id>runtime.verification.snapshots</id>
       <name>Runtime Verification Snapshot Repository</name>
-      <url>https://s3.us-east-2.amazonaws.com/runtimeverificationmaven/snapshots</url>
+      <url>https://runtimeverification.mycloudrepo.io/repositories/runtimeverification</url>
       <snapshots><enabled>true</enabled></snapshots>
       <releases><enabled>false</enabled></releases>
     </pluginRepository>
