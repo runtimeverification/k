@@ -547,6 +547,75 @@ KRULE_TO_KORE_EXPLICIT_DATA: Final = (
     ),
 )
 
+SORT_TERM_DATA: Final = (
+    (
+        'variable-int',
+        KVariable('X', 'Int'),
+        KSort('Int'),
+    ),
+    (
+        'variable-bool',
+        KVariable('X', 'Bool'),
+        KSort('Bool'),
+    ),
+    (
+        'variable-k',
+        KVariable('X', 'K'),
+        KSort('K'),
+    ),
+    (
+        'variable-kitem',
+        KVariable('X', 'KItem'),
+        KSort('KItem'),
+    ),
+    (
+        'int-token',
+        intToken(1),
+        KSort('Int'),
+    ),
+    (
+        'bool-token',
+        KToken('true', 'Bool'),
+        KSort('Bool'),
+    ),
+    (
+        'ksequence',
+        KSequence((intToken(0), intToken(1), intToken(2))),
+        KSort('K'),
+    ),
+    (
+        'krewrite-same-sort',
+        KRewrite(lhs=intToken(0), rhs=intToken(1)),
+        KSort('Int'),
+    ),
+    (
+        'krewrite-direct-supersort-lhs',
+        KRewrite(lhs=intToken(0), rhs=KVariable('X', 'KItem')),
+        KSort('KItem'),
+    ),
+    (
+        'krewrite-direct-supersort-rhs',
+        KRewrite(rhs=intToken(0), lhs=KVariable('X', 'KItem')),
+        KSort('KItem'),
+    ),
+    (
+        'sort-parametric-int',
+        KApply(
+            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('Int')]),
+            [KToken('true', 'Bool'), intToken(1), intToken(2)],
+        ),
+        KSort('Int'),
+    ),
+    (
+        'sort-parametric-bool',
+        KApply(
+            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('Bool')]),
+            [KToken('true', 'Bool'), KToken('true', 'Bool'), KToken('false', 'Bool')],
+        ),
+        KSort('Bool'),
+    ),
+)
+
 
 class TestKonvertSimpleProofs(KompiledTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
@@ -639,3 +708,21 @@ class TestKonvertSimpleProofs(KompiledTest):
 
         # Then
         assert actual_kore_text == kore_text
+
+    @pytest.mark.parametrize(
+        'test_id,kast,expected_sort',
+        SORT_TERM_DATA,
+        ids=[test_id for test_id, *_ in SORT_TERM_DATA],
+    )
+    def test_sort_term(
+        self,
+        definition: KDefinition,
+        test_id: str,
+        kast: KInner,
+        expected_sort: KSort,
+    ) -> None:
+        # When
+        actual_sort = definition.sort(kast)
+
+        # Then
+        assert actual_sort == expected_sort

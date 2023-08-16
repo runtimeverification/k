@@ -8,10 +8,10 @@ import pytest
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
-from pyk.kast.manip import minimize_term
+from pyk.kast.manip import get_cell, minimize_term
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import BOOL, notBool
+from pyk.prelude.kbool import BOOL, notBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
@@ -1147,3 +1147,137 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert len(proof.pending) == 1
         assert len(proof.terminal) == 1
         assert len(proof.failing) == 1
+
+    def test_anti_unify_forget_values(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprint: KPrint,
+    ) -> None:
+        cterm1 = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state='N |-> X:Int',
+            constraint=mlAnd(
+                [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('K', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                ]
+            ),
+        )
+        cterm2 = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state='N |-> Y:Int',
+            constraint=mlAnd(
+                [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('K', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                ]
+            ),
+        )
+
+        anti_unifier, subst1, subst2 = cterm1.anti_unify(cterm2, keep_values=False, kdef=kprint.definition)
+
+        k_cell = get_cell(anti_unifier.kast, 'STATE_CELL')
+        assert type(k_cell) is KApply
+        assert k_cell.label.name == '_|->_'
+        assert type(k_cell.args[1]) is KVariable
+        abstracted_var: KVariable = k_cell.args[1]
+
+        expected_anti_unifier = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state=f'N |-> {abstracted_var.name}:Int',
+            constraint=mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+        )
+
+        assert anti_unifier.kast == expected_anti_unifier.kast
+
+    def test_anti_unify_keep_values(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprint: KPrint,
+    ) -> None:
+        cterm1 = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state='N |-> X:Int',
+            constraint=mlAnd(
+                [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('K', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                ]
+            ),
+        )
+        cterm2 = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state='N |-> Y:Int',
+            constraint=mlAnd(
+                [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('K', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                ]
+            ),
+        )
+
+        anti_unifier, subst1, subst2 = cterm1.anti_unify(cterm2, keep_values=True, kdef=kprint.definition)
+
+        k_cell = get_cell(anti_unifier.kast, 'STATE_CELL')
+        assert type(k_cell) is KApply
+        assert k_cell.label.name == '_|->_'
+        assert type(k_cell.args[1]) is KVariable
+        abstracted_var: KVariable = k_cell.args[1]
+
+        expected_anti_unifier = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state=f'N |-> {abstracted_var.name}:Int',
+            constraint=mlAnd(
+                [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(
+                        orBool(
+                            [
+                                KApply('_==K_', [KVariable(name=abstracted_var.name), KVariable('X', 'Int')]),
+                                KApply('_==K_', [KVariable(name=abstracted_var.name), KVariable('Y', 'Int')]),
+                            ]
+                        )
+                    ),
+                ]
+            ),
+        )
+
+        assert anti_unifier.kast == expected_anti_unifier.kast
+
+    def test_anti_unify_subst_true(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprint: KPrint,
+    ) -> None:
+        cterm1 = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state='N |-> 0',
+            constraint=mlEqualsTrue(KApply('_==K_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+        )
+        cterm2 = self.config(
+            kprint=kprint,
+            k='int $n ; { }',
+            state='N |-> 0',
+            constraint=mlEqualsTrue(KApply('_==K_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+        )
+
+        anti_unifier, _, _ = cterm1.anti_unify(cterm2, keep_values=True, kdef=kprint.definition)
+
+        assert anti_unifier.kast == cterm1.kast
