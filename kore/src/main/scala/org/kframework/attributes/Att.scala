@@ -217,7 +217,7 @@ object Att {
   final val CONSTRUCTOR = Key("constructor", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val CONTEXT = Key("context", KeyType.BuiltIn, KeyParameter.Required)
   final val COOL = Key("cool", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val DEPENDS = Key("depends", KeyType.BuiltIn, KeyParameter.Forbidden)
+  final val DEPENDS = Key("depends", KeyType.BuiltIn, KeyParameter.Required)
   final val ELEMENT = Key("element", KeyType.BuiltIn, KeyParameter.Required)
   final val EXIT = Key("exit", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val FORMAT = Key("format", KeyType.BuiltIn, KeyParameter.Required)
