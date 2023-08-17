@@ -82,6 +82,18 @@ class KCLIArgs:
         return args
 
     @cached_property
+    def smt_args(self) -> ArgumentParser:
+        args = ArgumentParser(add_help=False)
+        args.add_argument('--smt-timeout', dest='smt_timeout', type=int, help='Timeout in ms to use for SMT queries.')
+        args.add_argument(
+            '--smt-retry-limit',
+            dest='smt_retry_limit',
+            type=int,
+            help='Number of times to retry SMT queries with scaling timeouts.',
+        )
+        return args
+
+    @cached_property
     def display_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
         args.add_argument('--minimize', dest='minimize', default=True, action='store_true', help='Minimize output.')
