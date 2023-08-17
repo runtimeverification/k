@@ -90,6 +90,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
     /**
      * Append an attribute to the list of attributes. In particular,
      * - inserting a key from the attribute whitelist if the attribute is recognized as a built-in
+     * - add the source location to any exceptions (ie. parameter restrictions) thrown when inserting the key
      * - otherwise, inserting an unrecognized key to be errored on later
      *
      * @param key
@@ -100,7 +101,11 @@ public abstract class ASTNode implements Serializable, HasLocation {
         if (att.contains(attKey)) {
             throw KEMException.outerParserError("Duplicate attribute: " + key, source, loc);
         }
-        att = att.add(attKey, val);
+        try {
+            att = att.add(attKey, val);
+        } catch (KEMException e) {
+            throw e.withLocation(loc, source);
+        }
     }
 
     /**
