@@ -179,13 +179,14 @@ object Att {
    * - Manually declare apply() and make it private, lest a public one is generated
    * - Manually declare copy() and make it private, preventing constructions like Att.GOOD_KEY.copy(key="bad-att")
    */
-  case class Key private[Att](key: String, keyType: KeyType, keyParam: KeyParameter) extends Serializable {
+  case class Key private[Att](key: String, keyType: KeyType, keyParam: KeyParameter, allowedSentences: Set[Class[_]]) extends Serializable {
     override def toString: String = key
     private[Key] def copy(): Unit = ()
   }
   object Key {
-    private[Att] def apply(key: String, keyType: KeyType): Key = new Key(key, keyType, KeyParameter.Optional)
-    private[Att] def apply(key: String, keyType: KeyType, keyParam: KeyParameter): Key = new Key(key, keyType, keyParam)
+    private[Att] def apply(key: String, keyType: KeyType): Key = Key(key, keyType, KeyParameter.Optional)
+    private[Att] def apply(key: String, keyType: KeyType, keyParam: KeyParameter): Key = Key(key, keyType, keyParam, Set(classOf[AnyRef]))
+    private[Att] def apply(key: String, keyType: KeyType, keyParam: KeyParameter, allowedSentences: Set[Class[_]]): Key = new Key(key, keyType, keyParam, allowedSentences)
   }
 
   def unrecognizedKey(key: String): Att.Key =
