@@ -9,6 +9,7 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+import org.kframework.main.Main;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
