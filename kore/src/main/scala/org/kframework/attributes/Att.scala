@@ -203,12 +203,9 @@ object Att {
   final val APPLY_PRIORITY = Key("applyPriority", KeyType.BuiltIn, KeyParameter.Required)
   final val ASSOC = Key("assoc", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val AVOID = Key("avoid", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val BAG = Key("bag", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val BINDER = Key("binder", KeyType.BuiltIn, KeyParameter.Optional)
   final val BRACKET = Key("bracket", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val CELL = Key("cell", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val CELL_COLLECTION = Key("cellCollection", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val CELL_NAME = Key("cellName", KeyType.BuiltIn, KeyParameter.Required)
   final val CIRCULARITY = Key("circularity", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val COLOR = Key("color", KeyType.BuiltIn, KeyParameter.Required)
   final val COLORS = Key("colors", KeyType.BuiltIn, KeyParameter.Required)
@@ -233,7 +230,6 @@ object Att {
   final val IMPURE = Key("impure", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val INDEX = Key("index", KeyType.BuiltIn, KeyParameter.Required)
   final val INITIAL = Key("initial", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val INITIALIZER = Key("initializer", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val INJECTIVE = Key("injective", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val INTERNAL = Key("internal", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val KAST = Key("kast", KeyType.BuiltIn, KeyParameter.Forbidden)
@@ -245,7 +241,6 @@ object Att {
   final val LOCATIONS = Key("locations", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val MACRO = Key("macro", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val MACRO_REC = Key("macro-rec", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val MAINCELL = Key("maincell", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val MEMO = Key("memo", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val ML_BINDER = Key("mlBinder", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val ML_OP = Key("mlOp", KeyType.BuiltIn, KeyParameter.Forbidden)
@@ -285,14 +280,16 @@ object Att {
   final val UNIT = Key("unit", KeyType.BuiltIn, KeyParameter.Required)
   final val UNPARSE_AVOID = Key("unparseAvoid", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val UNUSED = Key("unused", KeyType.BuiltIn, KeyParameter.Forbidden)
-  final val WRAP_ELEMENT = Key("wrapElement", KeyType.BuiltIn, KeyParameter.Required)
 
   /*
    * Internal attribute keys which cannot appear in user source code
    */
   final val ANONYMOUS = Key("anonymous", KeyType.Internal)
+  final val BAG = Key("bag", KeyType.Internal)
   final val BRACKET_LABEL = Key("bracketLabel", KeyType.Internal)
+  final val CELL_COLLECTION = Key("cellCollection", KeyType.Internal)
   final val CELL_FRAGMENT = Key("cellFragment", KeyType.Internal)
+  final val CELL_NAME = Key("cellName", KeyType.Internal)
   final val CELL_OPT_ABSENT = Key("cellOptAbsent", KeyType.Internal)
   final val CELL_SORT = Key("cellSort", KeyType.Internal)
   final val CONCAT = Key("concat", KeyType.Internal)
@@ -306,7 +303,9 @@ object Att {
   final val FRESH = Key("fresh", KeyType.Internal)
   final val GENERATED_BY_LIST_SUBSORTING = Key("generatedByListSubsorting", KeyType.Internal)
   final val HAS_DOMAIN_VALUES = Key("hasDomainValues", KeyType.Internal)
+  final val INITIALIZER = Key("initializer", KeyType.Internal)
   final val LOCATION = Key(classOf[Location].getName, KeyType.Internal)
+  final val MAINCELL = Key("maincell", KeyType.Internal)
   final val NAT = Key("nat", KeyType.Internal)
   final val NOT_INJECTION = Key("notInjection", KeyType.Internal)
   final val NOT_LR1_MODULES = Key("not-lr1-modules", KeyType.Internal)
@@ -343,6 +342,7 @@ object Att {
   final val USER_LIST = Key("userList", KeyType.Internal)
   final val USER_LIST_TERMINATOR = Key("userListTerminator", KeyType.Internal)
   final val WITH_CONFIG = Key("withConfig", KeyType.Internal)
+  final val WRAP_ELEMENT = Key("wrapElement", KeyType.Internal)
 
   private val stringClassName = classOf[String].getName
   private val intClassName = classOf[java.lang.Integer].getName
