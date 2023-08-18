@@ -85,7 +85,7 @@ public class Main {
         if (context.getArgs().length >= 1) {
             String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
             int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv(), startTime);
-            context.exit(result);
+            exit(result);
             return;
         }
         invalidJarArguments();
