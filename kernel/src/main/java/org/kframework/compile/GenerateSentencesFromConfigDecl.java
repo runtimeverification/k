@@ -563,8 +563,6 @@ public class GenerateSentencesFromConfigDecl {
     private static KApply optionalCellInitializer(boolean initializeOptionalCell, Att cellProperties, String initLabel) {
         if (initializeOptionalCell) {
             return KApply(KLabel(initLabel), INIT);
-        } else if (cellProperties.contains(Att.INITIAL())) {
-            return KApply(KLabel(initLabel));
         } else {
             return KApply(KLabels.CELLS);
         }

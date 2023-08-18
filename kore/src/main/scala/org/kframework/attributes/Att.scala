@@ -229,7 +229,6 @@ object Att {
   final val IDEM = Key("idem", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val IMPURE = Key("impure", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val INDEX = Key("index", KeyType.BuiltIn, KeyParameter.Required)
-  final val INITIAL = Key("initial", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val INJECTIVE = Key("injective", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val INTERNAL = Key("internal", KeyType.BuiltIn, KeyParameter.Forbidden)
   final val KAST = Key("kast", KeyType.BuiltIn, KeyParameter.Forbidden)
