@@ -713,6 +713,9 @@ public class ModuleToKORE {
         sbTemp.append("  axiom{} ");
         boolean hasToken = false;
         int numTerms = 0;
+        sbTemp.append("\\left-assoc{}(\\or{");
+        convert(sort, sbTemp);
+        sbTemp.append("} (");
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort.head(), Set()).toSeq().sorted(Production.ord()))) {
             if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                 continue;
@@ -721,9 +724,6 @@ public class ModuleToKORE {
                 continue;
             }
             numTerms++;
-            sbTemp.append("\\or{");
-            convert(sort, sbTemp);
-            sbTemp.append("} (");
             if (prod.att().contains(Att.TOKEN()) && !hasToken) {
                 convertTokenProd(sort, sbTemp);
                 hasToken = true;
@@ -753,9 +753,6 @@ public class ModuleToKORE {
         for (Sort s : iterable(module.sortedAllSorts())) {
             if (module.subsorts().lessThan(s, sort) && !sort.equals(Sorts.K())) {
                 numTerms++;
-                sbTemp.append("\\or{");
-                convert(sort, sbTemp);
-                sbTemp.append("} (");
                 sbTemp.append("\\exists{");
                 convert(sort, sbTemp);
                 sbTemp.append("} (Val:");
@@ -773,20 +770,13 @@ public class ModuleToKORE {
         Att sortAtt = module.sortAttributesFor().get(sort.head()).getOrElse(() -> KORE.Att());
         if (!hasToken && sortAtt.contains(Att.TOKEN())) {
             numTerms++;
-            sbTemp.append("\\or{");
-            convert(sort, sbTemp);
-            sbTemp.append("} (");
             convertTokenProd(sort, sbTemp);
             sbTemp.append(", ");
             hasToken = true;
         }
         sbTemp.append("\\bottom{");
         convert(sort, sbTemp);
-        sbTemp.append("}()");
-        for (int i = 0; i < numTerms; i++) {
-            sbTemp.append(")");
-        }
-        sbTemp.append(" [constructor{}()] // no junk");
+        sbTemp.append("}())) [constructor{}()] // no junk");
         if (hasToken && !METAVAR) {
             sbTemp.append(" (TODO: fix bug with \\dv)");
         }
