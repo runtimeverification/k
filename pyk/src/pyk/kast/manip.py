@@ -94,6 +94,10 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return second
                 if first == FALSE:
                     return notBool(second)
+                if second == TRUE:
+                    return first
+                if second == FALSE:
+                    return notBool(first)
                 if type(first) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
                 if type(first) is KSequence and type(second) is KSequence:
