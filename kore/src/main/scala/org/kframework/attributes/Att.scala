@@ -171,8 +171,11 @@ object Att {
 
   sealed trait KeyParameter
   private object KeyParameter extends Serializable {
+    // Attributes that must have parameters passed in (ie. [prec(25)]
     case object Required extends KeyParameter;
+    // Attributes which may or may not have a parameter
     case object Optional extends KeyParameter;
+    // Attributes which may not have a parameter (ie. [function])
     case object Forbidden extends KeyParameter;
   }
 
