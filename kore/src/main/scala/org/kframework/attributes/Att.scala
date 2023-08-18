@@ -275,7 +275,7 @@ object Att {
   final val PREC = Key.builtin("prec", KeyParameter.Required, onlyon[Production])
   final val PREFER = Key.builtin("prefer", KeyParameter.Forbidden, onlyon[Production])
   final val PRESERVES_DEFINEDNESS = Key.builtin("preserves-definedness", KeyParameter.Forbidden, onlyon[Rule])
-  final val PRIORITY = Key.builtin("priority", KeyParameter.Required, onlyon[Rule])
+  final val PRIORITY = Key.builtin("priority", KeyParameter.Required, onlyon2[Production, Rule])
   final val PRIVATE = Key.builtin("private", KeyParameter.Forbidden, onlyon2[Module, Production])
   final val PUBLIC = Key.builtin("public", KeyParameter.Forbidden, onlyon2[Module, Production])
   final val RESULT = Key.builtin("result", KeyParameter.Required, onlyon3[ContextAlias, Context, Rule])
