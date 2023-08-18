@@ -171,20 +171,12 @@ object implementation {
 
     def Alias(ctr: String, params: Seq[i.Sort]): i.Alias = d.Alias(ctr, params)
 
-    def LeftAssoc(p: i.Pattern): i.Pattern = {
-      p match {
-        case i.Application(head, ps) => {
-          ps.reduceLeft((accum, p) => Application(head, Seq(accum, p)))
-        }
-      }
+    def LeftAssoc(ctr: (i.Pattern, i.Pattern) => i.Pattern, args: Seq[i.Pattern]): i.Pattern = {
+      args.reduceLeft((accum, p) => ctr(accum, p))
     }
 
-    def RightAssoc(p: i.Pattern): i.Pattern = {
-      p match {
-        case i.Application(head, ps) => {
-          ps.reduceRight((p, accum) => Application(head, Seq(p, accum)))
-        }
-      }
+    def RightAssoc(ctr: (i.Pattern, i.Pattern) => i.Pattern, args: Seq[i.Pattern]): i.Pattern = {
+      args.reduceRight((p, accum) => ctr(p, accum))
     }
   }
 }
