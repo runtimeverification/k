@@ -97,9 +97,9 @@ module TEST
 
     // Kleene-Star Operator:
 
-     rule _B:Kat Kat* => .Kat              [klabel(_KLE_0)]
-     rule B:Kat Kat* => B                 [klabel(_KLE_1)]
-     rule B:Kat Kat* => B Kat; (B Kat*)   [klabel(_KLE_2)]
+     rule _B:Kat Kat* => .Kat
+     rule B:Kat Kat* => B
+     rule B:Kat Kat* => B Kat; (B Kat*)
 
 
 
