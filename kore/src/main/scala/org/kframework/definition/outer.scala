@@ -487,18 +487,8 @@ case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends 
 }
 
 object Rule {
-  implicit val ord: Ordering[Rule] = new Ordering[Rule] {
-    def compare(a: Rule, b: Rule): Int = {
-      val c1 = Ordering[K].compare(a.body, b.body)
-      if (c1 == 0) {
-        val c2 = Ordering[K].compare(a.requires, b.requires)
-        if (c2 == 0) {
-          Ordering[K].compare(a.ensures, b.ensures)
-        }
-        c2
-      }
-      c1
-    }
+  implicit val ord: Ordering[Rule] = {
+    Ordering.by[Rule, (K, K, K)](r => (r.body, r.requires, r.ensures))
   }
 }
 
@@ -710,10 +700,8 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 }
 
 object Production {
-  implicit val ord: Ordering[Production] = new Ordering[Production] {
-    def compare(a: Production, b: Production): Int = {
-      Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
-    }
+  implicit val ord: Ordering[Production] = {
+    Ordering.by[Production, Option[String]](s => s.klabel.map(_.name))
   }
 
   def apply(klabel: KLabel, params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
