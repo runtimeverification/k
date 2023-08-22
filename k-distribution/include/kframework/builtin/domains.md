@@ -73,7 +73,7 @@ this module should import only the `ARRAY` module.
 module ARRAY-SYNTAX
   imports private LIST
 
-  syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
+  syntax Array [hook(ARRAY.Array)]
 ```
 
 ### Array lookup
