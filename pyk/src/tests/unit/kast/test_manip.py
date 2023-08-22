@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
@@ -147,6 +147,36 @@ ML_TO_BOOL_TEST_DATA: Final = (
             [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])],
         ),
         KVariable('Exists_9a5d09ae'),
+    ),
+    (
+        'kapply-equal-kappy',
+        False,
+        KApply(
+            KLabel('#Equals', [KSort('Int'), KSort('GeneratedTopCell')]),
+            (
+                KApply(
+                    KLabel('#lookup(_,_)_EVM-TYPES_Int_Map_Int', []),
+                    (KVariable('?STORAGE', KSort('Map')), KToken('32', KSort('Int'))),
+                ),
+                KApply(
+                    KLabel('#lookup(_,_)_EVM-TYPES_Int_Map_Int', []),
+                    (KVariable('?STORAGE', KSort('Map')), KToken('32', KSort('Int'))),
+                ),
+            ),
+        ),
+        KApply(
+            KLabel('_==K_', []),
+            (
+                KApply(
+                    KLabel('#lookup(_,_)_EVM-TYPES_Int_Map_Int', []),
+                    (KVariable('?STORAGE', KSort('Map')), KToken('32', KSort('Int'))),
+                ),
+                KApply(
+                    KLabel('#lookup(_,_)_EVM-TYPES_Int_Map_Int', []),
+                    (KVariable('?STORAGE', KSort('Map')), KToken('32', KSort('Int'))),
+                ),
+            ),
+        ),
     ),
 )
 
