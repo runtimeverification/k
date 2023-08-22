@@ -65,8 +65,8 @@ ML_PATTERN_OF_TEST_DATA: Final = (
     (r'\next', (s,), (x,), Next(s, x)),
     (r'\rewrites', (s,), (x, y), Rewrites(s, x, y)),
     (r'\dv', (s,), (val,), DV(s, val)),
-    (r'\left-assoc', (), (app,), LeftAssoc(app)),
-    (r'\right-assoc', (), (app,), RightAssoc(app)),
+    (r'\left-assoc', (), (app,), LeftAssoc('app', (), (x, y))),
+    (r'\right-assoc', (), (app,), RightAssoc('app', (), (x, y))),
 )
 
 

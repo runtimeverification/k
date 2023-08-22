@@ -1570,7 +1570,9 @@ class MLSyntaxSugar(MLPattern):
 
 # TODO AppAssoc, OrAssoc
 class Assoc(MLSyntaxSugar):
-    app: App
+    child_symbol: str
+    child_sorts: tuple[Sort, ...]
+    child_patterns: tuple[Pattern, ...]
 
     @property
     @abstractmethod
@@ -1586,22 +1588,49 @@ class Assoc(MLSyntaxSugar):
         return ()
 
     @property
+    def app(self) -> App:
+        return App(self.child_symbol, self.child_sorts, self.child_patterns)
+
+    @property
     def ctor_patterns(self) -> tuple[App]:
         return (self.app,)
 
     @property
     def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'app': self.app.dict}
+        return {
+            'tag': self._tag(),
+            'symbol': self.child_symbol,
+            'sorts': [sort.dict for sort in self.child_sorts],
+            'patterns': [pattern.dict for pattern in self.child_patterns],
+        }
 
 
 @final
 @dataclass(frozen=True)
 class LeftAssoc(Assoc):
-    app: App
+    child_symbol: str
+    child_sorts: tuple[Sort, ...]
+    child_patterns: tuple[Pattern, ...]
 
-    def let(self, *, app: App | None = None) -> LeftAssoc:
-        app = app if app is not None else self.app
-        return LeftAssoc(app=app)
+    def __init__(self, child_symbol: str | SymbolId, child_sorts: Iterable[Sort], child_patterns: Iterable[Pattern]):
+        if isinstance(child_symbol, str):
+            child_symbol = SymbolId(child_symbol)
+
+        object.__setattr__(self, 'child_symbol', child_symbol.value)
+        object.__setattr__(self, 'child_sorts', tuple(child_sorts))
+        object.__setattr__(self, 'child_patterns', tuple(child_patterns))
+
+    def let(
+        self,
+        *,
+        child_symbol: str | None = None,
+        child_sorts: tuple[Sort, ...] | None = None,
+        child_patterns: tuple[Pattern, ...] | None = None,
+    ) -> LeftAssoc:
+        child_symbol = child_symbol if child_symbol is not None else self.child_symbol
+        child_sorts = child_sorts if child_sorts is not None else self.child_sorts
+        child_patterns = child_patterns if child_patterns is not None else self.child_patterns
+        return LeftAssoc(child_symbol=child_symbol, child_sorts=child_sorts, child_patterns=child_patterns)
 
     def let_patterns(self, patterns: Iterable[Pattern]) -> LeftAssoc:
         () = patterns
@@ -1609,13 +1638,16 @@ class LeftAssoc(Assoc):
 
     @property
     def pattern(self) -> Pattern:
-        if len(self.app.sorts) > 0:
-            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
-        if len(self.app.args) == 0:
+        if len(self.child_patterns) == 0:
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.app.args[0]
-        for a in self.app.args[1:]:
-            ret = App(self.app.symbol, [], [ret, a])
+        ret = self.child_patterns[0]
+        for a in self.child_patterns[1:]:
+            if self.child_symbol == Or.symbol():
+                ret = Or(self.child_sorts[0], ret, a)
+            elif self.child_symbol == And.symbol():
+                ret = And(self.child_sorts[0], ret, a)
+            else:
+                ret = App(self.child_symbol, self.child_sorts, (ret, a))
         return ret
 
     @classmethod
@@ -1637,22 +1669,44 @@ class LeftAssoc(Assoc):
         () = sorts
         (app,) = patterns
         app = check_type(app, App)
-        return LeftAssoc(app=app)
+        return LeftAssoc(child_symbol=app.symbol, child_sorts=app.sorts, child_patterns=app.patterns)
 
     @classmethod
     def from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any]) -> LeftAssoc:
         cls._check_tag(dct)
-        return LeftAssoc(app=App.from_dict(dct['app']))
+        return LeftAssoc(
+            child_symbol=dct['symbol'],
+            child_sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
+            child_patterns=(Pattern.from_dict(pattern) for pattern in dct['patterns']),
+        )
 
 
 @final
 @dataclass(frozen=True)
 class RightAssoc(Assoc):
-    app: App
+    child_symbol: str
+    child_sorts: tuple[Sort, ...]
+    child_patterns: tuple[Pattern, ...]
 
-    def let(self, *, app: App | None = None) -> RightAssoc:
-        app = app if app is not None else self.app
-        return RightAssoc(app=app)
+    def __init__(self, child_symbol: str | SymbolId, child_sorts: Iterable[Sort], child_patterns: Iterable[Pattern]):
+        if isinstance(child_symbol, str):
+            child_symbol = SymbolId(child_symbol)
+
+        object.__setattr__(self, 'child_symbol', child_symbol.value)
+        object.__setattr__(self, 'child_sorts', tuple(child_sorts))
+        object.__setattr__(self, 'child_patterns', tuple(child_patterns))
+
+    def let(
+        self,
+        *,
+        child_symbol: str | None = None,
+        child_sorts: tuple[Sort, ...] | None = None,
+        child_patterns: tuple[Pattern, ...] | None = None,
+    ) -> RightAssoc:
+        child_symbol = child_symbol if child_symbol is not None else self.child_symbol
+        child_sorts = child_sorts if child_sorts is not None else self.child_sorts
+        child_patterns = child_patterns if child_patterns is not None else self.child_patterns
+        return RightAssoc(child_symbol=child_symbol, child_sorts=child_sorts, child_patterns=child_patterns)
 
     def let_patterns(self, patterns: Iterable[Pattern]) -> RightAssoc:
         () = patterns
@@ -1660,13 +1714,16 @@ class RightAssoc(Assoc):
 
     @property
     def pattern(self) -> Pattern:
-        if len(self.app.sorts) > 0:
-            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
-        if len(self.app.args) == 0:
+        if len(self.child_patterns) == 0:
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.app.args[-1]
-        for a in reversed(self.app.args[:-1]):
-            ret = App(self.app.symbol, [], [a, ret])
+        ret = self.child_patterns[-1]
+        for a in reversed(self.child_patterns[:-1]):
+            if self.child_symbol == Or.symbol():
+                ret = Or(self.child_sorts[0], a, ret)
+            elif self.child_symbol == And.symbol():
+                ret = And(self.child_sorts[0], a, ret)
+            else:
+                ret = App(self.child_symbol, self.child_sorts, (a, ret))
         return ret
 
     @classmethod
@@ -1688,12 +1745,16 @@ class RightAssoc(Assoc):
         () = sorts
         (app,) = patterns
         app = check_type(app, App)
-        return RightAssoc(app=app)
+        return RightAssoc(child_symbol=app.symbol, child_sorts=app.sorts, child_patterns=app.patterns)
 
     @classmethod
     def from_dict(cls: type[RightAssoc], dct: Mapping[str, Any]) -> RightAssoc:
         cls._check_tag(dct)
-        return RightAssoc(app=App.from_dict(dct['app']))
+        return RightAssoc(
+            child_symbol=dct['symbol'],
+            child_sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
+            child_patterns=(Pattern.from_dict(pattern) for pattern in dct['patterns']),
+        )
 
 
 ML_SYMBOLS: Final = {
