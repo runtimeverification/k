@@ -42,7 +42,7 @@ RUN pip3 install --user --upgrade \
                  cytoolz          \
                  numpy            \
                  pycryptodomex    \
-                 git+https://github.com/runtimeverification/pyk.git@${PYK_VERSION}
+                 git+https://github.com/runtimeverification/pyk.git
 
 RUN    git clone 'https://github.com/WebAssembly/wabt' --branch 1.0.13 --recurse-submodules wabt \
     && cd wabt                                                                                   \
