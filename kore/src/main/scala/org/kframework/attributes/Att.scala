@@ -366,26 +366,32 @@ object Att {
 
   // All Key fields with UPPER_CASE naming
   private val pat = Pattern.compile("[A-Z]+(_[A-Z0-9]+)*")
-  private val keys: Map[String, Key] =
+  private val builtinKeys: Map[String, Key] =
     Att.getClass.getDeclaredFields
       .filter(f => f.getType.equals(classOf[Key]) && pat.matcher(f.getName).matches())
       .map(f => f.get(this).asInstanceOf[Key])
+      .filter(_.keyType == KeyType.BuiltIn)
       .map(k => (k.key, k))
       .toMap
 
-  private val builtinKeys: Set[String] = keys.filter(_._2.keyType == KeyType.BuiltIn).keySet
-  private val internalKeys: Set[String] = keys.filter(_._2.keyType == KeyType.Internal).keySet
+  private val internalKeys: Map[String, Key] =
+    Att.getClass.getDeclaredFields
+      .filter(f => f.getType.equals(classOf[Key]) && pat.matcher(f.getName).matches())
+      .map(f => f.get(this).asInstanceOf[Key])
+      .filter(_.keyType == KeyType.Internal)
+      .map(k => (k.key, k))
+      .toMap
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
     if (builtinKeys.contains(key)) {
-      Optional.of(keys.get(key).get)
+      Optional.of(builtinKeys.get(key).get)
     } else {
       Optional.empty()
     }
 
   def getInternalKeyOptional(key: String): Optional[Key] =
     if (internalKeys.contains(key)) {
-      Optional.of(keys.get(key).get)
+      Optional.of(internalKeys.get(key).get)
     } else {
       Optional.empty()
     }
