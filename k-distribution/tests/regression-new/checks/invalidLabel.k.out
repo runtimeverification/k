@@ -1,0 +1,16 @@
+[Error] Compiler: Rule label 'INVALIDLABEL.foo`bar' cannot contain whitespace or backticks.
+	Source(invalidLabel.k)
+	Location(5,19,5,32)
+	5 |	  rule [foo`bar]: true => false
+	  .	                  ^~~~~~~~~~~~~
+[Error] Compiler: Rule label 'foo bar' cannot contain whitespace or backticks.
+	Source(invalidLabel.k)
+	Location(6,8,6,21)
+	6 |	  rule false => true [label(foo bar)]
+	  .	       ^~~~~~~~~~~~~
+[Error] Compiler: Rule label 'foo`bar' cannot contain whitespace or backticks.
+	Source(invalidLabel.k)
+	Location(7,8,7,14)
+	7 |	  rule 0 => 1 [label(foo`bar)]
+	  .	       ^~~~~~
+[Error] Compiler: Had 3 structural errors.
