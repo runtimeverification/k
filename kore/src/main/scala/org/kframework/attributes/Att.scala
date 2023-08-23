@@ -366,21 +366,14 @@ object Att {
 
   // All Key fields with UPPER_CASE naming
   private val pat = Pattern.compile("[A-Z]+(_[A-Z0-9]+)*")
-  private val builtinKeys: Map[String, Key] =
+  private val keys: Map[KeyType, Array[Key]] =
     Att.getClass.getDeclaredFields
       .filter(f => f.getType.equals(classOf[Key]) && pat.matcher(f.getName).matches())
-      .map(f => f.get(this).asInstanceOf[Key])
-      .filter(_.keyType == KeyType.BuiltIn)
-      .map(k => (k.key, k))
-      .toMap
+      .map(_.get(this).asInstanceOf[Key])
+      .groupBy(_.keyType)
 
-  private val internalKeys: Map[String, Key] =
-    Att.getClass.getDeclaredFields
-      .filter(f => f.getType.equals(classOf[Key]) && pat.matcher(f.getName).matches())
-      .map(f => f.get(this).asInstanceOf[Key])
-      .filter(_.keyType == KeyType.Internal)
-      .map(k => (k.key, k))
-      .toMap
+  private val builtinKeys: Map[String, Key] = keys(KeyType.BuiltIn).map(k => (k.key, k)).toMap
+  private val internalKeys: Map[String, Key] = keys(KeyType.Internal).map(k => (k.key, k)).toMap
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
     if (builtinKeys.contains(key)) {
