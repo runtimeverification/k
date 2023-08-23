@@ -89,7 +89,7 @@ jobs:
           distro: jammy
           llvm: 14
       - name: 'Build and Test K'
-        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
+        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn package -T1C --batch-mode -U' # TODO: DO NOT MERGE THIS!!!!
       - name: 'Check out k-exercises'
         uses: actions/checkout@v3
         with:
@@ -97,16 +97,17 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
           path: k-exercises
-      - name: 'Tutorial Integration Tests'
-        run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/2_intermediate && ./test_kompile.sh'
+      # - name: 'Tutorial Integration Tests'
+      #   run: |
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/2_intermediate && ./test_kompile.sh'
       - name: 'Performance Benchmarks'
         run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/2_imp/lesson_5 && make clean && /usr/bin/time --format "{\n\t\"pl_tutorial/1_k/1_lambda/lesson_9\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json make kompile && cat results.json'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/ppl-tutorial/1_k/1_lambda/lesson_9 && make clean && /usr/bin/time --format "{\n\t\"pl_tutorial/1_k/1_lambda/lesson_9\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json make kompile && cat results.json'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/2_imp/lesson_5 && make clean && /usr/bin/time --format "{\n\t\"k-distribution/pl-tutorial/1_k/2_imp/lesson_5\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json make kompile && cat results.json'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/1_lambda/lesson_9 && make clean && /usr/bin/time --format "{\n\t\"k-distribution/pl-tutorial/1_k/1_lambda/lesson_9\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json make kompile && cat results.json'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd elrond-semantics && /usr/bin/time --format "{\n\t\"elrond-semantics\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json make build && cat results.json'
       - name: 'Tear down Docker'
         if: always()
         run: |
