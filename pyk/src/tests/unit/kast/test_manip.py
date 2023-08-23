@@ -9,6 +9,7 @@ from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, K
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
+    is_term_like,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
@@ -388,3 +389,25 @@ def test_split_config_from(term: KInner, expected_config: KInner, expected_subst
     # Then
     assert actual_config == expected_config
     assert actual_subst == expected_subst
+
+
+IS_TERM_LIKE_TEST_DATA = [
+    ('var_with_at', KVariable('@S1'), False),
+    ('var_without_at', KVariable('S1'), True),
+    *[
+        (f'label_{label_name}', KApply(KLabel(label_name), [KVariable('S1'), KVariable('S2')]), False)
+        for label_name in ['#Equals', '#And', '#Or', '#Implies']
+    ],
+    ('label_lookup', KApply(KLabel('<kevm>')), True),
+    ('nested-1', KApply(KLabel('<output>'), [KApply(KLabel('#And'), [KVariable('S1'), KVariable('S2')])]), False),
+    ('nested-2', KApply(KLabel('<pc>'), [KApply(KLabel('#lookup'), [KVariable('S1'), KVariable('@S2')])]), False),
+]
+
+
+@pytest.mark.parametrize(
+    'test_id,kast,expected',
+    IS_TERM_LIKE_TEST_DATA,
+    ids=[test_id for test_id, *_ in IS_TERM_LIKE_TEST_DATA],
+)
+def test_is_term_like(test_id: str, kast: KInner, expected: bool) -> None:
+    assert is_term_like(kast) == expected

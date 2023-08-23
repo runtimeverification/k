@@ -8,7 +8,19 @@ from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
 from ..prelude.ml import mlAnd, mlEqualsTrue, mlOr
 from ..utils import find_common_items, hash_str
-from .inner import KApply, KRewrite, KSequence, KToken, KVariable, Subst, bottom_up, top_down, var_occurrences
+from .inner import (
+    KApply,
+    KLabel,
+    KRewrite,
+    KSequence,
+    KToken,
+    KVariable,
+    Subst,
+    bottom_up,
+    collect,
+    top_down,
+    var_occurrences,
+)
 from .kast import EMPTY_ATT, KAtt, WithKAtt
 from .outer import KDefinition, KFlatModule, KRuleLike
 
@@ -35,6 +47,34 @@ def flatten_label(label: str, kast: KInner) -> list[KInner]:
         items = (flatten_label(label, arg) for arg in kast.args)
         return [c for cs in items for c in cs]
     return [kast]
+
+
+def is_term_like(kast: KInner) -> bool:
+    non_term_found = False
+
+    def _is_term_like(_kast: KInner) -> None:
+        nonlocal non_term_found
+        match _kast:
+            case KVariable(name, _):
+                if name.startswith('@'):
+                    non_term_found = True
+            case KApply(KLabel(name, _), _):
+                if name in {
+                    '#Equals',
+                    '#And',
+                    '#Or',
+                    '#Top',
+                    '#Bottom',
+                    '#Implies',
+                    '#Not',
+                    '#Ceil',
+                    '#Forall',
+                    '#Exists',
+                }:
+                    non_term_found = True
+
+    collect(_is_term_like, kast)
+    return not non_term_found
 
 
 def sort_assoc_label(label: str, kast: KInner) -> KInner:
@@ -74,13 +114,6 @@ def bool_to_ml_pred(kast: KInner) -> KInner:
 
 
 def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
-    def _are_all_element_vars(kast_term: KInner) -> bool:
-        if type(kast_term) == KVariable and kast_term.name.startswith('#'):
-            return False
-        if hasattr(kast_term, 'args'):
-            return all(_are_all_element_vars(arg) for arg in kast_term.args)
-        return True
-
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply:
             if _kast.label.name == '#Top':
@@ -110,7 +143,7 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                 if type(first) is KSequence and type(second) is KSequence:
                     if first.arity == 1 and second.arity == 1:
                         return KApply('_==K_', (first.items[0], second.items[0]))
-                if _are_all_element_vars(first) and _are_all_element_vars(second):
+                if is_term_like(first) and is_term_like(second):
                     return KApply('_==K_', first, second)
             if unsafe:
                 if _kast.label.name == '#Equals':
