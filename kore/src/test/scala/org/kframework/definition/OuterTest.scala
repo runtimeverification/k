@@ -4,6 +4,7 @@ package org.kframework.definition
 
 import org.junit.{Assert, Test}
 import org.kframework.attributes.Att
+import org.kframework.kore.ADT.KToken
 import org.kframework.kore.KORE.Sort
 import org.kframework.kore.KORE.KLabel
 
@@ -89,5 +90,98 @@ class OuterTest {
     val prod1 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "foo"))
     val prod2 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "bar"))
     Assert.assertNotEquals(prod1, prod2)
+  }
+
+  // Asserts that S1 < S2 < ... < Sn
+  def assertOrdering(sentences: Sentence*): Unit = {
+    val ord = Ordering[Sentence]
+    for (remaining <- sentences.tails.filter(_.nonEmpty)) {
+      val head = remaining.head
+      for (sentence <- remaining.tail) {
+        Assert.assertTrue(ord.compare(head, sentence) < 0)
+      }
+    }
+  }
+
+  @Test def sentenceOrdering(): Unit = {
+    val sortA = Sort("A")
+    val sortB = Sort("B")
+    val sortC = Sort("C")
+
+    val ktokenA = KToken("A", sortA)
+    val ktokenB = KToken("B", sortA)
+    val ktokenC = KToken("C", sortA)
+
+    val tagA = Tag("A")
+    val tagB = Tag("B")
+    val tagC = Tag("C")
+
+    val syntaxSort1 = SyntaxSort(Seq(sortA, sortC), sortA)
+    val syntaxSort2 = SyntaxSort(Seq(sortA, sortC), sortB)
+    val syntaxSort3 = SyntaxSort(Seq(sortB, sortC), sortA)
+    assertOrdering(syntaxSort1, syntaxSort2, syntaxSort3)
+
+    val synonym1 = SortSynonym(sortA, sortA)
+    val synonym2 = SortSynonym(sortA, sortB)
+    val synonym3 = SortSynonym(sortB, sortC)
+    assertOrdering(synonym1, synonym2, synonym3)
+
+    val lexical1 = SyntaxLexical("A", "A")
+    val lexical2 = SyntaxLexical("A", "B")
+    val lexical3 = SyntaxLexical("B", "A")
+    assertOrdering(lexical1, lexical2, lexical3)
+
+    val production1 = Production(Seq(), sortA, Seq(), Att.empty)
+    val production2 = Production(KLabel("A"), Seq(), sortA, Seq(), Att.empty)
+    val production3 = Production(KLabel("B"), Seq(), sortA, Seq(), Att.empty)
+    assertOrdering(production1, production2, production3)
+
+    val syntaxAssoc1 = SyntaxAssociativity(Associativity.Left, Set(tagA))
+    val syntaxAssoc2 = SyntaxAssociativity(Associativity.Left, Set(tagB))
+    val syntaxAssoc3 = SyntaxAssociativity(Associativity.Right, Set(tagA))
+    assertOrdering(syntaxAssoc1, syntaxAssoc2, syntaxAssoc3)
+
+    val syntaxPriority1 = SyntaxPriority(Seq(Set(tagB, tagA)))
+    val syntaxPriority2 = SyntaxPriority(Seq(Set(tagA, tagB, tagC), Set(tagB)))
+    val syntaxPriority3 = SyntaxPriority(Seq(Set(tagA, tagB, tagC), Set(tagC)))
+    val syntaxPriority4 = SyntaxPriority(Seq(Set(tagA, tagC, tagC), Set(tagB)))
+    val syntaxPriority5 = SyntaxPriority(Seq(Set(tagB)))
+    assertOrdering(syntaxPriority1, syntaxPriority2, syntaxPriority3, syntaxPriority4, syntaxPriority5)
+
+    val contextAlias1 = ContextAlias(ktokenA, ktokenA)
+    val contextAlias2 = ContextAlias(ktokenA, ktokenB)
+    val contextAlias3 = ContextAlias(ktokenB, ktokenB)
+    assertOrdering(contextAlias1, contextAlias2, contextAlias3)
+
+    val context1 = Context(ktokenA, ktokenA)
+    val context2 = Context(ktokenA, ktokenB)
+    val context3 = Context(ktokenB, ktokenA)
+    assertOrdering(context1, context2, context3)
+
+    val rule1 = Rule(ktokenA, ktokenA, ktokenA)
+    val rule2 = Rule(ktokenA, ktokenA, ktokenB)
+    val rule3 = Rule(ktokenA, ktokenA, ktokenC)
+    val rule4 = Rule(ktokenA, ktokenB, ktokenA)
+    val rule5 = Rule(ktokenB, ktokenA, ktokenA)
+    assertOrdering(rule1, rule2, rule3, rule4, rule5)
+
+    val claim1 = Claim(ktokenA, ktokenA, ktokenA)
+    val claim2 = Claim(ktokenA, ktokenA, ktokenB)
+    val claim3 = Claim(ktokenA, ktokenA, ktokenC)
+    val claim4 = Claim(ktokenA, ktokenB, ktokenA)
+    val claim5 = Claim(ktokenB, ktokenA, ktokenA)
+    assertOrdering(claim1, claim2, claim3, claim4, claim5)
+
+    assertOrdering(
+      syntaxSort1,
+      synonym1,
+      lexical1,
+      production1,
+      syntaxAssoc1,
+      syntaxPriority1,
+      contextAlias1,
+      context1,
+      rule1,
+      claim1)
   }
 }
