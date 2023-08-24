@@ -104,7 +104,13 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         )
         kcfg_pre, init_node, target_node = KCFG.from_claim(kprove.definition, claim, proof_dir)
         proof = APRProof(
-            f'{spec_module}.{claim_id}', kcfg_pre, init=init_node, target=target_node, logs={}, proof_dir=proof_dir
+            f'{spec_module}.{claim_id}',
+            kcfg_pre,
+            [],
+            init=init_node,
+            target=target_node,
+            logs={},
+            proof_dir=proof_dir,
         )
         prover = APRProver(proof, kcfg_explore)
 
@@ -147,7 +153,13 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         )
         kcfg_pre, init_node, target_node = KCFG.from_claim(kprove.definition, claim, proof_dir)
         proof = APRProof(
-            f'{spec_module}.{claim_id}', kcfg_pre, init=init_node, target=target_node, logs={}, proof_dir=proof_dir
+            f'{spec_module}.{claim_id}',
+            kcfg_pre,
+            [],
+            init=init_node,
+            target=target_node,
+            logs={},
+            proof_dir=proof_dir,
         )
         prover = APRProver(
             proof,
