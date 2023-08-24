@@ -527,17 +527,69 @@ class TextToKore(b: Builders = DefaultBuilders) {
             consumeWithLeadingWhitespaces("{")
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p = parsePattern()
+            val ctr = scanner.nextWithSkippingWhitespaces() match {
+              case '\\' =>
+                val c1 = scanner.next()
+                val c2 = scanner.next()
+                (c1, c2) match {
+                  case ('a', 'n') => // and
+                    consume("d")
+                    consumeWithLeadingWhitespaces("{")
+                    val s = parseSort()
+                    consumeWithLeadingWhitespaces("}")
+                    (p1: kore.Pattern, p2: kore.Pattern) => b.And(s, p1, p2)
+                  case ('o', 'r') => // or
+                    consumeWithLeadingWhitespaces("{")
+                    val s = parseSort()
+                    consumeWithLeadingWhitespaces("}")
+                    (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
+                }
+              case c => // variable or application
+                val id = parseId() // previousParsingLevel is set here
+                consumeWithLeadingWhitespaces("{")
+                val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
+                consumeWithLeadingWhitespaces("}")
+                (p1: kore.Pattern, p2: kore.Pattern) => b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
+            }
+            consumeWithLeadingWhitespaces("(")
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.LeftAssoc(p)
+            consumeWithLeadingWhitespaces(")")
+            b.LeftAssoc(ctr, args)
           case ('r', 'i') => // right-assoc
             consume("ght-assoc")
             consumeWithLeadingWhitespaces("{")
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p = parsePattern()
+            val ctr = scanner.nextWithSkippingWhitespaces() match {
+              case '\\' =>
+                val c1 = scanner.next()
+                val c2 = scanner.next()
+                (c1, c2) match {
+                  case ('a', 'n') => // and
+                    consume("d")
+                    consumeWithLeadingWhitespaces("{")
+                    val s = parseSort()
+                    consumeWithLeadingWhitespaces("}")
+                    (p1: kore.Pattern, p2: kore.Pattern) => b.And(s, p1, p2)
+                  case ('o', 'r') => // or
+                    consumeWithLeadingWhitespaces("{")
+                    val s = parseSort()
+                    consumeWithLeadingWhitespaces("}")
+                    (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
+                }
+              case c => // variable or application
+                val id = parseId() // previousParsingLevel is set here
+                consumeWithLeadingWhitespaces("{")
+                val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
+                consumeWithLeadingWhitespaces("}")
+                (p1: kore.Pattern, p2: kore.Pattern) => b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
+            }
+            consumeWithLeadingWhitespaces("(")
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.RightAssoc(p)
+            consumeWithLeadingWhitespaces(")")
+            b.RightAssoc(ctr, args)
           // case ('s', 'u') => // subset
           //   consume("bset")
           //   consumeWithLeadingWhitespaces("{")
