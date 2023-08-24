@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 module IMP-SYNTAX
   imports public BOOL-SYNTAX
   imports public INT-SYNTAX

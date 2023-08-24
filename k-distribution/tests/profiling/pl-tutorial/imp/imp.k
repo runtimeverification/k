@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 module IMP-SYNTAX
   imports public DOMAINS-SYNTAX
   syntax AExp  ::=
