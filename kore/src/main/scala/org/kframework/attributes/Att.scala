@@ -256,7 +256,7 @@ object Att {
   final val KORE = Key.builtin("kore", KeyParameter.Forbidden, onlyon2[RuleOrClaim, Module])
   final val LABEL = Key.builtin("label", KeyParameter.Required, onlyon[Sentence])
   final val LATEX = Key.builtin("latex", KeyParameter.Required, onlyon[Production])
-  final val LEFT = Key.builtin("left", KeyParameter.Optional, onlyon[Production])
+  final val LEFT = Key.builtin("left", KeyParameter.Forbidden, onlyon[Production])
   final val LOCATIONS = Key.builtin("locations", KeyParameter.Forbidden, onlyon[SyntaxSort])
   final val MACRO = Key.builtin("macro", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val MACRO_REC = Key.builtin("macro-rec", KeyParameter.Forbidden, onlyon2[Production, Rule])
@@ -280,7 +280,7 @@ object Att {
   final val PUBLIC = Key.builtin("public", KeyParameter.Forbidden, onlyon2[Module, Production])
   final val RESULT = Key.builtin("result", KeyParameter.Required, onlyon3[ContextAlias, Context, Rule])
   final val RETURNS_UNIT = Key.builtin("returnsUnit", KeyParameter.Forbidden, onlyon[Production])
-  final val RIGHT = Key.builtin("right", KeyParameter.Optional, onlyon[Production])
+  final val RIGHT = Key.builtin("right", KeyParameter.Forbidden, onlyon[Production])
   final val SEQSTRICT = Key.builtin("seqstrict", KeyParameter.Optional, onlyon[Production])
   final val SIMPLIFICATION = Key.builtin("simplification", KeyParameter.Optional, onlyon[Rule])
   final val SMTLIB = Key.builtin("smtlib", KeyParameter.Required, onlyon[Production])
@@ -321,6 +321,7 @@ object Att {
   final val FRESH = Key("fresh", KeyType.Internal)
   final val GENERATED_BY_LIST_SUBSORTING = Key("generatedByListSubsorting", KeyType.Internal)
   final val HAS_DOMAIN_VALUES = Key("hasDomainValues", KeyType.Internal)
+  final val LEFT_INTERNAL = Key("left", KeyType.Internal)
   final val LOCATION = Key(classOf[Location].getName, KeyType.Internal)
   final val NAT = Key("nat", KeyType.Internal)
   final val NOT_INJECTION = Key("notInjection", KeyType.Internal)
@@ -347,6 +348,7 @@ object Att {
   final val REGEX = Key("regex", KeyType.Internal)
   final val REJECT = Key("reject", KeyType.Internal)
   final val REMOVE = Key("remove", KeyType.Internal)
+  final val RIGHT_INTERNAL = Key("right", KeyType.Internal)
   final val SMT_PRELUDE = Key("smt-prelude", KeyType.Internal)
   final val SORT = Key(classOf[Sort].getName, KeyType.Internal)
   final val SORT_PARAMS = Key("sortParams", KeyType.Internal)
@@ -364,26 +366,25 @@ object Att {
 
   // All Key fields with UPPER_CASE naming
   private val pat = Pattern.compile("[A-Z]+(_[A-Z0-9]+)*")
-  private val keys: Map[String, Key] =
+  private val keys: Map[KeyType, Array[Key]] =
     Att.getClass.getDeclaredFields
       .filter(f => f.getType.equals(classOf[Key]) && pat.matcher(f.getName).matches())
-      .map(f => f.get(this).asInstanceOf[Key])
-      .map(k => (k.key, k))
-      .toMap
+      .map(_.get(this).asInstanceOf[Key])
+      .groupBy(_.keyType)
 
-  private val builtinKeys: Set[String] = keys.filter(_._2.keyType == KeyType.BuiltIn).keySet
-  private val internalKeys: Set[String] = keys.filter(_._2.keyType == KeyType.Internal).keySet
+  private val builtinKeys: Map[String, Key] = keys(KeyType.BuiltIn).map(k => (k.key, k)).toMap
+  private val internalKeys: Map[String, Key] = keys(KeyType.Internal).map(k => (k.key, k)).toMap
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
     if (builtinKeys.contains(key)) {
-      Optional.of(keys.get(key).get)
+      Optional.of(builtinKeys.get(key).get)
     } else {
       Optional.empty()
     }
 
   def getInternalKeyOptional(key: String): Optional[Key] =
     if (internalKeys.contains(key)) {
-      Optional.of(keys.get(key).get)
+      Optional.of(internalKeys.get(key).get)
     } else {
       Optional.empty()
     }
