@@ -77,7 +77,7 @@ runs:
           --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
           --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
           --build-arg K_COMMIT=${K_VERSION}                           \
-          --tag runtimeverification/elrond:${BASE_DISTRO}-${K_VERSION}
+          --tag elrond:${BASE_DISTRO}-${K_VERSION}
 
       docker build ${SUBDIR} --file ${SUBDIR}${DOCKERFILE}            \
           --tag runtimeverification/${TAG_NAME}                       \
