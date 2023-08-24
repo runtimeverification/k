@@ -1125,7 +1125,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         # Both branches will be checked and fail (fail_fast=False)
         assert len(proof.kcfg.leaves) == 3
         assert len(proof.pending) == 0
-        assert len(proof.terminal) == 2
+        assert len(proof._terminal) == 3
         assert len(proof.failing) == 2
 
         proof = APRProof.from_claim(
@@ -1145,7 +1145,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         # First branch will be reached first and terminate the proof, leaving the second long branch pending (fail_fast=True)
         assert len(proof.kcfg.leaves) == 3
         assert len(proof.pending) == 1
-        assert len(proof.terminal) == 1
+        assert len(proof._terminal) == 2
         assert len(proof.failing) == 1
 
     def test_anti_unify_forget_values(
