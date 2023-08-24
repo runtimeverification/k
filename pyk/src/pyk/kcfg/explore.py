@@ -23,7 +23,7 @@ from ..kore.syntax import Import, Module
 from ..prelude import k
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import notBool
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot, mlTop
+from ..prelude.ml import is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot, mlTop
 from ..utils import shorten_hashes, single
 from .kcfg import KCFG
 from .semantics import DefaultSemantics
@@ -102,12 +102,12 @@ class KCFGExplore:
                 next_states = []
         return depth, next_state, next_states, er.logs
 
-    def cterm_simplify(self, cterm: CTerm) -> tuple[KInner, tuple[LogEntry, ...]]:
+    def cterm_simplify(self, cterm: CTerm) -> tuple[CTerm, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {cterm}')
         kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
         kore_simplified, logs = self._kore_client.simplify(kore)
         kast_simplified = self.kprint.kore_to_kast(kore_simplified)
-        return kast_simplified, logs
+        return CTerm.from_kast(kast_simplified), logs
 
     def kast_simplify(self, kast: KInner) -> tuple[KInner, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {kast}')
@@ -271,12 +271,8 @@ class KCFGExplore:
         for node in cfg.nodes:
             _LOGGER.info(f'Simplifying node {self.id}: {shorten_hashes(node.id)}')
             new_term, next_node_logs = self.cterm_simplify(node.cterm)
-            if is_top(new_term):
-                raise ValueError(f'Node simplified to #Top {self.id}: {shorten_hashes(node.id)}')
-            if is_bottom(new_term):
-                raise ValueError(f'Node simplified to #Bottom {self.id}: {shorten_hashes(node.id)}')
-            if new_term != node.cterm.kast:
-                cfg.replace_node(node.id, CTerm.from_kast(new_term))
+            if new_term != node.cterm:
+                cfg.replace_node(node.id, new_term)
                 if node.id in logs:
                     logs[node.id] += next_node_logs
                 else:

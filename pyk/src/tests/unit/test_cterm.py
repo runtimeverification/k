@@ -7,7 +7,7 @@ import pytest
 
 from pyk.cterm import CTerm, build_claim, build_rule
 from pyk.kast import KAtt
-from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KVariable
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kint import INT, intToken
@@ -156,3 +156,33 @@ def test_build_claim(test_id: str, init: KInner, target: KInner, expected: KClai
 
     # Then
     assert actual == expected
+
+
+KAST_TEST_DATA: Final = (
+    ('simple-bottom', KApply('#Bottom'), CTerm.bottom()),
+    ('simple-top', KApply('#Top'), CTerm.top()),
+    (
+        'double-and-bottom',
+        KApply(
+            label=KLabel(name='#And', params=(KSort(name='GeneratedTopCell'),)),
+            args=(
+                KApply(label=KLabel(name='#Bottom', params=(KSort(name='GeneratedTopCell'),)), args=()),
+                KApply(label=KLabel(name='#Bottom', params=(KSort(name='GeneratedTopCell'),)), args=()),
+            ),
+        ),
+        CTerm.bottom(),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,kast,expected',
+    KAST_TEST_DATA,
+    ids=[test_id for test_id, *_ in KAST_TEST_DATA],
+)
+def test_from_kast(test_id: str, kast: KInner, expected: CTerm) -> None:
+    # When
+    cterm = CTerm.from_kast(kast)
+
+    # Then
+    assert cterm == expected

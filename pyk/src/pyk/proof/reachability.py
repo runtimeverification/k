@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
 
-from ..cterm import CTerm
 from ..kast.inner import KInner, KRewrite, KSort, Subst
 from ..kast.manip import flatten_label, ml_pred_to_bool
 from ..kast.outer import KClaim
@@ -24,6 +23,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
+    from ..cterm import CTerm
     from ..kast.outer import KDefinition
     from ..kcfg import KCFGExplore
     from ..kcfg.kcfg import NodeIdLike
@@ -789,10 +789,8 @@ class APRFailureInfo:
         failure_reasons = {}
         models = {}
         for node in proof.failing:
-            simplified_node, _ = kcfg_explore.cterm_simplify(node.cterm)
-            simplified_target, _ = kcfg_explore.cterm_simplify(target.cterm)
-            node_cterm = CTerm.from_kast(simplified_node)
-            target_cterm = CTerm.from_kast(simplified_target)
+            node_cterm, _ = kcfg_explore.cterm_simplify(node.cterm)
+            target_cterm, _ = kcfg_explore.cterm_simplify(target.cterm)
             _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
             path_condition = kcfg_explore.kprint.pretty_print(proof.path_constraints(node.id))
             failure_reasons[node.id] = reason
