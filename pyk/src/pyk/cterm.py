@@ -24,8 +24,8 @@ from .kast.manip import (
 from .kast.outer import KClaim, KRule
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.kbool import orBool
-from .prelude.ml import is_top, mlAnd, mlEqualsTrue, mlImplies, mlTop
-from .utils import unique
+from .prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from .utils import single, unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -40,22 +40,42 @@ class CTerm:
     constraints: tuple[KInner, ...]
 
     def __init__(self, config: KInner, constraints: Iterable[KInner] = ()) -> None:
-        self._check_config(config)
-        constraints = self._normalize_constraints(constraints)
+        if CTerm._is_top(config):
+            config = mlTop()
+            constraints = ()
+        elif CTerm._is_bottom(config):
+            config = mlBottom()
+            constraints = ()
+        else:
+            self._check_config(config)
+            constraints = self._normalize_constraints(constraints)
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
 
     @staticmethod
     def from_kast(kast: KInner) -> CTerm:
-        config, constraint = split_config_and_constraints(kast)
-        constraints = flatten_label('#And', constraint)
-        return CTerm(config, constraints)
+        if CTerm._is_top(kast):
+            return CTerm.top()
+        elif CTerm._is_bottom(kast):
+            return CTerm.bottom()
+        else:
+            config, constraint = split_config_and_constraints(kast)
+            constraints = flatten_label('#And', constraint)
+            return CTerm(config, constraints)
 
     @staticmethod
     def from_dict(dct: dict[str, Any]) -> CTerm:
         config = KInner.from_dict(dct['config'])
         constraints = [KInner.from_dict(c) for c in dct['constraints']]
         return CTerm(config, constraints)
+
+    @staticmethod
+    def top() -> CTerm:
+        return CTerm(mlTop(), ())
+
+    @staticmethod
+    def bottom() -> CTerm:
+        return CTerm(mlBottom(), ())
 
     @staticmethod
     def _check_config(config: KInner) -> None:
@@ -77,6 +97,20 @@ class CTerm:
         if is_top(term):
             return True
         return False
+
+    @staticmethod
+    def _is_top(kast: KInner) -> bool:
+        flat = flatten_label('#And', kast)
+        if len(flat) == 1:
+            return is_top(single(flat))
+        return all(CTerm._is_top(term) for term in flat)
+
+    @staticmethod
+    def _is_bottom(kast: KInner) -> bool:
+        flat = flatten_label('#And', kast)
+        if len(flat) == 1:
+            return is_bottom(single(flat))
+        return all(CTerm._is_bottom(term) for term in flat)
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> tuple[int, str]:
@@ -107,6 +141,9 @@ class CTerm:
 
     def cell(self, cell: str) -> KInner:
         return self.cells[cell]
+
+    def try_cell(self, cell: str) -> KInner | None:
+        return self.cells.get(cell)
 
     def match(self, cterm: CTerm) -> Subst | None:
         csubst = self.match_with_constraint(cterm)

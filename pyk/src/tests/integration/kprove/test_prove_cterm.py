@@ -63,7 +63,7 @@ class TestImpProof(KProveTest):
         results = kprove.prove_cterm(
             'prove-cterm', config(k, state), config(expected_k, expected_state), haskell_args=haskell_args
         )
-        actual_next_terms = [(get_cell(_p, 'K_CELL'), get_cell(_p, 'STATE_CELL')) for _p in results]
+        actual_next_terms = [(get_cell(_p.kast, 'K_CELL'), get_cell(_p.kast, 'STATE_CELL')) for _p in results]
         actual_next_states = [(kprove.pretty_print(k), kprove.pretty_print(s)) for k, s in actual_next_terms]
 
         # Then
