@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
     from ..kast import KInner
     from ..kast.outer import KClaim
+    from ..kcfg.exploration import KCFGExploration
     from ..kore.rpc import KoreClient, LogEntry
     from ..kore.syntax import Sentence
     from ..ktool.kprint import KPrint
@@ -356,7 +357,7 @@ class KCFGExplore:
 
     def extend(
         self,
-        kcfg: KCFG,
+        kcfg_exploration: KCFGExploration,
         node: KCFG.Node,
         logs: dict[int, tuple[LogEntry, ...]],
         execute_depth: int | None = None,
@@ -364,10 +365,14 @@ class KCFGExplore:
         terminal_rules: Iterable[str] = (),
         module_name: str | None = None,
     ) -> None:
+        kcfg: KCFG = kcfg_exploration.kcfg
+
         if not kcfg.is_leaf(node.id):
             raise ValueError(f'Cannot extend non-leaf node {self.id}: {node.id}')
         if kcfg.is_stuck(node.id):
             raise ValueError(f'Cannot extend stuck node {self.id}: {node.id}')
+        if kcfg_exploration.is_terminal(node.id):
+            raise ValueError(f'Cannot extend terminal node {self.id}: {node.id}')
 
         if self._check_abstract(node, kcfg):
             return

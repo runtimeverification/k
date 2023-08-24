@@ -742,10 +742,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         node_id = self._resolve(node_id)
         return node_id in self._covers
 
-    def prune(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[NodeIdLike]:
+    def prune(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[int]:
         nodes = self.reachable_nodes(node_id)
         keep_nodes = [self._resolve(nid) for nid in keep_nodes]
-        pruned_nodes: list[NodeIdLike] = []
+        pruned_nodes: list[int] = []
         for node in nodes:
             if node.id not in keep_nodes:
                 self.remove_node(node.id)

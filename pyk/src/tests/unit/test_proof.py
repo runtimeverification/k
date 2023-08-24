@@ -27,9 +27,10 @@ def proof_dir(tmp_path_factory: TempPathFactory) -> Path:
 def apr_proof(i: int, proof_dir: Path) -> APRProof:
     return APRProof(
         id=f'apr_proof_{i}',
+        kcfg=KCFG.from_dict({'nodes': node_dicts(i)}),
+        terminal=[],
         init=node(1).id,
         target=node(1).id,
-        kcfg=KCFG.from_dict({'nodes': node_dicts(i)}),
         logs={},
         proof_dir=proof_dir,
     )
@@ -42,6 +43,7 @@ def aprbmc_proof(i: int, proof_dir: Path) -> APRBMCProof:
         target=node(1).id,
         bmc_depth=i,
         kcfg=KCFG.from_dict({'nodes': node_dicts(i)}),
+        terminal=[],
         logs={},
         proof_dir=proof_dir,
     )
@@ -58,6 +60,7 @@ class TestProof:
         sample_proof = APRProof(
             id='apr_proof_1',
             kcfg=KCFG.from_dict({'nodes': node_dicts(1)}),
+            terminal=[],
             init=node(1).id,
             target=node(1).id,
             logs={},
@@ -80,6 +83,7 @@ class TestProof:
             id='aprbmc_proof_1',
             bmc_depth=1,
             kcfg=KCFG.from_dict({'nodes': node_dicts(1)}),
+            terminal=[],
             init=node(1).id,
             target=node(1).id,
             logs={},
@@ -122,24 +126,21 @@ class TestProof:
 
 
 def test_read_write_proof_data(proof_dir: Path) -> None:
-    proof = APRProof(
-        id='apr_proof_1',
-        kcfg=KCFG(),
-        init=0,
-        target=0,
-        logs={},
-        proof_dir=proof_dir,
-    )
-
     kcfg = KCFG(proof_dir / 'apr_proof_1' / 'kcfg')
     node1 = kcfg.create_node(term(1))
     node2 = kcfg.create_node(term(2))
     kcfg.create_node(term(3))
     kcfg.create_node(term(4))
 
-    proof.kcfg = kcfg
-    proof.init = node1.id
-    proof.target = node2.id
+    proof = APRProof(
+        id='apr_proof_1',
+        kcfg=kcfg,
+        terminal=[],
+        init=node1.id,
+        target=node2.id,
+        logs={},
+        proof_dir=proof_dir,
+    )
 
     proof.write_proof_data()
 
