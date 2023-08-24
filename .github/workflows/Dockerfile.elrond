@@ -22,8 +22,8 @@ RUN    apt-get update                      \
                        pandoc              \
                        python3.10          \
                        python3.10-dev      \
-                       python3.10-pip         \
-                       python3.10-venv        \
+                       python3-pip         \
+                       python3-venv        \
                     && apt-get -y clean            
 
 ARG USER=github-user
