@@ -64,7 +64,7 @@ RUN mxpy config set dependencies.rust.resolution host
 RUN git clone 'https://github.com/runtimeverification/elrond-semantics'
 
 # https://gist.github.com/taoyuan/bfa3ff87e4b5611b5cbe ; for a repository we don't control the submodules over. 
-RUN cd elrond-semantics &&                                                  \
-    git config --global url."https://github.com/".insteadOf git@github.com: \
-    git config --global url."https://".insteadOf git://                     \ 
+RUN cd elrond-semantics                                                     && \
+    git config --global url."https://github.com/".insteadOf git@github.com: && \
+    git config --global url."https://".insteadOf git://                     && \ 
     git submodule update --init --recursive
