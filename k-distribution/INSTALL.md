@@ -113,7 +113,7 @@ requires about ~1.4GB of dependencies and will take some time.
 ### Ubuntu Focal (20.04)
 
 ```sh
-sudo apt install ./kframework_amd64_ubuntu_focal.deb
+sudo apt install ./kframework_amd64_ubuntu_jammy.deb
 ```
 
 ### Ubuntu Jammy (22.04)
@@ -176,19 +176,19 @@ Docker images with K pre-installed are available at the
 [runtimeverification/kframework-k Docker Hub repository](https://hub.docker.com/repository/docker/runtimeverificationinc/kframework-k).
 
 Each release at `COMMIT_ID` has an image associated with it at
-`runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID`.
+`runtimeverificationinc/kframework-k:ubuntu-jammy-COMMIT_ID`.
 
 To run the image directly:
 
 ```sh
-docker run -it runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
+docker run -it runtimeverificationinc/kframework-k:ubuntu-jammy-COMMIT_ID
 ```
 
 and to make a Docker Image based on it, use the following line in your
 `Dockerfile`:
 
 ```Dockerfile
-FROM runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
+FROM runtimeverificationinc/kframework-k:ubuntu-jammy-COMMIT_ID
 ```
 
 We also create Ubuntu 22.04 images with the `ubuntu-jammy-COMMIT_ID` tags.

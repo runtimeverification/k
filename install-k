@@ -12,7 +12,7 @@ case $ID in
 	ubuntu)
 		CODENAME=$UBUNTU_CODENAME
 		case $CODENAME in
-			bionic|focal|jammy)
+			jammy)
 				;;
 			*)
 				echo "Unsupported Ubuntu version, try building from source."
