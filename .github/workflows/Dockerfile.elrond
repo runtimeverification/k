@@ -21,7 +21,8 @@ RUN    apt-get update                      \
                        libssl-dev          \
                        pandoc              \
                        python3.10          \
-                       python3.10-dev            
+                       python3.10-dev      \
+                    && apt-get -y clean            
 
 ARG USER=github-user
 ARG GROUP=$USER
