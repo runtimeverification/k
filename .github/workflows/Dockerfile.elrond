@@ -37,7 +37,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-202
 ENV PATH=/home/$USER/.cargo/bin:$PATH
 
 ARG PYK_VERSION
-RUN python3 -m pip install --upgrade pip
+RUN python3.10 -m pip install --upgrade pip
 RUN pip3 install --user --upgrade \
                  cytoolz          \
                  numpy            \
