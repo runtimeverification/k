@@ -131,6 +131,34 @@ jobs:
           path: |
             **/kore-exec.tar.gz
 
+  performance-tests:
+    name: 'Performace Tests'
+    runs-on: [self-hosted, linux, performance]
+    needs: version-sync
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: k-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 14
+      - name: 'Build and Test K'
+        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
+      - name: 'Profiling Performance Tests'
+        run: |
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make -j`nproc` --output-sync'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-ci-${GITHUB_SHA}
+          docker container rm --force k-ci-${GITHUB_SHA} || true
+
   compile-nix-flake:
     name: 'Nix flake'
     strategy:
