@@ -182,7 +182,7 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 14
-      - name: 'Download the uploaded package oo the Summary Page'
+      - name: 'Download the uploaded package on the Summary Page'
         uses: actions/download-artifact@v2
         with:
           name: package.pkg
