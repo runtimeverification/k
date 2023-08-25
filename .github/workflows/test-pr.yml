@@ -164,8 +164,36 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: package.pkg
-          path: |
-            package.pkg
+          path: package.pkg
+
+  test-uploaded-package:
+    name: 'K Uploaded Package'
+    runs-on: [self-hosted, linux, performance]
+    needs: version-sync
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: k-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 14
+      - name: 'Download the uploaded package oo the Summary Page'
+        uses: actions/download-artifact@v2
+        with:
+          name: package.pkg
+          path: package.pkg
+      - name: 'Copy package.pkg to the Docker container'
+        run: docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
+      - name: 'Install and Test K'
+        run: |
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'dpkg -i /kframework.deb'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
+
 
   compile-nix-flake:
     name: 'Nix flake'
