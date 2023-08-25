@@ -111,26 +111,27 @@ jobs:
       - uses: bencherdev/bencher@v0.3.9
       - name: 'Performance Benchmarks'
         run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/2_imp/lesson_5 && \
-            bencher run \
-              --if-branch "$GITHUB_REF_NAME" \
-              --else-if-branch "$GITHUB_BASE_REF" \
-              --else-if-branch master \
-              --err \
-              --github-actions ${{ secrets.GITHUB_TOKEN }} \
-              "make clean && \
-               /usr/bin/time --format "{\n\t\"k-distribution/pl-tutorial/1_k/2_imp/lesson_5\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json \
-               make kompile"'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/1_lambda/lesson_9 && \
-            bencher run \
-              --if-branch "$GITHUB_REF_NAME" \
-              --else-if-branch "$GITHUB_BASE_REF" \
-              --else-if-branch master \
-              --err \
-              --github-actions ${{ secrets.GITHUB_TOKEN }} \
-              "make clean && \
-               /usr/bin/time --format "{\n\t\"k-distribution/pl-tutorial/1_k/1_lambda/lesson_9\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json \
-               make kompile"'
+          docker exec -t  k-ci-${GITHUB_SHA} -c 'kompile --help'
+    #      docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/2_imp/lesson_5 && \
+    #        bencher run \
+    #          --if-branch "$GITHUB_REF_NAME" \
+    #          --else-if-branch "$GITHUB_BASE_REF" \
+    #          --else-if-branch master \
+    #          --err \
+    #          --github-actions ${{ secrets.GITHUB_TOKEN }} \
+    #          "make clean && \
+    #           /usr/bin/time --format "{\n\t\"k-distribution/pl-tutorial/1_k/2_imp/lesson_5\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json \
+    #           make kompile"'
+    #      docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/1_lambda/lesson_9 && \
+    #        bencher run \
+    #          --if-branch "$GITHUB_REF_NAME" \
+    #          --else-if-branch "$GITHUB_BASE_REF" \
+    #          --else-if-branch master \
+    #          --err \
+    #          --github-actions ${{ secrets.GITHUB_TOKEN }} \
+    #          "make clean && \
+    #           /usr/bin/time --format "{\n\t\"k-distribution/pl-tutorial/1_k/1_lambda/lesson_9\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}" --output=results.json \
+    #           make kompile"'
       - name: 'Tear down Docker'
         if: always()
         run: |
@@ -158,6 +159,13 @@ jobs:
           name: kore-exec.tar.gz
           path: |
             **/kore-exec.tar.gz
+      - name: 'On Success, Upload the package built to the Summary Page'
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kframework_*.deb
+          path: |
+            **/kframework_*.deb
 
   compile-nix-flake:
     name: 'Nix flake'
