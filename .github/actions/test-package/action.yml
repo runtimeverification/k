@@ -102,6 +102,16 @@ runs:
       set -euxo pipefail
       mv ${SUBDIR}${PKG_NAME} ${PKG_NAME}
       docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
+  - name: 'Copy Package: ${{ inputs.os }}:${{ inputs.distro }}'
+    shell: bash {0}
+    env:
+      BASE_OS: ${{ inputs.os }}
+      BASE_DISTRO: ${{ inputs.distro }}
+      PKG_NAME: ${{ inputs.pkg-name }}
+      SUBDIR: k-${{ inputs.distro }}/
+    run: |
+      set -euxo pipefail
+      docker cp k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA}:/opt/workspace/${PKG_NAME} ${PKG_NAME}
 
   - name: 'Tear down Docker Test'
     shell: bash {0}
