@@ -146,8 +146,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
     needs: [nix-maven]
     steps:
-      - name: 'df -h'
-        run: df -h
       - name: 'Check out code'
         uses: actions/checkout@v3
 
