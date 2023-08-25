@@ -2,6 +2,7 @@ SUBCLEAN=$(addsuffix .clean,$(SUBDIRS))
 SUBUPDATE=$(addsuffix .update,$(SUBDIRS))
 SUBKOMPILE=$(addsuffix .kompile,$(SUBDIRS))
 SUBKRUN=$(addsuffix .krun,$(SUBDIRS))
+SUBPROFILE=$(addsuffix .profile,$(SUBDIRS))
 SUBPROOFS=$(addsuffix .proofs,$(SUBDIRS))
 SUBSEARCHES=$(addsuffix .searches,$(SUBDIRS))
 SUBSTRAT=$(addsuffix .strat,$(SUBDIRS))
@@ -14,6 +15,7 @@ clean: $(SUBCLEAN)
 update-results: $(SUBUPDATE)
 kompile: $(SUBKOMPILE)
 krun: $(SUBKRUN)
+profile: $(SUBPROFILE)
 proofs: $(SUBPROOFS)
 searches: $(SUBSEARCHES)
 strat: $(SUBSTRAT)
@@ -33,6 +35,9 @@ $(SUBKOMPILE): %.kompile:
 
 $(SUBKRUN): %.krun:
 	$(MAKE) -C $* krun
+
+$(SUBPROFILE): %.profile:
+	$(MAKE) -C $* profile
 
 $(SUBPROOFS): %.proofs:
 	$(MAKE) -C $* proofs
