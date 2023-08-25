@@ -195,7 +195,6 @@ jobs:
         run: |
           set -euxo pipefail
           workspace=$(pwd)
-          cd k-${BASE_DISTRO}
           docker run                                                      \
             --name k-package-test-${BASE_OS}-${BASE_DISTRO}               \
             --rm -it                                                      \
