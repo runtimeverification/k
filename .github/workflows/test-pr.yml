@@ -163,9 +163,9 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v2
         with:
-          name: kframework_*.deb
+          name: package.pkg
           path: |
-            **/kframework_*.deb
+            k-jammy/
 
   compile-nix-flake:
     name: 'Nix flake'
