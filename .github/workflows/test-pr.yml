@@ -165,7 +165,7 @@ jobs:
         with:
           name: package.pkg
           path: |
-            k-jammy/
+            k-jammy/package.pkg
 
   compile-nix-flake:
     name: 'Nix flake'
