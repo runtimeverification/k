@@ -182,16 +182,19 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 14
-      - name: 'Download the uploaded package on the Summary Page'
+      - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v2
         with:
           name: package.pkg
           path: package.pkg
-      - name: 'Copy package.pkg to the Docker container'
-        run: docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
       - name: 'Install and Test K'
         run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'dpkg -i /kframework.deb'
+          docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive \
+            apt-get update             \
+            apt-get upgrade --yes      \
+            apt-get install --yes make \
+            apt-get install --yes ./kframework.deb'
           docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
 
 
