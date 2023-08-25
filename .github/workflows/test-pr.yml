@@ -188,36 +188,36 @@ jobs:
           name: package.pkg
           path: package.pkg
       - name: 'Set up Docker Test Image'
-          shell: bash {0}
-          env:
-            BASE_OS: unbuntu
-            BASE_DISTRO: jammy
-          run: |
-            set -euxo pipefail
-            workspace=$(pwd)
-            cd k-${BASE_DISTRO}
-            docker run                                                      \
-              --name k-package-test-${BASE_OS}-${BASE_DISTRO}               \
-              --rm -it                                                      \
-              --detach                                                      \
-              --workdir /opt/workspace                                      \
-              -v "${workspace}:/opt/workspace"                              \
-              ${BASE_OS}:${BASE_DISTRO}
+        shell: bash {0}
+        env:
+          BASE_OS: unbuntu
+          BASE_DISTRO: jammy
+        run: |
+          set -euxo pipefail
+          workspace=$(pwd)
+          cd k-${BASE_DISTRO}
+          docker run                                                      \
+            --name k-package-test-${BASE_OS}-${BASE_DISTRO}               \
+            --rm -it                                                      \
+            --detach                                                      \
+            --workdir /opt/workspace                                      \
+            -v "${workspace}:/opt/workspace"                              \
+            ${BASE_OS}:${BASE_DISTRO}
       
       - name: 'Test Package'
-          shell: bash {0}
-          env:
-            BASE_OS: ubuntu
-            BASE_DISTRO: jammy
-          run: |
-            set -euxo pipefail
-            docker cp kframework.deb k-package-test-${BASE_OS}-${BASE_DISTRO}:/opt/workspace/kframework.deb
-            docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && \
-              apt-get update             && \
-              apt-get upgrade --yes      && \
-              apt-get install --yes make && \
-              apt-get install --yes ./kframework.deb'
-            docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
+        shell: bash {0}
+        env:
+          BASE_OS: ubuntu
+          BASE_DISTRO: jammy
+        run: |
+          set -euxo pipefail
+          docker cp kframework.deb k-package-test-${BASE_OS}-${BASE_DISTRO}:/opt/workspace/kframework.deb
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && \
+            apt-get update             && \
+            apt-get upgrade --yes      && \
+            apt-get install --yes make && \
+            apt-get install --yes ./kframework.deb'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
       # - name: 'Install and Test K'
       #   run: |
       #     docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
