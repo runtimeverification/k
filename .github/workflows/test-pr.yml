@@ -94,7 +94,7 @@ jobs:
           distro: jammy
           llvm: 14
       - name: 'Build and Test K'
-        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn package -T1C --batch-mode -U' # TODO: DO NOT MERGE THIS!!!!
+        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
       - name: 'Check out k-exercises'
         uses: actions/checkout@v3
         with:
@@ -190,10 +190,10 @@ jobs:
       - name: 'Install and Test K'
         run: |
           docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive \
-            apt-get update             \
-            apt-get upgrade --yes      \
-            apt-get install --yes make \
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && \
+            apt-get update             && \
+            apt-get upgrade --yes      && \
+            apt-get install --yes make && \
             apt-get install --yes ./kframework.deb'
           docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
 
