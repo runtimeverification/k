@@ -111,7 +111,7 @@ jobs:
       - uses: bencherdev/bencher@v0.3.9
       - name: 'Performance Benchmarks'
         run: |
-          docker exec -t  k-ci-${GITHUB_SHA} -c 'kompile --help'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --help'
     #      docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/pl-tutorial/1_k/2_imp/lesson_5 && \
     #        bencher run \
     #          --if-branch "$GITHUB_REF_NAME" \
