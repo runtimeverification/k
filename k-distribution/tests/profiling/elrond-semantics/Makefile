@@ -5,4 +5,4 @@ KOMPILE_BACKEND=llvm
 BENCHMARK_NAME=ELROND-SEMANTICS
 KOMPILE_FLAGS=--main-module MANDOS --syntax-module MANDOS-SYNTAX
 
-include ../../../include/kframework/ktest.mak
+include ../kprofiling.mak
