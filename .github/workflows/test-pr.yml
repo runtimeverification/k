@@ -169,7 +169,7 @@ jobs:
   test-uploaded-package:
     name: 'K Uploaded Package'
     runs-on: [self-hosted, linux, performance]
-    needs: version-sync
+    needs: test-package-ubuntu-jammy
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
