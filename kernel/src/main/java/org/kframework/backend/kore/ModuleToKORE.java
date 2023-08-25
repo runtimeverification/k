@@ -713,7 +713,7 @@ public class ModuleToKORE {
         sbTemp.append("  axiom{} ");
         boolean hasToken = false;
         int numTerms = 0;
-        sbTemp.append("\\left-assoc{}(\\or{");
+        sbTemp.append("\\right-assoc{}(\\or{");
         convert(sort, sbTemp);
         sbTemp.append("} (");
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort.head(), Set()).toSeq().sorted(Production.ord()))) {
