@@ -204,7 +204,12 @@ jobs:
         run: |
           set -euxo pipefail
           docker cp package.pkg k-package-test-${BASE_OS}-${BASE_DISTRO}:/opt/workspace/kframework.deb
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'dpkg -i /opt/workspace/kframework.deb'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'pwd && ls -l'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'dpkg -i kframework.deb || export DEBIAN_FRONTEND=noninteractive && \
+          apt-get update             && \
+          apt-get upgrade --yes      && \
+          apt-get install --yes make && \
+          apt-get install --yes /opt/workspace/kframework.deb || true'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --version'
       - name: 'Tear down Docker Test'
         shell: bash {0}
