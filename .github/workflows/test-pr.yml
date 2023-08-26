@@ -175,13 +175,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-docker
-        with:
-          tag: k-ci-${{ github.sha }}
-          os: ubuntu
-          distro: jammy
-          llvm: 14
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v2
         with:
@@ -211,12 +204,22 @@ jobs:
         run: |
           set -euxo pipefail
           docker cp package.pkg k-package-test-${BASE_OS}-${BASE_DISTRO}:/opt/workspace/kframework.deb
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && \
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && \
             apt-get update             && \
             apt-get upgrade --yes      && \
             apt-get install --yes make && \
             apt-get install --yes ./kframework.deb'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --version'
+      - name: 'Tear down Docker Test'
+          shell: bash {0}
+          env:
+            BASE_OS: ubuntu
+            BASE_DISTRO: jammy
+          if: always()
+          run: |
+            docker stop --time=0 k-package-test-${BASE_OS}-${BASE_DISTRO}
+            docker container rm --force k-package-test-${BASE_OS}-${BASE_DISTRO} || true
+      
       # - name: 'Install and Test K'
       #   run: |
       #     docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
