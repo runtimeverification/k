@@ -187,6 +187,8 @@ jobs:
           BASE_DISTRO: jammy
         run: |
           set -euxo pipefail
+          md5sum package.deb > package.deb.md5
+          cat package.deb.md5
           workspace=$(pwd)
           docker run                                                      \
             --name k-package-test-${BASE_OS}-${BASE_DISTRO}               \
