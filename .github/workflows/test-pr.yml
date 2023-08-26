@@ -209,7 +209,7 @@ jobs:
           apt-get upgrade --yes      && \
           apt-get install --yes make && \
           apt-get install --yes /opt/workspace/kframework.deb || true'
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "package/debian/test-package package.pkg || true"
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c "package/debian/test-package package.pkg || true"
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --version'
       - name: 'Tear down Docker Test'
         shell: bash {0}
