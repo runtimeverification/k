@@ -203,8 +203,8 @@ jobs:
         run: |
           set -euxo pipefail
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'pwd && ls -l'
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'sudo dpkg -i package.deb || true'
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'mv package.deb package.pkh && \
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'dpkg -i package.deb || true'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'mv package.deb package.pkg && \
           export DEBIAN_FRONTEND=noninteractive && \
           apt-get update             && \
           apt-get upgrade --yes      && \
