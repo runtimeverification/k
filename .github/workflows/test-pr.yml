@@ -190,7 +190,7 @@ jobs:
       - name: 'Set up Docker Test Image'
         shell: bash {0}
         env:
-          BASE_OS: unbuntu
+          BASE_OS: ubuntu
           BASE_DISTRO: jammy
         run: |
           set -euxo pipefail
