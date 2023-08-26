@@ -203,7 +203,7 @@ jobs:
           BASE_DISTRO: jammy
         run: |
           set -euxo pipefail
-          docker cp package.pkg k-package-test-${BASE_OS}-${BASE_DISTRO}:/opt/workspace/package.pkg
+      #    docker cp package.pkg k-package-test-${BASE_OS}-${BASE_DISTRO}:/opt/workspace/package.pkg
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'pwd && ls -l'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'dpkg -i kframework.deb || export DEBIAN_FRONTEND=noninteractive && \
           apt-get update             && \
