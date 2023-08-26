@@ -163,8 +163,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v2
         with:
-          name: package.pkg
-          path: package.pkg
+          name: package.deb
+          path: package.deb
 
   test-uploaded-package:
     name: 'Test K Package on Performance Runner'
@@ -178,8 +178,8 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v2
         with:
-          name: package.pkg
-          path: package.pkg
+          name: package.deb
+          path: package.deb
       - name: 'Set up Docker Test Image'
         shell: bash {0}
         env:
@@ -195,7 +195,6 @@ jobs:
             --workdir /opt/workspace                                      \
             -v "${workspace}:/opt/workspace"                              \
             ${BASE_OS}:${BASE_DISTRO}
-      
       - name: 'Test Package'
         shell: bash {0}
         env:
@@ -204,11 +203,13 @@ jobs:
         run: |
           set -euxo pipefail
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'pwd && ls -l'
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'dpkg -i kframework.deb || export DEBIAN_FRONTEND=noninteractive && \
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'sudo dpkg -i package.deb || true'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'mv package.deb package.pkh && \
+          export DEBIAN_FRONTEND=noninteractive && \
           apt-get update             && \
           apt-get upgrade --yes      && \
           apt-get install --yes make && \
-          apt-get install --yes /opt/workspace/kframework.deb || true'
+          apt-get install --yes package.pkg || true'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c "package/debian/test-package package.pkg || true"
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --version'
       - name: 'Tear down Docker Test'

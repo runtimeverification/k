@@ -111,7 +111,7 @@ runs:
       SUBDIR: k-${{ inputs.distro }}/
     run: |
       set -euxo pipefail
-      docker cp k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA}:/opt/workspace/${PKG_NAME} ${PKG_NAME}
+      docker cp k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA}:/opt/workspace/${PKG_NAME} package.deb
 
   - name: 'Tear down Docker Test'
     shell: bash {0}
