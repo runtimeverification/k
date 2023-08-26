@@ -211,14 +211,14 @@ jobs:
             apt-get install --yes ./kframework.deb'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --version'
       - name: 'Tear down Docker Test'
-          shell: bash {0}
-          env:
-            BASE_OS: ubuntu
-            BASE_DISTRO: jammy
-          if: always()
-          run: |
-            docker stop --time=0 k-package-test-${BASE_OS}-${BASE_DISTRO}
-            docker container rm --force k-package-test-${BASE_OS}-${BASE_DISTRO} || true
+        shell: bash {0}
+        env:
+          BASE_OS: ubuntu
+          BASE_DISTRO: jammy
+        if: always()
+        run: |
+          docker stop --time=0 k-package-test-${BASE_OS}-${BASE_DISTRO}
+          docker container rm --force k-package-test-${BASE_OS}-${BASE_DISTRO} || true
       
       # - name: 'Install and Test K'
       #   run: |
