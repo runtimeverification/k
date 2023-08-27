@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from ..utils import ensure_dir_path
-from .utils import dir_path, file_path
+from .utils import bug_report_arg, dir_path, file_path
 
 if TYPE_CHECKING:
     from typing import TypeVar
@@ -25,6 +25,16 @@ class KCLIArgs:
     def parallel_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
         args.add_argument('--workers', '-j', default=1, type=int, help='Number of processes to run in parallel.')
+        return args
+
+    @cached_property
+    def bug_report_args(self) -> ArgumentParser:
+        args = ArgumentParser(add_help=False)
+        args.add_argument(
+            '--bug-report',
+            type=bug_report_arg,
+            help='Generate bug report with given name',
+        )
         return args
 
     @cached_property
