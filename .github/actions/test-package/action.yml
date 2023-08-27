@@ -103,7 +103,7 @@ runs:
       mv ${SUBDIR}${PKG_NAME} ${PKG_NAME}
       md5sum ${PKG_NAME} > ${PKG_NAME}.md5
       cat ${PKG_NAME}.md5
-      mv ${PKG_NAME} package.deb
+      cp ${PKG_NAME} package.deb
       docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
   # - name: 'Copy Package: ${{ inputs.os }}:${{ inputs.distro }}'
   #   shell: bash {0}
