@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..utils import check_dir_path, check_file_path, check_relative_path
+from ..utils import BugReport, check_dir_path, check_file_path, check_relative_path, ensure_dir_path
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -73,3 +73,9 @@ def arg_pair_of(
         return fst_type(elems[0]), snd_type(elems[1])
 
     return parse
+
+
+def bug_report_arg(path: str | Path) -> BugReport:
+    path = Path(path)
+    ensure_dir_path(path.parent)
+    return BugReport(path)
