@@ -179,7 +179,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: package.deb
-          path: package.deb
       - name: 'Set up Docker Test Image'
         shell: bash {0}
         env:
