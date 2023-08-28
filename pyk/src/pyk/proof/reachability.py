@@ -122,6 +122,10 @@ class APRProof(Proof, KCFGExploration):
         assert spb is not None
         return spb
 
+    def prune(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[int]:
+        pruned_nodes = super().prune(node_id, keep_nodes=list(keep_nodes) + [self.init, self.target])
+        return pruned_nodes
+
     @staticmethod
     def read_proof(id: str, proof_dir: Path) -> APRProof:
         proof_path = proof_dir / f'{hash_str(id)}.json'
@@ -427,7 +431,7 @@ class APRBMCProof(APRProof):
         return super().is_failing(node_id) and not self.is_bounded(node_id)
 
     def prune(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[int]:
-        pruned_nodes = self.prune(node_id, keep_nodes=keep_nodes)
+        pruned_nodes = super().prune(node_id, keep_nodes=keep_nodes)
         for nid in pruned_nodes:
             self.remove_bounded(nid)
         return pruned_nodes
@@ -495,8 +499,8 @@ class APRBMCProof(APRProof):
     def add_bounded(self, nid: NodeIdLike) -> None:
         self._bounded.add(self.kcfg._resolve(nid))
 
-    def remove_bounded(self, node_id: NodeIdLike) -> None:
-        self._bounded.discard(self.kcfg._resolve(node_id))
+    def remove_bounded(self, node_id: int) -> None:
+        self._bounded.discard(node_id)
 
     @property
     def summary(self) -> CompositeSummary:
