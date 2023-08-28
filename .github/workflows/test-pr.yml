@@ -208,6 +208,13 @@ jobs:
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes make'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes ./kframework.deb'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --help'
+
+      - name: 'Test Bencher'
+        run: |
+          set -euxo pipefail
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'wget https://github.com/bencherdev/bencher/releases/download/v0.3.9/bencher_0.3.9_amd64.deb'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'dpkg -i bencher_0.3.9_amd64.deb'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'bencher --help'
       - name: 'Tear down Docker Test'
         shell: bash {0}
         env:

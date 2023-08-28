@@ -62,7 +62,8 @@ RUN    apt-get update              \
         python3-distutils          \
         python3-pip                \
         time                       \
-        zlib1g-dev
+        wget                       \
+    zlib1g-dev
 
 COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
 COPY --from=STACK /usr/local/bin/stack /usr/local/bin/stack
