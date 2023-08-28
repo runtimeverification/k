@@ -206,6 +206,7 @@ jobs:
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get update'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get upgrade --yes'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes make'
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes wget'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes ./kframework.deb'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --help'
 
