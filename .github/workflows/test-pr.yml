@@ -134,8 +134,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v2
         with:
-          name: package.deb
-          path: package.deb
+          name: kframework.deb
+          path: kframework.deb
 
   performance-tests:
     name: 'Performace Tests'
@@ -149,7 +149,7 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v2
         with:
-          name: package.deb
+          name: kframework.deb
       - name: 'Set up Docker Test Image'
         env:
           BASE_OS: ubuntu
@@ -166,7 +166,6 @@ jobs:
         run: |
           set -euxo pipefail
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'pwd && ls -l'
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cp package.deb kframework.deb'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get update'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get upgrade --yes'
