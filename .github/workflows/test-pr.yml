@@ -208,8 +208,7 @@ jobs:
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get upgrade --yes'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes make'
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'apt-get install --yes ./kframework.deb'
-          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --version'
-       #  docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c "package/debian/test-package package.deb || true"
+          docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --help'
       - name: 'Tear down Docker Test'
         shell: bash {0}
         env:
@@ -219,16 +218,6 @@ jobs:
         run: |
           docker stop --time=0 k-package-test-${BASE_OS}-${BASE_DISTRO}
           docker container rm --force k-package-test-${BASE_OS}-${BASE_DISTRO} || true
-      
-      # - name: 'Install and Test K'
-      #   run: |
-      #     docker cp package.pkg k-ci-${GITHUB_SHA}:/kframework.deb
-      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && \
-      #       apt-get update             && \
-      #       apt-get upgrade --yes      && \
-      #       apt-get install --yes make && \
-      #       apt-get install --yes ./kframework.deb'
-      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'kompile --version'
 
 
   compile-nix-flake:
