@@ -171,6 +171,7 @@ jobs:
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get update'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get upgrade --yes'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes make'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes time'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes ./kframework.deb'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'kompile --help'
       - name: 'Profiling Performance Tests'

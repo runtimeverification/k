@@ -61,7 +61,6 @@ RUN    apt-get update              \
         python3-dev                \
         python3-distutils          \
         python3-pip                \
-        time                       \
         zlib1g-dev
 
 COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
