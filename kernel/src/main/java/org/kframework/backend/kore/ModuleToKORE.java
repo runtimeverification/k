@@ -713,7 +713,7 @@ public class ModuleToKORE {
         sbTemp.append("  axiom{} ");
         boolean hasToken = false;
         int numTerms = 0;
-        sbTemp.append("\\left-assoc{}(\\or{");
+        sbTemp.append("\\right-assoc{}(\\or{");
         convert(sort, sbTemp);
         sbTemp.append("} (");
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort.head(), Set()).toSeq().sorted(Production.ord()))) {
@@ -1593,8 +1593,8 @@ public class ModuleToKORE {
               att = att.add(Att.PRIORITIES(), KList.class, KList(lessThanK));
               att = att.remove(Att.LEFT());
               att = att.remove(Att.RIGHT());
-              att = att.add(Att.LEFT(), KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
-              att = att.add(Att.RIGHT(), KList.class, getAssoc(module.rightAssoc(), prod.klabel().get()));
+              att = att.add(Att.LEFT_INTERNAL(), KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
+              att = att.add(Att.RIGHT_INTERNAL(), KList.class, getAssoc(module.rightAssoc(), prod.klabel().get()));
           }
         } else {
           att = att.remove(Att.FORMAT());
