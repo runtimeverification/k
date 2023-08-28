@@ -210,6 +210,10 @@ jobs:
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'kompile --help'
 
       - name: 'Test Bencher'
+        shell: bash {0}
+        env:
+          BASE_OS: ubuntu
+          BASE_DISTRO: jammy
         run: |
           set -euxo pipefail
           docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO} /bin/bash -c 'wget https://github.com/bencherdev/bencher/releases/download/v0.3.9/bencher_0.3.9_amd64.deb'
