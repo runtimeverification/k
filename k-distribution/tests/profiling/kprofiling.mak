@@ -1,9 +1,5 @@
-# path to the current makefile
-MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-# path to binary directory of this distribution
-K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
 # path to the kompile binary of this distribuition
-KOMPILE=${K_BIN}/kompile
+KOMPILE?=$(shell which kompile)
 # time command for profiling kompile
 TIME=/usr/bin/time
 PROFILING_RESULTS=.profiling-results.json
