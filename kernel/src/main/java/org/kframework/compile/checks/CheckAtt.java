@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -58,6 +59,18 @@ public class CheckAtt {
         } else if (sentence instanceof Production) {
             check((Production) sentence);
         }
+        checkLabel(sentence);
+    }
+
+    private static final Pattern whitespace = Pattern.compile("\\s");
+
+    private void checkLabel(Sentence sentence) {
+      if (sentence.att().contains(Att.LABEL())) {
+        String label = sentence.att().get(Att.LABEL());
+        if (label.contains("`") || whitespace.matcher(label).find()) {
+          errors.add(KEMException.compilerError("Rule label '" + label + "' cannot contain whitespace or backticks.", sentence));
+        }
+      }
     }
 
     private void checkUnrecognizedAtts(Sentence sentence) {
