@@ -263,7 +263,6 @@ adds the length of `Vs` dimensions to the type `T`.
            $1[$2] = X;
          }
        }
-    [structural]
 ```
 
 ### Function declaration
@@ -285,7 +284,7 @@ When done with the first pass, call `main()`.
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> .Map => Env </genv>  [structural]
+       <genv> .Map => Env </genv>
 ```
 
 ### Expressions
@@ -335,11 +334,11 @@ Check array bounds, as part of the dynamic typing policy.
 ```k
 // Same comment as for simple untyped regarding [anywhere]
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [anywhere]
 
 // Same comment as for simple untyped regarding [anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [structural, anywhere]
+    when N >=Int 0 andBool N <Int M  [anywhere]
 ```
 
 ### Size of an array
@@ -381,7 +380,6 @@ completed to return the `nothing` value tagged as expected.
 ```k
   syntax Val ::= nothing(Type)
   rule <k> return; => return nothing(T); ...</k> <returnType> T </returnType>
-    [structural]
 ```
 
 ### Read
@@ -406,14 +404,14 @@ preserved:
 ### Blocks
 
 ```k
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 ```
 
 ### Sequential composition
 
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 ```
 
 ### Expression statements
@@ -432,7 +430,7 @@ preserved:
 ### While loop
 
 ```k
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}
 ```
 
 ### Print
@@ -441,7 +439,7 @@ We only allow printing integers and strings:
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
-  rule print(.Vals); => .  [structural]
+  rule print(.Vals); => .
 ```
 
 ### Exceptions
@@ -555,8 +553,8 @@ Environment recovery.
 // TODO: same comment regarding setEnv(...) as for simple untyped
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .) ~> setEnv(_)
 ```
 lvalue and loc
 ```k
@@ -564,14 +562,13 @@ lvalue and loc
   syntax Val ::= loc(Int)
 
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
-    [structural]
 
   //context lvalue(_[HOLE])
   //context lvalue(HOLE[_])
   context lvalue(_::Exp[HOLE::Exps])
   context lvalue(HOLE::Exp[_::Exps])
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 ```
 Adds the corresponding depth to an array type
 ```k
