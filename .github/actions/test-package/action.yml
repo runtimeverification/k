@@ -101,9 +101,6 @@ runs:
     run: |
       set -euxo pipefail
       mv ${SUBDIR}${PKG_NAME} ${PKG_NAME}
-      md5sum ${PKG_NAME} > ${PKG_NAME}.md5
-      cat ${PKG_NAME}.md5
-      cp ${PKG_NAME} package.deb
       docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
 
   - name: 'Tear down Docker Test'
