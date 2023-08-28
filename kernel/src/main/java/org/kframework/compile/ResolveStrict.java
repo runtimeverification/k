@@ -149,7 +149,7 @@ public class ResolveStrict {
                     requires = sideCondition.get();
                 }
 
-                String label = currentModule.name() + "." + production.klabelAtt().get() + (strictnessPosition+1);
+                String label = currentModule.name() + "." + production.klabelAtt().get().replace("`", "").replaceAll("\\s", "") + (strictnessPosition+1);
 
                 Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).add(Att.LABEL(), label));
                 sentences.add(ctx);
