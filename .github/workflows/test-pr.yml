@@ -9,7 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   version-sync:
     name: 'Version Sync'
     runs-on: ubuntu-20.04
@@ -124,6 +123,13 @@ jobs:
           llvm: 14
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
 
   compile-nix-flake:
     name: 'Nix flake'
@@ -131,8 +137,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-20.04
-            os: ubuntu-20.04
+          - runner: [self-hosted, linux, normal]
           - runner: macos-13
             os: macos-13
           - runner: MacM1

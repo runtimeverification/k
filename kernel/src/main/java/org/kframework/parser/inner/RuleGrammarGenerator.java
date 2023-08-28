@@ -533,7 +533,7 @@ public class RuleGrammarGenerator {
         Att att = mod.att();
         List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains(Att.NOT_LR1())).map(Module::name).collect(Collectors.toList());
         if (!notLrModules.isEmpty()) {
-          att = att.add(Att.NOT_LR1(), notLrModules.toString());
+          att = att.add(Att.NOT_LR1_MODULES(), notLrModules.toString());
         }
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(Import(origMod, true)), immutable(extensionProds), att);
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);

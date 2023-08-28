@@ -617,8 +617,7 @@ public class ConvertDataStructureToLookup {
 
 
     public Sentence convert(Sentence s) {
-        if (s.att().contains(Att.LEMMA())
-                || s.att().contains(Att.SMT_LEMMA())
+        if (s.att().contains(Att.SMT_LEMMA())
                 || s.att().contains(Att.PATTERN_FOLDING())) {
             return s;
         } else if (s instanceof Rule) {

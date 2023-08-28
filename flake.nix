@@ -2,9 +2,9 @@
   description = "K Framework";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-23.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend/3ac2c87da44ed9e8fe4ba4583fb5860a4680d821";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/1da6c43b8bb74a231b58978b1964a45d7ca753e4";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/a258fe8932da8c5cffab1c1bfbe18b99730cacd8";
+      url = "github:runtimeverification/hs-backend-booster/51f03a97530fb844635e232b81f9f18a3ca61b63";
       # NB booster-backend will bring in another dependency on haskell-backend,
       # but the two are not necessarily the same (different more often than not).
       # We get two transitive dependencies on haskell-nix.
@@ -61,7 +61,7 @@
               '';
             };
           in {
-            k-framework = haskell-backend-bins:
+            k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
                 booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
@@ -76,6 +76,7 @@
                 else
                   prev.gdb;
                 version = "${k-version}-${self.rev or "dirty"}";
+                inherit llvm-kompile-libs;
               };
           })
       ];
@@ -115,7 +116,13 @@
       in rec {
 
         packages = rec {
-          k = pkgs.k-framework haskell-backend-bins;
+          k = pkgs.k-framework {
+            inherit haskell-backend-bins;
+            llvm-kompile-libs = with pkgs; {
+              procps = [ "-I${procps}/include" "-L${procps}/lib" ];
+              openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
+            };
+          };
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
@@ -177,7 +184,7 @@
             };
         };
         defaultPackage = packages.k;
-        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework haskell-backend-bins);
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework { inherit haskell-backend-bins; llvm-kompile-libs = {}; });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlay;

@@ -69,10 +69,10 @@ public class GenerateSentencesFromConfigDeclTest {
         Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true, files).getExtensionModule();
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
         Att initializerAtts = Att().add(Att.INITIALIZER());
-        Att productionAtts = initializerAtts.add(Att.FUNCTION()).add(Att.NO_THREAD());
+        Att productionAtts = initializerAtts.add(Att.FUNCTION());
         Set<Sentence> reference = Set(Production(KLabel("<threads>"), Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>")),
-                        Att().add(Att.CELL()).add(Att.CELL_NAME(), "threads").add(Att.TOPCELL()).add(Att.FORMAT(), "%1%i%n%2%d%n%3")),
+                        Att().add(Att.CELL()).add(Att.CELL_NAME(), "threads").add(Att.FORMAT(), "%1%i%n%2%d%n%3")),
                 SyntaxSort(Seq(), Sort("ThreadCellBag"), Att().add(Att.HOOK(), "BAG.Bag").add(Att.CELL_COLLECTION())),
                 Production(KLabel("_ThreadCellBag_"), Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),

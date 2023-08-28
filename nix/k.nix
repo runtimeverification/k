@@ -1,6 +1,6 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
 , git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
-, prelude-kore, llvm-backend, debugger, version }:
+, prelude-kore, llvm-backend, llvm-backend-matching, debugger, version, llvm-kompile-libs }:
 
 let
   unwrapped = mavenix.buildMaven {
@@ -87,28 +87,42 @@ in let
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
 
-in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
-  nativeBuildInputs = [ makeWrapper ];
-  passthru = { inherit unwrapped; };
-  inherit unwrapped;
-} ''
-  mkdir -p $out/bin
+  final = current-llvm-kompile-libs:
+    runCommand (lib.removeSuffix "-maven" unwrapped.name) {
+      nativeBuildInputs = [ makeWrapper ];
+      passthru = {
+        inherit unwrapped;
+      } // builtins.mapAttrs
+        (_: paths: final (current-llvm-kompile-libs ++ paths))
+        llvm-kompile-libs;
+      inherit unwrapped;
+    } ''
+      mkdir -p $out/bin
 
-  # Wrap bin/ to augment PATH.
-  for prog in $unwrapped/bin/*
-  do
-    makeWrapper $prog $out/bin/$(basename $prog) --prefix PATH : ${hostPATH}
-  done
+      # Wrap bin/ to augment PATH.
+      for prog in $unwrapped/bin/*
+      do
+        makeWrapper $prog $out/bin/$(basename $prog) \
+          --prefix PATH : ${hostPATH} ${
+            lib.optionalString (current-llvm-kompile-libs != [ ]) ''
+              --set NIX_LLVM_KOMPILE_LIBS "${
+                lib.strings.concatStringsSep " "
+                (lib.lists.unique current-llvm-kompile-libs)
+              }"''
+          }
+      done
 
-  # Link each top-level package directory, for dependents that need that.
-  for each in include lib share
-  do
-    ln -sf $unwrapped/$each $out/$each
-  done
+      # Link each top-level package directory, for dependents that need that.
+      for each in include lib share
+      do
+        ln -sf $unwrapped/$each $out/$each
+      done
 
-  ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
-  ln -sf ${haskell-backend}/bin/kore-exec $out/bin/kore-exec
-  ln -sf ${haskell-backend}/bin/kore-parser $out/bin/kore-parser
-  ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
-  ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
-''
+      ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
+      ln -sf ${haskell-backend}/bin/kore-exec $out/bin/kore-exec
+      ln -sf ${haskell-backend}/bin/kore-parser $out/bin/kore-parser
+      ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
+      ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
+      ln -sf ${llvm-backend-matching}/bin/llvm-backend-matching $out/bin/llvm-backend-matching
+    '';
+in final [ ]

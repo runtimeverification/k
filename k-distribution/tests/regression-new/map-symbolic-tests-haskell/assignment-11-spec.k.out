@@ -12,8 +12,8 @@
 #And
   <k>
     assignmentResult ( ( MAP
-    X:MyId |-> 1
-    Y:MyId |-> 2 ) [ Z:MyId <- 3 ] ) ~> .
+    X:MyId |-> 1 ) [ Z:MyId <- 3 ]
+    Y:MyId |-> 2 ) ~> .
   </k>
 #And
   {

@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -51,12 +52,25 @@ public class CheckAtt {
 
     public void check(Sentence sentence) {
         checkUnrecognizedAtts(sentence);
+        checkRestrictedAtts(sentence);
         if (sentence instanceof Rule) {
             check(((Rule) sentence).att(), sentence);
             check((Rule) sentence);
         } else if (sentence instanceof Production) {
             check((Production) sentence);
         }
+        checkLabel(sentence);
+    }
+
+    private static final Pattern whitespace = Pattern.compile("\\s");
+
+    private void checkLabel(Sentence sentence) {
+      if (sentence.att().contains(Att.LABEL())) {
+        String label = sentence.att().get(Att.LABEL());
+        if (label.contains("`") || whitespace.matcher(label).find()) {
+          errors.add(KEMException.compilerError("Rule label '" + label + "' cannot contain whitespace or backticks.", sentence));
+        }
+      }
     }
 
     private void checkUnrecognizedAtts(Sentence sentence) {
@@ -64,6 +78,17 @@ public class CheckAtt {
             errors.add(KEMException.compilerError("Unrecognized attributes: " +
                     stream(sentence.att().unrecognizedKeys()).map(Key::toString).sorted().collect(Collectors.toList()) +
                     "\nHint: User-defined groups can be added with the group(_) attribute.", sentence));
+        }
+    }
+
+    private void checkRestrictedAtts(Sentence sentence) {
+        Class<?> cls = sentence.getClass();
+        Att att = sentence.att();
+        Set<Key> keys = stream(att.att().keySet()).map(k -> k._1()).collect(Collectors.toSet());
+        keys.removeIf(k -> k.allowedSentences().exists(c -> c.isAssignableFrom(cls)));
+        if (!keys.isEmpty()) {
+            List<String> sortedKeys = keys.stream().map(k -> k.toString()).sorted().collect(Collectors.toList());
+            errors.add(KEMException.compilerError(cls.getSimpleName() + " sentences can not have the following attributes: " + sortedKeys, sentence));
         }
     }
 
