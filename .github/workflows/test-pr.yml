@@ -130,34 +130,58 @@ jobs:
           name: kore-exec.tar.gz
           path: |
             **/kore-exec.tar.gz
+      - name: 'On Success, Upload the package built to the Summary Page'
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: package.deb
+          path: package.deb
 
   performance-tests:
     name: 'Performace Tests'
     runs-on: [self-hosted, linux, performance]
-    needs: version-sync
+    needs: test-package-ubuntu-jammy
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-docker
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v2
         with:
-          tag: k-ci-${{ github.sha }}
-          os: ubuntu
-          distro: jammy
-          llvm: 14
-      - name: 'Build and Test K'
-        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
+          name: package.deb
+      - name: 'Set up Docker Test Image'
+        env:
+          BASE_OS: ubuntu
+          BASE_DISTRO: jammy
+        run: |
+          set -euxo pipefail
+          workspace=$(pwd)
+          docker run --name k-profiling-tests-${GITHUB_SHA}               \
+            --rm -it --detach                                             \
+            --workdir /opt/workspace                                      \
+            -v "${workspace}:/opt/workspace"                              \
+            ${BASE_OS}:${BASE_DISTRO}
+      - name: 'Install K from Package'
+        run: |
+          set -euxo pipefail
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'pwd && ls -l'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cp package.deb kframework.deb'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get update'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get upgrade --yes'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes make'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes ./kframework.deb'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'kompile --help'
       - name: 'Profiling Performance Tests'
         run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make -j`nproc` --output-sync'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make -j`nproc` --output-sync'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-ci-${GITHUB_SHA}
-          docker container rm --force k-ci-${GITHUB_SHA} || true
+          docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
+          docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
 
   compile-nix-flake:
     name: 'Nix flake'
