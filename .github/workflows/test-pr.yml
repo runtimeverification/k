@@ -136,6 +136,7 @@ jobs:
         with:
           name: kframework.deb
           path: kframework.deb
+          retention-days: 1
 
   performance-tests:
     name: 'Performace Tests'
@@ -174,7 +175,7 @@ jobs:
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'kompile --help'
       - name: 'Profiling Performance Tests'
         run: |
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'spawn-kserver kserver.log'
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make -j`nproc` --output-sync'
       - name: 'Tear down Docker'
         if: always()
