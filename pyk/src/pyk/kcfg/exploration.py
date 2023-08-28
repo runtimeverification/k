@@ -54,8 +54,8 @@ class KCFGExploration:
         self._terminal.add(self.kcfg._resolve(node_id))
 
     # Unmarking a given node as terminal
-    def remove_terminal(self, node_id: NodeIdLike) -> None:
-        self._terminal.discard(self.kcfg._resolve(node_id))
+    def remove_terminal(self, node_id: int) -> None:
+        self._terminal.discard(node_id)
 
     #
     # Lifted KCFG functions that may affect terminal nodes
@@ -63,6 +63,7 @@ class KCFGExploration:
 
     # Removing a given node
     def remove_node(self, node_id: NodeIdLike) -> None:
+        node_id = self.kcfg._resolve(node_id)
         self.kcfg.remove_node(node_id)
         self.remove_terminal(node_id)
 
