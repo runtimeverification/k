@@ -1,7 +1,11 @@
 # path to the kompile binary of this distribuition
 KOMPILE?=$(shell which kompile)
 # time command for profiling kompile
-TIME=/usr/bin/time
+ifeq ($(shell uname -s),Darwin)
+	TIME?=$(shell which gtime)
+else
+	TIME?=/usr/bin/time
+endif
 PROFILING_RESULTS=.profiling-results.json
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
