@@ -1,4 +1,4 @@
-EXCLUDE=Makefile kprofiling.mak
+EXCLUDE=Makefile kprofiling.mak setup_profiling.sh
 SUBDIRS=$(filter-out $(EXCLUDE), $(wildcard *))
 
 SUBCLEAN=$(addsuffix .clean,$(SUBDIRS))
