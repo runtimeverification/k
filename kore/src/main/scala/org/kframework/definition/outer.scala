@@ -413,6 +413,16 @@ object Sentence {
   implicit val ord = new Ordering[Sentence] {
     def compare(a: Sentence, b: Sentence): Int = {
       (a, b) match {
+        case (c:SyntaxSort, d:SyntaxSort) => Ordering[SyntaxSort].compare(c, d)
+        case (c:SortSynonym, d:SortSynonym) => Ordering[SortSynonym].compare(c, d)
+        case (c:SyntaxLexical, d:SyntaxLexical) => Ordering[SyntaxLexical].compare(c, d)
+        case (c:Production, d:Production) => Ordering[Production].compare(c, d)
+        case (c:SyntaxAssociativity, d:SyntaxAssociativity) => Ordering[SyntaxAssociativity].compare(c, d)
+        case (c:SyntaxPriority, d:SyntaxPriority) => Ordering[SyntaxPriority].compare(c, d)
+        case (c:ContextAlias, d:ContextAlias) => Ordering[ContextAlias].compare(c, d)
+        case (c:Context, d:Context) => Ordering[Context].compare(c, d)
+        case (c:Rule, d:Rule) => Ordering[Rule].compare(c, d)
+        case (c:Claim, d:Claim) => Ordering[Claim].compare(c, d)
         case (_:SyntaxSort, _) => -1
         case (_, _:SyntaxSort) => 1
         case (_:SortSynonym, _) => -1
