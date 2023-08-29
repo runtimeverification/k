@@ -143,10 +143,7 @@ jobs:
     runs-on: [self-hosted, linux, performance]
     needs: test-package-ubuntu-jammy
     steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v3
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v3
         with:
