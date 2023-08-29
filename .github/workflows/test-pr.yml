@@ -136,6 +136,7 @@ jobs:
         with:
           name: kframework.deb
           path: kframework.deb
+          if-no-files-found: error
           retention-days: 1
 
   performance-tests:
@@ -163,12 +164,7 @@ jobs:
       - name: 'Install K from Package'
         run: |
           set -euxo pipefail
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'export DEBIAN_FRONTEND=noninteractive'
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get update'
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get upgrade --yes'
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes make'
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes time'
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'apt-get install --yes ./kframework.deb'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling/ && ./test_profiling.sh'
       - name: 'Profiling Performance Tests'
         run: |
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'spawn-kserver kserver.log'
