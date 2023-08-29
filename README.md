@@ -103,7 +103,7 @@ On macOS using [Homebrew](https://brew.sh/):
 
 ```shell
 git submodule update --init --recursive
-brew install bison boost cmake flex fmt gcc gmp gtime openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
+brew install bison boost cmake flex fmt gcc gmp gnu-time openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
 ```
 
 **Note**: in this case llvm@15 is required.
