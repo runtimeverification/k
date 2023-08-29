@@ -176,6 +176,68 @@ class HttpTransport(Transport):
         return f'{self._host}:{self._port}'
 
 
+class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
+    _JSON_RPC_VERSION: Final = '2.0'
+
+    _clients: dict[str, list[JsonRpcClient]]
+    _default_client: JsonRpcClient
+
+    def __init__(
+        self,
+        default_host: str,
+        default_port: int,
+        default_transport: TransportType,
+        dispatch: dict[str, list[tuple[str, int, TransportType]]],
+        *,
+        timeout: int | None = None,
+        bug_report: BugReport | None = None,
+    ):
+        client_cache = {}
+        self._clients = {}
+        self._default_client = JsonRpcClient(
+            default_host, default_port, timeout=timeout, bug_report=bug_report, transport=default_transport
+        )
+        client_cache[(default_host, default_port)] = self._default_client
+        for method, servers in dispatch.items():
+            for host, port, transport in servers:
+                if (host, port) in client_cache:
+                    self._update_clients(method, client_cache[(host, port)])
+                else:
+                    new_client = JsonRpcClient(host, port, timeout=timeout, bug_report=bug_report, transport=transport)
+                    self._update_clients(method, new_client)
+                    client_cache[(host, port)] = new_client
+
+    def _update_clients(self, method: str, client: JsonRpcClient) -> None:
+        clients = self._clients.get(method, [])
+        self._clients[method] = clients
+        clients.append(client)
+
+    def __enter__(self) -> JsonRpcClientFacade:
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        self._default_client.__exit__(*args)
+        for clients in self._clients.values():
+            for client in clients:
+                client.__exit__(*args)
+
+    def close(self) -> None:
+        self._default_client.close()
+        for clients in self._clients.values():
+            for client in clients:
+                client.close()
+
+    def request(self, method: str, **params: Any) -> dict[str, Any]:
+        if method in self._clients:
+            for client in self._clients[method]:
+                response = client.request(method, **params)
+                if 'error' in response:
+                    return response
+            return response
+        else:
+            return self._default_client.request(method, **params)
+
+
 class JsonRpcClient(ContextManager['JsonRpcClient']):
     _JSON_RPC_VERSION: Final = '2.0'
 
@@ -624,7 +686,7 @@ class SatResult(GetModelResult):
 class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
-    _client: JsonRpcClient
+    _client: JsonRpcClientFacade
 
     def __init__(
         self,
@@ -634,8 +696,13 @@ class KoreClient(ContextManager['KoreClient']):
         timeout: int | None = None,
         bug_report: BugReport | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
+        dispatch: dict[str, list[tuple[str, int, TransportType]]] | None = None,
     ):
-        self._client = JsonRpcClient(host, port, timeout=timeout, bug_report=bug_report, transport=transport)
+        if dispatch is None:
+            dispatch = {}
+        self._client = JsonRpcClientFacade(
+            host, port, transport, timeout=timeout, bug_report=bug_report, dispatch=dispatch
+        )
 
     def __enter__(self) -> KoreClient:
         return self
