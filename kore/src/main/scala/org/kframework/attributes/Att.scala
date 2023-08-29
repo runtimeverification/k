@@ -414,6 +414,11 @@ object Att {
     val attMap = union.groupBy({ case ((name, _), _) => name})
     Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
   }
+
+  implicit val ord: Ordering[Att] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[Att, Seq[(String, String, String)]](att => att.att.iterator.map(k => (k._1._1.key, k._1._2, k._2.toString)).toSeq.sorted)
+  }
 }
 
 trait AttributesToString {
