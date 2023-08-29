@@ -164,7 +164,7 @@ jobs:
       - name: 'Install K from Package'
         run: |
           set -euxo pipefail
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling/ && ./setup_profiling.sh'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
       - name: 'Profiling Performance Tests'
         run: |
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'spawn-kserver kserver.log'
