@@ -78,7 +78,7 @@ def kore_client(mock: Mock, mock_class: Mock) -> Iterator[KoreClient]:  # noqa: 
     mock_class.assert_called_with(
         'localhost', 3000, timeout=None, bug_report=None, transport=TransportType.SINGLE_SOCKET
     )
-    assert client._client == mock
+    assert client._client._default_client == mock
     yield client
     client.close()
     mock.close.assert_called()
