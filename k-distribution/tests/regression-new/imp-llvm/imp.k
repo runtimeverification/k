@@ -53,19 +53,19 @@ module IMP
   rule true && B => B
   rule false && _ => false
 
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {} => .
+  rule {S} => S
 
   rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
 
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     requires notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
+  rule int .Ids; S => S
 endmodule
