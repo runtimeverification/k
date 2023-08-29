@@ -409,7 +409,6 @@ definition.
            $1[$2] = X;
          }
        }
-    [structural]
 
 
   rule <k> X:Id => V ...</k>
@@ -444,10 +443,10 @@ definition.
 
 
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+    [anywhere]
 
 
   rule sizeOf(array(_,N)) => N
@@ -478,22 +477,22 @@ interestingly, the semantics of return stays unchanged.
     [group(assignment)]
 
 
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 
 
-  rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
+  rule S1::Stmt S2::Stmt => S1 ~> S2
 
   rule _:Val; => .
 
   rule if ( true) S else _ => S
   rule if (false) _ else S => S
 
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}
 
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     [group(print)]
-  rule print(.Vals); => .  [structural]
+  rule print(.Vals); => .
 
 
   syntax KItem ::= xstackFrame(Id,Stmt,K,Map,K)
@@ -570,8 +569,8 @@ from SIMPLE unchanged.
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .) ~> setEnv(_)
   // TODO: How can we make sure that the second rule above applies before the first one?
   //       Probably we'll deal with this using strategies, eventually.
 
@@ -579,12 +578,11 @@ from SIMPLE unchanged.
   syntax Val ::= loc(Int)
 
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
 
   context lvalue(_::Exp[HOLE::Exps])
   context lvalue(HOLE::Exp[_::Exps])
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 
 
   syntax Map ::= Int "..." Int "|->" K
@@ -619,7 +617,7 @@ that the user has not declared anything but classes at the top level
 of the program.
 ```k
   syntax KItem ::= "execute"
-  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
+  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>
 ```
 The semantics of `new` (defined below) requires the
 execution of all the class' declarations (and also of its
@@ -714,7 +712,7 @@ corresponding cells:
                             <baseClass> Class2 </baseClass>
                             <declarations> S </declarations>
                         </classData>)
-       ...</classes>  [structural]
+       ...</classes>
 ```
 
 ## Method declaration
@@ -791,9 +789,9 @@ members (both fields and methods) of that class.
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
        <className> Class </className>
        <baseClass> Class1:Id </baseClass>
-       <declarations> S </declarations>  [structural]
+       <declarations> S </declarations>
 
-  rule <k> create(Object) => . ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>
 ```
 The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class
@@ -803,7 +801,7 @@ semantics of method declarations above).
   syntax KItem ::= setCrntClass(Id)
 
   rule <k> setCrntClass(C) => . ...</k>
-       <crntClass> _ => C </crntClass>  [structural]
+       <crntClass> _ => C </crntClass>
 ```
 The next operation adds a new tagged environment layer to the
 current object and gets ready for the next layer by clearing the
@@ -816,7 +814,6 @@ empty).
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
        <envStack> .List => ListItem(envStackFrame(Class, Env)) ...</envStack>
-    [structural]
 ```
 The following operation stores the created object at the location
 reserved by `new`.  Note that the location reserved by
@@ -864,7 +861,7 @@ current object is not altered by `super`, so future method
 invocations see the entire object, as needed for dynamic method dispatch.
 ```k
   rule <k> X:Id => this . X ...</k> <env> Env:Map </env>
-    when notBool(X in keys(Env))  [structural]
+    when notBool(X in keys(Env))
 
   context HOLE._::Id when (HOLE =/=K super)
 
@@ -874,29 +871,25 @@ invocations see the entire object, as needed for dynamic method dispatch.
 /*  rule objectClosure(<crntClass> Class:Id </crntClass>
                      <envStack>... envStackFrame(Class,EnvC) EStack </envStack>)
        . X:Id
-    => lookupMember(envStackFrame(Class,EnvC) EStack, X)
-    [structural]*/
+    => lookupMember(envStackFrame(Class,EnvC) EStack, X) */
 
   rule objectClosure(Class:Id, ListItem(envStackFrame(Class,Env)) EStack)
        . X:Id
     => lookupMember(ListItem(envStackFrame(Class,Env)) EStack, X)
-    [structural]
   rule objectClosure(Class:Id, (ListItem(envStackFrame(Class':Id,_)) => .List) _)
        . _X:Id
-    when Class =/=K Class'  [structural]
+    when Class =/=K Class'
 
 /*  rule <k> super . X => lookupMember(EStack, X) ...</k>
        <crntClass> Class </crntClass>
-       <envStack>... envStackFrame(Class,EnvC) EStack </envStack>
-    [structural]*/
+       <envStack>... envStackFrame(Class,EnvC) EStack </envStack> */
   rule <k> super . X => lookupMember(EStack, X) ...</k>
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
-    [structural]
   rule <k> super . _X ...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
-    when Class =/=K Class'  [structural]
+    when Class =/=K Class'
 ```
 ## Method invocation
 
@@ -926,27 +919,25 @@ method call or the array access.
 
   rule <k> (X:Id => this . X)(_:Exps) ...</k>
        <env> Env </env>
-    when notBool(X in keys(Env))  [structural]
+    when notBool(X in keys(Env))
 
   context HOLE._::Id(_) when HOLE =/=K super
 
   rule (objectClosure(_, EStack) . X
-    => lookupMember(EStack, X:Id))(_:Exps)  [structural]
+    => lookupMember(EStack, X:Id))(_:Exps)
 
 /*  rule <k> (super . X
             => lookupMember(EStack,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... envStackFrame(Class,_) EStack </envStack>
-    [structural]*/
+       <envStack>... envStackFrame(Class,_) EStack </envStack> */
   rule <k> (super . X
             => lookupMember(EStack,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
-    [structural]
   rule <k> (super . _X)(_:Exps) ...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
-    when Class =/=K Class'  [structural]
+    when Class =/=K Class'
 
   // TODO(KORE): fix getKLabel #1801
   rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
@@ -981,7 +972,7 @@ argument does not evaluate to an object.
        instanceOf C => true
 
   rule objectClosure(_, (ListItem(envStackFrame(C,_)) => .List) _)
-       instanceOf C'  when C =/=K C'  [structural]
+       instanceOf C'  when C =/=K C'
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
   rule objectClosure(_, .List) instanceOf _ => false
@@ -1018,7 +1009,7 @@ evaluated, and finally the second rule initiates the lookup for the
 member's location based on the current class of the object.
 ```k
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
-    when notBool(X in keys(Env))  [structural]
+    when notBool(X in keys(Env))
 
   context lvalue((HOLE . _)::Exp)
 
@@ -1026,14 +1017,14 @@ member's location based on the current class of the object.
                             <envStack>... envStackFrame(C,EnvC) EStack </envStack>)
               . X
               => lookupMember(<envStack> envStackFrame(C,EnvC) EStack </envStack>,
-                              X))  [structural]*/
+                              X))  */
   rule lvalue(objectClosure(Class, ListItem(envStackFrame(Class,Env)) EStack)
               . X
               => lookupMember(ListItem(envStackFrame(Class,Env)) EStack,
-                              X))  [structural]
+                              X))
   rule lvalue(objectClosure(Class, (ListItem(envStackFrame(Class':Id,_)) => .List) _)
               . _X)
-    when Class =/=K Class'  [structural]
+    when Class =/=K Class'
 ```
 
 ## Lookup member

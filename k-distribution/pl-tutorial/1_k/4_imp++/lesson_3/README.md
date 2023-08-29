@@ -67,13 +67,12 @@ therefore allows you to finely tune the generated language models using the
 
 To state which constructs are to be considered to generate transitions in the
 generated language model, and for other reasons, too, the K tool allows you to
-tag any production and any rule. You can do this the same way we tagged
-rules with the `structural` keyword in earlier tutorials: put the tag in
-brackets. You can associate multiple tags to the same construct or rule, and
-more than one construct or rule can have the same tag. As an example, let us
-tag the division construct with `division`, the lookup rule with `lookup` and
-the increment rule with `increment`. The tags of the rules are not needed
-in this lesson, we do it only to demonstrate that rules can also be tagged.
+tag any production and any rule by putting the tag in brackets. You can associate
+ multiple tags to the same construct or rule, and more than one construct or
+rule can have the same tag. As an example, let us tag the division construct
+with `division`, the lookup rule with `lookup` and the increment rule with
+`increment`. The tags of the rules are not needed in this lesson, we do it only
+to demonstrate that rules can also be tagged.
 
 The least intrusive way to enforce our current language to explore the
 entire space of behaviors due to the strictness of division is to `kompile` it
