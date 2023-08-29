@@ -92,22 +92,15 @@ class OuterTest {
     Assert.assertNotEquals(prod1, prod2)
   }
 
-  @Test def sentenceDynamicOrdering(): Unit = {
-    val ord = Ordering[Sentence]
-    val sortA = Sort("A")
-    val sortB = Sort("B")
-    val sen1: Sentence = SortSynonym(sortB, sortB)
-    val sen2: Sentence = SortSynonym(sortA, sortA)
-    Assert.assertTrue(ord.compare(sen1, sen2) > 0)
-  }
-
   // Asserts that S1 < S2 < ... < Sn
+  // Likewise, Sn > Sn-1 > ... > S1
   def assertOrdering(sentences: Sentence*): Unit = {
     val ord = Ordering[Sentence]
     for (remaining <- sentences.tails.filter(_.nonEmpty)) {
       val head = remaining.head
       for (sentence <- remaining.tail) {
         Assert.assertTrue(ord.compare(head, sentence) < 0)
+        Assert.assertTrue(ord.compare(sentence, head) > 0)
       }
     }
   }
