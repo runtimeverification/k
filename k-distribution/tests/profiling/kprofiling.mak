@@ -27,8 +27,8 @@ JSON_FORMAT="{\n\t\"$(BENCHMARK_NAME)\": {\n\t\t\"build-time\": {\n\t\t\t\"value
 # profiles the kompile step
 profile: clean
 	$(BENCHER_RUN) $(BENCHER_RUN_BRANCH_ARGS) $(BENCHER_RUN_CI_ARGS) 		   \
-		$(TIME) --format ${JSON_FORMAT} --output=$(PROFILING_RESULTS) 		   \
-			$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $(DEF).$(SOURCE_EXT) --output-definition $(KOMPILED_DIR)
+		'$(TIME) --format ${JSON_FORMAT} --output=$(PROFILING_RESULTS) 		   \
+			$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $(DEF).$(SOURCE_EXT) --output-definition $(KOMPILED_DIR)'
 
 clean:
 	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz .profiling-results.json
