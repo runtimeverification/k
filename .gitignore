@@ -30,3 +30,4 @@ flake.lock
 .DS_Store
 git-describe.out
 timestamp.out
+.profiling-results.json

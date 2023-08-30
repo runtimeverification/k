@@ -130,6 +130,50 @@ jobs:
           name: kore-exec.tar.gz
           path: |
             **/kore-exec.tar.gz
+      - name: 'On Success, Upload the package built to the Summary Page'
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: kframework.deb
+          path: kframework.deb
+          if-no-files-found: error
+          retention-days: 1
+
+  performance-tests:
+    name: 'Performace Tests'
+    runs-on: [self-hosted, linux, performance]
+    needs: test-package-ubuntu-jammy
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v3
+        with:
+          name: kframework.deb
+      - name: 'Set up Docker Test Image'
+        env:
+          BASE_OS: ubuntu
+          BASE_DISTRO: jammy
+        run: |
+          set -euxo pipefail
+          workspace=$(pwd)
+          docker run --name k-profiling-tests-${GITHUB_SHA}               \
+            --rm -it --detach                                             \
+            --workdir /opt/workspace                                      \
+            -v "${workspace}:/opt/workspace"                              \
+            ${BASE_OS}:${BASE_DISTRO}
+      - name: 'Install K from Package'
+        run: |
+          set -euxo pipefail
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
+      - name: 'Profiling Performance Tests'
+        run: |
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'spawn-kserver kserver.log'
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make -j`nproc` --output-sync'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
+          docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
 
   compile-nix-flake:
     name: 'Nix flake'
