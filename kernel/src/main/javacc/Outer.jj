@@ -580,7 +580,9 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 | "context"       { matchedToken.kind = CONTEXT; } : CONTEXT_STATE
 
 // Note that "BUBBLE" must be last so it doesn't match keywords
-| <BUBBLE: (~[" ", "\t", "\r", "\n"])+>
+// '/' can only be the first character in a BUBBLE token, to prevent
+// bubble parsing from wrongly continuing on something like 'rule/* ... */'
+| <BUBBLE: ~[" ", "\t", "\r", "\n"] (~["/", " ", "\t", "\r", "\n"])*>
 }
 
 /** Parses and returns an unparsed bubble */
