@@ -46,7 +46,6 @@ the closure itself:
     rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
          <env> Rho </env>
          <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
-      [structural]
 
 Since each time `mu X . E` is encountered during the evaluation it needs to
 evaluate `E`, we conclude that `muclosure` cannot be a value.  We can declare

@@ -203,10 +203,9 @@ object Att {
   // Some helpers with scala reflection to make declaring class object sets more compact
   // If these break for some reason, replace their usage with Set(classOf[T1], classOf[T2], ...)
   private def onlyon[T: ClassTag](): Set[Class[_]] = Set(classTag[T].runtimeClass)
-  private def onlyon2[T1: ClassTag, T2: ClassTag](): Set[Class[_]] =
-    Set(classTag[T1].runtimeClass, classTag[T2].runtimeClass)
-  private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag](): Set[Class[_]] =
-    Set(classTag[T1].runtimeClass, classTag[T2].runtimeClass, classTag[T3].runtimeClass)
+  private def onlyon2[T1: ClassTag, T2: ClassTag](): Set[Class[_]] = onlyon[T1] ++ onlyon[T2]
+  private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag](): Set[Class[_]] = onlyon2[T1, T2] ++ onlyon[T3]
+  private def onlyon4[T1: ClassTag, T2: ClassTag, T3: ClassTag, T4:ClassTag](): Set[Class[_]] = onlyon3[T1, T2, T3] ++ onlyon[T4]
 
   /*
    * Built-in attribute keys which can appear in user source code
@@ -275,10 +274,10 @@ object Att {
   final val PREC = Key.builtin("prec", KeyParameter.Required, onlyon[Production])
   final val PREFER = Key.builtin("prefer", KeyParameter.Forbidden, onlyon[Production])
   final val PRESERVES_DEFINEDNESS = Key.builtin("preserves-definedness", KeyParameter.Forbidden, onlyon[Rule])
-  final val PRIORITY = Key.builtin("priority", KeyParameter.Required, onlyon2[Production, Rule])
+  final val PRIORITY = Key.builtin("priority", KeyParameter.Required, onlyon4[Context, ContextAlias, Production, Rule])
   final val PRIVATE = Key.builtin("private", KeyParameter.Forbidden, onlyon2[Module, Production])
   final val PUBLIC = Key.builtin("public", KeyParameter.Forbidden, onlyon2[Module, Production])
-  final val RESULT = Key.builtin("result", KeyParameter.Required, onlyon3[ContextAlias, Context, Rule])
+  final val RESULT = Key.builtin("result", KeyParameter.Required, onlyon4[Context, ContextAlias, Production, Rule])
   final val RETURNS_UNIT = Key.builtin("returnsUnit", KeyParameter.Forbidden, onlyon[Production])
   final val RIGHT = Key.builtin("right", KeyParameter.Forbidden, onlyon[Production])
   final val SEQSTRICT = Key.builtin("seqstrict", KeyParameter.Optional, onlyon[Production])
@@ -288,7 +287,6 @@ object Att {
   final val SMT_LEMMA = Key.builtin("smt-lemma", KeyParameter.Forbidden, onlyon[Rule])
   final val STREAM = Key.builtin("stream", KeyParameter.Optional, onlyon2[Production, Rule])
   final val STRICT = Key.builtin("strict", KeyParameter.Optional, onlyon[Production])
-  final val STRUCTURAL = Key.builtin("structural", KeyParameter.Forbidden, onlyon[Rule])
   final val SYMBOL = Key.builtin("symbol", KeyParameter.Forbidden, onlyon[Production])
   final val SYMBOLIC = Key.builtin("symbolic", KeyParameter.Optional, onlyon3[Module, Production, Rule])
   final val TAG = Key.builtin("tag", KeyParameter.Required, onlyon[Rule])
@@ -296,7 +294,7 @@ object Att {
   final val TOTAL = Key.builtin("total", KeyParameter.Forbidden, onlyon[Production])
   final val TRUSTED = Key.builtin("trusted", KeyParameter.Forbidden, onlyon[Claim])
   final val TYPE = Key.builtin("type", KeyParameter.Required, onlyon[Production])
-  final val UNBOUND_VARIABLES = Key.builtin("unboundVariables", KeyParameter.Required, onlyon[RuleOrClaim])
+  final val UNBOUND_VARIABLES = Key.builtin("unboundVariables", KeyParameter.Required, onlyon4[Context, ContextAlias, Production, RuleOrClaim])
   final val UNIT = Key.builtin("unit", KeyParameter.Required, onlyon[Production])
   final val UNPARSE_AVOID = Key.builtin("unparseAvoid", KeyParameter.Forbidden, onlyon[Production])
   final val UNUSED = Key.builtin("unused", KeyParameter.Forbidden, onlyon[Production])
@@ -415,6 +413,11 @@ object Att {
     val union = p.flatMap(_.att)
     val attMap = union.groupBy({ case ((name, _), _) => name})
     Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
+  }
+
+  implicit val ord: Ordering[Att] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[Att, Seq[(String, String, String)]](att => att.att.iterator.map(k => (k._1._1.key, k._1._2, k._2.toString)).toSeq.sorted)
   }
 }
 

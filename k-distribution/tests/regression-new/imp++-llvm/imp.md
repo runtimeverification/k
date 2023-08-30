@@ -355,7 +355,7 @@ corresponding computation `s1 ~> s2 ~> ... ~> sn`.
 
 ```k
    rule .Stmts => .
-   rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
+   rule S:Stmt Ss:Stmts => S ~> Ss
 ```
 
 ### Conditional statement
@@ -372,7 +372,7 @@ the semantics all empty lists become explicit corresponding dots
 (to avoid parsing ambiguities)
 
 ```k
-  rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {.Stmts}
 ```
 
 ### The new IMP++ constructs
@@ -431,8 +431,7 @@ currently, **K**'s lists are cons-lists, so we cannot simply rewrite the
 head of a list (`P`) into a list (`.`). The first rule below is tagged,
 because we want to include it in the list of transitions when we kompile;
 different threads may compete on the output buffer and we want to capture
-all behaviors. The second rule is structural because we do not want it to
-count as a computational step.
+all behaviors.
 
 ```k
   syntax Printable ::= Int | String
@@ -445,7 +444,7 @@ count as a computational step.
 
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>  [group(print)]
-  rule print(.AExps); => .  [structural]
+  rule print(.AExps); => .
 ```
 
 ### Halt
@@ -531,7 +530,7 @@ snapshot of the current environment; this operation is arguably not a
 computational step.
 
 ```k
-  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
+  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>
 ```
 
 ### Variable declaration
@@ -542,7 +541,7 @@ initialize it with 0.
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 ```
 
 ### Auxiliary operations
@@ -553,13 +552,13 @@ This rule is structural: we do not want them to count as computational
 steps in the transition system of a program.
 
 ```k
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>
 ```
 
 If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
 ```
-  rule (_:Map => .) ~> _:Map  [structural]
+  rule (_:Map => .) ~> _:Map
 ```
 This rule acts like a ``tail recursion'' optimization, but for blocks. */
 ```k
@@ -664,7 +663,7 @@ or more threads are about to access the same location in the store and at
 least one of these accesses is a write (i.e., an instance of the variable
 assignment rule), there is a high chance that different choices for
 the next transition lead to different program behaviors. While in the
-theory of **K** all the non-structural rules count as computational steps
+theory of **K** all the rules count as computational steps
 and hereby as transitions in the transition system associated to the
 program, in practice that may yield a tremendous number of step
 interleavings to consider. Most of these interleavings are behaviorally
