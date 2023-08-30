@@ -19,7 +19,7 @@ KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
 BENCHER_RUN=bencher run
 # Bencher flags
 BENCHER_RUN_BRANCH_ARGS=--if-branch "${GITHUB_HEAD_REF}" --else-if-branch "${GITHUB_BASE_REF}" --else-if-branch master
-BENCHER_RUN_CI_ARGS=--err --iter 5 --fold mean --ci-only-on-alert --github-actions "${GITHUB_TOKEN}" --file $(PROFILING_RESULTS)
+BENCHER_RUN_CI_ARGS=--err --iter ${ITER} --fold mean --ci-only-on-alert --github-actions "${GITHUB_TOKEN}" --file $(PROFILING_RESULTS)
 
 # JSON format for Bencher input
 JSON_FORMAT="{\n\t\"$(BENCHMARK_NAME)\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}"
