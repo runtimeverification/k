@@ -181,7 +181,7 @@ jobs:
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
       - name: 'Profiling Performance Tests'
         run: |
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'spawn-kserver kserver.log'
+          set -euxo pipefail
           docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make'
       - name: 'Tear down Docker'
         if: always()
