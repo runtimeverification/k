@@ -24,11 +24,15 @@ BENCHER_RUN_CI_ARGS=--err --iter ${ITER} --fold mean --ci-only-on-alert --github
 # JSON format for Bencher input
 JSON_FORMAT="{\n\t\"$(BENCHMARK_NAME)\": {\n\t\t\"build-time\": {\n\t\t\t\"value\": %e\n\t\t},\n\t\t\"max-resident-set-size\": {\n\t\t\t\"value\": %M\n\t\t}\n\t}\n}"
 
+# Delete the kompile dir before running kompile to ensure a clean build between iterations
+SET_CLEAN_BUILD=rm -rf $(KOMPILED_DIR)
+
 # profiles the kompile step
 profile: clean
-	$(BENCHER_RUN) $(BENCHER_RUN_BRANCH_ARGS) $(BENCHER_RUN_CI_ARGS) 		   \
-		'$(TIME) --format ${JSON_FORMAT} --output=$(PROFILING_RESULTS) 		   \
-			$(KOMPILE) -v $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $(DEF).$(SOURCE_EXT) --output-definition $(KOMPILED_DIR) && rm -r $(KOMPILED_DIR)'
+	$(BENCHER_RUN) $(BENCHER_RUN_BRANCH_ARGS) $(BENCHER_RUN_CI_ARGS)   \
+		'$(SET_CLEAN_BUILD) &&                                         \
+		 $(TIME) --format ${JSON_FORMAT} --output=$(PROFILING_RESULTS) \
+			$(KOMPILE) -v $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $(DEF).$(SOURCE_EXT) --output-definition $(KOMPILED_DIR)'
 
 clean:
 	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz .profiling-results.json
