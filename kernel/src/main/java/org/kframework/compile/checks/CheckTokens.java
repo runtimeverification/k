@@ -40,7 +40,7 @@ public class CheckTokens {
             return;
         }
 
-        if (!m.tokenProductionsFor().contains(p.sort()) // We only care about sorts that have been declared as tokens.
+        if (!m.tokenSorts().contains(p.sort()) // We only care about sorts that have been declared as tokens.
                 || p.klabel().isDefined() && m.macroKLabels().contains(p.klabel().get())) {
             return;
         }
