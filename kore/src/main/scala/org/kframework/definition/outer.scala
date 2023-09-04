@@ -202,6 +202,11 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }).fold(Map())(mergeMultiset)
   }
 
+  lazy val tokenSorts: Set[Sort] = {
+    sentences.collect({ case p:Production if p.att.contains(Att.TOKEN) => p.sort
+                        case s:SyntaxSort if s.att.contains(Att.TOKEN) => s.sort})
+  }
+
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
       .collect({ case p if p.att.contains(Att.TOKEN) => p })
