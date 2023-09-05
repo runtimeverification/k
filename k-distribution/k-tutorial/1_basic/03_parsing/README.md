@@ -92,7 +92,7 @@ You can ask yourself: How does K match the strings between the double quotes?
 The answer is that K uses Flex to generate a scanner for the grammar. Flex looks
 for the longest possible match of a regular expression in the input. If there
 are ambiguities between 2 or more regular expressions, it will pick the one with
-the max precedence token. You can learn more about how Flex matching works
+the highest `prec` attribute. You can learn more about how Flex matching works
 [here](https://westes.github.io/flex/manual/Matching.html#Matching).
 
 Bringing us back to the file `lesson-03-a.k`, we can see that this grammar
