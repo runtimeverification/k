@@ -88,6 +88,13 @@ interprets terms according to the grammar defined by the developer. It is
 automatically converted into an AST of that term, and then the `colorOf`
 function is evaluated using the function rules provided in the definition.
 
+You can ask yourself: How does K match the strings between the double quotes?
+The answer is that K uses Flex to generate a scanner for the grammar. Flex looks
+for the longest possible match of a regular expression in the input. If there
+are ambiguities between 2 or more regular expressions, it will pick the one with
+the highest `prec` attribute. You can learn more about how Flex matching works
+[here](https://westes.github.io/flex/manual/Matching.html#Matching).
+
 Bringing us back to the file `lesson-03-a.k`, we can see that this grammar
 has given a simple BNF grammar for expressions over Booleans. We have defined
 constructors corresponding to the Boolean values true and false, and functions
