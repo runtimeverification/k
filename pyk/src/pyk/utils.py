@@ -457,7 +457,7 @@ def ensure_dir_path(path: str | Path) -> Path:
     path = Path(path)
     if not path.exists():
         _LOGGER.info(f'Making directory: {path}')
-        path.mkdir(parents=True)
+        path.mkdir(parents=True, exist_ok=True)
     else:
         check_dir_path(path)
     return path
