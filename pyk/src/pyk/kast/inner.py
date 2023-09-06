@@ -577,10 +577,10 @@ class KSequence(KInner, Sequence[KInner]):
         else:
             items = args
 
-        _items = []
+        _items: list[KInner] = []
         for i in items:
             if type(i) is KSequence:
-                _items.extend(list(i.items))
+                _items.extend(i.items)
             else:
                 _items.append(i)
         items = tuple(_items)
