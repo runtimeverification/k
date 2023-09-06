@@ -164,4 +164,12 @@ module IMP-SIMPLE-SPEC
                         </state>
                       requires 0 <=Int N
 
+    claim [simple-untrue]:
+      <state>... $s |-> (1 => 2) ...</state>
+
+    claim [dep-fail-1]:
+      <k> $s = $s + 1; => . ...</k>
+      <state> $s |-> (0 => 2) </state>
+      [depends(simple-untrue)]
+
 endmodule
