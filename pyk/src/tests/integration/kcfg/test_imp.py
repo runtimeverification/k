@@ -11,7 +11,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import get_cell, minimize_term
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import BOOL, notBool, orBool
+from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
@@ -1257,6 +1257,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                     mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('R', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         )
@@ -1270,6 +1271,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                     mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<=Int_', [KVariable('R', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         )
@@ -1294,8 +1296,18 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                     mlEqualsTrue(
                         orBool(
                             [
-                                KApply('_==K_', [KVariable(name=abstracted_var.name), KVariable('X', 'Int')]),
-                                KApply('_==K_', [KVariable(name=abstracted_var.name), KVariable('Y', 'Int')]),
+                                andBool(
+                                    [
+                                        KApply('_==K_', [KVariable(name=abstracted_var.name), KVariable('X', 'Int')]),
+                                        KApply('_>Int_', [KVariable('R', 'Int'), KToken('1', 'Int')]),
+                                    ]
+                                ),
+                                andBool(
+                                    [
+                                        KApply('_==K_', [KVariable(name=abstracted_var.name), KVariable('Y', 'Int')]),
+                                        KApply('_<=Int_', [KVariable('R', 'Int'), KToken('1', 'Int')]),
+                                    ]
+                                ),
                             ]
                         )
                     ),
