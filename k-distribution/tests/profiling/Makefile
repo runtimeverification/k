@@ -1,4 +1,4 @@
-EXCLUDE=Makefile kprofiling.mak setup_profiling.sh
+EXCLUDE=Makefile kprofiling.mak setup_profiling.sh post_results_to_develop.py
 SUBDIRS=$(filter-out $(EXCLUDE), $(wildcard *))
 
 SUBCLEAN=$(addsuffix .clean,$(SUBDIRS))
