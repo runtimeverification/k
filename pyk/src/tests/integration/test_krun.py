@@ -18,7 +18,7 @@ class TestImpRun(KRunTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
     KOMPILE_BACKEND = 'haskell'
 
-    def test_run_kore_term(self, krun: KRun) -> None:
+    def test_run_pattern(self, krun: KRun) -> None:
         def state(k: KInner, state: KInner) -> Pattern:
             kast = krun.definition.empty_config(KSort('GeneratedTopCell'))
             kast = Subst(
@@ -48,7 +48,7 @@ class TestImpRun(KRunTest):
         )
 
         # When
-        actual = krun.run_kore_term(pattern)
+        actual = krun.run_pattern(pattern)
 
         # Then
         assert actual == expected

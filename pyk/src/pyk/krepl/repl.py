@@ -85,7 +85,7 @@ class KInterpreter(Interpreter[KState]):
         return KState(self.definition_dir, pattern)
 
     def next_state(self, state: KState, steps: int | None = None) -> KState:
-        pattern = KRun(self.definition_dir).run_kore_term(state.pattern, depth=steps)
+        pattern = KRun(self.definition_dir).run_pattern(state.pattern, depth=steps)
         return KState(self.definition_dir, pattern)
 
 
