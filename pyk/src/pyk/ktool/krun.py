@@ -58,7 +58,7 @@ class KRun(KPrint):
         )
         self.command = command
 
-    def run_kore_process(
+    def run_process(
         self,
         pgm: Pattern,
         *,
@@ -98,7 +98,7 @@ class KRun(KPrint):
                 debugger=debugger,
             )
 
-    def run_kore(
+    def run(
         self,
         pgm: Pattern,
         *,
@@ -115,7 +115,7 @@ class KRun(KPrint):
         bug_report: BugReport | None = None,
         debugger: bool = False,
     ) -> None:
-        result = self.run_kore_process(
+        result = self.run_process(
             pgm,
             cmap=cmap,
             pmap=pmap,
@@ -145,7 +145,7 @@ class KRun(KPrint):
         if check:
             result.check_returncode()
 
-    def run_kore_term(
+    def run_pattern(
         self,
         pattern: Pattern,
         *,
@@ -158,7 +158,7 @@ class KRun(KPrint):
         bug_report: BugReport | None = None,
         debugger: bool = False,
     ) -> Pattern:
-        proc_res = self.run_kore_process(
+        proc_res = self.run_process(
             pattern,
             depth=depth,
             term=True,

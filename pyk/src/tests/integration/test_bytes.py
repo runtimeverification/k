@@ -193,7 +193,7 @@ def test_krun(backend: str, definition_dir: Path, value: bytes) -> None:
     krun = KRun(definition_dir)
 
     # When
-    actual = krun.run_kore_term(kore)
+    actual = krun.run_pattern(kore)
 
     # Then
     assert actual == expected
