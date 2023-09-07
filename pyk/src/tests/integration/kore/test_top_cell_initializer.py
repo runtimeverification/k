@@ -47,7 +47,7 @@ def test_top_cell_initializer(definition_dir: Path) -> None:
 
     # When
     init_config = top_cell_initializer(_input_config(config))
-    actual = krun.run_kore_term(init_config)
+    actual = krun.run_pattern(init_config)
 
     # Then
     assert actual == expected

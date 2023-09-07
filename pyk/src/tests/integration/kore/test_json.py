@@ -79,7 +79,7 @@ class TestJsonToKore(KRunTest):
         # When
         json_pattern = json_to_kore(json_data)
         init_config = _config((inj(STRING, SORT_K_ITEM, json2string(json_pattern)),))
-        final_config = krun.run_kore_term(init_config)
+        final_config = krun.run_pattern(init_config)
         string_pattern = _extract(final_config)
         json_text = km.kore_str(string_pattern)
         actual_data = json.loads(json_text)
@@ -93,7 +93,7 @@ class TestJsonToKore(KRunTest):
         json_text = json.dumps(json_data)
         string_pattern = str_dv(json_text)
         init_config = _config((inj(SORT_JSON, SORT_K_ITEM, string2json(string_pattern)),))
-        final_config = krun.run_kore_term(init_config)
+        final_config = krun.run_pattern(init_config)
         json_pattern = _extract(final_config)
         actual_data = kore_to_json(json_pattern)
 
