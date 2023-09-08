@@ -20,6 +20,7 @@ from pyk.kore.rpc import (
     TerminalResult,
     UnknownResult,
     UnsatResult,
+    VacuousResult,
 )
 from pyk.kore.syntax import And, App, Bottom, Equals, EVar, Implies, Module, Top
 from pyk.testing import BoosterClientTest, KoreClientTest
@@ -80,6 +81,7 @@ EXECUTE_TEST_DATA: Final[tuple[tuple[str, int, Mapping[str, Any], ExecuteResult]
         {'terminal_rules': ['KORE-RPC-TEST.r56']},
         TerminalResult(state=state(6), depth=2, rule='KORE-RPC-TEST.r56', logs=()),
     ),
+    ('vacuous', 3, {}, VacuousResult(state=state(3), depth=0, logs=())),
 )
 
 
