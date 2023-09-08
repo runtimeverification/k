@@ -13,7 +13,7 @@ for flag in "$@"; do
         versionTimestampInMilliseconds=$(echo "${versionTimestamp} / 1000" | bc)
 
         if [ "$(uname)" = 'Darwin' ]; then
-            versionDate=$(gdate -d "@${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
+            versionDate=$(date -r "${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
         else
             versionDate=$(date -d "@${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
         fi
