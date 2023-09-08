@@ -110,7 +110,11 @@ class CTerm:
         flat = flatten_label('#And', kast)
         if len(flat) == 1:
             return is_bottom(single(flat))
-        return all(CTerm._is_bottom(term) for term in flat)
+        return any(CTerm._is_bottom(term) for term in flat)
+
+    @property
+    def is_bottom(self) -> bool:
+        return CTerm._is_bottom(self.config) or any(CTerm._is_bottom(cterm) for cterm in self.constraints)
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> tuple[int, str]:
