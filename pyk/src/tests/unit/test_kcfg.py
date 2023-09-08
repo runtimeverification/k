@@ -381,6 +381,19 @@ def test_resolve() -> None:
     assert node(1) == cfg.node(1)
 
 
+def test_vacuous() -> None:
+    # Given
+    d = {
+        'nodes': node_dicts(4),
+        'edges': edge_dicts((1, 2), (2, 3)),
+        'aliases': {'foo': 2},
+    }
+
+    cfg = KCFG.from_dict(d)
+    cfg.add_vacuous(3)
+    assert cfg.vacuous, node(3)
+
+
 def test_aliases() -> None:
     # Given
     d = {
@@ -476,6 +489,7 @@ def test_pretty_print() -> None:
         ),
         'ndbranches': ndbranch_dicts((20, [(24, False), (25, True)])),
         'stuck': [23],
+        'vacuous': [17],
     }
     cfg = KCFG.from_dict(d)
 
@@ -514,7 +528,7 @@ def test_pretty_print() -> None:
         '┣━━┓ constraint: #Equals ( x , 17 )\n'
         '┃  ┃ subst: V14 <- V17\n'
         '┃  │\n'
-        '┃  └─ 17 (leaf)\n'
+        '┃  └─ 17 (vacuous, leaf)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 18 )\n'
         '┃  ┃ subst: V14 <- V18\n'
@@ -522,7 +536,7 @@ def test_pretty_print() -> None:
         '┃  ├─ 18\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  └─ 17 (leaf)\n'
+        '┃  └─ 17 (vacuous, leaf)\n'
         '┃\n'
         '┣━━┓ constraint: #Equals ( x , 20 )\n'
         '┃  ┃ subst: V14 <- V20\n'
@@ -621,7 +635,7 @@ def test_pretty_print() -> None:
         '┣━━┓ constraint: #Equals ( x , 17 )\n'
         '┃  ┃ subst: V14 <- V17\n'
         '┃  │\n'
-        '┃  └─ 17 (leaf)\n'
+        '┃  └─ 17 (vacuous, leaf)\n'
         '┃        <top>\n'
         '┃          V17\n'
         '┃        </top>\n'
@@ -635,7 +649,7 @@ def test_pretty_print() -> None:
         '┃  │     </top>\n'
         '┃  │\n'
         '┃  │  (1 step)\n'
-        '┃  └─ 17 (leaf)\n'
+        '┃  └─ 17 (vacuous, leaf)\n'
         '┃        <top>\n'
         '┃          V17\n'
         '┃        </top>\n'
