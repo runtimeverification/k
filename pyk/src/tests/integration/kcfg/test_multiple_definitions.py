@@ -44,7 +44,7 @@ class TestMultipleDefinitionsProof(KCFGExploreTest):
         kcfg_explore: KCFGExplore,
         test_id: str,
     ) -> None:
-        split_depth, split_post_term, split_next_terms, _logs = kcfg_explore.cterm_execute(self.config(), depth=1)
+        _, split_depth, split_post_term, split_next_terms, _logs = kcfg_explore.cterm_execute(self.config(), depth=1)
 
         split_k = kcfg_explore.kprint.pretty_print(split_post_term.cell('K_CELL'))
         split_next_k = [kcfg_explore.kprint.pretty_print(split_post_term.cell('K_CELL')) for term in split_next_terms]
@@ -57,13 +57,13 @@ class TestMultipleDefinitionsProof(KCFGExploreTest):
             'a ( X:KItem )',
         ] == split_next_k
 
-        step_1_depth, step_1_post_term, step_1_next_terms, _logs = kcfg_explore.cterm_execute(
+        _, step_1_depth, step_1_post_term, step_1_next_terms, _logs = kcfg_explore.cterm_execute(
             split_next_terms[0], depth=1
         )
         step_1_k = kcfg_explore.kprint.pretty_print(step_1_post_term.cell('K_CELL'))
         assert 'c' == step_1_k
 
-        step_2_depth, step_2_post_term, step_2_next_terms, _logs = kcfg_explore.cterm_execute(
+        _, step_2_depth, step_2_post_term, step_2_next_terms, _logs = kcfg_explore.cterm_execute(
             split_next_terms[1], depth=1
         )
         step_2_k = kcfg_explore.kprint.pretty_print(step_1_post_term.cell('K_CELL'))

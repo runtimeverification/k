@@ -60,6 +60,8 @@ class NodePrinter:
             attrs.append('root')
         if kcfg.is_stuck(node.id):
             attrs.append('stuck')
+        if kcfg.is_vacuous(node.id):
+            attrs.append('vacuous')
         if kcfg.is_leaf(node.id):
             attrs.append('leaf')
         if kcfg.is_split(node.id):

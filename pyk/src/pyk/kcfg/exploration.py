@@ -29,7 +29,12 @@ class KCFGExploration:
 
     # Explorable node recogniser
     def is_explorable(self, node_id: NodeIdLike) -> bool:
-        return self.kcfg.is_leaf(node_id) and not self.is_terminal(node_id) and not self.kcfg.is_stuck(node_id)
+        return (
+            self.kcfg.is_leaf(node_id)
+            and not self.is_terminal(node_id)
+            and not self.kcfg.is_stuck(node_id)
+            and not self.kcfg.is_vacuous(node_id)
+        )
 
     #
     # Collectors

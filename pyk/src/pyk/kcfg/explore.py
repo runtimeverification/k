@@ -75,7 +75,7 @@ class KCFGExplore:
         cut_point_rules: Iterable[str] | None = None,
         terminal_rules: Iterable[str] | None = None,
         module_name: str | None = None,
-    ) -> tuple[int, CTerm, list[CTerm], tuple[LogEntry, ...]]:
+    ) -> tuple[bool, int, CTerm, list[CTerm], tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Executing: {cterm}')
         kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
         er = self._kore_client.execute(
@@ -89,19 +89,20 @@ class KCFGExplore:
             log_successful_simplifications=self._trace_rewrites,
             log_failed_simplifications=self._trace_rewrites,
         )
+        _is_vacuous = er.reason is StopReason.VACUOUS
         depth = er.depth
         next_state = CTerm.from_kast(self.kprint.kore_to_kast(er.state.kore))
         _next_states = er.next_states if er.next_states is not None else []
         next_states = [CTerm.from_kast(self.kprint.kore_to_kast(ns.kore)) for ns in _next_states]
         next_states = [cterm for cterm in next_states if not cterm.is_bottom]
         if len(next_states) == 1 and len(next_states) < len(_next_states):
-            return depth + 1, next_states[0], [], er.logs
+            return _is_vacuous, depth + 1, next_states[0], [], er.logs
         elif len(next_states) == 1:
             if er.reason == StopReason.CUT_POINT_RULE:
-                return depth, next_state, next_states, er.logs
+                return _is_vacuous, depth, next_state, next_states, er.logs
             else:
                 next_states = []
-        return depth, next_state, next_states, er.logs
+        return _is_vacuous, depth, next_state, next_states, er.logs
 
     def cterm_simplify(self, cterm: CTerm) -> tuple[CTerm, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {cterm}')
@@ -294,7 +295,7 @@ class KCFGExplore:
         if len(successors) != 0 and type(successors[0]) is KCFG.Split:
             raise ValueError(f'Cannot take step from split node {self.id}: {shorten_hashes(node.id)}')
         _LOGGER.info(f'Taking {depth} steps from node {self.id}: {shorten_hashes(node.id)}')
-        actual_depth, cterm, next_cterms, next_node_logs = self.cterm_execute(
+        _, actual_depth, cterm, next_cterms, next_node_logs = self.cterm_execute(
             node.cterm, depth=depth, module_name=module_name
         )
         if actual_depth != depth:
@@ -368,6 +369,8 @@ class KCFGExplore:
             raise ValueError(f'Cannot extend non-leaf node {self.id}: {node.id}')
         if kcfg.is_stuck(node.id):
             raise ValueError(f'Cannot extend stuck node {self.id}: {node.id}')
+        if kcfg.is_vacuous(node.id):
+            raise ValueError(f'Cannot extend vacuous node {self.id}: {node.id}')
         if kcfg_exploration.is_terminal(node.id):
             raise ValueError(f'Cannot extend terminal node {self.id}: {node.id}')
 
@@ -384,7 +387,7 @@ class KCFGExplore:
                 return
 
         _LOGGER.info(f'Extending KCFG from node {self.id}: {shorten_hashes(node.id)}')
-        depth, cterm, next_cterms, next_node_logs = self.cterm_execute(
+        _is_vacuous, depth, cterm, next_cterms, next_node_logs = self.cterm_execute(
             node.cterm,
             depth=execute_depth,
             cut_point_rules=cut_point_rules,
@@ -403,8 +406,12 @@ class KCFGExplore:
 
         # Stuck
         elif len(next_cterms) == 0:
-            kcfg.add_stuck(node.id)
-            _LOGGER.info(f'Found stuck node {self.id}: {shorten_hashes(node.id)}')
+            if _is_vacuous:
+                kcfg.add_vacuous(node.id)
+                _LOGGER.warning(f'Found vacuous node {self.id}: {shorten_hashes(node.id)}')
+            else:
+                kcfg.add_stuck(node.id)
+                _LOGGER.info(f'Found stuck node {self.id}: {shorten_hashes(node.id)}')
 
         # Cut Rule
         elif len(next_cterms) == 1:

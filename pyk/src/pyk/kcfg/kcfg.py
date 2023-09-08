@@ -205,6 +205,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     _covers: dict[int, dict[int, Cover]]
     _splits: dict[int, Split]
     _ndbranches: dict[int, NDBranch]
+    _vacuous: set[int]
     _stuck: set[int]
     _aliases: dict[str, int]
     _lock: RLock
@@ -219,6 +220,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._covers = {}
         self._splits = {}
         self._ndbranches = {}
+        self._vacuous = set()
         self._stuck = set()
         self._aliases = {}
         self._lock = RLock()
@@ -261,6 +263,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     @property
     def root(self) -> list[Node]:
         return [node for node in self.nodes if self.is_root(node.id)]
+
+    @property
+    def vacuous(self) -> list[Node]:
+        return [node for node in self.nodes if node.id in self._vacuous]
 
     @property
     def stuck(self) -> list[Node]:
@@ -315,6 +321,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         splits = [split.to_dict() for split in self.splits()]
         ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
 
+        vacuous = sorted(self._vacuous)
         stuck = sorted(self._stuck)
         aliases = dict(sorted(self._aliases.items()))
 
@@ -325,6 +332,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             'covers': covers,
             'splits': splits,
             'ndbranches': ndbranches,
+            'vacuous': vacuous,
             'stuck': stuck,
             'aliases': aliases,
         }
@@ -355,6 +363,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             target_id = cover_dict['target']
             csubst = CSubst.from_dict(cover_dict['csubst'])
             cfg.create_cover(source_id, target_id, csubst=csubst)
+
+        for vacuous_id in dct.get('vacuous') or []:
+            cfg.add_vacuous(vacuous_id)
 
         for stuck_id in dct.get('stuck') or []:
             cfg.add_stuck(stuck_id)
@@ -470,6 +481,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             if not self._covers[source_id]:
                 self._covers.pop(source_id)
 
+        self._vacuous.discard(node_id)
         self._stuck.discard(node_id)
 
         self._splits = {k: s for k, s in self._splits.items() if k != node_id and node_id not in s.target_ids}
@@ -636,6 +648,19 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             'List[KCFG.EdgeLike]', self.covers(source_id=source_id, target_id=target_id)
         )
 
+    def add_vacuous(self, node_id: NodeIdLike) -> None:
+        self._vacuous.add(self._resolve(node_id))
+
+    def remove_vacuous(self, node_id: NodeIdLike) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._vacuous:
+            raise ValueError(f'Node is not vacuous: {node_id}')
+        self._vacuous.remove(node_id)
+
+    def discard_vacuous(self, node_id: NodeIdLike) -> None:
+        node_id = self._resolve(node_id)
+        self._vacuous.discard(node_id)
+
     def add_stuck(self, node_id: NodeIdLike) -> None:
         self._stuck.add(self._resolve(node_id))
 
@@ -722,6 +747,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def is_root(self, node_id: NodeIdLike) -> bool:
         node_id = self._resolve(node_id)
         return len(self.predecessors(node_id)) == 0
+
+    def is_vacuous(self, node_id: NodeIdLike) -> bool:
+        node_id = self._resolve(node_id)
+        return node_id in self._vacuous
 
     def is_stuck(self, node_id: NodeIdLike) -> bool:
         node_id = self._resolve(node_id)
@@ -888,6 +917,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         splits = [split.to_dict() for split in self.splits()]
         ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
 
+        vacuous = sorted(self._vacuous)
         stuck = sorted(self._stuck)
         aliases = dict(sorted(self._aliases.items()))
         dct: dict[str, list[int] | int | dict[str, int] | list[dict[str, Any]]] = {}
@@ -897,6 +927,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         dct['covers'] = covers
         dct['splits'] = splits
         dct['ndbranches'] = ndbranches
+        dct['vacuous'] = vacuous
         dct['stuck'] = stuck
         dct['aliases'] = aliases
         cfg_json.write_text(json.dumps(dct))
@@ -963,6 +994,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             target_id = cover_dict['target']
             csubst = CSubst.from_dict(cover_dict['csubst'])
             cfg.create_cover(source_id, target_id, csubst=csubst)
+
+        for vacuous_id in dct.get('vacuous') or []:
+            cfg.add_vacuous(vacuous_id)
 
         for stuck_id in dct.get('stuck') or []:
             cfg.add_stuck(stuck_id)
