@@ -8,9 +8,11 @@ TIMESTAMP="${K_BASE}/kframework/timestamp.out"
 
 for flag in "$@"; do
     if [[ "$flag" == "--version" ]]; then
-        version="$(cat "${GIT_DESCRIBE}")"
+        if [[ -e "${GIT_DESCRIBE}" ]]; then
+            version="$(cat "${GIT_DESCRIBE}")"
+        fi
         versionTimestamp="$(cat "${TIMESTAMP}")"
-        versionTimestampInMilliseconds=$(echo "${versionTimestamp} / 1000" | bc)
+        versionTimestampInMilliseconds=$((versionTimestamp / 1000))
 
         if [ "$(uname)" = 'Darwin' ]; then
             versionDate=$(date -r "${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
