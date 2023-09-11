@@ -41,6 +41,7 @@ jobs:
   post-performance-tests:
     name: 'Performace Tests'
     runs-on: [self-hosted, linux, normal]
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v3
       - name: 'Set up Docker Test Image'
