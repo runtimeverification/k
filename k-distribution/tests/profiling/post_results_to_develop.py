@@ -2,15 +2,16 @@
 import json
 import subprocess
 
+COMMIT_SHA=''
 FROM_BRANCH=''
 TO_BRANCH='develop'
 
-# This command is needed to get the current branch name
-command = ['gh', 'pr', 'list', '-s', 'merged', '-B', 'develop', '-L', '1']
+# git command to get the last commit in develop
+commit_command = [ 'git', 'log', '--format=\"%H\"', '-n', '1' ]
 
 # Try to run the command
 try:
-    result = subprocess.run(command,stdout=subprocess.PIPE,
+    result = subprocess.run(commit_command,stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, text=True)
 
     # Check for errors
@@ -18,7 +19,28 @@ try:
         print("Error:", result.stderr)
         exit(1)
     else:
-        FROM_BRANCH = result.stdout.split('\t')[-3]
+        COMMIT_SHA = str(result.stdout).strip('\"').strip('\"\n')
+
+except subprocess.CalledProcessError as e:
+    # Handle any errors or exceptions here
+    print("Error:", e)
+
+# curl command to get the branch name of last commit in develop
+API_URL = 'https://api.github.com/repos/runtimeverification/k/commits/' \
+        + COMMIT_SHA + '/pulls'
+branch_command = ['curl', '-L', '-H', 'Accept:', 'application/vnd.github+json',
+                  '-H', '\"Authorization', 'Bearer', '${GITHUB_TOKEN}\"', '-H',
+                  '\"X-GitHub-Api-Version:', '2022-11-28\"', API_URL]
+try:
+    result = subprocess.run(branch_command,stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True)
+
+    # Check for errors
+    if result.returncode != 0:
+        print("Error:", result.stderr)
+        exit(1)
+    else:
+        FROM_BRANCH = json.loads(result.stdout)[0]['head']['label']
 
 except subprocess.CalledProcessError as e:
     # Handle any errors or exceptions here

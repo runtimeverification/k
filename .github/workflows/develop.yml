@@ -69,19 +69,9 @@ jobs:
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
             ${BASE_OS}:${BASE_DISTRO}
-      - name: 'Install GitHub CLI on Docker'
-        run: |
-          set -euxo pipefail
-          docker exec -t ci-${GITHUB_SHA} /bin/bash -c ' type -p curl >/dev/null || (apt update && apt install sudo curl -y) \
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-            && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-            && sudo apt update \
-            && sudo apt install gh -y'
       - name: 'Getting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t ci-${GITHUB_SHA} /bin/bash -c 'export GH_TOKEN="${GITHUB_TOKEN}"'
           docker exec -t ci-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py'
       - name: 'Posting Performance Tests Results'
         run: |
