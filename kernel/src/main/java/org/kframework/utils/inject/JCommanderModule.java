@@ -10,6 +10,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Set;
 
+import org.kframework.kompile.KompileUsageFormatter;
 import org.kframework.main.Tool;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -39,6 +40,7 @@ public class JCommanderModule extends AbstractModule  {
         try {
             JCommander jc = new JCommander(options.toArray(new Object[options.size()]), args);
             jc.setProgramName(tool.name().toLowerCase());
+            jc.setUsageFormatter(new KompileUsageFormatter(jc));
             sw.printIntermediate("Parse command line options");
             return jc;
         } catch (ParameterException e) {

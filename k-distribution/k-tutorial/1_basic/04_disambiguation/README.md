@@ -200,12 +200,12 @@ will express the exact same grammar as `lesson-04-b.k`
 ```k
 module LESSON-04-D
 
-  syntax Boolean ::= "true" [literal] | "false" [literal]
-                   | "(" Boolean ")" [atom, bracket]
-                   | "!" Boolean [not, function]
-                   | Boolean "&&" Boolean [and, function]
-                   | Boolean "^" Boolean [xor, function]
-                   | Boolean "||" Boolean [or, function]
+  syntax Boolean ::= "true" [group(literal)] | "false" [group(literal)]
+                   | "(" Boolean ")" [group(atom), bracket]
+                   | "!" Boolean [group(not), function]
+                   | Boolean "&&" Boolean [group(and), function]
+                   | Boolean "^" Boolean [group(xor), function]
+                   | Boolean "||" Boolean [group(or), function]
 
   syntax priorities literal atom > not > and > xor > or
   syntax left and
@@ -214,21 +214,22 @@ module LESSON-04-D
 endmodule
 ```
 
-This introduces a couple of new features of K. First of all, we see a bunch of
-attributes we don't already recognize. These are actually not built-in
-attributes, but rather user-defined attributes that are used to group
-productions together conceptually. For example, `literal` in the
-`syntax priorities` sentence is used to refer to the productions with the
-`literal` attribute, i.e., `true` and `false`.
+This introduces a couple of new features of K. First, the `group(_)` attribute
+is used to conceptually group together sets of sentences under a common
+user-defined name. For example, `literal` in the `syntax priorities` sentence is
+used to refer to all the productions marked with the `group(literal)` attribute,
+i.e., `true` and `false`. A production can belong to multiple groups using
+syntax such as `group(myGrp1,myGrp2)`.
 
 Once we understand this, it becomes relatively straightforward to understand
 the meaning of this grammar. Each `syntax priorities` sentence defines a
-priority relation where each `>` separates a priority group containing all
-the productions with at least one of the attributes in that group, and each
-`syntax left`, `syntax right`, or `syntax non-assoc` sentence defines an
-associativity relation connecting all the productions with one of the target
-attributes together into a left-, right-, or non-associative grouping.
-Specifically, this means that:
+priority relation where `>` separates different priority groups. Each priority
+group is defined by a list of one or more group names, and consists of all
+productions which are members of at least one of those named groups.
+
+In the same way, a `syntax left`, `syntax right`, or `syntax non-assoc` sentence
+defines an associativity relation among left-, right-, or non-associative
+groups. Specifically, this means that:
 ```
 syntax left a b
 ```

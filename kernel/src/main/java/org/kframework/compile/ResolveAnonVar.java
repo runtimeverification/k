@@ -2,6 +2,8 @@
 package org.kframework.compile;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.RuleOrClaim;
@@ -9,6 +11,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
@@ -104,16 +107,16 @@ public class ResolveAnonVar {
             @Override
             public K apply(KVariable k) {
                 if (ANON_VAR.equals(k)) {
-                    return newDotVariable("");
+                    return newDotVariable("", k);
                 }
                 if (FRESH_ANON_VAR.equals(k)) {
-                    return newDotVariable("?");
+                    return newDotVariable("?", k);
                 }
                 if (FRESH_ANON_CONSTANT.equals(k)) {
-                    return newDotVariable("!");
+                    return newDotVariable("!", k);
                 }
                 if (FRESH_LIST_VAR.equals(k)) {
-                    return newDotVariable("@");
+                    return newDotVariable("@", k);
                 }
                 return super.apply(k);
             }
@@ -121,11 +124,14 @@ public class ResolveAnonVar {
     }
 
     private int counter = 0;
-    KVariable newDotVariable(String prefix) {
+    KVariable newDotVariable(String prefix, K k) {
         KVariable newLabel;
-        Att att = Att().add("anonymous");
+        Att locInfo = Optional.of(Att())
+            .flatMap(att -> k.att().getOptional(Source.class).map(s -> att.add(Source.class, s)))
+            .flatMap(att -> k.att().getOptional(Location.class).map(l -> att.add(Location.class, l))).orElse(Att());
+        Att att = Att().add(Att.ANONYMOUS()).addAll(locInfo);
         if (prefix.equals("?")) {
-            att = att.add("fresh");
+            att = att.add(Att.FRESH());
         }
         do {
             newLabel = KVariable(prefix + "_Gen" + (counter++), att);

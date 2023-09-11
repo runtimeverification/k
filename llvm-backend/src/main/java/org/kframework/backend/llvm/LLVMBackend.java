@@ -4,6 +4,7 @@ package org.kframework.backend.llvm;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.kframework.attributes.Att;
 import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.compile.Backend;
@@ -182,7 +183,7 @@ public class LLVMBackend extends KoreBackend {
     }
 
     @Override
-    public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList("symbolic", "kast"));
+    public Set<Att.Key> excludedModuleTags() {
+        return new HashSet<>(Arrays.asList(Att.SYMBOLIC(), Att.KAST()));
     }
 }

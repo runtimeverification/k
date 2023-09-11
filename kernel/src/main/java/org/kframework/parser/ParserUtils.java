@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -16,6 +17,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.Main;
 import org.kframework.parser.inner.ApplySynonyms;
 import org.kframework.parser.inner.CollectProductionsVisitor;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
@@ -62,7 +64,7 @@ public class ParserUtils {
         this.kem = kem;
         this.options = options;
         this.files = files;
-        mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
+        this.mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
     }
 
     /**
@@ -79,6 +81,7 @@ public class ParserUtils {
         def.setMainModule(mainModule);
         def.setMainSyntaxModule(mainModule);
 
+        ProcessGroupAttributes.apply(def);
         Context context = new Context();
         new CollectProductionsVisitor(context).visit(def);
 
@@ -113,6 +116,9 @@ public class ParserUtils {
             }
         }
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
+        items.stream().filter((d) -> d instanceof org.kframework.kil.Module)
+                .forEach((m) -> ProcessGroupAttributes.apply((org.kframework.kil.Module) m));
+
         if (options.verbose) {
             System.out.println("Importing: " + source);
         }
@@ -199,6 +205,7 @@ public class ParserUtils {
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
+        ProcessGroupAttributes.apply(def);
         new CollectProductionsVisitor(context).visit(def);
 
         // Tuple4 of moduleName, Source, Location, digest
@@ -313,7 +320,7 @@ public class ParserUtils {
             previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, Source.apply("Auto imported prelude"), currentDirectory, lookupDirectories, requiredFiles, preprocess, leftAssoc));
         Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, preprocess, leftAssoc);
         if (preprocess) {
-          System.exit(0);
+          Main.exit(0);
         }
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Module mainModule = getMainModule(mainModuleName, modules);

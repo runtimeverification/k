@@ -2,6 +2,7 @@
 package org.kframework.compile.checks;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -15,7 +16,11 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 
@@ -37,12 +42,53 @@ public class CheckAtt {
         this.macros = m.macroKLabels();
     }
 
+    public void checkUnrecognizedModuleAtts() {
+        if (!m.att().unrecognizedKeys().isEmpty()) {
+            errors.add(KEMException.compilerError("Unrecognized attributes on module " + m.name() + ": " +
+                    stream(m.att().unrecognizedKeys()).map(Key::toString).sorted().collect(Collectors.toList()) +
+                    "\nHint: User-defined groups can be added with the group(_) attribute."));
+        }
+    }
+
     public void check(Sentence sentence) {
+        checkUnrecognizedAtts(sentence);
+        checkRestrictedAtts(sentence);
         if (sentence instanceof Rule) {
             check(((Rule) sentence).att(), sentence);
             check((Rule) sentence);
         } else if (sentence instanceof Production) {
             check((Production) sentence);
+        }
+        checkLabel(sentence);
+    }
+
+    private static final Pattern whitespace = Pattern.compile("\\s");
+
+    private void checkLabel(Sentence sentence) {
+      if (sentence.att().contains(Att.LABEL())) {
+        String label = sentence.att().get(Att.LABEL());
+        if (label.contains("`") || whitespace.matcher(label).find()) {
+          errors.add(KEMException.compilerError("Rule label '" + label + "' cannot contain whitespace or backticks.", sentence));
+        }
+      }
+    }
+
+    private void checkUnrecognizedAtts(Sentence sentence) {
+        if (!sentence.att().unrecognizedKeys().isEmpty()) {
+            errors.add(KEMException.compilerError("Unrecognized attributes: " +
+                    stream(sentence.att().unrecognizedKeys()).map(Key::toString).sorted().collect(Collectors.toList()) +
+                    "\nHint: User-defined groups can be added with the group(_) attribute.", sentence));
+        }
+    }
+
+    private void checkRestrictedAtts(Sentence sentence) {
+        Class<?> cls = sentence.getClass();
+        Att att = sentence.att();
+        Set<Key> keys = stream(att.att().keySet()).map(k -> k._1()).collect(Collectors.toSet());
+        keys.removeIf(k -> k.allowedSentences().exists(c -> c.isAssignableFrom(cls)));
+        if (!keys.isEmpty()) {
+            List<String> sortedKeys = keys.stream().map(k -> k.toString()).sorted().collect(Collectors.toList());
+            errors.add(KEMException.compilerError(cls.getSimpleName() + " sentences can not have the following attributes: " + sortedKeys, sentence));
         }
     }
 
@@ -51,17 +97,17 @@ public class CheckAtt {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
             if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array") && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) &&
-                    !prod.att().contains("token") && !prod.att().contains("macro") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
+                    !prod.att().contains(Att.TOKEN()) && !prod.att().contains(Att.MACRO()) && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
-                        if (!(sortAtt.contains("cellCollection") && prod.isSubsort())) {
+                        if (!(sortAtt.contains(Att.CELL_COLLECTION()) && prod.isSubsort())) {
                             errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
                         }
                     }
                 }
             }
         }
-        if (prod.att().contains("binder") && !isSymbolicKast) {
-            if (!prod.att().get("binder").equals("")) {
+        if (prod.att().contains(Att.BINDER()) && !isSymbolicKast) {
+            if (!prod.att().get(Att.BINDER()).equals("")) {
                 errors.add(KEMException.compilerError("Attribute value for 'binder' attribute is not supported.", prod));
             }
             if (prod.nonterminals().size() < 2) {
@@ -72,14 +118,14 @@ public class CheckAtt {
         }
         boolean hasColors = false;
         int ncolors = 0;
-        if (prod.att().contains("colors")) {
+        if (prod.att().contains(Att.COLORS())) {
           hasColors = true;
-          ncolors = prod.att().get("colors").split(",").length;
+          ncolors = prod.att().get(Att.COLORS()).split(",").length;
         }
         int nterminals = prod.items().size() - prod.nonterminals().size();
         int nescapes = 0;
-        if (prod.att().contains("format")) {
-            String format = prod.att().get("format");
+        if (prod.att().contains(Att.FORMAT())) {
+            String format = prod.att().get(Att.FORMAT());
             for (int i = 0; i < format.length(); i++) {
                 char c = format.charAt(i);
                 if (c == '%') {
@@ -126,7 +172,7 @@ public class CheckAtt {
                     }
                 }
             }
-        } else if (!prod.att().contains("token") && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
+        } else if (!prod.att().contains(Att.TOKEN()) && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
             for (ProductionItem pi : iterable(prod.items())) {
                 if (pi instanceof RegexTerminal) {
                     if (prod.items().size() == 1)  {

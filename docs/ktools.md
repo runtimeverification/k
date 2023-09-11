@@ -366,3 +366,21 @@ This is the line of `definition.kore` that the axiom appears on as
 well as the original location of the rule in the K semantics. You can
 use this information to figure out which rules and functions are
 causing the most time and optimize them to be more efficient.
+
+Running tests - kserver
+--------------------------
+
+The `kserver` is a front-end tool based on [Nailgun](https://github.com/facebookarchive/nailgun)
+which helps to reduce the startup time of the JVM. Calling `kserver` in a terminal
+window will wait for all kompile/kprove calls and force them to run in the same process
+and share the same threads. This also reduces the thread contention significantly. `kompile`
+uses all the threads available to do rule parsing. Another benefit is that it saves caches,
+and each time you call kprove/kast, you can access those directly w/o extra disk usage.
+Running the `regression-new` integration tests on a powerful machine (32 threads) takes 8m,
+with the kserver active it takes 2m. You can start the kserver in two ways.
+- blocking: call `kserver` in the command line. Close it after you are done testing. Useful for quick testing.
+- non-blocking: call `spawn-kserver <log.flie>` and close it with `stop-kserver` - this is used for automation on CI
+
+Because we reuse caches, you should stop and restart the server between runs.
+The Nailgun implementation hasn't been updated in the last 3-5 years, and it's not compatible with Java 18 onwards.
+

@@ -743,25 +743,26 @@ For this purpose, we introduce the equivalent `syntax priorities`,
 example, the above grammar can be written equivalently as:
 
 ```k
-syntax Exp ::= Exp "*" Exp [mult]
-             | Exp "/" Exp [div]
-             | Exp "+" Exp [add]
-             | Exp "-" Exp [sub]
+syntax Exp ::= Exp "*" Exp [group(mult)]
+             | Exp "/" Exp [group(div)]
+             | Exp "+" Exp [group(add)]
+             | Exp "-" Exp [group(sub)]
 
 syntax priorities mult div > add sub
 syntax left mult div
 syntax right add sub
 ```
 
-Here we use user-defined attributes to refer to a group of sentences
-collectively. The sets are flattened together. We could equivalently have
-written:
+Here, the `group(_)` attribute is used to create user-defined groups of
+sentences. A particular group name collectively refers to the whole set of
+sentences within that group. The sets are flattened together, so we could
+equivalently have written:
 
 ```k
-syntax Exp ::= Exp "*" Exp [mult]
-             | Exp "/" Exp [mult]
-             | Exp "+" Exp [add]
-             | Exp "-" Exp [add]
+syntax Exp ::= Exp "*" Exp [group(mult)]
+             | Exp "/" Exp [group(mult)]
+             | Exp "+" Exp [group(add)]
+             | Exp "-" Exp [group(add)]
 
 syntax priorities mult > add
 syntax left mult
@@ -1662,23 +1663,26 @@ For example:
 
 ```k
 syntax AExp ::= Int
-              | AExp "+" AExp [strict]
+              | AExp "+" AExp [strict, klabel(addExp)]
 ```
 
 This generates two heating rules (where the hole syntaxes `"[]" "+" AExp` and
 `AExp "+" "[]"` is automatically added to create an evaluation context):
 
 ```k
-rule <k> HOLE:AExp +  AE2:AExp => HOLE ~>  [] + AE2 ... </k> [heat]
-rule <k>  AE1:AExp + HOLE:AExp => HOLE ~> AE1 +  [] ... </k> [heat]
+rule [addExp1-heat]: <k> HOLE:AExp +  AE2:AExp => HOLE ~>  [] + AE2 ... </k> [heat]
+rule [addExp2-heat]: <k>  AE1:AExp + HOLE:AExp => HOLE ~> AE1 +  [] ... </k> [heat]
 ```
 
 And two corresponding cooling rules:
 
 ```k
-rule <k> HOLE:AExp ~>  [] + AE2 => HOLE +  AE2 ... </k> [cool]
-rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
+rule [addExp1-cool]: <k> HOLE:AExp ~>  [] + AE2 => HOLE +  AE2 ... </k> [cool]
+rule [addExp2-cool]: <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
 ```
+
+Note that the rules are given labels based on the klabel of the production, which
+nonterminal is the hole, and whether it's the heating or the cooling rule.
 
 You will note that these rules can apply one after another infinitely. In
 practice, the `KResult` sort is used to break this cycle by ensuring that only
@@ -1765,10 +1769,10 @@ unnecessarily verbose to write heating and cooling rules directly.
 
 For example, if the user wants to heat a term if it exists under a `foo`
 constructor if the term to be heated is of sort `bar`, one might write the
-following context:
+following context (with the optional label):
 
 ```k
-context foo(HOLE:Bar)
+context [foo]: foo(HOLE:Bar)
 ```
 
 Once again, note that `HOLE` is just a variable, but one that has special
@@ -1778,8 +1782,8 @@ be heated or cooled.
 This will automatically generate the following sentences:
 
 ```k
-rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> [heat]
-rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
+rule [foo-heat]: <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> [heat]
+rule [foo-cool]: <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
 ```
 
 The user may also write the K cell explicitly in the context declaration
@@ -2867,10 +2871,10 @@ Attributes Reference
 
 ### Attribute Syntax Overview
 
-In K, many different syntactic categories accept _attributes_, an optional
-trailing list of keywords or user-defined identifiers. Attribute lists have two
-different syntaxes, depending on where they occur. Each attribute also has a
-type which describes where it may occur.
+In K, many different syntactic categories accept an optional trailing list of
+keywords known as _attributes_. Attribute lists have two different syntaxes,
+depending on where they occur. Each attribute also has a type which describes
+where it may occur.
 
 The first syntax is a square-bracketed (`[]`) list of words. This syntax is
 available for following attribute types:
@@ -2893,8 +2897,7 @@ available for the following attribute types:
 1.  `cell` attributes - may appear inside of the cell start tag in
     configuration declarations
 
-Note that, currently, *unknown* attributes are *ignored*. Essentially, this
-means that there is no such thing as an *invalid* attribute. When we talk about
+Unrecognized attributes are reported as an error. When we talk about
 the *type* of an attribute, we mean a syntactic category to which an attribute
 can be attached where the attribute has some semantic effect.
 
@@ -2925,6 +2928,7 @@ arguments. A legend describing how to interpret the index follows.
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
 | `function`            | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
+| `group(_)`            | all   | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |

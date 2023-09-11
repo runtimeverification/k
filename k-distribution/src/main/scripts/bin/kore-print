@@ -11,19 +11,15 @@ dir=.
 kompiledDir=
 filterSubst=true
 literal=false
+verboseFlag=
 outputFile=-
 outputMode=pretty
 
-# setup temp files
-now=`date +"%Y-%m-%d-%H-%M-%S"`
-tempDir="$(mktemp -d .kore-print-${now}-XXXXXXXXXX)"
-tempFiles=("$tempDir")
-trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
 KORE_PRINT=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
 
-ktool="${KORE_PRINT}"
+export KTOOL="${KORE_PRINT}"
 source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 print_usage () {
@@ -139,6 +135,12 @@ do
       trap - INT TERM EXIT
       ;;
 
+      -v| --verbose)
+      verboseFlag="--verbose"
+      verbose=1
+      shift
+      ;;
+
       --version)
       kompile --version
       exit 0
@@ -199,8 +201,13 @@ if ! $hasKompiledDir; then
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
-  execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
+  (
+  if [ "$verbose" = true ]; then
+    set -x
+  fi
+  execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}" "$verboseFlag"
   exit $?
+  )
 fi
 
 if [[ "$input_file" == "-" ]]; then
@@ -213,9 +220,13 @@ if [ "$outputFile" = "-" ]; then
   outputFile=/dev/stdout
 fi
 
+(
+if [ "$verbose" = true ]; then
+  set -x
+fi
 case "$outputMode" in
   pretty)
-  output "$outputFile" kprint "$kompiledDir" "$input_file" $color $filterSubst
+  output "$outputFile" kprint "$kompiledDir" "$input_file" "$color" "$filterSubst"
   ;;
 
   kore)
@@ -229,4 +240,4 @@ case "$outputMode" in
   execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
   ;;
 esac
- 
+)

@@ -1,0 +1,5 @@
+[Error] Outer Parser: Duplicate attribute: concrete
+	Source(duplicateAttRule.k)
+	Location(5,29,5,37)
+	5 |	  rule a() => .K [concrete, concrete]
+	  .	                            ^~~~~~~~

@@ -54,7 +54,7 @@ jobs:
           submodules: recursive
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
@@ -70,7 +70,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 75
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -110,11 +110,18 @@ jobs:
         if: always()
         run: |
           docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
-
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
+ 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 75
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -123,6 +130,7 @@ jobs:
           os: ubuntu
           distro: focal
           llvm: 12
+          jdk: 11
           pkg-name: kframework_amd64_ubuntu_focal.deb
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
@@ -154,21 +162,28 @@ jobs:
         if: always()
         run: |
           docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
-
-  debian-bullseye:
-    name: 'K Debian Bullseye Package'
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
+   
+  debian-bookworm:
+    name: 'K Debian Bookworm Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
           os: debian
-          distro: bullseye
-          llvm: 11
-          pkg-name: kframework_amd64_debian_bullseye.deb
-          build-package: package/debian/build-package bullseye
+          distro: bookworm
+          llvm: 14
+          pkg-name: kframework_amd64_debian_bookworm.deb
+          build-package: package/debian/build-package bookworm
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
         env:
@@ -176,13 +191,13 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye.deb
-          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bullseye.deb
+          cp kframework_amd64_debian_bookworm.deb kframework_${version}_amd64_debian_bookworm.deb
+          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bookworm.deb
 
   arch:
     name: 'Arch Linux Package'
     runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -383,9 +398,9 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bookworm, set-release-id, arch]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -401,7 +416,8 @@ jobs:
           server-id: runtime.verification.snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-
+      
+      # Build and Run Tests in Docker
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
@@ -414,15 +430,14 @@ jobs:
         shell: bash {0}
         continue-on-error: true
         env:
-          MAVEN_PASSWORD: ${{ secrets.RV_JENKINS_DEPLOY_TOKEN }}
+          MAVEN_USERNAME: devops@runtimeverification.com
+          MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
         run: |
-          echo "MAVEN_USERNAME=rv-jenkins" > rv-jenkins.env
-          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> rv-jenkins.env
           cat ~/.m2/settings.xml
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p ~/.m2'
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p /home/github-runner/.m2'
           docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml ~/.m2/settings.xml'
-          docker exec --env-file rv-jenkins.env -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
+          docker exec -e MAVEN_USERNAME -e MAVEN_PASSWORD -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
 
       - name: 'Tear down Docker'
         if: always()

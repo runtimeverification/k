@@ -18,10 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.EnumSet;
 import java.util.HashSet;
-
-import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 public class HaskellBackend extends KoreBackend {
 
@@ -38,7 +35,7 @@ public class HaskellBackend extends KoreBackend {
             FileUtil files,
             KExceptionManager kem,
             Tool tool) {
-        super(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false, tool);
+        super(kompileOptions, files, kem, false, tool);
         this.files = files;
         this.haskellKompileOptions = haskellKompileOptions;
         this.kompileOptions = kompileOptions;
@@ -81,7 +78,7 @@ public class HaskellBackend extends KoreBackend {
     }
 
     @Override
-    public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList(Att.CONCRETE(), "kast"));
+    public Set<Att.Key> excludedModuleTags() {
+        return new HashSet<>(Arrays.asList(Att.CONCRETE(), Att.KAST()));
     }
 }

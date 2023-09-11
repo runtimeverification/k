@@ -52,7 +52,7 @@ public class UserList {
                     Terminal t = (Terminal) p.items().tail().head();
                     ul.separator = t.value();
                     ul.klabel = p.klabel().get();
-                    ul.attrs = p.att().remove("klabel");
+                    ul.attrs = p.att().remove(Att.KLABEL());
                     // should work without the Att.userList() att, i.e. for any list -- see #1892
                     ul.nonEmpty = ul.attrs.get(Att.USER_LIST()).equals("+");
                     if (!((NonTerminal)p.items().tail().tail().head()).sort().equals(p.sort())) {
