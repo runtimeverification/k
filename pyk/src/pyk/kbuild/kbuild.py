@@ -11,7 +11,6 @@ from filelock import FileLock
 
 from ..ktool.kompile import kompile
 from ..utils import single
-from .config import KBUILD_DIR
 from .utils import k_version, sync_files
 
 if TYPE_CHECKING:
@@ -25,22 +24,21 @@ if TYPE_CHECKING:
 @final
 @dataclass(frozen=True)
 class KBuild:
-    kbuild_dir: Path
+    kdist_dir: Path
 
-    def __init__(self, kbuild_dir: str | Path | None = None):
-        kbuild_dir = kbuild_dir if kbuild_dir is not None else KBUILD_DIR
-        kbuild_dir = Path(kbuild_dir).resolve()
-        object.__setattr__(self, 'kbuild_dir', kbuild_dir)
+    def __init__(self, kdist_dir: str | Path):
+        kdist_dir = Path(kdist_dir).resolve()
+        object.__setattr__(self, 'kdist_dir', kdist_dir)
 
     @cached_property
     def k_version(self) -> str:
         return k_version().text
 
     def definition_dir(self, package: Package, target_name: str) -> Path:
-        return self.kbuild_dir / package.target_dir / self.k_version / target_name
+        return self.kdist_dir / package.target_dir / self.k_version / target_name
 
     def resource_dir(self, package: Package, resource_name: str) -> Path:
-        return self.kbuild_dir / package.resource_dir / resource_name
+        return self.kdist_dir / package.resource_dir / resource_name
 
     def resource_files(self, package: Package, resource_name: str) -> list[Path]:
         return [
@@ -49,7 +47,7 @@ class KBuild:
         ]
 
     def include_dir(self, package: Package) -> Path:
-        return self.kbuild_dir / package.include_dir
+        return self.kdist_dir / package.include_dir
 
     def source_dir(self, package: Package) -> Path:
         return self.include_dir(package) / package.name
@@ -81,8 +79,8 @@ class KBuild:
         return res
 
     def kompile(self, package: Package, target_name: str) -> Path:
-        self.kbuild_dir.mkdir(parents=True, exist_ok=True)
-        with FileLock(self.kbuild_dir / '.lock'):
+        self.kdist_dir.mkdir(parents=True, exist_ok=True)
+        with FileLock(self.kdist_dir / '.lock'):
             for sub_package in package.sub_packages:
                 self.sync(sub_package)
 
@@ -96,7 +94,7 @@ class KBuild:
             kompile(
                 output_dir=output_dir,
                 include_dirs=[self.include_dir(sub_package) for sub_package in package.sub_packages],
-                cwd=self.kbuild_dir,
+                cwd=self.kdist_dir,
                 **args,
             )
 

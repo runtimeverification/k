@@ -6,7 +6,6 @@ from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, final
 
-from ..utils import hash_str
 from .project import GitSource, PathSource, Project
 
 if TYPE_CHECKING:
@@ -38,7 +37,7 @@ class Package(ABC):
 
     @property
     def path(self) -> Path:
-        return Path(self.name) / hash_str(self.source)[:7]
+        return Path(self.name)
 
     @property
     def target_dir(self) -> Path:
