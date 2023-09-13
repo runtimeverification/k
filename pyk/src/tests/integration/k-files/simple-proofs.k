@@ -47,4 +47,6 @@ module SIMPLE-PROOFS
     syntax KItem ::= "mybytes" [symbol, klabel(mybytes), function, total]
     rule mybytes => b"\x00\x90\xa0\n\xa1\xf1\x61"
 
+    syntax Foo ::= abcd(K) [klabel(abcd), symbol]
+
 endmodule
