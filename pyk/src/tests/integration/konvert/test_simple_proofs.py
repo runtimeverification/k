@@ -232,6 +232,39 @@ BIDIRECTIONAL_TEST_DATA: Final = (
 
 KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
     (
+        'kitem-function-k-arg',
+        KSort('Bool'),
+        """
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+          VarX:SortK{},
+          VarY:SortK{},
+        )
+        """,
+        KApply('_==K_', [KVariable('X', 'K'), KVariable('Y', 'K')]),
+    ),
+    (
+        'kitem-function-k-arg-2',
+        KSort('Bool'),
+        """
+        Lbl'UndsEqlsEqls'K'Unds'{}(
+          VarX:SortK{},
+          VarY:SortK{},
+        )
+        """,
+        KApply('_==K_', [KVariable('X'), KVariable('Y')]),
+    ),
+    (
+        'kitem-function',
+        KSort('Foo'),
+        """
+        Lblabcd{}(kseq{}(
+            VarX:SortKItem{},
+            dotk{}()
+        ))
+        """,
+        KApply('abcd', [KVariable('X', 'KItem')]),
+    ),
+    (
         'equals-k-encoding',
         KSort('KItem'),
         """
