@@ -49,7 +49,7 @@ public class KompileOptions implements Serializable {
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore]. Each creates the kompiled K definition.", descriptionKey = "backend")
     public String backend = Backends.LLVM;
 
     @Parameter(names="--main-module", description="Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).")
@@ -62,7 +62,7 @@ public class KompileOptions implements Serializable {
         return mainModule;
     }
 
-    @Parameter(names="--syntax-module", description="Specify main module for syntax. This information is used by 'krun'. (Default: <main-module>-SYNTAX).")
+    @Parameter(names="--syntax-module", description="Specify main module for syntax. This information is used by 'krun'. (Default: <main-module>-SYNTAX).", descriptionKey = "module")
     private String syntaxModule;
 
     public String syntaxModule(FileUtil files) {
@@ -75,7 +75,7 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
 
-    @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition", hidden = true)
+    @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition", descriptionKey = "string", hidden = true)
     public List<String> hookNamespaces = Collections.emptyList();
 
     @Parameter(names="-O1", description="Optimize in ways that improve performance and code size, but interfere with debugging and increase compilation time slightly.")
@@ -96,8 +96,7 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--read-only-kompiled-directory", description="Files in the generated kompiled directory should be read-only to other frontend tools.", hidden = true)
     public boolean readOnlyKompiledDirectory = false;
 
-    @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to " +
-            "rules marked with `[concrete]` attribute")
+    @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to rules marked with `[concrete]` attribute", descriptionKey = "labels")
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
     @ParametersDelegate
@@ -115,10 +114,10 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--gen-glr-bison-parser", description="Emit GLR bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
     public boolean genGlrBisonParser;
 
-    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.", hidden = true)
+    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.", descriptionKey = "file", hidden = true)
     public String bisonFile;
 
-    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).", hidden = true)
+    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).", descriptionKey = "size", hidden = true)
     public long bisonStackMaxDepth = 10000;
 
     @Parameter(names="--bison-parser-library", description="Generate a shared library rather than an executable for Bison parsers", hidden = true)
@@ -129,10 +128,10 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
     public String topCell;
 
-    @Parameter(names="--debug-type-inference", description="Filename and source line of rule to debug type inference for. This is generally an option used only by maintainers.", hidden = true)
+    @Parameter(names="--debug-type-inference", description="Filename and source line of rule to debug type inference for. This is generally an option used only by maintainers.", descriptionKey = "file", hidden = true)
     public String debugTypeInference;
 
-    @Parameter(names={"--post-process"}, description="JSON KAST => JSON KAST converter to run on definition after kompile pipeline.", hidden = true)
+    @Parameter(names={"--post-process"}, description="JSON KAST => JSON KAST converter to run on definition after kompile pipeline.", descriptionKey = "command", hidden = true)
     public String postProcess;
 
     // TODO(dwightguth): remove this when it is no longer needed
