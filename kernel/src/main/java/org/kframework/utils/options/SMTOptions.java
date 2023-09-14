@@ -14,7 +14,7 @@ public class SMTOptions implements Serializable {
     @Inject
     public SMTOptions(Void v) {}
 
-    @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|none].", descriptionKey = "executable", hidden = true)
+    @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <executable> is one of [z3|none].", descriptionKey = "executable", hidden = true)
     public SMTSolver smt = SMTSolver.Z3;
 
     public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {

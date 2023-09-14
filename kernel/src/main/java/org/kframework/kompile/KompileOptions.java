@@ -117,7 +117,7 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.", descriptionKey = "file", hidden = true)
     public String bisonFile;
 
-    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).", descriptionKey = "size", hidden = true)
+    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack.", descriptionKey = "size", hidden = true)
     public long bisonStackMaxDepth = 10000;
 
     @Parameter(names="--bison-parser-library", description="Generate a shared library rather than an executable for Bison parsers", hidden = true)

@@ -43,6 +43,6 @@ public class LLVMKompileOptions {
     @Parameter(names="--llvm-kompile-type", description="Specifies the llvm backend's output type. Valid choices are main (build an interpreter), library (build an interpreter, but don't link a main function), search (same as main, but the interpreter does search instead of single-path execution), static (same as library, but no '-l' flags are passed during linking. Used for making a partially linked object file) and python (build a Python bindings module for this definition)", descriptionKey = "type", hidden = true)
     public String llvmKompileType = "main";
 
-    @Parameter(names="--llvm-kompile-output", description="Name of the output binary from the llvm backend.", descriptionKey = "binary", hidden = true)
+    @Parameter(names="--llvm-kompile-output", description="Name of the output binary from the llvm backend.", descriptionKey = "file", hidden = true)
     public String llvmKompileOutput = null;
 }
