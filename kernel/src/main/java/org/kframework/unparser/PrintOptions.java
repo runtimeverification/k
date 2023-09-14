@@ -31,9 +31,9 @@ public class PrintOptions {
     public PrintOptions(Void v) {
     }
 
-    @Parameter(names = "--color", description = "Use colors in output.", descriptionKey = "mode",
+    @Parameter(names = "--color", description = "Use colors in output. Default is on.", descriptionKey = "mode",
             converter=ColorModeConverter.class)
-    private ColorSetting color = ColorSetting.ON;
+    private ColorSetting color;
 
     public ColorSetting color(boolean ttyStdout, Map<String, String> env) {
         boolean colorize = outputFile == null && ttyStdout;
