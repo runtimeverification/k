@@ -84,10 +84,10 @@ class KCFGExplore:
             cut_point_rules=cut_point_rules,
             terminal_rules=terminal_rules,
             module_name=module_name,
-            log_successful_rewrites=self._trace_rewrites,
-            log_failed_rewrites=self._trace_rewrites,
-            log_successful_simplifications=self._trace_rewrites,
-            log_failed_simplifications=self._trace_rewrites,
+            log_successful_rewrites=self._trace_rewrites if self._trace_rewrites else None,
+            log_failed_rewrites=self._trace_rewrites if self._trace_rewrites else None,
+            log_successful_simplifications=self._trace_rewrites if self._trace_rewrites else None,
+            log_failed_simplifications=self._trace_rewrites if self._trace_rewrites else None,
         )
         _is_vacuous = er.reason is StopReason.VACUOUS
         depth = er.depth
