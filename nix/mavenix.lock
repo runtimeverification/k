@@ -1410,52 +1410,52 @@
       "sha1": "1b77ba79f9b2b7dfd4e15ea7bb0d568d5eb9cb8d"
     },
     {
-      "path": "com/google/inject/extensions/extensions-parent/4.0-beta5/extensions-parent-4.0-beta5.pom",
-      "sha1": "516d8e5e771cd573364dc6ff53c2c6c13908a713"
+      "path": "com/google/inject/extensions/extensions-parent/4.0/extensions-parent-4.0.pom",
+      "sha1": "db8e45ab989a2347421ff0d32be5446528d6f63f"
     },
     {
-      "path": "com/google/inject/extensions/guice-assistedinject/4.0-beta5/guice-assistedinject-4.0-beta5.jar",
-      "sha1": "820f10e0650cd9ed2591f398937df50f330b147d"
+      "path": "com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.jar",
+      "sha1": "8fa6431da1a2187817e3e52e967535899e2e46ca"
     },
     {
-      "path": "com/google/inject/extensions/guice-assistedinject/4.0-beta5/guice-assistedinject-4.0-beta5.pom",
-      "sha1": "4b9b352e0537b0ca49cb97533387864b185df09b"
+      "path": "com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.pom",
+      "sha1": "00c7fc29684b20dd475f517d5dafc850c613efde"
     },
     {
-      "path": "com/google/inject/extensions/guice-grapher/4.0-beta5/guice-grapher-4.0-beta5.jar",
-      "sha1": "dd9a00d72fecfa05a77bf28c7922eacddda23b18"
+      "path": "com/google/inject/extensions/guice-grapher/4.0/guice-grapher-4.0.jar",
+      "sha1": "4e611ae9b12bfc4ddd430a58c65ba1c4328eeaf9"
     },
     {
-      "path": "com/google/inject/extensions/guice-grapher/4.0-beta5/guice-grapher-4.0-beta5.pom",
-      "sha1": "1cd692901e55d382cdb9e647d74617bb68d63126"
+      "path": "com/google/inject/extensions/guice-grapher/4.0/guice-grapher-4.0.pom",
+      "sha1": "86b9c4937ebba7d14054d0f025f0df51d071218d"
     },
     {
-      "path": "com/google/inject/extensions/guice-multibindings/4.0-beta5/guice-multibindings-4.0-beta5.jar",
-      "sha1": "f432356db0a167127ffe4a7921238d7205b12682"
+      "path": "com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.jar",
+      "sha1": "f4509545b4470bbcc865aa500ad6fef2e97d28bf"
     },
     {
-      "path": "com/google/inject/extensions/guice-multibindings/4.0-beta5/guice-multibindings-4.0-beta5.pom",
-      "sha1": "3cff7b7b5f418f5edca0fa1b0d4bcd3f3215d9c7"
+      "path": "com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.pom",
+      "sha1": "2387a1e5163308cd826b348db825973df0800ad3"
     },
     {
-      "path": "com/google/inject/extensions/guice-throwingproviders/4.0-beta5/guice-throwingproviders-4.0-beta5.jar",
-      "sha1": "8840bd8267a5b09ee84a314a54dbdc6c1b0a7efb"
+      "path": "com/google/inject/extensions/guice-throwingproviders/4.0/guice-throwingproviders-4.0.jar",
+      "sha1": "90876169e80b4db9b61d654367c4c55079ae4e91"
     },
     {
-      "path": "com/google/inject/extensions/guice-throwingproviders/4.0-beta5/guice-throwingproviders-4.0-beta5.pom",
-      "sha1": "cb52affb5a89e66a5f1d9ab3a7fde7dda1cc5baa"
+      "path": "com/google/inject/extensions/guice-throwingproviders/4.0/guice-throwingproviders-4.0.pom",
+      "sha1": "5118433baea2efed034af00a96e324b5717e8059"
     },
     {
-      "path": "com/google/inject/guice-parent/4.0-beta5/guice-parent-4.0-beta5.pom",
-      "sha1": "13d7df2b77236548d1e7cb9ba688686ddd4f19a5"
+      "path": "com/google/inject/guice-parent/4.0/guice-parent-4.0.pom",
+      "sha1": "a59ca1d3d70552158088d7f71e6c7e8779b9a8a1"
     },
     {
-      "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5-no_aop.jar",
-      "sha1": "7706f581d709b1afd89b4e0dbf1bebf250abbd9b"
+      "path": "com/google/inject/guice/4.0/guice-4.0-no_aop.jar",
+      "sha1": "199b7acaa05b570bbccf31be998f013963e5e752"
     },
     {
-      "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5.pom",
-      "sha1": "1e968b8c1da8cb48b7c0b77ffc565f92f313c392"
+      "path": "com/google/inject/guice/4.0/guice-4.0.pom",
+      "sha1": "688cb7b0d86456e3706573fe583173ee5e728f4e"
     },
     {
       "path": "com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar",
@@ -2678,12 +2678,12 @@
       "sha1": "df7f15de037a1ee4d57d2ed779739089f560338c"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.jar",
-      "sha1": "1c12d070e602efd8021891cdd7fd18bc129372d4"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar",
+      "sha1": "1200e7ebeedbe0d10062093f32925a912020e747"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.pom",
-      "sha1": "05e315ccb7e487e68bf19124d736afbc9136c631"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.pom",
+      "sha1": "b7cc05a5394544befc936c39080a93cc8c1e082e"
     },
     {
       "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
@@ -7330,20 +7330,20 @@
       "sha1": "e8848369738c03e40af5507686216f9b8b44b6a3"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230817.181106-1.pom",
+      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230818.165756-2.pom",
       "sha1": "81f6a397361513f34b26d5f43d329df888f2feaa"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.pom",
-      "sha1": "3c8bc01cd1f032dd7d78f2e3d6198e4d51502693"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.pom",
+      "sha1": "0b6e24b04b9c45f192ec3e23e5fdbd2627049def"
     },
     {
       "path": "org/kframework/dependencies/ng/0.9.2-k4.0/ng-0.9.2-k4.0-linux.uexe",
@@ -8209,11 +8209,11 @@
       "path": "com/google/code/gson/gson"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181106</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181106</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181106-1</value>\n        <updated>20230817181106</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165756</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165756</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165756-2</value>\n        <updated>20230818165756</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181113</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181113</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165803</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165803</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT"
     },
     {
