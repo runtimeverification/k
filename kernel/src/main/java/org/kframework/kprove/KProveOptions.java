@@ -71,10 +71,10 @@ public class KProveOptions {
             description="Mark this comma separated list of claims as [trusted]")
     public List<String> trusted = null;
 
-    @Parameter(names="--exclude", descriptionKey = "claims", description="Exclude this comma separated list of claims")
+    @Parameter(names="--exclude", descriptionKey = "labels", description="Exclude this comma separated list of claims")
     public List<String> exclude = null;
 
-    @Parameter(names="--claims", descriptionKey = "claims", description="Only keep this comma separated list of claims")
+    @Parameter(names="--claims", descriptionKey = "labels", description="Only keep this comma separated list of claims")
     public List<String> claims = null;
 
     @Parameter(names="--debugger",
