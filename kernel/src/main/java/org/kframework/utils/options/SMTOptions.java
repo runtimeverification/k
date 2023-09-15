@@ -45,7 +45,7 @@ public class SMTOptions implements Serializable {
             description="Path to the SMT prelude file.", descriptionKey = "path", hidden = true)
     public String smtPrelude;
 
-    @Parameter(names="--smt-timeout", descriptionKey = "millisecond",
+    @Parameter(names="--smt-timeout", descriptionKey = "milliseconds",
             description="Timeout for calls to the SMT solver, in milliseconds.", hidden = true)
     public Integer smtTimeout = null;
 

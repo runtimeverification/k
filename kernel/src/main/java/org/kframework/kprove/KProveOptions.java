@@ -55,19 +55,19 @@ public class KProveOptions {
     @ParametersDelegate
     public PrintOptions print = new PrintOptions();
 
-    @Parameter(names="--branching-allowed", descriptionKey = "value", arity = 1,
+    @Parameter(names="--branching-allowed", descriptionKey = "number", arity = 1,
             description="Number of branching events allowed before a forcible stop.")
     public int branchingAllowed = Integer.MAX_VALUE;
 
-    @Parameter(names={"--spec-module", "-sm"}, descriptionKey = "module",
+    @Parameter(names={"--spec-module", "-sm"}, descriptionKey = "name",
             description="Name of module containing specification to prove")
     public String specModule;
 
-    @Parameter(names="--depth", descriptionKey = "value",
+    @Parameter(names="--depth", descriptionKey = "number",
             description="The maximum number of computational steps to prove")
     public Integer depth;
 
-    @Parameter(names="--trusted", descriptionKey = "claims",
+    @Parameter(names="--trusted", descriptionKey = "labels",
             description="Mark this comma separated list of claims as [trusted]")
     public List<String> trusted = null;
 
