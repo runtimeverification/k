@@ -31,7 +31,8 @@ public class PrintOptions {
     public PrintOptions(Void v) {
     }
 
-    @Parameter(names = "--color", description = "Use colors in output. Default is on.", converter=ColorModeConverter.class)
+    @Parameter(names = "--color", description = "Use colors in output. Default is on.", descriptionKey = "mode",
+            converter=ColorModeConverter.class)
     private ColorSetting color;
 
     public ColorSetting color(boolean ttyStdout, Map<String, String> env) {
@@ -65,10 +66,11 @@ public class PrintOptions {
         }
     }
 
-    @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
+    @Parameter(names="--output-file", description="Store output in the file instead of displaying it.",
+            descriptionKey = "file")
     public String outputFile;
 
-    @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
+    @Parameter(names={"--output", "-o"}, descriptionKey = "mode", converter=OutputModeConverter.class,
             description="How to display krun results. <mode> is either [pretty|program|kast|binary|json|latex|kore|none].")
     public OutputModes output = OutputModes.PRETTY;
 
@@ -84,16 +86,20 @@ public class PrintOptions {
         }
     }
 
-    @Parameter(names={"--output-omit"}, listConverter=StringListConverter.class, description="KLabels to omit from the output.")
+    @Parameter(names={"--output-omit"}, descriptionKey = "KLabels", listConverter=StringListConverter.class,
+            description="KLabels to omit from the output.")
     public List<String> omittedKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--output-tokenize"}, listConverter=StringListConverter.class, description="KLabels to tokenize underneath (reducing output size).")
+    @Parameter(names={"--output-tokenize"}, descriptionKey = "KLabels", listConverter=StringListConverter.class,
+            description="KLabels to tokenize underneath (reducing output size).")
     public List<String> tokenizedKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--output-flatten"}, listConverter=StringListConverter.class, description="(Assoc) KLabels to flatten into one list.")
+    @Parameter(names={"--output-flatten"}, descriptionKey = "KLabels", listConverter=StringListConverter.class,
+            description="(Assoc) KLabels to flatten into one list.")
     public List<String> flattenedKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--output-tokast"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
+    @Parameter(names={"--output-tokast"}, descriptionKey = "KLabels", listConverter=StringListConverter.class,
+            description="KLabels to output as KAST tokens.")
     public List<String> tokastKLabels = new ArrayList<String>();
 
     @Parameter(names={"--no-alpha-renaming"}, listConverter=StringListConverter.class, description="Do not alpha rename anonymous variables in output.")
