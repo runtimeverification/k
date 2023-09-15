@@ -33,7 +33,7 @@ k_util_usage() {
   --no-exc-wrap     Do not wrap messages to 80 chars (keep long lines).
   --profile         Print coarse process timing information. Format printed:
                     exit-code wall-time user-time system-time command args*
-  --temp-dir        Put temp files in this location. Default: /tmp/.<tool>-xxx
+  --temp-dir PATH   Put temp files in this location. Default: /tmp/.<tool>-xxx
   -v, --verbose     Print significant sub-commands executed.
 HERE
 }
