@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-from abc import ABC
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, final
 
@@ -10,64 +10,12 @@ import tomli
 
 from ..cli.utils import relative_path
 from ..ktool.kompile import KompileBackend, LLVMKompileType
-from ..utils import (
-    FrozenDict,
-    abs_or_rel_to,
-    check_absolute_path,
-    check_dir_path,
-    check_file_path,
-    check_relative_path,
-    single,
-)
+from ..utils import FrozenDict, abs_or_rel_to, check_dir_path, check_file_path, check_relative_path, single
 from .config import PROJECT_FILE_NAME
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from typing import Any
-
-
-class Source(ABC):  # noqa: B024
-    @staticmethod
-    def from_dict(project_dir: Path, dct: Mapping[str, Any]) -> Source:
-        if 'path' in dct:
-            return PathSource.from_dict(project_dir, dct)
-
-        if 'git' in dct:
-            return GitSource(git=dct['git'], rev=dct['rev'])
-
-        raise ValueError(f'Invalid source: {dct}')
-
-
-@final
-@dataclass(frozen=True)
-class PathSource(Source):
-    path: Path
-
-    def __init__(self, path: Path):
-        check_dir_path(path)
-        check_absolute_path(path)
-        check_file_path(path / PROJECT_FILE_NAME)
-        path = path.resolve()
-        object.__setattr__(self, 'path', path)
-
-    @staticmethod
-    def from_dict(project_dir: Path, dct: Mapping[str, Any]) -> PathSource:
-        path = abs_or_rel_to(Path(dct['path']), project_dir).resolve()
-        return PathSource(path=path)
-
-
-@final
-@dataclass(frozen=True)
-class GitSource(Source):
-    git: str
-    rev: str
-
-
-@final
-@dataclass(frozen=True)
-class Dependency:  # TODO Maybe eliminate and store in project as Dict
-    name: str
-    source: Source
 
 
 @final
@@ -179,7 +127,7 @@ class Project:
     version: str
     source_dir: Path
     resources: FrozenDict[str, Path]
-    dependencies: tuple[Dependency, ...]
+    dependencies: tuple[Project, ...]
     targets: tuple[Target, ...]
 
     def __init__(
@@ -190,19 +138,18 @@ class Project:
         version: str,
         source_dir: str | Path,
         resources: Mapping[str, str | Path] | None = None,
-        dependencies: Iterable[Dependency] = (),
+        dependencies: Iterable[Project] = (),
         targets: Iterable[Target] = (),
     ):
         path = Path(path).resolve()
         check_dir_path(path)
 
-        source_dir = (path / relative_path(source_dir)).resolve()
+        source_dir = path / relative_path(source_dir)
         check_dir_path(source_dir)
 
         resources = resources or {}
         resources = {
-            resource_name: (path / relative_path(resource_dir)).resolve()
-            for resource_name, resource_dir in resources.items()
+            resource_name: path / relative_path(resource_dir) for resource_name, resource_dir in resources.items()
         }
 
         object.__setattr__(self, 'path', path)
@@ -221,26 +168,37 @@ class Project:
         with open(project_file, 'rb') as f:
             dct = tomli.load(f)
 
-        project_dir = project_file.parent.resolve()
+        def _load_dependency(name: str, path: str) -> Project:
+            dependency_path = abs_or_rel_to(Path(path), project_file.parent)
+            project = Project.load_from_dir(dependency_path)
+            if project.name != name:
+                raise ValueError(f'Invalid dependency, expected name {name}, got: {project.name}')
+            return project
 
-        return Project(
-            path=project_dir,
+        project = Project(
+            path=project_file.parent,
             name=dct['project']['name'],
             version=dct['project']['version'],
             source_dir=dct['project']['source'],
             resources=dct['project'].get('resources'),
-            dependencies=tuple(
-                Dependency(name=name, source=Source.from_dict(project_dir, source))
-                for name, source in dct.get('dependencies', {}).items()
-            ),
+            dependencies=tuple(_load_dependency(name, path) for name, path in dct.get('dependencies', {}).items()),
             targets=tuple(Target.from_dict(name, target) for name, target in dct.get('targets', {}).items()),
         )
+
+        return project
 
     @staticmethod
     def load_from_dir(project_dir: str | Path) -> Project:
         project_dir = Path(project_dir)
         check_dir_path(project_dir)
         return Project.load(project_dir / PROJECT_FILE_NAME)
+
+    @cached_property
+    def sub_projects(self) -> tuple[Project, ...]:
+        res: tuple[Project, ...] = (self,)
+        for project in self.dependencies:
+            res += project.sub_projects
+        return res
 
     @property
     def project_file(self) -> Path:
