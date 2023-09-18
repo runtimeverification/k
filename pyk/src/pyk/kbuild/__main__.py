@@ -6,7 +6,7 @@ from typing import Any
 from ..cli.utils import check_dir_path, dir_path
 from .config import DIST_DIR_NAME, PROJECT_FILE_NAME
 from .kbuild import KBuild
-from .package import Package
+from .project import Project
 from .utils import find_file_upwards
 
 
@@ -62,21 +62,21 @@ def _project_file(start_dir: Path) -> Path:
 
 def do_kompile(start_dir: Path, target_name: str, output_dir: Path | None, **kwargs: Any) -> None:
     project_file = _project_file(start_dir)
-    package = Package.create(project_file)
+    project = Project.load(project_file)
     kdist_dir = output_dir or project_file.parent / DIST_DIR_NAME
     kbuild = KBuild(kdist_dir)
 
-    definition_dir = kbuild.kompile(package, target_name)
+    definition_dir = kbuild.kompile(project, target_name)
     print(definition_dir)
 
 
 def do_which(start_dir: Path, target_name: str, output_dir: Path | None, **kwargs: Any) -> None:
     project_file = _project_file(start_dir)
-    package = Package.create(project_file)
+    project = Project.load(project_file)
     kdist_dir = output_dir or project_file.parent / DIST_DIR_NAME
     kbuild = KBuild(kdist_dir)
 
-    definition_dir = kbuild.definition_dir(package, target_name)
+    definition_dir = kbuild.definition_dir(project, target_name)
     try:
         check_dir_path(definition_dir)
     except ValueError as e:
