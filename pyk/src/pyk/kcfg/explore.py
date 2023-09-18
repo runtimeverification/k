@@ -377,14 +377,19 @@ class KCFGExplore:
         if self._check_abstract(node, kcfg):
             return
 
-        if not kcfg.splits(target_id=node.id):
-            branches = self.kcfg_semantics.extract_branches(node.cterm)
-            if branches:
-                kcfg.split_on_constraints(node.id, branches)
-                _LOGGER.info(
-                    f'Found {len(branches)} branches using heuristic for node {node.id}: {shorten_hashes(node.id)}: {[self.kprint.pretty_print(bc) for bc in branches]}'
-                )
-                return
+        _branches = self.kcfg_semantics.extract_branches(node.cterm)
+        branches = []
+        for constraint in _branches:
+            kast = mlAnd(list(node.cterm.constraints) + [constraint])
+            kast, _ = self.kast_simplify(kast)
+            if not CTerm._is_bottom(kast):
+                branches.append(constraint)
+        if len(branches) > 1:
+            kcfg.split_on_constraints(node.id, branches)
+            _LOGGER.info(
+                f'Found {len(branches)} branches using heuristic for node {node.id}: {shorten_hashes(node.id)}: {[self.kprint.pretty_print(bc) for bc in branches]}'
+            )
+            return
 
         _LOGGER.info(f'Extending KCFG from node {self.id}: {shorten_hashes(node.id)}')
         _is_vacuous, depth, cterm, next_cterms, next_node_logs = self.cterm_execute(
