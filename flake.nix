@@ -2,7 +2,7 @@
   description = "K Framework";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-23.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend/d677fe6bfc7305a3b515a7e99d78998ff7c370e3";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/85b5d086840a0f1e89499f086b50d7258598fc8b";
     booster-backend = {
       url = "github:runtimeverification/hs-backend-booster/05df62483b6ba8d26e3ed27d90ca090183dbbc5e";
       # NB booster-backend will bring in another dependency on haskell-backend,
