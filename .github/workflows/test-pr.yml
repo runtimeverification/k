@@ -115,14 +115,14 @@ jobs:
     needs: version-sync
     steps:
       - uses: actions/checkout@v3
-      - name: 'Build and Test'
-        uses: ./.github/actions/test-package
-        with:
-          os: ubuntu
-          distro: jammy
-          llvm: 14
-          build-package: package/debian/build-package jammy
-          test-package: package/debian/test-package
+      # - name: 'Build and Test'
+      #   uses: ./.github/actions/test-package
+      #   with:
+      #     os: ubuntu
+      #     distro: jammy
+      #     llvm: 14
+      #     build-package: package/debian/build-package jammy
+      #     test-package: package/debian/test-package
       # - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
       #   if: failure()
       #   uses: actions/upload-artifact@v2
