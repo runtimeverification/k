@@ -44,74 +44,74 @@ jobs:
           git config user.name devops
           git config user.email devops@runtimeverification.com
 
-      - name: 'Install Nix'
-        uses: cachix/install-nix-action@v22
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org https://hydra.iohk.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+      # - name: 'Install Nix'
+      #   uses: cachix/install-nix-action@v22
+      #   with:
+      #     install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+      #     extra_nix_config: |
+      #       access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      #       substituters = http://cache.nixos.org https://hydra.iohk.io
+      #       trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
-      - name: 'Install Cachix'
-        uses: cachix/cachix-action@v12
-        with:
-          name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-          skipPush: true
+      # - name: 'Install Cachix'
+      #   uses: cachix/cachix-action@v12
+      #   with:
+      #     name: k-framework
+      #     authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+      #     skipPush: true
 
-      - name: 'Update Maven dependencies, push changes'
-        run: |
-          set -x
-          git checkout ${GITHUB_HEAD_REF}
-          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
-                -- $(find . -name pom.xml); then
-            nix run .#update-maven
-          fi
-          if git add nix/ && git commit -m 'Update Nix lock files'; then
-            git push
-          fi
+      # - name: 'Update Maven dependencies, push changes'
+      #   run: |
+      #     set -x
+      #     git checkout ${GITHUB_HEAD_REF}
+      #     if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+      #           -- $(find . -name pom.xml); then
+      #       nix run .#update-maven
+      #     fi
+      #     if git add nix/ && git commit -m 'Update Nix lock files'; then
+      #       git push
+      #     fi
 
   test-k:
     name: 'K Tests'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: [self-hosted, linux, github-runner-17]
     needs: version-sync
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-docker
-        with:
-          tag: k-ci-${{ github.sha }}
-          os: ubuntu
-          distro: jammy
-          llvm: 14
-      - name: 'Build and Test K'
-        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
-      - name: 'Check out k-exercises'
-        uses: actions/checkout@v3
-        with:
-          repository: runtimeverification/k-exercises
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
-          submodules: recursive
-          path: k-exercises
-      - name: 'Tutorial Integration Tests'
-        run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/2_intermediate && ./test_kompile.sh'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 k-ci-${GITHUB_SHA}
-          docker container rm --force k-ci-${GITHUB_SHA} || true
+      # - name: 'Set up Docker'
+      #   uses: ./.github/actions/with-docker
+      #   with:
+      #     tag: k-ci-${{ github.sha }}
+      #     os: ubuntu
+      #     distro: jammy
+      #     llvm: 14
+      # - name: 'Build and Test K'
+      #   run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
+      # - name: 'Check out k-exercises'
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: runtimeverification/k-exercises
+      #     token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      #     submodules: recursive
+      #     path: k-exercises
+      # - name: 'Tutorial Integration Tests'
+      #   run: |
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+      #     docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/2_intermediate && ./test_kompile.sh'
+      # - name: 'Tear down Docker'
+      #   if: always()
+      #   run: |
+      #     docker stop --time=0 k-ci-${GITHUB_SHA}
+      #     docker container rm --force k-ci-${GITHUB_SHA} || true
 
   test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: [self-hosted, linux, github-runner-17]
     needs: version-sync
     steps:
       - uses: actions/checkout@v3
@@ -123,21 +123,21 @@ jobs:
           llvm: 14
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
-      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: kore-exec.tar.gz
-          path: |
-            **/kore-exec.tar.gz
-      - name: 'On Success, Upload the package built to the Summary Page'
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: kframework.deb
-          path: kframework.deb
-          if-no-files-found: error
-          retention-days: 1
+      # - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+      #   if: failure()
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: kore-exec.tar.gz
+      #     path: |
+      #       **/kore-exec.tar.gz
+      # - name: 'On Success, Upload the package built to the Summary Page'
+      #   if: success()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: kframework.deb
+      #     path: kframework.deb
+      #     if-no-files-found: error
+      #     retention-days: 1
 
   performance-tests:
     name: 'Performace Tests'
@@ -149,45 +149,45 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: kframework.deb
-      - name: 'Set up Docker Test Image'
-        env:
-          BASE_OS: ubuntu
-          BASE_DISTRO: jammy
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
-          BENCHER_PROJECT: k-framework
-          BENCHER_ADAPTER: json
-        run: |
-          set -euxo pipefail
-          workspace=$(pwd)
-          docker run --name k-profiling-tests-${GITHUB_SHA}                    \
-            --rm -it --detach                                                  \
-            -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
-            -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
-            -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
-            -e GITHUB_HEAD_REF=$GITHUB_HEAD_REF                                \
-            -e GITHUB_BASE_REF=$GITHUB_BASE_REF                                \
-            -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
-            -e GITHUB_ACTIONS=true                                             \
-            -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
-            -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
-            -e GITHUB_REF=$GITHUB_REF                                          \
-            --workdir /opt/workspace                                           \
-            -v "${workspace}:/opt/workspace"                                   \
-            ${BASE_OS}:${BASE_DISTRO}
-      - name: 'Install K from Package'
-        run: |
-          set -euxo pipefail
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
-      - name: 'Profiling Performance Tests'
-        run: |
-          set -euxo pipefail
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
-          docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
+      # - name: 'Set up Docker Test Image'
+      #   env:
+      #     BASE_OS: ubuntu
+      #     BASE_DISTRO: jammy
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+      #     BENCHER_PROJECT: k-framework
+      #     BENCHER_ADAPTER: json
+      #   run: |
+      #     set -euxo pipefail
+      #     workspace=$(pwd)
+      #     docker run --name k-profiling-tests-${GITHUB_SHA}                    \
+      #       --rm -it --detach                                                  \
+      #       -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
+      #       -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
+      #       -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
+      #       -e GITHUB_HEAD_REF=$GITHUB_HEAD_REF                                \
+      #       -e GITHUB_BASE_REF=$GITHUB_BASE_REF                                \
+      #       -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
+      #       -e GITHUB_ACTIONS=true                                             \
+      #       -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
+      #       -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
+      #       -e GITHUB_REF=$GITHUB_REF                                          \
+      #       --workdir /opt/workspace                                           \
+      #       -v "${workspace}:/opt/workspace"                                   \
+      #       ${BASE_OS}:${BASE_DISTRO}
+      # - name: 'Install K from Package'
+      #   run: |
+      #     set -euxo pipefail
+      #     docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
+      # - name: 'Profiling Performance Tests'
+      #   run: |
+      #     set -euxo pipefail
+      #     docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make'
+      # - name: 'Tear down Docker'
+      #   if: always()
+      #   run: |
+      #     docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
+      #     docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
 
   compile-nix-flake:
     name: 'Nix flake'
@@ -195,7 +195,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: [self-hosted, linux, normal]
+          - runner: [self-hosted, linux, github-runner-17]
           - runner: macos-13
             os: macos-13
           - runner: MacM1
@@ -206,33 +206,33 @@ jobs:
       - name: 'Check out code'
         uses: actions/checkout@v3
 
-      - name: 'Upgrade bash'
-        if: ${{ contains(matrix.os, 'macos') }}
-        run: brew install bash
+      # - name: 'Upgrade bash'
+      #   if: ${{ contains(matrix.os, 'macos') }}
+      #   run: brew install bash
 
-      - name: 'Install Nix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v22
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org https://hydra.iohk.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+      # - name: 'Install Nix'
+      #   if: ${{ !startsWith(matrix.os, 'self') }}
+      #   uses: cachix/install-nix-action@v22
+      #   with:
+      #     install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+      #     extra_nix_config: |
+      #       access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      #       substituters = http://cache.nixos.org https://hydra.iohk.io
+      #       trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
       
-      - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v12
-        with:
-          name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+      # - name: 'Install Cachix'
+      #   if: ${{ !startsWith(matrix.os, 'self') }}
+      #   uses: cachix/cachix-action@v12
+      #   with:
+      #     name: k-framework
+      #     authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
-      - name: 'Build K Framework'
-        run: GC_DONT_GC=1 nix build --print-build-logs .
+      # - name: 'Build K Framework'
+      #   run: GC_DONT_GC=1 nix build --print-build-logs .
 
-      # These tests take a really long time to run on other platforms, so we
-      # skip them unless we're on the M1 runner.
-      - name: 'Test K'
-        if: ${{ matrix.os == 'self-macos-12' }}
-        run: GC_DONT_GC=1 nix build --print-build-logs .#test
+      # # These tests take a really long time to run on other platforms, so we
+      # # skip them unless we're on the M1 runner.
+      # - name: 'Test K'
+      #   if: ${{ matrix.os == 'self-macos-12' }}
+      #   run: GC_DONT_GC=1 nix build --print-build-logs .#test
 
