@@ -145,10 +145,10 @@ jobs:
     needs: test-package-ubuntu-jammy
     steps:
       - uses: actions/checkout@v3
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v3
-        with:
-          name: kframework.deb
+      # - name: 'Download K package from the Summary Page'
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: kframework.deb
       # - name: 'Set up Docker Test Image'
       #   env:
       #     BASE_OS: ubuntu
