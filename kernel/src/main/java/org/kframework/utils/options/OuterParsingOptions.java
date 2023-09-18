@@ -43,12 +43,12 @@ public class OuterParsingOptions implements Serializable {
     }
 
 
-    @Parameter(names="-I", description="Add a directory to the search path for requires statements.")
+    @Parameter(names="-I", description="Add a directory to the search path for requires statements.", descriptionKey = "path")
     public List<String> includes = new ArrayList<>();
 
     @Parameter(names="--no-prelude", description="Do not implicitly require prelude.md.", hidden = true)
     public boolean noPrelude = false;
 
-    @Parameter(names="--md-selector", description="Preprocessor: for .md files, select only the md code blocks that match the selector expression. Ex:'k&(!a|b)'.")
+    @Parameter(names="--md-selector", description="Preprocessor: for .md files, select only the md code blocks that match the selector expression. Ex:'k&(!a|b)'.", descriptionKey = "expression")
     public String mdSelector = "k";
 }
