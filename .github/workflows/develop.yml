@@ -55,7 +55,7 @@ jobs:
         run: |
           set -euxo pipefail
           workspace=$(pwd)
-          docker run --name ci-${GITHUB_SHA}                                   \
+          docker run --name k-posting-profiling-tests-${GITHUB_SHA}                                   \
             --rm -it --detach                                                  \
             -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
             -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
@@ -73,20 +73,20 @@ jobs:
       - name: 'Setting up dependencies'
         run: |
           set -euxo pipefail
-          docker exec -t ci-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh SKIP_K_BUILD'
+          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh SKIP_K_BUILD'
       - name: 'Getting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t ci-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py'
+          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py'
       - name: 'Posting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t ci-${GITHUB_SHA} /bin/bash -c 'bencher run            \
+          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c 'bencher run            \
             --if-branch "develop" --else-if-branch "master"                    \
             --file .profiling-results.json --err --ci-only-on-alert            \
             --github-actions "${GITHUB_TOKEN}" 'echo "Exporting report"'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 ci-${GITHUB_SHA}
-          docker container rm --force ci-${GITHUB_SHA} || true
+          docker stop --time=0 k-posting-profiling-tests-${GITHUB_SHA}
+          docker container rm --force k-posting-profiling-tests-${GITHUB_SHA} || true
