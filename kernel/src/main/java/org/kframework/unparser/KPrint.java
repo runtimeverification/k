@@ -196,7 +196,7 @@ public class KPrint {
     private String unparseInternal(Module mod, K input, ColorSetting colorize) {
         ExpandMacros expandMacros = ExpandMacros.forNonSentences(mod, files, kompileOptions, true);
         return Formatter.format(
-                new AddBrackets(mod).addBrackets((ProductionReference) disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
+                new AddBrackets(mod).addBrackets((ProductionReference) disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), colorize);
     }
 
     public K abstractTerm(Module mod, K term) {
