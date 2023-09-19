@@ -232,6 +232,16 @@ class Project:
             for resource_name, resource_files in self.resource_files.items()
         }
 
+    @property
+    def all_files(self) -> list[Path]:
+        res: list[Path] = []
+        for sub_project in self.sub_projects:
+            res.append(sub_project.project_file)
+            res.extend(sub_project.source_files)
+            for resource_name in sub_project.resources:
+                res.extend(sub_project.resource_files[resource_name])
+        return res
+
     def get_target(self, target_name: str) -> Target:
         # TODO Should be enforced as a validation rule
         return single(target for target in self.targets if target.name == target_name)
