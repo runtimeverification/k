@@ -4,8 +4,8 @@ version = "0.1.0"
 source = "."
 
 [dependencies]
-b-semantics = "../b-semantics"
-c-semantics = "../c-semantics"
+b-semantics = { path = "../b-semantics" }
+c-semantics = { path = "../c-semantics" }
 
 [targets.llvm]
 main-file = 'a.k'

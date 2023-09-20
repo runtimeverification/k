@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import dataclasses
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
-from pathlib import Path
+from importlib import resources
+from pathlib import Path, PosixPath
 from typing import TYPE_CHECKING, final
 
 import tomli
@@ -16,6 +18,41 @@ from .config import PROJECT_FILE_NAME
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from typing import Any
+
+
+class Source(ABC):
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> Source:
+        if 'path' in dct:
+            return PathSource(Path(dct['path']))
+        if 'package' in dct:
+            return PackageSource(dct['package'])
+        raise ValueError(f'Cannot parse source: {dct}')
+
+    @abstractmethod
+    def resolve(self, project_path: Path) -> Path:
+        ...
+
+
+@final
+@dataclass(frozen=True)
+class PathSource(Source):
+    path: Path
+
+    def resolve(self, project_path: Path) -> Path:
+        return abs_or_rel_to(self.path, project_path)
+
+
+@final
+@dataclass(frozen=True)
+class PackageSource(Source):
+    package: str
+
+    def resolve(self, project_path: Path) -> Path:
+        traversable = resources.files(self.package)
+        if not isinstance(traversable, PosixPath):
+            raise ValueError(f'Package name {self.package!r} does not resolve to a directory')
+        return traversable.resolve(strict=True)
 
 
 @final
@@ -164,24 +201,28 @@ class Project:
     def load(project_file: str | Path) -> Project:
         project_file = Path(project_file)
         check_file_path(project_file)
+        project_path = project_file.parent
 
-        with open(project_file, 'rb') as f:
-            dct = tomli.load(f)
-
-        def _load_dependency(name: str, path: str) -> Project:
-            dependency_path = abs_or_rel_to(Path(path), project_file.parent)
+        def _load_dependency(name: str, dct: Any) -> Project:
+            source = Source.from_dict(dct)
+            dependency_path = source.resolve(project_path)
             project = Project.load_from_dir(dependency_path)
             if project.name != name:
                 raise ValueError(f'Invalid dependency, expected name {name}, got: {project.name}')
             return project
 
+        with open(project_file, 'rb') as f:
+            dct = tomli.load(f)
+
         project = Project(
-            path=project_file.parent,
+            path=project_path,
             name=dct['project']['name'],
             version=dct['project']['version'],
             source_dir=dct['project']['source'],
             resources=dct['project'].get('resources'),
-            dependencies=tuple(_load_dependency(name, path) for name, path in dct.get('dependencies', {}).items()),
+            dependencies=tuple(
+                _load_dependency(name, source_dct) for name, source_dct in dct.get('dependencies', {}).items()
+            ),
             targets=tuple(Target.from_dict(name, target) for name, target in dct.get('targets', {}).items()),
         )
 
