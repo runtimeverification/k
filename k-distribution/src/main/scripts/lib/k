@@ -5,6 +5,7 @@ ulimit -s "$(ulimit -H -s)"
 K_BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
 GIT_DESCRIBE="${K_BASE}/kframework/git-describe.out"
 TIMESTAMP="${K_BASE}/kframework/timestamp.out"
+version=
 
 for flag in "$@"; do
     if [[ "$flag" == "--version" ]]; then
