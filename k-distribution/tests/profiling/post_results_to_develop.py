@@ -36,6 +36,9 @@ branch_command = ['curl', '-L', '-H', 'Accept:', 'application/vnd.github+json',
                   '\"X-GitHub-Api-Version:', '2022-11-28\"', API_URL]
 FROM_BRANCH = json.loads(execute_command(branch_command))[0]['head']['label']
 
+# If FROM_BRANCH contains user information get only the branch name
+if ':' in FROM_BRANCH: FROM_BRANCH = FROM_BRANCH.split(':')[1]
+
 print("Exporting last bencher report from", FROM_BRANCH, "to", TO_BRANCH)
 
 # This command will generate a JSON file with a list containing the last reports
@@ -48,6 +51,8 @@ data = json.loads(execute_command(bencher_command))
 # Collect all elemnts where the key 'project' is 'k_framework'
 k_framework = [item for item in data if item['project']['slug'] == 'k-framework'
                and item['branch']['slug'] == FROM_BRANCH]
+
+print("Found", len(k_framework), "reports for k-framework in", FROM_BRANCH)
 
 # Append the last 6 reports to the list, they correspond to the last performance
 # execution on the last commit in FROM_BRANCH
@@ -64,7 +69,7 @@ for i in range(0,6):
 
     branch = item['branch']
     print("Appended:", benchmark_name, "created in", item['created'],
-          "on branch", branch['name'], "with version", branch['version']['number'])
+          "on branch", branch['name'], "with id", branch['version']['number'])
 
     data.update({benchmark_name: {metric_name_size: {"value": value_size},
                                   metric_name_memory: {"value": value_memory}}
