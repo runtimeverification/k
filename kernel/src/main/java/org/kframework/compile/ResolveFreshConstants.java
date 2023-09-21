@@ -171,11 +171,8 @@ public class ResolveFreshConstants {
             List<ProductionItem> pis = stream(prod.items()).collect(Collectors.toCollection(ArrayList::new));
             // expecting a production of the form <generatedTop> C1 C2 Cx.. </generatedTop>
             // insert the GeneratedCounterCell as the last cell
-            // fix the format after that
             pis.add(prod.items().size() - 1, NonTerminal(Sorts.GeneratedCounterCell()));
-            Production p = Production(prod.klabel().get(), prod.sort(), immutable(pis), prod.att());
-            p = fixFormat(p);
-            return p;
+            return Production(prod.klabel().get(), prod.sort(), immutable(pis), prod.att());
         }
         return prod;
     }
@@ -248,6 +245,8 @@ public class ResolveFreshConstants {
         if (sentences.equals(m.localSentences())) {
             return m;
         }
+        // fix the format after inserting the GeneratedCounterCell
+        sentences = immutable(stream(sentences).map(s -> s instanceof Production ? fixFormat((Production) s) : s).collect(Collectors.toSet()));
         return Module(m.name(), m.imports(), sentences, m.att());
     }
 

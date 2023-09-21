@@ -6,7 +6,7 @@ module MIR-CONFIG
     imports TEST-SYNTAX
     configuration
       <k> $PGM:Int </k>
-      <returncode exit=""> 4 </returncode>
+      <b> 4 </b>
 endmodule
 module TEST
     imports TEST-SYNTAX
