@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import json
+import sys
 import subprocess
 
-COMMIT_SHA=''
+COMMIT_SHA = sys.argv[1]
 FROM_BRANCH=''
 TO_BRANCH='develop'
 
@@ -24,10 +25,6 @@ def execute_command(command):
 
     return result.stdout
 
-# git command to get the last commit in develop
-commit_command = [ 'git', 'log', '--format=\"%H\"', '-n', '1' ]
-COMMIT_SHA = execute_command(commit_command).strip('\"').strip('\"\n')
-
 # curl command to get the branch name of last commit in develop
 API_URL = 'https://api.github.com/repos/runtimeverification/k/commits/' \
         + COMMIT_SHA + '/pulls'
@@ -35,6 +32,9 @@ branch_command = ['curl', '-L', '-H', 'Accept:', 'application/vnd.github+json',
                   '-H', '\"Authorization', 'Bearer', '${GITHUB_TOKEN}\"', '-H',
                   '\"X-GitHub-Api-Version:', '2022-11-28\"', API_URL]
 FROM_BRANCH = json.loads(execute_command(branch_command))[0]['head']['label']
+
+# If FROM_BRANCH contains user information get only the branch name
+if ':' in FROM_BRANCH: FROM_BRANCH = FROM_BRANCH.split(':')[1]
 
 print("Exporting last bencher report from", FROM_BRANCH, "to", TO_BRANCH)
 
@@ -48,6 +48,8 @@ data = json.loads(execute_command(bencher_command))
 # Collect all elemnts where the key 'project' is 'k_framework'
 k_framework = [item for item in data if item['project']['slug'] == 'k-framework'
                and item['branch']['slug'] == FROM_BRANCH]
+
+print("Found", len(k_framework), "reports for k-framework in", FROM_BRANCH)
 
 # Append the last 6 reports to the list, they correspond to the last performance
 # execution on the last commit in FROM_BRANCH
@@ -64,7 +66,7 @@ for i in range(0,6):
 
     branch = item['branch']
     print("Appended:", benchmark_name, "created in", item['created'],
-          "on branch", branch['name'], "with version", branch['version']['number'])
+          "on branch", branch['name'], "with id", branch['version']['number'])
 
     data.update({benchmark_name: {metric_name_size: {"value": value_size},
                                   metric_name_memory: {"value": value_memory}}
