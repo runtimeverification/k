@@ -54,6 +54,7 @@ jobs:
           BENCHER_ADAPTER: json
         run: |
           set -euxo pipefail
+          workspace=$(pwd)
           docker run --name k-posting-profiling-tests-${GITHUB_SHA}            \
             --rm -it --detach                                                  \
             -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
