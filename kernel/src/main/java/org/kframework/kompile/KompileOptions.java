@@ -3,6 +3,7 @@ package org.kframework.kompile;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
@@ -23,7 +24,8 @@ import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;
 
 @RequestScoped
 public class KompileOptions implements Serializable {
-
+    @Inject
+    public KompileOptions() {}
 
     /**
      * WARNING: this field will be non-null in kompile tool, but null when KompileOption is deserialized,

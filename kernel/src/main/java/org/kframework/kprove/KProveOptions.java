@@ -4,6 +4,7 @@ package org.kframework.kprove;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.file.FileUtil;
@@ -20,6 +21,8 @@ import java.util.List;
 
 @RequestScoped
 public class KProveOptions {
+    @Inject
+    public KProveOptions() {}
 
     @ParametersDelegate
     private final transient GlobalOptions global = new GlobalOptions();
