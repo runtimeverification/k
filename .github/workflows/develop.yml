@@ -54,7 +54,7 @@ jobs:
           BENCHER_ADAPTER: json
         run: |
           set -euxo pipefail
-          docker run --name k-posting-profiling-tests-${GITHUB_SHA}                                   \
+          docker run --name k-posting-profiling-tests-${GITHUB_SHA}            \
             --rm -it --detach                                                  \
             -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
             -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
@@ -66,7 +66,9 @@ jobs:
             -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
             -e GITHUB_REF=$GITHUB_REF                                          \
+            -e GITHUB_SHA=${GITHUB_SHA}                                        \
             --workdir /opt/workspace                                           \
+            -v "${workspace}:/opt/workspace"                                   \
             ${BASE_OS}:${BASE_DISTRO}
       - name: 'Copy K Framework'
         run: |
@@ -81,8 +83,7 @@ jobs:
       - name: 'Getting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c 'git config --global --add safe.directory /opt/workspace'
-          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c 'python3 k-distribution/tests/profiling/post_results_to_develop.py'
+          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py ${GITHUB_SHA}'
       - name: 'Posting Performance Tests Results'
         run: |
           set -euxo pipefail

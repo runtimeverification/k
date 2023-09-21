@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import json
+import sys
 import subprocess
 
-COMMIT_SHA=''
+COMMIT_SHA = sys.argv[1]
 FROM_BRANCH=''
 TO_BRANCH='develop'
 
@@ -23,10 +24,6 @@ def execute_command(command):
         exit(1)
 
     return result.stdout
-
-# git command to get the last commit in develop
-commit_command = [ 'git', 'log', '--format=\"%H\"', '-n', '1' ]
-COMMIT_SHA = execute_command(commit_command).strip('\"').strip('\"\n')
 
 # curl command to get the branch name of last commit in develop
 API_URL = 'https://api.github.com/repos/runtimeverification/k/commits/' \
