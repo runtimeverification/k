@@ -54,8 +54,7 @@ jobs:
           BENCHER_ADAPTER: json
         run: |
           set -euxo pipefail
-          workspace=$(pwd)
-          docker run --name k-posting-profiling-tests-${GITHUB_SHA}                                   \
+          docker run --name k-posting-profiling-tests-${GITHUB_SHA}            \
             --rm -it --detach                                                  \
             -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
             -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
@@ -67,6 +66,7 @@ jobs:
             -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
             -e GITHUB_REF=$GITHUB_REF                                          \
+            -e GITHUB_SHA=${GITHUB_SHA}                                        \
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
             ${BASE_OS}:${BASE_DISTRO}
@@ -77,14 +77,14 @@ jobs:
       - name: 'Getting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py'
+          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py ${GITHUB_SHA}'
       - name: 'Posting Performance Tests Results'
         run: |
           set -euxo pipefail
           docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c 'bencher run            \
             --if-branch "develop" --else-if-branch "master"                    \
             --file .profiling-results.json --err --ci-only-on-alert            \
-            --github-actions "${GITHUB_TOKEN}" 'echo "Exporting report"'
+            --github-actions "${GITHUB_TOKEN}" "echo Exporting report"'
       - name: 'Tear down Docker'
         if: always()
         run: |
