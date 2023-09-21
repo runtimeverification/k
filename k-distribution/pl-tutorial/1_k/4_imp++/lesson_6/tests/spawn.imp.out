@@ -1,18 +1,6 @@
     {
       Out:String
     #Equals
-      "x = 21\n"
-    }
-  #And
-    {
-      Store:Map
-    #Equals
-      0 |-> 21
-    }
-#Or
-    {
-      Out:String
-    #Equals
       "x = 11\n"
     }
   #And
@@ -56,6 +44,18 @@
       Store:Map
     #Equals
       0 |-> 16
+    }
+#Or
+    {
+      Out:String
+    #Equals
+      "x = 21\n"
+    }
+  #And
+    {
+      Store:Map
+    #Equals
+      0 |-> 21
     }
 #Or
     {
