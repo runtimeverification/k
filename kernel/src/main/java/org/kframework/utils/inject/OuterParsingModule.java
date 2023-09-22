@@ -27,7 +27,7 @@ public class OuterParsingModule extends AbstractModule {
 
     @Override
     protected void configure() {
-
+        binder().requireAtInjectOnConstructors();
     }
 
     @Provides

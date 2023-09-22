@@ -20,6 +20,7 @@ public class KServerModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(Tool.class).toInstance(Tool.KSERVER);
         bind(FrontEnd.class).to(KServerFrontEnd.class);
 
