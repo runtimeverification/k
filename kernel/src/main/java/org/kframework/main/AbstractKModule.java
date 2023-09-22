@@ -37,6 +37,7 @@ public abstract class AbstractKModule implements KModule {
     }
 
     protected void bindOptions(Supplier<List<Pair<Class<?>, Boolean>>> action, Binder binder) {
+        binder.requireAtInjectOnConstructors();
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder, Object.class, Options.class);
         for (Pair<Class<?>, Boolean> option : action.get()) {
             optionsBinder.addBinding().to(option.getKey());
@@ -81,6 +82,7 @@ public abstract class AbstractKModule implements KModule {
 
             @Override
             protected void configure() {
+                binder().requireAtInjectOnConstructors();
                 //bind backend implementations of tools to their interfaces
             }
         });
