@@ -54,7 +54,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore]. Each creates the kompiled K definition.", descriptionKey = "backend")
     public String backend = Backends.LLVM;
 
-    @Parameter(names="--main-module", description="Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).")
+    @Parameter(names="--main-module", descriptionKey = "name",
+            description="Specify main module in which a program starts to execute. This information is used by 'krun'. " +
+            "The default is the name of the given K definition file without the extension (.k).")
     private String mainModule;
 
     public String mainModule(FileUtil files) {
@@ -64,7 +66,8 @@ public class KompileOptions implements Serializable {
         return mainModule;
     }
 
-    @Parameter(names="--syntax-module", description="Specify main module for syntax. This information is used by 'krun'. (Default: <main-module>-SYNTAX).", descriptionKey = "module")
+    @Parameter(names="--syntax-module", descriptionKey = "name",
+            description="Specify main module for syntax. This information is used by 'krun'. (Default: <main-module>-SYNTAX).")
     private String syntaxModule;
 
     public String syntaxModule(FileUtil files) {

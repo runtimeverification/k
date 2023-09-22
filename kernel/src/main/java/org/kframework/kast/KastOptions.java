@@ -131,7 +131,7 @@ public final class KastOptions {
         }
     }
 
-    @Parameter(names={"--module", "-m"}, descriptionKey = "module",
+    @Parameter(names={"--module", "-m"}, descriptionKey = "name",
             description="Parse text in the specified module. Defaults to the syntax module of the definition.")
     public String module;
 

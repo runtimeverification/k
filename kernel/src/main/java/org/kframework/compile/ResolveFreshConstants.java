@@ -28,6 +28,7 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.collection.JavaConverters;
 import scala.collection.Set;
 import scala.Option;
 
@@ -170,7 +171,6 @@ public class ResolveFreshConstants {
             List<ProductionItem> pis = stream(prod.items()).collect(Collectors.toCollection(ArrayList::new));
             // expecting a production of the form <generatedTop> C1 C2 Cx.. </generatedTop>
             // insert the GeneratedCounterCell as the last cell
-            // fixing the format gets resolved later in GeneratedTopFormat.java
             pis.add(prod.items().size() - 1, NonTerminal(Sorts.GeneratedCounterCell()));
             return Production(prod.klabel().get(), prod.sort(), immutable(pis), prod.att());
         }
@@ -245,7 +245,38 @@ public class ResolveFreshConstants {
         if (sentences.equals(m.localSentences())) {
             return m;
         }
+        // fix the format after inserting the GeneratedCounterCell
+        sentences = immutable(stream(sentences).map(s -> s instanceof Production ? fixFormat((Production) s) : s).collect(Collectors.toSet()));
         return Module(m.name(), m.imports(), sentences, m.att());
+    }
+
+    private static Production fixFormat(Production prod) {
+        if (prod.klabel().isDefined() && prod.klabel().get().equals(KLabels.GENERATED_TOP_CELL)) {
+            List<Integer> cellPositions = new ArrayList<Integer>();
+            int i = 1;
+            for (ProductionItem p: JavaConverters.seqAsJavaList(prod.items())) {
+                if (p instanceof NonTerminal) {
+                    NonTerminal nt = (NonTerminal) p;
+                    if (! nt.sort().equals(Sorts.GeneratedCounterCell())) {
+                        cellPositions.add(i);
+                    }
+                }
+                i++;
+            }
+            StringBuilder format = new StringBuilder();
+            if (cellPositions.size() == 1) {
+                format.append("%").append(cellPositions.get(0));
+            } else {
+                format.append("%1%i");
+                int j;
+                for (j = 0; j < cellPositions.size(); j++) {
+                    format.append("%n%").append(cellPositions.get(j));
+                }
+                format.append("%d%n%").append(cellPositions.get(j - 1) + 2);
+            }
+            return prod.withAtt(prod.att().add(Att.FORMAT(), format.toString()));
+        }
+        return prod;
     }
 }
 

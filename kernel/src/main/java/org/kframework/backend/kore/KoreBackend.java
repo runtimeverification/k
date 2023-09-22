@@ -161,7 +161,6 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConfigConstants)
                 .andThen(resolveFreshConstants)
-                .andThen(d -> DefinitionTransformer.from(GeneratedTopFormat::resolve, "Fix GeneratedCounterCell format").apply(d))
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(subsortKItem)

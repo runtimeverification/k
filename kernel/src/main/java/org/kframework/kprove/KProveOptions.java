@@ -58,33 +58,40 @@ public class KProveOptions {
     @ParametersDelegate
     public PrintOptions print = new PrintOptions();
 
-    @Parameter(names="--branching-allowed", arity = 1, description="Number of branching events allowed before a forcible stop.")
+    @Parameter(names="--branching-allowed", descriptionKey = "number", arity = 1,
+            description="Number of branching events allowed before a forcible stop.")
     public int branchingAllowed = Integer.MAX_VALUE;
 
-    @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
+    @Parameter(names={"--spec-module", "-sm"}, descriptionKey = "name",
+            description="Name of module containing specification to prove")
     public String specModule;
 
-    @Parameter(names="--depth", description="The maximum number of computational steps to prove")
+    @Parameter(names="--depth", descriptionKey = "number",
+            description="The maximum number of computational steps to prove")
     public Integer depth;
 
-    @Parameter(names="--trusted", description="Mark this comma separated list of claims as [trusted]")
+    @Parameter(names="--trusted", descriptionKey = "labels",
+            description="Mark this comma separated list of claims as [trusted]")
     public List<String> trusted = null;
 
-    @Parameter(names="--exclude", description="Exclude this comma separated list of claims")
+    @Parameter(names="--exclude", descriptionKey = "labels", description="Exclude this comma separated list of claims")
     public List<String> exclude = null;
 
-    @Parameter(names="--claims", description="Only keep this comma separated list of claims")
+    @Parameter(names="--claims", descriptionKey = "labels", description="Only keep this comma separated list of claims")
     public List<String> claims = null;
 
-    @Parameter(names="--debugger", description="Launch proof in an interactive debugger. Currently only supported by the Haskell backend.")
+    @Parameter(names="--debugger",
+            description="Launch proof in an interactive debugger. Currently only supported by the Haskell backend.")
     public boolean debugger;
 
-    @Parameter(names="--debug-script", description="Run script passed in specified file when the debugger starts. Used with --debugger.")
+    @Parameter(names="--debug-script", descriptionKey = "file",
+            description="Run script passed in specified file when the debugger starts. Used with --debugger.")
     public String debugScript;
 
     @Parameter(names="--emit-json", description="Emit JSON serialized main definition for proving.")
     public boolean emitJson = false;
 
-    @Parameter(names="--emit-json-spec", description="If set, emit the JSON serialization of the spec module to the specified file.")
+    @Parameter(names="--emit-json-spec", descriptionKey = "file",
+            description="If set, emit the JSON serialization of the spec module to the specified file.")
     public String emitJsonSpec = null;
 }
