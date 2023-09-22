@@ -31,6 +31,9 @@ import java.util.List;
 @RequestScoped
 public final class KastOptions {
 
+    @Inject
+    public KastOptions() {}
+
     @Parameter(description="<file>")
     private List<String> parameters;
 
