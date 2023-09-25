@@ -135,35 +135,39 @@ public class KastFrontEnd extends FrontEnd {
                 Source source = options.source();
 
                 try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
-                    Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(stringToParse, sort, startSymbolLocation, source);
-                    kem.addAllKException(res._2().stream().map(KEMException::getKException).collect(Collectors.toSet()));
-                    if (res._1().isLeft()) {
-                        throw res._1().left().get().iterator().next();
-                    }
-                    // important to get the extension module for unparsing because it contains generated syntax
-                    // like casts, projections and others
-                    Module unparsingMod = parseInModule.getExtensionModule();
-                    K parsed = new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
+                    if (options.debugTokens)
+                        System.out.println(parseInModule.tokenizeString(stringToParse, source));
+                    else {
+                        Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(stringToParse, sort, startSymbolLocation, source);
+                        kem.addAllKException(res._2().stream().map(KEMException::getKException).collect(Collectors.toSet()));
+                        if (res._1().isLeft()) {
+                            throw res._1().left().get().iterator().next();
+                        }
+                        // important to get the extension module for unparsing because it contains generated syntax
+                        // like casts, projections and others
+                        Module unparsingMod = parseInModule.getExtensionModule();
+                        K parsed = new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
 
-                    if (options.expandMacros) {
-                        parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
-                    }
-                    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-                    LabelInfo labelInfo = new LabelInfoFromModule(mod);
-                    SortInfo sortInfo = SortInfo.fromModule(mod);
+                        if (options.expandMacros) {
+                            parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
+                        }
+                        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+                        LabelInfo labelInfo = new LabelInfoFromModule(mod);
+                        SortInfo sortInfo = SortInfo.fromModule(mod);
 
-                    Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
-                    if (options.steps.contains(KompileSteps.anonVars))
-                        r = (Rule) new ResolveAnonVar().resolve(r);
-                    r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition predicates
-                    r = (Rule) new ConstantFolding().fold(unparsingMod, r);
-                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
-                    if (options.steps.contains(KompileSteps.concretizeCells)) {
-                        r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
-                        r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod).concretize(mod, r);
+                        Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
+                        if (options.steps.contains(KompileSteps.anonVars))
+                            r = (Rule) new ResolveAnonVar().resolve(r);
+                        r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition predicates
+                        r = (Rule) new ConstantFolding().fold(unparsingMod, r);
+                        r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
+                        if (options.steps.contains(KompileSteps.concretizeCells)) {
+                            r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
+                            r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod).concretize(mod, r);
+                        }
+                        K result = r.body();
+                        kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                     }
-                    K result = r.body();
-                    kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                 }
 
                 sw.printTotal("Total");
@@ -210,17 +214,21 @@ public class KastFrontEnd extends FrontEnd {
             } else {
                 Reader stringToParse = options.stringToParse();
                 Source source = options.source();
-                K parsed = kread.prettyRead(parsingMod, sort, startSymbolLocation, def, source, FileUtil.read(stringToParse));
+                if (options.debugTokens)
+                    System.out.println(kread.showTokens(parsingMod, def, FileUtil.read(stringToParse), source));
+                else {
+                    K parsed = kread.prettyRead(parsingMod, sort, startSymbolLocation, def, source, FileUtil.read(stringToParse));
 
-                if (options.expandMacros) {
-                    parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
+                    if (options.expandMacros) {
+                        parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
+                    }
+
+                    if (sort.equals(Sorts.K())) {
+                        sort = Sorts.KItem();
+                    }
+
+                    kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), parsed, sort);
                 }
-
-                if (sort.equals(Sorts.K())) {
-                    sort = Sorts.KItem();
-                }
-
-                kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), parsed, sort);
             }
 
             sw.printTotal("Total");

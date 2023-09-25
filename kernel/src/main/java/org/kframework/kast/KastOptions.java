@@ -155,4 +155,7 @@ public final class KastOptions {
             return InputModes.class;
         }
     }
+
+    @Parameter(names="--debug-tokens", description="Print the list of tokens matched by the scanner. Useful for debugging parsing errors.")
+    public boolean debugTokens = false;
 }

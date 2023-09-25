@@ -198,13 +198,18 @@ public class CompiledDefinition implements Serializable {
 
     public K parseSingleTerm(Module module, Sort programStartSymbol, String startSymbolLocation, KExceptionManager kem, FileUtil files, String s, Source source) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true, files)) {
-            parseInModule.tokenizeString(s, programStartSymbol, startSymbolLocation, source);
             Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, startSymbolLocation, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
             return new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
+        }
+    }
+
+    public String showTokens(Module module, FileUtil files, String s, Source source) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true, files)) {
+            return parseInModule.tokenizeString(s, source);
         }
     }
 
