@@ -101,6 +101,12 @@ class KCLIArgs:
             type=int,
             help='Number of times to retry SMT queries with scaling timeouts.',
         )
+        args.add_argument(
+            '--smt-tactic',
+            dest='smt_tactic',
+            type=str,
+            help='Z3 tactic to use when checking satisfiability. Example: (check-sat-using smt)',
+        )
         return args
 
     @cached_property

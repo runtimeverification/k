@@ -850,6 +850,7 @@ class KoreServer(ContextManager['KoreServer']):
         smt_timeout: int | None = None,
         smt_retry_limit: int | None = None,
         smt_reset_interval: int | None = None,
+        smt_tactic: str | None = None,
         command: str | Iterable[str] | None = None,
         bug_report: BugReport | None = None,
         haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
@@ -881,6 +882,8 @@ class KoreServer(ContextManager['KoreServer']):
             smt_server_args += ['--smt-retry-limit', str(smt_retry_limit)]
         if smt_reset_interval:
             smt_server_args += ['--smt-reset-interval', str(smt_reset_interval)]
+        if smt_tactic:
+            smt_server_args += ['--smt-tactic', smt_tactic]
 
         haskell_log_args = (
             [
@@ -980,6 +983,7 @@ class BoosterServer(KoreServer):
         smt_timeout: int | None = None,
         smt_retry_limit: int | None = None,
         smt_reset_interval: int | None = None,
+        smt_tactic: str | None = None,
         command: str | Iterable[str] | None,
         bug_report: BugReport | None = None,
         haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
@@ -1027,6 +1031,7 @@ class BoosterServer(KoreServer):
             smt_timeout=smt_timeout,
             smt_retry_limit=smt_retry_limit,
             smt_reset_interval=smt_reset_interval,
+            smt_tactic=smt_tactic,
             command=args,
             bug_report=bug_report,
             haskell_log_format=haskell_log_format,
@@ -1045,6 +1050,7 @@ def kore_server(
     bug_report: BugReport | None = None,
     smt_timeout: int | None = None,
     smt_retry_limit: int | None = None,
+    smt_tactic: str | None = None,
     haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
     haskell_log_entries: Iterable[str] = (),
     log_axioms_file: Path | None = None,
@@ -1059,6 +1065,7 @@ def kore_server(
             bug_report=bug_report,
             smt_timeout=smt_timeout,
             smt_retry_limit=smt_retry_limit,
+            smt_tactic=smt_tactic,
             haskell_log_format=haskell_log_format,
             haskell_log_entries=haskell_log_entries,
             log_axioms_file=log_axioms_file,
@@ -1072,6 +1079,7 @@ def kore_server(
         bug_report=bug_report,
         smt_timeout=smt_timeout,
         smt_retry_limit=smt_retry_limit,
+        smt_tactic=smt_tactic,
         haskell_log_format=haskell_log_format,
         haskell_log_entries=haskell_log_entries,
         log_axioms_file=log_axioms_file,
