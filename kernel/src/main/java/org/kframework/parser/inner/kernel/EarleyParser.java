@@ -525,7 +525,7 @@ public class EarleyParser {
    * Metadata about the state of the sentence being parsed. We collect this all in a single place in order to simplify
    * the type signatures of many methods.
    */
-  private static class ParserMetadata {
+  public static class ParserMetadata {
     /**
      * @param input The sentence being parsed
      * @param scanner The scanner to use to tokenize the sentence
@@ -583,11 +583,11 @@ public class EarleyParser {
     }
 
     // the list of tokens in the sentence
-    Scanner.Token[] words;
+    public Scanner.Token[] words;
     // an array containing the line of each character in the input sentence
-    int[] lines;
+    public int[] lines;
     // an array containing the column of each character in the input sentence
-    int[] columns;
+    public int[] columns;
     // a Source containing the file the sentence was parsed from
     Source source;
     // the original un-tokenized input sentence

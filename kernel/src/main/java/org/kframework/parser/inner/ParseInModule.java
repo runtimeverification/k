@@ -7,6 +7,7 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.TerminalLike;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
@@ -29,9 +30,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * A wrapper that takes a module and one can call the parser
@@ -156,6 +159,24 @@ public class ParseInModule implements Serializable, AutoCloseable {
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
             return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
+        }
+    }
+
+    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
+        tokenizeString(String input, Sort startSymbol, String startSymbolLocation, Source source) {
+        try (Scanner scanner = getScanner()) {
+            EarleyParser.ParserMetadata mdata = new EarleyParser.ParserMetadata(input, scanner, source, 1, 1);
+            Map<Integer, TerminalLike> kind2Token =
+                    scanner.tokens.entrySet().stream().map(a -> new Tuple2<>(a.getValue()._1, a.getKey()))
+                    .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+            for (Scanner.Token word : mdata.words) {
+                System.out.format("%10s (%d,%d,%d,%d), %s\n", '`' + word.value + '`',
+                        mdata.lines[word.startLoc], mdata.columns[word.startLoc],
+                        mdata.lines[word.endLoc], mdata.columns[word.endLoc],
+                        kind2Token.get(word.kind));
+            }
+            System.exit(0);
+            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
         }
     }
 

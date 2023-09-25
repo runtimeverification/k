@@ -50,7 +50,7 @@ import static org.kframework.Collections.*;
  */
 public class Scanner implements AutoCloseable {
 
-    private final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
+    public final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
     private final File scanner;
     private final Module module;
     private GlobalOptions go = new GlobalOptions();
@@ -349,10 +349,10 @@ public class Scanner implements AutoCloseable {
     }
 
     public static class Token {
-        final int kind;
-        final String value;
-        final int startLoc;
-        final int endLoc;
+        public final int kind;
+        public final String value;
+        public final int startLoc;
+        public final int endLoc;
 
         public Token(int kind, String value, long startLoc, long endLoc) {
             this.kind = kind;
