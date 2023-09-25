@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 module EXPANDMACROENSURES
     imports INT
     imports BOOL
