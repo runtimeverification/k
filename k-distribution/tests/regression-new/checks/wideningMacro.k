@@ -3,7 +3,7 @@ module WIDENINGMACRO
     imports INT
     imports BOOL
 
-    syntax Bool ::= #bar ( Int ) [alias]
+    syntax Bool ::= #bar ( KItem ) [function]
 
-    rule #bar ( X ) => X
+    rule #bar ( X::KItem ) => X
 endmodule
