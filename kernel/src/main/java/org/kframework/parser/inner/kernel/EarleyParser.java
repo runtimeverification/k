@@ -573,12 +573,20 @@ public class EarleyParser {
       this.input = input;
     }
 
+    // the list of tokens in the sentence
+    final Scanner.Token[] words;
+    // an array containing the line of each character in the input sentence
+    final int[] lines;
+    // an array containing the column of each character in the input sentence
+    final int[] columns;
+    // a Source containing the file the sentence was parsed from
+    Source source;
+    // the original un-tokenized input sentence
+    String input;
+
     public List<Scanner.Token> getWords() {
       return List.of(words);
     }
-
-    // the list of tokens in the sentence
-    private final Scanner.Token[] words;
 
     public List<Integer> getLines() {
       return Arrays.stream(lines).boxed().collect(Collectors.toList());
@@ -587,15 +595,6 @@ public class EarleyParser {
     public List<Integer> getColumns() {
       return Arrays.stream(columns).boxed().collect(Collectors.toList());
     }
-
-    // an array containing the line of each character in the input sentence
-    public final int[] lines;
-    // an array containing the column of each character in the input sentence
-    private int[] columns;
-    // a Source containing the file the sentence was parsed from
-    Source source;
-    // the original un-tokenized input sentence
-    String input;
   }
 
   /**
