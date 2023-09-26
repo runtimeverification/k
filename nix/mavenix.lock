@@ -2678,12 +2678,12 @@
       "sha1": "df7f15de037a1ee4d57d2ed779739089f560338c"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.jar",
-      "sha1": "1c12d070e602efd8021891cdd7fd18bc129372d4"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar",
+      "sha1": "1200e7ebeedbe0d10062093f32925a912020e747"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.pom",
-      "sha1": "05e315ccb7e487e68bf19124d736afbc9136c631"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.pom",
+      "sha1": "b7cc05a5394544befc936c39080a93cc8c1e082e"
     },
     {
       "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
@@ -7330,20 +7330,20 @@
       "sha1": "e8848369738c03e40af5507686216f9b8b44b6a3"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230817.181106-1.pom",
+      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230818.165756-2.pom",
       "sha1": "81f6a397361513f34b26d5f43d329df888f2feaa"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.pom",
-      "sha1": "3c8bc01cd1f032dd7d78f2e3d6198e4d51502693"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.pom",
+      "sha1": "0b6e24b04b9c45f192ec3e23e5fdbd2627049def"
     },
     {
       "path": "org/kframework/dependencies/ng/0.9.2-k4.0/ng-0.9.2-k4.0-linux.uexe",
@@ -8209,11 +8209,11 @@
       "path": "com/google/code/gson/gson"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181106</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181106</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181106-1</value>\n        <updated>20230817181106</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165756</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165756</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165756-2</value>\n        <updated>20230818165756</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181113</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181113</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165803</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165803</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT"
     },
     {
