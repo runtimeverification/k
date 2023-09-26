@@ -30,14 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -50,12 +43,16 @@ import static org.kframework.Collections.*;
  */
 public class Scanner implements AutoCloseable {
 
-    public final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
+    private final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
     private final File scanner;
     private final Module module;
     private GlobalOptions go = new GlobalOptions();
 
     public static final String COMPILER = OS.current().equals(OS.OSX) ? "clang" : "gcc";
+
+    public Map<TerminalLike, Tuple2<Integer, Integer>> getTokens() {
+        return Collections.unmodifiableMap(tokens);
+    }
 
     public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
         Map<TerminalLike, Integer> tokens = new TreeMap<>();

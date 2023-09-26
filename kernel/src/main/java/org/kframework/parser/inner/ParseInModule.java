@@ -170,7 +170,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         try (Scanner scanner = getScanner()) {
             EarleyParser.ParserMetadata mdata = new EarleyParser.ParserMetadata(input, scanner, source, 1, 1);
             Map<Integer, TerminalLike> kind2Token =
-                    scanner.tokens.entrySet().stream().map(a -> new Tuple2<>(a.getValue()._1, a.getKey()))
+                    scanner.getTokens().entrySet().stream().map(a -> new Tuple2<>(a.getValue()._1, a.getKey()))
                     .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
             List<Integer> lines = mdata.getLines();
             List<Integer> columns = mdata.getColumns();
