@@ -7,6 +7,7 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
@@ -29,10 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -166,17 +164,22 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * Print the list of tokens matched by the scanner, the location and the Regex Terminal
      */
     public String tokenizeString(String input, Source source) {
-        StringBuilder sb = new StringBuilder("`Match`    (location), Regex Terminal\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("`Match`    (location),    Terminal\n");
+        sb.append("------------------------------------\n");
         try (Scanner scanner = getScanner()) {
             EarleyParser.ParserMetadata mdata = new EarleyParser.ParserMetadata(input, scanner, source, 1, 1);
             Map<Integer, TerminalLike> kind2Token =
                     scanner.tokens.entrySet().stream().map(a -> new Tuple2<>(a.getValue()._1, a.getKey()))
                     .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-            for (Scanner.Token word : mdata.words) {
-                sb.append(String.format("%-10s (%d,%d,%d,%d), %s\n", '`' + word.value + '`',
-                        mdata.lines[word.startLoc], mdata.columns[word.startLoc],
-                        mdata.lines[word.endLoc], mdata.columns[word.endLoc],
-                        kind2Token.get(word.kind)));
+            List<Integer> lines = mdata.getLines();
+            List<Integer> columns = mdata.getColumns();
+            for (Scanner.Token word : mdata.getWords()) {
+                String loc = String.format("(%d,%d,%d,%d),",
+                        lines.get(word.startLoc), columns.get(word.startLoc),
+                        lines.get(word.endLoc), columns.get(word.endLoc));
+                sb.append(String.format("%-10s %-12s %s\n", '`' + word.value + '`', loc,
+                        kind2Token.getOrDefault(word.kind, Terminal.apply("<eof>"))));
             }
         }
         return sb.toString();

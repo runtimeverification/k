@@ -24,18 +24,9 @@ import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -582,12 +573,25 @@ public class EarleyParser {
       this.input = input;
     }
 
+    public List<Scanner.Token> getWords() {
+      return List.of(words);
+    }
+
     // the list of tokens in the sentence
-    public Scanner.Token[] words;
+    private final Scanner.Token[] words;
+
+    public List<Integer> getLines() {
+      return Arrays.stream(lines).boxed().collect(Collectors.toList());
+    }
+
+    public List<Integer> getColumns() {
+      return Arrays.stream(columns).boxed().collect(Collectors.toList());
+    }
+
     // an array containing the line of each character in the input sentence
-    public int[] lines;
+    public final int[] lines;
     // an array containing the column of each character in the input sentence
-    public int[] columns;
+    private int[] columns;
     // a Source containing the file the sentence was parsed from
     Source source;
     // the original un-tokenized input sentence
