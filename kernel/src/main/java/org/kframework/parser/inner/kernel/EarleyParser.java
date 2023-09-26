@@ -23,10 +23,8 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
