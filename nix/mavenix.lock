@@ -2678,12 +2678,12 @@
       "sha1": "df7f15de037a1ee4d57d2ed779739089f560338c"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.jar",
-      "sha1": "1c12d070e602efd8021891cdd7fd18bc129372d4"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar",
+      "sha1": "1200e7ebeedbe0d10062093f32925a912020e747"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.pom",
-      "sha1": "05e315ccb7e487e68bf19124d736afbc9136c631"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.pom",
+      "sha1": "b7cc05a5394544befc936c39080a93cc8c1e082e"
     },
     {
       "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
@@ -7198,10 +7198,6 @@
       "sha1": "4e468148c830041ebe9389f3b183febf6508b0d7"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
-      "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
-    },
-    {
       "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
       "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
     },
@@ -7216,14 +7212,6 @@
     {
       "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.pom",
       "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
-      "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
-      "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
     },
     {
       "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
@@ -7330,20 +7318,20 @@
       "sha1": "e8848369738c03e40af5507686216f9b8b44b6a3"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230817.181106-1.pom",
+      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230818.165756-2.pom",
       "sha1": "81f6a397361513f34b26d5f43d329df888f2feaa"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.pom",
-      "sha1": "3c8bc01cd1f032dd7d78f2e3d6198e4d51502693"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.pom",
+      "sha1": "0b6e24b04b9c45f192ec3e23e5fdbd2627049def"
     },
     {
       "path": "org/kframework/dependencies/ng/0.9.2-k4.0/ng-0.9.2-k4.0-linux.uexe",
@@ -7590,12 +7578,12 @@
       "sha1": "79c2b5f8150ae55c4f46c77a5f8f5ea9ad2850a2"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
-      "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.jar",
+      "sha1": "16b228fa6f9d5afece0f2d2d6d5b03d5372dbea4"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.pom",
-      "sha1": "be1e909cee8fcaa2aba20438ffb7e2f7462e3e7d"
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.pom",
+      "sha1": "d07e9c55f4e6c91902087aeac9d2a9d351119c68"
     },
     {
       "path": "org/scala-lang/scala-compiler/2.10.5/scala-compiler-2.10.5.jar",
@@ -7606,12 +7594,12 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.jar",
-      "sha1": "3b7df7263c4302955a7cfe37d4af6cef5d4551bb"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.jar",
+      "sha1": "87fa026116e55786ea1a878ea37fb13b6d1365f6"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.pom",
-      "sha1": "c54913f97735e7460eb53a34e301259c1a26c9d6"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.pom",
+      "sha1": "eb8ca5ce97606a7ee2ab8e056f2b442a15106268"
     },
     {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
@@ -7622,20 +7610,20 @@
       "sha1": "4e8b721680f2defb491fe90447302658d464d5c0"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.jar",
-      "sha1": "270fc1cda47bc255f3cd03152ec8c2ed7d224e2b"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.jar",
+      "sha1": "0f2e89c89340282c9625ac57efb451056f31af57"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.pom",
-      "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.pom",
+      "sha1": "206e552eb6bed28249057c2f6e2357ed348ad4fd"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.jar",
-      "sha1": "1c65e76e15684d378fa2deb4ebe536a68e10c9bf"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.jar",
+      "sha1": "fa825f984172f6801e3d8c476071b1823c0a925b"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.pom",
-      "sha1": "1b1783cf18f4dc11a625701bdf185cb93b6f5de3"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.pom",
+      "sha1": "e143788a12ccf03101653a0ad8158ecda8850159"
     },
     {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.jar",
@@ -7646,12 +7634,12 @@
       "sha1": "30f1f646114a79eeefb254ead190f045c4605649"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.jar",
-      "sha1": "7116526cd205bb709241b29426ff98291f7facd0"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.jar",
+      "sha1": "7e1a6985bfbe78bdc94f33613301ef385d4629b4"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.pom",
-      "sha1": "a3316246e57553ae82e0817379535eb049c42215"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.pom",
+      "sha1": "7a479b115f28e4e4a977886fd703be68dff3ce53"
     },
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar",
@@ -8209,11 +8197,11 @@
       "path": "com/google/code/gson/gson"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181106</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181106</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181106-1</value>\n        <updated>20230817181106</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165756</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165756</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165756-2</value>\n        <updated>20230818165756</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181113</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181113</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165803</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165803</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT"
     },
     {
