@@ -7198,10 +7198,6 @@
       "sha1": "4e468148c830041ebe9389f3b183febf6508b0d7"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
-      "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
-    },
-    {
       "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
       "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
     },
@@ -7216,14 +7212,6 @@
     {
       "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.pom",
       "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
-      "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
-      "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
     },
     {
       "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
@@ -7590,12 +7578,12 @@
       "sha1": "79c2b5f8150ae55c4f46c77a5f8f5ea9ad2850a2"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
-      "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.jar",
+      "sha1": "16b228fa6f9d5afece0f2d2d6d5b03d5372dbea4"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.pom",
-      "sha1": "be1e909cee8fcaa2aba20438ffb7e2f7462e3e7d"
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.pom",
+      "sha1": "d07e9c55f4e6c91902087aeac9d2a9d351119c68"
     },
     {
       "path": "org/scala-lang/scala-compiler/2.10.5/scala-compiler-2.10.5.jar",
@@ -7606,12 +7594,12 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.jar",
-      "sha1": "3b7df7263c4302955a7cfe37d4af6cef5d4551bb"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.jar",
+      "sha1": "87fa026116e55786ea1a878ea37fb13b6d1365f6"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.pom",
-      "sha1": "c54913f97735e7460eb53a34e301259c1a26c9d6"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.pom",
+      "sha1": "eb8ca5ce97606a7ee2ab8e056f2b442a15106268"
     },
     {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
@@ -7622,20 +7610,20 @@
       "sha1": "4e8b721680f2defb491fe90447302658d464d5c0"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.jar",
-      "sha1": "270fc1cda47bc255f3cd03152ec8c2ed7d224e2b"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.jar",
+      "sha1": "0f2e89c89340282c9625ac57efb451056f31af57"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.pom",
-      "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.pom",
+      "sha1": "206e552eb6bed28249057c2f6e2357ed348ad4fd"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.jar",
-      "sha1": "1c65e76e15684d378fa2deb4ebe536a68e10c9bf"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.jar",
+      "sha1": "fa825f984172f6801e3d8c476071b1823c0a925b"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.pom",
-      "sha1": "1b1783cf18f4dc11a625701bdf185cb93b6f5de3"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.pom",
+      "sha1": "e143788a12ccf03101653a0ad8158ecda8850159"
     },
     {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.jar",
@@ -7646,12 +7634,12 @@
       "sha1": "30f1f646114a79eeefb254ead190f045c4605649"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.jar",
-      "sha1": "7116526cd205bb709241b29426ff98291f7facd0"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.jar",
+      "sha1": "7e1a6985bfbe78bdc94f33613301ef385d4629b4"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.pom",
-      "sha1": "a3316246e57553ae82e0817379535eb049c42215"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.pom",
+      "sha1": "7a479b115f28e4e4a977886fd703be68dff3ce53"
     },
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar",
