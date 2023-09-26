@@ -36,6 +36,7 @@ generatePagesFromMarkdownFiles({
   },
   displayCodeBlockSelectors: true,
   displayCodeBlockLineNumbers: true,
+  defaultPageTitle: "K",
 });
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "./pages/") + "/**/*.md",
@@ -52,6 +53,7 @@ generatePagesFromMarkdownFiles({
   },
   displayCodeBlockSelectors: true,
   displayCodeBlockLineNumbers: true,
+  defaultPageTitle: "K",
 });
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "../docs/") + "/*.md",
@@ -68,6 +70,7 @@ generatePagesFromMarkdownFiles({
   },
   displayCodeBlockSelectors: true,
   displayCodeBlockLineNumbers: true,
+  defaultPageTitle: "K",
 });
 
 fs.copyFileSync(

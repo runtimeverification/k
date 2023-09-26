@@ -195,12 +195,16 @@ public class KompileUsageFormatter implements IUsageFormatter {
             WrappedParameter parameter = pd.getParameter();
             String description = pd.getDescription();
             boolean hasDescription = !description.isEmpty();
+            String descriptionKey = pd.getParameter().getParameter().descriptionKey();
+            descriptionKey = descriptionKey.isEmpty() ? "" : " <" + descriptionKey + ">";
 
             // First line, command name
             out.append(indent)
                     .append("  ")
                     .append(parameter.required() ? "* " : "  ")
-                    .append(pd.getNames())
+                    .append(pd.getLongestName())
+                    .append(descriptionKey)
+                    .append(Arrays.stream(pd.getParameter().names()).count() > 1 ? ", " + pd.getParameter().names()[1] + descriptionKey : "")
                     .append("\n");
 
             if (hasDescription) {

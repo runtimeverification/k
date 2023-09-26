@@ -188,16 +188,20 @@ public class ExpandMacros {
          * contain macros that have not been expanded.
          */
         if (s instanceof RuleOrClaim){
-            new VisitK() {
+            VisitK visitor = new VisitK() {
                 @Override
                 public void apply(KApply k) {
                     Option<Att> atts = mod.attributesFor().get(k.klabel());
                     if (atts.isDefined() && mod.attributesFor().apply(k.klabel()).getMacro().isDefined()) {
                         errors.add(KEMException.compilerError("Rule contains macro symbol that was not expanded", s));
                     }
-                    k.klist().items().stream().forEach(i -> super.apply(i));
+                    k.klist().items().forEach(super::apply);
                 }
-            }.accept(((RuleOrClaim) s).body());
+            };
+
+            visitor.accept(((RuleOrClaim) s).body());
+            visitor.accept(((RuleOrClaim) s).requires());
+            visitor.accept(((RuleOrClaim) s).ensures());
         }
 
         if (!errors.isEmpty()) {
