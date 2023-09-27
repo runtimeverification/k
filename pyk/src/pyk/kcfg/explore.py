@@ -387,7 +387,7 @@ class KCFGExplore:
         if len(branches) > 1:
             kcfg.split_on_constraints(node.id, branches)
             _LOGGER.info(
-                f'Found {len(branches)} branches using heuristic for node {node.id}: {shorten_hashes(node.id)}: {[self.kprint.pretty_print(bc) for bc in branches]}'
+                f'Found {len(branches)} branches using heuristic for {self.id}: {node.id} -> {[self.kprint.pretty_print(bc) for bc in branches]}'
             )
             return
 

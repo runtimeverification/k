@@ -675,6 +675,10 @@ class KClaim(KRuleLike):
         return 'circularity' in self.att.atts
 
     @property
+    def is_trusted(self) -> bool:
+        return 'trusted' in self.att.atts
+
+    @property
     def dependencies(self) -> list[str]:
         deps = self.att.atts.get('depends', default=None)
         if deps is None:

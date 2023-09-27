@@ -81,7 +81,6 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
                 kprove.definition,
                 claim,
                 subproof_ids=[],
-                circularity=claim.is_circularity,
                 logs={},
                 proof_dir=proof_dir,
             )
