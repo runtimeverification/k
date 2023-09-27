@@ -128,8 +128,6 @@ module IMP-SIMPLE-SPEC
         <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (((S +Int N +Int 1) *Int (N:Int +Int 1)) +Int 1) $n |-> N:Int +Int 1) </state>
         [depends(IMP-SIMPLE-SPEC-DEPENDENCIES.if-almost-same-plus,if-almost-same-times)]
 
-
-
     claim [sum-loop]: <k> while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; }  => . ... </k>
                       <state> $s |-> (S => S +Int ((N *Int (N +Int 1)) /Int 2)) $n |-> (N => -1) </state>
                       requires 0 <=Int N
