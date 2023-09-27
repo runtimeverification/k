@@ -261,12 +261,13 @@ class KPrint:
         _LOGGER.warning(f'Falling back to using `kore-print` for Kore -> Kast: {kore.text}')
         return kast_term(json.loads(kore_print(kore, self.definition_dir, PrintOutput.JSON)), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
 
-    def kast_to_kore(self, kast: KInner, sort: KSort | None = None) -> Pattern:
-        try:
-            _LOGGER.info('Invoking kast_to_kore')
-            return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
-        except ValueError as ve:
-            _LOGGER.warning(ve)
+    def kast_to_kore(self, kast: KInner, sort: KSort | None = None, *, force_kast: bool = False) -> Pattern:
+        if not force_kast:
+            try:
+                _LOGGER.info('Invoking kast_to_kore')
+                return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
+            except ValueError as ve:
+                _LOGGER.warning(ve)
 
         _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': KAst.version(), 'term': kast.to_dict()}
