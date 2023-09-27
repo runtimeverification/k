@@ -27,9 +27,13 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -314,6 +318,24 @@ public class ParseInModule implements Serializable, AutoCloseable {
                     inferencers.add(currentInferencer);
                 }
             }
+
+
+
+            PrintWriter debug = null;
+            try {
+                File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
+                debugFile.getParentFile().mkdirs();
+                debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+                new SortInferencer(disambModule, debug, strict && inferSortChecks, true).
+                        apply(rez3, startSymbol, isAnywhere);
+            } catch (java.io.IOException e) {
+                throw KEMException.criticalError(e.getMessage());
+            } finally {
+                if (debug != null) {
+                    debug.close();
+                }
+            }
+
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
             if (rez.isLeft())
