@@ -385,6 +385,22 @@ object StringLiteral {
   def unapply(arg: StringLiteral): Option[String] = Some(arg.str)
 }
 
+trait LeftAssocTerm extends Pattern {
+  def p: Pattern
+}
+
+object LeftAssocTerm {
+  def unapply(arg: LeftAssocTerm): Option[Pattern] = Some(arg.p)
+}
+
+trait RightAssocTerm extends Pattern {
+  def p: Pattern
+}
+
+object RightAssocTerm {
+  def unapply(arg: RightAssocTerm): Option[Pattern] = Some(arg.p)
+}
+
 // Domain Values are needed to merge Kore to K.
 // The data structure for DomainValue is temporary.
 // It is designed and implemented just to make sure that we can
@@ -554,4 +570,8 @@ trait Builders {
   def LeftAssoc(ctr: (Pattern, Pattern) => Pattern, ps: Seq[Pattern]): Pattern
 
   def RightAssoc(ctr: (Pattern, Pattern) => Pattern, ps: Seq[Pattern]): Pattern
+
+  def LeftAssocTerm(p: Pattern): Pattern
+
+  def RightAssocTerm(p: Pattern): Pattern
 }
