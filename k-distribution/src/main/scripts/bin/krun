@@ -80,7 +80,7 @@ keepTempsIfDryRun () {
 
 print_usage () {
 cat <<HERE
-Usage: $KRUN [PROGRAM] [-cNAME=VALUE] [-d DIR]
+Usage: $KRUN [options] [PROGRAM] [-cNAME=VALUE] [-d DIR]
 Execute a program using a K semantics that was built with kompile.
 
 Mandatory arguments to long options are mandatory for short options too.

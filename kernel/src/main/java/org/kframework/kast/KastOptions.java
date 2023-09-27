@@ -101,20 +101,23 @@ public final class KastOptions {
         return files.get().resolveWorkingDirectory(parameters.get(0));
     }
 
-    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.", hidden = true)
+    @Parameter(names="--bison-file", descriptionKey = "file", hidden = true,
+            description="C file containing functions to link into bison parser.")
     public String bisonFile;
 
-    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).", hidden = true)
+    @Parameter(names="--bison-stack-max-depth", descriptionKey = "size", hidden = true,
+            description="Maximum size of bison parsing stack.")
     public long bisonStackMaxDepth = 10000;
 
-    @Parameter(names={"--expression", "-e"}, description="An expression to parse passed on the command " +
-    "line. It is an error to provide both this option and a file to parse.")
+    @Parameter(names={"--expression", "-e"}, descriptionKey = "expression",
+            description="An expression to parse passed on the command line. It is an error to provide both this " +
+                    "option and a file to parse.")
     private String expression;
 
-    @Parameter(names={"--sort", "-s"}, converter=SortTypeConverter.class, description="The start sort for the default parser. " +
-            "The default is the sort of $PGM from the configuration. A sort may also be specified " +
-            "with the 'KRUN_SORT' environment variable, in which case it is used if the option is " +
-            "not specified on the command line.")
+    @Parameter(names={"--sort", "-s"}, descriptionKey = "sort", converter=SortTypeConverter.class,
+            description="The start sort for the default parser. The default is the sort of $PGM from the configuration. " +
+                    "A sort may also be specified with the 'KRUN_SORT' environment variable, in which case it is used " +
+                    "if the option is not specified on the command line.")
     public Sort sort;
 
     public static class SortTypeConverter implements IStringConverter<Sort> {
@@ -125,17 +128,20 @@ public final class KastOptions {
         }
     }
 
-    @Parameter(names={"--module", "-m"}, description="Parse text in the specified module. Defaults to the syntax module of the definition.")
+    @Parameter(names={"--module", "-m"}, descriptionKey = "name",
+            description="Parse text in the specified module. Defaults to the syntax module of the definition.")
     public String module;
 
     @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
     public boolean expandMacros = false;
 
-    @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
+    @Parameter(names={"--input", "-i"}, descriptionKey = "mode", converter=InputModeConverter.class,
             description="How to read kast input in. <mode> is either [program|binary|kast|json|kore|rule].")
     public InputModes input = InputModes.PROGRAM;
 
-    @Parameter(names={"--steps"}, description="Apply specified kompilation steps to the parsed term. Only for --input rule. Use --steps help for a detailed description of available steps.")
+    @Parameter(names={"--steps"}, descriptionKey = "steps",
+            description="Apply specified kompilation steps to the parsed term. Only for --input rule. " +
+                    "Use --steps help for a detailed description of available steps.")
     public List<KastFrontEnd.KompileSteps> steps = Lists.newArrayList(KastFrontEnd.KompileSteps.anonVars);
 
     public static class InputModeConverter extends BaseEnumConverter<InputModes> {

@@ -130,6 +130,64 @@ jobs:
           name: kore-exec.tar.gz
           path: |
             **/kore-exec.tar.gz
+      - name: 'On Success, Upload the package built to the Summary Page'
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: kframework.deb
+          path: kframework.deb
+          if-no-files-found: error
+          retention-days: 1
+
+  performance-tests:
+    name: 'Performace Tests'
+    runs-on: [self-hosted, linux, performance]
+    needs: test-package-ubuntu-jammy
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v3
+        with:
+          name: kframework.deb
+      - name: 'Set up Docker Test Image'
+        env:
+          BASE_OS: ubuntu
+          BASE_DISTRO: jammy
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+          BENCHER_PROJECT: k-framework
+          BENCHER_ADAPTER: json
+        run: |
+          set -euxo pipefail
+          workspace=$(pwd)
+          docker run --name k-profiling-tests-${GITHUB_SHA}                    \
+            --rm -it --detach                                                  \
+            -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
+            -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
+            -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
+            -e GITHUB_HEAD_REF=$GITHUB_HEAD_REF                                \
+            -e GITHUB_BASE_REF=$GITHUB_BASE_REF                                \
+            -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
+            -e GITHUB_ACTIONS=true                                             \
+            -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
+            -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
+            -e GITHUB_REF=$GITHUB_REF                                          \
+            --workdir /opt/workspace                                           \
+            -v "${workspace}:/opt/workspace"                                   \
+            ${BASE_OS}:${BASE_DISTRO}
+      - name: 'Install K from Package'
+        run: |
+          set -euxo pipefail
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
+      - name: 'Profiling Performance Tests'
+        run: |
+          set -euxo pipefail
+          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
+          docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
 
   compile-nix-flake:
     name: 'Nix flake'

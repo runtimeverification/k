@@ -545,6 +545,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
                     (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
                 }
               case c => // variable or application
+                scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
                 consumeWithLeadingWhitespaces("{")
                 val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
@@ -579,6 +580,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
                     (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
                 }
               case c => // variable or application
+                scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
                 consumeWithLeadingWhitespaces("{")
                 val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')

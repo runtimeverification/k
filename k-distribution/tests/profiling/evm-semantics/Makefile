@@ -1,0 +1,9 @@
+DEF=test
+EXT=test
+ITER=1
+TESTDIR=.
+KOMPILE_BACKEND=llvm
+BENCHMARK_NAME=EVM-SEMANTICS
+KOMPILE_FLAGS=--main-module ETHEREUM-SIMULATION --syntax-module ETHEREUM-SIMULATION
+
+include ../kprofiling.mak
