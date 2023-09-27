@@ -887,55 +887,23 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
     ) -> None:
-        with tmp_path_factory.mktemp('apr_tmp_proofs') as proof_dir:
-            claim = single(
-                kprove.get_claims(
-                    Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
-                )
-            )
-
-            deps = claim.dependencies
-
-            def qualify(module: str, label: str) -> str:
-                if '.' in label:
-                    return label
-                return f'{module}.{label}'
-
-            subproof_ids = [qualify(spec_module, dep_id) for dep_id in deps]
-
-            # < Admit all the dependencies >
-            # We create files for all the subproofs, all tagged as `admitted`.
-            # Later, when creating the proof for the main claim, these get loaded
-            # and their status will be `PASSED`. This is similar to how Coq handles admitted lemmas.
-            # We do all this in order to decouple the tests of "main theorems" from tests of its dependencies.
-            deps_claims = kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=subproof_ids)
-
-            deps_proofs = [
-                APRProof.from_claim(kprove.definition, c, subproof_ids=[], logs={}, proof_dir=proof_dir)
-                for c in deps_claims
-            ]
-            for dp in deps_proofs:
-                if admit_deps:
-                    dp.admit()
-                dp.write_proof_data()
-            # </Admit all the dependencies >
-
-            proof = APRProof.from_claim(
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
                 kprove.definition,
-                claim,
-                subproof_ids=subproof_ids,
-                circularity=claim.is_circularity,
+                spec_modules,
+                spec_labels=[spec_label],
                 logs={},
                 proof_dir=proof_dir,
             )
-            _msg_suffix = ' (and is a circularity)' if claim.is_circularity else ''
-            _LOGGER.info(f"The claim '{spec_module}.{claim_id}' has {len(subproof_ids)} dependencies{_msg_suffix}")
+            proof = single([p for p in proofs if p.id == spec_label])
+            if admit_deps:
+                for subproof in proof.subproofs:
+                    subproof.admit()
+                    subproof.write_proof_data()
 
-            prover = APRProver(
-                proof,
-                kcfg_explore=kcfg_explore,
-            )
-
+            prover = APRProver(proof, kcfg_explore=kcfg_explore)
             prover.advance_proof(max_iterations=max_iterations, execute_depth=max_depth, cut_point_rules=cut_rules)
 
             kcfg_show = KCFGShow(
