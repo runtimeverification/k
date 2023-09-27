@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.kernel;
 
+import com.google.common.primitives.Ints;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.kframework.attributes.Att;
@@ -587,11 +588,11 @@ public class EarleyParser {
     }
 
     public List<Integer> getLines() {
-      return Arrays.stream(lines).boxed().collect(Collectors.toList());
+      return Ints.asList(lines);
     }
 
     public List<Integer> getColumns() {
-      return Arrays.stream(columns).boxed().collect(Collectors.toList());
+      return Ints.asList(columns);
     }
   }
 

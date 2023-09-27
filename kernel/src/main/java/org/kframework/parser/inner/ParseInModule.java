@@ -18,6 +18,7 @@ import org.kframework.parser.inner.disambiguation.*;
 import org.kframework.parser.inner.kernel.EarleyParser;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
@@ -165,8 +166,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
      */
     public String tokenizeString(String input, Source source) {
         StringBuilder sb = new StringBuilder();
-        sb.append("`Match`    (location),    Terminal\n");
-        sb.append("------------------------------------\n");
         try (Scanner scanner = getScanner()) {
             EarleyParser.ParserMetadata mdata = new EarleyParser.ParserMetadata(input, scanner, source, 1, 1);
             Map<Integer, TerminalLike> kind2Token =
@@ -174,11 +173,21 @@ public class ParseInModule implements Serializable, AutoCloseable {
                     .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
             List<Integer> lines = mdata.getLines();
             List<Integer> columns = mdata.getColumns();
+            int maxLocLen = 0;
+            List<String> locs = new ArrayList<>();
+            List<Scanner.Token> words = mdata.getWords();
             for (Scanner.Token word : mdata.getWords()) {
                 String loc = String.format("(%d,%d,%d,%d),",
                         lines.get(word.startLoc), columns.get(word.startLoc),
                         lines.get(word.endLoc), columns.get(word.endLoc));
-                sb.append(String.format("%-10s %-12s %s\n", '`' + word.value + '`', loc,
+                locs.add(loc);
+                maxLocLen = Math.max(maxLocLen, loc.length());
+            }
+            sb.append(String.format("%-" + maxLocLen + "s \"Match\"      Terminal\n", "(location)"));
+            sb.append("------------------------------------\n");
+            for (int i = 0; i < words.size(); i++) {
+                Scanner.Token word = words.get(i);
+                sb.append(String.format("%-" + maxLocLen + "s %-12s %s\n", locs.get(i), StringUtil.enquoteKString(word.value),
                         kind2Token.getOrDefault(word.kind, Terminal.apply("<eof>"))));
             }
         }
