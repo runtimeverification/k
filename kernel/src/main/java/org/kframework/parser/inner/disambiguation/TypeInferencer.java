@@ -8,6 +8,7 @@ import org.kframework.TopologicalSort;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
@@ -385,7 +386,9 @@ public class TypeInferencer implements AutoCloseable {
    * @return
    */
   private static boolean isFunction(Term t, boolean isAnywhere) {
-    return getFunction(t).map(pr -> pr.production().att()).orElse(Att()).contains(Att.FUNCTION()) || isAnywhere;
+    return isAnywhere ||
+            getFunction(t).filter(pr -> pr.production().att().contains(Att.FUNCTION())
+                    || ExpandMacros.isMacro(pr.production())).isPresent();
   }
 
   /**

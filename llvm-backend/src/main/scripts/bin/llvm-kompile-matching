@@ -1,0 +1,56 @@
+#!/usr/bin/env sh
+
+PNAME=$(basename "$0")
+
+print_usage () {
+cat <<HERE
+Usage: $PNAME <definition.kore> <heuristic> <output dir> <threshold> [logging]
+
+$PNAME options:
+  <definition dir>  The definition.kore file to generate the matching decision
+                    tree from.
+
+  <heuristic>       A string of single characters representing a sequence of
+                    heuristics to use during pattern matching compilation.
+                    Valid choices are f, d, b, a, l, r, n, p, q, _, N, L, R.
+                    The most common case is 'qbaL'
+
+  <output dir>      The directory where the dt files will be written
+
+  <threshold>       Threshold heuristic to use when choosing which axioms to
+                    optimize. A value of 0 turns the optimization off; a value
+                    of 1 turns the optimization on for every axiom. Values in
+                    between (expressed as a fraction of two integers, e.g. 1/2),
+                    control the aggressiveness of the optimization. Higher
+                    values increase compilation times extremely, but also
+                    increase the effectiveness of the optimization. Consider
+                    decreasing this threshold if compilation is too slow.
+                    The most common case is '1/2'
+
+  [logging]         Set this (ie. to '1') to enable logging (very large output)
+HERE
+}
+
+fail () {
+    print_usage
+    echo
+    echo "$1"
+    exit 1
+}
+
+if [ $# -eq 0 ];
+then
+    print_usage
+    exit
+elif [ $# -lt 4 ];
+then
+    fail "ERROR: Not enough arguments!"
+elif [ ! -f $1 ];
+then
+    fail "ERROR: <definition.kore> not a file!"
+elif [ ! -d $3 ];
+then
+    fail "ERROR: <output dir> not a directory!"
+fi
+
+"$(dirname "$0")/../lib/kframework/llvm-backend" "$@"
