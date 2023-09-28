@@ -1,0 +1,141 @@
+name: "Test PR"
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches:
+      - "develop"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version-sync:
+    name: "Version Sync"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: "Check out code"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          # fetch-depth 0 means deep clone the repo
+          fetch-depth: 0
+      - name: "Update Version"
+        run: |
+          set -x
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
+          ./package/version.sh sub
+          if git add --update && git commit --message "Set Version: $(cat package/version)"; then
+            git push origin HEAD:${GITHUB_HEAD_REF}
+          fi
+
+  nix-maven:
+    name: "Maven Build"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            os: macos-13
+          - runner: MacM1
+            os: self-macos-12
+    runs-on: ${{ matrix.runner }}
+    needs: version-sync
+    steps:
+      - name: "Check out code, set up Git"
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: "Upgrade bash"
+        if: ${{ contains(matrix.os, 'macos') }}
+        run: brew install bash
+      - name: "Install Dependencies"
+        run: brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
+      - name: "Build K from Source"
+        run: |
+          set -euxo pipefail
+          mvn package
+
+  test-k:
+    name: "K Tests"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            os: macos-13
+          - runner: MacM1
+            os: self-macos-12
+    runs-on: ${{ matrix.runner }}
+    needs: version-sync
+    steps:
+      - name: "Check out code"
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: "Build and Test K"
+        run: mvn verify --batch-mode -U
+      - name: "Check out k-exercises"
+        uses: actions/checkout@v3
+        with:
+          repository: runtimeverification/k-exercises
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          submodules: recursive
+          path: k-exercises
+      - name: "Tutorial Integration Tests"
+        run: |
+          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+          cd k-exercises/tutorial && make -j`nproc` --output-sync
+          cd ../../k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+          cd ../2_intermediate && ./test_kompile.sh'
+
+  # performance-tests:
+  #   name: 'Performace Tests'
+  #   runs-on: [self-hosted, linux, performance]
+  #   needs: test-package-ubuntu-jammy
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: 'Download K package from the Summary Page'
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: kframework.deb
+  #     - name: 'Set up Docker Test Image'
+  #       env:
+  #         BASE_OS: ubuntu
+  #         BASE_DISTRO: jammy
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+  #         BENCHER_PROJECT: k-framework
+  #         BENCHER_ADAPTER: json
+  #       run: |
+  #         set -euxo pipefail
+  #         workspace=$(pwd)
+  #         docker run --name k-profiling-tests-${GITHUB_SHA}                    \
+  #           --rm -it --detach                                                  \
+  #           -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
+  #           -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
+  #           -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
+  #           -e GITHUB_HEAD_REF=$GITHUB_HEAD_REF                                \
+  #           -e GITHUB_BASE_REF=$GITHUB_BASE_REF                                \
+  #           -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
+  #           -e GITHUB_ACTIONS=true                                             \
+  #           -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
+  #           -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
+  #           -e GITHUB_REF=$GITHUB_REF                                          \
+  #           --workdir /opt/workspace                                           \
+  #           -v "${workspace}:/opt/workspace"                                   \
+  #           ${BASE_OS}:${BASE_DISTRO}
+  #     - name: 'Install K from Package'
+  #       run: |
+  #         set -euxo pipefail
+  #         docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
+  #     - name: 'Profiling Performance Tests'
+  #       run: |
+  #         set -euxo pipefail
+  #         docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make'
+  #     - name: 'Tear down Docker'
+  #       if: always()
+  #       run: |
+  #         docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
+  #         docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
