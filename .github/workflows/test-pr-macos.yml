@@ -61,6 +61,8 @@ jobs:
            export PATH="$(brew --prefix openjdk)/bin:$PATH"
            echo $(which llvm-config)
            export LLVM_CONFIG=$(which llvm-config)
+           export LLVM_DIR="$(brew --prefix llvm@15)/lib/cmake/"
+           mvn package -T1C
          # brew install direnv
          # cp macos-envrc .envrc
          # eval "$(direnv hook bash)"
