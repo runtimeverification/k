@@ -68,15 +68,15 @@ class KoreTest {
   def getRewrite(axiom: AxiomDeclaration): Option[GeneralizedRewrite] = {
     def go(pattern: Pattern): Option[GeneralizedRewrite] = {
       pattern match {
-        case And(_, Equals(_, _, _, _), And(_, _, rw @ Rewrites(_, _, _))) => Some(rw)
-        case And(_, Top(_), And(_, _, rw @ Rewrites(_, _, _))) => Some(rw)
-        case Rewrites(s, And(_, Equals(_, _, _, _), l), And(_, _, r)) => Some(B.Rewrites(s, l, r))
-        case Rewrites(s, And(_, Top(_), l), And(_, _, r)) => Some(B.Rewrites(s, l, r))
+        case And(_, Equals(_, _, _, _) +: And(_, _ +: (rw @ Rewrites(_, _, _)) +: Seq()) +: Seq()) => Some(rw)
+        case And(_, Top(_) +: And(_, _ +: (rw @ Rewrites(_, _, _)) +: Seq()) +: Seq()) => Some(rw)
+        case Rewrites(s, And(_, Equals(_, _, _, _) +: l +: Seq()), And(_, _ +: r +: Seq())) => Some(B.Rewrites(s, l, r))
+        case Rewrites(s, And(_, Top(_) +: l +: Seq()), And(_, _ +: r +: Seq())) => Some(B.Rewrites(s, l, r))
         case Implies(_, Bottom(_), p) => go(p)
-        case Implies(_, Equals(_, _, _, _), And(_, eq @ Equals(_, _, Application(_, _), _), _)) => Some(eq)
-        case Implies(_, Top(_), And(_, eq @ Equals(_, _, Application(_, _), _), _)) => Some(eq)
-        case Implies(_, And(_, _, Equals(_, _, _, _)), And(_, eq @ Equals(_, _, Application(_, _), _), _)) => Some(eq)
-        case Implies(_, And(_, _, Top(_)), And(_, eq @ Equals(_, _, Application(_, _), _), _)) => Some(eq)
+        case Implies(_, Equals(_, _, _, _), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
+        case Implies(_, Top(_), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
+        case Implies(_, And(_, _ +: Equals(_, _, _, _) +: Seq()), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
+        case Implies(_, And(_, _ +: Top(_) +: Seq()), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
         case eq @ Equals(_, _, Application(_, _), _) => Some(eq)
         case _ => None
 
@@ -91,7 +91,7 @@ class KoreTest {
 
   def symbols(pat: Pattern): Seq[SymbolOrAlias] = {
     pat match {
-      case And(_, p1, p2) => symbols(p1) ++ symbols(p2)
+      case And(_, ps) => ps.flatMap(symbols)
       case Application(s, ps) => Seq(s).filter(isConcrete) ++ ps.flatMap(symbols)
       case Ceil(_, _, p) => symbols(p)
       case Equals(_, _, p1, p2) => symbols(p1) ++ symbols(p2)
@@ -103,7 +103,7 @@ class KoreTest {
       case Mem(_, _, p1, p2) => symbols(p1) ++ symbols(p2)
 //      case Next(_, p) => symbols(p)
       case Not(_, p) => symbols(p)
-      case Or(_, p1, p2) => symbols(p1) ++ symbols(p2)
+      case Or(_, ps) => ps.flatMap(symbols)
       case Rewrites(_, p1, p2) => symbols(p1) ++ symbols(p2)
       case _ => Seq()
     }
