@@ -52,6 +52,13 @@ jobs:
         run: brew install bash
       - name: "Install Dependencies"
         run: brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
+      - name: "Install and set up direnv"
+        run: |
+          set -euxo pipefail
+          brew install direnv
+          cp macos-envrc .envrc
+          direnv allow
+          which llvm-config
       - name: "Build K from Source"
         run: |
           set -euxo pipefail
