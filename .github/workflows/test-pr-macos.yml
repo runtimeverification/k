@@ -55,10 +55,10 @@ jobs:
       - name: "Install and set up direnv"
         run: |
            set -euxo pipefail
-           export PATH="'$(brew --prefix bison)'/bin:$PATH"
-           export PATH="'$(brew --prefix flex)'/bin:$PATH"
-           export PATH="'$(brew --prefix llvm@15)'/bin:$PATH"
-           export PATH="'$(brew --prefix openjdk)'/bin:$PATH"
+           export PATH="$(brew --prefix bison)/bin:$PATH"
+           export PATH="$(brew --prefix flex)/bin:$PATH"
+           export PATH="$(brew --prefix llvm@15)/bin:$PATH"
+           export PATH="$(brew --prefix openjdk)/bin:$PATH"
            echo $(which llvm-config)
          # brew install direnv
          # cp macos-envrc .envrc
