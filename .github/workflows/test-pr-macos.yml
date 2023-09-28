@@ -68,7 +68,7 @@ jobs:
       - name: "Build K from Source"
         run: |
           set -euxo pipefail
-          mvn package
+          LLVM_CONFIG=$(which llvm-config) mvn package -T1C
 
   test-k:
     name: "K Tests"
