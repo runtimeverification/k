@@ -5,7 +5,8 @@ import org.kframework.parser.{kore => i}
 
 object implementation {
 
-  private object ConcreteClasses {
+  // TODO: make private again
+  object ConcreteClasses {
 
     case class Definition(att: i.Attributes, modules: Seq[i.Module]) extends i.Definition
 
