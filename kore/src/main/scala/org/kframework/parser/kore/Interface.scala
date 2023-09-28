@@ -164,29 +164,21 @@ object Bottom {
 trait And extends Pattern {
   def s: Sort
 
-  def _1: Pattern
-
-  def _2: Pattern
-
   def args: Seq[Pattern]
 }
 
 object And {
-  def unapply(arg: And): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
+  def unapply(arg: And): Option[(Sort, Seq[Pattern])] = Some(arg.s, arg.args)
 }
 
 trait Or extends Pattern {
   def s: Sort
 
-  def _1: Pattern
-
-  def _2: Pattern
-
   def args: Seq[Pattern]
 }
 
 object Or {
-  def unapply(arg: Or): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
+  def unapply(arg: Or): Option[(Sort, Seq[Pattern])] = Some(arg.s, arg.args)
 }
 
 trait Not extends Pattern {

@@ -40,17 +40,9 @@ object implementation {
 
     case class Bottom(s: i.Sort) extends i.Bottom
 
-    case class And(s: i.Sort, args: Seq[i.Pattern]) extends i.And {
-      val _1 = args(0)
+    case class And(s: i.Sort, args: Seq[i.Pattern]) extends i.And
 
-      val _2 = args(1)
-    }
-
-    case class Or(s: i.Sort, args: Seq[i.Pattern]) extends i.Or {
-      val _1 = args(0)
-
-      val _2 = args(1)
-    }
+    case class Or(s: i.Sort, args: Seq[i.Pattern]) extends i.Or
 
     case class Not(s: i.Sort, _1: i.Pattern) extends i.Not
 
