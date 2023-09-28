@@ -57,7 +57,7 @@ jobs:
           set -euxo pipefail
           brew install direnv
           cp macos-envrc .envrc
-          eval "$(direnv hook zsh)"
+          eval "$(direnv hook bash)"
           direnv allow .
           echo $(which llvm-config)
       - name: "Build K from Source"
