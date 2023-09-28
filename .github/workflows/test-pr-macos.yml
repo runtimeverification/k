@@ -59,11 +59,11 @@ jobs:
            export PATH="'$(brew --prefix flex)'/bin:$PATH"
            export PATH="'$(brew --prefix llvm@15)'/bin:$PATH"
            export PATH="'$(brew --prefix openjdk)'/bin:$PATH"
+           echo $(which llvm-config)
          # brew install direnv
          # cp macos-envrc .envrc
          # eval "$(direnv hook bash)"
          # direnv allow .
-         # echo $(which llvm-config)
       - name: "Build K from Source"
         run: |
           set -euxo pipefail
