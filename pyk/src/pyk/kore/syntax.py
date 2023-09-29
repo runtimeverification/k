@@ -5,7 +5,7 @@ import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, reduce
 from io import StringIO
 from typing import TYPE_CHECKING, final
 
@@ -727,6 +727,13 @@ class And(BinaryConn):
     @classmethod
     def from_dict(cls: type[And], dct: Mapping[str, Any]) -> And:
         cls._check_tag(dct)
+        if 'patterns' in dct:
+            patterns = [Pattern.from_dict(pattern) for pattern in dct['patterns']]
+            if len(patterns) < 2:
+                raise ValueError(f'Expected at least 2 patterns, found: {len(patterns)}')
+            sort = Sort.from_dict(dct['sort'])
+            return reduce(lambda left, right: And(sort=sort, left=left, right=right), patterns)  # type: ignore
+
         return And(
             sort=Sort.from_dict(dct['sort']),
             left=Pattern.from_dict(dct['first']),
@@ -778,6 +785,13 @@ class Or(BinaryConn):
     @classmethod
     def from_dict(cls: type[Or], dct: Mapping[str, Any]) -> Or:
         cls._check_tag(dct)
+        if 'patterns' in dct:
+            patterns = [Pattern.from_dict(pattern) for pattern in dct['patterns']]
+            if len(patterns) < 2:
+                raise ValueError(f'Expected at least 2 patterns, found: {len(patterns)}')
+            sort = Sort.from_dict(dct['sort'])
+            return reduce(lambda left, right: Or(sort=sort, left=left, right=right), patterns)  # type: ignore
+
         return Or(
             sort=Sort.from_dict(dct['sort']),
             left=Pattern.from_dict(dct['first']),

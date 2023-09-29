@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import App, Kore, Pattern, kore_term
+from pyk.kore.syntax import And, App, Kore, Or, Pattern, SortVar, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -114,6 +114,35 @@ def test_multi_or(test_id: str, text: str, expected: list[Pattern]) -> None:
 
     # When
     actual = parser.multi_or()
+
+    # Then
+    assert parser.eof
+    assert actual == expected
+
+
+S = SortVar('S')
+a, b, c, d = (App(name) for name in ['a', 'b', 'c', 'd'])
+MULTIARY_TEST_DATA: Final = (
+    ('binary-and', r'\and{S}(a{}(), b{}())', And(S, a, b)),
+    ('ternary-and', r'\and{S}(a{}(), b{}(), c{}())', And(S, And(S, a, b), c)),
+    ('quaternary-and', r'\and{S}(a{}(), b{}(), c{}(), d{}())', And(S, And(S, And(S, a, b), c), d)),
+    ('binary-or', r'\or{S}(a{}(), b{}())', Or(S, a, b)),
+    ('ternary-or', r'\or{S}(a{}(), b{}(), c{}())', Or(S, Or(S, a, b), c)),
+    ('quaternary-or', r'\or{S}(a{}(), b{}(), c{}(), d{}())', Or(S, Or(S, Or(S, a, b), c), d)),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,text,expected',
+    MULTIARY_TEST_DATA,
+    ids=[test_id for test_id, *_ in MULTIARY_TEST_DATA],
+)
+def test_multiary(test_id: str, text: str, expected: list[Pattern]) -> None:
+    # Given
+    parser = KoreParser(text)
+
+    # When
+    actual = parser.pattern()
 
     # Then
     assert parser.eof
