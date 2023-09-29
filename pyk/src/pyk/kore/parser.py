@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import reduce
 from typing import TYPE_CHECKING
 
 from ..dequote import dequote_string
@@ -66,6 +67,7 @@ if TYPE_CHECKING:
     NC = TypeVar('NC', bound=NullaryConn)
     UC = TypeVar('UC', bound=Union[UnaryConn, Next])
     BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
+    MC = TypeVar('MC', bound=Union[And, Or])
     QF = TypeVar('QF', bound=MLQuant)
     FP = TypeVar('FP', bound=MLFixpoint)
     RP = TypeVar('RP', bound=RoundPred)
@@ -287,17 +289,35 @@ class KoreParser:
         self._match(TokenType.RPAREN)
         return cls(sort, left, right)  # type: ignore
 
-    def andd(self) -> And:
-        return self._binary(TokenType.ML_AND, And)
-
-    def orr(self) -> Or:
-        return self._binary(TokenType.ML_OR, Or)
-
     def implies(self) -> Implies:
         return self._binary(TokenType.ML_IMPLIES, Implies)
 
     def iff(self) -> Iff:
         return self._binary(TokenType.ML_IFF, Iff)
+
+    def _multiary(self, token_type: TokenType, cls: type[MC]) -> MC:
+        self._match(token_type)
+        self._match(TokenType.LBRACE)
+        sort = self.sort()
+        self._match(TokenType.RBRACE)
+        self._match(TokenType.LPAREN)
+        ops: list[Pattern] = []
+        ops.append(self.pattern())
+        self._match(TokenType.COMMA)
+        while True:
+            ops.append(self.pattern())
+            if self._la.type is not TokenType.COMMA:
+                break
+            self._consume()
+        self._match(TokenType.RPAREN)
+
+        return reduce(lambda left, right: cls(sort, left, right), ops)  # type: ignore
+
+    def andd(self) -> And:
+        return self._multiary(TokenType.ML_AND, And)
+
+    def orr(self) -> Or:
+        return self._multiary(TokenType.ML_OR, Or)
 
     def _quantifier(self, token_type: TokenType, cls: type[QF]) -> QF:
         self._match(token_type)
