@@ -130,11 +130,23 @@ object implementation {
 
     def And(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.And(s, Seq(_1, _2))
 
-    def And(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = d.And(s, args)
+    def And(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = {
+      args.size match {
+        case 0 => Top(s)
+        case 1 => args(0)
+        case _ => d.And(s, args)
+      }
+    }
 
     def Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Or(s, Seq(_1, _2))
 
-    def Or(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = d.Or(s, args)
+    def Or(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = {
+      args.size match {
+        case 0 => Bottom(s)
+        case 1 => args(0)
+        case _ => d.Or(s, args)
+      }
+    }
 
     def Not(s: i.Sort, _1: i.Pattern): i.Pattern = d.Not(s, _1)
 
