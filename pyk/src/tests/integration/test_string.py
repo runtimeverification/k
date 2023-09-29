@@ -184,6 +184,13 @@ def test_cli_rule_to_kast(llvm_dir: Path, text: str) -> None:
 
 @pytest.mark.parametrize('text', TEST_DATA, ids=TEST_DATA)
 def test_krun(backend: str, definition_dir: Path, text: str) -> None:
+    if backend == 'llvm':
+        try:
+            text.encode('latin-1')
+        except ValueError:
+            # https://github.com/runtimeverification/k/issues/3344
+            pytest.skip()
+
     # Given
     kore = kore_config(text, '')
     expected = kore_config(None, text)
