@@ -167,6 +167,8 @@ trait And extends Pattern {
   def _1: Pattern
 
   def _2: Pattern
+
+  def args: Seq[Pattern]
 }
 
 object And {
@@ -179,6 +181,8 @@ trait Or extends Pattern {
   def _1: Pattern
 
   def _2: Pattern
+
+  def args: Seq[Pattern]
 }
 
 object Or {
@@ -511,7 +515,11 @@ trait Builders {
 
   def And(s: Sort, _1: Pattern, _2: Pattern): Pattern
 
+  def And(s: Sort, args: Seq[Pattern]): Pattern
+
   def Or(s: Sort, _1: Pattern, _2: Pattern): Pattern
+
+  def Or(s: Sort, args: Seq[Pattern]): Pattern
 
   def Not(s: Sort, _1: Pattern): Pattern
 
