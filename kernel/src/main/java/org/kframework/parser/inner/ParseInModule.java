@@ -163,6 +163,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     /**
      * Print the list of tokens matched by the scanner, the location and the Regex Terminal
+     * The output is a valid Markdown table.
      */
     public String tokenizeString(String input, Source source) {
         StringBuilder sb = new StringBuilder();
@@ -173,22 +174,34 @@ public class ParseInModule implements Serializable, AutoCloseable {
                     .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
             List<Integer> lines = mdata.getLines();
             List<Integer> columns = mdata.getColumns();
-            int maxLocLen = 0;
+            int maxTokenLen = 7, maxLocLen = 10, maxTerminalLen = 10;
             List<String> locs = new ArrayList<>();
+            List<String> tokens = new ArrayList<>();
+            List<String> terminals = new ArrayList<>();
             List<Scanner.Token> words = mdata.getWords();
             for (Scanner.Token word : mdata.getWords()) {
-                String loc = String.format("(%d,%d,%d,%d),",
+                String loc = String.format("(%d,%d,%d,%d)",
                         lines.get(word.startLoc), columns.get(word.startLoc),
                         lines.get(word.endLoc), columns.get(word.endLoc));
                 locs.add(loc);
                 maxLocLen = Math.max(maxLocLen, loc.length());
+                String tok = StringUtil.enquoteKString(word.value);
+                tokens.add(tok);
+                maxTokenLen = Math.max(maxTokenLen, tok.length());
+                String terminal = kind2Token.getOrDefault(word.kind, Terminal.apply("<eof>")).toString();
+                terminals.add(terminal);
+                maxTerminalLen = Math.max(maxTerminalLen, terminal.length());
             }
-            sb.append(String.format("%-" + maxLocLen + "s \"Match\"      Terminal\n", "(location)"));
-            sb.append("------------------------------------\n");
+            // if the token is absurdly large limit the column to 80 chars to maintain alignment
+            maxTokenLen = Math.min(maxTokenLen, 80);
+            maxTerminalLen = Math.min(maxTerminalLen, 20);
+            sb.append(String.format("|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
+                    "\"Match\"", "(location)", "Terminal"));
+            sb.append(String.format("|-%s|--%s|-%s|\n", "-".repeat(maxTokenLen), "-".repeat(maxLocLen), "-".repeat(maxTerminalLen)));
             for (int i = 0; i < words.size(); i++) {
                 Scanner.Token word = words.get(i);
-                sb.append(String.format("%-" + maxLocLen + "s %-12s %s\n", locs.get(i), StringUtil.enquoteKString(word.value),
-                        kind2Token.getOrDefault(word.kind, Terminal.apply("<eof>"))));
+                sb.append(String.format("|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
+                        tokens.get(i), locs.get(i), terminals.get(i)));
             }
         }
         return sb.toString();
