@@ -65,6 +65,17 @@ class KoreTest {
     attributes.patterns.exists { case p: Application => p.head.ctr == name }
   }
 
+  // get the rewrite associated with a rule or equational axiom
+  //
+  // \and(\equals(requires, \dv("true")), \and(_, \rewrites(lhs, rhs)))
+  // \and(\top(), \and(_, \rewrites(lhs, rhs)))
+  // \rewrites(\and(\equals(requires, \dv("true")), lhs), \and(_, rhs))
+  // \rewrites(\and(\top(), lhs), \and(_, rhs))
+  // \implies(\equals(requires, \dv("true")), \and(\equals(lhs, rhs), _))
+  // \implies(\top, \and(\equals(lhs, rhs), _))
+  // \implies(\and(_, \equals(requires, \dv("true"))), \and(\equals(lhs, rhs), _))
+  // \implies(\and(_, \top), \and(\equals(lhs, rhs), _))
+  // \equals(lhs, rhs)
   def getRewrite(axiom: AxiomDeclaration): Option[GeneralizedRewrite] = {
     def go(pattern: Pattern): Option[GeneralizedRewrite] = {
       pattern match {
