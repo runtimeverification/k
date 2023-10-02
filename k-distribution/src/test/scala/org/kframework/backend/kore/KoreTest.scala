@@ -83,7 +83,6 @@ class KoreTest {
         case And(_, Top(_) +: And(_, _ +: (rw @ Rewrites(_, _, _)) +: Seq()) +: Seq()) => Some(rw)
         case Rewrites(s, And(_, Equals(_, _, _, _) +: l +: Seq()), And(_, _ +: r +: Seq())) => Some(B.Rewrites(s, l, r))
         case Rewrites(s, And(_, Top(_) +: l +: Seq()), And(_, _ +: r +: Seq())) => Some(B.Rewrites(s, l, r))
-        case Implies(_, Bottom(_), p) => go(p)
         case Implies(_, Equals(_, _, _, _), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
         case Implies(_, Top(_), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
         case Implies(_, And(_, _ +: Equals(_, _, _, _) +: Seq()), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) => Some(eq)
