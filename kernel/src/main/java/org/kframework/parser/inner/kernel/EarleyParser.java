@@ -588,11 +588,11 @@ public class EarleyParser {
     }
 
     public List<Integer> getLines() {
-      return Ints.asList(lines);
+      return Collections.unmodifiableList(Ints.asList(lines));
     }
 
     public List<Integer> getColumns() {
-      return Ints.asList(columns);
+      return Collections.unmodifiableList(Ints.asList(columns));
     }
   }
 
