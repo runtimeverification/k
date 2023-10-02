@@ -139,6 +139,122 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  set-release-id:
+    name: 'Set Release ID'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 'Get release_id'
+        run: echo "release_id=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> ${GITHUB_OUTPUT}
+        id: release
+    outputs:
+      release_id: ${{ steps.release.outputs.release_id }}
+
+  source-tarball:
+    name: 'Create source tarball'
+    runs-on: ubuntu-latest
+    #environment: production
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: 'Create source tarball'
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          tarball=kframework-${version}-src.tar.gz
+          find . -name .git | xargs rm -r
+          CURDIR=$(pwd)
+          cd ..
+          tar czvf ${tarball} $(basename ${CURDIR})
+          mv ${tarball} ${CURDIR}/
+          cd ${CURDIR}
+          gh release upload --repo runtimeverification/k --clobber v${version} ${tarball}
+
+  macos-build:
+    name: 'Build MacOS Package'
+    runs-on: macos-13
+    timeout-minutes: 120
+    environment: production
+    needs: [set-release-id, source-tarball]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: kframework
+
+      - name: Check out matching homebrew repo branch
+        uses: actions/checkout@v3
+        id: checkout
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+          ref: staging
+        continue-on-error: true
+
+      - name: Check out homebrew repo master branch
+        uses: actions/checkout@v3
+        if: ${{ steps.checkout.outcome == 'failure' }}
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+
+      - name: Cache maven
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build brew bottle
+        id: build
+        env:
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+          MAVEN_OPTS: >-
+              -Dhttp.keepAlive=false
+              -Dmaven.wagon.http.pool=false
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        run: |
+          PACKAGE=kframework
+          VERSION=$(cat kframework/package/version)
+          ROOT_URL='https://github.com/runtimeverification/k/releases/download'
+          wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
+          cd homebrew-k
+          ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
+          git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
+          ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
+          git reset HEAD^
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
+          BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
+          ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
+          echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
+
+      - name: Upload bottle
+        uses: actions/upload-artifact@v2
+        with:
+          name: homebrew
+          path: homebrew-k
+
+      - name: Delete Release
+        if: failure()
+        uses: actions/github-script@v6.0.0
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo
+            await github.rest.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
+
+    outputs:
+      bottle_path: ${{ steps.build.outputs.path }}
+      bottle_path_remote: ${{ steps.build.outputs.path_remote }}
+      version: ${{ steps.build.outputs.version }}
+
   performance-tests:
     name: 'Performace Tests'
     runs-on: [self-hosted, linux, performance]
