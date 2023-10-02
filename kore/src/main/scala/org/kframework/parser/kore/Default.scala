@@ -5,7 +5,8 @@ import org.kframework.parser.{kore => i}
 
 object implementation {
 
-  private object ConcreteClasses {
+  // TODO: make private again
+  object ConcreteClasses {
 
     case class Definition(att: i.Attributes, modules: Seq[i.Module]) extends i.Definition
 
@@ -39,9 +40,17 @@ object implementation {
 
     case class Bottom(s: i.Sort) extends i.Bottom
 
-    case class And(s: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.And
+    case class And(s: i.Sort, args: Seq[i.Pattern]) extends i.And {
+      val _1 = args(0)
 
-    case class Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.Or
+      val _2 = args(1)
+    }
+
+    case class Or(s: i.Sort, args: Seq[i.Pattern]) extends i.Or {
+      val _1 = args(0)
+
+      val _2 = args(1)
+    }
 
     case class Not(s: i.Sort, _1: i.Pattern) extends i.Not
 
@@ -127,9 +136,13 @@ object implementation {
 
     def Bottom(s: i.Sort): i.Pattern = d.Bottom(s)
 
-    def And(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.And(s, _1, _2)
+    def And(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.And(s, Seq(_1, _2))
 
-    def Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Or(s, _1, _2)
+    def And(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = d.And(s, args)
+
+    def Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Or(s, Seq(_1, _2))
+
+    def Or(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = d.Or(s, args)
 
     def Not(s: i.Sort, _1: i.Pattern): i.Pattern = d.Not(s, _1)
 
