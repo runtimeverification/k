@@ -26,7 +26,7 @@ jobs:
   source-tarball:
     name: 'Create source tarball'
     runs-on: ubuntu-latest
-    environment: production
+    #environment: production
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -50,7 +50,7 @@ jobs:
   nix-release:
     name: 'Nix Release'
     runs-on: ubuntu-20.04
-    environment: production
+    #environment: production
     steps:
       - name: Check out code
         uses: actions/checkout@v3
