@@ -152,7 +152,6 @@ jobs:
   source-tarball:
     name: 'Create source tarball'
     runs-on: ubuntu-latest
-    #environment: production
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -177,7 +176,6 @@ jobs:
     name: 'Build MacOS Package'
     runs-on: macos-13
     timeout-minutes: 120
-    environment: production
     needs: [set-release-id, source-tarball]
     steps:
       - name: Check out code
