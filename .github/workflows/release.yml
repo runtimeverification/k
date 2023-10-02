@@ -1,9 +1,13 @@
 name: 'Release'
 run-name: K Framework Release ${{ github.ref_name }}
 on:
-  release:
-    types:
-      - prereleased
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches:
+      - 'change-build-macos-runner'
+#   release:
+#     types:
+#       - prereleased
 concurrency:
   group: ${{ github.workflow }}
 
@@ -220,7 +224,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-11
+    runs-on: macos-13
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
