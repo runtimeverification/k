@@ -41,9 +41,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   else
     DBG_EXE="lldb"
   fi
-  DBG_CMD=" -- "
+  DBG_CMD=" --"
+  DBG_FLAG=" -s "
 else
   DBG_EXE="gdb"
+  DBG_FLAG=" -x "
   DBG_CMD=" --args "
 fi
 
@@ -400,13 +402,19 @@ do
       ;;
 
       --debugger-command)
-      if [[ "$DBG_EXE" == "gdb" ]]; then
-        cmdprefix="$DBG_EXE -x $2 $DBG_CMD"
-      else
-        cmdprefix="$DBG_EXE -s $2 $DBG_CMD"
-      fi
+        debugCommandFile="$2"
+        cmdprefix="$DBG_EXE $DBG_FLAG $debugCommandFile $DBG_CMD"
       shift
       ;;
+
+      --debugger-batch)
+      if [[ $cmdprefix == *gdb* || $cmdprefix == *lldb* ]]; then
+        cmdprefix="$DBG_EXE --batch $DBG_FLAG $debugCommandFile $DBG_CMD"
+      else
+        DBG_CMD=" --batch $DBG_CMD"
+      fi
+      ;;
+
 
       --statistics)
       statistics=true
