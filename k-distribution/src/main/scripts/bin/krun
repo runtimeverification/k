@@ -37,12 +37,14 @@ filterSubst=
 if [[ "$OSTYPE" == "darwin"* ]]; then
   LLDB_FILE="$(dirname "$0")/../lib/kllvm/lldb/k_lldb_path"
   if [ -f "$LLDB_FILE" ]; then
-    DBG_CMD="$(cat "$LLDB_FILE") -- "
+    DBG_EXE="$(cat "$LLDB_FILE")"
   else
-    DBG_CMD="lldb --"
+    DBG_EXE="lldb"
   fi
+  DBG_CMD=" -- "
 else
-  DBG_CMD="gdb --args "
+  DBG_EXE="gdb"
+  DBG_CMD=" --args "
 fi
 
 
@@ -112,6 +114,8 @@ $KRUN options:
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
+      --debugger-command FILE  Execute GDB commands from FILE to debug program.
+                               Currently only supported on LLVM backend.
   -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR.
       --dry-run            Do not execute backend, but instead print the
@@ -392,7 +396,16 @@ do
       ;;
 
       --debugger)
-      cmdprefix="$DBG_CMD"
+      cmdprefix="$DBG_EXE $DBG_CMD"
+      ;;
+
+      --debugger-command)
+      if [[ "$DBG_EXE" == "gdb" ]]; then
+        cmdprefix="$DBG_EXE -x $2 $DBG_CMD"
+      else
+        cmdprefix="$DBG_EXE -s $2 $DBG_CMD"
+      fi
+      shift
       ;;
 
       --statistics)
