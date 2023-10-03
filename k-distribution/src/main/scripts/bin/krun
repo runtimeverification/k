@@ -116,6 +116,8 @@ $KRUN options:
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
+      --debugger-batch     Launch the backend in a debugging console in batch
+                           mode. Currently only supported on LLVM backend.
       --debugger-command FILE  Execute GDB commands from FILE to debug program.
                                Currently only supported on LLVM backend.
   -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
