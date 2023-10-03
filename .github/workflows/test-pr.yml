@@ -217,7 +217,6 @@ jobs:
               -Dmaven.wagon.http.pool=false
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
         run: |
-          set -euxo pipefail
           PACKAGE=kframework
           VERSION=$(cat kframework/package/version)
           ROOT_URL='https://github.com/runtimeverification/k/releases/download'
@@ -227,10 +226,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          TEMP_BOTTLE_NAME=$(find . -name "kframework-${VERSION}.ventura.bottle*.tar.gz")
-          TEMP2_BOTTLE_NAME=$(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz")
-          ls
-          LOCAL_BOTTLE_NAME=$(basename ${TEMP_BOTTLE_NAME})
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
