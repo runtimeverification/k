@@ -42,7 +42,7 @@ runs:
     run: |
       set -euxo pipefail
 
-      Z3_VERSION=4.8.15
+      Z3_VERSION=4.12.1
       K_VERSION=$(cat ${SUBDIR}package/version)
       USER=$(id -un)
       USER_ID=$(id -u)
