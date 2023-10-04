@@ -10,12 +10,7 @@ public class SMTOptions implements Serializable {
 
     public SMTOptions() {}
 
-    //TODO(dwightguth): remove in Guice 4.0
-    @Inject
-    public SMTOptions(Void v) {}
-
-    @Parameter(names="--smt", descriptionKey = "executable", converter=SMTSolverConverter.class,
-            description="SMT solver to use for checking constraints. <executable> is one of [z3|none].", hidden = true)
+    @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <executable> is one of [z3|none].", descriptionKey = "executable", hidden = true)
     public SMTSolver smt = SMTSolver.Z3;
 
     public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> {

@@ -14,6 +14,7 @@ import java.util.Map;
 public class BackendModule extends AbstractModule {
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         MapBinder<String, Backend> backendBinder = MapBinder.newMapBinder(
                 binder(), String.class, org.kframework.compile.Backend.class);
         backendBinder.addBinding("kore").to(KoreBackend.class);

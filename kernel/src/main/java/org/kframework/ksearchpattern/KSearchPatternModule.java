@@ -22,6 +22,7 @@ import org.kframework.utils.options.DefinitionLoadingOptions;
 public class KSearchPatternModule extends AbstractModule {
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(FrontEnd.class).to(KSearchPatternFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KSEARCHPATTERN);
 

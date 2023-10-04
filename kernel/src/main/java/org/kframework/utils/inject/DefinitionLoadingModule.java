@@ -27,6 +27,7 @@ public class DefinitionLoadingModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
     }
 
     @Provides @DefinitionScoped

@@ -21,6 +21,7 @@ public class KastModule extends AbstractModule {
 
     @Override
     public void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(FrontEnd.class).to(KastFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KAST);
 
