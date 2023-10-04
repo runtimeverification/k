@@ -207,6 +207,12 @@ public class CompiledDefinition implements Serializable {
         }
     }
 
+    public String showTokens(Module module, FileUtil files, String s, Source source) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true, files)) {
+            return parseInModule.tokenizeString(s, source);
+        }
+    }
+
     public Module getExtensionModule(Module module, FileUtil files) {
         return RuleGrammarGenerator.getCombinedGrammar(module, true, files).getExtensionModule();
     }
