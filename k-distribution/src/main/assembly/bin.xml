@@ -69,7 +69,7 @@
     </fileSet>
     <fileSet>
       <directory>${project.parent.basedir}/package</directory>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/lib/kframework</outputDirectory>
       <includes>
         <include>version</include>
       </includes>
