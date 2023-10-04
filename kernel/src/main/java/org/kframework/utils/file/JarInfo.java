@@ -85,7 +85,7 @@ public class JarInfo {
             // the release version if we're not (e.g. from a release tarball).
             String version = mf.getMainAttributes().getValue("Implementation-Git-Describe");
             if (version.isEmpty()) {
-                version = "v" + FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
+                version = "v" + FileUtils.readFileToString(new File(kBase + "/lib/kframework/version")).trim();
             }
 
             System.out.println("K version:    " + version);

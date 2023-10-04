@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+source "$(dirname "$0")/setenv"
+ulimit -s "$(ulimit -H -s)"
+
+eval "$JAVA" org.kframework.backend.llvm.matching.Matching '"$@"'
+

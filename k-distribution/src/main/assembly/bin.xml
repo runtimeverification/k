@@ -69,7 +69,7 @@
     </fileSet>
     <fileSet>
       <directory>${project.parent.basedir}/package</directory>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/lib/kframework</outputDirectory>
       <includes>
         <include>version</include>
       </includes>
@@ -95,6 +95,18 @@
     <fileSet>
       <directory>${project.basedir}/../llvm-backend/target/build/install/bindings</directory>
       <outputDirectory>/bindings</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../llvm-backend/src/main/scripts/bin</directory>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../llvm-backend/src/main/scripts/lib</directory>
+      <outputDirectory>/lib/kframework</outputDirectory>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../haskell-backend/src/main/native/haskell-backend/src/main/kore</directory>
