@@ -23,17 +23,27 @@ sort_int = kllvm.ast.CompositeSort("SortInt")
 assert str(sort_int) == "SortInt{}"
 HERE
 
-# Make sure that the version of the various components is correct comparing to
-# the KServer version that uses JVM.
-VERSION_REGEX='v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+-g[0-9a-z]+(-dirty)?'
-KOMPILE_VERSION=$(kompile --version | grep -oP "${VERSION_REGEX}")
-KSERVER_VERSION=$(kserver --version | grep -oP "${VERSION_REGEX}")
+# Make sure that the help messages work and that the version of the various components is correct
+PACKAGE_VERSION=$(cat /usr/lib/kframework/version)
 
-if [ "$KOMPILE_VERSION" != "$KSERVER_VERSION" ]; then
-    echo "KOMPILE_VERSION: $KOMPILE_VERSION"
-    echo "KSERVER_VERSION: $KSERVER_VERSION"
-    exit 1
-fi
+kast          --help    | grep -q -- "--version"
+kdep          --help    | grep -q -- "--version"
+kompile       --help    | grep -q -- "--version"
+kprove        --help    | grep -q -- "--version"
+krun          --help    | grep -q -- "--version"
+kserver       --help    | grep -q -- "--version"
+kparse        --help    | grep -q -- "--version"
+kparse-gen    --help    | grep -q -- "--version"
+kore-print    --help    | grep -q -- "--version"
+kast          --version | grep -q ${PACKAGE_VERSION}
+kdep          --version | grep -q ${PACKAGE_VERSION}
+kompile       --version | grep -q ${PACKAGE_VERSION}
+kprove        --version | grep -q ${PACKAGE_VERSION}
+krun          --version | grep -q ${PACKAGE_VERSION}
+kserver       --version | grep -q ${PACKAGE_VERSION}
+kparse        --version | grep -q ${PACKAGE_VERSION}
+kparse-gen    --version | grep -q ${PACKAGE_VERSION}
+kore-print    --version | grep -q ${PACKAGE_VERSION}
 
 # Make sure that the Haskell Backend Booster has been installed properly.
 kore-rpc-booster --help
