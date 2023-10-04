@@ -51,6 +51,10 @@ public class KRead {
         this.globalOptions = globalOptions;
     }
 
+    public String showTokens(Module mod, CompiledDefinition def, String stringToParse, Source source) {
+        return def.showTokens(mod, files, stringToParse, source);
+    }
+
     public K prettyRead(Module mod, Sort sort, String startSymbolLocation, CompiledDefinition def, Source source, String stringToParse) {
         return prettyRead(mod, sort, startSymbolLocation, def, source, stringToParse, this.input);
     }

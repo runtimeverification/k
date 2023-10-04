@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.kernel;
 
+import com.google.common.primitives.Ints;
 import org.apache.commons.codec.binary.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.kframework.attributes.Att;
@@ -23,18 +24,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -525,7 +515,7 @@ public class EarleyParser {
    * Metadata about the state of the sentence being parsed. We collect this all in a single place in order to simplify
    * the type signatures of many methods.
    */
-  private static class ParserMetadata {
+  public static class ParserMetadata {
     /**
      * @param input The sentence being parsed
      * @param scanner The scanner to use to tokenize the sentence
@@ -583,15 +573,27 @@ public class EarleyParser {
     }
 
     // the list of tokens in the sentence
-    Scanner.Token[] words;
+    final Scanner.Token[] words;
     // an array containing the line of each character in the input sentence
-    int[] lines;
+    final int[] lines;
     // an array containing the column of each character in the input sentence
-    int[] columns;
+    final int[] columns;
     // a Source containing the file the sentence was parsed from
     Source source;
     // the original un-tokenized input sentence
     String input;
+
+    public List<Scanner.Token> getWords() {
+      return List.of(words);
+    }
+
+    public List<Integer> getLines() {
+      return Collections.unmodifiableList(Ints.asList(lines));
+    }
+
+    public List<Integer> getColumns() {
+      return Collections.unmodifiableList(Ints.asList(columns));
+    }
   }
 
   /**
