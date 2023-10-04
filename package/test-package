@@ -25,8 +25,9 @@ HERE
 
 # Make sure that the version of the various components is correct comparing to
 # the KServer version that uses JVM.
-KOMPILE_VERSION=$(kompile --version | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+-g[0-9a-z]+(-dirty)?')
-KSERVER_VERSION=$(kserver --version | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+-g[0-9a-z]+(-dirty)?')
+VERSION_REGEX='v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+-g[0-9a-z]+(-dirty)?'
+KOMPILE_VERSION=$(kompile --version | grep -oP "${VERSION_REGEX}")
+KSERVER_VERSION=$(kserver --version | grep -oP "${VERSION_REGEX}")
 
 if [ "$KOMPILE_VERSION" != "$KSERVER_VERSION" ]; then
     echo "KOMPILE_VERSION: $KOMPILE_VERSION"
