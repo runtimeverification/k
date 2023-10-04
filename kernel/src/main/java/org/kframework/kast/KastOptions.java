@@ -31,6 +31,9 @@ import java.util.List;
 @RequestScoped
 public final class KastOptions {
 
+    @Inject
+    public KastOptions() {}
+
     @Parameter(description="<file>")
     private List<String> parameters;
 
@@ -155,4 +158,7 @@ public final class KastOptions {
             return InputModes.class;
         }
     }
+
+    @Parameter(names="--debug-tokens", description="Print a Markdown table of tokens matched by the scanner. Useful for debugging parsing errors.")
+    public boolean debugTokens = false;
 }

@@ -23,14 +23,6 @@ public class PrintOptions {
         this.output = output;
     }
 
-    //TODO(dwightguth): remove in Guice 4.0
-    /**
-     * Prevents instantiation by Guice when not explicitly configured in a Module.
-     */
-    @Inject
-    public PrintOptions(Void v) {
-    }
-
     @Parameter(names = "--color", description = "Use colors in output. Default is on.", descriptionKey = "mode",
             converter=ColorModeConverter.class)
     private ColorSetting color;

@@ -20,6 +20,7 @@ import org.kframework.utils.options.SMTOptions;
 public class KProveModule extends AbstractModule {
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(FrontEnd.class).to(KProveFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KPROVE);
 
