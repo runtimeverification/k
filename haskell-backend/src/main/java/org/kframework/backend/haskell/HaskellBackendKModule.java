@@ -26,6 +26,7 @@ public class HaskellBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
+                binder().requireAtInjectOnConstructors();
                 bindOptions(HaskellBackendKModule.this::kompileOptions, binder());
                 installHaskellBackend(binder());
             }
@@ -54,6 +55,7 @@ public class HaskellBackendKModule extends AbstractKModule {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
+                binder().requireAtInjectOnConstructors();
                 installHaskellRewriter(binder());
             }
         });
@@ -74,6 +76,7 @@ public class HaskellBackendKModule extends AbstractKModule {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
+                binder().requireAtInjectOnConstructors();
                 installHaskellBackend(binder());
                 installHaskellRewriter(binder());
             }

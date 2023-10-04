@@ -22,6 +22,7 @@ public class CommonModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         SimpleScope requestScope = new SimpleScope();
         bindScope(RequestScoped.class, requestScope);
         DefinitionScope definitionScope = new DefinitionScope();

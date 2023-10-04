@@ -19,6 +19,9 @@ import static org.kframework.Collections.*;
 @RequestScoped
 public class Context implements Serializable {
 
+    @Inject
+    public Context() {}
+
     /**
      * Represents a map from all Klabels or attributes in string representation
      * to sets of corresponding productions.
