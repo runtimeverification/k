@@ -31,6 +31,7 @@ public class JCommanderModule extends AbstractModule  {
 
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(String[].class).annotatedWith(Options.class)
             .toProvider(SimpleScope.seededKeyProvider()).in(RequestScoped.class);;
     }

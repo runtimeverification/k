@@ -282,52 +282,52 @@
       "sha1": "1b77ba79f9b2b7dfd4e15ea7bb0d568d5eb9cb8d"
     },
     {
-      "path": "com/google/inject/extensions/extensions-parent/4.0-beta5/extensions-parent-4.0-beta5.pom",
-      "sha1": "516d8e5e771cd573364dc6ff53c2c6c13908a713"
+      "path": "com/google/inject/extensions/extensions-parent/4.0/extensions-parent-4.0.pom",
+      "sha1": "db8e45ab989a2347421ff0d32be5446528d6f63f"
     },
     {
-      "path": "com/google/inject/extensions/guice-assistedinject/4.0-beta5/guice-assistedinject-4.0-beta5.jar",
-      "sha1": "820f10e0650cd9ed2591f398937df50f330b147d"
+      "path": "com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.jar",
+      "sha1": "8fa6431da1a2187817e3e52e967535899e2e46ca"
     },
     {
-      "path": "com/google/inject/extensions/guice-assistedinject/4.0-beta5/guice-assistedinject-4.0-beta5.pom",
-      "sha1": "4b9b352e0537b0ca49cb97533387864b185df09b"
+      "path": "com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.pom",
+      "sha1": "00c7fc29684b20dd475f517d5dafc850c613efde"
     },
     {
-      "path": "com/google/inject/extensions/guice-grapher/4.0-beta5/guice-grapher-4.0-beta5.jar",
-      "sha1": "dd9a00d72fecfa05a77bf28c7922eacddda23b18"
+      "path": "com/google/inject/extensions/guice-grapher/4.0/guice-grapher-4.0.jar",
+      "sha1": "4e611ae9b12bfc4ddd430a58c65ba1c4328eeaf9"
     },
     {
-      "path": "com/google/inject/extensions/guice-grapher/4.0-beta5/guice-grapher-4.0-beta5.pom",
-      "sha1": "1cd692901e55d382cdb9e647d74617bb68d63126"
+      "path": "com/google/inject/extensions/guice-grapher/4.0/guice-grapher-4.0.pom",
+      "sha1": "86b9c4937ebba7d14054d0f025f0df51d071218d"
     },
     {
-      "path": "com/google/inject/extensions/guice-multibindings/4.0-beta5/guice-multibindings-4.0-beta5.jar",
-      "sha1": "f432356db0a167127ffe4a7921238d7205b12682"
+      "path": "com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.jar",
+      "sha1": "f4509545b4470bbcc865aa500ad6fef2e97d28bf"
     },
     {
-      "path": "com/google/inject/extensions/guice-multibindings/4.0-beta5/guice-multibindings-4.0-beta5.pom",
-      "sha1": "3cff7b7b5f418f5edca0fa1b0d4bcd3f3215d9c7"
+      "path": "com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.pom",
+      "sha1": "2387a1e5163308cd826b348db825973df0800ad3"
     },
     {
-      "path": "com/google/inject/extensions/guice-throwingproviders/4.0-beta5/guice-throwingproviders-4.0-beta5.jar",
-      "sha1": "8840bd8267a5b09ee84a314a54dbdc6c1b0a7efb"
+      "path": "com/google/inject/extensions/guice-throwingproviders/4.0/guice-throwingproviders-4.0.jar",
+      "sha1": "90876169e80b4db9b61d654367c4c55079ae4e91"
     },
     {
-      "path": "com/google/inject/extensions/guice-throwingproviders/4.0-beta5/guice-throwingproviders-4.0-beta5.pom",
-      "sha1": "cb52affb5a89e66a5f1d9ab3a7fde7dda1cc5baa"
+      "path": "com/google/inject/extensions/guice-throwingproviders/4.0/guice-throwingproviders-4.0.pom",
+      "sha1": "5118433baea2efed034af00a96e324b5717e8059"
     },
     {
-      "path": "com/google/inject/guice-parent/4.0-beta5/guice-parent-4.0-beta5.pom",
-      "sha1": "13d7df2b77236548d1e7cb9ba688686ddd4f19a5"
+      "path": "com/google/inject/guice-parent/4.0/guice-parent-4.0.pom",
+      "sha1": "a59ca1d3d70552158088d7f71e6c7e8779b9a8a1"
     },
     {
-      "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5-no_aop.jar",
-      "sha1": "7706f581d709b1afd89b4e0dbf1bebf250abbd9b"
+      "path": "com/google/inject/guice/4.0/guice-4.0-no_aop.jar",
+      "sha1": "199b7acaa05b570bbccf31be998f013963e5e752"
     },
     {
-      "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5.pom",
-      "sha1": "1e968b8c1da8cb48b7c0b77ffc565f92f313c392"
+      "path": "com/google/inject/guice/4.0/guice-4.0.pom",
+      "sha1": "688cb7b0d86456e3706573fe583173ee5e728f4e"
     },
     {
       "path": "com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar",

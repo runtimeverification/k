@@ -25,6 +25,7 @@ public class KompileModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(FrontEnd.class).to(KompileFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KOMPILE);
 

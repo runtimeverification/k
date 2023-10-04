@@ -2,12 +2,15 @@
 package org.kframework.backend.haskell;
 
 import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 
 @RequestScoped
 public class HaskellKRunOptions {
+    @Inject
+    public HaskellKRunOptions() {}
 
     @Parameter(names="--haskell-backend-command", descriptionKey = "command",
             description="Command to run the Haskell backend execution engine.", hidden = true)

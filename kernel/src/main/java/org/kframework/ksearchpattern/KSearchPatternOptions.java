@@ -3,6 +3,7 @@ package org.kframework.ksearchpattern;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -15,6 +16,9 @@ import java.util.List;
 
 @RequestScoped
 public class KSearchPatternOptions {
+
+    @Inject
+    public KSearchPatternOptions() {}
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
