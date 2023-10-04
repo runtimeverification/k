@@ -23,5 +23,16 @@ sort_int = kllvm.ast.CompositeSort("SortInt")
 assert str(sort_int) == "SortInt{}"
 HERE
 
+# Make sure that the version of the various components is correct comparing to
+# the KServer version that uses JVM.
+KOMPILE_VERSION=$(kompile --version | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+-g[0-9a-z]+(-dirty)?')
+KSERVER_VERSION=$(kserver --version | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+-[0-9]+-g[0-9a-z]+(-dirty)?')
+
+if [ "$KOMPILE_VERSION" != "$KSERVER_VERSION" ]; then
+    echo "KOMPILE_VERSION: $KOMPILE_VERSION"
+    echo "KSERVER_VERSION: $KSERVER_VERSION"
+    exit 1
+fi
+
 # Make sure that the Haskell Backend Booster has been installed properly.
 kore-rpc-booster --help
