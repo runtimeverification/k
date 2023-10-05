@@ -42,20 +42,13 @@ runs:
     run: |
       set -euxo pipefail
 
-      Z3_VERSION=4.8.15
+      Z3_VERSION=$(cat deps/z3)
       K_VERSION=$(cat ${SUBDIR}package/version)
       USER=$(id -un)
       USER_ID=$(id -u)
       GROUP=$(id -gn)
       GROUP_ID=$(id -g)
 
-      docker build ${SUBDIR}                                          \
-          --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
-          --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
-          --build-arg BASE_OS=${BASE_OS}                              \
-          --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
-          --tag z3:${BASE_DISTRO}-${Z3_VERSION}                       \
-          --file ${SUBDIR}${DOCKERFILE}.z3
       docker build ${SUBDIR}                                          \
           --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
           --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
