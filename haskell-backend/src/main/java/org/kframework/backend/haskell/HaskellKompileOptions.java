@@ -2,11 +2,14 @@
 package org.kframework.backend.haskell;
 
 import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import org.kframework.utils.inject.RequestScoped;
 
 @RequestScoped
 public class HaskellKompileOptions {
 
+    @Inject
+    public HaskellKompileOptions() {}
     @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.", descriptionKey = "command", hidden = true)
     public String haskellBackendCommand = "kore-exec";
 

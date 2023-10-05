@@ -71,6 +71,7 @@ public abstract class BaseTestCase {
 
         @Override
         protected void configure() {
+            binder().requireAtInjectOnConstructors();
             bind(KompileOptions.class).toInstance(context.kompileOptions);
             bind(Definition.class).toInstance(definition);
             bind(File.class).annotatedWith(KompiledDir.class).toInstance(kompiledDir);
@@ -88,6 +89,7 @@ public abstract class BaseTestCase {
 
         @Override
         protected void configure() {
+            binder().requireAtInjectOnConstructors();
             bind(RunProcess.class).toInstance(rp);
             bind(KastOptions.class).toInstance(new KastOptions());
         }

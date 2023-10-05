@@ -17,6 +17,7 @@ import java.util.function.Function;
 public class RewriterModule extends AbstractModule {
     @Override
     protected void configure() {
+        binder().requireAtInjectOnConstructors();
         bind(FileUtil.class);
     }
 

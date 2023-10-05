@@ -22,7 +22,7 @@ import org.kframework.utils.options.OutputDirectoryOptions;
 public class KDepModule extends AbstractModule {
     @Override
     protected void configure() {
-
+        binder().requireAtInjectOnConstructors();
         bind(FrontEnd.class).to(KDepFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KDEP);
 

@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kserver;
 
+import com.google.inject.Inject;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 
@@ -9,6 +10,9 @@ import com.beust.jcommander.ParametersDelegate;
 
 @RequestScoped
 public class KServerOptions {
+
+    @Inject
+    public KServerOptions() {}
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
