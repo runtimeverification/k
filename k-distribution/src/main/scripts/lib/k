@@ -22,7 +22,7 @@ for flag in "$@"; do
         fi
 
         if [[ -z "${version}" ]]; then
-            version="v"$(cat "${K_BASE}"/version)
+            version="v"$(cat "${K_BASE}"/kframework/version)
         fi
 
         echo "K version:    ${version}"
