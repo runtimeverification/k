@@ -2,6 +2,7 @@
 package org.kframework.main;
 
 import com.beust.jcommander.ParameterException;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.utils.ExitOnTimeoutThread;
 import org.kframework.utils.InterrupterRunnable;
@@ -22,6 +23,7 @@ public abstract class FrontEnd {
     private final JarInfo jarInfo;
     private final Provider<FileUtil> files;
 
+    @Inject
     public FrontEnd(
             KExceptionManager kem,
             GlobalOptions globalOptions,

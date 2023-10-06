@@ -23,5 +23,27 @@ sort_int = kllvm.ast.CompositeSort("SortInt")
 assert str(sort_int) == "SortInt{}"
 HERE
 
+# Make sure that the help messages work and that the version of the various components is correct
+PACKAGE_VERSION=$(cat /usr/lib/kframework/version)
+
+kast          --help    | grep -q -- "--version"
+kdep          --help    | grep -q -- "--version"
+kompile       --help    | grep -q -- "--version"
+kprove        --help    | grep -q -- "--version"
+krun          --help    | grep -q -- "--version"
+kserver       --help    | grep -q -- "--version"
+kparse        --help    | grep -q -- "--version"
+kparse-gen    --help    | grep -q -- "--version"
+kore-print    --help    | grep -q -- "--version"
+kast          --version | grep -q ${PACKAGE_VERSION}
+kdep          --version | grep -q ${PACKAGE_VERSION}
+kompile       --version | grep -q ${PACKAGE_VERSION}
+kprove        --version | grep -q ${PACKAGE_VERSION}
+krun          --version | grep -q ${PACKAGE_VERSION}
+kserver       --version | grep -q ${PACKAGE_VERSION}
+kparse        --version | grep -q ${PACKAGE_VERSION}
+kparse-gen    --version | grep -q ${PACKAGE_VERSION}
+kore-print    --version | grep -q ${PACKAGE_VERSION}
+
 # Make sure that the Haskell Backend Booster has been installed properly.
 kore-rpc-booster --help
