@@ -63,7 +63,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
       - name: Upload release.nix
-        uses: ttuegel/upload-release.nix@v1.0
+        uses: runtimeverification/upload-release.nix@v1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
