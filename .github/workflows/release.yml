@@ -302,7 +302,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-11
+    runs-on: macos-13
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
