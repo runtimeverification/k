@@ -47,6 +47,7 @@ RUN    apt-get update              \
         libncurses5-dev            \
         libnss3-dev                \
         libreadline-dev            \
+        libsecp256k1-dev           \
         libsqlite3-dev             \
         libssl-dev                 \
         libyaml-dev                \
