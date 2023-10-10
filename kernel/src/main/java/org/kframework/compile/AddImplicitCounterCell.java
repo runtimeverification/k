@@ -2,6 +2,7 @@
 
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Sentence;
@@ -28,6 +29,14 @@ public class AddImplicitCounterCell {
         return s;
     }
 
+    // We only add the implicit cell if the claim has any cells in it already,
+    // otherwise it is an equational claim.
+    private boolean hasAnyCell(List<K> items) {
+        return items.stream()
+                .filter(cell -> cell instanceof KApply)
+                .anyMatch(cell -> ((KApply) cell).att().contains(Att.CELL()));
+    }
+
     // We shouldn't add the implicit cell to the claim if the user has already written
     // it explicitly.
     private boolean alreadyHasGeneratedCounter(List<K> items) {
@@ -39,6 +48,9 @@ public class AddImplicitCounterCell {
     private K apply(K term, Module m) {
         List<K> items = IncompleteCellUtils.flattenCells(term);
         if(alreadyHasGeneratedCounter(items)) {
+            return term;
+        }
+        if(!hasAnyCell(items)) {
             return term;
         }
 

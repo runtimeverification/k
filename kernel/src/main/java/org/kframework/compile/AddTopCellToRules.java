@@ -4,6 +4,7 @@ package org.kframework.compile;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.backend.kore.ConstructorChecks;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -107,6 +108,7 @@ public class AddTopCellToRules {
     }
 
     public RuleOrClaim addImplicitCells(RuleOrClaim rule, Module m) {
+        if (rule instanceof Claim) return rule;
         return rule.newInstance(
                 addImplicitCells(rule.body(), m),
                 rule.requires(),

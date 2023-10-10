@@ -5,6 +5,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
@@ -69,6 +70,7 @@ public class AddSortInjections {
     }
 
     public RuleOrClaim addInjections(RuleOrClaim roc) {
+        if (roc instanceof Claim) return roc;
         initSortParams();
         K body = addTopSortInjections(roc.body());
         K requires = internalAddSortInjections(roc.requires(), Sorts.Bool());

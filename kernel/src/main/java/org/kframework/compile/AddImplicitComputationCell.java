@@ -100,7 +100,7 @@ public class AddImplicitComputationCell {
     }
 
     private K apply(K term, Module m, boolean isClaim) {
-        if (m.isFunction(term)) return term;
+        if (m.isFunction(term) || isClaim) return term;
 
         List<K> items = IncompleteCellUtils.flattenCells(term);
         if (!shouldConsider(items, isClaim)) {
