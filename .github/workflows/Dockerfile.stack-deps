@@ -9,6 +9,7 @@ RUN    apt-get update        \
     && apt-get upgrade --yes \
     && apt-get install --yes \
             curl             \
+            libsecp256k1-dev \
             libtinfo-dev     \
             pkg-config
 
