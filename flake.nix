@@ -2,13 +2,12 @@
   description = "K Framework";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-23.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend/1da6c43b8bb74a231b58978b1964a45d7ca753e4";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/63397c713d21322434d572281c1407d929a1189e";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/51f03a97530fb844635e232b81f9f18a3ca61b63";
+      url = "github:runtimeverification/hs-backend-booster/6c2f5ab988e2c5f98b1cdeb04b8a5787d8a7c566";
       # NB booster-backend will bring in another dependency on haskell-backend,
       # but the two are not necessarily the same (different more often than not).
       # We get two transitive dependencies on haskell-nix.
-      inputs.k-framework.follows = "";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     };
     llvm-backend.url = "github:runtimeverification/llvm-backend";

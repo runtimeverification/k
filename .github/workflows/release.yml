@@ -63,7 +63,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
       - name: Upload release.nix
-        uses: ttuegel/upload-release.nix@v1.0
+        uses: runtimeverification/upload-release.nix@v1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -117,7 +117,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-11
+    runs-on: macos-13
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -170,7 +170,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
@@ -199,7 +199,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-11
+    runs-on: macos-13
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]

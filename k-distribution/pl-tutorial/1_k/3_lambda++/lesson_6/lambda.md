@@ -112,7 +112,6 @@ then switch back to caller's environment.
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-    [structural]
   rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
        <env> Rho' => Rho[X <- !N] </env>
        <store>... .Map => (!N:Int |-> V) ...</store>
@@ -128,7 +127,6 @@ in the **K** team to add it to the set of pre-defined **K** features.
 
 ```k
   rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
-    [structural]
 ```
 
 ### Arithmetic Constructs
@@ -182,7 +180,6 @@ back to the fixed-point.
   rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
        <env> Rho </env>
        <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
-    [structural]
   rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
        <env> Rho' => Rho </env>
 ```

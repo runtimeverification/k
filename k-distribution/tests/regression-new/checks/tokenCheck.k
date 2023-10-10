@@ -1,5 +1,6 @@
 // Copyright (c) K Team. All Rights Reserved.
 module TOKENCHECK-SYNTAX
+  imports ID-SYNTAX
   syntax X ::= "abc" [token]
 
 endmodule
@@ -17,4 +18,5 @@ module TOKENCHECK
   syntax Int ::= "foo" [macro]
   rule foo => 3
 
+  syntax Id ::= Foo(Id)
 endmodule

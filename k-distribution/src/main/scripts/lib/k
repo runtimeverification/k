@@ -5,21 +5,24 @@ ulimit -s "$(ulimit -H -s)"
 K_BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
 GIT_DESCRIBE="${K_BASE}/kframework/git-describe.out"
 TIMESTAMP="${K_BASE}/kframework/timestamp.out"
+version=
 
 for flag in "$@"; do
     if [[ "$flag" == "--version" ]]; then
-        version="$(cat "${GIT_DESCRIBE}")"
+        if [[ -e "${GIT_DESCRIBE}" ]]; then
+            version="$(cat "${GIT_DESCRIBE}")"
+        fi
         versionTimestamp="$(cat "${TIMESTAMP}")"
-        versionTimestampInMilliseconds=$(echo "${versionTimestamp} / 1000" | bc)
+        versionTimestampInMilliseconds=$((versionTimestamp / 1000))
 
         if [ "$(uname)" = 'Darwin' ]; then
-            versionDate=$(gdate -d "@${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
+            versionDate=$(date -r "${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
         else
             versionDate=$(date -d "@${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
         fi
 
         if [[ -z "${version}" ]]; then
-            version="v"$(cat "${K_BASE}"/version)
+            version="v"$(cat "${K_BASE}"/kframework/version)
         fi
 
         echo "K version:    ${version}"

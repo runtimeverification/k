@@ -129,7 +129,7 @@ We hope this current limitation will be eliminated soon.
 Once a thread terminates, its computation cell becomes empty. When that
 happens, we can go ahead and remove the useless `thread` cell:
 
-    rule <thread>... <k> . </k> ...</thread> => .  [structural]
+    rule <thread>... <k> . </k> ...</thread> => .
 
 Let's see what we've got. `kompile` and `krun` `spawn.imp`.
 Note the following:

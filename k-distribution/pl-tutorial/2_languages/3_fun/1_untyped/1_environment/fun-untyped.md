@@ -695,7 +695,6 @@ way to achieve the benefits of tail recursion in **K**.
   syntax KItem ::= setEnv(Map)  // TODO: get rid of env
   //rule (setEnv(_) => .) ~> setEnv(_)  [anywhere]
   rule <k> _:Val ~> (setEnv(Rho) => .) ...</k> <env> _ => Rho </env>
-    [structural]
 ```
 
 ## `bindTo`, `bind` and `assignTo`
@@ -711,23 +710,21 @@ above.
   rule (. => getMatchingAux(Xs,Vs)) ~> bindTo(Xs:Names,Vs:Vals)
   rule matchResult(M:Map) ~> bindTo(_:Names, _:Vals) => bindMap(M)
 
-  rule bindMap(.Map) => .  [structural]
+  rule bindMap(.Map) => .
   rule <k> bindMap((X:Name |-> V:Val => .Map) _:Map) ...</k>
        <env> Rho => Rho[X <- !L:Int] </env>
        <store>... .Map => !L |-> V ...</store>
-    [structural]
 
-  rule bind(.Names) => .                  [structural]
+  rule bind(.Names) => .
   rule <k> bind(X:Name,Xs => Xs) ...</k>
        <env> Rho => Rho[X <- !_L:Int] </env>
-    [structural]
 
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 
-  rule <k> assignTo(.Names,.Vals) => . ...</k>            [structural]
+  rule <k> assignTo(.Names,.Vals) => . ...</k>
   rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs:Vals => Vs)) ...</k>
        <env>... X |-> L ...</env>
-       <store>... .Map => L |-> V ...</store>             [structural]
+       <store>... .Map => L |-> V ...</store>
 ```
 
 ## Getters

@@ -202,6 +202,11 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }).fold(Map())(mergeMultiset)
   }
 
+  lazy val tokenSorts: Set[Sort] = {
+    sentences.collect({ case p:Production if p.att.contains(Att.TOKEN) => p.sort
+                        case s:SyntaxSort if s.att.contains(Att.TOKEN) => s.sort})
+  }
+
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
       .collect({ case p if p.att.contains(Att.TOKEN) => p })
@@ -409,17 +414,65 @@ trait Sentence extends HasLocation with HasAtt with AttValue {
   def label: Optional[String] = att.getOptional(Att.LABEL)
 }
 
+object Sentence {
+  implicit val ord = new Ordering[Sentence] {
+    def compare(a: Sentence, b: Sentence): Int = {
+      (a, b) match {
+        case (c:SyntaxSort, d:SyntaxSort) => Ordering[SyntaxSort].compare(c, d)
+        case (c:SortSynonym, d:SortSynonym) => Ordering[SortSynonym].compare(c, d)
+        case (c:SyntaxLexical, d:SyntaxLexical) => Ordering[SyntaxLexical].compare(c, d)
+        case (c:Production, d:Production) => Ordering[Production].compare(c, d)
+        case (c:SyntaxAssociativity, d:SyntaxAssociativity) => Ordering[SyntaxAssociativity].compare(c, d)
+        case (c:SyntaxPriority, d:SyntaxPriority) => Ordering[SyntaxPriority].compare(c, d)
+        case (c:ContextAlias, d:ContextAlias) => Ordering[ContextAlias].compare(c, d)
+        case (c:Context, d:Context) => Ordering[Context].compare(c, d)
+        case (c:Rule, d:Rule) => Ordering[Rule].compare(c, d)
+        case (c:Claim, d:Claim) => Ordering[Claim].compare(c, d)
+        case (_:SyntaxSort, _) => -1
+        case (_, _:SyntaxSort) => 1
+        case (_:SortSynonym, _) => -1
+        case (_, _:SortSynonym) => 1
+        case (_:SyntaxLexical, _) => -1
+        case (_, _:SyntaxLexical) => 1
+        case (_:Production, _) => -1
+        case (_, _:Production) => 1
+        case (_:SyntaxAssociativity, _) => -1
+        case (_, _:SyntaxAssociativity) => 1
+        case (_:SyntaxPriority, _) => -1
+        case (_, _:SyntaxPriority) => 1
+        case (_:ContextAlias, _) => -1
+        case (_, _:ContextAlias) => 1
+        case (_:Context, _) => -1
+        case (_, _:Context) => 1
+        case (_:Rule, _) => -1
+        case (_, _:Rule) => 1
+        case (_:Claim, _) => -1
+        case (_, _:Claim) => 1
+        case (_, _) => throw KEMException.internalError("Cannot order these sentences:\n" + a.toString() + "\n" + b.toString())
+      }
+    }
+  }
+}
+
 // deprecated
 case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextToString {
   override val isSyntax = false
   override val isNonSyntax = true
   override def withAtt(att: Att) = Context(body, requires, att)
 }
+object Context {
+  implicit val ord: Ordering[Context] = Ordering.by[Context, (K, K, Att)](s => (s.body, s.requires, s.att))
+}
 
 case class ContextAlias(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextAliasToString {
   override val isSyntax = true
   override val isNonSyntax = false
   override def withAtt(att: Att) = ContextAlias(body, requires, att)
+}
+object ContextAlias {
+  implicit val ord: Ordering[ContextAlias] = {
+    Ordering.by[ContextAlias, (K, K, Att)](s => (s.body, s.requires, s.att))
+  }
 }
 
 abstract class RuleOrClaim extends Sentence {
@@ -436,6 +489,11 @@ case class Claim(body: K, requires: K, ensures: K, att: Att = Att.empty) extends
   override def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): Claim =
     Claim(body, requires, ensures, att)
 }
+object Claim {
+  implicit val ord: Ordering[Claim] = {
+    Ordering.by[Claim, (K, K, K, Att)](s => (s.body, s.requires, s.ensures, s.att))
+  }
+}
 
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends RuleOrClaim with RuleToString with OuterKORE {
   override def withAtt(att: Att): Rule = Rule(body, requires, ensures, att)
@@ -444,18 +502,8 @@ case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends 
 }
 
 object Rule {
-  implicit val ord: Ordering[Rule] = new Ordering[Rule] {
-    def compare(a: Rule, b: Rule): Int = {
-      val c1 = Ordering[K].compare(a.body, b.body)
-      if (c1 == 0) {
-        val c2 = Ordering[K].compare(a.requires, b.requires)
-        if (c2 == 0) {
-          Ordering[K].compare(a.ensures, b.ensures)
-        }
-        c2
-      }
-      c1
-    }
+  implicit val ord: Ordering[Rule] = {
+    Ordering.by[Rule, (K, K, K, Att)](r => (r.body, r.requires, r.ensures, r.att))
   }
 }
 
@@ -469,6 +517,12 @@ case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxPriority(priorities, att)
 }
+object SyntaxPriority {
+  implicit val ord: Ordering[SyntaxPriority] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[SyntaxPriority, (Seq[Seq[Tag]], Att)](s => (s.priorities.map(_.toSeq.sorted), s.att))
+  }
+}
 
 case class SyntaxAssociativity(
                                 assoc: Associativity,
@@ -479,8 +533,18 @@ case class SyntaxAssociativity(
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxAssociativity(assoc, tags, att)
 }
+object SyntaxAssociativity {
+  implicit val ord: Ordering[SyntaxAssociativity] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[SyntaxAssociativity, (Associativity, Seq[Tag], Att)](s => (s.assoc, s.tags.toSeq.sorted, s.att))
+  }
+}
 
 case class Tag(name: String) extends TagToString with OuterKORE
+
+object Tag {
+  implicit val ord: Ordering[Tag] = Ordering.by[Tag, String](_.name)
+}
 
 //trait Production {
 //  def sort: Sort
@@ -498,6 +562,13 @@ case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty) exten
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxSort(params, sort, att)
 }
+object SyntaxSort {
+  implicit val ord: Ordering[SyntaxSort] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[SyntaxSort, (Seq[String], String, Att)](s => (s.params.map(_.name), s.sort.name, s.att))
+  }
+}
+
 case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) extends Sentence
   with SortSynonymToString with OuterKORE {
 
@@ -505,12 +576,23 @@ case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) exten
   override val isNonSyntax = false
   override def withAtt(att: Att) = SortSynonym(newSort, oldSort, att)
 }
+object SortSynonym {
+  implicit val ord: Ordering[SortSynonym] = {
+    Ordering.by[SortSynonym, (String, String, Att)](s => (s.newSort.name, s.oldSort.name, s.att))
+  }
+}
+
 case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty) extends Sentence
   with SyntaxLexicalToString with OuterKORE {
 
   override val isSyntax = true
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxLexical(name, regex, att)
+}
+object SyntaxLexical {
+  implicit val ord: Ordering[SyntaxLexical] = {
+    Ordering.by[SyntaxLexical, (String, String, Att)](s => (s.name, s.regex, s.att))
+  }
 }
 
 case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att)
@@ -633,10 +715,8 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 }
 
 object Production {
-  implicit val ord: Ordering[Production] = new Ordering[Production] {
-    def compare(a: Production, b: Production): Int = {
-      Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
-    }
+  implicit val ord: Ordering[Production] = {
+    Ordering.by[Production, (Option[String], Att)](s => (s.klabel.map(_.name), s.att))
   }
 
   def apply(klabel: KLabel, params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {

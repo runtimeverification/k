@@ -320,8 +320,8 @@ typed SIMPLE, so we do not discuss them much here.
 
   context _:Type _::Exp[HOLE::Exps];
 
-  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
-  rule T:Type E:Exp[.Types]; => T E;          [structural]
+  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];
+  rule T:Type E:Exp[.Types]; => T E;
 
 
   rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .Bag
@@ -468,7 +468,6 @@ at the end of this module).
        <output>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </output>
-    [structural]
 ```
 
 ## Method declaration
@@ -502,7 +501,6 @@ for example, inside other methods).
                <tenv> .Map </tenv>
                <returnType> T </returnType>
              </task>)
-    [structural]
 ```
 
 ## Assignment
@@ -537,7 +535,7 @@ we cannot test the full type safety of exceptions.  Instead, we
 only check that the `try` and the `catch` statements
 type correctly.
 ```k
-  rule try block catch(T:Type X:Id) S => {T X; S}  [structural]
+  rule try block catch(T:Type X:Id) S => {T X; S}
   rule throw _T:Type ; => stmt
 ```
 
@@ -587,7 +585,6 @@ instance of this rule).
                 <inClass> C </inClass>
                 <ctenvT> .Map </ctenvT>
              </task>)
-    [structural]
 
 // You may want to try the thing below, but that failed, too
 /*
@@ -608,7 +605,6 @@ syntax Type ::= "stmtStop"
              ...</classData>
        ...</classes>
 //       <br/>
-  [structural]
 */
 ```
 
@@ -621,7 +617,6 @@ syntax Type ::= "stmtStop"
         ...</T> => .Bag)
        <output>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </output>
-    [structural]
 ```
 **Check for cycles in class hierarchy**  
 We check for cycles in the class hierarchy by transitively closing the
@@ -632,13 +627,13 @@ superclass relation, the second transitively closes it, and the third
 checks for cycles.
 ```k
   rule <baseClass> C </baseClass>
-       <baseClasses> .Set => SetItem(C) </baseClasses>  [structural, priority(25)]
+       <baseClasses> .Set => SetItem(C) </baseClasses>  [priority(25)]
 
   rule <classData>...
          <baseClasses> SetItem(C) Cs:Set (.Set => SetItem(C')) </baseClasses>
        ...</classData>
        <classData>... <className>C</className> <baseClass>C'</baseClass> ...</classData>
-    when notBool(C' in (SetItem(C) Cs))  [structural, priority(25)]
+    when notBool(C' in (SetItem(C) Cs))  [priority(25)]
 
   rule (<T>...
           <className> C </className>
@@ -721,7 +716,7 @@ wait.  Finally, the sixth rule below reports an error when the
     when notBool(X in keys(Rho))
 
 // OLD approach:
-//  rule ltype(E:Exp . X:Id) => E . X  [structural]
+//  rule ltype(E:Exp . X:Id) => E . X
 
   rule <k> `class`(C:Id) . X:Id => T ...</k>
        <className> C </className>
@@ -731,7 +726,7 @@ wait.  Finally, the sixth rule below reports an error when the
        <className> C1 </className>
        <baseClass> C2:Id </baseClass>
        <ctenv> Rho </ctenv>
-    when notBool(X in keys(Rho))  [structural]
+    when notBool(X in keys(Rho))
 
   rule <k> `class`(Object) . X:Id => stuck(`class`(Object) . X) ...</k>
        <inClass> C:Id </inClass>
@@ -739,7 +734,6 @@ wait.  Finally, the sixth rule below reports an error when the
        <output>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
                               +String Id2String(C) +String "\")\n") </output>
-    [structural]
 ```
 
 ## Instance of and casting
@@ -797,7 +791,6 @@ the `tasks` cell has been removed.
                     <returnType> void </returnType>
                     <inClass> Main </inClass>)
        </task>
-    [structural]
 
 // discard class task when done, adding a ctenv in class
 
@@ -808,7 +801,6 @@ the `tasks` cell has been removed.
         </task> => .Bag)
         <className> C </className>
         (.Bag => <ctenv> Rho </ctenv>)
-    [structural]
 
 // discard method task when done
 
@@ -816,13 +808,11 @@ the `tasks` cell has been removed.
          <k> stmt </k>
          <tenv> _ </tenv>  // only to ensure that this is a method task
        ...</task> => .Bag
-    [structural]
 
 // cleanup tasks and output a success message when done
 
   rule (<T>... <tasks> .Bag </tasks> ...</T> => .Bag)
        <output>... .List => ListItem("Type checked!\n") </output>
-    [structural]
 ```
 
 ## KOOL-specific auxiliary declarations and operations
@@ -833,24 +823,24 @@ The subclass relation introduces a subtyping relation.
 ```k
   syntax KItem ::= checkSubtype(Types,Types)
 
-  rule checkSubtype(T:Type, T) => .  [structural]
+  rule checkSubtype(T:Type, T) => .
 
   rule <k> checkSubtype(`class`(C:Id), `class`(C':Id)) => . ...</k>
        <className> C </className>
-       <baseClasses>... SetItem(C') ...</baseClasses>  [structural]
+       <baseClasses>... SetItem(C') ...</baseClasses>
 
   rule checkSubtype(Ts1->T2,Ts1'->T2')
-    => checkSubtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]
+    => checkSubtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))
 
 // note that the following rule would be wrong!
 //  rule checkSubtype(T[],T'[]) => checkSubtype(T,T')
 
   rule checkSubtype((T:Type,Ts),(T':Type,Ts'))
     => checkSubtype(T,T') ~> checkSubtype(Ts,Ts')
-    when Ts =/=K .Types  [structural]
+    when Ts =/=K .Types
 
-  rule checkSubtype(.Types,.Types) => .  [structural]
-  rule checkSubtype(.Types,void) => .  [structural]
+  rule checkSubtype(.Types,.Types) => .
+  rule checkSubtype(.Types,void) => .
 ```
 
 ## Checking well-formedness of types
@@ -861,17 +851,16 @@ check that the types used in the program actually exists
   syntax KItem ::= checkType(Types)
 
   rule checkType(T:Type,Ts:Types) => checkType(T) ~> checkType(Ts)
-    when Ts =/=K .Types  [structural]
-  rule checkType(.Types) => .  [structural]
-  rule checkType(int) => .  [structural]
-  rule checkType(bool) => .  [structural]
-  rule checkType(string) => .  [structural]
-  rule checkType(void) => .  [structural]
+    when Ts =/=K .Types
+  rule checkType(.Types) => .
+  rule checkType(int) => .
+  rule checkType(bool) => .
+  rule checkType(string) => .
+  rule checkType(void) => .
   rule <k> checkType(`class`(C:Id)) => . ...</k> <className> C </className>
-    [structural]
-  rule checkType(`class`(Object)) => .  [structural]
-  rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)  [structural]
-  rule checkType(T:Type[]) => checkType(T)  [structural]
+  rule checkType(`class`(Object)) => .
+  rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)
+  rule checkType(T:Type[]) => checkType(T)
 ```
 
 ## Checking correct  overiding of methods
@@ -889,13 +878,12 @@ is co-variant in the codomain and contra-variant in the domain).
   rule <k> checkMethod(F:Id, T:Type, C:Id) => checkSubtype(T, T') ...</k>
        <className> C </className>
        <ctenv>... F |-> T':Type ...</ctenv>
-    [structural]
 
   rule <k> checkMethod(F:Id, _T:Type, (C:Id => C')) ...</k>
        <className> C </className>
        <baseClass> C':Id </baseClass>
        <ctenv> Rho </ctenv>
-    when notBool(F in keys(Rho))  [structural]
+    when notBool(F in keys(Rho))
 
   rule checkMethod(_:Id,_,Object) => .
 ```
@@ -906,7 +894,7 @@ is co-variant in the codomain and contra-variant in the domain).
   syntax KItem ::= stuck(K)  [latex(\framebox{${#1}$})]
 
   syntax KItem ::= "discard"
-  rule _:KResult ~> discard => .  [structural]
+  rule _:KResult ~> discard => .
 
 endmodule
 ```

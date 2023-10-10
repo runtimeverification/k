@@ -19,13 +19,6 @@ public final class GlobalOptions {
 
     public GlobalOptions() {}
 
-    //TODO(dwightguth): remove in Guice 4.0
-    /**
-     * Prevents instantiation by Guice when not explicitly configured in a Module.
-     */
-    @Inject
-    public GlobalOptions(Void v) {}
-
     public GlobalOptions(boolean debug, Warnings warnings, boolean verbose) {
         this.debug = debug;
         this.warnings = warnings;
@@ -121,13 +114,13 @@ public final class GlobalOptions {
     @Parameter(names="--debug-warnings", description="Print debugging output messages and error/warning stack traces")
     public boolean debugWarnings = false;
 
-    @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
+    @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]", descriptionKey = "level")
     public Warnings warnings = Warnings.NORMAL;
 
-    @Parameter(names="-W", description="Enable specific warning categories. Values: [non-exhaustive-match|undeleted-temp-dir|missing-hook-java|missing-syntax-module|invalid-exit-code|deprecated-backend|invalid-config-var|future-error|unused-var|proof-lint|useless-rule|unresolved-function-symbol|malformed-markdown|invalidated-cache|unused-symbol|removed-anywhere]", converter=ExceptionTypeConverter.class)
+    @Parameter(names="-W", description="Enable specific warning categories. Values: [non-exhaustive-match|undeleted-temp-dir|missing-hook-java|missing-syntax-module|invalid-exit-code|deprecated-backend|invalid-config-var|future-error|unused-var|proof-lint|useless-rule|unresolved-function-symbol|malformed-markdown|invalidated-cache|unused-symbol|removed-anywhere]", descriptionKey = "warning", converter=ExceptionTypeConverter.class)
     public List<ExceptionType> enableWarnings = Collections.emptyList();
 
-    @Parameter(names="-Wno", description="Disable specific warning categories.", converter=ExceptionTypeConverter.class)
+    @Parameter(names="-Wno", description="Disable specific warning categories.", descriptionKey = "warning", converter=ExceptionTypeConverter.class)
     public List<ExceptionType> disableWarnings = Collections.emptyList();
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
@@ -139,13 +132,13 @@ public final class GlobalOptions {
                     "The wait time is the argument of this option, in format like 10ms/10s/10m/10h. " +
                     "Useful if K is interrupted by Ctrl+C, because it allows the backend to detect " +
                     "interruption and print diagnostics information. Currently interruption detection is implemented " +
-                    "in Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.", hidden = true)
+                    "in Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.", descriptionKey = "time", hidden = true)
     public Duration shutdownWaitTime;
 
     @Parameter(names = {"--timeout"}, converter = DurationConverter.class,
             description = "If option is set, timeout for this process, in format like 10ms/10s/10m/10h. " +
                     "Using this option is preferred compared to bash timeout command, which has known limitations " +
-                    "when invoked from scripts.", hidden = true)
+                    "when invoked from scripts.", descriptionKey = "duration", hidden = true)
     public Duration timeout;
 
     @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.", hidden = true)
@@ -155,6 +148,6 @@ public final class GlobalOptions {
         return debug || debugWarnings;
     }
 
-    @Parameter(names={"--temp-dir"}, description="Put temp files in this location. Default is /tmp/.<tool>-xxx")
+    @Parameter(names={"--temp-dir"}, description="Put temp files in this location. Default is /tmp/.<tool>-xxx", descriptionKey = "path")
     public String tempDir = null;
 }

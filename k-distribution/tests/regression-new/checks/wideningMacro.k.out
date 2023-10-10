@@ -1,0 +1,6 @@
+[Error] Inner Parser: Unexpected sort Int for term parsed as production syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]. Expected: Bool
+	Source(wideningMacro.k)
+	Location(8,10,8,25)
+	8 |	    rule #bar ( X ) => X
+	  .	         ^~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 parsing errors.

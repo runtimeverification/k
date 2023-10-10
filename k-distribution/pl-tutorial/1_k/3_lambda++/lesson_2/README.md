@@ -111,9 +111,6 @@ When the item preceding the environment recovery task `Rho` in the
 computation becomes a value, replace the current environment with `Rho`
 and dissolve `Rho` from the computation.
 
-Before we kompile, let us make this rule and the lambda evaluation rule
-structural, because we do not want these to count as transitions.
-
 Let us kompile and ... fail:
 
     kompile lambda

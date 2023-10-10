@@ -20,7 +20,6 @@ module LAMBDA
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-    [structural]
   rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
        <env> Rho' => Rho[X <- !N] </env>
        <store>... .Map => (!N:Int |-> V) ...</store>
@@ -28,7 +27,6 @@ module LAMBDA
        <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
   rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
-    [structural]
 
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
@@ -55,7 +53,6 @@ module LAMBDA
   rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
        <env> Rho </env>
        <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
-    [structural]
   rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
        <env> Rho' => Rho </env>
 

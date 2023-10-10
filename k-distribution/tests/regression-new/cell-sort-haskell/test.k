@@ -68,6 +68,6 @@ rule
       <function> <fId> N </fId> </function>
 
 rule
-  S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  S1:Stmt S2:Stmt => S1 ~> S2
 
 endmodule

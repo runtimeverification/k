@@ -379,21 +379,17 @@ class TextToKore(b: Builders = DefaultBuilders) {
             val s = parseSort()
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern()
-            consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern()
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.And(s, p1, p2)
+            b.And(s, args)
           case ('o', 'r') => // or
             consumeWithLeadingWhitespaces("{")
             val s = parseSort()
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern()
-            consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern()
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.Or(s, p1, p2)
+            b.Or(s, args)
           case ('n', 'o') => // not
             consume("t")
             consumeWithLeadingWhitespaces("{")
@@ -545,6 +541,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
                     (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
                 }
               case c => // variable or application
+                scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
                 consumeWithLeadingWhitespaces("{")
                 val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
@@ -579,6 +576,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
                     (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
                 }
               case c => // variable or application
+                scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
                 consumeWithLeadingWhitespaces("{")
                 val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')

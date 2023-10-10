@@ -21,17 +21,6 @@ is nothing but syntactic sugar for
 
 This can be easily achieved with a rule, as shown in `lambda.k`.
 
-As a side point, which is not very relevant here but good to know, we may
-want the *desugaring* of `let` to not even count as a computational step, but
-as a mere *structural rearrangement* of the program so that other semantic
-rules (beta reduction, in our case) can match and apply.
-
-The K tool allows us to tag rules with the attribute `structural`, with
-precisely the intuition above.  You can think of structural rules as a kind
-of light rules, almost like macros, or like ones which apply *under the hood*,
-instantaneously.  There are several other uses for structural rules in K,
-which we will discuss later in this tutorial.
-
 Compile `lambda.k` and write some programs using `let` binders.  
 
 For example, consider a `lets.lambda` program which takes `arithmetic.lambda`

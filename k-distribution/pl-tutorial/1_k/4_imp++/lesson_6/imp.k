@@ -70,22 +70,22 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .   [structural]
-  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>  [structural]
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule {} => .
+  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>  [group(assignment)]
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 
   syntax Printable ::= Int | String
 /* currently it is necessary to subsort Printable to AExp,
@@ -94,12 +94,12 @@ module IMP
   context print(HOLE:AExp, _AEs:AExps);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>  [group(print)]
-  rule print(.AExps); => .  [structural]
+  rule print(.AExps); => .
 
   rule <k> halt; ~> _ => . </k>
 
   rule <k> spawn S => . ...</k> <env> Rho </env>
        (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !_T:Int +Int 1 </id> ...</thread>)
 
-  rule <thread>... <k> . </k> ...</thread> => .Bag  [structural]
+  rule <thread>... <k> . </k> ...</thread> => .Bag
 endmodule

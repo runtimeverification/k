@@ -496,7 +496,6 @@ of the remaining dimensions, declared as variable `$2`:
            X[$1] = $2;
          }
        }
-    [structural]
 ```
 Ideally, one would like to perform syntactic desugarings like the one
 above before the actual semantics.  Unfortunately, that was not possible in
@@ -557,7 +556,7 @@ that the functions "see" each other, allowing for mutual recursion, etc.
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> .Map => Env </genv>  [structural]
+       <genv> .Map => Env </genv>
 ```
 
 ## Expressions
@@ -645,10 +644,10 @@ and is defined at the end of the file.
 // may not be worth, or we may need to come up with a special notation
 // allowing us to enumerate contexts for [anywhere] rules.
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+    [anywhere]
 ```
 
 ## Size of an array
@@ -776,8 +775,8 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps.
 
 ```k
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 ```
 The basic definition of environment recovery is straightforward and
 given in the section on auxiliary constructs at the end of the file.
@@ -804,9 +803,7 @@ so it is the one that we follow in general.
 Sequential composition is desugared into **K**'s builtin sequentialization
 operation (recall that, like in C, the semi-colon `;` is not a
 statement separator in SIMPLE — it is either a statement terminator or a
-construct for a statement from an expression).  The rule below is
-structural, so it does not count as a computational step.  One can make it
-computational if one wants it to count as a step.  Note that **K** allows
+construct for a statement from an expression).  Note that **K** allows
 to define the semantics of SIMPLE in such a way that statements eventually
 dissolve from the top of the computation when they are completed; this is in
 sharp contrast to (artificially) `evaluating` them to a special
@@ -816,7 +813,7 @@ to something).  This means that once `S₁` completes in the rule below, `S₂`
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules.
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 ```
 
 A subtle aspect of the rule above is that `S₁` is declared to have sort
@@ -856,16 +853,12 @@ proceed (otherwise the rewriting process gets stuck).
 
 The simplest way to give the semantics of the while loop is by unrolling.
 Note, however, that its unrolling is only allowed when the while loop reaches
-the top of the computation (to avoid non-termination of unrolling).  We prefer
-the rule below to be structural, because we don't want the unrolling of the
-while loop to count as a computational step; this is unavoidable in
-conventional semantics, but it is possible in **K** thanks to its distinction
-between structural and computational rules.  The simple while loop semantics
-below works because our while loops in SIMPLE are indeed very basic.  If we
-allowed break/continue of loops then we would need a completely different
-semantics, which would also involve the `control` cell.
+the top of the computation (to avoid non-termination of unrolling).  The
+simple while loop semantics below works because our while loops in SIMPLE are
+indeed very basic.  If we allowed break/continue of loops then we would need
+a completely different semantics, which would also involve the `control` cell.
 ```k
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}
 ```
 
 ## Print
@@ -877,7 +870,7 @@ its evaluated arguments to the output buffer, and discard the residual
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     [group(print)]
-  rule print(.Vals); => .  [structural]
+  rule print(.Vals); => .
 ```
 
 ## Exceptions
@@ -1090,7 +1083,7 @@ IMP++ tutorial:
 // TODO: eliminate the env wrapper, like we did in IMP++
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>  [structural]
+  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>
 ```
 While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop `while (E)S`,
@@ -1105,7 +1098,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem:
 ```k
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)
 ```
 In fact, the above follows a common convention in **K** for recovery
 operations of cell contents: the meaning of a computation task of the form
@@ -1142,7 +1135,6 @@ corresponding store lookup operation.
 // Local variable
 
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
 
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
@@ -1152,7 +1144,7 @@ corresponding store lookup operation.
 
 // Finally, return the address of the desired object member
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 ```
 
 ## Initializing multiple locations

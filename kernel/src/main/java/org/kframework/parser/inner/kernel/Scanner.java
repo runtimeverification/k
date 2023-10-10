@@ -30,14 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -56,6 +49,10 @@ public class Scanner implements AutoCloseable {
     private GlobalOptions go = new GlobalOptions();
 
     public static final String COMPILER = OS.current().equals(OS.OSX) ? "clang" : "gcc";
+
+    public Map<TerminalLike, Tuple2<Integer, Integer>> getTokens() {
+        return Collections.unmodifiableMap(tokens);
+    }
 
     public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
         Map<TerminalLike, Integer> tokens = new TreeMap<>();
@@ -349,10 +346,10 @@ public class Scanner implements AutoCloseable {
     }
 
     public static class Token {
-        final int kind;
-        final String value;
-        final int startLoc;
-        final int endLoc;
+        public final int kind;
+        public final String value;
+        public final int startLoc;
+        public final int endLoc;
 
         public Token(int kind, String value, long startLoc, long endLoc) {
             this.kind = kind;

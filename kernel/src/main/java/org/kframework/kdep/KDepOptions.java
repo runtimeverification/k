@@ -3,6 +3,7 @@ package org.kframework.kdep;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
@@ -15,6 +16,9 @@ import org.kframework.utils.options.OutputDirectoryOptions;
 
 @RequestScoped
 public class KDepOptions {
+
+    @Inject
+    public KDepOptions() {}
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();

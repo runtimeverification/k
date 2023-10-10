@@ -37,12 +37,16 @@ filterSubst=
 if [[ "$OSTYPE" == "darwin"* ]]; then
   LLDB_FILE="$(dirname "$0")/../lib/kllvm/lldb/k_lldb_path"
   if [ -f "$LLDB_FILE" ]; then
-    DBG_CMD="$(cat "$LLDB_FILE") -- "
+    DBG_EXE="$(cat "$LLDB_FILE")"
   else
-    DBG_CMD="lldb --"
+    DBG_EXE="lldb"
   fi
+  DBG_CMD=" --"
+  DBG_FLAG=" -s "
 else
-  DBG_CMD="gdb --args "
+  DBG_EXE="gdb"
+  DBG_FLAG=" -x "
+  DBG_CMD=" --args "
 fi
 
 
@@ -80,7 +84,7 @@ keepTempsIfDryRun () {
 
 print_usage () {
 cat <<HERE
-Usage: $KRUN [PROGRAM] [-cNAME=VALUE] [-d DIR]
+Usage: $KRUN [options] [PROGRAM] [-cNAME=VALUE] [-d DIR]
 Execute a program using a K semantics that was built with kompile.
 
 Mandatory arguments to long options are mandatory for short options too.
@@ -112,6 +116,10 @@ $KRUN options:
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
+      --debugger-batch     Launch the backend in a debugging console in batch
+                           mode. Currently only supported on LLVM backend.
+      --debugger-command FILE  Execute GDB commands from FILE to debug program.
+                               Currently only supported on LLVM backend.
   -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR.
       --dry-run            Do not execute backend, but instead print the
@@ -392,8 +400,23 @@ do
       ;;
 
       --debugger)
-      cmdprefix="$DBG_CMD"
+      cmdprefix="$DBG_EXE $DBG_CMD"
       ;;
+
+      --debugger-command)
+        debugCommandFile="$2"
+        cmdprefix="$DBG_EXE $DBG_FLAG $debugCommandFile $DBG_CMD"
+      shift
+      ;;
+
+      --debugger-batch)
+      if [[ $cmdprefix == *gdb* || $cmdprefix == *lldb* ]]; then
+        cmdprefix="$DBG_EXE --batch $DBG_FLAG $debugCommandFile $DBG_CMD"
+      else
+        DBG_CMD=" --batch $DBG_CMD"
+      fi
+      ;;
+
 
       --statistics)
       statistics=true

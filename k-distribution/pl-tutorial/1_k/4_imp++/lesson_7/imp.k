@@ -71,8 +71,8 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>
 // Stmt
   rule _:Int; => .
   rule <k> X = I:Int => I ...</k>
@@ -80,12 +80,12 @@ module IMP
        <store>... N |-> (_ => I) ...</store>  [group(assignment)]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {.Stmts}
 
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 
   syntax Printable ::= Int | String
 /* currently it is necessary to subsort Printable to AExp,
@@ -94,7 +94,7 @@ module IMP
   context print(HOLE:AExp, _AEs:AExps);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>  [group(print)]
-  rule print(.AExps); => .  [structural]
+  rule print(.AExps); => .
 
   rule <k> halt; ~> _ => . </k>
 
@@ -104,8 +104,8 @@ module IMP
        <thread>... <k> . </k> <id> T </id> ...</thread>
 
 // Stmts
-  rule .Stmts => .                 [structural]
-  rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
+  rule .Stmts => .
+  rule S:Stmt Ss:Stmts => S ~> Ss
 
 // verification ids
   syntax Id ::= "n"     [token]

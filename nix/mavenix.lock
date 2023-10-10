@@ -66,26 +66,6 @@
       "sha1": "c23a09377059bb343b69e9b86b9fc60257b83406"
     },
     {
-      "path": "ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar",
-      "sha1": "7c4f3c474fb2c041d8028740440937705ebb473a"
-    },
-    {
-      "path": "ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.pom",
-      "sha1": "bc627b0345626c9dfa55eac703602c3a7846950b"
-    },
-    {
-      "path": "ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.jar",
-      "sha1": "864344400c3d4d92dfeb0a305dc87d953677c03c"
-    },
-    {
-      "path": "ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.pom",
-      "sha1": "a8d536fbd395b033310f686c4085eec5d6099b0f"
-    },
-    {
-      "path": "ch/qos/logback/logback-parent/1.2.3/logback-parent-1.2.3.pom",
-      "sha1": "97bb391732b4500e61247d7fb261ff5b01efece3"
-    },
-    {
       "path": "classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar",
       "sha1": "05adf2e681c57d7f48038b602f3ca2254ee82d47"
     },
@@ -102,1046 +82,6 @@
       "sha1": "4703c4199028094698c222c17afea6dcd9f04999"
     },
     {
-      "path": "com/amazonaws/aws-java-sdk-acm/1.11.276/aws-java-sdk-acm-1.11.276.jar",
-      "sha1": "0ccf1e14f40dd7963a9bedb4d43f94cb3e94cd43"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-acm/1.11.276/aws-java-sdk-acm-1.11.276.pom",
-      "sha1": "ffb5688b8ef02552f5bd24d2e92826d6c9a2f16e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-alexaforbusiness/1.11.276/aws-java-sdk-alexaforbusiness-1.11.276.jar",
-      "sha1": "c2f7dc55733886807e2a5858ad9ae057a2da9822"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-alexaforbusiness/1.11.276/aws-java-sdk-alexaforbusiness-1.11.276.pom",
-      "sha1": "d9839eea046dbdad2615dc2de75fb31ca0cea4e5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-api-gateway/1.11.276/aws-java-sdk-api-gateway-1.11.276.jar",
-      "sha1": "b847a3845f14a14cdff3a03ce5b54ebd902f7e03"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-api-gateway/1.11.276/aws-java-sdk-api-gateway-1.11.276.pom",
-      "sha1": "01b239525ea319dda57f336c76d201433194e5d9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-applicationautoscaling/1.11.276/aws-java-sdk-applicationautoscaling-1.11.276.jar",
-      "sha1": "5b5d021bc1152f298116069e683e730e413c8f2f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-applicationautoscaling/1.11.276/aws-java-sdk-applicationautoscaling-1.11.276.pom",
-      "sha1": "232a8eea9ed8eedfbf6c6fc80cc43855e30c932f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appstream/1.11.276/aws-java-sdk-appstream-1.11.276.jar",
-      "sha1": "52edcd28aa6928409fe20c9bfd39b0ecd27c29cd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appstream/1.11.276/aws-java-sdk-appstream-1.11.276.pom",
-      "sha1": "07f2805782a461e622d66806f61d0b2a89bddecb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appsync/1.11.276/aws-java-sdk-appsync-1.11.276.jar",
-      "sha1": "a55899ccab0950d7e1eaaed0936b64a22ebf2041"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-appsync/1.11.276/aws-java-sdk-appsync-1.11.276.pom",
-      "sha1": "23f214f52a94d0c1754026ab58e06276677bc41d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-athena/1.11.276/aws-java-sdk-athena-1.11.276.jar",
-      "sha1": "0584cde1bb4b179605caacddadd146628b2b765e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-athena/1.11.276/aws-java-sdk-athena-1.11.276.pom",
-      "sha1": "a4ccfc7b5ea45ace9e5c7b7c63732b51dc041dbd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscaling/1.11.276/aws-java-sdk-autoscaling-1.11.276.jar",
-      "sha1": "0144d52dac9d1bbf3cf25c8008da89d61c72f40b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscaling/1.11.276/aws-java-sdk-autoscaling-1.11.276.pom",
-      "sha1": "a3720d51609ac9de66c8c844f43f5c3b31436f49"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscalingplans/1.11.276/aws-java-sdk-autoscalingplans-1.11.276.jar",
-      "sha1": "c5991c84d494ac7ee58868744cbcc3cd0ce547a8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-autoscalingplans/1.11.276/aws-java-sdk-autoscalingplans-1.11.276.pom",
-      "sha1": "2615f75855bd860537985c9723c39f0d09f73127"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-batch/1.11.276/aws-java-sdk-batch-1.11.276.jar",
-      "sha1": "90a649709b90b4e07a5c289fdc536421665cfa6a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-batch/1.11.276/aws-java-sdk-batch-1.11.276.pom",
-      "sha1": "2032e2cfc63f55f4a17265be03f476bf60294a2c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-budgets/1.11.276/aws-java-sdk-budgets-1.11.276.jar",
-      "sha1": "2ce15ef9e905b726e40bba248906818ee0aec387"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-budgets/1.11.276/aws-java-sdk-budgets-1.11.276.pom",
-      "sha1": "7af6f7efb97044b22684319958dee9a919bbf34b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloud9/1.11.276/aws-java-sdk-cloud9-1.11.276.jar",
-      "sha1": "a9fea16c1fb5bdd04b59eb52f0d1183eb06d087e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloud9/1.11.276/aws-java-sdk-cloud9-1.11.276.pom",
-      "sha1": "a2a04907100038957700c28ba543418be147b589"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-clouddirectory/1.11.276/aws-java-sdk-clouddirectory-1.11.276.jar",
-      "sha1": "27fa410648645078c6508f2626584a7bfc79fe02"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-clouddirectory/1.11.276/aws-java-sdk-clouddirectory-1.11.276.pom",
-      "sha1": "a0a36481bbdca321e7b4aff4d578fab01da6d719"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudformation/1.11.276/aws-java-sdk-cloudformation-1.11.276.jar",
-      "sha1": "e94f39552fe16ae613427d3f5434031cb1a5edb0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudformation/1.11.276/aws-java-sdk-cloudformation-1.11.276.pom",
-      "sha1": "b0a6cc028c8aa0c86cefddf6d5471b2c499db908"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudfront/1.11.276/aws-java-sdk-cloudfront-1.11.276.jar",
-      "sha1": "77d1ba3d0e816ff8d4fac4c71993b6b1e7f9f934"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudfront/1.11.276/aws-java-sdk-cloudfront-1.11.276.pom",
-      "sha1": "80a0b27b4524a6f881826d1aa81c7bc3bb609fe0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsm/1.11.276/aws-java-sdk-cloudhsm-1.11.276.jar",
-      "sha1": "031030694052d742dd56d00f879e6c661fa7b8f0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsm/1.11.276/aws-java-sdk-cloudhsm-1.11.276.pom",
-      "sha1": "a8e71a50f4c06266855a909a1b13681d03a4064f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsmv2/1.11.276/aws-java-sdk-cloudhsmv2-1.11.276.jar",
-      "sha1": "d4fdbabb266c02e88843c1881249d88ca8a6b879"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudhsmv2/1.11.276/aws-java-sdk-cloudhsmv2-1.11.276.pom",
-      "sha1": "699193145c8c12dd9cec2a97894c54d4c36909e5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudsearch/1.11.276/aws-java-sdk-cloudsearch-1.11.276.jar",
-      "sha1": "f48f7e638aa212fcda99b07b212f4facd5a072b9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudsearch/1.11.276/aws-java-sdk-cloudsearch-1.11.276.pom",
-      "sha1": "72de2ece8d1e8a3ae183e43798421f8da158633a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudtrail/1.11.276/aws-java-sdk-cloudtrail-1.11.276.jar",
-      "sha1": "cd16e67ee94339e61a03c6b9c12913f79c1c4b02"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudtrail/1.11.276/aws-java-sdk-cloudtrail-1.11.276.pom",
-      "sha1": "9501b2700fd94b03a0453da2dc4974cda5987f56"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatch/1.11.276/aws-java-sdk-cloudwatch-1.11.276.jar",
-      "sha1": "21a4b720237288803c7ee28ca7f4a20cba1e4180"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatch/1.11.276/aws-java-sdk-cloudwatch-1.11.276.pom",
-      "sha1": "f2875c0309e7b0084b2edd69a437be3337c639fc"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatchmetrics/1.11.276/aws-java-sdk-cloudwatchmetrics-1.11.276.jar",
-      "sha1": "eb0bcc9638c58069de4c98d6c8c95683ea74fdea"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cloudwatchmetrics/1.11.276/aws-java-sdk-cloudwatchmetrics-1.11.276.pom",
-      "sha1": "6955863ffa7c25fad3823b7a770b0ef21d8d1516"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codebuild/1.11.276/aws-java-sdk-codebuild-1.11.276.jar",
-      "sha1": "70c0421e62702df4de30e3465805c278870f5e88"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codebuild/1.11.276/aws-java-sdk-codebuild-1.11.276.pom",
-      "sha1": "59944b1116ebbaeb12eb45e9b3472c78e3288d74"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codecommit/1.11.276/aws-java-sdk-codecommit-1.11.276.jar",
-      "sha1": "411b0fbb74a54991ab3d04a39b45336075622247"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codecommit/1.11.276/aws-java-sdk-codecommit-1.11.276.pom",
-      "sha1": "7ae380b8aacff6be00c88e577fd6e81e2d2126e9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codedeploy/1.11.276/aws-java-sdk-codedeploy-1.11.276.jar",
-      "sha1": "6c0167b0d5807a16e258354fefdb274e73470d2a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codedeploy/1.11.276/aws-java-sdk-codedeploy-1.11.276.pom",
-      "sha1": "609c42b7e86b9e719fc2a2ea0ec5a0b557558ce7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codepipeline/1.11.276/aws-java-sdk-codepipeline-1.11.276.jar",
-      "sha1": "a63cd65e9f2de6f8bd4465cfcfc0bc9ca02dd4a1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codepipeline/1.11.276/aws-java-sdk-codepipeline-1.11.276.pom",
-      "sha1": "78fa03968cf3c7a1e831361053d5a1d142a406b5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codestar/1.11.276/aws-java-sdk-codestar-1.11.276.jar",
-      "sha1": "ae5e5dd636094cf13b9ccc9d5dc8c3a0fbc654fe"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-codestar/1.11.276/aws-java-sdk-codestar-1.11.276.pom",
-      "sha1": "a6ffdaa51530b02e5dabd91ec48368815eab3fe1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidentity/1.11.276/aws-java-sdk-cognitoidentity-1.11.276.jar",
-      "sha1": "30a99289ed90271717a7ca6b7984e8d7c076172c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidentity/1.11.276/aws-java-sdk-cognitoidentity-1.11.276.pom",
-      "sha1": "092229066fd4c86db254c4de1b9f8392561aaacf"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidp/1.11.276/aws-java-sdk-cognitoidp-1.11.276.jar",
-      "sha1": "f6cc34675fde34177f30efa1560260602e1ba2a1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitoidp/1.11.276/aws-java-sdk-cognitoidp-1.11.276.pom",
-      "sha1": "b2d31acee6501d23f7d5cc1ea5c34925df01f2e0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitosync/1.11.276/aws-java-sdk-cognitosync-1.11.276.jar",
-      "sha1": "4b5fb7fa655db5f8dece2b14b26b7ff77f187c5f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-cognitosync/1.11.276/aws-java-sdk-cognitosync-1.11.276.pom",
-      "sha1": "14a9f17d2b9ec66b21813ef3a3514b7efbba08f6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-comprehend/1.11.276/aws-java-sdk-comprehend-1.11.276.jar",
-      "sha1": "646a959d7af0ea019b614d3cd0e8c4349b86afbd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-comprehend/1.11.276/aws-java-sdk-comprehend-1.11.276.pom",
-      "sha1": "e65561d9c8b9421e164ed0de01d6bebbd9b6c1f4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-config/1.11.276/aws-java-sdk-config-1.11.276.jar",
-      "sha1": "bd0ec45dd93fc045b1bf38b45d8f9b76cc7e1744"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-config/1.11.276/aws-java-sdk-config-1.11.276.pom",
-      "sha1": "286ec624ccc087331a0762947985acb65d65d4fb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-core/1.11.22/aws-java-sdk-core-1.11.22.pom",
-      "sha1": "0cae44f2477e7c2cbbe284e13420c97ff570dc3d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-core/1.11.276/aws-java-sdk-core-1.11.276.jar",
-      "sha1": "07314655715cae0193838dc81bbc25cbdf0edc42"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-core/1.11.276/aws-java-sdk-core-1.11.276.pom",
-      "sha1": "5bab63c08067b88a5ce1785e6bfc6c1b786e1f01"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costandusagereport/1.11.276/aws-java-sdk-costandusagereport-1.11.276.jar",
-      "sha1": "e4b9f7b4a55d585be48095ac5d5ca6fb4237d5fb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costandusagereport/1.11.276/aws-java-sdk-costandusagereport-1.11.276.pom",
-      "sha1": "2d5db18b836607d922e41ba82a6542ffee958f9b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costexplorer/1.11.276/aws-java-sdk-costexplorer-1.11.276.jar",
-      "sha1": "53ea925f336e5c8589768049f41f30dec0d32a83"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-costexplorer/1.11.276/aws-java-sdk-costexplorer-1.11.276.pom",
-      "sha1": "1d80f0d1ab1d503ae5ddb461d53776511b9e3b87"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-datapipeline/1.11.276/aws-java-sdk-datapipeline-1.11.276.jar",
-      "sha1": "7e57778c6db4c0da53d29e1009295a634f578b9f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-datapipeline/1.11.276/aws-java-sdk-datapipeline-1.11.276.pom",
-      "sha1": "7609cdbe6e69f867d5bff6835972686bc465a75b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dax/1.11.276/aws-java-sdk-dax-1.11.276.jar",
-      "sha1": "718f998ab5205afdd945551ef08e5580a3d44153"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dax/1.11.276/aws-java-sdk-dax-1.11.276.pom",
-      "sha1": "ab687372004d599a1711b146684d91ce3ba6cf4c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-devicefarm/1.11.276/aws-java-sdk-devicefarm-1.11.276.jar",
-      "sha1": "26b082ddd7330aef50250ed8d005a68708c62fac"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-devicefarm/1.11.276/aws-java-sdk-devicefarm-1.11.276.pom",
-      "sha1": "29b6f486a052dfdf427f2930cf37f5f50d1c1032"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directconnect/1.11.276/aws-java-sdk-directconnect-1.11.276.jar",
-      "sha1": "87363075ab6749c5692225e76ae6cfe329dcc6e9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directconnect/1.11.276/aws-java-sdk-directconnect-1.11.276.pom",
-      "sha1": "e94851e773117bc73171302c799e55b665942748"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directory/1.11.276/aws-java-sdk-directory-1.11.276.jar",
-      "sha1": "bf32c1a084dfb52efaade73c74a1193e1a5f4bdc"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-directory/1.11.276/aws-java-sdk-directory-1.11.276.pom",
-      "sha1": "3c23f6ca641636d4142440dc959bef83a5532ac4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-discovery/1.11.276/aws-java-sdk-discovery-1.11.276.jar",
-      "sha1": "06115d03c71c9ae03ca3f76959fc241ad3ad17ba"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-discovery/1.11.276/aws-java-sdk-discovery-1.11.276.pom",
-      "sha1": "b7db17f655b0f2db1abed5091e28994246bf82ea"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dms/1.11.276/aws-java-sdk-dms-1.11.276.jar",
-      "sha1": "3b1f27ba6dad81ecece5e9644cf3eb29ef2588bc"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dms/1.11.276/aws-java-sdk-dms-1.11.276.pom",
-      "sha1": "7deb35774893443f4b621e31e464b7366c2a687c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dynamodb/1.11.276/aws-java-sdk-dynamodb-1.11.276.jar",
-      "sha1": "9697461438dac7af35b86772245cd6ba8b9ff4c2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-dynamodb/1.11.276/aws-java-sdk-dynamodb-1.11.276.pom",
-      "sha1": "9fde2b2eb5ba20dd0ef1a8e6278b12b7fc6bfa5a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ec2/1.11.276/aws-java-sdk-ec2-1.11.276.jar",
-      "sha1": "ed55b03f6a5a5a451f75ead107b20ff530f59478"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ec2/1.11.276/aws-java-sdk-ec2-1.11.276.pom",
-      "sha1": "0cd187c9e24f229699d8a49f1b48e129d27d06f2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecr/1.11.276/aws-java-sdk-ecr-1.11.276.jar",
-      "sha1": "1084f04a1bf743e6caa8e768fa83c0f2878b8063"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecr/1.11.276/aws-java-sdk-ecr-1.11.276.pom",
-      "sha1": "71fb106667bc8428cd2421bfd1838717e2d6cfa9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecs/1.11.276/aws-java-sdk-ecs-1.11.276.jar",
-      "sha1": "0710ea1d24086dd8498d7235a999ded10c840455"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ecs/1.11.276/aws-java-sdk-ecs-1.11.276.pom",
-      "sha1": "130518a966311b3a16b01cc9c51bf3926ff5696b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-efs/1.11.276/aws-java-sdk-efs-1.11.276.jar",
-      "sha1": "243affd81184b497db484cd7c884a7ddae993119"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-efs/1.11.276/aws-java-sdk-efs-1.11.276.pom",
-      "sha1": "894d766b226d0122fd674818b99a703dd4ce73a8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticache/1.11.276/aws-java-sdk-elasticache-1.11.276.jar",
-      "sha1": "7aee71ad6b268b95cedecfca1890b6e38e41e153"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticache/1.11.276/aws-java-sdk-elasticache-1.11.276.pom",
-      "sha1": "6a1bc4cc78951487fec755267b77de4b16925d05"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticbeanstalk/1.11.276/aws-java-sdk-elasticbeanstalk-1.11.276.jar",
-      "sha1": "d0e26004b4ce3be877659ccbaf637df7b3f5f693"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticbeanstalk/1.11.276/aws-java-sdk-elasticbeanstalk-1.11.276.pom",
-      "sha1": "dad836114f21e179dc71d684e577fa27ffe2e935"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancing/1.11.276/aws-java-sdk-elasticloadbalancing-1.11.276.jar",
-      "sha1": "19aabdbbbf0b970b971f3596c50a14c92ea84678"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancing/1.11.276/aws-java-sdk-elasticloadbalancing-1.11.276.pom",
-      "sha1": "f8d1a56af06414ed8f87570dcd506f02aa27232c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancingv2/1.11.276/aws-java-sdk-elasticloadbalancingv2-1.11.276.jar",
-      "sha1": "561b85cc0dbe7e602dfe1cdd6048d1e1aa0ad019"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticloadbalancingv2/1.11.276/aws-java-sdk-elasticloadbalancingv2-1.11.276.pom",
-      "sha1": "f815f8abb368eeb13ff5e4ce2564c9b74fc04308"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticsearch/1.11.276/aws-java-sdk-elasticsearch-1.11.276.jar",
-      "sha1": "d80bf64fe82f7a7e92196ebeb0585fcce1fc6bbe"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elasticsearch/1.11.276/aws-java-sdk-elasticsearch-1.11.276.pom",
-      "sha1": "5e403c079512b8e61399e1de14547212e19f7cdb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elastictranscoder/1.11.276/aws-java-sdk-elastictranscoder-1.11.276.jar",
-      "sha1": "0828ef9b4f26b7c85a5df24774ea7a2635894449"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-elastictranscoder/1.11.276/aws-java-sdk-elastictranscoder-1.11.276.pom",
-      "sha1": "af77702e4c30cf244eea789005150c1b3bf6cf09"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-emr/1.11.276/aws-java-sdk-emr-1.11.276.jar",
-      "sha1": "39ca2c9d9ab16e731cb396c18891f1ef8c97d943"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-emr/1.11.276/aws-java-sdk-emr-1.11.276.pom",
-      "sha1": "451e89f02c26ec89bf7b992655d15724badbd488"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-events/1.11.276/aws-java-sdk-events-1.11.276.jar",
-      "sha1": "a5896efd68b80b37f51fe751381bebc1279ef279"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-events/1.11.276/aws-java-sdk-events-1.11.276.pom",
-      "sha1": "b87116314504ad44f2f44e0e8aff64a8cd9abf65"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-gamelift/1.11.276/aws-java-sdk-gamelift-1.11.276.jar",
-      "sha1": "4d1dfa1d531467e5e372733ef71bc19f1c6f5478"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-gamelift/1.11.276/aws-java-sdk-gamelift-1.11.276.pom",
-      "sha1": "72ee506d6d6ed92d7f72e64b6fc42b8b08475ca3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glacier/1.11.276/aws-java-sdk-glacier-1.11.276.jar",
-      "sha1": "18cf237bf3974be658946305db595470904e8da2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glacier/1.11.276/aws-java-sdk-glacier-1.11.276.pom",
-      "sha1": "7155535f89e30ad2fc7aed9b75f9b80355af2e8c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glue/1.11.276/aws-java-sdk-glue-1.11.276.jar",
-      "sha1": "06eefd48a3a25dbb55c412725eccad6c637a6511"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-glue/1.11.276/aws-java-sdk-glue-1.11.276.pom",
-      "sha1": "2ad29ca038e103f5142a17b48e54594a2b4288c6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-greengrass/1.11.276/aws-java-sdk-greengrass-1.11.276.jar",
-      "sha1": "56ab3ff919366e36814d950f656826ad99dce103"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-greengrass/1.11.276/aws-java-sdk-greengrass-1.11.276.pom",
-      "sha1": "3913a29ab4e9fda3921b82de5d5429ad1bd89af3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-guardduty/1.11.276/aws-java-sdk-guardduty-1.11.276.jar",
-      "sha1": "e949a26b94fbf4aa2b1a2667005e3ee4f333158c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-guardduty/1.11.276/aws-java-sdk-guardduty-1.11.276.pom",
-      "sha1": "a4ca17b17683d24bdd304007c4fd82bfa605c604"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-health/1.11.276/aws-java-sdk-health-1.11.276.jar",
-      "sha1": "6f741c720c7d2368abe0e5184adf6481b2af1be0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-health/1.11.276/aws-java-sdk-health-1.11.276.pom",
-      "sha1": "d77c14e6624804f965ca753b8c935e2a962d5658"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iam/1.11.276/aws-java-sdk-iam-1.11.276.jar",
-      "sha1": "277f5569b115b1c36174b4ce2fd6aa024172926d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iam/1.11.276/aws-java-sdk-iam-1.11.276.pom",
-      "sha1": "3c46d28dbb1c3286bc935d48298d119b89c7e367"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-importexport/1.11.276/aws-java-sdk-importexport-1.11.276.jar",
-      "sha1": "e4c8b451c8ad1497dff9f3a333ec2d471bd1582f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-importexport/1.11.276/aws-java-sdk-importexport-1.11.276.pom",
-      "sha1": "02092625b7dc489641c14da2cf23d6f67c998364"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-inspector/1.11.276/aws-java-sdk-inspector-1.11.276.jar",
-      "sha1": "1946dd3e9eb9b5dbd6718841d97cc1969a86bcb9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-inspector/1.11.276/aws-java-sdk-inspector-1.11.276.pom",
-      "sha1": "5cdc7b4143db34dc9b1fa6d8070df92b4ea8ca86"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iot/1.11.276/aws-java-sdk-iot-1.11.276.jar",
-      "sha1": "2c0354b346a6dfa300ee031d78ed049b35c85df1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iot/1.11.276/aws-java-sdk-iot-1.11.276.pom",
-      "sha1": "9499ad941cdcf33c7a9cb30ab8c64581c327e731"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iotjobsdataplane/1.11.276/aws-java-sdk-iotjobsdataplane-1.11.276.jar",
-      "sha1": "f2166046316067a7033592630389d6da37c99e04"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-iotjobsdataplane/1.11.276/aws-java-sdk-iotjobsdataplane-1.11.276.pom",
-      "sha1": "00e638af1810f1d14ae05fc9277743fa6ce60b16"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesis/1.11.276/aws-java-sdk-kinesis-1.11.276.jar",
-      "sha1": "ad4a7919d6128216f1a2ff17a8769c1aabfbd98c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesis/1.11.276/aws-java-sdk-kinesis-1.11.276.pom",
-      "sha1": "e113ad7d61476cdede35c4181059c43f33ca2d88"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesisvideo/1.11.276/aws-java-sdk-kinesisvideo-1.11.276.jar",
-      "sha1": "26cedb8cd8f0b0b756953515550b0653bc8ac52b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kinesisvideo/1.11.276/aws-java-sdk-kinesisvideo-1.11.276.pom",
-      "sha1": "b397355102c463e529267034f32682a54d4b7614"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kms/1.11.276/aws-java-sdk-kms-1.11.276.jar",
-      "sha1": "9120fe917b08b7f882c637554d7c26b481dbd97e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-kms/1.11.276/aws-java-sdk-kms-1.11.276.pom",
-      "sha1": "8b3cd3fa230aeebcc7258777031d78c177510595"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lambda/1.11.276/aws-java-sdk-lambda-1.11.276.jar",
-      "sha1": "f0644142c0d967b3df07cd0ed565201d6f1e1cd4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lambda/1.11.276/aws-java-sdk-lambda-1.11.276.pom",
-      "sha1": "cb16afd03e372e4f2cd123e6a5e2f587e04b2d2a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lex/1.11.276/aws-java-sdk-lex-1.11.276.jar",
-      "sha1": "9eaa481f31283545750e456d42c58641807f21b0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lex/1.11.276/aws-java-sdk-lex-1.11.276.pom",
-      "sha1": "50ce68ed04e5425cda511aae59cb1b16caa28817"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lexmodelbuilding/1.11.276/aws-java-sdk-lexmodelbuilding-1.11.276.jar",
-      "sha1": "881b7c012ddc1a7f02bf1148785fefbf6de90acf"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lexmodelbuilding/1.11.276/aws-java-sdk-lexmodelbuilding-1.11.276.pom",
-      "sha1": "5474602eb83b8a07428840fd5743599ecf41e626"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lightsail/1.11.276/aws-java-sdk-lightsail-1.11.276.jar",
-      "sha1": "837d3e96e3bb39778ae4cec3db9e6253cbdb1fe3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-lightsail/1.11.276/aws-java-sdk-lightsail-1.11.276.pom",
-      "sha1": "a7ed266c44fd74545e1e8b95ed4d7119d62ca737"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-logs/1.11.276/aws-java-sdk-logs-1.11.276.jar",
-      "sha1": "1ae771f73d8392d3b3a5cb5f59a05f1721df00f7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-logs/1.11.276/aws-java-sdk-logs-1.11.276.pom",
-      "sha1": "6c6fe51b6e37f1c1c467887bde2e6c579e4e8382"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-machinelearning/1.11.276/aws-java-sdk-machinelearning-1.11.276.jar",
-      "sha1": "272a54f6f0bf9d832f9d63baa6d492e7e4945958"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-machinelearning/1.11.276/aws-java-sdk-machinelearning-1.11.276.pom",
-      "sha1": "8f64350da4dc6ee5b33029016cacf035f2a22ccb"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacecommerceanalytics/1.11.276/aws-java-sdk-marketplacecommerceanalytics-1.11.276.jar",
-      "sha1": "b1f8d1d30dc45ac0d3ba107c4488e70606f972e2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacecommerceanalytics/1.11.276/aws-java-sdk-marketplacecommerceanalytics-1.11.276.pom",
-      "sha1": "d667832f3f0917f15dce5d1d64bac34cea87c86e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplaceentitlement/1.11.276/aws-java-sdk-marketplaceentitlement-1.11.276.jar",
-      "sha1": "8be55cb8c36e28996e0b980c494846cdecaed375"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplaceentitlement/1.11.276/aws-java-sdk-marketplaceentitlement-1.11.276.pom",
-      "sha1": "c8f915728fb5460cb67c8705eb26114ceaa67c47"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacemeteringservice/1.11.276/aws-java-sdk-marketplacemeteringservice-1.11.276.jar",
-      "sha1": "41e2b80ada0d3fef8e5c32273fd96845ba5cffb3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-marketplacemeteringservice/1.11.276/aws-java-sdk-marketplacemeteringservice-1.11.276.pom",
-      "sha1": "f4b33544a31fca86485f6d8934923fb9af17736a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mechanicalturkrequester/1.11.276/aws-java-sdk-mechanicalturkrequester-1.11.276.jar",
-      "sha1": "9203bd137a090d03834d337d787d15082861b3f8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mechanicalturkrequester/1.11.276/aws-java-sdk-mechanicalturkrequester-1.11.276.pom",
-      "sha1": "4eeac77fbfd90d0313f1a5739ccac8994bb2cc70"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediaconvert/1.11.276/aws-java-sdk-mediaconvert-1.11.276.jar",
-      "sha1": "830abe735b0b1a2490c929a6fcd672e94ae7d4bd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediaconvert/1.11.276/aws-java-sdk-mediaconvert-1.11.276.pom",
-      "sha1": "c3de7fa40b836d31bc392d9922d7b4b2ff9b04fe"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-medialive/1.11.276/aws-java-sdk-medialive-1.11.276.jar",
-      "sha1": "3b545e020a358184dc650b45b123caf40fdfcb86"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-medialive/1.11.276/aws-java-sdk-medialive-1.11.276.pom",
-      "sha1": "2a3134247c28ded6f7f4653827f5446ac250ecea"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediapackage/1.11.276/aws-java-sdk-mediapackage-1.11.276.jar",
-      "sha1": "6b5f36d70e1e7dca45d4bdd8b15b7faea439f5cd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediapackage/1.11.276/aws-java-sdk-mediapackage-1.11.276.pom",
-      "sha1": "643f8424820fe2d85dade6d957160ed22a96be04"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastore/1.11.276/aws-java-sdk-mediastore-1.11.276.jar",
-      "sha1": "f6f90eb80b9ed0fb067b22c87799253f6a0fc1f0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastore/1.11.276/aws-java-sdk-mediastore-1.11.276.pom",
-      "sha1": "ebe9686c157c7a246598be96154142fbac4f7642"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastoredata/1.11.276/aws-java-sdk-mediastoredata-1.11.276.jar",
-      "sha1": "030092743df6ae167eff57b597ba9c94adc1450d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mediastoredata/1.11.276/aws-java-sdk-mediastoredata-1.11.276.pom",
-      "sha1": "91b34f14ff76b21c1ef9e25161d3908c36b1e423"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-migrationhub/1.11.276/aws-java-sdk-migrationhub-1.11.276.jar",
-      "sha1": "0b3c7bbbfecb12b8db03c308cfd93eb02fd9115f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-migrationhub/1.11.276/aws-java-sdk-migrationhub-1.11.276.pom",
-      "sha1": "01323165da6cdbeb112a66a980c8d28c4fb92324"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mobile/1.11.276/aws-java-sdk-mobile-1.11.276.jar",
-      "sha1": "059cdb47ff4b845b19702ed333d1ff475ce5c0be"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mobile/1.11.276/aws-java-sdk-mobile-1.11.276.pom",
-      "sha1": "a369b36ac448ddd9e175fce2c2c8778fee3dc675"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-models/1.11.276/aws-java-sdk-models-1.11.276.jar",
-      "sha1": "1e8d4066528a1f3925646eb1d13eb9d972f711ce"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-models/1.11.276/aws-java-sdk-models-1.11.276.pom",
-      "sha1": "bc3ad5fedf94f0a5ddf011fee05a695e087c825e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mq/1.11.276/aws-java-sdk-mq-1.11.276.jar",
-      "sha1": "f5554cfe3f9c56269f5e1fbb509c0fbdada0c5c8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-mq/1.11.276/aws-java-sdk-mq-1.11.276.pom",
-      "sha1": "b6119d0b648d9bd86ed0137ad5db53bee8f01709"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworks/1.11.276/aws-java-sdk-opsworks-1.11.276.jar",
-      "sha1": "a0638875d33a7ca4d2d0d008ebeb1e522bea93f7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworks/1.11.276/aws-java-sdk-opsworks-1.11.276.pom",
-      "sha1": "4198ca4cd5d8c1fe6c650b432c81463d2ddd822e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworkscm/1.11.276/aws-java-sdk-opsworkscm-1.11.276.jar",
-      "sha1": "6dc7c11ebbbb6921fc11dae7344d9fc6211041f4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-opsworkscm/1.11.276/aws-java-sdk-opsworkscm-1.11.276.pom",
-      "sha1": "a41d4b3bc6087da0c1e43a58f55cb4209e9a263f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-organizations/1.11.276/aws-java-sdk-organizations-1.11.276.jar",
-      "sha1": "b09552c772461a5e470561c8e733e9c4de836e64"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-organizations/1.11.276/aws-java-sdk-organizations-1.11.276.pom",
-      "sha1": "1f2e0e2c40fd1e9b6de007975ca82e6be21357b6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pinpoint/1.11.276/aws-java-sdk-pinpoint-1.11.276.jar",
-      "sha1": "259ecaceeef98805370b7ed5bdb19ef67cacc347"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pinpoint/1.11.276/aws-java-sdk-pinpoint-1.11.276.pom",
-      "sha1": "21a3aa52c55cf43ba81b8fce1525beb45f4d9060"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-polly/1.11.276/aws-java-sdk-polly-1.11.276.jar",
-      "sha1": "719c35b1188b9bec076974433d8f1c4a2003d4f1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-polly/1.11.276/aws-java-sdk-polly-1.11.276.pom",
-      "sha1": "087d394d008074dc99806f37b587b2035fe022d2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pom/1.11.22/aws-java-sdk-pom-1.11.22.pom",
-      "sha1": "c8ef804a5c40011aa68cc3a97e7f2abdba79cb4f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pom/1.11.276/aws-java-sdk-pom-1.11.276.pom",
-      "sha1": "af705cd2e2d33092c5529e096dde83ac89a539b8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pricing/1.11.276/aws-java-sdk-pricing-1.11.276.jar",
-      "sha1": "ae86dcef66fa8669cd591a7cf1136a16ea259c96"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-pricing/1.11.276/aws-java-sdk-pricing-1.11.276.pom",
-      "sha1": "394788969b12da20369687c467eab4634d3bd76a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rds/1.11.276/aws-java-sdk-rds-1.11.276.jar",
-      "sha1": "9d58a3878a881c777ec31e46b21278166d74df67"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rds/1.11.276/aws-java-sdk-rds-1.11.276.pom",
-      "sha1": "52120ac852c5555d8d566d0ad738de7f2c0eab83"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-redshift/1.11.276/aws-java-sdk-redshift-1.11.276.jar",
-      "sha1": "cd6a3e660d751c8f33c90d16f1321dd2c7f653e6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-redshift/1.11.276/aws-java-sdk-redshift-1.11.276.pom",
-      "sha1": "49c7f9422fbd7c22a8f5aa8d97faa705594ac1f0"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rekognition/1.11.276/aws-java-sdk-rekognition-1.11.276.jar",
-      "sha1": "10018100c11691cd1a46fa27520631ca8fd81d7a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-rekognition/1.11.276/aws-java-sdk-rekognition-1.11.276.pom",
-      "sha1": "966ad8b2a9fce06f3362b9665118925e2966d86d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroups/1.11.276/aws-java-sdk-resourcegroups-1.11.276.jar",
-      "sha1": "47f68d2891565487716bc647c2a7c2ac18e34fdd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroups/1.11.276/aws-java-sdk-resourcegroups-1.11.276.pom",
-      "sha1": "01a85786375cbd4cbc4c78fbd6353f131dbc3c38"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroupstaggingapi/1.11.276/aws-java-sdk-resourcegroupstaggingapi-1.11.276.jar",
-      "sha1": "2e1b995e3a3edace323fb97679d129dcedbf1993"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-resourcegroupstaggingapi/1.11.276/aws-java-sdk-resourcegroupstaggingapi-1.11.276.pom",
-      "sha1": "ce4231670d2268df2747c7a58b3464a525086698"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-route53/1.11.276/aws-java-sdk-route53-1.11.276.jar",
-      "sha1": "ef9993a1c3ba9d652deca3bc073f659f009d7efd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-route53/1.11.276/aws-java-sdk-route53-1.11.276.pom",
-      "sha1": "e8aa32cfd284a39c121a6a5e4f5637cc634d31a1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-s3/1.11.276/aws-java-sdk-s3-1.11.276.jar",
-      "sha1": "a1c52a11e8c03c5f63890895271216ba91922ff7"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-s3/1.11.276/aws-java-sdk-s3-1.11.276.pom",
-      "sha1": "91102d28c685da7903443a2d0ebaf3201b1e3813"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemaker/1.11.276/aws-java-sdk-sagemaker-1.11.276.jar",
-      "sha1": "2d025aa555b79951dff69fd4ef77e1212ad69a45"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemaker/1.11.276/aws-java-sdk-sagemaker-1.11.276.pom",
-      "sha1": "52e8d0daeccf38540bddcf740c10029a1cdbc7c3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemakerruntime/1.11.276/aws-java-sdk-sagemakerruntime-1.11.276.jar",
-      "sha1": "fc9bc60e85501c94e4a003fc8b0cd6b84c7f836d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sagemakerruntime/1.11.276/aws-java-sdk-sagemakerruntime-1.11.276.pom",
-      "sha1": "bc5b5500dc186a3427e8fe3b275c9f45ce834b5d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-serverlessapplicationrepository/1.11.276/aws-java-sdk-serverlessapplicationrepository-1.11.276.jar",
-      "sha1": "7c4176f2f9a2a610741b2c76f400ee8b242b60a8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-serverlessapplicationrepository/1.11.276/aws-java-sdk-serverlessapplicationrepository-1.11.276.pom",
-      "sha1": "27e89380f1cdc46c1dd009e3ee60232d786cc05a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servermigration/1.11.276/aws-java-sdk-servermigration-1.11.276.jar",
-      "sha1": "fae9eea0f5724034b766e4e26aeb32d61aa1c5f9"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servermigration/1.11.276/aws-java-sdk-servermigration-1.11.276.pom",
-      "sha1": "d96224bb4d638e4ae094ac0da554a12d2c16460c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicecatalog/1.11.276/aws-java-sdk-servicecatalog-1.11.276.jar",
-      "sha1": "5a6f8ed4df44da55f942ce939f5d0807ecc20d4a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicecatalog/1.11.276/aws-java-sdk-servicecatalog-1.11.276.pom",
-      "sha1": "17794c38b674772a7cb1d8164adc6dd7bca97c57"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicediscovery/1.11.276/aws-java-sdk-servicediscovery-1.11.276.jar",
-      "sha1": "5b900ce7f5d57ecae66584cdeda3dcc82eeac901"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-servicediscovery/1.11.276/aws-java-sdk-servicediscovery-1.11.276.pom",
-      "sha1": "33d9307b80b119808810b7722ae89b7c40919a85"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ses/1.11.276/aws-java-sdk-ses-1.11.276.jar",
-      "sha1": "27a9be1c6b35ae66ec9e1d1655e4982e526df4c5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ses/1.11.276/aws-java-sdk-ses-1.11.276.pom",
-      "sha1": "6c2b2d55fa2c9de4c040a7b137972b717c93185a"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-shield/1.11.276/aws-java-sdk-shield-1.11.276.jar",
-      "sha1": "73aed832cdcdd75c3d1c85aea03e8426cc6ae774"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-shield/1.11.276/aws-java-sdk-shield-1.11.276.pom",
-      "sha1": "806d6f6ecdaca575213bf430ca2a4b2da0d30a56"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpledb/1.11.276/aws-java-sdk-simpledb-1.11.276.jar",
-      "sha1": "77618ac03ec6a9a04a837f824dcfa9e9470559de"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpledb/1.11.276/aws-java-sdk-simpledb-1.11.276.pom",
-      "sha1": "1e84a3452d9d8cff80374572ec981b749c16c67e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpleworkflow/1.11.22/aws-java-sdk-simpleworkflow-1.11.22.pom",
-      "sha1": "d2146fa8131bd799d84532b7caae35497eb35221"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpleworkflow/1.11.276/aws-java-sdk-simpleworkflow-1.11.276.jar",
-      "sha1": "44701c6cfcaf7b7b945318511c222f02e8a0046d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-simpleworkflow/1.11.276/aws-java-sdk-simpleworkflow-1.11.276.pom",
-      "sha1": "840b92ea6c35dab6530ff3dbca65c2f49b3cb0e2"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-snowball/1.11.276/aws-java-sdk-snowball-1.11.276.jar",
-      "sha1": "0524a290ecdaefa4fc0a10faead0a4ce44f496e3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-snowball/1.11.276/aws-java-sdk-snowball-1.11.276.pom",
-      "sha1": "9db650cbee2f7aee599f1db90613d8489202805b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sns/1.11.276/aws-java-sdk-sns-1.11.276.jar",
-      "sha1": "88bce4048c07061a950a3861a11c6afc662d6b6f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sns/1.11.276/aws-java-sdk-sns-1.11.276.pom",
-      "sha1": "e515608a30c3145b7741980cd9fa31a8bb3640df"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sqs/1.11.276/aws-java-sdk-sqs-1.11.276.jar",
-      "sha1": "4687506096ff8017386c05102b76e376e7f60a19"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sqs/1.11.276/aws-java-sdk-sqs-1.11.276.pom",
-      "sha1": "10e71b970c1fe26e5a485d245d0d5ae20b066bc6"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ssm/1.11.276/aws-java-sdk-ssm-1.11.276.jar",
-      "sha1": "b3ece033c61dc2bc03c83145a3579db712199d4f"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-ssm/1.11.276/aws-java-sdk-ssm-1.11.276.pom",
-      "sha1": "32e87e8b117a58a92a106c2326644cdba15d20a4"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-stepfunctions/1.11.276/aws-java-sdk-stepfunctions-1.11.276.jar",
-      "sha1": "7a1dcb7d08cd5f23b41f0eb94a5eb1172a342f72"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-stepfunctions/1.11.276/aws-java-sdk-stepfunctions-1.11.276.pom",
-      "sha1": "b797cacfbe47e1808fca5f47505b00e535c27e85"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-storagegateway/1.11.276/aws-java-sdk-storagegateway-1.11.276.jar",
-      "sha1": "b786f51d5f82a4d35701e16abe5836e7a95091bd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-storagegateway/1.11.276/aws-java-sdk-storagegateway-1.11.276.pom",
-      "sha1": "24cde3c25f23857f24269d37d2e4424c98a1413c"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sts/1.11.276/aws-java-sdk-sts-1.11.276.jar",
-      "sha1": "fe7b86d2cd9495d09b533e03c5f5e054b613c814"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-sts/1.11.276/aws-java-sdk-sts-1.11.276.pom",
-      "sha1": "5263e61453a3e08085deb484d7d743817f98f2c5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-support/1.11.276/aws-java-sdk-support-1.11.276.jar",
-      "sha1": "e85ab956c4640271966b48ca576d0286753580e1"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-support/1.11.276/aws-java-sdk-support-1.11.276.pom",
-      "sha1": "c9be0a4437f3cf8885690a0e4a86c610fba7e44e"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-swf-libraries/1.11.22/aws-java-sdk-swf-libraries-1.11.22.jar",
-      "sha1": "04bb64607f756c0c1f427bdb491db05b48402694"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-swf-libraries/1.11.22/aws-java-sdk-swf-libraries-1.11.22.pom",
-      "sha1": "fcf308cd1a842bdaa033b0c2d3f3fede348f9409"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-transcribe/1.11.276/aws-java-sdk-transcribe-1.11.276.jar",
-      "sha1": "e562cb9a752d4b8618d7066de998b67bdca8127d"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-transcribe/1.11.276/aws-java-sdk-transcribe-1.11.276.pom",
-      "sha1": "449606f62a1fd602c855d08daee9249a708f2414"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-translate/1.11.276/aws-java-sdk-translate-1.11.276.jar",
-      "sha1": "7acce1c63e820f00ee1948e0629f0f1619321032"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-translate/1.11.276/aws-java-sdk-translate-1.11.276.pom",
-      "sha1": "b1f2f878c1f24d717b7b59a6441215d51d790422"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-waf/1.11.276/aws-java-sdk-waf-1.11.276.jar",
-      "sha1": "2753a8321b6e779773de4bb007ecade4675f8f23"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-waf/1.11.276/aws-java-sdk-waf-1.11.276.pom",
-      "sha1": "5712967c583a62123ab02398a976e153ab209e88"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workdocs/1.11.276/aws-java-sdk-workdocs-1.11.276.jar",
-      "sha1": "04b22eea6229c6942a80fd9012448b2afe0d7b6b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workdocs/1.11.276/aws-java-sdk-workdocs-1.11.276.pom",
-      "sha1": "615d04da482d7f5ebac35191e44e0477a2b7165b"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workmail/1.11.276/aws-java-sdk-workmail-1.11.276.jar",
-      "sha1": "cb653a4f9c0a98b0c762a801de40511794bcc0e8"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workmail/1.11.276/aws-java-sdk-workmail-1.11.276.pom",
-      "sha1": "d00ba76d278a6d56d5f7517b3c9b70434bf36bb5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workspaces/1.11.276/aws-java-sdk-workspaces-1.11.276.jar",
-      "sha1": "6929638a7907394778f1e22f3c3bfcb7282f31d5"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-workspaces/1.11.276/aws-java-sdk-workspaces-1.11.276.pom",
-      "sha1": "41b5b7aa6da766d0572c98d8229965d2feb046cd"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-xray/1.11.276/aws-java-sdk-xray-1.11.276.jar",
-      "sha1": "022497a43a019258bbe59abff5a567ac6c4443ef"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk-xray/1.11.276/aws-java-sdk-xray-1.11.276.pom",
-      "sha1": "2cceb79465ba9f13b70e1cda984060cdff698520"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk/1.11.276/aws-java-sdk-1.11.276.jar",
-      "sha1": "65128e5f3eaa97aab03711a3ed1560908d6a26b3"
-    },
-    {
-      "path": "com/amazonaws/aws-java-sdk/1.11.276/aws-java-sdk-1.11.276.pom",
-      "sha1": "11ef577b2a751072bfe49e7fee13d60beb94b1ee"
-    },
-    {
-      "path": "com/amazonaws/jmespath-java/1.11.276/jmespath-java-1.11.276.jar",
-      "sha1": "3dc2aaf1bf185fe91ff44e17339f480bd4f44ff4"
-    },
-    {
-      "path": "com/amazonaws/jmespath-java/1.11.276/jmespath-java-1.11.276.pom",
-      "sha1": "c7a62a124dcf9d2bb31c37529509072e943fcf7c"
-    },
-    {
       "path": "com/beust/jcommander/1.78/jcommander-1.78.jar",
       "sha1": "a3927de9bd6f351429bcf763712c9890629d8f51"
     },
@@ -1150,80 +90,12 @@
       "sha1": "d99f5df85ea6656189de6865d34653a804feca16"
     },
     {
-      "path": "com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.jar",
-      "sha1": "a0990e2e812ac6639b6ce955c91b13228500476e"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.pom",
-      "sha1": "74f0cf17283e921a4b78ce5a0588d22ffa26d832"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.6.6/jackson-core-2.6.6.pom",
-      "sha1": "3bbe4552671bc6c44eb0d4eb194b383dd6dfdb88"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.6.7/jackson-core-2.6.7.jar",
-      "sha1": "81838e08d5e10e33cdee7299f9682d836b78c63e"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.6.7/jackson-core-2.6.7.pom",
-      "sha1": "3457ebb3180f4f2f599242e70697c80135c58dcf"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-databind/2.6.6/jackson-databind-2.6.6.pom",
-      "sha1": "32698733d34d0c3bf27904a1549c9dd2a9555dbe"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-databind/2.6.7.1/jackson-databind-2.6.7.1.jar",
-      "sha1": "306775aeb5164835a1dcbdf3f945587045cfb3b5"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-databind/2.6.7.1/jackson-databind-2.6.7.1.pom",
-      "sha1": "fa5574a223726d64bcd6ec5f5c6afaa166d63471"
-    },
-    {
-      "path": "com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.6/jackson-dataformat-cbor-2.6.6.pom",
-      "sha1": "41621b57be660f734089aa44f95152232a21cceb"
-    },
-    {
-      "path": "com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.jar",
-      "sha1": "ba9e74b11135b18248e960df657a2b86ae77a079"
-    },
-    {
-      "path": "com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.pom",
-      "sha1": "db89ee53576ae700a78bfe1a9f605b074531064a"
-    },
-    {
-      "path": "com/fasterxml/jackson/jackson-parent/2.6.1/jackson-parent-2.6.1.pom",
-      "sha1": "d9178b7012e394e8c631f98167deca4f85a2cfde"
-    },
-    {
-      "path": "com/fasterxml/jackson/jackson-parent/2.6.2/jackson-parent-2.6.2.pom",
-      "sha1": "b232d48541db046aa1245c27bfa7398ea737d2ad"
-    },
-    {
-      "path": "com/fasterxml/oss-parent/23/oss-parent-23.pom",
-      "sha1": "8ee7f1755fea4b333428aac06fca31330404357f"
-    },
-    {
-      "path": "com/fasterxml/oss-parent/24/oss-parent-24.pom",
-      "sha1": "f4fbf349d22ab6a355ebecdb8a2886dd790b4877"
-    },
-    {
       "path": "com/github/luben/zstd-jni/1.5.2-5/zstd-jni-1.5.2-5.jar",
       "sha1": "ef34c3a855e144c03de5c0b0a8e80469915ebae6"
     },
     {
       "path": "com/github/luben/zstd-jni/1.5.2-5/zstd-jni-1.5.2-5.pom",
       "sha1": "25ac03c4da03aa7211e7cc5c2c23ec72f1eb8b71"
-    },
-    {
-      "path": "com/github/platform-team/aws-maven/6.0.0/aws-maven-6.0.0.jar",
-      "sha1": "01d5ce82f21445014ea661b94edb1776659fdec0"
-    },
-    {
-      "path": "com/github/platform-team/aws-maven/6.0.0/aws-maven-6.0.0.pom",
-      "sha1": "dc15dc0462a71c38cf113738c99975b883fbffb7"
     },
     {
       "path": "com/google/code/findbugs/annotations/3.0.0/annotations-3.0.0.jar",
@@ -1410,52 +282,52 @@
       "sha1": "1b77ba79f9b2b7dfd4e15ea7bb0d568d5eb9cb8d"
     },
     {
-      "path": "com/google/inject/extensions/extensions-parent/4.0-beta5/extensions-parent-4.0-beta5.pom",
-      "sha1": "516d8e5e771cd573364dc6ff53c2c6c13908a713"
+      "path": "com/google/inject/extensions/extensions-parent/4.0/extensions-parent-4.0.pom",
+      "sha1": "db8e45ab989a2347421ff0d32be5446528d6f63f"
     },
     {
-      "path": "com/google/inject/extensions/guice-assistedinject/4.0-beta5/guice-assistedinject-4.0-beta5.jar",
-      "sha1": "820f10e0650cd9ed2591f398937df50f330b147d"
+      "path": "com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.jar",
+      "sha1": "8fa6431da1a2187817e3e52e967535899e2e46ca"
     },
     {
-      "path": "com/google/inject/extensions/guice-assistedinject/4.0-beta5/guice-assistedinject-4.0-beta5.pom",
-      "sha1": "4b9b352e0537b0ca49cb97533387864b185df09b"
+      "path": "com/google/inject/extensions/guice-assistedinject/4.0/guice-assistedinject-4.0.pom",
+      "sha1": "00c7fc29684b20dd475f517d5dafc850c613efde"
     },
     {
-      "path": "com/google/inject/extensions/guice-grapher/4.0-beta5/guice-grapher-4.0-beta5.jar",
-      "sha1": "dd9a00d72fecfa05a77bf28c7922eacddda23b18"
+      "path": "com/google/inject/extensions/guice-grapher/4.0/guice-grapher-4.0.jar",
+      "sha1": "4e611ae9b12bfc4ddd430a58c65ba1c4328eeaf9"
     },
     {
-      "path": "com/google/inject/extensions/guice-grapher/4.0-beta5/guice-grapher-4.0-beta5.pom",
-      "sha1": "1cd692901e55d382cdb9e647d74617bb68d63126"
+      "path": "com/google/inject/extensions/guice-grapher/4.0/guice-grapher-4.0.pom",
+      "sha1": "86b9c4937ebba7d14054d0f025f0df51d071218d"
     },
     {
-      "path": "com/google/inject/extensions/guice-multibindings/4.0-beta5/guice-multibindings-4.0-beta5.jar",
-      "sha1": "f432356db0a167127ffe4a7921238d7205b12682"
+      "path": "com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.jar",
+      "sha1": "f4509545b4470bbcc865aa500ad6fef2e97d28bf"
     },
     {
-      "path": "com/google/inject/extensions/guice-multibindings/4.0-beta5/guice-multibindings-4.0-beta5.pom",
-      "sha1": "3cff7b7b5f418f5edca0fa1b0d4bcd3f3215d9c7"
+      "path": "com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.pom",
+      "sha1": "2387a1e5163308cd826b348db825973df0800ad3"
     },
     {
-      "path": "com/google/inject/extensions/guice-throwingproviders/4.0-beta5/guice-throwingproviders-4.0-beta5.jar",
-      "sha1": "8840bd8267a5b09ee84a314a54dbdc6c1b0a7efb"
+      "path": "com/google/inject/extensions/guice-throwingproviders/4.0/guice-throwingproviders-4.0.jar",
+      "sha1": "90876169e80b4db9b61d654367c4c55079ae4e91"
     },
     {
-      "path": "com/google/inject/extensions/guice-throwingproviders/4.0-beta5/guice-throwingproviders-4.0-beta5.pom",
-      "sha1": "cb52affb5a89e66a5f1d9ab3a7fde7dda1cc5baa"
+      "path": "com/google/inject/extensions/guice-throwingproviders/4.0/guice-throwingproviders-4.0.pom",
+      "sha1": "5118433baea2efed034af00a96e324b5717e8059"
     },
     {
-      "path": "com/google/inject/guice-parent/4.0-beta5/guice-parent-4.0-beta5.pom",
-      "sha1": "13d7df2b77236548d1e7cb9ba688686ddd4f19a5"
+      "path": "com/google/inject/guice-parent/4.0/guice-parent-4.0.pom",
+      "sha1": "a59ca1d3d70552158088d7f71e6c7e8779b9a8a1"
     },
     {
-      "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5-no_aop.jar",
-      "sha1": "7706f581d709b1afd89b4e0dbf1bebf250abbd9b"
+      "path": "com/google/inject/guice/4.0/guice-4.0-no_aop.jar",
+      "sha1": "199b7acaa05b570bbccf31be998f013963e5e752"
     },
     {
-      "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5.pom",
-      "sha1": "1e968b8c1da8cb48b7c0b77ffc565f92f313c392"
+      "path": "com/google/inject/guice/4.0/guice-4.0.pom",
+      "sha1": "688cb7b0d86456e3706573fe583173ee5e728f4e"
     },
     {
       "path": "com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar",
@@ -2122,14 +994,6 @@
       "sha1": "9499f0c87ab43a74c456b9847acbcb5e67fe9f32"
     },
     {
-      "path": "commons-codec/commons-codec/1.9/commons-codec-1.9.jar",
-      "sha1": "9ce04e34240f674bc72680f8b843b1457383161a"
-    },
-    {
-      "path": "commons-codec/commons-codec/1.9/commons-codec-1.9.pom",
-      "sha1": "f5357ff0f308600af3660bf00a8be3415a335723"
-    },
-    {
       "path": "commons-collections/commons-collections/2.0/commons-collections-2.0.pom",
       "sha1": "b0d78d06e725d7f8176256eaeceb9d5b3f0a7bca"
     },
@@ -2390,66 +1254,6 @@
       "sha1": "8df91b46d389066807c634e85ddb8b10222c7586"
     },
     {
-      "path": "io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.jar",
-      "sha1": "fdd68fb3defd7059a7392b9395ee941ef9bacc25"
-    },
-    {
-      "path": "io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.pom",
-      "sha1": "c82408a1224f512ecabe27947caac8c80b6bf9aa"
-    },
-    {
-      "path": "io/netty/netty-codec-http/4.1.17.Final/netty-codec-http-4.1.17.Final.jar",
-      "sha1": "251d7edcb897122b9b23f24ff793cd0739056b9e"
-    },
-    {
-      "path": "io/netty/netty-codec-http/4.1.17.Final/netty-codec-http-4.1.17.Final.pom",
-      "sha1": "d0471c9e26719bccb05702ee4146b842e3017b33"
-    },
-    {
-      "path": "io/netty/netty-codec/4.1.17.Final/netty-codec-4.1.17.Final.jar",
-      "sha1": "1d00f56dc9e55203a4bde5aae3d0828fdeb818e7"
-    },
-    {
-      "path": "io/netty/netty-codec/4.1.17.Final/netty-codec-4.1.17.Final.pom",
-      "sha1": "8d2947bda992ae0ba35827ced7d32d90ce8d23f4"
-    },
-    {
-      "path": "io/netty/netty-common/4.1.17.Final/netty-common-4.1.17.Final.jar",
-      "sha1": "581c8ee239e4dc0976c2405d155f475538325098"
-    },
-    {
-      "path": "io/netty/netty-common/4.1.17.Final/netty-common-4.1.17.Final.pom",
-      "sha1": "2e3b41a4a2f637055ff873d45b283dc6e86b2221"
-    },
-    {
-      "path": "io/netty/netty-handler/4.1.17.Final/netty-handler-4.1.17.Final.jar",
-      "sha1": "18c40ffb61a1d1979eca024087070762fdc4664a"
-    },
-    {
-      "path": "io/netty/netty-handler/4.1.17.Final/netty-handler-4.1.17.Final.pom",
-      "sha1": "40290f7b9c7f54eec0f6441e5d6e82b374d0c650"
-    },
-    {
-      "path": "io/netty/netty-parent/4.1.17.Final/netty-parent-4.1.17.Final.pom",
-      "sha1": "ef64d4dca26e45efa7b42dea81688f8607b642ef"
-    },
-    {
-      "path": "io/netty/netty-resolver/4.1.17.Final/netty-resolver-4.1.17.Final.jar",
-      "sha1": "8f386c80821e200f542da282ae1d3cde5cad8368"
-    },
-    {
-      "path": "io/netty/netty-resolver/4.1.17.Final/netty-resolver-4.1.17.Final.pom",
-      "sha1": "2e0bc9391f7800a33f70eea96907bc64baa0b3d0"
-    },
-    {
-      "path": "io/netty/netty-transport/4.1.17.Final/netty-transport-4.1.17.Final.jar",
-      "sha1": "9585776b0a8153182412b5d5366061ff486914c1"
-    },
-    {
-      "path": "io/netty/netty-transport/4.1.17.Final/netty-transport-4.1.17.Final.pom",
-      "sha1": "dba27c519135ee04fdecfb5b37696f5d1b9b4b6a"
-    },
-    {
       "path": "javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.jar",
       "sha1": "85262acf3ca9816f9537ca47d5adeabaead7cb16"
     },
@@ -2548,14 +1352,6 @@
     {
       "path": "jline/jline/2.14.6/jline-2.14.6.pom",
       "sha1": "378c8caace8e1e65314477420d9734373cf29531"
-    },
-    {
-      "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
-      "sha1": "f5bfc718c95a7b1d3c371bb02a188a4df18361a9"
-    },
-    {
-      "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.pom",
-      "sha1": "b6cd86ad72eb5eb5aa0614880ca284369e4e3624"
     },
     {
       "path": "jtidy/jtidy/4aug2000r7-dev/jtidy-4aug2000r7-dev.jar",
@@ -2678,12 +1474,12 @@
       "sha1": "df7f15de037a1ee4d57d2ed779739089f560338c"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.jar",
-      "sha1": "1c12d070e602efd8021891cdd7fd18bc129372d4"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar",
+      "sha1": "1200e7ebeedbe0d10062093f32925a912020e747"
     },
     {
-      "path": "net/java/dev/jna/jna/4.1.0/jna-4.1.0.pom",
-      "sha1": "05e315ccb7e487e68bf19124d736afbc9136c631"
+      "path": "net/java/dev/jna/jna/5.13.0/jna-5.13.0.pom",
+      "sha1": "b7cc05a5394544befc936c39080a93cc8c1e082e"
     },
     {
       "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
@@ -2954,10 +1750,6 @@
       "sha1": "08b969f02dfa03fa493fd6eba4cb9dcceea5aefd"
     },
     {
-      "path": "org/apache/commons/commons-lang3/3.7/commons-lang3-3.7.jar",
-      "sha1": "557edd918fd41f9260963583ebf5a61a43a6b423"
-    },
-    {
       "path": "org/apache/commons/commons-lang3/3.7/commons-lang3-3.7.pom",
       "sha1": "c445be3b6442b41cbea539d4218be3aea9428a55"
     },
@@ -2992,10 +1784,6 @@
     {
       "path": "org/apache/commons/commons-parent/25/commons-parent-25.pom",
       "sha1": "67b84199ca4acf0d8fbc5256d90b80f746737e94"
-    },
-    {
-      "path": "org/apache/commons/commons-parent/32/commons-parent-32.pom",
-      "sha1": "0e51c4223003c2c7c63f38d7b8823e40eb06bd1f"
     },
     {
       "path": "org/apache/commons/commons-parent/33/commons-parent-33.pom",
@@ -3094,24 +1882,12 @@
       "sha1": "e5b134e5cd3e28dc431ca5397e9b53d28d1cfa74"
     },
     {
-      "path": "org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar",
-      "sha1": "733db77aa8d9b2d68015189df76ab06304406e50"
-    },
-    {
-      "path": "org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.pom",
-      "sha1": "56f6338b324e438307e1f2c2b33bd02268310fc2"
-    },
-    {
       "path": "org/apache/httpcomponents/httpcomponents-client/4.0.2/httpcomponents-client-4.0.2.pom",
       "sha1": "f068349e19ba323665d0bc49141333747b174f3f"
     },
     {
       "path": "org/apache/httpcomponents/httpcomponents-client/4.5.13/httpcomponents-client-4.5.13.pom",
       "sha1": "61045e5bac5f6b0a7e3301053de0d78fc92f09db"
-    },
-    {
-      "path": "org/apache/httpcomponents/httpcomponents-client/4.5.2/httpcomponents-client-4.5.2.pom",
-      "sha1": "55d500e6c1e98ffbb00c35bee72fabc255c22108"
     },
     {
       "path": "org/apache/httpcomponents/httpcomponents-core/4.0.1/httpcomponents-core-4.0.1.pom",
@@ -3124,10 +1900,6 @@
     {
       "path": "org/apache/httpcomponents/httpcomponents-core/4.4.14/httpcomponents-core-4.4.14.pom",
       "sha1": "6dede7e95d51c365a10c346b010797c2656edc65"
-    },
-    {
-      "path": "org/apache/httpcomponents/httpcomponents-core/4.4.4/httpcomponents-core-4.4.4.pom",
-      "sha1": "84c5600018f58510ef3d2c3b5d218bea5d51bbbe"
     },
     {
       "path": "org/apache/httpcomponents/httpcomponents-parent/11/httpcomponents-parent-11.pom",
@@ -3154,24 +1926,12 @@
       "sha1": "16db7143a7586192ac1d863c7ecfaf25541bbc47"
     },
     {
-      "path": "org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar",
-      "sha1": "b31526a230871fbe285fbcbe2813f9c0839ae9b0"
-    },
-    {
-      "path": "org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.pom",
-      "sha1": "2feaed055f70af1aafd223137e4bd456decc5995"
-    },
-    {
       "path": "org/apache/httpcomponents/project/4.0/project-4.0.pom",
       "sha1": "096553966ef79545593062a0c6057a821e39d284"
     },
     {
       "path": "org/apache/httpcomponents/project/4.1/project-4.1.pom",
       "sha1": "b63ff67e6ffc1940041319e0e06d7c6b1d671fd2"
-    },
-    {
-      "path": "org/apache/httpcomponents/project/7/project-7.pom",
-      "sha1": "c486760d8e0eafe8d4932450e386c2805364f782"
     },
     {
       "path": "org/apache/jackrabbit/jackrabbit-jcr-commons/1.5.0/jackrabbit-jcr-commons-1.5.0.jar",
@@ -6774,10 +5534,6 @@
       "sha1": "a82e1ddd2d795616ac58d73ed246b8ec65326dfa"
     },
     {
-      "path": "org/codehaus/plexus/plexus-utils/1.1/plexus-utils-1.1.jar",
-      "sha1": "fa632b7f1cb7c50963d0fb7d818ca93c75c10127"
-    },
-    {
       "path": "org/codehaus/plexus/plexus-utils/1.1/plexus-utils-1.1.pom",
       "sha1": "15492ecd00920daca9ec15f6acd695b626621e5b"
     },
@@ -7198,10 +5954,6 @@
       "sha1": "4e468148c830041ebe9389f3b183febf6508b0d7"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
-      "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
-    },
-    {
       "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
       "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
     },
@@ -7216,14 +5968,6 @@
     {
       "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.pom",
       "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
-      "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
-      "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
     },
     {
       "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
@@ -7330,20 +6074,20 @@
       "sha1": "e8848369738c03e40af5507686216f9b8b44b6a3"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230817.181106-1.pom",
+      "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230818.165756-2.pom",
       "sha1": "81f6a397361513f34b26d5f43d329df888f2feaa"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.jar",
-      "sha1": "04e2c42db23399a624ac3c4dce874a66749379c7"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.jar",
+      "sha1": "5ee76d15654f02903cc47737f2436c26e8890950"
     },
     {
-      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230817.181113-1.pom",
-      "sha1": "3c8bc01cd1f032dd7d78f2e3d6198e4d51502693"
+      "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT/nailgun-server-1.0.0-20230818.165803-2.pom",
+      "sha1": "0b6e24b04b9c45f192ec3e23e5fdbd2627049def"
     },
     {
       "path": "org/kframework/dependencies/ng/0.9.2-k4.0/ng-0.9.2-k4.0-linux.uexe",
@@ -7590,12 +6334,12 @@
       "sha1": "79c2b5f8150ae55c4f46c77a5f8f5ea9ad2850a2"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
-      "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.jar",
+      "sha1": "16b228fa6f9d5afece0f2d2d6d5b03d5372dbea4"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.pom",
-      "sha1": "be1e909cee8fcaa2aba20438ffb7e2f7462e3e7d"
+      "path": "org/scala-lang/modules/scala-xml_2.12/2.1.0/scala-xml_2.12-2.1.0.pom",
+      "sha1": "d07e9c55f4e6c91902087aeac9d2a9d351119c68"
     },
     {
       "path": "org/scala-lang/scala-compiler/2.10.5/scala-compiler-2.10.5.jar",
@@ -7606,12 +6350,12 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.jar",
-      "sha1": "3b7df7263c4302955a7cfe37d4af6cef5d4551bb"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.jar",
+      "sha1": "87fa026116e55786ea1a878ea37fb13b6d1365f6"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.pom",
-      "sha1": "c54913f97735e7460eb53a34e301259c1a26c9d6"
+      "path": "org/scala-lang/scala-compiler/2.12.18/scala-compiler-2.12.18.pom",
+      "sha1": "eb8ca5ce97606a7ee2ab8e056f2b442a15106268"
     },
     {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
@@ -7622,20 +6366,20 @@
       "sha1": "4e8b721680f2defb491fe90447302658d464d5c0"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.jar",
-      "sha1": "270fc1cda47bc255f3cd03152ec8c2ed7d224e2b"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.jar",
+      "sha1": "0f2e89c89340282c9625ac57efb451056f31af57"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.pom",
-      "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
+      "path": "org/scala-lang/scala-library/2.12.15/scala-library-2.12.15.pom",
+      "sha1": "206e552eb6bed28249057c2f6e2357ed348ad4fd"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.jar",
-      "sha1": "1c65e76e15684d378fa2deb4ebe536a68e10c9bf"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.jar",
+      "sha1": "fa825f984172f6801e3d8c476071b1823c0a925b"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.pom",
-      "sha1": "1b1783cf18f4dc11a625701bdf185cb93b6f5de3"
+      "path": "org/scala-lang/scala-library/2.12.18/scala-library-2.12.18.pom",
+      "sha1": "e143788a12ccf03101653a0ad8158ecda8850159"
     },
     {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.jar",
@@ -7646,12 +6390,12 @@
       "sha1": "30f1f646114a79eeefb254ead190f045c4605649"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.jar",
-      "sha1": "7116526cd205bb709241b29426ff98291f7facd0"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.jar",
+      "sha1": "7e1a6985bfbe78bdc94f33613301ef385d4629b4"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.pom",
-      "sha1": "a3316246e57553ae82e0817379535eb049c42215"
+      "path": "org/scala-lang/scala-reflect/2.12.18/scala-reflect-2.12.18.pom",
+      "sha1": "7a479b115f28e4e4a977886fd703be68dff3ce53"
     },
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar",
@@ -7660,14 +6404,6 @@
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.pom",
       "sha1": "8aa25adef55174f1436073e551953c2f74a5c71b"
-    },
-    {
-      "path": "org/slf4j/jcl-over-slf4j/1.7.25/jcl-over-slf4j-1.7.25.jar",
-      "sha1": "f8c32b13ff142a513eeb5b6330b1588dcb2c0461"
-    },
-    {
-      "path": "org/slf4j/jcl-over-slf4j/1.7.25/jcl-over-slf4j-1.7.25.pom",
-      "sha1": "7d600fcbc5fec890d33f4ca3e99bc3f664d0051a"
     },
     {
       "path": "org/slf4j/slf4j-api/1.5.10/slf4j-api-1.5.10.jar",
@@ -7688,14 +6424,6 @@
     {
       "path": "org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6.pom",
       "sha1": "b79729ffc12292c0ec755db12360486066f6fd34"
-    },
-    {
-      "path": "org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar",
-      "sha1": "da76ca59f6a57ee3102f8f9bd9cee742973efa8a"
-    },
-    {
-      "path": "org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.pom",
-      "sha1": "df51c4a85dd6acf8b6cdc9323596766b3d577c28"
     },
     {
       "path": "org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar",
@@ -7756,10 +6484,6 @@
     {
       "path": "org/slf4j/slf4j-parent/1.5.6/slf4j-parent-1.5.6.pom",
       "sha1": "7e94cd535680417391d54c1b1a14bcf9ed29a400"
-    },
-    {
-      "path": "org/slf4j/slf4j-parent/1.7.25/slf4j-parent-1.7.25.pom",
-      "sha1": "8521938f0f43c60b79f9f73a9409d10e4bac649a"
     },
     {
       "path": "org/slf4j/slf4j-parent/1.7.30/slf4j-parent-1.7.30.pom",
@@ -8142,14 +6866,6 @@
       "sha1": "aefe9b573584341d6c271e43b95ba64179c98b31"
     },
     {
-      "path": "software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.jar",
-      "sha1": "ee9dacea7726e495f8352b81c12c23834ffbc564"
-    },
-    {
-      "path": "software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.pom",
-      "sha1": "fbc83906db667eaef1cb07b0c01087b1ba8a97c3"
-    },
-    {
       "path": "sslext/sslext/1.2-0/sslext-1.2-0.jar",
       "sha1": "c86a7db4ac0bc450e675f3d44b3d64cdc934361b"
     },
@@ -8209,11 +6925,11 @@
       "path": "com/google/code/gson/gson"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181106</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181106</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181106-1</value>\n        <updated>20230817181106</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165756</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165756</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165756-2</value>\n        <updated>20230818165756</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT"
     },
     {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230817.181113</timestamp>\n      <buildNumber>1</buildNumber>\n    </snapshot>\n    <lastUpdated>20230817181113</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230817.181113-1</value>\n        <updated>20230817181113</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-server</artifactId>\n  <version>1.0.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20230818.165803</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20230818165803</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>sources</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n      <snapshotVersion>\n        <classifier>javadoc</classifier>\n        <extension>jar</extension>\n        <value>1.0.0-20230818.165803-2</value>\n        <updated>20230818165803</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-server/1.0.0-SNAPSHOT"
     },
     {

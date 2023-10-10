@@ -60,19 +60,19 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {} => .
+  rule {S} => S
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 endmodule
