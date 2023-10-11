@@ -20,6 +20,7 @@ import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
+import org.kframework.parser.inner.disambiguation.TreeCleanerVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
@@ -193,6 +194,13 @@ public class EarleyParser {
         this.isMInt = isMInt;
       }
       return isMInt;
+    }
+
+    /**
+      * @return the number of non-terminals in the production
+     */
+    public int arity() {
+      return Math.toIntExact(items.stream().filter(EarleyProductionItem::isNonTerminal).count());
     }
   }
 
@@ -863,12 +871,48 @@ production:
     return Ambiguity.apply(S.get(data.words.length).states.get(0).parseTree().stream().map(list -> list.get(0)).collect(Collectors.toSet()));
   }
 
+  private void showPartialParseTrees(EarleySet parses) {
+    // We are only interested in displaying states that span the entire input
+    // when a parse error occurs; such states have a start-index of 0
+    Set<EarleyState> fullStates = parses.states.stream()
+            .filter(state -> state.start == 0)
+            .collect(Collectors.toSet());
+
+    // In the case of a parse error, we have a partial parse tree constructed
+    // that comprises each of the successful non-terminals in the current rule.
+    // To print an AST with correct arity, we want to create a dummy term that
+    // will never type-check, but can sit in a parsed AST to represent the errored
+    // non-terminal, as well as the ones we have not yet attempted to parse.
+    Production errorProd = Production.apply(Seq(), Sort("<invalid>"), Seq(), Att());
+    Term error = Constant.apply("<error>", errorProd);
+    Term incomplete = Constant.apply("<incomplete>", errorProd);
+
+    for(var state : fullStates) {
+      for(var possibleTree : state.parseTree()) {
+        int notAttempted = state.prod.arity() - state.ntItem - 1;
+
+        var correctArityTree = possibleTree
+                .plus(error)
+                .plusAll(Collections.nCopies(notAttempted, incomplete));
+
+        var cleaned = ConsPStack.from(correctArityTree.stream().map(term -> new TreeCleanerVisitor().apply(term)).collect(Collectors.toList());
+
+        var term = TermCons.apply(cleaned, state.prod.prod);
+        System.err.println(term);
+      }
+    }
+  }
+
   /**
    * @param data The {@link ParserMetadata} about the sentence being parsed
    * @param S The set of {@link EarleyState}s for each end-index in the input
    * @param k The end-index at which a parse error occurred. In other words, the index just prior to the first token that
    */
   private void parseError(ParserMetadata data, List<EarleySet> S, int k) {
+    if(partialParseDebug) {
+      showPartialParseTrees(S.get(k));
+    }
+
     int startLine, startColumn, endLine, endColumn;
     if (data.words.length == 1) {
       startLine = data.lines[0];
