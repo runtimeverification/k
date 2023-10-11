@@ -850,11 +850,11 @@ production:
       // a parse error after the outer loop finishes also.
       if (S.get(k+1).empty() && Q.empty()) {
         // no more states to process, so it must be a parse error
-        parseError(data, k);
+        parseError(data, S, k);
       }
     }
     if (S.get(data.words.length).empty()) {
-      parseError(data, data.words.length-1);
+      parseError(data, S, data.words.length-1);
     }
     // finished parsing successfully, so return the final parse forest
     return Ambiguity.apply(S.get(data.words.length).states.get(0).parseTree().stream().map(list -> list.get(0)).collect(Collectors.toSet()));
@@ -862,10 +862,10 @@ production:
 
   /**
    * @param data The {@link ParserMetadata} about the sentence being parsed
+   * @param S The set of {@link EarleyState}s for each end-index in the input
    * @param k The end-index at which a parse error occurred. In other words, the index just prior to the first token that
-   *          did not parse.
    */
-  private void parseError(ParserMetadata data, int k) {
+  private void parseError(ParserMetadata data, EarleySet S, int k) {
     int startLine, startColumn, endLine, endColumn;
     if (data.words.length == 1) {
       startLine = data.lines[0];
