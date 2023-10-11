@@ -601,8 +601,9 @@ public class EarleyParser {
    * @param scanner The scanner used to tokenize strings over this grammar.
    * @param startSymbol The start symbol to start parsing at.
    */
-  public EarleyParser(Module m, Scanner scanner, Sort startSymbol) {
+  public EarleyParser(Module m, Scanner scanner, Sort startSymbol, boolean partialParseDebug) {
     this.scanner = scanner;
+    this.partialParseDebug = partialParseDebug;
 
     // compute metadata about grammar
     sorts = getSorts(m);
@@ -790,6 +791,8 @@ production:
   private final BitSet nullable;
   // the scanner to use to tokenize sentences before parsing them
   private final Scanner scanner;
+  // whether to print detailed partial parse trees when an error occurs
+  private final boolean partialParseDebug;
 
   /**
    * Parse a sentence according to the grammar represented by this parser.
@@ -865,7 +868,7 @@ production:
    * @param S The set of {@link EarleyState}s for each end-index in the input
    * @param k The end-index at which a parse error occurred. In other words, the index just prior to the first token that
    */
-  private void parseError(ParserMetadata data, EarleySet S, int k) {
+  private void parseError(ParserMetadata data, List<EarleySet> S, int k) {
     int startLine, startColumn, endLine, endColumn;
     if (data.words.length == 1) {
       startLine = data.lines[0];

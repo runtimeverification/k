@@ -63,6 +63,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private final boolean forGlobalScanner;
     private final FileUtil files;
     private final String typeInferenceDebug;
+    private final boolean partialParseDebug;
 
     ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
         this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
@@ -84,6 +85,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.forGlobalScanner = forGlobalScanner;
         this.files = files;
         this.typeInferenceDebug = typeInferenceDebug;
+        this.partialParseDebug = true;
     }
 
     /**
@@ -217,7 +219,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         EarleyParser p = parser;
         if (p == null) {
             Module m = getParsingModule();
-            p = new EarleyParser(m, scanner, startSymbol);
+            p = new EarleyParser(m, scanner, startSymbol, partialParseDebug);
             parser = p;
         }
     }
