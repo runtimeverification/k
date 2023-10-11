@@ -631,7 +631,8 @@ class APRProver(Prover):
     circularities_module_name: str
     counterexample_info: bool
 
-    _checked_terminals: set[int]
+    _checked_for_terminal: set[int]
+    _checked_for_subsumption: set[int]
 
     def __init__(
         self,
@@ -669,16 +670,17 @@ class APRProver(Prover):
             priority=1,
         )
 
-        self._checked_terminals = set()
+        self._checked_for_terminal = set()
+        self._checked_for_subsumption = set()
         self._check_all_terminals()
 
     def nonzero_depth(self, node: KCFG.Node) -> bool:
         return not self.proof.kcfg.zero_depth_between(self.proof.init, node.id)
 
     def _check_terminal(self, node: KCFG.Node) -> None:
-        if node.id not in self._checked_terminals:
+        if node.id not in self._checked_for_terminal:
             _LOGGER.info(f'Checking terminal: {node.id}')
-            self._checked_terminals.add(node.id)
+            self._checked_for_terminal.add(node.id)
             if self.kcfg_explore.kcfg_semantics.is_terminal(node.cterm):
                 _LOGGER.info(f'Terminal node: {node.id}.')
                 self.proof._terminal.add(node.id)
@@ -757,7 +759,12 @@ class APRProver(Prover):
             self._check_all_terminals()
 
             for node in self.proof.terminal:
-                if self.proof.kcfg.is_leaf(node.id) and not self.proof.is_target(node.id):
+                if (
+                    not node.id in self._checked_for_subsumption
+                    and self.proof.kcfg.is_leaf(node.id)
+                    and not self.proof.is_target(node.id)
+                ):
+                    self._checked_for_subsumption.add(node.id)
                     self._check_subsume(node)
 
         if self.proof.failed:
