@@ -524,22 +524,6 @@ class TextToKore(b: Builders = DefaultBuilders) {
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
             val ctr = scanner.nextWithSkippingWhitespaces() match {
-              case '\\' =>
-                val c1 = scanner.next()
-                val c2 = scanner.next()
-                (c1, c2) match {
-                  case ('a', 'n') => // and
-                    consume("d")
-                    consumeWithLeadingWhitespaces("{")
-                    val s = parseSort()
-                    consumeWithLeadingWhitespaces("}")
-                    (p1: kore.Pattern, p2: kore.Pattern) => b.And(s, p1, p2)
-                  case ('o', 'r') => // or
-                    consumeWithLeadingWhitespaces("{")
-                    val s = parseSort()
-                    consumeWithLeadingWhitespaces("}")
-                    (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
-                }
               case c => // variable or application
                 scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
@@ -559,22 +543,6 @@ class TextToKore(b: Builders = DefaultBuilders) {
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
             val ctr = scanner.nextWithSkippingWhitespaces() match {
-              case '\\' =>
-                val c1 = scanner.next()
-                val c2 = scanner.next()
-                (c1, c2) match {
-                  case ('a', 'n') => // and
-                    consume("d")
-                    consumeWithLeadingWhitespaces("{")
-                    val s = parseSort()
-                    consumeWithLeadingWhitespaces("}")
-                    (p1: kore.Pattern, p2: kore.Pattern) => b.And(s, p1, p2)
-                  case ('o', 'r') => // or
-                    consumeWithLeadingWhitespaces("{")
-                    val s = parseSort()
-                    consumeWithLeadingWhitespaces("}")
-                    (p1: kore.Pattern, p2: kore.Pattern) => b.Or(s, p1, p2)
-                }
               case c => // variable or application
                 scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
