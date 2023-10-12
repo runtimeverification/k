@@ -6,7 +6,9 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
     && pacman -Syyu --noconfirm                   \
     && pacman -S    --noconfirm                   \
                         clang                     \
+                        libsecp256k1              \
                         make                      \
+                        pkgconf                   \
                         stack
 
 # The image is built specifically for an environment with this user/group

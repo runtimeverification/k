@@ -27,6 +27,7 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        hub                        \
                        jdk-openjdk                \
                        jemalloc                   \
+                       libsecp256k1               \
                        libyaml                    \
                        lld                        \
                        llvm                       \
