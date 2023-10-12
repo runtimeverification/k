@@ -3,7 +3,7 @@ ARG BASE_DISTRO
 ARG K_VERSION
 
 ARG Z3_VERSION
-FROM runtimeverificationinc/${BASE_OS}-${BASE_DISTRO}-z3:${Z3_VERSION} as Z3
+FROM runtimeverificationinc/z3:${BASE_OS}-${BASE_DISTRO}-${Z3_VERSION} as Z3
 
 ARG BASE_OS
 ARG BASE_DISTRO
@@ -47,6 +47,7 @@ RUN    apt-get update              \
         libncurses5-dev            \
         libnss3-dev                \
         libreadline-dev            \
+        libsecp256k1-dev           \
         libsqlite3-dev             \
         libssl-dev                 \
         libyaml-dev                \
