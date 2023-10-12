@@ -878,6 +878,10 @@ production:
             .filter(state -> state.start == 0)
             .collect(Collectors.toSet());
 
+    if(fullStates.isEmpty()) {
+      System.err.println("No top-level production could apply to this input");
+    }
+
     // In the case of a parse error, we have a partial parse tree constructed
     // that comprises each of the successful non-terminals in the current rule.
     // To print an AST with correct arity, we want to create a dummy term that
@@ -888,17 +892,30 @@ production:
     Term incomplete = Constant.apply("<incomplete>", errorProd);
 
     for(var state : fullStates) {
+      System.err.println(state.prod);
       for(var possibleTree : state.parseTree()) {
-        int notAttempted = state.prod.arity() - state.ntItem - 1;
+        int childrenNotAttempted = state.prod.arity() - state.ntItem;
+        var correctArityTree = possibleTree;
 
-        var correctArityTree = possibleTree
-                .plus(error)
-                .plusAll(Collections.nCopies(notAttempted, incomplete));
+        for(int i = 0; i < childrenNotAttempted; ++i) {
+          if(i == 0) {
+            correctArityTree = correctArityTree.plus(error);
+          } else {
+            correctArityTree = correctArityTree.plus(incomplete);
+          }
+        }
 
-        var cleaned = ConsPStack.from(correctArityTree.stream().map(term -> new TreeCleanerVisitor().apply(term)).collect(Collectors.toList());
+        var cleanedChildren = correctArityTree
+                .stream()
+                .map(term -> new TreeCleanerVisitor().apply(term))
+                .collect(Collectors.toList());
 
-        var term = TermCons.apply(cleaned, state.prod.prod);
-        System.err.println(term);
+        if(state.prod.prod.klabel().isDefined()) {
+          var term = TermCons.apply(ConsPStack.from(cleanedChildren), state.prod.prod);
+          System.err.println(term);
+        } else {
+          System.err.println(cleanedChildren);
+        }
       }
     }
   }
