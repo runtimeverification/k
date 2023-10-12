@@ -871,7 +871,7 @@ production:
     return Ambiguity.apply(S.get(data.words.length).states.get(0).parseTree().stream().map(list -> list.get(0)).collect(Collectors.toSet()));
   }
 
-  private void showPartialParseTrees(EarleySet parses) {
+  private String partialParseTreesDiagnostic(EarleySet parses) {
     // We are only interested in displaying states that span the entire input
     // when a parse error occurs; such states have a start-index of 0
     Set<EarleyState> fullStates = parses.states.stream()
@@ -879,8 +879,10 @@ production:
             .collect(Collectors.toSet());
 
     if(fullStates.isEmpty()) {
-      System.err.println("No top-level production could apply to this input");
+      return "No top-level production could apply to this input.";
     }
+
+    StringBuilder msg = new StringBuilder();
 
     // In the case of a parse error, we have a partial parse tree constructed
     // that comprises each of the successful non-terminals in the current rule.
@@ -892,7 +894,7 @@ production:
     Term incomplete = Constant.apply("<incomplete>", errorProd);
 
     for(var state : fullStates) {
-      System.err.println(state.prod);
+      msg.append("  Attempting to apply production:\n    ").append(state.prod).append("\n");
       for(var possibleTree : state.parseTree()) {
         int childrenNotAttempted = state.prod.arity() - state.ntItem;
         var correctArityTree = possibleTree;
@@ -912,12 +914,17 @@ production:
 
         if(state.prod.prod.klabel().isDefined()) {
           var term = TermCons.apply(ConsPStack.from(cleanedChildren), state.prod.prod);
-          System.err.println(term);
+          msg.append("    produced partial term:\n      ").append(term).append("\n");
         } else {
-          System.err.println(cleanedChildren);
+          msg.append("    produced partial term with no KLabel, and children:\n");
+          for(var child : cleanedChildren) {
+            msg.append("      ").append(child).append("\n");
+          }
         }
       }
     }
+
+    return msg.toString();
   }
 
   /**
@@ -926,10 +933,6 @@ production:
    * @param k The end-index at which a parse error occurred. In other words, the index just prior to the first token that
    */
   private void parseError(ParserMetadata data, List<EarleySet> S, int k) {
-    if(partialParseDebug) {
-      showPartialParseTrees(S.get(k));
-    }
-
     int startLine, startColumn, endLine, endColumn;
     if (data.words.length == 1) {
       startLine = data.lines[0];
@@ -953,6 +956,12 @@ production:
     }
     Location loc = new Location(startLine, startColumn,
             endLine, endColumn);
+
+    if(partialParseDebug) {
+      msg += " Additional parsing diagnostic information:\n";
+      msg += partialParseTreesDiagnostic(S.get(k));
+    }
+
     throw KEMException.innerParserError(msg, data.source, loc);
   }
 
