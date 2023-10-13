@@ -830,9 +830,9 @@ class KoreClient(ContextManager['KoreClient']):
         result = self._request('get-model', **params)
         return GetModelResult.from_dict(result)
 
-    def add_module(self, module: Module) -> None:
+    def add_module(self, module: Module) -> str:
         result = self._request('add-module', module=module.text)
-        assert result == []
+        return result['module']
 
 
 class KoreServer(ContextManager['KoreServer']):
