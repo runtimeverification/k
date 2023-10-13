@@ -260,10 +260,12 @@ def test_add_module(
     params: dict[str, Any],
 ) -> None:
     # Given
-    rpc_client.assume_response([])
+    expected = module.name
+    rpc_client.assume_response({'module': module.name})
 
     # When
-    kore_client.add_module(module)
+    actual = kore_client.add_module(module)
 
     # Then
     rpc_client.assert_request('add-module', **params)
+    assert actual == expected
