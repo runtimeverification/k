@@ -359,7 +359,14 @@ class TestKoreClient(KoreClientTest):
         test_id: str,
         module: Module,
     ) -> None:
-        kore_client.add_module(module)
+        # Given
+        expected = module.name
+
+        # When
+        actual = kore_client.add_module(module)
+
+        # Then
+        assert actual == expected
 
 
 class TestKoreClientWithSMTLemmas(KoreClientTest):
