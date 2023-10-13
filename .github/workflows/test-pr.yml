@@ -28,6 +28,22 @@ jobs:
           if git add --update && git commit --message "Set Version: $(cat package/version)"; then
             git push origin HEAD:${GITHUB_HEAD_REF}
           fi
+  arch:
+    name: 'Arch Linux Package'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 90
+    needs: version-sync
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test Package'
+        uses: ./.github/actions/test-package
+        with:
+          dockerfile: package/arch/Dockerfile
+          os: archlinux
+          distro: base
+          build-package: package/arch/build-package
+          test-package: package/arch/test-package
+          pkg-name: kframework_arch_x86_64.pkg.tar.zst
 
   nix-maven:
     name: 'Nix: Maven'

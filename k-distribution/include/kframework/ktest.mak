@@ -75,7 +75,7 @@ all: kompile krun proofs searches strat kast kast-bison kparse
 kompile: $(KOMPILED_DIR)/timestamp
 
 $(KOMPILED_DIR)/timestamp: $(DEF).$(SOURCE_EXT)
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< --output-definition $(KOMPILED_DIR)
+	$(KOMPILE) $(KOMPILE_FLAGS) --verbose -ccopt --verbose --backend $(KOMPILE_BACKEND) $(DEBUG) $< --output-definition $(KOMPILED_DIR)
 
 krun: $(TESTS)
 
