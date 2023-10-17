@@ -2109,6 +2109,21 @@ is not a valid index.
   syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
 ```
 
+### Multiple bytes update
+
+You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except
+the `count` bytes starting at `index` are replaced with `count` bytes of value
+`Int2Bytes(1, v, LE/BE)` in O(count) time. This does not create a new `Bytes`
+object and will instead modify the original on concrete backends.
+This will throw an exception if index` + `count` is not a valid index.
+The acceptable range of values for `v` is -128 to 127. This will throw an
+exception if `v` is outside of this range.
+This is implemented only for the LLVM backend.
+
+```k
+  syntax Bytes ::= memsetBytes(dest: Bytes, index: Int, count: Int, v: Int) [function, hook(BYTES.memset)]
+```
+
 ### Bytes padding
 
 You can create a new `Bytes` object which is at least `length` bytes long
