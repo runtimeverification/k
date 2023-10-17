@@ -205,15 +205,15 @@ def test_krun(backend: str, definition_dir: Path, text: str) -> None:
 
 @pytest.mark.parametrize('text', TEST_DATA, ids=TEST_DATA)
 def test_bindings(runtime: ModuleType, text: str) -> None:
-    from pyk.kllvm.convert import kore_to_llvm, llvm_to_kore
+    from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
 
     # Given
     kore = kore_config(text, '')
     expected = kore_config(None, text)
 
     # When
-    kore_llvm = runtime.interpret(kore_to_llvm(kore))
-    actual = llvm_to_kore(kore_llvm)
+    kore_llvm = runtime.interpret(pattern_to_llvm(kore))
+    actual = llvm_to_pattern(kore_llvm)
 
     # Then
     assert actual == expected
