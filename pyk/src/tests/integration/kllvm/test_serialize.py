@@ -2,7 +2,7 @@ import pytest
 
 import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.ast import Pattern
-from pyk.kllvm.convert import kore_to_llvm
+from pyk.kllvm.convert import pattern_to_llvm
 from pyk.kore.parser import KoreParser
 
 TEST_DATA = (
@@ -21,7 +21,7 @@ TEST_DATA = (
 def test_serialize(kore_text: str) -> None:
     # Given
     _pattern = KoreParser(kore_text).pattern()
-    pattern = kore_to_llvm(_pattern)
+    pattern = pattern_to_llvm(_pattern)
 
     # When
     bs = pattern.serialize()
