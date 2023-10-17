@@ -8,16 +8,26 @@ from _kllvm.parser import Parser  # type: ignore
 from ..cli.utils import check_file_path
 
 if TYPE_CHECKING:
-    from .ast import Pattern
+    from .ast import Definition, Pattern
 
 
-def parse_text(text: str) -> Pattern:
-    parser = Parser.from_string(text)
-    return parser.pattern()
+def parse_pattern(text: str) -> Pattern:
+    return Parser.from_string(text).pattern()
 
 
-def parse_file(path: str | Path) -> Pattern:
+def parse_definition(text: str) -> Definition:
+    return Parser.from_string(text).definition()
+
+
+def parse_pattern_file(path: str | Path) -> Pattern:
+    return _parser_from_path(path).pattern()
+
+
+def parse_definition_file(path: str | Path) -> Definition:
+    return _parser_from_path(path).definition()
+
+
+def _parser_from_path(path: str | Path) -> Parser:
     path = Path(path)
     check_file_path(path)
-    parser = Parser(str(path))
-    return parser.pattern()
+    return Parser(str(path))

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.convert import kore_to_llvm
+from pyk.kllvm.convert import pattern_to_llvm
 from pyk.kore.parser import KoreParser
 
 if TYPE_CHECKING:
@@ -39,8 +39,8 @@ TEST_DATA: Final = (
 @pytest.mark.parametrize('kore_text,expected_text', TEST_DATA, ids=count())
 def test_desugar_associative(kore_text: str, expected_text: str) -> None:
     # Given
-    kore = kore_to_llvm(KoreParser(kore_text).pattern())
-    expected = kore_to_llvm(KoreParser(expected_text).pattern())
+    kore = pattern_to_llvm(KoreParser(kore_text).pattern())
+    expected = pattern_to_llvm(KoreParser(expected_text).pattern())
 
     # When
     actual = kore.desugar_associative()
