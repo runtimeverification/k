@@ -80,16 +80,6 @@ sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev lib
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-On Ubuntu Linux 20.04 (Focal):
-
-**Note**: the installation process is very similar to the above, the only difference is that clang, lld and llvm-tools have to be version 12.
-
-```shell
-git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
-curl -sSL https://get.haskellstack.org/ | sh
-```
-
 On Arch Linux:
 
 ```shell
@@ -187,10 +177,6 @@ See the notes below.
     You can test if it works by calling `mvn -version` in a terminal.
     This will provide the information about the JDK Maven is using, in case
     it is the wrong one.
-
-    Note that on Ubuntu Focal, the default Maven version is not compatible with
-    newer versions of the JDK; for K's Maven build to work, please ensure you
-    have version 11 installed.
 
 5.   Haskell Stack
 
