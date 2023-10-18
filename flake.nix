@@ -2,7 +2,7 @@
   description = "K Framework";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-23.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend/834f8ebbae51033443f62aee9a89e3c36381eae5";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/cc2c89f61db945de0d18402117a03531df6d75d3";
     booster-backend = {
       url = "github:runtimeverification/hs-backend-booster/8c0907d55eb7505f8e2a71b8aaa207dce0010ff2";
       # NB booster-backend will bring in another dependency on haskell-backend,
@@ -104,8 +104,9 @@
           paths = let p = haskell-backend.packages.${system};
           in [
             p.kore-exec
-            p.kore-rpc
+            p.kore-parser
             p.kore-repl
+            p.kore-rpc
           ];
         };
 
