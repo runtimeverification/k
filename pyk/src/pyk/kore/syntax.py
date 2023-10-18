@@ -5,7 +5,7 @@ import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass
-from functools import cached_property, reduce
+from functools import cached_property
 from io import StringIO
 from typing import TYPE_CHECKING, final
 
@@ -685,122 +685,6 @@ class BinaryConn(MLConn):
 
 @final
 @dataclass(frozen=True)
-class And(BinaryConn):
-    sort: Sort
-    left: Pattern
-    right: Pattern
-
-    def let(
-        self,
-        *,
-        sort: Sort | None = None,
-        left: Pattern | None = None,
-        right: Pattern | None = None,
-    ) -> And:
-        sort = sort if sort is not None else self.sort
-        left = left if left is not None else self.left
-        right = right if right is not None else self.right
-        return And(sort=sort, left=left, right=right)
-
-    def let_sort(self: And, sort: Sort) -> And:
-        return self.let(sort=sort)
-
-    def let_patterns(self, patterns: Iterable[Pattern]) -> And:
-        left, right = patterns
-        return self.let(left=left, right=right)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'And'
-
-    @classmethod
-    def symbol(cls) -> str:
-        return '\\and'
-
-    @classmethod
-    def of(cls: type[And], symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()) -> And:
-        cls._check_symbol(symbol)
-        (sort,) = sorts
-        left, right = patterns
-        return And(sort=sort, left=left, right=right)
-
-    @classmethod
-    def from_dict(cls: type[And], dct: Mapping[str, Any]) -> And:
-        cls._check_tag(dct)
-        if 'patterns' in dct:
-            patterns = [Pattern.from_dict(pattern) for pattern in dct['patterns']]
-            if len(patterns) < 2:
-                raise ValueError(f'Expected at least 2 patterns, found: {len(patterns)}')
-            sort = Sort.from_dict(dct['sort'])
-            return reduce(lambda left, right: And(sort=sort, left=left, right=right), patterns)  # type: ignore
-
-        return And(
-            sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['first']),
-            right=Pattern.from_dict(dct['second']),
-        )
-
-
-@final
-@dataclass(frozen=True)
-class Or(BinaryConn):
-    sort: Sort
-    left: Pattern
-    right: Pattern
-
-    def let(
-        self,
-        *,
-        sort: Sort | None = None,
-        left: Pattern | None = None,
-        right: Pattern | None = None,
-    ) -> Or:
-        sort = sort if sort is not None else self.sort
-        left = left if left is not None else self.left
-        right = right if right is not None else self.right
-        return Or(sort=sort, left=left, right=right)
-
-    def let_sort(self: Or, sort: Sort) -> Or:
-        return self.let(sort=sort)
-
-    def let_patterns(self, patterns: Iterable[Pattern]) -> Or:
-        left, right = patterns
-        return self.let(left=left, right=right)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Or'
-
-    @classmethod
-    def symbol(cls) -> str:
-        return '\\or'
-
-    @classmethod
-    def of(cls: type[Or], symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()) -> Or:
-        cls._check_symbol(symbol)
-        (sort,) = sorts
-        left, right = patterns
-        return Or(sort=sort, left=left, right=right)
-
-    @classmethod
-    def from_dict(cls: type[Or], dct: Mapping[str, Any]) -> Or:
-        cls._check_tag(dct)
-        if 'patterns' in dct:
-            patterns = [Pattern.from_dict(pattern) for pattern in dct['patterns']]
-            if len(patterns) < 2:
-                raise ValueError(f'Expected at least 2 patterns, found: {len(patterns)}')
-            sort = Sort.from_dict(dct['sort'])
-            return reduce(lambda left, right: Or(sort=sort, left=left, right=right), patterns)  # type: ignore
-
-        return Or(
-            sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['first']),
-            right=Pattern.from_dict(dct['second']),
-        )
-
-
-@final
-@dataclass(frozen=True)
 class Implies(BinaryConn):
     sort: Sort
     left: Pattern
@@ -899,6 +783,121 @@ class Iff(BinaryConn):
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
+
+
+class MultiaryConn(MLConn):
+    ops: tuple[Pattern, ...]
+
+    def __iter__(self) -> Iterator[Pattern]:
+        return iter(self.ops)
+
+    @property
+    def patterns(self) -> tuple[Pattern, ...]:
+        return self.ops
+
+    @property
+    def dict(self) -> dict[str, Any]:
+        return {
+            'tag': self._tag(),
+            'sort': self.sort.dict,
+            'patterns': [op.dict for op in self.ops],
+        }
+
+
+@final
+@dataclass(frozen=True)
+class And(MultiaryConn):
+    sort: Sort
+    ops: tuple[Pattern, ...]
+
+    def __init__(self, sort: Sort, ops: Iterable[Pattern] = ()):
+        object.__setattr__(self, 'sort', sort)
+        object.__setattr__(self, 'ops', tuple(ops))
+
+    def let(
+        self,
+        *,
+        sort: Sort | None = None,
+        ops: Iterable[Pattern] | None = None,
+    ) -> And:
+        sort = sort if sort is not None else self.sort
+        ops = ops if ops is not None else self.ops
+        return And(sort=sort, ops=ops)
+
+    def let_sort(self, sort: Sort) -> And:
+        return self.let(sort=sort)
+
+    def let_patterns(self, patterns: Iterable[Pattern]) -> And:
+        return self.let(ops=patterns)
+
+    @classmethod
+    def _tag(cls) -> str:
+        return 'And'
+
+    @classmethod
+    def symbol(cls) -> str:
+        return '\\and'
+
+    @classmethod
+    def of(cls: type[And], symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()) -> And:
+        cls._check_symbol(symbol)
+        (sort,) = sorts
+        return And(sort=sort, ops=patterns)
+
+    @classmethod
+    def from_dict(cls: type[And], dct: Mapping[str, Any]) -> And:
+        cls._check_tag(dct)
+        sort = Sort.from_dict(dct['sort'])
+        ops = [Pattern.from_dict(op) for op in dct['patterns']]
+        return And(sort=sort, ops=ops)
+
+
+@final
+@dataclass(frozen=True)
+class Or(MultiaryConn):
+    sort: Sort
+    ops: tuple[Pattern, ...]
+
+    def __init__(self, sort: Sort, ops: Iterable[Pattern] = ()):
+        object.__setattr__(self, 'sort', sort)
+        object.__setattr__(self, 'ops', tuple(ops))
+
+    def let(
+        self,
+        *,
+        sort: Sort | None = None,
+        ops: Iterable[Pattern] | None = None,
+    ) -> Or:
+        sort = sort if sort is not None else self.sort
+        ops = ops if ops is not None else self.ops
+        return Or(sort=sort, ops=ops)
+
+    def let_sort(self, sort: Sort) -> Or:
+        return self.let(sort=sort)
+
+    def let_patterns(self, patterns: Iterable[Pattern]) -> Or:
+        return self.let(ops=patterns)
+
+    @classmethod
+    def _tag(cls) -> str:
+        return 'Or'
+
+    @classmethod
+    def symbol(cls) -> str:
+        return '\\or'
+
+    @classmethod
+    def of(cls: type[Or], symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()) -> Or:
+        cls._check_symbol(symbol)
+        (sort,) = sorts
+        return Or(sort=sort, ops=patterns)
+
+    @classmethod
+    def from_dict(cls: type[Or], dct: Mapping[str, Any]) -> Or:
+        cls._check_tag(dct)
+        sort = Sort.from_dict(dct['sort'])
+        ops = [Pattern.from_dict(op) for op in dct['patterns']]
+        return Or(sort=sort, ops=ops)
 
 
 class MLQuant(MLPattern, WithSort):
@@ -1584,9 +1583,7 @@ class MLSyntaxSugar(MLPattern):
 
 # TODO AppAssoc, OrAssoc
 class Assoc(MLSyntaxSugar):
-    child_symbol: str
-    child_sorts: tuple[Sort, ...]
-    child_patterns: tuple[Pattern, ...]
+    app: App
 
     @property
     @abstractmethod
@@ -1602,49 +1599,22 @@ class Assoc(MLSyntaxSugar):
         return ()
 
     @property
-    def app(self) -> App:
-        return App(self.child_symbol, self.child_sorts, self.child_patterns)
-
-    @property
     def ctor_patterns(self) -> tuple[App]:
         return (self.app,)
 
     @property
     def dict(self) -> dict[str, Any]:
-        return {
-            'tag': self._tag(),
-            'symbol': self.child_symbol,
-            'sorts': [sort.dict for sort in self.child_sorts],
-            'patterns': [pattern.dict for pattern in self.child_patterns],
-        }
+        return {'tag': self._tag(), 'app': self.app.dict}
 
 
 @final
 @dataclass(frozen=True)
 class LeftAssoc(Assoc):
-    child_symbol: str
-    child_sorts: tuple[Sort, ...]
-    child_patterns: tuple[Pattern, ...]
+    app: App
 
-    def __init__(self, child_symbol: str | SymbolId, child_sorts: Iterable[Sort], child_patterns: Iterable[Pattern]):
-        if isinstance(child_symbol, str):
-            child_symbol = SymbolId(child_symbol)
-
-        object.__setattr__(self, 'child_symbol', child_symbol.value)
-        object.__setattr__(self, 'child_sorts', tuple(child_sorts))
-        object.__setattr__(self, 'child_patterns', tuple(child_patterns))
-
-    def let(
-        self,
-        *,
-        child_symbol: str | None = None,
-        child_sorts: tuple[Sort, ...] | None = None,
-        child_patterns: tuple[Pattern, ...] | None = None,
-    ) -> LeftAssoc:
-        child_symbol = child_symbol if child_symbol is not None else self.child_symbol
-        child_sorts = child_sorts if child_sorts is not None else self.child_sorts
-        child_patterns = child_patterns if child_patterns is not None else self.child_patterns
-        return LeftAssoc(child_symbol=child_symbol, child_sorts=child_sorts, child_patterns=child_patterns)
+    def let(self, *, app: App | None = None) -> LeftAssoc:
+        app = app if app is not None else self.app
+        return LeftAssoc(app=app)
 
     def let_patterns(self, patterns: Iterable[Pattern]) -> LeftAssoc:
         () = patterns
@@ -1652,16 +1622,13 @@ class LeftAssoc(Assoc):
 
     @property
     def pattern(self) -> Pattern:
-        if len(self.child_patterns) == 0:
+        if len(self.app.sorts) > 0:
+            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
+        if len(self.app.args) == 0:
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.child_patterns[0]
-        for a in self.child_patterns[1:]:
-            if self.child_symbol == Or.symbol():
-                ret = Or(self.child_sorts[0], ret, a)
-            elif self.child_symbol == And.symbol():
-                ret = And(self.child_sorts[0], ret, a)
-            else:
-                ret = App(self.child_symbol, self.child_sorts, (ret, a))
+        ret = self.app.args[0]
+        for a in self.app.args[1:]:
+            ret = App(self.app.symbol, [], [ret, a])
         return ret
 
     @classmethod
@@ -1683,44 +1650,22 @@ class LeftAssoc(Assoc):
         () = sorts
         (app,) = patterns
         app = check_type(app, App)
-        return LeftAssoc(child_symbol=app.symbol, child_sorts=app.sorts, child_patterns=app.patterns)
+        return LeftAssoc(app=app)
 
     @classmethod
     def from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any]) -> LeftAssoc:
         cls._check_tag(dct)
-        return LeftAssoc(
-            child_symbol=dct['symbol'],
-            child_sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
-            child_patterns=(Pattern.from_dict(pattern) for pattern in dct['patterns']),
-        )
+        return LeftAssoc(app=App.from_dict(dct['app']))
 
 
 @final
 @dataclass(frozen=True)
 class RightAssoc(Assoc):
-    child_symbol: str
-    child_sorts: tuple[Sort, ...]
-    child_patterns: tuple[Pattern, ...]
+    app: App
 
-    def __init__(self, child_symbol: str | SymbolId, child_sorts: Iterable[Sort], child_patterns: Iterable[Pattern]):
-        if isinstance(child_symbol, str):
-            child_symbol = SymbolId(child_symbol)
-
-        object.__setattr__(self, 'child_symbol', child_symbol.value)
-        object.__setattr__(self, 'child_sorts', tuple(child_sorts))
-        object.__setattr__(self, 'child_patterns', tuple(child_patterns))
-
-    def let(
-        self,
-        *,
-        child_symbol: str | None = None,
-        child_sorts: tuple[Sort, ...] | None = None,
-        child_patterns: tuple[Pattern, ...] | None = None,
-    ) -> RightAssoc:
-        child_symbol = child_symbol if child_symbol is not None else self.child_symbol
-        child_sorts = child_sorts if child_sorts is not None else self.child_sorts
-        child_patterns = child_patterns if child_patterns is not None else self.child_patterns
-        return RightAssoc(child_symbol=child_symbol, child_sorts=child_sorts, child_patterns=child_patterns)
+    def let(self, *, app: App | None = None) -> RightAssoc:
+        app = app if app is not None else self.app
+        return RightAssoc(app=app)
 
     def let_patterns(self, patterns: Iterable[Pattern]) -> RightAssoc:
         () = patterns
@@ -1728,16 +1673,13 @@ class RightAssoc(Assoc):
 
     @property
     def pattern(self) -> Pattern:
-        if len(self.child_patterns) == 0:
+        if len(self.app.sorts) > 0:
+            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
+        if len(self.app.args) == 0:
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.child_patterns[-1]
-        for a in reversed(self.child_patterns[:-1]):
-            if self.child_symbol == Or.symbol():
-                ret = Or(self.child_sorts[0], a, ret)
-            elif self.child_symbol == And.symbol():
-                ret = And(self.child_sorts[0], a, ret)
-            else:
-                ret = App(self.child_symbol, self.child_sorts, (a, ret))
+        ret = self.app.args[-1]
+        for a in reversed(self.app.args[:-1]):
+            ret = App(self.app.symbol, [], [a, ret])
         return ret
 
     @classmethod
@@ -1759,16 +1701,12 @@ class RightAssoc(Assoc):
         () = sorts
         (app,) = patterns
         app = check_type(app, App)
-        return RightAssoc(child_symbol=app.symbol, child_sorts=app.sorts, child_patterns=app.patterns)
+        return RightAssoc(app=app)
 
     @classmethod
     def from_dict(cls: type[RightAssoc], dct: Mapping[str, Any]) -> RightAssoc:
         cls._check_tag(dct)
-        return RightAssoc(
-            child_symbol=dct['symbol'],
-            child_sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
-            child_patterns=(Pattern.from_dict(pattern) for pattern in dct['patterns']),
-        )
+        return RightAssoc(app=App.from_dict(dct['app']))
 
 
 ML_SYMBOLS: Final = {

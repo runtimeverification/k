@@ -187,7 +187,7 @@ def kseq(kitems: Iterable[Pattern], *, dotvar: EVar | None = None) -> Pattern:
     if len(args) == 2:
         return app
 
-    return RightAssoc(app.symbol, app.sorts, app.patterns)
+    return RightAssoc(app)
 
 
 def k_config_var(var: str) -> DV:
@@ -220,7 +220,7 @@ LBL_LIST_ITEM: Final = SymbolId('LblListItem')
 def list_pattern(*args: Pattern) -> Pattern:
     if not args:
         return STOP_LIST
-    return LeftAssoc(LBL_LIST, (), (App(LBL_LIST_ITEM, args=(arg,)) for arg in args))
+    return LeftAssoc(App(LBL_LIST, args=(App(LBL_LIST_ITEM, args=(arg,)) for arg in args)))
 
 
 STOP_SET: Final = App("Lbl'Stop'Set")
@@ -231,7 +231,7 @@ LBL_SET_ITEM: Final = SymbolId('LblSetItem')
 def set_pattern(*args: Pattern) -> Pattern:
     if not args:
         return STOP_SET
-    return LeftAssoc(LBL_SET, (), (App(LBL_SET_ITEM, args=(arg,)) for arg in args))
+    return LeftAssoc(App(LBL_SET, args=(App(LBL_SET_ITEM, args=(arg,)) for arg in args)))
 
 
 STOP_MAP: Final = App("Lbl'Stop'Map")
@@ -245,7 +245,7 @@ def map_pattern(*args: tuple[Pattern, Pattern], cell: str | None = None) -> Patt
 
     cons_symbol = SymbolId(f"Lbl'Unds'{cell}Map'Unds'") if cell else LBL_MAP
     item_symbol = SymbolId(f'Lbl{cell}MapItem') if cell else LBL_MAP_ITEM
-    return LeftAssoc(cons_symbol, (), (App(item_symbol, args=arg) for arg in args))
+    return LeftAssoc(App(cons_symbol, args=(App(item_symbol, args=arg) for arg in args)))
 
 
 # ----
@@ -284,7 +284,7 @@ def json_object(pattern: Pattern) -> App:
 
 
 def jsons(patterns: Iterable[Pattern]) -> RightAssoc:
-    return RightAssoc(LBL_JSONS, (), chain(patterns, (STOP_JSONS,)))
+    return RightAssoc(App(LBL_JSONS, (), chain(patterns, (STOP_JSONS,))))
 
 
 def json_key(key: str) -> App:

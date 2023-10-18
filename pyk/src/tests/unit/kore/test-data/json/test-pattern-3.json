@@ -1,29 +1,31 @@
 [
- {
-  "format": "KORE",
-  "version": 1,
-  "term": {
-    "tag": "And",
-    "sort": {
-      "tag": "SortVar",
-      "name": "S"
-    },
-    "first": {
-      "tag": "EVar",
-      "name": "X",
+  {
+    "format": "KORE",
+    "version": 1,
+    "term": {
+      "tag": "And",
       "sort": {
         "tag": "SortVar",
         "name": "S"
-      }
-    },
-    "second": {
-      "tag": "EVar",
-      "name": "X",
-      "sort": {
-        "tag": "SortVar",
-        "name": "S"
-      }
+      },
+      "patterns": [
+        {
+          "tag": "EVar",
+          "name": "X",
+          "sort": {
+            "tag": "SortVar",
+            "name": "S"
+          }
+        },
+        {
+          "tag": "EVar",
+          "name": "X",
+          "sort": {
+            "tag": "SortVar",
+            "name": "S"
+          }
+        }
+      ]
     }
   }
-} 
 ]

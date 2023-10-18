@@ -1,7 +1,0 @@
-\left-assoc{}(
-    \and{SortInt{}}(
-        \dv{SortInt{}}("0"),
-        \dv{SortInt{}}("1"),
-        \dv{SortInt{}}("2")
-    )
-)
