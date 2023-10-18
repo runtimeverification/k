@@ -104,6 +104,7 @@
           paths = let p = haskell-backend.packages.${system};
           in [
             p.kore-exec
+            p.kore-match-disjunction
             p.kore-parser
             p.kore-repl
             p.kore-rpc
