@@ -20,13 +20,13 @@ FREE_OCCS_TEST_DATA: Iterable = (
     (Top(S), [], {}),
     (x, [], {'x': [x]}),
     (x, ['x'], {}),
-    (And(S, x, y), [], {'x': [x], 'y': [y]}),
-    (And(S, x, x), [], {'x': [x, x]}),
-    (And(S, x, y), ['x'], {'y': [y]}),
-    (And(S, x, x), ['x'], {}),
+    (And(S, (x, y)), [], {'x': [x], 'y': [y]}),
+    (And(S, (x, x)), [], {'x': [x, x]}),
+    (And(S, (x, y)), ['x'], {'y': [y]}),
+    (And(S, (x, x)), ['x'], {}),
     (Exists(S, x, x), [], {}),
     (Exists(S, x, y), [], {'y': [y]}),
-    (And(S, x, Exists(S, y, y)), [], {'x': [x]}),
+    (And(S, (x, Exists(S, y, y))), [], {'x': [x]}),
 )
 
 

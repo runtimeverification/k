@@ -72,44 +72,8 @@
                   "name": "String",
                   "args": []
                 },
-                "first": {
-                  "tag": "App",
-                  "name": "input",
-                  "sorts": [],
-                  "args": [
-                    {
-                      "tag": "DV",
-                      "sort": {
-                        "tag": "SortApp",
-                        "name": "Int",
-                        "args": []
-                      },
-                      "value": "1"
-                    },
-                    {
-                      "tag": "DV",
-                      "sort": {
-                        "tag": "SortApp",
-                        "name": "Int",
-                        "args": []
-                      },
-                      "value": "2"
-                    }
-                  ]
-                },
-                "second": {
-                  "tag": "Equals",
-                  "argSort": {
-                    "tag": "SortApp",
-                    "name": "String",
-                    "args": []
-                  },
-                  "sort": {
-                    "tag": "SortApp",
-                    "name": "String",
-                    "args": []
-                  },
-                  "first": {
+                "patterns": [
+                  {
                     "tag": "App",
                     "name": "input",
                     "sorts": [],
@@ -134,11 +98,49 @@
                       }
                     ]
                   },
-                  "second": {
-                    "tag": "String",
-                    "value": "-15"
+                  {
+                    "tag": "Equals",
+                    "argSort": {
+                      "tag": "SortApp",
+                      "name": "String",
+                      "args": []
+                    },
+                    "sort": {
+                      "tag": "SortApp",
+                      "name": "String",
+                      "args": []
+                    },
+                    "first": {
+                      "tag": "App",
+                      "name": "input",
+                      "sorts": [],
+                      "args": [
+                        {
+                          "tag": "DV",
+                          "sort": {
+                            "tag": "SortApp",
+                            "name": "Int",
+                            "args": []
+                          },
+                          "value": "1"
+                        },
+                        {
+                          "tag": "DV",
+                          "sort": {
+                            "tag": "SortApp",
+                            "name": "Int",
+                            "args": []
+                          },
+                          "value": "2"
+                        }
+                      ]
+                    },
+                    "second": {
+                      "tag": "String",
+                      "value": "-15"
+                    }
                   }
-                }
+                ]
               },
               {
                 "tag": "DV",

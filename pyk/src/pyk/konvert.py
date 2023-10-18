@@ -110,8 +110,10 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     else:
         kore_lhs0 = And(
             top_level_kore_sort,
-            kast_to_kore(kast_defn, kompiled_kore, krule_lhs.kast, sort=top_level_k_sort),
-            Top(top_level_kore_sort),
+            (
+                kast_to_kore(kast_defn, kompiled_kore, krule_lhs.kast, sort=top_level_k_sort),
+                Top(top_level_kore_sort),
+            ),
         )
 
     kore_rhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_rhs.kast, sort=top_level_k_sort)
@@ -291,9 +293,8 @@ def _kore_to_kast(kore: Pattern) -> KInner:
 
     elif type(kore) is And:
         psort = KSort(kore.sort.name[4:])
-        larg = _kore_to_kast(kore.left)
-        rarg = _kore_to_kast(kore.right)
-        return mlAnd((larg, rarg), sort=psort)
+        args = tuple(_kore_to_kast(op) for op in kore.ops)
+        return mlAnd(args, sort=psort)
 
     elif type(kore) is Implies:
         psort = KSort(kore.sort.name[4:])

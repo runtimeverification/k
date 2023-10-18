@@ -118,7 +118,7 @@ IMPLIES_ERROR_TEST_DATA: Final = (
     ('X -> Y', x, y),
 )
 
-SIMPLIFY_TEST_DATA: Final = (('top-and-top', And(INT, int_top, int_top), int_top),)
+SIMPLIFY_TEST_DATA: Final = (('top-and-top', And(INT, (int_top, int_top)), int_top),)
 
 GET_MODEL_TEST_DATA: Final = (
     ('unkown-config', term(0), None, UnknownResult()),
@@ -128,7 +128,7 @@ GET_MODEL_TEST_DATA: Final = (
     ('unsat-eq', Equals(BOOL, INT, TRUE, and_bool(eq_int(x, int_dv(0)), eq_int(x, int_dv(1)))), None, UnsatResult()),
     (
         'unsat-eq-ml',
-        And(INT, Equals(BOOL, INT, TRUE, eq_int(x, int_dv(0))), Equals(BOOL, INT, TRUE, eq_int(x, int_dv(1)))),
+        And(INT, (Equals(BOOL, INT, TRUE, eq_int(x, int_dv(0))), Equals(BOOL, INT, TRUE, eq_int(x, int_dv(1))))),
         None,
         UnsatResult(),
     ),
@@ -140,7 +140,7 @@ GET_MODEL_TEST_DATA: Final = (
     ),
     (
         'sat-ineq-ml',
-        And(INT, Equals(BOOL, INT, TRUE, gt_int(x, int_dv(0))), Equals(BOOL, INT, TRUE, le_int(x, int_dv(1)))),
+        And(INT, (Equals(BOOL, INT, TRUE, gt_int(x, int_dv(0))), Equals(BOOL, INT, TRUE, le_int(x, int_dv(1))))),
         None,
         SatResult(Equals(INT, INT, x, int_dv(1))),
     ),
@@ -154,7 +154,7 @@ GET_MODEL_TEST_DATA: Final = (
         'sat-eq-two-vars',
         Equals(BOOL, INT, TRUE, and_bool(eq_int(x, int_dv(0)), eq_int(y, int_dv(1)))),
         None,
-        SatResult(And(INT, Equals(INT, INT, x, int_dv(0)), Equals(INT, INT, y, int_dv(1)))),
+        SatResult(And(INT, (Equals(INT, INT, x, int_dv(0)), Equals(INT, INT, y, int_dv(1))))),
     ),
 )
 
@@ -166,13 +166,17 @@ GET_MODEL_WITH_SMT_TEST_DATA: Final = (
         # chop(x) == x && x == 1
         And(
             INT,
-            Equals(
-                BOOL,
-                INT,
-                TRUE,
-                eq_int(App("Lblchop'LParUndsRParUnds'SMT'Unds'Int'Unds'Int", (), (EVar('x', INT),)), EVar('x', INT)),
+            (
+                Equals(
+                    BOOL,
+                    INT,
+                    TRUE,
+                    eq_int(
+                        App("Lblchop'LParUndsRParUnds'SMT'Unds'Int'Unds'Int", (), (EVar('x', INT),)), EVar('x', INT)
+                    ),
+                ),
+                Equals(BOOL, INT, TRUE, eq_int(EVar('x', INT), int_dv(1))),
             ),
-            Equals(BOOL, INT, TRUE, eq_int(EVar('x', INT), int_dv(1))),
         ),
         None,
         # x == 1
@@ -183,29 +187,31 @@ GET_MODEL_WITH_SMT_TEST_DATA: Final = (
         # chop(1 - x) == 0 && x == 1
         And(
             INT,
-            Equals(
-                BOOL,
-                INT,
-                TRUE,
-                eq_int(
-                    App(
-                        "Lblchop'LParUndsRParUnds'SMT'Unds'Int'Unds'Int",
-                        (),
-                        (
-                            App(
-                                "Lbl'Unds'-Int'Unds'",
-                                (),
-                                (
-                                    int_dv(1),
-                                    EVar('x', INT),
+            (
+                Equals(
+                    BOOL,
+                    INT,
+                    TRUE,
+                    eq_int(
+                        App(
+                            "Lblchop'LParUndsRParUnds'SMT'Unds'Int'Unds'Int",
+                            (),
+                            (
+                                App(
+                                    "Lbl'Unds'-Int'Unds'",
+                                    (),
+                                    (
+                                        int_dv(1),
+                                        EVar('x', INT),
+                                    ),
                                 ),
                             ),
                         ),
+                        int_dv(0),
                     ),
-                    int_dv(0),
                 ),
+                Equals(BOOL, INT, TRUE, eq_int(EVar('x', INT), int_dv(1))),
             ),
-            Equals(BOOL, INT, TRUE, eq_int(EVar('x', INT), int_dv(1))),
         ),
         None,
         # x == 1

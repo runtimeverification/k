@@ -123,12 +123,16 @@ def test_multi_or(test_id: str, text: str, expected: list[Pattern]) -> None:
 S = SortVar('S')
 a, b, c, d = (App(name) for name in ['a', 'b', 'c', 'd'])
 MULTIARY_TEST_DATA: Final = (
-    ('binary-and', r'\and{S}(a{}(), b{}())', And(S, a, b)),
-    ('ternary-and', r'\and{S}(a{}(), b{}(), c{}())', And(S, And(S, a, b), c)),
-    ('quaternary-and', r'\and{S}(a{}(), b{}(), c{}(), d{}())', And(S, And(S, And(S, a, b), c), d)),
-    ('binary-or', r'\or{S}(a{}(), b{}())', Or(S, a, b)),
-    ('ternary-or', r'\or{S}(a{}(), b{}(), c{}())', Or(S, Or(S, a, b), c)),
-    ('quaternary-or', r'\or{S}(a{}(), b{}(), c{}(), d{}())', Or(S, Or(S, Or(S, a, b), c), d)),
+    ('nullary-and', r'\and{S}()', And(S, ())),
+    ('unary-and', r'\and{S}(a{}())', And(S, (a,))),
+    ('binary-and', r'\and{S}(a{}(), b{}())', And(S, (a, b))),
+    ('ternary-and', r'\and{S}(a{}(), b{}(), c{}())', And(S, (a, b, c))),
+    ('quaternary-and', r'\and{S}(a{}(), b{}(), c{}(), d{}())', And(S, (a, b, c, d))),
+    ('nullary-or', r'\or{S}()', Or(S, ())),
+    ('unary-or', r'\or{S}(a{}())', Or(S, (a,))),
+    ('binary-or', r'\or{S}(a{}(), b{}())', Or(S, (a, b))),
+    ('ternary-or', r'\or{S}(a{}(), b{}(), c{}())', Or(S, (a, b, c))),
+    ('quaternary-or', r'\or{S}(a{}(), b{}(), c{}(), d{}())', Or(S, (a, b, c, d))),
 )
 
 

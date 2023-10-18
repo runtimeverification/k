@@ -163,8 +163,8 @@ def test_implies(
 
 SIMPLIFY_TEST_DATA: Final = (
     (
-        And(INT, int_top, int_top),
-        {'state': kore(And(INT, int_top, int_top))},
+        And(INT, (int_top, int_top)),
+        {'state': kore(And(INT, (int_top, int_top)))},
         {'state': kore(int_top)},
         int_top,
     ),

@@ -42,40 +42,52 @@ if TYPE_CHECKING:
 
 s, t = (SortApp(name) for name in ('s', 't'))
 u = SVar('@u', s)
-x, y = (EVar(name, s) for name in ('x', 'y'))
+x, y, z = (EVar(name, s) for name in ('x', 'y', 'z'))
 val = String('val')
 app = App('app', (), (x, y))
 
 ML_PATTERN_OF_TEST_DATA: Final = (
-    (r'\top', (s,), (), Top(s)),
-    (r'\bottom', (s,), (), Bottom(s)),
-    (r'\not', (s,), (x,), Not(s, x)),
-    (r'\and', (s,), (x, y), And(s, x, y)),
-    (r'\or', (s,), (x, y), Or(s, x, y)),
-    (r'\implies', (s,), (x, y), Implies(s, x, y)),
-    (r'\iff', (s,), (x, y), Iff(s, x, y)),
-    (r'\exists', (s,), (x, y), Exists(s, x, y)),
-    (r'\forall', (s,), (x, y), Forall(s, x, y)),
-    (r'\mu', (), (u, x), Mu(u, x)),
-    (r'\nu', (), (u, x), Nu(u, x)),
-    (r'\ceil', (s, t), (x,), Ceil(s, t, x)),
-    (r'\floor', (s, t), (x,), Floor(s, t, x)),
-    (r'\equals', (s, t), (x, y), Equals(s, t, x, y)),
-    (r'\in', (s, t), (x, y), In(s, t, x, y)),
-    (r'\next', (s,), (x,), Next(s, x)),
-    (r'\rewrites', (s,), (x, y), Rewrites(s, x, y)),
-    (r'\dv', (s,), (val,), DV(s, val)),
-    (r'\left-assoc', (), (app,), LeftAssoc('app', (), (x, y))),
-    (r'\right-assoc', (), (app,), RightAssoc('app', (), (x, y))),
+    ('top', r'\top', (s,), (), Top(s)),
+    ('bottom', r'\bottom', (s,), (), Bottom(s)),
+    ('not', r'\not', (s,), (x,), Not(s, x)),
+    ('and0', r'\and', (s,), (), And(s, ())),
+    ('and1', r'\and', (s,), (x,), And(s, (x,))),
+    ('and2', r'\and', (s,), (x, y), And(s, (x, y))),
+    ('and3', r'\and', (s,), (x, y, z), And(s, (x, y, z))),
+    ('or0', r'\or', (s,), (), Or(s, ())),
+    ('or1', r'\or', (s,), (x,), Or(s, (x,))),
+    ('or2', r'\or', (s,), (x, y), Or(s, (x, y))),
+    ('or3', r'\or', (s,), (x, y, z), Or(s, (x, y, z))),
+    ('implies', r'\implies', (s,), (x, y), Implies(s, x, y)),
+    ('iff', r'\iff', (s,), (x, y), Iff(s, x, y)),
+    ('exists', r'\exists', (s,), (x, y), Exists(s, x, y)),
+    ('forall', r'\forall', (s,), (x, y), Forall(s, x, y)),
+    ('mu', r'\mu', (), (u, x), Mu(u, x)),
+    ('nu', r'\nu', (), (u, x), Nu(u, x)),
+    ('ceil', r'\ceil', (s, t), (x,), Ceil(s, t, x)),
+    ('floor', r'\floor', (s, t), (x,), Floor(s, t, x)),
+    ('equals', r'\equals', (s, t), (x, y), Equals(s, t, x, y)),
+    ('in', r'\in', (s, t), (x, y), In(s, t, x, y)),
+    ('next', r'\next', (s,), (x,), Next(s, x)),
+    ('rewrites', r'\rewrites', (s,), (x, y), Rewrites(s, x, y)),
+    ('dv', r'\dv', (s,), (val,), DV(s, val)),
+    ('left-assoc', r'\left-assoc', (), (app,), LeftAssoc(app)),
+    ('right-assoc', r'\right-assoc', (), (app,), RightAssoc(app)),
 )
 
 
 @pytest.mark.parametrize(
-    'symbol,sorts,patterns,expected',
+    'test_id,symbol,sorts,patterns,expected',
     ML_PATTERN_OF_TEST_DATA,
-    ids=[symbol for symbol, *_ in ML_PATTERN_OF_TEST_DATA],
+    ids=[test_id for test_id, *_ in ML_PATTERN_OF_TEST_DATA],
 )
-def test_ml_pattern_of(symbol: str, sorts: Iterable[Sort], patterns: Iterable[Pattern], expected: MLPattern) -> None:
+def test_ml_pattern_of(
+    test_id: str,
+    symbol: str,
+    sorts: Iterable[Sort],
+    patterns: Iterable[Pattern],
+    expected: MLPattern,
+) -> None:
     # When
     actual = MLPattern.of(symbol, sorts, patterns)
 

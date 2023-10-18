@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import reduce
 from typing import TYPE_CHECKING
 
 from ..dequote import dequote_string
@@ -55,6 +54,7 @@ if TYPE_CHECKING:
         MLFixpoint,
         MLPattern,
         MLQuant,
+        MultiaryConn,
         NullaryConn,
         Pattern,
         RoundPred,
@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     NC = TypeVar('NC', bound=NullaryConn)
     UC = TypeVar('UC', bound=Union[UnaryConn, Next])
     BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
-    MC = TypeVar('MC', bound=Union[And, Or])
+    MC = TypeVar('MC', bound=MultiaryConn)
     QF = TypeVar('QF', bound=MLQuant)
     FP = TypeVar('FP', bound=MLFixpoint)
     RP = TypeVar('RP', bound=RoundPred)
@@ -300,18 +300,8 @@ class KoreParser:
         self._match(TokenType.LBRACE)
         sort = self.sort()
         self._match(TokenType.RBRACE)
-        self._match(TokenType.LPAREN)
-        ops: list[Pattern] = []
-        ops.append(self.pattern())
-        self._match(TokenType.COMMA)
-        while True:
-            ops.append(self.pattern())
-            if self._la.type is not TokenType.COMMA:
-                break
-            self._consume()
-        self._match(TokenType.RPAREN)
-
-        return reduce(lambda left, right: cls(sort, left, right), ops)  # type: ignore
+        ops = self._delimited_list_of(self.pattern, TokenType.LPAREN, TokenType.RPAREN)
+        return cls(sort, ops)  # type: ignore
 
     def andd(self) -> And:
         return self._multiary(TokenType.ML_AND, And)
@@ -413,24 +403,9 @@ class KoreParser:
         self._match(TokenType.LBRACE)
         self._match(TokenType.RBRACE)
         self._match(TokenType.LPAREN)
-        token_type = self._la.type
-        if token_type == TokenType.ML_OR or token_type == TokenType.ML_AND:
-            if token_type == TokenType.ML_OR:
-                symbol = Or.symbol()
-            else:
-                symbol = And.symbol()
-            self._match(token_type)
-            self._match(TokenType.LBRACE)
-            sorts: tuple[Sort, ...] = (self.sort(),)
-            self._match(TokenType.RBRACE)
-            patterns = tuple(self._pattern_list())
-        else:
-            app = self.app()
-            symbol = app.symbol
-            sorts = app.sorts
-            patterns = app.patterns
+        app = self.app()
         self._match(TokenType.RPAREN)
-        return cls(symbol, sorts, patterns)  # type: ignore
+        return cls(app)  # type: ignore
 
     def left_assoc(self) -> LeftAssoc:
         return self._assoc(TokenType.ML_LEFT_ASSOC, LeftAssoc)
