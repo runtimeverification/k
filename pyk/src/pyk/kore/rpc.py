@@ -366,9 +366,9 @@ class State:
     def kore(self) -> Pattern:
         _kore = self.term
         if self.substitution is not None:
-            _kore = And(SortApp('SortGeneratedTopCell'), _kore, self.substitution)
+            _kore = And(SortApp('SortGeneratedTopCell'), (_kore, self.substitution))
         if self.predicate is not None:
-            _kore = And(SortApp('SortGeneratedTopCell'), _kore, self.predicate)
+            _kore = And(SortApp('SortGeneratedTopCell'), (_kore, self.predicate))
         return _kore
 
 

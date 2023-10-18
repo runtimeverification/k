@@ -20,44 +20,54 @@ Sd = {'tag': 'SortVar', 'name': 'S'}
 
 TEST_DATA: Final = (
     (
-        'binary-and-old',
-        {'tag': 'And', 'sort': Sd, 'first': ad, 'second': bd},
-        And(S, a, b),
+        'nullary-and',
+        {'tag': 'And', 'sort': Sd, 'patterns': []},
+        And(S, ()),
+    ),
+    (
+        'unary-and',
+        {'tag': 'And', 'sort': Sd, 'patterns': [ad]},
+        And(S, (a,)),
     ),
     (
         'binary-and',
         {'tag': 'And', 'sort': Sd, 'patterns': [ad, bd]},
-        And(S, a, b),
+        And(S, (a, b)),
     ),
     (
         'ternary-and',
         {'tag': 'And', 'sort': Sd, 'patterns': [ad, bd, cd]},
-        And(S, And(S, a, b), c),
+        And(S, (a, b, c)),
     ),
     (
         'quaternary-and',
         {'tag': 'And', 'sort': Sd, 'patterns': [ad, bd, cd, dd]},
-        And(S, And(S, And(S, a, b), c), d),
+        And(S, (a, b, c, d)),
     ),
     (
-        'binary-or-old',
-        {'tag': 'Or', 'sort': Sd, 'first': ad, 'second': bd},
-        Or(S, a, b),
+        'nullary-or',
+        {'tag': 'Or', 'sort': Sd, 'patterns': []},
+        Or(S, ()),
+    ),
+    (
+        'unary-or',
+        {'tag': 'Or', 'sort': Sd, 'patterns': [ad]},
+        Or(S, (a,)),
     ),
     (
         'binary-or',
         {'tag': 'Or', 'sort': Sd, 'patterns': [ad, bd]},
-        Or(S, a, b),
+        Or(S, (a, b)),
     ),
     (
         'ternary-or',
         {'tag': 'Or', 'sort': Sd, 'patterns': [ad, bd, cd]},
-        Or(S, Or(S, a, b), c),
+        Or(S, (a, b, c)),
     ),
     (
         'quaternary-or',
         {'tag': 'Or', 'sort': Sd, 'patterns': [ad, bd, cd, dd]},
-        Or(S, Or(S, Or(S, a, b), c), d),
+        Or(S, (a, b, c, d)),
     ),
 )
 
