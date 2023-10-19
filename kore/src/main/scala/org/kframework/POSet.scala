@@ -11,7 +11,6 @@ import scala.annotation.tailrec
  * A partially ordered set based on an initial set of direct relations.
  */
 class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
-
   // convert the input set of relations to Map form for performance
   private val directRelationsMap: Map[T, Set[T]] = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet } map identity
 
@@ -56,8 +55,16 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
 
   /**
    * All the relations of the POSet, including the transitive ones.
+   *
+   * Concretely, a map from each element of the poset to the set of elements greater than it.
    */
   val relations: Map[T, Set[T]] = transitiveClosure(directRelationsMap)
+
+  /**
+   * A map from each element of the poset to the set of elements less than it.
+   */
+  lazy val relationsOp: Map[T, Set[T]] =
+    relations.toSet[(T, Set[T])].flatMap { case (x, ys) => ys.map(_ -> x) }.groupBy(_._1).mapValues(_.map(_._2))
 
   def <(x: T, y: T): Boolean = relations.get(x).exists(_.contains(y))
   def >(x: T, y: T): Boolean = relations.get(y).exists(_.contains(x))
@@ -81,23 +88,26 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   def inSomeRelation(x: T, y: T): Boolean = this.~(x, y)
   def inSomeRelationEq(x: T, y: T): Boolean = x == y || this.~(x, y)
 
-  lazy val lub: Option[T] = {
-    val candidates = relations.values reduce { (a, b) => a & b }
+  /**
+   * Return the set of all upper bounds of the input.
+   */
+  def upperBounds(sorts: Iterable[T]): Set[T] =
+    if (sorts.isEmpty) elements else POSet.upperBounds(sorts, relations)
 
-    if (candidates.isEmpty)
-      None
-    else if (candidates.size == 1)
-      Some(candidates.head)
-    else {
-      val allPairs = for (a <- candidates; b <- candidates) yield { (a, b) }
-      if (allPairs exists { case (a, b) => ! ~(a, b) })
-        None
-      else
-        Some(
-          candidates.min(new Ordering[T]() {
-            def compare(x: T, y: T): Int = if (x < y) -1 else if (x > y) 1 else 0
-          }))
-    }
+  /**
+   * Return the set of all lower bounds of the input.
+   */
+  def lowerBounds(sorts: Iterable[T]): Set[T] =
+    if (sorts.isEmpty) elements else POSet.upperBounds(sorts, relationsOp)
+
+  lazy val lub: Option[T] = {
+    val mins = minimal(upperBounds(elements))
+    if (mins.size == 1) Some(mins.head) else None
+  }
+
+  lazy val glb: Option[T] = {
+    val maxs = maximal(lowerBounds(elements))
+    if (maxs.size == 1) Some(maxs.head) else None
   }
 
   lazy val asOrdering: Ordering[T] = (x: T, y: T) => if (lessThanEq(x, y)) -1 else if (lessThanEq(y, x)) 1 else 0
@@ -149,4 +159,12 @@ object POSet {
     def <(y: T): Boolean = po.<(x, y)
     def >(y: T): Boolean = po.>(x, y)
   }
+
+  /**
+   * Return the set of all elements which are greater than or equal to each element of the input,
+   * using the provided relations map. Input must be non-empty.
+   */
+  private def upperBounds[T](sorts: Iterable[T], relations: Map[T, Set[T]]): Set[T] =
+    (((sorts filterNot relations.keys.toSet[T]) map {Set.empty + _}) ++
+      ((relations filterKeys sorts.toSet) map { case (k, v) => v + k })) reduce { (a, b) => a & b }
 }
