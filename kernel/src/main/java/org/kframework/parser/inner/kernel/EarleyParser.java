@@ -871,14 +871,30 @@ production:
     return Ambiguity.apply(S.get(data.words.length).states.get(0).parseTree().stream().map(list -> list.get(0)).collect(Collectors.toSet()));
   }
 
-  private String partialParseTreesDiagnostic(EarleySet parses) {
-    // We are only interested in displaying states that span the entire input
-    // when a parse error occurs; such states have a start-index of 0
-    Set<EarleyState> fullStates = parses.states.stream()
+  // We are only interested in displaying states that span the entire input
+  // when a parse error occurs; such states have a start-index of 0.
+  private Set<EarleyState> spanningStates(EarleySet parses) {
+    return parses.states.stream()
             .filter(state -> state.start == 0)
             .collect(Collectors.toSet());
+  }
 
-    if(fullStates.isEmpty()) {
+  // We heuristically identify the best state-set for producing diagnostics as the
+  // most recent such set that includes a _spanning state_; i.e. one with a start
+  // index of zero.
+  private Set<EarleyState> bestDiagnosticStates(List<EarleySet> S, int k) {
+    for(int i = k; i >= 0; --i) {
+      Set<EarleyState> candidate = spanningStates(S.get(i));
+      if(!candidate.isEmpty()) {
+        return candidate;
+      }
+    }
+
+    return new HashSet<>();
+  }
+
+  private String partialParseTreesDiagnostic(Set<EarleyState> spanningStates) {
+    if(spanningStates.isEmpty()) {
       return "No top-level production could apply to this input.";
     }
 
@@ -893,7 +909,7 @@ production:
     Term error = Constant.apply("<error>", errorProd);
     Term incomplete = Constant.apply("<incomplete>", errorProd);
 
-    for(var state : fullStates) {
+    for(var state : spanningStates) {
       msg.append("  Attempting to apply production:\n    ").append(state.prod).append("\n");
       for(var possibleTree : state.parseTree()) {
         int childrenNotAttempted = state.prod.arity() - state.ntItem;
@@ -959,7 +975,7 @@ production:
 
     if(partialParseDebug) {
       msg += " Additional parsing diagnostic information:\n";
-      msg += partialParseTreesDiagnostic(S.get(k));
+      msg += partialParseTreesDiagnostic(bestDiagnosticStates(S, k));
     }
 
     throw KEMException.innerParserError(msg, data.source, loc);
