@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
@@ -92,19 +93,20 @@ public class SortInferencer {
             return Left.apply(errs);
         }
 
-        debug.println(new GsonBuilder().setPrettyPrinting().create().toJson(unsimplifiedSlices));
-
         // Convert to compact types and simplify
         Map<Ambiguity, Map<Term, Optional<InferenceResult<CompactSort>>>> slices = new HashMap<>();
         for (Ambiguity amb : unsimplifiedSlices.keySet()) {
             Map<Term, Optional<InferenceResult<CompactSort>>> sliceRes = new HashMap<>();
             for (Map.Entry<Term, Optional<InferenceResult<BoundedSort>>> entry :
                     unsimplifiedSlices.get(amb).entrySet()) {
-                Optional<InferenceResult<CompactSort>> simplified = entry.getValue().map(this::compact);
-                simplified.ifPresent(this::simplify);
+                Optional<InferenceResult<CompactSort>> simplified =
+                        entry.getValue().map(this::compact).map(this::simplify);
                 sliceRes.put(entry.getKey(), simplified);
             }
+            slices.put(amb, sliceRes);
         }
+
+        debug.println(new GsonBuilder().setPrettyPrinting().create().toJson(slices));
 
         // Propagate ambiguities upwards to collect all well-typed parses
 
@@ -389,27 +391,123 @@ public class SortInferencer {
         return new InferenceResult<>(sort, varSorts, ambSorts);
     }
 
-    private void simplify(InferenceResult<CompactSort> res) {
-
-        // We model terms as functions from their variable sorts to the term's sort.
-        // For a slice, the contained ambiguities are also inputs to this function.
-        // As a result, any variable or ambiguity's sort occurs in negative position.
-
+    private InferenceResult<CompactSort> simplify(InferenceResult<CompactSort> res) {
         Set<BoundedSort.Variable> allVars = new HashSet<>();
         Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences = new HashMap<>();
 
 
+        // Boolean is used to represent polarity - true is positive, false is negative
+        List<Tuple2<CompactSort, Boolean>> compactSorts = new ArrayList<>();
+        // The sort of the overall term is positive
+        compactSorts.add(Tuple2.apply(res.sort(), true));
+        // The sorts of variables are negative
+        compactSorts.addAll(
+                res.varSorts().values().stream().map((v) -> Tuple2.apply(v, false)).collect(Collectors.toList()));
+        compactSorts.addAll(
+                res.ambSorts().values().stream().map((v) -> Tuple2.apply(v, false)).collect(Collectors.toList()));
+
+        compactSorts.forEach(polSort -> collectCoOccurrences(polSort._1, polSort._2, allVars, coOccurrences));
+
         Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst = new HashMap<>();
 
+        // Simplify away all those variables that only occur in negative (resp. positive) position.
+        allVars.forEach((v) -> {
+            boolean negative = coOccurrences.containsKey(Tuple2.apply(v, false));
+            boolean positive = coOccurrences.containsKey(Tuple2.apply(v, true));
+            if ((negative && !positive) || (!negative && positive)) {
+                varSubst.put(v, Optional.empty());
+            }
+        });
 
-        // If two type variables occur in exactly the same set of negative (resp. positive) positions,
-        // they are indistinguishable and can be unified
+        List<Boolean> pols = new ArrayList<>();
+        pols.add(false);
+        pols.add(true);
 
+        pols.forEach((pol) ->  allVars.forEach((v) ->
+            coOccurrences.getOrDefault(Tuple2.apply(v, pol), new HashSet<>()).forEach((co) -> {
+                if (co instanceof BoundedSort.Variable) {
+                    BoundedSort.Variable w = (BoundedSort.Variable) co;
+                    if (v.equals(w) || varSubst.containsKey(w)) {
+                        return;
+                    }
+                    if (coOccurrences.getOrDefault(Tuple2.apply(w, pol), new HashSet<>()).contains(v)) {
+                        // v and w co-occur in the given polarity, so we unify w into v
+                        varSubst.put(w, Optional.of(v));
+                        // we also need to update v's co-occurrences correspondingly (intersecting with w's)
+                        coOccurrences.get(Tuple2.apply(v, !pol)).retainAll(coOccurrences.get(Tuple2.apply(w, !pol)));
+                        coOccurrences.get(Tuple2.apply(v, !pol)).add(v);
+                    }
+                    return;
+                }
+                // This is not a variable, so check if we have a sandwich t <: v <: t and can thus simplify away v
+                if (coOccurrences.getOrDefault(Tuple2.apply(v, !pol), new HashSet<>()).contains(co)) {
+                    varSubst.put(v, Optional.empty());
+                }
+            })
+        ));
 
-        // Flatten variable sandwiches t <: a <: t
+        CompactSort newSort = applySubstitutions(res.sort(), varSubst);
+        Map<String, CompactSort> newVarSorts = new HashMap<>();
+        for (Map.Entry<String, CompactSort> entry : res.varSorts().entrySet()) {
+            newVarSorts.put(entry.getKey(), applySubstitutions(entry.getValue(), varSubst));
+        }
+        Map<Ambiguity, CompactSort> newAmbSorts = new HashMap<>();
+        for (Map.Entry<Ambiguity, CompactSort> entry : res.ambSorts().entrySet()) {
+            newAmbSorts.put(entry.getKey(), applySubstitutions(entry.getValue(),  varSubst));
+        }
+        return new InferenceResult<>(newSort, newVarSorts, newAmbSorts);
+    }
 
+    /**
+     * Update the co-occurrence analysis results so-far to account for the occurrences within sort
+     *
+     * @param sort - The sort which we are processing
+     * @param polarity - The polarity of the provided sort
+     * @param allVars - mutated to add all variables seen in sort
+     * @param coOccurrences - mutated to record all co-occurrences in each variable occurring in sort
+     */
+    private void collectCoOccurrences(CompactSort sort, boolean polarity,
+                                      Set<BoundedSort.Variable> allVars,
+                                      Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences) {
+        for (BoundedSort.Variable var : sort.vars()) {
+            allVars.add(var);
+            Set<BoundedSort> newOccs =
+                    Stream.concat(
+                            sort.vars().stream().map(v -> (BoundedSort) v),
+                            // TODO: Handle co-occurrence with parametric sorts
+                            sort.ctors().stream()
+                                    .filter((c) -> c._1.params() == 0)
+                                    .map(c -> new BoundedSort.Constructor(c._1, new ArrayList<>()))
+                            ).collect(Collectors.toSet());
+            Tuple2<BoundedSort.Variable, Boolean> polVar = Tuple2.apply(var, polarity);
+            if (coOccurrences.containsKey(polVar)) {
+                coOccurrences.get(polVar).retainAll(newOccs);
+            } else {
+                coOccurrences.put(polVar, newOccs);
+            }
+        }
+        // TODO: Recurse into parametric sorts
+    }
 
-
+    private static CompactSort
+    applySubstitutions(CompactSort sort, Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst) {
+        Set<BoundedSort.Variable> vars = new HashSet<>();
+        for (BoundedSort.Variable var : sort.vars()) {
+            if (!varSubst.containsKey(var)) {
+                vars.add(var);
+                continue;
+            }
+            varSubst.get(var).ifPresent(vars::add);
+        }
+        Set<Tuple2<SortHead, List<CompactSort>>> ctors = new HashSet<>();
+        for (Tuple2<SortHead, List<CompactSort>> ctor : sort.ctors()) {
+            List<CompactSort> newArgs =
+                    ctor._2.stream()
+                            .map((s) -> applySubstitutions(s, varSubst))
+                            .collect(Collectors.toList());
+            ctors.add(Tuple2.apply(ctor._1, newArgs));
+        }
+        return new CompactSort(vars, ctors);
     }
 
     private static String locStr(ProductionReference pr) {
