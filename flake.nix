@@ -2,9 +2,9 @@
   description = "K Framework";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-23.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend/63397c713d21322434d572281c1407d929a1189e";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/03a6228f78d7f4805fee4b9d9c45208dcbe0c9fb";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/6c2f5ab988e2c5f98b1cdeb04b8a5787d8a7c566";
+      url = "github:runtimeverification/hs-backend-booster/26b5d2df37c6fcc210d80ff57d1c3572a41f90b5";
       # NB booster-backend will bring in another dependency on haskell-backend,
       # but the two are not necessarily the same (different more often than not).
       # We get two transitive dependencies on haskell-nix.
@@ -31,7 +31,8 @@
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
-        haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
+        haskell-backend.overlays.z3
+        haskell-backend.overlays.integration-tests
         (final: prev:
           let
             k-version =
@@ -96,19 +97,17 @@
             ++ allOverlays;
         };
 
-        haskell-backend-bins-version =
-          haskell-backend.packages.${system}."kore:exe:kore-exec".version;
         haskell-backend-bins = pkgs.symlinkJoin {
-          name = "kore-${haskell-backend-bins-version}-${
+          name = "kore-${
               haskell-backend.sourceInfo.shortRev or "local"
             }";
           paths = let p = haskell-backend.packages.${system};
           in [
-            p."kore:exe:kore-exec"
-            p."kore:exe:kore-rpc"
-            p."kore:exe:kore-repl"
-            p."kore:exe:kore-parser"
-            p."kore:exe:kore-match-disjunction"
+            p.kore-exec
+            p.kore-match-disjunction
+            p.kore-parser
+            p.kore-repl
+            p.kore-rpc
           ];
         };
 
@@ -186,7 +185,7 @@
         devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework { inherit haskell-backend-bins; llvm-kompile-libs = {}; });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
-        overlays.z3 = haskell-backend.overlay;
+        overlays.z3 = haskell-backend.overlays.z3;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
 

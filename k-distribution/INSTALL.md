@@ -40,7 +40,7 @@ Install through packages
 
 We currently strive to provide packages for the following platforms:
 
--   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
+-   Ubuntu Jammy Jellyfish (22.04)
 -   Debian Bookworm
 -   Arch Linux
 -   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
@@ -52,7 +52,7 @@ Pre-installation Notes
 -   We **do not** currently support running K natively on Windows. To use K on
     Windows 10, you are encouraged to install the
     [Windows Subsystem for Linux (version 2)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-    and follow the instructions for installing Ubuntu Focal.
+    and follow the instructions for installing Ubuntu Jammy.
 
     If you have already installed WSL, before proceeding, you will need to
     enter the WSL environment. You can do this by:
@@ -65,7 +65,7 @@ Pre-installation Notes
     you will need to use a virtual machine (VM) software. We assume you have:
 
     1.  Created a virtual machine
-    2.  Installed a Linux distribution (e.g. Ubuntu Focal Fossa) on your
+    2.  Installed a Linux distribution (e.g. Ubuntu Jammy Jellyfish) on your
         virtual machine
 
     Consult your virtual machine software if you need help with the above
@@ -109,12 +109,6 @@ requires about ~1.4GB of dependencies and will take some time.
 
 -   On Linux systems, K will typically be installed under `/usr`.
 -   On macOS/brew, K will typically be installed under `/usr/local`.
-
-### Ubuntu Focal (20.04)
-
-```sh
-sudo apt install ./kframework_amd64_ubuntu_jammy.deb
-```
 
 ### Ubuntu Jammy (22.04)
 

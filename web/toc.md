@@ -62,7 +62,7 @@ output:
 - [K User Manual](/docs/user_manual.md)
 - [K Cheat Sheet](/docs/cheat_sheet.md)
 - [K Tool Reference](/docs/ktools.md)
-- [K Builtins](/k-distribution/include/kframework/builtin/README.md)
+- [K Builtins](/k-distribution/include/kframework/README.md)
   - [domains](/k-distribution/include/kframework/builtin/domains.md)
   - [kast](/k-distribution/include/kframework/builtin/kast.md)
   - [prelude](/k-distribution/include/kframework/builtin/prelude.md)
