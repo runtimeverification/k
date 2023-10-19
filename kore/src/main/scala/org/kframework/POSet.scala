@@ -4,8 +4,8 @@ package org.kframework
 import org.kframework.utils.errorsystem.KEMException
 
 import java.util
-import java.util.Optional
 import collection._
+import scala.annotation.tailrec
 
 /**
  * A partially ordered set based on an initial set of direct relations.
@@ -26,6 +26,7 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    * The implementation is simple. It links each element to the successors of its successors.
    * TODO: there may be a more efficient algorithm (low priority)
    */
+  @tailrec
   private def transitiveClosure(relations: Map[T, Set[T]]): Map[T, Set[T]] = {
     val newRelations = relations map {
       case (start, succ) =>
@@ -44,11 +45,11 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    * @param current element
    * @param path so far
    */
-  private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]) {
+  private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]): Unit = {
     val currentPath = path :+ current
     val succs = directRelationsMap.getOrElse(current, Set())
     if (succs.contains(start)) {
-      throw KEMException.compilerError("Illegal circular relation: " + (currentPath :+ start).mkString(" < "));
+      throw KEMException.compilerError("Illegal circular relation: " + (currentPath :+ start).mkString(" < "))
     }
     succs foreach { constructAndThrowCycleException(start, _, currentPath) }
   }
@@ -56,11 +57,11 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   /**
    * All the relations of the POSet, including the transitive ones.
    */
-  val relations = transitiveClosure(directRelationsMap)
+  val relations: Map[T, Set[T]] = transitiveClosure(directRelationsMap)
 
   def <(x: T, y: T): Boolean = relations.get(x).exists(_.contains(y))
   def >(x: T, y: T): Boolean = relations.get(y).exists(_.contains(x))
-  def ~(x: T, y: T) = <(x, y) || <(y, x)
+  def ~(x: T, y: T): Boolean = <(x, y) || <(y, x)
 
   /**
    * Returns true if x < y
@@ -77,21 +78,13 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   /**
    * Returns true if y < x or y < x
    */
-  def inSomeRelation(x: T, y: T) = this.~(x, y)
-  def inSomeRelationEq(x: T, y: T) = x == y || this.~(x, y)
-
-  /**
-   * Returns an Optional of the least upper bound if it exists, or an empty Optional otherwise.
-   */
-  lazy val leastUpperBound: Optional[T] = lub match {
-    case Some(x) => Optional.of(x)
-    case None => Optional.empty()
-  }
+  def inSomeRelation(x: T, y: T): Boolean = this.~(x, y)
+  def inSomeRelationEq(x: T, y: T): Boolean = x == y || this.~(x, y)
 
   lazy val lub: Option[T] = {
     val candidates = relations.values reduce { (a, b) => a & b }
 
-    if (candidates.size == 0)
+    if (candidates.isEmpty)
       None
     else if (candidates.size == 1)
       Some(candidates.head)
@@ -102,7 +95,7 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
       else
         Some(
           candidates.min(new Ordering[T]() {
-            def compare(x: T, y: T) = if (x < y) -1 else if (x > y) 1 else 0
+            def compare(x: T, y: T): Int = if (x < y) -1 else if (x > y) 1 else 0
           }))
     }
   }
@@ -113,33 +106,33 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
     * Return the subset of items from the argument which are not
     * less than any other item.
     */
-  def maximal(sorts : Iterable[T]) : Set[T] =
+  def maximal(sorts: Iterable[T]): Set[T] =
     sorts.filter(s1 => !sorts.exists(s2 => lessThan(s1,s2))).toSet
 
-  def maximal(sorts : util.Collection[T]) : util.Set[T] = {
-    import scala.collection.JavaConversions._
-    maximal(sorts : Iterable[T])
+  def maximal(sorts: util.Collection[T]): util.Set[T] = {
+    import scala.collection.JavaConverters._
+    maximal(sorts.asScala).asJava
   }
 
   /**
     * Return the subset of items from the argument which are not
     * greater than any other item.
     */
-  def minimal(sorts : Iterable[T]) : Set[T] =
+  def minimal(sorts: Iterable[T]): Set[T] =
     sorts.filter(s1 => !sorts.exists(s2 => >(s1,s2))).toSet
 
-  def minimal(sorts : util.Collection[T]) : util.Set[T] = {
-    import scala.collection.JavaConversions._
-    minimal(sorts : Iterable[T])
+  def minimal(sorts: util.Collection[T]): util.Set[T] = {
+    import scala.collection.JavaConverters._
+    minimal(sorts.asScala).asJava
   }
 
-  override def toString() = {
-    "POSet(" + (relations flatMap { case (from, tos) => tos map { case to => from + "<" + to } }).mkString(",") + ")"
+  override def toString: String = {
+    "POSet(" + (relations flatMap { case (from, tos) => tos map { to => from + "<" + to } }).mkString(",") + ")"
   }
 
-  override def hashCode = relations.hashCode()
+  override def hashCode: Int = relations.hashCode()
 
-  override def equals(that: Any) = that match {
+  override def equals(that: Any): Boolean = that match {
     case that: POSet[_] => relations == that.relations
     case _ => false
   }
@@ -153,7 +146,7 @@ object POSet {
    * Import this for Scala syntactic sugar.
    */
   implicit class PO[T](x: T)(implicit val po: POSet[T]) {
-    def <(y: T) = po.<(x, y)
-    def >(y: T) = po.>(x, y)
+    def <(y: T): Boolean = po.<(x, y)
+    def >(y: T): Boolean = po.>(x, y)
   }
 }
