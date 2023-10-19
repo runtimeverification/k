@@ -453,46 +453,29 @@ public class AddSortInjections {
         if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
-        Set<Sort> bounds = upperBounds(filteredEntries, mod);
+
+        Set<Sort> nonParametric =
+                filteredEntries.stream().filter(s -> s.params().isEmpty()).collect(Collectors.toSet());
+        Set<Sort> bounds = mutable(mod.subsorts().upperBounds(immutable(nonParametric)));
+        // Anything less than KBott or greater than K is a syntactic sort from kast.md which should not be considered
+        bounds.removeIf(s -> mod.subsorts().lessThanEq(s, Sorts.KBott()) || mod.subsorts().greaterThan(s, Sorts.K()));
         if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME)) {
             bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
         }
+
+        // For parametric sorts, each bound must bound at least one instantiation
+        Set<Sort> parametric =
+                filteredEntries.stream().filter(s -> ! s.params().isEmpty()).collect(Collectors.toSet());
+        bounds.removeIf(bound ->
+                parametric.stream().anyMatch(param ->
+                        stream(mod.definedInstantiations().apply(param.head()))
+                                .noneMatch(inst -> mod.subsorts().lessThanEq(inst, bound))));
+
         Set<Sort> lub = mod.subsorts().minimal(bounds);
         if (lub.size() != 1) {
             throw KEMException.internalError("Could not compute least upper bound for rewrite sort. Possible candidates: " + lub, loc);
         }
         return lub.iterator().next();
-    }
-
-    private static Set<Sort> upperBounds(Collection<Sort> bounds, Module mod) {
-        Set<Sort> maxs = new HashSet<>();
-    nextsort:
-        for (Sort sort : iterable(mod.allSorts())) { // for every declared sort
-            // Sorts at or below KBott, or above K, are assumed to be
-            // sorts from kast.k representing meta-syntax that is not a real sort.
-            // This is done to prevent variables from being inferred as KBott or
-            // as KList.
-            if (mod.subsorts().lessThanEq(sort, Sorts.KBott()))
-                continue;
-            if (mod.subsorts().greaterThan(sort, Sorts.K()))
-                continue;
-            for (Sort bound : bounds)
-                if (bound.params().isEmpty()) {
-                    if (!mod.subsorts().lessThanEq(bound, sort))
-                        continue nextsort;
-                } else {
-                    boolean any = false;
-                    for (Sort instantiation : iterable(mod.definedInstantiations().apply(bound.head()))) {
-                        if (mod.subsorts().lessThanEq(instantiation, sort)) {
-                            any = true;
-                        }
-                    }
-                    if (!any)
-                        continue nextsort;
-                }
-            maxs.add(sort);
-        }
-        return maxs;
     }
 
     private Sort freshSortParam() {
