@@ -1,5 +1,9 @@
 // Copyright (c) K Team. All Rights Reserved.
 
+// NOTE: this definition is not up to date with the latest version of K, as it
+// uses substitution, unification and symbolic reasoning.
+// It is intended for documentation and academic purposes only.
+
 require "unification.k"
 require "substitution.md"
 
