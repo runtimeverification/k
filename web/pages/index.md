@@ -27,7 +27,6 @@ call/cc.
 ## Learn K
 
 - <a href="/k-distribution/k-tutorial/README.md">Do the K Tutorial!</a>
-- <a href="/k-distribution/pl-tutorial/README.md">Build programming languages in K!</a>
 - <a href="/docs/user_manual.md">Reference Documentation</a>
 - <a href="/docs/cheat_sheet.md">K Cheat Sheet</a>
 - <a href="/docs/ktools.md">K Tool Reference</a>
@@ -41,6 +40,7 @@ call/cc.
 
 ## Resources
 
+- A set of <a href="/k-distribution/pl-tutorial/README.md">reference implementations and tutorials</a> for common programming language features and paradigms is available, although parts of these implementations may not be fully up to date with modern K features.
 - Read some papers about K on the [Formal Systems Laboratory (FSL)](https://fsl.cs.illinois.edu/publications/).
 - [Matching logic](http://matching-logic.org/) webpage at UIUC (USA).
 - A ten-minute overview video [slide presentation](./overview.md).
