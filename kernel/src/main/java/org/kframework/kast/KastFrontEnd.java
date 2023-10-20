@@ -135,8 +135,6 @@ public class KastFrontEnd extends FrontEnd {
                 Source source = options.source();
 
                 try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
-                    parseInModule.setPartialParseDebug(options.debugParse);
-
                     if (options.debugTokens)
                         System.out.println(parseInModule.tokenizeString(stringToParse, source));
                     else {
@@ -219,7 +217,7 @@ public class KastFrontEnd extends FrontEnd {
                 if (options.debugTokens)
                     System.out.println(kread.showTokens(parsingMod, def, FileUtil.read(stringToParse), source));
                 else {
-                    K parsed = kread.prettyRead(parsingMod, sort, startSymbolLocation, def, source, FileUtil.read(stringToParse));
+                    K parsed = kread.prettyRead(parsingMod, sort, startSymbolLocation, def, source, FileUtil.read(stringToParse), options.debugParse);
 
                     if (options.expandMacros) {
                         parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
