@@ -1,5 +1,6 @@
 // Copyright (c) K Team. All Rights Reserved.
 module MISSINGKLABEL-SYNTAX
+  syntax KItem ::= "foo" [unused]
 endmodule
 
 module MISSINGKLABEL
@@ -13,7 +14,5 @@ module MISSINGKLABEL
       [ left, function, hook(MAP.concat), klabel(_MyMap_), symbol, assoc, comm
       , unit(.MyMap), element(_M|->_), index(0), format(%1%n%2), unused
       ]
-
-  syntax KItem ::= "foo" [unused]
 
 endmodule
