@@ -7,7 +7,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -408,7 +407,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files, options.debugTypeInference)) {
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files, options.debugTypeInference, false)) {
             Scanner scanner;
             if (deserializeScanner) {
                 scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
@@ -436,7 +435,7 @@ public class DefinitionParsing {
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = needNewScanner ?
                 RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference) :
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files, options.debugTypeInference)) {
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files, options.debugTypeInference, false)) {
             if (needNewScanner)
                 parser.getScanner(globalOptions);
             parser.initialize();
@@ -550,7 +549,7 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
-                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files, options.debugTypeInference)) {
+                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files, options.debugTypeInference, false)) {
             parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
                     new Bubble(rule, contents, Att().add(Att.CONTENT_START_LINE(), 1)

@@ -161,4 +161,7 @@ public final class KastOptions {
 
     @Parameter(names="--debug-tokens", description="Print a Markdown table of tokens matched by the scanner. Useful for debugging parsing errors.")
     public boolean debugTokens = false;
+
+    @Parameter(names="--debug-parse", description="Print extended diagnostic information and partial ASTs for parse errors.")
+    public boolean debugParse = false;
 }
