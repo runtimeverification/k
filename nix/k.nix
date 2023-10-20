@@ -77,7 +77,10 @@ in let
     flex
     (if stdenv.isDarwin then clang else gcc)
     gmp
-    (if stdenv.isDarwin then jre_minimal else jre_minimal.override { jdk = jdk.override { headless = true; }; })
+    (jre_minimal.override {
+      modules = [ "java.base" "java.desktop" "java.logging" "java.rmi" ];
+      jdk = if stdenv.isDarwin then jdk else jdk.override { headless = true; };
+    })
     mpfr
     ncurses
     pkgconfig
