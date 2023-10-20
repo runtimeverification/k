@@ -1,6 +1,7 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
-, prelude-kore, llvm-backend, debugger, version, llvm-kompile-libs }:
+, git, gmp, jdk, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3
+, haskell-backend, booster ? null, prelude-kore, llvm-backend, debugger, version
+, llvm-kompile-libs }:
 
 let
   unwrapped = mavenix.buildMaven {
@@ -52,7 +53,8 @@ let
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
       ln -sf ${llvm-backend}/lib/scripts $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
-      ${lib.optionalString (booster != null ) "ln -sf ${booster}/bin/* $out/bin/"}
+      ${lib.optionalString (booster != null)
+      "ln -sf ${booster}/bin/* $out/bin/"}
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
@@ -75,7 +77,7 @@ in let
     flex
     (if stdenv.isDarwin then clang else gcc)
     gmp
-    jre_minimal
+    (jre_minimal.override { jdk = jdk.override { headless = true; }; })
     mpfr
     ncurses
     pkgconfig
