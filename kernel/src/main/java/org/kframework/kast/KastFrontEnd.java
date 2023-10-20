@@ -135,6 +135,8 @@ public class KastFrontEnd extends FrontEnd {
                 Source source = options.source();
 
                 try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
+                    parseInModule.setPartialParseDebug(options.debugParse);
+
                     if (options.debugTokens)
                         System.out.println(parseInModule.tokenizeString(stringToParse, source));
                     else {
