@@ -1,0 +1,11 @@
+[Error] Inner Parser: Parse error: unexpected token '+' following token '+'.
+Additional parsing diagnostic information:
+  Attempting to apply production:
+    syntax Exp ::= Exp "+" Exp
+    produced partial term:
+      `_+__TEST-SYNTAX_Exp_Exp_Exp`(#token("1","Int"),#token("<error>","<invalid>"))
+
+	Source(/Users/brucecollie/code/k/k-distribution/tests/regression-new/issue-3672-debugParse/./a.test.kast)
+	Location(1,4,1,5)
+	1 |	1 ++ 2
+	  .	   ^
