@@ -195,13 +195,6 @@ public class EarleyParser {
       }
       return isMInt;
     }
-
-    /**
-      * @return the number of non-terminals in the production
-     */
-    public int arity() {
-      return Math.toIntExact(items.stream().filter(EarleyProductionItem::isNonTerminal).count());
-    }
   }
 
   /**
@@ -900,30 +893,10 @@ production:
 
     StringBuilder msg = new StringBuilder();
 
-    // In the case of a parse error, we have a partial parse tree constructed
-    // that comprises each of the successful non-terminals in the current rule.
-    // To print an AST with correct arity, we want to create a dummy term that
-    // will never type-check, but can sit in a parsed AST to represent the errored
-    // non-terminal, as well as the ones we have not yet attempted to parse.
-    Production errorProd = Production.apply(Seq(), Sort("<invalid>"), Seq(), Att());
-    Term error = Constant.apply("<error>", errorProd);
-    Term incomplete = Constant.apply("<incomplete>", errorProd);
-
-    for(var state : spanningStates) {
+    for(EarleyState state : spanningStates) {
       msg.append("  Attempting to apply production:\n    ").append(state.prod).append("\n");
-      for(var possibleTree : state.parseTree()) {
-        int childrenNotAttempted = state.prod.arity() - state.ntItem;
-        var correctArityTree = possibleTree;
-
-        for(int i = 0; i < childrenNotAttempted; ++i) {
-          if(i == 0) {
-            correctArityTree = correctArityTree.plus(error);
-          } else {
-            correctArityTree = correctArityTree.plus(incomplete);
-          }
-        }
-
-        var cleanedChildren = correctArityTree
+      for(PStack<Term> possibleTree : state.parseTree()) {
+        var cleanedChildren = possibleTree
                 .stream()
                 .map(term -> new TreeCleanerVisitor().apply(term))
                 .collect(Collectors.toList());

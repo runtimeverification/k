@@ -3,7 +3,7 @@ Additional parsing diagnostic information:
   Attempting to apply production:
     syntax Exp ::= Exp "*" Exp
     produced partial term:
-      `_*__TEST-SYNTAX_Exp_Exp_Exp`(`_+__TEST-SYNTAX_Exp_Exp_Exp`(#token("1","Int"),#token("5","Int")),#token("<error>","<invalid>"))
+      `_*__TEST-SYNTAX_Exp_Exp_Exp`(`_+__TEST-SYNTAX_Exp_Exp_Exp`(#token("1","Int"),#token("5","Int")))
 
 	Source(b.test.kast)
 	Location(1,9,1,10)
