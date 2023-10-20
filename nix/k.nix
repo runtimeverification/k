@@ -1,6 +1,7 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
-, prelude-kore, llvm-backend, llvm-backend-matching, debugger, version, llvm-kompile-libs }:
+, git, gmp, jdk, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3
+, haskell-backend, booster ? null, prelude-kore, llvm-backend, debugger, version
+, llvm-kompile-libs }:
 
 let
   unwrapped = mavenix.buildMaven {
@@ -46,13 +47,14 @@ let
         fi
       done
 
-      mkdir -p $out/lib/cmake/kframework && ln -sf ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
+      mkdir -p $out/lib/cmake/kframework && cp ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
       ln -sf ${llvm-backend}/include/kllvm $out/include/
       ln -sf ${llvm-backend}/include/kllvm-c $out/include/
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
       ln -sf ${llvm-backend}/lib/scripts $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
-      ${lib.optionalString (booster != null ) "ln -sf ${booster}/bin/* $out/bin/"}
+      ${lib.optionalString (booster != null)
+      "ln -sf ${booster}/bin/* $out/bin/"}
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
@@ -75,7 +77,10 @@ in let
     flex
     (if stdenv.isDarwin then clang else gcc)
     gmp
-    jdk
+    (jre_minimal.override {
+      modules = [ "java.base" "java.desktop" "java.logging" "java.rmi" ];
+      jdk = if stdenv.isDarwin then jdk else jdk.override { headless = true; };
+    })
     mpfr
     ncurses
     pkgconfig
@@ -123,6 +128,5 @@ in let
       ln -sf ${haskell-backend}/bin/kore-parser $out/bin/kore-parser
       ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
       ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
-      ln -sf ${llvm-backend-matching}/bin/llvm-backend-matching $out/bin/llvm-backend-matching
     '';
 in final [ ]
