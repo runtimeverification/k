@@ -2,6 +2,8 @@
 module TEST-SYNTAX
   imports ML-SYNTAX
 
+  syntax KItem ::= "foo" [unused]
+
 endmodule
 
 module TEST
