@@ -20,6 +20,7 @@ import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
+import org.kframework.parser.inner.disambiguation.TreeCleanerVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
@@ -601,8 +602,9 @@ public class EarleyParser {
    * @param scanner The scanner used to tokenize strings over this grammar.
    * @param startSymbol The start symbol to start parsing at.
    */
-  public EarleyParser(Module m, Scanner scanner, Sort startSymbol) {
+  public EarleyParser(Module m, Scanner scanner, Sort startSymbol, boolean partialParseDebug) {
     this.scanner = scanner;
+    this.partialParseDebug = partialParseDebug;
 
     // compute metadata about grammar
     sorts = getSorts(m);
@@ -790,6 +792,8 @@ production:
   private final BitSet nullable;
   // the scanner to use to tokenize sentences before parsing them
   private final Scanner scanner;
+  // whether to print detailed partial parse trees when an error occurs
+  private final boolean partialParseDebug;
 
   /**
    * Parse a sentence according to the grammar represented by this parser.
@@ -850,22 +854,74 @@ production:
       // a parse error after the outer loop finishes also.
       if (S.get(k+1).empty() && Q.empty()) {
         // no more states to process, so it must be a parse error
-        parseError(data, k);
+        parseError(data, S, k);
       }
     }
     if (S.get(data.words.length).empty()) {
-      parseError(data, data.words.length-1);
+      parseError(data, S, data.words.length-1);
     }
     // finished parsing successfully, so return the final parse forest
     return Ambiguity.apply(S.get(data.words.length).states.get(0).parseTree().stream().map(list -> list.get(0)).collect(Collectors.toSet()));
   }
 
+  // We are only interested in displaying states that span the entire input
+  // when a parse error occurs; such states have a start-index of 0.
+  private Set<EarleyState> spanningStates(EarleySet parses) {
+    return parses.states.stream()
+            .filter(state -> state.start == 0)
+            .collect(Collectors.toSet());
+  }
+
+  // We heuristically identify the best state-set for producing diagnostics as the
+  // most recent such set that includes a _spanning state_; i.e. one with a start
+  // index of zero.
+  private Set<EarleyState> bestDiagnosticStates(List<EarleySet> S, int k) {
+    for(int i = k; i >= 0; --i) {
+      Set<EarleyState> candidate = spanningStates(S.get(i));
+      if(!candidate.isEmpty()) {
+        return candidate;
+      }
+    }
+
+    return new HashSet<>();
+  }
+
+  private String partialParseTreesDiagnostic(Set<EarleyState> spanningStates) {
+    if(spanningStates.isEmpty()) {
+      return "No top-level production could apply to this input.";
+    }
+
+    StringBuilder msg = new StringBuilder();
+
+    for(EarleyState state : spanningStates) {
+      msg.append("  Attempting to apply production:\n    ").append(state.prod).append("\n");
+      for(PStack<Term> possibleTree : state.parseTree()) {
+        var cleanedChildren = possibleTree
+                .stream()
+                .map(term -> new TreeCleanerVisitor().apply(term))
+                .collect(Collectors.toList());
+
+        if(state.prod.prod.klabel().isDefined()) {
+          var term = TermCons.apply(ConsPStack.from(cleanedChildren), state.prod.prod);
+          msg.append("    produced partial term:\n      ").append(term).append("\n");
+        } else {
+          msg.append("    produced partial term with no KLabel, and children:\n");
+          for(var child : cleanedChildren) {
+            msg.append("      ").append(child).append("\n");
+          }
+        }
+      }
+    }
+
+    return msg.toString();
+  }
+
   /**
    * @param data The {@link ParserMetadata} about the sentence being parsed
+   * @param S The set of {@link EarleyState}s for each end-index in the input
    * @param k The end-index at which a parse error occurred. In other words, the index just prior to the first token that
-   *          did not parse.
    */
-  private void parseError(ParserMetadata data, int k) {
+  private void parseError(ParserMetadata data, List<EarleySet> S, int k) {
     int startLine, startColumn, endLine, endColumn;
     if (data.words.length == 1) {
       startLine = data.lines[0];
@@ -889,6 +945,12 @@ production:
     }
     Location loc = new Location(startLine, startColumn,
             endLine, endColumn);
+
+    if(partialParseDebug) {
+      msg += " Additional parsing diagnostic information:\n";
+      msg += partialParseTreesDiagnostic(bestDiagnosticStates(S, k));
+    }
+
     throw KEMException.innerParserError(msg, data.source, loc);
   }
 
