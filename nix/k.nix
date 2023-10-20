@@ -1,6 +1,6 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
-, prelude-kore, llvm-backend, llvm-backend-matching, debugger, version, llvm-kompile-libs }:
+, git, gmp, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend, booster ? null
+, prelude-kore, llvm-backend, debugger, version, llvm-kompile-libs }:
 
 let
   unwrapped = mavenix.buildMaven {
@@ -75,7 +75,7 @@ in let
     flex
     (if stdenv.isDarwin then clang else gcc)
     gmp
-    jdk
+    jre_minimal
     mpfr
     ncurses
     pkgconfig
@@ -123,6 +123,5 @@ in let
       ln -sf ${haskell-backend}/bin/kore-parser $out/bin/kore-parser
       ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
       ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
-      ln -sf ${llvm-backend-matching}/bin/llvm-backend-matching $out/bin/llvm-backend-matching
     '';
 in final [ ]
