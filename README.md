@@ -109,7 +109,7 @@ The following dependencies are needed either at build time or runtime:
 *   [fmt](https://fmt.dev/)
 *   [gcc](https://gcc.gnu.org/)
 *   [gmp](https://gmplib.org/)
-*   [jdk](https://openjdk.java.net/) (version 11 or greater)
+*   [jdk](https://openjdk.java.net/) (version 17 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
 *   [llvm](https://llvm.org/) (We require version 10 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
@@ -135,10 +135,10 @@ See the notes below.
 
 ### Installation Notes
 
-1.  Java Development Kit (required JDK11 or higher)
+1.  Java Development Kit (required JDK 17 or higher)
 
     *   Linux: Download from package manager
-        (e.g. `sudo apt-get install openjdk-11-jdk`).
+        (e.g. `sudo apt-get install openjdk-17-jdk`).
 
     *   macOS/brew: Download from package manager
         (e.g. `brew install java`).
@@ -418,10 +418,6 @@ Common build-time error messages:
     + You may run into this issue if target/generated-sources/javacc is not added to the
       build path of your IDE. Generally this is solved by regenerating your project /
       re-syncing it with the pom.xml.
-
--   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
-     (default-compile) on project k-core: Fatal error compiling: invalid target release: 11 -> [Help 1]`
-    + You either do not have Java 11 installed, or `$JAVA_HOME` does not point to a Java 11 JDK.
 
 -   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run
      (build-haskell) on project haskell-backend: An Ant BuildException has occured: exec returned: 1`
