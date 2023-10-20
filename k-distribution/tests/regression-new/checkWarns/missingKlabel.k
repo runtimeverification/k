@@ -14,4 +14,6 @@ module MISSINGKLABEL
       , unit(.MyMap), element(_M|->_), index(0), format(%1%n%2), unused
       ]
 
+  syntax KItem ::= "foo" [unused]
+
 endmodule
