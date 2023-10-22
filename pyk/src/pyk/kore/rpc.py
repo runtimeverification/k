@@ -191,11 +191,17 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
         *,
         timeout: int | None = None,
         bug_report: BugReport | None = None,
+        bug_report_id: str | None = None,
     ):
         client_cache = {}
         self._clients = {}
         self._default_client = JsonRpcClient(
-            default_host, default_port, timeout=timeout, bug_report=bug_report, transport=default_transport
+            default_host,
+            default_port,
+            timeout=timeout,
+            bug_report=bug_report,
+            bug_report_id=bug_report_id,
+            transport=default_transport,
         )
         client_cache[(default_host, default_port)] = self._default_client
         for method, servers in dispatch.items():
@@ -203,7 +209,10 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
                 if (host, port) in client_cache:
                     self._update_clients(method, client_cache[(host, port)])
                 else:
-                    new_client = JsonRpcClient(host, port, timeout=timeout, bug_report=bug_report, transport=transport)
+                    new_id = None if bug_report_id is None else bug_report_id + '_' + str(transport)
+                    new_client = JsonRpcClient(
+                        host, port, timeout=timeout, bug_report=bug_report, bug_report_id=new_id, transport=transport
+                    )
                     self._update_clients(method, new_client)
                     client_cache[(host, port)] = new_client
 
@@ -244,6 +253,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     _transport: Transport
     _req_id: int
     _bug_report: BugReport | None
+    _bug_report_id: str
 
     def __init__(
         self,
@@ -252,6 +262,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         *,
         timeout: int | None = None,
         bug_report: BugReport | None = None,
+        bug_report_id: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
         if transport is TransportType.SINGLE_SOCKET:
@@ -262,6 +273,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
             raise AssertionError()
         self._req_id = 1
         self._bug_report = bug_report
+        self._bug_report_id = bug_report_id if bug_report_id is not None else str(id(self))
 
     def __enter__(self) -> JsonRpcClient:
         return self
@@ -275,7 +287,6 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         old_id = self._req_id
         self._req_id += 1
-        bug_report_id = str(id(self))
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
@@ -288,9 +299,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
         if self._bug_report:
-            bug_report_request = f'rpc_{bug_report_id}/{old_id:03}_request.json'
+            bug_report_request = f'rpc_{self._bug_report_id}/{old_id:03}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._transport.command(bug_report_id, old_id, bug_report_request))
+            self._bug_report.add_command(self._transport.command(self._bug_report_id, old_id, bug_report_request))
 
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         resp = self._transport.request(req)
@@ -299,15 +310,15 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
-            bug_report_response = f'rpc_{bug_report_id}/{old_id:03}_response.json'
+            bug_report_response = f'rpc_{self._bug_report_id}/{old_id:03}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
             self._bug_report.add_command(
                 [
                     'diff',
                     '-b',
                     '-s',
-                    f'rpc_{bug_report_id}/{old_id:03}_actual.json',
-                    f'rpc_{bug_report_id}/{old_id:03}_response.json',
+                    f'rpc_{self._bug_report_id}/{old_id:03}_actual.json',
+                    f'rpc_{self._bug_report_id}/{old_id:03}_response.json',
                 ]
             )
 
@@ -719,13 +730,20 @@ class KoreClient(ContextManager['KoreClient']):
         *,
         timeout: int | None = None,
         bug_report: BugReport | None = None,
+        bug_report_id: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
         dispatch: dict[str, list[tuple[str, int, TransportType]]] | None = None,
     ):
         if dispatch is None:
             dispatch = {}
         self._client = JsonRpcClientFacade(
-            host, port, transport, timeout=timeout, bug_report=bug_report, dispatch=dispatch
+            host,
+            port,
+            transport,
+            timeout=timeout,
+            bug_report=bug_report,
+            bug_report_id=bug_report_id,
+            dispatch=dispatch,
         )
 
     def __enter__(self) -> KoreClient:
