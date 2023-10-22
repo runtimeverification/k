@@ -77,7 +77,7 @@ def rpc_client(mock: Mock) -> MockClient:
 def kore_client(mock: Mock, mock_class: Mock) -> Iterator[KoreClient]:  # noqa: N803
     client = KoreClient('localhost', 3000)
     mock_class.assert_called_with(
-        'localhost', 3000, timeout=None, bug_report=None, transport=TransportType.SINGLE_SOCKET
+        'localhost', 3000, timeout=None, bug_report=None, bug_report_id=None, transport=TransportType.SINGLE_SOCKET
     )
     assert client._client._default_client == mock
     yield client
