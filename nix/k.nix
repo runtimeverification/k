@@ -1,5 +1,5 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3
+, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, booster ? null, prelude-kore, llvm-backend, debugger, version
 , llvm-kompile-libs }:
 
@@ -77,10 +77,11 @@ in let
     flex
     (if stdenv.isDarwin then clang else gcc)
     gmp
-    (jre_minimal.override {
-      modules = [ "java.base" "java.desktop" "java.logging" "java.rmi" ];
-      jdk = if stdenv.isDarwin then jdk else jdk.override { headless = true; };
-    })
+    (if stdenv.isDarwin && stdenv.isx86_64 then jre else
+      (jre_minimal.override {
+        modules = [ "java.base" "java.desktop" "java.logging" "java.rmi" ];
+        jdk = if stdenv.isDarwin then jdk else jdk.override { headless = true; };
+      }))
     mpfr
     ncurses
     pkgconfig

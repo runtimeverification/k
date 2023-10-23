@@ -113,6 +113,7 @@
         };
 
       in rec {
+        k-version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
           k = pkgs.k-framework {
@@ -149,11 +150,26 @@
                 "llvm-backend/src/main/native/llvm-backend";
             };
 
+          smoke-test = with pkgs;
+            stdenv.mkDerivation {
+              name = "k-${k-version}-${self.rev or "dirty"}-smoke-test";
+              unpackPhase = "true";
+              buildInputs = [ fmt gmp mpfr k ];
+              buildPhase = ''
+                echo "module TEST imports BOOL endmodule" > test.k
+                kompile test.k --syntax-module TEST --backend llvm
+                rm -rf test-kompiled
+                kompile test.k --syntax-module TEST --backend haskell
+              '';
+              installPhase = ''
+                runHook preInstall
+                touch "$out"
+                runHook postInstall
+              '';
+            };
+
           test = with pkgs;
-            let
-              k-version =
-                lib.removeSuffix "\n" (builtins.readFile ./package/version);
-            in stdenv.mkDerivation {
+            stdenv.mkDerivation {
               name = "k-${k-version}-${self.rev or "dirty"}-test";
               src = lib.cleanSource
                 (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
