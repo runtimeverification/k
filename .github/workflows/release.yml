@@ -1,4 +1,4 @@
-name: 'Release Testing'
+name: 'Release'
 run-name: K Framework Release ${{ github.ref_name }}
 on:
   release:
