@@ -7,9 +7,9 @@ on:
   push:
     branches:
       - hotfix/release-investigation
-      
+
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-test
 
 jobs:
 
