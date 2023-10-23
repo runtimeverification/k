@@ -230,9 +230,11 @@ jobs:
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build --print-build-logs .
 
+      - name: 'Smoke test K'
+        run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
+
       # These tests take a really long time to run on other platforms, so we
       # skip them unless we're on the M1 runner.
       - name: 'Test K'
         if: ${{ matrix.os == 'self-macos-12' }}
         run: GC_DONT_GC=1 nix build --print-build-logs .#test
-
