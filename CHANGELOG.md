@@ -2,6 +2,66 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+K Framework 6.1.0
+=================
+TODO: remove me updated up to version 6.0.162 1b12ea45f617b081b1b095287e9c1514312e5571
+
+Features
+--------
+- Added support for MacOS 13 Ventura and Debian 12 Bookworm. We dropped support for
+  Ubuntu 20 Focal.
+
+- Updated dependency to Java version 17 or higher.
+
+- Added the Haskell Backend Booster as a dependency to K. This can improve performance
+  when running large proofs. It combines the llvm-backend for concrete execution and
+  relies on the haskell-backend to simplify terms when there is a split in the proof.
+
+- Optimized the kompiler by removing unit applications for collections.
+
+- Minimize JSON output by dropping unused attributes
+
+- Added `--smt-timeout` flag to `krun` and `kprove`.
+
+- Changed the Maven repository to Cloudrepo for more stability and flexibility when
+  building K from sources.
+
+- Improved attribute error messages by creating a whitelist dependent on the context.
+  This check is now mandatory.
+
+- Rule label cannot contain ` or whitespace
+
+- Improved the help messages by adding a description of the expected parameter.
+
+- Documentation: Started work on Section 2 of the tutorial. Added a description for
+  `kserver`.
+
+- Added `--debugger-command` flag to krun.
+
+- Added two options `--debug-tokens` and `--debug-parse` to help with debugging
+  parsing errors. The first option will print a Markdown table with all the matched
+  tokens by the scanner. The second one will give more details about the partial parse
+  tree constructed before an error was encountered.
+
+Misc/Bug Fixes
+--------------
+- Fixed a bug where the llvm backend would segfault because of badly initialized
+  fresh variables in the configuration.
+
+- Improved performance for JSON creation.
+
+- Remove old unused attributes.
+
+- Fix output sorting for KPrint. This will create a more stable pretty printed output.
+
+- Fix configuration pretty printing where `<generatedCounter>` would appear instead
+  of a closing cell.
+
+- Moved a README file from the `builtin` directory that could collide with users' files.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3706
+
 K Framework 6.0.0
 =================
 
