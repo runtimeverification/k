@@ -4,6 +4,10 @@ on:
   release:
     types:
       - prereleased
+  push:
+    branches:
+      - hotfix/release-investigation
+      
 concurrency:
   group: ${{ github.workflow }}
 
