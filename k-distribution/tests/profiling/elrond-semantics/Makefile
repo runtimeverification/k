@@ -4,6 +4,6 @@ ITER=1
 TESTDIR=.
 KOMPILE_BACKEND=llvm
 BENCHMARK_NAME=ELROND-SEMANTICS
-KOMPILE_FLAGS=--main-module MANDOS --syntax-module MANDOS-SYNTAX
+KOMPILE_FLAGS=--main-module MANDOS --syntax-module MANDOS-SYNTAX --jit-parser
 
 include ../kprofiling.mak
