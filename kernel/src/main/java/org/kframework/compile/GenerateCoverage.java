@@ -11,19 +11,14 @@ import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.File;
+
 import static org.kframework.kore.KORE.*;
 
-public class GenerateCoverage {
-    private final boolean cover;
-    private final FileUtil files;
-
-    public GenerateCoverage(boolean cover, FileUtil files) {
-        this.cover = cover;
-        this.files = files;
-    }
+public record GenerateCoverage(boolean cover, FileUtil files) {
 
     public K gen(RuleOrClaim r, K body, Module mod) {
-        if (!cover || !r.att().getOptional(Source.class).isPresent()) {
+        if (!cover || r.att().getOptional(Source.class).isEmpty()) {
             return body;
         }
         K left = RewriteToTop.toLeft(body);
