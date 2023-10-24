@@ -18,14 +18,7 @@ import java.util.Set;
 /**
  * Created by dwightguth on 1/25/16.
  */
-public class CheckRewrite {
-    private final Set<KEMException> errors;
-    private final Module m;
-
-    public CheckRewrite(Set<KEMException> errors, Module m) {
-        this.errors = errors;
-        this.m = m;
-    }
+public record CheckRewrite(Set<KEMException> errors, Module m) {
 
     public void check(Sentence sentence) {
         if (sentence instanceof RuleOrClaim) {
