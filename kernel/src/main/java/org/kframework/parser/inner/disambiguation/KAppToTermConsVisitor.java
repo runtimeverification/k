@@ -50,10 +50,9 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
     public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.KAPP)) {
-            if (!(tc.get(0) instanceof Constant) || !((Constant) tc.get(0)).production().sort().equals(Sorts.KLabel()))
+            if (!(tc.get(0) instanceof Constant kl) || !((Constant) tc.get(0)).production().sort().equals(Sorts.KLabel()))
                 // TODO: remove check once the java backend is no longer supported.
                 return super.apply(tc); // don't do anything if the label is not a token KLabel (in case of variable or casted variable)
-            Constant kl = (Constant) tc.get(0);
             String klvalue = kl.value();
             try { klvalue = StringUtil.unescapeKoreKLabel(kl.value()); } catch (IllegalArgumentException e) { /* ignore */ } // if possible, unescape
             Set<Production> prods = mutable(mod.productionsFor().get(KLabel(klvalue))
@@ -85,8 +84,7 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
             assert false : KAppToTermConsVisitor.class + " expected all ambiguities to already be pushed to the top:\n" +
                     "   Source: " + ((Ambiguity) t).items().iterator().next().source().orElse(null) + "\n" +
                     "   Location: " + ((Ambiguity) t).items().iterator().next().location().orElse(null);
-        } else if (t instanceof TermCons) {
-            TermCons tc = (TermCons) t;
+        } else if (t instanceof TermCons tc) {
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.KLIST))
                 return flattenKList(tc.get(0)).plusAll(Lists.reverse(Lists.newArrayList(flattenKList(tc.get(1)))));
             else if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.EMPTYKLIST))

@@ -205,8 +205,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 } else {
                     List<ProductionItem> items = new ArrayList<>();
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
-                        if (it instanceof NonTerminal) {
-                            NonTerminal nt = (NonTerminal)it;
+                        if (it instanceof NonTerminal nt) {
                             items.add(NonTerminal(nt.getSort(), nt.getName()));
                         } else if (it instanceof UserList) {
                             throw new AssertionError("Lists should have applied before.");

@@ -24,10 +24,9 @@ public class Annotations {
             }
 
             public boolean equals(Object o) {
-                if (!(o instanceof Main)) {
+                if (!(o instanceof Main other)) {
                     return false;
                 }
-                Main other = (Main) o;
                 return annotation.equals(other.value());
             }
 
@@ -53,10 +52,9 @@ public class Annotations {
             }
 
             public boolean equals(Object o) {
-                if (!(o instanceof Spec1)) {
+                if (!(o instanceof Spec1 other)) {
                     return false;
                 }
-                Spec1 other = (Spec1) o;
                 return annotation.equals(other.value());
             }
 
@@ -82,10 +80,9 @@ public class Annotations {
             }
 
             public boolean equals(Object o) {
-                if (!(o instanceof Spec2)) {
+                if (!(o instanceof Spec2 other)) {
                     return false;
                 }
-                Spec2 other = (Spec2) o;
                 return annotation.equals(other.value());
             }
 

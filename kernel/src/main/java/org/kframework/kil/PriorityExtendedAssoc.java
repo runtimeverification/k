@@ -49,9 +49,8 @@ public class PriorityExtendedAssoc extends ModuleItem {
             return false;
         if (this == obj)
             return true;
-        if (!(obj instanceof PriorityExtendedAssoc))
+        if (!(obj instanceof PriorityExtendedAssoc syn))
             return false;
-        PriorityExtendedAssoc syn = (PriorityExtendedAssoc) obj;
 
         if (syn.tags.size() != tags.size())
             return false;

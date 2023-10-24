@@ -154,8 +154,7 @@ public class CloseCells {
             }
             requiredRight = new HashSet<>(requiredLeft);
             for (K item : contents) {
-                if (item instanceof KRewrite) {
-                    KRewrite rw = (KRewrite) item;
+                if (item instanceof KRewrite rw) {
                     for (K leftItem : IncompleteCellUtils.flattenCells(rw.left())) {
                         filterRequired(requiredLeft, leftItem);
                     }

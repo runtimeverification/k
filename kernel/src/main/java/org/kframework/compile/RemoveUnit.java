@@ -29,10 +29,9 @@ public class RemoveUnit {
   }
 
   private Stream<Sentence> gen(Sentence s) {
-    if (!(s instanceof Rule)) {
+    if (!(s instanceof Rule r)) {
       return Stream.of(s);
     }
-    Rule r = (Rule)s;
     K body = flattenLists(r.body());
     K requires = flattenLists(r.requires());
     K ensures = flattenLists(r.ensures());

@@ -658,8 +658,7 @@ public class EarleyParser {
       }
       List<EarleyProductionItem> items = new ArrayList<>(prod.items().size());
       for (ProductionItem item : iterable(prod.items())) {
-        if (item instanceof Terminal) {
-          Terminal t = (Terminal) item;
+        if (item instanceof Terminal t) {
           if (t.value().isEmpty()) {
             continue;
           }

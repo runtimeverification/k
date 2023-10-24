@@ -94,8 +94,7 @@ public class ResolveIOStreams {
     private java.util.Set<Production> getStreamProductions(Set<Sentence> sentences) {
         java.util.Set<Production> productions = new HashSet<>();
         for (Sentence s : mutable(sentences)) {
-            if (s instanceof Production) {
-                Production p = (Production) s;
+            if (s instanceof Production p) {
                 if (p.att().getOption(Att.STREAM()).isDefined()) {
                     checkStreamName(p.att().get(Att.STREAM()));
                     productions.add(p);
@@ -187,8 +186,7 @@ public class ResolveIOStreams {
 
         java.util.Set<Sentence> sentences = new HashSet<>();
         for (Sentence s : mutable(getStreamModule(streamName).localSentences())) {
-            if (s instanceof Rule) {
-                Rule rule = (Rule) s;
+            if (s instanceof Rule rule) {
                 if (rule.att().contains(Att.STREAM())) {
                     // Update cell names
                     K body = new TransformK() {
@@ -212,8 +210,7 @@ public class ResolveIOStreams {
                 } else if (rule.att().contains(Att.PROJECTION())) {
                     sentences.add(rule);
                 }
-            } else if (s instanceof Production) {
-                Production production = (Production) s;
+            } else if (s instanceof Production production) {
                 if (production.sort().toString().equals("Stream") || production.att().contains(Att.PROJECTION())) {
                     sentences.add(production);
                 }
@@ -257,8 +254,7 @@ public class ResolveIOStreams {
         // find rules with currently supported matching patterns
         java.util.Set<Tuple2<Rule, String>> rules = new HashSet<>();
         for (Sentence s : sentences) {
-            if (s instanceof Rule) {
-                Rule rule = (Rule) s;
+            if (s instanceof Rule rule) {
                 java.util.List<String> sorts = isSupportingRulePatternAndGetSortNameOfCast(streamProduction, rule);
                 assert sorts.size() <= 1;
                 if (sorts.size() == 1) {
@@ -402,8 +398,7 @@ public class ResolveIOStreams {
             public K apply(KApply k) {
                 if (k.klabel().name().equals("#SemanticCastToString") && k.klist().size() == 1) {
                     K i = k.klist().items().get(0);
-                    if (i instanceof KVariable) {
-                        KVariable x = (KVariable) i;
+                    if (i instanceof KVariable x) {
                         switch (x.name()) {
                         case "?Sort":
                             return KToken("\"" + sort + "\"", Sorts.String());

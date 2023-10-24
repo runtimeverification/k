@@ -181,8 +181,7 @@ public class AddParentCells {
                 }
             }
             return Optional.empty();
-        } else if (k instanceof  KRewrite) {
-            KRewrite rew = (KRewrite) k;
+        } else if (k instanceof KRewrite rew) {
             List<K> cells = IncompleteCellUtils.flattenCells(rew.left());
             cells.addAll(IncompleteCellUtils.flattenCells(rew.right()));
             Optional<Integer> level = Optional.empty();
@@ -205,8 +204,7 @@ public class AddParentCells {
     }
 
     Optional<KLabel> getParent(K k) {
-        if (k instanceof KApply) {
-            final KApply app = (KApply) k;
+        if (k instanceof final KApply app) {
             if (KLabels.CELLS.equals(app.klabel())) {
                 List<K> items = app.klist().items();
                 if (items.isEmpty()) {
@@ -246,10 +244,9 @@ public class AddParentCells {
     }
 
     K concretizeCell(K k) {
-        if (!(k instanceof KApply)) {
+        if (!(k instanceof KApply app)) {
             return k;
         } else {
-            KApply app = (KApply) k;
             KLabel target = app.klabel();
             if (cfg.isLeafCell(target)) {
                 return k;
@@ -291,8 +288,7 @@ public class AddParentCells {
     }
 
     K concretize(K term) {
-        if (term instanceof KApply) {
-            KApply app = (KApply) term;
+        if (term instanceof KApply app) {
             KApply newTerm = KApply(app.klabel(), KList(app.klist().stream()
                     .map(this::concretize).collect(Collectors.toList())), app.att());
             if (cfg.isParentCell(newTerm.klabel())) {
@@ -300,8 +296,7 @@ public class AddParentCells {
             } else {
                 return newTerm;
             }
-        } else if (term instanceof KRewrite) {
-            KRewrite rew = (KRewrite) term;
+        } else if (term instanceof KRewrite rew) {
             return KRewrite(concretize(rew.left()), concretize(rew.right()));
         } else if (term instanceof KSequence) {
             return KSequence(((KSequence) term).stream()
@@ -314,11 +309,9 @@ public class AddParentCells {
     }
 
     public Sentence concretize(Sentence m) {
-        if (m instanceof RuleOrClaim) {
-            RuleOrClaim r = (RuleOrClaim) m;
+        if (m instanceof RuleOrClaim r) {
             return r.newInstance(concretize(r.body()), r.requires(), r.ensures(), r.att());
-        } else if (m instanceof Context) {
-            Context c = (Context) m;
+        } else if (m instanceof Context c) {
             return new Context(concretize(c.body()), c.requires(), c.att());
         } else {
             return m;

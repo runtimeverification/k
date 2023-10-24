@@ -22,8 +22,7 @@ public class RemoveOverloads {
     public Term apply(Ambiguity a) {
         Set<Production> productions = new HashSet<>();
         for (Term t : a.items()) {
-            if (t instanceof TermCons) {
-                TermCons tc = (TermCons)t;
+            if (t instanceof TermCons tc) {
                 productions.add(tc.production());
             } else {
                 return a;

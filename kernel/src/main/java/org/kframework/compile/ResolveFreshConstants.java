@@ -72,8 +72,7 @@ public class ResolveFreshConstants {
                 rule.att());
         if (rule.att().contains(Att.INITIALIZER())) {
             K left = RewriteToTop.toLeft(withFresh.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
+            if (left instanceof KApply kapp) {
                 if (kapp.klabel().equals(KLabels.INIT_GENERATED_TOP_CELL)) {
                     KApply right = (KApply)RewriteToTop.toRight(withFresh.body());
                     KApply cells = (KApply)right.items().get(1);
@@ -91,8 +90,7 @@ public class ResolveFreshConstants {
             }
         }
         K left = RewriteToTop.toLeft(rule.body());
-        if (left instanceof KApply) {
-            KApply kapp = (KApply)left;
+        if (left instanceof KApply kapp) {
             if (kapp.klabel().name().equals("#withConfig")) {
                 left = kapp.items().get(0);
             }
@@ -255,8 +253,7 @@ public class ResolveFreshConstants {
             List<Integer> cellPositions = new ArrayList<Integer>();
             int i = 1;
             for (ProductionItem p: JavaConverters.seqAsJavaList(prod.items())) {
-                if (p instanceof NonTerminal) {
-                    NonTerminal nt = (NonTerminal) p;
+                if (p instanceof NonTerminal nt) {
                     if (! nt.sort().equals(Sorts.GeneratedCounterCell())) {
                         cellPositions.add(i);
                     }

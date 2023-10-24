@@ -37,11 +37,10 @@ public class ResolveFreshConfigConstants {
      *         fresh constant
      */
     private K transform(RuleOrClaim r, K body) {
-        if (!(r instanceof Rule)) {
+        if (!(r instanceof Rule rule)) {
             return body;
         }
 
-        Rule rule = (Rule) r;
         if (!rule.att().contains(Att.INITIALIZER())) {
             return body;
         }
