@@ -37,16 +37,8 @@ import static org.kframework.kore.KORE.*;
 /**
  * Created by daejunpark on 9/6/15.
  */
-public class ResolveIOStreams {
-
-    private final Definition definition;
-
-    private final KExceptionManager kem;
-
-    public ResolveIOStreams(Definition definition, KExceptionManager kem) {
-        this.definition = definition;
-        this.kem = kem;
-    }
+public record ResolveIOStreams(Definition definition,
+                               KExceptionManager kem) {
 
     /**
      * Update modules that declare stream cells in configuration,
@@ -83,7 +75,7 @@ public class ResolveIOStreams {
                     sentences.addAll(getStreamModuleSentences(p));
                 }
             }
-            return Module(m.name(), (Set<Import>)m.imports().
+            return Module(m.name(), (Set<Import>) m.imports().
                             $bar(Set(Import(definition.getModule("K-IO").get(), true))).
                             $bar(Set(Import(definition.getModule("K-REFLECTION").get(), true))),
                     immutable(sentences), m.att());
@@ -94,8 +86,7 @@ public class ResolveIOStreams {
     private java.util.Set<Production> getStreamProductions(Set<Sentence> sentences) {
         java.util.Set<Production> productions = new HashSet<>();
         for (Sentence s : mutable(sentences)) {
-            if (s instanceof Production) {
-                Production p = (Production) s;
+            if (s instanceof Production p) {
                 if (p.att().getOption(Att.STREAM()).isDefined()) {
                     checkStreamName(p.att().get(Att.STREAM()));
                     productions.add(p);
@@ -165,8 +156,7 @@ public class ResolveIOStreams {
 
         java.util.List<Sentence> initRules =
                 stream(getStreamModule(streamName).localSentences())
-                        .filter(s -> isInitRule(initLabel, cellLabel, s))
-                        .collect(Collectors.toList());
+                        .filter(s -> isInitRule(initLabel, cellLabel, s)).toList();
         assert initRules.size() == 1;
         Sentence initRule = initRules.get(0);
 
@@ -187,8 +177,7 @@ public class ResolveIOStreams {
 
         java.util.Set<Sentence> sentences = new HashSet<>();
         for (Sentence s : mutable(getStreamModule(streamName).localSentences())) {
-            if (s instanceof Rule) {
-                Rule rule = (Rule) s;
+            if (s instanceof Rule rule) {
                 if (rule.att().contains(Att.STREAM())) {
                     // Update cell names
                     K body = new TransformK() {
@@ -212,8 +201,7 @@ public class ResolveIOStreams {
                 } else if (rule.att().contains(Att.PROJECTION())) {
                     sentences.add(rule);
                 }
-            } else if (s instanceof Production) {
-                Production production = (Production) s;
+            } else if (s instanceof Production production) {
                 if (production.sort().toString().equals("Stream") || production.att().contains(Att.PROJECTION())) {
                     sentences.add(production);
                 }
@@ -257,8 +245,7 @@ public class ResolveIOStreams {
         // find rules with currently supported matching patterns
         java.util.Set<Tuple2<Rule, String>> rules = new HashSet<>();
         for (Sentence s : sentences) {
-            if (s instanceof Rule) {
-                Rule rule = (Rule) s;
+            if (s instanceof Rule rule) {
                 java.util.List<String> sorts = isSupportingRulePatternAndGetSortNameOfCast(streamProduction, rule);
                 assert sorts.size() <= 1;
                 if (sorts.size() == 1) {
@@ -392,8 +379,7 @@ public class ResolveIOStreams {
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         java.util.List<Sentence> unblockRules = stream(getStreamModule(streamName).localSentences())
-                .filter(s -> s instanceof Rule && s.att().getOptional(Att.LABEL()).map(lbl -> lbl.equals("STDIN-STREAM.stdinUnblock")).orElse(false))
-                .collect(Collectors.toList());
+                .filter(s -> s instanceof Rule && s.att().getOptional(Att.LABEL()).map(lbl -> lbl.equals("STDIN-STREAM.stdinUnblock")).orElse(false)).toList();
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);
 
@@ -402,8 +388,7 @@ public class ResolveIOStreams {
             public K apply(KApply k) {
                 if (k.klabel().name().equals("#SemanticCastToString") && k.klist().size() == 1) {
                     K i = k.klist().items().get(0);
-                    if (i instanceof KVariable) {
-                        KVariable x = (KVariable) i;
+                    if (i instanceof KVariable x) {
                         switch (x.name()) {
                         case "?Sort":
                             return KToken("\"" + sort + "\"", Sorts.String());
