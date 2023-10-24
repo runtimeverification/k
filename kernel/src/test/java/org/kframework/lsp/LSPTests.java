@@ -121,10 +121,10 @@ public class LSPTests {
         System.out.println(caches.size());
 
         KPos pos = new KPos(10, 11);
-        Map<String, ParseCache.ParsedSentence> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith("TEST-RULE-CELLS")).findFirst().get().getValue().getCache();
+        Map<String, ParseCache.ParsedSentence> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith("TEST-RULE-CELLS")).findFirst().get().getValue().cache();
 
         ParseCache.ParsedSentence rl = ch.entrySet().stream().filter(r -> r.getKey().equals("1 => 2")).findFirst().get().getValue();
-        K ast = rl.getParse();
+        K ast = rl.parse();
         AtomicReference<K> x = new AtomicReference<>();
         KViz.from(t -> {
             if (TextDocumentSyncHandler.isPositionOverLocation(pos, t.location().get())) {
