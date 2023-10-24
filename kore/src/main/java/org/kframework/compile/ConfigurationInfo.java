@@ -105,16 +105,12 @@ public interface ConfigurationInfo {
         STAR;
 
         public static Multiplicity of(String multiplicity) {
-            switch(multiplicity) {
-            case "1":
-                return ConfigurationInfo.Multiplicity.ONE;
-            case "*":
-                return ConfigurationInfo.Multiplicity.STAR;
-            case "?":
-                return ConfigurationInfo.Multiplicity.OPTIONAL;
-            default:
-                throw new IllegalArgumentException(multiplicity);
-            }
+            return switch (multiplicity) {
+                case "1" -> Multiplicity.ONE;
+                case "*" -> Multiplicity.STAR;
+                case "?" -> Multiplicity.OPTIONAL;
+                default -> throw new IllegalArgumentException(multiplicity);
+            };
         }
     }
 }

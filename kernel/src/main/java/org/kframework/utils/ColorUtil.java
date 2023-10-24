@@ -370,16 +370,12 @@ public final class ColorUtil {
     }
 
     public synchronized static String RgbToAnsi(String rgb, ColorSetting colorSetting) {
-        switch(colorSetting) {
-            case OFF:
-                return "";
-            case ON:
-                return getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes);
-            case EXTENDED:
-                return getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes);
-            default:
-                throw new UnsupportedOperationException("colorSettung: " + colorSetting);
-        }
+        return switch (colorSetting) {
+            case OFF -> "";
+            case ON -> getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes);
+            case EXTENDED -> getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes);
+            default -> throw new UnsupportedOperationException("colorSettung: " + colorSetting);
+        };
     }
 
     public static void main(String[] args) {

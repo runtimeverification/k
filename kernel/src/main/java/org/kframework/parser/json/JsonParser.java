@@ -168,94 +168,93 @@ public class JsonParser {
 ///////////////////////////
 
     public static Sentence toSentence(JsonObject data) {
-        switch(data.getString("node")) {
-            case KCONTEXT: {
-                K body     = toK(data.getJsonObject("body"));
-                K requires = toK(data.getJsonObject("requires"));
-                Att att    = toAtt(data.getJsonObject("att"));
-                return new Context(body, requires, att);
+        switch (data.getString("node")) {
+        case KCONTEXT -> {
+            K body = toK(data.getJsonObject("body"));
+            K requires = toK(data.getJsonObject("requires"));
+            Att att = toAtt(data.getJsonObject("att"));
+            return new Context(body, requires, att);
+        }
+        case KRULE -> {
+            K body = toK(data.getJsonObject("body"));
+            K requires = toK(data.getJsonObject("requires"));
+            K ensures = toK(data.getJsonObject("ensures"));
+            Att att = toAtt(data.getJsonObject("att"));
+            return new Rule(body, requires, ensures, att);
+        }
+        case KCLAIM -> {
+            K body = toK(data.getJsonObject("body"));
+            K requires = toK(data.getJsonObject("requires"));
+            K ensures = toK(data.getJsonObject("ensures"));
+            Att att = toAtt(data.getJsonObject("att"));
+            return new Claim(body, requires, ensures, att);
+        }
+        case KSYNTAXPRIORITY -> {
+            JsonArray priorities = data.getJsonArray("priorities");
+            Att att = toAtt(data.getJsonObject("att"));
+            List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
+            priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
+            return new SyntaxPriority(immutable(syntaxPriorities), att);
+        }
+        case KSYNTAXASSOCIATIVITY -> {
+            String assocString = data.getString("assoc");
+            Associativity assoc = "Left".equals(assocString) ? Associativity.Left
+                    : "Right".equals(assocString) ? Associativity.Right
+                    : "NonAssoc".equals(assocString) ? Associativity.NonAssoc
+                    : Associativity.Unspecified;
+            scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
+            Att att = toAtt(data.getJsonObject("att"));
+            return new SyntaxAssociativity(assoc, tags, att);
+        }
+        case KCONFIGURATION -> {
+            K body = toK(data.getJsonObject("body"));
+            K ensures = toK(data.getJsonObject("ensures"));
+            Att att = toAtt(data.getJsonObject("att"));
+            return new Configuration(body, ensures, att);
+        }
+        case KSYNTAXSORT -> {
+            Sort sort = toSort(data.getJsonObject("sort"));
+            Att att = toAtt(data.getJsonObject("att"));
+            List<Sort> params = new ArrayList<>();
+            for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
+                params.add(toSort(s));
             }
-            case KRULE: {
-                K body     = toK(data.getJsonObject("body"));
-                K requires = toK(data.getJsonObject("requires"));
-                K ensures  = toK(data.getJsonObject("ensures"));
-                Att att    = toAtt(data.getJsonObject("att"));
-                return new Rule(body, requires, ensures, att);
-            }
-            case KCLAIM: {
-                K body     = toK(data.getJsonObject("body"));
-                K requires = toK(data.getJsonObject("requires"));
-                K ensures  = toK(data.getJsonObject("ensures"));
-                Att att    = toAtt(data.getJsonObject("att"));
-                return new Claim(body, requires, ensures, att);
-            }
-            case KSYNTAXPRIORITY: {
-                JsonArray priorities = data.getJsonArray("priorities");
-                Att att = toAtt(data.getJsonObject("att"));
-                List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
-                priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
-                return new SyntaxPriority(immutable(syntaxPriorities), att);
-            }
-            case KSYNTAXASSOCIATIVITY: {
-                String assocString = data.getString("assoc");
-                Associativity assoc = "Left".equals(assocString)     ? Associativity.Left
-                                    : "Right".equals(assocString)    ? Associativity.Right
-                                    : "NonAssoc".equals(assocString) ? Associativity.NonAssoc
-                                    :                                  Associativity.Unspecified;
-                scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
-                Att att = toAtt(data.getJsonObject("att"));
-                return new SyntaxAssociativity(assoc, tags, att);
-            }
-            case KCONFIGURATION: {
-                K body    = toK(data.getJsonObject("body"));
-                K ensures = toK(data.getJsonObject("ensures"));
-                Att att   = toAtt(data.getJsonObject("att"));
-                return new Configuration(body, ensures, att);
-            }
-            case KSYNTAXSORT: {
-                Sort sort = toSort(data.getJsonObject("sort"));
-                Att att   = toAtt(data.getJsonObject("att"));
-                List<Sort> params = new ArrayList<>();
-                for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
-                    params.add(toSort(s));
-                }
-                return new SyntaxSort(immutable(params), sort, att);
-            }
-            case KSORTSYNONYM: {
-                Sort newSort = toSort(data.getJsonObject("newSort"));
-                Sort oldSort = toSort(data.getJsonObject("oldSort"));
-                Att att   = toAtt(data.getJsonObject("att"));
-                return new SortSynonym(newSort, oldSort, att);
-            }
-            case KSYNTAXLEXICAL: {
-                String name = data.getString("name");
-                String regex = data.getString("regex");
-                Att att   = toAtt(data.getJsonObject("att"));
-                return new SyntaxLexical(name, regex, att);
-            }
-            case KBUBBLE: {
-                String sentenceType = data.getString("sentenceType");
-                String contents     = data.getString("contents");
-                Att att             = toAtt(data.getJsonObject("att"));
-                return new Bubble(sentenceType, contents, att);
-            }
-            case KPRODUCTION: {
-                Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? toKLabel(data.getJsonObject("klabel")) : null);
-                Sort sort             = toSort(data.getJsonObject("sort"));
-                Att att               = toAtt(data.getJsonObject("att"));
+            return new SyntaxSort(immutable(params), sort, att);
+        }
+        case KSORTSYNONYM -> {
+            Sort newSort = toSort(data.getJsonObject("newSort"));
+            Sort oldSort = toSort(data.getJsonObject("oldSort"));
+            Att att = toAtt(data.getJsonObject("att"));
+            return new SortSynonym(newSort, oldSort, att);
+        }
+        case KSYNTAXLEXICAL -> {
+            String name = data.getString("name");
+            String regex = data.getString("regex");
+            Att att = toAtt(data.getJsonObject("att"));
+            return new SyntaxLexical(name, regex, att);
+        }
+        case KBUBBLE -> {
+            String sentenceType = data.getString("sentenceType");
+            String contents = data.getString("contents");
+            Att att = toAtt(data.getJsonObject("att"));
+            return new Bubble(sentenceType, contents, att);
+        }
+        case KPRODUCTION -> {
+            Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? toKLabel(data.getJsonObject("klabel")) : null);
+            Sort sort = toSort(data.getJsonObject("sort"));
+            Att att = toAtt(data.getJsonObject("att"));
 
-                List<ProductionItem> pItems = new ArrayList<>();
-                for (JsonObject pi: data.getJsonArray("productionItems").getValuesAs(JsonObject.class)) {
-                    pItems.add(toProductionItem(pi));
-                }
-                List<Sort> params = new ArrayList<>();
-                for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
-                    params.add(toSort(s));
-                }
-                return new Production(klabel, immutable(params), sort, immutable(pItems), att);
+            List<ProductionItem> pItems = new ArrayList<>();
+            for (JsonObject pi : data.getJsonArray("productionItems").getValuesAs(JsonObject.class)) {
+                pItems.add(toProductionItem(pi));
             }
-            default:
-                throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
+            List<Sort> params = new ArrayList<>();
+            for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
+                params.add(toSort(s));
+            }
+            return new Production(klabel, immutable(params), sort, immutable(pItems), att);
+        }
+        default -> throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
         }
     }
 
@@ -272,24 +271,23 @@ public class JsonParser {
     }
 
     private static ProductionItem toProductionItem(JsonObject data) {
-        switch(data.getString("node")) {
-            case KNONTERMINAL: {
-                Sort sort           = toSort(data.getJsonObject("sort"));
-                Option<String> name = Option.apply(data.containsKey("name") ? data.getString("name") : null);
-                return new NonTerminal(sort, name);
-            }
-            case KREGEXTERMINAL: {
-                String precedeRegex = data.getString("precedeRegex");
-                String regex        = data.getString("regex");
-                String followRegex  = data.getString("followRegex");
-                return new RegexTerminal(precedeRegex, regex, followRegex);
-            }
-            case KTERMINAL: {
-                String value = data.getString("value");
-                return new Terminal(value);
-            }
-            default:
-                throw KEMException.criticalError("Unexpected node found in ProductionItem Json term: " + data.getString("node"));
+        switch (data.getString("node")) {
+        case KNONTERMINAL -> {
+            Sort sort = toSort(data.getJsonObject("sort"));
+            Option<String> name = Option.apply(data.containsKey("name") ? data.getString("name") : null);
+            return new NonTerminal(sort, name);
+        }
+        case KREGEXTERMINAL -> {
+            String precedeRegex = data.getString("precedeRegex");
+            String regex = data.getString("regex");
+            String followRegex = data.getString("followRegex");
+            return new RegexTerminal(precedeRegex, regex, followRegex);
+        }
+        case KTERMINAL -> {
+            String value = data.getString("value");
+            return new Terminal(value);
+        }
+        default -> throw KEMException.criticalError("Unexpected node found in ProductionItem Json term: " + data.getString("node"));
         }
     }
 

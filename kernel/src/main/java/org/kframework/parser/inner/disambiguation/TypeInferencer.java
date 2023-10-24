@@ -238,16 +238,15 @@ public class TypeInferencer implements AutoCloseable {
       println("))");
       status = null;
       Status status = status();
-      switch(status) {
-      case SATISFIABLE:
+      switch (status) {
+      case SATISFIABLE -> {
         println("(pop)");
         print("(assert (and ");
         print(constraint.smt);
         println("))");
-        break;
-      case UNKNOWN:
-        throw KEMException.internalError("Could not solve sort constraints.", currentTerm);
-      case UNSATISFIABLE:
+      }
+      case UNKNOWN -> throw KEMException.internalError("Could not solve sort constraints.", currentTerm);
+      case UNSATISFIABLE -> {
         println("(pop)");
         computeStatus();
         if (constraint.name != null) {
@@ -259,6 +258,7 @@ public class TypeInferencer implements AutoCloseable {
           Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
           throw new LocalizedError("Unexpected sort " + actualSort + " for term parsed as production " + constraint.actualParams.get().production() + ". Expected: " + expectedSort, constraint.actualParams.get());
         }
+      }
       }
     }
   }
@@ -797,17 +797,12 @@ public class TypeInferencer implements AutoCloseable {
             throw KEMException.internalError("Unexpected EOF reached while waiting for response from z3.", currentTerm);
         }
       } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.equals("timeout") && !result.startsWith("(error"));
-      switch (result) {
-      case "sat":
-        return Status.SATISFIABLE;
-      case "unsat":
-        return Status.UNSATISFIABLE;
-      case "unknown":
-      case "timeout":
-        return Status.UNKNOWN;
-      default:
-        throw KEMException.internalError("Unexpected result from z3: " + result, currentTerm);
-      }
+      return switch (result) {
+        case "sat" -> Status.SATISFIABLE;
+        case "unsat" -> Status.UNSATISFIABLE;
+        case "unknown", "timeout" -> Status.UNKNOWN;
+        default -> throw KEMException.internalError("Unexpected result from z3: " + result, currentTerm);
+      };
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
     }

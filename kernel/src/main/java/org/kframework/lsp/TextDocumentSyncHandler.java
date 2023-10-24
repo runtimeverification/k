@@ -175,28 +175,28 @@ public class TextDocumentSyncHandler {
             String context = doc.getContextAt(pos);
             List<DefinitionItem> allDi = slurp(position.getTextDocument().getUri());
             switch (context) {
-                case "":
-                    lci.add(getNewRequiresCompletion());
-                    lci.add(getNewModuleCompletion()); break;
-                case "endmodule":
-                    lci.add(getNewModuleCompletion()); break;
-                case "module":
-                    lci.add(getNewImportCompletion());
-                    lci.addAll(getNewSentenceCompletion()); break;
-                case "import":
-                case "imports":
-                    lci.add(getNewImportCompletion());
-                    lci.addAll(getNewSentenceCompletion());
-                    lci.addAll(getImportCompletion(allDi)); break;
-                case "syntax":
-                    lci.addAll(getNewSentenceCompletion());
-                    lci.addAll(getSyntaxCompletion(allDi)); break;
-                case "context":
-                case "rule":
-                case "configuration":
-                case "claim":
-                    lci.addAll(getNewSentenceCompletion());
-                    lci.addAll(getRuleCompletion(allDi)); break;
+            case "" -> {
+                lci.add(getNewRequiresCompletion());
+                lci.add(getNewModuleCompletion());
+            }
+            case "endmodule" -> lci.add(getNewModuleCompletion());
+            case "module" -> {
+                lci.add(getNewImportCompletion());
+                lci.addAll(getNewSentenceCompletion());
+            }
+            case "import", "imports" -> {
+                lci.add(getNewImportCompletion());
+                lci.addAll(getNewSentenceCompletion());
+                lci.addAll(getImportCompletion(allDi));
+            }
+            case "syntax" -> {
+                lci.addAll(getNewSentenceCompletion());
+                lci.addAll(getSyntaxCompletion(allDi));
+            }
+            case "context", "rule", "configuration", "claim" -> {
+                lci.addAll(getNewSentenceCompletion());
+                lci.addAll(getRuleCompletion(allDi));
+            }
             }
             this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument().getUri() + " #pos: "
                     + pos.getLine() + " " + pos.getCharacter() + " context: " + context + " #: " + lci.size());
