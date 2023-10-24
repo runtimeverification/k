@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.function.Supplier;
 
 // instantiate processes
@@ -26,27 +25,16 @@ public class RunProcess {
         return new Thread(() -> {
                     try {
                         IOUtils.copy(in.get(), out);
-                    } catch (IOException e) {}
+                    } catch (IOException ignored) {}
                 });
     }
 
-    public static class ProcessOutput {
-        public final byte[] stdout;
-        public final byte[] stderr;
-        public final int exitCode;
-
-        public ProcessOutput(byte[] stdout, byte[] stderr, int exitCode) {
-            this.stdout = stdout;
-            this.stderr = stderr;
-            this.exitCode = exitCode;
-        }
+    public record ProcessOutput(byte[] stdout, byte[] stderr, int exitCode) {
     }
 
     private RunProcess() {}
 
     public static ProcessOutput execute(Map<String, String> environment, ProcessBuilder pb, String... commands) {
-
-
         try {
             if (commands.length <= 0) {
                 throw KEMException.criticalError("Need command options to run");

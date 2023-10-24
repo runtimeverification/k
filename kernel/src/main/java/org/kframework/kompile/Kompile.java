@@ -263,11 +263,11 @@ public class Kompile {
         command.add(compiledJson.getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
         sw.printIntermediate("Post process JSON: " + String.join(" ", command));
-        if (output.exitCode != 0) {
+        if (output.exitCode() != 0) {
             throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
-                    + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
+                    + output.exitCode() + "\nStdout:\n" + new String(output.stdout()) + "\nStderr:\n" + new String(output.stderr()));
         }
-        return JsonParser.parseDefinition(new String(output.stdout));
+        return JsonParser.parseDefinition(new String(output.stdout()));
     }
 
     private static String ruleSourceMap(Definition def) {
