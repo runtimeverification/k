@@ -18,18 +18,10 @@ import java.util.Set;
  * - if right, then A <= B
  * - if non-assoc, then A <= B and A <= C
  */
-public class CheckAssoc {
-    private final Set<KEMException> errors;
-    private final Module module;
-
-    public CheckAssoc(Set<KEMException> errors, Module module) {
-        this.errors = errors;
-        this.module = module;
-    }
+public record CheckAssoc(Set<KEMException> errors, Module module) {
 
     public void check(Sentence s) {
-        if (s instanceof Production) {
-            Production p = (Production) s;
+        if (s instanceof Production p) {
             if (p.arity() != 2) {
                 return;
             }
