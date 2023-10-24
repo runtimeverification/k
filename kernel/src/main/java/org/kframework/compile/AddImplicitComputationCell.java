@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  *  If a SemanticSentence (Rule or Context) has a body that is not wrapped in any cell,
  *  wrap it in a {@code <k>} cell
  */
-public class AddImplicitComputationCell {
+public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelInfo) {
 
     public static Definition transformDefinition(Definition input) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
@@ -35,24 +35,14 @@ public class AddImplicitComputationCell {
                 "concretizing configuration").apply(mod);
     }
 
-    private final ConfigurationInfo cfg;
-    private final LabelInfo labelInfo;
-
-    public AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelInfo) {
-        this.cfg = cfg;
-        this.labelInfo = labelInfo;
-    }
-
     public Sentence apply(Module m, Sentence s) {
         if (skipSentence(s)) {
             return s;
         }
 
-        if (s instanceof RuleOrClaim) {
-            RuleOrClaim rule = (RuleOrClaim) s;
+        if (s instanceof RuleOrClaim rule) {
             return rule.newInstance(apply(rule.body(), m, rule instanceof Claim), rule.requires(), rule.ensures(), rule.att());
-        } else if (s instanceof Context) {
-            Context context = (Context) s;
+        } else if (s instanceof Context context) {
             return new Context(apply(context.body(), m, false), context.requires(), context.att());
         } else {
             return s;
@@ -74,8 +64,7 @@ public class AddImplicitComputationCell {
             return true;
         } else if (items.size() == 2 && isClaim) {
             K second = items.get(1);
-            if(second instanceof KApply) {
-                KApply app = (KApply) second;
+            if(second instanceof KApply app) {
                 return app.klabel() == KLabels.GENERATED_COUNTER_CELL;
             }
         }
@@ -88,8 +77,7 @@ public class AddImplicitComputationCell {
             return false;
         }
 
-        if (item instanceof KRewrite) {
-            final KRewrite rew = (KRewrite) item;
+        if (item instanceof final KRewrite rew) {
             return Stream.concat(
                             IncompleteCellUtils.flattenCells(rew.left()).stream(),
                             IncompleteCellUtils.flattenCells(rew.right()).stream())
