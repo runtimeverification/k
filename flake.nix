@@ -4,7 +4,7 @@
     nixpkgs.url = "nixpkgs/nixos-23.05";
     haskell-backend.url = "github:runtimeverification/haskell-backend/03a6228f78d7f4805fee4b9d9c45208dcbe0c9fb";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/26b5d2df37c6fcc210d80ff57d1c3572a41f90b5";
+      url = "github:runtimeverification/hs-backend-booster/66439eba81e7311698cb3647b22bb840529ac524";
       # NB booster-backend will bring in another dependency on haskell-backend,
       # but the two are not necessarily the same (different more often than not).
       # We get two transitive dependencies on haskell-nix.
