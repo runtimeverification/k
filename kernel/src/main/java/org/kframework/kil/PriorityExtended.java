@@ -36,9 +36,8 @@ public class PriorityExtended extends ModuleItem {
             return false;
         if (this == obj)
             return true;
-        if (!(obj instanceof PriorityExtended))
+        if (!(obj instanceof PriorityExtended syn))
             return false;
-        PriorityExtended syn = (PriorityExtended) obj;
 
         if (syn.priorityBlocks.size() != priorityBlocks.size())
             return false;

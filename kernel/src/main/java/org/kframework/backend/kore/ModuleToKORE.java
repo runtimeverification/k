@@ -201,8 +201,7 @@ public class ModuleToKORE {
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : sortedRules) {
             K left = RewriteToTop.toLeft(rule.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
+            if (left instanceof KApply kapp) {
                 Production prod = production(kapp);
                 if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
                     functionRules.put(kapp.klabel(), rule);

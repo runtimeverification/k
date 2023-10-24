@@ -84,10 +84,9 @@ public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
 
         a = (Ambiguity)super.apply(a);
         for (Term t : a.items()) {
-            if (!(t instanceof ProductionReference)) {
+            if (!(t instanceof ProductionReference ref)) {
                 return a;
             }
-            ProductionReference ref = (ProductionReference)t;
             if (prod == null) {
                 prod = ref.production();
                 if (ref instanceof TermCons) {

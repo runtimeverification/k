@@ -66,9 +66,8 @@ public class PriorityBlock extends ASTNode {
             return false;
         if (this == obj)
             return true;
-        if (!(obj instanceof PriorityBlock))
+        if (!(obj instanceof PriorityBlock pb))
             return false;
-        PriorityBlock pb = (PriorityBlock) obj;
 
         if (!pb.getAssoc().equals(this.assoc))
             return false;

@@ -354,10 +354,9 @@ public class TypeInferencer implements AutoCloseable {
    * @return
    */
   private static Optional<ProductionReference> getFunction(Term t) {
-    if (!(t instanceof ProductionReference)) {
+    if (!(t instanceof ProductionReference child)) {
       return Optional.empty();
     }
-    ProductionReference child = (ProductionReference)t;
     while (child.production().att().contains(Att.BRACKET())) {
       if (((TermCons)child).get(0) instanceof Ambiguity) {
         return Optional.empty();
@@ -514,8 +513,7 @@ public class TypeInferencer implements AutoCloseable {
      * this term.
      */
     public String apply(Term t) {
-      if (t instanceof Ambiguity) {
-        Ambiguity amb = (Ambiguity)t;
+      if (t instanceof Ambiguity amb) {
         if (isIncremental) {
           // we are error checking an ill typed term, so we pick just one branch of the ambiguity and explain why it is
           // ill typed.
@@ -567,15 +565,13 @@ public class TypeInferencer implements AutoCloseable {
         // get cached id
         id = pr.id().get();
       }
-      if (pr instanceof TermCons) {
+      if (pr instanceof TermCons tc) {
         boolean wasStrict = isStrictEquality;
         Sort oldExpectedSort = expectedSort;
         Optional<ProductionReference> oldExpectedParams = expectedParams;
-        TermCons tc = (TermCons)pr;
         // traverse children
         for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-          if (tc.production().items().apply(i) instanceof NonTerminal) {
-            NonTerminal nt = (NonTerminal)tc.production().items().apply(i);
+          if (tc.production().items().apply(i) instanceof NonTerminal nt) {
             expectedParams = Optional.of(tc);
             isStrictEquality = false;
             // compute expected sort and whether this is a cast
@@ -586,8 +582,7 @@ public class TypeInferencer implements AutoCloseable {
               expectedSort = getSortOfCast(tc);
               isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().equals("#InnerCast");
-              if (tc.get(0) instanceof Constant) {
-                Constant child = (Constant)tc.get(0);
+              if (tc.get(0) instanceof Constant child) {
                 if (child.production().sort().equals(Sorts.KVariable()) || child.production().sort().equals(Sorts.KConfigVar())) {
                   isStrictEquality = true;
                 }
@@ -619,8 +614,7 @@ public class TypeInferencer implements AutoCloseable {
       if (isIncremental || !shared || !cached) {
         // if we are in incremental mode or this is the first time reaching this term under this expected sort,
         // compute the local constraints of this term and add them to the current constraint.
-        if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
-          Constant c = (Constant) pr;
+        if (pr instanceof Constant c && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
           String name;
           boolean oldStrictEquality = isStrictEquality;
           if (!shared) {

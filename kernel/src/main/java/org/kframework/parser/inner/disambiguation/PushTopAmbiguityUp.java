@@ -16,8 +16,7 @@ public class PushTopAmbiguityUp extends SafeTransformer {
     public Term apply(TermCons tc) {
         if (tc.production().sort().equals(Sorts.RuleContent())) {
             Term t = new PushTopAmbiguityUp2().apply(tc.get(0));
-            if (t instanceof Ambiguity) {
-                Ambiguity old = (Ambiguity)t;
+            if (t instanceof Ambiguity old) {
                 Set<Term> newTerms = new HashSet<>();
                 for (Term child : old.items()) {
                     Term newTerm = tc.with(0, child);
@@ -34,8 +33,7 @@ public class PushTopAmbiguityUp extends SafeTransformer {
         public Term apply(TermCons tc) {
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().head().equals(KLabels.KREWRITE)) {
                 Term t = tc.get(0);
-                if (t instanceof Ambiguity) {
-                    Ambiguity old = (Ambiguity)t;
+                if (t instanceof Ambiguity old) {
                     Set<Term> newTerms = new HashSet<>();
                     for (Term child : old.items()) {
                         Term newTerm = tc.with(0, child);

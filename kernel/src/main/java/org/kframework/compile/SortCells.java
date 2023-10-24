@@ -146,8 +146,7 @@ public class SortCells {
                 }
             }
             for (K item : items) {
-                if (item instanceof KApply) {
-                    KApply kApply = (KApply) item;
+                if (item instanceof KApply kApply) {
                     Sort s = cfg.getCellSort(kApply.klabel());
                     if (s != null && cfg.getMultiplicity(s) != Multiplicity.STAR) {
                         remainingCells.remove(s);
@@ -275,8 +274,7 @@ public class SortCells {
             private void processSide(KApply parentCell, boolean allowRhs, List<K> items) {
                 List<KVariable> bagVars = new ArrayList<>();
                 for (K item : items) {
-                    if (item instanceof KVariable) {
-                        KVariable var = (KVariable) item;
+                    if (item instanceof KVariable var) {
                         if (var.att().contains(Sort.class)) {
                             Sort sort = var.att().get(Sort.class);
                             if (cfg.cfg.isCell(sort)) {
@@ -382,8 +380,7 @@ public class SortCells {
                                 .reduce(BooleanUtils.TRUE, BooleanUtils::and);
                     } else if(k.klabel().name().equals("isBag")
                             && k.klist().size() == 1
-                            && k.klist().items().get(0) instanceof KVariable) {
-                        KVariable var = (KVariable)k.klist().items().get(0);
+                            && k.klist().items().get(0) instanceof KVariable var) {
                         VarInfo info = variables.get(var);
                         if (info != null) {
                             return info.getSplit(var).entrySet().stream()
@@ -454,8 +451,7 @@ public class SortCells {
                             return concatenateStarCells(e.getKey(), e.getValue());
                         }
                     }));
-                } else if (item instanceof KRewrite) {
-                    KRewrite rw = (KRewrite) item;
+                } else if (item instanceof KRewrite rw) {
                     Map<Sort, K> splitLeft = new HashMap<>(getSplit(rw.left()));
                     Map<Sort, K> splitRight = new HashMap<>(getSplit(rw.right()));
                     addDefaultCells(item, splitLeft, splitRight);
@@ -573,8 +569,7 @@ public class SortCells {
             for (int idx = 0; idx < k0.klist().size(); idx++) {
                 K item0 = k0.klist().items().get(idx);
                 klist0.set(idx, item0);
-                if (item0 instanceof KApply) {
-                    KApply k = (KApply) item0;
+                if (item0 instanceof KApply k) {
 
                     // incomplete cells remain as #cells(...) after processVars
                     if (k.klabel().name().equals("#cells")) {
@@ -612,8 +607,7 @@ public class SortCells {
                             KApply cellFragment = null;
                             ArrayList<K> klist = new ArrayList<K>(Collections.nCopies(subcellSorts.size(), null));
                             for (K item : IncompleteCellUtils.flattenCells(k)) { // #cells(#cells(x,y),z) => [x,y,z]
-                                if (item instanceof KApply) {
-                                    KApply kapp = (KApply) item;
+                                if (item instanceof KApply kapp) {
                                     if (cfg.cfg.isCellLabel(kapp.klabel())) {
                                         Sort sort = cfg.getCellSort(kapp.klabel());
                                         if (!subcellSorts.contains(sort)) {
@@ -627,8 +621,7 @@ public class SortCells {
                                     } else {
                                         throw KEMException.compilerError("Unsupported cell fragment element.", item);
                                     }
-                                } else if (item instanceof KVariable) {
-                                    KVariable var = (KVariable) item;
+                                } else if (item instanceof KVariable var) {
                                     VarInfo varinfo = null;
                                     if (variables.containsKey(var)) {
                                         varinfo = variables.get(var);
@@ -747,8 +740,7 @@ public class SortCells {
                 if (k.klabel().name().equals("#cells")) {
                     for (int i = 0; i < k.klist().size(); i++) {
                         K item = k.klist().items().get(i);
-                        if (item instanceof KVariable) {
-                            KVariable var = (KVariable) item;
+                        if (item instanceof KVariable var) {
                             if (var.att().contains(Sort.class)) {
                                 Sort sort = var.att().get(Sort.class);
                                 if (!cfg.cfg.isCell(sort)) {
@@ -817,8 +809,7 @@ public class SortCells {
                     for (int idx = 0; idx < k0.klist().size(); idx++) {
                         K item0 = k0.klist().items().get(idx);
                         klist0.set(idx, item0);
-                        if (item0 instanceof KApply) {
-                            KApply k = (KApply) item0;
+                        if (item0 instanceof KApply k) {
                             if (k.klabel().name().equals("#cells")) {
                                 if (cellFragmentVarsCell.contains(k)) {
                                     Sort cellFragmentSort = nthArgSort(k0.klabel(), idx);

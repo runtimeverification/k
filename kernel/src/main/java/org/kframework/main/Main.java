@@ -127,10 +127,9 @@ public class Main {
             return retval;
         } catch (ProvisionException e) {
             for (Message m : e.getErrorMessages()) {
-                if (!(m.getCause() instanceof KEMException)) {
+                if (!(m.getCause() instanceof KEMException ex)) {
                     throw e;
                 } else {
-                    KEMException ex = (KEMException) m.getCause();
                     kem.registerThrown(ex);
                 }
             }

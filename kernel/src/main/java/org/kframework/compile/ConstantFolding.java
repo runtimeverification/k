@@ -41,8 +41,7 @@ public class ConstantFolding {
   }
 
   public Sentence fold(Module module, Sentence sentence) {
-    if (sentence instanceof Rule) {
-      Rule r = (Rule)sentence;
+    if (sentence instanceof Rule r) {
       return Rule(fold(module, r.body(), true), fold(module, r.requires(), false), fold(module, r.ensures(), false), r.att());
     }
     return sentence;

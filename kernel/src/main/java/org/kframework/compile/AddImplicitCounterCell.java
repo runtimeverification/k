@@ -21,8 +21,7 @@ public class AddImplicitCounterCell {
     public AddImplicitCounterCell() {}
 
     public Sentence apply(Module m, Sentence s) {
-        if(s instanceof Claim) {
-            Claim claim = (Claim) s;
+        if(s instanceof Claim claim) {
             return claim.newInstance(apply(claim.body(), m), claim.requires(), claim.ensures(), claim.att());
         }
         return s;

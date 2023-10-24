@@ -369,21 +369,18 @@ public class ToJson {
     public static JsonObject toJson(ProductionItem prod) {
         JsonObjectBuilder jsonProduction = factory.createObjectBuilder();
 
-        if (prod instanceof NonTerminal) {
-            NonTerminal t = (NonTerminal) prod;
+        if (prod instanceof NonTerminal t) {
             jsonProduction.add("node", JsonParser.KNONTERMINAL);
             jsonProduction.add("sort", toJson(t.sort()));
             Option<String> name = t.name();
             if (! name.isEmpty())
                 jsonProduction.add("name", name.get());
-        } else if (prod instanceof RegexTerminal) {
-            RegexTerminal t = (RegexTerminal) prod;
+        } else if (prod instanceof RegexTerminal t) {
             jsonProduction.add("node", JsonParser.KREGEXTERMINAL);
             jsonProduction.add("precedeRegex", t.precedeRegex());
             jsonProduction.add("regex", t.regex());
             jsonProduction.add("followRegex", t.followRegex());
-        } else if (prod instanceof Terminal) {
-            Terminal t = (Terminal) prod;
+        } else if (prod instanceof Terminal t) {
             jsonProduction.add("node", JsonParser.KTERMINAL);
             jsonProduction.add("value", t.value());
         }
@@ -431,15 +428,13 @@ public class ToJson {
 
     public static JsonStructure toJson(K k) {
         JsonObjectBuilder knode = factory.createObjectBuilder();
-        if (k instanceof KToken) {
-            KToken tok = (KToken) k;
+        if (k instanceof KToken tok) {
 
             knode.add("node", JsonParser.KTOKEN);
             knode.add("sort", toJson(tok.sort()));
             knode.add("token", tok.s());
 
-        } else if (k instanceof KApply) {
-            KApply app = (KApply) k;
+        } else if (k instanceof KApply app) {
 
             knode.add("node", JsonParser.KAPPLY);
             knode.add("label", toJson(((KApply) k).klabel()));
@@ -452,8 +447,7 @@ public class ToJson {
             knode.add("arity", app.klist().size());
             knode.add("args", args.build());
 
-        } else if (k instanceof KSequence) {
-            KSequence seq = (KSequence) k;
+        } else if (k instanceof KSequence seq) {
 
             knode.add("node", JsonParser.KSEQUENCE);
 
@@ -465,8 +459,7 @@ public class ToJson {
             knode.add("arity", seq.size());
             knode.add("items", items.build());
 
-        } else if (k instanceof KVariable) {
-            KVariable var = (KVariable) k;
+        } else if (k instanceof KVariable var) {
 
             knode.add("node", JsonParser.KVARIABLE);
             knode.add("name", var.name());
@@ -474,22 +467,19 @@ public class ToJson {
                 knode.add("sort", toJson(k.att().get(Sort.class)));
             }
 
-        } else if (k instanceof KRewrite) {
-            KRewrite rew = (KRewrite) k;
+        } else if (k instanceof KRewrite rew) {
 
             knode.add("node", JsonParser.KREWRITE);
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
 
-        } else if (k instanceof KAs) {
-            KAs alias = (KAs) k;
+        } else if (k instanceof KAs alias) {
 
             knode.add("node", JsonParser.KAS);
             knode.add("pattern", toJson(alias.pattern()));
             knode.add("alias",   toJson(alias.alias()));
 
-        } else if (k instanceof InjectedKLabel) {
-            InjectedKLabel inj = (InjectedKLabel) k;
+        } else if (k instanceof InjectedKLabel inj) {
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
             knode.add("label", toJson(inj.klabel()));

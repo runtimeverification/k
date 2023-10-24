@@ -221,11 +221,10 @@ public class KPrint {
     }
 
     private K filterSubst(K term, Module mod) {
-      if (!(term instanceof KApply)) {
+      if (!(term instanceof KApply kapp)) {
         return term;
       }
-      KApply kapp = (KApply)term;
-      if (kapp.klabel().head().equals(KLabels.ML_AND)) {
+        if (kapp.klabel().head().equals(KLabels.ML_AND)) {
         return filterConjunction(kapp, mod);
       } else if (kapp.klabel().head().equals(KLabels.ML_OR)) {
         KLabel unit = KLabel(KLabels.ML_FALSE.name(), kapp.klabel().params().apply(0));
@@ -244,11 +243,10 @@ public class KPrint {
     }
 
     private K filterConjunction(K term, Module mod) {
-      if (!(term instanceof KApply)) {
+      if (!(term instanceof KApply kapp)) {
         return term;
       }
-      KApply kapp = (KApply)term;
-      if (kapp.klabel().head().equals(KLabels.ML_AND)) {
+        if (kapp.klabel().head().equals(KLabels.ML_AND)) {
         KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
         List<K> conjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return conjuncts.stream()
@@ -266,11 +264,10 @@ public class KPrint {
     }
 
     public Optional<K> filterEquality(K term, Multiset<KVariable> vars, Module mod) {
-      if (!(term instanceof KApply)) {
+      if (!(term instanceof KApply kapp)) {
         return Optional.of(term);
       }
-      KApply kapp = (KApply)term;
-      if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
+        if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
         if (!(kapp.items().get(0) instanceof KVariable) &&
             (!(kapp.items().get(0) instanceof KApply) ||
              !mod.attributesFor().apply(((KApply)kapp.items().get(0)).klabel()).contains(Att.FUNCTION()))) {
@@ -391,10 +388,9 @@ public class KPrint {
             @Override
             public K apply(KApply orig) {
                 K newK = super.apply(orig);
-                if (! (newK instanceof KApply)) {
+                if (! (newK instanceof KApply kapp)) {
                     return newK;
                 }
-                KApply kapp = (KApply) newK;
                 String name = orig.klabel().name();
                 return options.flattenedKLabels.contains(name) ? flattenTerm(mod, kapp)
                      : kapp ;

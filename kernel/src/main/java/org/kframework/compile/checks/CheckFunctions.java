@@ -29,30 +29,26 @@ public class CheckFunctions {
     }
 
     public void check(Sentence sentence) {
-        if (sentence instanceof Rule) {
-            Rule rl = (Rule) sentence;
+        if (sentence instanceof Rule rl) {
             checkFuncAtt(rl);
             if (!rl.att().contains(Att.SIMPLIFICATION()))
                 // functions are allowed on the LHS of simplification rules
                 check(rl.body());
-        } else if (sentence instanceof Claim) {
+        } else if (sentence instanceof Claim c) {
             // functions are allowed on LHS of claims
-            Claim c = (Claim) sentence;
             if (c.att().contains(Att.MACRO()) || c.att().contains(Att.MACRO_REC())
                     || c.att().contains(Att.ALIAS()) || c.att().contains(Att.ALIAS_REC()))
                 errors.add(KEMException.compilerError(
                         "Attributes " + Att.MACRO() + "|" + Att.MACRO_REC() + "|"
                                 + Att.ALIAS() + "|" + Att.ALIAS_REC() + " are not allowed on claims.", c));
-        } else if (sentence instanceof Context) {
-            Context ctx = (Context) sentence;
+        } else if (sentence instanceof Context ctx) {
             check(ctx.body());
             if (ctx.att().contains(Att.MACRO()) || ctx.att().contains(Att.MACRO_REC())
                     || ctx.att().contains(Att.ALIAS()) || ctx.att().contains(Att.ALIAS_REC()))
                 errors.add(KEMException.compilerError(
                         "Attributes " + Att.MACRO() + "|" + Att.MACRO_REC() + "|"
                                 + Att.ALIAS() + "|" + Att.ALIAS_REC() + " are not allowed on contexts.", ctx));
-        } else if (sentence instanceof ContextAlias) {
-            ContextAlias ctx = (ContextAlias) sentence;
+        } else if (sentence instanceof ContextAlias ctx) {
             check(ctx.body());
             if (ctx.att().contains(Att.MACRO()) || ctx.att().contains(Att.MACRO_REC())
                     || ctx.att().contains(Att.ALIAS()) || ctx.att().contains(Att.ALIAS_REC()))
