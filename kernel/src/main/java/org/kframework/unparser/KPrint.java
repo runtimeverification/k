@@ -165,20 +165,14 @@ public class KPrint {
     }
 
     public static byte[] serialize(K term, OutputModes outputMode) {
-        switch (outputMode) {
-            case KAST:
-                return (ToKast.apply(term) + "\n").getBytes();
-            case NONE:
-                return "".getBytes();
-            case BINARY:
-                return ToBinary.apply(term);
-            case JSON:
-                return ToJson.apply(term);
-            case LATEX:
-                return ToLatex.apply(term);
-            default:
-                throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
-        }
+        return switch (outputMode) {
+            case KAST -> (ToKast.apply(term) + "\n").getBytes();
+            case NONE -> "".getBytes();
+            case BINARY -> ToBinary.apply(term);
+            case JSON -> ToJson.apply(term);
+            case LATEX -> ToLatex.apply(term);
+            default -> throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
+        };
     }
 
     public String unparseTerm(K input, Module test) {

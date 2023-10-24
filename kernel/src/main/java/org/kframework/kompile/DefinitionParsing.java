@@ -576,74 +576,55 @@ public class DefinitionParsing {
     private Claim upClaim(K contents) {
         KApply ruleContents = (KApply) contents;
         List<org.kframework.kore.K> items = ruleContents.klist().items();
-        switch (ruleContents.klabel().name()) {
-        case "#ruleNoConditions":
-            return Claim(items.get(0), BooleanUtils.TRUE, BooleanUtils.TRUE, ruleContents.att());
-        case "#ruleRequires":
-            return Claim(items.get(0), items.get(1), BooleanUtils.TRUE, ruleContents.att());
-        case "#ruleEnsures":
-            return Claim(items.get(0), BooleanUtils.TRUE, items.get(1), ruleContents.att());
-        case "#ruleRequiresEnsures":
-            return Claim(items.get(0), items.get(1), items.get(2), ruleContents.att());
-        default:
-            throw new AssertionError("Wrong KLabel for claim content");
-        }
+        return switch (ruleContents.klabel().name()) {
+            case "#ruleNoConditions" -> Claim(items.get(0), BooleanUtils.TRUE, BooleanUtils.TRUE, ruleContents.att());
+            case "#ruleRequires" -> Claim(items.get(0), items.get(1), BooleanUtils.TRUE, ruleContents.att());
+            case "#ruleEnsures" -> Claim(items.get(0), BooleanUtils.TRUE, items.get(1), ruleContents.att());
+            case "#ruleRequiresEnsures" -> Claim(items.get(0), items.get(1), items.get(2), ruleContents.att());
+            default -> throw new AssertionError("Wrong KLabel for claim content");
+        };
     }
 
     private Rule upRule(K contents) {
         KApply ruleContents = (KApply) contents;
         List<org.kframework.kore.K> items = ruleContents.klist().items();
-        switch (ruleContents.klabel().name()) {
-        case "#ruleNoConditions":
-            return Rule(items.get(0), BooleanUtils.TRUE, BooleanUtils.TRUE, ruleContents.att());
-        case "#ruleRequires":
-            return Rule(items.get(0), items.get(1), BooleanUtils.TRUE, ruleContents.att());
-        case "#ruleEnsures":
-            return Rule(items.get(0), BooleanUtils.TRUE, items.get(1), ruleContents.att());
-        case "#ruleRequiresEnsures":
-            return Rule(items.get(0), items.get(1), items.get(2), ruleContents.att());
-        default:
-            throw new AssertionError("Wrong KLabel for rule content");
-        }
+        return switch (ruleContents.klabel().name()) {
+            case "#ruleNoConditions" -> Rule(items.get(0), BooleanUtils.TRUE, BooleanUtils.TRUE, ruleContents.att());
+            case "#ruleRequires" -> Rule(items.get(0), items.get(1), BooleanUtils.TRUE, ruleContents.att());
+            case "#ruleEnsures" -> Rule(items.get(0), BooleanUtils.TRUE, items.get(1), ruleContents.att());
+            case "#ruleRequiresEnsures" -> Rule(items.get(0), items.get(1), items.get(2), ruleContents.att());
+            default -> throw new AssertionError("Wrong KLabel for rule content");
+        };
     }
 
     private Context upContext(K contents) {
         KApply ruleContents = (KApply) contents;
         List<K> items = ruleContents.klist().items();
-        switch (ruleContents.klabel().name()) {
-        case "#ruleNoConditions":
-            return Context(items.get(0), BooleanUtils.TRUE, ruleContents.att());
-        case "#ruleRequires":
-            return Context(items.get(0), items.get(1), ruleContents.att());
-        default:
-            throw KEMException.criticalError("Illegal context with ensures clause detected.", contents);
-        }
+        return switch (ruleContents.klabel().name()) {
+            case "#ruleNoConditions" -> Context(items.get(0), BooleanUtils.TRUE, ruleContents.att());
+            case "#ruleRequires" -> Context(items.get(0), items.get(1), ruleContents.att());
+            default -> throw KEMException.criticalError("Illegal context with ensures clause detected.", contents);
+        };
     }
 
     private ContextAlias upAlias(K contents) {
         KApply ruleContents = (KApply) contents;
         List<K> items = ruleContents.klist().items();
-        switch (ruleContents.klabel().name()) {
-        case "#ruleNoConditions":
-            return ContextAlias(items.get(0), BooleanUtils.TRUE, ruleContents.att());
-        case "#ruleRequires":
-            return ContextAlias(items.get(0), items.get(1), ruleContents.att());
-        default:
-            throw KEMException.criticalError("Illegal context alias with ensures clause detected.", contents);
-        }
+        return switch (ruleContents.klabel().name()) {
+            case "#ruleNoConditions" -> ContextAlias(items.get(0), BooleanUtils.TRUE, ruleContents.att());
+            case "#ruleRequires" -> ContextAlias(items.get(0), items.get(1), ruleContents.att());
+            default -> throw KEMException.criticalError("Illegal context alias with ensures clause detected.", contents);
+        };
     }
 
     private Configuration upConfiguration(K contents) {
         KApply configContents = (KApply) contents;
         List<K> items = configContents.klist().items();
-        switch (configContents.klabel().name()) {
-        case "#ruleNoConditions":
-            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
-        case "#ruleEnsures":
-            return Configuration(items.get(0), items.get(1), configContents.att());
-        default:
-            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
-        }
+        return switch (configContents.klabel().name()) {
+            case "#ruleNoConditions" -> Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
+            case "#ruleEnsures" -> Configuration(items.get(0), items.get(1), configContents.att());
+            default -> throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
+        };
     }
 
     private ParseCache loadCache(Module parser) {

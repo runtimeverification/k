@@ -40,16 +40,12 @@ public class KPrintTest {
 
     private K unparseThenParse(K origTerm, OutputModes outputMode) {
         byte[] unparsed = KPrint.serialize(origTerm, outputMode);
-        switch (outputMode) {
-            case JSON:
-                return JsonParser.parse(unparsed);
-            case BINARY:
-                return BinaryParser.parse(unparsed);
-            case KAST:
-               return KastParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
-            default:
-                return KToken("###", Sort("UnsupportedOutputMode"));
-        }
+        return switch (outputMode) {
+            case JSON -> JsonParser.parse(unparsed);
+            case BINARY -> BinaryParser.parse(unparsed);
+            case KAST -> KastParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
+            default -> KToken("###", Sort("UnsupportedOutputMode"));
+        };
     }
 
     @Test

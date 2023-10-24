@@ -424,8 +424,8 @@ jobs:
       - name: 'Install pandoc/texlive/calibre'
         run: |
           sudo apt update --yes
-          sudo apt install --yes wget texlive-xetex
-          sudo wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.44.0
+          sudo apt install --yes wget texlive-xetex libegl1 libopengl0
+          sudo wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=6.29.0
           sudo wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb
           sudo dpkg -i /tmp/pandoc.deb
       - name: 'Checkout code and set up web build'

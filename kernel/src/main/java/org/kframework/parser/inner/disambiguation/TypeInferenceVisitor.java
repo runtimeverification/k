@@ -94,21 +94,23 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         // skip the rest as there is nothing to infer
         return Right.apply(t);
       }
-      switch(inferencer.status()) {
-      case SATISFIABLE:
+      switch (inferencer.status()) {
+      case SATISFIABLE -> {
         // there is at least one solution, so compute it and pop the soft constraints
         inferencer.computeModel();
         inferencer.pop();
-        break;
-      case UNKNOWN:
+      }
+      case UNKNOWN -> {
         // constraints could not be solved, so error
         inferencer.pop();
         throw KEMException.internalError("Could not solve sort constraints.", t);
-      case UNSATISFIABLE:
+      }
+      case UNSATISFIABLE -> {
         // no solutions exist. This is a type error, so ask the inferencer for an error message and return
         inferencer.pop();
         Set<KEMException> kex = inferencer.error();
         return Left.apply(kex);
+      }
       }
       boolean hasAnotherSolution = true;
       Set<Map<String, Sort>> models = new HashSet<>();
@@ -122,38 +124,36 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         boolean isMaximal = false;
         do {
           inferencer.pushGreater();
-          switch(inferencer.status()) {
-            case SATISFIABLE:
-              // is not maximal, keep going
-              isMaximal = false;
-              inferencer.computeModel();
-              inferencer.pop();
-              break;
-            case UNKNOWN:
-              // constraints coiuld not be solved, so error
-              throw KEMException.internalError("Could not solve sortconstraints.", t);
-            case UNSATISFIABLE:
-              isMaximal = true;
-              inferencer.pop();
-              break;
+          switch (inferencer.status()) {
+          case SATISFIABLE -> {
+            // is not maximal, keep going
+            isMaximal = false;
+            inferencer.computeModel();
+            inferencer.pop();
+          }
+          case UNKNOWN ->
+                  // constraints coiuld not be solved, so error
+                  throw KEMException.internalError("Could not solve sortconstraints.", t);
+          case UNSATISFIABLE -> {
+            isMaximal = true;
+            inferencer.pop();
+          }
           }
         } while (!isMaximal);
         models.add(inferencer.getModel());
         // assert that we don't want any solutions less than this one
         inferencer.pushNotModel();
-        switch(inferencer.status()) {
-        case SATISFIABLE:
-          // found another solution, keep going
-          hasAnotherSolution = true;
-          break;
-        case UNKNOWN:
-          // constraints could not be solved, so error
-          throw KEMException.internalError("Could not solve sort constraints.", t);
-        case UNSATISFIABLE:
-          // no more solutions, terminate loop
-          hasAnotherSolution = false;
-          break;
-        }
+        hasAnotherSolution = switch (inferencer.status()) {
+          case SATISFIABLE ->
+                  // found another solution, keep going
+                  true;
+          case UNKNOWN ->
+                  // constraints could not be solved, so error
+                  throw KEMException.internalError("Could not solve sort constraints.", t);
+          case UNSATISFIABLE ->
+                  // no more solutions, terminate loop
+                  false;
+        };
       } while (hasAnotherSolution);
       // remove all models that are not maximal
       Set<Term> candidates = new HashSet<>();
