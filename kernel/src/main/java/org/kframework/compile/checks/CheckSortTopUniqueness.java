@@ -18,20 +18,7 @@ import java.util.Set;
  *   syntax KList ::= A
  *   syntax Bag ::= A
  */
-public class CheckSortTopUniqueness {
-    private final Set<KEMException> errors;
-
-    private final Module module;
-
-    /**
-     * Check that the given module has no sort that has multiple top sorts.
-     * @param errors to be updated when violations occur. Multiple violations will be accumulated in `errors`.
-     * @param module to be checked.
-     */
-    public CheckSortTopUniqueness(Set<KEMException> errors, Module module) {
-        this.errors = errors;
-        this.module = module;
-    }
+public record CheckSortTopUniqueness(Set<KEMException> errors, Module module) {
 
     public void check(Sentence s) {
         if (s instanceof Production) {
