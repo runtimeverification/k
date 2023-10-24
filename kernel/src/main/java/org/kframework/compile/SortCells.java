@@ -141,7 +141,7 @@ public class SortCells {
             }
             if (var.att().contains(Sort.class)) {
                 Sort sort = var.att().get(Sort.class);
-                if (cfg.cfg.isCell(sort)) {
+                if (cfg.cfg().isCell(sort)) {
                     remainingCells.removeIf(s -> !s.equals(sort));
                 }
             }
@@ -175,7 +175,7 @@ public class SortCells {
                     if (cfg.getMultiplicity(child) == Multiplicity.ONE) {
                         arg = cfg.getCellAbsentTerm(child);
                     } else {
-                        arg = cfg.cfg.getUnit(child);
+                        arg = cfg.cfg().getUnit(child);
                     }
                 }
                 assert arg != null;
@@ -279,7 +279,7 @@ public class SortCells {
                         KVariable var = (KVariable) item;
                         if (var.att().contains(Sort.class)) {
                             Sort sort = var.att().get(Sort.class);
-                            if (cfg.cfg.isCell(sort)) {
+                            if (cfg.cfg().isCell(sort)) {
                                 if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
                                     Sort prevSort = cellVariables.get(var);
                                     throw KEMException.compilerError("Variable "+var+" occurs annotated as multiple cell sorts, "+sort+" and "+prevSort,
@@ -335,7 +335,7 @@ public class SortCells {
 
     private Sort getPredicateSort(Sort s) {
         if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
-            scala.collection.Set<Sort> sorts = cfg.cfg.getCellBagSortsOfCell(s);
+            scala.collection.Set<Sort> sorts = cfg.cfg().getCellBagSortsOfCell(s);
             if (sorts.size() != 1) {
                 throw KEMException.compilerError("Expected exactly one cell collection sort for the sort " + s + "; found " + sorts);
             }
@@ -410,7 +410,7 @@ public class SortCells {
                         if (cfg.getMultiplicity(sort) == Multiplicity.ONE) {
                             throw KEMException.compilerError("Missing cell of multiplicity=\"1\": " + sort, k);
                         } else {
-                            ordered.set(indexOf(order, sort, k), cfg.cfg.getUnit(sort));
+                            ordered.set(indexOf(order, sort, k), cfg.cfg().getUnit(sort));
                         }
                     });
                     return KApply(k.klabel(), KList(ordered), k.att());
@@ -475,9 +475,9 @@ public class SortCells {
                             + "into a cell collection.", children.iterator().next());
                 }
                 if (children.size() == 0) {
-                    return cfg.cfg.getUnit(sort);
+                    return cfg.cfg().getUnit(sort);
                 }
-                KLabel concat = cfg.cfg.getConcat(sort);
+                KLabel concat = cfg.cfg().getConcat(sort);
                 int ix = children.size();
                 K result = children.get(--ix);
                 while (ix > 0) {
@@ -491,7 +491,7 @@ public class SortCells {
                     if (cfg.getMultiplicity(s) == Multiplicity.ONE) {
                         throw KEMException.compilerError("Cannot rewrite a multiplicity=\"1\" cell to or from the cell unit.", item);
                     } else {
-                        splitRight.put(s, cfg.cfg.getUnit(s));
+                        splitRight.put(s, cfg.cfg().getUnit(s));
                     }
                 }
             }
@@ -588,7 +588,7 @@ public class SortCells {
                         if (cellFragmentSort.name().endsWith("Fragment")) {
 
                             Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
-                            KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
+                            KLabel cellLabel = cfg.cfg().getCellLabel(cellSort);
 
                             List<Sort> subcellSorts = cfg.getChildren(cellLabel);
 
@@ -614,7 +614,7 @@ public class SortCells {
                             for (K item : IncompleteCellUtils.flattenCells(k)) { // #cells(#cells(x,y),z) => [x,y,z]
                                 if (item instanceof KApply) {
                                     KApply kapp = (KApply) item;
-                                    if (cfg.cfg.isCellLabel(kapp.klabel())) {
+                                    if (cfg.cfg().isCellLabel(kapp.klabel())) {
                                         Sort sort = cfg.getCellSort(kapp.klabel());
                                         if (!subcellSorts.contains(sort)) {
                                             throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
@@ -639,7 +639,7 @@ public class SortCells {
                                     }
                                     if (var.att().contains(Sort.class)) {
                                         Sort sort = var.att().get(Sort.class);
-                                        if (cfg.cfg.isCell(sort)) {
+                                        if (cfg.cfg().isCell(sort)) {
                                             if (!subcellSorts.contains(sort)) {
                                                 throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
                                             }
@@ -648,7 +648,7 @@ public class SortCells {
                                             // if the variable is not explicitly sort-casted, then its sort information should be found in other places
                                             if (varinfo != null && varinfo.remainingCells != null && varinfo.remainingCells.size() == 1) {
                                                 Sort s = Iterables.getOnlyElement(varinfo.remainingCells);
-                                                if (cfg.cfg.isCell(s)) {
+                                                if (cfg.cfg().isCell(s)) {
                                                     if (!subcellSorts.contains(s)) {
                                                         throw new IllegalArgumentException("No such sub-cell " + s + " in the cell " + cellLabel);
                                                     }
@@ -676,7 +676,7 @@ public class SortCells {
                                         if (cfg.getMultiplicity(subcellSorts.get(i)) == Multiplicity.ONE) {
                                             klist.set(i, cfg.getCellAbsentTerm(subcellSorts.get(i)));
                                         } else { // Multiplicity.OPTIONAL || Multiplicity.STAR
-                                            klist.set(i, cfg.cfg.getUnit(subcellSorts.get(i)));
+                                            klist.set(i, cfg.cfg().getUnit(subcellSorts.get(i)));
                                         }
                                     }
 
@@ -751,7 +751,7 @@ public class SortCells {
                             KVariable var = (KVariable) item;
                             if (var.att().contains(Sort.class)) {
                                 Sort sort = var.att().get(Sort.class);
-                                if (!cfg.cfg.isCell(sort)) {
+                                if (!cfg.cfg().isCell(sort)) {
                                     if (!cellFragmentVars.containsKey(var)) {
                                         cellFragmentVars.put(var, new HashSet<>());
                                     }
@@ -827,7 +827,7 @@ public class SortCells {
                                     }
                                     if (cellFragmentSort.name().endsWith("Fragment")) {
                                         Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
-                                        KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
+                                        KLabel cellLabel = cfg.cfg().getCellLabel(cellSort);
                                         klist0.set(idx, KApply(cellLabel, KList(item0), Att().add(Att.DUMMY_CELL())));
                                     }
                                 }

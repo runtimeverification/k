@@ -15,15 +15,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * Created by brandon on 3/31/15.
  */
-public class ConcretizationInfo {
-    public final ConfigurationInfo cfg;
-    private final LabelInfo labels;
-
-    public ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
-        this.cfg = cfg;
-        this.labels = labels;
-    }
-
+public record ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
 
     public Sort getCellSort(K k) {
         if (k instanceof KApply) {
