@@ -59,8 +59,7 @@ public class Scanner implements AutoCloseable {
         Set<String> terminals = new HashSet<>();
         for (Production p : iterable(module.productions())) {
             for (ProductionItem pi : iterable(p.items())) {
-                if (pi instanceof TerminalLike) {
-                    TerminalLike lx = (TerminalLike) pi;
+                if (pi instanceof TerminalLike lx) {
                     if (tokens.containsKey(lx)) {
                         int prec;
                         if (p.att().contains(Att.PREC())) {
@@ -151,8 +150,7 @@ public class Scanner implements AutoCloseable {
         }
         List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
         for (TerminalLike key : ordered) {
-            if (key instanceof Terminal) {
-                Terminal t = (Terminal) key;
+            if (key instanceof Terminal t) {
                 flex.append(StringUtil.enquoteCString(t.value()));
             } else {
                 RegexTerminal t = (RegexTerminal) key;
@@ -191,11 +189,10 @@ public class Scanner implements AutoCloseable {
         flex.append("%%\n\n");
         if (module.productionsForSort().contains(Sorts.LineMarker().head())) {
           stream(module.productionsForSort().apply(Sorts.LineMarker().head())).forEach(prod -> {
-            if (prod.items().size() != 1 || !(prod.items().apply(0) instanceof RegexTerminal)) {
+            if (prod.items().size() != 1 || !(prod.items().apply(0) instanceof RegexTerminal terminal)) {
               throw KEMException.compilerError("Productions of sort `#LineMarker` must be exactly one `RegexTerminal`.", prod);
             }
-            RegexTerminal terminal = (RegexTerminal)prod.items().apply(0);
-            String regex = terminal.regex();
+              String regex = terminal.regex();
             flex.append(regex).append(" line_marker(yytext, yyscanner);\n");
           });
         }

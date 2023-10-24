@@ -82,9 +82,8 @@ public class Syntax extends ModuleItem {
             return false;
         if (this == obj)
             return true;
-        if (!(obj instanceof Syntax))
+        if (!(obj instanceof Syntax syn))
             return false;
-        Syntax syn = (Syntax) obj;
 
         if (!syn.getDeclaredSort().equals(this.sort))
             return false;

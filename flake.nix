@@ -14,7 +14,7 @@
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
-    mavenix.url = "github:goodlyrottenapple/mavenix";
+    mavenix.url = "github:nix-community/mavenix";
     # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
       url = "github:edolstra/flake-compat";

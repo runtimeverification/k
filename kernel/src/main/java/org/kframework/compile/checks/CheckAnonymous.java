@@ -75,17 +75,14 @@ public class CheckAnonymous {
             return;
         }
         resetVars();
-        if (s instanceof RuleOrClaim) {
-            RuleOrClaim r = (RuleOrClaim) s;
+        if (s instanceof RuleOrClaim r) {
             gatherVars(r.body());
             gatherVars(r.requires());
             gatherVars(r.ensures());
-        } else if (s instanceof Context) {
-            Context c = (Context)s;
+        } else if (s instanceof Context c) {
             gatherVars(c.body());
             gatherVars(c.requires());
-        } else if (s instanceof ContextAlias) {
-            ContextAlias c = (ContextAlias)s;
+        } else if (s instanceof ContextAlias c) {
             gatherVars(c.body());
             gatherVars(c.requires());
         }

@@ -315,9 +315,8 @@ public class ExpandMacros {
             return Collections.singleton(k.att().getOptional(Sort.class).orElse(null));
         } else if (k instanceof KToken) {
             return Collections.singleton(((KToken)k).sort());
-        } else if (k instanceof KApply) {
-           KApply kapp = (KApply)k;
-           if (kapp.klabel() instanceof KVariable) {
+        } else if (k instanceof KApply kapp) {
+            if (kapp.klabel() instanceof KVariable) {
                throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
            }
            Set<Production> prods = new HashSet<>(mutable(mod.productionsFor().apply(kapp.klabel())));
@@ -364,10 +363,8 @@ public class ExpandMacros {
                 }
             }
         }
-        if (pattern instanceof KApply && subject instanceof KApply) {
-           KApply p = (KApply)pattern;
-           KApply s = (KApply)subject;
-           if (p.klabel() instanceof KVariable || s.klabel() instanceof KVariable) {
+        if (pattern instanceof KApply p && subject instanceof KApply s) {
+            if (p.klabel() instanceof KVariable || s.klabel() instanceof KVariable) {
                throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
            }
            if (!p.klabel().name().equals(s.klabel().name())) {

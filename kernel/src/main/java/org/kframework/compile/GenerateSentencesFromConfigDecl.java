@@ -79,16 +79,14 @@ public class GenerateSentencesFromConfigDecl {
      * @return A tuple of the sentences generated, a list of the sorts of the children of the cell, and the body of the initializer.
      */
     private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(K term, K ensures, Att cfgAtt, Module m) {
-        if (term instanceof KApply) {
-            KApply kapp = (KApply) term;
+        if (term instanceof KApply kapp) {
             if (kapp.klabel().name().equals("#configCell")) {
                 // is a single cell
                 if (kapp.klist().size() == 4) {
                     K startLabel = kapp.klist().items().get(0);
                     K endLabel = kapp.klist().items().get(3);
                     if (startLabel.equals(endLabel)) {
-                        if (startLabel instanceof KToken) {
-                            KToken label = (KToken) startLabel;
+                        if (startLabel instanceof KToken label) {
                             if (label.sort().equals(Sort("#CellName"))) {
                                 String cellName = label.s();
                                 Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
@@ -115,8 +113,7 @@ public class GenerateSentencesFromConfigDecl {
             } else if (kapp.klabel().name().equals("#externalCell")) {
                 if (kapp.klist().size() == 1) {
                     K startLabel = kapp.klist().items().get(0);
-                    if (startLabel instanceof KToken) {
-                        KToken label = (KToken) startLabel;
+                    if (startLabel instanceof KToken label) {
                         if (label.sort().equals(Sort("#CellName"))) {
                             String cellName = label.s();
                             Sort sort = Sort(getSortOfCell(cellName));
@@ -166,10 +163,9 @@ public class GenerateSentencesFromConfigDecl {
             Sort sort = kapp.att().get(Production.class).sort();
             Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
             return Tuple4.apply(res._2(), Lists.newArrayList(sort), res._1(), true);
-        } else if (term instanceof KToken) {
+        } else if (term instanceof KToken ktoken) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
-            KToken ktoken = (KToken) term;
             Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
             return Tuple4.apply(res._2(), Lists.newArrayList(ktoken.sort()), res._1(), true);
         } else if (term instanceof KSequence || term instanceof KVariable || term instanceof InjectedKLabel) {
@@ -217,8 +213,7 @@ public class GenerateSentencesFromConfigDecl {
             if (kapp.klabel().name().equals("#externalCell")) {
                 if (kapp.klist().size() == 1) {
                     K startLabel = kapp.klist().items().get(0);
-                    if (startLabel instanceof KToken) {
-                        KToken label = (KToken) startLabel;
+                    if (startLabel instanceof KToken label) {
                         if (label.sort().equals(Sort("#CellName"))) {
                             String cellName = label.s();
                             Sort sort = Sort(getSortOfCell(cellName));
@@ -580,8 +575,7 @@ public class GenerateSentencesFromConfigDecl {
     }
 
     private static Att getCellPropertiesAsAtt(K k) {
-        if (k instanceof KApply) {
-            KApply kapp = (KApply) k;
+        if (k instanceof KApply kapp) {
             if (kapp.klabel().name().equals("#cellPropertyListTerminator")) {
                 return Att();
             } else if (kapp.klabel().name().equals("#cellPropertyList")) {
@@ -598,12 +592,10 @@ public class GenerateSentencesFromConfigDecl {
     }
 
     private static Tuple2<Att.Key, String> getCellProperty(K k) {
-        if (k instanceof KApply) {
-            KApply kapp = (KApply) k;
+        if (k instanceof KApply kapp) {
             if (kapp.klabel().name().equals("#cellProperty")) {
                 if (kapp.klist().size() == 2) {
-                    if (kapp.klist().items().get(0) instanceof KToken) {
-                        KToken keyToken = (KToken) kapp.klist().items().get(0);
+                    if (kapp.klist().items().get(0) instanceof KToken keyToken) {
                         if (keyToken.sort().equals(Sort("#CellName"))) {
                             Att.Key key = Att.getBuiltinKeyOptional(keyToken.s())
                                     .orElseThrow(() ->

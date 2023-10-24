@@ -354,8 +354,7 @@ public class ConvertDataStructureToLookup {
                             }
                             frame = (KVariable) component;
                             isRight = true;
-                        } else if (component instanceof KApply) {
-                            KApply kapp = (KApply) component;
+                        } else if (component instanceof KApply kapp) {
                             boolean needsWrapper = false;
                             if (kapp.klabel().equals(elementLabel)
                                     || (needsWrapper = kapp.klabel().equals(getWrapElement(collectionLabel)))) {
@@ -444,10 +443,9 @@ public class ConvertDataStructureToLookup {
                                 throw KEMException.internalError("Unsupported associative matching on Map. Found variables " + component + " and " + frame, k);
                             }
                             frame = (KVariable) component;
-                        } else if (component instanceof KApply) {
+                        } else if (component instanceof KApply kapp) {
 
                             boolean needsWrapper = false;
-                            KApply kapp = (KApply) component;
                             if (kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).get(Att.ELEMENT())))
                                     || (needsWrapper = kapp.klabel().equals(getWrapElement(collectionLabel)))) {
                                 if (kapp.klist().size() != 2 && !needsWrapper) {
@@ -520,8 +518,7 @@ public class ConvertDataStructureToLookup {
                                 throw KEMException.internalError("Unsupported associative matching on Set. Found variables " + component + " and " + frame, k);
                             }
                             frame = (KVariable) component;
-                        } else if (component instanceof KApply) {
-                            KApply kapp = (KApply) component;
+                        } else if (component instanceof KApply kapp) {
 
                             boolean needsWrapper = false;
                             if (kapp.klabel().equals(elementLabel)

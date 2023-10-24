@@ -338,9 +338,8 @@ public class Kompile {
     }
 
     public static Sentence removePolyKLabels(Sentence s) {
-      if (s instanceof Production) {
-        Production p = (Production)s;
-        if (!p.isSyntacticSubsort() && p.params().nonEmpty()) {
+      if (s instanceof Production p) {
+          if (!p.isSyntacticSubsort() && p.params().nonEmpty()) {
             p = p.substitute(immutable(Collections.nCopies(p.params().size(), Sorts.K())));
             return Production(p.klabel().map(KLabel::head), Seq(), p.sort(), p.items(), p.att());
         }

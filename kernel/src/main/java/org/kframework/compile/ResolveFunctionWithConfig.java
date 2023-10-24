@@ -122,9 +122,8 @@ public class ResolveFunctionWithConfig {
     }
 
     private K resolve(K body, Module module) {
-      if (body instanceof KApply) {
-        KApply kapp = (KApply) body;
-        if (kapp.klabel().name().equals("#withConfig")) {
+      if (body instanceof KApply kapp) {
+          if (kapp.klabel().name().equals("#withConfig")) {
           K fun = kapp.items().get(0);
           K cell = kapp.items().get(1);
           K rhs = null;
@@ -134,18 +133,16 @@ public class ResolveFunctionWithConfig {
             fun = rew.left();
             rhs = rew.right();
           }
-          if (!(fun instanceof KApply)) {
+          if (!(fun instanceof KApply funKApp)) {
             throw KEMException.compilerError("Found term that is not a cell or a function at the top of a rule.", fun);
           }
-          KApply funKApp = (KApply)fun;
-          if (!module.attributesFor().apply(funKApp.klabel()).contains(Att.FUNCTION())) {
+              if (!module.attributesFor().apply(funKApp.klabel()).contains(Att.FUNCTION())) {
             throw KEMException.compilerError("Found term that is not a cell or a function at the top of a rule.", fun);
           }
-          if (!(cell instanceof KApply)) {
+          if (!(cell instanceof KApply cellKApp)) {
             throw KEMException.compilerError("Found term that is not a cell in the context of a function rule.", cell);
           }
-          KApply cellKApp = (KApply)cell;
-          K secondChild;
+              K secondChild;
           if (cellKApp.klabel().equals(topCellLabel)) {
             secondChild = cell;
           } else {
@@ -213,9 +210,8 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolveConfigVar(Sentence s) {
-      if (s instanceof RuleOrClaim) {
-        RuleOrClaim r = (RuleOrClaim)s;
-        return r.newInstance(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
+      if (s instanceof RuleOrClaim r) {
+          return r.newInstance(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
       }
       return s;
     }

@@ -71,13 +71,11 @@ public class ToLatex {
     }
 
     public static void apply(DataOutputStream out, K k) throws IOException {
-        if (k instanceof KToken) {
-            KToken tok = (KToken) k;
+        if (k instanceof KToken tok) {
 
             writeString(out, ("\\texttt{ " + tok.s() + " }"));
 
-        } else if (k instanceof KApply) {
-            KApply app = (KApply) k;
+        } else if (k instanceof KApply app) {
 
             writeString(out, ("\\" + latexedKLabel(app.klabel().name())));
 
@@ -87,8 +85,7 @@ public class ToLatex {
                 writeString(out, "}");
             }
 
-        } else if (k instanceof KSequence) {
-            KSequence kseq = (KSequence) k;
+        } else if (k instanceof KSequence kseq) {
 
             writeString(out, "\\kseq{");
 
@@ -99,8 +96,7 @@ public class ToLatex {
 
             writeString(out, "}{\\dotk{}}");
 
-        } else if (k instanceof KVariable) {
-            KVariable var = (KVariable) k;
+        } else if (k instanceof KVariable var) {
 
             Optional<String> origName = var.att().getOptional(Att.ORIGINAL_NAME());
             if (origName.isPresent()) {
@@ -109,8 +105,7 @@ public class ToLatex {
                 writeString(out, var.name());
             }
 
-        } else if (k instanceof KRewrite) {
-            KRewrite rew = (KRewrite) k;
+        } else if (k instanceof KRewrite rew) {
 
             writeString(out, "\\krewrites{");
             apply(out, rew.left());
@@ -120,8 +115,7 @@ public class ToLatex {
             apply(out, rew.att());
             writeString(out, "}");
 
-        } else if (k instanceof KAs) {
-            KAs alias = (KAs) k;
+        } else if (k instanceof KAs alias) {
 
             writeString(out, "\\kas{");
             apply(out, alias.pattern());
@@ -131,8 +125,7 @@ public class ToLatex {
             apply(out, alias.att());
             writeString(out, "}");
 
-        } else if (k instanceof InjectedKLabel) {
-            InjectedKLabel inj = (InjectedKLabel) k;
+        } else if (k instanceof InjectedKLabel inj) {
 
             writeString(out, "\\injectedklabel{");
             writeString(out, inj.klabel().name());

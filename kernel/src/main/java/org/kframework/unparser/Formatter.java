@@ -33,43 +33,30 @@ public class Formatter {
     public static void format(Term term, Indenter indenter, ColorSetting colorize) {
         int indent = 0;
         int localColor = 0;
-        if (term instanceof Constant) {
-            Constant c = (Constant) term;
+        if (term instanceof Constant c) {
             color(indenter, c.production(), 0, colorize);
             indenter.append(c.value());
             resetColor(indenter, c.production(), colorize);
-        } else if (term instanceof TermCons) {
-            TermCons tc = (TermCons) term;
+        } else if (term instanceof TermCons tc) {
             String format = tc.production().att().getOptional(Att.FORMAT()).orElse(defaultFormat(tc.production().items().size()));
             for (int i = 0; i < format.length(); i++) {
                 char c = format.charAt(i);
                 if (c == '%') {
                     char c2 = format.charAt(i + 1);
                     i++;
-                    switch(c2) {
-                    case 'n':
-                        indenter.newline();
-                        break;
-                    case 'i':
+                    switch (c2) {
+                    case 'n' -> indenter.newline();
+                    case 'i' -> {
                         indenter.indent();
                         indent++;
-                        break;
-                    case 'd':
+                    }
+                    case 'd' -> {
                         indenter.dedent();
                         indent--;
-                        break;
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
+                    }
+                    case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
                         StringBuilder sb = new StringBuilder();
-                        for(; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9';i++) {
+                        for (; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9'; i++) {
                             sb.append(format.charAt(i));
                         }
                         i--;
@@ -95,8 +82,7 @@ public class Formatter {
                             assert tc.production().nonterminal(nt) == item;
                             Term inner = tc.get(nt);
                             boolean assoc = false;
-                            if (inner instanceof TermCons) {
-                                TermCons innerTc = (TermCons)inner;
+                            if (inner instanceof TermCons innerTc) {
                                 Production origProd = tc.production().att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(tc.production());
                                 Production innerOrigProd = innerTc.production().att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(innerTc.production());
                                 if (innerOrigProd.equals(origProd) && origProd.att().contains(Att.ASSOC())) {
@@ -117,9 +103,8 @@ public class Formatter {
                         } else {
                             throw KEMException.internalError("Cannot currently format productions with regex terminals which are not tokens.", tc.production());
                         }
-                        break;
-                    default:
-                        indenter.append(c2);
+                    }
+                    default -> indenter.append(c2);
                     }
                 } else {
                     indenter.append(c);

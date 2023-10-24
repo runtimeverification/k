@@ -186,8 +186,7 @@ public class AddSortInjections {
         if (actualSort.name().equals(SORTPARAM_NAME)) {
             sortParams.add(actualSort.params().head().name());
         }
-        if (term instanceof KApply) {
-            KApply kapp = (KApply)term;
+        if (term instanceof KApply kapp) {
             if (kapp.klabel().name().equals("inj")) {
                 return term;
             }
@@ -208,8 +207,7 @@ public class AddSortInjections {
                 children.add(internalAddSortInjections(child, expectedSortOfChild));
             }
             return KApply(substituted.klabel().get(), KList(children), att);
-        } else if (term instanceof KRewrite) {
-            KRewrite rew = (KRewrite) term;
+        } else if (term instanceof KRewrite rew) {
             isLHS = true;
             K lhs = internalAddSortInjections(rew.left(), actualSort);
             isLHS = false;
@@ -220,8 +218,7 @@ public class AddSortInjections {
             return KToken(((KToken) term).s(), ((KToken) term).sort(), att);
         } else if (term instanceof InjectedKLabel) {
             return InjectedKLabel(((InjectedKLabel) term).klabel(), att);
-        } else if (term instanceof KSequence) {
-            KSequence kseq = (KSequence)term;
+        } else if (term instanceof KSequence kseq) {
             List<K> children = new ArrayList<>();
             for (int i = 0; i < kseq.size(); i++) {
                 K child = kseq.items().get(i);
@@ -233,8 +230,7 @@ public class AddSortInjections {
                 }
             }
             return KSequence(children, att);
-        } else if (term instanceof KAs) {
-            KAs kas = (KAs)term;
+        } else if (term instanceof KAs kas) {
             return KAs(internalAddSortInjections(kas.pattern(), actualSort), kas.alias(), att);
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
@@ -323,8 +319,7 @@ public class AddSortInjections {
      * Compute the sort of a term with a particular expected sort.
      */
     public Sort sort(K term, Sort expectedSort) {
-        if (term instanceof KApply) {
-            KApply kapp = (KApply)term;
+        if (term instanceof KApply kapp) {
             if (kapp.klabel().name().equals("inj")) {
                 return kapp.klabel().params().apply(1);
             }
@@ -381,8 +376,7 @@ public class AddSortInjections {
                 substituted = prod.substitute(immutable(args));
             }
             return substituted.sort();
-        } else if (term instanceof KRewrite) {
-            KRewrite rew = (KRewrite)term;
+        } else if (term instanceof KRewrite rew) {
             Sort leftSort = sort(rew.left(), expectedSort);
             Sort rightSort = sort(rew.right(), expectedSort);
             return lubSort(leftSort, rightSort, expectedSort, term, mod);
@@ -394,8 +388,7 @@ public class AddSortInjections {
             return Sorts.K();
         } else if (term instanceof InjectedKLabel) {
             return Sorts.KItem();
-        } else if (term instanceof KAs) {
-            KAs as = (KAs) term;
+        } else if (term instanceof KAs as) {
             Sort patternSort = sort(as.pattern(), expectedSort);
             Sort rightSort = sort(as.alias(), expectedSort);
             return lubSort(patternSort, rightSort, expectedSort, term, mod);
