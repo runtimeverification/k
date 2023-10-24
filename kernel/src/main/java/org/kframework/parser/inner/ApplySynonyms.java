@@ -20,9 +20,8 @@ public class ApplySynonyms {
       Sort returnSort = m.sortSynonymMap().applyOrElse(p.sort(), s -> p.sort());
       List<ProductionItem> pis = new ArrayList<>();
       for (ProductionItem pi : iterable(p.items())) {
-          if (pi instanceof NonTerminal) {
-            NonTerminal nt = (NonTerminal)pi;
-            pis.add(NonTerminal(m.sortSynonymMap().applyOrElse(nt.sort(), s -> nt.sort()), nt.name()));
+          if (pi instanceof NonTerminal nt) {
+              pis.add(NonTerminal(m.sortSynonymMap().applyOrElse(nt.sort(), s -> nt.sort()), nt.name()));
           } else {
             pis.add(pi);
           }

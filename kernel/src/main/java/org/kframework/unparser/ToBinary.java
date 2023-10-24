@@ -64,16 +64,14 @@ public class ToBinary {
             add_intern(k);
             return;
         }
-        if (k instanceof KToken) {
-            KToken tok = (KToken) k;
+        if (k instanceof KToken tok) {
 
             data.writeByte(BinaryParser.KTOKEN);
             add_intern(k);
             writeString(tok.s());
             writeString(tok.sort().toString());
 
-        } else if (k instanceof KApply) {
-            KApply app = (KApply) k;
+        } else if (k instanceof KApply app) {
 
             for (K item : app.asIterable()) {
                 traverse(item);
@@ -84,8 +82,7 @@ public class ToBinary {
             data.writeBoolean(app.klabel() instanceof KVariable);
             data.writeInt(app.size());
 
-        } else if (k instanceof KSequence) {
-            KSequence seq = (KSequence) k;
+        } else if (k instanceof KSequence seq) {
 
             for (K item : seq.asIterable()) {
                 traverse(item);
@@ -94,23 +91,20 @@ public class ToBinary {
             add_intern(k);
             data.writeInt(seq.size());
 
-        } else if (k instanceof KVariable) {
-            KVariable var = (KVariable) k;
+        } else if (k instanceof KVariable var) {
 
             data.writeByte(BinaryParser.KVARIABLE);
             add_intern(k);
             writeString(var.name());
 
-        } else if (k instanceof KRewrite) {
-            KRewrite rew = (KRewrite) k;
+        } else if (k instanceof KRewrite rew) {
 
             traverse(rew.left());
             traverse(rew.right());
             data.writeByte(BinaryParser.KREWRITE);
             add_intern(k);
 
-        } else if (k instanceof InjectedKLabel) {
-            InjectedKLabel inj = (InjectedKLabel) k;
+        } else if (k instanceof InjectedKLabel inj) {
 
             data.writeByte(BinaryParser.INJECTEDKLABEL);
             add_intern(k);

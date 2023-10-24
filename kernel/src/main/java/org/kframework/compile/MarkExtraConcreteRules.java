@@ -22,8 +22,7 @@ public class MarkExtraConcreteRules {
         }
         HashSet<String> concreteLabelsSet = new HashSet<>(extraConcreteRuleLabels);
         Definition result = DefinitionTransformer.fromSentenceTransformer((mod, s) -> {
-            if (s instanceof Rule) {
-                Rule r = (Rule) s;
+            if (s instanceof Rule r) {
                 String label = r.att().getOption(Att.LABEL()).getOrElse(() -> null);
                 if (label != null && concreteLabelsSet.contains(label)) {
                     // rule labels must be unique, so it's safe to remove from the set as we iterate

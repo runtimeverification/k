@@ -24,16 +24,10 @@ public class StringSentence extends ModuleItem {
 
     @Override
     public void toString(StringBuilder sb) {
-        switch(type) {
-        case "config":
-          sb.append("  configuration ");
-          break;
-        case "alias":
-          sb.append("  context alias ");
-          break;
-        default:
-          sb.append("  ").append(type).append(" ");
-          break;
+        switch (type) {
+        case "config" -> sb.append("  configuration ");
+        case "alias" -> sb.append("  context alias ");
+        default -> sb.append("  ").append(type).append(" ");
         }
         if (!label.equals("")) {
           sb.append("[").append(label).append("]: ");

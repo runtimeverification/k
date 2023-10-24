@@ -92,8 +92,7 @@ public class AddTopCellToRules {
         }
 
         // KRewrite instance
-        if (term instanceof KRewrite) {
-            KRewrite rew = (KRewrite) term;
+        if (term instanceof KRewrite rew) {
             K left = addRootCell(rew.left());
             if (left == rew.left()) {
                 return KRewrite(rew.left(), rew.right());

@@ -60,20 +60,13 @@ public class KRead {
     }
 
     public K prettyRead(Module mod, Sort sort, String startSymbolLocation, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode, boolean partialParseDebug) {
-        switch (inputMode) {
-            case BINARY:
-            case JSON:
-            case KAST:
-                return deserialize(stringToParse, inputMode, source);
-            case KORE:
-                return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
-            case PROGRAM:
-                return def.parseSingleTerm(mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
-            case RULE:
-                throw KEMException.internalError("Should have been handled directly by the kast front end: " + inputMode);
-            default:
-                throw KEMException.criticalError("Unsupported input mode: " + inputMode);
-        }
+        return switch (inputMode) {
+            case BINARY, JSON, KAST -> deserialize(stringToParse, inputMode, source);
+            case KORE -> new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
+            case PROGRAM -> def.parseSingleTerm(mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
+            case RULE -> throw KEMException.internalError("Should have been handled directly by the kast front end: " + inputMode);
+            default -> throw KEMException.criticalError("Unsupported input mode: " + inputMode);
+        };
     }
 
     public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth, boolean library) {
@@ -143,16 +136,12 @@ public class KRead {
     }
 
     public static K deserialize(String stringToParse, InputModes inputMode, Source source) {
-        switch (inputMode) {
-            case BINARY:
-                return BinaryParser.parse(stringToParse.getBytes());
-            case JSON:
-                return JsonParser.parse(stringToParse);
-            case KAST:
-                return KastParser.parse(stringToParse, source);
-            default:
-                throw KEMException.criticalError("Unsupported input mode for deserialization: " + inputMode);
-        }
+        return switch (inputMode) {
+            case BINARY -> BinaryParser.parse(stringToParse.getBytes());
+            case JSON -> JsonParser.parse(stringToParse);
+            case KAST -> KastParser.parse(stringToParse, source);
+            default -> throw KEMException.criticalError("Unsupported input mode for deserialization: " + inputMode);
+        };
     }
 
     public static K autoDeserialize(byte[] kast, Source source) {

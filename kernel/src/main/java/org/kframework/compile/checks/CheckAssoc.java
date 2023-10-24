@@ -28,8 +28,7 @@ public class CheckAssoc {
     }
 
     public void check(Sentence s) {
-        if (s instanceof Production) {
-            Production p = (Production) s;
+        if (s instanceof Production p) {
             if (p.arity() != 2) {
                 return;
             }

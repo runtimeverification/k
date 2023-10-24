@@ -87,21 +87,17 @@ public class CheckKLabels {
                 }
             }
         };
-        if (sentence instanceof Rule) {
-            Rule rl = (Rule) sentence;
+        if (sentence instanceof Rule rl) {
             checkKLabels.apply(rl.body());
             checkKLabels.apply(rl.requires());
             checkKLabels.apply(rl.ensures());
-        } else if (sentence instanceof Context) {
-            Context ctx = (Context) sentence;
+        } else if (sentence instanceof Context ctx) {
             checkKLabels.apply(ctx.body());
             checkKLabels.apply(ctx.requires());
-        } else if (sentence instanceof ContextAlias) {
-            ContextAlias ctx = (ContextAlias) sentence;
+        } else if (sentence instanceof ContextAlias ctx) {
             checkKLabels.apply(ctx.body());
             checkKLabels.apply(ctx.requires());
-        } else if (sentence instanceof Production) {
-            Production prod = (Production) sentence;
+        } else if (sentence instanceof Production prod) {
             if (prod.klabel().isDefined()) {
                 KLabel klabel = prod.klabel().get();
                 if (klabelProds.containsKey(klabel.name()) && !internalDuplicates.contains(klabel.name())) {

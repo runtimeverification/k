@@ -190,15 +190,15 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1689018333,
-        "narHash": "sha256-sthxx50rj0E7gv38oeMj8GZOp7i1776P1qZsM7pVLd0=",
-        "owner": "goodlyrottenapple",
+        "lastModified": 1643802645,
+        "narHash": "sha256-BynM25iwp/l3FyrcHqiNJdDxvN6IxSM3/zkFR6PD3B0=",
+        "owner": "nix-community",
         "repo": "mavenix",
-        "rev": "153d69e62f87e5dd37d35492cc3e35dd80d2b5fa",
+        "rev": "ce9ddfd7f361190e8e8dcfaf6b8282eebbb3c7cb",
         "type": "github"
       },
       "original": {
-        "owner": "goodlyrottenapple",
+        "owner": "nix-community",
         "repo": "mavenix",
         "type": "github"
       }

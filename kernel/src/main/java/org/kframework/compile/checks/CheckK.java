@@ -29,8 +29,7 @@ public class CheckK {
                 boolean error = false;
                 if (!(as.alias() instanceof KVariable)) {
                     error = true;
-                    if (as.alias() instanceof KApply) {
-                        KApply app = (KApply)as.alias();
+                    if (as.alias() instanceof KApply app) {
                         if (app.klabel().name().startsWith("#SemanticCastTo") && app.items().size() == 1 && app.items().get(0) instanceof KVariable) {
                             error = false;
                         }
@@ -45,17 +44,14 @@ public class CheckK {
     }
 
     public void check(Sentence s) {
-        if (s instanceof RuleOrClaim) {
-            RuleOrClaim r = (RuleOrClaim)s;
+        if (s instanceof RuleOrClaim r) {
             check(r.body());
             check(r.requires());
             check(r.ensures());
-        } else if (s instanceof Context) {
-            Context c = (Context)s;
+        } else if (s instanceof Context c) {
             check(c.body());
             check(c.requires());
-        } else if (s instanceof ContextAlias) {
-            ContextAlias c = (ContextAlias)s;
+        } else if (s instanceof ContextAlias c) {
             check(c.body());
             check(c.requires());
         }

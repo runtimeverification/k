@@ -41,8 +41,7 @@ public class ConstantFolding {
   }
 
   public Sentence fold(Module module, Sentence sentence) {
-    if (sentence instanceof Rule) {
-      Rule r = (Rule)sentence;
+    if (sentence instanceof Rule r) {
       return Rule(fold(module, r.body(), true), fold(module, r.requires(), false), fold(module, r.ensures(), false), r.att());
     }
     return sentence;
@@ -85,33 +84,23 @@ public class ConstantFolding {
   }
 
   private Class<?> classOf(String hook) {
-    switch(hook) {
-      case "BOOL.Bool":
-        return boolean.class;
-      case "FLOAT.Float":
-        return FloatBuiltin.class;
-      case "INT.Int":
-        return BigInteger.class;
-      case "STRING.String":
-        return String.class;
-      default:
-        return String.class;
-    }
+    return switch (hook) {
+      case "BOOL.Bool" -> boolean.class;
+      case "FLOAT.Float" -> FloatBuiltin.class;
+      case "INT.Int" -> BigInteger.class;
+      case "STRING.String" -> String.class;
+      default -> String.class;
+    };
   }
 
   private Object unwrap(String token, String hook) {
-    switch(hook) {
-      case "BOOL.Bool":
-        return Boolean.valueOf(token);
-      case "FLOAT.Float":
-        return FloatBuiltin.of(token);
-      case "INT.Int":
-        return new BigInteger(token);
-      case "STRING.String":
-        return StringUtil.unquoteKString(token);
-      default:
-        return token;
-    }
+    return switch (hook) {
+      case "BOOL.Bool" -> Boolean.valueOf(token);
+      case "FLOAT.Float" -> FloatBuiltin.of(token);
+      case "INT.Int" -> new BigInteger(token);
+      case "STRING.String" -> StringUtil.unquoteKString(token);
+      default -> token;
+    };
   }
 
   private K wrap(Object result, Sort sort, Module module) {
