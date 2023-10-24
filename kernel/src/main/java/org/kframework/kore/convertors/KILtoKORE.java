@@ -136,16 +136,12 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Associativity applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
-        switch (assocOrig) {
-        case "left":
-            return Associativity.Left;
-        case "right":
-            return Associativity.Right;
-        case "non-assoc":
-            return Associativity.NonAssoc;
-        default:
-            throw new AssertionError("Incorrect assoc string: " + assocOrig);
-        }
+        return switch (assocOrig) {
+            case "left" -> Associativity.Left;
+            case "right" -> Associativity.Right;
+            case "non-assoc" -> Associativity.NonAssoc;
+            default -> throw new AssertionError("Incorrect assoc string: " + assocOrig);
+        };
     }
 
     public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {

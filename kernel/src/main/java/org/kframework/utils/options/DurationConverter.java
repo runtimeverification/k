@@ -25,20 +25,14 @@ public class DurationConverter implements IStringConverter<Duration> {
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw durationException(value);
         }
-        switch (unit) {
-        case "ms":
-            return Duration.ofMillis(num);
-        case "s":
-            return Duration.ofSeconds(num);
-        case "m":
-            return Duration.ofMinutes(num);
-        case "h":
-            return Duration.ofHours(num);
-        case "d":
-            return Duration.ofDays(num);
-        default:
-            throw durationException(value);
-        }
+        return switch (unit) {
+            case "ms" -> Duration.ofMillis(num);
+            case "s" -> Duration.ofSeconds(num);
+            case "m" -> Duration.ofMinutes(num);
+            case "h" -> Duration.ofHours(num);
+            case "d" -> Duration.ofDays(num);
+            default -> throw durationException(value);
+        };
     }
 
     private ParameterException durationException(String value) {
