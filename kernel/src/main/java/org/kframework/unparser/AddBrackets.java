@@ -29,12 +29,7 @@ import static org.kframework.definition.Constructors.*;
  * the same terminals in such a way as to cause ambiguities that cannot be resolved using priorities and associativities.
  * As such, we use this algorithm in krun in output --pretty, but it is insufficient for --output sound.
  */
-public class AddBrackets {
-
-    private final Module m;
-    public AddBrackets(Module m) {
-        this.m = m;
-    }
+public record AddBrackets(Module m) {
 
     public ProductionReference addBrackets(ProductionReference t) {
         return addBrackets(t, null, null);
@@ -70,8 +65,7 @@ public class AddBrackets {
                                 .filter(i -> i instanceof NonTerminal)
                                 .map(i -> (NonTerminal) i)
                                 .map(NonTerminal::sort)
-                                .filter(s -> m.subsorts().lessThanEq(innerSort, s))
-                                .findAny().isPresent();
+                                .anyMatch(s -> m.subsorts().lessThanEq(innerSort, s));
                         if (isCorrectInnerSort) {
                             return TermCons.apply(ConsPStack.singleton(inner), p);
                         }
@@ -118,24 +112,6 @@ public class AddBrackets {
         return false;
     }
 
-    private boolean isRightAssoc(ProductionReference outer, ProductionReference inner) {
-        Tag parentLabel = new Tag(outer.production().klabel().get().name());
-        Tag localLabel = new Tag(inner.production().klabel().get().name());
-        if (m.rightAssoc().contains(new Tuple2<>(parentLabel, localLabel))) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isLeftAssoc(ProductionReference outer, ProductionReference inner) {
-        Tag parentLabel = new Tag(outer.production().klabel().get().name());
-        Tag localLabel = new Tag(inner.production().klabel().get().name());
-        if (m.leftAssoc().contains(new Tuple2<>(parentLabel, localLabel))) {
-            return true;
-        }
-        return false;
-    }
-
     private boolean isPriorityWrong(ProductionReference outer, ProductionReference inner, int position) {
         if (outer.production().klabel().isEmpty()  || inner.production().klabel().isEmpty()) {
             return false;
@@ -152,21 +128,6 @@ public class AddBrackets {
             return true;
         }
         if (m.rightAssoc().contains(new Tuple2<>(parentLabel, localLabel)) && position == 0) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isPriorityWrong(ProductionReference outer, ProductionReference inner) {
-        Tag parentLabel = new Tag(outer.production().klabel().get().name());
-        Tag localLabel = new Tag(inner.production().klabel().get().name());
-        if (m.priorities().lessThan(parentLabel, localLabel)) {
-            return true;
-        }
-        if (m.leftAssoc().contains(new Tuple2<>(parentLabel, localLabel))) {
-            return true;
-        }
-        if (m.rightAssoc().contains(new Tuple2<>(parentLabel, localLabel))) {
             return true;
         }
         return false;
