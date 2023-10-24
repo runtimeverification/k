@@ -228,13 +228,11 @@ public class TextDocumentSyncHandler {
                                     loc2range(loc)));
                             break;
                         }
-                    } else if (di instanceof Module) {
-                        Module m = (Module) di;
+                    } else if (di instanceof Module m) {
                         for (ModuleItem mi : m.getItems()) {
                             org.kframework.attributes.Location loc = getSafeLoc(mi);
                             if (isPositionOverLocation(pos, loc)) {
-                                if (mi instanceof Import) { // goto module definition
-                                    Import imp = (Import) mi;
+                                if (mi instanceof Import imp) { // goto module definition
                                     List<DefinitionItem> allDi = slurp(params.getTextDocument().getUri());
                                     allDi.stream().filter(ddi -> ddi instanceof Module)
                                             .map(ddi -> ((Module) ddi))
@@ -243,8 +241,7 @@ public class TextDocumentSyncHandler {
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(imp)))));
-                                } else if (mi instanceof StringSentence) { // goto syntax of term inside rule
-                                    StringSentence ss = (StringSentence) mi;
+                                } else if (mi instanceof StringSentence ss) { // goto syntax of term inside rule
                                     String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
                                     Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
                                     if (ch.isPresent()) {
@@ -461,22 +458,19 @@ public class TextDocumentSyncHandler {
                 KPos pos = new KPos(ppos);
                 for (DefinitionItem di : dis) {
                     if (isPositionOverLocation(pos, getSafeLoc(di))) {
-                        if (di instanceof Module) {
-                            Module m = (Module) di;
+                        if (di instanceof Module m) {
                             SelectionRange msr = new SelectionRange(loc2range(m.getLocation()), topsr);
                             for (ModuleItem mi : m.getItems()) {
                                 if (isPositionOverLocation(pos, getSafeLoc(mi))) {
                                     SelectionRange sentsr = new SelectionRange(loc2range(getSafeLoc(mi)), msr);
-                                    if (mi instanceof org.kframework.kil.Syntax) {
-                                        Syntax stx = (org.kframework.kil.Syntax) mi;
+                                    if (mi instanceof Syntax stx) {
                                         for (PriorityBlock pb : stx.getPriorityBlocks()) {
                                             SelectionRange pbsr = new SelectionRange(loc2range(getSafeLoc(pb)), sentsr);
                                             for (Production prd : pb.getProductions())
                                                 if (isPositionOverLocation(pos, getSafeLoc(prd)))
                                                     lloc.add(new SelectionRange(loc2range(getSafeLoc(prd)), pbsr));
                                         }
-                                    } else if (mi instanceof StringSentence) { // if we have caches, find the deepest term
-                                        StringSentence ss = (StringSentence) mi;
+                                    } else if (mi instanceof StringSentence ss) { // if we have caches, find the deepest term
                                         String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
                                         Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
                                         AtomicReference<SelectionRange> x = new AtomicReference<>(sentsr);

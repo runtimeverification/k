@@ -105,8 +105,7 @@ public class ResolveSemanticCasts {
                 if (v.klabel().name().startsWith("#SemanticCastTo")) {
                     casts.add(v);
                     K child = v.klist().items().get(0);
-                    if (child instanceof KVariable) {
-                        KVariable var = (KVariable) child;
+                    if (child instanceof KVariable var) {
                         varToTypedVar.put(var, KVariable(var.name(), var.att().contains(Sort.class) ? var.att() : var.att().add(Sort.class, Outer.parseSort(getSortNameOfCast(v)))));
                     }
                 }

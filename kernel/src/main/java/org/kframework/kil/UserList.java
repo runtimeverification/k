@@ -58,10 +58,8 @@ public class UserList extends ProductionItem {
             return false;
         if (obj == this)
             return true;
-        if (!(obj instanceof UserList))
+        if (!(obj instanceof UserList srt))
             return false;
-
-        UserList srt = (UserList) obj;
 
         if (!sort.equals(srt.getSort()))
             return false;

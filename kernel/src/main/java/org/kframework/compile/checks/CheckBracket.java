@@ -21,8 +21,7 @@ public class CheckBracket {
     }
 
     private static void check(ModuleItem i) {
-        if (i instanceof Syntax) {
-            Syntax s = (Syntax) i;
+        if (i instanceof Syntax s) {
             for (PriorityBlock b : s.getPriorityBlocks()) {
                 for (Production p : b.getProductions()) {
                     if (p.containsAttribute(Att.BRACKET())) {

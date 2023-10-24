@@ -13,8 +13,7 @@ public class TreeCleanerVisitor extends SafeTransformer {
     @Override
     public Term apply(Ambiguity amb) {
         Term newTerm = super.apply(amb);
-        if (newTerm instanceof Ambiguity) {
-            Ambiguity newAmb = (Ambiguity)newTerm;
+        if (newTerm instanceof Ambiguity newAmb) {
             if (newAmb.items().size() == 1) {
                 return newAmb.items().iterator().next();
             }

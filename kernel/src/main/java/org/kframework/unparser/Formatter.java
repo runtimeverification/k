@@ -33,13 +33,11 @@ public class Formatter {
     public static void format(Term term, Indenter indenter, ColorSetting colorize) {
         int indent = 0;
         int localColor = 0;
-        if (term instanceof Constant) {
-            Constant c = (Constant) term;
+        if (term instanceof Constant c) {
             color(indenter, c.production(), 0, colorize);
             indenter.append(c.value());
             resetColor(indenter, c.production(), colorize);
-        } else if (term instanceof TermCons) {
-            TermCons tc = (TermCons) term;
+        } else if (term instanceof TermCons tc) {
             String format = tc.production().att().getOptional(Att.FORMAT()).orElse(defaultFormat(tc.production().items().size()));
             for (int i = 0; i < format.length(); i++) {
                 char c = format.charAt(i);
@@ -84,8 +82,7 @@ public class Formatter {
                             assert tc.production().nonterminal(nt) == item;
                             Term inner = tc.get(nt);
                             boolean assoc = false;
-                            if (inner instanceof TermCons) {
-                                TermCons innerTc = (TermCons) inner;
+                            if (inner instanceof TermCons innerTc) {
                                 Production origProd = tc.production().att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(tc.production());
                                 Production innerOrigProd = innerTc.production().att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(innerTc.production());
                                 if (innerOrigProd.equals(origProd) && origProd.att().contains(Att.ASSOC())) {

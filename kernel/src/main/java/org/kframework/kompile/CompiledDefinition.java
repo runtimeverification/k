@@ -100,11 +100,9 @@ public class CompiledDefinition implements Serializable {
                         @Override
                         public void apply(KApply k) {
                             if (k.klabel().name().startsWith("project:")
-                                    && k.items().size() == 1 && k.items().get(0) instanceof KApply) {
-                                KApply theMapLookup = (KApply) k.items().get(0);
+                                    && k.items().size() == 1 && k.items().get(0) instanceof KApply theMapLookup) {
                                 if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
-                                        && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken) {
-                                    KToken t = (KToken) theMapLookup.items().get(1);
+                                        && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken t) {
                                     if (t.sort().equals(Sorts.KConfigVar())) {
                                         Sort sort = Outer.parseSort(k.klabel().name().substring("project:".length()));
                                         configurationVariableDefaultSorts.put(t.s(), sort);

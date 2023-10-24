@@ -184,8 +184,7 @@ public class ResolveContexts {
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
         KLabel freezerLabel;
-        if (cooled instanceof KApply) {
-            KApply kApply = (KApply)cooled;
+        if (cooled instanceof KApply kApply) {
             String name = kApply.klabel().name();
             if (name.equals("#SemanticCastToK")) {
                 K firstArg = kApply.klist().items().get(0);
@@ -309,8 +308,7 @@ public class ResolveContexts {
 
             // return true when k is either HOLE or #SemanticCastToX(HOLE)
             private boolean isHOLE(K k) {
-                if (k instanceof KApply) {
-                    KApply kapp = (KApply) k;
+                if (k instanceof KApply kapp) {
                     return kapp.klabel().name().startsWith("#SemanticCastTo") &&
                             kapp.klist().size() == 1 &&
                             isHOLEVar(kapp.klist().items().get(0));

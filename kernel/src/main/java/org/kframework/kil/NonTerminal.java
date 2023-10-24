@@ -52,10 +52,8 @@ public class NonTerminal extends ProductionItem {
             return false;
         if (obj == this)
             return true;
-        if (!(obj instanceof NonTerminal))
+        if (!(obj instanceof NonTerminal nt))
             return false;
-
-        NonTerminal nt = (NonTerminal) obj;
 
         if (!sort.equals(nt.sort))
             return false;

@@ -222,8 +222,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
     }
 
     private Optional<KLabel> klabelFromTerm(Term labelTerm) {
-        if (labelTerm instanceof Constant) {
-            Constant labelCon = (Constant) labelTerm;
+        if (labelTerm instanceof Constant labelCon) {
             if (labelCon.production().sort().equals(Sorts.KLabel())) {
                 String labelVal = labelCon.value();
                 if (labelVal.charAt(0) == '`') {
@@ -243,8 +242,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
     }
 
     private void lowerKListAcc(Term term, List<Term> items) {
-        if (term instanceof TermCons) {
-            TermCons cons = (TermCons) term;
+        if (term instanceof TermCons cons) {
             if (cons.production().klabel().isDefined()) {
                 String labelName = cons.production().klabel().get().name();
                 if (labelName.equals("#KList")) {
