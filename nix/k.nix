@@ -9,11 +9,6 @@ let
     infoFile = ./mavenix.lock;
     inherit src;
 
-    # By default, mavenix copies the jars defined in `submodules` of mavenix.lock to `$out/share/java`.
-    # The following flag disables this, since we copy the jars ourselves.
-    # Otherwise, the jars are needlessly duplicated and bloat the cachix cache.
-    copySubmodules = false;
-
     # Add build dependencies
     buildInputs = [ git ];
 
@@ -37,15 +32,6 @@ let
     # as these will be expected/required when compiling other projects, e.g. the evm-semantics repo
     postInstall = ''
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
-
-      for file in $out/lib/kframework/java/*; do
-        file_name=$(basename $file)
-        found_in_share="$(find -L $out/share/mavenix/repo -maxdepth 20 -name "$file_name")"
-        if [ ! -z "$found_in_share" ]; then
-          rm "$file"
-          ln -sf "$found_in_share" "$file"
-        fi
-      done
 
       mkdir -p $out/lib/cmake/kframework && cp ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
       ln -sf ${llvm-backend}/include/kllvm $out/include/
