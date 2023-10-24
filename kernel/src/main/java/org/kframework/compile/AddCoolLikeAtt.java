@@ -13,13 +13,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.FoldK;
 
-public class AddCoolLikeAtt {
-
-    private final Module mod;
-
-    public AddCoolLikeAtt(Module mod) {
-      this.mod = mod;
-    }
+public record AddCoolLikeAtt(Module mod) {
 
     private Rule add(Rule rule) {
         return new Rule(
@@ -52,9 +46,8 @@ public class AddCoolLikeAtt {
 
             @Override
             public Boolean apply(KApply k) {
-                if (mod.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).contains(Att.MAINCELL())) {
-                    if (k.items().get(0) instanceof KSequence) {
-                        KSequence seq = (KSequence) k.items().get(0);
+                if (mod.attributesFor().get(k.klabel()).getOrElse(Att::empty).contains(Att.MAINCELL())) {
+                    if (k.items().get(0) instanceof KSequence seq) {
                         if (seq.items().size() > 1 && seq.items().get(0) instanceof KVariable) {
                             return true;
                         }
