@@ -1696,38 +1696,23 @@ public class ModuleToKORE {
     }
 
     private static String convertBuiltinLabel(String klabel) {
-      switch(klabel) {
-      case "#Bottom":
-        return "\\bottom";
-      case "#Top":
-        return "\\top";
-      case "#Or":
-        return "\\or";
-      case "#And":
-        return "\\and";
-      case "#Not":
-        return "\\not";
-      case "#Floor":
-        return "\\floor";
-      case "#Ceil":
-        return "\\ceil";
-      case "#Equals":
-        return "\\equals";
-      case "#Implies":
-        return "\\implies";
-      case "#Exists":
-        return "\\exists";
-      case "#Forall":
-        return "\\forall";
-      case "#AG":
-        return "allPathGlobally";
-      case "weakExistsFinally":
-        return ONE_PATH_OP;
-      case "weakAlwaysFinally":
-        return ALL_PATH_OP;
-      default:
-        throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
-      }
+        return switch (klabel) {
+            case "#Bottom" -> "\\bottom";
+            case "#Top" -> "\\top";
+            case "#Or" -> "\\or";
+            case "#And" -> "\\and";
+            case "#Not" -> "\\not";
+            case "#Floor" -> "\\floor";
+            case "#Ceil" -> "\\ceil";
+            case "#Equals" -> "\\equals";
+            case "#Implies" -> "\\implies";
+            case "#Exists" -> "\\exists";
+            case "#Forall" -> "\\forall";
+            case "#AG" -> "allPathGlobally";
+            case "weakExistsFinally" -> ONE_PATH_OP;
+            case "weakAlwaysFinally" -> ALL_PATH_OP;
+            default -> throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
+        };
     }
 
     public static void convert(KLabel klabel, StringBuilder sb) {
@@ -1858,14 +1843,12 @@ public class ModuleToKORE {
                     convertStringVarList(location, freeVarsMap, strVal, sb);
                 } else {
                     switch (strKey) {
-                        case "unit":
-                        case "element":
-                            Production prod = production(KApply(KLabel(strVal)));
-                            convert(prod.klabel().get(), prod.params(), sb);
-                            sb.append("()");
-                            break;
-                        default:
-                            sb.append(StringUtil.enquoteKString(strVal));
+                    case "unit", "element" -> {
+                        Production prod = production(KApply(KLabel(strVal)));
+                        convert(prod.klabel().get(), prod.params(), sb);
+                        sb.append("()");
+                    }
+                    default -> sb.append(StringUtil.enquoteKString(strVal));
                     }
                 }
                 sb.append(")");
@@ -1911,18 +1894,13 @@ public class ModuleToKORE {
     public static String[] asciiReadableEncodingKore = asciiReadableEncodingKoreCalc();
 
     private static void convert(String name, StringBuilder sb) {
-        switch(name) {
-        case "module":
-        case "endmodule":
-        case "sort":
-        case "hooked-sort":
-        case "symbol":
-        case "hooked-symbol":
-        case "alias":
-        case "axiom":
+        switch (name) {
+        case "module", "endmodule", "sort", "hooked-sort", "symbol", "hooked-symbol", "alias", "axiom" -> {
             sb.append(name).append("'Kywd'");
             return;
-        default: break;
+        }
+        default -> {
+        }
         }
         StringBuilder buffer = new StringBuilder();
         StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar, "'");
