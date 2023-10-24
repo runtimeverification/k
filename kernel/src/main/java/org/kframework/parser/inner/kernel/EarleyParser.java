@@ -78,15 +78,8 @@ public class EarleyParser {
    *
    * The sort is represented as an index within the `sorts` field.
    */
-  private static final class EarleyNonTerminal implements EarleyProductionItem {
-    public EarleyNonTerminal(int sort, List<Sort> sorts) {
-      this.sort = sort;
-      this.sorts = sorts;
-    }
-
-    final int sort;
-    final List<Sort> sorts;
-
+  private record EarleyNonTerminal(int sort, List<Sort> sorts)
+          implements EarleyProductionItem {
     public boolean isNonTerminal() { return true; }
     public boolean isNullable(BitSet nullable) { return nullable.get(sort); }
 
@@ -101,15 +94,8 @@ public class EarleyParser {
    * The terminal is represented by a particular token kind as informed by the provided {@link Scanner}.
    * Token 0 is always the EOF token, which should appear only in the production used by the start state of the parser.
    */
-  private static final class EarleyTerminal implements EarleyProductionItem {
-    public EarleyTerminal(Scanner scanner, int kind) {
-      this.scanner = scanner;
-      this.kind = kind;
-    }
-
-    private final Scanner scanner;
-    final int kind;
-
+  private record EarleyTerminal(Scanner scanner, int kind)
+          implements EarleyProductionItem {
     public boolean isNonTerminal() { return false; }
     public boolean isNullable(BitSet ignored) { return false; }
 
