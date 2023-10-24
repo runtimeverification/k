@@ -7,15 +7,7 @@ package org.kframework.utils;
  * @author Denis Bogdanas
  * Created on 24-Dec-18.
  */
-public class InterrupterRunnable implements Runnable {
-
-    private final Thread thread;
-    private final long waitTimeMillis;
-
-    public InterrupterRunnable(Thread thread, long waitTimeMillis) {
-        this.thread = thread;
-        this.waitTimeMillis = waitTimeMillis;
-    }
+public record InterrupterRunnable(Thread thread, long waitTimeMillis) implements Runnable {
 
     @Override
     public void run() {
