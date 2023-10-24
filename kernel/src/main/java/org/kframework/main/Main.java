@@ -35,7 +35,11 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ExecutionException;
 
-public class Main {
+public record Main(
+         Provider<KExceptionManager> kem,
+         Provider<FrontEnd> frontEnd,
+         @Named("requestScope") SimpleScope requestScope
+) {
 
     /**
      * @param args
@@ -91,19 +95,8 @@ public class Main {
         invalidJarArguments();
     }
 
-    private final Provider<KExceptionManager> kem;
-    private final Provider<FrontEnd> frontEnd;
-    private final SimpleScope requestScope;
-
     @Inject
-    public Main(
-            Provider<KExceptionManager> kem,
-            Provider<FrontEnd> frontEnd,
-            @Named("requestScope") SimpleScope requestScope) {
-        this.kem = kem;
-        this.frontEnd = frontEnd;
-        this.requestScope = requestScope;
-    }
+    public Main {}
 
     public SimpleScope getRequestScope() {
         return requestScope;
@@ -123,14 +116,12 @@ public class Main {
         KExceptionManager kem = this.kem.get();
         kem.installForUncaughtExceptions();
         try {
-            int retval = frontEnd.get().main();
-            return retval;
+            return frontEnd.get().main();
         } catch (ProvisionException e) {
             for (Message m : e.getErrorMessages()) {
-                if (!(m.getCause() instanceof KEMException)) {
+                if (!(m.getCause() instanceof KEMException ex)) {
                     throw e;
                 } else {
-                    KEMException ex = (KEMException) m.getCause();
                     kem.registerThrown(ex);
                 }
             }
@@ -208,8 +199,7 @@ public class Main {
             //boot error, we should have printed it already
             Main.exit(1);
         }
-        Injector injector = Guice.createInjector(modules);
-        return injector;
+        return Guice.createInjector(modules);
     }
 
     private static void invalidJarArguments() {
