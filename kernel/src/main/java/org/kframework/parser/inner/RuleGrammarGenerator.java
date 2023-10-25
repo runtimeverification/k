@@ -551,11 +551,12 @@ public record RuleGrammarGenerator(Definition baseK) {
 
     private static void addCellNameProd(Set<Sentence> prods, Sentence prod) {
         if (prod instanceof Production) {
-          for (ProductionItem pi : iterable(((Production)prod).items())) {
-            if (pi instanceof Terminal t) {
-                if (alphaNum.matcher(t.value()).matches()) {
-                prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add(Att.TOKEN())));
-              }
+            for (ProductionItem pi : iterable(((Production) prod).items())) {
+                if (pi instanceof Terminal t) {
+                    if (alphaNum.matcher(t.value()).matches()) {
+                        prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add(Att.TOKEN())));
+                    }
+                }
             }
         }
     }

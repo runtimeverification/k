@@ -608,7 +608,7 @@ public class SortCells {
                             ArrayList<K> klist = new ArrayList<K>(Collections.nCopies(subcellSorts.size(), null));
                             for (K item : IncompleteCellUtils.flattenCells(k)) { // #cells(#cells(x,y),z) => [x,y,z]
                                 if (item instanceof KApply kapp) {
-                                    if (cfg.cfg.isCellLabel(kapp.klabel())) {
+                                    if (cfg.cfg().isCellLabel(kapp.klabel())) {
                                         Sort sort = cfg.getCellSort(kapp.klabel());
                                         if (!subcellSorts.contains(sort)) {
                                             throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
