@@ -5,16 +5,19 @@
     haskell-backend.url = "github:runtimeverification/haskell-backend/03a6228f78d7f4805fee4b9d9c45208dcbe0c9fb";
     booster-backend = {
       url = "github:runtimeverification/hs-backend-booster/66439eba81e7311698cb3647b22bb840529ac524";
-      # NB booster-backend will bring in another dependency on haskell-backend,
-      # but the two are not necessarily the same (different more often than not).
-      # We get two transitive dependencies on haskell-nix.
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.haskell-backend.follows = "haskell-backend";
+      inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
     };
+    flake-utils.url = "github:numtide/flake-utils";
+    mavenix.url = "github:nix-community/mavenix";
+    mavenix.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+    mavenix.inputs.utils.follows = "flake-utils";
     llvm-backend.url = "github:runtimeverification/llvm-backend";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
+    llvm-backend.inputs.mavenix.follows = "mavenix";
+    llvm-backend.inputs.utils.follows = "flake-utils";
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
-    mavenix.url = "github:nix-community/mavenix";
     # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
       url = "github:edolstra/flake-compat";
