@@ -34,7 +34,6 @@ public class JarInfo {
         String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
         File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile().getParentFile();
         return parent.getAbsolutePath();
-        return null;
     }
 
     /**
