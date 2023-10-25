@@ -1,7 +1,6 @@
 {
   description = "K Framework";
   inputs = {
-    nixpkgs.follows = "haskell-backend/nixpkgs";
     haskell-backend.url = "github:runtimeverification/haskell-backend/03a6228f78d7f4805fee4b9d9c45208dcbe0c9fb";
     booster-backend = {
       url = "github:runtimeverification/hs-backend-booster/66439eba81e7311698cb3647b22bb840529ac524";
@@ -9,14 +8,19 @@
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
     };
+    nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
-    mavenix.url = "github:nix-community/mavenix";
-    mavenix.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-    mavenix.inputs.utils.follows = "flake-utils";
-    llvm-backend.url = "github:runtimeverification/llvm-backend";
-    llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-    llvm-backend.inputs.mavenix.follows = "mavenix";
-    llvm-backend.inputs.utils.follows = "flake-utils";
+    mavenix = {
+      url = "github:nix-community/mavenix";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.utils.follows = "flake-utils";
+    };
+    llvm-backend = {
+      url = "github:runtimeverification/llvm-backend";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.mavenix.follows = "mavenix";
+      inputs.utils.follows = "flake-utils";
+    };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
     # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
