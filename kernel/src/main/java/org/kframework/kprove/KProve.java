@@ -18,43 +18,28 @@ import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 
-public class KProve {
-
-    public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
-
+public record KProve(
+     KExceptionManager kem,
+     FileUtil files,
+     KPrint kprint,
+     KProveOptions kproveOptions,
+     CompiledDefinition compiledDefinition,
+     ProofDefinitionBuilder proofDefinitionBuilder,
+     Function<Definition, Rewriter> rewriterGenerator,
+     Stopwatch sw
+) {
     private static final int KPROVE_SUCCESS_EXIT_CODE = 0;
     private static final int KPROVE_MISMATCH_CONFIG_CODE = 1;
 
-    private final KExceptionManager kem;
-    private final FileUtil files;
-    private final KPrint kprint;
-    private final KProveOptions kproveOptions;
-    private final CompiledDefinition compiledDefinition;
-    private final BinaryLoader loader;
-    private final ProofDefinitionBuilder proofDefinitionBuilder;
-    private final Function<Definition, Rewriter> rewriterGenerator;
-    private final Stopwatch sw;
-
     @Inject
-    public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
-                  CompiledDefinition compiledDefinition, BinaryLoader loader,
-                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator, Stopwatch sw) {
-        this.kem = kem;
-        this.files = files;
-        this.kprint = kprint;
-        this.kproveOptions = kproveOptions;
-        this.compiledDefinition = compiledDefinition;
-        this.loader = loader;
-        this.proofDefinitionBuilder = proofDefinitionBuilder;
-        this.rewriterGenerator = rewriterGenerator;
-        this.sw = sw;
-    }
+    public KProve {}
 
     public int run() {
         if (!kproveOptions.specFile(files).exists()) {
@@ -69,11 +54,7 @@ public class KProve {
         Module specModule = compiled._2();
 
         if (kproveOptions.emitJson) {
-            try {
-                files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1()), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
-            }
+            files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1()), StandardCharsets.UTF_8));
         }
 
         if (kproveOptions.emitJsonSpec != null) {
@@ -91,16 +72,15 @@ public class KProve {
 
         int errCode = results.exitCode().orElse(0);
         switch (errCode) {
-        case KPROVE_SUCCESS_EXIT_CODE:
-            break;
-        case KPROVE_MISMATCH_CONFIG_CODE:
-            kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
-                    "backend terminated because the configuration cannot be rewritten further. See output for more details."));
-            break;
-        default:
-            kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
-                    "backend crashed with exit code " + String.valueOf(errCode)));
-            break;
+            case KPROVE_SUCCESS_EXIT_CODE -> {}
+            case KPROVE_MISMATCH_CONFIG_CODE -> {
+                kem.addKException(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
+                        "backend terminated because the configuration cannot be rewritten further. See output for more details."));
+            }
+            default -> {
+                kem.addKException(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
+                        "backend crashed with exit code " + errCode));
+            }
         }
 
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);

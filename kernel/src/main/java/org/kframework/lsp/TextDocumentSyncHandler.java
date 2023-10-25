@@ -75,7 +75,7 @@ public class TextDocumentSyncHandler {
         if (caches == null)
             caches = new HashMap<>();
         caches.forEach((key, val) -> {
-            String uri = Path.of(val.getModule().att().get(org.kframework.attributes.Source.class).source()).toUri().toString();
+            String uri = Path.of(val.module().att().get(org.kframework.attributes.Source.class).source()).toUri().toString();
             // load into LSP all the files found in the caches, even if they are not open in the IDE.
             // this way we can find all the updated locations when finding references
             if (!files.containsKey(uri))
@@ -245,7 +245,7 @@ public class TextDocumentSyncHandler {
                                     String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
                                     Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
                                     if (ch.isPresent()) {
-                                        Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().getCache();
+                                        Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().cache();
                                         if (parsedSent.containsKey(ss.getContent())) {
                                             Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                     .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
@@ -256,7 +256,7 @@ public class TextDocumentSyncHandler {
                                                 if (isPositionOverLocation(pos, t.location().get()))
                                                     x.set(t); // find the deepest term that contains this position
                                                 return t;
-                                            }, "Find def in rule").apply(parse.getParse());
+                                            }, "Find def in rule").apply(parse.parse());
                                             if (x.get() != null && x.get().att().get(org.kframework.definition.Production.class).source().isPresent()) {
                                                 org.kframework.definition.Production prd = x.get().att().get(org.kframework.definition.Production.class);
                                                 if (prd.source().isPresent()) // exclude generated productions like casts
@@ -324,17 +324,17 @@ public class TextDocumentSyncHandler {
                                 Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
                                 if (ch.isPresent()) {
                                     ParseCache parseCache = ch.get().getValue();
-                                    Map<String, ParseCache.ParsedSentence> parsedSent = parseCache.getCache();
+                                    Map<String, ParseCache.ParsedSentence> parsedSent = parseCache.cache();
                                     if (parsedSent.containsKey(ss.getContent())) {
                                         Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                 .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
                                                 .add(Att.CONTENT_START_LINE(), ss.getContentStartLine()).add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                                         ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(b.contents()), b);
-                                        parse.getErrors().forEach(err -> {
+                                        parse.errors().forEach(err -> {
                                             Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
                                             problems.add(d);
                                         });
-                                        parse.getWarnings().forEach(err -> {
+                                        parse.warnings().forEach(err -> {
                                             Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Warning, "Inner Parser");
                                             problems.add(d);
                                         });
@@ -399,16 +399,16 @@ public class TextDocumentSyncHandler {
                             // 1. for each cached sentence
                             // 2. find if it still exists in the source file and get its updated location
                             caches.forEach((mname, parseCache) -> {
-                                String uri = Path.of(parseCache.getModule().att().get(org.kframework.attributes.Source.class).source()).toUri().toString();
+                                String uri = Path.of(parseCache.module().att().get(org.kframework.attributes.Source.class).source()).toUri().toString();
                                 files.get(uri).dis.stream().filter(di2 -> di2 instanceof Module)
                                         .map(di2 -> (Module) di2)
                                         .filter(mm -> mname.startsWith((mm.getName())))
                                         .forEach(mm -> mm.getItems().stream().filter(mi -> mi instanceof StringSentence)
                                                 .map(mi -> (StringSentence) mi)
                                                 .forEach(ss -> {
-                                                    if (parseCache.getCache().containsKey(ss.getContent())) {
-                                                        ParseCache.ParsedSentence ps = parseCache.getCache().get(ss.getContent());
-                                                        if (ps.getParse() != null) {
+                                                    if (parseCache.cache().containsKey(ss.getContent())) {
+                                                        ParseCache.ParsedSentence ps = parseCache.cache().get(ss.getContent());
+                                                        if (ps.parse() != null) {
                                                             Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                                     .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
                                                                     .add(Att.CONTENT_START_LINE(), ss.getContentStartLine()).add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
@@ -423,7 +423,7 @@ public class TextDocumentSyncHandler {
                                                                             loc2range(t.location().get())));
                                                                 }
                                                                 return t;
-                                                            }, "Find ref in rule").apply(ps.getParse());
+                                                            }, "Find ref in rule").apply(ps.parse());
                                                         }
                                                     }
                                                 })
@@ -475,7 +475,7 @@ public class TextDocumentSyncHandler {
                                         Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
                                         AtomicReference<SelectionRange> x = new AtomicReference<>(sentsr);
                                         if (ch.isPresent()) {
-                                            Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().getCache();
+                                            Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().cache();
                                             if (parsedSent.containsKey(ss.getContent())) {
                                                 Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                         .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
@@ -487,7 +487,7 @@ public class TextDocumentSyncHandler {
                                                         x.set(tsr); // find the deepest term that contains this position
                                                     }
                                                     return t;
-                                                }, "Find selectionRange in rule").apply(parse.getParse());
+                                                }, "Find selectionRange in rule").apply(parse.parse());
                                             }
                                         }
                                         lloc.add(x.get());

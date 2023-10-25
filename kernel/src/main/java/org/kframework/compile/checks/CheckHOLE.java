@@ -20,14 +20,7 @@ import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
 
-public class CheckHOLE {
-    private final Set<KEMException> errors;
-    private final Module m;
-
-    public CheckHOLE(Set<KEMException> errors, Module m) {
-        this.errors = errors;
-        this.m = m;
-    }
+public record CheckHOLE(Set<KEMException> errors, Module m) {
 
     public void check(Sentence sentence) {
         if (sentence instanceof Production) {

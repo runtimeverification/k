@@ -32,24 +32,12 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-public class KRead {
-
-    private final KExceptionManager kem;
-    private final FileUtil files;
-    private final InputModes input;
-    private final GlobalOptions globalOptions;
-
-    public KRead(
-            KExceptionManager kem,
-            FileUtil files,
-            InputModes input,
-            GlobalOptions globalOptions
-    ) {
-        this.kem = kem;
-        this.files = files;
-        this.input = input;
-        this.globalOptions = globalOptions;
-    }
+public record KRead(
+     KExceptionManager kem,
+     FileUtil files,
+     InputModes input,
+     GlobalOptions globalOptions
+) {
 
     public String showTokens(Module mod, CompiledDefinition def, String stringToParse, Source source) {
         return def.showTokens(mod, files, stringToParse, source);
@@ -96,16 +84,15 @@ public class KRead {
                 if (exit != 0) {
                     throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
                 }
-                List<String> command = new ArrayList<>();
-                command.addAll(Arrays.asList(
-                      Scanner.COMPILER,
-                      "-DK_BISON_PARSER_SORT=" + sort.name(),
-                      files.resolveKInclude("cparser/main.c").getAbsolutePath(),
-                      files.resolveTemp("lex.yy.c").getAbsolutePath(),
-                      files.resolveTemp("parser.tab.c").getAbsolutePath(),
-                      "-iquote", files.resolveTemp(".").getAbsolutePath(),
-                      "-iquote", files.resolveKInclude("cparser").getAbsolutePath(),
-                      "-o", outputFile.getAbsolutePath()));
+                List<String> command = new ArrayList<>(Arrays.asList(
+                        Scanner.COMPILER,
+                        "-DK_BISON_PARSER_SORT=" + sort.name(),
+                        files.resolveKInclude("cparser/main.c").getAbsolutePath(),
+                        files.resolveTemp("lex.yy.c").getAbsolutePath(),
+                        files.resolveTemp("parser.tab.c").getAbsolutePath(),
+                        "-iquote", files.resolveTemp(".").getAbsolutePath(),
+                        "-iquote", files.resolveKInclude("cparser").getAbsolutePath(),
+                        "-o", outputFile.getAbsolutePath()));
 
                 if (library) {
                     command.addAll(OS.current().getSharedLibraryCompilerFlags());

@@ -19,14 +19,7 @@ import java.util.Set;
 /**
  * Check that functions are not used on LHS in places that should be performing matching.
  */
-public class CheckFunctions {
-    private final Set<KEMException> errors;
-    private final Module m;
-
-    public CheckFunctions(Set<KEMException> errors, Module m) {
-        this.errors = errors;
-        this.m = m;
-    }
+public record CheckFunctions(Set<KEMException> errors, Module m) {
 
     public void check(Sentence sentence) {
         if (sentence instanceof Rule rl) {
