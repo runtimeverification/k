@@ -386,7 +386,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         boolean addRuleCells;
         if (mod.importedModuleNames().contains(RULE_CELLS)) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
-            addRuleCells = mod.sentences().exists(p -> p instanceof Production && ((Production) p).att().contains(Att.CELL()));
+            addRuleCells = mod.sentences().exists(p -> p instanceof Production && p.att().contains(Att.CELL()));
         } else {
             addRuleCells = false;
         }
@@ -565,9 +565,9 @@ public record RuleGrammarGenerator(Definition baseK) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add(Sort.class, castSort);
         prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(labelSort), Terminal("::" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1%2")));
-        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()), labelSort, Seq(NonTerminal(labelSort), Terminal(":" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1%2")));
-        prods.add(Production(KLabel("#InnerCast"), castSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
-        prods.add(Production(KLabel("#OuterCast"), labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
+        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()), labelSort, Seq(NonTerminal(labelSort), Terminal(":" + castSort)), attrs1.add(Att.FORMAT(), "%1%2")));
+        prods.add(Production(KLabel("#InnerCast"), castSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort)), attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
+        prods.add(Production(KLabel("#OuterCast"), labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort)), attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
         return prods;
     }
 }

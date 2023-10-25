@@ -32,7 +32,7 @@ public final class GlobalOptions {
         this.warnings2errors = warnings2errors;
     }
 
-    public static enum Warnings {
+    public enum Warnings {
         /**
          * All warnings and errors
          */
@@ -48,10 +48,10 @@ public final class GlobalOptions {
          */
         NONE(EnumSet.of(ExceptionType.ERROR));
 
-        private Warnings(Set<ExceptionType> types) {
+        Warnings(Set<ExceptionType> types) {
             typesIncluded = types;
         }
-        private Set<ExceptionType> typesIncluded;
+        private final Set<ExceptionType> typesIncluded;
 
         public Set<ExceptionType> getTypesIncluded() { return typesIncluded; }
     }

@@ -78,11 +78,8 @@ public class LabelInfo {
         if (term instanceof KApply && isFunction(((KApply) term).klabel())) {
             return true;
         }
-        if (term instanceof KRewrite && ((KRewrite) term).left() instanceof KApply
-                && isFunction(((KApply) ((KRewrite) term).left()).klabel())) {
-            return true;
-        }
-        return false;
+        return term instanceof KRewrite && ((KRewrite) term).left() instanceof KApply
+                && isFunction(((KApply) ((KRewrite) term).left()).klabel());
     }
 
     /**

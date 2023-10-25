@@ -28,8 +28,8 @@ import static org.kframework.kore.KORE.*;
  */
 public class DeconstructIntegerAndFloatLiterals {
 
-    private Set<KApply> state = new HashSet<>();
-    private Set<KVariable> vars = new HashSet<>();
+    private final Set<KApply> state = new HashSet<>();
+    private final Set<KVariable> vars = new HashSet<>();
 
     void reset() {
         state.clear();

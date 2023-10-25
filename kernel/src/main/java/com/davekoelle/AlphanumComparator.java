@@ -83,8 +83,8 @@ public class AlphanumComparator implements Comparator<String>
         {
             return 0;
         }
-        String s1 = (String)o1;
-        String s2 = (String)o2;
+        String s1 = o1;
+        String s2 = o2;
 
         int thisMarker = 0;
         int thatMarker = 0;

@@ -21,7 +21,7 @@ public class KException implements Serializable, HasLocation {
     private final Throwable exception;
     private final boolean printException;
     private final String sourceText;
-    private StringBuilder trace = new StringBuilder();
+    private final StringBuilder trace = new StringBuilder();
 
     private static final Map<KExceptionGroup, String> labels;
     static {
@@ -41,11 +41,11 @@ public class KException implements Serializable, HasLocation {
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message) {
-        this(type, label, message, null, (Location) null, null);
+        this(type, label, message, null, null, null);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Throwable e) {
-        this(type, label, message, null, (Location) null, e);
+        this(type, label, message, null, null, e);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location) {
@@ -221,7 +221,7 @@ public class KException implements Serializable, HasLocation {
         StringBuilder sourceText = new StringBuilder();
 
         sourceText.append("\n\t");
-        sourceText.append(String.valueOf(location.startLine()) + " |\t");
+        sourceText.append(location.startLine() + " |\t");
         Stream lines = Files.lines(Paths.get(getSource().source()));
         sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().orElse(""));
 
@@ -258,13 +258,13 @@ public class KException implements Serializable, HasLocation {
         }
         sourceText.append("\n\t");
         int padding = String.valueOf(location.endLine()).length() - String.valueOf(location.startLine()).length();
-        sourceText.append(StringUtils.repeat(' ', padding) + String.valueOf(location.startLine()) + " |\t");
+        sourceText.append(StringUtils.repeat(' ', padding) + location.startLine() + " |\t");
         sourceText.append(firstLine);
 
         if (errorLineCount == 3) {
             sourceText.append("\n\t");
             int padding2 = String.valueOf(location.endLine()).length() - String.valueOf(location.startLine() + 1).length();
-            sourceText.append(StringUtils.repeat(' ', padding2) + String.valueOf(location.startLine() + 1) + " |\t");
+            sourceText.append(StringUtils.repeat(' ', padding2) + (location.startLine() + 1) + " |\t");
             Stream secondline = Files.lines(Paths.get(getSource().source()));
             sourceText.append((String) secondline.skip(location.startLine()).findFirst().get());
         } else if (errorLineCount > 3) {
@@ -276,8 +276,8 @@ public class KException implements Serializable, HasLocation {
         }
 
         sourceText.append("\n\t");
-        sourceText.append(String.valueOf(location.endLine()) + " |\t");
-        String lastLine = (String)Files.lines(Paths.get(getSource().source())).skip(location.endLine() -1).findFirst().get();
+        sourceText.append(location.endLine() + " |\t");
+        String lastLine = Files.lines(Paths.get(getSource().source())).skip(location.endLine() -1).findFirst().get();
         int firstCharIndex = lastLine.indexOf(lastLine.trim());
         sourceText.append(lastLine);
 

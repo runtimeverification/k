@@ -33,7 +33,7 @@ public class JCommanderModule extends AbstractModule  {
     protected void configure() {
         binder().requireAtInjectOnConstructors();
         bind(String[].class).annotatedWith(Options.class)
-            .toProvider(SimpleScope.seededKeyProvider()).in(RequestScoped.class);;
+            .toProvider(SimpleScope.seededKeyProvider()).in(RequestScoped.class);
     }
 
     @Provides @RequestScoped

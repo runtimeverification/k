@@ -22,7 +22,7 @@ import static org.kframework.kore.KORE.*;
 
 public class ResolveFreshConfigConstants {
     private int currentFresh = 0;
-    private Map<KVariable, Integer> freshMap = new HashMap<>();
+    private final Map<KVariable, Integer> freshMap = new HashMap<>();
 
     /**
      * Replaces fresh variables in the RHS of cell initializer rules with a fresh constant.

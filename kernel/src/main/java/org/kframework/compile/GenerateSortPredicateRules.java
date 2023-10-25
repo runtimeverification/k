@@ -49,11 +49,11 @@ public class GenerateSortPredicateRules {
 
     private Stream<? extends Sentence> gen(Sort sort) {
         if (sort.equals(Sorts.K())) {
-            return Stream.of(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
+            return Stream.of(Rule(KRewrite(KApply(KLabel("is" + sort), KVariable("K")), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
         } else {
             List<Sentence> res = new ArrayList<>();
-            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable(sort.name(), Att().add(Sort.class, sort))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
-            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.OWISE())));
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort), KVariable(sort.name(), Att().add(Sort.class, sort))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.OWISE())));
             return res.stream();
         }
     }

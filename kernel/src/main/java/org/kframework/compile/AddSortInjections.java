@@ -50,7 +50,7 @@ public class AddSortInjections {
     private final ConfigurationInfoFromModule configurationInfo;
 
     private int freshSortParamCounter = 0;
-    private Set<String> sortParams = new HashSet<>();
+    private final Set<String> sortParams = new HashSet<>();
     public static final String SORTPARAM_NAME = "#SortParam";
     private boolean isLHS = false;
 

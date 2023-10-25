@@ -100,7 +100,7 @@ public class CheckRHSVariables {
         return unboundVariableNames;
     }
 
-    private Set<KVariable> vars = Sets.newHashSet();
+    private final Set<KVariable> vars = Sets.newHashSet();
 
     void resetVars() {
         vars.clear();

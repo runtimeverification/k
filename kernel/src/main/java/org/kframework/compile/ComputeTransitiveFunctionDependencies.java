@@ -106,5 +106,5 @@ public class ComputeTransitiveFunctionDependencies {
         return ancestors(labels, dependencies);
     }
 
-    private DirectedGraph<KLabel, Object> dependencies;
+    private final DirectedGraph<KLabel, Object> dependencies;
 }

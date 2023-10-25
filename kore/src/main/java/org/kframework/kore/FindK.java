@@ -10,7 +10,7 @@ import scala.collection.Set;
 public class FindK extends AbstractFoldK<Set<K>> {
     @Override
     public Set<K> unit() {
-        return Collections.<K>Set();
+        return Collections.Set();
     }
 
     @Override

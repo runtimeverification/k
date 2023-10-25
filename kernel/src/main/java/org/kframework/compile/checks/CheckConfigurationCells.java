@@ -38,7 +38,7 @@ public class CheckConfigurationCells {
         }
     }
 
-    private Set<Sort> cells = new HashSet<>();
+    private final Set<Sort> cells = new HashSet<>();
 
     private void check(Production p) {
         if (p.att().contains(Att.CELL())) {

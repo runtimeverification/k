@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
 import java.util.*;
@@ -412,7 +413,7 @@ public class Scanner implements AutoCloseable {
                 }
             }
 
-            byte[] buf = input.getBytes("UTF-8");
+            byte[] buf = input.getBytes(StandardCharsets.UTF_8);
             ByteBuffer size = ByteBuffer.allocate(4);
             size.order(ByteOrder.nativeOrder());
             size.putInt(buf.length);
@@ -445,7 +446,7 @@ public class Scanner implements AutoCloseable {
                 int len = byteBuf.getInt();
                 byte[] bytes = new byte[len];
                 IOUtils.readFully(process.getInputStream(), bytes);
-                String value = new String(bytes, "UTF-8");
+                String value = new String(bytes, StandardCharsets.UTF_8);
                 Token t = new Token(kind, value, startLoc, endLoc);
                 if (kind == -1) {
                     String msg = "Scanner error: unexpected character sequence '" + value + "'.";

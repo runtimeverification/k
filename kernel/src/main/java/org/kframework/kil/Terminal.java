@@ -35,9 +35,7 @@ public class Terminal extends ProductionItem {
         if (!(obj instanceof Terminal trm))
             return false;
 
-        if (!trm.terminal.equals(this.terminal))
-            return false;
-        return true;
+        return trm.terminal.equals(this.terminal);
     }
 
     @Override

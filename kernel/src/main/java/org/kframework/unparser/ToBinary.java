@@ -48,9 +48,9 @@ public class ToBinary {
         return out.toByteArray();
     }
 
-    private DataOutputStream data;
-    private Map<String, Integer> interns = new HashMap<>();
-    private Map<K, Integer> kInterns = new IdentityHashMap<>();
+    private final DataOutputStream data;
+    private final Map<String, Integer> interns = new HashMap<>();
+    private final Map<K, Integer> kInterns = new IdentityHashMap<>();
     private int numTermsWritten;
 
     private ToBinary(DataOutputStream data) {

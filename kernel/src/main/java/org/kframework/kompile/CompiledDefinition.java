@@ -60,8 +60,8 @@ public class CompiledDefinition implements Serializable {
     public final HashMap<String, Sort> configurationVariableDefaultSorts = new HashMap<>();
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
-    private Map<String, Rule> cachedcompiledPatterns = new ConcurrentHashMap<>();
-    private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
+    private final Map<String, Rule> cachedcompiledPatterns = new ConcurrentHashMap<>();
+    private final Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
 
     public CompiledDefinition(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {

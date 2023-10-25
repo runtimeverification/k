@@ -221,11 +221,8 @@ public class Production extends ASTNode {
         } else if (!sort.equals(other.sort))
             return false;
         if (binderMap == null) {
-            if (other.binderMap != null)
-                return false;
-        } else if (!binderMap.equals(other.binderMap))
-            return false;
-        return true;
+            return other.binderMap == null;
+        } else return binderMap.equals(other.binderMap);
     }
 
     @Override

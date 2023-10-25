@@ -53,7 +53,7 @@ public class AddEmptyListsTest {
         String definitionText;
         files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
-        File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/prelude.md");
+        File definitionFile = new File(Kompile.BUILTIN_DIRECTORY + "/prelude.md");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
         Definition baseK =
