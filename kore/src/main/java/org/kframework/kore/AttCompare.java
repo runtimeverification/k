@@ -39,15 +39,11 @@ public class AttCompare {
                 || (thisK instanceof KVariable && thatK instanceof KVariable)
                 || (thisK instanceof InjectedKLabel && thatK instanceof InjectedKLabel)) {
             return thisK.equals(thatK);
-        } else if (thisK instanceof KApply && thatK instanceof KApply) {
-            KApply thisKItem = (KApply) thisK;
-            KApply thatKItem = (KApply) thatK;
+        } else if (thisK instanceof KApply thisKItem && thatK instanceof KApply thatKItem) {
             return thisKItem.klabel().equals(thatKItem.klabel()) && attEquals(thisKItem.klist().items(), thatKItem.klist().items());
         } else if (thisK instanceof KSequence && thatK instanceof KSequence) {
             return attEquals(((KSequence) thisK).items(), ((KSequence) thatK).items());
-        } else if (thisK instanceof KRewrite && thatK instanceof KRewrite) {
-            KRewrite thisKR = (KRewrite) thisK;
-            KRewrite thatKR = (KRewrite) thatK;
+        } else if (thisK instanceof KRewrite thisKR && thatK instanceof KRewrite thatKR) {
             return attEquals(thisKR.left(), thatKR.left()) && attEquals(thisKR.right(), thatKR.right());
         } else {
             return false;

@@ -79,8 +79,7 @@ public class KSyntax2Bison {
     Set<Sentence> sentences = new HashSet<>();
     Set<Tuple2<Sort, Set<Tag>>> nts = new HashSet<>();
     for (Sentence s : iterable(module.sentences())) {
-      if (s instanceof Production) {
-        Production prod = (Production)s;
+      if (s instanceof Production prod) {
         if (prod.klabel().isDefined() && prod.params().isEmpty()) {
           List<ProductionItem> items = new ArrayList<>(mutable(prod.items()));
           if (items.get(0) instanceof NonTerminal) {
@@ -332,8 +331,7 @@ public class KSyntax2Bison {
     int i = 1;
     List<Integer> nts = new ArrayList<>();
     for (ProductionItem item : iterable(prod.items())) {
-      if (item instanceof NonTerminal) {
-        NonTerminal nt = (NonTerminal)item;
+      if (item instanceof NonTerminal nt) {
         encode(nt.sort(), bison);
         bison.append(" ");
         nts.add(i);

@@ -14,17 +14,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1697708260,
-        "narHash": "sha256-90yzwwRfFGXpqYHLU++r1hW+PxH09+vF11BN8JkUe0c=",
+        "lastModified": 1698013447,
+        "narHash": "sha256-H3Um2kgQLfEkvbIGJBQAqLojcikVhc0SoMW/7HPdgH8=",
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "26b5d2df37c6fcc210d80ff57d1c3572a41f90b5",
+        "rev": "66439eba81e7311698cb3647b22bb840529ac524",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "26b5d2df37c6fcc210d80ff57d1c3572a41f90b5",
+        "rev": "66439eba81e7311698cb3647b22bb840529ac524",
         "type": "github"
       }
     },
@@ -190,15 +190,15 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1689018333,
-        "narHash": "sha256-sthxx50rj0E7gv38oeMj8GZOp7i1776P1qZsM7pVLd0=",
-        "owner": "goodlyrottenapple",
+        "lastModified": 1643802645,
+        "narHash": "sha256-BynM25iwp/l3FyrcHqiNJdDxvN6IxSM3/zkFR6PD3B0=",
+        "owner": "nix-community",
         "repo": "mavenix",
-        "rev": "153d69e62f87e5dd37d35492cc3e35dd80d2b5fa",
+        "rev": "ce9ddfd7f361190e8e8dcfaf6b8282eebbb3c7cb",
         "type": "github"
       },
       "original": {
-        "owner": "goodlyrottenapple",
+        "owner": "nix-community",
         "repo": "mavenix",
         "type": "github"
       }
@@ -263,11 +263,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1697655685,
-        "narHash": "sha256-79Kuv+QdgsVc+rkibuAgWHnh8IXrLBTOKg5nM0Qvux0=",
+        "lastModified": 1697851979,
+        "narHash": "sha256-lJ8k4qkkwdvi+t/Xc6Fn74kUuobpu9ynPGxNZR6OwoA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "80c1aab725151632ddc2a20caeb914e76dd0673c",
+        "rev": "5550a85a087c04ddcace7f892b0bdc9d8bb080c8",
         "type": "github"
       },
       "original": {

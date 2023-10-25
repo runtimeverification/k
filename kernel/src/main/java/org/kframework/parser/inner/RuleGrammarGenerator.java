@@ -398,8 +398,7 @@ public record RuleGrammarGenerator(Definition baseK) {
                 if (s instanceof Production && s.att().contains(Att.CELL_COLLECTION())) {
                     return Stream.empty();
                 }
-                if (s instanceof Production && (s.att().contains(Att.CELL()))) {
-                    Production p = (Production) s;
+                if (s instanceof Production p && (s.att().contains(Att.CELL()))) {
                     // assuming that productions tagged with 'cell' start and end with terminals, and only have non-terminals in the middle
                     assert p.items().head() instanceof Terminal || p.items().head() instanceof RegexTerminal;
                     assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
@@ -415,8 +414,7 @@ public record RuleGrammarGenerator(Definition baseK) {
                     Production p2 = Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())));
                     return Stream.of(p1, p2);
                 }
-                if (s instanceof Production && (s.att().contains(Att.CELL_FRAGMENT(), Sort.class))) {
-                    Production p = (Production) s;
+                if (s instanceof Production p && (s.att().contains(Att.CELL_FRAGMENT(), Sort.class))) {
                     Production p1 = Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())));
                     return Stream.of(p, p1);
                 }
@@ -445,8 +443,7 @@ public record RuleGrammarGenerator(Definition baseK) {
                 if (i instanceof Terminal) terminals.put(((Terminal) i).value(), PRESENT);
             }));
             parseProds = parseProds.stream().map(s -> {
-                if (s instanceof Production) {
-                    Production p = (Production) s;
+                if (s instanceof Production p) {
                     if (p.sort().name().startsWith("#"))
                         return p; // don't do anything for such productions since they are advanced features
                     // rewrite productions to contain follow restrictions for prefix terminals
@@ -554,13 +551,11 @@ public record RuleGrammarGenerator(Definition baseK) {
 
     private static void addCellNameProd(Set<Sentence> prods, Sentence prod) {
         if (prod instanceof Production) {
-            for (ProductionItem pi : iterable(((Production) prod).items())) {
-                if (pi instanceof Terminal) {
-                    Terminal t = (Terminal) pi;
-                    if (alphaNum.matcher(t.value()).matches()) {
-                        prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add(Att.TOKEN())));
-                    }
-                }
+          for (ProductionItem pi : iterable(((Production)prod).items())) {
+            if (pi instanceof Terminal t) {
+                if (alphaNum.matcher(t.value()).matches()) {
+                prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add(Att.TOKEN())));
+              }
             }
         }
     }

@@ -31,8 +31,7 @@ public class ComputeTransitiveFunctionDependencies {
         Set<KLabel> anywhereKLabels = new HashSet<>();
         stream(module.rules()).filter(r -> !ExpandMacros.isMacro(r)).forEach(r -> {
             K left = RewriteToTop.toLeft(r.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
+            if (left instanceof KApply kapp) {
                 if (r.att().contains(Att.ANYWHERE())) {
                     if (kapp.klabel().name().equals(KLabels.INJ)) {
                         K k = kapp.items().get(0);

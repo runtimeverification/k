@@ -27,10 +27,8 @@ public class Lexical extends ProductionItem {
             return false;
         if (obj == this)
             return true;
-        if (!(obj instanceof Lexical))
+        if (!(obj instanceof Lexical trm))
             return false;
-
-        Lexical trm = (Lexical) obj;
 
         if (!trm.lexicalRule.equals(this.lexicalRule))
             return false;

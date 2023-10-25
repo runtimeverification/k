@@ -38,9 +38,8 @@ public class PriorityBlockExtended extends ASTNode {
             return false;
         if (this == obj)
             return true;
-        if (!(obj instanceof PriorityBlockExtended))
+        if (!(obj instanceof PriorityBlockExtended pb))
             return false;
-        PriorityBlockExtended pb = (PriorityBlockExtended) obj;
 
         if (pb.productions.size() != productions.size())
             return false;

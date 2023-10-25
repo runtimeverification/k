@@ -55,8 +55,7 @@ public class AmbFilterError extends SetsTransformerWithErrors<KEMException> {
         for (int i = 0; i < amb.items().size(); i++) {
             msg += "\n" + (i + 1) + ": ";
             Term elem = (Term) amb.items().toArray()[i];
-            if (elem instanceof ProductionReference) {
-                ProductionReference tc = (ProductionReference) elem;
+            if (elem instanceof ProductionReference tc) {
                 msg += tc.production().toString();
             }
             // TODO: use the unparser

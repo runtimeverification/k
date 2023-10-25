@@ -208,8 +208,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
 
     @Override
     public Either<Set<KEMException>, Term> apply(Term term) {
-      if (term instanceof Ambiguity) {
-        Ambiguity amb = (Ambiguity)term;
+      if (term instanceof Ambiguity amb) {
         return super.apply(amb);
       }
       ProductionReference pr = (ProductionReference)term;
@@ -233,8 +232,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         return typeError(pr, expectedSort, actualSort);
       }
       // check types of children
-      if (pr instanceof TermCons) {
-        TermCons tc = (TermCons)pr;
+      if (pr instanceof TermCons tc) {
         for (int i = 0, j = 0; i < substituted.items().size(); i++) {
           if (substituted.items().apply(i) instanceof NonTerminal) {
             // save prior value of variables

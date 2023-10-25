@@ -32,10 +32,8 @@ public class Terminal extends ProductionItem {
             return false;
         if (obj == this)
             return true;
-        if (!(obj instanceof Terminal))
+        if (!(obj instanceof Terminal trm))
             return false;
-
-        Terminal trm = (Terminal) obj;
 
         if (!trm.terminal.equals(this.terminal))
             return false;
