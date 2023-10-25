@@ -14,13 +14,7 @@ import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.Set;
 
-public class CheckK {
-
-    private final Set<KEMException> errors;
-
-    public CheckK(Set<KEMException> errors) {
-        this.errors = errors;
-    }
+public record CheckK(Set<KEMException> errors) {
 
     private void check(K k) {
         new VisitK() {

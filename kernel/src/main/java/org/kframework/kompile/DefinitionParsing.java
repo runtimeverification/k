@@ -347,7 +347,7 @@ public class DefinitionParsing {
                 return m;
             Module configParserModule = gen.getConfigGrammar(m);
             ParseCache cache = loadCache(configParserModule);
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference)) {
+            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.module(), true, profileRules, files, options.debugTypeInference)) {
                 // each parser gets its own scanner because config labels can conflict with user tokens
                 parser.getScanner(globalOptions);
                 parser.initialize();
@@ -356,7 +356,7 @@ public class DefinitionParsing {
                         .filter(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))
                         .map(b -> (Bubble) b)
                         .parallel()
-                        .flatMap(b -> parseBubble(parser, cache.getCache(), b)
+                        .flatMap(b -> parseBubble(parser, cache.cache(), b)
                                 .map(p -> upSentence(p, b.sentenceType())))
                         .collect(Collectors.toSet());
                 Set<Sentence> allSent = m.localSentences().$bar(immutable(parsedSet)).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
@@ -407,7 +407,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files, options.debugTypeInference, false)) {
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.module(), true, profileRules, false, true, files, options.debugTypeInference, false)) {
             Scanner scanner;
             if (deserializeScanner) {
                 scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
@@ -434,8 +434,8 @@ public class DefinitionParsing {
 
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = needNewScanner ?
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference) :
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files, options.debugTypeInference, false)) {
+                RuleGrammarGenerator.getCombinedGrammar(cache.module(), true, profileRules, files, options.debugTypeInference) :
+                RuleGrammarGenerator.getCombinedGrammar(cache.module(), scanner, true, profileRules, false, files, options.debugTypeInference, false)) {
             if (needNewScanner)
                 parser.getScanner(globalOptions);
             parser.initialize();
@@ -444,7 +444,7 @@ public class DefinitionParsing {
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .flatMap(b -> parseBubble(parser, cache.getCache(), b)
+                    .flatMap(b -> parseBubble(parser, cache.cache(), b)
                             .map(p -> upSentence(p, b.sentenceType())))
                     .collect(Collections.toSet());
 
@@ -474,15 +474,15 @@ public class DefinitionParsing {
                     .filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))
                     .map(b -> (Bubble) b)
                     .flatMap(b -> {
-                        if (cache.getCache().containsKey(b.contents()) && cache.getCache().get(b.contents()).getParse() != null) {
-                            ParsedSentence parse = updateLocation(cache.getCache().get(b.contents()), b);
-                            Att termAtt = parse.getParse().att().remove(Source.class).remove(Location.class).remove(Production.class);
+                        if (cache.cache().containsKey(b.contents()) && cache.cache().get(b.contents()).parse() != null) {
+                            ParsedSentence parse = updateLocation(cache.cache().get(b.contents()), b);
+                            Att termAtt = parse.parse().att().remove(Source.class).remove(Location.class).remove(Production.class);
                             Att bubbleAtt = b.att().remove(Source.class).remove(Location.class).remove(Att.CONTENT_START_LINE(), Integer.class).remove(Att.CONTENT_START_COLUMN(), Integer.class);
                             if (!termAtt.equals(bubbleAtt)) // invalidate cache if attributes changed
                                 return Stream.of();
                             cachedBubbles.getAndIncrement();
-                            registerWarnings(parse.getWarnings());
-                            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(parse.getParse());
+                            registerWarnings(parse.warnings());
+                            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(parse.parse());
                             return Stream.of(Pair.of(b, upSentence(k, b.sentenceType())));
                         }
                         return Stream.of();
@@ -501,24 +501,24 @@ public class DefinitionParsing {
     public static ParsedSentence updateLocation(ParsedSentence parse, Bubble b) {
         int newStartLine = b.att().get(Att.CONTENT_START_LINE(), Integer.class);
         int newStartColumn = b.att().get(Att.CONTENT_START_COLUMN(), Integer.class);
-        int oldStartLine = parse.getStartLine();
-        int oldStartColumn = parse.getStartColumn();
-        if (oldStartLine != newStartLine || oldStartColumn != newStartColumn || !parse.getSource().equals(b.source().get())) {
+        int oldStartLine = parse.startLine();
+        int oldStartColumn = parse.startColumn();
+        if (oldStartLine != newStartLine || oldStartColumn != newStartColumn || !parse.source().equals(b.source().get())) {
             int lineOffset = newStartLine - oldStartLine;
             int columnOffset = newStartColumn - oldStartColumn;
-            K k = parse.getParse() != null ? new AddAttRec(a -> {
+            K k = parse.parse() != null ? new AddAttRec(a -> {
                 Location loc = a.get(Location.class);
                 Location newLoc = updateLocation(oldStartLine, lineOffset, columnOffset, loc);
                 return a.remove(Source.class).remove(Location.class).add(Location.class, newLoc)
                         .add(Source.class, b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!")));
-            }).apply(parse.getParse()) : null;
-            java.util.Set<KEMException> warnings = parse.getWarnings().stream().map(ex -> ex.withLocation(updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
+            }).apply(parse.parse()) : null;
+            java.util.Set<KEMException> warnings = parse.warnings().stream().map(ex -> ex.withLocation(updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
                             b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
                     .collect(Collectors.toSet());
-            java.util.Set<KEMException> errors = parse.getErrors().stream().map(ex -> ex.withLocation(updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
+            java.util.Set<KEMException> errors = parse.errors().stream().map(ex -> ex.withLocation(updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
                             b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
                     .collect(Collectors.toSet());
-            return new ParsedSentence(k, warnings, errors, newStartLine, newStartColumn, parse.getSource());
+            return new ParsedSentence(k, warnings, errors, newStartLine, newStartColumn, parse.source());
         }
         return parse;
     }
@@ -629,7 +629,7 @@ public class DefinitionParsing {
 
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
-        if (cachedParser == null || !equalsSyntax(cachedParser.getModule().signature(), parser.signature())) {
+        if (cachedParser == null || !equalsSyntax(cachedParser.module().signature(), parser.signature())) {
             cachedParser = new ParseCache(parser, true, java.util.Collections.synchronizedMap(new HashMap<>()));
             caches.put(parser.name(), cachedParser);
         }

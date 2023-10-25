@@ -55,45 +55,22 @@ import java.util.function.Function;
 import static org.kframework.builtin.BooleanUtils.*;
 
 @RequestScoped
-public class HaskellRewriter implements Function<Definition, Rewriter> {
-
-    private final GlobalOptions globalOptions;
-    private final SMTOptions smtOptions;
-    private final KompileOptions kompileOptions;
-    private final KProveOptions kProveOptions;
-    private final HaskellKRunOptions haskellKRunOptions;
-    private final BackendOptions backendOptions;
-    private final FileUtil files;
-    private final CompiledDefinition def;
-    private final KExceptionManager kem;
-    private final KPrint kprint;
-    private final Tool tool;
+public record HaskellRewriter(
+     GlobalOptions globalOptions,
+     SMTOptions smtOptions,
+     KompileOptions kompileOptions,
+     KProveOptions kProveOptions,
+     HaskellKRunOptions haskellKRunOptions,
+     BackendOptions backendOptions,
+     FileUtil files,
+     CompiledDefinition def,
+     KExceptionManager kem,
+     KPrint kprint,
+     Tool tool
+) implements Function<Definition, Rewriter> {
 
     @Inject
-    public HaskellRewriter(
-            GlobalOptions globalOptions,
-            SMTOptions smtOptions,
-            KompileOptions kompileOptions,
-            KProveOptions kProveOptions,
-            HaskellKRunOptions haskellKRunOptions,
-            BackendOptions backendOptions,
-            FileUtil files,
-            CompiledDefinition def,
-            KExceptionManager kem,
-            KPrint kprint,
-            Tool tool) {
-        this.globalOptions = globalOptions;
-        this.smtOptions = smtOptions;
-        this.haskellKRunOptions = haskellKRunOptions;
-        this.backendOptions = backendOptions;
-        this.kompileOptions = kompileOptions;
-        this.kProveOptions = kProveOptions;
-        this.files = files;
-        this.def = def;
-        this.kem = kem;
-        this.kprint = kprint;
-        this.tool = tool;
-    }
+    public HaskellRewriter {}
 
     @Override
     public Rewriter apply(Definition definition) {
@@ -294,8 +271,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 String koreOutput = converter.convertSpecificationModule(module, rules,
                         haskellKRunOptions.defaultClaimType, sb);
                 files.saveToTemp("spec.kore", koreOutput);
-                String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
-                return specPath;
+                return files.resolveTemp("spec.kore").getAbsolutePath();
             }
 
             private List<String> buildCommonProvingCommand(String defPath, String specPath, String outPath,
@@ -393,8 +369,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     System.err.println("Executing " + args);
                 }
 
-                RewriterResult result = executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
-                return result;
+                return executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
             }
 
             @Override
@@ -456,7 +431,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         p2.getOutputStream().write(buffer, 0, count);
                         p2.getOutputStream().flush();
                     }
-                } catch (IOException e) {}
+                } catch (IOException ignored) {}
             });
             Thread out = RunProcess.getOutputStreamThread(p2::getInputStream, System.out);
             Thread err = RunProcess.getOutputStreamThread(p2::getErrorStream, System.err);

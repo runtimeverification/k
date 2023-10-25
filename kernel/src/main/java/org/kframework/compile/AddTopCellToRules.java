@@ -31,22 +31,14 @@ import static org.kframework.kore.KORE.*;
  * Rules with the anywhere attribute are not modified.
  */
 // TODO: rules defining functions shouldn't be wrapped
-public class AddTopCellToRules {
-
-    private final ConfigurationInfo cfg;
-    private final LabelInfo labelInfo;
-
-    public AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo) {
-        this.cfg = cfg;
-        this.labelInfo = labelInfo;
-    }
+public record AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo) {
 
     public K addImplicitCells(K term, Module m) {
         if (m.isFunction(term)) return term;
         return addRootCell(term);
     }
 
-    protected K addRootCell(K term) {
+    private K addRootCell(K term) {
         KLabel root;
         root = KLabels.GENERATED_TOP_CELL;
 

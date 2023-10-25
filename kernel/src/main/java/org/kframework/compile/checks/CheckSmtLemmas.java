@@ -12,14 +12,7 @@ import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.Set;
 
-public class CheckSmtLemmas {
-    private final Set<KEMException> errors;
-    private final Module m;
-
-    public CheckSmtLemmas(Set<KEMException> errors, Module m) {
-        this.errors = errors;
-        this.m = m;
-    }
+public record CheckSmtLemmas(Set<KEMException> errors, Module m) {
 
     public void check(Sentence sentence) {
         if ((sentence instanceof Rule) && sentence.att().contains(Att.SMT_LEMMA())) {
@@ -37,7 +30,7 @@ public class CheckSmtLemmas {
                             "Invalid term in smt-lemma detected. All terms in smt-lemma rules require smt-hook or smtlib labels", k));
                 }
 
-                k.klist().items().stream().forEach(ki -> super.apply(ki));
+                k.klist().items().forEach(super::apply);
             }
         }.accept(rule.body());
     }

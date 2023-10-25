@@ -18,15 +18,7 @@ import static org.kframework.Collections.*;
 /**
  * Checks that stream cells have contents of List sort.
  */
-public class CheckStreams {
-    private final Set<KEMException> errors;
-
-    private final Module module;
-
-    public CheckStreams(Set<KEMException> errors, Module module) {
-        this.errors = errors;
-        this.module = module;
-    }
+public record CheckStreams(Set<KEMException> errors, Module module) {
 
     public void check(Sentence s) {
         if (s instanceof Production) {

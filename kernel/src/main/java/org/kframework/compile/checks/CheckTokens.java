@@ -11,22 +11,14 @@ import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.Set;
 
-public class CheckTokens {
-    private final Set<KEMException> errors;
-    private final Module m;
+public record CheckTokens(Set<KEMException> errors, Module m) {
     private static final ImmutableSet<String> ignoredSortNames = ImmutableSet.of("KBott", "KLabel");
     private static final ImmutableSet<Att.Key> allowedAtts = ImmutableSet.of(Att.FUNCTION(), Att.TOKEN(), Att.BRACKET());
 
-    public CheckTokens(Set<KEMException> errors, Module m) {
-        this.errors = errors;
-        this.m = m;
-    }
-
     public void check(Sentence sentence) {
-        if (sentence instanceof Production) {
-            check((Production) sentence);
+        if (sentence instanceof Production p) {
+            check(p);
         }
-        return;
     }
 
     // This check ensures that sorts containing token declarations only contain syntax declarations that are also tokens (or macros).

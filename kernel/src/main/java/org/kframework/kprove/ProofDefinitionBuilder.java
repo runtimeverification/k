@@ -6,8 +6,8 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.attributes.Att;
 import org.kframework.compile.Backend;
-import org.kframework.definition.Module;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.utils.Stopwatch;
@@ -25,24 +25,13 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 
-public class ProofDefinitionBuilder {
-
-    private final CompiledDefinition compiledDefinition;
-    private final Backend backend;
-    private final Kompile kompile;
-    private final KProveOptions proveOptions;
-    private final FileUtil files;
-    private final Stopwatch sw;
+public record ProofDefinitionBuilder(CompiledDefinition compiledDefinition,
+                                     Backend backend, Kompile kompile,
+                                     KProveOptions proveOptions,
+                                     FileUtil files, Stopwatch sw) {
 
     @Inject
-    public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
-                                  KProveOptions proveOptions, FileUtil files, Stopwatch sw) {
-        this.compiledDefinition = compiledDefinition;
-        this.backend = backend;
-        this.kompile = kompile;
-        this.proveOptions = proveOptions;
-        this.files = files;
-        this.sw = sw;
+    public ProofDefinitionBuilder {
     }
 
     /**

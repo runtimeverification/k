@@ -175,7 +175,7 @@ public class AddParentCells {
         } else if (k instanceof KVariable) {
             if (k.att().contains(Sort.class)) {
                 Sort sort = k.att().get(Sort.class);
-                int level = cfg.cfg.getLevel(sort);
+                int level = cfg.cfg().getLevel(sort);
                 if (level >= 0) {
                     return Optional.of(level);
                 }
