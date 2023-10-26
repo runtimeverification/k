@@ -362,7 +362,8 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, debian-bookworm, set-release-id, arch]
+    # Add arch back to this list if we reinstate it as a release platform
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, debian-bookworm, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
