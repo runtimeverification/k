@@ -208,7 +208,7 @@ First, run the following command from the K source root:
 cd haskell-backend/src/main/native/haskell-backend && stack setup && cd -
 ```
 
-Then, snsure that Homebrew-installed versions of `llvm-config`, `flex` and
+Then, ensure that Homebrew-installed versions of `llvm-config`, `flex` and
 `bison` are on your `PATH` ahead of any macOS-supplied versions.
 [`direnv`](https://direnv.net/) offers a convenient way to automate this. To do
 so:
