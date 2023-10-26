@@ -371,15 +371,14 @@ public class KoreBackend extends AbstractBackend {
     return s;
   }
 
-  // If a user guarantees that their semantics will never _dynamically_ try to rewrite an anywhere
-  // rule on the
-  // Haskell backend (with the --allow-anywhere-haskell flag), but cannot prove this statically, we
-  // allow them to
-  // strip out all those rules before sending the definition to the backend. If this transformation
-  // is applied
-  // unsoundly (i.e. an anywhere rule would have been attempted if it had not been stripped), the
-  // behaviour of the
-  // Haskell backend on that program is essentially undefined.
+  /**
+   * If a user guarantees that their semantics will never _dynamically_ try to rewrite an anywhere
+   * rule on the Haskell backend (with the --allow-anywhere-haskell flag), but cannot prove this
+   * statically, we allow them to strip out all those rules before sending the definition to the
+   * backend. If this transformation is applied unsoundly (i.e. an anywhere rule would have been
+   * attempted if it had not been stripped), the behaviour of the Haskell backend on that program is
+   * essentially undefined.
+   */
   private Module removeAnywhereRules(Module m) {
     java.util.Set<Sentence> sentences = mutable(m.localSentences());
 
