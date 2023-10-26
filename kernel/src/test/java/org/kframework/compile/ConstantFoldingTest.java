@@ -1,18 +1,17 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import static org.junit.Assert.*;
+import static org.kframework.kore.KORE.*;
+
+import java.math.BigInteger;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.mpfr.BigFloat;
 import org.kframework.mpfr.BinaryMathContext;
 import org.kframework.utils.errorsystem.KEMException;
-
-import java.math.BigInteger;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import static org.junit.Assert.*;
-import static org.kframework.kore.KORE.*;
 
 public class ConstantFoldingTest {
 
@@ -30,7 +29,8 @@ public class ConstantFoldingTest {
     assertEquals(false, cf.BOOL_not(true));
   }
 
-  public void assertBinBoolOp(boolean a, boolean b, boolean c, boolean d, BiFunction<Boolean, Boolean, Boolean> f) {
+  public void assertBinBoolOp(
+      boolean a, boolean b, boolean c, boolean d, BiFunction<Boolean, Boolean, Boolean> f) {
     assertEquals(a, f.apply(false, false));
     assertEquals(b, f.apply(false, true));
     assertEquals(c, f.apply(true, false));
@@ -101,12 +101,12 @@ public class ConstantFoldingTest {
     assertEquals("\udbff\udfff", cf.STRING_chr(BigInteger.valueOf(0x10ffff)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testChrError1() {
     cf.STRING_chr(BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testChrError2() {
     cf.STRING_chr(BigInteger.valueOf(0x110000));
   }
@@ -120,12 +120,12 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(0x10ffff), cf.STRING_ord("\udbff\udfff"));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testOrdError1() {
     cf.STRING_ord("");
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testOrdError2() {
     cf.STRING_ord("foo");
   }
@@ -143,22 +143,22 @@ public class ConstantFoldingTest {
     assertEquals("o", cf.STRING_substr("foo", BigInteger.valueOf(1), BigInteger.valueOf(2)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testSubstrError1() {
     cf.STRING_substr("foo", BigInteger.valueOf(1), BigInteger.valueOf(4));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testSubstrError2() {
     cf.STRING_substr("foo", BigInteger.valueOf(4), BigInteger.valueOf(5));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testSubstrError3() {
     cf.STRING_substr("foo", BigInteger.valueOf(3), BigInteger.valueOf(1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testSubstError4() {
     cf.STRING_substr("foo", BigInteger.valueOf(-1), BigInteger.valueOf(1));
   }
@@ -174,12 +174,12 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(-1), cf.STRING_find("foo", "oo", BigInteger.valueOf(2)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testFindError1() {
     cf.STRING_find("foo", "f", BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testFindError2() {
     cf.STRING_find("foo", "f", BigInteger.valueOf(4));
   }
@@ -195,77 +195,100 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(1), cf.STRING_rfind("foo", "oo", BigInteger.valueOf(2)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testRFindError1() {
     cf.STRING_rfind("foo", "f", BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testRFindError2() {
     cf.STRING_rfind("foo", "f", BigInteger.valueOf(4));
   }
 
   @Test
   public void testFindChar() {
-    assertEquals(BigInteger.valueOf(0), cf.STRING_findChar("sandwich", "sw", BigInteger.valueOf(0)));
-    assertEquals(BigInteger.valueOf(4), cf.STRING_findChar("sandwich", "sw", BigInteger.valueOf(1)));
-    assertEquals(BigInteger.valueOf(-1), cf.STRING_findChar("sandwich", "s", BigInteger.valueOf(1)));
+    assertEquals(
+        BigInteger.valueOf(0), cf.STRING_findChar("sandwich", "sw", BigInteger.valueOf(0)));
+    assertEquals(
+        BigInteger.valueOf(4), cf.STRING_findChar("sandwich", "sw", BigInteger.valueOf(1)));
+    assertEquals(
+        BigInteger.valueOf(-1), cf.STRING_findChar("sandwich", "s", BigInteger.valueOf(1)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testFindCharError1() {
     cf.STRING_findChar("foo", "f", BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testFindCharError2() {
     cf.STRING_findChar("foo", "f", BigInteger.valueOf(4));
   }
 
   @Test
   public void testRFindChar() {
-    assertEquals(BigInteger.valueOf(0), cf.STRING_rfindChar("sandwich", "sw", BigInteger.valueOf(0)));
-    assertEquals(BigInteger.valueOf(0), cf.STRING_rfindChar("sandwich", "sw", BigInteger.valueOf(1)));
-    assertEquals(BigInteger.valueOf(4), cf.STRING_rfindChar("sandwich", "sw", BigInteger.valueOf(7)));
-    assertEquals(BigInteger.valueOf(-1), cf.STRING_rfindChar("sandwich", "w", BigInteger.valueOf(1)));
+    assertEquals(
+        BigInteger.valueOf(0), cf.STRING_rfindChar("sandwich", "sw", BigInteger.valueOf(0)));
+    assertEquals(
+        BigInteger.valueOf(0), cf.STRING_rfindChar("sandwich", "sw", BigInteger.valueOf(1)));
+    assertEquals(
+        BigInteger.valueOf(4), cf.STRING_rfindChar("sandwich", "sw", BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(-1), cf.STRING_rfindChar("sandwich", "w", BigInteger.valueOf(1)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testRFindCharError1() {
     cf.STRING_rfindChar("foo", "f", BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testRFindCharError2() {
     cf.STRING_rfindChar("foo", "f", BigInteger.valueOf(4));
   }
 
   @Test
   public void testFloat2String() {
-    assertEquals("Infinityp53x11", cf.STRING_float2string(FloatBuiltin.of(BigFloat.positiveInfinity(53), 11)));
+    assertEquals(
+        "Infinityp53x11",
+        cf.STRING_float2string(FloatBuiltin.of(BigFloat.positiveInfinity(53), 11)));
     assertEquals("NaNp53x11", cf.STRING_float2string(FloatBuiltin.of(BigFloat.NaN(53), 11)));
     assertEquals("0e+00p53x11", cf.STRING_float2string(FloatBuiltin.of(BigFloat.zero(53), 11)));
-    assertEquals("-0e+00p53x11", cf.STRING_float2string(FloatBuiltin.of(BigFloat.negativeZero(53), 11)));
-    assertEquals("-Infinityp53x11", cf.STRING_float2string(FloatBuiltin.of(BigFloat.negativeInfinity(53), 11)));
-    assertEquals("1.0000000000000001e-01p53x11", cf.STRING_float2string(FloatBuiltin.of(new BigFloat(0.1, BinaryMathContext.BINARY64), 11)));
+    assertEquals(
+        "-0e+00p53x11", cf.STRING_float2string(FloatBuiltin.of(BigFloat.negativeZero(53), 11)));
+    assertEquals(
+        "-Infinityp53x11",
+        cf.STRING_float2string(FloatBuiltin.of(BigFloat.negativeInfinity(53), 11)));
+    assertEquals(
+        "1.0000000000000001e-01p53x11",
+        cf.STRING_float2string(FloatBuiltin.of(new BigFloat(0.1, BinaryMathContext.BINARY64), 11)));
   }
 
   @Test
   public void testString2Float() {
-    assertEquals(FloatBuiltin.of(BigFloat.positiveInfinity(53), 11), cf.STRING_string2float("Infinity"));
-    assertEquals(FloatBuiltin.of(BigFloat.positiveInfinity(24), 8), cf.STRING_string2float("Infinityf"));
-    assertEquals(FloatBuiltin.of(BigFloat.positiveInfinity(10), 10), cf.STRING_string2float("Infinityp10x10"));
+    assertEquals(
+        FloatBuiltin.of(BigFloat.positiveInfinity(53), 11), cf.STRING_string2float("Infinity"));
+    assertEquals(
+        FloatBuiltin.of(BigFloat.positiveInfinity(24), 8), cf.STRING_string2float("Infinityf"));
+    assertEquals(
+        FloatBuiltin.of(BigFloat.positiveInfinity(10), 10),
+        cf.STRING_string2float("Infinityp10x10"));
     assertEquals(FloatBuiltin.of(BigFloat.NaN(53), 11), cf.STRING_string2float("NaN"));
     assertEquals(FloatBuiltin.of(BigFloat.zero(53), 11), cf.STRING_string2float("0.0"));
     assertEquals(FloatBuiltin.of(BigFloat.zero(53), 11), cf.STRING_string2float("0e+00"));
     assertEquals(FloatBuiltin.of(BigFloat.zero(53), 11), cf.STRING_string2float("0e-00"));
     assertEquals(FloatBuiltin.of(BigFloat.negativeZero(53), 11), cf.STRING_string2float("-0.0"));
-    assertEquals(FloatBuiltin.of(BigFloat.negativeInfinity(53), 11), cf.STRING_string2float("-Infinity"));
-    assertEquals(FloatBuiltin.of(new BigFloat(0.1, BinaryMathContext.BINARY64), 11), cf.STRING_string2float("0.1"));
-    assertEquals(FloatBuiltin.of(new BigFloat(0.1f, BinaryMathContext.BINARY32), 8), cf.STRING_string2float("0.1f"));
+    assertEquals(
+        FloatBuiltin.of(BigFloat.negativeInfinity(53), 11), cf.STRING_string2float("-Infinity"));
+    assertEquals(
+        FloatBuiltin.of(new BigFloat(0.1, BinaryMathContext.BINARY64), 11),
+        cf.STRING_string2float("0.1"));
+    assertEquals(
+        FloatBuiltin.of(new BigFloat(0.1f, BinaryMathContext.BINARY32), 8),
+        cf.STRING_string2float("0.1f"));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2FloatError() {
     cf.STRING_string2float("0.0.0");
   }
@@ -275,7 +298,8 @@ public class ConstantFoldingTest {
     assertEquals("0", cf.STRING_int2string(BigInteger.valueOf(0)));
     assertEquals("1", cf.STRING_int2string(BigInteger.valueOf(1)));
     assertEquals("-1", cf.STRING_int2string(BigInteger.valueOf(-1)));
-    assertEquals("100000000000000000000", cf.STRING_int2string(new BigInteger("100000000000000000000")));
+    assertEquals(
+        "100000000000000000000", cf.STRING_int2string(new BigInteger("100000000000000000000")));
   }
 
   @Test
@@ -284,10 +308,11 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(1), cf.STRING_string2int("1"));
     assertEquals(BigInteger.valueOf(1), cf.STRING_string2int("+1"));
     assertEquals(BigInteger.valueOf(-1), cf.STRING_string2int("-1"));
-    assertEquals(new BigInteger("100000000000000000000"), cf.STRING_string2int("100000000000000000000"));
+    assertEquals(
+        new BigInteger("100000000000000000000"), cf.STRING_string2int("100000000000000000000"));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2IntError() {
     cf.STRING_string2int("0.0");
   }
@@ -302,12 +327,12 @@ public class ConstantFoldingTest {
     assertEquals("10", cf.STRING_base2string(BigInteger.valueOf(36), BigInteger.valueOf(36)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testBase2StringError1() {
     cf.STRING_base2string(BigInteger.valueOf(0), BigInteger.valueOf(1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testBase2StringError2() {
     cf.STRING_base2string(BigInteger.valueOf(0), BigInteger.valueOf(37));
   }
@@ -323,27 +348,27 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(36), cf.STRING_string2base("10", BigInteger.valueOf(36)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2BaseError1() {
     cf.STRING_string2base("0", BigInteger.valueOf(1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2BaseError2() {
     cf.STRING_string2base("0", BigInteger.valueOf(37));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2BaseError3() {
     cf.STRING_string2base("8", BigInteger.valueOf(8));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2BaseError4() {
     cf.STRING_string2base("g", BigInteger.valueOf(16));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testString2BaseError5() {
     cf.STRING_string2base("0.0", BigInteger.valueOf(2));
   }
@@ -364,12 +389,12 @@ public class ConstantFoldingTest {
     assertEquals("foo", cf.STRING_replace("foo", "bar", "baz", BigInteger.valueOf(0)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testReplaceError1() {
     cf.STRING_replace("foo", "oo", "ar", BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testReplaceError2() {
     cf.STRING_replace("foo", "oo", "ar", BigInteger.valueOf(Long.MAX_VALUE));
   }
@@ -465,33 +490,42 @@ public class ConstantFoldingTest {
   public void testIntPow() {
     assertEquals(BigInteger.valueOf(1), cf.INT_pow(BigInteger.valueOf(10), BigInteger.valueOf(0)));
     assertEquals(BigInteger.valueOf(10), cf.INT_pow(BigInteger.valueOf(10), BigInteger.valueOf(1)));
-    assertEquals(BigInteger.valueOf(100), cf.INT_pow(BigInteger.valueOf(10), BigInteger.valueOf(2)));
+    assertEquals(
+        BigInteger.valueOf(100), cf.INT_pow(BigInteger.valueOf(10), BigInteger.valueOf(2)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntPowError() {
     cf.INT_pow(BigInteger.valueOf(10), BigInteger.valueOf(-1));
   }
 
   @Test
   public void testIntPowMod() {
-    assertEquals(BigInteger.valueOf(1), cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(0), BigInteger.valueOf(7)));
-    assertEquals(BigInteger.valueOf(3), cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(1), BigInteger.valueOf(7)));
-    assertEquals(BigInteger.valueOf(2), cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(2), BigInteger.valueOf(7)));
-    assertEquals(BigInteger.valueOf(5), cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(-1), BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(1),
+        cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(0), BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(3),
+        cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(1), BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(2),
+        cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(2), BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(5),
+        cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(-1), BigInteger.valueOf(7)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntPowModError1() {
     cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(1), BigInteger.valueOf(0));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntPowModError2() {
     cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(1), BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntPowModError3() {
     cf.INT_powmod(BigInteger.valueOf(10), BigInteger.valueOf(-1), BigInteger.valueOf(5));
   }
@@ -505,12 +539,15 @@ public class ConstantFoldingTest {
   public void testIntTDiv() {
     assertEquals(BigInteger.valueOf(2), cf.INT_tdiv(BigInteger.valueOf(10), BigInteger.valueOf(5)));
     assertEquals(BigInteger.valueOf(2), cf.INT_tdiv(BigInteger.valueOf(7), BigInteger.valueOf(3)));
-    assertEquals(BigInteger.valueOf(-2), cf.INT_tdiv(BigInteger.valueOf(7), BigInteger.valueOf(-3)));
-    assertEquals(BigInteger.valueOf(-2), cf.INT_tdiv(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
-    assertEquals(BigInteger.valueOf(2), cf.INT_tdiv(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
+    assertEquals(
+        BigInteger.valueOf(-2), cf.INT_tdiv(BigInteger.valueOf(7), BigInteger.valueOf(-3)));
+    assertEquals(
+        BigInteger.valueOf(-2), cf.INT_tdiv(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
+    assertEquals(
+        BigInteger.valueOf(2), cf.INT_tdiv(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntTDivError() {
     cf.INT_tdiv(BigInteger.valueOf(10), BigInteger.valueOf(0));
   }
@@ -519,12 +556,14 @@ public class ConstantFoldingTest {
   public void testIntTMod() {
     assertEquals(BigInteger.valueOf(0), cf.INT_tmod(BigInteger.valueOf(10), BigInteger.valueOf(5)));
     assertEquals(BigInteger.valueOf(1), cf.INT_tmod(BigInteger.valueOf(7), BigInteger.valueOf(3)));
-    assertEquals(BigInteger.valueOf(-1), cf.INT_tmod(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
+    assertEquals(
+        BigInteger.valueOf(-1), cf.INT_tmod(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
     assertEquals(BigInteger.valueOf(1), cf.INT_tmod(BigInteger.valueOf(7), BigInteger.valueOf(-3)));
-    assertEquals(BigInteger.valueOf(-1), cf.INT_tmod(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
+    assertEquals(
+        BigInteger.valueOf(-1), cf.INT_tmod(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntTModError() {
     cf.INT_tmod(BigInteger.valueOf(10), BigInteger.valueOf(0));
   }
@@ -533,12 +572,15 @@ public class ConstantFoldingTest {
   public void testIntEDiv() {
     assertEquals(BigInteger.valueOf(2), cf.INT_ediv(BigInteger.valueOf(10), BigInteger.valueOf(5)));
     assertEquals(BigInteger.valueOf(2), cf.INT_ediv(BigInteger.valueOf(7), BigInteger.valueOf(3)));
-    assertEquals(BigInteger.valueOf(-2), cf.INT_ediv(BigInteger.valueOf(7), BigInteger.valueOf(-3)));
-    assertEquals(BigInteger.valueOf(-3), cf.INT_ediv(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
-    assertEquals(BigInteger.valueOf(3), cf.INT_ediv(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
+    assertEquals(
+        BigInteger.valueOf(-2), cf.INT_ediv(BigInteger.valueOf(7), BigInteger.valueOf(-3)));
+    assertEquals(
+        BigInteger.valueOf(-3), cf.INT_ediv(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
+    assertEquals(
+        BigInteger.valueOf(3), cf.INT_ediv(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntEDivError() {
     cf.INT_ediv(BigInteger.valueOf(10), BigInteger.valueOf(0));
   }
@@ -549,10 +591,11 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(1), cf.INT_emod(BigInteger.valueOf(7), BigInteger.valueOf(3)));
     assertEquals(BigInteger.valueOf(2), cf.INT_emod(BigInteger.valueOf(-7), BigInteger.valueOf(3)));
     assertEquals(BigInteger.valueOf(1), cf.INT_emod(BigInteger.valueOf(7), BigInteger.valueOf(-3)));
-    assertEquals(BigInteger.valueOf(2), cf.INT_emod(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
+    assertEquals(
+        BigInteger.valueOf(2), cf.INT_emod(BigInteger.valueOf(-7), BigInteger.valueOf(-3)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntEModError() {
     cf.INT_emod(BigInteger.valueOf(10), BigInteger.valueOf(0));
   }
@@ -575,7 +618,7 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(8), cf.INT_shr(BigInteger.valueOf(8), BigInteger.valueOf(0)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testShrError() {
     cf.INT_shr(BigInteger.valueOf(8), BigInteger.valueOf(-2));
   }
@@ -586,7 +629,7 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(8), cf.INT_shl(BigInteger.valueOf(8), BigInteger.valueOf(0)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testShlError() {
     cf.INT_shl(BigInteger.valueOf(32), BigInteger.valueOf(-2));
   }
@@ -638,55 +681,99 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(3), cf.INT_log2(BigInteger.valueOf(8)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntLog2Error1() {
     cf.INT_log2(BigInteger.valueOf(0));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testIntLog2Error2() {
     cf.INT_log2(BigInteger.valueOf(-1));
   }
 
   @Test
   public void testBitRange() {
-    assertEquals(BigInteger.valueOf(127), cf.INT_bitRange(BigInteger.valueOf(127), BigInteger.valueOf(0), BigInteger.valueOf(8)));
-    assertEquals(BigInteger.valueOf(255), cf.INT_bitRange(BigInteger.valueOf(255), BigInteger.valueOf(0), BigInteger.valueOf(8)));
-    assertEquals(BigInteger.valueOf(64), cf.INT_bitRange(BigInteger.valueOf(128), BigInteger.valueOf(1), BigInteger.valueOf(7)));
-    assertEquals(BigInteger.valueOf(0), cf.INT_bitRange(BigInteger.valueOf(129), BigInteger.valueOf(1), BigInteger.valueOf(5)));
-    assertEquals(BigInteger.valueOf(0), cf.INT_bitRange(BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(0)));
-    assertEquals(BigInteger.valueOf(0), cf.INT_bitRange(new BigInteger("8040201008040201", 16), BigInteger.valueOf(256), BigInteger.valueOf(8)));
-    assertEquals(BigInteger.valueOf(12), cf.INT_bitRange(new BigInteger("-710567042938717889665411037832208781722350888143921263584927239275773573551204588944105336352942349727184887589413944684473529682801526123805453895275517072855048781056"), BigInteger.valueOf(32), BigInteger.valueOf(8)));
-    assertEquals(BigInteger.valueOf(56), cf.INT_bitRange(new BigInteger("697754608693466068295273213726275558775348389513141500672185545754018175722916164768735179047222610843044264325669307777729891642448846794142000"), BigInteger.valueOf(64), BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(127),
+        cf.INT_bitRange(BigInteger.valueOf(127), BigInteger.valueOf(0), BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(255),
+        cf.INT_bitRange(BigInteger.valueOf(255), BigInteger.valueOf(0), BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(64),
+        cf.INT_bitRange(BigInteger.valueOf(128), BigInteger.valueOf(1), BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(0),
+        cf.INT_bitRange(BigInteger.valueOf(129), BigInteger.valueOf(1), BigInteger.valueOf(5)));
+    assertEquals(
+        BigInteger.valueOf(0),
+        cf.INT_bitRange(BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(0)));
+    assertEquals(
+        BigInteger.valueOf(0),
+        cf.INT_bitRange(
+            new BigInteger("8040201008040201", 16),
+            BigInteger.valueOf(256),
+            BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(12),
+        cf.INT_bitRange(
+            new BigInteger(
+                "-710567042938717889665411037832208781722350888143921263584927239275773573551204588944105336352942349727184887589413944684473529682801526123805453895275517072855048781056"),
+            BigInteger.valueOf(32),
+            BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(56),
+        cf.INT_bitRange(
+            new BigInteger(
+                "697754608693466068295273213726275558775348389513141500672185545754018175722916164768735179047222610843044264325669307777729891642448846794142000"),
+            BigInteger.valueOf(64),
+            BigInteger.valueOf(8)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testBitRangeError1() {
     cf.INT_bitRange(BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testBitRangeError2() {
     cf.INT_bitRange(BigInteger.valueOf(128), BigInteger.valueOf(-1), BigInteger.valueOf(8));
   }
 
   @Test
   public void testSignExtendBitRange() {
-    assertEquals(BigInteger.valueOf(-1), cf.INT_signExtendBitRange(BigInteger.valueOf(255), BigInteger.valueOf(0), BigInteger.valueOf(8)));
-    assertEquals(BigInteger.valueOf(127), cf.INT_signExtendBitRange(BigInteger.valueOf(127), BigInteger.valueOf(0), BigInteger.valueOf(8)));
-    assertEquals(BigInteger.valueOf(-64), cf.INT_signExtendBitRange(BigInteger.valueOf(128), BigInteger.valueOf(1), BigInteger.valueOf(7)));
-    assertEquals(BigInteger.valueOf(0), cf.INT_signExtendBitRange(BigInteger.valueOf(129), BigInteger.valueOf(1), BigInteger.valueOf(5)));
-    assertEquals(BigInteger.valueOf(0), cf.INT_signExtendBitRange(BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(0)));
+    assertEquals(
+        BigInteger.valueOf(-1),
+        cf.INT_signExtendBitRange(
+            BigInteger.valueOf(255), BigInteger.valueOf(0), BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(127),
+        cf.INT_signExtendBitRange(
+            BigInteger.valueOf(127), BigInteger.valueOf(0), BigInteger.valueOf(8)));
+    assertEquals(
+        BigInteger.valueOf(-64),
+        cf.INT_signExtendBitRange(
+            BigInteger.valueOf(128), BigInteger.valueOf(1), BigInteger.valueOf(7)));
+    assertEquals(
+        BigInteger.valueOf(0),
+        cf.INT_signExtendBitRange(
+            BigInteger.valueOf(129), BigInteger.valueOf(1), BigInteger.valueOf(5)));
+    assertEquals(
+        BigInteger.valueOf(0),
+        cf.INT_signExtendBitRange(
+            BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(0)));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testSignExtendBitRangeError1() {
-    cf.INT_signExtendBitRange(BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(-1));
+    cf.INT_signExtendBitRange(
+        BigInteger.valueOf(128), BigInteger.valueOf(0), BigInteger.valueOf(-1));
   }
 
-  @Test(expected=KEMException.class)
+  @Test(expected = KEMException.class)
   public void testSignExtendBitRangeError2() {
-    cf.INT_signExtendBitRange(BigInteger.valueOf(128), BigInteger.valueOf(-1), BigInteger.valueOf(8));
+    cf.INT_signExtendBitRange(
+        BigInteger.valueOf(128), BigInteger.valueOf(-1), BigInteger.valueOf(8));
   }
 
   @Test
@@ -755,25 +842,49 @@ public class ConstantFoldingTest {
 
   @Test
   public void testPrecision() {
-    assertEquals(BigInteger.valueOf(2), cf.FLOAT_precision(FloatBuiltin.of(new BigFloat(1.0, new BinaryMathContext(2, 8)), 8)));
-    assertEquals(BigInteger.valueOf(24), cf.FLOAT_precision(FloatBuiltin.of(new BigFloat(1.0, BinaryMathContext.BINARY32), 8)));
+    assertEquals(
+        BigInteger.valueOf(2),
+        cf.FLOAT_precision(FloatBuiltin.of(new BigFloat(1.0, new BinaryMathContext(2, 8)), 8)));
+    assertEquals(
+        BigInteger.valueOf(24),
+        cf.FLOAT_precision(FloatBuiltin.of(new BigFloat(1.0, BinaryMathContext.BINARY32), 8)));
   }
 
   @Test
   public void testExponentBits() {
-    assertEquals(BigInteger.valueOf(8), cf.FLOAT_exponentBits(FloatBuiltin.of(new BigFloat(1.0, new BinaryMathContext(2, 8)), 8)));
-    assertEquals(BigInteger.valueOf(11), cf.FLOAT_exponentBits(FloatBuiltin.of(new BigFloat(1.0, BinaryMathContext.BINARY64), 11)));
+    assertEquals(
+        BigInteger.valueOf(8),
+        cf.FLOAT_exponentBits(FloatBuiltin.of(new BigFloat(1.0, new BinaryMathContext(2, 8)), 8)));
+    assertEquals(
+        BigInteger.valueOf(11),
+        cf.FLOAT_exponentBits(FloatBuiltin.of(new BigFloat(1.0, BinaryMathContext.BINARY64), 11)));
   }
 
   @Test
   public void testExponent() {
-    assertEquals(BigInteger.valueOf(-127), cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(0.0, BinaryMathContext.BINARY32), 8)));
-    assertEquals(BigInteger.valueOf(-127), cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(-0.0, BinaryMathContext.BINARY32), 8)));
-    assertEquals(BigInteger.valueOf(128), cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(1.0/0.0, BinaryMathContext.BINARY32), 8)));
-    assertEquals(BigInteger.valueOf(128), cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(0.0/0.0, BinaryMathContext.BINARY32), 8)));
-    assertEquals(BigInteger.valueOf(2), cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(4.0, BinaryMathContext.BINARY32), 8)));
-    assertEquals(BigInteger.valueOf(-127), cf.FLOAT_exponent(FloatBuiltin.of(BigFloat.minValue(24, BinaryMathContext.BINARY32.minExponent), 8)));
-    assertEquals(BigInteger.valueOf(-126), cf.FLOAT_exponent(FloatBuiltin.of(BigFloat.minNormal(24, BinaryMathContext.BINARY32.minExponent), 8)));
+    assertEquals(
+        BigInteger.valueOf(-127),
+        cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(0.0, BinaryMathContext.BINARY32), 8)));
+    assertEquals(
+        BigInteger.valueOf(-127),
+        cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(-0.0, BinaryMathContext.BINARY32), 8)));
+    assertEquals(
+        BigInteger.valueOf(128),
+        cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(1.0 / 0.0, BinaryMathContext.BINARY32), 8)));
+    assertEquals(
+        BigInteger.valueOf(128),
+        cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(0.0 / 0.0, BinaryMathContext.BINARY32), 8)));
+    assertEquals(
+        BigInteger.valueOf(2),
+        cf.FLOAT_exponent(FloatBuiltin.of(new BigFloat(4.0, BinaryMathContext.BINARY32), 8)));
+    assertEquals(
+        BigInteger.valueOf(-127),
+        cf.FLOAT_exponent(
+            FloatBuiltin.of(BigFloat.minValue(24, BinaryMathContext.BINARY32.minExponent), 8)));
+    assertEquals(
+        BigInteger.valueOf(-126),
+        cf.FLOAT_exponent(
+            FloatBuiltin.of(BigFloat.minNormal(24, BinaryMathContext.BINARY32.minExponent), 8)));
   }
 
   private FloatBuiltin _float(float f) {
@@ -788,21 +899,21 @@ public class ConstantFoldingTest {
   public void testSign() {
     assertEquals(false, cf.FLOAT_sign(_float(0.0f)));
     assertEquals(true, cf.FLOAT_sign(_float(-0.0f)));
-    assertEquals(false, cf.FLOAT_sign(_float(1.0f/0.0f)));
-    assertEquals(true, cf.FLOAT_sign(_float(-1.0f/0.0f)));
+    assertEquals(false, cf.FLOAT_sign(_float(1.0f / 0.0f)));
+    assertEquals(true, cf.FLOAT_sign(_float(-1.0f / 0.0f)));
     assertEquals(false, cf.FLOAT_sign(_float(1.0f)));
     assertEquals(true, cf.FLOAT_sign(_float(-1.0f)));
     assertEquals(false, cf.FLOAT_sign(_float(3.0f)));
     assertEquals(false, cf.FLOAT_sign(_float(0.5f)));
-    assertEquals(false, cf.FLOAT_sign(_float(0.0f/0.0f)));
+    assertEquals(false, cf.FLOAT_sign(_float(0.0f / 0.0f)));
   }
 
   @Test
   public void testIsNaN() {
     assertEquals(false, cf.FLOAT_isNaN(_float(0.0f)));
     assertEquals(false, cf.FLOAT_isNaN(_float(-0.0f)));
-    assertEquals(false, cf.FLOAT_isNaN(_float(1.0f/0.0f)));
-    assertEquals(true, cf.FLOAT_isNaN(_float(0.0f/0.0f)));
+    assertEquals(false, cf.FLOAT_isNaN(_float(1.0f / 0.0f)));
+    assertEquals(true, cf.FLOAT_isNaN(_float(0.0f / 0.0f)));
   }
 
   @Test
@@ -810,13 +921,16 @@ public class ConstantFoldingTest {
     testUnaryOp(cf::FLOAT_neg, a -> -a);
   }
 
-  private final double[] refs = new double[] {0.0, -0.0, 1.0/0.0, -1.0/0.0, 1.0, -1.0, 3.0, 0.5, 0.0/0.0};
+  private final double[] refs =
+      new double[] {0.0, -0.0, 1.0 / 0.0, -1.0 / 0.0, 1.0, -1.0, 3.0, 0.5, 0.0 / 0.0};
 
-  private void testUnaryOp(Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp) {
+  private void testUnaryOp(
+      Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp) {
     testUnaryOp(op, refOp, Double.MIN_VALUE);
   }
 
-  private void testUnaryOp(Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp, Double epsilon) {
+  private void testUnaryOp(
+      Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp, Double epsilon) {
     for (int i = 0; i < refs.length; i++) {
       FloatBuiltin result = op.apply(_double(refs[i]));
       double ref = refOp.apply(refs[i]);
@@ -824,12 +938,19 @@ public class ConstantFoldingTest {
     }
   }
 
-  private void testBinaryOp(String operator, BiFunction<FloatBuiltin, FloatBuiltin, FloatBuiltin> op, BiFunction<Double, Double, Double> refOp) {
+  private void testBinaryOp(
+      String operator,
+      BiFunction<FloatBuiltin, FloatBuiltin, FloatBuiltin> op,
+      BiFunction<Double, Double, Double> refOp) {
     for (int i = 0; i < refs.length; i++) {
       for (int j = 0; j < refs.length; j++) {
         FloatBuiltin result = op.apply(_double(refs[i]), _double(refs[j]));
         double ref = refOp.apply(refs[i], refs[j]);
-        assertEquals("Operator " + operator + "(" + refs[i] + "," + refs[j] + ") failed", ref, result.doubleValue(), Double.MIN_VALUE);
+        assertEquals(
+            "Operator " + operator + "(" + refs[i] + "," + refs[j] + ") failed",
+            ref,
+            result.doubleValue(),
+            Double.MIN_VALUE);
       }
     }
   }
@@ -851,27 +972,27 @@ public class ConstantFoldingTest {
 
   @Test
   public void testFloatMul() {
-    testBinaryOp("*", cf::FLOAT_mul, (a, b) -> a*b);
+    testBinaryOp("*", cf::FLOAT_mul, (a, b) -> a * b);
   }
 
   @Test
   public void testFloatDiv() {
-    testBinaryOp("/", cf::FLOAT_div, (a, b) -> a/b);
+    testBinaryOp("/", cf::FLOAT_div, (a, b) -> a / b);
   }
 
   @Test
   public void testFloatRem() {
-    testBinaryOp("%", cf::FLOAT_rem, (a, b) -> a%b);
+    testBinaryOp("%", cf::FLOAT_rem, (a, b) -> a % b);
   }
 
   @Test
   public void testFloatAdd() {
-    testBinaryOp("+", cf::FLOAT_add, (a, b) -> a+b);
+    testBinaryOp("+", cf::FLOAT_add, (a, b) -> a + b);
   }
 
   @Test
   public void testFloatSub() {
-    testBinaryOp("-", cf::FLOAT_sub, (a, b) -> a-b);
+    testBinaryOp("-", cf::FLOAT_sub, (a, b) -> a - b);
   }
 
   @Test
@@ -886,10 +1007,22 @@ public class ConstantFoldingTest {
 
   @Test
   public void testRound() {
-    assertEquals(12.0, cf.FLOAT_round(_double(10.5), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(), Double.MIN_VALUE);
-    assertEquals(8.0, cf.FLOAT_round(_double(9.5), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(), Double.MIN_VALUE);
-    assertEquals(10.5f, cf.FLOAT_round(_double(10.5), BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(), Double.MIN_VALUE);
-    assertEquals(9.5f, cf.FLOAT_round(_double(9.5), BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(), Double.MIN_VALUE);
+    assertEquals(
+        12.0,
+        cf.FLOAT_round(_double(10.5), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        8.0,
+        cf.FLOAT_round(_double(9.5), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        10.5f,
+        cf.FLOAT_round(_double(10.5), BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        9.5f,
+        cf.FLOAT_round(_double(9.5), BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(),
+        Double.MIN_VALUE);
   }
 
   @Test
@@ -977,25 +1110,40 @@ public class ConstantFoldingTest {
     return Math.max(a, b);
   }
 
-
   @Test
   public void testMaxValue() {
-    assertEquals(Float.MAX_VALUE, cf.FLOAT_maxValue(BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(), Double.MIN_VALUE);
-    assertEquals(Double.MAX_VALUE, cf.FLOAT_maxValue(BigInteger.valueOf(53), BigInteger.valueOf(11)).doubleValue(), Double.MIN_VALUE);
+    assertEquals(
+        Float.MAX_VALUE,
+        cf.FLOAT_maxValue(BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        Double.MAX_VALUE,
+        cf.FLOAT_maxValue(BigInteger.valueOf(53), BigInteger.valueOf(11)).doubleValue(),
+        Double.MIN_VALUE);
   }
 
   @Test
   public void testMinValue() {
-    assertEquals(Float.MIN_VALUE, cf.FLOAT_minValue(BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(), Double.MIN_VALUE);
-    assertEquals(Double.MIN_VALUE, cf.FLOAT_minValue(BigInteger.valueOf(53), BigInteger.valueOf(11)).doubleValue(), Double.MIN_VALUE);
+    assertEquals(
+        Float.MIN_VALUE,
+        cf.FLOAT_minValue(BigInteger.valueOf(24), BigInteger.valueOf(8)).floatValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        Double.MIN_VALUE,
+        cf.FLOAT_minValue(BigInteger.valueOf(53), BigInteger.valueOf(11)).doubleValue(),
+        Double.MIN_VALUE);
   }
 
-  private void testComparisonOp(String operator, BiFunction<FloatBuiltin, FloatBuiltin, Boolean> op, BiFunction<Double, Double, Boolean> refOp) {
+  private void testComparisonOp(
+      String operator,
+      BiFunction<FloatBuiltin, FloatBuiltin, Boolean> op,
+      BiFunction<Double, Double, Boolean> refOp) {
     for (int i = 0; i < refs.length; i++) {
       for (int j = 0; j < refs.length; j++) {
         boolean result = op.apply(_double(refs[i]), _double(refs[j]));
         boolean ref = refOp.apply(refs[i], refs[j]);
-        assertEquals("Operator " + operator + "(" + refs[i] + "," + refs[j] + ") failed", ref, result);
+        assertEquals(
+            "Operator " + operator + "(" + refs[i] + "," + refs[j] + ") failed", ref, result);
       }
     }
   }
@@ -1032,10 +1180,26 @@ public class ConstantFoldingTest {
 
   @Test
   public void testInt2Float() {
-    assertEquals(8.0, cf.FLOAT_int2float(BigInteger.valueOf(9), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(), Double.MIN_VALUE);
-    assertEquals(12.0, cf.FLOAT_int2float(BigInteger.valueOf(11), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(), Double.MIN_VALUE);
-    assertEquals(8.0, cf.FLOAT_int2float(BigInteger.valueOf(10), BigInteger.valueOf(2), BigInteger.valueOf(8)).doubleValue(), Double.MIN_VALUE);
-    assertEquals(10.0, cf.FLOAT_int2float(BigInteger.valueOf(10), BigInteger.valueOf(24), BigInteger.valueOf(8)).doubleValue(), Double.MIN_VALUE);
+    assertEquals(
+        8.0,
+        cf.FLOAT_int2float(BigInteger.valueOf(9), BigInteger.valueOf(2), BigInteger.valueOf(8))
+            .doubleValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        12.0,
+        cf.FLOAT_int2float(BigInteger.valueOf(11), BigInteger.valueOf(2), BigInteger.valueOf(8))
+            .doubleValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        8.0,
+        cf.FLOAT_int2float(BigInteger.valueOf(10), BigInteger.valueOf(2), BigInteger.valueOf(8))
+            .doubleValue(),
+        Double.MIN_VALUE);
+    assertEquals(
+        10.0,
+        cf.FLOAT_int2float(BigInteger.valueOf(10), BigInteger.valueOf(24), BigInteger.valueOf(8))
+            .doubleValue(),
+        Double.MIN_VALUE);
   }
 
   @Test
