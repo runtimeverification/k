@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  *  If a SemanticSentence (Rule or Context) has a body that is not wrapped in any cell,
  *  wrap it in a {@code <k>} cell
  */
-public class AddImplicitComputationCell {
+public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelInfo) {
 
     public static Definition transformDefinition(Definition input) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
@@ -33,14 +33,6 @@ public class AddImplicitComputationCell {
         return ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration").apply(mod);
-    }
-
-    private final ConfigurationInfo cfg;
-    private final LabelInfo labelInfo;
-
-    public AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelInfo) {
-        this.cfg = cfg;
-        this.labelInfo = labelInfo;
     }
 
     public Sentence apply(Module m, Sentence s) {

@@ -12,12 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RemoveOverloads {
-    private final POSet<Production> overloads;
-
-    public RemoveOverloads(POSet<Production> overloads) {
-        this.overloads = overloads;
-    }
+public record RemoveOverloads(POSet<Production> overloads) {
 
     public Term apply(Ambiguity a) {
         Set<Production> productions = new HashSet<>();
@@ -29,7 +24,7 @@ public class RemoveOverloads {
             }
         }
         Set<Production> candidates = overloads.minimal(productions);
-        Ambiguity result = Ambiguity.apply(a.items().stream().filter(t -> candidates.contains(((ProductionReference)t).production())).collect(Collectors.toSet()));
+        Ambiguity result = Ambiguity.apply(a.items().stream().filter(t -> candidates.contains(((ProductionReference) t).production())).collect(Collectors.toSet()));
         if (result.items().size() == 1) {
             return result.items().iterator().next();
         }

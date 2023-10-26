@@ -37,16 +37,8 @@ import static org.kframework.kore.KORE.*;
 /**
  * Created by daejunpark on 9/6/15.
  */
-public class ResolveIOStreams {
-
-    private final Definition definition;
-
-    private final KExceptionManager kem;
-
-    public ResolveIOStreams(Definition definition, KExceptionManager kem) {
-        this.definition = definition;
-        this.kem = kem;
-    }
+public record ResolveIOStreams(Definition definition,
+                               KExceptionManager kem) {
 
     /**
      * Update modules that declare stream cells in configuration,
@@ -83,7 +75,7 @@ public class ResolveIOStreams {
                     sentences.addAll(getStreamModuleSentences(p));
                 }
             }
-            return Module(m.name(), (Set<Import>)m.imports().
+            return Module(m.name(), (Set<Import>) m.imports().
                             $bar(Set(Import(definition.getModule("K-IO").get(), true))).
                             $bar(Set(Import(definition.getModule("K-REFLECTION").get(), true))),
                     immutable(sentences), m.att());
@@ -164,8 +156,7 @@ public class ResolveIOStreams {
 
         java.util.List<Sentence> initRules =
                 stream(getStreamModule(streamName).localSentences())
-                        .filter(s -> isInitRule(initLabel, cellLabel, s))
-                        .collect(Collectors.toList());
+                        .filter(s -> isInitRule(initLabel, cellLabel, s)).toList();
         assert initRules.size() == 1;
         Sentence initRule = initRules.get(0);
 
@@ -388,8 +379,7 @@ public class ResolveIOStreams {
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>
 
         java.util.List<Sentence> unblockRules = stream(getStreamModule(streamName).localSentences())
-                .filter(s -> s instanceof Rule && s.att().getOptional(Att.LABEL()).map(lbl -> lbl.equals("STDIN-STREAM.stdinUnblock")).orElse(false))
-                .collect(Collectors.toList());
+                .filter(s -> s instanceof Rule && s.att().getOptional(Att.LABEL()).map(lbl -> lbl.equals("STDIN-STREAM.stdinUnblock")).orElse(false)).toList();
         assert unblockRules.size() == 1;
         Rule unblockRule = (Rule) unblockRules.get(0);
 

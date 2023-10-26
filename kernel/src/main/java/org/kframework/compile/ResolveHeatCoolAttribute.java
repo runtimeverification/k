@@ -2,7 +2,6 @@
 package org.kframework.compile;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Att.Key;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -20,13 +19,7 @@ import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
-public class ResolveHeatCoolAttribute {
-
-    private final Set<String> unrestrictedRules;
-
-    public ResolveHeatCoolAttribute(Set<String> unrestrictedRules) {
-        this.unrestrictedRules = unrestrictedRules;
-    }
+public record ResolveHeatCoolAttribute(Set<String> unrestrictedRules) {
 
     private Rule resolve(Module m, Rule rule) {
         return Rule(
@@ -70,10 +63,10 @@ public class ResolveHeatCoolAttribute {
         if (!s.att().contains(Att.HEAT()) && !s.att().contains(Att.COOL())) {
             return s;
         }
-        if (s instanceof Rule) {
-            return resolve(m, (Rule) s);
-        } else if (s instanceof Context) {
-            return resolve(m, (Context) s);
+        if (s instanceof Rule r) {
+            return resolve(m, r);
+        } else if (s instanceof Context c) {
+            return resolve(m, c);
         } else {
             return s;
         }

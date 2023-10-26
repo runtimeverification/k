@@ -23,15 +23,7 @@ import static org.kframework.Collections.immutable;
 import static org.kframework.Collections.stream;
 import static org.kframework.definition.Constructors.Module;
 
-public class ResolveComm {
-
-
-    private final KExceptionManager kem;
-
-
-    public ResolveComm(KExceptionManager kem) {
-        this.kem = kem;
-    }
+public record ResolveComm(KExceptionManager kem) {
 
 
     public Module resolve(Module m) {
