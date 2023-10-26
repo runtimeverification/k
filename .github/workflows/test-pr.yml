@@ -248,7 +248,7 @@ jobs:
         run: |
           cachix --version
           export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
-          export PATH="$(nix build github:runtimeverification/kup/sam/robust-publish --no-link --json | $JQ -r '.[].outputs | to_entries[].value')/bin:$PATH"
+          export PATH="$(nix build github:runtimeverification/kup/sam/robust-publish --refresh --no-link --json | $JQ -r '.[].outputs | to_entries[].value')/bin:$PATH"
           kup publish k-framework-binary .#k --keep-days 180
           kup publish k-framework-binary .#k.openssl --keep-days 180
           kup publish k-framework-binary .#k.procps --keep-days 180
