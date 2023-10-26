@@ -398,8 +398,8 @@ public class GenerateSentencesFromConfigDecl {
                     fragmentItems.add(NonTerminal(childOptSort));
 
                     sentences.add(Production(Seq(), childOptSort, List(NonTerminal(childSort))));
-                    if (!m.definedKLabels().contains(KLabel("no"+ childSort))) {
-                        sentences.add(Production(KLabel("no"+ childSort), childOptSort, List(Terminal("no"+ childSort)),
+                    if (!m.definedKLabels().contains(KLabel("no" + childSort))) {
+                        sentences.add(Production(KLabel("no" + childSort), childOptSort, List(Terminal("no" + childSort)),
                                 Att().add(Att.CELL_OPT_ABSENT(),Sort.class,childSort)));
                     }
                 }
