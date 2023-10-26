@@ -309,15 +309,6 @@ and commit the updated `nix/mavenix.lock` file.
 You should run K from the k-distribution project, because it is the only project to have the complete
 classpath and therefore all backends.
 
-## Eclipse
-_N.B. the Eclipse internal compiler may generate false compilation errors (there are bugs in its support of Scala mixed compilation). We recommend using IntelliJ IDEA if at all possible._
-
-To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
-command line, and then go into each of the `kore` and `tiny` directories and run `sbt eclipse`.
-Then start eclipse and go to File->Import->General->Existing projects into workspace, and select
-the directory of the installation. You should only add the leaves to the workspace, because
-eclipse does not support hierarchical projects.
-
 ## IntelliJ IDEA
 
 IntelliJ IDEA comes with built-in maven integration. For more information, refer to
@@ -329,9 +320,6 @@ To completely test the current version of the K framework, run `mvn verify`.
 This normally takes roughly 30 minutes on a fast machine. If you are interested only
 in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
-
-# Changing the KORE Data Structures
-If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/runtimeverification/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
 # Building the Final Release Directory/Archives
 Call `mvn install` in the base directory. This will attach an artifact to the local
