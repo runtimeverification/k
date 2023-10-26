@@ -243,6 +243,8 @@ jobs:
       - name: Publish K to k-framework-binary cache
         env:
           CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
+          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
+          GC_DONT_GC: '1'
         run: |
           cachix --version
           export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
