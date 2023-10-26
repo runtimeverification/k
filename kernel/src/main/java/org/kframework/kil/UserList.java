@@ -63,9 +63,7 @@ public class UserList extends ProductionItem {
 
         if (!sort.equals(srt.getSort()))
             return false;
-        if (!separator.equals(srt.getSeparator()))
-            return false;
-        return true;
+        return separator.equals(srt.getSeparator());
     }
 
     @Override

@@ -69,7 +69,7 @@ public class GenerateSortProjections {
         }
         Production prod = Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add(Att.FUNCTION()).add(Att.PROJECTION()));
         if (cover) {
-            KLabel sideEffectLbl = KLabel("sideEffect:" + sort.toString());
+            KLabel sideEffectLbl = KLabel("sideEffect:" + sort);
             Production sideEffect = Production(sideEffectLbl, sort, Seq(Terminal(sideEffectLbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(","), NonTerminal(sort), Terminal(")")), Att().add(Att.FUNCTION()));
             Rule sideEffectR = Rule(KRewrite(KApply(sideEffectLbl, KVariable("K2", Att.empty().add(Sort.class, Sorts.K())), var), var), BooleanUtils.TRUE, BooleanUtils.TRUE);
             return stream(Set(prod, r, sideEffect, sideEffectR));

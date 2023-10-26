@@ -12,8 +12,8 @@ import java.util.List;
  * Created by dwightguth on 6/17/15.
  */
 public class AttCompare {
-    private K k;
-    private List<Att.Key> attNames;
+    private final K k;
+    private final List<Att.Key> attNames;
 
     public AttCompare(K k, Att.Key... attNames) {
         this.k = k;

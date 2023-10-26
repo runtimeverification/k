@@ -105,9 +105,7 @@ public record AddBrackets(Module m) {
         if (innerFixity.contains(Fixity.BARE_LEFT) && leftCapture != null) {
             inversePriority = isPriorityWrong(inner, leftCapture, 0);
             EnumSet<Fixity> leftCaptureFixity = getFixity(leftCapture);
-            if (!inversePriority && leftCaptureFixity.contains(Fixity.BARE_RIGHT)) {
-                return true;
-            }
+            return !inversePriority && leftCaptureFixity.contains(Fixity.BARE_RIGHT);
         }
         return false;
     }
@@ -127,10 +125,7 @@ public record AddBrackets(Module m) {
         if (m.leftAssoc().contains(new Tuple2<>(parentLabel, localLabel)) && position == outer.production().items().size() - 1) {
             return true;
         }
-        if (m.rightAssoc().contains(new Tuple2<>(parentLabel, localLabel)) && position == 0) {
-            return true;
-        }
-        return false;
+        return m.rightAssoc().contains(new Tuple2<>(parentLabel, localLabel)) && position == 0;
     }
 
     private enum Fixity {

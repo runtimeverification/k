@@ -104,11 +104,7 @@ public class TypeInferencer implements AutoCloseable {
         int major = Integer.valueOf(parts[0]);
         int minor = Integer.valueOf(parts[1]);
         int patch = Integer.valueOf(parts[2].split(" ")[0]);
-        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9)) {
-          destroyOnReset = true;
-        } else {
-          destroyOnReset = false;
-        }
+      destroyOnReset = major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9);
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e);
     }
@@ -491,7 +487,7 @@ public class TypeInferencer implements AutoCloseable {
     private int ambId = 0;
 
     // cache for sharing ambiguity nodes
-    private Map<Ambiguity, Map<String, Integer>> ambCache = new IdentityHashMap<>();
+    private final Map<Ambiguity, Map<String, Integer>> ambCache = new IdentityHashMap<>();
 
     /**
      *

@@ -11,7 +11,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
  */
 public class KWorkspaceService implements WorkspaceService {
 
-    private KLanguageServer languageServer;
+    private final KLanguageServer languageServer;
     LSClientLogger clientLogger;
 
     public KWorkspaceService(KLanguageServer languageServer) {

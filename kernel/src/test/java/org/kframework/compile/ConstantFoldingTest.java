@@ -810,7 +810,7 @@ public class ConstantFoldingTest {
     testUnaryOp(cf::FLOAT_neg, a -> -a);
   }
 
-  private double[] refs = new double[] {0.0, -0.0, 1.0/0.0, -1.0/0.0, 1.0, -1.0, 3.0, 0.5, 0.0/0.0};
+  private final double[] refs = new double[] {0.0, -0.0, 1.0/0.0, -1.0/0.0, 1.0, -1.0, 3.0, 0.5, 0.0/0.0};
 
   private void testUnaryOp(Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp) {
     testUnaryOp(op, refOp, Double.MIN_VALUE);

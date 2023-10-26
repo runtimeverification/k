@@ -97,7 +97,7 @@ public class FileUtil {
         DateFormat df = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-SSS-");
         Date today = Calendar.getInstance().getTime();
         String reportDate = df.format(today);
-        return dirName + reportDate + UUID.randomUUID().toString();
+        return dirName + reportDate + UUID.randomUUID();
     }
 
     /**

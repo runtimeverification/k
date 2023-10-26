@@ -11,7 +11,7 @@ import java.util.Optional;
 public class NonTerminal extends ProductionItem {
 
     private Sort sort;
-    private Optional<String> name;
+    private final Optional<String> name;
 
     public NonTerminal(Sort sort, Optional<String> name) {
         super();
@@ -55,9 +55,7 @@ public class NonTerminal extends ProductionItem {
         if (!(obj instanceof NonTerminal nt))
             return false;
 
-        if (!sort.equals(nt.sort))
-            return false;
-        return true;
+        return sort.equals(nt.sort);
     }
 
     @Override

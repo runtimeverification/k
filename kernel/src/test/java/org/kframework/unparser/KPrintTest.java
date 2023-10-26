@@ -9,6 +9,7 @@ import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +28,7 @@ public class KPrintTest {
                                                   };
 
     private String bytes2String(byte[] input) {
-        try {
-            return new String(input, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError("UTF-8 encoding not supported");
-        }
+        return new String(input, StandardCharsets.UTF_8);
     }
 
     private String asKast(K term) {

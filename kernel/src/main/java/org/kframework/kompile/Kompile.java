@@ -61,6 +61,7 @@ import scala.collection.Set$;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,14 +171,10 @@ public class Kompile {
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
         if (kompileOptions.emitJson) {
-            try {
-                Stopwatch sw = new Stopwatch(globalOptions);
-                files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef),          "UTF-8"));
-                files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), "UTF-8"));
-                sw.printIntermediate("  Emit parsed & compiled JSON");
-            } catch (UnsupportedEncodingException e) {
-                throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
-            }
+            Stopwatch sw = new Stopwatch(globalOptions);
+            files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef), StandardCharsets.UTF_8));
+            files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), StandardCharsets.UTF_8));
+            sw.printIntermediate("  Emit parsed & compiled JSON");
         }
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
@@ -252,7 +249,7 @@ public class Kompile {
         Map<String, String> environment = new HashMap<>();
         File compiledJson;
         try {
-            String inputDefinition = new String(ToJson.apply(defn), "UTF-8");
+            String inputDefinition = new String(ToJson.apply(defn), StandardCharsets.UTF_8);
             compiledJson = files.resolveTemp("post-process-compiled.json");
             FileUtils.writeStringToFile(compiledJson, inputDefinition);
         } catch (UnsupportedEncodingException e) {

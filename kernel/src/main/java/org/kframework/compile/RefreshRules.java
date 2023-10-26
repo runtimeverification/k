@@ -28,7 +28,7 @@ public class RefreshRules {
 
     private final Set<String> avoidVars;
     private int counter = 0;
-    private Map<KVariable, String> vars = new HashMap<>();
+    private final Map<KVariable, String> vars = new HashMap<>();
 
     public RefreshRules(Set<String> avoidVars) {
         this.avoidVars = avoidVars;

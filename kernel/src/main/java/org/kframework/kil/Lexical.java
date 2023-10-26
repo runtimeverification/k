@@ -6,7 +6,7 @@ import org.kframework.utils.StringUtil;
 /** A terminal in a {@link Production}. */
 public class Lexical extends ProductionItem {
 
-    private String lexicalRule;
+    private final String lexicalRule;
     private String follow;
 
     public Lexical(String terminal, String follow) {
@@ -30,9 +30,7 @@ public class Lexical extends ProductionItem {
         if (!(obj instanceof Lexical trm))
             return false;
 
-        if (!trm.lexicalRule.equals(this.lexicalRule))
-            return false;
-        return true;
+        return trm.lexicalRule.equals(this.lexicalRule);
     }
 
     @Override

@@ -44,6 +44,7 @@ import javax.json.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -93,11 +94,7 @@ public class JsonParser {
 /////////////////////////////
 
     public static Definition parseDefinition(byte[] data) {
-        try {
-            return parseDefinition(new String(data, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError("UTF-8 encoding not supported");
-        }
+        return parseDefinition(new String(data, StandardCharsets.UTF_8));
     }
 
     public static Definition parseDefinition(String data) {
@@ -347,11 +344,7 @@ public class JsonParser {
 ////////////////////
 
     public static K parse(byte[] data) {
-        try {
-            return parse(new String(data, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError("UTF-8 encoding not supported");
-        }
+        return parse(new String(data, StandardCharsets.UTF_8));
     }
 
     public static K parse(String data) {

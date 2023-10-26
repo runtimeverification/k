@@ -59,7 +59,7 @@ public class ToLatex {
     public static String latexedKLabel(String orig) {
         StringBuilder buffer = new StringBuilder();
         StringUtil.encodeStringToAlphanumeric(buffer, orig, asciiReadableEncodingLatex, identChar, "z");
-        return "klabel" + buffer.toString();
+        return "klabel" + buffer;
     }
 
     private static void writeString(DataOutputStream out, String str) throws IOException {

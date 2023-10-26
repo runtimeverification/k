@@ -12,7 +12,7 @@ import java.util.Formatter;
  */
 @RequestScoped
 public class Stopwatch {
-    private long start;
+    private final long start;
     private long lastIntermediate;
     Formatter f = new Formatter(System.out);
     private final GlobalOptions options;

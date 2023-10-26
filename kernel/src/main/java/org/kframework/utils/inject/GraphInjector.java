@@ -4,6 +4,7 @@ package org.kframework.utils.inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import com.google.inject.Guice;
@@ -22,7 +23,7 @@ public class GraphInjector {
     }
 
     private static void graph(String filename, Injector demoInjector) throws IOException {
-        PrintWriter out = new PrintWriter(new File(filename), "UTF-8");
+        PrintWriter out = new PrintWriter(new File(filename), StandardCharsets.UTF_8);
 
         Injector injector = Guice.createInjector(new GraphvizModule());
         GraphvizGrapher grapher = injector.getInstance(GraphvizGrapher.class);

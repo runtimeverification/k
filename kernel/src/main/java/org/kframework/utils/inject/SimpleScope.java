@@ -65,7 +65,7 @@ public class SimpleScope implements Scope {
     public void enter() {
         checkState(values.get() == null,
                 "A scoping block is already in progress");
-        values.set(Maps.<Key<?>, Object> newHashMap());
+        values.set(Maps.newHashMap());
     }
 
     public void exit() {

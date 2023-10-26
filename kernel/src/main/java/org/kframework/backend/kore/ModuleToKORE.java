@@ -953,7 +953,7 @@ public class ModuleToKORE {
         boolean constructorBased = constructorChecks.isConstructorBased(left);
         RuleInfo ruleInfo = getRuleInfo(rule, heatCoolEq, topCellSortStr);
         sb.append("// ");
-        sb.append(rule.toString());
+        sb.append(rule);
         sb.append("\n");
         if (ruleInfo.isCeil && options.disableCeilSimplificationRules) {
           return;
@@ -1561,11 +1561,7 @@ public class ModuleToKORE {
                 colors.append(conn).append(att.get(Att.COLOR()));
                 conn = ",";
               }
-              if (format.charAt(i) == '%') {
-                escape = true;
-              } else {
-                escape = false;
-              }
+                escape = format.charAt(i) == '%';
             }
             att = att.add(Att.COLORS(), colors.toString());
           }
@@ -1608,10 +1604,7 @@ public class ModuleToKORE {
     }
 
     private boolean isFunction(Production prod) {
-        if (!prod.att().contains(Att.FUNCTION())) {
-            return false;
-        }
-        return true;
+        return prod.att().contains(Att.FUNCTION());
     }
 
     // Assume that there is no quantifiers

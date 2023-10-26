@@ -40,7 +40,7 @@ public record CheckSortTopUniqueness(Set<KEMException> errors, Module module) {
         if (!s.equals(Sorts.Cell()) &&
                 module.subsorts().lessThan(s, Sorts.KList()) &&
                 module.subsorts().lessThan(s, Sorts.Bag())) {
-            errors.add(KEMException.compilerError("Multiple top sorts found for " + s.toString() + ": KList and Bag.", p));
+            errors.add(KEMException.compilerError("Multiple top sorts found for " + s + ": KList and Bag.", p));
         }
     }
 }

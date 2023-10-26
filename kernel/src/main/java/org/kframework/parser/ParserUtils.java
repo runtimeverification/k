@@ -250,7 +250,7 @@ public class ParserUtils {
         }
 
         if (preprocess) {
-          System.out.println(def.toString());
+          System.out.println(def);
         }
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc);
