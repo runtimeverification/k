@@ -240,6 +240,7 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
         run: |
+          cachix --version
           export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
           export PATH="$(nix build github:runtimeverification/kup --no-link --json | $JQ -r '.[].outputs | to_entries[].value')/bin:$PATH"
           kup publish k-framework-binary .#k --keep-days 180
