@@ -302,54 +302,6 @@ nix run .#update-maven
 
 and commit the updated `nix/mavenix.lock` file.
 
-## Building with Nix (not recommended, use Nix flakes)
-
-To build the K Framework itself, run:
-
-```bash
-nix-build -A k
-```
-
-The various backends are provided as separate packages:
-
-```bash
-nix-build -A llvm-backend
-nix-build -A haskell-backend
-```
-
-To run the integration tests:
-
-```bash
-nix-build test.nix
-```
-
-You can enter a development environment for working on the K Framework frontend
-by running:
-
-```bash
-nix-shell
-```
-
-To create a development environment for a project that depends on the K
-Framework, you can add a `shell.nix` based on this template:
-
-```.nix
-# shell.nix
-let
-  kframework = import ./path/to/k {};
-  inherit (kframework) mkShell;
-in
-mkShell {
-  buildInputs = [
-    kframework.k
-    clang kframework.llvm-backend
-    kframework.haskell-backend
-  ];
-}
-```
-
-If you change any `pom.xml`, you must run `./nix/update-maven.sh`.
-
 # IDE Setup
 
 ## General
