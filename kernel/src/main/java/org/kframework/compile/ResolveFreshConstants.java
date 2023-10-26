@@ -49,10 +49,10 @@ public class ResolveFreshConstants {
     private final Definition def;
     private final FileUtil files;
     private Module m;
-    private java.util.Set<KVariable> freshVars = new HashSet<>();
-    private Map<KVariable, Integer> offsets = new HashMap<>();
+    private final java.util.Set<KVariable> freshVars = new HashSet<>();
+    private final Map<KVariable, Integer> offsets = new HashMap<>();
     private final String manualTopCell;
-    private int initialFresh;
+    private final int initialFresh;
 
     private void reset() {
         freshVars.clear();
@@ -123,7 +123,7 @@ public class ResolveFreshConstants {
         }
     }
 
-    private static KVariable FRESH = KVariable("#Fresh", Att.empty().add(Sort.class, Sorts.Int()));
+    private static final KVariable FRESH = KVariable("#Fresh", Att.empty().add(Sort.class, Sorts.Int()));
 
     private K transform(K term) {
         return new TransformK() {

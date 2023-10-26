@@ -79,8 +79,8 @@ import static org.kframework.kore.KORE.*;
 public class ConvertDataStructureToLookup {
 
 
-    private Set<KApply> state = new HashSet<>();
-    private Multiset<KVariable> vars = HashMultiset.create();
+    private final Set<KApply> state = new HashSet<>();
+    private final Multiset<KVariable> vars = HashMultiset.create();
 
     void reset() {
         state.clear();
@@ -223,7 +223,7 @@ public class ConvertDataStructureToLookup {
                     }
                 }
             }
-        };
+        }
         List<KApply> topologicalSorted = mutable(TopologicalSort.tsort(immutable(edges)).toList());
         return state.stream().sorted((k1, k2) -> (topologicalSorted.indexOf(k1) - topologicalSorted.indexOf(k2)));
     }

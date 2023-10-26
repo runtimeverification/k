@@ -28,7 +28,7 @@ public class CheckListDecl {
         m.getItems().stream().forEach(CheckListDecl::check); // i -> check(i)
     }
 
-    private static Set<Sort> BASE_SORTS = ImmutableSet.of(Sorts.K(), Sorts.KResult(), Sorts.KItem(),
+    private static final Set<Sort> BASE_SORTS = ImmutableSet.of(Sorts.K(), Sorts.KResult(), Sorts.KItem(),
             Sorts.KList(), Sorts.Bag(), Sorts.KLabel());
 
     private static boolean isBaseSort(Sort sort) {

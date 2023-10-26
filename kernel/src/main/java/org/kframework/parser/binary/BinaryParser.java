@@ -68,7 +68,7 @@ public class BinaryParser {
     private final List<String> interns = new ArrayList<>();
     private final List<K> kInterns = new ArrayList<>();
 
-    private static K[] EMPTY_KLIST = new K[0];
+    private static final K[] EMPTY_KLIST = new K[0];
 
     private BinaryParser(ByteBuffer data) {
         this.data = data;
@@ -145,8 +145,8 @@ public class BinaryParser {
         return stack.peek();
     }
 
-    private Map<String, KLabel> klabelCache = new HashMap<>();
-    private Map<String, Map<String, KToken>> ktokenCache = new HashMap<>();
+    private final Map<String, KLabel> klabelCache = new HashMap<>();
+    private final Map<String, Map<String, KToken>> ktokenCache = new HashMap<>();
 
     private KLabel readKLabel() throws IOException {
         String lbl = readString();

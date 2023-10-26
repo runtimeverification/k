@@ -103,7 +103,7 @@ public record ResolveIOStreams(Definition definition,
 
         if (!streams.contains(streamName)) {
             throw KEMException.compilerError("Make sure you give the correct stream names: " + streamName +
-                    "\nIt should be one of " + streams.toString());
+                    "\nIt should be one of " + streams);
         }
     }
 

@@ -690,7 +690,7 @@ public class StringUtil {
                     inIdent = false;
                     sb.append(escapeChar);
                 }
-                int charAt = (int) name.charAt(i);
+                int charAt = name.charAt(i);
                 if (charAt < 128 && asciiReadableEncodingTable[charAt] != null) {
                     sb.append(asciiReadableEncodingTable[charAt]);
                 } else {

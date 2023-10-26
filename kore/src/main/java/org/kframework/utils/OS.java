@@ -9,7 +9,7 @@ import java.util.List;
 public enum OS {
     OSX(true), LINUX(true), UNKNOWN(false), WINDOWS(false);
 
-    private OS(boolean isPosix) {
+    OS(boolean isPosix) {
         this.isPosix = isPosix;
     }
 

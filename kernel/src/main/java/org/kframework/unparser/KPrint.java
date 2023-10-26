@@ -315,7 +315,7 @@ public class KPrint {
 
     private K alphaRename(K input) {
         return new TransformK() {
-            Map<KVariable, KVariable> renames = new HashMap<>();
+            final Map<KVariable, KVariable> renames = new HashMap<>();
             int newCount = 0;
 
             @Override

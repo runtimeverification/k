@@ -277,7 +277,7 @@ public class GenerateSentencesFromConfigDecl {
         }.apply(leafContents), h.sentences);
     }
 
-    private static KVariable INIT = KVariable("Init", Att.empty().add(Sort.class, Sorts.Map()));
+    private static final KVariable INIT = KVariable("Init", Att.empty().add(Sort.class, Sorts.Map()));
 
     /**
      * Generates the sentences associated with a particular cell.
@@ -398,8 +398,8 @@ public class GenerateSentencesFromConfigDecl {
                     fragmentItems.add(NonTerminal(childOptSort));
 
                     sentences.add(Production(Seq(), childOptSort, List(NonTerminal(childSort))));
-                    if (!m.definedKLabels().contains(KLabel("no"+childSort.toString()))) {
-                        sentences.add(Production(KLabel("no"+childSort.toString()), childOptSort, List(Terminal("no"+childSort.toString())),
+                    if (!m.definedKLabels().contains(KLabel("no" + childSort))) {
+                        sentences.add(Production(KLabel("no" + childSort), childOptSort, List(Terminal("no" + childSort)),
                                 Att().add(Att.CELL_OPT_ABSENT(),Sort.class,childSort)));
                     }
                 }

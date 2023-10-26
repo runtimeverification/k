@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class FloatBuiltin {
 
     /* Token cache */
-    private static Map<Pair<BigFloat, Integer>, FloatBuiltin> tokenCache = new HashMap<>();
+    private static final Map<Pair<BigFloat, Integer>, FloatBuiltin> tokenCache = new HashMap<>();
 
     /**
      * Returns a {@link FloatBuiltin} representing the given {@link BigFloat} value
@@ -73,7 +73,7 @@ public class FloatBuiltin {
         this.exponent = exponent;
     }
 
-    private static Pattern precisionAndExponent = Pattern.compile("(.*)[pP](\\d+)[xX](\\d+)");
+    private static final Pattern precisionAndExponent = Pattern.compile("(.*)[pP](\\d+)[xX](\\d+)");
     public static Pair<BigFloat, Integer> parseKFloat(String s) {
         try {
             Matcher m = precisionAndExponent.matcher(s);
@@ -187,10 +187,7 @@ public class FloatBuiltin {
         if (!value.equals(other.value)) {
             return false;
         }
-        if (exponent != other.exponent) {
-            return false;
-        }
-        return true;
+        return exponent == other.exponent;
     }
 
     @Override

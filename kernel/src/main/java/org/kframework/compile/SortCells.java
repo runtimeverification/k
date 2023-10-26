@@ -219,9 +219,9 @@ public class SortCells {
         return newLabel;
     }
 
-    private Map<KVariable, VarInfo> variables = new HashMap<>();
-    private Map<KVariable, Sort> cellVariables = new HashMap<>();
-    private Set<KVariable> previousVars = new HashSet<>();
+    private final Map<KVariable, VarInfo> variables = new HashMap<>();
+    private final Map<KVariable, Sort> cellVariables = new HashMap<>();
+    private final Set<KVariable> previousVars = new HashSet<>();
 
     private void resetVars() {
         variables.clear(); cellVariables.clear(); previousVars.clear(); counter = 0;
@@ -784,7 +784,7 @@ public class SortCells {
                 }
                 @Override
                 public void apply(KVariable var) {
-                    if (!inKCell && cellFragmentVars.containsKey(var)) {
+                    if (!inKCell) {
                         cellFragmentVars.remove(var);
                     }
                 }

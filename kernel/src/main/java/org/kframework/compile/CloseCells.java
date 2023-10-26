@@ -78,7 +78,7 @@ public class CloseCells {
     }
 
     private int counter = 0;
-    private Set<KVariable> vars = Sets.newHashSet();
+    private final Set<KVariable> vars = Sets.newHashSet();
     private KRewrite rhsOf = null;
 
     void resetVars() {
@@ -173,10 +173,10 @@ public class CloseCells {
                 } else {
                     if (requiredLeft.equals(requiredRight)) {
                         throw KEMException.compilerError("Closed parent cell missing " +
-                                "required children " + requiredLeft.toString(), cell);
+                                "required children " + requiredLeft, cell);
                     } else {
                         throw KEMException.compilerError("Closed parent cell missing " +
-                                "required children " + requiredLeft.toString() + " on left hand side and " + requiredRight.toString() + " on right hand side.", cell);
+                                "required children " + requiredLeft + " on left hand side and " + requiredRight + " on right hand side.", cell);
                     }
                 }
             }
@@ -206,7 +206,7 @@ public class CloseCells {
         // Is a leaf cell
         if (contents.size() != 1) {
             throw KEMException.criticalError("Leaf cells should contain exactly 1 body term,"
-                    + " but there are " + contents.size() + " in " + cell.toString());
+                    + " but there are " + contents.size() + " in " + cell);
         }
 
         if (!openLeft && !openRight) {
@@ -214,7 +214,7 @@ public class CloseCells {
         }
         if (rhsOf != null) {
             throw KEMException.criticalError("Leaf cells on right hand side of a rewrite" +
-                    " may not be open, but " + cell.toString() + " is right of " + rhsOf.toString());
+                    " may not be open, but " + cell + " is right of " + rhsOf.toString());
         }
 
         K body = contents.get(0);
@@ -244,14 +244,14 @@ public class CloseCells {
             KLabel closeOperator = sortInfo.getCloseOperator(cellType);
             if (closeOperator == null) {
                 throw KEMException.criticalError("No operator registered for closing cells of sort "
-                        + cellType.toString() + " when closing cell " + cell.toString());
+                        + cellType + " when closing cell " + cell);
             }
             LabelInfo.AssocInfo info = labelInfo.getAssocInfo(closeOperator);
             if (!info.isAssoc() && openLeft && openRight) {
                 throw KEMException.criticalError(
-                        "Ambiguity closing a cell. Operator " + closeOperator.toString()
-                                + " for sort " + cellType.toString() + " is not associative, "
-                                + "but the cell has ellipses on both sides " + cell.toString());
+                        "Ambiguity closing a cell. Operator " + closeOperator
+                                + " for sort " + cellType + " is not associative, "
+                                + "but the cell has ellipses on both sides " + cell);
             }
             if (info.isComm() && (!openLeft || !openRight || info.isAssoc())) {
                 openLeft = false;

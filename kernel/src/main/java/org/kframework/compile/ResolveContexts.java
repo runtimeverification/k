@@ -91,8 +91,8 @@ public class ResolveContexts {
         K requiresHeat = context.requires();
         K requiresCool = BooleanUtils.TRUE;
 
-        int currentHolePosition[] = new int[] { 0 };
-        int finalHolePosition[] = new int[] { 0 };
+        int[] currentHolePosition = new int[] { 0 };
+        int[] finalHolePosition = new int[] { 0 };
         // does this context have a main cell?
         boolean hasMainCell = new FoldK<Boolean>() {
             @Override

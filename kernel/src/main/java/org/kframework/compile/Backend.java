@@ -17,13 +17,13 @@ import java.util.function.Function;
  */
 public interface Backend {
 
-    public class Holder {
+    class Holder {
         public CompiledDefinition def;
 
         public Holder(CompiledDefinition def) {
             this.def = def;
         }
-    };
+    }
 
     void accept(Holder def);
 

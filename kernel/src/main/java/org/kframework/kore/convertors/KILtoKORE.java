@@ -36,7 +36,7 @@ import static org.kframework.kore.KORE.*;
 
 public class KILtoKORE extends KILTransformation<Object> {
 
-    private org.kframework.kil.loader.Context context;
+    private final org.kframework.kil.loader.Context context;
     private final boolean syntactic;
     private String moduleName;
     private final boolean bisonLists;

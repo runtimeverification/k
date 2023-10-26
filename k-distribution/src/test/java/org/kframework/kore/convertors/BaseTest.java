@@ -54,7 +54,7 @@ public abstract class BaseTest {
     }
 
     // WARNING: only use this after checking the results manually
-    private static boolean forceFixAssertionFiles = false;
+    private static final boolean forceFixAssertionFiles = false;
 
     private void testConversion(Function<File, DefinitionWithContext> parse) throws IOException {
         File kilDefinitionFile = testResource("/convertor-tests/" + name.getMethodName() + ".k");

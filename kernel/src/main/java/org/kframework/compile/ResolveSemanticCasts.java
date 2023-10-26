@@ -28,8 +28,8 @@ import static org.kframework.kore.KORE.*;
 public class ResolveSemanticCasts {
 
     private final boolean skipSortPredicates;
-    private Set<KApply> casts = new HashSet<>();
-    private Map<KVariable, KVariable> varToTypedVar = new HashMap<>();
+    private final Set<KApply> casts = new HashSet<>();
+    private final Map<KVariable, KVariable> varToTypedVar = new HashMap<>();
 
     public ResolveSemanticCasts(boolean skipSortPredicates) {
 

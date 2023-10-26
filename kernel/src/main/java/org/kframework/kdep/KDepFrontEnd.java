@@ -104,7 +104,7 @@ public class KDepFrontEnd extends FrontEnd {
                 source,
                 currentDirectory,
                 lookupDirectories,
-                requiredFiles));;
+                requiredFiles));
         Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
         System.out.println(files.get().resolveWorkingDirectory(".").toURI().relativize(files.get().resolveKompiled("timestamp").toURI()).getPath() + " : \\");
 

@@ -76,10 +76,7 @@ public class ResolveFunctionWithConfig {
                 return k.name().startsWith("!") || k.name().equals("#Configuration");
             }
         };
-        if (hasVarNeedsConfig.apply(RewriteToTop.toRight(r.body())) || hasVarNeedsConfig.apply(r.requires()) || hasVarNeedsConfig.apply(r.ensures())) {
-            return true;
-        }
-        return false;
+        return hasVarNeedsConfig.apply(RewriteToTop.toRight(r.body())) || hasVarNeedsConfig.apply(r.requires()) || hasVarNeedsConfig.apply(r.ensures());
     }
 
     public RuleOrClaim resolve(RuleOrClaim rule, Module m) {

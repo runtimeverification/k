@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -30,14 +31,9 @@ public class JarInfo {
         String path = new File(JarInfo.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
         if (!path.endsWith(".jar") || new File(path).getParentFile().getName().equals("target"))
             path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
-        try {
-            String decodedPath = URLDecoder.decode(path, "UTF-8");
-            File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile().getParentFile();
-            return parent.getAbsolutePath();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile().getParentFile();
+        return parent.getAbsolutePath();
     }
 
     /**

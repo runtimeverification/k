@@ -25,9 +25,7 @@ public class SyntaxLexical extends ModuleItem {
         SyntaxLexical other = (SyntaxLexical) obj;
         if (!name.equals(other.name))
             return false;
-        if (!regex.equals(other.regex))
-            return false;
-        return true;
+        return regex.equals(other.regex);
     }
 
     @Override

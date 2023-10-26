@@ -20,18 +20,18 @@ public final class ColorUtil {
      * Terminal code corresponding to closest color for this one, from the list of basic 8
      * terminal codes only.
      */
-    private static Map<Color, String> ansiColorsToTerminalCodes;
+    private static final Map<Color, String> ansiColorsToTerminalCodes;
 
     /**
      * Terminal code corresponding to closest color for this one, from the list of 216 colors supported by
      * linux terminals.
      */
-    private static Map<Color, String> eightBitColorsToTerminalCodes;
+    private static final Map<Color, String> eightBitColorsToTerminalCodes;
 
     /**
      * A cache to avoid computing the closest terminal color for a given color each time it is needed.
      */
-    private static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache;
+    private static final Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache;
 
     public static Map<String, Color> colors() {
         colors = doInitColors();

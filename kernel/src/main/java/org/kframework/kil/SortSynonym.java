@@ -25,9 +25,7 @@ public class SortSynonym extends ModuleItem {
         SortSynonym other = (SortSynonym) obj;
         if (!newSort.equals(other.newSort))
             return false;
-        if (!oldSort.equals(other.oldSort))
-            return false;
-        return true;
+        return oldSort.equals(other.oldSort);
     }
 
     @Override

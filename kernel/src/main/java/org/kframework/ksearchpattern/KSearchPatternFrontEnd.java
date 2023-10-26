@@ -108,7 +108,7 @@ public class KSearchPatternFrontEnd extends FrontEnd {
             sb.append(", \\dv{SortBool{}}(\"true\"))");
           }
           sb.append(")");
-          System.out.println(sb.toString());
+          System.out.println(sb);
           return 0;
         } finally {
             scope.exit();

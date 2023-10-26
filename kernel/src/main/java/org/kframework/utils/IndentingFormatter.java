@@ -13,8 +13,8 @@ import java.util.Formatter;
 public class IndentingFormatter {
 
     public static final String ENDL = "\n";
-    private Formatter formatter;
-    private String endlReplacement;
+    private final Formatter formatter;
+    private final String endlReplacement;
 
     public IndentingFormatter(@Nonnull Formatter formatter, @Nonnull String indent) {
         this.formatter = formatter;

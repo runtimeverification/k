@@ -35,7 +35,7 @@ public class ResolveAnonVar {
     }
 
 
-    private Set<KVariable> vars = new HashSet<>();
+    private final Set<KVariable> vars = new HashSet<>();
 
     void resetVars() {
         vars.clear();
@@ -75,7 +75,7 @@ public class ResolveAnonVar {
     }
 
     public K resolveK(K k) {
-        resetVars();;
+        resetVars();
         gatherVars(k);
         return transform(k);
     }

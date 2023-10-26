@@ -15,7 +15,7 @@ import org.kframework.definition.Sentence;
 public record PropagateMacro(Module m) {
 
     public Sentence propagate(Sentence s) {
-        if (s instanceof Rule && m.ruleLhsHasMacroKLabel((Rule) s) && !((Rule) s).att().contains(Att.SIMPLIFICATION())) {
+        if (s instanceof Rule && m.ruleLhsHasMacroKLabel((Rule) s) && !s.att().contains(Att.SIMPLIFICATION())) {
             Att macroAtt = m.attributesFor().apply(m.matchKLabel((Rule) s));
             return Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(macroAtt.getMacro().get()));
         }

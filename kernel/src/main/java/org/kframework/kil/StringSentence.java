@@ -9,8 +9,8 @@ package org.kframework.kil;
  */
 public class StringSentence extends ModuleItem {
     private String content;
-    private int contentStartLine;
-    private int contentStartColumn;
+    private final int contentStartLine;
+    private final int contentStartColumn;
     private String label;
     private String type;
 

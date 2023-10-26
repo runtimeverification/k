@@ -54,7 +54,7 @@ public class CheckAtt {
         checkUnrecognizedAtts(sentence);
         checkRestrictedAtts(sentence);
         if (sentence instanceof Rule) {
-            check(((Rule) sentence).att(), sentence);
+            check(sentence.att(), sentence);
             check((Rule) sentence);
         } else if (sentence instanceof Production) {
             check((Production) sentence);
@@ -161,7 +161,7 @@ public class CheckAtt {
                         i--;
                         int idx = Integer.parseInt(sb.toString());
                         if (idx == 0 || idx > prod.items().size()) {
-                            errors.add(KEMException.compilerError("Invalid format escape sequence '%" + sb.toString() + "'. Expected a number between 1 and " + prod.items().size(), prod));
+                            errors.add(KEMException.compilerError("Invalid format escape sequence '%" + sb + "'. Expected a number between 1 and " + prod.items().size(), prod));
                         } else {
                             ProductionItem pi = prod.items().apply(idx-1);
                             if (pi instanceof RegexTerminal) {

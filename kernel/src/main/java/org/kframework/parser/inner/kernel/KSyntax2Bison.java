@@ -187,7 +187,7 @@ public class KSyntax2Bison {
     do {
       Sort s = workList.poll();
       if (reachableSorts.add(s)) {
-        List<Production> prodsForSort = prods.getOrDefault(s, java.util.Collections.<Production>emptyList());
+        List<Production> prodsForSort = prods.getOrDefault(s, java.util.Collections.emptyList());
         for (Production prod : prodsForSort) {
           for (NonTerminal nt : iterable(prod.nonterminals())) {
             workList.offer(nt.sort());
@@ -511,13 +511,13 @@ public class KSyntax2Bison {
     StringBuilder sb = new StringBuilder();
     ModuleToKORE.convert(klabel, sb);
     String quoted = StringUtil.enquoteCString(sb.toString());
-    bison.append(quoted.substring(1, quoted.length() - 1));
+    bison.append(quoted, 1, quoted.length() - 1);
   }
 
   private static void encodeKore(Sort sort, StringBuilder bison) {
     StringBuilder sb = new StringBuilder();
     ModuleToKORE.convert(sort, sb);
     String quoted = StringUtil.enquoteCString(sb.toString());
-    bison.append(quoted.substring(1, quoted.length() - 1));
+    bison.append(quoted, 1, quoted.length() - 1);
   }
 }
