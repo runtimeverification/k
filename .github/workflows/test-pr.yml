@@ -229,6 +229,10 @@ jobs:
           skipPush: true
 
       - name: 'Build K Framework and push build time dependencies to cachix'
+        env:
+          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
+          GC_DONT_GC: '1'
         run: |
           nix --version
           export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
