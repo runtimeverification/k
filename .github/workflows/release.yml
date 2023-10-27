@@ -246,6 +246,11 @@ jobs:
           name: homebrew
           path: homebrew-k
 
+      - name: Clean up Homebrew
+        run: |
+          brew uninstall -f kframework/k/kframework
+          brew untap -f kframework/k 
+
       - name: Delete Release
         if: failure()
         uses: actions/github-script@v6.0.0
@@ -346,6 +351,11 @@ jobs:
           git commit -m 'Update brew package version' Formula/kframework.rb
           git remote set-url origin git@github.com:kframework/homebrew-k.git
           git push origin master
+
+      - name: Clean up Homebrew
+        run: |
+          brew uninstall -f kframework/k/kframework
+          brew untap -f kframework/k 
 
       - name: 'Delete Release'
         if: failure()
