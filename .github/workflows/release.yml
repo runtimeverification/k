@@ -186,6 +186,9 @@ jobs:
           submodules: recursive
           path: kframework
 
+      - name: Install script dependencies
+        run: brew install wget
+
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
         id: checkout
