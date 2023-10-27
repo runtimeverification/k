@@ -80,13 +80,6 @@ sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev lib
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-On Arch Linux:
-
-```shell
-git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost fmt libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
-```
-
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
 
 On macOS using [Homebrew](https://brew.sh/):
