@@ -10,16 +10,26 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
+from pyk.kast.inner import KInner
+from pyk.kore.rpc import ExecuteResult
+
 from .cli.args import KCLIArgs
 from .cli.utils import LOG_FORMAT, dir_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
-from .cterm import split_config_and_constraints
-from .kast.inner import KInner
-from .kast.manip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
+from .cterm import CTerm
+from .kast.manip import (
+    flatten_label,
+    minimize_rule,
+    minimize_term,
+    propagate_up_constraints,
+    remove_source_map,
+    split_config_and_constraints,
+)
 from .kast.outer import read_kast_definition
 from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
-from .kore.syntax import Pattern
+from .kore.rpc import StopReason
+from .kore.syntax import Pattern, kore_term
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .prelude.k import GENERATED_TOP_CELL
@@ -96,6 +106,88 @@ def exec_print(args: Namespace) -> None:
         _LOGGER.info(f'Wrote file: {args.output_file.name}')
 
 
+def exec_rpc_print(args: Namespace) -> None:
+    kompiled_dir: Path = args.definition_dir
+    printer = KPrint(kompiled_dir)
+    input_dict = json.loads(args.input_file.read())
+    output_buffer = []
+
+    def pretty_print_request(request_params: dict[str, Any]) -> list[str]:
+        output_buffer = []
+        non_state_keys = set(request_params.keys()).difference(['state'])
+        for key in non_state_keys:
+            output_buffer.append(f'{key}: {request_params[key]}')
+        state = CTerm.from_kast(printer.kore_to_kast(kore_term(request_params['state'])))  # type: ignore
+        output_buffer.append('State:')
+        output_buffer.append(printer.pretty_print(state.kast, sort_collections=True))
+        return output_buffer
+
+    def pretty_print_execute_response(execute_result: ExecuteResult) -> list[str]:
+        output_buffer = []
+        output_buffer.append(f'Depth: {execute_result.depth}')
+        output_buffer.append(f'Stop reason: {execute_result.reason.value}')
+        if execute_result.reason == StopReason.TERMINAL_RULE or execute_result.reason == StopReason.CUT_POINT_RULE:
+            output_buffer.append(f'Stop rule: {execute_result.rule}')
+        output_buffer.append(
+            f'Number of next states: {len(execute_result.next_states) if execute_result.next_states is not None else 0}'
+        )
+        state = CTerm.from_kast(printer.kore_to_kast(execute_result.state.kore))
+        output_buffer.append('State:')
+        output_buffer.append(printer.pretty_print(state.kast, sort_collections=True))
+        if execute_result.next_states is not None:
+            next_states = [CTerm.from_kast(printer.kore_to_kast(s.kore)) for s in execute_result.next_states]
+            for i, s in enumerate(next_states):
+                output_buffer.append(f'Next state #{i}:')
+                output_buffer.append(printer.pretty_print(s.kast, sort_collections=True))
+        return output_buffer
+
+    try:
+        if 'method' in input_dict:
+            output_buffer.append('JSON RPC request')
+            output_buffer.append(f'id: {input_dict["id"]}')
+            output_buffer.append(f'Method: {input_dict["method"]}')
+            try:
+                if 'state' in input_dict['params']:
+                    output_buffer += pretty_print_request(input_dict['params'])
+                else:  # this is an "add-module" request, skip trying to print state
+                    for key in input_dict['params'].keys():
+                        output_buffer.append(f'{key}: {input_dict["params"][key]}')
+            except KeyError as e:
+                _LOGGER.critical(f'Could not find key {str(e)} in input JSON file')
+                exit(1)
+        else:
+            if not 'result' in input_dict:
+                _LOGGER.critical('The input is neither a request not a resonse')
+                exit(1)
+            output_buffer.append('JSON RPC Response')
+            output_buffer.append(f'id: {input_dict["id"]}')
+            if list(input_dict['result'].keys()) == ['state']:  # this is a "simplify" response
+                output_buffer.append('Method: simplify')
+                state = CTerm.from_kast(printer.kore_to_kast(kore_term(input_dict['result']['state'])))  # type: ignore
+                output_buffer.append('State:')
+                output_buffer.append(printer.pretty_print(state.kast, sort_collections=True))
+            elif list(input_dict['result'].keys()) == ['module']:  # this is an "add-module" response
+                output_buffer.append('Method: add-module')
+                output_buffer.append('Module:')
+                output_buffer.append(input_dict['result']['module'])
+            else:
+                try:  # assume it is an "execute" response
+                    output_buffer.append('Method: execute')
+                    execute_result = ExecuteResult.from_dict(input_dict['result'])
+                    output_buffer += pretty_print_execute_response(execute_result)
+                except KeyError as e:
+                    _LOGGER.critical(f'Could not find key {str(e)} in input JSON file')
+                    exit(1)
+        if args.output_file is not None:
+            args.output_file.write('\n'.join(output_buffer))
+        else:
+            print('\n'.join(output_buffer))
+    except ValueError as e:
+        # shorten and print the error message in case kore_to_kast throws ValueError
+        _LOGGER.critical(str(e)[:200])
+        exit(1)
+
+
 def exec_prove(args: Namespace) -> None:
     kompiled_dir: Path = args.definition_dir
     kprover = KProve(kompiled_dir, args.main_file)
@@ -166,6 +258,18 @@ def create_argument_parser() -> ArgumentParser:
         '--keep-cells', default='', nargs='?', help='List of cells with primitive values to keep in output.'
     )
     print_args.add_argument('--output-file', type=FileType('w'), default='-')
+
+    rpc_print_args = pyk_args_command.add_parser(
+        'rpc-print',
+        help='Pretty-print an RPC request/response',
+        parents=[k_cli_args.logging_args, definition_args],
+    )
+    rpc_print_args.add_argument(
+        'input_file',
+        type=FileType('r'),
+        help='An input file containing the JSON RPC request or response with KoreJSON payload.',
+    )
+    rpc_print_args.add_argument('--output-file', type=FileType('w'), default='-')
 
     prove_args = pyk_args_command.add_parser(
         'prove',
