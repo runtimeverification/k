@@ -175,7 +175,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-13
+    runs-on: self-macos-13
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -185,6 +185,11 @@ jobs:
         with:
           submodules: recursive
           path: kframework
+
+      - name: Install script dependencies
+        run: |
+          brew uninstall -f kframework/k/kframework
+          brew install wget
 
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
@@ -228,7 +233,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_ventura.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
@@ -257,7 +262,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-13
+    runs-on: self-macos-13
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
@@ -306,14 +311,7 @@ jobs:
           spawn-kserver $WD/kserver.log
           cd pl-tutorial
           echo 'Testing tutorial in user environment...'
-          # The macOS public runners are prone to flakiness when running this
-          # test suite with high parallelism:
-          #   - https://github.com/runtimeverification/k/issues/3705
-          # We know that there are 4 CPUs on macos-13 runners, so rather than
-          # using them all, we use only 2 to reduce load on the machine. Old
-          # command:
-          #   make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
-          make -j2 ${MAKE_EXTRA_ARGS}
+          make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
           cd ~
           echo 'module TEST imports BOOL endmodule' > test.k
           kompile test.k --backend llvm
