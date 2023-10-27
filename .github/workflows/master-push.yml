@@ -5,58 +5,6 @@ on:
       - master
 
 jobs:
-
-  nix-flake-release:
-    name: 'Nix flake release'
-    strategy:
-      matrix:
-        include:
-          - runner: ubuntu-20.04
-            os: ubuntu-20.04
-          - runner: macos-13
-            os: macos-13
-          - runner: MacM1
-            os: self-macos-12
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v3
-
-      - name: 'Upgrade bash'
-        if: ${{ contains(matrix.os, 'macos') }}
-        run: brew install bash
-
-      - name: 'Install Nix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v22
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org https://hydra.iohk.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-
-      - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v12
-        with:
-          name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-          skipPush: true
-
-      - name: 'Build and cache K Framework'
-        uses: workflow/nix-shell-action@v3
-        env:
-          GC_DONT_GC: 1
-          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-        with:
-          packages: jq
-          script: |
-            k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
-            drv=$(nix-store --query --deriver ${k})
-            nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
-
   gh-release:
     name: 'Publish GitHub Prerelease'
     runs-on: ubuntu-latest

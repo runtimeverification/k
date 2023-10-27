@@ -240,22 +240,6 @@ jobs:
           drv=$(nix-store --query --deriver ${k})
           nix-store --query --requisites ${drv} | cachix push k-framework
 
-      - name: Publish K to k-framework-binary cache
-        env:
-          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
-          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
-          GC_DONT_GC: '1'
-        run: |
-          cachix --version
-          export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
-          export PATH="$(nix build github:runtimeverification/kup/sam/robust-publish --refresh --no-link --json | $JQ -r '.[].outputs | to_entries[].value')/bin:$PATH"
-          kup publish k-framework-binary .#k --keep-days 180
-          kup publish k-framework-binary .#k.openssl --keep-days 180
-          kup publish k-framework-binary .#k.procps --keep-days 180
-          kup publish k-framework-binary .#k.openssl.procps --keep-days 180
-          kup publish k-framework-binary .#k.procps.openssl --keep-days 180
-
-
       - name: 'Smoke test K'
         run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
 

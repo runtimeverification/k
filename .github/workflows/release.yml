@@ -43,17 +43,25 @@ jobs:
           cd ${CURDIR}
           gh release upload --repo runtimeverification/k --clobber v${version} ${tarball}
 
-  nix-release:
-    name: 'Nix Release'
-    runs-on: ubuntu-20.04
-    environment: production
+  cachix-release:
+    name: 'k-framework-binary cachix release'
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-20.04
+            os: ubuntu-20.04
+          - runner: macos-13
+            os: macos-13
+          - runner: MacM1
+            os: self-macos-12
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     steps:
-      - name: Check out code
+      - name: 'Check out code'
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
-      - name: Install Nix
+      - name: 'Install Nix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
@@ -62,10 +70,24 @@ jobs:
             substituters = http://cache.nixos.org https://hydra.iohk.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
-      - name: Upload release.nix
-        uses: runtimeverification/upload-release.nix@v1.1
+      - name: 'Install Cachix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/cachix-action@v12
+
+      - name: 'Publish K to k-framework-binary cache'
+        uses: workflow/nix-shell-action@v3
+        env:
+          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
+          GC_DONT_GC: '1'
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          packages: jq
+          script: |
+            export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
+            kup publish k-framework-binary .#k --keep-days 180
+            kup publish k-framework-binary .#k.openssl --keep-days 180
+            kup publish k-framework-binary .#k.procps --keep-days 180
+            kup publish k-framework-binary .#k.openssl.procps --keep-days 180
+            kup publish k-framework-binary .#k.procps.openssl --keep-days 180
 
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
@@ -348,7 +370,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, debian-bookworm, set-release-id, arch]
+    needs: [cachix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, debian-bookworm, set-release-id, arch]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
