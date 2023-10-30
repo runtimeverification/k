@@ -134,7 +134,7 @@ To directly install the latest K Framework brew package without needing to
 download it separately, do the following:
 
 ```sh
-brew install kframework/k/kframework
+brew install runtimeverification/k/kframework
 ```
 
 Or, to streamline future K Framework upgrades, you can `tap` the K Framework
@@ -142,7 +142,7 @@ package repository. This lets future installations/upgrades/etc... use the
 unprefixed package name.
 
 ```sh
-brew tap kframework/k
+brew tap runtimeverification/k
 brew install kframework
 ```
 
