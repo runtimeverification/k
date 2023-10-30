@@ -81,6 +81,7 @@ sudo apt-get install    \
     build-essential     \
     clang-15            \
     cmake               \
+    curl                \
     flex                \
     g++                 \
     gcc                 \
@@ -147,8 +148,9 @@ The following dependencies are needed either at build time or runtime:
 *   [gmp](https://gmplib.org/)
 *   [jdk](https://openjdk.java.net/) (version 17 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
+*   [libsecp256k1](https://github.com/bitcoin-core/secp256k1)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
-*   [llvm](https://llvm.org/) (We require version 14 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
+*   [llvm](https://llvm.org/) (We require version 15 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
     * [clang](http://clang.llvm.org/)
     * [lld](https://lld.llvm.org/)
 *   [make](https://www.gnu.org/software/make/)
