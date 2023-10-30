@@ -118,61 +118,6 @@ jobs:
           path: |
             **/kore-exec.tar.gz
 
-  debian-bookworm:
-    name: 'K Debian Bookworm Package'
-    runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 90
-    steps:
-      - uses: actions/checkout@v3
-      - name: 'Build and Test Package'
-        uses: ./.github/actions/test-package
-        with:
-          os: debian
-          distro: bookworm
-          llvm: 14
-          pkg-name: kframework_amd64_debian_bookworm.deb
-          build-package: package/debian/build-package bookworm
-          test-package: package/debian/test-package
-      - name: 'Upload Package to Release'
-        env:
-          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        run: |
-          set -x
-          version=$(cat package/version)
-          cp kframework_amd64_debian_bookworm.deb kframework_${version}_amd64_debian_bookworm.deb
-          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bookworm.deb
-
-  # The arch linux packaging step is disabled because of recurrent flakiness on
-  # the runners we use:
-  #   - https://github.com/runtimeverification/k/issues/3723
-  #   - https://github.com/runtimeverification/k/issues/3731
-  # We may wish to consider reinstating this step when these issues have been
-  # resolved.
-  #
-  # arch:
-  #   name: 'Arch Linux Package'
-  #   runs-on: [self-hosted, linux, normal]
-  #   timeout-minutes: 90
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: 'Build and Test Package'
-  #       uses: ./.github/actions/test-package
-  #       with:
-  #         dockerfile: package/arch/Dockerfile
-  #         os: archlinux
-  #         distro: base
-  #         build-package: package/arch/build-package
-  #         test-package: package/arch/test-package
-  #         pkg-name: kframework_arch_x86_64.pkg.tar.zst
-  #     - name: 'Upload Package to Release'
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-  #       run: |
-  #         set -x
-  #         version=$(cat package/version)
-  #         cp kframework_arch_x86_64.pkg.tar.zst kframework_${version}_arch_x86_64.pkg.tar.zst
-  #         gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_arch_x86_64.pkg.tar.zst
-
   macos-build:
     name: 'Build MacOS Package'
     runs-on: self-macos-13
@@ -245,6 +190,11 @@ jobs:
         with:
           name: homebrew
           path: homebrew-k
+
+      - name: Clean up Homebrew
+        run: |
+          brew uninstall -f kframework/k/kframework
+          brew untap -f kframework/k 
 
       - name: Delete Release
         if: failure()
@@ -347,6 +297,11 @@ jobs:
           git remote set-url origin git@github.com:kframework/homebrew-k.git
           git push origin master
 
+      - name: Clean up Homebrew
+        run: |
+          brew uninstall -f kframework/k/kframework
+          brew untap -f kframework/k 
+
       - name: 'Delete Release'
         if: failure()
         uses: actions/github-script@v6.0.0
@@ -360,8 +315,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    # Add arch back to this list if we reinstate it as a release platform
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, debian-bookworm, set-release-id]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3

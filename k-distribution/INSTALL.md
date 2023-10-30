@@ -41,9 +41,7 @@ Install through packages
 We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Jammy Jellyfish (22.04)
--   Debian Bookworm
--   Arch Linux
--   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
+-   macOS Ventura (13) via Homebrew
 -   Docker Images
 
 Pre-installation Notes
@@ -116,19 +114,7 @@ requires about ~1.4GB of dependencies and will take some time.
 sudo apt install ./kframework_amd64_ubuntu_jammy.deb
 ```
 
-### Debian Bookworm
-
-```sh
-sudo apt install ./kframework_amd64_debian_bookworm.deb
-```
-
-### Arch Linux
-
-```sh
-pacman -U ./kframework_arch_x86_64.pkg.tar.zst
-```
-
-### MacOS X Mojave/Homebrew
+### macOS (Homebrew)
 
 [Homebrew](https://brew.sh/) (or just brew) is a third-party package manager
 for MacOS.
@@ -141,10 +127,6 @@ With brew installed, do the following to install the K Framework brew package
 ```sh
 brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
 ```
-
-Note: we do not yet have a MacOS Monterey bottle. The existing brew package
-also does not work on M1 Silicon Macs. If you have either of these systems,
-you should build from source for the time being.
 
 #### Homebrew Alternate Installation
 
