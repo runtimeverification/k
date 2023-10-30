@@ -188,6 +188,28 @@ def exec_rpc_print(args: Namespace) -> None:
         exit(1)
 
 
+def exec_rpc_kast(args: Namespace) -> None:
+    """
+    Convert an 'execute' JSON RPC response to a new 'execute' or 'simplify' request,
+    copying parameters from a reference request.
+    """
+    reference_request = json.loads(args.reference_request_file.read())
+    input_dict = json.loads(args.response_file.read())
+    execute_result = ExecuteResult.from_dict(input_dict['result'])
+    non_state_keys = set(reference_request['params'].keys()).difference(['state'])
+    request_params = {}
+    for key in non_state_keys:
+        request_params[key] = reference_request['params'][key]
+    request_params['state'] = {'format': 'KORE', 'version': 1, 'term': execute_result.state.kore.dict}
+    request = {
+        'jsonrpc': reference_request['jsonrpc'],
+        'id': reference_request['id'],
+        'method': reference_request['method'],
+        'params': request_params,
+    }
+    args.output_file.write(json.dumps(request))
+
+
 def exec_prove(args: Namespace) -> None:
     kompiled_dir: Path = args.definition_dir
     kprover = KProve(kompiled_dir, args.main_file)
@@ -270,6 +292,23 @@ def create_argument_parser() -> ArgumentParser:
         help='An input file containing the JSON RPC request or response with KoreJSON payload.',
     )
     rpc_print_args.add_argument('--output-file', type=FileType('w'), default='-')
+
+    rpc_kast_args = pyk_args_command.add_parser(
+        'rpc-kast',
+        help='Convert an "execute" JSON RPC response to a new "execute" or "simplify" request, copying parameters from a reference request.',
+        parents=[k_cli_args.logging_args],
+    )
+    rpc_kast_args.add_argument(
+        'reference_request_file',
+        type=FileType('r'),
+        help='An input file containing a JSON RPC request to server as a reference for the new request.',
+    )
+    rpc_kast_args.add_argument(
+        'response_file',
+        type=FileType('r'),
+        help='An input file containing a JSON RPC response with KoreJSON payload.',
+    )
+    rpc_kast_args.add_argument('--output-file', type=FileType('w'), default='-')
 
     prove_args = pyk_args_command.add_parser(
         'prove',
