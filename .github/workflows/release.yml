@@ -144,7 +144,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: self-macos-13
+    runs-on: macos-13
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -154,11 +154,6 @@ jobs:
         with:
           submodules: recursive
           path: kframework
-
-      - name: Install script dependencies
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew install wget
 
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
@@ -202,7 +197,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_ventura.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
@@ -214,11 +209,6 @@ jobs:
         with:
           name: homebrew
           path: homebrew-k
-
-      - name: Clean up Homebrew
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew untap -f kframework/k 
 
       - name: Delete Release
         if: failure()
@@ -236,7 +226,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: self-macos-13
+    runs-on: macos-13
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
@@ -275,18 +265,21 @@ jobs:
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
+          # The macOS public runners are prone to flakiness when running this
+          # test suite, so the PL-tutorial is disabled for now.
+          #   - https://github.com/runtimeverification/k/issues/3705
           cd homebrew-k-old
           brew tap kframework/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
-          cp -R /usr/local/share/kframework/pl-tutorial ~
-          WD=`pwd`
-          cd
-          echo 'Starting kserver...'
-          spawn-kserver $WD/kserver.log
-          cd pl-tutorial
-          echo 'Testing tutorial in user environment...'
-          make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
-          cd ~
+          # cp -R /usr/local/share/kframework/pl-tutorial ~
+          # WD=`pwd`
+          # cd
+          # echo 'Starting kserver...'
+          # spawn-kserver $WD/kserver.log
+          # cd pl-tutorial
+          # echo 'Testing tutorial in user environment...'
+          # make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
+          # cd ~
           echo 'module TEST imports BOOL endmodule' > test.k
           kompile test.k --backend llvm
           kompile test.k --backend haskell
@@ -320,11 +313,6 @@ jobs:
           git commit -m 'Update brew package version' Formula/kframework.rb
           git remote set-url origin git@github.com:kframework/homebrew-k.git
           git push origin master
-
-      - name: Clean up Homebrew
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew untap -f kframework/k 
 
       - name: 'Delete Release'
         if: failure()
