@@ -1306,3 +1306,25 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         anti_unifier, _, _ = cterm1.anti_unify(cterm2, keep_values=True, kdef=kprint.definition)
 
         assert anti_unifier.kast == cterm1.kast
+
+    @pytest.mark.parametrize(
+        'test_id,antecedent,consequent,expected',
+        IMPLICATION_FAILURE_TEST_DATA,
+        ids=[test_id for test_id, *_ in IMPLICATION_FAILURE_TEST_DATA],
+    )
+    def test_implication_failure_reason(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprove: KProve,
+        test_id: str,
+        antecedent: tuple[str, str] | tuple[str, str, KInner],
+        consequent: tuple[str, str] | tuple[str, str, KInner],
+        expected: str,
+    ) -> None:
+        antecedent_term = self.config(kcfg_explore.kprint, *antecedent)
+        consequent_term = self.config(kcfg_explore.kprint, *consequent)
+
+        failed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
+
+        assert not failed
+        assert actual == expected
