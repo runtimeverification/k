@@ -73,6 +73,8 @@ jobs:
       - name: 'Install Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/cachix-action@v12
+        with:
+          name: k-framework-binary
 
       - name: 'Publish K to k-framework-binary cache'
         uses: workflow/nix-shell-action@v3
