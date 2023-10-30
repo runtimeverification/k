@@ -76,7 +76,32 @@ On Ubuntu Linux 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-14 lld-14 llvm-14-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install    \
+    bison               \
+    build-essential     \
+    clang-15            \
+    cmake               \
+    flex                \
+    g++                 \
+    gcc                 \
+    libboost-test-dev   \
+    libfmt-dev          \
+    libgmp-dev          \
+    libjemalloc-dev     \
+    libmpfr-dev         \
+    libsecp256k1-dev    \
+    libyaml-dev         \
+    libz3-dev           \
+    lld-15              \
+    llvm-15-tools       \
+    m4                  \
+    maven               \
+    openjdk-17-jdk      \
+    pkg-config          \
+    python3             \
+    python3-dev         \
+    z3                  \
+    zlib1g-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -86,7 +111,27 @@ On macOS using [Homebrew](https://brew.sh/):
 
 ```shell
 git submodule update --init --recursive
-brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm make maven mpfr pkg-config python secp256k1 stack zlib z3
+brew install    \
+    bison       \
+    boost       \
+    cmake       \
+    flex        \
+    fmt         \
+    gcc         \
+    gmp         \
+    openjdk     \
+    jemalloc    \
+    libyaml     \
+    llvm        \
+    make        \
+    maven       \
+    mpfr        \
+    pkg-config  \
+    python      \
+    secp256k1   \
+    stack       \
+    zlib        \
+    z3
 ```
 
 ## The Long Version
