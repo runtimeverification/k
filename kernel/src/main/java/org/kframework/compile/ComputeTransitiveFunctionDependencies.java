@@ -10,8 +10,8 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KApply;
 import org.kframework.kore.VisitK;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import scala.Tuple2;
 
 import java.util.Collection;
@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ import static org.kframework.Collections.*;
 
 public class ComputeTransitiveFunctionDependencies {
     public ComputeTransitiveFunctionDependencies(Module module) {
-        dependencies = new DirectedSparseGraph<>();
+        dependencies = ArrayListMultimap.create();
 
         Set<KLabel> anywhereKLabels = new HashSet<>();
         stream(module.rules()).filter(r -> !ExpandMacros.isMacro(r)).forEach(r -> {
@@ -59,7 +60,7 @@ public class ComputeTransitiveFunctionDependencies {
                     return;
                 }
                 if (module.attributesFor().getOrElse(k.klabel(), () -> Att.empty()).contains(Att.FUNCTION()) || anywhereKLabels.contains(k.klabel())) {
-                    dependencies.addEdge(new Object(), current, k.klabel());
+                    dependencies.put(k.klabel(), current);
                 }
                 super.apply(k);
             }
@@ -77,7 +78,7 @@ public class ComputeTransitiveFunctionDependencies {
     }
 
     private static <V> Set<V> ancestors(
-            Collection<? extends V> startNodes, DirectedGraph<V, ?> graph)
+            Collection<? extends V> startNodes, ListMultimap<V, V> graph)
     {
         Queue<V> queue = new LinkedList<V>();
         queue.addAll(startNodes);
@@ -85,7 +86,7 @@ public class ComputeTransitiveFunctionDependencies {
         while(!queue.isEmpty())
         {
             V v = queue.poll();
-            Collection<V> neighbors = graph.getPredecessors(v);
+            List<V> neighbors = graph.get(v);
             for (V n : neighbors)
             {
                 if (!visited.contains(n))
@@ -106,5 +107,5 @@ public class ComputeTransitiveFunctionDependencies {
         return ancestors(labels, dependencies);
     }
 
-    private final DirectedGraph<KLabel, Object> dependencies;
+    private final ListMultimap<KLabel, KLabel> dependencies;
 }
