@@ -154,9 +154,7 @@ jobs:
           path: kframework
 
       - name: Install script dependencies
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew install wget
+        run: brew install wget
 
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
@@ -200,7 +198,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_ventura.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
