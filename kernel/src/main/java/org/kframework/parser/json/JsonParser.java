@@ -1,7 +1,6 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.json;
 
-import org.checkerframework.checker.nullness.Opt;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
