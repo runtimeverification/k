@@ -1,10 +1,15 @@
 {
   description = "Application packaged using poetry2nix";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
-  inputs.poetry2nix.url = "github:nix-community/poetry2nix/master";
-  inputs.poetry2nix.inputs.nixpkgs.follows = "nixpkgs";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+    poetry2nix = {
+      url =
+        "github:nix-community/poetry2nix/626111646fe236cb1ddc8191a48c75e072a82b7c";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    flake-utils.follows = "poetry2nix/flake-utils";
+  };
 
   outputs = { self, nixpkgs, flake-utils, poetry2nix }:
     {
@@ -12,7 +17,7 @@
       overlay = final: prev:
         let
           mkPyk = python:
-            prev.poetry2nix.mkPoetryApplication {
+            (poetry2nix.lib.mkPoetry2Nix { pkgs = prev; }).mkPoetryApplication {
               python = python;
               projectDir = ./.;
               groups = [ ];
@@ -28,7 +33,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ poetry2nix.overlay self.overlay ];
+          overlays = [ self.overlay ];
         };
       in {
         packages = {
