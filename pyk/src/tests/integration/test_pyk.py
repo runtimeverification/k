@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from typing import TYPE_CHECKING
 
@@ -141,3 +142,47 @@ class TestRpcPrint(KompiledTest):
         # When
         with pytest.raises(SystemExit):
             main()
+
+
+class TestRpcKast:
+    TEST_DATA = [
+        ('imp-execute-request', 'imp-execute-depth-bound-response', 'imp-execute-request-from-execute-response'),
+        ('imp-simplify-request', 'imp-execute-depth-bound-response', 'imp-simplify-request-from-execute-response'),
+    ]
+
+    @pytest.mark.parametrize(
+        'reference_filename_stem, input_filename_stem, output_filename_stem',
+        TEST_DATA,
+        ids=[id for id, _ in enumerate(TEST_DATA)],
+    )
+    def test_rpc_kast(
+        self,
+        assume_argv: AssumeArgv,
+        tmp_path: Path,
+        reference_filename_stem: str,
+        input_filename_stem: str,
+        output_filename_stem: str,
+    ) -> None:
+        # Given
+        reference_file = TEST_DATA_DIR / 'pyk-rpc-kast' / f'{reference_filename_stem}.json'
+        input_file = TEST_DATA_DIR / 'pyk-rpc-kast' / f'{input_filename_stem}.json'
+        expected_file = TEST_DATA_DIR / 'pyk-rpc-kast' / f'{output_filename_stem}.json.golden'
+        actual_file = tmp_path / f'{output_filename_stem}.json'
+        assume_argv(
+            [
+                'pyk',
+                'rpc-kast',
+                str(reference_file),
+                str(input_file),
+                '--output-file',
+                str(actual_file),
+            ]
+        )
+
+        # When
+        main()
+
+        # Then
+        expected = json.loads(expected_file.read_text())
+        actual = json.loads(actual_file.read_text())
+        assert actual == expected
