@@ -8,7 +8,6 @@ jobs:
   gh-release:
     name: 'Publish GitHub Prerelease'
     runs-on: ubuntu-latest
-    needs: nix-flake-release
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
