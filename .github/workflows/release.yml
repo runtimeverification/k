@@ -288,6 +288,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: k-homebrew-checkout
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
 
       - name: 'Upload Package to Release'
         env:
@@ -299,7 +300,7 @@ jobs:
           version=$(cat k-homebrew-checkout/package/version)
           mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
           gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
-
+      # Deprecate After Homebrew tap migration
       - name: 'Add ssh key'
         uses: shimataro/ssh-key-action@v2
         with:
