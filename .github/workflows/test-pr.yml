@@ -18,6 +18,7 @@ jobs:
         id: checkout
         with:
           repository: runtimeverification/homebrew-k
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           path: homebrew-k
           ref: staging
           persist-credentials: false
@@ -28,6 +29,7 @@ jobs:
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
           repository: runtimeverification/homebrew-k
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           path: homebrew-k
           persist-credentials: false
 
