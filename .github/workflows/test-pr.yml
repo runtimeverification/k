@@ -39,6 +39,7 @@ jobs:
         run: |
           cd homebrew-k
           echo "TEST" >> dummy
+          git add dummy
           git commit -m 'REVERT ME' dummy
           git push origin master
 
