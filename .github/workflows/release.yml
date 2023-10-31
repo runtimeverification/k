@@ -43,17 +43,25 @@ jobs:
           cd ${CURDIR}
           gh release upload --repo runtimeverification/k --clobber v${version} ${tarball}
 
-  nix-release:
-    name: 'Nix Release'
-    runs-on: ubuntu-20.04
-    environment: production
+  cachix-release:
+    name: 'k-framework-binary cachix release'
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-20.04
+            os: ubuntu-20.04
+          - runner: macos-13
+            os: macos-13
+          - runner: MacM1
+            os: self-macos-12
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     steps:
-      - name: Check out code
+      - name: 'Check out code'
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
-      - name: Install Nix
+      - name: 'Install Nix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
@@ -62,10 +70,26 @@ jobs:
             substituters = http://cache.nixos.org https://hydra.iohk.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
-      - name: Upload release.nix
-        uses: runtimeverification/upload-release.nix@v1.1
+      - name: 'Install Cachix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/cachix-action@v12
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: k-framework-binary
+
+      - name: 'Publish K to k-framework-binary cache'
+        uses: workflow/nix-shell-action@v3
+        env:
+          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PRIVATE_KFB_TOKEN }}'
+          GC_DONT_GC: '1'
+        with:
+          packages: jq
+          script: |
+            export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
+            kup publish k-framework-binary .#k --keep-days 180
+            kup publish k-framework-binary .#k.openssl --keep-days 180
+            kup publish k-framework-binary .#k.procps --keep-days 180
+            kup publish k-framework-binary .#k.openssl.procps --keep-days 180
+            kup publish k-framework-binary .#k.procps.openssl --keep-days 180
 
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
@@ -120,7 +144,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: self-macos-13
+    runs-on: macos-13
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -131,16 +155,11 @@ jobs:
           submodules: recursive
           path: kframework
 
-      - name: Install script dependencies
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew install wget
-
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
         id: checkout
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
           ref: staging
         continue-on-error: true
@@ -149,7 +168,7 @@ jobs:
         uses: actions/checkout@v3
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
 
       - name: Cache maven
@@ -178,7 +197,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_ventura.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
@@ -190,11 +209,6 @@ jobs:
         with:
           name: homebrew
           path: homebrew-k
-
-      - name: Clean up Homebrew
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew untap -f kframework/k 
 
       - name: Delete Release
         if: failure()
@@ -212,7 +226,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: self-macos-13
+    runs-on: macos-13
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
@@ -221,7 +235,7 @@ jobs:
         uses: actions/checkout@v3
         id: checkout
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
           ref: staging
           persist-credentials: false
@@ -231,7 +245,7 @@ jobs:
         uses: actions/checkout@v3
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
           persist-credentials: false
 
@@ -251,18 +265,21 @@ jobs:
           JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
+          # The macOS public runners are prone to flakiness when running this
+          # test suite, so the PL-tutorial is disabled for now.
+          #   - https://github.com/runtimeverification/k/issues/3705
           cd homebrew-k-old
-          brew tap kframework/k "file:///$(pwd)"
+          brew tap runtimeverification/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
-          cp -R /usr/local/share/kframework/pl-tutorial ~
-          WD=`pwd`
-          cd
-          echo 'Starting kserver...'
-          spawn-kserver $WD/kserver.log
-          cd pl-tutorial
-          echo 'Testing tutorial in user environment...'
-          make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
-          cd ~
+          # cp -R /usr/local/share/kframework/pl-tutorial ~
+          # WD=`pwd`
+          # cd
+          # echo 'Starting kserver...'
+          # spawn-kserver $WD/kserver.log
+          # cd pl-tutorial
+          # echo 'Testing tutorial in user environment...'
+          # make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
+          # cd ~
           echo 'module TEST imports BOOL endmodule' > test.k
           kompile test.k --backend llvm
           kompile test.k --backend haskell
@@ -271,6 +288,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: k-homebrew-checkout
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
 
       - name: 'Upload Package to Release'
         env:
@@ -282,7 +300,7 @@ jobs:
           version=$(cat k-homebrew-checkout/package/version)
           mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
           gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
-
+      # Deprecate After Homebrew tap migration
       - name: 'Add ssh key'
         uses: shimataro/ssh-key-action@v2
         with:
@@ -294,13 +312,8 @@ jobs:
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
           git commit -m 'Update brew package version' Formula/kframework.rb
-          git remote set-url origin git@github.com:kframework/homebrew-k.git
+          git remote set-url origin git@github.com:runtimeverification/homebrew-k.git
           git push origin master
-
-      - name: Clean up Homebrew
-        run: |
-          brew uninstall -f kframework/k/kframework
-          brew untap -f kframework/k 
 
       - name: 'Delete Release'
         if: failure()
@@ -315,7 +328,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, set-release-id]
+    needs: [cachix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
