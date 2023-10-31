@@ -41,7 +41,6 @@ jobs:
           git checkout -b test-branch
           echo "TEST" >> Formula/kframework.rb
           git commit -m 'Update brew package version' Formula/kframework.rb
-          git remote set-url origin git@github.com:runtimeverification/homebrew-k.git
           git push origin test-branch
 
 #   version-sync:
