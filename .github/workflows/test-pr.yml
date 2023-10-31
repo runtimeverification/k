@@ -21,7 +21,7 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           path: homebrew-k
           ref: staging
-          persist-credentials: false
+          # persist-credentials: false
         continue-on-error: true
 
       - name: 'Check out homebrew repo master branch'
@@ -31,10 +31,12 @@ jobs:
           repository: runtimeverification/homebrew-k
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           path: homebrew-k
-          persist-credentials: false
+          # persist-credentials: false
 
       - name: 'Commit changes'
         run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
           cd homebrew-k
           git checkout -b test-branch
           echo "TEST" >> Formula/kframework.rb
