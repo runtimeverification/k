@@ -159,7 +159,7 @@ jobs:
         uses: actions/checkout@v3
         id: checkout
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
           ref: staging
         continue-on-error: true
@@ -168,7 +168,7 @@ jobs:
         uses: actions/checkout@v3
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
 
       - name: Cache maven
@@ -235,7 +235,7 @@ jobs:
         uses: actions/checkout@v3
         id: checkout
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
           ref: staging
           persist-credentials: false
@@ -245,7 +245,7 @@ jobs:
         uses: actions/checkout@v3
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
-          repository: kframework/homebrew-k
+          repository: runtimeverification/homebrew-k
           path: homebrew-k
           persist-credentials: false
 
@@ -269,7 +269,7 @@ jobs:
           # test suite, so the PL-tutorial is disabled for now.
           #   - https://github.com/runtimeverification/k/issues/3705
           cd homebrew-k-old
-          brew tap kframework/k "file:///$(pwd)"
+          brew tap runtimeverification/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
           # cp -R /usr/local/share/kframework/pl-tutorial ~
           # WD=`pwd`
@@ -288,6 +288,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: k-homebrew-checkout
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
 
       - name: 'Upload Package to Release'
         env:
@@ -299,7 +300,7 @@ jobs:
           version=$(cat k-homebrew-checkout/package/version)
           mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
           gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
-
+      # Deprecate After Homebrew tap migration
       - name: 'Add ssh key'
         uses: shimataro/ssh-key-action@v2
         with:
@@ -311,7 +312,7 @@ jobs:
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
           git commit -m 'Update brew package version' Formula/kframework.rb
-          git remote set-url origin git@github.com:kframework/homebrew-k.git
+          git remote set-url origin git@github.com:runtimeverification/homebrew-k.git
           git push origin master
 
       - name: 'Delete Release'
