@@ -133,9 +133,9 @@ jobs:
         name: Cache ~/.stack
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-stack-global-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/package.yaml') }}
+          key: a-${{ runner.os }}-stack-global-${{ hashFiles('**/stack.yaml') }}-${{ hashFiles('**/package.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-stack-global-
+            a-${{ runner.os }}-stack-global-
 
       - name: Build brew bottle
         id: build
