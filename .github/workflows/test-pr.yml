@@ -94,6 +94,74 @@ jobs:
             git push
           fi
 
+  macos-build:
+    name: 'Build MacOS Package'
+    runs-on: macos-13
+    needs: [version-sync]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: kframework
+
+      - name: Check out matching homebrew repo branch
+        uses: actions/checkout@v3
+        id: checkout
+        with:
+          repository: runtimeverification/homebrew-k
+          path: homebrew-k
+          ref: staging
+        continue-on-error: true
+
+      - name: Check out homebrew repo master branch
+        uses: actions/checkout@v3
+        if: ${{ steps.checkout.outcome == 'failure' }}
+        with:
+          repository: runtimeverification/homebrew-k
+          path: homebrew-k
+
+      - name: Cache maven
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - uses: actions/cache@v3
+        name: Cache ~/.stack
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-global-
+
+      - name: Build brew bottle
+        id: build
+        env:
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+          MAVEN_OPTS: >-
+              -Dhttp.keepAlive=false
+              -Dmaven.wagon.http.pool=false
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        run: |
+          PACKAGE=kframework
+          VERSION=$(cat kframework/package/version)
+          ROOT_URL='https://github.com/runtimeverification/k/releases/download'
+          wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
+          cd homebrew-k
+          ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
+          git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
+          ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
+          git reset HEAD^
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
+          BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
+          ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
+          echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
+
   test-k:
     name: 'K Tests'
     runs-on: [self-hosted, linux, normal]
