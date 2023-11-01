@@ -5,77 +5,82 @@ import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 
 /**
- * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item in a {@link Production}.
+ * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item
+ * in a {@link Production}.
  */
 public class UserList extends ProductionItem {
-    protected Sort sort;
-    protected String separator;
-    protected String listType;
+  protected Sort sort;
+  protected String separator;
+  protected String listType;
 
-    public static final String ZERO_OR_MORE = "*";
-    public static final String ONE_OR_MORE = "+";
+  public static final String ZERO_OR_MORE = "*";
+  public static final String ONE_OR_MORE = "+";
 
-    public UserList(Sort sort, String separator) {
-        this.sort = sort;
-        this.separator = separator.trim();
-        this.listType = ZERO_OR_MORE;
+  public UserList(Sort sort, String separator) {
+    this.sort = sort;
+    this.separator = separator.trim();
+    this.listType = ZERO_OR_MORE;
+  }
+
+  public UserList(Sort sort, String separator, String listType) {
+    this.sort = sort;
+    this.separator = separator.trim();
+    this.listType = listType;
+  }
+
+  @Override
+  public void toString(StringBuilder sb) {
+    if (listType.equals(ZERO_OR_MORE)) {
+      sb.append("List{")
+          .append(sort)
+          .append(",")
+          .append(StringUtil.enquoteCString(separator))
+          .append("}");
+    } else {
+      sb.append("NeList{")
+          .append(sort)
+          .append(",")
+          .append(StringUtil.enquoteCString(separator))
+          .append("}");
     }
+  }
 
-    public UserList(Sort sort, String separator, String listType) {
-        this.sort = sort;
-        this.separator = separator.trim();
-        this.listType = listType;
-    }
+  public Sort getSort() {
+    return sort;
+  }
 
-    @Override
-    public void toString(StringBuilder sb) {
-        if (listType.equals(ZERO_OR_MORE)) {
-            sb.append("List{").append(sort).append(",").append(StringUtil.enquoteCString(separator)).append("}");
-        } else {
-            sb.append("NeList{").append(sort).append(",").append(StringUtil.enquoteCString(separator)).append("}");
-        }
-    }
+  public void setSort(Sort sort) {
+    this.sort = sort;
+  }
 
-    public Sort getSort() {
-        return sort;
-    }
+  public String getSeparator() {
+    return separator;
+  }
 
-    public void setSort(Sort sort) {
-        this.sort = sort;
-    }
+  public void setSeparator(String separator) {
+    this.separator = separator.trim();
+  }
 
-    public String getSeparator() {
-        return separator;
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) return false;
+    if (obj == this) return true;
+    if (!(obj instanceof UserList srt)) return false;
 
-    public void setSeparator(String separator) {
-        this.separator = separator.trim();
-    }
+    if (!sort.equals(srt.getSort())) return false;
+    return separator.equals(srt.getSeparator());
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (obj == this)
-            return true;
-        if (!(obj instanceof UserList srt))
-            return false;
+  @Override
+  public int hashCode() {
+    return this.separator.hashCode() + this.sort.hashCode();
+  }
 
-        if (!sort.equals(srt.getSort()))
-            return false;
-        return separator.equals(srt.getSeparator());
-    }
+  public String getListType() {
+    return listType;
+  }
 
-    @Override
-    public int hashCode() {
-        return this.separator.hashCode() + this.sort.hashCode();
-    }
-
-    public String getListType() {
-        return listType;
-    }
-
-    public void setListType(String listType) {
-        this.listType = listType;
-    }
+  public void setListType(String listType) {
+    this.listType = listType;
+  }
 }

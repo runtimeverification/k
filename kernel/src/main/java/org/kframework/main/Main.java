@@ -12,6 +12,14 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.spi.Message;
 import com.martiansoftware.nailgun.NGContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.concurrent.ExecutionException;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kast.KastFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
@@ -26,184 +34,191 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.SimpleScope;
 import org.kframework.utils.inject.StartTime;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.concurrent.ExecutionException;
-
 public record Main(
-         Provider<KExceptionManager> kem,
-         Provider<FrontEnd> frontEnd,
-         @Named("requestScope") SimpleScope requestScope
-) {
+    Provider<KExceptionManager> kem,
+    Provider<FrontEnd> frontEnd,
+    @Named("requestScope") SimpleScope requestScope) {
 
-    /**
-     * @param args
-     *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
-     * @throws IOException when loadDefinition fails
-     */
-    public static void main(String[] args) {
-        isNailgun = false;
-        long startTime = System.nanoTime();
-        AnsiConsole.systemInstall();
-        if (args.length >= 1) {
+  /**
+   * @param args - the running arguments for the K3 tool. First argument must be one of the
+   *     following: kompile|kast|krun.
+   * @throws IOException when loadDefinition fails
+   */
+  public static void main(String[] args) {
+    isNailgun = false;
+    long startTime = System.nanoTime();
+    AnsiConsole.systemInstall();
+    if (args.length >= 1) {
 
-            String[] args2 = Arrays.copyOfRange(args, 1, args.length);
-            Injector injector = getInjector(args[0]);
-            int result = injector.getInstance(Main.class).runApplication(args[0], args2, new File("."), System.getenv(), startTime);
-            AnsiConsole.systemUninstall();
-            System.exit(result);
+      String[] args2 = Arrays.copyOfRange(args, 1, args.length);
+      Injector injector = getInjector(args[0]);
+      int result =
+          injector
+              .getInstance(Main.class)
+              .runApplication(args[0], args2, new File("."), System.getenv(), startTime);
+      AnsiConsole.systemUninstall();
+      System.exit(result);
+    }
+    AnsiConsole.systemUninstall();
+    invalidJarArguments();
+  }
+
+  private static volatile boolean isNailgun;
+
+  public static boolean isNailgun() {
+    return isNailgun;
+  }
+
+  private static NGContext context = null;
+
+  public static void exit(int exitCode) {
+    if (context != null) {
+      context.exit(exitCode);
+    } else {
+      System.exit(exitCode);
+    }
+  }
+
+  public static void nailMain(NGContext context) {
+    long startTime = System.nanoTime();
+    KServerFrontEnd kserver = KServerFrontEnd.instance();
+    if (!kserver.isLocal()) {
+      context.assertLoopbackClient();
+    }
+    isNailgun = true;
+    Main.context = context;
+    if (context.getArgs().length >= 1) {
+      String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
+      int result =
+          kserver.run(
+              context.getArgs()[0],
+              args2,
+              new File(context.getWorkingDirectory()),
+              (Map) context.getEnv(),
+              startTime);
+      exit(result);
+      return;
+    }
+    invalidJarArguments();
+  }
+
+  @Inject
+  public Main {}
+
+  public SimpleScope getRequestScope() {
+    return requestScope;
+  }
+
+  public int runApplication(
+      String tool, String[] args, File workingDir, Map<String, String> env, long startTime) {
+    try {
+      requestScope.enter();
+      seedInjector(requestScope, tool, args, workingDir, env, startTime);
+      return runApplication();
+    } finally {
+      requestScope.exit();
+    }
+  }
+
+  public int runApplication() {
+    KExceptionManager kem = this.kem.get();
+    kem.installForUncaughtExceptions();
+    try {
+      return frontEnd.get().main();
+    } catch (ProvisionException e) {
+      for (Message m : e.getErrorMessages()) {
+        if (!(m.getCause() instanceof KEMException ex)) {
+          throw e;
+        } else {
+          kem.registerThrown(ex);
         }
-        AnsiConsole.systemUninstall();
-        invalidJarArguments();
-    }
-
-    private static volatile boolean isNailgun;
-
-    public static boolean isNailgun() {
-        return isNailgun;
-    }
-
-    private static NGContext context = null;
-
-    public static void exit(int exitCode) {
-      if (context != null) {
-          context.exit(exitCode);
-      } else {
-          System.exit(exitCode);
       }
+      kem.print();
+      return 1;
+    }
+  }
+
+  public static void seedInjector(
+      SimpleScope scope,
+      String tool,
+      String[] args,
+      File workingDir,
+      Map<String, String> env,
+      long startTime) {
+    scope.seed(Key.get(File.class, WorkingDir.class), workingDir);
+    scope.seed(Key.get(new TypeLiteral<Map<String, String>>() {}, Environment.class), env);
+    scope.seed(Key.get(String[].class, Options.class), args);
+    scope.seed(Key.get(Long.class, StartTime.class), startTime);
+  }
+
+  public static Injector getInjector(String tool) {
+    ServiceLoader<KModule> kLoader = ServiceLoader.load(KModule.class);
+    List<KModule> kModules = new ArrayList<>();
+    for (KModule m : kLoader) {
+      kModules.add(m);
     }
 
-    public static void nailMain(NGContext context) {
-        long startTime = System.nanoTime();
-        KServerFrontEnd kserver = KServerFrontEnd.instance();
-        if (!kserver.isLocal()) {
-            context.assertLoopbackClient();
+    List<Module> modules = new ArrayList<>();
+
+    switch (tool) {
+      case "-klsp":
+        try {
+          org.kframework.lsp.KLanguageServerLauncher.startServer(System.in, System.out);
+        } catch (InterruptedException | ExecutionException e) {
+          throw new RuntimeException(e);
         }
-        isNailgun = true;
-        Main.context = context;
-        if (context.getArgs().length >= 1) {
-            String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
-            int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv(), startTime);
-            exit(result);
-            return;
+        break;
+      case "-kserver":
+        modules.addAll(KServerFrontEnd.getModules());
+        break;
+      case "-kompile":
+        modules.addAll(KompileFrontEnd.getModules());
+        for (KModule kModule : kModules) {
+          List<Module> ms = kModule.getKompileModules();
+          if (ms != null) {
+            modules.addAll(ms);
+          }
         }
+        break;
+      case "-kast":
+        modules.addAll(KastFrontEnd.getModules());
+        for (KModule kModule : kModules) {
+          List<Module> ms = kModule.getKastModules();
+          if (ms != null) {
+            modules.addAll(ms);
+          }
+        }
+        break;
+      case "-kdep":
+        modules = KDepFrontEnd.getModules();
+        break;
+      case "-k-compile-search-pattern":
+        modules = KSearchPatternFrontEnd.getModules();
+        break;
+      case "-kprove":
+        modules.addAll(org.kframework.kprove.KProveFrontEnd.getModules());
+        for (KModule kModule : kModules) {
+          List<Module> ms = kModule.getKProveModules();
+          if (ms != null) {
+            modules.addAll(ms);
+          }
+        }
+        break;
+      default:
         invalidJarArguments();
+        throw new AssertionError("unreachable");
     }
-
-    @Inject
-    public Main {}
-
-    public SimpleScope getRequestScope() {
-        return requestScope;
+    if (modules.size() == 0) {
+      // boot error, we should have printed it already
+      Main.exit(1);
     }
+    return Guice.createInjector(modules);
+  }
 
-    public int runApplication(String tool, String[] args, File workingDir, Map<String, String> env, long startTime) {
-        try {
-            requestScope.enter();
-            seedInjector(requestScope, tool, args, workingDir, env, startTime);
-            return runApplication();
-        } finally {
-            requestScope.exit();
-        }
-    }
-
-    public int runApplication() {
-        KExceptionManager kem = this.kem.get();
-        kem.installForUncaughtExceptions();
-        try {
-            return frontEnd.get().main();
-        } catch (ProvisionException e) {
-            for (Message m : e.getErrorMessages()) {
-                if (!(m.getCause() instanceof KEMException ex)) {
-                    throw e;
-                } else {
-                    kem.registerThrown(ex);
-                }
-            }
-            kem.print();
-            return 1;
-        }
-    }
-
-    public static void seedInjector(SimpleScope scope, String tool, String[] args, File workingDir,
-                                    Map<String, String> env, long startTime) {
-        scope.seed(Key.get(File.class, WorkingDir.class), workingDir);
-        scope.seed(Key.get(new TypeLiteral<Map<String, String>>() {}, Environment.class), env);
-        scope.seed(Key.get(String[].class, Options.class), args);
-        scope.seed(Key.get(Long.class, StartTime.class), startTime);
-    }
-
-    public static Injector getInjector(String tool) {
-        ServiceLoader<KModule> kLoader = ServiceLoader.load(KModule.class);
-        List<KModule> kModules = new ArrayList<>();
-        for (KModule m : kLoader) {
-            kModules.add(m);
-        }
-
-        List<Module> modules = new ArrayList<>();
-
-            switch (tool) {
-                case "-klsp":
-                    try {
-                        org.kframework.lsp.KLanguageServerLauncher.startServer(System.in, System.out);
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
-                    break;
-                case "-kserver":
-                    modules.addAll(KServerFrontEnd.getModules());
-                    break;
-                case "-kompile":
-                    modules.addAll(KompileFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKompileModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kast":
-                    modules.addAll(KastFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKastModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kdep":
-                    modules = KDepFrontEnd.getModules();
-                    break;
-                case "-k-compile-search-pattern":
-                    modules = KSearchPatternFrontEnd.getModules();
-                    break;
-                case "-kprove":
-                    modules.addAll(org.kframework.kprove.KProveFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKProveModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                default:
-                    invalidJarArguments();
-                    throw new AssertionError("unreachable");
-        }
-        if (modules.size() == 0) {
-            //boot error, we should have printed it already
-            Main.exit(1);
-        }
-        return Guice.createInjector(modules);
-    }
-
-    private static void invalidJarArguments() {
-        System.err.println("The first argument of the K java compiler not recognized. Try -kompile, -kast, -kdep, -kserver, or -klsp.");
-        Main.exit(1);
-    }
+  private static void invalidJarArguments() {
+    System.err.println(
+        "The first argument of the K java compiler not recognized. Try -kompile, -kast, -kdep,"
+            + " -kserver, or -klsp.");
+    Main.exit(1);
+  }
 }
