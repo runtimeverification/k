@@ -254,7 +254,7 @@ public class ParserUtils {
         groupedModules.entrySet().stream()
             .filter(e -> e.getValue().size() > 1)
             .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+            .toList();
 
     int errors = 0;
     for (String moduleName : duplicateModules) {

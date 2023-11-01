@@ -121,7 +121,6 @@ public class ConvertDataStructureToLookup {
     return stream(m.productions())
         .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains(Att.FILTER_ELEMENT()))
         .map(p -> p.klabel().get())
-        .distinct()
         .collect(Collectors.toSet());
   }
 

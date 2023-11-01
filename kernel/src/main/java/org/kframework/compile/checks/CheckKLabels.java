@@ -167,16 +167,14 @@ public class CheckKLabels {
           || s.isEmpty()
           || (prod.att().contains(Att.CELL())
               && stream(prod.nonterminals())
-                  .filter(
+                  .anyMatch(
                       nt ->
                           klabels
                               .get(symbol)
                               .sortAttributesFor()
                               .get(nt.sort().head())
                               .getOrElse(() -> Att.empty())
-                              .contains(Att.CELL_COLLECTION()))
-                  .findAny()
-                  .isPresent())) {
+                              .contains(Att.CELL_COLLECTION())))) {
         continue;
       }
       if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {

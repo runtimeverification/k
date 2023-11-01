@@ -176,7 +176,7 @@ public class TypeInferencer implements AutoCloseable {
     for (Tuple2<Sort, Set<Sort>> relation :
         stream(relations.relations())
             .sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1().head(), 0)))
-            .collect(Collectors.toList())) {
+            .toList()) {
       if (!isRealSort(relation._1().head())) {
         continue;
       }

@@ -60,10 +60,7 @@ public class AddParentCells {
     List<K> children =
         allChildren.stream().filter(t -> !(t instanceof KRewrite)).collect(Collectors.toList());
     List<KRewrite> rewrites =
-        allChildren.stream()
-            .filter(t -> t instanceof KRewrite)
-            .map(t -> (KRewrite) t)
-            .collect(Collectors.toList());
+        allChildren.stream().filter(t -> t instanceof KRewrite).map(t -> (KRewrite) t).toList();
 
     // see if all children can fit together
     Set<Sort> usedCells = Sets.newHashSet();
