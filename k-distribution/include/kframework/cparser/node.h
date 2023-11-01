@@ -2,8 +2,7 @@
 #define NODE_H
 
 typedef struct YYLTYPE YYLTYPE;
-struct YYLTYPE
-{
+struct YYLTYPE {
   char *filename;
   int first_line;
   int first_column;
@@ -13,8 +12,10 @@ struct YYLTYPE
 
 #define YYLTYPE struct YYLTYPE
 
-#include <stdbool.h>
 #include "parser.tab.h"
+
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct node {
   char *symbol;
@@ -23,7 +24,7 @@ typedef struct node {
   size_t nchildren;
   bool hasLocation;
   YYLTYPE location;
-  struct node * children[];
+  struct node *children[];
 } node;
 
 typedef union value_type {

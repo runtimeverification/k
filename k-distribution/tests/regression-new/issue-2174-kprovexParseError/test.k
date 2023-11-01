@@ -1,8 +1,9 @@
+// Copyright (c) K Team. All Rights Reserved.
 module SERIALIZATION
     imports INT
     imports BYTES
 
-    syntax Int ::= keccak ( Bytes ) [function, functional, smtlib(smt_keccak)]
+    syntax Int ::= keccak ( Bytes ) [function, total, smtlib(smt_keccak)]
  // --------------------------------------------------------------------------
     rule [keccak]: keccak(_) => 1
 

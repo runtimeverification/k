@@ -1,7 +1,0 @@
-/dist/
-
-/definitions/
-
-/kit-tests/**/*.json
-/kit-tests/**/*.run.out
-/kit-tests/**/*_summary/

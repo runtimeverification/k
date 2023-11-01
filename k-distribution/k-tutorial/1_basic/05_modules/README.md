@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.5: Modules, Imports, and Requires
 
 The purpose of this lesson is to explain how K definitions can be broken into
@@ -38,7 +42,7 @@ endmodule
 A module with some attributes:
 
 ```k
-module LESSON-05-B [attr1, attr2, attr3(value)]
+module LESSON-05-B [group(attr1,attr2), private]
 
 endmodule
 ```
@@ -56,7 +60,7 @@ endmodule
 
 ## Imports
 
-Thus far we have only discussed definitions containing a single module. 
+Thus far we have only discussed definitions containing a single module.
 Definitions can also contain multiple modules, in which one module imports
 others.
 
@@ -131,7 +135,7 @@ module, as well as all the modules it imports recursively, are used to
 determine the rules that can be applied at runtime in order to execute a
 program. For example, in the above example, if the main semantics module is
 module `LESSON-05-D-1`, then `not` is an uninterpreted function (i.e., has no
-rules associated with it), and the rules in module `LESSON-05-D-2` are not
+rules associated with it), and the rules in module `LESSON-05-D` are not
 included.
 
 While you can specify the entry point modules explicitly by passing the
@@ -218,7 +222,7 @@ One note can be made about how paths are resolved in `requires` statements.
 
 By default, the path you specify is allowed to be an absolute or a relative
 path. If the path is absolute, that exact file is imported. If the path is
-relative, a matching file is looked for within all of the 
+relative, a matching file is looked for within all of the
 **include directories** specified to the compiler. By default, the include
 directories include the current working directory, followed by the
 `include/kframework/builtin` directory within your installation of K. You can
@@ -227,7 +231,7 @@ in which case these directories are prepended to the beginning of the list.
 
 ## Exercises
 
-1. Take the solution to lesson 1.4, problem 2 which included the explicit
+1. Take the solution to Lesson 1.4, Exercise 2 which included the explicit
 priority and associativity declarations, and modify the definition so that
 the syntax of integers and brackets is in one module, the syntax of addition,
 subtraction, and unary negation is in another module, and the syntax of
@@ -235,10 +239,10 @@ multiplication and division is in a third module. Make sure you can still parse
 the same set of expressions as before. Place priority declarations in the main
 module.
 
-2. Modify `lesson-02-d.k` from lesson 1.2 so that the rules and syntax are in
+2. Modify `lesson-02-d.k` from Lesson 1.2 so that the rules and syntax are in
 separate modules in separate files.
 
-3. Place the file containing the syntax from problem 2 in another directory,
+3. Place the file containing the syntax from Exercise 2 in another directory,
 then recompile the definition. Observe why a compilation error occurs. Then
 fix the compiler error by passing `-I` to kompile.
 

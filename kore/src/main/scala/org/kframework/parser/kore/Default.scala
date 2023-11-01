@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore
 
 import org.kframework.parser.{kore => i}
@@ -38,9 +39,9 @@ object implementation {
 
     case class Bottom(s: i.Sort) extends i.Bottom
 
-    case class And(s: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.And
+    case class And(s: i.Sort, args: Seq[i.Pattern]) extends i.And
 
-    case class Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.Or
+    case class Or(s: i.Sort, args: Seq[i.Pattern]) extends i.Or
 
     case class Not(s: i.Sort, _1: i.Pattern) extends i.Not
 
@@ -126,9 +127,25 @@ object implementation {
 
     def Bottom(s: i.Sort): i.Pattern = d.Bottom(s)
 
-    def And(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.And(s, _1, _2)
+    def And(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.And(s, Seq(_1, _2))
 
-    def Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Or(s, _1, _2)
+    def And(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = {
+      args.size match {
+        case 0 => Top(s)
+        case 1 => args(0)
+        case _ => d.And(s, args)
+      }
+    }
+
+    def Or(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Or(s, Seq(_1, _2))
+
+    def Or(s: i.Sort, args: Seq[i.Pattern]): i.Pattern = {
+      args.size match {
+        case 0 => Bottom(s)
+        case 1 => args(0)
+        case _ => d.Or(s, args)
+      }
+    }
 
     def Not(s: i.Sort, _1: i.Pattern): i.Pattern = d.Not(s, _1)
 
@@ -170,20 +187,12 @@ object implementation {
 
     def Alias(ctr: String, params: Seq[i.Sort]): i.Alias = d.Alias(ctr, params)
 
-    def LeftAssoc(p: i.Pattern): i.Pattern = {
-      p match {
-        case i.Application(head, ps) => {
-          ps.reduceLeft((accum, p) => Application(head, Seq(accum, p)))
-        }
-      }
+    def LeftAssoc(ctr: (i.Pattern, i.Pattern) => i.Pattern, args: Seq[i.Pattern]): i.Pattern = {
+      args.reduceLeft((accum, p) => ctr(accum, p))
     }
 
-    def RightAssoc(p: i.Pattern): i.Pattern = {
-      p match {
-        case i.Application(head, ps) => {
-          ps.reduceRight((p, accum) => Application(head, Seq(p, accum)))
-        }
-      }
+    def RightAssoc(ctr: (i.Pattern, i.Pattern) => i.Pattern, args: Seq[i.Pattern]): i.Pattern = {
+      args.reduceRight((p, accum) => ctr(p, accum))
     }
   }
 }

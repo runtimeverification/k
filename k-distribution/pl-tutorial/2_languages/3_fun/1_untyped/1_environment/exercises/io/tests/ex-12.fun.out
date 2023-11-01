@@ -1,3 +1,11 @@
-  S ==K "10"
+  {
+    S:String
+  #Equals
+    "10"
+  }
 #Or
-  S ==K "20"
+  {
+    S:String
+  #Equals
+    "20"
+  }

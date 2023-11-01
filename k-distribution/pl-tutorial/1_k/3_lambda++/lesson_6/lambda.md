@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 Tutorial 3--- LAMBDA++
@@ -50,8 +50,8 @@ We move all the LAMBDA++ syntax here.
                > Exp "<=" Exp         [strict]
 // Other functional constructs
   syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)] // Conditional
-               | "let" Id "=" Exp "in" Exp                   // Let binder
-               | "letrec" Id Id "=" Exp "in" Exp             // Letrec
+               | "let" Id "=" Exp "in" Exp [macro]           // Let binder
+               | "letrec" Id Id "=" Exp "in" Exp [macro]     // Letrec
                | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]  // Mu
                | "callcc" Exp  [strict]                      // Callcc
 ```
@@ -112,7 +112,6 @@ then switch back to caller's environment.
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-    [structural]
   rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
        <env> Rho' => Rho[X <- !N] </env>
        <store>... .Map => (!N:Int |-> V) ...</store>
@@ -128,7 +127,6 @@ in the **K** team to add it to the set of pre-defined **K** features.
 
 ```k
   rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
-    [structural]
 ```
 
 ### Arithmetic Constructs
@@ -160,14 +158,14 @@ division rule.
 ### Let Binder
 
 ```k
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 ```
 
 ### Letrec Binder
 We define `letrec` in term of `mu`, whose semantics is below.
 
 ```k
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 ```
 
 ### Mu
@@ -182,7 +180,6 @@ back to the fixed-point.
   rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
        <env> Rho </env>
        <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
-    [structural]
   rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
        <env> Rho' => Rho </env>
 ```

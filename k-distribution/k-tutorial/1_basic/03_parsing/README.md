@@ -1,7 +1,11 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.3: BNF Syntax and Parser Generation
 
 The purpose of this lesson is to explain the full syntax and semantics of
-**productions** in K as well as how productions and other syntactic 
+**productions** in K as well as how productions and other syntactic
 **sentences** can be used to define grammars for use parsing both rules as well
 as programs.
 
@@ -83,6 +87,13 @@ parsed and interpreted by K's interpreter. In other words, `krun` parses and
 interprets terms according to the grammar defined by the developer. It is
 automatically converted into an AST of that term, and then the `colorOf`
 function is evaluated using the function rules provided in the definition.
+
+You can ask yourself: How does K match the strings between the double quotes?
+The answer is that K uses Flex to generate a scanner for the grammar. Flex looks
+for the longest possible match of a regular expression in the input. If there
+are ambiguities between 2 or more regular expressions, it will pick the one with
+the highest `prec` attribute. You can learn more about how Flex matching works
+[here](https://westes.github.io/flex/manual/Matching.html#Matching).
 
 Bringing us back to the file `lesson-03-a.k`, we can see that this grammar
 has given a simple BNF grammar for expressions over Booleans. We have defined
@@ -265,7 +276,7 @@ only would it be cumbersome and tedious, you would also then have to deal with
 an AST generated for the literal which is not convenient to work with.
 
 Instead of doing this, K allows you to define **token** productions, where
-a production consists of a regular expression followed by the `token`
+a production consists of a [regular expression](https://en.wikipedia.org/wiki/Regular_expression) followed by the `token`
 attribute, and the resulting AST consists of a typed string containing the
 value recognized by the regular expression.
 
@@ -363,7 +374,7 @@ such, if your grammar is not LR(1), it may not parse exactly the same as if
 you were to use the just-in-time parser, because Bison will automatically pick
 one of the possible branches whenever it encounters a shift-reduce or
 reduce-reduce conflict. In this case, you can either modify your grammar to be
-LR(1), or you can enable use of Bison's GLR support by instead passing 
+LR(1), or you can enable use of Bison's GLR support by instead passing
 `--gen-glr-bison-parser` to `kompile`. Note that if your grammar is ambiguous,
 the ahead-of-time parser will not provide you with particularly readable error
 messages at this time.
@@ -383,7 +394,7 @@ yourself that both produce the same result, but that the latter is faster.
 subtraction, multiplication, division, and unary negation. Integers should be
 in decimal form and lexically without a sign, whereas negative numbers can be
 represented via unary negation. Ensure that you are able to parse some basic
-arithmetic expressions using a generated ahead-of-time parser. Do not worry 
+arithmetic expressions using a generated ahead-of-time parser. Do not worry
 about disambiguating the grammar or about writing rules to implement the
 operations in this definition.
 

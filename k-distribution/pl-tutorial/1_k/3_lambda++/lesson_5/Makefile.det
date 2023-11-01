@@ -3,7 +3,7 @@ TESTDIR=tests/deterministic
 DEFDIR=det
 include $(MAKEFILE_PATH)/../../1_lambda/lesson_1/Makefile
 # disable bison parser because we are using the Java backend
-KOMPILE_FLAGS=--enable-search
+KOMPILE_FLAGS=--enable-search --syntax-module LAMBDA
 KRUN_FLAGS=--pattern "<k> V:K </k>"
 # Some of these programs yield nondeterminism unless we kompile with the
 # superstrict "strict" option, which is done in Makefile.nondet.  We do not

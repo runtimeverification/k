@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
 
@@ -127,7 +129,7 @@ We hope this current limitation will be eliminated soon.
 Once a thread terminates, its computation cell becomes empty. When that
 happens, we can go ahead and remove the useless `thread` cell:
 
-    rule <thread>... <k> . </k> ...</thread> => .  [structural]
+    rule <thread>... <k> . </k> ...</thread> => .
 
 Let's see what we've got. `kompile` and `krun` `spawn.imp`.
 Note the following:

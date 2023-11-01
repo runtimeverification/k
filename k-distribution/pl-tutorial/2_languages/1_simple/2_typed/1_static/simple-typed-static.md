@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # SIMPLE — Typed — Static
@@ -135,7 +135,7 @@ The lists of types are useful for function arguments.
                 | "(" Type ")"             [bracket]
                 > Types "->" Type
 
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}          [klabel(exps)]
 ```
 
 ## Declarations
@@ -203,7 +203,7 @@ We still need lists of expressions, defined below, but note that we do
 not need lists of identifiers anymore.  They have been replaced by the lists
 of parameters.
 ```k
-  syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
 ```
 
 ## Statements
@@ -221,9 +221,9 @@ type the actual construct.
   syntax Stmt ::= Block
                 | Exp ";"                                  [strict]
                 | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                   [macro]
                 | "while" "(" Exp ")" Block                [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block     [macro]
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
@@ -245,11 +245,11 @@ they now reduce to the `stmt` type, which is a result.
 We use the same desugaring macros like in untyped SIMPLE, but, of
 course, including the types of the involved variables.
 ```k
-  rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
-  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
-  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [anywhere]
+  rule T:Type X:Id = E; => T X; X = E;                                  [anywhere]
 
 endmodule
 
@@ -335,7 +335,7 @@ subcells.
 ```k
   configuration <T color="yellow">
                   <tasks color="orange">
-                    <task multiplicity="*" color="yellow">
+                    <task multiplicity="*" color="yellow" type="Set">
                       <k color="green"> $PGM:Stmt </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
                       <returnType multiplicity="?" color="black"> void </returnType>
@@ -374,10 +374,10 @@ variable.
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
-  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
+  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];
 // I want to write the rule below as _:Type (E:Exp[.Types] => E),
 // but the list completion seems to not work well with that.
-  rule T:Type E:Exp[.Types]; => T E;          [structural]
+  rule T:Type E:Exp[.Types]; => T E;
 ```
 
 ## Function declarations
@@ -404,7 +404,6 @@ entire code of the function body needs to type anyway.
        (.Bag => <task>
                <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <returnType> T </returnType>
              </task>)
-    [structural]
 ```
 
 ## Checking if `main()` exists}
@@ -418,7 +417,6 @@ types (remove this task creation if you do not want your type system
 to reject programs without a `main` function).
 ```k
   rule <task> <k> stmt => main(.Exps); </k> (.Bag => <tenv> .Map </tenv>) </task>
-    [structural]
 ```
 
 ## Collecting the terminated tasks
@@ -509,7 +507,7 @@ Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes:
 ```k
 // NOTE:
-// We used to need parentheses in the RHS, to avoid capturing Ts as rule tag.
+// We used to need parentheses in the RHS, to avoid capturing Ts as an attribute
 // Let's hope that is not a problem anymore.
 
   rule (T[])[int, Ts:Types] => T[Ts]
@@ -599,8 +597,8 @@ any try-catch block (with the currently unchecked ‒also for
 simplicity‒ expectation that the caller functions would catch those
 exceptions).
 ```k
-  rule try block catch(int X:Id) {S} => {int X; S}  [structural]
-  rule try block catch(int X:Id) {} => {int X;}  [structural]
+  rule try block catch(int X:Id) {S} => {int X; S}
+  rule try block catch(int X:Id) {} => {int X;}
   rule throw int; => stmt
 ```
 

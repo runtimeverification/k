@@ -1,18 +1,12 @@
+// Copyright (c) K Team. All Rights Reserved.
 // CafeOBJ-style proof of addition associativity
 // https://pdfs.semanticscholar.org/16b0/a31be7de330027dfffc3c9521d5d4424e4cd.pdf
 
-module IH
+module ASSOC-SPEC
     imports NAT
-
-    // declaring constants as arbitrary values
-    syntax Nat ::= "k" [function]
 
     // induction hypothesis:
     rule (I:Nat + J:Nat) + k => I:Nat + (J:Nat + k) [simplification]
-endmodule
-
-module ASSOC-SPEC
-    imports IH
 
     // Prove associativity: (i + j) + k = i +(j + k)
     // by induction on k

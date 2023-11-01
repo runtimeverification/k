@@ -8,3 +8,4 @@
     assignmentResult ( ( X:MyId |-> 3 ) [ x <- 5 ]
     y |-> 4 ) ~> .
   </k>
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

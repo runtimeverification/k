@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.15: Configuration Declarations and Cell Nesting
 
 The purpose of this lesson is to explain how to store additional information
@@ -70,8 +74,8 @@ endmodule
 ```
 
 This simple definition takes a list of integers as input and sums them
-together. Here we have declared two cells: `<k>` and `<sum>`. Unlike `<k>`, 
-`<sum>` does not get initialized via a configuration variable, but instead 
+together. Here we have declared two cells: `<k>` and `<sum>`. Unlike `<k>`,
+`<sum>` does not get initialized via a configuration variable, but instead
 is initialized statically with the value `0`.
 
 Note the rule in the second module: we have explicitly specified multiple
@@ -116,7 +120,7 @@ to be explicitly initialized with `-c`.
 
 ### Exercise
 
-Modify your solution to Lesson 1.14, Problem 2 to add a new cell with a
+Modify your solution to Lesson 1.14, Exercise 2 to add a new cell with a
 configuration variable of sort `Bool`. This variable should determine whether
 the `/` operator is evaluated using `/Int` or `divInt`. Test that by specifying
 different values for this variable, you can change the behavior of rounding on
@@ -127,7 +131,7 @@ division of negative numbers.
 It is possible to nest cells inside one another. A cell that contains other
 cells must contain **only** other cells, but in doing this, you are able to
 create a hierarchical structure to the configuration. Consider the following
-definition which is equivalent to the one in `LESSON-15-B` (`lesson-15-c.k`):
+definition (`lesson-15-c.k`), which is equivalent to the one in `LESSON-15-B`:
 
 ```k
 module LESSON-15-C-SYNTAX
@@ -184,6 +188,25 @@ rule each time. Thus, K follows the principle that you should only mention the
 cells in a rule that are actually needed in order to accomplish its specific
 goal. By following this best practice, you can significantly increase the
 modularity of the definition and make it easier to maintain and modify.
+
+Note that unlike top-level rewrite rules, cells that appear inside function
+rules are not necessarily completed to the top of the configuration. They still
+participate in cell ccompletion in the sense that you can mention cell
+structure loosely inside a function rule and it will be completed into the
+correct cell structure specified by the configuration declaration. However,
+they do not complete all the way to the top, instead completing only up to
+the top-most cell mentioned in the rule.
+
+For example, if I write the following function rule in the above definition:
+
+```
+  rule doStuff(<first> FIRST </first>) => FIRST
+```
+
+The function will only match on the `first` cell, rather than the entire
+configuration. However, if we had mentioned a parent cell in the rule, it still
+would have completed the children of that parent cell as needed to ensure that
+the resulting term is well formed.
 
 ### Exercise
 

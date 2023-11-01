@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # KOOL — Typed — Dynamic
@@ -126,9 +126,9 @@ untyped KOOL.
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -145,10 +145,10 @@ untyped KOOL.
 ## Desugaring macros
 
 ```k
-  rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S::Stmt} => {Start while(Cond){S Step;}} [macro]
-  rule T::Type E1::Exp, E2::Exp, Es::Exps; => T E1; T E2, Es;           [macro-rec]
-  rule T::Type X::Id = E; => T X; X = E;                                [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S::Stmt} => {Start while(Cond){S Step;}}
+  rule T::Type E1::Exp, E2::Exp, Es::Exps; => T E1; T E2, Es;           [anywhere]
+  rule T::Type X::Id = E; => T X; X = E;                                [anywhere]
 
   rule class C:Id S => class C extends Object S                     // KOOL
 
@@ -275,17 +275,16 @@ KOOL).
            $1[$2] = X;
          }
        }
-    [structural]
 
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 
 
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [group(increment)]
 
 
   rule I1 + I2 => I1 +Int I2
@@ -309,30 +308,29 @@ KOOL).
 
 
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [anywhere]
 
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    requires N >=Int 0 andBool N <Int M  [structural, anywhere]
+    requires N >=Int 0 andBool N <Int M  [anywhere]
 
   rule sizeOf(array(_,_,N)) => N
 
 
   syntax Val ::= nothing(Type)
   rule <k> return; => return nothing(T); ...</k> <returnType> T </returnType>
-    [structural]
 
 
-  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 
 
   context (HOLE => lvalue(HOLE)) = _
 
 
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 
 
   rule _:Val; => .
@@ -342,12 +340,12 @@ KOOL).
   rule if (false) _ else S => S
 
 
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}
 
 
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    requires typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
-  rule print(.Vals); => .  [structural]
+    requires typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
+  rule print(.Vals); => .
 
 
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
@@ -360,7 +358,7 @@ KOOL).
   rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy (.Set => SetItem(V)) </busy>
-    requires (notBool(V in Busy:Set))  [acquire]
+    requires (notBool(V in Busy:Set))  [group(acquire)]
 
   rule <k> acquire V; => . ...</k>
        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
@@ -373,7 +371,7 @@ KOOL).
        <busy>... SetItem(V) => .Set ...</busy>
 
   rule <k> rendezvous V:Val; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [rendezvous]
+       <k> rendezvous V; => . ...</k>  [group(rendezvous)]
 ```
 
 ## Unchanged auxiliary operations from dynamically typed SIMPLE
@@ -385,21 +383,20 @@ KOOL).
   rule mkDecls(.Params,.Vals) => {}
 
   syntax Exp ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .) ~> setEnv(_)
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
-    [structural]
 
   context lvalue(_::Exp[HOLE::Exps])
   context lvalue(HOLE::Exp[_::Exps])
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 
   syntax Type ::= Type "<" Vals ">"  [function]
   rule T:Type<_,Vs:Vals> => T[]<Vs>
@@ -436,7 +433,7 @@ get more from the existing SIMPLE constructs.
 Like in untyped KOOL.
 ```k
   syntax KItem ::= "execute"
-  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>  [structural]
+  rule <k> execute => new Main(.Exps); </k> <env> .Map </env>
 ```
 
 ## Method application
@@ -518,7 +515,7 @@ values are allowed to be stored in each location.
            => subtype(typeOf(V),typeOf(V')) ~> true?
               ~> unsafeCast(V, typeOf(V')) ...</k>
        <store>... L |-> (V' => unsafeCast(V, typeOf(V'))) ...</store>
-    [assignment]
+    [group(assignment)]
 ```
 
 ## Typed exceptions
@@ -578,7 +575,7 @@ Like in untyped KOOL.
                             <baseClass> Class2 </baseClass>
                             <declarations> S </declarations>
                         </classData>)
-       ...</classes>  [structural]
+       ...</classes>
 ```
 
 ## Method declaration
@@ -630,14 +627,14 @@ those in untyped KOOL.
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
        <className> Class </className>
        <baseClass> Class1:Id </baseClass>
-       <declarations> S </declarations>  [structural]
+       <declarations> S </declarations>
 
-  rule <k> create(Object) => . ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>
 
   syntax KItem ::= setCrntClass(Id)
 
   rule <k> setCrntClass(C) => . ...</k>
-       <crntClass> _ => C </crntClass>  [structural]
+       <crntClass> _ => C </crntClass>
 
   syntax KItem ::= "addEnvLayer"
 
@@ -645,7 +642,6 @@ those in untyped KOOL.
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
        <envStack> .List => ListItem(envStackFrame(Class, Env)) ...</envStack>
-    [structural]
 
   syntax KItem ::= "storeObj"
 
@@ -675,37 +671,33 @@ Like in untyped KOOL.
 Like in untyped KOOL.
 ```k
   rule <k> X:Id => this . X ...</k> <env> Env:Map </env>
-    requires notBool(X in keys(Env))  [structural]
+    requires notBool(X in keys(Env))
 
   context HOLE . _::Id requires (HOLE =/=K super)
 
 /*  rule objectClosure(<crntObj> <crntClass> Class:Id </crntClass>
                      <envStack>... ListItem((Class,EnvC:EnvCell)) EStack </envStack> </crntObj>)
        . X:Id
-    => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
-    [structural]*/
+    => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X) */
   rule objectClosure(Class:Id,
                      ListItem(envStackFrame(Class,Env)) EStack)
        . X:Id
     => lookupMember(ListItem(envStackFrame(Class,Env)) EStack, X)
-    [structural]
   rule objectClosure(Class:Id,
                      (ListItem(envStackFrame(Class':Id,_)) => .List) _EStack)
        . _X:Id
-    requires Class =/=K Class' [structural]
+    requires Class =/=K Class'
 
 /*  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
-       <envStack>... ListItem((Class,EnvC:EnvCell)) EStack </envStack>
-    [structural]*/
+       <envStack>... ListItem((Class,EnvC:EnvCell)) EStack </envStack> */
   rule <k> super . X => lookupMember(EStack, X) ...</k>
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
-    [structural]
   rule <k> super . _X ...</k>
        <crntClass> Class:Id </crntClass>
        <envStack> (ListItem(envStackFrame(Class':Id,_)) => .List) _EStack </envStack>
-    requires Class =/=K Class' [structural]
+    requires Class =/=K Class'
 ```
 
 ## Method invocation
@@ -714,31 +706,29 @@ The method lookup is the same as in untyped KOOL.
 ```k
   rule <k> (X:Id => V)(_:Exps) ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   rule <k> (X:Id => this . X)(_:Exps) ...</k>
        <env> Env </env>
-    requires notBool(X in keys(Env))  [structural]
+    requires notBool(X in keys(Env))
 
   context HOLE._::Id(_) requires HOLE =/=K super
 
   rule (objectClosure(_, EStack) . X
-    => lookupMember(EStack, X:Id))(_:Exps)  [structural]
+    => lookupMember(EStack, X:Id))(_:Exps)
 
 /*  rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... ListItem((Class,_)) EStack </envStack>
-    [structural]*/
+       <envStack>... ListItem((Class,_)) EStack </envStack> */
   rule <k> (super . X
             => lookupMember(EStack,X))(_:Exps)...</k>
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
-    [structural]
   rule <k> (super . _X)(_:Exps)...</k>
        <crntClass> Class:Id </crntClass>
        <envStack> (ListItem(envStackFrame(Class':Id,_)) => .List) _EStack </envStack>
-    requires Class =/=K Class' [structural]
+    requires Class =/=K Class'
 
   // TODO(KORE): fix getKLabel #1801
   rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
@@ -751,7 +741,7 @@ The method lookup is the same as in untyped KOOL.
   */
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
-    [lookup]
+    [group(lookup)]
 ```
 
 ## Instance of
@@ -762,7 +752,7 @@ Like in untyped KOOL.
        instanceOf C => true
 
   rule objectClosure(_, (ListItem(envStackFrame(C::Id,_)) => .List) _)
-       instanceOf C'  requires C =/=K C'  [structural]
+       instanceOf C'  requires C =/=K C'
 
   rule objectClosure(_, .List) instanceOf _ => false
 ```
@@ -784,7 +774,7 @@ can indeed be cast to the claimed type.
 Like in untyped KOOL.
 ```k
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
-    requires notBool(X in keys(Env))  [structural]
+    requires notBool(X in keys(Env))
 
   context lvalue((HOLE . _)::Exp)
 
@@ -792,16 +782,16 @@ Like in untyped KOOL.
                             <envStack>... ListItem((C,EnvC:EnvCell)) EStack </envStack> </crntObj>)
               . X
               => lookupMember(<envStack> ListItem((C,EnvC)) EStack </envStack>,
-                              X))  [structural]*/
+                              X)) */
   rule lvalue(objectClosure(C:Id,
                             ListItem(envStackFrame(C,Env)) EStack)
               . X
               => lookupMember(ListItem(envStackFrame(C,Env)) EStack,
-                              X))  [structural]
+                              X))
   rule lvalue(objectClosure(C,
                             (ListItem(envStackFrame(C',_)) => .List) _EStack)
               . _X)
-    requires C =/=K C' [structural]
+    requires C =/=K C'
 ```
 
 ## Lookup member
@@ -834,24 +824,24 @@ The subclass relation induces a subtyping relation.
 ```k
   syntax Exp ::= subtype(Types,Types)
 
-  rule subtype(T:Type, T) => true  [structural]
+  rule subtype(T:Type, T) => true
 
   rule <k> subtype(C1:Id, C:Id) => subtype(C2, C) ...</k>
        <className> C1 </className>
        <baseClass> C2:Id </baseClass>
-    requires C1 =/=K C  [structural]
+    requires C1 =/=K C
 
   rule subtype(Object,Class:Id) => false
-    requires Class =/=K Object  [structural]
+    requires Class =/=K Object
 
-  rule subtype(Ts1->T2,Ts1'->T2') => subtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]
+  rule subtype(Ts1->T2,Ts1'->T2') => subtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))
 
 // Note that the following rule would be wrong!
 //  rule subtype(T[],T'[]) => subtype(T,T')
 
   rule subtype((T:Type,Ts),(T':Type,Ts')) => subtype(T,T') && subtype(Ts,Ts')
-    requires Ts =/=K .Types  [structural]
-  rule subtype(.Types,.Types) => true  [structural]
+    requires Ts =/=K .Types
+  rule subtype(.Types,.Types) => true
 ```
 
 ## Unsafe Casting
@@ -875,7 +865,7 @@ A generic computational guard: it allows the computation to continue
 only if a prefix guard evaluates to true.
 ```k
   syntax KItem ::= "true?"
-  rule true ~> true? => .  [structural]
+  rule true ~> true? => .
 
 endmodule
 ```

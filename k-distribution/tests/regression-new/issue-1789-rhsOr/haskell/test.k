@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST-SYNTAX
   imports INT-SYNTAX
 endmodule
@@ -8,7 +9,7 @@ module TEST
   imports BOOL
 
   configuration <k> split($PGM:Int) </k>
-  syntax Int ::= split(Int)  [function, functional]
+  syntax Int ::= split(Int)  [function, total]
 
   rule  split(V:Int)
         =>

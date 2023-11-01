@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.16: Maps, Semantic Lists, and Sets
 
 The purpose of this lesson is to explain how to use the data structure sorts
@@ -143,7 +147,7 @@ represent certain types of program state. For this purpose, it is generally
 useful to have an associative-list sort, rather than the cons-list sorts
 provided in [Lesson 1.12](../12_syntactic_lists/README.md).
 
-The type provided by K for this purpose is the `List` sort, and it is also 
+The type provided by K for this purpose is the `List` sort, and it is also
 provided in `domains.md`, in the `LIST` module. This type is also not
 (currently) polymorphic. Like `Map`, all `List` terms are lists of terms of the
 `KItem` sort.
@@ -251,7 +255,7 @@ When we `krun` this program, we should get the following output:
   <fstack>
     .List
   </fstack>
-</T> 
+</T>
 ```
 
 Note that we have successfully put on the `<k>` cell the value returned by the
@@ -340,7 +344,7 @@ stuck on the declaration.
 
 ## Exercises
 
-1. Modify your solution to Lesson 1.14, Problem 2 and introduce the sorts
+1. Modify your solution to Lesson 1.14, Exercise 2 and introduce the sorts
 `Decls`, `Decl`, and `Stmt` which include variable and function declaration
 (without function parameters), and return and assignment statements, as well
 as call expressions. Use `List` and `Map` to implement these operators, making

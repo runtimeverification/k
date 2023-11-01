@@ -1,0 +1,6 @@
+[Error] Compiler: The attribute 'total' cannot be applied to a production which does not have the 'function' attribute.
+	Source(totalWithoutFunction.k)
+	Location(4,16,4,28)
+	4 |	  syntax A ::= c(A) [total]
+	  .	               ^~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.

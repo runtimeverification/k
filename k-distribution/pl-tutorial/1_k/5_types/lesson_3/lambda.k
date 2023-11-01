@@ -1,9 +1,9 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module LAMBDA
   imports DOMAINS
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type               [klabel(functionType)]
                 | "(" Type ")"                 [bracket]
 
   syntax Exp ::= Id
@@ -20,7 +20,7 @@ module LAMBDA
                   <tenv color="blue"> .Map </tenv>
                 </T>
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [strict, klabel(functionType)]
   rule <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
        <tenv> Rho => Rho[X <- T] </tenv>
 
@@ -43,13 +43,13 @@ module LAMBDA
   syntax Exp ::= "if" Exp "then" Exp "else" Exp                       [strict]
   rule if bool then T:Type else T => T
 
-  syntax Exp ::= "let" Id ":" Type "=" Exp "in" Exp
-  rule let X : T = E in E' => (lambda X : T . E') E                   [macro]
+  syntax Exp ::= "let" Id ":" Type "=" Exp "in" Exp [macro]
+  rule let X : T = E in E' => (lambda X : T . E') E
 
-  syntax Exp ::= "letrec" Id ":" Type Id ":" Type "=" Exp "in" Exp
+  syntax Exp ::= "letrec" Id ":" Type Id ":" Type "=" Exp "in" Exp [macro]
                | "mu" Id ":" Type "." Exp
   rule letrec F : T1  X : T2 = E in E'
-    => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
+    => let F : T1 = mu F : T1 . lambda X : T2 . E in E'
   rule <k> mu X : T . E => (T -> T) E ~> Rho ...</k>
        <tenv> Rho => Rho[X <- T] </tenv>
 

@@ -3,7 +3,7 @@ DEF=simple-typed-static
 EXT=simple
 TESTDIR?=../programs/*
 RESULTDIR=tests
-KOMPILE_BACKEND?=java
+KOMPILE_FLAGS=--enable-search
 KRUN_FLAGS=--pattern "<tasks> .Bag </tasks>" --smt none
 
 include $(MAKEFILE_PATH)/../../../../find-k.mak

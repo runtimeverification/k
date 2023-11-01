@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module MACRO-VARS-SYNTAX
 endmodule
 module MACRO-VARS

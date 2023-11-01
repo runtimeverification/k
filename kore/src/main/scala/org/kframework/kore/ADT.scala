@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kore
 
 import org.kframework.builtin.{KLabels, Sorts}
@@ -105,7 +106,7 @@ object ADT {
 object SortedADT {
 
   case class SortedKVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
-    val sort: Sort = if (att.contains("cellSort")) Sorts.K else att.getOptional(classOf[Sort]).orElse(Sorts.K)
+    val sort: Sort = if (att.contains(Att.CELL_SORT)) Sorts.K else att.getOptional(classOf[Sort]).orElse(Sorts.K)
 
     def params = Seq()
 

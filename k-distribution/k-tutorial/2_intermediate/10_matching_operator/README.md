@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.10: The Matching Operators, `:=K` and `:/=K`
 
 ## Return to Top

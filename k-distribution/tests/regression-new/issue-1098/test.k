@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 
 module TEST
   imports DOMAINS
@@ -7,7 +8,7 @@ module TEST
   syntax Record ::= Map | ".Record"
 
   syntax RecordDescr ::= "record2descr" "(" Record ")" [function]
-  rule record2descr( F:Id |-> V ) => F = V [structural]
+  rule record2descr( F:Id |-> V ) => F = V
 
   rule 0 => record2descr(x |-> 0)
   syntax Id ::= "x" [token]

@@ -1,34 +1,42 @@
-# Lesson 1.19: Debugging with GDB
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
+# Lesson 1.19: Debugging with GDB or LLDB
 
 The purpose of this lesson is to teach how to debug your K interpreter using
-the K-language support provided in [GDB](https://www.gnu.org/software/gdb/).
+the K-language support provided in [GDB](https://www.gnu.org/software/gdb/) or
+[LLDB](https://lldb.llvm.org/index.html).
 
 ## Caveats
 
-Debugging K definitions using GDB is currently only supported on Linux; the
-instructions in this section will not work properly on macOS. Support for
-debugging K using LLDB is a work in progress, and this chapter will be updated
-when doing so is possible.
+This lesson has been written with GDB support on Linux in mind. Unfortunately,
+on macOS, GDB has limited support. To address this, we have introduced early
+experimental support for debugging with LLDB on macOS. In some cases, the
+features supported by LLDB are slightly different to those supported by GDB; the
+tutorial text will make this clear where necessary. If you use a macOS with an
+LLVM version older than 15, you may need to upgrade it to use the LLDB
+correctly. If you encounter an issue on either operating system, please open an
+issue against the [K repository](https://github.com/runtimeverification/k).
 
 ## Getting started
 
-You will need GDB in order to complete this lesson. If you do not already
-have GDB installed, then do so. Steps to install GDB are outlined in
+On Linux, you will need GDB in order to complete this lesson. If you do not
+already have GDB installed, then do so. Steps to install GDB are outlined in
 this [GDB Tutorial](http://www.gdbtutorial.com/tutorial/how-install-gdb).
 
-The first thing neccessary in order to debug a K interpreter in GDB is to
-build the interpreter with full debugging support enabled. This can be done
-relatively simply. First, make sure you have not passed `-O1`, `-O2`, or `-O3`
-to `kompile`. Second, simply add the command line flags `-ccopt -g -ccopt -O1`
-to `kompile`. The resulting compiled K definition will be ready to support
-debugging.
+On macOS, LLDB should already have been installed with K's build dependencies
+(whether you have built K from source, or installed it using `kup` or Homebrew).
 
-Note: the 'O' in `-O1` is the letter 'O' not the number 0!
+The first thing neccessary in order to debug a K interpreter is to build the
+interpreter with full debugging support enabled. This can be done relatively
+simply. First, run `kompile` with the command line flag `--enable-llvm-debug`.
+The resulting compiled K definition will be ready to support debugging.
 
-Once you have a compiled K definition and a program you wish to debug, you
-can start the debugger by passing the `--debugger` flag to `krun`. This will
-automatically load the program you are executing into GDB and drop you into
-a GDB shell ready to start executing the program.
+Once you have a compiled K definition and a program you wish to debug, you can
+start the debugger by passing the `--debugger` flag to `krun`. This will
+automatically load the program you are executing into GDB and drop you into a
+GDB shell ready to start executing the program.
 
 As an example, consider the following K definition (`lesson-19-a.k`):
 
@@ -41,10 +49,12 @@ module LESSON-19-A
 endmodule
 ```
 
-If we compile this definition with
-`kompile lesson-19-a.k -ccopt -g -ccopt -O1`, and run the program `0` in the
-debugger with `krun -cPGM=0 --debugger`, we will see the following output
-(roughly):
+If we compile this definition with `kompile lesson-19-a.k --enable-llvm-debug`,
+and run the program `0` in the debugger with `krun -cPGM=0 --debugger`, we will
+see the following output (roughly, and depending on which platform you are
+using):
+
+### GDB / Linux
 
 ```
 GNU gdb (Ubuntu 9.2-0ubuntu1~20.04) 9.2
@@ -87,7 +97,46 @@ time you kompile a different `K` definition, then you can just trust a minimal
 directory containing all your kompiled files; however, do not choose a top-level directory containing arbitrary files as this amounts to trusting arbitrary files and is a security risk. More info on the load safe path
 can be found [here](https://sourceware.org/gdb/onlinedocs/gdb/Auto_002dloading-safe-path.html).
 
+### LLDB / macOS
+
+```
+(lldb) target create "./lesson-19-a-kompiled/interpreter"
+warning: 'interpreter' contains a debug script. To run this script in this debug session:
+
+    command script import "/Users/brucecollie/code/scratch/lesson-19-a-kompiled/interpreter.dSYM/Contents/Resources/Python/interpreter.py"
+
+To run all discovered debug scripts in this session:
+
+    settings set target.load-script-from-symbol-file true
+
+Current executable set to '/Users/brucecollie/code/scratch/lesson-19-a-kompiled/interpreter' (x86_64).
+(lldb) settings set -- target.run-args  ".krun-2023-03-20-11-22-46-TcYt9ffhb2/tmp.in.RupiLwHNfn" "-1" ".krun-2023-03-20-11-22-46-TcYt9ffhb2/result.kore"
+(lldb) 
+```
+
+LLDB applies slightly different security policies to GDB. To load K's debugging
+scripts for this session only, you can run the `command script import` line at
+the LLDB prompt. The loaded scripts will not persist across debugging sessions
+if you do this. It is also possible to configure LLDB to automatically load the
+K scripts when an interpreter is started in LLDB; doing so requires a slightly
+less broad permission than GDB.
+
+On macOS, the `.dSYM` directory that contains debugging symbols for an
+executable can also contain Python scripts in `Contents/Resources/Python`. If
+there is a Python script with a name matching the name of the current executable
+(here, `interpreter` and `interpreter.py`), it will be automatically loaded if
+the `target.load-script-from-symbol-file` setting is set). You can therefore add
+the `settings set` command to your `~/.lldbinit` without enabling full arbitrary
+code execution, but you should be aware of the paths from which code _can_ be
+executed if you do so.
+
 ## Basic commands
+
+> **LLDB Note:** the `k start` and `k step` commands are currently not
+> implemented in the K LLDB scripts. To work around this limitation temporarily,
+> you can run `process launch --stop-at-entry` instead of `k start`. To emulate
+> `k step`, first run `rbreak k_step` once, then `continue` instead of each `k
+> step`. We hope to address these limitations soon.
 
 The most basic commands you can execute in the K GDB session are to run your
 program or to step through it. The first can be accomplished using GDB's
@@ -160,7 +209,7 @@ As we can see, ten rewrite steps were taken.
 
 The next important step in debugging an application in GDB is to be able to
 set breakpoints. Generally speaking, there are three types of breakpoints we
-are interested in in a K semantics: Setting a breakpoint when a particular
+are interested in a K semantics: Setting a breakpoint when a particular
 function is called, setting a breakpoint when a particular rule is applied,
 and setting a breakpoint when a side condition of a rule is evaluated.
 
@@ -184,10 +233,14 @@ endmodule
 
 Once this program has been compiled for debugging, we can run the program
 `Blueberry()`. We can then set a breakpoint that stops when the `isBlue`
-function is called with the following command:
-
+function is called with the following command in GDB:
 ```
 break lesson-19-b.k:4
+```
+
+Similarly, in LLDB, run:
+```
+breakpoint set --file lesson-19-b.k --line 4
 ```
 
 Here is what we see if we set this breakpoint and then run the interpreter:
@@ -203,6 +256,24 @@ Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 Breakpoint 1, LblisBlue'LParUndsRParUnds'LESSON-19-B'Unds'Bool'Unds'Fruit (_1=Blueberry ( )) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k:4
 4         syntax Bool ::= isBlue(Fruit) [function]
 (gdb)
+```
+
+```
+(lldb) breakpoint set --file lesson-19-b.k --line 4
+Breakpoint 1: where = interpreter`LblisBlue'LParUndsRParUnds'LESSON-19-B'Unds'Bool'Unds'Fruit + 20 at lesson-19-b.k:4:19, address = 0x0000000100003ff4
+(lldb) run
+Process 50546 launched: '/Users/brucecollie/code/scratch/lesson-19-b-kompiled/interpreter' (x86_64)
+Process 50546 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000100003ff4 interpreter`LblisBlue'LParUndsRParUnds'LESSON-19-B'Unds'Bool'Unds'Fruit(_1=Blueberry ( )) at lesson-19-b.k:4:19
+   1   	module LESSON-19-B
+   2   	  imports BOOL
+   3   	
+-> 4   	  syntax Bool ::= isBlue(Fruit) [function]
+   5   	  syntax Fruit ::= Blueberry() | Banana()
+   6   	  rule isBlue(Blueberry()) => true
+   7   	  rule isBlue(Banana()) => false
+(lldb)
 ```
 
 As we can see, we have stopped at the point where we are evaluating that
@@ -225,6 +296,24 @@ Breakpoint 1, apply_rule_138 () at /home/dwightguth/kframework-5.0.0/k-distribut
 (gdb)
 ```
 
+```
+(lldb) breakpoint set --file lesson-19-b.k --line 6
+Breakpoint 1: where = interpreter`apply_rule_140 at lesson-19-b.k:6:8, address = 0x0000000100004620
+(lldb) run
+Process 50681 launched: '/Users/brucecollie/code/scratch/lesson-19-b-kompiled/interpreter' (x86_64)
+Process 50681 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000100004620 interpreter`apply_rule_140 at lesson-19-b.k:6:8
+   3   	
+   4   	  syntax Bool ::= isBlue(Fruit) [function]
+   5   	  syntax Fruit ::= Blueberry() | Banana()
+-> 6   	  rule isBlue(Blueberry()) => true
+   7   	  rule isBlue(Banana()) => false
+   8   	
+   9   	  rule F:Fruit => isBlue(F)
+(lldb) 
+```
+
 We can also do the same with a top-level rule:
 
 ```
@@ -240,6 +329,24 @@ Breakpoint 1, apply_rule_107 (Var'Unds'DotVar0=<generatedCounter>
 </generatedCounter>, Var'Unds'DotVar1=., VarF=Blueberry ( )) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k:9
 9         rule F:Fruit => isBlue(F)
 (gdb)
+```
+
+```
+(lldb) breakpoint set --file lesson-19-b.k --line 9
+Breakpoint 1: 2 locations.
+(lldb) run
+Process 50798 launched: '/Users/brucecollie/code/scratch/lesson-19-b-kompiled/interpreter' (x86_64)
+Process 50798 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000100003f2e interpreter`apply_rule_109(Var'Unds'DotVar0=<generatedCounter>
+  0
+</generatedCounter>, Var'Unds'DotVar1=., VarF=Blueberry ( )) at lesson-19-b.k:9:8
+   6   	  rule isBlue(Blueberry()) => true
+   7   	  rule isBlue(Banana()) => false
+   8   	
+-> 9   	  rule F:Fruit => isBlue(F)
+   10  	endmodule
+(lldb)  
 ```
 
 Unlike the function rule above, we see several parameters to this function.
@@ -282,6 +389,24 @@ Breakpoint 1, LESSON-19-C.isEven.rhs () at /home/dwightguth/kframework-5.0.0/k-d
 (gdb)
 ```
 
+```
+(lldb) breakpoint set --name LESSON-19-C.isEven.rhs
+Breakpoint 1: where = interpreter`LESSON-19-C.isEven.rhs at lesson-19-c.k:6:18, address = 0x00000001000038e0
+(lldb) run
+Process 51205 launched: '/Users/brucecollie/code/scratch/lesson-19-c-kompiled/interpreter' (x86_64)
+Process 51205 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x00000001000038e0 interpreter`LESSON-19-C.isEven.rhs at lesson-19-c.k:6:18
+   3   	  imports BOOL
+   4   	
+   5   	  syntax Bool ::= isEven(Int) [function]
+-> 6   	  rule [isEven]: isEven(I) => true requires I %Int 2 ==Int 0
+   7   	  rule [isOdd]: isEven(I) => false requires I %Int 2 =/=Int 0
+   8   	
+   9   	endmodule
+(lldb) 
+```
+
 We can also set a breakpoint for when a rule's side condition is evaluated
 by means of the `MODULE-NAME.label.sc` syntax:
 
@@ -303,10 +428,41 @@ Value returned is $1 = true
 (gdb)
 ```
 
-Here we have used the built-in GDB command `finish` to tell us whether the
-side condition returned true or not. Note that once again, we see the
-substitution that was matched from the left-hand side. Like before, a variable
-will only appear here if it is used in the side condition.
+```
+(lldb) breakpoint set --name LESSON-19-C.isEven.sc
+Breakpoint 1: where = interpreter`LESSON-19-C.isEven.sc + 1 at lesson-19-c.k:6:18, address = 0x00000001000038c1
+(lldb) run
+Process 52530 launched: '/Users/brucecollie/code/scratch/lesson-19-c-kompiled/interpreter' (x86_64)
+Process 52530 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x00000001000038c1 interpreter`LESSON-19-C.isEven.sc(VarI=0x0000000101800088) at lesson-19-c.k:6:18
+   3   	  imports BOOL
+   4   	
+   5   	  syntax Bool ::= isEven(Int) [function]
+-> 6   	  rule [isEven]: isEven(I) => true requires I %Int 2 ==Int 0
+   7   	  rule [isOdd]: isEven(I) => false requires I %Int 2 =/=Int 0
+   8   	
+   9   	endmodule
+(lldb) finish
+Process 52649 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = step out
+Return value: (bool) $0 = true
+
+    frame #0: 0x00000001000069e5 interpreter`LblisEven'LParUndsRParUnds'LESSON-19-C'Unds'Bool'Unds'Int(_1=0x0000000101800088) at lesson-19-c.k:5:19
+   2   	  imports INT
+   3   	  imports BOOL
+   4   	
+-> 5   	  syntax Bool ::= isEven(Int) [function]
+   6   	  rule [isEven]: isEven(I) => true requires I %Int 2 ==Int 0
+   7   	  rule [isOdd]: isEven(I) => false requires I %Int 2 =/=Int 0
+   8
+(lldb)
+```
+
+Here we have used the built-in command `finish` to tell us whether the side
+condition returned true or not. Note that once again, we see the substitution
+that was matched from the left-hand side. Like before, a variable will only
+appear here if it is used in the side condition.
 
 ## Debugging rule matching
 
@@ -348,6 +504,14 @@ does not match pattern:
 baz ( )
 ```
 
+```
+(lldb) k match LESSON-19-D.baz subject
+Subject:
+baz2 ( )
+does not match pattern:
+baz ( )
+```
+
 As we can see, it provided the exact subterm which did not match against the
 rule, as well as the particular subpattern it ought to have matched against.
 
@@ -358,17 +522,18 @@ to advance to the next step.
 ## Final notes
 
 In addition to the functionality provided above, you have the full power of
-GDB at your disposal when debugging. Some features are not particularly
+GDB or LLDB at your disposal when debugging. Some features are not particularly
 well-adapted to K code and may require more advanced knowledge of the
 term representation or implementation to use effectively, but anything that
-can be done in GDB can in theory be done using this debugging functionality.
+can be done in GDB or LLDB can in theory be done using this debugging functionality.
 We suggest you refer to the
-[GDB Documentation](https://www.gnu.org/software/gdb/documentation/) if you
+[GDB Documentation](https://www.gnu.org/software/gdb/documentation/) or
+[LLDB Tutorial](https://lldb.llvm.org/use/tutorial.html) if you
 want to try to do something and are unsure as to how.
 
 ## Exercises
 
-1. Compile your solution to Lesson 1.18, Problem 2 with debugging support
+1. Compile your solution to Lesson 1.18, Exercise 2 with debugging support
 enabled and step through several programs you have previously used to test.
 Then set a breakpoint on the `isKResult` function and observe the state of the
 interpreter when stopped at that breakpoint. Set a breakpoint on the rule for

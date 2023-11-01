@@ -1,6 +1,10 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.7: Side Conditions and Rule Priority
 
-The purpose of this lesson is to explain how to write conditional rules in K, 
+The purpose of this lesson is to explain how to write conditional rules in K,
 and to explain how to control the order in which rules are tried.
 
 ## Side Conditions
@@ -21,7 +25,7 @@ module LESSON-07-A
   imports BOOL
   imports INT
 
-  syntax Grade ::= "letter-A" 
+  syntax Grade ::= "letter-A"
                  | "letter-B"
                  | "letter-C"
                  | "letter-D"
@@ -83,7 +87,7 @@ module LESSON-07-B
   imports BOOL
   imports INT
 
-  syntax Grade ::= "letter-A" 
+  syntax Grade ::= "letter-A"
                  | "letter-B"
                  | "letter-C"
                  | "letter-D"
@@ -99,7 +103,7 @@ This rule is saying, "if all the other rules do not apply, then the grade is a
 B if the percentile is greater than or equal to 80." Note here that we use both
 a side condition and an `owise` attribute on the same rule. This is not
 required (as we will see later), but it is allowed. What this means is that the
-side condition is only tried if the other rules did not apply **and** the 
+side condition is only tried if the other rules did not apply **and** the
 left-hand side of the rule matched. You can even use more complex matching on
 the left-hand side than simply a variable. More generally, you can also have
 multiple higher-priority rules, or multiple `owise` rules. What this means in
@@ -136,7 +140,7 @@ module LESSON-07-C
   imports BOOL
   imports INT
 
-  syntax Grade ::= "letter-A" 
+  syntax Grade ::= "letter-A"
                  | "letter-B"
                  | "letter-C"
                  | "letter-D"
@@ -149,7 +153,7 @@ endmodule
 ```
 
 We can, of course, assign a priority equal to any non-negative integer. For
-example, here is a more complex example that handles the remaining grades 
+example, here is a more complex example that handles the remaining grades
 (`lesson-07-d.k`):
 
 ```k
@@ -157,7 +161,7 @@ module LESSON-07-D
   imports BOOL
   imports INT
 
-  syntax Grade ::= "letter-A" 
+  syntax Grade ::= "letter-A"
                  | "letter-B"
                  | "letter-C"
                  | "letter-D"
@@ -196,10 +200,15 @@ be Boolean literals. Refer back to
 [domains.md](../../../include/kframework/builtin/domains.md) for the relevant
 integer operations.
 
-2. Modify the calculator application from lesson 1.6, problem 2, so that division
+2. Modify the calculator application from Lesson 1.6, Exercise 2, so that division
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
 Instead, the `/` function should not match any of its rules if the denominator
 is zero.
+
+3. Write your own implementation of `==`, `<`, `<=`, `>`, `>=` for integers and modify your solution from Exercise 2 to use it.
+You can use any arithmetic operations in the `INT` module, but do not use any built-in boolean functions for comparing integers.
+
+    Hint: Use pattern matching and recursive definitions with rule priorities.
 
 ## Next lesson
 

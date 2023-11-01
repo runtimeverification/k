@@ -1,16 +1,14 @@
 <generatedTop>
   <k>
-    0
+    0 ~> .
   </k>
   <map>
-    <key>
-      0
-    </key> |-> <entry>
+    <entry>
       <key>
-        0
+        0 ~> .
       </key>
       <value>
-        0
+        0 ~> .
       </value>
     </entry>
   </map>

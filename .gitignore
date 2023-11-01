@@ -18,7 +18,6 @@
 .project
 .classpath
 .settings/
-java-backend/.project
 k-distribution/.project
 *~
 junit-reports
@@ -29,3 +28,6 @@ result*
 .envrc
 flake.lock
 .DS_Store
+git-describe.out
+timestamp.out
+.profiling-results.json

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST
   imports ID
   imports INT
@@ -6,7 +7,7 @@ syntax Exp ::= "(" Name ExpList ")"
 syntax Exp ::= Int
              | Name
 syntax Name ::= Id
-syntax ExpList ::= List{Exp,""} [expList]
+syntax ExpList ::= List{Exp,""} [group(expList)]
 syntax Name ::= BuiltinName
 syntax BuiltinName ::= "+"
 

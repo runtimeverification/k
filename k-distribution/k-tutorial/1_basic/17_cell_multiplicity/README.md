@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.17: Cell Multiplicity and Cell Collections
 
 The purpose of this lesson is to explain how you can create optional cells
@@ -53,7 +57,7 @@ module LESSON-17-A
        (<optional> _ </optional> => .Bag)
 
 endmodule
-```	
+```
 
 In this definition, when the `init` symbol is executed, the `<optional>` cell
 is added to the configuration, and when the `destroy` symbol is executed, it
@@ -98,8 +102,8 @@ module LESSON-17-B
   syntax Stmt ::= Id "=" Exp ";" [strict(2)]
                 | "return" Exp ";" [strict]
   syntax Stmts ::= List{Stmt,""}
-  syntax Exp ::= Id 
-               | Int 
+  syntax Exp ::= Id
+               | Int
                | Exp "+" Exp [seqstrict]
                | "spawn" "{" Stmts "}"
                | "join" Exp ";" [strict]
@@ -124,7 +128,7 @@ module LESSON-17-B
          <k> spawn { Ss } => NEXTID ...</k>
        ...</thread>
        <next-id> NEXTID => NEXTID +Int 1 </next-id>
-       (.Bag => 
+       (.Bag =>
        <thread>
          <id> NEXTID </id>
          <k> Ss </k>
@@ -163,7 +167,7 @@ still being a collection under the hood.
 
 ## Exercises
 
-1. Modify the solution from Lesson 1.16, Problem 1 so that the cell you use to
+1. Modify the solution from Lesson 1.16, Exercise 1 so that the cell you use to
 keep track of functions in a `Map` is now a cell collection. Run some programs
 and compare how they get unparsed before and after this change.
 

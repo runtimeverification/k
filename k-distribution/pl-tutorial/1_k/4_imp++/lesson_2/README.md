@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Configuration Refinement; Freshness
 

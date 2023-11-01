@@ -1,7 +1,12 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST
     imports BYTES
+    imports BOOL
+    imports K-EQUAL
 
-    configuration <k> $PGM:Bytes </k>
+    syntax Bool ::= bytesEq(Bytes, Bytes) [function]
+    configuration <k> $PGM:Bool </k>
 
-    rule <k> b"\x80\x00\x80" => b"\x80\x00" ... </k>
+    rule bytesEq(B1, B2) => true requires B1 ==K B2
+    rule bytesEq(_B1, _B2) => false [owise]
 endmodule

@@ -1,5 +1,3 @@
-  #Ceil ( _Gen0 ~> _DotVar1 ~> . )
-#And
   #Not ( {
     _DotVar1
   #Equals

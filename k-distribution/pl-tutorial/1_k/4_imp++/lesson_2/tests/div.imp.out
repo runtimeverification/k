@@ -1,55 +1,53 @@
-  Result ==K <T>
-    <k>
-      ++ x ~> #freezer_/__IMP-SYNTAX0_ ( 1 ) ~> #freezer_/__IMP-SYNTAX1_ ( ++ x ) ~> #freezer_=_;_IMP-SYNTAX1_ ( y )
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 1
-      2 |-> 0
-    </store>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <k>
+        ++ x ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp0_ ( 1 ~> . ) ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp1_ ( ++ x ~> . ) ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_ ( y ~> . ) ~> .
+      </k>
+      <env>
+        x |-> 0
+        y |-> 1
+      </env>
+      <store>
+        0 |-> 1
+        1 |-> 0
+      </store>
+    </T>
+  }
 #Or
-  Result ==K <T>
-    <k>
-      ++ x ~> #freezer_/__IMP-SYNTAX0_ ( ++ x / 1 ) ~> #freezer_=_;_IMP-SYNTAX1_ ( y )
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 1
-      2 |-> 0
-    </store>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <k>
+        ++ x ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp0_ ( ++ x / x ~> . ) ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_ ( y ~> . ) ~> .
+      </k>
+      <env>
+        x |-> 0
+        y |-> 1
+      </env>
+      <store>
+        0 |-> 1
+        1 |-> 0
+      </store>
+    </T>
+  }
 #Or
-  Result ==K <T>
-    <k>
-      ++ x ~> #freezer_/__IMP-SYNTAX0_ ( ++ x / x ) ~> #freezer_=_;_IMP-SYNTAX1_ ( y )
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 1
-      2 |-> 0
-    </store>
-  </T>
-#Or
-  Result ==K <T>
-    <k>
-      ++ x ~> #freezer_/__IMP-SYNTAX0_ ( x ) ~> #freezer_/__IMP-SYNTAX1_ ( ++ x ) ~> #freezer_=_;_IMP-SYNTAX1_ ( y )
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 1
-      2 |-> 0
-    </store>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <k>
+        ++ x ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp0_ ( x ~> . ) ~> #freezer_/__IMP-SYNTAX_AExp_AExp_AExp1_ ( ++ x ~> . ) ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_ ( y ~> . ) ~> .
+      </k>
+      <env>
+        x |-> 0
+        y |-> 1
+      </env>
+      <store>
+        0 |-> 1
+        1 |-> 0
+      </store>
+    </T>
+  }

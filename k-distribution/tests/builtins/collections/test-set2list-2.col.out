@@ -2,5 +2,5 @@
   ListItem ( 1 )
   ListItem ( 2 )
   ListItem ( 3 )
-  ListItem ( 4 )
+  ListItem ( 4 ) ~> .
 </k>

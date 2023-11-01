@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "ffi.md"
 require "json.md"
 require "rat.md"

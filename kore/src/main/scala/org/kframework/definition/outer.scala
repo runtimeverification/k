@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 package org.kframework.definition
 
@@ -202,9 +202,14 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }).fold(Map())(mergeMultiset)
   }
 
+  lazy val tokenSorts: Set[Sort] = {
+    sentences.collect({ case p:Production if p.att.contains(Att.TOKEN) => p.sort
+                        case s:SyntaxSort if s.att.contains(Att.TOKEN) => s.sort})
+  }
+
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
-      .collect({ case p if p.att.contains("token") => p })
+      .collect({ case p if p.att.contains(Att.TOKEN) => p })
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
@@ -212,7 +217,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     if (tokenProductionsFor.contains(s))
       tokenProductionsFor.apply(s).head
     else
-      Production(None, Seq(), s, Seq(), Att.empty.add("token"))
+      Production(None, Seq(), s, Seq(), Att.empty.add(Att.TOKEN))
   }
 
   lazy val allModuleNames : Set[String] = importedModuleNames + name
@@ -292,7 +297,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
 
   lazy val sortDeclarationsFor: Map[SortHead, Set[SyntaxSort]] =
-    sortDeclarations
+    (sortDeclarations ++ allSorts.map(s => SyntaxSort(Seq(), s, Att.empty)))
       .groupBy(_.sort.head)
 
   @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}
@@ -313,7 +318,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
   }
 
-  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(_, _, srt, _, att1) if att1.contains("userList") =>
+  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(_, _, srt, _, att1) if att1.contains(Att.USER_LIST) =>
     srt
   })
 
@@ -346,7 +351,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   }
 
   @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
-    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")))
+    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains(Att.FRESH_GENERATOR)))
       .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
       if (set.size > 1)
         throw KEMException.compilerError("Found more than one fresh generator for sort " + sortFor(set.head)
@@ -360,8 +365,8 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   def checkSorts (): Unit = localSentences foreach {
     case p@Production(_, params, _, items, _) =>
       val res = items collect
-      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
-        case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
+      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt.sort
+        case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt.sort
       }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
@@ -406,7 +411,47 @@ trait Sentence extends HasLocation with HasAtt with AttValue {
   def withAtt(att: Att): Sentence
   def location: Optional[Location] = att.getOptional(classOf[Location])
   def source: Optional[Source] = att.getOptional(classOf[Source])
-  def label: Optional[String] = att.getOptional("label")
+  def label: Optional[String] = att.getOptional(Att.LABEL)
+}
+
+object Sentence {
+  implicit val ord = new Ordering[Sentence] {
+    def compare(a: Sentence, b: Sentence): Int = {
+      (a, b) match {
+        case (c:SyntaxSort, d:SyntaxSort) => Ordering[SyntaxSort].compare(c, d)
+        case (c:SortSynonym, d:SortSynonym) => Ordering[SortSynonym].compare(c, d)
+        case (c:SyntaxLexical, d:SyntaxLexical) => Ordering[SyntaxLexical].compare(c, d)
+        case (c:Production, d:Production) => Ordering[Production].compare(c, d)
+        case (c:SyntaxAssociativity, d:SyntaxAssociativity) => Ordering[SyntaxAssociativity].compare(c, d)
+        case (c:SyntaxPriority, d:SyntaxPriority) => Ordering[SyntaxPriority].compare(c, d)
+        case (c:ContextAlias, d:ContextAlias) => Ordering[ContextAlias].compare(c, d)
+        case (c:Context, d:Context) => Ordering[Context].compare(c, d)
+        case (c:Rule, d:Rule) => Ordering[Rule].compare(c, d)
+        case (c:Claim, d:Claim) => Ordering[Claim].compare(c, d)
+        case (_:SyntaxSort, _) => -1
+        case (_, _:SyntaxSort) => 1
+        case (_:SortSynonym, _) => -1
+        case (_, _:SortSynonym) => 1
+        case (_:SyntaxLexical, _) => -1
+        case (_, _:SyntaxLexical) => 1
+        case (_:Production, _) => -1
+        case (_, _:Production) => 1
+        case (_:SyntaxAssociativity, _) => -1
+        case (_, _:SyntaxAssociativity) => 1
+        case (_:SyntaxPriority, _) => -1
+        case (_, _:SyntaxPriority) => 1
+        case (_:ContextAlias, _) => -1
+        case (_, _:ContextAlias) => 1
+        case (_:Context, _) => -1
+        case (_, _:Context) => 1
+        case (_:Rule, _) => -1
+        case (_, _:Rule) => 1
+        case (_:Claim, _) => -1
+        case (_, _:Claim) => 1
+        case (_, _) => throw KEMException.internalError("Cannot order these sentences:\n" + a.toString() + "\n" + b.toString())
+      }
+    }
+  }
 }
 
 // deprecated
@@ -415,11 +460,19 @@ case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence 
   override val isNonSyntax = true
   override def withAtt(att: Att) = Context(body, requires, att)
 }
+object Context {
+  implicit val ord: Ordering[Context] = Ordering.by[Context, (K, K, Att)](s => (s.body, s.requires, s.att))
+}
 
 case class ContextAlias(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextAliasToString {
   override val isSyntax = true
   override val isNonSyntax = false
   override def withAtt(att: Att) = ContextAlias(body, requires, att)
+}
+object ContextAlias {
+  implicit val ord: Ordering[ContextAlias] = {
+    Ordering.by[ContextAlias, (K, K, Att)](s => (s.body, s.requires, s.att))
+  }
 }
 
 abstract class RuleOrClaim extends Sentence {
@@ -436,6 +489,11 @@ case class Claim(body: K, requires: K, ensures: K, att: Att = Att.empty) extends
   override def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): Claim =
     Claim(body, requires, ensures, att)
 }
+object Claim {
+  implicit val ord: Ordering[Claim] = {
+    Ordering.by[Claim, (K, K, K, Att)](s => (s.body, s.requires, s.ensures, s.att))
+  }
+}
 
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends RuleOrClaim with RuleToString with OuterKORE {
   override def withAtt(att: Att): Rule = Rule(body, requires, ensures, att)
@@ -444,18 +502,8 @@ case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends 
 }
 
 object Rule {
-  implicit val ord: Ordering[Rule] = new Ordering[Rule] {
-    def compare(a: Rule, b: Rule): Int = {
-      val c1 = Ordering[K].compare(a.body, b.body)
-      if (c1 == 0) {
-        val c2 = Ordering[K].compare(a.requires, b.requires)
-        if (c2 == 0) {
-          Ordering[K].compare(a.ensures, b.ensures)
-        }
-        c2
-      }
-      c1
-    }
+  implicit val ord: Ordering[Rule] = {
+    Ordering.by[Rule, (K, K, K, Att)](r => (r.body, r.requires, r.ensures, r.att))
   }
 }
 
@@ -469,6 +517,12 @@ case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxPriority(priorities, att)
 }
+object SyntaxPriority {
+  implicit val ord: Ordering[SyntaxPriority] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[SyntaxPriority, (Seq[Seq[Tag]], Att)](s => (s.priorities.map(_.toSeq.sorted), s.att))
+  }
+}
 
 case class SyntaxAssociativity(
                                 assoc: Associativity,
@@ -479,8 +533,18 @@ case class SyntaxAssociativity(
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxAssociativity(assoc, tags, att)
 }
+object SyntaxAssociativity {
+  implicit val ord: Ordering[SyntaxAssociativity] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[SyntaxAssociativity, (Associativity, Seq[Tag], Att)](s => (s.assoc, s.tags.toSeq.sorted, s.att))
+  }
+}
 
 case class Tag(name: String) extends TagToString with OuterKORE
+
+object Tag {
+  implicit val ord: Ordering[Tag] = Ordering.by[Tag, String](_.name)
+}
 
 //trait Production {
 //  def sort: Sort
@@ -498,6 +562,13 @@ case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty) exten
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxSort(params, sort, att)
 }
+object SyntaxSort {
+  implicit val ord: Ordering[SyntaxSort] = {
+    import scala.math.Ordering.Implicits._
+    Ordering.by[SyntaxSort, (Seq[String], String, Att)](s => (s.params.map(_.name), s.sort.name, s.att))
+  }
+}
+
 case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) extends Sentence
   with SortSynonymToString with OuterKORE {
 
@@ -505,6 +576,12 @@ case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) exten
   override val isNonSyntax = false
   override def withAtt(att: Att) = SortSynonym(newSort, oldSort, att)
 }
+object SortSynonym {
+  implicit val ord: Ordering[SortSynonym] = {
+    Ordering.by[SortSynonym, (String, String, Att)](s => (s.newSort.name, s.oldSort.name, s.att))
+  }
+}
+
 case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty) extends Sentence
   with SyntaxLexicalToString with OuterKORE {
 
@@ -512,17 +589,22 @@ case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty) exte
   override val isNonSyntax = false
   override def withAtt(att: Att) = SyntaxLexical(name, regex, att)
 }
+object SyntaxLexical {
+  implicit val ord: Ordering[SyntaxLexical] = {
+    Ordering.by[SyntaxLexical, (String, String, Att)](s => (s.name, s.regex, s.att))
+  }
+}
 
 case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
 
-  lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
-  lazy val parseLabel: KLabel = klabel.getOrElse(att.get("bracketLabel", classOf[KLabel]))
+  lazy val klabelAtt: Option[String] = att.getOption(Att.KLABEL).orElse(klabel.map(_.name))
+  lazy val parseLabel: KLabel = klabel.getOrElse(att.get(Att.BRACKET_LABEL, classOf[KLabel]))
 
   override def equals(that: Any): Boolean = that match {
     case p@Production(`klabel`, `params`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt
-                                                      && this.att.getOption("function") == p.att.getOption("function")
-                                                      && this.att.getOption("symbol") == p.att.getOption("symbol")
+                                                      && this.att.getOption(Att.FUNCTION) == p.att.getOption(Att.FUNCTION)
+                                                      && this.att.getOption(Att.SYMBOL) == p.att.getOption(Att.SYMBOL)
                                                        )
     case _ => false
   }
@@ -611,19 +693,19 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
     val suffix = items.last
     val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], this)
     if (namedNts.isEmpty) // if it doesn't contain named NTs, don't generate the extra list productions
-      Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero")))
+      Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add(Att.RECORD_PRD_ZERO)))
     else if(namedNts.size == 1) {
-      val main = Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero"))
-      val one = Production(klabel, params, sort, prefix :+ Terminal(namedNts.head.name.get) :+ Terminal(":") :+ namedNts.head :+ suffix, newAtt.add("recordPrd-one", namedNts.head.name.get))
+      val main = Production(klabel, params, sort, prefix :+ suffix, newAtt.add(Att.RECORD_PRD_ZERO))
+      val one = Production(klabel, params, sort, prefix :+ Terminal(namedNts.head.name.get) :+ Terminal(":") :+ namedNts.head :+ suffix, newAtt.add(Att.RECORD_PRD_ONE, namedNts.head.name.get))
       Set(main, one)
     } else {
       val baseName = items.head.asInstanceOf[Terminal].value + "-" + uid
-      val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
-      val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add("recordPrd-empty"))
-      val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add("recordPrd-subsort"))
-      val repeat = Production(klabel, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Ne"), None), Terminal(","), NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-repeat"))
-      val subsort2 = Production(None, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-subsort"))
-      val namedItems: Set[Production] = namedNts.map(nt => Production(klabel, Seq(), Sort(baseName + "Item"), Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)), newAtt.add("recordPrd-item", nt.name.get))).toSet
+      val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add(Att.RECORD_PRD_MAIN))
+      val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add(Att.RECORD_PRD_EMPTY))
+      val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add(Att.RECORD_PRD_SUBSORT))
+      val repeat = Production(klabel, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Ne"), None), Terminal(","), NonTerminal(Sort(baseName + "Item"), None)), newAtt.add(Att.RECORD_PRD_REPEAT))
+      val subsort2 = Production(None, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Item"), None)), newAtt.add(Att.RECORD_PRD_SUBSORT))
+      val namedItems: Set[Production] = namedNts.map(nt => Production(klabel, Seq(), Sort(baseName + "Item"), Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)), newAtt.add(Att.RECORD_PRD_ITEM, nt.name.get))).toSet
       namedItems + main + empty + subsort + repeat + subsort2
     }
   }
@@ -633,24 +715,20 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 }
 
 object Production {
-  implicit val ord: Ordering[Production] = new Ordering[Production] {
-    def compare(a: Production, b: Production): Int = {
-      Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
-    }
+  implicit val ord: Ordering[Production] = {
+    Ordering.by[Production, (Option[String], Att)](s => (s.klabel.map(_.name), s.att))
   }
 
   def apply(klabel: KLabel, params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
     Production(Some(klabel), params, sort, items, att)
   }
   def apply(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att): Production = {
-    if (att.contains(kLabelAttribute)) {
-      Production(Some(KORE.KLabel(att.get(kLabelAttribute))), params, sort, items, att)
+    if (att.contains(Att.KLABEL)) {
+      Production(Some(KORE.KLabel(att.get(Att.KLABEL))), params, sort, items, att)
     } else {
       Production(None, params, sort, items, att)
     }
   }
-
-  val kLabelAttribute = "klabel"
 }
 
 // a way to deterministically generate unique IDs dependent on module name

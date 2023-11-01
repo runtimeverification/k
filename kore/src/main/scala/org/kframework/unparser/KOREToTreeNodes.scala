@@ -1,9 +1,10 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.unparser
 
 import java.util
 
 import org.kframework.POSet
-import org.kframework.attributes.{Location, Source}
+import org.kframework.attributes.{Att, Location, Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
@@ -16,47 +17,35 @@ import JavaConverters._
 
 object KOREToTreeNodes {
 
-  import org.kframework.kore.KORE._
+  import org.kframework.kore.KORE.{Att => _, _}
 
   def wellTyped(args: Seq[Sort], p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
-    val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
+    val origP = p.att.getOptional(Att.ORIGINAL_PRD, classOf[Production]).orElse(p)
     val subst = origP.substitute(args)
     val rightPoly = (args.isEmpty && origP.params.nonEmpty) || (p.sort == subst.sort && p.items == subst.items)
     return rightPoly && p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
   }
 
-  def apply(t: K, mod: Module, fromKore: Boolean): Term = t match {
+  def apply(t: K, mod: Module): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionFor(t.sort), t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod, fromKore).asInstanceOf[Term] }
+      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }
       val children = ConsPStack.from(scalaChildren.reverse asJava)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
-      if (!fromKore) {
-        val allProds: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.nonterminals.lengthCompare(children.size) == 0 && !p.att.contains("unparseAvoid"))
-        val typedProds: Set[Production] = allProds.filter(p => wellTyped(a.klabel.params, p, scalaChildren, mod.subsorts))
-        // if no productions are left, then the term is ill-sorted, but don't return the empty ambiguity because we want to fail gracefully.
-        val minProds: Set[Production] = mod.overloads.minimal(if (typedProds.size == 0) allProds else typedProds)
-        if (minProds.size == 1) {
-          TermCons(children, minProds.head, loc, source)
-        } else {
-          Ambiguity(new util.HashSet(minProds.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
-        }
+      val p = mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains(Att.UNPARSE_AVOID)).head
+      val subst = if (a.klabel.params.nonEmpty) {
+        val origP = p.att.getOptional(Att.ORIGINAL_PRD, classOf[Production]).orElse(p)
+        origP.substitute(a.klabel.params)
       } else {
-        val p = mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains("unparseAvoid")).head
-        val subst = if (a.klabel.params.nonEmpty) {
-          val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
-          origP.substitute(a.klabel.params)
-        } else {
-          p
-        }
-        TermCons(children, subst, loc, source)
+        p
       }
+      TermCons(children, subst, loc, source)
   }
 
   def up(mod: Module)(t: K): K = t match {
     case v: KVariable =>
-      if (v.att.contains("prettyPrintWithSortAnnotation"))
+      if (v.att.contains(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
         KORE.KApply(KORE.KLabel("#SemanticCastTo" + v.att.get(classOf[org.kframework.kore.Sort])), KToken(v.name, Sorts.KVariable, v.att))
       else
         KToken(v.name, Sorts.KVariable, v.att)

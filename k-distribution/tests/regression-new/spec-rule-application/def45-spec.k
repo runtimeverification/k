@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "def.k"
 
 // 2 equalities can generate mutually exclusive substitutions.

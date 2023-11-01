@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 // test error messages
 
 requires "demo.k"

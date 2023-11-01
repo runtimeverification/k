@@ -1,5 +1,5 @@
-[Error] Compiler: Sort MyList previously declared as a user list at Source(checkDuplicateList.k) and Location(3,21,3,33)
+[Error] Compiler: Sort MyList previously declared as a user list at Source(checkDuplicateList.k) and Location(4,21,4,33)
 	Source(checkDuplicateList.k)
-	Location(8,21,8,33)
-	8 |	  syntax MyList ::= List{Int,""}
+	Location(9,21,9,33)
+	9 |	  syntax MyList ::= List{Int,""}
 	  .	                    ^~~~~~~~~~~~

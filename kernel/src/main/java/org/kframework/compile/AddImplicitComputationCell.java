@@ -1,9 +1,10 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import java.util.List;
+import java.util.stream.Stream;
 import org.kframework.attributes.Att;
-import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.compile.LabelInfoFromModule;
+import org.kframework.builtin.KLabels;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
@@ -11,87 +12,104 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 /**
- *  If a SemanticSentence (Rule or Context) has a body that is not wrapped in any cell,
- *  wrap it in a {@code <k>} cell
+ * If a SemanticSentence (Rule or Context) has a body that is not wrapped in any cell, wrap it in a
+ * {@code <k>} cell
  */
-public class AddImplicitComputationCell {
+public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelInfo) {
 
-    public static Definition transformDefinition(Definition input) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
-        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo)::apply,
-                "concretizing configuration").apply(input);
+  public static Definition transformDefinition(Definition input) {
+    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
+    LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+    return DefinitionTransformer.fromSentenceTransformer(
+            new AddImplicitComputationCell(configInfo, labelInfo)::apply,
+            "concretizing configuration")
+        .apply(input);
+  }
+
+  public static Module transformModule(Module mod) {
+    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+    LabelInfo labelInfo = new LabelInfoFromModule(mod);
+    return ModuleTransformer.fromSentenceTransformer(
+            new AddImplicitComputationCell(configInfo, labelInfo)::apply,
+            "concretizing configuration")
+        .apply(mod);
+  }
+
+  public Sentence apply(Module m, Sentence s) {
+    if (skipSentence(s)) {
+      return s;
     }
 
-    public static Module transformModule(Module mod) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-        LabelInfo labelInfo = new LabelInfoFromModule(mod);
-        return ModuleTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo)::apply,
-                "concretizing configuration").apply(mod);
+    if (s instanceof RuleOrClaim rule) {
+      return rule.newInstance(
+          apply(rule.body(), m, rule instanceof Claim),
+          rule.requires(),
+          rule.ensures(),
+          rule.att());
+    } else if (s instanceof Context context) {
+      return new Context(apply(context.body(), m, false), context.requires(), context.att());
+    } else {
+      return s;
+    }
+  }
+
+  private boolean skipSentence(Sentence s) {
+    return ExpandMacros.isMacro(s)
+        || s.att().contains(Att.ANYWHERE())
+        || s.att().contains(Att.SIMPLIFICATION())
+        || s.att().contains(Att.KORE());
+  }
+
+  // If there are multiple cells mentioned in the split configuration, we don't
+  // apply the implicit <k> cell, unless the configuration is a claim and the second
+  // cell mentioned is the automatically-added <generatedCounter> cell.
+  private boolean shouldConsider(List<K> items, boolean isClaim) {
+    if (items.size() == 1) {
+      return true;
+    } else if (items.size() == 2 && isClaim) {
+      K second = items.get(1);
+      if (second instanceof KApply app) {
+        return app.klabel() == KLabels.GENERATED_COUNTER_CELL;
+      }
     }
 
-    private final ConfigurationInfo cfg;
-    private final LabelInfo labelInfo;
+    return false;
+  }
 
-    public AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelInfo) {
-        this.cfg = cfg;
-        this.labelInfo = labelInfo;
+  private boolean canAddImplicitKCell(K item) {
+    if (isCell(item)) {
+      return false;
     }
 
-    public Sentence apply(Module m, Sentence s) {
-        if (skipSentence(s)) {
-            return s;
-        }
-
-        if (s instanceof RuleOrClaim) {
-            RuleOrClaim rule = (RuleOrClaim) s;
-            return rule.newInstance(apply(rule.body(), m), rule.requires(), rule.ensures(), rule.att());
-        } else if (s instanceof Context) {
-            Context context = (Context) s;
-            return new Context(apply(context.body(), m), context.requires(), context.att());
-        } else {
-            return s;
-        }
+    if (item instanceof final KRewrite rew) {
+      return Stream.concat(
+              IncompleteCellUtils.flattenCells(rew.left()).stream(),
+              IncompleteCellUtils.flattenCells(rew.right()).stream())
+          .noneMatch(this::isCell);
     }
 
-    private boolean skipSentence(Sentence s) {
-        return ExpandMacros.isMacro(s)
-                || s.att().contains(Att.ANYWHERE())
-                || s.att().contains(Att.SIMPLIFICATION())
-                || s.att().contains(Att.KORE());
+    return true;
+  }
+
+  private K apply(K term, Module m, boolean isClaim) {
+    if (m.isFunction(term)) return term;
+
+    List<K> items = IncompleteCellUtils.flattenCells(term);
+    if (!shouldConsider(items, isClaim)) {
+      return term;
     }
 
-    private K apply(K term, Module m) {
-        if (m.isFunction(term)) return term;
-
-        List<K> items = IncompleteCellUtils.flattenCells(term);
-        if (items.size() != 1) {
-            return term;
-        }
-        K item = items.get(0);
-        if (isCell(item)) {
-            return term;
-        } else if (item instanceof KRewrite) {
-            final KRewrite rew = (KRewrite) item;
-            if (Stream.concat(
-                    IncompleteCellUtils.flattenCells(rew.left()).stream(),
-                    IncompleteCellUtils.flattenCells(rew.right()).stream())
-                    .anyMatch(this::isCell)) {
-                return term;
-            }
-        }
-        KLabel computation = cfg.getCellLabel(cfg.getComputationCell());
-        return IncompleteCellUtils.make(computation, false, item, true);
+    K item = items.get(0);
+    if (!canAddImplicitKCell(item)) {
+      return term;
     }
 
-    private boolean isCell(K k) {
-        return k instanceof KApply
-                && cfg.isCell(labelInfo.getCodomain(((KApply) k).klabel()));
-    }
+    KLabel computation = cfg.getCellLabel(cfg.getComputationCell());
+    return IncompleteCellUtils.make(computation, false, item, true);
+  }
+
+  private boolean isCell(K k) {
+    return k instanceof KApply && cfg.isCell(labelInfo.getCodomain(((KApply) k).klabel()));
+  }
 }

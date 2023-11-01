@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "with-config.k"
 
 module OWISE-SPEC

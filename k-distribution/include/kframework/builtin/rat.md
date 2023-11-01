@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2019-2020 K Team. All Rights Reserverd.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 Rational Numbers in K
@@ -32,13 +32,13 @@ You can:
 
 ```k
   syntax Rat ::= left:
-                 Rat "^Rat" Int [function, functional, klabel(_^Rat_), symbol, left, smtlib(ratpow), hook(RAT.pow)]
+                 Rat "^Rat" Int [function, total, klabel(_^Rat_), symbol, smtlib(ratpow), hook(RAT.pow)]
                > left:
-                 Rat "*Rat" Rat [function, functional, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
+                 Rat "*Rat" Rat [function, total, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
                | Rat "/Rat" Rat [function,             klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
                > left:
-                 Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
-               | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
+                 Rat "+Rat" Rat [function, total, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
+               | Rat "-Rat" Rat [function, total, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
 ```
 
 Comparison
@@ -49,12 +49,12 @@ one of less than, less than or equalto, greater than, or greater than or equal
 to the other:
 
 ```k
-  syntax Bool ::= Rat  "==Rat" Rat [function, functional, klabel(_==Rat_),  symbol, smtlib(rateq), hook(RAT.eq)]
-                | Rat "=/=Rat" Rat [function, functional, klabel(_=/=Rat_), symbol, smtlib(ratne), hook(RAT.ne)]
-                | Rat   ">Rat" Rat [function, functional, klabel(_>Rat_),   symbol, smtlib(ratgt), hook(RAT.gt)]
-                | Rat  ">=Rat" Rat [function, functional, klabel(_>=Rat_),  symbol, smtlib(ratge), hook(RAT.ge)]
-                | Rat   "<Rat" Rat [function, functional, klabel(_<Rat_),   symbol, smtlib(ratlt), hook(RAT.lt)]
-                | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, smtlib(ratle), hook(RAT.le)]
+  syntax Bool ::= Rat  "==Rat" Rat [function, total, klabel(_==Rat_),  symbol, smtlib(rateq), hook(RAT.eq)]
+                | Rat "=/=Rat" Rat [function, total, klabel(_=/=Rat_), symbol, smtlib(ratne), hook(RAT.ne)]
+                | Rat   ">Rat" Rat [function, total, klabel(_>Rat_),   symbol, smtlib(ratgt), hook(RAT.gt)]
+                | Rat  ">=Rat" Rat [function, total, klabel(_>=Rat_),  symbol, smtlib(ratge), hook(RAT.ge)]
+                | Rat   "<Rat" Rat [function, total, klabel(_<Rat_),   symbol, smtlib(ratlt), hook(RAT.lt)]
+                | Rat  "<=Rat" Rat [function, total, klabel(_<=Rat_),  symbol, smtlib(ratle), hook(RAT.le)]
 ```
 
 Min/Max
@@ -63,8 +63,8 @@ Min/Max
 You can compute the minimum and maximum of two rational numbers:
 
 ```k
-  syntax Rat ::= minRat(Rat, Rat) [function, functional, klabel(minRat), symbol, smtlib(ratmin), hook(RAT.min)]
-               | maxRat(Rat, Rat) [function, functional, klabel(maxRat), symbol, smtlib(ratmax), hook(RAT.max)]
+  syntax Rat ::= minRat(Rat, Rat) [function, total, klabel(minRat), symbol, smtlib(ratmin), hook(RAT.min)]
+               | maxRat(Rat, Rat) [function, total, klabel(maxRat), symbol, smtlib(ratmax), hook(RAT.max)]
 ```
 
 Conversion to Floating Point
@@ -127,28 +127,10 @@ module RAT-KORE [kore]
   rule R =/=Rat S => R =/=K S
 endmodule
 
-module RAT-KAST [kast]
-  imports private RAT-COMMON
-  imports private INT
-  imports private BOOL
-
-  /*
-   * equalities for non-kore backends such as the java backend
-   */
-
-  rule < I , I' >Rat ==Rat < J , J' >Rat => I ==Int J andBool I' ==Int J'
-  rule _:Int         ==Rat < _ , _  >Rat => false
-  rule < _ , _  >Rat ==Rat _:Int         => false
-  rule I:Int         ==Rat J:Int         => I ==Int J
-
-  rule R =/=Rat S => notBool (R ==Rat S)
-endmodule
-
 module RAT [private]
   imports private RAT-COMMON
   imports public RAT-SYMBOLIC
   imports public RAT-KORE
-  imports public RAT-KAST
   imports public RAT-SYNTAX
   imports private INT
   imports private BOOL

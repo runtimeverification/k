@@ -1,0 +1,49 @@
+#!/bin/sh -ex
+cp -r /usr/share/kframework/pl-tutorial ~
+WD=`pwd`
+cd
+echo 'Starting kserver...'
+spawn-kserver $WD/kserver.log
+cd pl-tutorial
+echo 'Testing tutorial in user environment...'
+make -j`nproc`
+make clean
+cd ~
+echo "module TEST imports BOOL endmodule" > test.k
+kompile test.k --backend haskell
+rm -rf test-kompiled
+
+# Make sure that the KLLVM bindings have been installed properly.
+python3 <<HERE
+import sys
+sys.path = sys.path + ["$(llvm-kompile --bindings-path)"]
+import kllvm
+
+sort_int = kllvm.ast.CompositeSort("SortInt")
+assert str(sort_int) == "SortInt{}"
+HERE
+
+# Make sure that the help messages work and that the version of the various components is correct
+PACKAGE_VERSION=$(cat /usr/lib/kframework/version)
+
+kast          --help    | grep -q -- "--version"
+kdep          --help    | grep -q -- "--version"
+kompile       --help    | grep -q -- "--version"
+kprove        --help    | grep -q -- "--version"
+krun          --help    | grep -q -- "--version"
+kserver       --help    | grep -q -- "--version"
+kparse        --help    | grep -q -- "--version"
+kparse-gen    --help    | grep -q -- "--version"
+kore-print    --help    | grep -q -- "--version"
+kast          --version | grep -q ${PACKAGE_VERSION}
+kdep          --version | grep -q ${PACKAGE_VERSION}
+kompile       --version | grep -q ${PACKAGE_VERSION}
+kprove        --version | grep -q ${PACKAGE_VERSION}
+krun          --version | grep -q ${PACKAGE_VERSION}
+kserver       --version | grep -q ${PACKAGE_VERSION}
+kparse        --version | grep -q ${PACKAGE_VERSION}
+kparse-gen    --version | grep -q ${PACKAGE_VERSION}
+kore-print    --version | grep -q ${PACKAGE_VERSION}
+
+# Make sure that the Haskell Backend Booster has been installed properly.
+kore-rpc-booster --help

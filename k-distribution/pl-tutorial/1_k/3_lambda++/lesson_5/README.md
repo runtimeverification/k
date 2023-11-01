@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # More Semantic Computation Items
 
@@ -28,9 +30,9 @@ Let us next add one more closure-like semantic computational item, for `mu`.
 But before that, let us reuse the semantics of `letrec` in terms of `mu` that
 was defined in Lesson 8 of Part 1 of the tutorial on LAMBDA:
 
-    syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-                 | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]
-    rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+    syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp [macro]
+                 | "mu" Id "." Exp                 [latex(\mu{#1}.{#2})]
+    rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 
 We removed the `binder` annotation of `mu`, because it is not necessary
 anymore (since we do not work with substitutions anymore).
@@ -44,7 +46,6 @@ the closure itself:
     rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
          <env> Rho </env>
          <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
-      [structural]
 
 Since each time `mu X . E` is encountered during the evaluation it needs to
 evaluate `E`, we conclude that `muclosure` cannot be a value.  We can declare

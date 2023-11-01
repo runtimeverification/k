@@ -1,28 +1,45 @@
 {
   description = "K Framework";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-22.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend";
-    llvm-backend.url = "github:runtimeverification/llvm-backend";
-    llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/811e94fbcaef8550a6a709a9ce793f7166457911";
+    booster-backend = {
+      url = "github:runtimeverification/hs-backend-booster/d240f6e954bdbc16572259ac6fec70a66416e2d8";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.haskell-backend.follows = "haskell-backend";
+      inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
+    };
+    nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
-    mavenix.url = "github:goodlyrottenapple/mavenix";
+    mavenix = {
+      url = "github:goodlyrottenapple/mavenix";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.utils.follows = "flake-utils";
+    };
+    llvm-backend = {
+      url = "github:runtimeverification/llvm-backend";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.mavenix.follows = "mavenix";
+      inputs.utils.follows = "flake-utils";
+    };
+    rv-utils.url = "github:runtimeverification/rv-nix-tools";
     # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix
-    , flake-compat, poetry2nix }:
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
+    , llvm-backend, mavenix, flake-compat }:
     let
       allOverlays = [
-        poetry2nix.overlay
+        (_: _: {
+          llvm-version = 13;
+          llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
-        haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
+        haskell-backend.overlays.z3
+        haskell-backend.overlays.integration-tests
         (final: prev:
           let
             k-version =
@@ -37,6 +54,7 @@
                   "nix/"
                   "*.nix"
                   "haskell-backend/src/main/native/haskell-backend/*"
+                  "hs-backend-booster/src/main/native/hs-backend-booster/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
                 ] ./.);
@@ -50,9 +68,11 @@
               '';
             };
           in {
-            k-framework = haskell-backend-bins:
+            k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
+                clang = prev."clang_${toString final.llvm-version}";
+                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
@@ -64,12 +84,8 @@
                 else
                   prev.gdb;
                 version = "${k-version}-${self.rev or "dirty"}";
+                inherit llvm-kompile-libs;
               };
-
-            pyk = prev.poetry2nix.mkPoetryApplication {
-              python = prev.python39;
-              projectDir = ./pyk;
-            };
           })
       ];
     in flake-utils.lib.eachSystem [
@@ -81,102 +97,97 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ (final: prev: { llvm-backend-release = false; }) ]
+
+          # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
+          # https://github.com/NixOS/nixpkgs/pull/172397
+          config.allowBroken = system == "aarch64-darwin";
+          overlays = [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
             ++ allOverlays;
         };
 
-        haskell-backend-bins-version =
-          haskell-backend.packages.${system}."kore:exe:kore-exec".version;
         haskell-backend-bins = pkgs.symlinkJoin {
-          name = "kore-${haskell-backend-bins-version}-${
+          name = "kore-${
               haskell-backend.sourceInfo.shortRev or "local"
             }";
           paths = let p = haskell-backend.packages.${system};
           in [
-            p."kore:exe:kore-exec"
-            p."kore:exe:kore-rpc"
-            p."kore:exe:kore-repl"
-            p."kore:exe:kore-prof"
-            p."kore:exe:kore-match-disjunction"
+            p.kore-exec
+            p.kore-match-disjunction
+            p.kore-parser
+            p.kore-repl
+            p.kore-rpc
           ];
         };
 
       in rec {
+        k-version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
-          inherit (pkgs) pyk;
-          k = pkgs.k-framework haskell-backend-bins;
+          k = pkgs.k-framework {
+            inherit haskell-backend-bins;
+            llvm-kompile-libs = with pkgs; {
+              procps = [ "-I${procps}/include" "-L${procps}/lib" ];
+              openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
+            };
+          };
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
-          # interface, i.e. we have `update-maven`/`update-python` in k and 
+          # interface, i.e. we have `update-maven` in k and
           # `update-cabal` in the haskell-backend.
-          # The first `nix-build` command below ensures k source is loaded into the Nix store. 
-          # This command will fail, but only after loading the source. 
-          # mavenix will not do this automatically because we it uses restrict-eval, 
-          # and we are using filterSource, which is disabled under restrict-eval. 
+          # The first `nix-build` command below ensures k source is loaded into the Nix store.
+          # This command will fail, but only after loading the source.
+          # mavenix will not do this automatically because we it uses restrict-eval,
+          # and we are using filterSource, which is disabled under restrict-eval.
           update-maven = pkgs.writeShellScriptBin "update-maven" ''
             #!/bin/sh
             ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
               || echo "^~~~ expected error"
 
+            export PATH="${pkgs.gnused}/bin:$PATH"
             ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
           '';
 
-          check-versions = let
-            hashes = [
-              {
-                name = "llvm-mackend";
-                rev = llvm-backend.rev;
-              }
-              {
-                name = "haskell-mackend";
-                rev = haskell-backend.rev;
-              }
-            ];
-          in pkgs.writeShellScriptBin "check-versions" ''
-            STATUS=$(git submodule status);
-            for elem in ${
-              pkgs.lib.concatMapStringsSep " " ({ name, rev }: "${name},${rev}")
-              hashes
-            }; do
-              IFS=","; set -- $elem;
-              if ! grep -q "$2" <<< "$STATUS";
-              then
-                  echo "$1 with hash '$2' does not match any current submodules:"
-                  git submodule status
-                  exit 1
-              fi
-            done
-            echo "All dependencies match"
-          '';
+          check-submodules = rv-utils.lib.check-submodules pkgs {
+            inherit llvm-backend haskell-backend booster-backend;
+          };
+
+          update-from-submodules =
+            rv-utils.lib.update-from-submodules pkgs ./flake.lock {
+              llvm-backend.submodule =
+                "llvm-backend/src/main/native/llvm-backend";
+            };
+
+          smoke-test = with pkgs;
+            stdenv.mkDerivation {
+              name = "k-${k-version}-${self.rev or "dirty"}-smoke-test";
+              unpackPhase = "true";
+              buildInputs = [ fmt gmp mpfr k ];
+              buildPhase = ''
+                echo "module TEST imports BOOL endmodule" > test.k
+                kompile test.k --syntax-module TEST --backend llvm
+                rm -rf test-kompiled
+                kompile test.k --syntax-module TEST --backend haskell
+              '';
+              installPhase = ''
+                runHook preInstall
+                touch "$out"
+                runHook postInstall
+              '';
+            };
 
           test = with pkgs;
-            let
-              k-version =
-                lib.removeSuffix "\n" (builtins.readFile ./package/version);
-            in stdenv.mkDerivation {
+            stdenv.mkDerivation {
               name = "k-${k-version}-${self.rev or "dirty"}-test";
               src = lib.cleanSource
                 (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
                   ./k-distribution);
               preferLocalBuild = true;
-              buildInputs = [ gmp mpfr k ];
+              buildInputs = [ fmt gmp mpfr k ];
               postPatch = ''
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
-                ${
-                # we add the `--no-haskell-binary` flag due to the compact library
-                # (used to create the binary haskell files) being broken on Mac
-                # https://github.com/runtimeverification/haskell-backend/issues/3137
-                lib.optionalString stdenv.isDarwin ''
-                  for mak in include/kframework/*.mak
-                  do
-                    substituteInPlace $mak \
-                      --replace 'KOMPILE_FLAGS+=--no-exc-wrap' 'KOMPILE_FLAGS+=--no-exc-wrap --no-haskell-binary'
-                  done
-                ''}
               '';
               buildFlags = [
                 "K_BIN=${k}/bin"
@@ -194,13 +205,14 @@
                 runHook postInstall
               '';
             };
-
         };
         defaultPackage = packages.k;
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework { inherit haskell-backend-bins; llvm-kompile-libs = {}; });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
-        overlays.z3 = haskell-backend.overlay;
+        overlays.z3 = haskell-backend.overlays.z3;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
+
       };
 }

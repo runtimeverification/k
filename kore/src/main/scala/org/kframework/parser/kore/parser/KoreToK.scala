@@ -1,6 +1,8 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
 import org.kframework.builtin.{KLabels, Sorts}
+import org.kframework.kore.Assoc
 import org.kframework.kore.KVariable
 import org.kframework.kore.KORE
 import org.kframework.attributes.Att
@@ -34,7 +36,6 @@ class KoreToK (sortAtt : Map[String, String]) {
     "Star" -> "*",
     "Plus" -> "+",
     "Comm" -> ",",
-    "Hyph" -> "-",
     "Stop" -> ".",
     "Slsh" -> "/",
     "Coln" -> ":",
@@ -117,7 +118,7 @@ class KoreToK (sortAtt : Map[String, String]) {
     case kore.Application(head, args) => head.ctr match {
       case "inj" =>
         apply(args.head) match {
-          case KVariable(name, att) => KORE.KVariable(name, att.add("prettyPrintWithSortAnnotation"))
+          case KVariable(name, att) => KORE.KVariable(name, att.add(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
           case body => body
         }
       case "kseq" =>
@@ -133,10 +134,12 @@ class KoreToK (sortAtt : Map[String, String]) {
       KORE.KApply(KORE.KLabel(KLabels.ML_TRUE.name, apply(s)))
     case kore.Bottom(s) =>
       KORE.KApply(KORE.KLabel(KLabels.ML_FALSE.name, apply(s)))
-    case kore.And(s, p, q) =>
-      KORE.KApply(KORE.KLabel(KLabels.ML_AND.name, apply(s)), apply(p), apply(q))
-    case kore.Or(s, p, q) =>
-      KORE.KApply(KORE.KLabel(KLabels.ML_OR.name, apply(s)), apply(p), apply(q))
+    case kore.And(s, items) =>
+      val and = KORE.KLabel(KLabels.ML_AND.name, apply(s))
+      KORE.KApply(and,  Assoc.flatten(and, items.map(apply), KORE.KLabel(KLabels.ML_TRUE.name, apply(s))))
+    case kore.Or(s, items) =>
+      val or = KORE.KLabel(KLabels.ML_OR.name, apply(s))
+      KORE.KApply(or,  Assoc.flatten(or, items.map(apply), KORE.KLabel(KLabels.ML_FALSE.name, apply(s))))
     case kore.Not(s, p) =>
       KORE.KApply(KORE.KLabel(KLabels.ML_NOT.name, apply(s)), apply(p))
     case kore.Implies(s, p, q) =>

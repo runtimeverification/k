@@ -1,11 +1,23 @@
-  S ==K "123"
+  {
+    S:String
+  #Equals
+    "123"
+  }
 #Or
-  S ==K "132"
+  {
+    S:String
+  #Equals
+    "132"
+  }
 #Or
-  S ==K "213"
+  {
+    S:String
+  #Equals
+    "312"
+  }
 #Or
-  S ==K "231"
-#Or
-  S ==K "312"
-#Or
-  S ==K "321"
+  {
+    S:String
+  #Equals
+    "321"
+  }

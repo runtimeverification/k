@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
 

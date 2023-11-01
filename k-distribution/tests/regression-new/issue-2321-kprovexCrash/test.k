@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST
     imports BOOL
     imports INT
@@ -15,5 +16,5 @@ module TEST
     rule #assert false => #fail
 
 // Uninterpreted functions
-    syntax Int ::= i(Int, Int)   [function, functional, no-evaluators, smtlib(fi), klabel(i)]
+    syntax Int ::= i(Int, Int)   [function, total, no-evaluators, smtlib(fi), klabel(i)]
 endmodule

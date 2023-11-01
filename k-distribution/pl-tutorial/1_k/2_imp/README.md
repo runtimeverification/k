@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 ## Part 2: Defining IMP
@@ -16,7 +16,6 @@ Specifically, you will learn the following:
 * The additional syntax of the K syntactic category.
 * How the strictness annotations are automatically desugared into rules.
 * The first steps of the configuration abstraction mechanism.
-* The distinction between structural and computational rules.
 
 Like in the previous tutorial, this folder contains several lessons, each
 adding new features to IMP.  Do them in order.  Also, make sure you completed

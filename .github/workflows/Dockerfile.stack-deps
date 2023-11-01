@@ -1,0 +1,36 @@
+ARG BASE_OS
+ARG BASE_DISTRO
+FROM ${BASE_OS}:${BASE_DISTRO}
+
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN    apt-get update        \
+    && apt-get upgrade --yes \
+    && apt-get install --yes \
+            curl             \
+            libsecp256k1-dev \
+            libtinfo-dev     \
+            pkg-config
+
+RUN curl -sSL https://get.haskellstack.org/ | sh
+
+# The image is built specifically for an environment with this user/group
+ARG USER=github-user
+ARG GROUP=$USER
+ARG USER_ID=1000
+ARG GROUP_ID=$USER_ID
+RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP $USER
+
+USER $USER:$GROUP
+
+ENV LC_ALL=C.UTF-8
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/stack.yaml                          /home/$USER/.tmp-haskell/
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/kore/kore.cabal                     /home/$USER/.tmp-haskell/kore/
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/kore-rpc-types/kore-rpc-types.cabal /home/$USER/.tmp-haskell/kore-rpc-types/
+RUN cd /home/$USER/.tmp-haskell && stack build --only-snapshot
+
+ENV LC_ALL=C.UTF-8
+ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/stack.yaml                    /home/$USER/.tmp-booster/
+ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/package.yaml                  /home/$USER/.tmp-booster/
+RUN cd /home/$USER/.tmp-booster && stack build --only-snapshot

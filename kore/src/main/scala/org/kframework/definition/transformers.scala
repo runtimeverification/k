@@ -1,12 +1,12 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 package org.kframework.definition
 
+import java.util.Optional
 import java.util.function.BiFunction
-
-import org.kframework.attributes.{Source, Location}
+import org.kframework.attributes.{Location, Source}
 import org.kframework.definition
-import org.kframework.kore.{AttCompare, K}
+import org.kframework.kore.{AttCompare, K, KApply, KToken}
 import org.kframework.utils.errorsystem.KEMException
 
 object ModuleTransformer {
@@ -22,9 +22,11 @@ object ModuleTransformer {
           f(m, s)
         } catch {
           case e: KEMException =>
-            e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
-              + "\n\t" + s.att.getOption(classOf[Source]).map(_.toString).getOrElse("<none>")
-              + "\n\t" + s.att.getOption(classOf[Location]).map(_.toString).getOrElse("<none>"))
+            val extraInfo = Optional.of(" on sentence at")
+              .flatMap[String](prefix => s.source.map[String](src => prefix + "\n\t" + src.toString))
+              .flatMap[String](prefix => s.location.map[String](loc => prefix + "\n\t" + loc.toString)).orElse("")
+
+            e.exception.addTraceFrame("while executing phase \"" + name + "\"" + extraInfo)
             throw e
         }
       }
@@ -116,4 +118,24 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
   }
 }
 
+object KViz {
+  def from(f: java.util.function.UnaryOperator[K], name:String):KViz = KViz(f(_), name)
 
+  def apply(f: K => K, name: String): KViz = f match {
+    case f: KViz => f
+    case _ => new KViz(f, name)
+  }
+}
+
+class KViz(f: K => K, name: String) extends (K => K) {
+  override def apply(input: K): K = {
+    input match {
+      case c: KToken  => f(c)
+      case tc: KApply =>
+        f(tc)
+        tc.items.forEach(apply)
+        tc
+      case _ => throw new AssertionError("Not expected downed term in visitor " + name + " term: " + input)
+    }
+  }
+}

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
 import org.kframework.parser.kore._
@@ -58,10 +59,22 @@ class TextToKore(b: Builders = DefaultBuilders) {
     parsePattern(io.Source.fromFile(file), line)
   }
 
-  /** Parses the file and returns [[kore.Pattern]]. */
+  /** Parses the string and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
   def parsePattern(str: String): Pattern = {
     parsePattern(io.Source.fromString(str), 0)
+  }
+
+  /** Parses the file and returns [[kore.Module]]. */
+  @throws(classOf[ParseError])
+  def parseModule(file: java.io.File, line: Integer): Module = {
+    parseModule(io.Source.fromFile(file), line)
+  }
+
+  /** Parses the string and returns [[kore.Module]]. */
+  @throws(classOf[ParseError])
+  def parseModule(str: String): Module = {
+    parseModule(io.Source.fromString(str), 0)
   }
 
   /** Parses from the stream and returns [[kore.Definition]]. */
@@ -72,14 +85,12 @@ class TextToKore(b: Builders = DefaultBuilders) {
       parseDefinition()
     } catch {
       case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
-      case exc: ParseError => throw exc
-      case exc: Throwable => throw new ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage, exc) // shouldn't be reachable
     } finally {
       scanner.close()
     }
   }
 
-  /** Parses from the stream and returns [[kore.Definition]]. */
+  /** Parses from the stream and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
   def parsePattern(src: io.Source, line: Integer): Pattern = {
     try {
@@ -87,8 +98,19 @@ class TextToKore(b: Builders = DefaultBuilders) {
       parsePattern()
     } catch {
       case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
-      case exc: ParseError => throw exc
-      case exc: Throwable => throw new ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage, exc) // shouldn't be reachable
+    } finally {
+      scanner.close()
+    }
+  }
+
+  /** Parses from the stream and returns [[kore.Module]]. */
+  @throws(classOf[ParseError])
+  def parseModule(src: io.Source, line: Integer): Module = {
+    try {
+      scanner.init(src, line)
+      parseModule()
+    } catch {
+      case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
     } finally {
       scanner.close()
     }
@@ -357,21 +379,17 @@ class TextToKore(b: Builders = DefaultBuilders) {
             val s = parseSort()
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern()
-            consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern()
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.And(s, p1, p2)
+            b.And(s, args)
           case ('o', 'r') => // or
             consumeWithLeadingWhitespaces("{")
             val s = parseSort()
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern()
-            consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern()
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.Or(s, p1, p2)
+            b.Or(s, args)
           case ('n', 'o') => // not
             consume("t")
             consumeWithLeadingWhitespaces("{")
@@ -505,17 +523,39 @@ class TextToKore(b: Builders = DefaultBuilders) {
             consumeWithLeadingWhitespaces("{")
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p = parsePattern()
+            val ctr = scanner.nextWithSkippingWhitespaces() match {
+              case c => // variable or application
+                scanner.putback(c)
+                val id = parseId() // previousParsingLevel is set here
+                consumeWithLeadingWhitespaces("{")
+                val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
+                consumeWithLeadingWhitespaces("}")
+                (p1: kore.Pattern, p2: kore.Pattern) => b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
+            }
+            consumeWithLeadingWhitespaces("(")
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.LeftAssoc(p)
+            consumeWithLeadingWhitespaces(")")
+            b.LeftAssoc(ctr, args)
           case ('r', 'i') => // right-assoc
             consume("ght-assoc")
             consumeWithLeadingWhitespaces("{")
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val p = parsePattern()
+            val ctr = scanner.nextWithSkippingWhitespaces() match {
+              case c => // variable or application
+                scanner.putback(c)
+                val id = parseId() // previousParsingLevel is set here
+                consumeWithLeadingWhitespaces("{")
+                val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
+                consumeWithLeadingWhitespaces("}")
+                (p1: kore.Pattern, p2: kore.Pattern) => b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
+            }
+            consumeWithLeadingWhitespaces("(")
+            val args = parseList(() => parsePattern(), ',', ')')
             consumeWithLeadingWhitespaces(")")
-            b.RightAssoc(p)
+            consumeWithLeadingWhitespaces(")")
+            b.RightAssoc(ctr, args)
           // case ('s', 'u') => // subset
           //   consume("bset")
           //   consumeWithLeadingWhitespaces("{")

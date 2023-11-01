@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2013-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 Modify IMP so that the K *followed by* arrow, `~>`, does not explicitly
 occur in the definition (it currently occurs in the semantics of

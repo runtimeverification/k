@@ -1,1 +1,5 @@
-V ==K [ Thursday , Saturday , Thursday , .Bottoms ]
+{
+  V:K
+#Equals
+  [ Thursday , Saturday , Thursday , .Bottoms ] ~> .
+}

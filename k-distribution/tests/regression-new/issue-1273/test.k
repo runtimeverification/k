@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST
     imports INT
     imports BOOL
@@ -6,9 +7,9 @@ module TEST
                   | FInt ( value: Int , one: Int ) [klabel(FInt), symbol]
  // ---------------------------------------------------------------------
 
-    syntax FInt ::= "1FInt" "(" Int ")"
- // -----------------------------------
-    rule 1FInt(ONE) => FInt(ONE, ONE) [macro]
+    syntax FInt ::= "1FInt" "(" Int ")" [macro]
+ // -------------------------------------------
+    rule 1FInt(ONE) => FInt(ONE, ONE)
 
     syntax FInt ::= foo ( FInt ) [function]
  // ---------------------------------------

@@ -1,7 +1,7 @@
 DEF=var-eq
 EXT=test
 KOMPILE_FLAGS=--syntax-module VAR-EQ
-KOMPILE_BACKEND?=java
+KOMPILE_BACKEND?=haskell
 
 TESTDIR=.
 

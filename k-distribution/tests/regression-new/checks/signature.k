@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module A [private]
 
   syntax Foo ::= foo() // <- B may not use this symbol

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}
@@ -141,15 +141,10 @@ The empty block \texttt{\{\}} is simply dissolved.  The $\kdot$ below is the
 unit of the computation list structure $K$, that is, the empty task.
 Similarly, the non-empty blocks are dissolved and replaced by their statement
 contents, thus effectively giving them a bracket semantics; we can afford to
-do this only because we have no block-local variable declarations yet in IMP.
-Since we tagged the rules below as "structural", the \K tool structurally
-erases the block constructs from the computation structure, without
-considering their erasure as computational steps in the resulting transition
-systems.  You can make these rules computational (dropping the attribute
-\texttt{structural}) if you do want these to count as computational steps. */
+do this only because we have no block-local variable declarations yet in IMP. */
 
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {} => .
+  rule {S} => S
 
 /*@ \subsubsection{Assignment}
 The assigned variable is updated in the state.  The variable is expected
@@ -160,16 +155,9 @@ the assignment is dissolved. */
 
 /*@ \subsubsection{Sequential composition}
 Sequential composition is simply structurally translated into \K's
-builtin task sequentialization operation.  You can make this rule
-computational (i.e., remove the \texttt{structural} attribute) if you
-want it to count as a computational step.  Recall that the semantics
-of a program in a programming language defined in \K is the transition
-system obtained from the initial configuration holding that program
-and counting only the steps corresponding to computational rules as
-transitions (i.e., hiding the structural rules as unobservable, or
-internal steps). */
+builtin task sequentialization operation. */
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -182,10 +170,9 @@ argument is allowed to be evaluated. */
   rule if (false) _ else S => S
 
 /*@ \subsubsection{While loop}
-We give the semantics of the \texttt{while} loop by unrolling.
-Note that we preferred to make the rule below structural. */
+We give the semantics of the \texttt{while} loop by unrolling. */
 
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
 /*@ \subsection{Programs}
 The semantics of an IMP program is that its body statement is executed
@@ -195,12 +182,9 @@ constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list has at least one element and
 another when the list is empty.  In the first case we initialize the
 variable to 0 in the state, but only when the variable is not already
-declared (all variables are global and distinct in IMP).  We prefer to
-make the second rule structural, thinking of dissolving the residual
-empty \texttt{int;} declaration as a structural cleanup rather than as
-a computational step. */
+declared (all variables are global and distinct in IMP). */
 
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     requires notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
+  rule int .Ids; S => S
 endmodule

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser
 
 import java.util
@@ -19,18 +20,14 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
   import org.kframework.kore.KORE.{KApply,KLabel,KList,KToken,KVariable,KSequence,KAs,KRewrite,InjectedKLabel}
 
   def apply(t: Term): K = t match {
-    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source))
+    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source)
+      .add(classOf[Production], c.production.att.getOption(Att.ORIGINAL_PRD, classOf[Production]).getOrElse(c.production)))
     case t@TermCons(_, _) => termConsToKApply(t)
     case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att.empty)
   }
 
-  def anonVar(sort: Sort, t: HasLocation): K = {
-    val lbl = KLabel("#SemanticCastTo" + sort.toString())
-    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))), locationToAtt(t.location, t.source).add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))
-  }
-
   def termConsToKApply(t: TermCons): K = {
-    val realProd = if (t.production.att.contains("originalPrd", classOf[Production])) t.production.att.get("originalPrd", classOf[Production]) else t.production
+    val realProd = if (t.production.att.contains(Att.ORIGINAL_PRD, classOf[Production])) t.production.att.get(Att.ORIGINAL_PRD, classOf[Production]) else t.production
     if (t.production.att.contains(Att.BRACKET))
       return apply(t.items.get(0))
     if (t.production.klabel.isEmpty)
@@ -73,7 +70,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1).replace("\\\"", "\"")
 
-      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), parseSort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
+      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), parseSort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)), t.att)
 
     case t@KApply(l, items) =>
       KApply(l, KList((items map down _).asJava), t.att)

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.attributes
 
 case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) extends Comparable[Location] with AttValue {

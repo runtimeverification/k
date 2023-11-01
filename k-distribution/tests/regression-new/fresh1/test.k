@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 module TEST
   imports INT
   imports BOOL
@@ -6,7 +6,7 @@ module TEST
 
   syntax Foo ::= foo(Int)
 
-  syntax Foo ::= freshFoo(Int)    [freshGenerator, function, functional]
+  syntax Foo ::= freshFoo(Int)    [freshGenerator, function, total]
   rule freshFoo(I:Int) => foo(I)
 
   syntax KItem ::= foo(Foo, Int, Int, Int)

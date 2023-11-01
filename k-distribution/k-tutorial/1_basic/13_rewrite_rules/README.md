@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.13: Basics of K Rewriting
 
 The purpose of this lesson is to explain how rewrite rules that are not the
@@ -45,8 +49,8 @@ grammar:
 ```
 
 As a syntactic convenience, K allows you to treat `~>` like it is an
-associative list (i.e., as if it were defined as `syntax K ::= K "~>" K`), but
-when a definition is compiled, it will automatically transform the rules you
+associative list (i.e., as if it were defined as `syntax K ::= K "~>" K`).
+When a definition is compiled, it will automatically transform the rules you
 write so that they treat the `K` sort as a cons-list. Another syntactic
 convenience is that, for disambiguation purposes, you can write `.K` anywhere
 you would otherwise write `.` and the meaning is identical.
@@ -54,7 +58,7 @@ you would otherwise write `.` and the meaning is identical.
 Now, you may notice that the above grammar mentions the sort `KItem`. This is
 another built-in sort in K. For every sort `S` declared in a definition (with
 the exception of `K` and `KItem`), K will implicitly insert the following
-production: 
+production:
 
 ```
   syntax KItem ::= S
@@ -83,11 +87,32 @@ becomes the **final configuration** and is output by `krun`.
 If more than one top-level rule applies, by default, `K` will pick just one
 of those rules, apply it, and continue rewriting. However, it is
 **non-deterministic** which rule applies. In theory, it could be any of them.
-By passing the `--search` flag to `krun`, you are able to tell `krun` to 
+By passing the `--search` flag to `krun`, you are able to tell `krun` to
 explore all possible non-deterministic choices, and generate a complete list of
 all possible final configurations reachable by each nondeterminstic choice that
 can be made. Note that the `--search` flag to krun only works if you pass
 `--enable-search` to kompile first.
+
+Unlike top-level rewrite rules, function rules are not associated with any
+particular set of cells in the configuration (although they can contain cells
+in their function arguments and return value). While top-level rewrite rules
+apply to the entire term being rewritten, function rules apply anywhere a
+function application for that function appears, and are immediately rewritten
+to their return value in that position.
+
+Another key distinction between top-level rules and function rules is that
+function *symbols*, i.e., productions with the `function` attribute, are
+mathematical functions rather than constructors. While a constructor is
+logically distinct from any other constructor of the same sort, and can be
+matched against unconditionally, a function does not necessaraily have the
+same restriction unless it happens to be an injective function. Thus, two
+function symbols with different arguments may still ultimately produce the
+same value and thus compare equal to one another. Due to this, concrete
+execution (i.e., all K definitions introduced thus far; see Lesson 1.21)
+introduces the restriction that you cannot match on a function symbol on the
+left-hand side of a rule, except as the top symbol on the left-hand side of
+a function rule. This restriction will be later lifted when we introduce the
+Haskell Backend which performs **symbolic execution**.
 
 ### Exercise
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
   syntax AExp  ::= Int | String | Id
@@ -6,7 +6,7 @@ module IMP-SYNTAX
                  | "read" "(" ")"
                  | "-" Int
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -26,8 +26,8 @@ module IMP-SYNTAX
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax AExps ::= Ids
 endmodule
 
@@ -48,10 +48,10 @@ module IMP
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [group(lookup)]
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [group(increment)]
   rule <k> read() => I ...</k>
        <input> ListItem(I:Int) => .List ...</input>
   rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
@@ -64,22 +64,22 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .   [structural]
-  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>  [structural]
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule {} => .
+  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 
   syntax Printable ::= Int | String
 /* currently it is necessary to subsort Printable to AExp,
@@ -88,7 +88,7 @@ module IMP
   context print(HOLE:AExp, _AEs:AExps);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>
-  rule print(.AExps); => .  [structural]
+  rule print(.AExps); => .
 
   rule <k> halt; ~> _ => . </k>
 endmodule

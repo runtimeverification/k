@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework
 
 import org.kframework.utils.errorsystem.KEMException
@@ -43,5 +44,13 @@ class POSetTest {
     assertEquals(Some(b4), POSet(b1 -> b3, b2 -> b3, b3 -> b4).lub)
     assertEquals(None, POSet(b1 -> b2, b2 -> b3, b4 -> b5).lub)
     assertEquals(None, POSet(b1 -> b2, b2 -> b3, b2 -> b4).lub)
+  }
+
+  @Test def glb() {
+    assertEquals(Some(b2), POSet(b2 -> b1).glb)
+    assertEquals(Some(b3), POSet(b3 -> b1, b3 -> b2).glb)
+    assertEquals(Some(b4), POSet(b3 -> b1, b3 -> b2, b4 -> b3).glb)
+    assertEquals(None, POSet(b2 -> b1, b3 -> b2, b5 -> b4).glb)
+    assertEquals(None, POSet(b2 -> b1, b3 -> b2, b4 -> b2).glb)
   }
 }

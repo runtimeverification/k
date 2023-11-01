@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Deleting, Saving and Restoring Cell Contents
 
@@ -41,11 +43,11 @@ _reminder_ item in the computation whenever we need to take a snapshot of
 some cell contents; the item simply consists of the entire contents of the cell.
 Then, when the reminder item is reached, we restore the contents of the cell:
 
-    rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>  [structural]
+    rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>
 
 The only thing left now is to give the definition of environment restore:
 
-    rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+    rule <k> Rho => . ...</k> <env> _ => Rho </env>
 
 Done. `kompile` and `krun` `locals.imp`. Everything should work correctly now.
 Note that the rule above is different from the one we had for LAMBDA++ in

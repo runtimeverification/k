@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "b.k"
 require "c.k"
 

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module C-LEXICAL-SORTS
   syntax Identifier
   syntax Constant ::= Char
@@ -83,29 +84,29 @@ module C18-COMMON
                > right:
                  Exp "?" Exp ":" Exp
                > right:
-                 Exp "=" Exp [assign]
-               | Exp "*=" Exp [assign]
-               | Exp "/=" Exp [assign]
-               | Exp "%=" Exp [assign]
-               | Exp "+=" Exp [assign]
-               | Exp "-=" Exp [assign]
-               | Exp "<<=" Exp [assign]
-               | Exp ">>=" Exp [assign]
-               | Exp "&=" Exp [assign]
-               | Exp "^=" Exp [assign]
-               | Exp "|=" Exp [assign]
+                 Exp "=" Exp [group(assign)]
+               | Exp "*=" Exp [group(assign)]
+               | Exp "/=" Exp [group(assign)]
+               | Exp "%=" Exp [group(assign)]
+               | Exp "+=" Exp [group(assign)]
+               | Exp "-=" Exp [group(assign)]
+               | Exp "<<=" Exp [group(assign)]
+               | Exp ">>=" Exp [group(assign)]
+               | Exp "&=" Exp [group(assign)]
+               | Exp "^=" Exp [group(assign)]
+               | Exp "|=" Exp [group(assign)]
                > left:
-                 Exp "," Exp [comma]
+                 Exp "," Exp [group(comma)]
   syntax priorities assignExp > comma
   syntax priorities constantExp > assign
 
   syntax GenericAssocs ::= NeList{GenericAssoc,","}
 
-  syntax GenericAssoc ::= TypeName ":" Exp  [assignExp]
-                              | "default" ":" Exp [assignExp]
+  syntax GenericAssoc ::= TypeName ":" Exp  [group(assignExp)]
+                              | "default" ":" Exp [group(assignExp)]
 
-  syntax Exps ::= Exp [klabel(arg), assignExp]
-                | Exps "," Exp [assignExp]
+  syntax Exps ::= Exp [klabel(arg), group(assignExp)]
+                | Exps "," Exp [group(assignExp)]
 
   // \section(A.2.2)
 
@@ -174,13 +175,13 @@ module C18-COMMON
   syntax StructDeclarators ::= NeList{StructDeclarator,","}
 
   syntax StructDeclarator ::= Declarator
-                            | Declarator ":" Exp [constantExp]
-                            | ":" Exp [constantExp]
+                            | Declarator ":" Exp [group(constantExp)]
+                            | ":" Exp [group(constantExp)]
 
   syntax Enumerators ::= NeList{Enumerator,","}
 
   syntax Enumerator ::= Identifier
-                      | Identifier "=" Exp [constantExp]
+                      | Identifier "=" Exp [group(constantExp)]
 
   syntax TypeQualifier ::= "const" | "restrict" | "volatile" | "_Atomic"
   syntax FunctionSpecifier ::= "inline" | "_Noreturn"
@@ -256,7 +257,7 @@ module C18-COMMON
                                     | DirectAbstractDeclarator "(" ")"
                                     | DirectAbstractDeclarator "(" ParamTypeList ")"
 
-  syntax Init ::= Exp [klabel(initExp), assignExp]
+  syntax Init ::= Exp [klabel(initExp), group(assignExp)]
                 | "{" Inits "}"
                 | "{" Inits "," "}"
 

@@ -1,4 +1,6 @@
-<!--- Copyright (c) 2014-2019 K Team. All Rights Reserved. --->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 IMP
 ===
@@ -151,15 +153,10 @@ unit of the computation list structure `K`, that is, the empty task.
 Similarly, the non-empty blocks are dissolved and replaced by their statement
 contents, thus effectively giving them a bracket semantics; we can afford to
 do this only because we have no block-local variable declarations yet in IMP.
-Since we tagged the rules below as *structural*, the **K** tool structurally
-erases the block constructs from the computation structure, without
-considering their erasure as computational steps in the resulting transition
-systems.  You can make these rules computational (dropping the attribute
-`structural`) if you do want these to count as computational steps.
 
 ```k
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {} => .
+  rule {S} => S
 ```
 
 ### Assignment
@@ -173,17 +170,10 @@ the assignment is dissolved.
 
 ### Sequential composition
 Sequential composition is simply structurally translated into **K**'s
-builtin task sequentialization operation.  You can make this rule
-computational (i.e., remove the `structural` attribute) if you
-want it to count as a computational step.  Recall that the semantics
-of a program in a programming language defined in **K** is the transition
-system obtained from the initial configuration holding that program
-and counting only the steps corresponding to computational rules as
-transitions (i.e., hiding the structural rules as unobservable, or
-internal steps).
+builtin task sequentialization operation.
 
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 ```
 
 ### Conditional
@@ -200,10 +190,9 @@ argument is allowed to be evaluated.
 
 ### While loop
 We give the semantics of the `while` loop by unrolling.
-Note that we preferred to make the rule below structural.
 
 ```k
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 ```
 
 ### Programs
@@ -214,14 +203,11 @@ constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list has at least one element and
 another when the list is empty.  In the first case we initialize the
 variable to 0 in the state, but only when the variable is not already
-declared (all variables are global and distinct in IMP).  We prefer to
-make the second rule structural, thinking of dissolving the residual
-empty `int;` declaration as a structural cleanup rather than as
-a computational step.
+declared (all variables are global and distinct in IMP).
 
 ```k
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     requires notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
+  rule int .Ids; S => S
 endmodule
 ```

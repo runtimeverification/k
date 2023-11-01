@@ -1,30 +1,32 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kdep;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.OutputDirectoryOptions;
 
 /**
- * JCommander options for kdep. Essentially, this should contain all the kompile options needed in order to decide what
- * files get slurped by the outer parser.
+ * JCommander options for kdep. Essentially, this should contain all the kompile options needed in
+ * order to decide what files get slurped by the outer parser.
  */
-
 @RequestScoped
 public class KDepOptions {
 
-    @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+  @Inject
+  public KDepOptions() {}
 
-    @ParametersDelegate
-    public OuterParsingOptions outerParsing = new OuterParsingOptions();
+  @ParametersDelegate public transient GlobalOptions global = new GlobalOptions();
 
-    @ParametersDelegate
-    public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
+  @ParametersDelegate public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
-    @Parameter(names="--remake-depend", description="Generate an additional rule to remake the dependency file.")
-    public boolean alsoRemakeDepend = false;
+  @ParametersDelegate public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
+
+  @Parameter(
+      names = "--remake-depend",
+      description = "Generate an additional rule to remake the dependency file.")
+  public boolean alsoRemakeDepend = false;
 }

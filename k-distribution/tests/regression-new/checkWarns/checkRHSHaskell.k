@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+//
 // This should kompile just fine for the haskell backend, variables
 // in the requires clause should be considered as part of LHS for haskell backend.
 // https://github.com/runtimeverification/k/issues/2687
@@ -14,7 +16,7 @@ module CHECKRHSHASKELL
 
     syntax Pgm ::= "a" | "b"
     rule <k> a => b </k>
-    syntax Int ::= f ( Int ) [function, functional, no-evaluators]
+    syntax Int ::= f ( Int ) [function, total, no-evaluators]
 
     configuration <k> $PGM:Pgm </k>
 

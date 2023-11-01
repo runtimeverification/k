@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CONCRETE
   imports INT
 
@@ -27,4 +28,9 @@ module CONCRETE
 
   syntax Int ::= baz3(Int) [function]
   rule baz3(X) => 0 [concrete(X)]
+
+  syntax Int ::= baz4(Int, Int) [function]
+  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic(A, B), simplification]
+  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic, simplification]
+  rule baz4(C, D) => baz4(D, C) [concrete(C), symbolic(D), simplification]
 endmodule

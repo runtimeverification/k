@@ -21,7 +21,7 @@ else
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$K_LIB_DIR/native/linux$ARCH"
 fi
 
-export LC_ALL=C  # sets locale to C to avoid issues with numeric formats
+export LC_NUMERIC=C  # sets locale to C to avoid issues with numeric formats
 if [ -n "${TERM}" ]; then
   export TERM;
   export K_COLOR_SUPPORT=`tput colors`

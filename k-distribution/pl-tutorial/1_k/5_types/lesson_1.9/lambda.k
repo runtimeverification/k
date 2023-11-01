@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 require "substitution.md"
 
@@ -7,7 +7,7 @@ module LAMBDA
   imports SUBSTITUTION
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type               [klabel(functionType)]
                 | "(" Type ")"                 [bracket]
 
   syntax Exp ::= KVar
@@ -19,7 +19,7 @@ module LAMBDA
 
   syntax KResult ::= Type
 
-  syntax Exp ::= Exp "->" Exp
+  syntax Exp ::= Exp "->" Exp                  [klabel(functionType)]
   rule lambda X : T . E => T -> (E[T/X])       [anywhere]
   rule (T1 -> T2) T1 => T2                     [anywhere]
 
@@ -40,12 +40,12 @@ module LAMBDA
   syntax Exp ::= "if" Exp "then" Exp "else" Exp
   rule if bool then T:Type else T => T         [anywhere]
 
-  syntax Exp ::= "let" KVar ":" Type "=" Exp "in" Exp
-  rule let X : T = E in E' => (lambda X : T . E') E                   [macro]
+  syntax Exp ::= "let" KVar ":" Type "=" Exp "in" Exp [macro]
+  rule let X : T = E in E' => (lambda X : T . E') E
 
-  syntax Exp ::= "letrec" KVar ":" Type KVar ":" Type "=" Exp "in" Exp
-               | "mu" KVar ":" Type "." Exp      [binder]
+  syntax Exp ::= "letrec" KVar ":" Type KVar ":" Type "=" Exp "in" Exp  [macro]
+               | "mu" KVar ":" Type "." Exp                             [binder]
   rule letrec F : T1  X : T2 = E in E'
-    => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
+    => let F : T1 = mu F : T1 . lambda X : T2 . E in E'
   rule mu X : T . E => (T -> T) (E[T/X])         [anywhere]
 endmodule

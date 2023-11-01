@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module LEXICAL-SORTS
   syntax Identifier [token]
   syntax IntConstant [token]

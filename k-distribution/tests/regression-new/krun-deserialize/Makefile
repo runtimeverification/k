@@ -7,6 +7,3 @@ export KOMPILE_BACKEND
 KRUN_FLAGS=--parser "cat"
 
 include ../../../include/kframework/ktest.mak
-
-# Use krun-legacy for these tests instead of krun.
-KRUN_OR_LEGACY=$(KRUN_LEGACY)

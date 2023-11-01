@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # SIMPLE — Typed — Dynamic
@@ -47,7 +47,7 @@ constructs.
                 | Type "[" "]"
                 | "(" Type ")"           [bracket]
                 > Types "->" Type
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}        [klabel(exps)]
 ```
 
 ## Declarations
@@ -95,9 +95,9 @@ constructs.
 Like in the static semantics, there is no need for lists of identifiers
 (because we now have lists of parameters).
 ```k
-  syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(exps)]
 ```
 
 ## Statements
@@ -109,9 +109,9 @@ Like in the static semantics, there is no need for lists of identifiers
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-            | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -126,11 +126,11 @@ Like in the static semantics, there is no need for lists of identifiers
 ```
 The same desugaring macros like in the statically typed SIMPLE.
 ```k
-  rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
-  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
-  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [anywhere]
+  rule T:Type X:Id = E; => T X; X = E;                                  [anywhere]
 
 endmodule
 
@@ -180,7 +180,8 @@ function body encounters an explicit `return` statement.
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" color="yellow" type="Map">
+                      <id color="pink"> 0 </id>
                       <k color="green"> ($PGM:Stmt ~> execute) </k>
 //                      <br/>
                       <control color="cyan">
@@ -191,7 +192,6 @@ function body encounters an explicit `return` statement.
 //                      <br/>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
-                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
 //                  <br/>
@@ -253,7 +253,7 @@ adds the length of `Vs` dimensions to the type `T`.
 ```k
 // TODO: Check the desugaring below to be consistent with the one for untyped simple
 
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token] | "$2" [token]
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
     => T[]<Vs> X[N1];
        {
@@ -263,7 +263,6 @@ adds the length of `Vs` dimensions to the type `T`.
            $1[$2] = X;
          }
        }
-    [structural]
 ```
 
 ### Function declaration
@@ -285,7 +284,7 @@ When done with the first pass, call `main()`.
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> .Map => Env </genv>  [structural]
+       <genv> .Map => Env </genv>
 ```
 
 ### Expressions
@@ -295,7 +294,7 @@ When done with the first pass, call `main()`.
 ```k
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 ```
 
 ### Variable/Array increment
@@ -303,7 +302,7 @@ When done with the first pass, call `main()`.
 ```k
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [group(increment)]
 ```
 
 ### Arithmetic operators
@@ -335,11 +334,11 @@ Check array bounds, as part of the dynamic typing policy.
 ```k
 // Same comment as for simple untyped regarding [anywhere]
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [anywhere]
 
 // Same comment as for simple untyped regarding [anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [structural, anywhere]
+    when N >=Int 0 andBool N <Int M  [anywhere]
 ```
 
 ### Size of an array
@@ -381,13 +380,12 @@ completed to return the `nothing` value tagged as expected.
 ```k
   syntax Val ::= nothing(Type)
   rule <k> return; => return nothing(T); ...</k> <returnType> T </returnType>
-    [structural]
 ```
 
 ### Read
 
 ```k
-  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 ```
 
 ### Assignment
@@ -398,7 +396,7 @@ preserved:
   context (HOLE => lvalue(HOLE)) = _
 
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (V' => V) ...</store>
-    when typeOf(V) ==K typeOf(V')  [assignment]
+    when typeOf(V) ==K typeOf(V')  [group(assignment)]
 ```
 
 ### Statements
@@ -406,14 +404,14 @@ preserved:
 ### Blocks
 
 ```k
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 ```
 
 ### Sequential composition
 
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 ```
 
 ### Expression statements
@@ -432,7 +430,7 @@ preserved:
 ### While loop
 
 ```k
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}
 ```
 
 ### Print
@@ -440,8 +438,8 @@ preserved:
 We only allow printing integers and strings:
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
-  rule print(.Vals); => .  [structural]
+    when typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
+  rule print(.Vals); => .
 ```
 
 ### Exceptions
@@ -480,13 +478,13 @@ values, in which case our semantics below works fine:
 
 ```k
    rule <thread>...
-          <k> spawn S => !T:Int ...</k>
+          <k> spawn S => !T:Int +Int 1 ...</k>
           <env> Env </env>
         ...</thread>
         (.Bag => <thread>...
                 <k> S </k>
                 <env> Env </env>
-                <id> !T </id>
+                <id> !T +Int 1 </id>
               ...</thread>)
 ```
 
@@ -511,7 +509,7 @@ values, in which case our semantics below works fine:
    rule <k> acquire V:Val; => . ...</k>
         <holds>... .Map => V |-> 0 ...</holds>
         <busy> Busy (.Set => SetItem(V)) </busy>
-     when (notBool(V in Busy:Set))  [acquire]
+     when (notBool(V in Busy:Set))  [group(acquire)]
 
    rule <k> acquire V; => . ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
@@ -532,7 +530,7 @@ values, in which case our semantics below works fine:
 
 ```k
    rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [rendezvous]
+        <k> rendezvous V; => . ...</k>  [group(rendezvous)]
 ```
 
 ### Auxiliary declarations and operations
@@ -548,15 +546,15 @@ into a list of variable declarations.
 Location lookup.
 ```k
   syntax Exp ::= lookup(Int)  // see NOTES.md for why Exp instead of KItem
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 ```
 Environment recovery.
 ```k
 // TODO: same comment regarding setEnv(...) as for simple untyped
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .) ~> setEnv(_)
 ```
 lvalue and loc
 ```k
@@ -564,14 +562,13 @@ lvalue and loc
   syntax Val ::= loc(Int)
 
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
-    [structural]
 
   //context lvalue(_[HOLE])
   //context lvalue(HOLE[_])
   context lvalue(_::Exp[HOLE::Exps])
   context lvalue(HOLE::Exp[_::Exps])
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 ```
 Adds the corresponding depth to an array type
 ```k

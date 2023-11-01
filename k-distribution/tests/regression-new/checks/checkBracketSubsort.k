@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKBRACKETSUBSORT-SYNTAX
   syntax A
   syntax Exp ::= A

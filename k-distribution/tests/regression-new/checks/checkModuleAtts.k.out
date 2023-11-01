@@ -1,0 +1,3 @@
+[Error] Compiler: Had 1 structural errors.
+[Error] Compiler: Unrecognized attributes on module CHECKMODULEATTS: [baz, foo]
+Hint: User-defined groups can be added with the group(_) attribute.

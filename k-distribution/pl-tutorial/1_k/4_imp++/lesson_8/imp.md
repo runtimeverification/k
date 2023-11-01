@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 IMP++
@@ -97,19 +97,17 @@ example, the syntax of the previous "statement" assignment which
 is now obtained by composing the new assignment expression, and the
 new expression statement constructs); go the last lesson of
 Tutorial 2 if you are interested in IMP's constructs. For execution
-purposes, we tag the addition and division operations with the
-`addition` and `division` tags. These attributes have
-no theoretical significance, in that they do not affect the semantics
-of the language in any way. They only have practical relevance,
-specific to our implementation of the **K** tool. Specifically, we can
-tell the **K** tool (using its `superheat` and `supercool`
+purposes, we tag the addition and division operations as members of the
+`addition` and `division` groups. These groups have no theoretical significance,
+in that they do not affect the semantics of the language in any way. They only
+have practical relevance, specific to our implementation of the **K** tool.
+Specifically, we can tell the **K** tool (using its `superheat` and `supercool`
 options) that we want to exhaustively explore all the non-deterministic
 behaviors (due to strictness) of these language constructs. For performance
 reasons, by default the **K** tool chooses an arbitrary but fixed order to
-evaluate the arguments of the strict language constructs, thus possibly
-losing behaviors due to missed interleavings. This aspect was irrelevant in
-IMP, because its expressions had no side effects, but it becomes relevant
-in IMP++.
+evaluate the arguments of the strict language constructs, thus possibly losing
+behaviors due to missed interleavings. This aspect was irrelevant in IMP,
+because its expressions had no side effects, but it becomes relevant in IMP++.
 
 The syntax of the IMP++ constructs is self-explanatory. Note that assignment
 is now an expression construct. Also, `print` is variadic, taking a
@@ -126,7 +124,7 @@ of statements surrounded by curly brackets.
                  | "read" "(" ")"
                  | "-" AExp                   [strict]
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
@@ -146,8 +144,8 @@ of statements surrounded by curly brackets.
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax Stmts ::= List{Stmt,""}
   syntax AExps ::= Ids
 endmodule
@@ -190,10 +188,10 @@ buffers as lists of items.
 ```k
   configuration <T color="yellow">
                   <threads color="orange">
-                    <thread multiplicity="*" color="blue">
+                    <thread multiplicity="*" color="blue" type="Map">
+                      <id color="black"> 0 </id>
                       <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
-                      <id color="black"> 0 </id>
                     </thread>
                   </threads>
 //                <br/>
@@ -293,7 +291,7 @@ configuration.
 Below we list the semantics of the old IMP constructs, referring the
 reader to the **K** semantics of IMP for their meaning. Like we tagged the
 addition and the division rules above in the syntax, we also tag the lookup
-and the assignment rules below (with tags `lookup` and
+and the assignment rules below (as members of the groups `lookup` and
 `assignment`), because we want to refer to them when we generate the
 language model (with the `kompile` tool), basically to allow them to
 generate (possibly non-deterministic) transitions. Indeed, these two rules,
@@ -312,7 +310,7 @@ them is chosen first.
 ```k
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [group(lookup)]
 ```
 
 ### Arithmetic constructs
@@ -343,7 +341,7 @@ semantics of the two constructs:
   rule _:Int; => .
   rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>  [assignment]
+       <store>... N |-> (_ => I) ...</store>  [group(assignment)]
 ```
 
 ### Sequential composition
@@ -355,7 +353,7 @@ corresponding computation `s1 ~> s2 ~> ... ~> sn`.
 
 ```k
    rule .Stmts => .
-   rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
+   rule S:Stmt Ss:Stmts => S ~> Ss
 ```
 
 ### Conditional statement
@@ -372,7 +370,7 @@ the semantics all empty lists become explicit corresponding dots
 (to avoid parsing ambiguities)
 
 ```k
-  rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {.Stmts}
 ```
 
 ### The new IMP++ constructs
@@ -400,12 +398,12 @@ Without abstraction, you would have to also include the `thread` and
 ```k
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [group(increment)]
 ```
 
 ### Read
 The `read()` construct evaluates to the first integer in the
-input buffer, which it consumes. Note that this rule is tagged
+input buffer, which it consumes. Note that this rule is put in the group
 `increment`. This is because we will include it in the set of
 potentially non-deterministic transitions when we kompile the definition;
 we want to do that because two or more threads can "compete" on
@@ -414,7 +412,7 @@ for the next transition can lead to different behaviors.
 
 ```k
   rule <k> read() => I ...</k>
-       <input> ListItem(I:Int) => .List ...</input>  [read]
+       <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 ```
 
 ### Print
@@ -431,8 +429,7 @@ currently, **K**'s lists are cons-lists, so we cannot simply rewrite the
 head of a list (`P`) into a list (`.`). The first rule below is tagged,
 because we want to include it in the list of transitions when we kompile;
 different threads may compete on the output buffer and we want to capture
-all behaviors. The second rule is structural because we do not want it to
-count as a computational step.
+all behaviors.
 
 ```k
   syntax Printable ::= Int | String
@@ -444,8 +441,8 @@ count as a computational step.
   context print(HOLE:AExp, _AEs:AExps);
 
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <output>... .List => ListItem(P) </output>  [print]
-  rule print(.AExps); => .  [structural]
+       <output>... .List => ListItem(P) </output>  [group(print)]
+  rule print(.AExps); => .
 ```
 
 ### Halt
@@ -493,8 +490,8 @@ with the declared configuration cell multiplicity. The unique identifier
 of the new thread is generated using the `fresh` side condition.
 
 ```k
-  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+  rule <k> spawn S => !T:Int +Int 1 ...</k> <env> Rho </env>
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
 ```
 ### Join thread
 A thread who wants to join another thread `T` has to wait until
@@ -525,13 +522,10 @@ new layer at block entrance and pop it at block exit. The variable
 lookup/assign/increment operations then also need to change, so we do
 not prefer that non-modular approach. Compilers solve this problem by
 statically renaming all local variables into fresh ones, to completely
-eliminate shadowing and thus environment saving/restoring. The rule
-below can be structural, because what it effectively does is to take a
-snapshot of the current environment; this operation is arguably not a
-computational step.
+eliminate shadowing and thus environment saving/restoring.
 
 ```k
-  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
+  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>
 ```
 
 ### Variable declaration
@@ -542,24 +536,22 @@ initialize it with 0.
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 ```
 
 ### Auxiliary operations
 We only have one auxiliary operation in IMP++, the environment
 recovery. Its role is to discard the current environment in the
 `env` cell and replace it with the environment that it holds.
-This rule is structural: we do not want them to count as computational
-steps in the transition system of a program.
 
 ```k
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>
 ```
 
 If you want to avoid useless environment recovery steps and keep the size
 of the computation structure smaller, then you can also add the rule
 ```
-  rule (_:Map => .) ~> _:Map  [structural]
+  rule (_:Map => .) ~> _:Map
 ```
 This rule acts like a ``tail recursion'' optimization, but for blocks. */
 ```k
@@ -587,7 +579,7 @@ with the command:
 kompile imp.k --transition="addition division lookup assignment increment read print"
 ```
 
-As already mentioned, the syntax and rule tags play no theoretical or
+As already mentioned, the syntax and rule groups play no theoretical or
 foundational role in **K**. They are only a means to allow `kompile` to
 refer to them in its options, like we did above. By default, `kompile`'s
 transition option is empty, because this yields the fastest language model when
@@ -664,7 +656,7 @@ or more threads are about to access the same location in the store and at
 least one of these accesses is a write (i.e., an instance of the variable
 assignment rule), there is a high chance that different choices for
 the next transition lead to different program behaviors. While in the
-theory of **K** all the non-structural rules count as computational steps
+theory of **K** all the count as computational steps
 and hereby as transitions in the transition system associated to the
 program, in practice that may yield a tremendous number of step
 interleavings to consider. Most of these interleavings are behaviorally

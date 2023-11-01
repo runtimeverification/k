@@ -1,4 +1,35 @@
 #!/usr/bin/env bash
 source "$(dirname "$0")/setenv"
-ulimit -s `ulimit -H -s`
-eval $JAVA org.kframework.main.Main '"$@"'
+ulimit -s "$(ulimit -H -s)"
+
+K_BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
+GIT_DESCRIBE="${K_BASE}/kframework/git-describe.out"
+TIMESTAMP="${K_BASE}/kframework/timestamp.out"
+version=
+
+for flag in "$@"; do
+    if [[ "$flag" == "--version" ]]; then
+        if [[ -e "${GIT_DESCRIBE}" ]]; then
+            version="$(cat "${GIT_DESCRIBE}")"
+        fi
+        versionTimestamp="$(cat "${TIMESTAMP}")"
+        versionTimestampInMilliseconds=$((versionTimestamp / 1000))
+
+        if [ "$(uname)" = 'Darwin' ]; then
+            versionDate=$(date -r "${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
+        else
+            versionDate=$(date -d "@${versionTimestampInMilliseconds}" "+%a %b %d %H:%M:%S %Z %Y")
+        fi
+
+        if [[ -z "${version}" ]]; then
+            version="v"$(cat "${K_BASE}"/kframework/version)
+        fi
+
+        echo "K version:    ${version}"
+        echo "Build date:   ${versionDate}"
+        exit 0
+    fi
+done
+
+eval "$JAVA" org.kframework.main.Main '"$@"'
+

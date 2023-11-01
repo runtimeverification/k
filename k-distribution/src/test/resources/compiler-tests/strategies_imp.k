@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 requires "domains.md"
 
 module IMP-SYNTAX
@@ -10,7 +10,7 @@ module IMP-SYNTAX
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
-                 > AExp "+" AExp              [left, strict, transition]
+                 > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -52,17 +52,17 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .K   [structural]
-  rule {S} => S  [structural]
+  rule {} => .K
+  rule {S} => S
 // Stmt
   rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
-  rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
+  rule S1::Stmt S2::Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 // Pgm
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     when notBool (X in keys(Rho))
 
-  rule int .Ids; S => S  [structural]
+  rule int .Ids; S => S
 endmodule

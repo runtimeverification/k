@@ -1,6 +1,17 @@
-// Copyright (c) 2021 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Hooks;
@@ -11,27 +22,15 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
-import org.kframework.kore.TransformK;
-import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.StringUtil;
 import org.kframework.mpfr.BigFloat;
 import org.kframework.mpfr.BinaryMathContext;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
-import static org.kframework.definition.Constructors.*;
+import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 
 public class ConstantFolding {
 
-  private static final List<String> hookNamespaces = Arrays.asList(Hooks.BOOL, Hooks.FLOAT, Hooks.INT, Hooks.STRING);
+  private static final List<String> hookNamespaces =
+      Arrays.asList(Hooks.BOOL, Hooks.FLOAT, Hooks.INT, Hooks.STRING);
 
   private K loc;
 
@@ -40,9 +39,12 @@ public class ConstantFolding {
   }
 
   public Sentence fold(Module module, Sentence sentence) {
-    if (sentence instanceof Rule) {
-      Rule r = (Rule)sentence;
-      return Rule(fold(module, r.body(), true), fold(module, r.requires(), false), fold(module, r.ensures(), false), r.att());
+    if (sentence instanceof Rule r) {
+      return Rule(
+          fold(module, r.body(), true),
+          fold(module, r.requires(), false),
+          fold(module, r.ensures(), false),
+          r.att());
     }
     return sentence;
   }
@@ -72,9 +74,19 @@ public class ConstantFolding {
             }
             try {
               loc = k;
-              return doFolding(hook, args, module.productionsFor().apply(k.klabel().head()).head().substitute(k.klabel().params()).sort(), module);
+              return doFolding(
+                  hook,
+                  args,
+                  module
+                      .productionsFor()
+                      .apply(k.klabel().head())
+                      .head()
+                      .substitute(k.klabel().params())
+                      .sort(),
+                  module);
             } catch (NoSuchMethodException e) {
-              throw KEMException.internalError("Missing constant-folding implementation for hook " + hook, e);
+              throw KEMException.internalError(
+                  "Missing constant-folding implementation for hook " + hook, e);
             }
           }
         }
@@ -84,69 +96,68 @@ public class ConstantFolding {
   }
 
   private Class<?> classOf(String hook) {
-    switch(hook) {
-      case "BOOL.Bool":
-        return boolean.class;
-      case "FLOAT.Float":
-        return FloatBuiltin.class;
-      case "INT.Int":
-        return BigInteger.class;
-      case "STRING.String":
-        return String.class;
-      default:
-        return String.class;
-    }
+    return switch (hook) {
+      case "BOOL.Bool" -> boolean.class;
+      case "FLOAT.Float" -> FloatBuiltin.class;
+      case "INT.Int" -> BigInteger.class;
+      case "STRING.String" -> String.class;
+      default -> String.class;
+    };
   }
 
   private Object unwrap(String token, String hook) {
-    switch(hook) {
-      case "BOOL.Bool":
-        return Boolean.valueOf(token);
-      case "FLOAT.Float":
-        return FloatBuiltin.of(token);
-      case "INT.Int":
-        return new BigInteger(token);
-      case "STRING.String":
-        return StringUtil.unquoteKString(token);
-      default:
-        return token;
-    }
+    return switch (hook) {
+      case "BOOL.Bool" -> Boolean.valueOf(token);
+      case "FLOAT.Float" -> FloatBuiltin.of(token);
+      case "INT.Int" -> new BigInteger(token);
+      case "STRING.String" -> StringUtil.unquoteKString(token);
+      default -> token;
+    };
   }
 
-  private K wrap(Object result, Sort sort) {
+  private K wrap(Object result, Sort sort, Module module) {
+    String resultHookName =
+        module.sortAttributesFor().apply(sort.head()).getOptional(Att.HOOK()).orElse("");
+    boolean hasStringHook =
+        resultHookName.equals("STRING.String") || resultHookName.equals("BYTES.Bytes");
+
     if (result instanceof Boolean) {
       return KToken(result.toString(), sort);
     } else if (result instanceof FloatBuiltin) {
-      return KToken(((FloatBuiltin)result).value(), sort);
+      return KToken(((FloatBuiltin) result).value(), sort);
     } else if (result instanceof BigInteger) {
       return KToken(result.toString(), sort);
-    } else if (result instanceof String) {
-      return KToken(StringUtil.enquoteKString((String)result), sort);
+    } else if (result instanceof String && hasStringHook) {
+      return KToken(StringUtil.enquoteKString((String) result), sort);
     } else {
       return KToken(result.toString(), sort);
     }
   }
 
-  private K doFolding(String hook, List<K> args, Sort resultSort, Module module) throws NoSuchMethodException {
+  private K doFolding(String hook, List<K> args, Sort resultSort, Module module)
+      throws NoSuchMethodException {
     String renamedHook = hook.replace('.', '_');
     List<Class<?>> paramTypes = new ArrayList<>();
     List<Object> unwrappedArgs = new ArrayList<>();
     for (K arg : args) {
-      KToken tok = (KToken)arg;
+      KToken tok = (KToken) arg;
       Sort sort = tok.sort();
-      String argHook = module.sortAttributesFor().apply(sort.head()).getOptional(Att.HOOK()).orElse("");
+      String argHook =
+          module.sortAttributesFor().apply(sort.head()).getOptional(Att.HOOK()).orElse("");
       paramTypes.add(classOf(argHook));
       unwrappedArgs.add(unwrap(tok.s(), argHook));
     }
     try {
-      Method m = ConstantFolding.class.getDeclaredMethod(renamedHook, paramTypes.toArray(new Class<?>[args.size()]));
+      Method m =
+          ConstantFolding.class.getDeclaredMethod(
+              renamedHook, paramTypes.toArray(new Class<?>[args.size()]));
       Object result = m.invoke(this, unwrappedArgs.toArray(new Object[args.size()]));
-      return wrap(result, resultSort);
+      return wrap(result, resultSort, module);
     } catch (IllegalAccessException e) {
       throw KEMException.internalError("Error invoking constant folding function", e);
     } catch (InvocationTargetException e) {
       if (e.getCause() instanceof KEMException) {
-        throw (KEMException)e.getCause();
+        throw (KEMException) e.getCause();
       } else {
         throw KEMException.internalError("Error invoking constant folding function", e);
       }
@@ -154,7 +165,7 @@ public class ConstantFolding {
   }
 
   boolean BOOL_not(boolean a) {
-    return ! a;
+    return !a;
   }
 
   boolean BOOL_and(boolean a, boolean b) {
@@ -178,7 +189,7 @@ public class ConstantFolding {
   }
 
   boolean BOOL_implies(boolean a, boolean b) {
-    return ! a || b;
+    return !a || b;
   }
 
   boolean BOOL_eq(boolean a, boolean b) {
@@ -200,28 +211,35 @@ public class ConstantFolding {
   String STRING_chr(BigInteger a) {
     // unicode code points range from 0x0 to 0x10ffff
     if (a.compareTo(BigInteger.ZERO) < 0 || a.compareTo(BigInteger.valueOf(0x10ffff)) > 0) {
-      throw KEMException.compilerError("Argument to hook STRING.chr out of range. Expected a number between 0 and 1114111.", loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.chr out of range. Expected a number between 0 and 1114111.",
+          loc);
     }
-    int[] codePoint = new int[] { a.intValue() };
+    int[] codePoint = new int[] {a.intValue()};
     return new String(codePoint, 0, 1);
   }
 
   BigInteger STRING_ord(String a) {
     if (a.codePointCount(0, a.length()) != 1) {
-      throw KEMException.compilerError("Argument to hook STRING.ord out of range. Expected a single character.");
+      throw KEMException.compilerError(
+          "Argument to hook STRING.ord out of range. Expected a single character.");
     }
     return BigInteger.valueOf(a.codePointAt(0));
   }
 
   private void throwIfNotInt(BigInteger i, String hook) {
-    if (i.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) < 0 || i.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
-      throw KEMException.compilerError("Argument to hook " + hook + " out of range. Expected a 32-bit signed integer.", loc);
+    if (i.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) < 0
+        || i.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+      throw KEMException.compilerError(
+          "Argument to hook " + hook + " out of range. Expected a 32-bit signed integer.", loc);
     }
   }
 
   private void throwIfNotUnsignedInt(BigInteger i, String hook) {
-    if (i.compareTo(BigInteger.ZERO) < 0 || i.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
-      throw KEMException.compilerError("Argument to hook " + hook + " out of range. Expected a 32-bit unsigned integer.", loc);
+    if (i.compareTo(BigInteger.ZERO) < 0
+        || i.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+      throw KEMException.compilerError(
+          "Argument to hook " + hook + " out of range. Expected a 32-bit unsigned integer.", loc);
     }
   }
 
@@ -229,9 +247,14 @@ public class ConstantFolding {
     throwIfNotUnsignedInt(start, "STRING.substr");
     throwIfNotUnsignedInt(end, "STRING.substr");
     try {
-      return s.substring(s.offsetByCodePoints(0, start.intValue()), s.offsetByCodePoints(0, end.intValue()));
+      return s.substring(
+          s.offsetByCodePoints(0, start.intValue()), s.offsetByCodePoints(0, end.intValue()));
     } catch (IndexOutOfBoundsException e) {
-      throw KEMException.compilerError("Argument to hook STRING.substr out of range. Expected two indices >= 0 and <= the length of the string.", e, loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.substr out of range. Expected two indices >= 0 and <= the length"
+              + " of the string.",
+          e,
+          loc);
     }
   }
 
@@ -239,10 +262,14 @@ public class ConstantFolding {
     throwIfNotUnsignedInt(idx, "STRING.find");
     try {
       int offset = haystack.offsetByCodePoints(0, idx.intValue());
-     int foundOffset = haystack.indexOf(needle, offset);
+      int foundOffset = haystack.indexOf(needle, offset);
       return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
-    } catch(IndexOutOfBoundsException e) {
-      throw KEMException.compilerError("Argument to hook STRING.find out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    } catch (IndexOutOfBoundsException e) {
+      throw KEMException.compilerError(
+          "Argument to hook STRING.find out of range. Expected an index >= 0 and <= the length of"
+              + " the string to search.",
+          e,
+          loc);
     }
   }
 
@@ -252,8 +279,12 @@ public class ConstantFolding {
       int offset = haystack.offsetByCodePoints(0, idx.intValue());
       int foundOffset = haystack.lastIndexOf(needle, offset);
       return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
-    } catch(IndexOutOfBoundsException e) {
-      throw KEMException.compilerError("Argument to hook STRING.rfind out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    } catch (IndexOutOfBoundsException e) {
+      throw KEMException.compilerError(
+          "Argument to hook STRING.rfind out of range. Expected an index >= 0 and <= the length of"
+              + " the string to search.",
+          e,
+          loc);
     }
   }
 
@@ -263,8 +294,12 @@ public class ConstantFolding {
       int offset = haystack.offsetByCodePoints(0, idx.intValue());
       int foundOffset = StringUtil.indexOfAny(haystack, needles, offset);
       return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
-    } catch(IndexOutOfBoundsException e) {
-      throw KEMException.compilerError("Argument to hook STRING.findChar out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    } catch (IndexOutOfBoundsException e) {
+      throw KEMException.compilerError(
+          "Argument to hook STRING.findChar out of range. Expected an index >= 0 and <= the length"
+              + " of the string to search.",
+          e,
+          loc);
     }
   }
 
@@ -274,8 +309,12 @@ public class ConstantFolding {
       int offset = haystack.offsetByCodePoints(0, idx.intValue());
       int foundOffset = StringUtil.lastIndexOfAny(haystack, needles, offset);
       return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
-    } catch(IndexOutOfBoundsException e) {
-      throw KEMException.compilerError("Argument to hook STRING.rfindChar out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    } catch (IndexOutOfBoundsException e) {
+      throw KEMException.compilerError(
+          "Argument to hook STRING.rfindChar out of range. Expected an index >= 0 and <= the length"
+              + " of the string to search.",
+          e,
+          loc);
     }
   }
 
@@ -291,7 +330,10 @@ public class ConstantFolding {
     try {
       return FloatBuiltin.of(s);
     } catch (NumberFormatException e) {
-      throw KEMException.compilerError("Argument to hook STRING.string2float invalid. Expected a valid floating point nuwber.", e, loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.string2float invalid. Expected a valid floating point nuwber.",
+          e,
+          loc);
     }
   }
 
@@ -299,7 +341,8 @@ public class ConstantFolding {
     try {
       return new BigInteger(s, 10);
     } catch (NumberFormatException e) {
-      throw KEMException.compilerError("Argument to hook STRING.string2int invalid. Expected a valid integer.", e, loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.string2int invalid. Expected a valid integer.", e, loc);
     }
   }
 
@@ -309,18 +352,27 @@ public class ConstantFolding {
 
   BigInteger STRING_string2base(String s, BigInteger base) {
     if (base.compareTo(BigInteger.valueOf(2)) < 0 || base.compareTo(BigInteger.valueOf(36)) > 0) {
-      throw KEMException.compilerError("Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.", loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.",
+          loc);
     }
     try {
       return new BigInteger(s, base.intValue());
     } catch (NumberFormatException e) {
-      throw KEMException.compilerError("Argument to hook STRING.string2base invalid. Expected a valid integer in base " + base.intValue() + ".", e, loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.string2base invalid. Expected a valid integer in base "
+              + base.intValue()
+              + ".",
+          e,
+          loc);
     }
   }
 
   String STRING_base2string(BigInteger i, BigInteger base) {
     if (base.compareTo(BigInteger.valueOf(2)) < 0 || base.compareTo(BigInteger.valueOf(36)) > 0) {
-      throw KEMException.compilerError("Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.", loc);
+      throw KEMException.compilerError(
+          "Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.",
+          loc);
     }
     return i.toString(base.intValue());
   }
@@ -386,8 +438,12 @@ public class ConstantFolding {
   BigInteger INT_powmod(BigInteger a, BigInteger b, BigInteger c) {
     try {
       return a.modPow(b, c);
-    } catch(ArithmeticException e) {
-      throw KEMException.compilerError("Argument to hook INT.powmod is invalid. Modulus must be positive and negative exponents are only allowed when value and modulus are relatively prime.", e, loc);
+    } catch (ArithmeticException e) {
+      throw KEMException.compilerError(
+          "Argument to hook INT.powmod is invalid. Modulus must be positive and negative exponents"
+              + " are only allowed when value and modulus are relatively prime.",
+          e,
+          loc);
     }
   }
 
@@ -471,7 +527,8 @@ public class ConstantFolding {
 
   BigInteger INT_log2(BigInteger a) {
     if (a.compareTo(BigInteger.ZERO) <= 0) {
-      throw KEMException.compilerError("Argument to hook INT.log2 out of range. Expected a positive integer.", loc);
+      throw KEMException.compilerError(
+          "Argument to hook INT.log2 out of range. Expected a positive integer.", loc);
     }
     int log2 = 0;
     while (a.compareTo(BigInteger.ONE) > 0) {
@@ -484,7 +541,12 @@ public class ConstantFolding {
   BigInteger INT_bitRange(BigInteger i, BigInteger index, BigInteger length) {
     throwIfNotUnsignedInt(index, "INT.bitRange");
     throwIfNotUnsignedInt(length, "INT.bitRange");
-    return i.and(BigInteger.ONE.shiftLeft(length.intValue()).subtract(BigInteger.ONE).shiftLeft(index.intValue())).shiftRight(index.intValue());
+    return i.and(
+            BigInteger.ONE
+                .shiftLeft(length.intValue())
+                .subtract(BigInteger.ONE)
+                .shiftLeft(index.intValue()))
+        .shiftRight(index.intValue());
   }
 
   BigInteger INT_signExtendBitRange(BigInteger i, BigInteger index, BigInteger length) {
@@ -556,38 +618,45 @@ public class ConstantFolding {
 
   private void throwIfNotMatched(FloatBuiltin a, FloatBuiltin b, String hook) {
     if (!a.getMathContext().equals(b.getMathContext())) {
-      throw KEMException.compilerError("Arguments to hook " + hook + " do not match in exponent bits and precision.", loc);
+      throw KEMException.compilerError(
+          "Arguments to hook " + hook + " do not match in exponent bits and precision.", loc);
     }
   }
 
   FloatBuiltin FLOAT_pow(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.pow");
-    return FloatBuiltin.of(a.bigFloatValue().pow(b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().pow(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_mul(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.mul");
-    return FloatBuiltin.of(a.bigFloatValue().multiply(b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().multiply(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_div(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.div");
-    return FloatBuiltin.of(a.bigFloatValue().divide(b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().divide(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_rem(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.rem");
-    return FloatBuiltin.of(a.bigFloatValue().remainder(b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().remainder(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_add(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.add");
-    return FloatBuiltin.of(a.bigFloatValue().add(b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().add(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_sub(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.sub");
-    return FloatBuiltin.of(a.bigFloatValue().subtract(b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().subtract(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_root(FloatBuiltin a, BigInteger b) {
@@ -603,17 +672,26 @@ public class ConstantFolding {
     throwIfNotUnsignedInt(prec, "FLOAT.round");
     throwIfNotUnsignedInt(exp, "FLOAT.round");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
-      throw KEMException.compilerError("Arguments to hook FLOAT.round are too small. Precision and exponent bits must both be at least 2.", loc);
+      throw KEMException.compilerError(
+          "Arguments to hook FLOAT.round are too small. Precision and exponent bits must both be at"
+              + " least 2.",
+          loc);
     }
-    return FloatBuiltin.of(a.bigFloatValue().round(new BinaryMathContext(prec.intValue(), exp.intValue())), exp.intValue());
+    return FloatBuiltin.of(
+        a.bigFloatValue().round(new BinaryMathContext(prec.intValue(), exp.intValue())),
+        exp.intValue());
   }
 
   FloatBuiltin FLOAT_floor(FloatBuiltin a) {
-    return FloatBuiltin.of(a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.FLOOR)), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.FLOOR)),
+        a.exponent());
   }
 
   FloatBuiltin FLOAT_ceil(FloatBuiltin a) {
-    return FloatBuiltin.of(a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.CEILING)), a.exponent());
+    return FloatBuiltin.of(
+        a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.CEILING)),
+        a.exponent());
   }
 
   FloatBuiltin FLOAT_exp(FloatBuiltin a) {
@@ -650,24 +728,30 @@ public class ConstantFolding {
 
   FloatBuiltin FLOAT_atan2(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.atan2");
-    return FloatBuiltin.of(BigFloat.atan2(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        BigFloat.atan2(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_max(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.max");
-    return FloatBuiltin.of(BigFloat.max(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        BigFloat.max(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_min(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.min");
-    return FloatBuiltin.of(BigFloat.min(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
+    return FloatBuiltin.of(
+        BigFloat.min(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
   FloatBuiltin FLOAT_maxValue(BigInteger prec, BigInteger exp) {
     throwIfNotUnsignedInt(prec, "FLOAT.maxValue");
     throwIfNotUnsignedInt(exp, "FLOAT.maxValue");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
-      throw KEMException.compilerError("Arguments to hook FLOAT.maxValue are too small. Precision and exponent bits must both be at least 2.", loc);
+      throw KEMException.compilerError(
+          "Arguments to hook FLOAT.maxValue are too small. Precision and exponent bits must both be"
+              + " at least 2.",
+          loc);
     }
     BinaryMathContext mc = new BinaryMathContext(prec.intValue(), exp.intValue());
     return FloatBuiltin.of(BigFloat.maxValue(mc.precision, mc.maxExponent), exp.intValue());
@@ -677,7 +761,10 @@ public class ConstantFolding {
     throwIfNotUnsignedInt(prec, "FLOAT.minValue");
     throwIfNotUnsignedInt(exp, "FLOAT.minValue");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
-      throw KEMException.compilerError("Arguments to hook FLOAT.minValue are too small. Precision and exponent bits must both be at least 2.", loc);
+      throw KEMException.compilerError(
+          "Arguments to hook FLOAT.minValue are too small. Precision and exponent bits must both be"
+              + " at least 2.",
+          loc);
     }
     BinaryMathContext mc = new BinaryMathContext(prec.intValue(), exp.intValue());
     return FloatBuiltin.of(BigFloat.minValue(mc.precision, mc.minExponent), exp.intValue());
@@ -711,7 +798,10 @@ public class ConstantFolding {
     throwIfNotUnsignedInt(prec, "FLOAT.int2float");
     throwIfNotUnsignedInt(exp, "FLOAT.int2float");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
-      throw KEMException.compilerError("Arguments to hook FLOAT.int2float are too small. Precision and exponent bits must both be at least 2.", loc);
+      throw KEMException.compilerError(
+          "Arguments to hook FLOAT.int2float are too small. Precision and exponent bits must both"
+              + " be at least 2.",
+          loc);
     }
     BinaryMathContext mc = new BinaryMathContext(prec.intValue(), exp.intValue());
     return FloatBuiltin.of(new BigFloat(a, mc), exp.intValue());
@@ -721,7 +811,8 @@ public class ConstantFolding {
     try {
       return a.bigFloatValue().rint(a.getMathContext()).toBigIntegerExact();
     } catch (ArithmeticException e) {
-      throw KEMException.compilerError("Argument to hook FLOAT.float2int cannot be rounded to an integer.", e, loc);
+      throw KEMException.compilerError(
+          "Argument to hook FLOAT.float2int cannot be rounded to an integer.", e, loc);
     }
   }
 }

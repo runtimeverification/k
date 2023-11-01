@@ -1,10 +1,11 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Configuration Abstraction, Part 1; Types of Rules
 
 Here we will complete the K definition of IMP and, while doing so, we will
-learn the very first step of what we call _configuration abstraction_, and
-the semantic distinction between structural and computational rules.
+learn the very first step of what we call _configuration abstraction_.
 
 ## The IMP Semantic Rules
 
@@ -102,34 +103,6 @@ definitions. The k-cell-completion is only the very first step, though.
 If you really want certain rewrites over syntactic terms to apply
 anywhere they match, then you should tag the rule with the attribute
 `anywhere`, which was discussed in Tutorial 1, Lesson 2.5.
-
-## Structural vs. Computational Rules
-
-The K rules are of two types: structural and computational. Intuitively,
-structural rules rearrange the configuration so that computational rules can
-apply. Structural rules therefore do not count as computational steps. A K
-semantics can be thought of as a generator of transition systems, one for each
-program. It is only the computational rules that create steps, or transitions,
-in the corresponding transition system, the structural rules being unobservable
-at this level. By default, rules are all assumed computational, except for
-the implicit heating/cooling rules that define evaluation strategies of
-language constructs, which are assumed structural. If you want to explicitly
-make a rule structural, then you should include the tag (or attribute)
-`structural` in square brackets right after the rule. These attributes may be
-taken into account by different K tools, so it is highly recommended to spend
-a moment or two after each rule and think whether you want it to be structural
-or computational.
-
-Let us do it. We want the lookup and the arithmetic and Boolean construct
-rules to be computational, because they make computational progress whenever
-they apply. However, the block rules can be very well structural, because
-we can regard them simply as syntactic grouping constructs. In general,
-we want to have as few computational rules as possible, because we want
-the resulting transition systems to be smaller for analysis purposes, but not
-too few to lose behaviors. For example, making the block rules structural
-loses no meaningful behaviors. Similarly, the sequential composition,
-the while loop unrolling, and the no-variable declaration rules can all
-safely be structural.
 
 Kompile and then krun the programs that you only parsed in Lesson 1. They
 should all execute as expected. The state cell shows the final state

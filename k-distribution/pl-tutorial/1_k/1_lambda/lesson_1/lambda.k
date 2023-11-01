@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module LAMBDA-SYNTAX
   imports DOMAINS-SYNTAX

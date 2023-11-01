@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 require "substitution.md"
 
@@ -21,16 +21,16 @@ module LAMBDA-SYNTAX
 
   syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
 
-  syntax Exp ::= "let" KVar "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
+  syntax Exp ::= "let" KVar "=" Exp "in" Exp [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 
-  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
+  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp [macro]
   syntax KVar ::= "$x" [token] | "$y" [token]
   rule letrec F:KVar X:KVar = E in E'
     => let F =
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-       in E'                                                           [macro]
+       in E'
 endmodule
 
 module LAMBDA

@@ -1,7 +1,8 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "domains.md"
 
 module DOMAINS-LEMMAS-NO-SMT
-    import INT-SYMBOLIC
+    import INT
 
     configuration <k> $PGM:Pgm </k>
 

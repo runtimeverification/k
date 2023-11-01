@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2016-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 The builtins have changed, they are now generic for all backends.
 

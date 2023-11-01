@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
@@ -7,7 +7,7 @@ module IMP-SYNTAX
                  | "read" "(" ")"
                  | "-" Int
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -27,8 +27,8 @@ module IMP-SYNTAX
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax AExps ::= Ids
 endmodule
 
@@ -40,7 +40,8 @@ module IMP
 
   configuration <T color="yellow">
                   <threads color="orange">
-                    <thread multiplicity="*" color="blue">
+                    <thread multiplicity="*" color="blue" type="Map">
+                      <id color="black"> 0 </id>
                       <k color="green"> $PGM:Stmt </k>
                       <env color="LightSkyBlue"> .Map </env>
                     </thread>
@@ -53,12 +54,12 @@ module IMP
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
+       <store>... N |-> I ...</store>  [group(lookup)]
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... N |-> (I => I +Int 1) ...</store>  [group(increment)]
   rule <k> read() => I ...</k>
-       <input> ListItem(I:Int) => .List ...</input>  [read]
+       <input> ListItem(I:Int) => .List ...</input>  [group(read)]
   rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
   rule - I => 0 -Int I
@@ -69,22 +70,22 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .   [structural]
-  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>  [structural]
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
+  rule {} => .
+  rule <k> {S} => S ~> Rho ...</k> <env> Rho </env>
+  rule <k> Rho => . ...</k> <env> _ => Rho </env>
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>  [assignment]
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+       <store>... N |-> (_ => I) ...</store>  [group(assignment)]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 
   syntax Printable ::= Int | String
 /* currently it is necessary to subsort Printable to AExp,
@@ -92,13 +93,13 @@ module IMP
   syntax AExp ::= Printable
   context print(HOLE:AExp, _AEs:AExps);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <output>... .List => ListItem(P) </output>  [print]
-  rule print(.AExps); => .  [structural]
+       <output>... .List => ListItem(P) </output>  [group(print)]
+  rule print(.AExps); => .
 
   rule <k> halt; ~> _ => . </k>
 
   rule <k> spawn S => . ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> ...</thread>)
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !_T:Int +Int 1 </id> ...</thread>)
 
-  rule <thread>... <k> . </k> ...</thread> => .Bag  [structural]
+  rule <thread>... <k> . </k> ...</thread> => .Bag
 endmodule

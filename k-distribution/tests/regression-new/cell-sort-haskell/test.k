@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 module TEST-SYNTAX
   imports DOMAINS-SYNTAX
 
@@ -68,6 +68,6 @@ rule
       <function> <fId> N </fId> </function>
 
 rule
-  S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  S1:Stmt S2:Stmt => S1 ~> S2
 
 endmodule

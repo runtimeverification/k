@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module PARAMAMB
 
   syntax T ::= "wrap" M | "wrap" X

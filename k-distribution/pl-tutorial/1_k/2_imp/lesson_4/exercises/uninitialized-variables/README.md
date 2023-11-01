@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2013-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 Modify the K definition of IMP to not automatically initialize
 variables to `0`.  Instead, declared variables should stay uninitialized

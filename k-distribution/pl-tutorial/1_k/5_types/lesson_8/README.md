@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # A Naive Environment-based Polymorphic Type Inferencer
 
@@ -9,18 +11,18 @@ characters. In terms of the K framework, you will learn how to have
 both environments and substitution in the same definition.
 
 Like in the previous lesson, all we have to do is to take the LAMBDA
-type inferencer in Lesson 5 and only change the macro
+type inferencer in Lesson 5 and only change the rule
 
-    rule let X = E in E' => (lambda X . E') E  [macro]
+    rule let X = E in E' => (lambda X . E') E
 
 as follows:
 
-    rule let X = E in E' => E'[E/X]  [macro]
+    rule let X = E in E' => E'[E/X]
 
 The reasons why this works have already been explained in the previous
 lesson, so we do not repeat them here.
 
-Since our new let macro uses substitution, we have to require the
+Since our new let rule uses substitution, we have to require the
 substitution module at the top and also import SUBSTITUTION in the
 current module, besides the already existing UNIFICATION.
 

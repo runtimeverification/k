@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # LOGIK
@@ -319,7 +319,6 @@ Pick a clause and generate a fresh instance of it when the
   rule <fresh> . => #renameVariables(C) </fresh> <clause> C </clause>
        <k> T:Term ...</k>
   requires #unifiable(T,head(C))
-    [transition]
 
   syntax Term ::= head(Clause) [function]
   rule head(L.) => L

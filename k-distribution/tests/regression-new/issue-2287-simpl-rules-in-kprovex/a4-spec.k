@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "test.k"
 // https://github.com/runtimeverification/k/issues/2587
 

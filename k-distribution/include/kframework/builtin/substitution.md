@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2015-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 Capture-Aware Substitution in K
@@ -48,23 +48,14 @@ module KVAR-COMMON
   imports KVAR-SYNTAX
   imports private STRING
 
-  syntax KVar ::= String2KVar (String) [function, functional, hook(STRING.string2token)]
-  syntax KVar ::= freshKVar(Int)    [freshGenerator, function, functional, private]
+  syntax KVar ::= String2KVar (String) [function, total, hook(STRING.string2token)]
+  syntax KVar ::= freshKVar(Int)    [freshGenerator, function, total, private]
 
   rule freshKVar(I:Int) => String2KVar("_" +String Int2String(I))
 endmodule
 
-module KVAR-SYMBOLIC [symbolic, kast]
-  imports KVAR-COMMON
-  imports private STRING
-
-  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, klabel(#parseKVar), hook(STRING.parseToken)]
-  rule String2KVar(S:String) => {#parseToken("KVar", S)}:>KVar
-endmodule
-
 module KVAR
   imports KVAR-COMMON
-  imports KVAR-SYMBOLIC
 endmodule
 ```
 

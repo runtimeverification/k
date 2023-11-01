@@ -1,6 +1,7 @@
+// Copyright (c) K Team. All Rights Reserved.
 module NOIMPORTFLOAT-SYNTAX
   imports DOMAINS-SYNTAX
-   syntax Pgm ::= foo(Float) | bar()
+   syntax Pgm ::= foo(x:Float) | bar()
 endmodule
 
 

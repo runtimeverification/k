@@ -1,4 +1,9 @@
+// Copyright (c) K Team. All Rights Reserved.
+module WITH-CONFIG-SYNTAX
+endmodule
+
 module WITH-CONFIG
+    imports WITH-CONFIG-SYNTAX
     imports INT
     imports COLLECTIONS
     imports K-EQUAL
@@ -19,9 +24,9 @@ module WITH-CONFIG
     syntax AccountId ::= ".AccountId" | Int
     // ---------------------------------------
 
-    syntax Int ::= "total_balance" "(" AccountId ")" [function, functional]
+    syntax Int ::= "total_balance" "(" AccountId ")" [function, total]
     // -----------------------------------------------------------------------
-    rule total_balance(WHO) => 0 [owise]
+    rule total_balance(_WHO) => 0 [owise]
     rule [[ total_balance(WHO) => FREE_BALANCE ]]
         <account>
             <accountID> WHO </accountID>

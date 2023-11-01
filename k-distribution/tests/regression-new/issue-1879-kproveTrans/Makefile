@@ -1,2 +1,2 @@
-SUBDIRS=haskell java
+SUBDIRS=haskell
 include ../../../include/kframework/ktest-group.mak

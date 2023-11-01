@@ -1,1 +1,5 @@
-S ==K "Start\nIn spawned thread\n"
+{
+  S:String
+#Equals
+  "Start\nIn spawned thread\n"
+}

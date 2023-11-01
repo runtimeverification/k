@@ -1,0 +1,85 @@
+name: 'With Docker'
+description: 'Run a given stage with Docker Image'
+inputs:
+  tag:
+    description: 'Docker image tag to use'
+    required: true
+  subdir:
+    description: 'Subdirectory where code is cloned.'
+    required: false
+    default: "./"
+  os: 
+    description: 'OS to setup Docker for.'
+    required: true
+  distro:
+    description: 'Distribution to setup Docker for.'
+    required: true
+  llvm:
+    description: 'LLVM version to use.'
+    required: false
+    default: 15
+  jdk:
+    description: 'JDK version to use.'
+    required: false
+    default: 17
+  dockerfile:
+    description: 'Hardcode the path of the dockerfile to use.'
+    required: false
+    default: .github/workflows/Dockerfile
+runs:
+  using: 'composite'
+  steps:
+  - name: 'Set up Docker'
+    shell: bash {0}
+    env:
+      TAG_NAME: ${{ inputs.tag }}
+      SUBDIR: ${{ inputs.subdir }}
+      BASE_OS: ${{ inputs.os }}
+      BASE_DISTRO: ${{ inputs.distro }}
+      LLVM_VERSION: ${{ inputs.llvm }}
+      JDK_VERSION: ${{ inputs.jdk }}
+      DOCKERFILE: ${{ inputs.dockerfile }}
+    run: |
+      set -euxo pipefail
+
+      Z3_VERSION=$(cat deps/z3)
+      K_VERSION=$(cat ${SUBDIR}package/version)
+      USER=$(id -un)
+      USER_ID=$(id -u)
+      GROUP=$(id -gn)
+      GROUP_ID=$(id -g)
+
+      docker build ${SUBDIR}                                          \
+          --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
+          --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
+          --build-arg BASE_OS=${BASE_OS}                              \
+          --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
+          --tag stack:${BASE_DISTRO}-${K_VERSION}                     \
+          --file ${SUBDIR}${DOCKERFILE}.stack-deps
+      docker build ${SUBDIR}                                          \
+          --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
+          --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
+          --build-arg BASE_OS=${BASE_OS}                              \
+          --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
+          --tag maven:${BASE_DISTRO}-${K_VERSION}                     \
+          --file ${SUBDIR}${DOCKERFILE}.maven-cache
+
+      docker build ${SUBDIR} --file ${SUBDIR}${DOCKERFILE}            \
+          --tag runtimeverification/${TAG_NAME}                       \
+          --build-arg BASE_OS=${BASE_OS}                              \
+          --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
+          --build-arg Z3_VERSION=${Z3_VERSION}                        \
+          --build-arg K_VERSION=${K_VERSION}                          \
+          --build-arg LLVM_VERSION=${LLVM_VERSION}                    \
+          --build-arg JDK_VERSION=${JDK_VERSION}                      \
+          --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
+          --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID}
+
+      docker run                             \
+          --name ${TAG_NAME}                 \
+          --rm -it                           \
+          --detach                           \
+          --workdir /opt/workspace/${SUBDIR} \
+          --user ${USER}:${GROUP}            \
+          -v "$(pwd):/opt/workspace"         \
+          runtimeverification/${TAG_NAME}

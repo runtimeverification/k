@@ -1,4 +1,4 @@
-// Copyright (c) 2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module NO-DUP-RULES-INIT
     imports STRING-BUFFER

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module MACROWITHFUNCTION
     imports INT
     imports BOOL
@@ -8,13 +9,13 @@ module MACROWITHFUNCTION
  // ---------------------------------------------------------------------
 
     syntax Wad = FInt
-    syntax Wad ::= wad ( Int )
+    syntax Wad ::= wad ( Int ) [macro]
  // --------------------------
-    rule wad(I) => FInt(I *Int WAD, WAD) [macro]
+    rule wad(I) => FInt(I *Int WAD, WAD)
 
-    syntax Int ::= "WAD"
+    syntax Int ::= "WAD" [macro]
  // --------------------
-    rule WAD => 1000000000000000000 [macro]
+    rule WAD => 1000000000000000000
 
     syntax Pgm ::= "go" FInt | Pgm ";" Pgm [left]
  // ---------------------------------------------

@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # SIMPLE — Untyped
@@ -175,13 +175,13 @@ whenever requested (e.g., when they appear as strict arguments of
 the constructs above).
 
 ```k
-  syntax Ids  ::= List{Id,","}
-  syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
+  syntax Ids  ::= List{Id,","}           [klabel(Exps)]
+  syntax Exps ::= List{Exp,","}          [klabel(Exps), strict]  // automatically hybrid now
   syntax Exps ::= Ids
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(Exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom,","}
+  syntax Bottoms ::= List{Bottom,","}    [klabel(Exps)]
   syntax Ids ::= Bottoms
 ```
 
@@ -211,11 +211,11 @@ arguments.
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "return" Exp ";"                      [strict]
-                | "return" ";"
+                | "return" ";"                          [macro]
                 | "print" "(" Exps ")" ";"              [strict]
 // NOTE: print strict allows non-deterministic evaluation of its arguments
 // Either keep like this but document, or otherwise make Exps seqstrict.
@@ -258,11 +258,11 @@ We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.  All desugaring macros below are
 straightforward.
 ```k
-  rule if (E) S => if (E) S else {}                                 [macro]
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro-rec]
-  rule var X:Id = E; => var X; X = E;                               [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
+  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var X:Id = E; => var X; X = E;
 ```
 
 For the semantics, we can therefore assume from now on that each
@@ -371,7 +371,8 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" type="Map" color="yellow">
+                      <id color="pink"> -1 </id>
                       <k color="green"> $PGM:Stmt ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
@@ -381,7 +382,6 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
-                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
                 //<br/> // TODO(KORE): support latex annotations #1799
@@ -487,7 +487,7 @@ To this aim, we introduce two special unique variable identifiers,
 through and initializes each element of the first dimension with an array
 of the remaining dimensions, declared as variable `$2`:
 ```k
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token] | "$2" [token]
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
     => var X[N1];
        {
@@ -496,7 +496,6 @@ of the remaining dimensions, declared as variable `$2`:
            X[$1] = $2;
          }
        }
-    [structural]
 ```
 Ideally, one would like to perform syntactic desugarings like the one
 above before the actual semantics.  Unfortunately, that was not possible in
@@ -557,7 +556,7 @@ that the functions "see" each other, allowing for mutual recursion, etc.
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> .Map => Env </genv>  [structural]
+       <genv> .Map => Env </genv>
 ```
 
 ## Expressions
@@ -572,7 +571,7 @@ store, then we rewrite `X` into `V`:
 ```k
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [group(lookup)]
 ```
 Note that the rule above excludes reading `⊥`, because `⊥` is not
 a value and `V` is checked at runtime to be a value.
@@ -591,7 +590,7 @@ integers.
 ```k
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
-       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
+       <store>... L |-> (I => I +Int 1) ...</store>  [group(increment)]
 ```
 
 ## Arithmetic operators
@@ -645,10 +644,10 @@ and is defined at the end of the file.
 // may not be worth, or we may need to come up with a special notation
 // allowing us to enumerate contexts for [anywhere] rules.
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+    [anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+    [anywhere]
 ```
 
 ## Size of an array
@@ -713,7 +712,7 @@ nulary `return;` statements.
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [macro]
+  rule return; => return nothing;
 ```
 Like for division-by-zero, it is left unspecified what happens
 when the `nothing` value is used in domain calculations.  For
@@ -739,7 +738,7 @@ input value, at the same time discarding the input value from the
 `in` cell.
 
 ```k
-  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [group(read)]
 ```
 
 ## Assignment
@@ -757,7 +756,7 @@ resulting location:
   context (HOLE => lvalue(HOLE)) = _
 
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
-    [assignment]
+    [group(assignment)]
 ```
 
 ## Statements
@@ -776,8 +775,8 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps.
 
 ```k
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 ```
 The basic definition of environment recovery is straightforward and
 given in the section on auxiliary constructs at the end of the file.
@@ -804,9 +803,7 @@ so it is the one that we follow in general.
 Sequential composition is desugared into **K**'s builtin sequentialization
 operation (recall that, like in C, the semi-colon `;` is not a
 statement separator in SIMPLE — it is either a statement terminator or a
-construct for a statement from an expression).  The rule below is
-structural, so it does not count as a computational step.  One can make it
-computational if one wants it to count as a step.  Note that **K** allows
+construct for a statement from an expression).  Note that **K** allows
 to define the semantics of SIMPLE in such a way that statements eventually
 dissolve from the top of the computation when they are completed; this is in
 sharp contrast to (artificially) `evaluating` them to a special
@@ -816,7 +813,7 @@ to something).  This means that once `S₁` completes in the rule below, `S₂`
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules.
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 ```
 
 A subtle aspect of the rule above is that `S₁` is declared to have sort
@@ -856,16 +853,12 @@ proceed (otherwise the rewriting process gets stuck).
 
 The simplest way to give the semantics of the while loop is by unrolling.
 Note, however, that its unrolling is only allowed when the while loop reaches
-the top of the computation (to avoid non-termination of unrolling).  We prefer
-the rule below to be structural, because we don't want the unrolling of the
-while loop to count as a computational step; this is unavoidable in
-conventional semantics, but it is possible in **K** thanks to its distinction
-between structural and computational rules.  The simple while loop semantics
-below works because our while loops in SIMPLE are indeed very basic.  If we
-allowed break/continue of loops then we would need a completely different
-semantics, which would also involve the `control` cell.
+the top of the computation (to avoid non-termination of unrolling).  The
+simple while loop semantics below works because our while loops in SIMPLE are
+indeed very basic.  If we allowed break/continue of loops then we would need
+a completely different semantics, which would also involve the `control` cell.
 ```k
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}
 ```
 
 ## Print
@@ -876,8 +869,8 @@ its evaluated arguments to the output buffer, and discard the residual
 `print` statement with an empty list of arguments.
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    [print]
-  rule print(.Vals); => .  [structural]
+    [group(print)]
+  rule print(.Vals); => .
 ```
 
 ## Exceptions
@@ -1010,7 +1003,7 @@ by the two rules below:
   rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy (.Set => SetItem(V)) </busy>
-    requires (notBool(V in Busy))  [acquire]
+    requires (notBool(V in Busy))  [group(acquire)]
 
   rule <k> acquire V; => . ...</k>
        <holds>... V:Val |-> (N => N +Int 1) ...</holds>
@@ -1052,7 +1045,7 @@ actual configuration of SIMPLE is to include each `k` cell in a
 `thread` cell.
 ```k
   rule <k> rendezvous V:Val; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [rendezvous]
+       <k> rendezvous V; => . ...</k>  [group(rendezvous)]
 ```
 
 ## Auxiliary declarations and operations
@@ -1073,13 +1066,13 @@ declarations.
 
 ## Location lookup
 
-The operation below is straightforward.  Note that we tag it with the same
-`lookup` tag as the variable lookup rule defined above.  This way,
+The operation below is straightforward.  Note that we place it in the same
+`lookup` group as the variable lookup rule defined above.  This way,
 both rules will be considered transitions when we include the `lookup`
 tag in the transition option of `kompile`.
 ```k
   syntax Exp ::= lookup(Int)
-  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
+  rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 ```
 
 ## Environment recovery
@@ -1090,7 +1083,7 @@ IMP++ tutorial:
 // TODO: eliminate the env wrapper, like we did in IMP++
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>  [structural]
+  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>
 ```
 While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop `while (E)S`,
@@ -1105,7 +1098,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem:
 ```k
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)
 ```
 In fact, the above follows a common convention in **K** for recovery
 operations of cell contents: the meaning of a computation task of the form
@@ -1142,7 +1135,6 @@ corresponding store lookup operation.
 // Local variable
 
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
 
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
@@ -1152,7 +1144,7 @@ corresponding store lookup operation.
 
 // Finally, return the address of the desired object member
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 ```
 
 ## Initializing multiple locations
@@ -1170,7 +1162,7 @@ definition with the right options in order to generate the desired model.
 No kompile options are needed if you only only want to execute the definition
 (and thus get an interpreter), but if you want to search for a different
 program behaviors then you need to kompile with the transition option
-including rule tags such as lookup, increment, acquire, etc.  See the
+including rule groups such as lookup, increment, acquire, etc.  See the
 IMP++ tutorial for what the transition option means how to use it.
 ```k
 endmodule

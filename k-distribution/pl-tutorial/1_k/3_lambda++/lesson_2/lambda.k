@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module LAMBDA
   imports DOMAINS
@@ -19,7 +19,6 @@ module LAMBDA
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-    [structural]
   rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
        <env> Rho' => Rho[X <- !N] </env>
        <store>... .Map => (!N:Int |-> V) ...</store>
@@ -29,5 +28,4 @@ module LAMBDA
 
 // Auxiliary task
   rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
-    [structural]
 endmodule

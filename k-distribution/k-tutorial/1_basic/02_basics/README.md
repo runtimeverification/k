@@ -1,10 +1,14 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.2: Basics of Functional K
 
 The purpose of this lesson is to explain the basics of **productions** and
 **rules** in K. These are two types of K **sentences**. A K file consists of
 one or more **requires** or **modules** in K. Each module consists of one or
 more **imports** or sentences. For more information on requires, modules, and
-sentences, refer to [Lesson 1.4](../04_modules/README.md). However, for the time
+sentences, refer to [Lesson 1.5](../05_modules/README.md). However, for the time
 being, just think of a module as a container for sentences, and don't worry
 about requires or imports just yet.
 
@@ -84,11 +88,11 @@ The first thing to realize is that this K definition contains 5 productions.
 Productions are introduced with the **syntax** keyword, followed by a **sort**,
 followed by the operator `::=` followed by the definition of one or more
 productions themselves, separated by the `|` operator. There are different
-types of productions, but for now we only care about **constructors** and 
+types of productions, but for now we only care about **constructors** and
 **functions**. Each declaration separated by the `|` operator is individually
 a single production, and the `|` symbol simply groups together productions that
 have the same sort. For example, we could equally have written an identical K
-definition like so:
+definition `lesson-02-b.k` like so:
 
 ```k
 module LESSON-02-B
@@ -105,7 +109,15 @@ module LESSON-02-B
 endmodule
 ```
 
-Or even:
+You can try compiling and running `lesson-02-b.k` to see that it produces the same output as `lesson-02-a.k`:
+
+```
+kompile lesson-02-b.k
+krun -cPGM='colorOf(Banana())' --definition 'lesson-02-b-kompiled'
+```
+
+where the `--definition` attribute points to the *directory* containing a compiled version of `LESSON-02-B`.
+Even the following definition is equivalent:
 
 ```k
 module LESSON-02-C
@@ -154,7 +166,7 @@ Functions in K are given definitions using rules. A rule begins with the `rule`
 keyword and contains at least one **rewrite operator**. The rewrite operator
 is represented by the syntax `=>`. The rewrite operator is one of the built-in
 productions in K, and we will discuss in more detail how it can be used in
-future lessons, but for now, you can think of a rule as consisting of a 
+future lessons, but for now, you can think of a rule as consisting of a
 **left-hand side** and a **right-hand side**, separated by the rewrite
 operator. On the left-hand side is the name of the function and zero or more
 **patterns** corresponding to the parameters of the function. On the right-hand

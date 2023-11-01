@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKFUNCWITHCONTEXT-SYNTAX
   imports INT-SYNTAX
   syntax S ::= func(Int) [function]

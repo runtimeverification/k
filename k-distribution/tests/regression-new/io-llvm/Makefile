@@ -1,6 +1,6 @@
 DEF=test
 EXT=test
-TESTDIR=../io-java
+TESTDIR=.
 RESULTDIR=.
 KOMPILE_BACKEND=llvm
 PREPARE=./prepare.sh

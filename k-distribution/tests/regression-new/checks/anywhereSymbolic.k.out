@@ -1,0 +1,6 @@
+[Error] Compiler: anywhere attribute is not supported on symbolic rules.
+	Source(anywhereSymbolic.k)
+	Location(6,8,6,18)
+	6 |	  rule a() => b() [anywhere, symbolic]
+	  .	       ^~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.

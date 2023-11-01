@@ -1,1 +1,11 @@
-T ==K int -> ( V0 -> int )
+  {
+    T:Type
+  #Equals
+    int -> ( ?T1:Type -> int )
+  }
+#Or
+  {
+    T:Type
+  #Equals
+    int -> ( ?T2:Type -> int )
+  }

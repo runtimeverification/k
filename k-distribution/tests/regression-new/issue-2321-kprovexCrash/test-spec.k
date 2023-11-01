@@ -1,4 +1,4 @@
-// Copyright (c) 2021 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 requires "test.k"
 

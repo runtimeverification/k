@@ -1,12 +1,47 @@
-Installing the K Framework Package
-==================================
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+Installing the K Framework
+==========================
+
+Fast Installation (preferred)
+-----------------------------
+
+If you're on a system that supports [Nix](https://nixos.org/download.html),
+use this command to install via Nix:
+
+```shell
+bash <(curl https://kframework.org/install)
+kup install k
+```
+
+You can update K with:
+
+```shell
+kup update k
+```
+
+And list available versions with:
+
+```shell
+kup list
+```
+
+This will take care of all the dependencies and specific versions used by K.
+Note that the first run will take longer to fetch all the libraries and compile
+sources. (30m to 1h)
+
+If you are on Apple Silicon, `kup` is currently the only way to install K
+because of upstream issues in the general Haskell ecosystem.
+
+
+Install through packages
+----------------
 
 We currently strive to provide packages for the following platforms:
 
--   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
--   Debian Bullseye
--   Arch Linux
--   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
+-   Ubuntu Jammy Jellyfish (22.04)
+-   macOS Ventura (13) via Homebrew
 -   Docker Images
 
 Pre-installation Notes
@@ -15,7 +50,7 @@ Pre-installation Notes
 -   We **do not** currently support running K natively on Windows. To use K on
     Windows 10, you are encouraged to install the
     [Windows Subsystem for Linux (version 2)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-    and follow the instructions for installing Ubuntu Focal.
+    and follow the instructions for installing Ubuntu Jammy.
 
     If you have already installed WSL, before proceeding, you will need to
     enter the WSL environment. You can do this by:
@@ -28,7 +63,7 @@ Pre-installation Notes
     you will need to use a virtual machine (VM) software. We assume you have:
 
     1.  Created a virtual machine
-    2.  Installed a Linux distribution (e.g. Ubuntu Focal Fossa) on your
+    2.  Installed a Linux distribution (e.g. Ubuntu Jammy Jellyfish) on your
         virtual machine
 
     Consult your virtual machine software if you need help with the above
@@ -73,31 +108,13 @@ requires about ~1.4GB of dependencies and will take some time.
 -   On Linux systems, K will typically be installed under `/usr`.
 -   On macOS/brew, K will typically be installed under `/usr/local`.
 
-### Ubuntu Focal (20.04)
-
-```sh
-sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
-```
-
 ### Ubuntu Jammy (22.04)
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_jammy.deb
+sudo apt install ./kframework_amd64_ubuntu_jammy.deb
 ```
 
-### Debian Bullseye
-
-```sh
-sudo apt install ./kframework_X.Y.Z_amd64_bullseye.deb
-```
-
-### Arch Linux
-
-```sh
-pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
-```
-
-### MacOS X Mojave/Homebrew
+### macOS (Homebrew)
 
 [Homebrew](https://brew.sh/) (or just brew) is a third-party package manager
 for MacOS.
@@ -111,17 +128,13 @@ With brew installed, do the following to install the K Framework brew package
 brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
 ```
 
-Note: we do not yet have a MacOS Monterey bottle. The existing brew package
-also does not work on M1 Silicon Macs. If you have either of these systems,
-you should build from source for the time being.
-
 #### Homebrew Alternate Installation
 
 To directly install the latest K Framework brew package without needing to
 download it separately, do the following:
 
 ```sh
-brew install kframework/k/kframework
+brew install runtimeverification/k/kframework
 ```
 
 Or, to streamline future K Framework upgrades, you can `tap` the K Framework
@@ -129,7 +142,7 @@ package repository. This lets future installations/upgrades/etc... use the
 unprefixed package name.
 
 ```sh
-brew tap kframework/k
+brew tap runtimeverification/k
 brew install kframework
 ```
 
@@ -139,21 +152,19 @@ Docker images with K pre-installed are available at the
 [runtimeverification/kframework-k Docker Hub repository](https://hub.docker.com/repository/docker/runtimeverificationinc/kframework-k).
 
 Each release at `COMMIT_ID` has an image associated with it at
-`runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID`.
-The latest `master` build Docker image can be accessed with `COMMIT_ID` set to
-`master`.
+`runtimeverificationinc/kframework-k:ubuntu-jammy-COMMIT_ID`.
 
 To run the image directly:
 
 ```sh
-docker run -it runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
+docker run -it runtimeverificationinc/kframework-k:ubuntu-jammy-COMMIT_ID
 ```
 
 and to make a Docker Image based on it, use the following line in your
 `Dockerfile`:
 
 ```Dockerfile
-FROM runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
+FROM runtimeverificationinc/kframework-k:ubuntu-jammy-COMMIT_ID
 ```
 
 We also create Ubuntu 22.04 images with the `ubuntu-jammy-COMMIT_ID` tags.

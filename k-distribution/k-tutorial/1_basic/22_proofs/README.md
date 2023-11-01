@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.22: Basics of Deductive Program Verification using K
 
 In this lesson, you will familiarize yourself with the basics of using K for
@@ -358,7 +362,9 @@ which formalizes our internal understanding of `?C ==Int B`. The rule states
 that when we update the same key in the same map with two values, and the
 resulting maps are equal, then the two values must be equal as well. The
 `[simplification]` attribute indicates to K to use this rule to simplify the
-state when trying to prove claims. Re-run the K prover, which should now return
+state when trying to prove claims. Like function rules, simplification rules
+do not complete to the top of the configuration, but instead apply anywhere
+their left-hand-side matches. Re-run the K prover, which should now return
 `#Top`, indicating that K was able to use the simplification and prove the
 required claims.
 

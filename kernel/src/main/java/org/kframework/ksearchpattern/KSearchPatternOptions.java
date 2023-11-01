@@ -1,31 +1,30 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.ksearchpattern;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.inject.Inject;
+import java.util.List;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
-import java.util.List;
-
-/**
- * JCommander options for k-compile-search-pattern.
- */
-
+/** JCommander options for k-compile-search-pattern. */
 @RequestScoped
 public class KSearchPatternOptions {
 
-    @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+  @Inject
+  public KSearchPatternOptions() {}
 
-    @ParametersDelegate
-    public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
+  @ParametersDelegate public transient GlobalOptions global = new GlobalOptions();
 
-    @Parameter(description="<file>")
-    private List<String> parameters;
+  @ParametersDelegate
+  public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
 
-    public String pattern() {
-      return parameters.get(0);
-    }
+  @Parameter(description = "<file>")
+  private List<String> parameters;
+
+  public String pattern() {
+    return parameters.get(0);
+  }
 }

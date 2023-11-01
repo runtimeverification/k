@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.definition
 
 import org.kframework.attributes.{Location,Source}
@@ -59,7 +60,7 @@ trait TerminalToString {
 
 trait NonTerminalToString {
   self: NonTerminal =>
-  override def toString = sort.toString()
+  override def toString = if (name.isDefined) name.get + ":" + sort.toString() else sort.toString()
 }
 
 trait RegexTerminalToString {

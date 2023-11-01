@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module LAMBDA
   imports DOMAINS
@@ -20,7 +20,6 @@ module LAMBDA
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
        <env> Rho </env>
-    [structural]
   rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
        <env> Rho' => Rho[X <- !N] </env>
        <store>... .Map => (!N:Int |-> V) ...</store>
@@ -28,7 +27,6 @@ module LAMBDA
        <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
   rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
-    [structural]
 
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
@@ -44,18 +42,17 @@ module LAMBDA
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
+  syntax Exp ::= "let" Id "=" Exp "in" Exp [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp  [macro]
+               | "mu" Id "." Exp                  [latex(\mu{#1}.{#2})]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 
   syntax Exp ::= muclosure(Map,Exp)
   rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
        <env> Rho </env>
        <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
-    [structural]
   rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
        <env> Rho' => Rho </env>
 

@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.9: Unparsing and the format and color attributes
 
 The purpose of this lesson is to teach the user about how terms are
@@ -17,7 +21,7 @@ after the program has been interpreted, and converting it from an AST back into
 text that (in theory, anyway) could be parsed back into the same AST that was
 the output of the execution phase.
 
-In practice, unparsing is not always precisely reversible. It turns out
+In practice, parsing is not always precisely reversible. It turns out
 (although we are not going to cover exactly why this is here), that
 constructing a sound algorithm that takes a grammar and an AST and emits text
 that could be parsed via that grammar to the original AST is an
@@ -286,7 +290,7 @@ formatter interacts with the list of colors specified by the `colors`
 attribute. You can essentially think of the `color` attribute as a way of
 specifying that you want all the colors in the list to be the same color.
 
-Note that the `%c` and `%r` format codes are relatively primitive in nature. 
+Note that the `%c` and `%r` format codes are relatively primitive in nature.
 The `color` and `colors` attributes merely maintain a list of colors, whereas
 the `%c` and `%r` format codes merely control how to advance through that list
 and how individual text is colored.
@@ -316,8 +320,8 @@ module LESSON-09-D
 endmodule
 ```
 
-For a complete list of allowed colors, see 
-[here](https://github.com/kframework/llvm-backend/blob/master/lib/ast/AST.cpp#L381).
+For a complete list of allowed colors, see
+[here](https://github.com/kframework/llvm-backend/blob/master/lib/ast/AST.cpp#L440).
 
 ## Exercises
 
@@ -326,7 +330,7 @@ For a complete list of allowed colors, see
 `(`, `)`, `{`, and `}` a third color.
 
 2. Use the `format`, `color`, and `colors` attributes to tell the unparser to
-style the expression grammar from lesson 1.8, problem 3 according to your own
+style the expression grammar from Lesson 1.8, Exercise 3 according to your own
 personal preferences for syntax highlighting and code formatting. You can
 view the result of the unparser on a function term without evaluating that
 function by means of the command `kparse <file> | kore-print -`.

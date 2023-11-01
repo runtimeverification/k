@@ -14,16 +14,10 @@ glr=--gen-parser
 literal=false
 stackDepth=10000
 
-# setup temp files
-now=`date +"%Y-%m-%d-%H-%M-%S"`
-tempDir="$(mktemp -d .kparse-gen-${now}-XXXXXXXXXX)"
-tempFiles=("$tempDir")
-trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
-
 KPARSE_GEN=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
 
-ktool="${KPARSE_GEN}"
+export KTOOL="${KPARSE_GEN}"
 source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 print_usage () {
@@ -48,7 +42,7 @@ $KPARSE_GEN options:
       --bison-file FILE    C file that should be linked into the generated
                            parser
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
-  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
       --definition DIR     Exact path to the kompiled directory.
   -g, --glr                Generate a GLR parser instead of an LR(1) parser
@@ -85,6 +79,7 @@ do
       ;;
 
       -d|--directory)
+      echo "[Warning]: -d/--directory is deprecated. Use --definition instead."
       dir="$2"
       shift
       ;;
@@ -161,7 +156,7 @@ else
 fi
 
 if ! $hasKompiledDir; then
-  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --definition to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
@@ -181,4 +176,4 @@ if [ -z "${sort+unset}" ]; then
   fi
 fi
 
-execute "$KAST_UTIL" ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" --directory "$dir" $glr --module "$module" --sort "$sort" "$output_file"
+execute "$KAST_UTIL" ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" --definition "$kompiledDir" $glr --module "$module" --sort "$sort" "$output_file"

@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.17: Debugging Proofs using the Haskell Backend REPL
 
 ## Return to Top

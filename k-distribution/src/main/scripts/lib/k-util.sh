@@ -9,13 +9,14 @@
 # You can use this script by adding the following line (minus the comment) to
 # your script:
 #
-# ktool=TOOL_NAME
+# KTOOL=TOOL_NAME
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 # initialize flags
 fold_lines='fold -s'
 profile=false
 verbose=false
+tempDirParent=$(dirname "$(mktemp -u)")
 
 # initialize state
 result=0
@@ -23,8 +24,8 @@ result=0
 error () {
   local result
   result="$1" ; shift
-  printf "[Error] ${ktool}: $*\n" | ${fold_lines} 1>&2
-  exit ${result}
+  printf "[Error] ${KTOOL}: $*\n" | ${fold_lines} 1>&2
+  exit "${result}"
 }
 
 k_util_usage() {
@@ -32,6 +33,7 @@ k_util_usage() {
   --no-exc-wrap     Do not wrap messages to 80 chars (keep long lines).
   --profile         Print coarse process timing information. Format printed:
                     exit-code wall-time user-time system-time command args*
+  --temp-dir PATH   Put temp files in this location. Default: /tmp/.<tool>-xxx
   -v, --verbose     Print significant sub-commands executed.
 HERE
 }
@@ -53,6 +55,11 @@ do
       profile=true
       ;;
 
+      --temp-dir)
+      tempDirParent="$1"
+      shift
+      ;;
+
       -v|--verbose)
       verbose=true
       ;;
@@ -71,16 +78,38 @@ if [[ "${#args[@]}" -gt 0 ]]; then
   set -- "${args[@]}"
 fi
 
+# setup temp files
+now="$(date +"%Y-%m-%d-%H-%M-%S")"
+tempDir="$(mktemp -d "$tempDirParent/.${KTOOL}-${now}-XXXXXXXXXX")"
+tempFiles=("$tempDir")
+trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
+
+
 execute () {
   (
-  if ${verbose}; then
-    set -x
-  fi
+  set +e
+
   if ${profile}; then
+    if ${verbose}; then
+      set -x
+    fi
+
     TIMEFORMAT="%lR %lU %lS $*"
     time "$@"
+    ret="$?"
   else
+    if ${verbose}; then
+      set -x
+    fi
+
     "$@"
+    ret="$?"
+  fi
+
+  { set +x; } 2>/dev/null
+
+  if [ "$ret" -ne 0 ]; then
+    error "$ret" "$@"
   fi
   )
 }

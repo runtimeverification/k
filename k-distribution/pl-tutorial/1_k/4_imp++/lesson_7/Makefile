@@ -1,16 +1,24 @@
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-DEF=imp
-EXT=imp
-KOMPILE_FLAGS=--transition "division lookup increment assignment read print"
-KOMPILE_BACKEND?=java
-KRUN_FLAGS=--output none
+SUBMAKES=$(MAKEFILE_PATH)/Makefile.concrete $(MAKEFILE_PATH)/Makefile.proof
+SUBCLEAN=$(addsuffix .clean,$(SUBMAKES))
+SUBUPDATE=$(addsuffix .update,$(SUBMAKES))
+SUBKOMPILE=$(addsuffix .kompile,$(SUBMAKES))
 
-include $(MAKEFILE_PATH)/../../../find-k.mak
-include ${K_HOME}/include/kframework/ktest.mak
+.PHONY: all update-results clean $(SUBMAKES) $(SUBCLEAN) $(SUBUPDATE) $(SUBKOMPILE)
 
+all: $(SUBMAKES)
+clean: $(SUBCLEAN)
+update-results: $(SUBUPDATE)
+kompile: $(SUBKOMPILE)
 
-tests/div.imp: kompile
-	cat $@.in 2>/dev/null | $(KRUN_OR_LEGACY) $@ -d $(DEFDIR) --search $(CHECK) $@.out
+$(SUBMAKES):
+	$(MAKE) -e -f $@
 
-tests/spawn.imp: kompile
-	cat $@.in 2>/dev/null | $(KRUN_OR_LEGACY) $@ -d $(DEFDIR) --search --pattern "<output> ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) </output>" $(CHECK) $@.out
+$(SUBCLEAN): %.clean:
+	$(MAKE) -e -f $* clean
+
+$(SUBUPDATE): %.update:
+	$(MAKE) -e -f $* update-results
+
+$(SUBKOMPILE): %.kompile:
+	$(MAKE) -e -f $* kompile

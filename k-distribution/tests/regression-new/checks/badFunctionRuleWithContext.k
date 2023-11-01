@@ -1,9 +1,10 @@
+// Copyright (c) K Team. All Rights Reserved.
 module BADFUNCTIONRULEWITHCONTEXT
   imports INT
   imports BOOL
   imports MAP
 
-syntax Int ::= foo(Int) [withConfig, function]
+syntax Int ::= foo(Int) [function]
 
 configuration <k> $PGM:K </k> <bar> 0 </bar>
 

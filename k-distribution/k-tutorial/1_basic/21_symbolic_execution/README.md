@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.21: Unification and Symbolic Execution
 
 The purpose of this lesson is to teach the basic concepts of symbolic execution
@@ -19,7 +23,7 @@ functions.
 
 ## Unification
 
-Previously, we have introduced the concept that K rewrite rules operate by 
+Previously, we have introduced the concept that K rewrite rules operate by
 means of pattern matching: the current configuration being rewritten is pattern
 matched against the left-hand side of the rewrite rule, and the substitution
 is used in order to construct a new term from the right-hand side. In symbolic
@@ -38,7 +42,7 @@ execution. One task symbolic execution must perform is to identify whether
 a particular symbolic term is **feasible**, that is to say, that there actually
 exists a concrete instantiation of that term such that all the logical
 constraints on that term can actually be satisfied. The Haskell Backend
-delegates this task to [Z3](https://github.com/Z3Prover/z3), a 
+delegates this task to [Z3](https://github.com/Z3Prover/z3), an
 [SMT solver](https://en.wikipedia.org/wiki/Satisfiability_modulo_theories).
 This solver is used to periodically trim configurations that are determined
 to be mathematically infeasible.

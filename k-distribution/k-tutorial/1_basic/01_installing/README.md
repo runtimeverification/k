@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.1: Setting up a K Environment
 
 The first step to learning K is to install K on your system, and configure your

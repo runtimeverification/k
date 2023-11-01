@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 `set_balance` spec
 ==================
 
@@ -64,7 +68,7 @@ Some predicates which help specifying behavior:
 -   `#inWidth`: Specify that a given number is in some bitwidth.
 
 ```k
-    syntax Bool ::= #inWidth(Int, Int) [function, functional]
+    syntax Bool ::= #inWidth(Int, Int) [function, total]
  // ---------------------------------------------------------
     rule #inWidth(N, M) => 0 <=Int M andBool M <Int (2 ^Int N)
 ```
@@ -91,7 +95,7 @@ Retrieves the total balance of an account.  This includes both the free and
 reserved balances.
 
 ```k
-    syntax Int ::= "total_balance" "(" AccountId ")" [function, functional]
+    syntax Int ::= "total_balance" "(" AccountId ")" [function, total]
  // -----------------------------------------------------------------------
     rule total_balance(WHO) => free_balance(WHO) +Int reserved_balance(WHO)
 ```
@@ -104,7 +108,7 @@ Other than when this module is executing, this will never be strictly between
 `EXISTENTIAL_DEPOSIT` and zero.
 
 ```k
-    syntax Int ::= "free_balance" "(" AccountId ")" [function, functional]
+    syntax Int ::= "free_balance" "(" AccountId ")" [function, total]
  // ----------------------------------------------------------------------
     rule    free_balance(_)   => 0 [owise]
     rule [[ free_balance(WHO) => FREE_BALANCE ]]
@@ -123,7 +127,7 @@ Other than when this module is executing, this will never be strictly between
 `EXISTENTIAL_DEPOSIT` and zero.
 
 ```k
-    syntax Int ::= "reserved_balance" "(" AccountId ")" [function, functional]
+    syntax Int ::= "reserved_balance" "(" AccountId ")" [function, total]
  // --------------------------------------------------------------------------
     rule    reserved_balance(_)   => 0 [owise]
     rule [[ reserved_balance(WHO) => FREE_BALANCE ]]
@@ -141,7 +145,7 @@ often used to determine if an account has enough balance to cover a potential
 slash, hence the name.
 
 ```k
-    syntax Bool ::= "can_slash" "(" AccountId "," Int ")" [function, functional]
+    syntax Bool ::= "can_slash" "(" AccountId "," Int ")" [function, total]
  // ----------------------------------------------------------------------------
     rule    can_slash(_, _)        => false
     rule [[ can_slash(WHO, AMOUNT) => FREE_BALANCE >=Int AMOUNT ]]
@@ -159,7 +163,7 @@ always be equal to the sum of all free and reserved balances in all active
 accounts, except when the balances module is executing.
 
 ```k
-    syntax Int ::= "total_issuance" [function, functional]
+    syntax Int ::= "total_issuance" [function, total]
  // ------------------------------------------------------
     rule [[ total_issuance => TOTAL_ISSUANCE ]]
          <totalIssuance> TOTAL_ISSUANCE </totalIssuance>
@@ -194,7 +198,7 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
 ### `account_exists`
 
 ```k
-    syntax Bool ::= "account_exists" "(" AccountId ")" [function, functional]
+    syntax Bool ::= "account_exists" "(" AccountId ")" [function, total]
  // -------------------------------------------------------------------------
     rule    account_exists(_)   => false [owise]
     rule [[ account_exists(WHO) => true ]]
@@ -536,7 +540,7 @@ lacking polymorphism.
  // -------------------------------
 
 
-    syntax Bool ::= "ensure_can_withdraw" "(" AccountId "," WithdrawReason "," Int ")" [function, functional]
+    syntax Bool ::= "ensure_can_withdraw" "(" AccountId "," WithdrawReason "," Int ")" [function, total]
  // ---------------------------------------------------------------------------------------------------------
     rule ensure_can_withdraw(_, _, _) => true [owise]
 
@@ -716,7 +720,7 @@ Vesting
 * `vesting_balance` ― get the balance that cannot currently be withdrawn.
 
 ```k
-    syntax Int ::= "locked_at" "(" AccountId ")" [function, functional]
+    syntax Int ::= "locked_at" "(" AccountId ")" [function, total]
  // -------------------------------------------------------------------
     rule [[ locked_at(WHO) => maxInt(0, VESTING_BALANCE -Int (PER_BLOCK *Int maxInt(0, NOW -Int STARTING_BLOCK))) ]]
          <now> NOW </now>
@@ -728,7 +732,7 @@ Vesting
            ...
          </account>
 
-    syntax Int ::= "vesting_balance" "(" AccountId ")" [function, functional]
+    syntax Int ::= "vesting_balance" "(" AccountId ")" [function, total]
  // -------------------------------------------------------------------------
     rule [[ vesting_balance(WHO) => minInt(FREE_BALANCE, locked_at(WHO)) ]]
          <account>

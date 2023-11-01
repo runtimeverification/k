@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 require "substitution.md"
 
@@ -21,12 +21,12 @@ module LAMBDA-SYNTAX
 
   syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
 
-  syntax Exp ::= "let" KVar "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
+  syntax Exp ::= "let" KVar "=" Exp "in" Exp [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 
-  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
-               | "mu" KVar "." Exp                 [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:KVar X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp  [macro]
+               | "mu" KVar "." Exp                    [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:KVar X = E in E' => let F = mu F . lambda X . E in E'
 
   syntax Exp ::= "callcc" Exp  [strict]
   syntax Val ::= cc(K)

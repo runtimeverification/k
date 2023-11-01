@@ -1,7 +1,23 @@
-  S ==K "x = 5\n"
+  {
+    S:String
+  #Equals
+    "x = 5\n"
+  }
 #Or
-  S ==K "x = 10\n"
+  {
+    S:String
+  #Equals
+    "x = 10\n"
+  }
 #Or
-  S ==K "x = 15\n"
+  {
+    S:String
+  #Equals
+    "x = 15\n"
+  }
 #Or
-  S ==K "x = 20\n"
+  {
+    S:String
+  #Equals
+    "x = 20\n"
+  }

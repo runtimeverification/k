@@ -1,3 +1,182 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
+K Framework 6.0.0
+=================
+
+Features
+--------
+- Removed the Java backend. From now on, all symbolic execution will be handled by the
+  haskell backend and concrete execution by the llvm backend. Alongside that we also
+  removed the `kprove-legacy` and the `kbmc` tool. Bounded model checking capabilities
+  have been added to the pyk library.
+
+- Deprecated the `--directory` option. Use `--output-definition` to store a definition
+  and `--definition` to load one.
+
+- Introduced `--execute-to-branch` to `krun` when using the LLVM backend.
+
+- Created a hidden category for advanced options: `--help-hidden`. This should make it
+  easier to read the help menu for `kompile` and `kprove`.
+
+- Added attribute validation. From now on, you will have to use `group(_)` to tag a
+  production. You can still get the old behavior by providing `--no-pedantic-attributes`.
+
+- Add `--temp-dir` option to specify where to store all the temp files created at
+  runtime. This can avoid some issues with accumulating files and readonly restrictions.
+
+- Added a new builtin type `RangeMap`, a map whose keys are stored as ranges, bounded
+  inclusively below and exclusively above. Contiguous or overlapping ranges that
+  map to the same value are merged into a single range.
+
+Misc/Bug Fixes
+--------------
+- Fix some issues related to unicode characters not being parsed correctly.
+
+- Total attribute is allowed only on function symbols.
+
+- Added more checks and warning messages.
+
+- Fix inconsistencies around the `comm` attribute.
+
+- Fix KLabel checks to consider `--concrete-rules` option.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3403
+
+K Framework 5.6.0
+=================
+
+Features
+--------
+- Rename the attribute `functional` to `total` to better reflect its semantics.
+
+- Updated `pl-tutorial` examples to work with the more modern backends: simple-untyped, kool, fun and logik.
+
+- Pass through C build type option to llvm-kompile.
+
+- Extended the syntax for code block annotations to allow for more decorators for web extensions.
+
+- Added option `kompile --enable-llvm-debug` as a more easy to remember alternative to `-g -O1`.
+
+- Improved LLDB debugging support for macOS.
+
+- Added the `klsp` tool. It adds [Language Server](https://microsoft.github.io/language-server-protocol/) support for K.
+  For now it supports: contextual code completion, go-to definition, find references, syntax error reporting
+  and selection range. Has been tested with VSCode. You can find the
+  [K Framework](https://marketplace.visualstudio.com/items?itemName=RuntimeVerification.k-vscode) extension on the marketplace.
+
+Misc/Bug Fixes
+--------------
+- Fix an issue where #Exists would not bind variables in the LHS.
+
+- Automatically import BOOL when strictness is applied.
+
+- Update the check for duplicated modules. It now allows for file copy.
+  It calculates a digest and looks for content changes.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3260
+
+K Framework 5.5.0
+=================
+
+Features
+--------
+- Improve error messages for erroneous simplification rules.
+
+- Added the `kup` tool to help with keeping the various dependencies up to date.
+
+- Documentation updates
+
+
+Misc/Bug Fixes
+--------------
+- Relax module duplication check to allow for duplicate files. Useful when moving
+  the original definition to a new location.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3005
+
+
+K Framework 5.4.0
+=================
+
+Features
+--------
+
+- Added `--definition` and `--output-definition` command line options for specifying the exact
+  path for storing and loading from the kompiled definition.
+
+- Print source lines in error messages.
+
+- The haskell backend uses by default a new binary kore format. This decreases load time but
+  can cause issues on certain systems (Apple Silicon). Use the `-no-haskell-binary` option to
+  fall back to the textual format.
+
+- Renamed `kprovex` to `kprove` and `kprove` to `kprove-legacy`.
+
+- Introduced V2 of the JSON kast format. Better handling for `KLabel` parameters and sorts.
+
+- Add error message for duplicate user lists.
+
+- Added `#trace` to the list of IO operations to aid in debugging.
+
+- Added `--post-process`, a JSON KAST => JSON KAST converter to run on the definition after
+  kompile pipeline. The [pyk](https://github.com/runtimeverification/pyk/tree/master/pyk-tests/post-process)
+  library offers a convenient collection of operations for quick prototyping.
+
+- Adding the `comm` attribute on a simplification rule will now generate a similar rule
+  with the top most LHS function reversed. The syntax declaration also needs this attribute.
+  
+- LLDB can now be used for debugging the llvm-backend on OSX.
+
+- The `kast` tool now allows access to the rule grammar by providing `--input rule`.
+
+- Added more claims filtering options for `kprove`: `--trusted`, `--exclude` and `--claims`.
+
+- Various improvements to error messages and made it easier to debug and profile a definition. 
+
+Performance Improvements
+------------------------
+
+- Optimize grammar generator steps.
+
+- Optimize the type inference step by reducing the work done by Z3.
+
+Misc/Bug Fixes
+--------------
+
+- Make generated anonymous variables parsable (`_0` => `_Gen0`).
+
+- Outer parser returned off by one end-column.
+
+- Bad parameters to kompile and kprove are now corectly reported as errors.
+
+- Fix the Bison parser not handling Bytes correctly.
+
+- Use clang by default on OSX
+
+- `--emit-json-spec` now can print out multiple modules.
+
+Dependency Updates
+------------------
+
+- Haskell backend is updated to version [efeb976](https://github.com/runtimeverification/haskell-backend/tree/efeb976108a0baa202844386193695564a257540).
+
+- LLVM backend is updated to version [5001b5b](https://github.com/runtimeverification/llvm-backend/tree/5001b5b294bab59db6034c79e92bbd71b1746666).
+
+- K Web Theme is updated to version [f670742](https://github.com/runtimeverification/k-web-theme/tree/f67074272c1513e8194c7653f8bbdef0b293f4ee).
+
+- Require Z3 4.8.15 or higher
+
+- Downgrade Calibre to 5.42.0
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/2514
+
+
 K Framework 5.3.0
 =================
 
@@ -196,7 +375,7 @@ K Framework 5.0.0
 Major changes since version 3.6, not all are documented here.
 In particular:
 
-- No longer user Maude backend for K.
+- No longer uses Maude backend for K.
 
 - OCaml backend was developed, but now is being deprecated in favor of LLVM
   backend for concrete execution.

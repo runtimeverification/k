@@ -1,9 +1,9 @@
-[Error] Outer Parser: Module LIST previously declared at Source...
+[Error] Outer Parser: Module LIST differs from previous declaration at Source...
 	Source(test.k)
-	Location(1,1,3,10)
+	Location(2,1,4,10)
 	  .	v~~~~~~~~~~
-	1 |	module LIST
-	2 |	
-	3 |	endmodule
+	2 |	module LIST
+	3 |	
+	4 |	endmodule
 	  .	~~~~~~~~^
 [Error] Outer Parser: Had 1 outer parsing errors.

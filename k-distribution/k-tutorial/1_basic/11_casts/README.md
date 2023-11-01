@@ -1,7 +1,11 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.11: Casting Terms
 
 The purpose of this lesson is to explain how to use **cast** expressions in
-order to disambiguate terms using sort information. We also explain how the 
+order to disambiguate terms using sort information. We also explain how the
 variable sort inference algorithm works in K, and how to change the default
 behavior by casting variables to a particular sort.
 
@@ -30,7 +34,7 @@ following (implicit) production for use in sentences:
   syntax S ::= S ":S"
 ```
 
-Note that `S` simply represents the name of the sort. For example, if we 
+Note that `S` simply represents the name of the sort. For example, if we
 defined a sort `Exp`, the actual production for that sort would be:
 
 ```
@@ -90,16 +94,16 @@ example, consider the following definition:
 module LESSON-11-C
   imports INT
 
-  syntax Exp ::= Int | Exp "+" Exp [exp]
-  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [exp2]
+  syntax Exp ::= Int | Exp "+" Exp [group(exp)]
+  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [group(exp2)]
 endmodule
 ```
 
 This grammar is a little ambiguous and contrived, but it serves to demonstrate
-how a semantic cast might be insufficient to disambiguate a term. If we were 
+how a semantic cast might be insufficient to disambiguate a term. If we were
 to write the term `(I1:Int + I2:Int):Exp2`, the term would be ambiguous,
 because the cast is not sufficiently strict to determine whether you mean
-to derive the "+" production tagged `exp`, or the one tagged `exp2`.
+to derive the "+" production in the group `exp` or the one in the group `exp2`.
 
 In this situation, there is a solution: the **strict cast**. For every sort
 `S` in your grammar, K also defines the following production:
@@ -122,7 +126,7 @@ should be chosen, whereas if we want the first derivation, we could write
 
 ### Projection casts
 
-Thus far we have focused entirely on casts which exist solely to inform the 
+Thus far we have focused entirely on casts which exist solely to inform the
 compiler about the sort of terms. However, sometimes when dealing with grammars
 containing subsorts, it can be desirable to reason with the subsort production
 itself, which **injects** one sort into another. Remember from above that such
@@ -134,7 +138,7 @@ symbol at runtime which keeps track of where such subsortings occur; this
 symbol is called an **injection**.
 
 Sometimes, when one sort is a subsort of another, it can be the case that
-a function returns one sort, but you actually want to cast the result of 
+a function returns one sort, but you actually want to cast the result of
 calling that function to another sort which is a subsort of the first sort.
 This is similar to what happens with inheritance in an object-oriented
 language, where you might cast a superclass to a subclass if you know for
@@ -185,7 +189,7 @@ the projection cast will fail.
 1. Extend the `eval` function in `LESSON-11-D` to include Strings and add a `.`
 operator which concatenates them.
 
-2. Modify your solution from lesson 1.9, problem 2 by using an `Exp` sort to
+2. Modify your solution from Lesson 1.9, Exercise 2 by using an `Exp` sort to
 express the integer and Boolean expressions that it supports, in the same style
 as `LESSON-11-D`. Then write an `eval` function that evaluates all terms of
 sort `Exp` to either a `Bool` or an `Int`.

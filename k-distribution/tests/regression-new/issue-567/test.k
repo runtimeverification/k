@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST-COMMON
   imports INT-SYNTAX
   imports BOOL

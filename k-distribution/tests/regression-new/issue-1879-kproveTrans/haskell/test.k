@@ -1,4 +1,4 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module TEST-SYNTAX
 endmodule
@@ -20,9 +20,9 @@ module TEST
     syntax FInt ::= FInt ( value: Int , one: Int ) [klabel(FInt), symbol]
  // ---------------------------------------------------------------------
 
-    syntax FInt ::= "0FInt" "(" Int ")"
- // -----------------------------------
-    rule 0FInt(ONE) => FInt(0, ONE) [macro]
+    syntax FInt ::= "0FInt" "(" Int ")" [macro]
+ // -------------------------------------------
+    rule 0FInt(ONE) => FInt(0, ONE)
 
     syntax FInt ::= rdiv ( FInt , FInt ) [function]
  // -----------------------------------------------

@@ -12,4 +12,4 @@ $(KOMPILED_DIR)/timestamp: $(DEF).k
 	mv test2-kompiled $(KOMPILED_DIR)
 
 clean:
-	rm -rf test2-kompiled test-kompiled
+	rm -rf test2.k test2-kompiled test-kompiled

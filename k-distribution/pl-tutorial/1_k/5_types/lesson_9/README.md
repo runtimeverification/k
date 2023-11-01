@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)
 
@@ -21,7 +23,7 @@ the above possible.
 
 The main idea is to replace the rule
 
-    rule let X = E in E' => E'[E/X]  [macro]
+    rule let X = E in E' => E'[E/X]
 
 which creates potentially many copies of `E` within `E'` with a rule
 which types `E` once and then reuses that type in each place where `X`
@@ -137,9 +139,9 @@ of a type schema will always be a set of fresh types. We also declare
 this construct to be a `binder`, so that we can make use of the generic
 free variable function provided by the K tool.
 
-We now replace the old macro of `let`
+We now replace the old rule for `let`
 
-    rule let X = E in E' => E'[E/X]  [macro]
+    rule let X = E in E' => E'[E/X]
 
 with the following rule:
 

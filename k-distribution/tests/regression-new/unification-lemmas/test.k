@@ -1,4 +1,4 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module TEST-SYNTAX
 endmodule
@@ -17,7 +17,7 @@ module TEST
     rule makeLookup(B) => lookup(#hash(B))
 
     syntax Int ::= lookup(Hash) [function, no-evaluators]
-                 | #lookupMemory  ( Map , Int ) [function, functional, smtlib(lookupMemory)]
+                 | #lookupMemory  ( Map , Int ) [function, total, smtlib(lookupMemory)]
     syntax Int ::= "pow256" [alias] /* 2 ^Int 256 */
     rule pow256 => 115792089237316195423570985008687907853269984665640564039457584007913129639936
 

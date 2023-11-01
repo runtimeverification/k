@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+<!-- Copyright (c) K Team. All Rights Reserved. -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
@@ -69,7 +69,7 @@
     </fileSet>
     <fileSet>
       <directory>${project.parent.basedir}/package</directory>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/lib/kframework</outputDirectory>
       <includes>
         <include>version</include>
       </includes>
@@ -93,11 +93,33 @@
       <outputDirectory>/lib/cmake/kframework</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../llvm-backend/target/build/install/bindings</directory>
+      <outputDirectory>/bindings</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../llvm-backend/src/main/scripts/bin</directory>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../llvm-backend/src/main/scripts/lib</directory>
+      <outputDirectory>/lib/kframework</outputDirectory>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../haskell-backend/src/main/native/haskell-backend/src/main/kore</directory>
       <outputDirectory>/include/kframework/kore</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../haskell-backend/target/stack-install</directory>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../hs-backend-booster/target/stack-install</directory>
       <outputDirectory>/bin</outputDirectory>
       <fileMode>775</fileMode>
       <directoryMode>775</directoryMode>

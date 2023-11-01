@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2016-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 Substitution has been reimplemented in the meanwhile, where the fresh
 variables are resolved locally.  So there is no global counter for

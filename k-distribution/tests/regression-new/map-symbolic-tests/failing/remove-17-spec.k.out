@@ -1,3 +1,0 @@
-<k>
-  removeResult ( ( X |-> 3 y |-> 4 ) [ x <- undef ] [ X ] )
-</k>

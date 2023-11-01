@@ -1,5 +1,5 @@
 [Error] Compiler: Could not find sorts: [MInt{6}]
 	Source(checkInstantiation.k)
-	Location(9,20,9,32)
-	9 |	  syntax KItem ::= foo(MInt{6})
-	  .	                   ^~~~~~~~~~~~
+	Location(10,20,10,32)
+	10 |	  syntax KItem ::= foo(MInt{6})
+	   .	                   ^~~~~~~~~~~~

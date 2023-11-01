@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
@@ -8,7 +8,7 @@ module IMP-SYNTAX
                  // remove division tag when we have proper search strategies
                  | "-" Int
                  | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
+                 > AExp "/" AExp              [left, strict, group(division)]
                  > AExp "+" AExp              [left, strict]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -28,10 +28,8 @@ module IMP-SYNTAX
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
-  // K does not yet handle automatically subsorting one user defined list to
-  // another when the elements are subsorted, so we must do it manually.
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax AExps ::= Ids
 endmodule
 
@@ -57,17 +55,17 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {} => .
+  rule {S} => S
 // Stmt
   rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 
   rule <k> int (X,Xs => Xs); ...</k>
        <state> Rho (.Map => X |-> 0) </state>
     requires notBool (X in keys(Rho))
-  rule int .Ids; => .  [structural]
+  rule int .Ids; => .
 endmodule
