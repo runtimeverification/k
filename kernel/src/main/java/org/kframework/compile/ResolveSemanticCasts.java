@@ -72,17 +72,16 @@ public class ResolveSemanticCasts {
       Optional<KApply> sideCondition =
           casts.stream()
               .map(
-                  k -> {
-                    return new TransformK() {
-                      @Override
-                      public K apply(KVariable k) {
-                        if (varToTypedVar.containsKey(k)) {
-                          return varToTypedVar.get(k);
+                  k ->
+                      new TransformK() {
+                        @Override
+                        public K apply(KVariable k) {
+                          if (varToTypedVar.containsKey(k)) {
+                            return varToTypedVar.get(k);
+                          }
+                          return k;
                         }
-                        return k;
-                      }
-                    }.apply(k);
-                  })
+                      }.apply(k))
               .map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply) k)), transform(k)))
               .reduce(BooleanUtils::and);
       if (!sideCondition.isPresent()) {
