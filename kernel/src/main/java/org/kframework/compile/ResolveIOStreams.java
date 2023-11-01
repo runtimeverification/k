@@ -38,9 +38,13 @@ public record ResolveIOStreams(Definition definition, KExceptionManager kem) {
 
   /**
    * Update modules that declare stream cells in configuration, by using builtin *-STREAM modules.
+   * Steps:
    *
-   * <p>Steps: 1. Update the init rules of the stream cells. 2. Update rules that refer to 'stdin'
-   * stream. 3. Import rules from *-STREAM modules (with modification of cell names).
+   * <ol type="1">
+   *   <li>Update the init rules of the stream cells.
+   *   <li>Update rules that refer to 'stdin' stream.
+   *   <li>Import rules from *-STREAM modules (with modification of cell names).
+   * </ol>
    */
   public Module resolve(Module m) {
     java.util.Set<Production> streamProductions = getStreamProductions(m.sentences());

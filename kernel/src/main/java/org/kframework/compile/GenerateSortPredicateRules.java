@@ -22,12 +22,16 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import scala.collection.Set;
 
-/*
+/**
  * Generates sort predicates from the subsort hierarchy of the module. This module assumes that the
  * backend implements the following rules:
  *
- *  isSort(#token(Sort, _)) => true isK(K) => true
- *  isKItem(K1(K2)) => true isKItem(#token(_, _)) => true
+ * <pre>
+ *  isSort(#token(Sort, _)) => true
+ *  isK(K) => true
+ *  isKItem(K1(K2)) => true
+ *  isKItem(#token(_, _)) => true
+ * </pre>
  *
  * plus one sort membership function for each builtin-hooked sort.
  */

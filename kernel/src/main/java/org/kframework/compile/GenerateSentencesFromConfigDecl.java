@@ -40,16 +40,22 @@ public class GenerateSentencesFromConfigDecl {
    * Takes a configuration declaration and returns the sentences that it desugars into.
    *
    * <p>Cells of multiplicity 1 desugar into an initializer production, an initializer rule, and a
-   * cell production. Cells of multiplicity * desugar into an initializer production, an initializer
-   * rule, a cell production, and a bag sort to represent a bag of those cells. Cells of
-   * multiplicity ? desugar into an initializer production, an initializer rule, a cell production,
-   * and an empty production indicating the absence of that cell. Cells with children additionally
-   * generate a *CellFragment sort with the same arity as the cell production, but the arguments
-   * made optional by generating additional sorts. Cells which have parents and are not multiplicity
-   * * generate a CellOpt sort which is a supersort of the cell sort and has an additional
-   * production name like {@code <cell>-absent}. (For a cell with multiplicitly ? this is necessary
-   * to distinguish a fragment that did capture the state of the cell when it wasn't present, from a
-   * cell fragment that didn't even try to capture the cell).
+   * cell production.
+   *
+   * <p>Cells of multiplicity * desugar into an initializer production, an initializer rule, a cell
+   * production, and a bag sort to represent a bag of those cells.
+   *
+   * <p>Cells of multiplicity ? desugar into an initializer production, an initializer rule, a cell
+   * production, and an empty production indicating the absence of that cell.
+   *
+   * <p>Cells with children additionally generate a *CellFragment sort with the same arity as the
+   * cell production, but the arguments made optional by generating additional sorts.
+   *
+   * <p>Cells which have parents and are not multiplicity * generate a CellOpt sort which is a
+   * supersort of the cell sort and has an additional production name like {@code <cell>-absent}.
+   * (For a cell with multiplicitly ? this is necessary to distinguish a fragment that did capture
+   * the state of the cell when it wasn't present, from a cell fragment that didn't even try to
+   * capture the cell).
    *
    * <p>Currently the implementation does not handle initializer rules; we will address this
    * eventually.
