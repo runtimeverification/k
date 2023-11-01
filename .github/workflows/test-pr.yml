@@ -133,7 +133,7 @@ jobs:
         name: Cache ~/.stack
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          key: ${{ runner.os }}-stack-global-${{ hashFiles('kframework/**/stack.yaml') }}-${{ hashFiles('kframework/**/package.yaml') }}
           restore-keys: |
             ${{ runner.os }}-stack-global-
 
