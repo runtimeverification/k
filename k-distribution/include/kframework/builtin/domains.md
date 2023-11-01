@@ -303,7 +303,7 @@ effectively constant.
 
 You can remove the key/value pairs in a map that are present in another map in
 O(N*log(M)) time (where M is the size of the first map and N is the size of the
-second), or effectively linear. Note that only keys whose value is the same 
+second), or effectively linear. Note that only keys whose value is the same
 in both maps are removed. To remove all the keys in one map from another map,
 you can say `removeAll(M1, keys(M2))`.
 
@@ -489,7 +489,7 @@ module RANGEMAP
 
 ```k
   syntax Range ::= "[" KItem "," KItem ")"    [klabel(Rangemap:Range), symbol]
-  
+
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
 ```
 
@@ -686,7 +686,7 @@ endmodule
 Sets
 ----
 
-Provided here is the syntax of an implementation of immutable, associative, 
+Provided here is the syntax of an implementation of immutable, associative,
 commutative sets of `KItem`. This type is hooked to an implementation of sets
 provided by the backend. For more information on matching on sets and allowable
 patterns for doing so, refer to K's
@@ -741,7 +741,7 @@ An element of a `Set` is constructed via the `SetItem` operator.
 
 You can compute the union of two sets in O(N*log(M)) time (Where N is the size
 of the smaller set). Note that the base of the logarithm is a relatively high
-number and thus the time is effectively linear. The union consists of all the 
+number and thus the time is effectively linear. The union consists of all the
 elements present in either set.
 
 ```k
@@ -1093,7 +1093,7 @@ You can:
 * Check inequality of two boolean values.
 
 Note that only `andThenBool` and `orElseBool` are short-circuiting. `andBool`
-and `orBool` may be short-circuited in concrete backends, but in symbolic 
+and `orBool` may be short-circuited in concrete backends, but in symbolic
 ackends, both arguments will be evaluated.
 
 ```k
@@ -1311,7 +1311,7 @@ greater than or equal to, greater than, equal, or unequal to another integer.
 
 ### Divides
 
-You can compute whether one integer evenly divides another. This is the 
+You can compute whether one integer evenly divides another. This is the
 case when the second integer modulo the first integer is equal to zero.
 
 ```k
@@ -1439,14 +1439,14 @@ IEEE 754 Floating-point Numbers
 
 Provided here is the syntax of an implementation of arbitrary-precision
 floating-point arithmetic in K based on a generalization of the IEEE 754
-standard. This type is hooked to an implementation of floats provided by the 
+standard. This type is hooked to an implementation of floats provided by the
 backend.
 
 The syntax of ordinary floating-point values in K consists of an optional sign
 (+ or -) followed by an optional integer part, followed by a decimal point,
-followed by an optional fractional part. Either the integer part or the 
+followed by an optional fractional part. Either the integer part or the
 fractional part must be specified. The mantissa is followed by an optional
-exponent part, which consists of an `e` or `E`, an optional sign (+ or -), 
+exponent part, which consists of an `e` or `E`, an optional sign (+ or -),
 and an integer. The expoennt is followed by an optional suffix, which can be
 either `f`, `F`, `d`, `D`, or `pNxM` where `N` and `M` are positive integers.
 `p` and `x` can be either upper or lowercase.
@@ -2455,7 +2455,7 @@ known to K, `#unknownIOError` is returned along with the integer errno value.
 
 ### I/O result sorts
 
-Here we see sorts defined to contain either an `Int` or an `IOError`, or 
+Here we see sorts defined to contain either an `Int` or an `IOError`, or
 either a `String` or an `IOError`. These sorts are used to implement the
 return sort of functions that may succeed, in which case they return a value,
 or may fail, in which case their return value indicates an error and the
@@ -2509,7 +2509,7 @@ requested. A string of zero length being returned indicates end-of-file.
 
 ### Write to file
 
-You can write a single character to a file using `#putc`. You can also write 
+You can write a single character to a file using `#putc`. You can also write
 a string to a file using `#write`. The returned value on success is `.K`.
 
 ```k
@@ -2527,7 +2527,7 @@ You can close a file using `#close`. The returned value on success is `.K`.
 
 ### Locking/unlocking a file
 
-You can lock or unlock parts of a file using the `#lock` and `#unlock` 
+You can lock or unlock parts of a file using the `#lock` and `#unlock`
 functions. The lock starts at the beginning of the file and continues for
 `endIndex` bytes. Note that Unix systems do not actually prevent locked files
  from being read and modified; you will have to lock both sides of a concurrent
@@ -2540,7 +2540,7 @@ access to guarantee exclusivity.
 
 ### Networking
 
-You can accept a connection on a socket using `#accept`, or shut down the 
+You can accept a connection on a socket using `#accept`, or shut down the
 write end of a socket with `#shutdownWrite`. Note that facility is not provided
 for opening, binding, and listening on sockets. These functions are implemented
 in order to support creating stateful request/response servers where the
@@ -2860,7 +2860,7 @@ You can get the number of bits of width in an MInt using `bitwidthMInt`.
 
 ### Int and MInt conversions
 
-You can convert from an `MInt` to an `Int` using the `MInt2Signed` and 
+You can convert from an `MInt` to an `Int` using the `MInt2Signed` and
 `MInt2Unsigned` functions. an `MInt` does not have a sign; its sign is instead
 reflected in how operators interpret its value either as a signed integer or as
 an unsigned integer. Thus, you can interpret a `MInt` as a signed integer witth
@@ -2880,8 +2880,8 @@ has the correct bitwidth, as this will influence the width of the resulting
 
 ### MInt min and max values
 
-You can get the minimum and maximum values of a signed or unsigned `MInt` 
-with az specified bit width using `sminMInt`, `smaxMInt`, `uminMInt`, and 
+You can get the minimum and maximum values of a signed or unsigned `MInt`
+with az specified bit width using `sminMInt`, `smaxMInt`, `uminMInt`, and
 `umaxMInt`.
 
 ```k
