@@ -1,80 +1,80 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import org.kframework.utils.errorsystem.KEMException;
-
-import org.apache.commons.io.IOUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.apache.commons.io.IOUtils;
+import org.kframework.utils.errorsystem.KEMException;
 
 // instantiate processes
 public class RunProcess {
 
-    /**
-     * Returns a thread that pipes all incoming data from {@param in} to {@param out}.
-     * @param in A function that returns the input stream to be piped to {@param out}
-     * @param out The output stream to pipe data to.
-     * @return A {@link Thread} that will pipe all data from {@param in} to {@param out} until EOF is reached.
-     */
-    public static Thread getOutputStreamThread(Supplier<InputStream> in, PrintStream out) {
-        return new Thread(() -> {
-                    try {
-                        IOUtils.copy(in.get(), out);
-                    } catch (IOException ignored) {}
-                });
+  /**
+   * Returns a thread that pipes all incoming data from {@param in} to {@param out}.
+   *
+   * @param in A function that returns the input stream to be piped to {@param out}
+   * @param out The output stream to pipe data to.
+   * @return A {@link Thread} that will pipe all data from {@param in} to {@param out} until EOF is
+   *     reached.
+   */
+  public static Thread getOutputStreamThread(Supplier<InputStream> in, PrintStream out) {
+    return new Thread(
+        () -> {
+          try {
+            IOUtils.copy(in.get(), out);
+          } catch (IOException ignored) {
+          }
+        });
+  }
+
+  public record ProcessOutput(byte[] stdout, byte[] stderr, int exitCode) {}
+
+  private RunProcess() {}
+
+  public static ProcessOutput execute(
+      Map<String, String> environment, ProcessBuilder pb, String... commands) {
+    try {
+      if (commands.length <= 0) {
+        throw KEMException.criticalError("Need command options to run");
+      }
+
+      // create process
+      pb = pb.command(commands);
+      Map<String, String> realEnvironment = pb.environment();
+      realEnvironment.putAll(environment);
+
+      // start process
+      Process process = pb.start();
+
+      ByteArrayOutputStream out, err;
+      PrintStream outWriter, errWriter;
+      out = new ByteArrayOutputStream();
+      err = new ByteArrayOutputStream();
+      outWriter = new PrintStream(out);
+      errWriter = new PrintStream(err);
+
+      Thread outThread = getOutputStreamThread(process::getInputStream, outWriter);
+      Thread errThread = getOutputStreamThread(process::getErrorStream, errWriter);
+
+      outThread.start();
+      errThread.start();
+
+      // wait for process to finish
+      process.waitFor();
+
+      outThread.join();
+      errThread.join();
+      outWriter.flush();
+      errWriter.flush();
+
+      return new ProcessOutput(out.toByteArray(), err.toByteArray(), process.exitValue());
+
+    } catch (IOException | InterruptedException e) {
+      throw KEMException.criticalError("Error while running process:" + e.getMessage(), e);
     }
-
-    public record ProcessOutput(byte[] stdout, byte[] stderr, int exitCode) {
-    }
-
-    private RunProcess() {}
-
-    public static ProcessOutput execute(Map<String, String> environment, ProcessBuilder pb, String... commands) {
-        try {
-            if (commands.length <= 0) {
-                throw KEMException.criticalError("Need command options to run");
-            }
-
-            // create process
-            pb = pb.command(commands);
-            Map<String, String> realEnvironment = pb.environment();
-            realEnvironment.putAll(environment);
-
-            // start process
-            Process process = pb.start();
-
-            ByteArrayOutputStream out, err;
-            PrintStream outWriter, errWriter;
-            out = new ByteArrayOutputStream();
-            err = new ByteArrayOutputStream();
-            outWriter = new PrintStream(out);
-            errWriter = new PrintStream(err);
-
-            Thread outThread = getOutputStreamThread(process::getInputStream, outWriter);
-            Thread errThread = getOutputStreamThread(process::getErrorStream, errWriter);
-
-            outThread.start();
-            errThread.start();
-
-            // wait for process to finish
-            process.waitFor();
-
-            outThread.join();
-            errThread.join();
-            outWriter.flush();
-            errWriter.flush();
-
-            return new ProcessOutput(out.toByteArray(), err.toByteArray(), process.exitValue());
-
-        } catch (IOException | InterruptedException e) {
-            throw KEMException.criticalError("Error while running process:" + e.getMessage(), e);
-        }
-
-    }
-
+  }
 }
