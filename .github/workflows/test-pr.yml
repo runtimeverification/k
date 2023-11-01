@@ -147,6 +147,7 @@ jobs:
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
         run: |
           stack --help
+          ls -al ~/.stack
           # PACKAGE=kframework
           # VERSION=$(cat kframework/package/version)
           # ROOT_URL='https://github.com/runtimeverification/k/releases/download'
