@@ -87,7 +87,7 @@ jobs:
           tag: k-ci-${{ github.sha }}
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
       - name: 'Build and Test K'
         run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
       - name: 'Check out k-exercises'
@@ -120,7 +120,7 @@ jobs:
         with:
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
       - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
