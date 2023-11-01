@@ -2,6 +2,4 @@
 package org.kframework;
 
 @API
-public interface Warning {
-
-}
+public interface Warning {}

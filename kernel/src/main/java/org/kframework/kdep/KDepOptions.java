@@ -10,25 +10,23 @@ import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.OutputDirectoryOptions;
 
 /**
- * JCommander options for kdep. Essentially, this should contain all the kompile options needed in order to decide what
- * files get slurped by the outer parser.
+ * JCommander options for kdep. Essentially, this should contain all the kompile options needed in
+ * order to decide what files get slurped by the outer parser.
  */
-
 @RequestScoped
 public class KDepOptions {
 
-    @Inject
-    public KDepOptions() {}
+  @Inject
+  public KDepOptions() {}
 
-    @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+  @ParametersDelegate public transient GlobalOptions global = new GlobalOptions();
 
-    @ParametersDelegate
-    public OuterParsingOptions outerParsing = new OuterParsingOptions();
+  @ParametersDelegate public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
-    @ParametersDelegate
-    public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
+  @ParametersDelegate public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
-    @Parameter(names="--remake-depend", description="Generate an additional rule to remake the dependency file.")
-    public boolean alsoRemakeDepend = false;
+  @Parameter(
+      names = "--remake-depend",
+      description = "Generate an additional rule to remake the dependency file.")
+  public boolean alsoRemakeDepend = false;
 }

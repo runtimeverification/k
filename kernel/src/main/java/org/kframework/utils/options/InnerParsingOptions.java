@@ -3,21 +3,24 @@ package org.kframework.utils.options;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
-
 import java.io.Serializable;
 
 /**
  * Provides the options needed for tools to perform inner parsing of definitions from source.
  *
- * Used currently by kompile, and kprove.
+ * <p>Used currently by kompile, and kprove.
  */
 public class InnerParsingOptions implements Serializable {
 
-    public InnerParsingOptions() {}
+  public InnerParsingOptions() {}
 
-    @Inject
-    public InnerParsingOptions(Void v) {}
+  @Inject
+  public InnerParsingOptions(Void v) {}
 
-    @Parameter(names="--profile-rule-parsing", description="Store in this file time taken in ms to parse each rule in the semantics.", descriptionKey = "file", hidden = true)
-    public String profileRules;
+  @Parameter(
+      names = "--profile-rule-parsing",
+      description = "Store in this file time taken in ms to parse each rule in the semantics.",
+      descriptionKey = "file",
+      hidden = true)
+  public String profileRules;
 }
