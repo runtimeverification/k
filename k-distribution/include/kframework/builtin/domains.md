@@ -1119,33 +1119,33 @@ operations listed above.
   rule notBool false => true
 
   rule true andBool B:Bool => B:Bool
-  rule B:Bool andBool true => B:Bool
+  rule B:Bool andBool true => B:Bool [simplification]
   rule false andBool _:Bool => false
-  rule _:Bool andBool false => false
+  rule _:Bool andBool false => false [simplification]
 
   rule true andThenBool K::Bool => K
-  rule K::Bool andThenBool true => K
+  rule K::Bool andThenBool true => K [simplification]
   rule false andThenBool _ => false
-  rule _ andThenBool false => false
+  rule _ andThenBool false => false  [simplification]
 
   rule false xorBool B:Bool => B:Bool
-  rule B:Bool xorBool false => B:Bool
+  rule B:Bool xorBool false => B:Bool [simplification]
   rule B:Bool xorBool B:Bool => false
 
   rule true orBool _:Bool => true
-  rule _:Bool orBool true => true
+  rule _:Bool orBool true => true [simplification]
   rule false orBool B:Bool => B
-  rule B:Bool orBool false => B
+  rule B:Bool orBool false => B   [simplification]
 
   rule true orElseBool _ => true
-  rule _ orElseBool true => true
+  rule _ orElseBool true => true     [simplification]
   rule false orElseBool K::Bool => K
-  rule K::Bool orElseBool false => K
+  rule K::Bool orElseBool false => K [simplification]
 
   rule true impliesBool B:Bool => B
   rule false impliesBool _:Bool => true
-  rule _:Bool impliesBool true => true
-  rule B:Bool impliesBool false => notBool B
+  rule _:Bool impliesBool true => true       [simplification]
+  rule B:Bool impliesBool false => notBool B [simplification]
 
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
 endmodule
