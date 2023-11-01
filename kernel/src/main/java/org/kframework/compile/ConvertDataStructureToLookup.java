@@ -163,7 +163,7 @@ public class ConvertDataStructureToLookup {
    */
   K addSideCondition(K requires) {
     Optional<KApply> sideCondition = getSortedLookups().reduce(BooleanUtils::and);
-    if (!sideCondition.isPresent()) {
+    if (sideCondition.isEmpty()) {
       return requires;
     } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
       return sideCondition.get();

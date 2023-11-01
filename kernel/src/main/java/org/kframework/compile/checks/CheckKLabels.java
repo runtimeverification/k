@@ -164,7 +164,7 @@ public class CheckKLabels {
       if (prod.att().contains(Att.MAINCELL())
           || prod.att().contains(Att.UNUSED())
           || symbol.equals("<generatedTop>")
-          || !s.isPresent()
+          || s.isEmpty()
           || (prod.att().contains(Att.CELL())
               && stream(prod.nonterminals())
                   .filter(

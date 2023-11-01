@@ -84,7 +84,7 @@ public class ResolveSemanticCasts {
                       }.apply(k))
               .map(k -> KApply(KLabel("is" + getSortNameOfCast((KApply) k)), transform(k)))
               .reduce(BooleanUtils::and);
-      if (!sideCondition.isPresent()) {
+      if (sideCondition.isEmpty()) {
         return requires;
       } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
         return sideCondition.get();

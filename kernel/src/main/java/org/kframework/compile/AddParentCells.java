@@ -200,10 +200,10 @@ public class AddParentCells {
       Optional<Integer> level = Optional.empty();
       for (K item : cells) {
         Optional<Integer> level2 = getLevel(item);
-        if (item instanceof KVariable && !level2.isPresent()) {
+        if (item instanceof KVariable && level2.isEmpty()) {
           continue;
         }
-        if (!level.isPresent()) {
+        if (level.isEmpty()) {
           level = level2;
         } else if (!level.equals(level2)) {
           throw KEMException.criticalError("Can't mix cells at different levels under a rewrite");
@@ -247,10 +247,10 @@ public class AddParentCells {
     } else {
       Optional<KLabel> leftParent = getParent(((KRewrite) k).left());
       Optional<KLabel> rightParent = getParent(((KRewrite) k).right());
-      if (!leftParent.isPresent()) {
+      if (leftParent.isEmpty()) {
         return rightParent;
       }
-      if (!rightParent.isPresent()) {
+      if (rightParent.isEmpty()) {
         return leftParent;
       }
       if (leftParent.equals(rightParent)) {

@@ -130,7 +130,7 @@ public class ResolveFreshConstants {
       public K apply(KVariable k) {
         if (freshVars.contains(k)) {
           Optional<Sort> s = k.att().getOptional(Sort.class);
-          if (!s.isPresent()) {
+          if (s.isEmpty()) {
             throw KEMException.compilerError("Fresh constant used without a declared sort.", k);
           }
           Option<KLabel> lbl = m.freshFunctionFor().get(s.get());
