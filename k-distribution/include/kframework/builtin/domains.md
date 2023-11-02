@@ -1094,7 +1094,7 @@ You can:
 
 Note that only `andThenBool` and `orElseBool` are short-circuiting. `andBool`
 and `orBool` may be short-circuited in concrete backends, but in symbolic
-ackends, both arguments will be evaluated.
+backends, both arguments will be evaluated.
 
 ```k
   syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
