@@ -34,7 +34,7 @@
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 13;
+          llvm-version = 15;
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
