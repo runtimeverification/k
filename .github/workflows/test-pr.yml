@@ -35,6 +35,7 @@ jobs:
               -Dmaven.wagon.http.pool=false
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
         run: |
+          ./scripts/get-version-string.sh
           PACKAGE=kframework
           VERSION=$(./scripts/get-version-string.sh | cut -d'-' -f1)
           echo ${VERSION}
