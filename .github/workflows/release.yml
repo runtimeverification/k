@@ -102,7 +102,7 @@ jobs:
         with:
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
@@ -349,7 +349,7 @@ jobs:
           tag: k-release-ci-${{ github.sha }}
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
 
       - name: 'Push Maven Packages'
         shell: bash {0}
