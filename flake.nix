@@ -11,7 +11,7 @@
     nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     mavenix = {
-      url = "github:nix-community/mavenix";
+      url = "github:goodlyrottenapple/mavenix";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.utils.follows = "flake-utils";
     };
@@ -34,7 +34,7 @@
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 13;
+          llvm-version = 15;
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
@@ -144,6 +144,7 @@
             ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
               || echo "^~~~ expected error"
 
+            export PATH="${pkgs.gnused}/bin:$PATH"
             ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
           '';
 

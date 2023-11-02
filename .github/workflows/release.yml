@@ -102,7 +102,7 @@ jobs:
         with:
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
@@ -236,9 +236,9 @@ jobs:
         id: checkout
         with:
           repository: runtimeverification/homebrew-k
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           path: homebrew-k
           ref: staging
-          persist-credentials: false
         continue-on-error: true
 
       - name: 'Check out homebrew repo master branch'
@@ -246,8 +246,8 @@ jobs:
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
           repository: runtimeverification/homebrew-k
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           path: homebrew-k
-          persist-credentials: false
 
       - name: 'Download bottle'
         uses: actions/download-artifact@v2
@@ -300,19 +300,16 @@ jobs:
           version=$(cat k-homebrew-checkout/package/version)
           mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
           gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
-      # Deprecate After Homebrew tap migration
-      - name: 'Add ssh key'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.HOMEBREW_SSH_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS_GITHUB_COM }}
+
+      - run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
 
       - name: 'Commit changes'
         run: |
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
           git commit -m 'Update brew package version' Formula/kframework.rb
-          git remote set-url origin git@github.com:runtimeverification/homebrew-k.git
           git push origin master
 
       - name: 'Delete Release'
@@ -352,7 +349,7 @@ jobs:
           tag: k-release-ci-${{ github.sha }}
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
 
       - name: 'Push Maven Packages'
         shell: bash {0}
