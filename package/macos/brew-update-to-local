@@ -1,5 +1,5 @@
 #!/bin/sh -exu
 package="$1" ; shift
 version="$1" ; shift
-sed -i "" -e 's!^    tag ".*"$!    tag "v6.0.189"'
+sed -i "" -e 's!^    tag ".*"$!    revision "${version}"'
     Formula/$package.rb
