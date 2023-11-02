@@ -50,6 +50,10 @@ jobs:
       #     echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
       #     echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
 
+      - name: Cleanup
+        if: always()
+        run: brew uninstall -f kframework
+
   # format-check:
   #   name: 'Check Java code formatting'
   #   runs-on: ubuntu-latest
