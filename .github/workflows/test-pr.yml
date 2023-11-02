@@ -36,7 +36,7 @@ jobs:
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
         run: |
           PACKAGE=kframework
-          VERSION=${{ github.ref }}
+          VERSION=${{ github.event.workflow_run.head_sha }}
           echo ${VERSION}
           cd homebrew-k
           ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
