@@ -1107,6 +1107,7 @@ ackends, both arguments will be evaluated.
                 > left:
                   Bool "==Bool" Bool      [function, total, klabel(_==Bool_), symbol, left, comm, smt-hook(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, total, klabel(_=/=Bool_), symbol, left, comm, smt-hook(distinct), hook(BOOL.ne)]
+endmodule
 ```
 
 ### Implementation of Booleans
@@ -1115,43 +1116,42 @@ The remainder of this section consists of an implementation in K of the
 operations listed above.
 
 ```k
+module BOOL-KORE [kore, symbolic]
+  imports BOOL-COMMON
+
   rule notBool true => false
   rule notBool false => true
 
-  rule true andBool B:Bool => B:Bool
+  rule true andBool B:Bool => B:Bool [simplification]
   rule B:Bool andBool true => B:Bool [simplification]
-  rule false andBool _:Bool => false
+  rule false andBool _:Bool => false [simplification]
   rule _:Bool andBool false => false [simplification]
 
-  rule true andThenBool K::Bool => K
+  rule true andThenBool K::Bool => K [simplification]
   rule K::Bool andThenBool true => K [simplification]
-  rule false andThenBool _ => false
+  rule false andThenBool _ => false  [simplification]
   rule _ andThenBool false => false  [simplification]
 
-  rule false xorBool B:Bool => B:Bool
+  rule false xorBool B:Bool => B:Bool [simplification]
   rule B:Bool xorBool false => B:Bool [simplification]
-  rule B:Bool xorBool B:Bool => false
+  rule B:Bool xorBool B:Bool => false [simplification]
 
-  rule true orBool _:Bool => true
+  rule true orBool _:Bool => true [simplification]
   rule _:Bool orBool true => true [simplification]
-  rule false orBool B:Bool => B
+  rule false orBool B:Bool => B   [simplification]
   rule B:Bool orBool false => B   [simplification]
 
-  rule true orElseBool _ => true
+  rule true orElseBool _ => true     [simplification]
   rule _ orElseBool true => true     [simplification]
-  rule false orElseBool K::Bool => K
+  rule false orElseBool K::Bool => K [simplification]
   rule K::Bool orElseBool false => K [simplification]
 
-  rule true impliesBool B:Bool => B
-  rule false impliesBool _:Bool => true
+  rule true impliesBool B:Bool => B          [simplification]
+  rule false impliesBool _:Bool => true      [simplification]
   rule _:Bool impliesBool true => true       [simplification]
   rule B:Bool impliesBool false => notBool B [simplification]
 
-  rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
-endmodule
-
-module BOOL-KORE [kore, symbolic]
-  imports BOOL-COMMON
+  rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2) [simplification]
 
   rule {true #Equals notBool @B} => {false #Equals @B} [simplification]
   rule {notBool @B #Equals true} => {@B #Equals false} [simplification]
