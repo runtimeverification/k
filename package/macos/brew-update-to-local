@@ -2,4 +2,5 @@
 package="$1" ; shift
 version="$1" ; shift
 sed -i "" -e 's!^    tag: ".*"$!    revision: "'${version}'", version: "1.0"!' \
+          -e 's!^  url!  head!' \
     Formula/$package.rb
