@@ -40,7 +40,7 @@ jobs:
           echo ${VERSION}
           cd homebrew-k
           ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
-          brew install --build-from-source --verbose --formula ./Formula/${PACKAGE}.rb
+          brew install --HEAD --build-from-source --verbose --formula ./Formula/${PACKAGE}.rb
       #     ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
       #     git reset HEAD^
       #     LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
