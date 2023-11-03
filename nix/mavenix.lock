@@ -1574,6 +1574,14 @@
       "sha1": "a21993ca994a2927e1e43adfbb3a8d92d131fc80"
     },
     {
+      "path": "org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.jar",
+      "sha1": "fb418f9b33a0b951e9a2978b4b6ee93b2707e72f"
+    },
+    {
+      "path": "org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.pom",
+      "sha1": "ef6b86a126ae192d8639af6f5b3dbe5d4c6d7dde"
+    },
+    {
       "path": "org/apache/ant/ant-launcher/1.8.1/ant-launcher-1.8.1.pom",
       "sha1": "436b71817fb83bb7a162a22b1aadebe0a2910133"
     },
@@ -4226,6 +4234,14 @@
       "sha1": "f6d55739cb1a70aef37b345b89cdd9d4f53ed637"
     },
     {
+      "path": "org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar",
+      "sha1": "f87a3a54c856714e4157b9ce7a5ff6ffc310d447"
+    },
+    {
+      "path": "org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom",
+      "sha1": "8c2dcedec327bbb9daf24ced48fc59ce228a6b1f"
+    },
+    {
       "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar",
       "sha1": "9f6d2088ae64dd926b8ec445afdb7e148eb08060"
     },
@@ -5022,6 +5038,14 @@
       "sha1": "f9f2e45942b25bfded764cce615156228e7b8a3a"
     },
     {
+      "path": "org/codehaus/mojo/build-helper-maven-plugin/3.4.0/build-helper-maven-plugin-3.4.0.jar",
+      "sha1": "542285128a4510fbe9e59b43f11407e01e530edc"
+    },
+    {
+      "path": "org/codehaus/mojo/build-helper-maven-plugin/3.4.0/build-helper-maven-plugin-3.4.0.pom",
+      "sha1": "6bfad437d7b5848928c5610c931f8a6b53acd0f6"
+    },
+    {
       "path": "org/codehaus/mojo/buildnumber-maven-plugin/1.3/buildnumber-maven-plugin-1.3.jar",
       "sha1": "a87082dcc28b7ff61412c3e59dac2ae2748393a1"
     },
@@ -5056,6 +5080,10 @@
     {
       "path": "org/codehaus/mojo/mojo-parent/40/mojo-parent-40.pom",
       "sha1": "d2fa7c95447827e9bbcb8c60bd9484c51202732e"
+    },
+    {
+      "path": "org/codehaus/mojo/mojo-parent/74/mojo-parent-74.pom",
+      "sha1": "2ef0a93fea172659305d787e51dfd4af9247334c"
     },
     {
       "path": "org/codehaus/plexus/plexus-archiver/1.0/plexus-archiver-1.0.jar",
@@ -5742,6 +5770,14 @@
       "sha1": "2e7d0c48e7888250f5ecf22634fc7be5a9743e69"
     },
     {
+      "path": "org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
+      "sha1": "c6bfb17c97ecc8863e88778ea301be742c62b06d"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom",
+      "sha1": "9b1bf6967abaa0a516a04ea096da08ec8d8fe0d7"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-velocity/1.1.7/plexus-velocity-1.1.7.jar",
       "sha1": "1440fc2552d1405b1c2d380ef3b96c4d9c6dbd0b"
     },
@@ -6096,6 +6132,10 @@
     {
       "path": "org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
       "sha1": "e8848369738c03e40af5507686216f9b8b44b6a3"
+    },
+    {
+      "path": "org/junit/junit-bom/5.9.2/junit-bom-5.9.2.pom",
+      "sha1": "645a08cbe455cad14d8bfb25a35d7f594c53cafd"
     },
     {
       "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230818.165756-2.pom",
