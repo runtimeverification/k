@@ -47,6 +47,19 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>get-cpu-count</id>
+            <goals>
+              <goal>cpu-count</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
         <version>3.3.1</version>
@@ -108,7 +121,7 @@
             <configuration>
               <target>
                 <exec dir="${ktestDir}" executable="make" failonerror="true">
-                  <arg value="-j12" />
+                  <arg value="-j${cpu.count}" />
                   <arg line="${make.args}" />
                 </exec>
               </target>
