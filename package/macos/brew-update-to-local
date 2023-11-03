@@ -1,6 +1,6 @@
 #!/bin/sh -exu
 package="$1" ; shift
 version="$1" ; shift
-sed -i "" -e 's!^    tag: ".*"$!    revision: "'${version}'"!' \
+sed -i "" -e 's!^    tag: ".*"$!    branch: "'${version}'"!' \
           -e 's!^  url!  head!' \
     Formula/$package.rb
