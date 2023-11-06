@@ -182,8 +182,12 @@
       "sha1": "292197f3cb1ebc0dd03e20897e4250b265177286"
     },
     {
-      "path": "com/google/errorprone/error_prone_annotations/2.3.4/error_prone_annotations-2.3.4.jar",
-      "sha1": "dac170e4594de319655ffb62f41cbd6dbb5e601e"
+      "path": "com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar",
+      "sha1": "6d9b10773b5237df178a7b3c1b4208df7d0e7f94"
+    },
+    {
+      "path": "com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.pom",
+      "sha1": "e3d7e7e5c6e7b24256bd55642344a8d99b64e599"
     },
     {
       "path": "com/google/errorprone/error_prone_annotations/2.3.4/error_prone_annotations-2.3.4.pom",
@@ -196,6 +200,10 @@
     {
       "path": "com/google/errorprone/error_prone_annotations/2.7.1/error_prone_annotations-2.7.1.pom",
       "sha1": "0b0fa22131b64b3985fba347927252af21898984"
+    },
+    {
+      "path": "com/google/errorprone/error_prone_parent/2.21.1/error_prone_parent-2.21.1.pom",
+      "sha1": "e5a62220a9c871cb1283dde6e52b7f1f21c84207"
     },
     {
       "path": "com/google/errorprone/error_prone_parent/2.3.4/error_prone_parent-2.3.4.pom",
@@ -234,10 +242,6 @@
       "sha1": "a2c0df489614352b7e8e503e274bd1dee5c42a64"
     },
     {
-      "path": "com/google/guava/guava-parent/30.0-jre/guava-parent-30.0-jre.pom",
-      "sha1": "967743c6cda3e5267084455bca3c7ab08df3f453"
-    },
-    {
       "path": "com/google/guava/guava-parent/30.1-jre/guava-parent-30.1-jre.pom",
       "sha1": "b732bbf7c4ceb14dfd6af514a8b8b71dd952e53b"
     },
@@ -246,20 +250,16 @@
       "sha1": "eb78b5264bd92cca5655396c44420eef3ad3ec0f"
     },
     {
+      "path": "com/google/guava/guava-parent/32.1.3-jre/guava-parent-32.1.3-jre.pom",
+      "sha1": "25e3a63dea904b6b1461cb6cbcf7e31bd211714e"
+    },
+    {
       "path": "com/google/guava/guava/16.0.1/guava-16.0.1.pom",
       "sha1": "52f16cd93f1ee1f0d1e1e55f46fa21c35f829f85"
     },
     {
       "path": "com/google/guava/guava/19.0/guava-19.0.pom",
       "sha1": "65a43a21dbddcc19aa3ca50a63a4b33166bfbc77"
-    },
-    {
-      "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.jar",
-      "sha1": "8ddbc8769f73309fe09b54c5951163f10b0d89fa"
-    },
-    {
-      "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.pom",
-      "sha1": "d7239fe628e6e3fbb6734acbc07195435fdac305"
     },
     {
       "path": "com/google/guava/guava/30.1-jre/guava-30.1-jre.pom",
@@ -272,6 +272,14 @@
     {
       "path": "com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.pom",
       "sha1": "d0ec1628dcc04e4835721416103672384ea3136f"
+    },
+    {
+      "path": "com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.jar",
+      "sha1": "0f306708742ce2bf0fb0901216183bc14073feae"
+    },
+    {
+      "path": "com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.pom",
+      "sha1": "698deeca13a1dc49e069b8a7e11d8cc2ff6a8cf9"
     },
     {
       "path": "com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar",
@@ -338,6 +346,14 @@
       "sha1": "47e0dd93285dcc6b33181713bc7e8aed66742964"
     },
     {
+      "path": "com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar",
+      "sha1": "c85270e307e7b822f1086b93689124b89768e273"
+    },
+    {
+      "path": "com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.pom",
+      "sha1": "c8daacea97066c6826844e2175ec89857e598122"
+    },
+    {
       "path": "com/helger/maven/ph-javacc-maven-plugin/4.1.4/ph-javacc-maven-plugin-4.1.4.jar",
       "sha1": "c4434297659c27e788ee9d352188862734278fe5"
     },
@@ -394,12 +410,12 @@
       "sha1": "f5e5690593e7124b34b7463a10473517f3d14098"
     },
     {
-      "path": "com/ibm/icu/icu4j/59.1/icu4j-59.1.jar",
-      "sha1": "6f06e820cf4c8968bbbaae66ae0b33f6a256b57f"
+      "path": "com/ibm/icu/icu4j/72.1/icu4j-72.1.jar",
+      "sha1": "bc9057df4b5efddf7f6d1880bf7f3399f4ce5633"
     },
     {
-      "path": "com/ibm/icu/icu4j/59.1/icu4j-59.1.pom",
-      "sha1": "577f1f4e1d5c8603f45a5fa34ba42128ea6e5b84"
+      "path": "com/ibm/icu/icu4j/72.1/icu4j-72.1.pom",
+      "sha1": "035e3d76620a1ae74da17fa52d2c33609d3673ae"
     },
     {
       "path": "com/jcraft/jsch/0.1.27/jsch-0.1.27.jar",
@@ -426,40 +442,32 @@
       "sha1": "d96547ef58c82124f804209865254f13aa1db928"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-core/1.0.0/openhtmltopdf-core-1.0.0.jar",
-      "sha1": "a0c330e952ca185ff7b105e36294f02199d2c171"
+      "path": "com/openhtmltopdf/openhtmltopdf-core/1.0.10/openhtmltopdf-core-1.0.10.jar",
+      "sha1": "cab5dcb31834bd86ffb1b1f82811a37fcea63cd2"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-core/1.0.0/openhtmltopdf-core-1.0.0.pom",
-      "sha1": "78b9520d9e091f294d7d05648ab9df8159eac2b9"
+      "path": "com/openhtmltopdf/openhtmltopdf-core/1.0.10/openhtmltopdf-core-1.0.10.pom",
+      "sha1": "863d04f060068ab723a1b183f4ed60518e205618"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-jsoup-dom-converter/1.0.0/openhtmltopdf-jsoup-dom-converter-1.0.0.jar",
-      "sha1": "dba071d26065e53a83270ae01d4b1d3f2faa1757"
+      "path": "com/openhtmltopdf/openhtmltopdf-parent/1.0.10/openhtmltopdf-parent-1.0.10.pom",
+      "sha1": "25ee9e84d10793153ca288db3892cb30ca6e04cf"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-jsoup-dom-converter/1.0.0/openhtmltopdf-jsoup-dom-converter-1.0.0.pom",
-      "sha1": "fd9243f930cc126acfe378be901f755de95bc5fc"
+      "path": "com/openhtmltopdf/openhtmltopdf-pdfbox/1.0.10/openhtmltopdf-pdfbox-1.0.10.jar",
+      "sha1": "4041442fda47e760985cea8005d51a830031420f"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-parent/1.0.0/openhtmltopdf-parent-1.0.0.pom",
-      "sha1": "61eae444a6ca3842c7246d48e7b1de32dc24e9f5"
+      "path": "com/openhtmltopdf/openhtmltopdf-pdfbox/1.0.10/openhtmltopdf-pdfbox-1.0.10.pom",
+      "sha1": "d2a6028968660a2af7908d14448f2aebf91907c7"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-pdfbox/1.0.0/openhtmltopdf-pdfbox-1.0.0.jar",
-      "sha1": "b5a0ceb836b85a02b412333bb5a2e990b0bb0d84"
+      "path": "com/openhtmltopdf/openhtmltopdf-rtl-support/1.0.10/openhtmltopdf-rtl-support-1.0.10.jar",
+      "sha1": "074232c12ffb569ae287c6d0d983811880d7172f"
     },
     {
-      "path": "com/openhtmltopdf/openhtmltopdf-pdfbox/1.0.0/openhtmltopdf-pdfbox-1.0.0.pom",
-      "sha1": "fd972fdecfe515938248116eb9e711f1e7e94384"
-    },
-    {
-      "path": "com/openhtmltopdf/openhtmltopdf-rtl-support/1.0.0/openhtmltopdf-rtl-support-1.0.0.jar",
-      "sha1": "b47402742530ce94720161c0e44623f460f48683"
-    },
-    {
-      "path": "com/openhtmltopdf/openhtmltopdf-rtl-support/1.0.0/openhtmltopdf-rtl-support-1.0.0.pom",
-      "sha1": "74d18a5a5cffbfa318c2d7d648e81483af9629fb"
+      "path": "com/openhtmltopdf/openhtmltopdf-rtl-support/1.0.10/openhtmltopdf-rtl-support-1.0.10.pom",
+      "sha1": "8cd6426319ff6d8b76d4e25e41034f326cd442f9"
     },
     {
       "path": "com/puppycrawl/tools/checkstyle/9.3/checkstyle-9.3.jar",
@@ -522,392 +530,400 @@
       "sha1": "c8bc33680364e03feab66f8672c906ab015b74d8"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-all/0.60.2/flexmark-all-0.60.2.jar",
-      "sha1": "108b9c4dede3ca7ef56a15ded46ebdb099a530f4"
+      "path": "com/vladsch/flexmark/flexmark-all/0.64.6/flexmark-all-0.64.6.jar",
+      "sha1": "a0873fd9edc51c7116a8bb06452f049c54eb64bf"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-all/0.60.2/flexmark-all-0.60.2.pom",
-      "sha1": "1ace631ba021f7d5ef69da7dbd39d6fcf39c0fd8"
+      "path": "com/vladsch/flexmark/flexmark-all/0.64.6/flexmark-all-0.64.6.pom",
+      "sha1": "9a091f55340621fc89092acdf6acf6e89aeef529"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-abbreviation/0.60.2/flexmark-ext-abbreviation-0.60.2.jar",
-      "sha1": "6cf9a249320fc0ef80f73c73a1a48e8d1fe4ea4d"
+      "path": "com/vladsch/flexmark/flexmark-ext-abbreviation/0.64.6/flexmark-ext-abbreviation-0.64.6.jar",
+      "sha1": "6e61c1e878316a7d08cc9847e20ed57ccf3f5ee4"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-abbreviation/0.60.2/flexmark-ext-abbreviation-0.60.2.pom",
-      "sha1": "c7ef090a92be897ce7b00b70f34f98c28b4e04de"
+      "path": "com/vladsch/flexmark/flexmark-ext-abbreviation/0.64.6/flexmark-ext-abbreviation-0.64.6.pom",
+      "sha1": "4ed9361f4cf68dcc1e7ed52ea474064946c7e881"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-admonition/0.60.2/flexmark-ext-admonition-0.60.2.jar",
-      "sha1": "3be30c580544310791d5cf797d4bb0e3e327fe2d"
+      "path": "com/vladsch/flexmark/flexmark-ext-admonition/0.64.6/flexmark-ext-admonition-0.64.6.jar",
+      "sha1": "1f309ee74523e885b9a6ce9561bfdc9180ae7072"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-admonition/0.60.2/flexmark-ext-admonition-0.60.2.pom",
-      "sha1": "a9ff1995b063ce7e601a3f79c18b97bd72f96789"
+      "path": "com/vladsch/flexmark/flexmark-ext-admonition/0.64.6/flexmark-ext-admonition-0.64.6.pom",
+      "sha1": "5f217339d972d075b87d85cde0994723c2c36337"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-anchorlink/0.60.2/flexmark-ext-anchorlink-0.60.2.jar",
-      "sha1": "49c56e1a0d80fdc31a6b89cd7b36f2e5493df124"
+      "path": "com/vladsch/flexmark/flexmark-ext-anchorlink/0.64.6/flexmark-ext-anchorlink-0.64.6.jar",
+      "sha1": "13cdca9006615b7f4e919c2701f48b4d5790483d"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-anchorlink/0.60.2/flexmark-ext-anchorlink-0.60.2.pom",
-      "sha1": "05a4a80b3096348bc721f5c502c40c4efb35e5e0"
+      "path": "com/vladsch/flexmark/flexmark-ext-anchorlink/0.64.6/flexmark-ext-anchorlink-0.64.6.pom",
+      "sha1": "a846660c287bfe5eb1e7e553b4da705fa1aa9558"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-aside/0.60.2/flexmark-ext-aside-0.60.2.jar",
-      "sha1": "24386047788c8f2fad3c9ec5ff12f39d8fa6aa72"
+      "path": "com/vladsch/flexmark/flexmark-ext-aside/0.64.6/flexmark-ext-aside-0.64.6.jar",
+      "sha1": "c8fa5d9df64363f81a1904f64f6a169005aa7cb7"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-aside/0.60.2/flexmark-ext-aside-0.60.2.pom",
-      "sha1": "bbee3167051fdf3286763512c8c87fa6ff217288"
+      "path": "com/vladsch/flexmark/flexmark-ext-aside/0.64.6/flexmark-ext-aside-0.64.6.pom",
+      "sha1": "ddb0beec713c41f21224c3be00685555fd393f46"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-attributes/0.60.2/flexmark-ext-attributes-0.60.2.jar",
-      "sha1": "92c01b3a56f186e7d6cbb54c8cc5f8e06540dac5"
+      "path": "com/vladsch/flexmark/flexmark-ext-attributes/0.64.6/flexmark-ext-attributes-0.64.6.jar",
+      "sha1": "baa0a051dd492099d21db9c6907bd4c1070885c7"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-attributes/0.60.2/flexmark-ext-attributes-0.60.2.pom",
-      "sha1": "89805e24e74c6c1dca4726fbb0c31b41d681ce26"
+      "path": "com/vladsch/flexmark/flexmark-ext-attributes/0.64.6/flexmark-ext-attributes-0.64.6.pom",
+      "sha1": "b3ad1b37209cdb2d4769aeb43d605a3a24d0cf0c"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-autolink/0.60.2/flexmark-ext-autolink-0.60.2.jar",
-      "sha1": "697876cbfd3d75e774af0f038523a712ed03bc37"
+      "path": "com/vladsch/flexmark/flexmark-ext-autolink/0.64.6/flexmark-ext-autolink-0.64.6.jar",
+      "sha1": "5896022d0bc27b1fb9704802635cebe823c18e87"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-autolink/0.60.2/flexmark-ext-autolink-0.60.2.pom",
-      "sha1": "d9f7f1b1cfcc82f71c7282d64f706f0bc39590dc"
+      "path": "com/vladsch/flexmark/flexmark-ext-autolink/0.64.6/flexmark-ext-autolink-0.64.6.pom",
+      "sha1": "d6e1d788091dcbe17dba10ee6a3a1fba8893df23"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-definition/0.60.2/flexmark-ext-definition-0.60.2.jar",
-      "sha1": "1cacb9035224c8462fb5957be239c6888d96803c"
+      "path": "com/vladsch/flexmark/flexmark-ext-definition/0.64.6/flexmark-ext-definition-0.64.6.jar",
+      "sha1": "6db2da9cfa806317b69430ba84f9c330b9fcc962"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-definition/0.60.2/flexmark-ext-definition-0.60.2.pom",
-      "sha1": "1906d5ce0b213d67669990bd80d4554e5a385db5"
+      "path": "com/vladsch/flexmark/flexmark-ext-definition/0.64.6/flexmark-ext-definition-0.64.6.pom",
+      "sha1": "635e5ff38d0975cb053ecf400d2e15aa648d70e2"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-emoji/0.60.2/flexmark-ext-emoji-0.60.2.jar",
-      "sha1": "5a11d261f822f9570b38a7dfe7003d9941f3177f"
+      "path": "com/vladsch/flexmark/flexmark-ext-emoji/0.64.6/flexmark-ext-emoji-0.64.6.jar",
+      "sha1": "d28358dedd8154f5233d2db9f7f31edffd35025e"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-emoji/0.60.2/flexmark-ext-emoji-0.60.2.pom",
-      "sha1": "81a6e5a92d9890096d15a4fe04cc66b2e20ed6f3"
+      "path": "com/vladsch/flexmark/flexmark-ext-emoji/0.64.6/flexmark-ext-emoji-0.64.6.pom",
+      "sha1": "f597cb9f4b9eec3e5b8b90f728f8878ffb75abdf"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-enumerated-reference/0.60.2/flexmark-ext-enumerated-reference-0.60.2.jar",
-      "sha1": "ff5fad22442e95c42551f03f33c878678f995208"
+      "path": "com/vladsch/flexmark/flexmark-ext-enumerated-reference/0.64.6/flexmark-ext-enumerated-reference-0.64.6.jar",
+      "sha1": "e589943601ab290c46fabdb18ff32035ea24c6d0"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-enumerated-reference/0.60.2/flexmark-ext-enumerated-reference-0.60.2.pom",
-      "sha1": "25b698de67c5566a85dc3f7a33ff2741765fa063"
+      "path": "com/vladsch/flexmark/flexmark-ext-enumerated-reference/0.64.6/flexmark-ext-enumerated-reference-0.64.6.pom",
+      "sha1": "86dfe86456d49ba92983294b54f02241830252da"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-escaped-character/0.60.2/flexmark-ext-escaped-character-0.60.2.jar",
-      "sha1": "2ba7185f2bb92824ccae4f2954ccc8ef01efa67a"
+      "path": "com/vladsch/flexmark/flexmark-ext-escaped-character/0.64.6/flexmark-ext-escaped-character-0.64.6.jar",
+      "sha1": "8d9ebf200f5313d389164aa76ed36054930656cc"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-escaped-character/0.60.2/flexmark-ext-escaped-character-0.60.2.pom",
-      "sha1": "3dadb0bb22fe99e44bf9da94626fef8e732a6e2f"
+      "path": "com/vladsch/flexmark/flexmark-ext-escaped-character/0.64.6/flexmark-ext-escaped-character-0.64.6.pom",
+      "sha1": "4dddca2caa2c6e16c7c31e0c22f8c849ea880611"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-footnotes/0.60.2/flexmark-ext-footnotes-0.60.2.jar",
-      "sha1": "f0f33a706fa9d78dabdaf1fa81d4b904a19ebd08"
+      "path": "com/vladsch/flexmark/flexmark-ext-footnotes/0.64.6/flexmark-ext-footnotes-0.64.6.jar",
+      "sha1": "6d99e8d56d128c7b640caf1b2fe5bb6f45dc736d"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-footnotes/0.60.2/flexmark-ext-footnotes-0.60.2.pom",
-      "sha1": "a5de234048c5bbd4824009c782c6ec61d4666ddd"
+      "path": "com/vladsch/flexmark/flexmark-ext-footnotes/0.64.6/flexmark-ext-footnotes-0.64.6.pom",
+      "sha1": "a953a2533e7462a3a86fe301a29a574159f3ed89"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-issues/0.60.2/flexmark-ext-gfm-issues-0.60.2.jar",
-      "sha1": "38a80722c7ba3a7483788b5dc6096056b18adfa9"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-issues/0.64.6/flexmark-ext-gfm-issues-0.64.6.jar",
+      "sha1": "96e017f022a8352513fb437d44703668f6d108cd"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-issues/0.60.2/flexmark-ext-gfm-issues-0.60.2.pom",
-      "sha1": "28c942ed9a31970b5be54037b164425b2eb5b53b"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-issues/0.64.6/flexmark-ext-gfm-issues-0.64.6.pom",
+      "sha1": "ed42f7f72a7bea3e472c5e76071b3533e23d3bad"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-strikethrough/0.60.2/flexmark-ext-gfm-strikethrough-0.60.2.jar",
-      "sha1": "5596e49c93675d5ce02daa3d0519fe10d4186258"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-strikethrough/0.64.6/flexmark-ext-gfm-strikethrough-0.64.6.jar",
+      "sha1": "4efc43213c62df5ee64a9d49cf347577c58e4430"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-strikethrough/0.60.2/flexmark-ext-gfm-strikethrough-0.60.2.pom",
-      "sha1": "e573a623970b28f3abff98a46bc1d8b46db34529"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-strikethrough/0.64.6/flexmark-ext-gfm-strikethrough-0.64.6.pom",
+      "sha1": "cbd88eb47523b92433a2284425523af0b0219b0f"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-tasklist/0.60.2/flexmark-ext-gfm-tasklist-0.60.2.jar",
-      "sha1": "10a525068a99dc8e66a825ed07152e5ee76b72b6"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-tasklist/0.64.6/flexmark-ext-gfm-tasklist-0.64.6.jar",
+      "sha1": "96153a10ac31402534853cd2cf6b90a363bd8c3b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-tasklist/0.60.2/flexmark-ext-gfm-tasklist-0.60.2.pom",
-      "sha1": "82ea49c71ee94424fea2dee37956d39492ffcd41"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-tasklist/0.64.6/flexmark-ext-gfm-tasklist-0.64.6.pom",
+      "sha1": "a76bf7987e37b79649cacd4d9eff779892bf27a0"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-users/0.60.2/flexmark-ext-gfm-users-0.60.2.jar",
-      "sha1": "b6099b9c62da5221847a84162be37d476607eff7"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-users/0.64.6/flexmark-ext-gfm-users-0.64.6.jar",
+      "sha1": "47c46de63718f08fff5bfcf4cf44881bb37bb1e2"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gfm-users/0.60.2/flexmark-ext-gfm-users-0.60.2.pom",
-      "sha1": "d42addee996832c74fa98a623f6c456a2b752cfb"
+      "path": "com/vladsch/flexmark/flexmark-ext-gfm-users/0.64.6/flexmark-ext-gfm-users-0.64.6.pom",
+      "sha1": "d36256594267bcb1fbbd9091dfa7fb010a65f15b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gitlab/0.60.2/flexmark-ext-gitlab-0.60.2.jar",
-      "sha1": "fe18172fc35fe0a4c0b8c22c424f84b5aa688058"
+      "path": "com/vladsch/flexmark/flexmark-ext-gitlab/0.64.6/flexmark-ext-gitlab-0.64.6.jar",
+      "sha1": "fe201c9a859866d1867dcedd0b82be7a9dcfa00f"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-gitlab/0.60.2/flexmark-ext-gitlab-0.60.2.pom",
-      "sha1": "52133fd9f74a264e20c8198c89e6757fae60be80"
+      "path": "com/vladsch/flexmark/flexmark-ext-gitlab/0.64.6/flexmark-ext-gitlab-0.64.6.pom",
+      "sha1": "584659a3c4e3c5c5b7ff8f5e1d8612ed438a55f5"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-ins/0.60.2/flexmark-ext-ins-0.60.2.jar",
-      "sha1": "6a34a48f9d2478ef1e8c793e32ab7650c057be3a"
+      "path": "com/vladsch/flexmark/flexmark-ext-ins/0.64.6/flexmark-ext-ins-0.64.6.jar",
+      "sha1": "bf61251b412df232853a3e7284fd4eac3a34f594"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-ins/0.60.2/flexmark-ext-ins-0.60.2.pom",
-      "sha1": "22535df1be857a37f4738ac4959453a4d0d75be0"
+      "path": "com/vladsch/flexmark/flexmark-ext-ins/0.64.6/flexmark-ext-ins-0.64.6.pom",
+      "sha1": "f0bfc016b41ecf7d4524b24582cacf50b4e13944"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-front-matter/0.60.2/flexmark-ext-jekyll-front-matter-0.60.2.jar",
-      "sha1": "7a83f6f2d4558ee673b719e8f24f8a2f312890c5"
+      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-front-matter/0.64.6/flexmark-ext-jekyll-front-matter-0.64.6.jar",
+      "sha1": "5587cf106274f5aa537a56596b38cfe4b6444171"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-front-matter/0.60.2/flexmark-ext-jekyll-front-matter-0.60.2.pom",
-      "sha1": "907d0c076f1027ef711d1c66da593f21eb5c42de"
+      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-front-matter/0.64.6/flexmark-ext-jekyll-front-matter-0.64.6.pom",
+      "sha1": "3e291b0fe0512d0a1ef45256413cc4d2c3ff14cf"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-tag/0.60.2/flexmark-ext-jekyll-tag-0.60.2.jar",
-      "sha1": "40f91672c85f869ff6920ab8c9ec874ab6026385"
+      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-tag/0.64.6/flexmark-ext-jekyll-tag-0.64.6.jar",
+      "sha1": "0ffda5e6f9d39f3c47902fad2f4d64f8fcf9d9c0"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-tag/0.60.2/flexmark-ext-jekyll-tag-0.60.2.pom",
-      "sha1": "5fbc2dc15086c22a29f0866ce7830033a339470b"
+      "path": "com/vladsch/flexmark/flexmark-ext-jekyll-tag/0.64.6/flexmark-ext-jekyll-tag-0.64.6.pom",
+      "sha1": "99c518290a7dcbd5e0b08030577b1f7c2f26375f"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-macros/0.60.2/flexmark-ext-macros-0.60.2.jar",
-      "sha1": "b423af384a6a5b9f074bd2f957306e1a850fd4e9"
+      "path": "com/vladsch/flexmark/flexmark-ext-macros/0.64.6/flexmark-ext-macros-0.64.6.jar",
+      "sha1": "8d0d9bebf0e134017e5bc2a3b70f20b924aabe33"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-macros/0.60.2/flexmark-ext-macros-0.60.2.pom",
-      "sha1": "dc52277f66fa2b0d4b3d8ab68bccb3123dc81748"
+      "path": "com/vladsch/flexmark/flexmark-ext-macros/0.64.6/flexmark-ext-macros-0.64.6.pom",
+      "sha1": "0ba690a3fb802094022daae90897fec250d0d44d"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-media-tags/0.60.2/flexmark-ext-media-tags-0.60.2.jar",
-      "sha1": "d57cf95f86e25c2fafcca1bdc12d0b4730fdb65f"
+      "path": "com/vladsch/flexmark/flexmark-ext-media-tags/0.64.6/flexmark-ext-media-tags-0.64.6.jar",
+      "sha1": "4ce92735883aa62f933cc18785cf82f65748782b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-media-tags/0.60.2/flexmark-ext-media-tags-0.60.2.pom",
-      "sha1": "4ddd45aa6c8a701360c1ad41e3bc70a17d419255"
+      "path": "com/vladsch/flexmark/flexmark-ext-media-tags/0.64.6/flexmark-ext-media-tags-0.64.6.pom",
+      "sha1": "ae13817577a4feeb7a45f9ca7cc882fed6cb5682"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-superscript/0.60.2/flexmark-ext-superscript-0.60.2.jar",
-      "sha1": "0a363a6bf7c622f669e867bef620cffac67cfd46"
+      "path": "com/vladsch/flexmark/flexmark-ext-resizable-image/0.64.6/flexmark-ext-resizable-image-0.64.6.jar",
+      "sha1": "79b3dcfebd4c024045f976d4749168f6622f1570"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-superscript/0.60.2/flexmark-ext-superscript-0.60.2.pom",
-      "sha1": "01002b79470743480025d7157f4d3a403062ce6c"
+      "path": "com/vladsch/flexmark/flexmark-ext-resizable-image/0.64.6/flexmark-ext-resizable-image-0.64.6.pom",
+      "sha1": "2f9387a2b6e71422664ab130c817af43843a2ac9"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-tables/0.60.2/flexmark-ext-tables-0.60.2.jar",
-      "sha1": "56b026a571bbd9e098fda3a114452414fdfead6d"
+      "path": "com/vladsch/flexmark/flexmark-ext-superscript/0.64.6/flexmark-ext-superscript-0.64.6.jar",
+      "sha1": "5a901a2926d2d4a69e1828a7436982236fb9a545"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-tables/0.60.2/flexmark-ext-tables-0.60.2.pom",
-      "sha1": "d02f6bbb88373707dd0d11761235d32ce9fb1140"
+      "path": "com/vladsch/flexmark/flexmark-ext-superscript/0.64.6/flexmark-ext-superscript-0.64.6.pom",
+      "sha1": "5684f8d2e07abcccea469fdaf1d11dd9ae751df7"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-toc/0.60.2/flexmark-ext-toc-0.60.2.jar",
-      "sha1": "eec83613105d4fdef09941a1b5af5d6d6478638b"
+      "path": "com/vladsch/flexmark/flexmark-ext-tables/0.64.6/flexmark-ext-tables-0.64.6.jar",
+      "sha1": "79a451aca1271ddc865bd9125a49cea52da938e8"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-toc/0.60.2/flexmark-ext-toc-0.60.2.pom",
-      "sha1": "3623550a2f4294095c27daffe5dbffa37313aeda"
+      "path": "com/vladsch/flexmark/flexmark-ext-tables/0.64.6/flexmark-ext-tables-0.64.6.pom",
+      "sha1": "8d4f530e09b62e19dfc9d60eb062099e36905863"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-typographic/0.60.2/flexmark-ext-typographic-0.60.2.jar",
-      "sha1": "ce55ebfa056d4a15e6e083e56f398de25e053214"
+      "path": "com/vladsch/flexmark/flexmark-ext-toc/0.64.6/flexmark-ext-toc-0.64.6.jar",
+      "sha1": "5505aea3c013e5f62f2774a04632f06fea8a14d8"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-typographic/0.60.2/flexmark-ext-typographic-0.60.2.pom",
-      "sha1": "81d7f4152f89df1ff7a08d3d2b64eae24d9da0f5"
+      "path": "com/vladsch/flexmark/flexmark-ext-toc/0.64.6/flexmark-ext-toc-0.64.6.pom",
+      "sha1": "c615622289858410c1464aaa7f9a404a5dbacebf"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-wikilink/0.60.2/flexmark-ext-wikilink-0.60.2.jar",
-      "sha1": "a5d8dc95935aac683bbe11ce75adb1652aaaecc7"
+      "path": "com/vladsch/flexmark/flexmark-ext-typographic/0.64.6/flexmark-ext-typographic-0.64.6.jar",
+      "sha1": "6569f2d1a44227b6abd11d1d2d63e23d66b70b95"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-wikilink/0.60.2/flexmark-ext-wikilink-0.60.2.pom",
-      "sha1": "e5cc08eda5be4ee764fb2db8f83912d81c48516b"
+      "path": "com/vladsch/flexmark/flexmark-ext-typographic/0.64.6/flexmark-ext-typographic-0.64.6.pom",
+      "sha1": "c5d3965ea3e8143783d980477624a86d832cfdbd"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-xwiki-macros/0.60.2/flexmark-ext-xwiki-macros-0.60.2.jar",
-      "sha1": "b8e4ff9a9acce31c86e6747d1eb214a8c6a1dabc"
+      "path": "com/vladsch/flexmark/flexmark-ext-wikilink/0.64.6/flexmark-ext-wikilink-0.64.6.jar",
+      "sha1": "56c27e1a35997102c37de54b3356fdfdf31a8dc3"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-xwiki-macros/0.60.2/flexmark-ext-xwiki-macros-0.60.2.pom",
-      "sha1": "569742e120816cc369056c16ead3bc6da591d161"
+      "path": "com/vladsch/flexmark/flexmark-ext-wikilink/0.64.6/flexmark-ext-wikilink-0.64.6.pom",
+      "sha1": "e27ef72bfa2482c55a8b9227ef4a2133fc0b1a71"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-yaml-front-matter/0.60.2/flexmark-ext-yaml-front-matter-0.60.2.jar",
-      "sha1": "3620a1f67d54fe9a2fabf72ecf85e161784eea44"
+      "path": "com/vladsch/flexmark/flexmark-ext-xwiki-macros/0.64.6/flexmark-ext-xwiki-macros-0.64.6.jar",
+      "sha1": "247187bb190d64d5753bf5b36c6720dfe3be4128"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-yaml-front-matter/0.60.2/flexmark-ext-yaml-front-matter-0.60.2.pom",
-      "sha1": "e8bf5ceae8aeea0e8ac82e5209417446f2cd3255"
+      "path": "com/vladsch/flexmark/flexmark-ext-xwiki-macros/0.64.6/flexmark-ext-xwiki-macros-0.64.6.pom",
+      "sha1": "1f4355264c7a195142c1ed4dd3e6e52d73f73a93"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-youtube-embedded/0.60.2/flexmark-ext-youtube-embedded-0.60.2.jar",
-      "sha1": "cfa08ca03bd75b1552b09563dfe432a5487751e2"
+      "path": "com/vladsch/flexmark/flexmark-ext-yaml-front-matter/0.64.6/flexmark-ext-yaml-front-matter-0.64.6.jar",
+      "sha1": "67bac33c44cc9743b9446fd8ddb03076adb3ca34"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-ext-youtube-embedded/0.60.2/flexmark-ext-youtube-embedded-0.60.2.pom",
-      "sha1": "16328c3639641212284ac3dd0f95f730ab315f84"
+      "path": "com/vladsch/flexmark/flexmark-ext-yaml-front-matter/0.64.6/flexmark-ext-yaml-front-matter-0.64.6.pom",
+      "sha1": "8205bb41d1f1b5e19a3311efbd5cb2f0f31b36b4"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-html2md-converter/0.60.2/flexmark-html2md-converter-0.60.2.jar",
-      "sha1": "e3c3088e04fc3b09694d13685ce37d8fb76dfb92"
+      "path": "com/vladsch/flexmark/flexmark-ext-youtube-embedded/0.64.6/flexmark-ext-youtube-embedded-0.64.6.jar",
+      "sha1": "30782ef4ea47b98c03d5b0985c5c88aa9d8835ab"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-html2md-converter/0.60.2/flexmark-html2md-converter-0.60.2.pom",
-      "sha1": "4d1158dadd616c992fe62078659178f02d3fe741"
+      "path": "com/vladsch/flexmark/flexmark-ext-youtube-embedded/0.64.6/flexmark-ext-youtube-embedded-0.64.6.pom",
+      "sha1": "edd90998bbd9124f57908e1e68e639d3d10f44e1"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-java/0.60.2/flexmark-java-0.60.2.pom",
-      "sha1": "62b238100f57faa0e3a0dddd07bcd743e8f1af17"
+      "path": "com/vladsch/flexmark/flexmark-html2md-converter/0.64.6/flexmark-html2md-converter-0.64.6.jar",
+      "sha1": "2d106e0c0cf1c055c7384df5d5e05c2478dca75b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-jira-converter/0.60.2/flexmark-jira-converter-0.60.2.jar",
-      "sha1": "9f85300a9bc5473a4445cb8787cd29f1eb87717a"
+      "path": "com/vladsch/flexmark/flexmark-html2md-converter/0.64.6/flexmark-html2md-converter-0.64.6.pom",
+      "sha1": "8e752d3304ff37f7699922592324f69d283d75c7"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-jira-converter/0.60.2/flexmark-jira-converter-0.60.2.pom",
-      "sha1": "5afc389bc70009a46adf19b579b3682df83b653e"
+      "path": "com/vladsch/flexmark/flexmark-java/0.64.6/flexmark-java-0.64.6.pom",
+      "sha1": "64e7fb4e04cefba53c8766fe3b0956681ef4d129"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-pdf-converter/0.60.2/flexmark-pdf-converter-0.60.2.jar",
-      "sha1": "4654974a35cc8c655a19bcbbb10b7da672da65cc"
+      "path": "com/vladsch/flexmark/flexmark-jira-converter/0.64.6/flexmark-jira-converter-0.64.6.jar",
+      "sha1": "49fe9c751060fa90118bc275466f8eee93330a8a"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-pdf-converter/0.60.2/flexmark-pdf-converter-0.60.2.pom",
-      "sha1": "92c168236fb792459a46abf789906d95cdfd1ec0"
+      "path": "com/vladsch/flexmark/flexmark-jira-converter/0.64.6/flexmark-jira-converter-0.64.6.pom",
+      "sha1": "6cf0c110731e28fd6e34ea2bacd571bd37f3a4c9"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-profile-pegdown/0.60.2/flexmark-profile-pegdown-0.60.2.jar",
-      "sha1": "fec661c12c22d6c3fab82520891822c3235a367c"
+      "path": "com/vladsch/flexmark/flexmark-pdf-converter/0.64.6/flexmark-pdf-converter-0.64.6.jar",
+      "sha1": "7c86f3677f568c7a428e5c749fd4cc06d04cddec"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-profile-pegdown/0.60.2/flexmark-profile-pegdown-0.60.2.pom",
-      "sha1": "e2c023864c44c4c714c683acded036ad32920cbf"
+      "path": "com/vladsch/flexmark/flexmark-pdf-converter/0.64.6/flexmark-pdf-converter-0.64.6.pom",
+      "sha1": "0e3cb914f933c91c773b96803125a9426a5e59a0"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-ast/0.60.2/flexmark-util-ast-0.60.2.jar",
-      "sha1": "84176a7e141b449f9e3f88aec045784d180cfe1b"
+      "path": "com/vladsch/flexmark/flexmark-profile-pegdown/0.64.6/flexmark-profile-pegdown-0.64.6.jar",
+      "sha1": "d12e0075a9516acc28bccb8446e0747a959dfd2b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-ast/0.60.2/flexmark-util-ast-0.60.2.pom",
-      "sha1": "4acc9e56bf8eafe3d2124e42a254ffbb55f2bc84"
+      "path": "com/vladsch/flexmark/flexmark-profile-pegdown/0.64.6/flexmark-profile-pegdown-0.64.6.pom",
+      "sha1": "e4b829e8c676425a601bf8a65aec3da951af9e4c"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-builder/0.60.2/flexmark-util-builder-0.60.2.jar",
-      "sha1": "14704b83570899a22389e633876c43fb0ba41e7c"
+      "path": "com/vladsch/flexmark/flexmark-util-ast/0.64.6/flexmark-util-ast-0.64.6.jar",
+      "sha1": "03148be3402ac4a7691c386784823c7f3494c20b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-builder/0.60.2/flexmark-util-builder-0.60.2.pom",
-      "sha1": "fdf2970078841ba1b76553ba868f928d9762beff"
+      "path": "com/vladsch/flexmark/flexmark-util-ast/0.64.6/flexmark-util-ast-0.64.6.pom",
+      "sha1": "9083182eeadd9920be2a6c414e9a25de90af1e94"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-collection/0.60.2/flexmark-util-collection-0.60.2.jar",
-      "sha1": "58261382aa3af036cebf7e3e2bfc06d20b380f39"
+      "path": "com/vladsch/flexmark/flexmark-util-builder/0.64.6/flexmark-util-builder-0.64.6.jar",
+      "sha1": "85292a943917a46a2bdfdcb5656c1cb91f4cef06"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-collection/0.60.2/flexmark-util-collection-0.60.2.pom",
-      "sha1": "0d900fd257cc8f49f47d1c87897d3bcc6088eeba"
+      "path": "com/vladsch/flexmark/flexmark-util-builder/0.64.6/flexmark-util-builder-0.64.6.pom",
+      "sha1": "43acac11759c30dcdfb311ef7e1b332a6361c765"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-data/0.60.2/flexmark-util-data-0.60.2.jar",
-      "sha1": "1f4a21f63f7e8c624a2f626ac199214654b60442"
+      "path": "com/vladsch/flexmark/flexmark-util-collection/0.64.6/flexmark-util-collection-0.64.6.jar",
+      "sha1": "c06f05aafab1c83f2b49f6c5e58fbb9a8aad433f"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-data/0.60.2/flexmark-util-data-0.60.2.pom",
-      "sha1": "d9678d924d1d42f7971500ca1de3694ad4967b48"
+      "path": "com/vladsch/flexmark/flexmark-util-collection/0.64.6/flexmark-util-collection-0.64.6.pom",
+      "sha1": "d4cf190bd777f7a8199fefd7e4b4fa16342a7b21"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-dependency/0.60.2/flexmark-util-dependency-0.60.2.jar",
-      "sha1": "12a08b6f695e53863161c8df3a61cc03cf8cb82c"
+      "path": "com/vladsch/flexmark/flexmark-util-data/0.64.6/flexmark-util-data-0.64.6.jar",
+      "sha1": "a99b69beed9359d384fff9a9475c485cbf37956c"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-dependency/0.60.2/flexmark-util-dependency-0.60.2.pom",
-      "sha1": "2fde998a851a8483a21e799f1b490eba641d59d2"
+      "path": "com/vladsch/flexmark/flexmark-util-data/0.64.6/flexmark-util-data-0.64.6.pom",
+      "sha1": "3e7b42a797edc855d600bc36d487b8bd26f81faf"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-format/0.60.2/flexmark-util-format-0.60.2.jar",
-      "sha1": "f7b698daea094f10ed402d81ae3b4deef89cb4f9"
+      "path": "com/vladsch/flexmark/flexmark-util-dependency/0.64.6/flexmark-util-dependency-0.64.6.jar",
+      "sha1": "138054fe981c705f02abd1d8d948eb5582fbc5ea"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-format/0.60.2/flexmark-util-format-0.60.2.pom",
-      "sha1": "f2ae42e3579af750b90f2743d63e88452b4dc701"
+      "path": "com/vladsch/flexmark/flexmark-util-dependency/0.64.6/flexmark-util-dependency-0.64.6.pom",
+      "sha1": "054c71c58604fc0213690fe4bd48d7fe67433981"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-html/0.60.2/flexmark-util-html-0.60.2.jar",
-      "sha1": "4cb886716882d32201caedf1d9819ba065411290"
+      "path": "com/vladsch/flexmark/flexmark-util-format/0.64.6/flexmark-util-format-0.64.6.jar",
+      "sha1": "16b4975a85269e3e4639e0e5f0cb8a15cc142e7e"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-html/0.60.2/flexmark-util-html-0.60.2.pom",
-      "sha1": "a4283bcb04cddb67a7d6224656a8c7681bea8cbb"
+      "path": "com/vladsch/flexmark/flexmark-util-format/0.64.6/flexmark-util-format-0.64.6.pom",
+      "sha1": "95a8feeed97ca403e1a26dc0d09805aecd7bec27"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-misc/0.60.2/flexmark-util-misc-0.60.2.jar",
-      "sha1": "fe60af722e2e900cffcfc174a9d26e27e80e0047"
+      "path": "com/vladsch/flexmark/flexmark-util-html/0.64.6/flexmark-util-html-0.64.6.jar",
+      "sha1": "415c79bd96ace0c58da30045f8dc73073b070482"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-misc/0.60.2/flexmark-util-misc-0.60.2.pom",
-      "sha1": "7d514fd762201345dee29964d93ea91aafc4e357"
+      "path": "com/vladsch/flexmark/flexmark-util-html/0.64.6/flexmark-util-html-0.64.6.pom",
+      "sha1": "9183b5e221bb9da05d358c22bc669e7dc7ff3fa2"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-options/0.60.2/flexmark-util-options-0.60.2.jar",
-      "sha1": "bdab984888357359b4bca1197fba6d1312cc4c75"
+      "path": "com/vladsch/flexmark/flexmark-util-misc/0.64.6/flexmark-util-misc-0.64.6.jar",
+      "sha1": "a84b340693ce22d812455390dcdac9dcd958238c"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-options/0.60.2/flexmark-util-options-0.60.2.pom",
-      "sha1": "b727832a22878e9704a0d86a29e658374a1001e9"
+      "path": "com/vladsch/flexmark/flexmark-util-misc/0.64.6/flexmark-util-misc-0.64.6.pom",
+      "sha1": "4fe398386a28f7644d85605f1446dc8a8c0d7252"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-sequence/0.60.2/flexmark-util-sequence-0.60.2.jar",
-      "sha1": "55d2d9bd128e9974117ff133b79bf7f581953933"
+      "path": "com/vladsch/flexmark/flexmark-util-options/0.64.6/flexmark-util-options-0.64.6.jar",
+      "sha1": "a39973dd0ea3c139e7b34a4bc64fd8e9722afa03"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-sequence/0.60.2/flexmark-util-sequence-0.60.2.pom",
-      "sha1": "efd5a1c40536c662755973c4de7dda124596d53b"
+      "path": "com/vladsch/flexmark/flexmark-util-options/0.64.6/flexmark-util-options-0.64.6.pom",
+      "sha1": "44a9950dabf3dbc6815ae54019c22850476cf89e"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-visitor/0.60.2/flexmark-util-visitor-0.60.2.jar",
-      "sha1": "e2cf64e197ecaf33ca22196eca9c2b83a123dd72"
+      "path": "com/vladsch/flexmark/flexmark-util-sequence/0.64.6/flexmark-util-sequence-0.64.6.jar",
+      "sha1": "1ae2cd22728557c2740812aeae799ccc8d50fabc"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util-visitor/0.60.2/flexmark-util-visitor-0.60.2.pom",
-      "sha1": "6b4a214b52cd55e8620647b94727336d88a05c6c"
+      "path": "com/vladsch/flexmark/flexmark-util-sequence/0.64.6/flexmark-util-sequence-0.64.6.pom",
+      "sha1": "982c5e7220e4a08ee378f97b0cb960ca0c58faa0"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util/0.60.2/flexmark-util-0.60.2.jar",
-      "sha1": "98a508d0d6b8f5444a6eb1cd3d971453335ff024"
+      "path": "com/vladsch/flexmark/flexmark-util-visitor/0.64.6/flexmark-util-visitor-0.64.6.jar",
+      "sha1": "d2cd1af4ab5b654ca8c588900390c1611ffc8c4d"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-util/0.60.2/flexmark-util-0.60.2.pom",
-      "sha1": "18b88919aa421fbd2131c40f517f1122c763d121"
+      "path": "com/vladsch/flexmark/flexmark-util-visitor/0.64.6/flexmark-util-visitor-0.64.6.pom",
+      "sha1": "8d950463677e7fc88f01f7b0467b33e37c5f78c7"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-youtrack-converter/0.60.2/flexmark-youtrack-converter-0.60.2.jar",
-      "sha1": "7fc14b300ae7fb3df26f53eb9a98bb5768685ba1"
+      "path": "com/vladsch/flexmark/flexmark-util/0.64.6/flexmark-util-0.64.6.jar",
+      "sha1": "ca8dc5c99fddcceee61791885fcff1b2fb50f06b"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark-youtrack-converter/0.60.2/flexmark-youtrack-converter-0.60.2.pom",
-      "sha1": "8f3966a49ec695016d5165c28196ac7ba6fa5623"
+      "path": "com/vladsch/flexmark/flexmark-util/0.64.6/flexmark-util-0.64.6.pom",
+      "sha1": "add67e78f62c3cff15a64b548d9a15503dc987a2"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark/0.60.2/flexmark-0.60.2.jar",
-      "sha1": "954b8199998760fba7499b733d3855efec755f10"
+      "path": "com/vladsch/flexmark/flexmark-youtrack-converter/0.64.6/flexmark-youtrack-converter-0.64.6.jar",
+      "sha1": "eed74ea3b7495d9ca4001e59288f01aeae49d590"
     },
     {
-      "path": "com/vladsch/flexmark/flexmark/0.60.2/flexmark-0.60.2.pom",
-      "sha1": "903cf837f733bd977246afb84a16cf49e25f0b92"
+      "path": "com/vladsch/flexmark/flexmark-youtrack-converter/0.64.6/flexmark-youtrack-converter-0.64.6.pom",
+      "sha1": "1d096b8fb54d7ce35a9234350eb58f90bd828560"
+    },
+    {
+      "path": "com/vladsch/flexmark/flexmark/0.64.6/flexmark-0.64.6.jar",
+      "sha1": "d859a65013f6df2d46868bdcec643da9792f30ca"
+    },
+    {
+      "path": "com/vladsch/flexmark/flexmark/0.64.6/flexmark-0.64.6.pom",
+      "sha1": "ff19594e0627972f4a53a8ed1d7e1c30b5ac2e5c"
     },
     {
       "path": "commons-beanutils/commons-beanutils/1.6/commons-beanutils-1.6.pom",
@@ -954,20 +970,20 @@
       "sha1": "e1b71e4b511c3c63f8b19d0302fe1d1c6e79035a"
     },
     {
-      "path": "commons-codec/commons-codec/1.10/commons-codec-1.10.jar",
-      "sha1": "4b95f4897fa13f2cd904aee711aeafc0c5295cd8"
-    },
-    {
-      "path": "commons-codec/commons-codec/1.10/commons-codec-1.10.pom",
-      "sha1": "44b9477418d2942d45550f7e7c66c16262062d0e"
-    },
-    {
       "path": "commons-codec/commons-codec/1.11/commons-codec-1.11.jar",
       "sha1": "3acb4705652e16236558f0f4f2192cc33c3bd189"
     },
     {
       "path": "commons-codec/commons-codec/1.11/commons-codec-1.11.pom",
       "sha1": "093ee1760aba62d6896d578bd7d247d0fa52f0e7"
+    },
+    {
+      "path": "commons-codec/commons-codec/1.13/commons-codec-1.13.jar",
+      "sha1": "3f18e1aa31031d89db6f01ba05d501258ce69d2c"
+    },
+    {
+      "path": "commons-codec/commons-codec/1.13/commons-codec-1.13.pom",
+      "sha1": "d3c2c675df030573f0d8b0e475e00d3a0f5235a4"
     },
     {
       "path": "commons-codec/commons-codec/1.2/commons-codec-1.2.jar",
@@ -1206,12 +1222,16 @@
       "sha1": "d152f01fb849a11abbc3ef8d7ed0ae8e00b3b226"
     },
     {
-      "path": "de/rototor/pdfbox/graphics2d/0.24/graphics2d-0.24.jar",
-      "sha1": "d6b5ec6e59188e97289edf5f680e544e5a3cc750"
+      "path": "de/rototor/pdfbox/graphics2d/0.32/graphics2d-0.32.jar",
+      "sha1": "d8892871a9a1446e94f25eb625a7eec3bfa31b15"
     },
     {
-      "path": "de/rototor/pdfbox/graphics2d/0.24/graphics2d-0.24.pom",
-      "sha1": "331d47196489033aa021cf4ecc37a17fc6005777"
+      "path": "de/rototor/pdfbox/graphics2d/0.32/graphics2d-0.32.pom",
+      "sha1": "a2f1f51988edd793c7354162e60b6657d630dac5"
+    },
+    {
+      "path": "de/rototor/pdfbox/pdfboxgraphics2d-parent/0.32/pdfboxgraphics2d-parent-0.32.pom",
+      "sha1": "f7bf999b969ec2599db2a09b969539fcc6745121"
     },
     {
       "path": "dk/brics/automaton/automaton/1.11-8/automaton-1.11-8.jar",
@@ -1554,6 +1574,14 @@
       "sha1": "a21993ca994a2927e1e43adfbb3a8d92d131fc80"
     },
     {
+      "path": "org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.jar",
+      "sha1": "fb418f9b33a0b951e9a2978b4b6ee93b2707e72f"
+    },
+    {
+      "path": "org/apache-extras/beanshell/bsh/2.0b6/bsh-2.0b6.pom",
+      "sha1": "ef6b86a126ae192d8639af6f5b3dbe5d4c6d7dde"
+    },
+    {
       "path": "org/apache/ant/ant-launcher/1.8.1/ant-launcher-1.8.1.pom",
       "sha1": "436b71817fb83bb7a162a22b1aadebe0a2910133"
     },
@@ -1678,12 +1706,12 @@
       "sha1": "de55d73a30c7521f3d55e8141d360ffbdfd88caa"
     },
     {
-      "path": "org/apache/commons/commons-collections4/4.1/commons-collections4-4.1.jar",
-      "sha1": "a4cf4688fe1c7e3a63aa636cc96d013af537768e"
+      "path": "org/apache/commons/commons-collections4/4.3/commons-collections4-4.3.jar",
+      "sha1": "1c262f70f9b3c2351f1d13a9a9bd10d2ec7cfbc4"
     },
     {
-      "path": "org/apache/commons/commons-collections4/4.1/commons-collections4-4.1.pom",
-      "sha1": "56c31f5fa1096fa1b33bf2813f2913412c47db2c"
+      "path": "org/apache/commons/commons-collections4/4.3/commons-collections4-4.3.pom",
+      "sha1": "10df23463e67877d44fdcf7c856c37d359a62091"
     },
     {
       "path": "org/apache/commons/commons-compress/1.11/commons-compress-1.11.jar",
@@ -1798,10 +1826,6 @@
       "sha1": "d88c24ebb385e5404f34573f24362b17434e3f33"
     },
     {
-      "path": "org/apache/commons/commons-parent/38/commons-parent-38.pom",
-      "sha1": "b1fe2a39dc1f76d14fbc402982938ffb5ba1043a"
-    },
-    {
       "path": "org/apache/commons/commons-parent/39/commons-parent-39.pom",
       "sha1": "4bc32d3cda9f07814c548492af7bf19b21798d46"
     },
@@ -1824,6 +1848,10 @@
     {
       "path": "org/apache/commons/commons-parent/47/commons-parent-47.pom",
       "sha1": "391715f2f4f1b32604a201a2f4ea74a174e1f21c"
+    },
+    {
+      "path": "org/apache/commons/commons-parent/48/commons-parent-48.pom",
+      "sha1": "1cdeb626cf4f0cec0f171ec838a69922efc6ef95"
     },
     {
       "path": "org/apache/commons/commons-parent/5/commons-parent-5.pom",
@@ -4206,6 +4234,14 @@
       "sha1": "f6d55739cb1a70aef37b345b89cdd9d4f53ed637"
     },
     {
+      "path": "org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar",
+      "sha1": "f87a3a54c856714e4157b9ce7a5ff6ffc310d447"
+    },
+    {
+      "path": "org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom",
+      "sha1": "8c2dcedec327bbb9daf24ced48fc59ce228a6b1f"
+    },
+    {
       "path": "org/apache/maven/shared/maven-artifact-transfer/0.13.1/maven-artifact-transfer-0.13.1.jar",
       "sha1": "9f6d2088ae64dd926b8ec445afdb7e148eb08060"
     },
@@ -4750,32 +4786,32 @@
       "sha1": "9813ead8dc1379522a51ff27ee4c8bbb0d356439"
     },
     {
-      "path": "org/apache/pdfbox/fontbox/2.0.16/fontbox-2.0.16.jar",
-      "sha1": "3f7819279a0b90a01b07a870d1d27dffd8de24db"
+      "path": "org/apache/pdfbox/fontbox/2.0.24/fontbox-2.0.24.jar",
+      "sha1": "df8ecb3006dfcd52355a5902096e5ec34f06112e"
     },
     {
-      "path": "org/apache/pdfbox/fontbox/2.0.16/fontbox-2.0.16.pom",
-      "sha1": "b7434809b761c67ed1adea2cd7f1a3aa4d978a36"
+      "path": "org/apache/pdfbox/fontbox/2.0.24/fontbox-2.0.24.pom",
+      "sha1": "0b0b787f24b546460706d50f93594e33522e8d0d"
     },
     {
-      "path": "org/apache/pdfbox/pdfbox-parent/2.0.16/pdfbox-parent-2.0.16.pom",
-      "sha1": "9699fb292c6352544aff5ba662e182a622d3f2cf"
+      "path": "org/apache/pdfbox/pdfbox-parent/2.0.24/pdfbox-parent-2.0.24.pom",
+      "sha1": "46bb28d861f8d03db8c1ff972133a10f0d951124"
     },
     {
-      "path": "org/apache/pdfbox/pdfbox/2.0.16/pdfbox-2.0.16.jar",
-      "sha1": "5dce5e41fc472d02800df5ef060a1f3a58c36902"
+      "path": "org/apache/pdfbox/pdfbox/2.0.24/pdfbox-2.0.24.jar",
+      "sha1": "cb562ee5f43e29415af4477e62fbe668ef88d18b"
     },
     {
-      "path": "org/apache/pdfbox/pdfbox/2.0.16/pdfbox-2.0.16.pom",
-      "sha1": "97f1728b684282369ef547b3dd6823b38c04e11c"
+      "path": "org/apache/pdfbox/pdfbox/2.0.24/pdfbox-2.0.24.pom",
+      "sha1": "b76ada0618094445191770c138005c8b97e0b2a1"
     },
     {
-      "path": "org/apache/pdfbox/xmpbox/2.0.16/xmpbox-2.0.16.jar",
-      "sha1": "efc4fd9fd83ba7a5ec6e5c2995df6b20f46bad11"
+      "path": "org/apache/pdfbox/xmpbox/2.0.24/xmpbox-2.0.24.jar",
+      "sha1": "df8b7a6a363281f9f1365ed4b37580aa5d3f38f1"
     },
     {
-      "path": "org/apache/pdfbox/xmpbox/2.0.16/xmpbox-2.0.16.pom",
-      "sha1": "fc5c25638339e5197c22c70d9bf08efd2ece0928"
+      "path": "org/apache/pdfbox/xmpbox/2.0.24/xmpbox-2.0.24.pom",
+      "sha1": "4b83e73d0ef4b0580bce283e24d5dfce0fe49349"
     },
     {
       "path": "org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar",
@@ -4870,12 +4906,12 @@
       "sha1": "57e0b6a607859774b2cdd680c6f2aab147b83a4f"
     },
     {
-      "path": "org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.jar",
-      "sha1": "8c0998045da87dbc2f1d4b6480458ed811ca7b82"
+      "path": "org/bouncycastle/bcprov-jdk15on/1.69/bcprov-jdk15on-1.69.jar",
+      "sha1": "91e1628251cf3ca90093ce9d0fe67e5b7dab3850"
     },
     {
-      "path": "org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.pom",
-      "sha1": "c622f23fc3d1acf7c0cf66755ad7455781c4d489"
+      "path": "org/bouncycastle/bcprov-jdk15on/1.69/bcprov-jdk15on-1.69.pom",
+      "sha1": "c9f3e7d46996214727e0df730b2a6214b49a0ac0"
     },
     {
       "path": "org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.jar",
@@ -4886,8 +4922,12 @@
       "sha1": "fb8dca6f40fcb30f7b89de269940bf3316fb9845"
     },
     {
-      "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar",
-      "sha1": "2f50520c8abea66fbd8d26e481d3aef5c673b510"
+      "path": "org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar",
+      "sha1": "ba74746d38026581c12166e164bb3c15e90cc4ea"
+    },
+    {
+      "path": "org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.pom",
+      "sha1": "2b5c81b974afb0dad5a99ee7d2540a0bbb0c3555"
     },
     {
       "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.pom",
@@ -4998,6 +5038,14 @@
       "sha1": "f9f2e45942b25bfded764cce615156228e7b8a3a"
     },
     {
+      "path": "org/codehaus/mojo/build-helper-maven-plugin/3.4.0/build-helper-maven-plugin-3.4.0.jar",
+      "sha1": "542285128a4510fbe9e59b43f11407e01e530edc"
+    },
+    {
+      "path": "org/codehaus/mojo/build-helper-maven-plugin/3.4.0/build-helper-maven-plugin-3.4.0.pom",
+      "sha1": "6bfad437d7b5848928c5610c931f8a6b53acd0f6"
+    },
+    {
       "path": "org/codehaus/mojo/buildnumber-maven-plugin/1.3/buildnumber-maven-plugin-1.3.jar",
       "sha1": "a87082dcc28b7ff61412c3e59dac2ae2748393a1"
     },
@@ -5032,6 +5080,10 @@
     {
       "path": "org/codehaus/mojo/mojo-parent/40/mojo-parent-40.pom",
       "sha1": "d2fa7c95447827e9bbcb8c60bd9484c51202732e"
+    },
+    {
+      "path": "org/codehaus/mojo/mojo-parent/74/mojo-parent-74.pom",
+      "sha1": "2ef0a93fea172659305d787e51dfd4af9247334c"
     },
     {
       "path": "org/codehaus/plexus/plexus-archiver/1.0/plexus-archiver-1.0.jar",
@@ -5718,6 +5770,14 @@
       "sha1": "2e7d0c48e7888250f5ecf22634fc7be5a9743e69"
     },
     {
+      "path": "org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
+      "sha1": "c6bfb17c97ecc8863e88778ea301be742c62b06d"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom",
+      "sha1": "9b1bf6967abaa0a516a04ea096da08ec8d8fe0d7"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-velocity/1.1.7/plexus-velocity-1.1.7.jar",
       "sha1": "1440fc2552d1405b1c2d380ef3b96c4d9c6dbd0b"
     },
@@ -6042,12 +6102,12 @@
       "sha1": "34346a37a2ae0397ece7a64bb61c5618f32a91c6"
     },
     {
-      "path": "org/jetbrains/annotations/15.0/annotations-15.0.jar",
-      "sha1": "d40ab99147584cf6cfb5245be67b3fee2c7220f9"
+      "path": "org/jetbrains/annotations/24.0.1/annotations-24.0.1.jar",
+      "sha1": "13c5c75c4206580aa4d683bffee658caae6c9f43"
     },
     {
-      "path": "org/jetbrains/annotations/15.0/annotations-15.0.pom",
-      "sha1": "061c533b685552908a13ff6af0f6deb0d531b312"
+      "path": "org/jetbrains/annotations/24.0.1/annotations-24.0.1.pom",
+      "sha1": "1b582e5b99fdfe09ca6c2ebdfdf84b6ded77f49e"
     },
     {
       "path": "org/jline/jline-parent/3.21.0/jline-parent-3.21.0.pom",
@@ -6062,16 +6122,20 @@
       "sha1": "bd03ef78247c946d6762aa7c72a7e4f1a2c13ce3"
     },
     {
-      "path": "org/jsoup/jsoup/1.11.3/jsoup-1.11.3.jar",
-      "sha1": "36da09a8f68484523fa2aaa100399d612b247d67"
+      "path": "org/jsoup/jsoup/1.15.4/jsoup-1.15.4.jar",
+      "sha1": "cd56eb47dcd4590ef6451f87e5ec33bddd1a9a51"
     },
     {
-      "path": "org/jsoup/jsoup/1.11.3/jsoup-1.11.3.pom",
-      "sha1": "0adf4b6abe306af443469df2a4ed4f201529cd37"
+      "path": "org/jsoup/jsoup/1.15.4/jsoup-1.15.4.pom",
+      "sha1": "444c1da89e9136358cfb7ba41b33fda946dffef0"
     },
     {
       "path": "org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
       "sha1": "e8848369738c03e40af5507686216f9b8b44b6a3"
+    },
+    {
+      "path": "org/junit/junit-bom/5.9.2/junit-bom-5.9.2.pom",
+      "sha1": "645a08cbe455cad14d8bfb25a35d7f594c53cafd"
     },
     {
       "path": "org/kframework/dependencies/nailgun-all/1.0.0-SNAPSHOT/nailgun-all-1.0.0-20230818.165756-2.pom",
