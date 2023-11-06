@@ -66,7 +66,6 @@ public record KRead(
           mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
       case RULE -> throw KEMException.internalError(
           "Should have been handled directly by the kast front end: " + inputMode);
-      default -> throw KEMException.criticalError("Unsupported input mode: " + inputMode);
     };
   }
 

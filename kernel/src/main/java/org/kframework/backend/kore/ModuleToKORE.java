@@ -2034,9 +2034,7 @@ public class ModuleToKORE {
 
     for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
         // Sort to stabilize error messages
-        stream(att.att())
-            .sorted(Comparator.comparing(Tuple2::toString))
-            .collect(Collectors.toList())) {
+        stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).toList()) {
       Att.Key key = attribute._1._1;
       String strKey = key.key();
       String clsName = attribute._1._2;
@@ -2095,7 +2093,7 @@ public class ModuleToKORE {
                   else
                     throw KEMException.criticalError("No free variable found for " + s, location);
                 })
-            .collect(Collectors.toList());
+            .toList();
     String conn = "";
     for (KVariable var : variables) {
       sb.append(conn);
