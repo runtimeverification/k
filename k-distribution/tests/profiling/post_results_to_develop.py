@@ -38,18 +38,17 @@ if ':' in FROM_BRANCH: FROM_BRANCH = FROM_BRANCH.split(':')[1]
 
 print("Exporting last bencher report from", FROM_BRANCH, "to", TO_BRANCH)
 
+# Remove any special characters from the branch name to get the slug
+FROM_BRANCH = FROM_BRANCH.replace('_', '').replace('/', '-')
+
 # This command will generate a JSON file with a list containing the last reports
 # sorted in descendenting order for the project.
-bencher_command = ["bencher", "report", "list", "--project", "k-framework",
-                   "--sort", "date_time", "--direction", "desc", "--per-page",
-                   "255"]
-data = json.loads(execute_command(bencher_command))
+bencher_command = ["bencher", "report", "list", "--project", "k-framework", 
+                   "--branch", FROM_BRANCH, "--sort", "date_time", 
+                   "--direction", "desc"]
+reports = json.loads(execute_command(bencher_command))
 
-# Collect all elemnts where the key 'project' is 'k_framework'
-k_framework = [item for item in data if item['project']['slug'] == 'k-framework'
-               and item['branch']['slug'] == FROM_BRANCH]
-
-print("Found", len(k_framework), "reports for k-framework in", FROM_BRANCH)
+print("Found", len(reports), "reports for k-framework in", FROM_BRANCH)
 
 # Append the last 6 reports to the list, they correspond to the last performance
 # execution on the last commit in FROM_BRANCH
@@ -58,7 +57,7 @@ def get_name_and_value(item):
 
 data = {}
 for i in range(0,6):
-    item = k_framework[i]
+    item = reports[i]
     results = item['results']
     benchmark_name = results[0][0]['benchmarks'][0]['name']
     metric_name_memory, value_memory = get_name_and_value(results[0][0])
