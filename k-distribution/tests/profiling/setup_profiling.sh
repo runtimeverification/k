@@ -11,7 +11,7 @@ apt-get install --yes python3 git curl make time sudo wget
 if [ $# -eq 0 ]; then
     apt-get install --yes ./kframework.deb
 fi
-pip install python-slugify
+python -m pip install python-slugify
 
 wget https://github.com/bencherdev/bencher/releases/download/v"${BENCHER_VERSION}"/bencher_"${BENCHER_VERSION}"_amd64.deb
 sudo dpkg -i bencher_"${BENCHER_VERSION}"_amd64.deb
