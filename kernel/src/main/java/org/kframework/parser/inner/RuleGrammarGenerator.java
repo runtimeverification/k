@@ -375,7 +375,7 @@ public record RuleGrammarGenerator(Definition baseK) {
     List<Sort> allSorts =
         stream(mod.allSorts())
             .filter(s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
-            .collect(Collectors.toList());
+            .toList();
     for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
       for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
         // syntax MInt{K} ::= MInt{6}
@@ -583,7 +583,7 @@ public record RuleGrammarGenerator(Definition baseK) {
               .collect(Collectors.toSet());
     }
 
-    disambProds = parseProds.stream().collect(Collectors.toSet());
+    disambProds = new HashSet<>(parseProds);
     if (mod.importedModuleNames().contains(PROGRAM_LISTS)) {
       Set<Sentence> prods3 = new HashSet<>();
       // if no start symbol has been defined in the configuration, then use K
@@ -594,7 +594,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         }
       }
       // for each triple, generate a new pattern which works better for parsing lists in programs.
-      prods3.addAll(parseProds.stream().collect(Collectors.toSet()));
+      prods3.addAll(new HashSet<>(parseProds));
       Set<Sentence> res = new HashSet<>();
       for (UserList ul : UserList.getLists(prods3)) {
         Production prod1, prod2, prod3 = null, prod4 = null, prod5 = null;
@@ -714,7 +714,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         stream(mod.importedModules())
             .filter(m -> m.att().contains(Att.NOT_LR1()))
             .map(Module::name)
-            .collect(Collectors.toList());
+            .toList();
     if (!notLrModules.isEmpty()) {
       att = att.add(Att.NOT_LR1_MODULES(), notLrModules.toString());
     }

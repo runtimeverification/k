@@ -2,7 +2,6 @@
 package org.kframework.compile.checks;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.kframework.attributes.Att;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -25,14 +24,12 @@ public class CheckBracket {
         for (Production p : b.getProductions()) {
           if (p.containsAttribute(Att.BRACKET())) {
             List<ProductionItem> nts =
-                p.getItems().stream()
-                    .filter(x -> x instanceof NonTerminal)
-                    .collect(Collectors.toList());
+                p.getItems().stream().filter(x -> x instanceof NonTerminal).toList();
             if (nts.size() != 1
                 || !((NonTerminal) nts.get(0)).getSort().equals(s.getDeclaredSort().getSort()))
               throw KEMException.outerParserError(
-                  "bracket productions should have exactly one non-terminal of the same sort as the"
-                      + " production.",
+                  "bracket productions should have exactly one non-terminal "
+                      + "of the same sort as the production.",
                   p.getSource(),
                   p.getLocation());
           }

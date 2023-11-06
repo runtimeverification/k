@@ -254,7 +254,7 @@ public class ParserUtils {
         groupedModules.entrySet().stream()
             .filter(e -> e.getValue().size() > 1)
             .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+            .toList();
 
     int errors = 0;
     for (String moduleName : duplicateModules) {
@@ -415,7 +415,7 @@ public class ParserUtils {
     Optional<Module> opt;
     opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
     Module syntaxModule;
-    if (!opt.isPresent()) {
+    if (opt.isEmpty()) {
       kem.registerCompilerWarning(
           ExceptionType.MISSING_SYNTAX_MODULE,
           "Could not find main syntax module with name "
@@ -435,7 +435,7 @@ public class ParserUtils {
   private Module getMainModule(String mainModuleName, Set<Module> modules) {
     Optional<Module> opt =
         modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
-    if (!opt.isPresent()) {
+    if (opt.isEmpty()) {
       throw KEMException.compilerError(
           "Could not find main module with name "
               + mainModuleName

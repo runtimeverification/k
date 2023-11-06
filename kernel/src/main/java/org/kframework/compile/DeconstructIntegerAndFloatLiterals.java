@@ -92,7 +92,7 @@ public class DeconstructIntegerAndFloatLiterals {
 
   K addSideCondition(K requires) {
     Optional<KApply> sideCondition = state.stream().reduce(BooleanUtils::and);
-    if (!sideCondition.isPresent()) {
+    if (sideCondition.isEmpty()) {
       return requires;
     } else if (requires.equals(BooleanUtils.TRUE) && sideCondition.isPresent()) {
       return sideCondition.get();

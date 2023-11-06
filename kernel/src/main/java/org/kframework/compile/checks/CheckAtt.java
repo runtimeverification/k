@@ -46,10 +46,7 @@ public class CheckAtt {
               "Unrecognized attributes on module "
                   + m.name()
                   + ": "
-                  + stream(m.att().unrecognizedKeys())
-                      .map(Key::toString)
-                      .sorted()
-                      .collect(Collectors.toList())
+                  + stream(m.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
                   + "\nHint: User-defined groups can be added with the group(_) attribute."));
     }
   }
@@ -84,10 +81,7 @@ public class CheckAtt {
       errors.add(
           KEMException.compilerError(
               "Unrecognized attributes: "
-                  + stream(sentence.att().unrecognizedKeys())
-                      .map(Key::toString)
-                      .sorted()
-                      .collect(Collectors.toList())
+                  + stream(sentence.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
                   + "\nHint: User-defined groups can be added with the group(_) attribute.",
               sentence));
     }
@@ -99,8 +93,7 @@ public class CheckAtt {
     Set<Key> keys = stream(att.att().keySet()).map(k -> k._1()).collect(Collectors.toSet());
     keys.removeIf(k -> k.allowedSentences().exists(c -> c.isAssignableFrom(cls)));
     if (!keys.isEmpty()) {
-      List<String> sortedKeys =
-          keys.stream().map(k -> k.toString()).sorted().collect(Collectors.toList());
+      List<String> sortedKeys = keys.stream().map(k -> k.toString()).sorted().toList();
       errors.add(
           KEMException.compilerError(
               cls.getSimpleName()

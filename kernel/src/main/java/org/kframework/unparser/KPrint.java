@@ -312,7 +312,7 @@ public class KPrint {
         return Optional.of(term);
       }
       Set<KVariable> leftVars = vars(kapp.items().get(0));
-      if (leftVars.stream().filter(v -> !v.att().contains(Att.ANONYMOUS())).findAny().isPresent()) {
+      if (leftVars.stream().anyMatch(v -> !v.att().contains(Att.ANONYMOUS()))) {
         return Optional.of(term);
       }
       for (KVariable var : leftVars) {

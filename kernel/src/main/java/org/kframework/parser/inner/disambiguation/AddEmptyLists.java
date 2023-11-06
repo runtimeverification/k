@@ -100,7 +100,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
             orig);
     java.util.Set<KEMException> warnings = new HashSet<>();
 
-    List<Term> reversed = tc.items().stream().collect(Collectors.toList());
+    List<Term> reversed = new ArrayList<>(tc.items());
     Collections.reverse(
         reversed); // TermCons with PStack requires the elements to be in the reverse order
     Iterator<Term> items = reversed.iterator();

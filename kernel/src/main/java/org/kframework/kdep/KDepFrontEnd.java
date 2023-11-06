@@ -126,10 +126,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     List<File> sortedFiles = new ArrayList<File>(allFiles);
     Collections.sort(
-        sortedFiles,
-        (File a, File b) -> {
-          return a.getAbsolutePath().compareTo(b.getAbsolutePath());
-        });
+        sortedFiles, (File a, File b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()));
 
     for (File file : sortedFiles) {
       System.out.println("    " + file.getAbsolutePath() + " \\");

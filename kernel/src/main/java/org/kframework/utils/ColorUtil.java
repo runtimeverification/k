@@ -373,7 +373,6 @@ public final class ColorUtil {
       case OFF -> "";
       case ON -> getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes);
       case EXTENDED -> getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes);
-      default -> throw new UnsupportedOperationException("colorSettung: " + colorSetting);
     };
   }
 
