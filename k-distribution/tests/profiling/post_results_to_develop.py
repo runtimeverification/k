@@ -2,6 +2,7 @@
 import json
 import sys
 import subprocess
+from slugify import slugify
 
 COMMIT_SHA = sys.argv[1]
 FROM_BRANCH=''
@@ -39,8 +40,7 @@ if ':' in FROM_BRANCH: FROM_BRANCH = FROM_BRANCH.split(':')[1]
 print("Exporting last bencher report from", FROM_BRANCH, "to", TO_BRANCH)
 
 # Remove any special characters from the branch name to get the slug
-FROM_BRANCH = FROM_BRANCH[1:] if FROM_BRANCH[0] == '_' else FROM_BRANCH
-FROM_BRANCH = FROM_BRANCH.replace('/', '-').replace('_', '-')
+FROM_BRANCH = slugify(FROM_BRANCH)
 
 # This command will generate a JSON file with a list containing the last reports
 # sorted in descendenting order for the project.
