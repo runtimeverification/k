@@ -192,6 +192,7 @@ jobs:
             -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
             -e GITHUB_ACTIONS=true                                             \
             -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
+            -e GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH                            \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
             -e GITHUB_REF=$GITHUB_REF                                          \
             --workdir /opt/workspace                                           \
