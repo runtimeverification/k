@@ -45,7 +45,7 @@ Features
 
 Misc/Bug Fixes
 --------------
-- Fixed a bug where the llvm backend would segfault because of badly initialized
+- Fixed a bug where the LLVM backend would segfault because of badly initialized
   fresh variables in the configuration.
 
 - Improved performance for JSON creation.
