@@ -7,7 +7,7 @@ K Framework 6.1.0
 
 Features
 --------
-- Added support for MacOS 13 Ventura and Debian 12 Bookworm. We dropped support for
+- Added support for MacOS 13 Ventura. We dropped support for
   Ubuntu 20.04 Focal. K can now be built from source on Apple Silicon. See README
   for more details.
 
