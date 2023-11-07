@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 export BENCHER_VERSION="0.3.15"
 apt-get update
 apt-get upgrade --yes
-apt-get install --yes python3 git curl make time sudo wget
+apt-get install --yes python3 python3-pip git curl make time sudo wget
 # Build K if no flag was given and don't execute if flag was given
 if [ $# -eq 0 ]; then
     apt-get install --yes ./kframework.deb
