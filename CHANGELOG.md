@@ -15,7 +15,7 @@ Features
 
 - Added the Haskell Backend Booster as a dependency to K. This can improve performance
   when running large proofs. It combines the llvm-backend for concrete execution and
-  relies on the haskell-backend to simplify terms when there is a split in the proof.
+  relies on the Haskell Backend to simplify terms when there is a split in the proof.
 
 - Optimized the kompiler by removing unit applications for collections.
 
