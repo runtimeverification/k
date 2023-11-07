@@ -116,39 +116,38 @@ public class CompiledDefinition implements Serializable {
     // searching for #SemanticCastTo<Sort>(Map:lookup(_, #token(<VarName>, KConfigVar)))
     Collections.stream(kompiledDefinition.mainModule().rules())
         .forEach(
-            r -> {
-              new VisitK() {
-                @Override
-                public void apply(KApply k) {
-                  if (k.klabel().name().startsWith("project:")
-                      && k.items().size() == 1
-                      && k.items().get(0) instanceof KApply theMapLookup) {
-                    if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
-                        && theMapLookup.size() == 2
-                        && theMapLookup.items().get(1) instanceof KToken t) {
-                      if (t.sort().equals(Sorts.KConfigVar())) {
-                        Sort sort =
-                            Outer.parseSort(k.klabel().name().substring("project:".length()));
-                        configurationVariableDefaultSorts.put(t.s(), sort);
-                        if (sort.equals(Sorts.K())) {
-                          sort = Sorts.KItem();
+            r ->
+                new VisitK() {
+                  @Override
+                  public void apply(KApply k) {
+                    if (k.klabel().name().startsWith("project:")
+                        && k.items().size() == 1
+                        && k.items().get(0) instanceof KApply theMapLookup) {
+                      if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
+                          && theMapLookup.size() == 2
+                          && theMapLookup.items().get(1) instanceof KToken t) {
+                        if (t.sort().equals(Sorts.KConfigVar())) {
+                          Sort sort =
+                              Outer.parseSort(k.klabel().name().substring("project:".length()));
+                          configurationVariableDefaultSorts.put(t.s(), sort);
+                          if (sort.equals(Sorts.K())) {
+                            sort = Sorts.KItem();
+                          }
+                          String str =
+                              "declaredConfigVar_"
+                                  + t.s().substring(1)
+                                  + "='"
+                                  + sort.toString()
+                                  + "'\n";
+                          sb.append(str);
+                          String astr = "    '" + t.s().substring(1) + "'\n";
+                          arr.append(astr);
                         }
-                        String str =
-                            "declaredConfigVar_"
-                                + t.s().substring(1)
-                                + "='"
-                                + sort.toString()
-                                + "'\n";
-                        sb.append(str);
-                        String astr = "    '" + t.s().substring(1) + "'\n";
-                        arr.append(astr);
                       }
                     }
+                    super.apply(k);
                   }
-                  super.apply(k);
-                }
-              }.apply(r.body());
-            });
+                }.apply(r.body()));
     sb.append(arr);
     sb.append(")\n");
 

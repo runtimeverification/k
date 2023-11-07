@@ -736,7 +736,6 @@ public class Kompile {
                     m.productionsForSort()
                         .getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
         .collect(Collectors.toSet())
-        .stream()
         .forEach(
             prod -> {
               Seq<ProductionItem> items = prod.items();

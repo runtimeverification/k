@@ -167,7 +167,7 @@ public class ResolveStrict {
                 .map(j -> KApply(KLabel("is" + result.toString()), KVariable("K" + (j - 1))))
                 .reduce(BooleanUtils::and);
         K requires;
-        if (!sideCondition.isPresent() || !sequential) {
+        if (sideCondition.isEmpty() || !sequential) {
           requires = BooleanUtils.TRUE;
         } else {
           requires = sideCondition.get();
@@ -261,7 +261,7 @@ public class ResolveStrict {
                 .map(j -> KApply(result, KVariable("K" + (j - 1))))
                 .reduce(BooleanUtils::and);
         K requires;
-        if (!sideCondition.isPresent()) {
+        if (sideCondition.isEmpty()) {
           requires = BooleanUtils.TRUE;
         } else {
           requires = sideCondition.get();

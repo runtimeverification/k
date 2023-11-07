@@ -117,7 +117,7 @@ public class ExpandMacros {
         stream(mod.rules())
             .filter(r -> isMacro(r.att(), reverse))
             .sorted(Comparator.comparingInt(r -> ModuleToKORE.getPriority(r.att())))
-            .collect(Collectors.toList());
+            .toList();
     macros =
         allMacros.stream()
             .filter(r -> getLeft(r, reverse) instanceof KApply)

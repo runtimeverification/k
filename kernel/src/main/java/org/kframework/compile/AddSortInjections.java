@@ -503,9 +503,7 @@ public class AddSortInjections {
     assert !entries.isEmpty();
     entries = new HashSet<>(entries);
     Collection<Sort> filteredEntries =
-        entries.stream()
-            .filter(s -> s != null && !s.name().equals(SORTPARAM_NAME))
-            .collect(Collectors.toList());
+        entries.stream().filter(s -> s != null && !s.name().equals(SORTPARAM_NAME)).toList();
     if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
       return entries.iterator().next();
     }

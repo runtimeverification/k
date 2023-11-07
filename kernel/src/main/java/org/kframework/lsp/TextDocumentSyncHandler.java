@@ -523,9 +523,7 @@ public class TextDocumentSyncHandler {
 
               if (isPositionOverLocation(pos, nameLoc)) {
                 List<DefinitionItem> allDi =
-                    files.values().stream()
-                        .flatMap(doc -> doc.dis.stream())
-                        .collect(Collectors.toList());
+                    files.values().stream().flatMap(doc -> doc.dis.stream()).toList();
                 allDi.stream()
                     .filter(ddi -> ddi instanceof Module)
                     .map(ddi -> ((Module) ddi))
@@ -787,9 +785,7 @@ public class TextDocumentSyncHandler {
                   + " #poss: "
                   + poss
                   + " rezDepth: "
-                  + lloc.stream()
-                      .map(TextDocumentSyncHandler::getSelectionRangeDepth)
-                      .collect(Collectors.toList()));
+                  + lloc.stream().map(TextDocumentSyncHandler::getSelectionRangeDepth).toList());
 
           return lloc;
         });
