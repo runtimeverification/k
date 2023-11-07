@@ -197,6 +197,7 @@ jobs:
             -e GITHUB_REF=$GITHUB_REF                                          \
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
+            -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
             ${BASE_OS}:${BASE_DISTRO}
       - name: 'Install K from Package'
         run: |
