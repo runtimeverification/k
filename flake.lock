@@ -136,11 +136,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1698757479,
-        "narHash": "sha256-gE4AEKCcckGeJ9hgHeuHunFRweBwXI/dxTkTnjOr0tI=",
+        "lastModified": 1699324123,
+        "narHash": "sha256-1BPe87ABW1FSe/sBdN3vy2y4gWQM9GsPysBuMlElRnM=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "44a675f1c1d4b53d6f174d67fe9776ddb4c89419",
+        "rev": "cb8fe609ba0a9894b207c14da9e88bf311978d4c",
         "type": "github"
       },
       "original": {
@@ -160,16 +160,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1689018333,
-        "narHash": "sha256-sthxx50rj0E7gv38oeMj8GZOp7i1776P1qZsM7pVLd0=",
+        "lastModified": 1656435814,
+        "narHash": "sha256-Gx4QoWB9eI437/66iqTr6AUjxGgN6WslqrQ57s+sL6A=",
         "owner": "goodlyrottenapple",
         "repo": "mavenix",
-        "rev": "153d69e62f87e5dd37d35492cc3e35dd80d2b5fa",
+        "rev": "0cbd57b2494d52909b27f57d03580acc66bf0298",
         "type": "github"
       },
       "original": {
         "owner": "goodlyrottenapple",
         "repo": "mavenix",
+        "rev": "0cbd57b2494d52909b27f57d03580acc66bf0298",
         "type": "github"
       }
     },
