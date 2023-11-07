@@ -9,7 +9,8 @@ TODO: remove me updated up to version 6.0.162 1b12ea45f617b081b1b095287e9c151431
 Features
 --------
 - Added support for MacOS 13 Ventura and Debian 12 Bookworm. We dropped support for
-  Ubuntu 20 Focal.
+  Ubuntu 20 Focal. You can now build K from sources on Apple Silicon. See README
+  for more details.
 
 - Updated dependency to Java version 17 or higher.
 
