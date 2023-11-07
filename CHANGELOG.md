@@ -4,7 +4,6 @@ copyright: Copyright (c) K Team. All Rights Reserved.
 
 K Framework 6.1.0
 =================
-TODO: remove me updated up to version 6.0.162 1b12ea45f617b081b1b095287e9c1514312e5571
 
 Features
 --------
