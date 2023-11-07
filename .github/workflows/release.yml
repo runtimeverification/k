@@ -267,6 +267,18 @@ jobs:
           name: homebrew
           path: homebrew-k-old
 
+      - name: Mac Dependencies
+        run: |
+          # Via: https://github.com/ledger/ledger/commit/1eec9f86667cad3b0bbafb82a83739a0d30ca09f
+          # Unlink and re-link to prevent errors when github mac runner images
+          # install python outside of brew, for example:
+          # https://github.com/orgs/Homebrew/discussions/3895
+          # https://github.com/actions/setup-python/issues/577
+          # https://github.com/actions/runner-images/issues/6459
+          # https://github.com/actions/runner-images/issues/6507
+          # https://github.com/actions/runner-images/issues/2322
+          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
+
       - name: 'Test brew bottle'
         id: test
         env:
