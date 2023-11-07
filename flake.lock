@@ -160,16 +160,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1689018333,
-        "narHash": "sha256-sthxx50rj0E7gv38oeMj8GZOp7i1776P1qZsM7pVLd0=",
+        "lastModified": 1656435814,
+        "narHash": "sha256-Gx4QoWB9eI437/66iqTr6AUjxGgN6WslqrQ57s+sL6A=",
         "owner": "goodlyrottenapple",
         "repo": "mavenix",
-        "rev": "153d69e62f87e5dd37d35492cc3e35dd80d2b5fa",
+        "rev": "0cbd57b2494d52909b27f57d03580acc66bf0298",
         "type": "github"
       },
       "original": {
         "owner": "goodlyrottenapple",
         "repo": "mavenix",
+        "rev": "0cbd57b2494d52909b27f57d03580acc66bf0298",
         "type": "github"
       }
     },
