@@ -11,7 +11,7 @@
     nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     mavenix = {
-      url = "github:goodlyrottenapple/mavenix";
+      url = "github:goodlyrottenapple/mavenix/0cbd57b2494d52909b27f57d03580acc66bf0298";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.utils.follows = "flake-utils";
     };
