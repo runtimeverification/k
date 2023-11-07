@@ -3,7 +3,6 @@ package org.kframework.utils.options;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.ParameterException;
-
 import java.time.Duration;
 
 /**
@@ -13,36 +12,32 @@ import java.time.Duration;
  */
 public class DurationConverter implements IStringConverter<Duration> {
 
-    @Override
-    public Duration convert(String value) {
-        int num;
-        String unit;
-        try {
-            //kudos to https://stackoverflow.com/a/3552805/4182868
-            String numPart = value.split("[a-z]")[0];
-            num = Integer.parseInt(numPart);
-            unit = value.substring(numPart.length());
-        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            throw durationException(value);
-        }
-        switch (unit) {
-        case "ms":
-            return Duration.ofMillis(num);
-        case "s":
-            return Duration.ofSeconds(num);
-        case "m":
-            return Duration.ofMinutes(num);
-        case "h":
-            return Duration.ofHours(num);
-        case "d":
-            return Duration.ofDays(num);
-        default:
-            throw durationException(value);
-        }
+  @Override
+  public Duration convert(String value) {
+    int num;
+    String unit;
+    try {
+      // kudos to https://stackoverflow.com/a/3552805/4182868
+      String numPart = value.split("[a-z]")[0];
+      num = Integer.parseInt(numPart);
+      unit = value.substring(numPart.length());
+    } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+      throw durationException(value);
     }
+    return switch (unit) {
+      case "ms" -> Duration.ofMillis(num);
+      case "s" -> Duration.ofSeconds(num);
+      case "m" -> Duration.ofMinutes(num);
+      case "h" -> Duration.ofHours(num);
+      case "d" -> Duration.ofDays(num);
+      default -> throw durationException(value);
+    };
+  }
 
-    private ParameterException durationException(String value) {
-        return new ParameterException(String.format(
-                "Invalid value for duration '%s', valid value examples: 10ms, 10s, 10m, 10h or 10d", value));
-    }
+  private ParameterException durationException(String value) {
+    return new ParameterException(
+        String.format(
+            "Invalid value for duration '%s', valid value examples: 10ms, 10s, 10m, 10h or 10d",
+            value));
+  }
 }

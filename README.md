@@ -76,15 +76,34 @@ On Ubuntu Linux 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-17-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-14 lld-14 llvm-14-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install    \
+    bison               \
+    build-essential     \
+    clang-15            \
+    cmake               \
+    curl                \
+    flex                \
+    g++                 \
+    gcc                 \
+    libboost-test-dev   \
+    libfmt-dev          \
+    libgmp-dev          \
+    libjemalloc-dev     \
+    libmpfr-dev         \
+    libsecp256k1-dev    \
+    libyaml-dev         \
+    libz3-dev           \
+    lld-15              \
+    llvm-15-tools       \
+    m4                  \
+    maven               \
+    openjdk-17-jdk      \
+    pkg-config          \
+    python3             \
+    python3-dev         \
+    z3                  \
+    zlib1g-dev
 curl -sSL https://get.haskellstack.org/ | sh
-```
-
-On Arch Linux:
-
-```shell
-git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost fmt libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
 ```
 
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
@@ -93,10 +112,28 @@ On macOS using [Homebrew](https://brew.sh/):
 
 ```shell
 git submodule update --init --recursive
-brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
+brew install    \
+    bison       \
+    boost       \
+    cmake       \
+    flex        \
+    fmt         \
+    gcc         \
+    gmp         \
+    openjdk     \
+    jemalloc    \
+    libyaml     \
+    llvm        \
+    make        \
+    maven       \
+    mpfr        \
+    pkg-config  \
+    python      \
+    secp256k1   \
+    stack       \
+    zlib        \
+    z3
 ```
-
-**Note**: in this case llvm@15 is required.
 
 ## The Long Version
 
@@ -111,8 +148,9 @@ The following dependencies are needed either at build time or runtime:
 *   [gmp](https://gmplib.org/)
 *   [jdk](https://openjdk.java.net/) (version 17 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
+*   [libsecp256k1](https://github.com/bitcoin-core/secp256k1)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
-*   [llvm](https://llvm.org/) (We require version 10 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
+*   [llvm](https://llvm.org/) (We require version 15 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
     * [clang](http://clang.llvm.org/)
     * [lld](https://lld.llvm.org/)
 *   [make](https://www.gnu.org/software/make/)
@@ -123,7 +161,7 @@ The following dependencies are needed either at build time or runtime:
 *   [stack](https://docs.haskellstack.org/en/stable/README/)
 *   [zlib](https://www.zlib.net/)
 *   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also
-    needed and packaged separately) Note that you need version 4.8.15 of Z3,
+    needed and packaged separately) Note that you need version 4.12.1 of Z3,
     which may require you to build and install from source if your package
     manager does not supply it. Other versions are known to have bugs and
     performance regressions likely to cause issues in the K test suite.
@@ -151,9 +189,6 @@ See the notes below.
     *   macOS/brew: Since LLVM is distributed as a keg-only package, we must
         explicitly make it available for command line usage. See the results
         of the `brew info llvm` command for more information on how to do this.
-        Additionally, the default version of LLVM supplied by Homebrew is newer
-        than the version supported by K. The formula `llvm@15` should be used
-        instead of `llvm`.
 
 3.  Flex / Bison
 
@@ -201,36 +236,40 @@ build process.
 
 ### Apple Silicon Support
 
-K currently offers partial support for Apple Silicon; the toolchain has been
-tested and works on ARM macOS, but is not yet part of our CI/CI pipeline. To
-build K on an Apple Silicon machine, ensure the following steps are followed in
-addition to the usual Maven build setup:
-* Ensure that Homebrew-installed versions of `llvm-config`, `flex` and `bison`
-  are on your `PATH` ahead of any macOS-supplied versions.
-  * [`direnv`](https://direnv.net/) offers a convenient way to automate this. To
-    do so:
-    ```shell
-    brew install direnv
-    # Follow the instructions at https://direnv.net/docs/hook.html
-    # ...for example, if your shell is bash, run:
-    #   echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
-    # then restart your shell.
-    cp macos-envrc .envrc
-    direnv allow
-    # You should see a message like:
-    #   direnv: loading .../k/.envrc
-    #   direnv: export ~PATH
-    # The llvm-config binary should also be on your PATH; check with:
-    which llvm-config
-    ```
-* Pass `-Dstack.extra-opts='--compiler ghc-8.10.7 --system-ghc'` as an
-  additional argument to `mvn package` when building the toolchain.
-  * This is a workaround for `stack` and `ghc` not yet properly supporting ARM
-    macOS; the underlying problem is likely to be fixed at some point in the
-    future.
-  * See [the documentation](https://github.com/kframework/kore#apple-silicon)
-    and [associated PR](https://github.com/kframework/kore/pull/2893) for more
-    details.
+K is fully tested and supported on ARM (M1/M2) family macOS machines. However,
+to work around an [upstream
+bug](https://github.com/commercialhaskell/stack/issues/4373) in the Haskell /
+Stack ecosystem, care needs to be taken when initially building K from source.
+Before running any Maven commands, the Haskell Stack build needs to be
+configured without Homebrew's LLVM appearing on your `$PATH`:
+
+First, run the following command from the K source root:
+```shell
+cd haskell-backend/src/main/native/haskell-backend && stack setup && cd -
+```
+
+Then, ensure that Homebrew-installed versions of `llvm-config`, `flex` and
+`bison` are on your `PATH` ahead of any macOS-supplied versions.
+[`direnv`](https://direnv.net/) offers a convenient way to automate this. To do
+so:
+```shell
+brew install direnv
+# Follow the instructions at https://direnv.net/docs/hook.html
+# ...for example, if your shell is bash, run:
+#   echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+# then restart your shell.
+cp macos-envrc .envrc
+direnv allow
+# You should see a message like:
+#   direnv: loading .../k/.envrc
+#   direnv: export ~PATH
+# The llvm-config binary should also be on your PATH; check with:
+which llvm-config
+```
+
+If you subsequently encounter errors when building the Haskell components of K
+(the Haskell backend and booster), try removing the entire Stack cache
+(`~/.stack`) and retrying the instructions above.
 
 ## Building with Nix flakes (Recommended)
 
@@ -303,69 +342,12 @@ nix run .#update-maven
 
 and commit the updated `nix/mavenix.lock` file.
 
-## Building with Nix (not recommended, use Nix flakes)
-
-To build the K Framework itself, run:
-
-```bash
-nix-build -A k
-```
-
-The various backends are provided as separate packages:
-
-```bash
-nix-build -A llvm-backend
-nix-build -A haskell-backend
-```
-
-To run the integration tests:
-
-```bash
-nix-build test.nix
-```
-
-You can enter a development environment for working on the K Framework frontend
-by running:
-
-```bash
-nix-shell
-```
-
-To create a development environment for a project that depends on the K
-Framework, you can add a `shell.nix` based on this template:
-
-```.nix
-# shell.nix
-let
-  kframework = import ./path/to/k {};
-  inherit (kframework) mkShell;
-in
-mkShell {
-  buildInputs = [
-    kframework.k
-    clang kframework.llvm-backend
-    kframework.haskell-backend
-  ];
-}
-```
-
-If you change any `pom.xml`, you must run `./nix/update-maven.sh`.
-
 # IDE Setup
 
 ## General
 
 You should run K from the k-distribution project, because it is the only project to have the complete
 classpath and therefore all backends.
-
-## Eclipse
-_N.B. the Eclipse internal compiler may generate false compilation errors (there are bugs in its support of Scala mixed compilation). We recommend using IntelliJ IDEA if at all possible._
-
-To autogenerate an Eclipse project for K, run `mvn install -DskipKTest; mvn eclipse:eclipse` on the
-command line, and then go into each of the `kore` and `tiny` directories and run `sbt eclipse`.
-Then start eclipse and go to File->Import->General->Existing projects into workspace, and select
-the directory of the installation. You should only add the leaves to the workspace, because
-eclipse does not support hierarchical projects.
 
 ## IntelliJ IDEA
 
@@ -378,9 +360,6 @@ To completely test the current version of the K framework, run `mvn verify`.
 This normally takes roughly 30 minutes on a fast machine. If you are interested only
 in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
-
-# Changing the KORE Data Structures
-If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/runtimeverification/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
 # Building the Final Release Directory/Archives
 Call `mvn install` in the base directory. This will attach an artifact to the local

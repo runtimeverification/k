@@ -20,17 +20,6 @@ case $ID in
 				;;
 		esac
 		;;
-	debian)
-		case $VERSION_ID in
-			12)
-				CODENAME=bookworm
-				;;
-			*)
-				echo "Unsupported Debian version, try building from source."
-				exit 1
-				;;
-		esac
-		;;
 	*)
 		echo "Unsupported Linux distro, try building from source."
 		exit 1
