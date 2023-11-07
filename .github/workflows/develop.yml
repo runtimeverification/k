@@ -1,9 +1,10 @@
 name: 'Bump version and make master job'
 on:
-  push:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
     branches:
       - 'develop'
-      - 'update-bencher '
+      - 'update-bencher'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
