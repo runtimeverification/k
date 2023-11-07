@@ -29,7 +29,7 @@ Features
 - Improved attribute error messages by creating a whitelist dependent on the context.
   This check is now mandatory.
 
-- Rule label cannot contain ` or whitespace
+- Rule label can no longer contain backticks (`) or whitespace
 
 - Improved the help messages by adding a description of the expected parameter.
 
