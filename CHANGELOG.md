@@ -7,9 +7,8 @@ K Framework 6.1.0
 
 Features
 --------
-- Added support for MacOS 13 Ventura. We dropped support for
-  Ubuntu 20.04 Focal. K can now be built from source on Apple Silicon. See README
-  for more details.
+- Added support for MacOS 13 Ventura. We dropped support for Ubuntu 20.04 Focal. 
+  K can now be built from source on Apple Silicon. See README for more details.
 
 - Updated dependency to Java version 17 or higher.
 
@@ -19,7 +18,7 @@ Features
 
 - Optimized the kompiler by removing unit applications for collections.
 
-- Minimize JSON output by dropping unused attributes
+- Minimize JSON output by dropping unused attributes.
 
 - Added `--smt-timeout` flag to `krun` and `kprove`.
 
@@ -29,7 +28,7 @@ Features
 - Improved attribute error messages by creating a whitelist dependent on the context.
   This check is now mandatory.
 
-- Rule label can no longer contain backticks (`) or whitespace
+- Rule label can no longer contain backticks (`) or whitespace.
 
 - Improved the help messages by adding a description of the expected parameter.
 
