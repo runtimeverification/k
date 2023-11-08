@@ -42,7 +42,11 @@ import org.kframework.utils.errorsystem.KEMException;
  * <p>The rule Ctx[#fun(Pattern)(Expression)] is equivalent to the following sentences assuming some
  * completely unique KLabel #lambda1 not used in any token:
  *
- * <p>rule Ctx[#lambda1(Expression)] syntax K ::= #lambda1(K) [function] rule #lambda1(LHS) => RHS
+ * <pre>
+ *   rule Ctx[#lambda1(Expression)]
+ *   syntax K ::= #lambda1(K) [function]
+ *   rule #lambda1(LHS) => RHS
+ * </pre>
  *
  * <p>Where LHS is the LHS of Pattern and RHS is the RHS of Pattern.
  *
