@@ -113,8 +113,8 @@ public class ResolveFun {
               && app.items().get(0) instanceof KVariable) {
             nameHint1 = ((KVariable) app.items().get(0)).name();
           }
-          if (body instanceof KApply) {
-            nameHint2 = ((KApply) body).klabel().name();
+          if (body instanceof KApply app) {
+            nameHint2 = app.klabel().name();
           }
           KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
           Sort lhsSort = sort(RewriteToTop.toLeft(body));
