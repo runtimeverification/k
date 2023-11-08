@@ -29,6 +29,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
@@ -122,7 +123,8 @@ public class ResolveFun {
           if (lbl.name().equals("#fun3")
               || lbl.name().equals("#fun2")
               || lbl.name().equals("#let")) {
-            funProds.add(funProd(fun, body, lubSort));
+            boolean total = body instanceof KRewrite rew && isLHSTotal(rew.left());
+            funProds.add(funProd(fun, body, lubSort, total));
             funRules.add(funRule(fun, body, k.att()));
           } else {
             funProds.add(predProd(fun, body, lubSort));
@@ -141,6 +143,18 @@ public class ResolveFun {
         return super.apply(k);
       }
     }.apply(body);
+  }
+
+  private boolean isLHSTotal(K lhs) {
+    if (lhs instanceof KVariable) {
+      return true;
+    } else if (lhs instanceof KApply app) {
+      return app.klabel().name().startsWith("#SemanticCastTo")
+          && app.items().size() == 1
+          && isLHSTotal(app.items().get(0));
+    }
+
+    return false;
   }
 
   private Rule funRule(KLabel fun, K k, Att att) {
@@ -188,8 +202,9 @@ public class ResolveFun {
     return result;
   }
 
-  private Production funProd(KLabel fun, K k, Sort arg) {
-    return lambdaProd(fun, k, arg, sort(RewriteToTop.toRight(k)));
+  private Production funProd(KLabel fun, K k, Sort arg, boolean total) {
+    Att att = total ? Att().add(Att.TOTAL()) : Att();
+    return lambdaProd(fun, k, arg, sort(RewriteToTop.toRight(k)), att);
   }
 
   private Production predProd(KLabel fun, K k, Sort arg) {
@@ -197,6 +212,10 @@ public class ResolveFun {
   }
 
   private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs) {
+    return lambdaProd(fun, k, arg, rhs, Att());
+  }
+
+  private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs, Att att) {
     List<ProductionItem> pis = new ArrayList<>();
     pis.add(Terminal(fun.name()));
     pis.add(Terminal("("));
@@ -206,7 +225,7 @@ public class ResolveFun {
       pis.add(NonTerminal(var.att().getOptional(Sort.class).orElse(Sorts.K())));
     }
     pis.add(Terminal(")"));
-    return Production(fun, rhs, immutable(pis), Att().add(Att.FUNCTION()));
+    return Production(fun, rhs, immutable(pis), att.add(Att.FUNCTION()));
   }
 
   private Sort sort(K k) {
