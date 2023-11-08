@@ -419,21 +419,23 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      PrintWriter debug = null;
-      try {
-        File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
-        debugFile.getParentFile().mkdirs();
-        debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-        new SortInferencer(disambModule, debug, strict && inferSortChecks, true)
-            .apply(rez3, startSymbol, isAnywhere);
-      } catch (java.io.IOException e) {
-        throw KEMException.criticalError(e.getMessage());
-      } finally {
-        if (debug != null) {
-          debug.close();
+      if (SortInferencer.isSupported(rez3)) {
+        PrintWriter debug = null;
+        try {
+          File debugFile =
+              files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
+          debugFile.getParentFile().mkdirs();
+          debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+          new SortInferencer(disambModule, debug, strict && inferSortChecks, true)
+                  .apply(rez3, startSymbol, isAnywhere);
+        } catch (java.io.IOException e) {
+          throw KEMException.criticalError(e.getMessage());
+        } finally {
+          if (debug != null) {
+            debug.close();
+          }
         }
       }
-
       TypeInferencer currentInferencer;
       if (isDebug(source, startLine)) {
         currentInferencer = new TypeInferencer(disambModule, true);
@@ -446,11 +448,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
           inferencers.add(currentInferencer);
         }
       }
-
       rez =
           new TypeInferenceVisitor(
                   currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere)
               .apply(rez3);
+
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 

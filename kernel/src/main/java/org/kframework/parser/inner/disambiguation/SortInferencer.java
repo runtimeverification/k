@@ -10,6 +10,7 @@ import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.parser.Ambiguity;
@@ -53,514 +54,546 @@ import static org.kframework.Collections.*;
  * - TermCons are treated as primitive functions
  */
 public class SortInferencer {
-    private final Module mod;
+  private final Module mod;
 
-    private int id = 0;
+  private int id = 0;
 
-    private final PrintWriter debug;
+  private final Map<ProductionReference, Integer> prIds = new HashMap<>();
 
-    private final boolean inferSortChecks;
+  private final PrintWriter debug;
 
-    private final boolean inferCasts;
+  private final boolean inferCasts;
 
-    //
-    public SortInferencer(Module mod, PrintWriter debug, boolean inferSortChecks, boolean inferCasts) {
-        this.mod = mod;
-        this.debug = debug;
-        this.inferSortChecks = inferSortChecks;
-        this.inferCasts = inferCasts;
+  public SortInferencer(
+      Module mod, PrintWriter debug, boolean inferSortChecks, boolean inferCasts) {
+    this.mod = mod;
+    this.debug = debug;
+    this.inferCasts = inferCasts;
+  }
+
+  /**
+   * @param t - A term
+   * @return Whether t is a Term which the sort inference engine can currently handle. Specifically,
+   */
+  public static boolean isSupported(Term t) {
+    return !hasAmbiguity(t) && !hasStrictCast(t) && !hasParametricSorts(t);
+  }
+
+  private static boolean hasAmbiguity(Term t) {
+    if (t instanceof Ambiguity) {
+      return true;
+    }
+    if (t instanceof Constant) {
+      return false;
+    }
+    return ((TermCons) t).items().stream().anyMatch(SortInferencer::hasAmbiguity);
+  }
+
+  private static boolean hasStrictCast(Term t) {
+    if (t instanceof Ambiguity) {
+      return ((Ambiguity) t).items().stream().anyMatch(SortInferencer::hasStrictCast);
+    }
+    ProductionReference pr = (ProductionReference) t;
+    if (pr.production().klabel().isDefined()) {
+      KLabel klabel = pr.production().klabel().get();
+      String label = klabel.name();
+      if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
+        return true;
+      }
+    }
+    if (t instanceof Constant) {
+      return false;
+    }
+    return ((TermCons) t).items().stream().anyMatch(SortInferencer::hasStrictCast);
+  }
+
+  private static boolean hasParametricSorts(Term t) {
+    if (t instanceof Ambiguity) {
+      return ((Ambiguity) t).items().stream().anyMatch(SortInferencer::hasParametricSorts);
+    }
+    ProductionReference pr = (ProductionReference) t;
+    if (stream(pr.production().items())
+        .filter(pi -> pi instanceof NonTerminal)
+        .map(pi -> ((NonTerminal) pi).sort())
+        .anyMatch(s -> !s.params().isEmpty())) {
+      return true;
+    }
+    if (pr instanceof Constant) {
+      return false;
+    }
+    return ((TermCons) t).items().stream().anyMatch(SortInferencer::hasParametricSorts);
+  }
+
+  public Either<Set<KEMException>, Term> apply(Term t, Sort topSort, boolean isAnywhereRule) {
+    t.source().ifPresent(debug::println);
+    t.location().ifPresent(debug::println);
+
+    InferenceResult<CompactSort> res;
+    try {
+      InferenceState inferState =
+          new InferenceState(new HashMap<>(), new HashMap<>(), new HashSet<>());
+      BoundedSort itemSort = infer(t, isAnywhereRule, inferState);
+      BoundedSort topBoundedSort = sortWithoutSortVariablesToBoundedSort(topSort);
+      constrain(itemSort, topBoundedSort, inferState, (ProductionReference) t);
+      InferenceResult<BoundedSort> unsimplifiedRes =
+          new InferenceResult<>(topBoundedSort, inferState.varSorts());
+      res = simplify(compact(unsimplifiedRes));
+    } catch (SortInferenceError e) {
+      Set<KEMException> errs = new HashSet<>();
+      errs.add(e.asInnerParseError());
+      return Left.apply(errs);
     }
 
-    public Either<Set<KEMException>, Term> apply(Term t, Sort topSort, boolean isAnywhereRule) {
-        // Avoid some special casing by inserting t into an Ambiguity node
-        Ambiguity topAmb;
-        if (t instanceof Ambiguity) {
-            topAmb = (Ambiguity) t;
-        } else {
-            Set<Term> items = new HashSet<>();
-            items.add(t);
-            topAmb = new Ambiguity(items);
-        }
+    debug.println(new GsonBuilder().setPrettyPrinting().create().toJson(res));
 
-        // Infer an unsimplified type for each unambiguous slice of the parse forest parametric over its
-        // contained ambiguities
-        Map<Ambiguity, Map<Term, Optional<InferenceResult<BoundedSort>>>> unsimplifiedSlices = new HashMap<>();
-        try {
-            inferAllSlices(topAmb, isAnywhereRule, Optional.of(topSort), unsimplifiedSlices);
-        } catch (SortInferenceError e) {
-            Set<KEMException> errs = new HashSet<>();
-            errs.add(KEMException.innerParserError(e.getMessage(), e.getProductionReference()));
-            return Left.apply(errs);
-        }
+    // return typeTerm(t, res);
+      return null;
+  }
 
-        // Convert to compact types and simplify
-        Map<Ambiguity, Map<Term, Optional<InferenceResult<CompactSort>>>> slices = new HashMap<>();
-        for (Ambiguity amb : unsimplifiedSlices.keySet()) {
-            Map<Term, Optional<InferenceResult<CompactSort>>> sliceRes = new HashMap<>();
-            for (Map.Entry<Term, Optional<InferenceResult<BoundedSort>>> entry :
-                    unsimplifiedSlices.get(amb).entrySet()) {
-                Optional<InferenceResult<CompactSort>> simplified =
-                        entry.getValue().map(this::compact).map(this::simplify);
-                sliceRes.put(entry.getKey(), simplified);
-            }
-            slices.put(amb, sliceRes);
-        }
+  private static class SortInferenceError extends Exception {
+    private final Optional<ProductionReference> pr;
 
-        debug.println(new GsonBuilder().setPrettyPrinting().create().toJson(slices));
-
-        // Propagate ambiguities upwards to collect all well-typed parses
-
-        // Monomorphize each result to assign concrete types
-        return null;
+    SortInferenceError(String message, Optional<ProductionReference> pr) {
+      super(message);
+      this.pr = pr;
     }
 
-    /**
-     *
-     * @param t - The term to collect ambiguities of
-     * @param result - The set of all ambiguities which are contained in t,
-     *                 but are not themselves contained within any other ambiguity.
-     */
-    private void collectChildAmbiguities(Term t, Set<Ambiguity> result) {
-        if (t instanceof Ambiguity) {
-            result.add((Ambiguity) t);
-            return;
-        }
-
-        if (t instanceof TermCons) {
-            for (Term item : ((TermCons) t).items()) {
-                collectChildAmbiguities(item, result);
-            }
-        }
+    public KEMException asInnerParseError() {
+      return pr.map(p -> KEMException.innerParserError(getMessage(), p))
+          .orElseGet(() -> KEMException.innerParserError(getMessage()));
     }
 
-    /**
-     * @param amb - The Ambiguity to infer all slices of.
-     * @param topSort - The expected sort of the top of the term.
-     * @param isAnywhereRule - Whether t is an anywhere rule
-     * @param result - An output parameter used to store the result of inferring all slices.
-     *                 This is passed as an argument so that it can also be used as a cache throughout.
-     *  The final result is a map with entries A |-> M as follows:
-     *  - A is an ambiguity node in t
-     *  - M is a map from A's items to their InferenceResults (or Optional.empty() if the item is ill-typed)
-     *  Note that if an item is ill-typed, we do not explore its contained ambiguities, so they may not be
-     *  present as keys in the final map.
-     *
-     * @throws SortInferenceError if none of the possible parses of t are well-typed
-     */        
-    private void inferAllSlices(Ambiguity amb, boolean isAnywhereRule, Optional<Sort> topSort,
-                                Map<Ambiguity, Map<Term, Optional<InferenceResult<BoundedSort>>>> result)
-            throws SortInferenceError {
-        if (result.containsKey(amb)) {
-            return;
-        }
-        boolean hasWellTypedItem = false;
-        SortInferenceError lastError = null;
-        Map<Term, Optional<InferenceResult<BoundedSort>>> itemResults = new HashMap<>();
-        for (Term item : amb.items()) {
-            try {
-                InferenceState itemState =
-                        new InferenceState(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashSet<>());
-                BoundedSort itemSort = infer(item, isAnywhereRule, itemState);
-
-                if (topSort.isPresent()) {
-                    BoundedSort topBoundedSort = sortWithoutSortVariablesToBoundedSort(topSort.get());
-                    constrain(itemSort, topBoundedSort, itemState, (ProductionReference) item);
-                    itemSort = topBoundedSort;
-                }
-
-                Set<Ambiguity> childAmbiguities = new HashSet<>();
-                collectChildAmbiguities(item, childAmbiguities);
-                for (Ambiguity childAmb : childAmbiguities) {
-                    inferAllSlices(childAmb, isAnywhereRule, Optional.empty(), result);
-                }
-
-                itemResults.put(item, Optional.of(new InferenceResult<>(itemSort, itemState.varSorts(), itemState.ambSorts())));
-
-                hasWellTypedItem = true;
-            } catch (SortInferenceError e) {
-                itemResults.put(item, Optional.empty());
-                lastError = e;
-            }
-        }
-        if (!hasWellTypedItem && lastError != null) {
-            // None of the ambiguity branches type check, so arbitrarily pick the last error to propagate upward
-            throw lastError;
-        }
-        result.put(amb, itemResults);
+    private static SortInferenceError constrainError(Sort lhs, Sort rhs, ProductionReference pr) {
+      String msg;
+      if (pr instanceof Constant) {
+        msg =
+            "Unexpected sort "
+                + lhs
+                + " for term "
+                + ((Constant) pr).value()
+                + ". Expected "
+                + rhs
+                + ".";
+      } else {
+        msg =
+            "Unexpected sort "
+                + lhs
+                + " for term parsed as production "
+                + pr.production()
+                + ". Expected "
+                + rhs
+                + ".";
+      }
+      return new SortInferenceError(msg, Optional.of(pr));
     }
 
-    private static class SortInferenceError extends Exception {
-        private final ProductionReference pr;
+    private static SortInferenceError boundsError(
+        Set<Sort> sorts, Set<Sort> candidates, boolean polarity) {
+      String msg =
+          "Could not compute "
+              + (polarity ? "least upper bound" : "greatest lower bound")
+              + " of sorts "
+              + sorts
+              + ". ";
+      if (candidates.isEmpty()) {
+        msg += "No possible candidates.";
+      } else {
+        msg += "Multiple possible candidates: " + candidates + ".";
+      }
+      return new SortInferenceError(msg, Optional.empty());
+    }
+  }
 
-        private static String message(Sort lhs, Sort rhs, ProductionReference pr) {
-            String msg;
-            if (pr instanceof Constant) {
-                msg = "Unexpected sort " + lhs + " for term " + ((Constant)pr).value() + ". Expected " + rhs + ".";
-            } else {
-                msg = "Unexpected sort " + lhs + " for term parsed as production " + pr.production() +
-                        ". Expected " + rhs + ".";
-            }
-            return msg;
-        }
-
-        public SortInferenceError(Sort lhs, Sort rhs, ProductionReference pr) {
-            super(message(lhs, rhs, pr));
-            this.pr = pr;
-        }
-
-        ProductionReference getProductionReference() {
-            return pr;
-        }
+  /**
+   * @param t - The term we want to infer the type of
+   * @param isAnywhereRule - Whether t is an anywhere rule
+   * @param inferState - All state maintained during inference, which will be updated throughout
+   *     with sorts for all contained variables
+   * @return The unsimplified sort of the input term
+   * @throws SortInferenceError - an exception indicating that the term is not well-typed
+   */
+  private BoundedSort infer(Term t, boolean isAnywhereRule, InferenceState inferState)
+      throws SortInferenceError {
+    if (t instanceof Ambiguity) {
+      throw new AssertionError("Ambiguities are not yet supported!");
     }
 
+    ProductionReference pr = (ProductionReference) t;
+    if (!prIds.containsKey(pr)) {
+      prIds.put(pr, id);
+      id++;
+    }
+    addParamsFromProduction(inferState, pr);
 
-    /**
-     *
-     * @param t - The term we want to infer the type of
-     * @param isAnywhereRule - Whether t is an anywhere rule
-     * @param inferState - All state maintained during inference, which will be updated throughout
-     *                     with sorts for all contained variables and ambiguities
-     *
-     * @return The unsimplified sort of the input term parametric over any contained ambiguities.
-     * @throws SortInferenceError - an exception indicating that the term is not well-typed
-     */
-    private BoundedSort infer(Term t, boolean isAnywhereRule,
-                              InferenceState inferState) throws SortInferenceError {
-        if (t instanceof Ambiguity) {
-            BoundedSort.Variable ambVar = new BoundedSort.Variable(new ArrayList<>(), new ArrayList<>(), Optional.empty());
-            inferState.ambSorts().put((Ambiguity) t, ambVar);
-            return ambVar;
+    if (pr instanceof Constant) {
+      Constant c = (Constant) t;
+      if (c.production().sort().equals(Sorts.KVariable())
+          || c.production().sort().equals(Sorts.KConfigVar())) {
+        String name = varName(c);
+        if (!inferState.varSorts().containsKey(name)) {
+          inferState
+              .varSorts()
+              .put(
+                  name,
+                  new BoundedSort.Variable(
+                      new ArrayList<>(), new ArrayList<>(), Optional.of(name)));
         }
-
-        ProductionReference pr = (ProductionReference) t;
-        if (pr.id().isEmpty()) {
-            pr.setId(Optional.of(id));
-            id++;
-        }
-        addParamsFromProduction(inferState, pr);
-
-        if (pr instanceof Constant) {
-            Constant c = (Constant) t;
-            if (c.production().sort().equals(Sorts.KVariable()) || c.production().sort().equals(Sorts.KConfigVar())) {
-                String name = varName(c);
-                if (!inferState.varSorts().containsKey(name)) {
-                    inferState.varSorts().put(name,
-                            new BoundedSort.Variable(new ArrayList<>(), new ArrayList<>(), Optional.of(name)));
-                }
-                return inferState.varSorts().get(name);
-            }
-            return sortToBoundedSort(c.production().sort(), pr, inferState.params());
-        }
-
-        TermCons tc = (TermCons) pr;
-        if (tc.production().klabel().isDefined()) {
-            KLabel klabel = tc.production().klabel().get();
-            String label = klabel.name();
-            if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
-                BoundedSort childSort = infer(tc.get(0), false, inferState);
-                BoundedSort castedSort = sortToBoundedSort(
-                        label.equals("#InnerCast") ? ((NonTerminal) tc.production().items().apply(1)).sort() : tc.production().sort(),
-                        pr, inferState.params());
-                debug.println("Ignoring strict cast!");
-                constrain(childSort, castedSort, inferState, pr);
-                // TODO: Unify here instead of constraining!
-                return childSort;
-            }
-
-            // For function, macro, and anywhere rules, the RHS must be a subsort of the LHS
-            if (klabel.head().equals(KLabels.KREWRITE)) {
-                if (isAnywhereRule || isFunctionOrMacro(tc.get(0))) {
-                    BoundedSort lhsSort = infer (tc.get(0), isAnywhereRule, inferState);
-                    BoundedSort rhsSort = infer(tc.get(1), isAnywhereRule, inferState);
-                    constrain(rhsSort, lhsSort, inferState, pr);
-                    return lhsSort;
-                }
-            }
-        }
-
-        for (int prodI = 0, tcI = 0; prodI < tc.production().items().size(); prodI++) {
-            if (!(tc.production().items().apply(prodI) instanceof NonTerminal)) {
-                continue;
-            }
-            NonTerminal nt = (NonTerminal) tc.production().items().apply(prodI);
-            BoundedSort expectedSort = sortToBoundedSort(nt.sort(), pr, inferState.params());
-            BoundedSort childSort = infer(tc.get(tcI), isAnywhereRule, inferState);
-            constrain(childSort, expectedSort, inferState, pr);
-            tcI++;
-        }
-        BoundedSort resSort = new BoundedSort.Variable(new ArrayList<>(), new ArrayList<>(), Optional.empty());
-        constrain(sortToBoundedSort(tc.production().sort(), pr, inferState.params()), resSort, inferState, pr);
-        return resSort;
+        return inferState.varSorts().get(name);
+      }
+      return sortToBoundedSort(c.production().sort(), pr, inferState.params());
     }
 
-    private static boolean isFunctionOrMacro(Term tc) {
-        Term raw = stripBrackets(tc);
-        if (raw instanceof ProductionReference) {
-            ProductionReference pr = (ProductionReference) raw;
-            return pr.production().att().contains(Att.FUNCTION()) || ExpandMacros.isMacro(pr.production());
+    TermCons tc = (TermCons) pr;
+    if (tc.production().klabel().isDefined()) {
+      KLabel klabel = tc.production().klabel().get();
+      String label = klabel.name();
+      if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
+        BoundedSort childSort = infer(tc.get(0), false, inferState);
+        BoundedSort castedSort =
+            sortToBoundedSort(
+                label.equals("#InnerCast")
+                    ? ((NonTerminal) tc.production().items().apply(1)).sort()
+                    : tc.production().sort(),
+                pr,
+                inferState.params());
+        debug.println("Ignoring strict cast!");
+        constrain(childSort, castedSort, inferState, pr);
+        // TODO: Unify here instead of constraining!
+        return childSort;
+      }
+
+      // For function, macro, and anywhere rules, the RHS must be a subsort of the LHS
+      if (klabel.head().equals(KLabels.KREWRITE)) {
+        if (isAnywhereRule || isFunctionOrMacro(tc.get(0))) {
+          BoundedSort lhsSort = infer(tc.get(0), isAnywhereRule, inferState);
+          BoundedSort rhsSort = infer(tc.get(1), isAnywhereRule, inferState);
+          constrain(rhsSort, lhsSort, inferState, pr);
+          return lhsSort;
         }
-        return false;
+      }
     }
 
-    private static void addParamsFromProduction(InferenceState inferState, ProductionReference pr) {
-        for (Sort param : iterable(pr.production().params())) {
-            inferState.params().put(Tuple2.apply(pr, param),
-                    new BoundedSort.Variable(new ArrayList<>(), new ArrayList<>(), Optional.of(paramName(pr, param))));
-        }
+    for (int prodI = 0, tcI = 0; prodI < tc.production().items().size(); prodI++) {
+      if (!(tc.production().items().apply(prodI) instanceof NonTerminal nt)) {
+        continue;
+      }
+      BoundedSort expectedSort = sortToBoundedSort(nt.sort(), pr, inferState.params());
+      BoundedSort childSort = infer(tc.get(tcI), isAnywhereRule, inferState);
+      constrain(childSort, expectedSort, inferState, pr);
+      tcI++;
+    }
+    BoundedSort resSort =
+        new BoundedSort.Variable(new ArrayList<>(), new ArrayList<>(), Optional.empty());
+    constrain(
+        sortToBoundedSort(tc.production().sort(), pr, inferState.params()),
+        resSort,
+        inferState,
+        pr);
+    return resSort;
+  }
+
+  private static boolean isFunctionOrMacro(Term tc) {
+    Term raw = stripBrackets(tc);
+    if (raw instanceof ProductionReference pr) {
+      return pr.production().att().contains(Att.FUNCTION())
+          || ExpandMacros.isMacro(pr.production());
+    }
+    return false;
+  }
+
+  private void addParamsFromProduction(InferenceState inferState, ProductionReference pr) {
+    for (Sort param : iterable(pr.production().params())) {
+      inferState
+          .params()
+          .put(
+              Tuple2.apply(pr, param),
+              new BoundedSort.Variable(
+                  new ArrayList<>(), new ArrayList<>(), Optional.of(paramName(pr, param))));
+    }
+  }
+
+  private void constrain(
+      BoundedSort lhs, BoundedSort rhs, InferenceState inferState, ProductionReference pr)
+      throws SortInferenceError {
+    if (lhs.equals(rhs) || inferState.constraintCache().contains(Tuple2.apply(lhs, rhs))) {
+      return;
     }
 
-    private void constrain(BoundedSort lhs, BoundedSort rhs, InferenceState inferState, ProductionReference pr)
-            throws SortInferenceError {
-        if (lhs.equals(rhs) ||
-                inferState.constraintCache().contains(Tuple2.apply(lhs, rhs))) {
-            return;
-        }
-
-        if (lhs instanceof BoundedSort.Variable) {
-            BoundedSort.Variable lhsVar = (BoundedSort.Variable) lhs;
-            inferState.constraintCache().add(Tuple2.apply(lhs, rhs));
-            lhsVar.upperBounds().add(rhs);
-            for (BoundedSort lhsLower : lhsVar.lowerBounds()) {
-                constrain(lhsLower, rhs, inferState, pr);
-            }
-            return;
-        }
-
-        if (rhs instanceof BoundedSort.Variable) {
-            BoundedSort.Variable rhsVar = (BoundedSort.Variable) rhs;
-            inferState.constraintCache().add(Tuple2.apply(lhs, rhs));
-            rhsVar.lowerBounds().add(lhs);
-            for (BoundedSort rhsUpper : rhsVar.upperBounds()) {
-                constrain(lhs, rhsUpper, inferState, pr);
-            }
-            return;
-        }
-
-        // If they are primitive sorts, we can directly check the sort poset directly
-        BoundedSort.Constructor lhsCtor = (BoundedSort.Constructor) lhs;
-        BoundedSort.Constructor rhsCtor = (BoundedSort.Constructor) rhs;
-        if (lhsCtor.head().params() == 0 && rhsCtor.head().params() == 0) {
-            Sort lhsSort = new org.kframework.kore.ADT.Sort(lhsCtor.head().name(), Seq());
-            Sort rhsSort = new org.kframework.kore.ADT.Sort(rhsCtor.head().name(), Seq());
-            if (mod.subsorts().lessThanEq(lhsSort, rhsSort)) {
-                return;
-            }
-            throw new SortInferenceError(lhsSort, rhsSort, pr);
-        }
-
-        throw new AssertionError("Parametric sorts are not yet implemented!");
+    if (lhs instanceof BoundedSort.Variable lhsVar) {
+      inferState.constraintCache().add(Tuple2.apply(lhs, rhs));
+      lhsVar.upperBounds().add(rhs);
+      for (BoundedSort lhsLower : lhsVar.lowerBounds()) {
+        constrain(lhsLower, rhs, inferState, pr);
+      }
+      return;
     }
 
-    private CompactSort compact(BoundedSort sort, boolean polarity) {
-        if (sort instanceof BoundedSort.Constructor) {
-            BoundedSort.Constructor ctor = (BoundedSort.Constructor) sort;
-            if (ctor.head().params() == 0) {
-                Set<Tuple2<SortHead, List<CompactSort>>> ctors = new HashSet<>();
-                ctors.add(Tuple2.apply(ctor.head(), new ArrayList<>()));
-                return new CompactSort(new HashSet<>(), ctors);
-            }
-            throw new AssertionError("Parametric sorts are not yet implemented!");
-        }
-        BoundedSort.Variable var = (BoundedSort.Variable) sort;
-        List<BoundedSort> bounds = polarity ? var.lowerBounds() : var.upperBounds();
-
-        Set<BoundedSort.Variable> vars = new HashSet<>();
-        Set<Tuple2<SortHead, List<CompactSort>>> ctors = new HashSet<>();
-        vars.add(var);
-        for (BoundedSort bound : bounds) {
-            CompactSort compactBound = compact(bound, polarity);
-            vars.addAll(compactBound.vars());
-            ctors.addAll(compactBound.ctors());
-        }
-        return new CompactSort(vars, ctors);
+    if (rhs instanceof BoundedSort.Variable rhsVar) {
+      inferState.constraintCache().add(Tuple2.apply(lhs, rhs));
+      rhsVar.lowerBounds().add(lhs);
+      for (BoundedSort rhsUpper : rhsVar.upperBounds()) {
+        constrain(lhs, rhsUpper, inferState, pr);
+      }
+      return;
     }
 
-    private InferenceResult<CompactSort> compact(InferenceResult<BoundedSort> res) {
-        CompactSort sort = compact(res.sort(), true);
-        
-        Map<String, CompactSort> varSorts = new HashMap<>();
-        for (Map.Entry<String, BoundedSort> entry : res.varSorts().entrySet()) {
-            varSorts.put(entry.getKey(), compact(entry.getValue(), false));
-        }
-        
-        Map<Ambiguity, CompactSort> ambSorts = new HashMap<>();
-        for (Map.Entry<Ambiguity, BoundedSort> entry : res.ambSorts().entrySet()) {
-            ambSorts.put(entry.getKey(), compact(entry.getValue(), false));
-        }
-
-        return new InferenceResult<>(sort, varSorts, ambSorts);
+    // If they are primitive sorts, we can directly check the sort poset directly
+    BoundedSort.Constructor lhsCtor = (BoundedSort.Constructor) lhs;
+    BoundedSort.Constructor rhsCtor = (BoundedSort.Constructor) rhs;
+    if (lhsCtor.head().params() == 0 && rhsCtor.head().params() == 0) {
+      Sort lhsSort = new org.kframework.kore.ADT.Sort(lhsCtor.head().name(), Seq());
+      Sort rhsSort = new org.kframework.kore.ADT.Sort(rhsCtor.head().name(), Seq());
+      if (mod.subsorts().lessThanEq(lhsSort, rhsSort)) {
+        return;
+      }
+      throw SortInferenceError.constrainError(lhsSort, rhsSort, pr);
     }
 
-    private InferenceResult<CompactSort> simplify(InferenceResult<CompactSort> res) {
-        Set<BoundedSort.Variable> allVars = new HashSet<>();
-        Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences = new HashMap<>();
+    throw new AssertionError("Parametric sorts are not yet supported!");
+  }
 
+  private CompactSort compact(BoundedSort sort, boolean polarity) {
+    if (sort instanceof BoundedSort.Constructor ctor) {
+      if (ctor.head().params() == 0) {
+        Set<SortHead> ctors = new HashSet<>();
+        ctors.add(ctor.head());
+        return new CompactSort(new HashSet<>(), ctors);
+      }
+      throw new AssertionError("Parametric sorts are not yet supported!");
+    }
+    BoundedSort.Variable var = (BoundedSort.Variable) sort;
+    List<BoundedSort> bounds = polarity ? var.lowerBounds() : var.upperBounds();
 
-        // Boolean is used to represent polarity - true is positive, false is negative
-        List<Tuple2<CompactSort, Boolean>> compactSorts = new ArrayList<>();
-        // The sort of the overall term is positive
-        compactSorts.add(Tuple2.apply(res.sort(), true));
-        // The sorts of variables are negative
-        compactSorts.addAll(
-                res.varSorts().values().stream().map((v) -> Tuple2.apply(v, false)).collect(Collectors.toList()));
-        compactSorts.addAll(
-                res.ambSorts().values().stream().map((v) -> Tuple2.apply(v, false)).collect(Collectors.toList()));
+    Set<BoundedSort.Variable> vars = new HashSet<>();
+    Set<SortHead> ctors = new HashSet<>();
+    vars.add(var);
+    for (BoundedSort bound : bounds) {
+      CompactSort compactBound = compact(bound, polarity);
+      vars.addAll(compactBound.vars());
+      ctors.addAll(compactBound.ctors());
+    }
+    return new CompactSort(vars, ctors);
+  }
 
-        compactSorts.forEach(polSort -> collectCoOccurrences(polSort._1, polSort._2, allVars, coOccurrences));
+  private InferenceResult<CompactSort> compact(InferenceResult<BoundedSort> res) {
+    CompactSort sort = compact(res.sort(), true);
 
-        Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst = new HashMap<>();
+    Map<String, CompactSort> varSorts = new HashMap<>();
+    for (Map.Entry<String, BoundedSort> entry : res.varSorts().entrySet()) {
+      varSorts.put(entry.getKey(), compact(entry.getValue(), false));
+    }
 
-        // Simplify away all those variables that only occur in negative (resp. positive) position.
-        allVars.forEach((v) -> {
-            boolean negative = coOccurrences.containsKey(Tuple2.apply(v, false));
-            boolean positive = coOccurrences.containsKey(Tuple2.apply(v, true));
-            if ((negative && !positive) || (!negative && positive)) {
-                varSubst.put(v, Optional.empty());
-            }
+    return new InferenceResult<>(sort, varSorts);
+  }
+
+  private InferenceResult<CompactSort> simplify(InferenceResult<CompactSort> res)
+      throws SortInferenceError {
+    Set<BoundedSort.Variable> allVars = new HashSet<>();
+    Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences = new HashMap<>();
+
+    // Boolean is used to represent polarity - true is positive, false is negative
+    List<Tuple2<CompactSort, Boolean>> compactSorts = new ArrayList<>();
+    // The sort of the overall term is positive
+    compactSorts.add(Tuple2.apply(res.sort(), true));
+    // The sorts of variables are negative
+    compactSorts.addAll(
+        res.varSorts().values().stream().map((v) -> Tuple2.apply(v, false)).toList());
+
+    compactSorts.forEach(
+        polSort -> collectCoOccurrences(polSort._1, polSort._2, allVars, coOccurrences));
+
+    Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst = new HashMap<>();
+
+    // Simplify away all those variables that only occur in negative (resp. positive) position.
+    allVars.forEach(
+        (v) -> {
+          boolean negative = coOccurrences.containsKey(Tuple2.apply(v, false));
+          boolean positive = coOccurrences.containsKey(Tuple2.apply(v, true));
+          if ((negative && !positive) || (!negative && positive)) {
+            varSubst.put(v, Optional.empty());
+          }
         });
 
-        List<Boolean> pols = new ArrayList<>();
-        pols.add(false);
-        pols.add(true);
+    List<Boolean> pols = new ArrayList<>();
+    pols.add(false);
+    pols.add(true);
 
-        pols.forEach((pol) ->  allVars.forEach((v) ->
-            coOccurrences.getOrDefault(Tuple2.apply(v, pol), new HashSet<>()).forEach((co) -> {
-                if (co instanceof BoundedSort.Variable) {
-                    BoundedSort.Variable w = (BoundedSort.Variable) co;
-                    if (v.equals(w) || varSubst.containsKey(w)) {
-                        return;
-                    }
-                    if (coOccurrences.getOrDefault(Tuple2.apply(w, pol), new HashSet<>()).contains(v)) {
-                        // v and w co-occur in the given polarity, so we unify w into v
-                        varSubst.put(w, Optional.of(v));
-                        // we also need to update v's co-occurrences correspondingly (intersecting with w's)
-                        coOccurrences.get(Tuple2.apply(v, !pol)).retainAll(coOccurrences.get(Tuple2.apply(w, !pol)));
-                        coOccurrences.get(Tuple2.apply(v, !pol)).add(v);
-                    }
-                    return;
-                }
-                // This is not a variable, so check if we have a sandwich t <: v <: t and can thus simplify away v
-                if (coOccurrences.getOrDefault(Tuple2.apply(v, !pol), new HashSet<>()).contains(co)) {
-                    varSubst.put(v, Optional.empty());
-                }
-            })
-        ));
+    pols.forEach(
+        (pol) ->
+            allVars.forEach(
+                (v) ->
+                    coOccurrences
+                        .getOrDefault(Tuple2.apply(v, pol), new HashSet<>())
+                        .forEach(
+                            (co) -> {
+                              if (co instanceof BoundedSort.Variable w) {
+                                if (v.equals(w) || varSubst.containsKey(w)) {
+                                  return;
+                                }
+                                if (coOccurrences
+                                    .getOrDefault(Tuple2.apply(w, pol), new HashSet<>())
+                                    .contains(v)) {
+                                  // v and w co-occur in the given polarity, so we unify w into v
+                                  varSubst.put(w, Optional.of(v));
+                                  // we also need to update v's co-occurrences correspondingly
+                                  // (intersecting with w's)
+                                  coOccurrences
+                                      .get(Tuple2.apply(v, !pol))
+                                      .retainAll(coOccurrences.get(Tuple2.apply(w, !pol)));
+                                  coOccurrences.get(Tuple2.apply(v, !pol)).add(v);
+                                }
+                                return;
+                              }
+                              // This is not a variable, so check if we have a sandwich t <: v <: t
+                              // and can thus simplify away v
+                              if (coOccurrences
+                                  .getOrDefault(Tuple2.apply(v, !pol), new HashSet<>())
+                                  .contains(co)) {
+                                varSubst.put(v, Optional.empty());
+                              }
+                            })));
 
-        CompactSort newSort = applySubstitutions(res.sort(), varSubst);
-        Map<String, CompactSort> newVarSorts = new HashMap<>();
-        for (Map.Entry<String, CompactSort> entry : res.varSorts().entrySet()) {
-            newVarSorts.put(entry.getKey(), applySubstitutions(entry.getValue(), varSubst));
-        }
-        Map<Ambiguity, CompactSort> newAmbSorts = new HashMap<>();
-        for (Map.Entry<Ambiguity, CompactSort> entry : res.ambSorts().entrySet()) {
-            newAmbSorts.put(entry.getKey(), applySubstitutions(entry.getValue(),  varSubst));
-        }
-        return new InferenceResult<>(newSort, newVarSorts, newAmbSorts);
+    CompactSort newSort = computeTypes(applySubstitutions(res.sort(), varSubst), true);
+    Map<String, CompactSort> newVarSorts = new HashMap<>();
+    for (Map.Entry<String, CompactSort> entry : res.varSorts().entrySet()) {
+      newVarSorts.put(
+          entry.getKey(), computeTypes(applySubstitutions(entry.getValue(), varSubst), false));
+    }
+    return new InferenceResult<>(newSort, newVarSorts);
+  }
+
+  /**
+   * Update the co-occurrence analysis results so-far to account for the occurrences within sort
+   *
+   * @param sort - The sort which we are processing
+   * @param polarity - The polarity of the provided sort
+   * @param allVars - mutated to add all variables seen in sort
+   * @param coOccurrences - mutated to record all co-occurrences in each variable occurring in sort
+   */
+  private void collectCoOccurrences(
+      CompactSort sort,
+      boolean polarity,
+      Set<BoundedSort.Variable> allVars,
+      Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences) {
+    for (BoundedSort.Variable var : sort.vars()) {
+      allVars.add(var);
+      Set<BoundedSort> newOccurs =
+          Stream.concat(
+                  sort.vars().stream().map(v -> (BoundedSort) v),
+                  // TODO: Handle co-occurrence with parametric sorts
+                  sort.ctors().stream().map(BoundedSort.Constructor::new))
+              .collect(Collectors.toSet());
+      Tuple2<BoundedSort.Variable, Boolean> polVar = Tuple2.apply(var, polarity);
+      if (coOccurrences.containsKey(polVar)) {
+        coOccurrences.get(polVar).retainAll(newOccurs);
+      } else {
+        coOccurrences.put(polVar, newOccurs);
+      }
+    }
+    // TODO: Recurse into parametric sorts
+  }
+
+  /**
+   * Apply a substitution to a sort
+   *
+   * @param sort - The input sort
+   * @param varSubst - A map describing the substitution - a -> None indicates that a should be
+   *     removed form the sort - a -> Some(b) indicates that a should be replaced by b
+   * @return sort with the substitution applied
+   */
+  private static CompactSort applySubstitutions(
+      CompactSort sort, Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst) {
+    Set<BoundedSort.Variable> vars = new HashSet<>();
+    for (BoundedSort.Variable var : sort.vars()) {
+      if (!varSubst.containsKey(var)) {
+        vars.add(var);
+        continue;
+      }
+      varSubst.get(var).ifPresent(vars::add);
+    }
+    Set<SortHead> ctors = new HashSet<>(sort.ctors());
+    return new CompactSort(vars, ctors);
+  }
+
+  private CompactSort computeTypes(CompactSort sort, boolean polarity) throws SortInferenceError {
+    if (sort.ctors().stream().anyMatch(p -> p.params() != 0)) {
+      throw new AssertionError("Parametric sorts are not yet supported!");
+    }
+    if (sort.ctors().size() <= 1) {
+      return new CompactSort(new HashSet<>(sort.vars()), new HashSet<>(sort.ctors()));
+    }
+    Set<Sort> sorts = sort.ctors().stream().map(KORE::Sort).collect(Collectors.toSet());
+    Set<Sort> ogBounds =
+        polarity ? mod.subsorts().upperBounds(sorts) : mod.subsorts().lowerBounds(sorts);
+    Set<Sort> bounds = new HashSet<>(ogBounds);
+    // TODO: bounds.removeIf(s -> mod.subsorts().lessThanEq(s, Sorts.KBott()) ||
+    // mod.subsorts().greaterThan(s, Sorts.K()));
+    Set<Sort> res = polarity ? mod.subsorts().minimal(bounds) : mod.subsorts().maximal(bounds);
+
+    if (res.size() != 1) {
+      throw SortInferenceError.boundsError(sorts, res, polarity);
     }
 
-    /**
-     * Update the co-occurrence analysis results so-far to account for the occurrences within sort
-     *
-     * @param sort - The sort which we are processing
-     * @param polarity - The polarity of the provided sort
-     * @param allVars - mutated to add all variables seen in sort
-     * @param coOccurrences - mutated to record all co-occurrences in each variable occurring in sort
-     */
-    private void collectCoOccurrences(CompactSort sort, boolean polarity,
-                                      Set<BoundedSort.Variable> allVars,
-                                      Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences) {
-        for (BoundedSort.Variable var : sort.vars()) {
-            allVars.add(var);
-            Set<BoundedSort> newOccs =
-                    Stream.concat(
-                            sort.vars().stream().map(v -> (BoundedSort) v),
-                            // TODO: Handle co-occurrence with parametric sorts
-                            sort.ctors().stream()
-                                    .filter((c) -> c._1.params() == 0)
-                                    .map(c -> new BoundedSort.Constructor(c._1, new ArrayList<>()))
-                            ).collect(Collectors.toSet());
-            Tuple2<BoundedSort.Variable, Boolean> polVar = Tuple2.apply(var, polarity);
-            if (coOccurrences.containsKey(polVar)) {
-                coOccurrences.get(polVar).retainAll(newOccs);
-            } else {
-                coOccurrences.put(polVar, newOccs);
-            }
-        }
-        // TODO: Recurse into parametric sorts
-    }
+    Set<SortHead> newCtors = res.stream().map(Sort::head).collect(Collectors.toSet());
 
-    private static CompactSort
-    applySubstitutions(CompactSort sort, Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst) {
-        Set<BoundedSort.Variable> vars = new HashSet<>();
-        for (BoundedSort.Variable var : sort.vars()) {
-            if (!varSubst.containsKey(var)) {
-                vars.add(var);
-                continue;
-            }
-            varSubst.get(var).ifPresent(vars::add);
-        }
-        Set<Tuple2<SortHead, List<CompactSort>>> ctors = new HashSet<>();
-        for (Tuple2<SortHead, List<CompactSort>> ctor : sort.ctors()) {
-            List<CompactSort> newArgs =
-                    ctor._2.stream()
-                            .map((s) -> applySubstitutions(s, varSubst))
-                            .collect(Collectors.toList());
-            ctors.add(Tuple2.apply(ctor._1, newArgs));
-        }
-        return new CompactSort(vars, ctors);
-    }
+    return new CompactSort(new HashSet<>(sort.vars()), newCtors);
+  }
 
-    private static String locStr(ProductionReference pr) {
-        String suffix = "";
-        if (pr.production().klabel().isDefined()) {
-            suffix = "_" + pr.production().klabel().get().name().replace("|","");
-        }
-        if (pr.location().isPresent()) {
-            Location l = pr.location().get();
-            return l.startLine() + "_" + l.startColumn() + "_" + l.endLine() + "_" + l.endColumn() + suffix;
-        }
-        assert pr.id().isPresent();
-        return pr.id().get() + suffix;
+  private String locStr(ProductionReference pr) {
+    String suffix = "";
+    if (pr.production().klabel().isDefined()) {
+      suffix = "_" + pr.production().klabel().get().name().replace("|", "");
     }
+    if (pr.location().isPresent()) {
+      Location l = pr.location().get();
+      return l.startLine()
+          + "_"
+          + l.startColumn()
+          + "_"
+          + l.endLine()
+          + "_"
+          + l.endColumn()
+          + suffix;
+    }
+    assert prIds.containsKey(pr);
+    return prIds.get(pr) + suffix;
+  }
 
-    public static String varName(Constant var) {
-        if (ResolveAnonVar.isAnonVarOrNamedAnonVar(KVariable(var.value()))) {
-            return "Var_" + var.value() + "_" + locStr(var);
-        }
-        return "Var" + var.value();
+  public String varName(Constant var) {
+    if (ResolveAnonVar.isAnonVarOrNamedAnonVar(KVariable(var.value()))) {
+      return "Var_" + var.value() + "_" + locStr(var);
     }
+    return "Var" + var.value();
+  }
 
-    public static String paramName(ProductionReference pr, Sort param) {
-        return "Param_" + param.name() + "_" + locStr(pr);
-    }
+  public String paramName(ProductionReference pr, Sort param) {
+    return "Param_" + param.name() + "_" + locStr(pr);
+  }
 
-    private static Term stripBrackets(Term tc) {
-        Term child = tc;
-        while (child instanceof TermCons &&
-                ((TermCons) child).production().att().contains(Att.BRACKET())) {
-            child = ((TermCons) child).get(0);
-        }
-        return child;
+  private static Term stripBrackets(Term tc) {
+    Term child = tc;
+    while (child instanceof TermCons
+        && ((TermCons) child).production().att().contains(Att.BRACKET())) {
+      child = ((TermCons) child).get(0);
     }
+    return child;
+  }
 
-    private static BoundedSort
-    sortToBoundedSort(Sort sort, ProductionReference pr, Map<Tuple2<ProductionReference, Sort>, BoundedSort.Variable> params) {
-        if (pr.production().params().contains(sort)) {
-            return params.get(Tuple2.apply(pr, sort));
-        }
-        return new BoundedSort.Constructor(
-                sort.head(),
-                stream(sort.params()).map((p) -> sortToBoundedSort(p, pr, params)).collect(Collectors.toList()));
+  private static BoundedSort sortToBoundedSort(
+      Sort sort,
+      ProductionReference pr,
+      Map<Tuple2<ProductionReference, Sort>, BoundedSort.Variable> params) {
+    if (pr.production().params().contains(sort)) {
+      return params.get(Tuple2.apply(pr, sort));
     }
+    return new BoundedSort.Constructor(sort.head());
+  }
 
-    /**
-     * @param sort - The sort to convert, which must not contain any sort variables!
-     * @return sort as a BoundedSort
-     */
-    private static BoundedSort.Constructor sortWithoutSortVariablesToBoundedSort(Sort sort) {
-        return new BoundedSort.Constructor(
-                sort.head(),
-                stream(sort.params()).map(SortInferencer::sortWithoutSortVariablesToBoundedSort)
-                        .collect(Collectors.toList()));
-    }
+  /**
+   * @param sort - The sort to convert, which must not contain any sort variables!
+   * @return sort as a BoundedSort
+   */
+  private static BoundedSort.Constructor sortWithoutSortVariablesToBoundedSort(Sort sort) {
+    return new BoundedSort.Constructor(sort.head());
+  }
 }

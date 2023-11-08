@@ -94,11 +94,17 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   def upperBounds(sorts: Iterable[T]): Set[T] =
     if (sorts.isEmpty) elements else POSet.upperBounds(sorts, relations)
 
+  def upperBounds(sorts: util.Collection[T]): util.Set[T] =
+    Collections.mutable(upperBounds(Collections.immutable(sorts)))
+
   /**
    * Return the set of all lower bounds of the input.
    */
   def lowerBounds(sorts: Iterable[T]): Set[T] =
     if (sorts.isEmpty) elements else POSet.upperBounds(sorts, relationsOp)
+
+  def lowerBounds(sorts: util.Collection[T]): util.Set[T] =
+    Collections.mutable(lowerBounds(Collections.immutable(sorts)))
 
   lazy val lub: Option[T] = {
     val mins = minimal(upperBounds(elements))
@@ -119,10 +125,8 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   def maximal(sorts: Iterable[T]): Set[T] =
     sorts.filter(s1 => !sorts.exists(s2 => lessThan(s1,s2))).toSet
 
-  def maximal(sorts: util.Collection[T]): util.Set[T] = {
-    import scala.collection.JavaConverters._
-    maximal(sorts.asScala).asJava
-  }
+  def maximal(sorts: util.Collection[T]): util.Set[T] =
+    Collections.mutable(maximal(Collections.immutable(sorts)))
 
   /**
     * Return the subset of items from the argument which are not
@@ -131,10 +135,8 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   def minimal(sorts: Iterable[T]): Set[T] =
     sorts.filter(s1 => !sorts.exists(s2 => >(s1,s2))).toSet
 
-  def minimal(sorts: util.Collection[T]): util.Set[T] = {
-    import scala.collection.JavaConverters._
-    minimal(sorts.asScala).asJava
-  }
+  def minimal(sorts: util.Collection[T]): util.Set[T] =
+    Collections.mutable(minimal(Collections.immutable(sorts)))
 
   override def toString: String = {
     "POSet(" + (relations flatMap { case (from, tos) => tos map { to => from + "<" + to } }).mkString(",") + ")"
