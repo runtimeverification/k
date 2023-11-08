@@ -2,6 +2,13 @@
 package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -27,382 +34,492 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
-
 /**
- * A wrapper that takes a module and one can call the parser
- * for that module in thread safe way.
+ * A wrapper that takes a module and one can call the parser for that module in thread safe way.
  * Declarative disambiguation filters are also applied.
  */
 public class ParseInModule implements Serializable, AutoCloseable {
-    private final Module seedModule;
-    private Module extensionModule;
-    /**
-     * The module in which parsing will be done.
-     * Note that this module will be used for disambiguation, and the parsing module can be different.
-     * This allows for grammar rewriting and more flexibility in the implementation.
-     */
-    private Module disambModule;
-    /**
-     * The exact module used for parsing. This can contain productions and sorts that are not
-     * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
-     * In this case the modified production will be annotated with the information from the
-     * original production, so disambiguation can be done safely.
-     */
-    private volatile Module parsingModule;
-    private volatile EarleyParser parser = null;
-    private final boolean strict;
-    private final boolean profileRules;
-    private final boolean isBison;
-    private final boolean forGlobalScanner;
-    private final FileUtil files;
-    private final String typeInferenceDebug;
+  private final Module seedModule;
+  private Module extensionModule;
 
-    ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
-        this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
+  /**
+   * The module in which parsing will be done. Note that this module will be used for
+   * disambiguation, and the parsing module can be different. This allows for grammar rewriting and
+   * more flexibility in the implementation.
+   */
+  private Module disambModule;
+
+  /**
+   * The exact module used for parsing. This can contain productions and sorts that are not
+   * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions). In this case
+   * the modified production will be annotated with the information from the original production, so
+   * disambiguation can be done safely.
+   */
+  private volatile Module parsingModule;
+
+  private volatile EarleyParser parser = null;
+  private final boolean strict;
+  private final boolean profileRules;
+  private final boolean isBison;
+  private final boolean forGlobalScanner;
+  private final FileUtil files;
+  private final String typeInferenceDebug;
+  private final boolean partialParseDebug;
+
+  ParseInModule(
+      Module seedModule,
+      boolean strict,
+      boolean profileRules,
+      boolean isBison,
+      boolean forGlobalScanner,
+      FileUtil files,
+      String typeInferenceDebug,
+      boolean partialParseDebug) {
+    this(
+        seedModule,
+        null,
+        null,
+        null,
+        null,
+        strict,
+        profileRules,
+        isBison,
+        forGlobalScanner,
+        files,
+        typeInferenceDebug,
+        partialParseDebug);
+  }
+
+  ParseInModule(
+      Module seedModule,
+      Scanner scanner,
+      boolean strict,
+      boolean profileRules,
+      boolean isBison,
+      boolean forGlobalScanner,
+      FileUtil files,
+      String typeInferenceDebug,
+      boolean partialParseDebug) {
+    this(
+        seedModule,
+        null,
+        null,
+        null,
+        scanner,
+        strict,
+        profileRules,
+        isBison,
+        forGlobalScanner,
+        files,
+        typeInferenceDebug,
+        partialParseDebug);
+  }
+
+  private ParseInModule(
+      Module seedModule,
+      Module extensionModule,
+      Module disambModule,
+      Module parsingModule,
+      Scanner scanner,
+      boolean strict,
+      boolean profileRules,
+      boolean isBison,
+      boolean forGlobalScanner,
+      FileUtil files,
+      String typeInferenceDebug,
+      boolean partialParseDebug) {
+    this.seedModule = seedModule;
+    this.extensionModule = extensionModule;
+    this.disambModule = disambModule;
+    this.parsingModule = parsingModule;
+    this.scanner = scanner;
+    this.strict = strict;
+    this.profileRules = profileRules;
+    this.isBison = isBison;
+    this.forGlobalScanner = forGlobalScanner;
+    this.files = files;
+    this.typeInferenceDebug = typeInferenceDebug;
+    this.partialParseDebug = partialParseDebug;
+  }
+
+  /**
+   * The original module, which includes all the marker/flags imports. This can be used to
+   * invalidate caches.
+   *
+   * @return Module given by the user.
+   */
+  public Module seedModule() {
+    return seedModule;
+  }
+
+  /**
+   * An extension module of the seedModule which includes all productions, unmodified, and in
+   * addition, contains extra productions auto-defined, like casts.
+   *
+   * @return Module with extra productions defined during parser generator.
+   */
+  public Module getExtensionModule() {
+    Module extM = extensionModule;
+    if (extM == null) {
+      Tuple3<Module, Module, Module> mods =
+          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
+      extM = mods._1();
+      disambModule = mods._2();
+      parsingModule = mods._3();
+      extensionModule = extM;
     }
+    return extM;
+  }
 
-    ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
-        this(seedModule, null, null, null, scanner, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
+  public Module getParsingModule() {
+    Module parseM = parsingModule;
+    if (parseM == null) {
+      Tuple3<Module, Module, Module> mods =
+          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
+      extensionModule = mods._1();
+      disambModule = mods._2();
+      parseM = mods._3();
+      parsingModule = parseM;
     }
+    return parseM;
+  }
 
-    private ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
-        this.seedModule = seedModule;
-        this.extensionModule = extensionModule;
-        this.disambModule = disambModule;
-        this.parsingModule = parsingModule;
-        this.scanner = scanner;
-        this.strict = strict;
-        this.profileRules = profileRules;
-        this.isBison = isBison;
-        this.forGlobalScanner = forGlobalScanner;
-        this.files = files;
-        this.typeInferenceDebug = typeInferenceDebug;
+  public Module getDisambiguationModule() {
+    Module disambM = disambModule;
+    if (disambM == null) {
+      Tuple3<Module, Module, Module> mods =
+          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
+      extensionModule = mods._1();
+      disambM = mods._2();
+      parsingModule = mods._3();
+      disambModule = disambM;
     }
+    return disambM;
+  }
 
-    /**
-     * The original module, which includes all the marker/flags imports.
-     * This can be used to invalidate caches.
-     * @return Module given by the user.
-     */
-    public Module seedModule() {
-        return seedModule;
+  public void initialize() {
+    Module m = getDisambiguationModule();
+    m.definedSorts();
+    m.subsorts();
+    m.priorities();
+    m.leftAssoc();
+    m.rightAssoc();
+    m.productionsFor();
+    m.overloads();
+  }
+
+  /**
+   * Parse as input the given string and start symbol using the module stored in the object.
+   *
+   * @param input the string to parse.
+   * @param startSymbol the start symbol from which to parse.
+   * @return the Term representation of the parsed input.
+   */
+  public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> parseString(
+      String input, Sort startSymbol, Source source) {
+    try (Scanner scanner = getScanner()) {
+      return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
     }
+  }
 
-    /**
-     * An extension module of the seedModule which includes all productions, unmodified, and in addition,
-     * contains extra productions auto-defined, like casts.
-     * @return Module with extra productions defined during parser generator.
-     */
-    public Module getExtensionModule() {
-        Module extM = extensionModule;
-        if (extM == null) {
-            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
-            extM = mods._1();
-            disambModule = mods._2();
-            parsingModule = mods._3();
-            extensionModule = extM;
+  /**
+   * Print the list of tokens matched by the scanner, the location and the Regex Terminal The output
+   * is a valid Markdown table.
+   */
+  public String tokenizeString(String input, Source source) {
+    StringBuilder sb = new StringBuilder();
+    try (Scanner scanner = getScanner()) {
+      EarleyParser.ParserMetadata mdata =
+          new EarleyParser.ParserMetadata(input, scanner, source, 1, 1);
+      Map<Integer, TerminalLike> kind2Token =
+          scanner.getTokens().entrySet().stream()
+              .map(a -> new Tuple2<>(a.getValue()._1, a.getKey()))
+              .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+      List<Integer> lines = mdata.getLines();
+      List<Integer> columns = mdata.getColumns();
+      int maxTokenLen = 7, maxLocLen = 10, maxTerminalLen = 10;
+      List<String> locs = new ArrayList<>();
+      List<String> tokens = new ArrayList<>();
+      List<String> terminals = new ArrayList<>();
+      List<Scanner.Token> words = mdata.getWords();
+      for (Scanner.Token word : mdata.getWords()) {
+        String loc =
+            String.format(
+                "(%d,%d,%d,%d)",
+                lines.get(word.startLoc),
+                columns.get(word.startLoc),
+                lines.get(word.endLoc),
+                columns.get(word.endLoc));
+        locs.add(loc);
+        maxLocLen = Math.max(maxLocLen, loc.length());
+        String tok = StringUtil.enquoteKString(word.value);
+        tokens.add(tok);
+        maxTokenLen = Math.max(maxTokenLen, tok.length());
+        String terminal = kind2Token.getOrDefault(word.kind, Terminal.apply("<eof>")).toString();
+        terminals.add(terminal);
+        maxTerminalLen = Math.max(maxTerminalLen, terminal.length());
+      }
+      // if the token is absurdly large limit the column to 80 chars to maintain alignment
+      maxTokenLen = Math.min(maxTokenLen, 80);
+      maxTerminalLen = Math.min(maxTerminalLen, 20);
+      sb.append(
+          String.format(
+              "|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
+              "\"Match\"",
+              "(location)",
+              "Terminal"));
+      sb.append(
+          String.format(
+              "|-%s|--%s|-%s|\n",
+              "-".repeat(maxTokenLen), "-".repeat(maxLocLen), "-".repeat(maxTerminalLen)));
+      for (int i = 0; i < words.size(); i++) {
+        Scanner.Token word = words.get(i);
+        sb.append(
+            String.format(
+                "|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
+                tokens.get(i),
+                locs.get(i),
+                terminals.get(i)));
+      }
+    }
+    return sb.toString();
+  }
+
+  public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> parseString(
+      String input, Sort startSymbol, String startSymbolLocation, Source source) {
+    try (Scanner scanner = getScanner()) {
+      return parseString(
+          input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
+    }
+  }
+
+  private void getParser(Scanner scanner, Sort startSymbol) {
+    EarleyParser p = parser;
+    if (p == null) {
+      Module m = getParsingModule();
+      p = new EarleyParser(m, scanner, startSymbol, partialParseDebug);
+      parser = p;
+    }
+  }
+
+  private Scanner scanner;
+  private final ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
+  private final Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
+
+  public Scanner getScanner(GlobalOptions go) {
+    if (scanner == null) {
+      scanner = new Scanner(this, go);
+    }
+    return scanner;
+  }
+
+  public Scanner getScanner() {
+    if (scanner == null) {
+      scanner = new Scanner(this);
+    }
+    return scanner;
+  }
+
+  public void setScanner(Scanner s) {
+    scanner = s;
+  }
+
+  public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> parseString(
+      String input,
+      Sort startSymbol,
+      String startSymbolLocation,
+      Scanner scanner,
+      Source source,
+      int startLine,
+      int startColumn,
+      boolean inferSortChecks,
+      boolean isAnywhere) {
+    final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result =
+        parseStringTerm(
+            input,
+            startSymbol,
+            startSymbolLocation,
+            scanner,
+            source,
+            startLine,
+            startColumn,
+            inferSortChecks,
+            isAnywhere);
+    Either<Set<KEMException>, K> parseInfo;
+    if (result._1().isLeft()) {
+      parseInfo = Left.apply(result._1().left().get());
+    } else {
+      parseInfo =
+          Right.apply(
+              new TreeNodesToKORE(Outer::parseSort, inferSortChecks && strict)
+                  .apply(result._1().right().get()));
+    }
+    return new Tuple2<>(parseInfo, result._2());
+  }
+
+  /**
+   * Parse the given input. This function is private because the final disambiguation in {@link
+   * AmbFilter} eliminates ambiguities that will be equivalent only after calling {@link
+   * TreeNodesToKORE#apply(Term)}, but returns a result that is somewhat arbitrary as an actual
+   * parser {@link Term}. Fortunately all callers want the result as a K, and can use the public
+   * version of this method.
+   *
+   * @param input
+   * @param startSymbol
+   * @param source
+   * @param startLine
+   * @param startColumn
+   * @return
+   */
+  private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> parseStringTerm(
+      String input,
+      Sort startSymbol,
+      String startSymbolLocation,
+      Scanner scanner,
+      Source source,
+      int startLine,
+      int startColumn,
+      boolean inferSortChecks,
+      boolean isAnywhere) {
+    if (!parsingModule.definedSorts().contains(startSymbol.head()))
+      throw KEMException.innerParserError(
+          "Could not find start symbol: " + startSymbol + " provided to " + startSymbolLocation,
+          source,
+          Location.apply(startLine, startColumn, startLine, startColumn + 1));
+    getParser(scanner, startSymbol);
+
+    long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
+    start = profileRules ? System.currentTimeMillis() : 0;
+
+    try {
+      Set<KEMException> warn = Sets.newHashSet();
+      Term parsed;
+      try {
+        parsed = parser.parse(input, source, startLine, startColumn);
+      } catch (KEMException e) {
+        return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
+      }
+      endParse = profileRules ? System.currentTimeMillis() : 0;
+
+      Term rez3 = new TreeCleanerVisitor().apply(parsed);
+      Either<Set<KEMException>, Term> rez = new CollapseRecordProdsVisitor(rez3).apply(rez3);
+      if (rez.isLeft()) return new Tuple2<>(rez, warn);
+      rez =
+          new PriorityVisitor(
+                  disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc())
+              .apply(rez.right().get());
+      if (rez.isLeft()) return new Tuple2<>(rez, warn);
+      rez = new KAppToTermConsVisitor(disambModule).apply(rez.right().get());
+      if (rez.isLeft()) return new Tuple2<>(rez, warn);
+      rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
+      rez3 = new PushTopAmbiguityUp().apply(rez3);
+      startTypeInf = profileRules ? System.currentTimeMillis() : 0;
+
+      PrintWriter debug = null;
+      try {
+	  File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
+	  debugFile.getParentFile().mkdirs();
+	  debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+	  new SortInferencer(disambModule, debug, strict && inferSortChecks, true).
+	      apply(rez3, startSymbol, isAnywhere);
+      } catch (java.io.IOException e) {
+	  throw KEMException.criticalError(e.getMessage());
+      } finally {
+	  if (debug != null) {
+	      debug.close();
+	  }
+      }
+
+      TypeInferencer currentInferencer;
+      if (isDebug(source, startLine)) {
+        currentInferencer = new TypeInferencer(disambModule, true);
+        inferencers.add(currentInferencer);
+      } else {
+        currentInferencer = inferencer.get();
+        if (currentInferencer == null) {
+          currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+          inferencer.set(currentInferencer);
+          inferencers.add(currentInferencer);
         }
-        return extM;
-    }
+      }
 
-    public Module getParsingModule() {
-        Module parseM = parsingModule;
-        if (parseM == null) {
-            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
-            extensionModule = mods._1();
-            disambModule = mods._2();
-            parseM = mods._3();
-            parsingModule = parseM;
-        }
-        return parseM;
-    }
+      rez =
+          new TypeInferenceVisitor(
+                  currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere)
+              .apply(rez3);
+      if (rez.isLeft()) return new Tuple2<>(rez, warn);
+      endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-    public Module getDisambiguationModule() {
-        Module disambM = disambModule;
-        if (disambM == null) {
-            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
-            extensionModule = mods._1();
-            disambM = mods._2();
-            parsingModule = mods._3();
-            disambModule = disambM;
-        }
-        return disambM;
-    }
+      rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez.right().get());
+      if (rez.isLeft()) return new Tuple2<>(rez, warn);
+      rez3 =
+          new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
+      rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
+      if (rez.isLeft()) return new Tuple2<>(rez, warn);
+      Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2 =
+          new AddEmptyLists(disambModule, startSymbol).apply(rez.right().get());
+      warn = Sets.union(rez2._2(), warn);
+      if (rez2._1().isLeft()) return rez2;
+      rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
 
-
-    public void initialize() {
-       Module m = getDisambiguationModule();
-       m.definedSorts();
-       m.subsorts();
-       m.priorities();
-       m.leftAssoc();
-       m.rightAssoc();
-       m.productionsFor();
-       m.overloads();
-    }
-
-    /**
-     * Parse as input the given string and start symbol using the module stored in the object.
-     * @param input          the string to parse.
-     * @param startSymbol    the start symbol from which to parse.
-     * @return the Term representation of the parsed input.
-     */
-    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
-            parseString(String input, Sort startSymbol, Source source) {
-        try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
-        }
-    }
-
-    /**
-     * Print the list of tokens matched by the scanner, the location and the Regex Terminal
-     * The output is a valid Markdown table.
-     */
-    public String tokenizeString(String input, Source source) {
-        StringBuilder sb = new StringBuilder();
-        try (Scanner scanner = getScanner()) {
-            EarleyParser.ParserMetadata mdata = new EarleyParser.ParserMetadata(input, scanner, source, 1, 1);
-            Map<Integer, TerminalLike> kind2Token =
-                    scanner.getTokens().entrySet().stream().map(a -> new Tuple2<>(a.getValue()._1, a.getKey()))
-                    .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-            List<Integer> lines = mdata.getLines();
-            List<Integer> columns = mdata.getColumns();
-            int maxTokenLen = 7, maxLocLen = 10, maxTerminalLen = 10;
-            List<String> locs = new ArrayList<>();
-            List<String> tokens = new ArrayList<>();
-            List<String> terminals = new ArrayList<>();
-            List<Scanner.Token> words = mdata.getWords();
-            for (Scanner.Token word : mdata.getWords()) {
-                String loc = String.format("(%d,%d,%d,%d)",
-                        lines.get(word.startLoc), columns.get(word.startLoc),
-                        lines.get(word.endLoc), columns.get(word.endLoc));
-                locs.add(loc);
-                maxLocLen = Math.max(maxLocLen, loc.length());
-                String tok = StringUtil.enquoteKString(word.value);
-                tokens.add(tok);
-                maxTokenLen = Math.max(maxTokenLen, tok.length());
-                String terminal = kind2Token.getOrDefault(word.kind, Terminal.apply("<eof>")).toString();
-                terminals.add(terminal);
-                maxTerminalLen = Math.max(maxTerminalLen, terminal.length());
-            }
-            // if the token is absurdly large limit the column to 80 chars to maintain alignment
-            maxTokenLen = Math.min(maxTokenLen, 80);
-            maxTerminalLen = Math.min(maxTerminalLen, 20);
-            sb.append(String.format("|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
-                    "\"Match\"", "(location)", "Terminal"));
-            sb.append(String.format("|-%s|--%s|-%s|\n", "-".repeat(maxTokenLen), "-".repeat(maxLocLen), "-".repeat(maxTerminalLen)));
-            for (int i = 0; i < words.size(); i++) {
-                Scanner.Token word = words.get(i);
-                sb.append(String.format("|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
-                        tokens.get(i), locs.get(i), terminals.get(i)));
-            }
-        }
-        return sb.toString();
-    }
-
-    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
-            parseString(String input, Sort startSymbol, String startSymbolLocation, Source source) {
-        try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
-        }
-    }
-    private void getParser(Scanner scanner, Sort startSymbol) {
-        EarleyParser p = parser;
-        if (p == null) {
-            Module m = getParsingModule();
-            p = new EarleyParser(m, scanner, startSymbol);
-            parser = p;
-        }
-    }
-
-    private Scanner scanner;
-    private final ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
-    private final Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
-
-    public Scanner getScanner(GlobalOptions go) {
-        if (scanner == null) {
-            scanner = new Scanner(this, go);
-        }
-        return scanner;
-    }
-    public Scanner getScanner() {
-        if (scanner == null) {
-            scanner = new Scanner(this);
-        }
-        return scanner;
-    }
-    public void setScanner(Scanner s) {
-        scanner = s;
-    }
-
-    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
-        parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
-        final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
-                = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
-        Either<Set<KEMException>, K> parseInfo;
-        if (result._1().isLeft()) {
-            parseInfo = Left.apply(result._1().left().get());
-        } else {
-            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort, inferSortChecks && strict).apply(result._1().right().get()));
-        }
-        return new Tuple2<>(parseInfo, result._2());
-    }
-
-    /**
-     * Parse the given input. This function is private because the final disambiguation
-     * in {@link AmbFilter} eliminates ambiguities that will be equivalent only after
-     * calling {@link TreeNodesToKORE#apply(Term)}, but returns a result that is
-     * somewhat arbitrary as an actual parser {@link Term}.
-     * Fortunately all callers want the result as a K, and can use the public
-     * version of this method.
-     * @param input
-     * @param startSymbol
-     * @param source
-     * @param startLine
-     * @param startColumn
-     * @return
-     */
-    private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
-            parseStringTerm(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
-        if (!parsingModule.definedSorts().contains(startSymbol.head()))
-            throw KEMException.innerParserError("Could not find start symbol: " + startSymbol + " provided to " + startSymbolLocation, source, Location.apply(startLine, startColumn, startLine, startColumn + 1));
-        getParser(scanner, startSymbol);
-
-        long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
-        start = profileRules ? System.currentTimeMillis() : 0;
-
+      return new Tuple2<>(Right.apply(rez3), warn);
+    } finally {
+      if (profileRules) {
         try {
-            Set<KEMException> warn = Sets.newHashSet();
-            Term parsed;
-            try {
-                parsed = parser.parse(input, source, startLine, startColumn);
-            } catch (KEMException e) {
-                return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
-            }
-            endParse = profileRules ? System.currentTimeMillis() : 0;
-
-            Term rez3 = new TreeCleanerVisitor().apply(parsed);
-            Either<Set<KEMException>, Term> rez = new CollapseRecordProdsVisitor(rez3).apply(rez3);
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new KAppToTermConsVisitor(disambModule).apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
-            rez3 = new PushTopAmbiguityUp().apply(rez3);
-            startTypeInf = profileRules ? System.currentTimeMillis() : 0;
-
-            TypeInferencer currentInferencer;
-            if (isDebug(source, startLine)) {
-                currentInferencer = new TypeInferencer(disambModule, true);
-                inferencers.add(currentInferencer);
-            } else {
-                currentInferencer = inferencer.get();
-                if (currentInferencer == null) {
-                    currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
-                    inferencer.set(currentInferencer);
-                    inferencers.add(currentInferencer);
-                }
-            }
-
-
-
-            PrintWriter debug = null;
-            try {
-                File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
-                debugFile.getParentFile().mkdirs();
-                debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-                new SortInferencer(disambModule, debug, strict && inferSortChecks, true).
-                        apply(rez3, startSymbol, isAnywhere);
-            } catch (java.io.IOException e) {
-                throw KEMException.criticalError(e.getMessage());
-            } finally {
-                if (debug != null) {
-                    debug.close();
-                }
-            }
-
-
-            rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            endTypeInf = profileRules ? System.currentTimeMillis() : 0;
-
-            rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
-            rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2 = new AddEmptyLists(disambModule, startSymbol).apply(rez.right().get());
-            warn = Sets.union(rez2._2(), warn);
-            if (rez2._1().isLeft())
-                return rez2;
-            rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
-
-            return new Tuple2<>(Right.apply(rez3), warn);
-        } finally {
-            if (profileRules) {
-                try {
-                    long stop = System.currentTimeMillis();
-                    long totalTime = stop - start;
-                    long parseTime = endParse - start;
-                    long tiTime = endTypeInf - startTypeInf;
-                    File f = File.createTempFile("timing", ".log", files.resolveTemp(""));
-                    FileUtils.writeStringToFile(f, String.format("%s:%d\n%5d %s:%d   parse:%4d typeInf:%4d",
-                            source.source(), startLine, totalTime, source.source(), startLine, parseTime, tiTime), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                  throw KEMException.internalError("Could not write to timing.log", e);
-                }
-            }
+          long stop = System.currentTimeMillis();
+          long totalTime = stop - start;
+          long parseTime = endParse - start;
+          long tiTime = endTypeInf - startTypeInf;
+          File f = File.createTempFile("timing", ".log", files.resolveTemp(""));
+          FileUtils.writeStringToFile(
+              f,
+              String.format(
+                  "%s:%d\n%5d %s:%d   parse:%4d typeInf:%4d",
+                  source.source(),
+                  startLine,
+                  totalTime,
+                  source.source(),
+                  startLine,
+                  parseTime,
+                  tiTime),
+              StandardCharsets.UTF_8);
+        } catch (IOException e) {
+          throw KEMException.internalError("Could not write to timing.log", e);
         }
+      }
     }
+  }
 
-    private boolean isDebug(Source source, int startLine) {
-        if (typeInferenceDebug == null) {
-            return false;
-        }
-        return (source.source() + ":" + startLine).endsWith(typeInferenceDebug);
+  private boolean isDebug(Source source, int startLine) {
+    if (typeInferenceDebug == null) {
+      return false;
     }
+    return (source.source() + ":" + startLine).endsWith(typeInferenceDebug);
+  }
 
-    public void close() {
-        if (scanner != null) {
-            scanner.close();
-        }
-        for (TypeInferencer inferencer : inferencers) {
-            inferencer.close();
-        }
-        inferencers.clear();
+  public void close() {
+    if (scanner != null) {
+      scanner.close();
     }
+    for (TypeInferencer inferencer : inferencers) {
+      inferencer.close();
+    }
+    inferencers.clear();
+  }
 
-    public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
-        Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
-        Either<Set<KEMException>, Term> rez;
-        Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
-        try (TypeInferencer inferencer = new TypeInferencer(mod, false)) {
-            rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
-        }
-        if (rez.isLeft()) {
-            rez2 = new AmbFilter(false).apply(rez3);
-            return rez2._1().right().get();
-        }
-        rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez.right().get());
-        rez2 = new AmbFilter(false).apply(rez3);
-        return rez2._1().right().get();
+  public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
+    Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
+    Either<Set<KEMException>, Term> rez;
+    Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
+    try (TypeInferencer inferencer = new TypeInferencer(mod, false)) {
+      rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
     }
+    if (rez.isLeft()) {
+      rez2 = new AmbFilter(false).apply(rez3);
+      return rez2._1().right().get();
+    }
+    rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez.right().get());
+    rez2 = new AmbFilter(false).apply(rez3);
+    return rez2._1().right().get();
+  }
 }

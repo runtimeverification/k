@@ -7,11 +7,17 @@ import com.beust.jcommander.ParametersDelegate;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.List;
 import org.kframework.attributes.Source;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.outer.Outer;
 import org.kframework.parser.InputModes;
+import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
@@ -20,145 +26,175 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.File;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.List;
-
 @RequestScoped
 public final class KastOptions {
 
-    @Inject
-    public KastOptions() {}
+  @Inject
+  public KastOptions() {}
 
-    @Parameter(description="<file>")
-    private List<String> parameters;
+  @Parameter(description = "<file>")
+  private List<String> parameters;
 
-    public Reader stringToParse() {
-        checkFileExprExclusion();
-        if (expression != null) {
-            return new StringReader(expression);
-        }
-        checkSingleFile();
-        if (parameters.get(0).equals("-")) {
-          return new BufferedReader(new InputStreamReader(System.in));
-        }
-        return files.get().readFromWorkingDirectory(parameters.get(0));
+  public Reader stringToParse() {
+    checkFileExprExclusion();
+    if (expression != null) {
+      return new StringReader(expression);
+    }
+    checkSingleFile();
+    if (parameters.get(0).equals("-")) {
+      return new BufferedReader(new InputStreamReader(System.in));
+    }
+    return files.get().readFromWorkingDirectory(parameters.get(0));
+  }
+
+  private void checkFileExprExclusion() {
+    if (parameters != null && parameters.size() > 0 && expression != null) {
+      throw KEMException.criticalError(
+          "It is an error to provide both a file and an expression to parse.");
+    }
+  }
+
+  private void checkSingleFile() {
+    if (parameters != null && parameters.size() > 1) {
+      throw KEMException.criticalError("You can only parse one program at a time.");
+    }
+    if (parameters == null || parameters.size() != 1) {
+      throw KEMException.criticalError("You have to provide a file in order to kast a program.");
+    }
+  }
+
+  private Provider<FileUtil> files;
+
+  @Inject
+  public void setFiles(Provider<FileUtil> files) {
+    this.files = files;
+  }
+
+  /**
+   * Get the source of the string to parse. This method is undefined if it is called before calling
+   * {@link #stringToParse()}.
+   *
+   * @return A textual description of the source of the string to parse.
+   */
+  public Source source() {
+    if (expression != null) {
+      return Source.apply("<command line: -e>");
+    } else {
+      return Source.apply(files.get().resolveWorkingDirectory(parameters.get(0)).getAbsolutePath());
+    }
+  }
+
+  @ParametersDelegate public transient GlobalOptions global = new GlobalOptions();
+
+  @ParametersDelegate
+  public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
+
+  @ParametersDelegate public PrintOptions print = new PrintOptions(OutputModes.KAST);
+
+  @Parameter(
+      names = {"--gen-parser"},
+      description = "Generate a Bison/Flex parser for the specified module and sort.")
+  public boolean genParser;
+
+  @Parameter(
+      names = {"--gen-glr-parser"},
+      description = "Generate a Bison/Flex GLR parser for the specified module and sort.")
+  public boolean genGlrParser;
+
+  public File bisonOutputFile() {
+    checkSingleFile();
+    return files.get().resolveWorkingDirectory(parameters.get(0));
+  }
+
+  @Parameter(
+      names = "--bison-file",
+      descriptionKey = "file",
+      hidden = true,
+      description = "C file containing functions to link into bison parser.")
+  public String bisonFile;
+
+  @Parameter(
+      names = "--bison-stack-max-depth",
+      descriptionKey = "size",
+      hidden = true,
+      description = "Maximum size of bison parsing stack.")
+  public long bisonStackMaxDepth = 10000;
+
+  @Parameter(
+      names = {"--expression", "-e"},
+      descriptionKey = "expression",
+      description =
+          "An expression to parse passed on the command line. It is an error to provide both this "
+              + "option and a file to parse.")
+  private String expression;
+
+  @Parameter(
+      names = {"--sort", "-s"},
+      descriptionKey = "sort",
+      converter = SortTypeConverter.class,
+      description =
+          "The start sort for the default parser. The default is the sort of $PGM from the"
+              + " configuration. A sort may also be specified with the 'KRUN_SORT' environment"
+              + " variable, in which case it is used if the option is not specified on the command"
+              + " line.")
+  public Sort sort;
+
+  public static class SortTypeConverter implements IStringConverter<Sort> {
+    // converts the command line argument into a Sort
+    @Override
+    public Sort convert(String arg) {
+      return Outer.parseSort(arg);
+    }
+  }
+
+  @Parameter(
+      names = {"--module", "-m"},
+      descriptionKey = "name",
+      description =
+          "Parse text in the specified module. Defaults to the syntax module of the definition.")
+  public String module;
+
+  @Parameter(names = "--expand-macros", description = "Also expand macros in the parsed string.")
+  public boolean expandMacros = false;
+
+  @Parameter(
+      names = {"--input", "-i"},
+      descriptionKey = "mode",
+      converter = InputModeConverter.class,
+      description =
+          "How to read kast input in. <mode> is either [program|binary|kast|json|kore|rule].")
+  public InputModes input = InputModes.PROGRAM;
+
+  @Parameter(
+      names = {"--steps"},
+      descriptionKey = "steps",
+      description =
+          "Apply specified kompilation steps to the parsed term. Only for --input rule. "
+              + "Use --steps help for a detailed description of available steps.")
+  public List<KastFrontEnd.KompileSteps> steps =
+      Lists.newArrayList(KastFrontEnd.KompileSteps.anonVars);
+
+  public static class InputModeConverter extends BaseEnumConverter<InputModes> {
+
+    public InputModeConverter(String optionName) {
+      super(optionName);
     }
 
-    private void checkFileExprExclusion() {
-        if (parameters != null && parameters.size() > 0 && expression != null) {
-            throw KEMException.criticalError("It is an error to provide both a file and an expression to parse.");
-        }
+    @Override
+    public Class<InputModes> enumClass() {
+      return InputModes.class;
     }
+  }
 
-    private void checkSingleFile() {
-        if (parameters != null && parameters.size() > 1) {
-            throw KEMException.criticalError("You can only parse one program at a time.");
-        }
-        if (parameters == null || parameters.size() != 1) {
-            throw KEMException.criticalError("You have to provide a file in order to kast a program.");
-        }
-    }
+  @Parameter(
+      names = "--debug-tokens",
+      description =
+          "Print a Markdown table of tokens matched by the scanner. Useful for debugging parsing"
+              + " errors.")
+  public boolean debugTokens = false;
 
-    private Provider<FileUtil> files;
-
-    @Inject
-    public void setFiles(Provider<FileUtil> files) {
-        this.files = files;
-    }
-
-    /**
-     * Get the source of the string to parse. This method is undefined if it is called before calling
-     * {@link #stringToParse()}.
-     * @return A textual description of the source of the string to parse.
-     */
-    public Source source() {
-        if (expression != null) {
-            return Source.apply("<command line: -e>");
-        } else {
-            return Source.apply(files.get().resolveWorkingDirectory(parameters.get(0)).getAbsolutePath());
-        }
-    }
-
-    @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
-
-    @ParametersDelegate
-    public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
-
-    @ParametersDelegate
-    public PrintOptions print = new PrintOptions(OutputModes.KAST);
-
-    @Parameter(names={"--gen-parser"}, description="Generate a Bison/Flex parser for the specified module and sort.")
-    public boolean genParser;
-
-    @Parameter(names={"--gen-glr-parser"}, description="Generate a Bison/Flex GLR parser for the specified module and sort.")
-    public boolean genGlrParser;
-
-    public File bisonOutputFile() {
-        checkSingleFile();
-        return files.get().resolveWorkingDirectory(parameters.get(0));
-    }
-
-    @Parameter(names="--bison-file", descriptionKey = "file", hidden = true,
-            description="C file containing functions to link into bison parser.")
-    public String bisonFile;
-
-    @Parameter(names="--bison-stack-max-depth", descriptionKey = "size", hidden = true,
-            description="Maximum size of bison parsing stack.")
-    public long bisonStackMaxDepth = 10000;
-
-    @Parameter(names={"--expression", "-e"}, descriptionKey = "expression",
-            description="An expression to parse passed on the command line. It is an error to provide both this " +
-                    "option and a file to parse.")
-    private String expression;
-
-    @Parameter(names={"--sort", "-s"}, descriptionKey = "sort", converter=SortTypeConverter.class,
-            description="The start sort for the default parser. The default is the sort of $PGM from the configuration. " +
-                    "A sort may also be specified with the 'KRUN_SORT' environment variable, in which case it is used " +
-                    "if the option is not specified on the command line.")
-    public Sort sort;
-
-    public static class SortTypeConverter implements IStringConverter<Sort> {
-        // converts the command line argument into a Sort
-        @Override
-        public Sort convert(String arg) {
-            return Outer.parseSort(arg);
-        }
-    }
-
-    @Parameter(names={"--module", "-m"}, descriptionKey = "name",
-            description="Parse text in the specified module. Defaults to the syntax module of the definition.")
-    public String module;
-
-    @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
-    public boolean expandMacros = false;
-
-    @Parameter(names={"--input", "-i"}, descriptionKey = "mode", converter=InputModeConverter.class,
-            description="How to read kast input in. <mode> is either [program|binary|kast|json|kore|rule].")
-    public InputModes input = InputModes.PROGRAM;
-
-    @Parameter(names={"--steps"}, descriptionKey = "steps",
-            description="Apply specified kompilation steps to the parsed term. Only for --input rule. " +
-                    "Use --steps help for a detailed description of available steps.")
-    public List<KastFrontEnd.KompileSteps> steps = Lists.newArrayList(KastFrontEnd.KompileSteps.anonVars);
-
-    public static class InputModeConverter extends BaseEnumConverter<InputModes> {
-
-        public InputModeConverter(String optionName) {
-            super(optionName);
-        }
-
-        @Override
-        public Class<InputModes> enumClass() {
-            return InputModes.class;
-        }
-    }
-
-    @Parameter(names="--debug-tokens", description="Print a Markdown table of tokens matched by the scanner. Useful for debugging parsing errors.")
-    public boolean debugTokens = false;
+  @Parameter(
+      names = "--debug-parse",
+      description = "Print extended diagnostic information and partial ASTs for parse errors.")
+  public boolean debugParse = false;
 }

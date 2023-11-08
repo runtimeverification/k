@@ -1,20 +1,27 @@
 {
   description = "K Framework";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.05";
-    haskell-backend.url = "github:runtimeverification/haskell-backend/03a6228f78d7f4805fee4b9d9c45208dcbe0c9fb";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/eebe4e9fd9dd6c606b37a384dbbfecca85943a38";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/26b5d2df37c6fcc210d80ff57d1c3572a41f90b5";
-      # NB booster-backend will bring in another dependency on haskell-backend,
-      # but the two are not necessarily the same (different more often than not).
-      # We get two transitive dependencies on haskell-nix.
+      url = "github:runtimeverification/hs-backend-booster/15a9fc41edcf6b22730f37e77a3e29acb2ae3601";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.haskell-backend.follows = "haskell-backend";
+      inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
     };
-    llvm-backend.url = "github:runtimeverification/llvm-backend";
-    llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+    nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
+    mavenix = {
+      url = "github:goodlyrottenapple/mavenix/0cbd57b2494d52909b27f57d03580acc66bf0298";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.utils.follows = "flake-utils";
+    };
+    llvm-backend = {
+      url = "github:runtimeverification/llvm-backend";
+      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
+      inputs.mavenix.follows = "mavenix";
+      inputs.utils.follows = "flake-utils";
+    };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
-    mavenix.url = "github:goodlyrottenapple/mavenix";
     # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -27,7 +34,7 @@
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 13;
+          llvm-version = 15;
           llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
@@ -64,6 +71,7 @@
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
                 inherit (prev) llvm-backend;
+                clang = prev."clang_${toString final.llvm-version}";
                 booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
                 mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
@@ -112,6 +120,7 @@
         };
 
       in rec {
+        k-version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
           k = pkgs.k-framework {
@@ -135,6 +144,7 @@
             ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
               || echo "^~~~ expected error"
 
+            export PATH="${pkgs.gnused}/bin:$PATH"
             ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
           '';
 
@@ -148,11 +158,26 @@
                 "llvm-backend/src/main/native/llvm-backend";
             };
 
+          smoke-test = with pkgs;
+            stdenv.mkDerivation {
+              name = "k-${k-version}-${self.rev or "dirty"}-smoke-test";
+              unpackPhase = "true";
+              buildInputs = [ fmt gmp mpfr k ];
+              buildPhase = ''
+                echo "module TEST imports BOOL endmodule" > test.k
+                kompile test.k --syntax-module TEST --backend llvm
+                rm -rf test-kompiled
+                kompile test.k --syntax-module TEST --backend haskell
+              '';
+              installPhase = ''
+                runHook preInstall
+                touch "$out"
+                runHook postInstall
+              '';
+            };
+
           test = with pkgs;
-            let
-              k-version =
-                lib.removeSuffix "\n" (builtins.readFile ./package/version);
-            in stdenv.mkDerivation {
+            stdenv.mkDerivation {
               name = "k-${k-version}-${self.rev or "dirty"}-test";
               src = lib.cleanSource
                 (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]

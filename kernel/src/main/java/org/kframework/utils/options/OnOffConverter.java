@@ -6,18 +6,19 @@ import com.beust.jcommander.converters.BaseConverter;
 
 public class OnOffConverter extends BaseConverter<Boolean> {
 
-    public OnOffConverter(String optionName) {
-        super(optionName);
-    }
+  public OnOffConverter(String optionName) {
+    super(optionName);
+  }
 
-    @Override
-    public Boolean convert(String arg0) {
-        if (arg0.equals("on")) {
-            return true;
-        } else if (arg0.equals("off")) {
-            return false;
-        } else {
-            throw new ParameterException("\"" + getOptionName() + "\": must be either \"on\" or \"off\".");
-        }
+  @Override
+  public Boolean convert(String arg0) {
+    if (arg0.equals("on")) {
+      return true;
+    } else if (arg0.equals("off")) {
+      return false;
+    } else {
+      throw new ParameterException(
+          "\"" + getOptionName() + "\": must be either \"on\" or \"off\".");
     }
+  }
 }

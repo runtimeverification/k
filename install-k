@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-K_VERSION=6.0.0
+K_VERSION=6.1.0
 
 if [ `id -u` -ne 0 ]; then
   echo "$0: error: This script must be run as root."
@@ -16,17 +16,6 @@ case $ID in
 				;;
 			*)
 				echo "Unsupported Ubuntu version, try building from source."
-				exit 1
-				;;
-		esac
-		;;
-	debian)
-		case $VERSION_ID in
-			12)
-				CODENAME=bookworm
-				;;
-			*)
-				echo "Unsupported Debian version, try building from source."
 				exit 1
 				;;
 		esac

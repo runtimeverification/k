@@ -1,10 +1,27 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
+import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.kframework.Collections;
 import org.kframework.POSet;
 import org.kframework.attributes.Att;
-import org.kframework.Collections;
-import org.kframework.TopologicalSort;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
@@ -22,35 +39,16 @@ import org.kframework.parser.TermCons;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
-
+import scala.Tuple2;
 import scala.collection.Seq;
 import scala.collection.Set;
-import scala.Tuple2;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.kframework.kore.KORE.*;
-import static org.kframework.Collections.*;
 
 /**
  * Class to manage communication with z3 for the purposes of type inference. This class is driven by
- * {@link TypeInferenceVisitor} and handles all the communication to/from z3 as well as construction of constraints.
+ * {@link TypeInferenceVisitor} and handles all the communication to/from z3 as well as construction
+ * of constraints.
  *
- * For a description of the algorithm, see the companion class's javadoc.
+ * <p>For a description of the algorithm, see the companion class's javadoc.
  */
 public class TypeInferencer implements AutoCloseable {
 
@@ -69,10 +67,10 @@ public class TypeInferencer implements AutoCloseable {
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
 
-  // logic QF_DT is best if it exists as it will be faster than ALL. However, some z3 versions do not have this logic.
+  // logic QF_DT is best if it exists as it will be faster than ALL. However, some z3 versions do
+  // not have this logic.
   // Fortunately, z3 ignores unknown logics.
-  private static final String PRELUDE1 =
-    "(set-logic QF_DT)\n";
+  private static final String PRELUDE1 = "(set-logic QF_DT)\n";
 
   private final boolean destroyOnReset;
 
@@ -89,26 +87,24 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Create a new z3 process and write the sorts and subsort relation to it.
+   *
    * @param mod the module to create an inferencer for.
    */
   public TypeInferencer(Module mod, boolean debug) {
     initProcess();
     println("(get-info :version)");
     try {
-        String version = output.readLine();
-        version = version.substring("(:version \"".length());
-        version = version.substring(0, version.indexOf('"'));
-        String[] parts = version.split("\\.");
-        // example of version string:
-        // "4.8.8 - build hashcode ad55a1f1c617"
-        int major = Integer.valueOf(parts[0]);
-        int minor = Integer.valueOf(parts[1]);
-        int patch = Integer.valueOf(parts[2].split(" ")[0]);
-        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9)) {
-          destroyOnReset = true;
-        } else {
-          destroyOnReset = false;
-        }
+      String version = output.readLine();
+      version = version.substring("(:version \"".length());
+      version = version.substring(0, version.indexOf('"'));
+      String[] parts = version.split("\\.");
+      // example of version string:
+      // "4.8.8 - build hashcode ad55a1f1c617"
+      int major = Integer.valueOf(parts[0]);
+      int minor = Integer.valueOf(parts[1]);
+      int patch = Integer.valueOf(parts[2].split(" ")[0]);
+      destroyOnReset =
+          major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9);
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e);
     }
@@ -119,13 +115,19 @@ public class TypeInferencer implements AutoCloseable {
     push(mod);
   }
 
-  // returns whether a particular sort should be written to z3 and thus be a possible sort for variables.
+  // returns whether a particular sort should be written to z3 and thus be a possible sort for
+  // variables.
   private boolean isRealSort(SortHead head) {
     if (head.params() > 0) {
       return true;
     }
     Sort s = Sort(head);
-    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel()) || s.equals(Sorts.RuleTag()) || s.isNat();
+    return !RuleGrammarGenerator.isParserSort(s)
+        || s.equals(Sorts.K())
+        || s.equals(Sorts.KItem())
+        || s.equals(Sorts.KLabel())
+        || s.equals(Sorts.RuleTag())
+        || s.isNat();
   }
 
   public Module module() {
@@ -134,6 +136,7 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Writes the prelude for a particular module.
+   *
    * @param mod
    */
   private void push(Module mod) {
@@ -156,7 +159,8 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private void makeSubsorts(Module mod, String name, POSet<Sort> relations) {
-    // map from each sort to an integer representing the topological sorting of the sorts. higher numbers mean greater
+    // map from each sort to an integer representing the topological sorting of the sorts. higher
+    // numbers mean greater
     // sorts
     Map<SortHead, Integer> ordinals = new HashMap<>();
     int i = 0;
@@ -169,7 +173,10 @@ public class TypeInferencer implements AutoCloseable {
     }
     // provide fixed interpretation of subsort relation
     println("(define-fun " + name + " ((s1 Sort) (s2 Sort)) Bool (or");
-    for (Tuple2<Sort, Set<Sort>> relation : stream(relations.relations()).sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1().head(), 0))).collect(Collectors.toList())) {
+    for (Tuple2<Sort, Set<Sort>> relation :
+        stream(relations.relations())
+            .sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1().head(), 0)))
+            .toList()) {
       if (!isRealSort(relation._1().head())) {
         continue;
       }
@@ -204,7 +211,8 @@ public class TypeInferencer implements AutoCloseable {
   private final List<String> variables = new ArrayList<>();
   // list of names for sort parameters only in z3
   private final List<String> parameters = new ArrayList<>();
-  // array mapping from integer id of terms to the list of names of their variable or sort parameters in z3
+  // array mapping from integer id of terms to the list of names of their variable or sort
+  // parameters in z3
   private final List<List<String>> variablesById = new ArrayList<>();
   // array mapping from integer id of terms to the expected sorts they have appeared under so far
   private final List<java.util.Set<String>> cacheById = new ArrayList<>();
@@ -215,6 +223,7 @@ public class TypeInferencer implements AutoCloseable {
 
   private static class LocalizedError extends RuntimeException {
     private final Term loc;
+
     LocalizedError(String message, Term loc) {
       super(message);
       this.loc = loc;
@@ -226,8 +235,9 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   /**
-   * Replays a list of {@link Constraint} one at a time and throws an exception with the error message explaining
-   * why the constraints are not satisfied.
+   * Replays a list of {@link Constraint} one at a time and throws an exception with the error
+   * message explaining why the constraints are not satisfied.
+   *
    * @param constraints
    */
   private void replayConstraints(List<Constraint> constraints) {
@@ -238,37 +248,49 @@ public class TypeInferencer implements AutoCloseable {
       println("))");
       status = null;
       Status status = status();
-      switch(status) {
-      case SATISFIABLE:
-        println("(pop)");
-        print("(assert (and ");
-        print(constraint.smt);
-        println("))");
-        break;
-      case UNKNOWN:
-        throw KEMException.internalError("Could not solve sort constraints.", currentTerm);
-      case UNSATISFIABLE:
-        println("(pop)");
-        computeStatus();
-        if (constraint.name != null) {
-          Sort actualSort = computeValue(constraint.name);
-          Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
-          throw new LocalizedError("Unexpected sort " + actualSort + " for variable " + constraint.loc.value() + ". Expected: " + expectedSort, constraint.loc);
-        } else {
-          Sort actualSort = eval(constraint.actualSort, constraint.actualParams);
-          Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
-          throw new LocalizedError("Unexpected sort " + actualSort + " for term parsed as production " + constraint.actualParams.get().production() + ". Expected: " + expectedSort, constraint.actualParams.get());
+      switch (status) {
+        case SATISFIABLE -> {
+          println("(pop)");
+          print("(assert (and ");
+          print(constraint.smt);
+          println("))");
+        }
+        case UNKNOWN -> throw KEMException.internalError(
+            "Could not solve sort constraints.", currentTerm);
+        case UNSATISFIABLE -> {
+          println("(pop)");
+          computeStatus();
+          if (constraint.name != null) {
+            Sort actualSort = computeValue(constraint.name);
+            Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
+            throw new LocalizedError(
+                "Unexpected sort "
+                    + actualSort
+                    + " for variable "
+                    + constraint.loc.value()
+                    + ". Expected: "
+                    + expectedSort,
+                constraint.loc);
+          } else {
+            Sort actualSort = eval(constraint.actualSort, constraint.actualParams);
+            Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
+            throw new LocalizedError(
+                "Unexpected sort "
+                    + actualSort
+                    + " for term parsed as production "
+                    + constraint.actualParams.get().production()
+                    + ". Expected: "
+                    + expectedSort,
+                constraint.actualParams.get());
+          }
         }
       }
     }
   }
 
-  /**
-   * Asserts that none of the sort parameters are of the KLabel sort.
-   */
+  /** Asserts that none of the sort parameters are of the KLabel sort. */
   private void assertNotKLabel() {
-    if (!sorts.contains(Sorts.KLabel().head()))
-      return;
+    if (!sorts.contains(Sorts.KLabel().head())) return;
     for (String param : parameters) {
       print("(distinct |" + param + "| ");
       printSort(Sorts.KLabel());
@@ -278,6 +300,7 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Uses z3 to compute the error message associated with a badly typed term.
+   *
    * @return
    */
   private KEMException push() {
@@ -290,7 +313,7 @@ public class TypeInferencer implements AutoCloseable {
     for (String var : variables) {
       println("(declare-const |" + var + "| Sort)");
     }
-    //assert sort parameters are not sort KLabel.
+    // assert sort parameters are not sort KLabel.
     print("(assert (and true ");
     assertNotKLabel();
     println("))");
@@ -307,6 +330,7 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * write constraints to z3 for a term.
+   *
    * @param t The term to compute constraints for.
    * @param topSort The expected sort at the top of the term.
    * @param isAnywhere Whether the term is an anywhere rule.
@@ -315,14 +339,14 @@ public class TypeInferencer implements AutoCloseable {
     currentTerm = t;
     currentTopSort = topSort;
     this.isAnywhere = isAnywhere;
-    level+=2;
+    level += 2;
     println("(push)");
     // compute constraints in non-incremental mode
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere, false);
     String id = viz.apply(t);
     if (variables.isEmpty()) {
-        // there are no variables. so return as there is nothing to infer.
-        return;
+      // there are no variables. so return as there is nothing to infer.
+      return;
     }
     // declare variables and sort parameters
     for (String var : variables) {
@@ -350,49 +374,56 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Returns the top term on the lhs of a rule, if one exists.
+   *
    * @param t
    * @return
    */
   private static Optional<ProductionReference> getFunction(Term t) {
-    if (!(t instanceof ProductionReference)) {
+    if (!(t instanceof ProductionReference child)) {
       return Optional.empty();
     }
-    ProductionReference child = (ProductionReference)t;
     while (child.production().att().contains(Att.BRACKET())) {
-      if (((TermCons)child).get(0) instanceof Ambiguity) {
+      if (((TermCons) child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
-      child = (ProductionReference)((TermCons)child).get(0);
+      child = (ProductionReference) ((TermCons) child).get(0);
     }
-    if (child.production().klabel().isDefined() && child.production().klabel().get().head().equals(KLabels.KREWRITE)) {
-      if (((TermCons)child).get(0) instanceof Ambiguity) {
+    if (child.production().klabel().isDefined()
+        && child.production().klabel().get().head().equals(KLabels.KREWRITE)) {
+      if (((TermCons) child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
-      child = (ProductionReference)((TermCons)child).get(0);
+      child = (ProductionReference) ((TermCons) child).get(0);
     }
     while (child.production().att().contains(Att.BRACKET())) {
-      if (((TermCons)child).get(0) instanceof Ambiguity) {
+      if (((TermCons) child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
-      child = (ProductionReference)((TermCons)child).get(0);
+      child = (ProductionReference) ((TermCons) child).get(0);
     }
     return Optional.of(child);
   }
 
   /**
    * Returns true if a rule is a function or anywhere rule.
+   *
    * @param t
    * @param isAnywhere
    * @return
    */
   private static boolean isFunction(Term t, boolean isAnywhere) {
-    return isAnywhere ||
-            getFunction(t).filter(pr -> pr.production().att().contains(Att.FUNCTION())
-                    || ExpandMacros.isMacro(pr.production())).isPresent();
+    return isAnywhere
+        || getFunction(t)
+            .filter(
+                pr ->
+                    pr.production().att().contains(Att.FUNCTION())
+                        || ExpandMacros.isMacro(pr.production()))
+            .isPresent();
   }
 
   /**
    * Returns return sort of a function or anywhere rule.
+   *
    * @param t
    * @return
    */
@@ -402,27 +433,26 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Returns the declared of a cast.
+   *
    * @param tc
    * @return
    */
   private static Sort getSortOfCast(TermCons tc) {
     switch (tc.production().klabel().get().name()) {
-    case "#SyntacticCast":
-    case "#OuterCast":
-      return tc.production().sort();
-    case "#InnerCast":
-      return ((NonTerminal)tc.production().items().apply(1)).sort();
-    default:
-      if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
+      case "#SyntacticCast":
+      case "#OuterCast":
         return tc.production().sort();
-      }
-      throw new AssertionError("Unexpected cast type");
+      case "#InnerCast":
+        return ((NonTerminal) tc.production().items().apply(1)).sort();
+      default:
+        if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
+          return tc.production().sort();
+        }
+        throw new AssertionError("Unexpected cast type");
     }
   }
 
-  /**
-   * A z3 constraint to be replayed later.
-   */
+  /** A z3 constraint to be replayed later. */
   public static class Constraint {
     public final String smt;
     public final String name;
@@ -434,13 +464,19 @@ public class TypeInferencer implements AutoCloseable {
 
     /**
      * Creates an upper bound constraint on a variable.
+     *
      * @param smt The smtlib of the constraint
      * @param name The name of the variable
      * @param loc The variable
      * @param expectedSort The upper bound on the variable.
      * @param expectedParams The term that provided that upper bound.
      */
-    public Constraint(String smt, String name, Constant loc, Sort expectedSort, Optional<ProductionReference> expectedParams) {
+    public Constraint(
+        String smt,
+        String name,
+        Constant loc,
+        Sort expectedSort,
+        Optional<ProductionReference> expectedParams) {
       this.smt = smt;
       this.name = name;
       this.loc = loc;
@@ -452,13 +488,19 @@ public class TypeInferencer implements AutoCloseable {
 
     /**
      * Creates a constraint that an actual sort is less than or equal to an expected sort.
+     *
      * @param smt The smtlib of the constraint
      * @param actualSort The actual sort of the term.
      * @param actualParams The term
      * @param expectedSort The expected sort of the term.
      * @param expectedParams The term that provided that expected sort.
      */
-    public Constraint(String smt, Sort actualSort, Optional<ProductionReference> actualParams, Sort expectedSort, Optional<ProductionReference> expectedParams) {
+    public Constraint(
+        String smt,
+        Sort actualSort,
+        Optional<ProductionReference> actualParams,
+        Sort expectedSort,
+        Optional<ProductionReference> expectedParams) {
       this.smt = smt;
       this.name = null;
       this.loc = null;
@@ -470,6 +512,7 @@ public class TypeInferencer implements AutoCloseable {
 
     /**
      * Returns true if a constraint is an upper bound on a variable.
+     *
      * @return
      */
     public boolean isVar() {
@@ -478,8 +521,8 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   /**
-   * Computes the smtlib constraints for a term by traversing it and creating a set of declarations that capture the
-   * sort constraints.
+   * Computes the smtlib constraints for a term by traversing it and creating a set of declarations
+   * that capture the sort constraints.
    */
   public class ExpectedSortsVisitor {
     private Sort expectedSort;
@@ -492,13 +535,13 @@ public class TypeInferencer implements AutoCloseable {
     private int ambId = 0;
 
     // cache for sharing ambiguity nodes
-    private Map<Ambiguity, Map<String, Integer>> ambCache = new IdentityHashMap<>();
+    private final Map<Ambiguity, Map<String, Integer>> ambCache = new IdentityHashMap<>();
 
     /**
-     *
      * @param topSort Expected sort at top of term.
      * @param isAnywhere true if the term is an anywhere rule.
-     * @param isIncremental true if we should compute the constraints as a list of {@link Constraint}
+     * @param isIncremental true if we should compute the constraints as a list of {@link
+     *     Constraint}
      */
     ExpectedSortsVisitor(Sort topSort, boolean isAnywhere, boolean isIncremental) {
       this.expectedSort = topSort;
@@ -507,17 +550,18 @@ public class TypeInferencer implements AutoCloseable {
     }
 
     /**
-     * Generate constraints for a term and accumulate them either in sb if in non-incremental mode, or in constraints
-     * if in incremental model.
+     * Generate constraints for a term and accumulate them either in sb if in non-incremental mode,
+     * or in constraints if in incremental model.
+     *
      * @param t The term to generate constraints for.
-     * @return the name of the function generated by this term in non-incremental mode that captures the constraints of
-     * this term.
+     * @return the name of the function generated by this term in non-incremental mode that captures
+     *     the constraints of this term.
      */
     public String apply(Term t) {
-      if (t instanceof Ambiguity) {
-        Ambiguity amb = (Ambiguity)t;
+      if (t instanceof Ambiguity amb) {
         if (isIncremental) {
-          // we are error checking an ill typed term, so we pick just one branch of the ambiguity and explain why it is
+          // we are error checking an ill typed term, so we pick just one branch of the ambiguity
+          // and explain why it is
           // ill typed.
           return apply(amb.items().iterator().next());
         }
@@ -527,7 +571,8 @@ public class TypeInferencer implements AutoCloseable {
         int id = contexts.computeIfAbsent(expected, expected2 -> ambId);
         boolean cached = id != ambId;
         if (!cached) {
-          // if this is the first time reaching this ambiguity node with this expected sort, define a new function
+          // if this is the first time reaching this ambiguity node with this expected sort, define
+          // a new function
           // with a disjunction of each of the children of the ambiguity.
           ambId++;
           List<String> ids = new ArrayList<>();
@@ -543,13 +588,15 @@ public class TypeInferencer implements AutoCloseable {
         // return name of created or cached function
         return "amb" + id;
       }
-      ProductionReference pr = (ProductionReference)t;
+      ProductionReference pr = (ProductionReference) t;
       List<String> ids = new ArrayList<>();
-      boolean isTopSort = expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
+      boolean isTopSort =
+          expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
       int id = nextId;
       boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
       if (!shared) {
-        // if this is the first time reaching this term, initialize data structures with the variables associated with
+        // if this is the first time reaching this term, initialize data structures with the
+        // variables associated with
         // this term.
         nextId++;
         variablesById.add(new ArrayList<>());
@@ -567,28 +614,27 @@ public class TypeInferencer implements AutoCloseable {
         // get cached id
         id = pr.id().get();
       }
-      if (pr instanceof TermCons) {
+      if (pr instanceof TermCons tc) {
         boolean wasStrict = isStrictEquality;
         Sort oldExpectedSort = expectedSort;
         Optional<ProductionReference> oldExpectedParams = expectedParams;
-        TermCons tc = (TermCons)pr;
         // traverse children
         for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-          if (tc.production().items().apply(i) instanceof NonTerminal) {
-            NonTerminal nt = (NonTerminal)tc.production().items().apply(i);
+          if (tc.production().items().apply(i) instanceof NonTerminal nt) {
             expectedParams = Optional.of(tc);
             isStrictEquality = false;
             // compute expected sort and whether this is a cast
             if (tc.production().klabel().isDefined()
-                  && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                  || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                  || tc.production().klabel().get().name().equals("#InnerCast"))) {
+                && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
               expectedSort = getSortOfCast(tc);
-              isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
-                  || tc.production().klabel().get().name().equals("#InnerCast");
-              if (tc.get(0) instanceof Constant) {
-                Constant child = (Constant)tc.get(0);
-                if (child.production().sort().equals(Sorts.KVariable()) || child.production().sort().equals(Sorts.KConfigVar())) {
+              isStrictEquality =
+                  tc.production().klabel().get().name().equals("#SyntacticCast")
+                      || tc.production().klabel().get().name().equals("#InnerCast");
+              if (tc.get(0) instanceof Constant child) {
+                if (child.production().sort().equals(Sorts.KVariable())
+                    || child.production().sort().equals(Sorts.KConfigVar())) {
                   isStrictEquality = true;
                 }
               }
@@ -598,7 +644,8 @@ public class TypeInferencer implements AutoCloseable {
             } else {
               expectedSort = nt.sort();
             }
-            // recurse and add name of function generated by child to the current children of this constraint.
+            // recurse and add name of function generated by child to the current children of this
+            // constraint.
             ids.add(apply(tc.get(j)));
             j++;
           }
@@ -611,16 +658,24 @@ public class TypeInferencer implements AutoCloseable {
       String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
       boolean cached = !cacheById.get(id).add(expected);
       if (!isIncremental && (!shared || !cached)) {
-        // if we are in non-incremental mode and this is the first time reaching this term under this expected sort,
-        // define a new function with a conjunction of each of the children of the term and the constraints of the
+        // if we are in non-incremental mode and this is the first time reaching this term under
+        // this expected sort,
+        // define a new function with a conjunction of each of the children of the term and the
+        // constraints of the
         // current term.
-        sb.append("(define-fun |constraint").append(id).append("_").append(expected).append("| () Bool (and true ");
+        sb.append("(define-fun |constraint")
+            .append(id)
+            .append("_")
+            .append(expected)
+            .append("| () Bool (and true ");
       }
       if (isIncremental || !shared || !cached) {
-        // if we are in incremental mode or this is the first time reaching this term under this expected sort,
+        // if we are in incremental mode or this is the first time reaching this term under this
+        // expected sort,
         // compute the local constraints of this term and add them to the current constraint.
-        if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
-          Constant c = (Constant) pr;
+        if (pr instanceof Constant c
+            && (pr.production().sort().equals(Sorts.KVariable())
+                || pr.production().sort().equals(Sorts.KConfigVar()))) {
           String name;
           boolean oldStrictEquality = isStrictEquality;
           if (!shared) {
@@ -647,7 +702,7 @@ public class TypeInferencer implements AutoCloseable {
           pushConstraint(pr.production().sort(), Optional.of(pr));
         }
       }
-      if (!isIncremental && (!shared ||  !cached)) {
+      if (!isIncremental && (!shared || !cached)) {
         for (String i : ids) {
           sb.append(i).append(" ");
         }
@@ -663,11 +718,13 @@ public class TypeInferencer implements AutoCloseable {
 
     /**
      * Add a constraint that an actual sort is less than an expected sort.
+     *
      * @param actualSort
      * @param actualParams
      */
     private void pushConstraint(Sort actualSort, Optional<ProductionReference> actualParams) {
-      if (mod.subsorts().lessThanEq(actualSort, Sorts.KBott()) || mod.subsorts().lessThan(Sorts.K(), actualSort)) {
+      if (mod.subsorts().lessThanEq(actualSort, Sorts.KBott())
+          || mod.subsorts().lessThan(Sorts.K(), actualSort)) {
         return;
       }
       if (isBadNatSort(actualSort)) {
@@ -693,6 +750,7 @@ public class TypeInferencer implements AutoCloseable {
 
     /**
      * Add a constraint that a variable is less than an expected sort.
+     *
      * @param name
      * @param loc
      */
@@ -704,7 +762,7 @@ public class TypeInferencer implements AutoCloseable {
       }
       sb.append("|").append(name).append("| ");
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
-          expectedSort = Sorts.K();
+        expectedSort = Sorts.K();
       }
       sb.append(printSort(expectedSort, expectedParams, isIncremental));
       sb.append(") ");
@@ -721,7 +779,8 @@ public class TypeInferencer implements AutoCloseable {
     }
 
     private void saveConstraint(Sort actualSort, Optional<ProductionReference> actualParams) {
-      constraints.add(new Constraint(sb.toString(), actualSort, actualParams, expectedSort, expectedParams));
+      constraints.add(
+          new Constraint(sb.toString(), actualSort, actualParams, expectedSort, expectedParams));
       sb = new StringBuilder();
     }
 
@@ -735,6 +794,7 @@ public class TypeInferencer implements AutoCloseable {
     if (actualSort.isNat() && !mod.definedSorts().contains(actualSort.head())) return true;
     return stream(actualSort.params()).anyMatch(this::isBadNatSort);
   }
+
   private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
     Map<Sort, String> params = new HashMap<>();
     if (t.isPresent()) {
@@ -742,7 +802,7 @@ public class TypeInferencer implements AutoCloseable {
         int id = t.get().id().get();
         List<String> names = variablesById.get(id);
         Seq<Sort> formalParams = t.get().production().params();
-        assert(names.size() == formalParams.size());
+        assert (names.size() == formalParams.size());
         for (int i = 0; i < names.size(); i++) {
           params.put(formalParams.apply(i), names.get(i));
         }
@@ -785,6 +845,7 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Check satisfiability of current assertions and return status.
+   *
    * @return
    */
   private Status computeStatus() {
@@ -794,20 +855,21 @@ public class TypeInferencer implements AutoCloseable {
       do {
         result = output.readLine();
         if (result == null) {
-            throw KEMException.internalError("Unexpected EOF reached while waiting for response from z3.", currentTerm);
+          throw KEMException.internalError(
+              "Unexpected EOF reached while waiting for response from z3.", currentTerm);
         }
-      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.equals("timeout") && !result.startsWith("(error"));
-      switch (result) {
-      case "sat":
-        return Status.SATISFIABLE;
-      case "unsat":
-        return Status.UNSATISFIABLE;
-      case "unknown":
-      case "timeout":
-        return Status.UNKNOWN;
-      default:
-        throw KEMException.internalError("Unexpected result from z3: " + result, currentTerm);
-      }
+      } while (!result.equals("sat")
+          && !result.equals("unsat")
+          && !result.equals("unknown")
+          && !result.equals("timeout")
+          && !result.startsWith("(error"));
+      return switch (result) {
+        case "sat" -> Status.SATISFIABLE;
+        case "unsat" -> Status.UNSATISFIABLE;
+        case "unknown", "timeout" -> Status.UNKNOWN;
+        default -> throw KEMException.internalError(
+            "Unexpected result from z3: " + result, currentTerm);
+      };
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
     }
@@ -815,11 +877,12 @@ public class TypeInferencer implements AutoCloseable {
 
   /**
    * Check satisfiability of current assertions and return status, cached if called multiple times.
+   *
    * @return
    */
   public Status status() {
     if (status == null) {
-     status = computeStatus();
+      status = computeStatus();
     }
     return status;
   }
@@ -919,8 +982,7 @@ public class TypeInferencer implements AutoCloseable {
         result = result.substring(startIdx, endIdx);
       }
       Sort r = new SmtSortParser(new StringReader(result)).Sort();
-      if (debug)
-        sb.append("; ").append(r).append("\n");
+      if (debug) sb.append("; ").append(r).append("\n");
       return r;
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
@@ -940,8 +1002,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private void reset() {
-    if (level > 0)
-      return;
+    if (level > 0) return;
     if (debug) {
       System.err.print(sb.toString());
       sb = new StringBuilder();
@@ -965,11 +1026,19 @@ public class TypeInferencer implements AutoCloseable {
   private static String locStr(ProductionReference pr) {
     String suffix = "";
     if (pr.production().klabel().isDefined()) {
-      suffix = "_" + pr.production().klabel().get().name().replace("|","");
+      suffix = "_" + pr.production().klabel().get().name().replace("|", "");
     }
     if (pr.location().isPresent()) {
       Location l = pr.location().get();
-      return "_" + l.startLine() + "_" + l.startColumn() + "_" + l.endLine() + "_" + l.endColumn() + suffix;
+      return "_"
+          + l.startLine()
+          + "_"
+          + l.startColumn()
+          + "_"
+          + l.endLine()
+          + "_"
+          + l.endColumn()
+          + suffix;
     }
     return pr.id().get() + suffix;
   }
