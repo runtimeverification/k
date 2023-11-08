@@ -106,12 +106,12 @@ public class ResolveFun {
             body = k.items().get(0);
             arg = k.items().get(1);
           }
-          if (arg instanceof KVariable) {
-            nameHint1 = ((KVariable) arg).name();
-          } else if (arg instanceof KApply
-              && ((KApply) arg).klabel().name().startsWith("#SemanticCastTo")
-              && ((KApply) arg).items().get(0) instanceof KVariable) {
-            nameHint1 = ((KVariable) ((KApply) arg).items().get(0)).name();
+          if (arg instanceof KVariable var) {
+            nameHint1 = var.name();
+          } else if (arg instanceof KApply app
+              && app.klabel().name().startsWith("#SemanticCastTo")
+              && app.items().get(0) instanceof KVariable) {
+            nameHint1 = ((KVariable) app.items().get(0)).name();
           }
           if (body instanceof KApply) {
             nameHint2 = ((KApply) body).klabel().name();
@@ -151,7 +151,7 @@ public class ResolveFun {
     } else if (lhs instanceof KApply app) {
       return app.klabel().name().startsWith("#SemanticCastTo")
           && app.items().size() == 1
-          && isLHSTotal(app.items().get(0));
+          && app.items().get(0) instanceof KVariable;
     }
 
     return false;
@@ -230,9 +230,9 @@ public class ResolveFun {
 
   private Sort sort(K k) {
     if (k instanceof KSequence) return Sorts.K();
-    if (k instanceof KAs) return sort(((KAs) k).pattern());
+    if (k instanceof KAs as) return sort(as.pattern());
     if (k instanceof InjectedKLabel) return Sorts.KItem();
-    if (k instanceof KToken) return ((KToken) k).sort();
+    if (k instanceof KToken token) return token.sort();
     if (k instanceof KApply) {
       return inj.sort(k, Sorts.K());
     }
@@ -250,12 +250,12 @@ public class ResolveFun {
   }
 
   public Sentence resolve(Sentence s) {
-    if (s instanceof Rule) {
-      return resolve((Rule) s);
-    } else if (s instanceof Context) {
-      return resolve((Context) s);
-    } else if (s instanceof ContextAlias) {
-      return resolve((ContextAlias) s);
+    if (s instanceof Rule r) {
+      return resolve(r);
+    } else if (s instanceof Context c) {
+      return resolve(c);
+    } else if (s instanceof ContextAlias ca) {
+      return resolve(ca);
     } else {
       return s;
     }
