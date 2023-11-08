@@ -2,8 +2,12 @@
 package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
+
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -417,17 +421,17 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
       PrintWriter debug = null;
       try {
-	  File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
-	  debugFile.getParentFile().mkdirs();
-	  debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-	  new SortInferencer(disambModule, debug, strict && inferSortChecks, true).
-	      apply(rez3, startSymbol, isAnywhere);
+        File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
+        debugFile.getParentFile().mkdirs();
+        debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+        new SortInferencer(disambModule, debug, strict && inferSortChecks, true)
+            .apply(rez3, startSymbol, isAnywhere);
       } catch (java.io.IOException e) {
-	  throw KEMException.criticalError(e.getMessage());
+        throw KEMException.criticalError(e.getMessage());
       } finally {
-	  if (debug != null) {
-	      debug.close();
-	  }
+        if (debug != null) {
+          debug.close();
+        }
       }
 
       TypeInferencer currentInferencer;
