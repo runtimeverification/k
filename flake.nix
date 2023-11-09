@@ -16,15 +16,10 @@
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
-    # needed by nix/flake-compat-k-unwrapped.nix
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , booster-backend, llvm-backend, flake-compat }:
+    , booster-backend, llvm-backend }:
     let
       allOverlays = [
         (_: _: {
@@ -68,8 +63,8 @@
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
                 mvnHash = "sha256-EvTLGyv648FT47yAWoM2imsZe+GJzIELHG5SvUws68A=";
-                manualMvnArtifacts = [ 
-                  "org.scala-lang:scala-compiler:2.12.18" 
+                manualMvnArtifacts = [
+                  "org.scala-lang:scala-compiler:2.12.18"
                   "ant-contrib:ant-contrib:1.0b3"
                   "org.apache.ant:ant-nodeps:1.8.1"
                 ];
