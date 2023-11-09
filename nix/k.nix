@@ -1,4 +1,4 @@
-{ src, maven, mvnHash, clang, stdenv, lib, runCommand, makeWrapper, bison, flex, gcc, git
+{ src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand, makeWrapper, bison, flex, gcc, git
 , gmp, jdk, jre, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, booster ? null, prelude-kore, llvm-backend, debugger, version
 , llvm-kompile-libs }:
@@ -29,7 +29,7 @@ let
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
-      inherit version src mvnHash;
+      inherit version src mvnHash manualMvnArtifacts;
 
       buildOffline = true;
 
