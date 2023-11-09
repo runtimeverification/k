@@ -51,6 +51,49 @@ jobs:
           version: 1.18.1
           args: "--dry-run --set-exit-if-changed"
 
+  nix-maven:
+    name: 'Nix: Maven'
+    runs-on: ubuntu-20.04
+    needs: format-check
+    steps:
+
+      - name: 'Check out code, set up Git'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
+
+      - name: 'Install Nix'
+        uses: cachix/install-nix-action@v22
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            substituters = http://cache.nixos.org https://hydra.iohk.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+
+      - name: 'Install Cachix'
+        uses: cachix/cachix-action@v12
+        with:
+          name: k-framework
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          skipPush: true
+
+      - name: 'Update Maven dependencies, push changes'
+        run: |
+          set -x
+          git checkout ${GITHUB_HEAD_REF}
+          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+                -- $(find . -name pom.xml); then
+            nix run .#update-maven
+          fi
+          if git add nix/ && git commit -m 'Update Nix lock files'; then
+            git push
+          fi
+
   test-k:
     name: 'K Tests'
     runs-on: [self-hosted, linux, normal]
@@ -182,6 +225,7 @@ jobs:
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
+    needs: [nix-maven]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
