@@ -23,13 +23,14 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
-    , llvm-backend, flake-compat }:
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+    , booster-backend, llvm-backend, flake-compat }:
     let
       allOverlays = [
         (_: _: {
           llvm-version = 15;
-          llvm-backend-build-type = "Release"; })
+          llvm-backend-build-type = "Release";
+        })
         llvm-backend.overlays.default
         haskell-backend.overlays.z3
         haskell-backend.overlays.integration-tests
@@ -61,14 +62,17 @@
               '';
             };
           in {
+            # this version of maven from nixpkgs 23.11. we can remove this version of maven once our nixpkgs catches up
             maven = prev.callPackage ./nix/maven.nix { };
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
+                mvnHash = "sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=";
                 inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
-                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
+                booster =
+                  booster-backend.packages.${prev.system}.kore-rpc-booster;
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
@@ -96,14 +100,13 @@
           # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
           # https://github.com/NixOS/nixpkgs/pull/172397
           config.allowBroken = system == "aarch64-darwin";
-          overlays = [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
+          overlays =
+            [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
             ++ allOverlays;
         };
 
         haskell-backend-bins = pkgs.symlinkJoin {
-          name = "kore-${
-              haskell-backend.sourceInfo.shortRev or "local"
-            }";
+          name = "kore-${haskell-backend.sourceInfo.shortRev or "local"}";
           paths = let p = haskell-backend.packages.${system};
           in [
             p.kore-exec
@@ -115,7 +118,8 @@
         };
 
       in rec {
-        k-version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
+        k-version =
+          pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
           k = pkgs.k-framework {
@@ -185,7 +189,10 @@
             };
         };
         defaultPackage = packages.k;
-        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework { inherit haskell-backend-bins; llvm-kompile-libs = {}; });
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework {
+          inherit haskell-backend-bins;
+          llvm-kompile-libs = { };
+        });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlays.z3;
