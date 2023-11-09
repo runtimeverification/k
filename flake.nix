@@ -10,15 +10,9 @@
     };
     nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
-    mavenix = {
-      url = "github:goodlyrottenapple/mavenix/0cbd57b2494d52909b27f57d03580acc66bf0298";
-      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-      inputs.utils.follows = "flake-utils";
-    };
     llvm-backend = {
       url = "github:runtimeverification/llvm-backend";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-      inputs.mavenix.follows = "mavenix";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
@@ -30,13 +24,12 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
-    , llvm-backend, mavenix, flake-compat }:
+    , llvm-backend, flake-compat }:
     let
       allOverlays = [
         (_: _: {
           llvm-version = 15;
           llvm-backend-build-type = "Release"; })
-        mavenix.overlay
         llvm-backend.overlays.default
         haskell-backend.overlays.z3
         haskell-backend.overlays.integration-tests
@@ -68,12 +61,14 @@
               '';
             };
           in {
+            maven = prev.callPackage ./nix/maven.nix { };
+
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
+                inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
                 booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
-                mavenix = { inherit (prev) buildMaven; };
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
@@ -130,23 +125,6 @@
               openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
             };
           };
-
-          # This is a copy of the `nix/update-maven.sh` script, which should be
-          # eventually removed. Having this inside the flake provides a uniform
-          # interface, i.e. we have `update-maven` in k and
-          # `update-cabal` in the haskell-backend.
-          # The first `nix-build` command below ensures k source is loaded into the Nix store.
-          # This command will fail, but only after loading the source.
-          # mavenix will not do this automatically because we it uses restrict-eval,
-          # and we are using filterSource, which is disabled under restrict-eval.
-          update-maven = pkgs.writeShellScriptBin "update-maven" ''
-            #!/bin/sh
-            ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
-              || echo "^~~~ expected error"
-
-            export PATH="${pkgs.gnused}/bin:$PATH"
-            ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
-          '';
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend booster-backend;
