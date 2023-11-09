@@ -37,10 +37,6 @@ let
         "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true";
       nativeBuildInputs = [ makeWrapper ];
 
-      preFixup = lib.optionalString (!stdenv.isDarwin) ''
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin/ng"
-      '';
-
       postPatch = ''
         patchShebangs k-distribution/src/main/scripts/bin
         patchShebangs k-distribution/src/main/scripts/lib
@@ -81,6 +77,10 @@ let
                 }"''
             }
         done
+      '';
+
+      preFixup = lib.optionalString (!stdenv.isDarwin) ''
+        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin/.ng-wrapped"
       '';
 
       passthru =
