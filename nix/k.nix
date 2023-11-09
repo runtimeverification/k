@@ -1,7 +1,7 @@
-{ src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand, makeWrapper, bison, flex, gcc, git
-, gmp, jdk, jre, jre_minimal, mpfr, ncurses, pkgconfig, python3, z3
-, haskell-backend, booster ? null, prelude-kore, llvm-backend, debugger, version
-, llvm-kompile-libs }:
+{ src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
+, makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
+, pkgconfig, python3, z3, haskell-backend, booster, prelude-kore, llvm-backend
+, debugger, version, llvm-kompile-libs }:
 
 let
   runtimeInputs = [
@@ -43,10 +43,13 @@ let
       '';
 
       installPhase = ''
-        mkdir $out
-        cp -r k-distribution/target/release/k/{bin,include,lib} $out/
+        mkdir -p $out/bin-unwrapped
+        mkdir -p $out/bin
+        cp -r k-distribution/target/release/k/bin/* $out/bin-unwrapped/
+        cp -r k-distribution/target/release/k/{include,lib} $out/
 
-        mkdir -p $out/lib/cmake/kframework && cp ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
+        mkdir -p $out/lib/cmake/kframework
+        cp ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
         ln -sf ${llvm-backend}/include/kllvm $out/include/
         ln -sf ${llvm-backend}/include/kllvm-c $out/include/
         ln -sf ${llvm-backend}/lib/kllvm $out/lib/
@@ -59,16 +62,15 @@ let
         ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
         ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
 
-        ${lib.optionalString (booster != null)
-        "ln -sf ${booster}/bin/* $out/bin/"}
+        ln -sf ${booster}/bin/* $out/bin/
 
         prelude_kore="$out/include/kframework/kore/prelude.kore"
         mkdir -p "$(dirname "$prelude_kore")"
         ln -sf "${prelude-kore}" "$prelude_kore"
 
-        for prog in $out/bin/*
+        for prog in $out/bin-unwrapped/*
         do
-          wrapProgram $prog \
+          makeWrapper $prog $out/bin/$(basename $prog) \
             --prefix PATH : ${runtimePath} ${
               lib.optionalString (current-llvm-kompile-libs != [ ]) ''
                 --set NIX_LLVM_KOMPILE_LIBS "${
@@ -80,7 +82,7 @@ let
       '';
 
       preFixup = lib.optionalString (!stdenv.isDarwin) ''
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin/.ng-wrapped"
+        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin-unwrapped/ng"
       '';
 
       passthru =
