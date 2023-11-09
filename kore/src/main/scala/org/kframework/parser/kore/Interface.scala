@@ -1,6 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore  
 
+import com.davekoelle.AlphanumComparator
 import org.kframework.utils.errorsystem.KEMException
 
 trait Definition {
@@ -127,6 +128,10 @@ trait Pattern extends Comparable[Pattern] {
   def compareTo(that: Pattern): Int = Pattern.ord.compare(this, that)
 }
 
+object AlphanumOrdering extends Ordering[String] {
+  def compare(a:String, b:String): Int = new AlphanumComparator().compare(a, b)
+}
+ 
 object Pattern {
   implicit val ord = new Ordering[Pattern] {
     def compare(a: Pattern, b: Pattern): Int = {
@@ -451,6 +456,7 @@ trait DomainValue extends Pattern {
 
 object DomainValue {
   import scala.math.Ordering.Implicits._
+  implicit val strOrd: Ordering[String] = AlphanumOrdering
   def unapply(arg: DomainValue): Option[(Sort, String)] = Some(arg.s, arg.str)
   implicit val ord: Ordering[DomainValue] = Ordering.by(unapply)
 }
