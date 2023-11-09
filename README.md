@@ -417,19 +417,23 @@ Common build-time error messages:
           at build time (and remove the GHC dependency) by doing: `mvn package -Dhaskell.backend.skip`.
 
 -   When building with nix and getting:
-    ```bash
-    error: hash mismatch in fixed-output derivation '/nix/store/wjz7gjqs3cch9lgdjhs1fnb8wfl352vd-k-6.1.0-dirty-maven-deps.drv':
-            specified: sha256-kLpjMj05uC94/5vGMwMlFzLKNFOKey◊Nvq/vmB6pHTAo=
-                got:    sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=
-    error: 1 dependencies of derivation '/nix/store/79hazjbxp8829wpjvhh9c7kzc1m0ii22-k-6.1.0-dirty.drv' failed to build
-    ```
-    copy the `got:` hash (`sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=`) and replace it in `flake.nix`:
-    ```nix
-    k-framework = { haskell-backend-bins, llvm-kompile-libs }:
-        prev.callPackage ./nix/k.nix {
-            mvnHash = "sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=";
-            ...
-    ```
+    -   ```bash
+        error: hash mismatch in fixed-output derivation '/nix/store/wjz7gjqs3cch9lgdjhs1fnb8wfl352vd-k-6.1.0-dirty-maven-deps.drv':
+                specified: sha256-kLpjMj05uC94/5vGMwMlFzLKNFOKey◊Nvq/vmB6pHTAo=
+                    got:    sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=
+        error: 1 dependencies of derivation '/nix/store/79hazjbxp8829wpjvhh9c7kzc1m0ii22-k-6.1.0-dirty.drv' failed to build
+        ```
+
+        copy the `got:` hash (`sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=`) and replace it in `flake.nix`:
+        
+        ```nix
+        k-framework = { haskell-backend-bins, llvm-kompile-libs }:
+            prev.callPackage ./nix/k.nix {
+                mvnHash = "sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=";
+                ...
+        ```
+    -   `[ERROR] Failed to execute goal ... org.apache.maven.artifact.resolver.ArtifactNotFoundException: The following artifacts could not be resolved: org.scala-lang:scala-compiler:jar:2.12.18 ...`
+        Add `"org.scala-lang:scala-compiler:2.12.18"` (without the `jar:`) to `manualMvnArtifacts` in `flake.nix`
 
 
 
