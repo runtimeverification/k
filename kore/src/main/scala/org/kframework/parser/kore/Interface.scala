@@ -183,6 +183,7 @@ object Pattern {
         case (_:Rewrites, _) => -1
         case (_, _:Rewrites) => 1
         case (_:Equals, _) => -1
+        case (_, _:Equals) => 1
         case (_:Mem, _) => -1
         case (_, _:Mem) => 1
         case (_:DomainValue, _) => -1
