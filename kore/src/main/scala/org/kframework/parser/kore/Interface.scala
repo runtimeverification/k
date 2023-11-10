@@ -1,5 +1,8 @@
 // Copyright (c) K Team. All Rights Reserved.
-package org.kframework.parser.kore
+package org.kframework.parser.kore  
+
+import com.davekoelle.AlphanumComparator
+import org.kframework.utils.errorsystem.KEMException
 
 trait Definition {
   def att: Attributes
@@ -121,7 +124,77 @@ object Attributes {
   def unapply(arg: Attributes): Option[Seq[Pattern]] = Some(arg.patterns)
 }
 
-trait Pattern
+trait Pattern extends Comparable[Pattern] {
+  def compareTo(that: Pattern): Int = Pattern.ord.compare(this, that)
+}
+
+object AlphanumOrdering extends Ordering[String] {
+  def compare(a:String, b:String): Int = new AlphanumComparator().compare(a, b)
+}
+ 
+object Pattern {
+  implicit val ord = new Ordering[Pattern] {
+    def compare(a: Pattern, b: Pattern): Int = {
+      (a, b) match {
+        case (c:Variable, d:Variable) => Ordering[Variable].compare(c, d)
+        case (c:Application, d:Application) => Ordering[Application].compare(c, d)
+        case (c:Top, d:Top) => Ordering[Top].compare(c, d)
+        case (c:Bottom, d:Bottom) => Ordering[Bottom].compare(c, d)
+        case (c:And, d:And) => Ordering[And].compare(c, d)
+        case (c:Or, d:Or) => Ordering[Or].compare(c, d)
+        case (c:Not, d:Not) => Ordering[Not].compare(c, d)
+        case (c:Implies, d:Implies) => Ordering[Implies].compare(c, d)
+        case (c:Iff, d:Iff) => Ordering[Iff].compare(c, d)
+        case (c:Exists, d:Exists) => Ordering[Exists].compare(c, d)
+        case (c:Forall, d:Forall) => Ordering[Forall].compare(c, d)
+        case (c:Ceil, d:Ceil) => Ordering[Ceil].compare(c, d)
+        case (c:Floor, d:Floor) => Ordering[Floor].compare(c, d)
+        case (c:Rewrites, d:Rewrites) => Ordering[Rewrites].compare(c, d)
+        case (c:Equals, d:Equals) => Ordering[Equals].compare(c, d)
+        case (c:Mem, d:Mem) => Ordering[Mem].compare(c, d)
+        case (c:DomainValue, d:DomainValue) => Ordering[DomainValue].compare(c, d)
+        case (c:StringLiteral, d:StringLiteral) => Ordering[StringLiteral].compare(c, d)
+        case (_:Variable, _) => -1
+        case (_, _:Variable) => 1
+        case (_:Application, _) => -1
+        case (_, _:Application) => 1
+        case (_:Top, _) => -1
+        case (_, _:Top) => 1
+        case (_:Bottom, _) => -1
+        case (_, _:Bottom) => 1
+        case (_:And, _) => -1
+        case (_, _:And) => 1
+        case (_:Or, _) => -1
+        case (_, _:Or) => 1
+        case (_:Not, _) => -1
+        case (_, _:Not) => 1
+        case (_:Implies, _) => -1
+        case (_, _:Implies) => 1
+        case (_:Iff, _) => -1
+        case (_, _:Iff) => 1
+        case (_:Exists, _) => -1
+        case (_, _:Exists) => 1
+        case (_:Forall, _) => -1
+        case (_, _:Forall) => 1
+        case (_:Ceil, _) => -1
+        case (_, _:Ceil) => 1
+        case (_:Floor, _) => -1
+        case (_, _:Floor) => 1
+        case (_:Rewrites, _) => -1
+        case (_, _:Rewrites) => 1
+        case (_:Equals, _) => -1
+        case (_, _:Equals) => 1
+        case (_:Mem, _) => -1
+        case (_, _:Mem) => 1
+        case (_:DomainValue, _) => -1
+        case (_, _:DomainValue) => 1
+        case (_:StringLiteral, _) => -1
+        case (_, _:StringLiteral) => 1
+        case (_, _) => throw KEMException.internalError("Cannot order these patterns:\n" + a.toString() + "\n" + b.toString())
+      }
+    }
+  }
+}
 
 trait Variable extends Pattern {
   def name: String
@@ -130,7 +203,9 @@ trait Variable extends Pattern {
 }
 
 object Variable {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
+  implicit val ord: Ordering[Variable] = Ordering.by(unapply)
 }
 
 trait SetVariable extends Variable {}
@@ -142,7 +217,9 @@ trait Application extends Pattern {
 }
 
 object Application {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Application): Option[(SymbolOrAlias, Seq[Pattern])] = Some(arg.head, arg.args)
+  implicit val ord: Ordering[Application] = Ordering.by(unapply)
 }
 
 trait Top extends Pattern {
@@ -150,7 +227,9 @@ trait Top extends Pattern {
 }
 
 object Top {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Top): Option[Sort] = Some(arg.s)
+  implicit val ord: Ordering[Top] = Ordering.by(unapply)
 }
 
 trait Bottom extends Pattern {
@@ -158,7 +237,9 @@ trait Bottom extends Pattern {
 }
 
 object Bottom {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Bottom): Option[Sort] = Some(arg.s)
+  implicit val ord: Ordering[Bottom] = Ordering.by(unapply)
 }
 
 trait And extends Pattern {
@@ -168,7 +249,9 @@ trait And extends Pattern {
 }
 
 object And {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: And): Option[(Sort, Seq[Pattern])] = Some(arg.s, arg.args)
+  implicit val ord: Ordering[And] = Ordering.by(unapply)
 }
 
 trait Or extends Pattern {
@@ -178,7 +261,9 @@ trait Or extends Pattern {
 }
 
 object Or {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Or): Option[(Sort, Seq[Pattern])] = Some(arg.s, arg.args)
+  implicit val ord: Ordering[Or] = Ordering.by(unapply)
 }
 
 trait Not extends Pattern {
@@ -188,7 +273,9 @@ trait Not extends Pattern {
 }
 
 object Not {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Not): Option[(Sort, Pattern)] = Some(arg.s, arg._1)
+  implicit val ord: Ordering[Not] = Ordering.by(unapply)
 }
 
 trait Implies extends Pattern {
@@ -200,7 +287,9 @@ trait Implies extends Pattern {
 }
 
 object Implies {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Implies): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
+  implicit val ord: Ordering[Implies] = Ordering.by(unapply)
 }
 
 trait Iff extends Pattern {
@@ -212,7 +301,9 @@ trait Iff extends Pattern {
 }
 
 object Iff {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Iff): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
+  implicit val ord: Ordering[Iff] = Ordering.by(unapply)
 }
 
 trait Exists extends Pattern {
@@ -224,7 +315,9 @@ trait Exists extends Pattern {
 }
 
 object Exists {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Exists): Option[(Sort, Variable, Pattern)] = Some(arg.s, arg.v, arg.p)
+  implicit val ord: Ordering[Exists] = Ordering.by(unapply)
 }
 
 trait Forall extends Pattern {
@@ -236,7 +329,9 @@ trait Forall extends Pattern {
 }
 
 object Forall {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Forall): Option[(Sort, Variable, Pattern)] = Some(arg.s, arg.v, arg.p)
+  implicit val ord: Ordering[Forall] = Ordering.by(unapply)
 }
 
 trait Ceil extends Pattern {
@@ -248,7 +343,9 @@ trait Ceil extends Pattern {
 }
 
 object Ceil {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Ceil): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
+  implicit val ord: Ordering[Ceil] = Ordering.by(unapply)
 }
 
 trait Floor extends Pattern {
@@ -260,7 +357,9 @@ trait Floor extends Pattern {
 }
 
 object Floor {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Floor): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
+  implicit val ord: Ordering[Floor] = Ordering.by(unapply)
 }
 // trait Next extends Pattern {
 //   def s: Sort
@@ -298,8 +397,10 @@ trait Rewrites extends Pattern with GeneralizedRewrite {
 }
 
 object Rewrites {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Rewrites): Option[(Sort, Pattern, Pattern)] =
     Some(arg.s, arg._1, arg._2)
+  implicit val ord: Ordering[Rewrites] = Ordering.by(unapply)
 }
 
 trait Equals extends Pattern with GeneralizedRewrite {
@@ -321,7 +422,9 @@ trait Equals extends Pattern with GeneralizedRewrite {
 }
 
 object Equals {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Equals): Option[(Sort, Sort, Pattern, Pattern)] = Some(arg.s, arg.rs, arg._1, arg._2)
+  implicit val ord: Ordering[Equals] = Ordering.by(unapply)
 }
 
 /**
@@ -338,7 +441,9 @@ trait Mem extends Pattern {
 }
 
 object Mem {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: Mem): Option[(Sort, Sort, Pattern, Pattern)] = Some(arg.s, arg.rs, arg.p, arg.q)
+  implicit val ord: Ordering[Mem] = Ordering.by(unapply)
 }
 
 /**
@@ -351,7 +456,10 @@ trait DomainValue extends Pattern {
 }
 
 object DomainValue {
+  import scala.math.Ordering.Implicits._
+  implicit val strOrd: Ordering[String] = AlphanumOrdering
   def unapply(arg: DomainValue): Option[(Sort, String)] = Some(arg.s, arg.str)
+  implicit val ord: Ordering[DomainValue] = Ordering.by(unapply)
 }
 
 /**
@@ -378,7 +486,9 @@ trait StringLiteral extends Pattern {
 }
 
 object StringLiteral {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: StringLiteral): Option[String] = Some(arg.str)
+  implicit val ord: Ordering[StringLiteral] = Ordering.by(unapply)
 }
 
 // Domain Values are needed to merge Kore to K.
@@ -404,12 +514,30 @@ object StringLiteral {
 
 trait Sort
 
+object Sort {
+  implicit val ord = new Ordering[Sort] {
+    def compare(a: Sort, b: Sort): Int = {
+      (a, b) match {
+        case (c:SortVariable, d:SortVariable) => Ordering[SortVariable].compare(c, d)
+        case (c:CompoundSort, d:CompoundSort) => Ordering[CompoundSort].compare(c, d)
+        case (_:SortVariable, _) => -1
+        case (_, _:SortVariable) => 1
+        case (_:CompoundSort, _) => -1
+        case (_, _:CompoundSort) => 1
+        case (_, _) => throw KEMException.internalError("Cannot order these sorts:\n" + a.toString() + "\n" + b.toString())
+      }
+    }
+  }
+}
+
 trait SortVariable extends Sort {
   def name: String
 }
 
 object SortVariable {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: SortVariable): Option[String] = Some(arg.name)
+  implicit val ord: Ordering[SortVariable] = Ordering.by(unapply)
 }
 
 /** A compound sort is of the form C{s1,...,sn}
@@ -422,7 +550,9 @@ trait CompoundSort extends Sort {
 }
 
 object CompoundSort {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: CompoundSort): Option[(String, Seq[Sort])] = Some(arg.ctr, arg.params)
+  implicit val ord: Ordering[CompoundSort] = Ordering.by(unapply)
 }
 
 /** A symbol-or-alias is of the form C{s1,...,sn}
@@ -436,8 +566,10 @@ trait SymbolOrAlias {
 }
 
 object SymbolOrAlias {
+  import scala.math.Ordering.Implicits._
   def unapply(arg: SymbolOrAlias): Option[(String, Seq[Sort])] =
     Some(arg.ctr, arg.params)
+  implicit val ord: Ordering[SymbolOrAlias] = Ordering.by(unapply)
 }
 
 trait Symbol extends SymbolOrAlias
