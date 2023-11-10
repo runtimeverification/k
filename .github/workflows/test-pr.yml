@@ -48,7 +48,7 @@ jobs:
       - name: 'Check code is formatted correctly'
         uses: axel-op/googlejavaformat-action@v3
         with:
-          version: 1.18.1
+          version: v1.18.1
           args: "--dry-run --set-exit-if-changed"
 
   test-k:
