@@ -17,7 +17,7 @@ let
     buildPhase = ''
       runHook preBuild
     '' + lib.optionalString buildOffline ''
-      mvn dependency:go-offline -Dmaven.repo.local=$out/.m2 ${mvnDepsParameters}
+      mvn org.apache.maven.plugins:maven-dependency-plugin:3.6.1:go-offline -Dmaven.repo.local=$out/.m2 ${mvnDepsParameters}
 
       for artifactId in ${builtins.toString manualMvnArtifacts}
       do
@@ -37,8 +37,13 @@ let
       find $out -type f \( \
         -name \*.lastUpdated \
         -o -name resolver-status.properties \
-        -o -name _remote.repositories \) \
+        -o -name _remote.repositories \
+        -o -name \*.snapshots.xml \
+        -o -name \*.snapshots.xml.sha1 \) \
         -delete
+      
+      # delete any empty directories
+      find . -type d -empty -delete
 
       runHook postInstall
     '';

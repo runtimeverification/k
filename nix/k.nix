@@ -35,6 +35,7 @@ let
 
       mvnParameters =
         "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true";
+
       nativeBuildInputs = [ makeWrapper ];
 
       postPatch = ''

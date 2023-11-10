@@ -62,11 +62,12 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-EvTLGyv648FT47yAWoM2imsZe+GJzIELHG5SvUws68A=";
+                mvnHash = "sha256-CF6MQRDMDTSAr3Z7y2yheRiWdA3V0JnnQxRr7UGPm18=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.12.18"
                   "ant-contrib:ant-contrib:1.0b3"
                   "org.apache.ant:ant-nodeps:1.8.1"
+                  "org.apache.maven.wagon:wagon-provider-api:1.0-alpha-6"
                 ];
                 inherit (final) maven;
                 inherit (prev) llvm-backend;
