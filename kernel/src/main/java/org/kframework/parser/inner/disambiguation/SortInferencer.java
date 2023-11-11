@@ -9,6 +9,7 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
+import org.kframework.definition.Production;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
@@ -35,9 +36,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.kframework.utils.errorsystem.KEMException;
+import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Left;
+import scala.util.Right;
 
 import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
@@ -62,13 +65,52 @@ public class SortInferencer {
 
   private final PrintWriter debug;
 
-  private final boolean inferCasts;
+  /**
+   * Modes controlling how type inference inserts semantic casts x:Sort or strict casts x::Sort on
+   * variables in order to record their inferred types.
+   */
+  public enum CastInsertionMode {
+    /**
+     * Don't insert any casts. Type inference is still run and will report an error if the
+     * term is ill-typed, but it never modifies the term.
+     *
+     * <ul>
+     *   <li>x -> x
+     *   <li>x:Sort -> x:Sort
+     *   <li>x::Sort -> x::Sort
+     * </ul>
+     */
+    NONE,
+    /**
+     * Insert a semantic cast on every variable not currently wrapped by one.
+     *
+     * <ul>
+     *   <li>x -> x:Sort
+     *   <li>x:Sort -> x:Sort
+     *   <li>x::Sort -> (x:Sort)::Sort
+     * </ul>
+     */
+    SEMANTIC_CASTS_ON_ALL_VARS,
+    /**
+     * Insert a strict cast on every variable not currently wrapped by either a strict cast or a
+     * semantic cast.
+     *
+     * <ul>
+     *   <li>x -> x::Sort
+     *   <li>x:Sort -> x:Sort
+     *   <li>x::Sort -> x::Sort
+     * </ul>
+     */
+    STRICT_CASTS_ON_UNCASTED_VARS,
+  }
+
+  private final CastInsertionMode castMode;
 
   public SortInferencer(
-      Module mod, PrintWriter debug, boolean inferSortChecks, boolean inferCasts) {
+      Module mod, PrintWriter debug, CastInsertionMode castMode) {
     this.mod = mod;
     this.debug = debug;
-    this.inferCasts = inferCasts;
+    this.castMode = castMode;
   }
 
   /**
@@ -146,8 +188,20 @@ public class SortInferencer {
 
     debug.println(new GsonBuilder().setPrettyPrinting().create().toJson(res));
 
-    // return typeTerm(t, res);
-      return null;
+    Set<Map<String, Sort>> monoRes = monomorphizeVarSorts(res.varSorts());
+    if (castMode == CastInsertionMode.NONE) {
+      return Right.apply(t);
+    }
+
+    Set<Term> items = new HashSet<>();
+    for (Map<String, Sort> mono : monoRes) {
+      items.add(insertCasts(t, mono, CastContext.NONE));
+    }
+    if (items.size() == 1) {
+      return Right.apply(items.iterator().next());
+    } else {
+      return Right.apply(Ambiguity.apply(items));
+    }
   }
 
   private static class SortInferenceError extends Exception {
@@ -225,8 +279,7 @@ public class SortInferencer {
     }
     addParamsFromProduction(inferState, pr);
 
-    if (pr instanceof Constant) {
-      Constant c = (Constant) t;
+    if (pr instanceof Constant c) {
       if (c.production().sort().equals(Sorts.KVariable())
           || c.production().sort().equals(Sorts.KConfigVar())) {
         String name = varName(c);
@@ -248,18 +301,7 @@ public class SortInferencer {
       KLabel klabel = tc.production().klabel().get();
       String label = klabel.name();
       if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
-        BoundedSort childSort = infer(tc.get(0), false, inferState);
-        BoundedSort castedSort =
-            sortToBoundedSort(
-                label.equals("#InnerCast")
-                    ? ((NonTerminal) tc.production().items().apply(1)).sort()
-                    : tc.production().sort(),
-                pr,
-                inferState.params());
-        debug.println("Ignoring strict cast!");
-        constrain(childSort, castedSort, inferState, pr);
-        // TODO: Unify here instead of constraining!
-        return childSort;
+        throw new AssertionError("Strict casts not yet supported!");
       }
 
       // For function, macro, and anywhere rules, the RHS must be a subsort of the LHS
@@ -418,40 +460,33 @@ public class SortInferencer {
     pols.add(false);
     pols.add(true);
 
-    pols.forEach(
-        (pol) ->
-            allVars.forEach(
-                (v) ->
-                    coOccurrences
-                        .getOrDefault(Tuple2.apply(v, pol), new HashSet<>())
-                        .forEach(
-                            (co) -> {
-                              if (co instanceof BoundedSort.Variable w) {
-                                if (v.equals(w) || varSubst.containsKey(w)) {
-                                  return;
-                                }
-                                if (coOccurrences
-                                    .getOrDefault(Tuple2.apply(w, pol), new HashSet<>())
-                                    .contains(v)) {
-                                  // v and w co-occur in the given polarity, so we unify w into v
-                                  varSubst.put(w, Optional.of(v));
-                                  // we also need to update v's co-occurrences correspondingly
-                                  // (intersecting with w's)
-                                  coOccurrences
-                                      .get(Tuple2.apply(v, !pol))
-                                      .retainAll(coOccurrences.get(Tuple2.apply(w, !pol)));
-                                  coOccurrences.get(Tuple2.apply(v, !pol)).add(v);
-                                }
-                                return;
-                              }
-                              // This is not a variable, so check if we have a sandwich t <: v <: t
-                              // and can thus simplify away v
-                              if (coOccurrences
-                                  .getOrDefault(Tuple2.apply(v, !pol), new HashSet<>())
-                                  .contains(co)) {
-                                varSubst.put(v, Optional.empty());
-                              }
-                            })));
+    for (Boolean pol : pols) {
+      for (BoundedSort.Variable v : allVars) {
+        for (BoundedSort co : coOccurrences.getOrDefault(Tuple2.apply(v, pol), new HashSet<>())) {
+          if (co instanceof BoundedSort.Variable w) {
+            if (v.equals(w) || varSubst.containsKey(w)) {
+              continue;
+            }
+            if (coOccurrences.getOrDefault(Tuple2.apply(w, pol), new HashSet<>()).contains(v)) {
+              // v and w co-occur in the given polarity, so we unify w into v
+              varSubst.put(w, Optional.of(v));
+              // we also need to update v's co-occurrences correspondingly
+              // (intersecting with w's)
+              coOccurrences
+                  .get(Tuple2.apply(v, !pol))
+                  .retainAll(coOccurrences.get(Tuple2.apply(w, !pol)));
+              coOccurrences.get(Tuple2.apply(v, !pol)).add(v);
+            }
+            continue;
+          }
+          // This is not a variable, so check if we have a sandwich t <: v <: t
+          // and can thus simplify away v
+          if (coOccurrences.getOrDefault(Tuple2.apply(v, !pol), new HashSet<>()).contains(co)) {
+            varSubst.put(v, Optional.empty());
+          }
+        }
+      }
+    }
 
     CompactSort newSort = computeTypes(applySubstitutions(res.sort(), varSubst), true);
     Map<String, CompactSort> newVarSorts = new HashMap<>();
@@ -480,7 +515,6 @@ public class SortInferencer {
       Set<BoundedSort> newOccurs =
           Stream.concat(
                   sort.vars().stream().map(v -> (BoundedSort) v),
-                  // TODO: Handle co-occurrence with parametric sorts
                   sort.ctors().stream().map(BoundedSort.Constructor::new))
               .collect(Collectors.toSet());
       Tuple2<BoundedSort.Variable, Boolean> polVar = Tuple2.apply(var, polarity);
@@ -490,7 +524,6 @@ public class SortInferencer {
         coOccurrences.put(polVar, newOccurs);
       }
     }
-    // TODO: Recurse into parametric sorts
   }
 
   /**
@@ -537,6 +570,80 @@ public class SortInferencer {
     Set<SortHead> newCtors = res.stream().map(Sort::head).collect(Collectors.toSet());
 
     return new CompactSort(new HashSet<>(sort.vars()), newCtors);
+  }
+
+  private Set<Map<String, Sort>> monomorphizeVarSorts(Map<String, CompactSort> varSorts) {
+    return null;
+  }
+
+  // The type of cast which wraps the current term being typed
+  private enum CastContext {
+    NONE,
+    SEMANTIC_CAST,
+    STRICT_CAST
+  }
+
+  private Term insertCasts(Term t, Map<String, Sort> sorts, CastContext castCtx) {
+    if (t instanceof Ambiguity) {
+      throw new AssertionError("Ambiguities are not yet supported!");
+    }
+
+    ProductionReference pr = (ProductionReference) t;
+    if (pr instanceof Constant c) {
+      if (c.production().sort().equals(Sorts.KVariable())
+          || c.production().sort().equals(Sorts.KConfigVar())) {
+        Sort inferred = sorts.get(varName(c));
+        return wrapTermWithCast(c, inferred, castCtx);
+      }
+    }
+
+    assert pr instanceof TermCons;
+    TermCons tc = (TermCons) pr;
+    CastContext newCtx = CastContext.NONE;
+    if (tc.production().klabel().isDefined()) {
+      KLabel klabel = tc.production().klabel().get();
+      String label = klabel.name();
+      if (label.startsWith("#SemanticCastTo")) {
+        newCtx = CastContext.SEMANTIC_CAST;
+      } else if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
+        newCtx = CastContext.STRICT_CAST;
+      }
+    }
+    for (int i = 0; i < tc.items().size(); i++) {
+      tc = tc.with(i, insertCasts(tc, sorts, newCtx));
+    }
+    return tc;
+  }
+
+  private Term wrapTermWithCast(Term t, Sort sort, CastContext castCtx) {
+    Production cast = null;
+    switch (castMode) {
+      case NONE -> {}
+      case SEMANTIC_CASTS_ON_ALL_VARS -> {
+        if (castCtx != CastContext.SEMANTIC_CAST) {
+          cast = mod.productionsFor().apply(KLabel("#SemanticCastTo" + sort.toString())).head();
+        }
+      }
+      case STRICT_CASTS_ON_UNCASTED_VARS -> {
+        if (castCtx == CastContext.NONE) {
+          cast =
+              stream(mod.productionsFor().apply(KLabel("#SyntacticCast")))
+                  .filter(p -> p.sort().equals(sort))
+                  .findAny()
+                  .orElseThrow(
+                      () ->
+                          new AssertionError(
+                              "Attempting to insert strict cast to "
+                                  + sort
+                                  + ", but no appropriate #SyntacticCast production found."));
+        }
+      }
+    }
+
+    if (cast == null) {
+      return t;
+    }
+    return TermCons.apply(ConsPStack.singleton(t), cast, t.location(), t.source());
   }
 
   private String locStr(ProductionReference pr) {
