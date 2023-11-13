@@ -139,8 +139,7 @@ public class KastFrontEnd extends FrontEnd {
         String stringToParse = FileUtil.read(options.stringToParse());
         Source source = options.source();
 
-        try (ParseInModule parseInModule =
-            RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, null)) {
           if (options.debugTokens)
             System.out.println(parseInModule.tokenizeString(stringToParse, source));
           else {
@@ -155,7 +154,7 @@ public class KastFrontEnd extends FrontEnd {
             // syntax
             // like casts, projections and others
             Module unparsingMod = parseInModule.getExtensionModule();
-            K parsed = new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
+            K parsed = new TreeNodesToKORE(Outer::parseSort).down(res._1().right().get());
 
             if (options.expandMacros) {
               parsed =
