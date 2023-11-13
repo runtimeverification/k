@@ -17,11 +17,7 @@ import scala.util.Right;
 /** Eliminate remaining ambiguities by choosing one of them. */
 public class AmbFilter extends SetsGeneralTransformer<KEMException, KEMException> {
 
-  private final boolean strict;
-
-  public AmbFilter(boolean strict) {
-    this.strict = strict;
-  }
+  public AmbFilter() {}
 
   @Override
   public Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> apply(Ambiguity amb) {
@@ -31,7 +27,7 @@ public class AmbFilter extends SetsGeneralTransformer<KEMException, KEMException
     for (Term t : amb.items()) {
       candidate = this.apply(t);
       K next =
-          new TreeNodesToKORE(Outer::parseSort, strict)
+          new TreeNodesToKORE(Outer::parseSort)
               .apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
       if (last != null) {
         if (!last.equals(next)) {

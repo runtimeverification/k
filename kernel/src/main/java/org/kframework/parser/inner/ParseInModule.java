@@ -58,7 +58,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
   private volatile Module parsingModule;
 
   private volatile EarleyParser parser = null;
-  private final boolean strict;
   private final boolean profileRules;
   private final boolean isBison;
   private final boolean forGlobalScanner;
@@ -68,7 +67,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
   ParseInModule(
       Module seedModule,
-      boolean strict,
       boolean profileRules,
       boolean isBison,
       boolean forGlobalScanner,
@@ -81,7 +79,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
         null,
         null,
         null,
-        strict,
         profileRules,
         isBison,
         forGlobalScanner,
@@ -93,7 +90,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
   ParseInModule(
       Module seedModule,
       Scanner scanner,
-      boolean strict,
       boolean profileRules,
       boolean isBison,
       boolean forGlobalScanner,
@@ -106,7 +102,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
         null,
         null,
         scanner,
-        strict,
         profileRules,
         isBison,
         forGlobalScanner,
@@ -121,7 +116,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
       Module disambModule,
       Module parsingModule,
       Scanner scanner,
-      boolean strict,
       boolean profileRules,
       boolean isBison,
       boolean forGlobalScanner,
@@ -133,7 +127,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
     this.disambModule = disambModule;
     this.parsingModule = parsingModule;
     this.scanner = scanner;
-    this.strict = strict;
     this.profileRules = profileRules;
     this.isBison = isBison;
     this.forGlobalScanner = forGlobalScanner;
@@ -350,9 +343,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       parseInfo = Left.apply(result._1().left().get());
     } else {
       parseInfo =
-          Right.apply(
-              new TreeNodesToKORE(Outer::parseSort, inferSortChecks && strict)
-                  .apply(result._1().right().get()));
+          Right.apply(new TreeNodesToKORE(Outer::parseSort).apply(result._1().right().get()));
     }
     return new Tuple2<>(parseInfo, result._2());
   }
@@ -430,7 +421,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
       rez =
           new TypeInferenceVisitor(
-                  currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere)
+                  currentInferencer, startSymbol, inferSortChecks, true, isAnywhere)
               .apply(rez3);
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
@@ -439,7 +430,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       rez3 =
           new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
-      rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
+      rez = new AmbFilterError().apply(rez3);
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2 =
           new AddEmptyLists(disambModule, startSymbol).apply(rez.right().get());
@@ -500,11 +491,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
     }
     if (rez.isLeft()) {
-      rez2 = new AmbFilter(false).apply(rez3);
+      rez2 = new AmbFilter().apply(rez3);
       return rez2._1().right().get();
     }
     rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez.right().get());
-    rez2 = new AmbFilter(false).apply(rez3);
+    rez2 = new AmbFilter().apply(rez3);
     return rez2._1().right().get();
   }
 }

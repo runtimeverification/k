@@ -4,20 +4,19 @@ package org.kframework.parser
 import java.util
 import java.util.Optional
 
-import org.kframework.attributes.{Att,HasLocation,Location,Source}
+import org.kframework.attributes.{Att, Location, Source}
 import org.kframework.builtin.Sorts
-import org.kframework.definition.{NonTerminal, Production}
+import org.kframework.definition.Production
 import org.kframework.{kore => k}
 import org.kframework.kore.Unapply._
-import org.kframework.kore.{KORE, _}
+import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
-import org.pcollections.PStack
 
 import scala.collection.JavaConverters._
 
-class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], strict: Boolean) {
+class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
 
-  import org.kframework.kore.KORE.{KApply,KLabel,KList,KToken,KVariable,KSequence,KAs,KRewrite,InjectedKLabel}
+  import org.kframework.kore.KORE.{KApply, KLabel, KList, KToken, KVariable, KSequence, KAs, KRewrite, InjectedKLabel}
 
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source)
