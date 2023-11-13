@@ -44,6 +44,7 @@ import scala.util.Right;
  */
 public class ParseInModule implements Serializable, AutoCloseable {
   private final Module seedModule;
+
   private Module extensionModule;
 
   /**
@@ -68,6 +69,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
   private final boolean forGlobalScanner;
   private final FileUtil files;
   private final String typeInferenceDebug;
+  private final boolean alwaysZ3TypeInference;
   private final boolean partialParseDebug;
 
   ParseInModule(
@@ -78,6 +80,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
+      boolean alwaysZ3TypeInference,
       boolean partialParseDebug) {
     this(
         seedModule,
@@ -91,6 +94,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         forGlobalScanner,
         files,
         typeInferenceDebug,
+        alwaysZ3TypeInference,
         partialParseDebug);
   }
 
@@ -103,6 +107,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
+      boolean alwaysZ3TypeInference,
       boolean partialParseDebug) {
     this(
         seedModule,
@@ -116,6 +121,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         forGlobalScanner,
         files,
         typeInferenceDebug,
+        alwaysZ3TypeInference,
         partialParseDebug);
   }
 
@@ -131,6 +137,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
+      boolean alwaysZ3TypeInference,
       boolean partialParseDebug) {
     this.seedModule = seedModule;
     this.extensionModule = extensionModule;
@@ -143,6 +150,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     this.forGlobalScanner = forGlobalScanner;
     this.files = files;
     this.typeInferenceDebug = typeInferenceDebug;
+    this.alwaysZ3TypeInference = alwaysZ3TypeInference;
     this.partialParseDebug = partialParseDebug;
   }
 

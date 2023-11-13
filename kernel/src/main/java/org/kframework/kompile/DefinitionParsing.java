@@ -441,7 +441,12 @@ public class DefinitionParsing {
               ParseCache cache = loadCache(configParserModule);
               try (ParseInModule parser =
                   RuleGrammarGenerator.getCombinedGrammar(
-                      cache.module(), true, profileRules, files, options.debugTypeInference)) {
+                      cache.module(),
+                      true,
+                      profileRules,
+                      files,
+                      options.debugTypeInference,
+                      options.alwaysZ3TypeInference)) {
                 // each parser gets its own scanner because config labels can conflict with user
                 // tokens
                 parser.getScanner(globalOptions);
@@ -510,7 +515,8 @@ public class DefinitionParsing {
                           true,
                           profileRules,
                           files,
-                          options.debugTypeInference)
+                          options.debugTypeInference,
+                          options.alwaysZ3TypeInference)
                       .getExtensionModule();
               Set<Sentence> configDeclProductions =
                   stream(module.localSentences())
@@ -558,6 +564,7 @@ public class DefinitionParsing {
             true,
             files,
             options.debugTypeInference,
+            options.alwaysZ3TypeInference,
             false)) {
       Scanner scanner;
       if (deserializeScanner) {
@@ -590,7 +597,12 @@ public class DefinitionParsing {
     try (ParseInModule parser =
         needNewScanner
             ? RuleGrammarGenerator.getCombinedGrammar(
-                cache.module(), true, profileRules, files, options.debugTypeInference)
+                cache.module(),
+                true,
+                profileRules,
+                files,
+                options.debugTypeInference,
+                options.alwaysZ3TypeInference)
             : RuleGrammarGenerator.getCombinedGrammar(
                 cache.module(),
                 scanner,
@@ -599,6 +611,7 @@ public class DefinitionParsing {
                 false,
                 files,
                 options.debugTypeInference,
+                options.alwaysZ3TypeInference,
                 false)) {
       if (needNewScanner) parser.getScanner(globalOptions);
       parser.initialize();
@@ -800,6 +813,7 @@ public class DefinitionParsing {
             true,
             files,
             options.debugTypeInference,
+            options.alwaysZ3TypeInference,
             false)) {
       parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
       java.util.Set<K> res =

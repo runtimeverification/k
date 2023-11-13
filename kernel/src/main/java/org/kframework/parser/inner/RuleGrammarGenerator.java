@@ -201,27 +201,42 @@ public record RuleGrammarGenerator(Definition baseK) {
 
   /* use this overload if you don't need to profile rule parse times. */
   public static ParseInModule getCombinedGrammar(Module mod, boolean strict, FileUtil files) {
-    return getCombinedGrammar(mod, strict, false, false, false, files, null, false);
+    return getCombinedGrammar(mod, strict, false, false, false, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
       Module mod, boolean strict, FileUtil files, boolean partialParseDebug) {
-    return getCombinedGrammar(mod, strict, false, false, false, files, null, partialParseDebug);
+    return getCombinedGrammar(
+        mod, strict, false, false, false, files, null, false, partialParseDebug);
   }
 
   public static ParseInModule getCombinedGrammar(
       Module mod, boolean strict, boolean timing, FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, false, false, files, null, false);
+    return getCombinedGrammar(mod, strict, timing, false, false, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, boolean timing, FileUtil files, String debugTypeInference) {
-    return getCombinedGrammar(mod, strict, timing, false, false, files, debugTypeInference, false);
+      Module mod,
+      boolean strict,
+      boolean timing,
+      FileUtil files,
+      String debugTypeInference,
+      boolean alwaysZ3BasedTypeInference) {
+    return getCombinedGrammar(
+        mod,
+        strict,
+        timing,
+        false,
+        false,
+        files,
+        debugTypeInference,
+        alwaysZ3BasedTypeInference,
+        false);
   }
 
   public static ParseInModule getCombinedGrammar(
       Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, isBison, false, files, null, false);
+    return getCombinedGrammar(mod, strict, timing, isBison, false, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -231,7 +246,8 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean isBison,
       boolean forGlobalScanner,
       FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, isBison, forGlobalScanner, files, null, false);
+    return getCombinedGrammar(
+        mod, strict, timing, isBison, forGlobalScanner, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -241,7 +257,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean timing,
       boolean isBison,
       FileUtil files) {
-    return getCombinedGrammar(mod, scanner, strict, timing, isBison, files, null, false);
+    return getCombinedGrammar(mod, scanner, strict, timing, isBison, files, null, false, false);
   }
 
   // the forGlobalScanner flag tells the ParseInModule class not to exclude
@@ -270,6 +286,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean forGlobalScanner,
       FileUtil files,
       String debugTypeInference,
+      boolean alwaysZ3TypeInference,
       boolean partialParseDebug) {
     return new ParseInModule(
         mod,
@@ -279,6 +296,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         forGlobalScanner,
         files,
         debugTypeInference,
+        alwaysZ3TypeInference,
         partialParseDebug);
   }
 
@@ -290,9 +308,19 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean isBison,
       FileUtil files,
       String debugTypeInference,
+      boolean alwaysZ3TypeInference,
       boolean partialParseDebug) {
     return new ParseInModule(
-        mod, scanner, strict, timing, isBison, false, files, debugTypeInference, partialParseDebug);
+        mod,
+        scanner,
+        strict,
+        timing,
+        isBison,
+        false,
+        files,
+        debugTypeInference,
+        alwaysZ3TypeInference,
+        partialParseDebug);
   }
 
   public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(

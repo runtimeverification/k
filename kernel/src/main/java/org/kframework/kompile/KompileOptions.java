@@ -241,7 +241,13 @@ public class KompileOptions implements Serializable {
 
   @Parameter(
       names = "--enable-kore-antileft",
-      description = "Enable generation of legacy antileft priority predicates ",
+      description = "Enable generation of legacy antileft priority predicates.",
       hidden = true)
   public boolean enableKoreAntileft;
+
+  @Parameter(
+          names = "--z3-type-inference",
+          description = "Always used the Z3-based type inference algorithm.",
+          hidden = true)
+  public boolean alwaysZ3TypeInference;
 }
