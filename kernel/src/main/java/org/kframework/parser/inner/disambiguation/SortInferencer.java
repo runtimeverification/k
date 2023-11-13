@@ -1,6 +1,5 @@
 package org.kframework.parser.inner.disambiguation;
 
-import com.google.gson.GsonBuilder;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
@@ -11,7 +10,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.parser.Ambiguity;
@@ -30,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,16 +44,16 @@ import scala.util.Right;
 import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 
-/*
+/**
  * Disambiguation transformer which performs type checking and infers the sorts of variables.
  *
- * The overall design is based on the algorithm described in
- * "The Simple Essence of Algebraic Subtyping: Principal Type Inference with Subtyping Made Easy" by Lionel Parreaux.
+ * <p>The overall design is based on the algorithm described in "The Simple Essence of Algebraic
+ * Subtyping: Principal Type Inference with Subtyping Made Easy" by Lionel Parreaux.
  *
- * Specifically, we can straightforwardly treat any (non-ambiguous) term in our language as a function in the SimpleSub
+ * <p>Specifically, we can straightforwardly treat any (non-ambiguous) term in our language as a
+ * function in the SimpleSub
  *
- * - Constants are treated as built-ins
- * - TermCons are treated as primitive functions
+ * <p>- Constants are treated as built-ins - TermCons are treated as primitive functions
  */
 public class SortInferencer {
   private final Module mod;
@@ -66,13 +65,13 @@ public class SortInferencer {
   private final PrintWriter debug;
 
   /**
-   * Modes controlling how type inference inserts semantic casts x:Sort or strict casts x::Sort on
+   * Modes controlling how type inference inserts semantic (x:Sort) or strict (x::Sort) casts on
    * variables in order to record their inferred types.
    */
   public enum CastInsertionMode {
     /**
-     * Don't insert any casts. Type inference is still run and will report an error if the
-     * term is ill-typed, but it never modifies the term.
+     * Don't insert any casts. Type inference is still run and will report an error if the term is
+     * ill-typed, but it never modifies the term.
      *
      * <ul>
      *   <li>x -> x
@@ -106,8 +105,7 @@ public class SortInferencer {
 
   private final CastInsertionMode castMode;
 
-  public SortInferencer(
-      Module mod, PrintWriter debug, CastInsertionMode castMode) {
+  public SortInferencer(Module mod, PrintWriter debug, CastInsertionMode castMode) {
     this.mod = mod;
     this.debug = debug;
     this.castMode = castMode;
@@ -170,7 +168,7 @@ public class SortInferencer {
     t.source().ifPresent(debug::println);
     t.location().ifPresent(debug::println);
 
-    InferenceResult<CompactSort> res;
+    Set<InferenceResult<Sort>> monoRes;
     try {
       InferenceState inferState =
           new InferenceState(new HashMap<>(), new HashMap<>(), new HashSet<>());
@@ -179,22 +177,20 @@ public class SortInferencer {
       constrain(itemSort, topBoundedSort, inferState, (ProductionReference) t);
       InferenceResult<BoundedSort> unsimplifiedRes =
           new InferenceResult<>(topBoundedSort, inferState.varSorts());
-      res = simplify(compact(unsimplifiedRes));
+      InferenceResult<CompactSort> res = simplify(compact(unsimplifiedRes));
+      monoRes = monomorphize(res);
     } catch (SortInferenceError e) {
       Set<KEMException> errs = new HashSet<>();
       errs.add(e.asInnerParseError());
       return Left.apply(errs);
     }
 
-    debug.println(new GsonBuilder().setPrettyPrinting().create().toJson(res));
-
-    Set<Map<String, Sort>> monoRes = monomorphizeVarSorts(res.varSorts());
     if (castMode == CastInsertionMode.NONE) {
       return Right.apply(t);
     }
 
     Set<Term> items = new HashSet<>();
-    for (Map<String, Sort> mono : monoRes) {
+    for (InferenceResult<Sort> mono : monoRes) {
       items.add(insertCasts(t, mono, CastContext.NONE));
     }
     if (items.size() == 1) {
@@ -430,23 +426,13 @@ public class SortInferencer {
 
   private InferenceResult<CompactSort> simplify(InferenceResult<CompactSort> res)
       throws SortInferenceError {
-    Set<BoundedSort.Variable> allVars = new HashSet<>();
-    Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences = new HashMap<>();
 
-    // Boolean is used to represent polarity - true is positive, false is negative
-    List<Tuple2<CompactSort, Boolean>> compactSorts = new ArrayList<>();
-    // The sort of the overall term is positive
-    compactSorts.add(Tuple2.apply(res.sort(), true));
-    // The sorts of variables are negative
-    compactSorts.addAll(
-        res.varSorts().values().stream().map((v) -> Tuple2.apply(v, false)).toList());
-
-    compactSorts.forEach(
-        polSort -> collectCoOccurrences(polSort._1, polSort._2, allVars, coOccurrences));
-
+    Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences =
+        analyzeCoOcurrences(res, CoOccurMode.ALWAYS);
     Map<BoundedSort.Variable, Optional<BoundedSort.Variable>> varSubst = new HashMap<>();
-
     // Simplify away all those variables that only occur in negative (resp. positive) position.
+    Set<BoundedSort.Variable> allVars =
+        coOccurrences.keySet().stream().map(Tuple2::_1).collect(Collectors.toSet());
     allVars.forEach(
         (v) -> {
           boolean negative = coOccurrences.containsKey(Tuple2.apply(v, false));
@@ -479,7 +465,7 @@ public class SortInferencer {
             }
             continue;
           }
-          // This is not a variable, so check if we have a sandwich t <: v <: t
+          // This is not a variable, so check if we have a sandwich co <: v <: co
           // and can thus simplify away v
           if (coOccurrences.getOrDefault(Tuple2.apply(v, !pol), new HashSet<>()).contains(co)) {
             varSubst.put(v, Optional.empty());
@@ -488,13 +474,38 @@ public class SortInferencer {
       }
     }
 
-    CompactSort newSort = computeTypes(applySubstitutions(res.sort(), varSubst), true);
-    Map<String, CompactSort> newVarSorts = new HashMap<>();
-    for (Map.Entry<String, CompactSort> entry : res.varSorts().entrySet()) {
-      newVarSorts.put(
-          entry.getKey(), computeTypes(applySubstitutions(entry.getValue(), varSubst), false));
-    }
+    CompactSort newSort = applySubstitutions(res.sort(), varSubst);
+    Map<String, CompactSort> newVarSorts =
+        res.varSorts().entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    (Entry::getKey), (e) -> applySubstitutions(e.getValue(), varSubst)));
     return new InferenceResult<>(newSort, newVarSorts);
+  }
+
+  /** Modes for the co-occurrence analysis. */
+  private enum CoOccurMode {
+    /** Record only those sorts which always co-occur with a given variable and polarity. */
+    ALWAYS,
+    /** Record any sort that ever co-occurs with a given variable and polarity. */
+    EVER
+  }
+
+  private Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> analyzeCoOcurrences(
+      InferenceResult<CompactSort> res, CoOccurMode mode) {
+    Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences = new HashMap<>();
+
+    // Boolean is used to represent polarity - true is positive, false is negative
+    List<Tuple2<CompactSort, Boolean>> compactSorts = new ArrayList<>();
+    // The sort of the overall term is positive
+    compactSorts.add(Tuple2.apply(res.sort(), true));
+    // The sorts of variables are negative
+    compactSorts.addAll(
+        res.varSorts().values().stream().map((v) -> Tuple2.apply(v, false)).toList());
+    compactSorts.forEach(
+        polSort -> updateCoOccurrences(polSort._1, polSort._2, mode, coOccurrences));
+
+    return coOccurrences;
   }
 
   /**
@@ -502,16 +513,14 @@ public class SortInferencer {
    *
    * @param sort - The sort which we are processing
    * @param polarity - The polarity of the provided sort
-   * @param allVars - mutated to add all variables seen in sort
    * @param coOccurrences - mutated to record all co-occurrences in each variable occurring in sort
    */
-  private void collectCoOccurrences(
+  private void updateCoOccurrences(
       CompactSort sort,
       boolean polarity,
-      Set<BoundedSort.Variable> allVars,
+      CoOccurMode mode,
       Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> coOccurrences) {
     for (BoundedSort.Variable var : sort.vars()) {
-      allVars.add(var);
       Set<BoundedSort> newOccurs =
           Stream.concat(
                   sort.vars().stream().map(v -> (BoundedSort) v),
@@ -519,7 +528,10 @@ public class SortInferencer {
               .collect(Collectors.toSet());
       Tuple2<BoundedSort.Variable, Boolean> polVar = Tuple2.apply(var, polarity);
       if (coOccurrences.containsKey(polVar)) {
-        coOccurrences.get(polVar).retainAll(newOccurs);
+        switch (mode) {
+          case ALWAYS -> coOccurrences.get(polVar).retainAll(newOccurs);
+          case EVER -> coOccurrences.get(polVar).addAll(newOccurs);
+        }
       } else {
         coOccurrences.put(polVar, newOccurs);
       }
@@ -548,32 +560,127 @@ public class SortInferencer {
     return new CompactSort(vars, ctors);
   }
 
-  private CompactSort computeTypes(CompactSort sort, boolean polarity) throws SortInferenceError {
-    if (sort.ctors().stream().anyMatch(p -> p.params() != 0)) {
-      throw new AssertionError("Parametric sorts are not yet supported!");
-    }
-    if (sort.ctors().size() <= 1) {
-      return new CompactSort(new HashSet<>(sort.vars()), new HashSet<>(sort.ctors()));
-    }
-    Set<Sort> sorts = sort.ctors().stream().map(KORE::Sort).collect(Collectors.toSet());
-    Set<Sort> ogBounds =
-        polarity ? mod.subsorts().upperBounds(sorts) : mod.subsorts().lowerBounds(sorts);
-    Set<Sort> bounds = new HashSet<>(ogBounds);
-    // TODO: bounds.removeIf(s -> mod.subsorts().lessThanEq(s, Sorts.KBott()) ||
-    // mod.subsorts().greaterThan(s, Sorts.K()));
-    Set<Sort> res = polarity ? mod.subsorts().minimal(bounds) : mod.subsorts().maximal(bounds);
+  //  private CompactSort computeTypes(CompactSort sort, boolean polarity) throws SortInferenceError
+  // {
+  //    if (sort.ctors().stream().anyMatch(p -> p.params() != 0)) {
+  //      throw new AssertionError("Parametric sorts are not yet supported!");
+  //    }
+  //    if (sort.ctors().size() <= 1) {
+  //      return new CompactSort(new HashSet<>(sort.vars()), new HashSet<>(sort.ctors()));
+  //    }
+  //    Set<Sort> sorts = sort.ctors().stream().map(KORE::Sort).collect(Collectors.toSet());
+  //    Set<Sort> ogBounds =
+  //        polarity ? mod.subsorts().upperBounds(sorts) : mod.subsorts().lowerBounds(sorts);
+  //    Set<Sort> bounds = new HashSet<>(ogBounds);
+  //    // TODO: bounds.removeIf(s -> mod.subsorts().lessThanEq(s, Sorts.KBott()) ||
+  //    // mod.subsorts().greaterThan(s, Sorts.K()));
+  //    Set<Sort> res = polarity ? mod.subsorts().minimal(bounds) : mod.subsorts().maximal(bounds);
+  //
+  //    if (res.size() != 1) {
+  //      throw SortInferenceError.boundsError(sorts, res, polarity);
+  //    }
+  //
+  //    Set<SortHead> newCtors = res.stream().map(Sort::head).collect(Collectors.toSet());
+  //
+  //    return new CompactSort(new HashSet<>(sort.vars()), newCtors);
+  //  }
 
-    if (res.size() != 1) {
-      throw SortInferenceError.boundsError(sorts, res, polarity);
+  private Set<InferenceResult<Sort>> monomorphize(InferenceResult<CompactSort> res)
+      throws SortInferenceError {
+    Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> bounds =
+        analyzeCoOcurrences(res, CoOccurMode.EVER);
+    Set<BoundedSort.Variable> allVars =
+        bounds.keySet().stream().map(Tuple2::_1).collect(Collectors.toSet());
+    Set<Map<BoundedSort.Variable, Sort>> instantiations = new HashSet<>();
+    instantiations.add(new HashMap<>());
+    for (BoundedSort.Variable var : allVars) {
+      Set<Map<BoundedSort.Variable, Sort>> newInstantiations = new HashSet<>();
+      for (Map<BoundedSort.Variable, Sort> instant : instantiations) {
+        newInstantiations.addAll(monomorphizeInVar(instant, var, bounds));
+      }
+      // TODO: Throw a nice error message here
+      assert !newInstantiations.isEmpty();
+      instantiations = newInstantiations;
     }
 
-    Set<SortHead> newCtors = res.stream().map(Sort::head).collect(Collectors.toSet());
-
-    return new CompactSort(new HashSet<>(sort.vars()), newCtors);
+    Set<InferenceResult<Sort>> monos = new HashSet<>();
+    SortInferenceError lastError = null;
+    for (Map<BoundedSort.Variable, Sort> inst : instantiations) {
+      try {
+        Sort sort = compactSortToSort(res.sort(), true, inst);
+        Map<String, Sort> varSorts = new HashMap<>();
+        for (Entry<String, CompactSort> entry : res.varSorts().entrySet()) {
+          varSorts.put(entry.getKey(), compactSortToSort(entry.getValue(), false, inst));
+        }
+        monos.add(new InferenceResult<>(sort, varSorts));
+      } catch (SortInferenceError e) {
+        lastError = e;
+      }
+    }
+    if (monos.isEmpty()) {
+      throw lastError;
+    }
+    return monos;
   }
 
-  private Set<Map<String, Sort>> monomorphizeVarSorts(Map<String, CompactSort> varSorts) {
-    return null;
+  /**
+   * Convert a CompactSort into a K-Sort
+   *
+   * @param sort - A compact sort
+   * @param polarity - The polarity in which sort occurs. True for positive, false for negative.
+   * @param instantiation - A map indicating how the variables in sort should be instantiated
+   * @return An equivalent Sort
+   */
+  private Sort compactSortToSort(
+      CompactSort sort, boolean polarity, Map<BoundedSort.Variable, Sort> instantiation)
+      throws SortInferenceError {
+    Set<Sort> sorts = sort.vars().stream().map(instantiation::get).collect(Collectors.toSet());
+    sorts.addAll(
+        sort.ctors().stream()
+            .map(h -> new org.kframework.kore.ADT.Sort(h.name(), Seq()))
+            .collect(Collectors.toSet()));
+    Set<Sort> bounds =
+        polarity ? mod.subsorts().upperBounds(sorts) : mod.subsorts().lowerBounds(sorts);
+    Set<Sort> candidates =
+        polarity ? mod.subsorts().minimal(bounds) : mod.subsorts().maximal(bounds);
+    if (candidates.size() != 1) {
+      throw SortInferenceError.boundsError(sorts, candidates, polarity);
+    }
+    return candidates.iterator().next();
+  }
+
+  private Set<Map<BoundedSort.Variable, Sort>> monomorphizeInVar(
+      Map<BoundedSort.Variable, Sort> instantiation,
+      BoundedSort.Variable var,
+      Map<Tuple2<BoundedSort.Variable, Boolean>, Set<BoundedSort>> bounds) {
+
+    Map<Boolean, Set<Sort>> polBounds = new HashMap<>();
+    polBounds.put(true, new HashSet<>());
+    polBounds.put(false, new HashSet<>());
+
+    for (Entry<Boolean, Set<Sort>> polBound : polBounds.entrySet()) {
+      for (BoundedSort bSort :
+          bounds.getOrDefault(Tuple2.apply(var, polBound.getKey()), new HashSet<>())) {
+        if (bSort instanceof BoundedSort.Variable bVar) {
+          if (instantiation.containsKey(bVar)) {
+            polBound.getValue().add(instantiation.get(bVar));
+          }
+        } else if (bSort instanceof BoundedSort.Constructor lowerCtor) {
+          polBound.getValue().add(new org.kframework.kore.ADT.Sort(lowerCtor.head().name(), Seq()));
+        }
+      }
+    }
+
+    Set<Sort> range = mod.subsorts().upperBounds(polBounds.get(true));
+    range.retainAll(mod.subsorts().lowerBounds(polBounds.get(false)));
+
+    Set<Map<BoundedSort.Variable, Sort>> insts = new HashSet<>();
+    for (Sort sort : range) {
+      Map<BoundedSort.Variable, Sort> inst = new HashMap<>(instantiation);
+      inst.put(var, sort);
+      insts.add(inst);
+    }
+    return insts;
   }
 
   // The type of cast which wraps the current term being typed
@@ -583,7 +690,7 @@ public class SortInferencer {
     STRICT_CAST
   }
 
-  private Term insertCasts(Term t, Map<String, Sort> sorts, CastContext castCtx) {
+  private Term insertCasts(Term t, InferenceResult<Sort> sorts, CastContext castCtx) {
     if (t instanceof Ambiguity) {
       throw new AssertionError("Ambiguities are not yet supported!");
     }
@@ -592,12 +699,12 @@ public class SortInferencer {
     if (pr instanceof Constant c) {
       if (c.production().sort().equals(Sorts.KVariable())
           || c.production().sort().equals(Sorts.KConfigVar())) {
-        Sort inferred = sorts.get(varName(c));
+        Sort inferred = sorts.varSorts().get(varName(c));
         return wrapTermWithCast(c, inferred, castCtx);
       }
+      return c;
     }
 
-    assert pr instanceof TermCons;
     TermCons tc = (TermCons) pr;
     CastContext newCtx = CastContext.NONE;
     if (tc.production().klabel().isDefined()) {
@@ -610,7 +717,7 @@ public class SortInferencer {
       }
     }
     for (int i = 0; i < tc.items().size(); i++) {
-      tc = tc.with(i, insertCasts(tc, sorts, newCtx));
+      tc = tc.with(i, insertCasts(tc.get(i), sorts, newCtx));
     }
     return tc;
   }
