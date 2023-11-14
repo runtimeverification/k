@@ -8,6 +8,7 @@ import static org.kframework.kore.KORE.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -106,13 +107,12 @@ public class ResolveFun {
             body = k.items().get(0);
             arg = k.items().get(1);
           }
-          if (arg instanceof KVariable var) {
-            nameHint1 = var.name();
-          } else if (arg instanceof KApply app
-              && app.klabel().name().startsWith("#SemanticCastTo")
-              && app.items().get(0) instanceof KVariable) {
-            nameHint1 = ((KVariable) app.items().get(0)).name();
+
+          Optional<KVariable> underlying = underlyingVariable(arg);
+          if (underlying.isPresent()) {
+            nameHint1 = underlying.get().name();
           }
+
           if (body instanceof KApply app) {
             nameHint2 = app.klabel().name();
           }
@@ -123,7 +123,8 @@ public class ResolveFun {
           if (lbl.name().equals("#fun3")
               || lbl.name().equals("#fun2")
               || lbl.name().equals("#let")) {
-            boolean total = body instanceof KRewrite rew && isLHSTotal(rew.left());
+            boolean total =
+                body instanceof KRewrite rew && underlyingVariable(rew.left()).isPresent();
             funProds.add(funProd(fun, body, lubSort, total));
             funRules.add(funRule(fun, body, k.att()));
           } else {
@@ -145,16 +146,16 @@ public class ResolveFun {
     }.apply(body);
   }
 
-  private boolean isLHSTotal(K lhs) {
-    if (lhs instanceof KVariable) {
-      return true;
-    } else if (lhs instanceof KApply app) {
-      return app.klabel().name().startsWith("#SemanticCastTo")
-          && app.items().size() == 1
-          && app.items().get(0) instanceof KVariable;
+  private Optional<KVariable> underlyingVariable(K term) {
+    if (term instanceof KVariable var) {
+      return Optional.of(var);
+    } else if (term instanceof KApply app
+        && app.klabel().name().startsWith("#SemanticCastTo")
+        && app.items().size() == 1) {
+      return underlyingVariable(app.items().get(0));
     }
 
-    return false;
+    return Optional.empty();
   }
 
   private Rule funRule(KLabel fun, K k, Att att) {
