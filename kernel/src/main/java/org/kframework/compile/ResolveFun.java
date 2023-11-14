@@ -8,6 +8,7 @@ import static org.kframework.kore.KORE.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
@@ -42,7 +44,11 @@ import org.kframework.utils.errorsystem.KEMException;
  * <p>The rule Ctx[#fun(Pattern)(Expression)] is equivalent to the following sentences assuming some
  * completely unique KLabel #lambda1 not used in any token:
  *
- * <p>rule Ctx[#lambda1(Expression)] syntax K ::= #lambda1(K) [function] rule #lambda1(LHS) => RHS
+ * <pre>
+ *   rule Ctx[#lambda1(Expression)]
+ *   syntax K ::= #lambda1(K) [function]
+ *   rule #lambda1(LHS) => RHS
+ * </pre>
  *
  * <p>Where LHS is the LHS of Pattern and RHS is the RHS of Pattern.
  *
@@ -101,15 +107,14 @@ public class ResolveFun {
             body = k.items().get(0);
             arg = k.items().get(1);
           }
-          if (arg instanceof KVariable) {
-            nameHint1 = ((KVariable) arg).name();
-          } else if (arg instanceof KApply
-              && ((KApply) arg).klabel().name().startsWith("#SemanticCastTo")
-              && ((KApply) arg).items().get(0) instanceof KVariable) {
-            nameHint1 = ((KVariable) ((KApply) arg).items().get(0)).name();
+
+          Optional<KVariable> underlying = underlyingVariable(arg);
+          if (underlying.isPresent()) {
+            nameHint1 = underlying.get().name();
           }
-          if (body instanceof KApply) {
-            nameHint2 = ((KApply) body).klabel().name();
+
+          if (body instanceof KApply app) {
+            nameHint2 = app.klabel().name();
           }
           KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
           Sort lhsSort = sort(RewriteToTop.toLeft(body));
@@ -118,7 +123,9 @@ public class ResolveFun {
           if (lbl.name().equals("#fun3")
               || lbl.name().equals("#fun2")
               || lbl.name().equals("#let")) {
-            funProds.add(funProd(fun, body, lubSort));
+            boolean total =
+                body instanceof KRewrite rew && underlyingVariable(rew.left()).isPresent();
+            funProds.add(funProd(fun, body, lubSort, total));
             funRules.add(funRule(fun, body, k.att()));
           } else {
             funProds.add(predProd(fun, body, lubSort));
@@ -137,6 +144,32 @@ public class ResolveFun {
         return super.apply(k);
       }
     }.apply(body);
+  }
+
+  /**
+   * Get the underlying variable from a (possibly nested) set of semantic casts. For example, in
+   * each of the following terms the variable X is returned:
+   *
+   * <pre>
+   *   X
+   *   ((X))
+   *   X:Sort
+   *   (X:SortA):SortB
+   * </pre>
+   *
+   * The {@link KRewrite} induced by a {@code #let} or {@code #fun} binding is considered to be
+   * total if its left-hand side has an underlying variable.
+   */
+  private Optional<KVariable> underlyingVariable(K term) {
+    if (term instanceof KVariable var) {
+      return Optional.of(var);
+    } else if (term instanceof KApply app
+        && app.klabel().name().startsWith("#SemanticCastTo")
+        && app.items().size() == 1) {
+      return underlyingVariable(app.items().get(0));
+    }
+
+    return Optional.empty();
   }
 
   private Rule funRule(KLabel fun, K k, Att att) {
@@ -184,8 +217,9 @@ public class ResolveFun {
     return result;
   }
 
-  private Production funProd(KLabel fun, K k, Sort arg) {
-    return lambdaProd(fun, k, arg, sort(RewriteToTop.toRight(k)));
+  private Production funProd(KLabel fun, K k, Sort arg, boolean total) {
+    Att att = total ? Att().add(Att.TOTAL()) : Att();
+    return lambdaProd(fun, k, arg, sort(RewriteToTop.toRight(k)), att);
   }
 
   private Production predProd(KLabel fun, K k, Sort arg) {
@@ -193,6 +227,10 @@ public class ResolveFun {
   }
 
   private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs) {
+    return lambdaProd(fun, k, arg, rhs, Att());
+  }
+
+  private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs, Att att) {
     List<ProductionItem> pis = new ArrayList<>();
     pis.add(Terminal(fun.name()));
     pis.add(Terminal("("));
@@ -202,14 +240,14 @@ public class ResolveFun {
       pis.add(NonTerminal(var.att().getOptional(Sort.class).orElse(Sorts.K())));
     }
     pis.add(Terminal(")"));
-    return Production(fun, rhs, immutable(pis), Att().add(Att.FUNCTION()));
+    return Production(fun, rhs, immutable(pis), att.add(Att.FUNCTION()));
   }
 
   private Sort sort(K k) {
     if (k instanceof KSequence) return Sorts.K();
-    if (k instanceof KAs) return sort(((KAs) k).pattern());
+    if (k instanceof KAs as) return sort(as.pattern());
     if (k instanceof InjectedKLabel) return Sorts.KItem();
-    if (k instanceof KToken) return ((KToken) k).sort();
+    if (k instanceof KToken token) return token.sort();
     if (k instanceof KApply) {
       return inj.sort(k, Sorts.K());
     }
@@ -227,12 +265,12 @@ public class ResolveFun {
   }
 
   public Sentence resolve(Sentence s) {
-    if (s instanceof Rule) {
-      return resolve((Rule) s);
-    } else if (s instanceof Context) {
-      return resolve((Context) s);
-    } else if (s instanceof ContextAlias) {
-      return resolve((ContextAlias) s);
+    if (s instanceof Rule r) {
+      return resolve(r);
+    } else if (s instanceof Context c) {
+      return resolve(c);
+    } else if (s instanceof ContextAlias ca) {
+      return resolve(ca);
     } else {
       return s;
     }
