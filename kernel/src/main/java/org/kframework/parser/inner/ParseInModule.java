@@ -434,13 +434,14 @@ public class ParseInModule implements Serializable, AutoCloseable {
               files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
           debugFile.getParentFile().mkdirs();
           debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-          new SortInferencer(
-                  disambModule,
-                  debug,
-                  strict && inferSortChecks
-                      ? SortInferencer.CastInsertionMode.SEMANTIC_CASTS_ON_ALL_VARS
-                      : SortInferencer.CastInsertionMode.STRICT_CASTS_ON_UNCASTED_VARS)
-              .apply(rez3, startSymbol, isAnywhere);
+          rez =
+              new SortInferencer(
+                      disambModule,
+                      debug,
+                      strict && inferSortChecks
+                          ? SortInferencer.CastInsertionMode.SEMANTIC_CASTS_ON_ALL_VARS
+                          : SortInferencer.CastInsertionMode.STRICT_CASTS_ON_UNCASTED_VARS)
+                  .apply(rez3, startSymbol, isAnywhere);
         } catch (java.io.IOException e) {
           throw KEMException.criticalError(e.getMessage());
         } finally {
@@ -448,24 +449,24 @@ public class ParseInModule implements Serializable, AutoCloseable {
             debug.close();
           }
         }
-      }
-      TypeInferencer currentInferencer;
-      if (isDebug(source, startLine)) {
-        currentInferencer = new TypeInferencer(disambModule, true);
-        inferencers.add(currentInferencer);
       } else {
-        currentInferencer = inferencer.get();
-        if (currentInferencer == null) {
-          currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
-          inferencer.set(currentInferencer);
+        TypeInferencer currentInferencer;
+        if (isDebug(source, startLine)) {
+          currentInferencer = new TypeInferencer(disambModule, true);
           inferencers.add(currentInferencer);
+        } else {
+          currentInferencer = inferencer.get();
+          if (currentInferencer == null) {
+            currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+            inferencer.set(currentInferencer);
+            inferencers.add(currentInferencer);
+          }
         }
+        rez =
+            new TypeInferenceVisitor(
+                    currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere)
+                .apply(rez3);
       }
-      rez =
-          new TypeInferenceVisitor(
-                  currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere)
-              .apply(rez3);
-
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
