@@ -146,6 +146,20 @@ public class ResolveFun {
     }.apply(body);
   }
 
+  /**
+   * Get the underlying variable from a (possibly nested) set of semantic casts. For example, in
+   * each of the following terms the variable X is returned:
+   *
+   * <pre>
+   *   X
+   *   ((X))
+   *   X:Sort
+   *   (X:SortA):SortB
+   * </pre>
+   *
+   * The {@link KRewrite} induced by a {@code #let} or {@code #fun} binding is considered to be
+   * total if its left-hand side has an underlying variable.
+   */
   private Optional<KVariable> underlyingVariable(K term) {
     if (term instanceof KVariable var) {
       return Optional.of(var);
