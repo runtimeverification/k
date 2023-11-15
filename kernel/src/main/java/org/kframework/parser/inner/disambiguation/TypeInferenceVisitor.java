@@ -284,32 +284,17 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
     }
 
     private Either<Set<KEMException>, Term> wrapTermWithCast(Constant c, Sort declared) {
-      Production cast;
       if (!hasCheckAlready) {
         // strictly typing variables and one does not already exist, so add :Sort
-        cast =
+        Production cast =
             inferencer
                 .module()
                 .productionsFor()
                 .apply(KLabel("#SemanticCastTo" + declared.toString()))
                 .head();
-      } else if (!hasCastAlready
-          && inferencer.module().productionsFor().contains(KLabel("#SyntacticCast"))) {
-        // casting variables and one doeds not already exist, so add ::Sort
-        cast =
-            stream(inferencer.module().productionsFor().apply(KLabel("#SyntacticCast")))
-                .filter(p -> p.sort().equals(declared))
-                .findAny()
-                .get();
-      } else {
-        // unparsing or cast already exists, so do nothing
-        cast = null;
-      }
-      if (cast == null) {
-        return Right.apply(c);
-      } else {
         return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
       }
+      return Right.apply(c);
     }
   }
 }
