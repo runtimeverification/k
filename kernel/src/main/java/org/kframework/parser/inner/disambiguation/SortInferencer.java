@@ -62,51 +62,9 @@ public class SortInferencer {
 
   private final PrintWriter debug;
 
-  /**
-   * Modes controlling how type inference inserts semantic (x:Sort) or strict (x::Sort) casts on
-   * variables in order to record their inferred types.
-   */
-  public enum CastInsertionMode {
-    /**
-     * Don't insert any casts. Type inference is still run and will report an error if the term is
-     * ill-typed, but it never modifies the term.
-     *
-     * <ul>
-     *   <li>x -> x
-     *   <li>x:Sort -> x:Sort
-     *   <li>x::Sort -> x::Sort
-     * </ul>
-     */
-    NONE,
-    /**
-     * Insert a semantic cast on every variable not currently wrapped by one.
-     *
-     * <ul>
-     *   <li>x -> x:Sort
-     *   <li>x:Sort -> x:Sort
-     *   <li>x::Sort -> (x:Sort)::Sort
-     * </ul>
-     */
-    SEMANTIC_CASTS_ON_ALL_VARS,
-    /**
-     * Insert a strict cast on every variable not currently wrapped by either a strict cast or a
-     * semantic cast.
-     *
-     * <ul>
-     *   <li>x -> x::Sort
-     *   <li>x:Sort -> x:Sort
-     *   <li>x::Sort -> x::Sort
-     * </ul>
-     */
-    STRICT_CASTS_ON_UNCASTED_VARS,
-  }
-
-  private final CastInsertionMode castMode;
-
-  public SortInferencer(Module mod, PrintWriter debug, CastInsertionMode castMode) {
+  public SortInferencer(Module mod, PrintWriter debug) {
     this.mod = mod;
     this.debug = debug;
-    this.castMode = castMode;
   }
 
   /**
@@ -181,10 +139,6 @@ public class SortInferencer {
       Set<KEMException> errs = new HashSet<>();
       errs.add(e.asInnerParseError());
       return Left.apply(errs);
-    }
-
-    if (castMode == CastInsertionMode.NONE) {
-      return Right.apply(t);
     }
 
     Set<Term> items = new HashSet<>();
@@ -721,34 +675,12 @@ public class SortInferencer {
   }
 
   private Term wrapTermWithCast(Term t, Sort sort, CastContext castCtx) {
-    Production cast = null;
-    switch (castMode) {
-      case NONE -> {}
-      case SEMANTIC_CASTS_ON_ALL_VARS -> {
-        if (castCtx != CastContext.SEMANTIC_CAST) {
-          cast = mod.productionsFor().apply(KLabel("#SemanticCastTo" + sort.toString())).head();
-        }
-      }
-      case STRICT_CASTS_ON_UNCASTED_VARS -> {
-        if (castCtx == CastContext.NONE) {
-          cast =
-              stream(mod.productionsFor().apply(KLabel("#SyntacticCast")))
-                  .filter(p -> p.sort().equals(sort))
-                  .findAny()
-                  .orElseThrow(
-                      () ->
-                          new AssertionError(
-                              "Attempting to insert strict cast to "
-                                  + sort
-                                  + ", but no appropriate #SyntacticCast production found."));
-        }
-      }
+    if (castCtx != CastContext.SEMANTIC_CAST) {
+      Production cast =
+          mod.productionsFor().apply(KLabel("#SemanticCastTo" + sort.toString())).head();
+      return TermCons.apply(ConsPStack.singleton(t), cast, t.location(), t.source());
     }
-
-    if (cast == null) {
-      return t;
-    }
-    return TermCons.apply(ConsPStack.singleton(t), cast, t.location(), t.source());
+    return t;
   }
 
   private String locStr(ProductionReference pr) {

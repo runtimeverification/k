@@ -418,12 +418,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
           File debugFile = files.resolveKompiled("inference/" + disambModule.name() + ".log");
           debugFile.getParentFile().mkdirs();
           debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-          rez =
-              new SortInferencer(
-                      disambModule,
-                      debug,
-                      SortInferencer.CastInsertionMode.SEMANTIC_CASTS_ON_ALL_VARS)
-                  .apply(rez3, startSymbol, isAnywhere);
+          rez = new SortInferencer(disambModule, debug).apply(rez3, startSymbol, isAnywhere);
         } catch (java.io.IOException e) {
           throw KEMException.criticalError(e.getMessage());
         } finally {
