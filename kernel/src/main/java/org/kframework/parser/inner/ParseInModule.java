@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
@@ -211,7 +210,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
   public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> parseString(
       String input, Sort startSymbol, Source source) {
     try (Scanner scanner = getScanner()) {
-      return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
+      return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, false);
     }
   }
 
@@ -281,8 +280,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
   public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> parseString(
       String input, Sort startSymbol, String startSymbolLocation, Source source) {
     try (Scanner scanner = getScanner()) {
-      return parseString(
-          input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
+      return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, false);
     }
   }
 
@@ -325,7 +323,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
       Source source,
       int startLine,
       int startColumn,
-      boolean inferSortChecks,
       boolean isAnywhere) {
     final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result =
         parseStringTerm(
@@ -336,7 +333,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
             source,
             startLine,
             startColumn,
-            inferSortChecks,
             isAnywhere);
     Either<Set<KEMException>, K> parseInfo;
     if (result._1().isLeft()) {
@@ -370,7 +366,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
       Source source,
       int startLine,
       int startColumn,
-      boolean inferSortChecks,
       boolean isAnywhere) {
     if (!parsingModule.definedSorts().contains(startSymbol.head()))
       throw KEMException.innerParserError(
@@ -419,10 +414,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
       }
 
-      rez =
-          new TypeInferenceVisitor(
-                  currentInferencer, startSymbol, inferSortChecks, true, isAnywhere)
-              .apply(rez3);
+      rez = new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
@@ -481,21 +473,5 @@ public class ParseInModule implements Serializable, AutoCloseable {
       inferencer.close();
     }
     inferencers.clear();
-  }
-
-  public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
-    Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
-    Either<Set<KEMException>, Term> rez;
-    Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
-    try (TypeInferencer inferencer = new TypeInferencer(mod, false)) {
-      rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
-    }
-    if (rez.isLeft()) {
-      rez2 = new AmbFilter().apply(rez3);
-      return rez2._1().right().get();
-    }
-    rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez.right().get());
-    rez2 = new AmbFilter().apply(rez3);
-    return rez2._1().right().get();
   }
 }
