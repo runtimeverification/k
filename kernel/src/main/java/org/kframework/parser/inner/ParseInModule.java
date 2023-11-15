@@ -482,20 +482,4 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
     inferencers.clear();
   }
-
-  public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
-    Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
-    Either<Set<KEMException>, Term> rez;
-    Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
-    try (TypeInferencer inferencer = new TypeInferencer(mod, false)) {
-      rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
-    }
-    if (rez.isLeft()) {
-      rez2 = new AmbFilter().apply(rez3);
-      return rez2._1().right().get();
-    }
-    rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez.right().get());
-    rez2 = new AmbFilter().apply(rez3);
-    return rez2._1().right().get();
-  }
 }
