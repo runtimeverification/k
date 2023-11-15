@@ -929,7 +929,6 @@ public class DefinitionParsing {
             source,
             startLine,
             startColumn,
-            true,
             isAnywhere);
     parsedBubbles.getAndIncrement();
     registerWarnings(result._2());
