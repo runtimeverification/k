@@ -179,7 +179,14 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
   public class TypeCheckVisitor extends SetsTransformerWithErrors<KEMException> {
 
     private Sort expectedSort;
-    private boolean hasCastAlready = false, hasCheckAlready = false;
+
+    private enum CastContext {
+      NONE,
+      SEMANTIC,
+      STRICT
+    };
+
+    private CastContext castContext = CastContext.NONE;
 
     public TypeCheckVisitor(Sort topSort) {
       this.expectedSort = topSort;
@@ -233,7 +240,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
       // compute the instantiated production with its sort parameters
       Production substituted = pr.production().substitute(inferencer.getArgs(pr));
       Sort actualSort = substituted.sort();
-      boolean isExactSort = hasCastAlready && !hasCheckAlready;
+      boolean isExactSort = castContext == CastContext.STRICT;
       // check type: inner casts and syntactic casts indicate type equality, everything else is <=
       if ((isExactSort && !actualSort.equals(expectedSort))
           || (!isExactSort
@@ -246,21 +253,17 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         for (int i = 0, j = 0; i < substituted.items().size(); i++) {
           if (substituted.items().apply(i) instanceof NonTerminal) {
             // save prior value of variables
-            boolean wasCast = hasCastAlready;
-            boolean wasCheck = hasCheckAlready;
+            CastContext oldContext = castContext;
             // compute whether this is a cast already
             if (substituted.klabel().isDefined()
                 && substituted.klabel().get().name().startsWith("#SemanticCastTo")) {
-              hasCheckAlready = true;
-              hasCastAlready = true;
+              castContext = CastContext.SEMANTIC;
             } else if (substituted.klabel().isDefined()
                 && (substituted.klabel().get().name().equals("#SyntacticCast")
                     || substituted.klabel().get().name().equals("#InnerCast"))) {
-              hasCastAlready = true;
-              hasCheckAlready = false;
+              castContext = CastContext.STRICT;
             } else {
-              hasCastAlready = false;
-              hasCheckAlready = false;
+              castContext = CastContext.NONE;
             }
             Term t = tc.get(j);
             Sort oldExpected = expectedSort;
@@ -270,8 +273,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
             Either<Set<KEMException>, Term> rez = apply(t);
             // restore values
             expectedSort = oldExpected;
-            hasCastAlready = wasCast;
-            hasCheckAlready = wasCheck;
+            castContext = oldContext;
             if (rez.isLeft()) return rez;
             // apply result of visiting child to the term.
             tc = tc.with(j, rez.right().get());
@@ -284,8 +286,8 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
     }
 
     private Either<Set<KEMException>, Term> wrapTermWithCast(Constant c, Sort declared) {
-      if (!hasCheckAlready) {
-        // strictly typing variables and one does not already exist, so add :Sort
+      if (castContext != CastContext.SEMANTIC) {
+        // There isn't an existing :Sort, so add one
         Production cast =
             inferencer
                 .module()
