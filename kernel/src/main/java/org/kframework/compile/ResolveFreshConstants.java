@@ -249,8 +249,7 @@ public class ResolveFreshConstants {
     if (m.name().equals(def.mainModule().name())) {
       if (!m.definedKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-        ParseInModule mod =
-            RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true, files);
+        ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), files);
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(m);
         Sort topCellSort;
         try {
@@ -283,8 +282,7 @@ public class ResolveFreshConstants {
     }
     if (m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
       RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-      ParseInModule mod =
-          RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true, files);
+      ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), files);
       Set<Sentence> newSentences =
           GenerateSentencesFromConfigDecl.gen(
               freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());

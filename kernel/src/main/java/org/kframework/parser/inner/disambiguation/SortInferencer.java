@@ -1,5 +1,19 @@
 package org.kframework.parser.inner.disambiguation;
 
+import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
@@ -21,28 +35,12 @@ import org.kframework.parser.InferenceState;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
-
-import static org.kframework.kore.KORE.*;
-import static org.kframework.Collections.*;
 
 /**
  * Disambiguation transformer which performs type checking and infers the sorts of variables.

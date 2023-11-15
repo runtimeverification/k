@@ -442,7 +442,6 @@ public class DefinitionParsing {
               try (ParseInModule parser =
                   RuleGrammarGenerator.getCombinedGrammar(
                       cache.module(),
-                      true,
                       profileRules,
                       files,
                       options.debugTypeInference,
@@ -512,7 +511,6 @@ public class DefinitionParsing {
               Module extMod =
                   RuleGrammarGenerator.getCombinedGrammar(
                           gen.getConfigGrammar(module),
-                          true,
                           profileRules,
                           files,
                           options.debugTypeInference,
@@ -558,7 +556,6 @@ public class DefinitionParsing {
     try (ParseInModule parser =
         RuleGrammarGenerator.getCombinedGrammar(
             cache.module(),
-            true,
             profileRules,
             false,
             true,
@@ -598,7 +595,6 @@ public class DefinitionParsing {
         needNewScanner
             ? RuleGrammarGenerator.getCombinedGrammar(
                 cache.module(),
-                true,
                 profileRules,
                 files,
                 options.debugTypeInference,
@@ -606,7 +602,6 @@ public class DefinitionParsing {
             : RuleGrammarGenerator.getCombinedGrammar(
                 cache.module(),
                 scanner,
-                true,
                 profileRules,
                 false,
                 files,
@@ -695,8 +690,7 @@ public class DefinitionParsing {
                               registerWarnings(parse.warnings());
                               KApply k =
                                   (KApply)
-                                      new TreeNodesToKORE(Outer::parseSort, true)
-                                          .down(parse.parse());
+                                      new TreeNodesToKORE(Outer::parseSort).down(parse.parse());
                               return Stream.of(Pair.of(b, upSentence(k, b.sentenceType())));
                             }
                             return Stream.of();
@@ -807,7 +801,6 @@ public class DefinitionParsing {
     try (ParseInModule parser =
         RuleGrammarGenerator.getCombinedGrammar(
             gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()),
-            true,
             profileRules,
             false,
             true,
@@ -954,7 +947,6 @@ public class DefinitionParsing {
             source,
             startLine,
             startColumn,
-            true,
             isAnywhere);
     parsedBubbles.getAndIncrement();
     registerWarnings(result._2());
@@ -975,7 +967,7 @@ public class DefinitionParsing {
           b.contents(),
           new ParsedSentence(
               k, new HashSet<>(result._2()), new HashSet<>(), startLine, startColumn, source));
-      k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(k);
+      k = (KApply) new TreeNodesToKORE(Outer::parseSort).down(k);
       return Stream.of(k);
     } else {
       cache.put(

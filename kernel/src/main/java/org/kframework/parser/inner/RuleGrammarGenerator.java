@@ -200,64 +200,42 @@ public record RuleGrammarGenerator(Definition baseK) {
   }
 
   /* use this overload if you don't need to profile rule parse times. */
-  public static ParseInModule getCombinedGrammar(Module mod, boolean strict, FileUtil files) {
-    return getCombinedGrammar(mod, strict, false, false, false, files, null, false, false);
+  public static ParseInModule getCombinedGrammar(Module mod, FileUtil files) {
+    return getCombinedGrammar(mod, false, false, false, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, FileUtil files, boolean partialParseDebug) {
-    return getCombinedGrammar(
-        mod, strict, false, false, false, files, null, false, partialParseDebug);
+      Module mod, FileUtil files, boolean partialParseDebug) {
+    return getCombinedGrammar(mod, false, false, false, files, null, false, partialParseDebug);
   }
 
-  public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, boolean timing, FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, false, false, files, null, false, false);
+  public static ParseInModule getCombinedGrammar(Module mod, boolean timing, FileUtil files) {
+    return getCombinedGrammar(mod, timing, false, false, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
       Module mod,
-      boolean strict,
       boolean timing,
       FileUtil files,
       String debugTypeInference,
       boolean alwaysZ3BasedTypeInference) {
     return getCombinedGrammar(
-        mod,
-        strict,
-        timing,
-        false,
-        false,
-        files,
-        debugTypeInference,
-        alwaysZ3BasedTypeInference,
-        false);
+        mod, timing, false, false, files, debugTypeInference, alwaysZ3BasedTypeInference, false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, isBison, false, files, null, false, false);
+      Module mod, boolean timing, boolean isBison, FileUtil files) {
+    return getCombinedGrammar(mod, timing, isBison, false, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod,
-      boolean strict,
-      boolean timing,
-      boolean isBison,
-      boolean forGlobalScanner,
-      FileUtil files) {
-    return getCombinedGrammar(
-        mod, strict, timing, isBison, forGlobalScanner, files, null, false, false);
+      Module mod, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    return getCombinedGrammar(mod, timing, isBison, forGlobalScanner, files, null, false, false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod,
-      Scanner scanner,
-      boolean strict,
-      boolean timing,
-      boolean isBison,
-      FileUtil files) {
-    return getCombinedGrammar(mod, scanner, strict, timing, isBison, files, null, false, false);
+      Module mod, Scanner scanner, boolean timing, boolean isBison, FileUtil files) {
+    return getCombinedGrammar(mod, scanner, timing, isBison, files, null, false, false);
   }
 
   // the forGlobalScanner flag tells the ParseInModule class not to exclude
@@ -280,7 +258,6 @@ public record RuleGrammarGenerator(Definition baseK) {
    */
   public static ParseInModule getCombinedGrammar(
       Module mod,
-      boolean strict,
       boolean timing,
       boolean isBison,
       boolean forGlobalScanner,
@@ -290,7 +267,6 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean partialParseDebug) {
     return new ParseInModule(
         mod,
-        strict,
         timing,
         isBison,
         forGlobalScanner,
@@ -303,7 +279,6 @@ public record RuleGrammarGenerator(Definition baseK) {
   public static ParseInModule getCombinedGrammar(
       Module mod,
       Scanner scanner,
-      boolean strict,
       boolean timing,
       boolean isBison,
       FileUtil files,
@@ -313,7 +288,6 @@ public record RuleGrammarGenerator(Definition baseK) {
     return new ParseInModule(
         mod,
         scanner,
-        strict,
         timing,
         isBison,
         false,
@@ -617,10 +591,12 @@ public record RuleGrammarGenerator(Definition baseK) {
       // if no start symbol has been defined in the configuration, then use K
       for (Sort srt : iterable(mod.allSorts())) {
         if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
-          // K ::= Sort
+          // KItem ::= Sort
           prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
         }
       }
+      // Add KItem subsorts to disambiguation for use by sort inference
+      disambProds.addAll(prods3);
       // for each triple, generate a new pattern which works better for parsing lists in programs.
       prods3.addAll(new HashSet<>(parseProds));
       Set<Sentence> res = new HashSet<>();

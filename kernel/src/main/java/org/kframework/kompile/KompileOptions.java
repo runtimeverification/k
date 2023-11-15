@@ -246,8 +246,8 @@ public class KompileOptions implements Serializable {
   public boolean enableKoreAntileft;
 
   @Parameter(
-          names = "--z3-type-inference",
-          description = "Always used the Z3-based type inference algorithm.",
-          hidden = true)
+      names = "--z3-type-inference",
+      description = "Always used the Z3-based type inference algorithm.",
+      hidden = true)
   public boolean alwaysZ3TypeInference;
 }
