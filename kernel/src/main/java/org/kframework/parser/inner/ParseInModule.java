@@ -427,11 +427,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      if (SortInferencer.isSupported(rez3)) {
+      if (!alwaysZ3TypeInference && SortInferencer.isSupported(rez3)) {
         PrintWriter debug = null;
         try {
           File debugFile =
-              files.resolveWorkingDirectory("inference/" + disambModule.name() + ".log");
+              files.resolveKompiled("inference/" + disambModule.name() + ".log");
           debugFile.getParentFile().mkdirs();
           debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
           rez =
