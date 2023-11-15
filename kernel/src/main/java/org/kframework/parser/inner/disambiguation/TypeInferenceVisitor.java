@@ -50,21 +50,17 @@ import scala.util.Right;
  */
 public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException> {
   private final TypeInferencer inferencer;
-  private final boolean inferSortChecks;
   private final boolean isAnywhere;
   private final Sort topSort;
 
   /**
    * @param inferencer
    * @param topSort The expected sort of the top of the term.
-   * @param inferSortChecks true if we should add :Sort to variables
    * @param isAnywhere true if the term is an anywhere rule
    */
-  public TypeInferenceVisitor(
-      TypeInferencer inferencer, Sort topSort, boolean inferSortChecks, boolean isAnywhere) {
+  public TypeInferenceVisitor(TypeInferencer inferencer, Sort topSort, boolean isAnywhere) {
     this.inferencer = inferencer;
     this.topSort = topSort;
-    this.inferSortChecks = inferSortChecks;
     this.isAnywhere = isAnywhere;
   }
 
@@ -289,7 +285,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
 
     private Either<Set<KEMException>, Term> wrapTermWithCast(Constant c, Sort declared) {
       Production cast;
-      if (inferSortChecks && !hasCheckAlready) {
+      if (!hasCheckAlready) {
         // strictly typing variables and one does not already exist, so add :Sort
         cast =
             inferencer
