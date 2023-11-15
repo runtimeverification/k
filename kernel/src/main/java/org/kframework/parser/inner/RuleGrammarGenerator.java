@@ -569,10 +569,12 @@ public record RuleGrammarGenerator(Definition baseK) {
       // if no start symbol has been defined in the configuration, then use K
       for (Sort srt : iterable(mod.allSorts())) {
         if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
-          // K ::= Sort
+          // KItem ::= Sort
           prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
         }
       }
+      // Add KItem subsorts to disambiguation for use by sort inference
+      disambProds.addAll(prods3);
       // for each triple, generate a new pattern which works better for parsing lists in programs.
       prods3.addAll(new HashSet<>(parseProds));
       Set<Sentence> res = new HashSet<>();

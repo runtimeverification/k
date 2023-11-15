@@ -3,7 +3,7 @@
   inputs = {
     haskell-backend.url = "github:runtimeverification/haskell-backend/eebe4e9fd9dd6c606b37a384dbbfecca85943a38";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/175f10b16ad50dd2bb50fcfe68cbcacd79760317";
+      url = "github:runtimeverification/hs-backend-booster/8ecb99be22406efbdf151eb20a8d253d72a961f2";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
@@ -62,7 +62,7 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-CF6MQRDMDTSAr3Z7y2yheRiWdA3V0JnnQxRr7UGPm18=";
+                mvnHash = "sha256-515qtUCNyqq+PchTLObbb4FtlHjtmTAnI+MDidjiENE=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.12.18"
                   "ant-contrib:ant-contrib:1.0b3"
