@@ -1,13 +1,12 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import java.util.stream.Stream;
 import org.kframework.attributes.Att;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.KRewrite;
-
-import java.util.stream.Stream;
 
 /**
  * Apply the configuration concretization process. The implicit {@code <k>} cell is added by another
