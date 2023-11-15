@@ -51,7 +51,6 @@ import scala.util.Right;
 public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException> {
   private final TypeInferencer inferencer;
   private final boolean inferSortChecks;
-  private final boolean inferCasts;
   private final boolean isAnywhere;
   private final Sort topSort;
 
@@ -59,19 +58,13 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
    * @param inferencer
    * @param topSort The expected sort of the top of the term.
    * @param inferSortChecks true if we should add :Sort to variables
-   * @param inferCasts true if we should add ::Sort to variables
    * @param isAnywhere true if the term is an anywhere rule
    */
   public TypeInferenceVisitor(
-      TypeInferencer inferencer,
-      Sort topSort,
-      boolean inferSortChecks,
-      boolean inferCasts,
-      boolean isAnywhere) {
+      TypeInferencer inferencer, Sort topSort, boolean inferSortChecks, boolean isAnywhere) {
     this.inferencer = inferencer;
     this.topSort = topSort;
     this.inferSortChecks = inferSortChecks;
-    this.inferCasts = inferCasts;
     this.isAnywhere = isAnywhere;
   }
 
@@ -304,8 +297,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
                 .productionsFor()
                 .apply(KLabel("#SemanticCastTo" + declared.toString()))
                 .head();
-      } else if (inferCasts
-          && !hasCastAlready
+      } else if (!hasCastAlready
           && inferencer.module().productionsFor().contains(KLabel("#SyntacticCast"))) {
         // casting variables and one doeds not already exist, so add ::Sort
         cast =

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
@@ -420,8 +419,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       }
 
       rez =
-          new TypeInferenceVisitor(
-                  currentInferencer, startSymbol, inferSortChecks, true, isAnywhere)
+          new TypeInferenceVisitor(currentInferencer, startSymbol, inferSortChecks, isAnywhere)
               .apply(rez3);
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
