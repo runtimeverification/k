@@ -55,7 +55,6 @@ let
         ln -sf ${llvm-backend}/include/kllvm-c $out/include/
         ln -sf ${llvm-backend}/lib/kllvm $out/lib/
         ln -sf ${llvm-backend}/lib/scripts $out/lib/
-        ln -sf ${llvm-backend}/bin/* $out/bin/
 
         ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
         ln -sf ${haskell-backend}/bin/kore-exec $out/bin/kore-exec
@@ -80,6 +79,18 @@ let
                 }"''
             }
         done
+
+        ${
+          lib.optionalString (current-llvm-kompile-libs != [ ]) ''
+            for prog in ${llvm-backend}/bin/*
+            do
+              makeWrapper $prog $out/bin/$(basename $prog) \
+                --set NIX_LLVM_KOMPILE_LIBS "${
+                  lib.strings.concatStringsSep " "
+                  (lib.lists.unique current-llvm-kompile-libs)
+                }"
+            done''
+        }
       '';
 
       preFixup = lib.optionalString (!stdenv.isDarwin) ''
