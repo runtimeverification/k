@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, overload
 
 from ..dequote import bytes_encode
 from ..utils import case, check_type
-from .prelude import BOOL, BYTES, INT, STRING
+from .prelude import BOOL, BYTES, ID, INT, STRING
 from .syntax import DV, App, LeftAssoc
 
 if TYPE_CHECKING:
@@ -109,6 +109,11 @@ def kore_bytes(pattern: Pattern) -> bytes:
 
 def kore_str(pattern: Pattern) -> str:
     dv = match_dv(pattern, STRING)
+    return dv.value.value
+
+
+def kore_id(pattern: Pattern) -> str:
+    dv = match_dv(pattern, ID)
     return dv.value.value
 
 
