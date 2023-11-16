@@ -121,9 +121,6 @@ public class SortInferencer {
   }
 
   public Either<Set<KEMException>, Term> apply(Term t, Sort topSort, boolean isAnywhereRule) {
-    t.source().ifPresent(debug::println);
-    t.location().ifPresent(debug::println);
-
     Set<InferenceResult<Sort>> monoRes;
     try {
       InferenceState inferState =
@@ -166,26 +163,14 @@ public class SortInferencer {
     }
 
     private static SortInferenceError constrainError(Sort lhs, Sort rhs, ProductionReference pr) {
-      String msg;
-      if (pr instanceof Constant) {
-        msg =
-            "Unexpected sort "
-                + lhs
-                + " for term "
-                + ((Constant) pr).value()
-                + ". Expected "
-                + rhs
-                + ".";
-      } else {
-        msg =
-            "Unexpected sort "
-                + lhs
-                + " for term parsed as production "
-                + pr.production()
-                + ". Expected "
-                + rhs
-                + ".";
-      }
+      String msg =
+          "Unexpected sort "
+              + lhs
+              + " for term parsed as production "
+              + pr.production()
+              + ". Expected "
+              + rhs
+              + ".";
       return new SortInferenceError(msg, Optional.of(pr));
     }
 
@@ -246,18 +231,23 @@ public class SortInferencer {
 
     TermCons tc = (TermCons) pr;
     if (tc.production().klabel().isDefined()) {
-      KLabel klabel = tc.production().klabel().get();
-      String label = klabel.name();
-      if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
-        throw new AssertionError("Strict casts not yet supported!");
-      }
+      // For function, macro, and anywhere rules, the overall sort cannot be wider than the LHS
+      if (tc.production().klabel().get().head().equals(KLabels.KREWRITE)) {
 
-      // For function, macro, and anywhere rules, the RHS must be a subsort of the LHS
-      if (klabel.head().equals(KLabels.KREWRITE)) {
         if (isAnywhereRule || isFunctionOrMacro(tc.get(0))) {
           BoundedSort lhsSort = infer(tc.get(0), isAnywhereRule, inferState);
+          // To prevent widening, we constrain RHS's inferred sort <: LHS's declared sort.
+          //
+          // Note that we do actually need the LHS's declared sort. The LHS's inferred sort
+          // is a variable X with a bound L <: X, and constraining against X would just add a
+          // new lower bound aka permit widening.
+          BoundedSort lhsDeclaredSort =
+              sortToBoundedSort(
+                  ((ProductionReference) stripBrackets(tc.get(0))).production().sort(),
+                  pr,
+                  inferState.params());
           BoundedSort rhsSort = infer(tc.get(1), isAnywhereRule, inferState);
-          constrain(rhsSort, lhsSort, inferState, pr);
+          constrain(rhsSort, lhsDeclaredSort, inferState, (ProductionReference) tc.get(1));
           return lhsSort;
         }
       }
@@ -593,6 +583,11 @@ public class SortInferencer {
             .collect(Collectors.toSet()));
     Set<Sort> bounds =
         polarity ? mod.subsorts().upperBounds(sorts) : mod.subsorts().lowerBounds(sorts);
+    bounds.removeIf(
+        s ->
+            mod.subsorts().lessThanEq(s, Sorts.KLabel())
+                || mod.subsorts().lessThanEq(s, Sorts.KBott())
+                || mod.subsorts().greaterThan(s, Sorts.K()));
     Set<Sort> candidates =
         polarity ? mod.subsorts().minimal(bounds) : mod.subsorts().maximal(bounds);
     if (candidates.size() != 1) {
