@@ -412,35 +412,43 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      if (!alwaysZ3TypeInference && SortInferencer.isSupported(rez3)) {
-        PrintWriter debug = null;
-        try {
-          File debugFile = files.resolveKompiled("inference/" + disambModule.name() + ".log");
-          debugFile.getParentFile().mkdirs();
-          debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+      PrintWriter debug = null;
+      try {
+        File debugFile = files.resolveKompiled("inference/" + disambModule.name() + ".log");
+        debugFile.getParentFile().mkdirs();
+        debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+        boolean supported = !alwaysZ3TypeInference && SortInferencer.isSupported(rez3);
+        debug.println(
+            rez3.source().map(Object::toString).orElse("None")
+                + ", "
+                + rez3.location().map(Object::toString).orElse("None")
+                + ", "
+                + (supported ? " Supported" : " Z3"));
+        if (supported) {
           rez = new SortInferencer(disambModule, debug).apply(rez3, startSymbol, isAnywhere);
-        } catch (java.io.IOException e) {
-          throw KEMException.criticalError(e.getMessage());
-        } finally {
-          if (debug != null) {
-            debug.close();
-          }
-        }
-      } else {
-        TypeInferencer currentInferencer;
-        if (isDebug(source, startLine)) {
-          currentInferencer = new TypeInferencer(disambModule, true);
-          inferencers.add(currentInferencer);
         } else {
-          currentInferencer = inferencer.get();
-          if (currentInferencer == null) {
-            currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
-            inferencer.set(currentInferencer);
+          TypeInferencer currentInferencer;
+          if (isDebug(source, startLine)) {
+            currentInferencer = new TypeInferencer(disambModule, true);
             inferencers.add(currentInferencer);
+          } else {
+            currentInferencer = inferencer.get();
+            if (currentInferencer == null) {
+              currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+              inferencer.set(currentInferencer);
+              inferencers.add(currentInferencer);
+            }
           }
+          rez = new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
         }
-        rez = new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
+      } catch (java.io.IOException e) {
+        throw KEMException.criticalError(e.getMessage());
+      } finally {
+        if (debug != null) {
+          debug.close();
+        }
       }
+
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
