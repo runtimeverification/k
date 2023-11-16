@@ -22,6 +22,7 @@ BOOL: Final = SortApp('SortBool')
 INT: Final = SortApp('SortInt')
 BYTES: Final = SortApp('SortBytes')
 STRING: Final = SortApp('SortString')
+ID: Final = SortApp('SortId')
 
 TRUE: Final = DV(BOOL, String('true'))
 FALSE: Final = DV(BOOL, String('false'))

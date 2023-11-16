@@ -6,11 +6,14 @@ module IMP-SYNTAX
   imports ID
 
   syntax AExp  ::= Int | Id
-                 | AExp "/" AExp              [klabel(_/_), symbol, left, seqstrict, color(pink)]
                  | AExp "*" AExp              [klabel(_*_), symbol, left, seqstrict, color(pink)]
+                 | AExp "/" AExp              [klabel(_/_), symbol, left, seqstrict, color(pink)]
+                 | AExp "%" AExp              [klabel(_%_), symbol, left, seqstrict, color(pink)]
                  > AExp "+" AExp              [klabel(_+_), symbol, left, seqstrict, color(pink)]
+                 | AExp "-" AExp              [klabel(_-_), symbol, left, seqstrict, color(pink)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
+                 | AExp "<" AExp              [klabel(_<_), symbol, seqstrict, latex({#1}<{#2}), color(pink)]
                  | AExp "<=" AExp             [klabel(_<=_), symbol, seqstrict, latex({#1}\leq{#2}), color(pink)]
                  | "!" BExp                   [klabel(!_), symbol, strict, color(pink)]
                  > BExp "&&" BExp             [klabel(_&&_), symbol, left, strict(1), color(pink)]
@@ -46,10 +49,13 @@ module IMP
 
   rule <k> X:Id => STATE[X] ... </k> <state> STATE </state> requires X in_keys(STATE)
 
-  rule <k> I1 / I2 => I1 /Int I2 ... </k>  requires I2 =/=Int 0
-  rule <k> I1 * I2 => I1 *Int I2 ... </k>
-  rule <k> I1 + I2 => I1 +Int I2 ... </k>
+  rule <k> I1 * I2 => I1 *Int I2   ... </k>
+  rule <k> I1 / I2 => I1 /Int I2   ... </k> requires I2 =/=Int 0
+  rule <k> I1 % I2 => I1 modInt I2 ... </k> requires I2 =/=Int 0
+  rule <k> I1 + I2 => I1 +Int I2   ... </k>
+  rule <k> I1 - I2 => I1 -Int I2   ... </k>
 
+  rule <k> I1 < I2    => I1 <Int I2  ... </k>
   rule <k> I1 <= I2   => I1 <=Int I2 ... </k>
   rule <k> ! T        => notBool T   ... </k>
   rule <k> true && B  => B           ... </k>
