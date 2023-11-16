@@ -80,17 +80,17 @@ let
             }
         done
 
-        ${
-          lib.optionalString (current-llvm-kompile-libs != [ ]) ''
-            for prog in ${llvm-backend}/bin/*
-            do
-              makeWrapper $prog $out/bin/$(basename $prog) \
-                --set NIX_LLVM_KOMPILE_LIBS "${
-                  lib.strings.concatStringsSep " "
-                  (lib.lists.unique current-llvm-kompile-libs)
-                }"
-            done''
-        }
+        ${if (current-llvm-kompile-libs == [ ]) then ''
+          ln -sf ${llvm-backend}/bin/* $out/bin/
+        '' else ''
+          for prog in ${llvm-backend}/bin/*
+          do
+            makeWrapper $prog $out/bin/$(basename $prog) \
+              --set NIX_LLVM_KOMPILE_LIBS "${
+                lib.strings.concatStringsSep " "
+                (lib.lists.unique current-llvm-kompile-libs)
+              }"
+          done''}
       '';
 
       preFixup = lib.optionalString (!stdenv.isDarwin) ''
