@@ -423,7 +423,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
                 + ", "
                 + rez3.location().map(Object::toString).orElse("None")
                 + ", "
-                + (supported ? " Supported" : " Z3"));
+                + (supported ? "Supported" : "Z3"));
         if (supported) {
           rez = new SortInferencer(disambModule, debug).apply(rez3, startSymbol, isAnywhere);
         } else {

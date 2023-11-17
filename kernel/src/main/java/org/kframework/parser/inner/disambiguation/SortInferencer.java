@@ -125,7 +125,12 @@ public class SortInferencer {
     try {
       InferenceState inferState =
           new InferenceState(new HashMap<>(), new HashMap<>(), new HashSet<>());
-      BoundedSort itemSort = infer(t, isAnywhereRule, inferState);
+      BoundedSort itemSort =
+          infer(
+              t,
+              topSort.equals(Sorts.RuleContent()) || topSort.name().equals("#RuleBody"),
+              isAnywhereRule,
+              inferState);
       BoundedSort topBoundedSort = sortWithoutSortVariablesToBoundedSort(topSort);
       constrain(itemSort, topBoundedSort, inferState, (ProductionReference) t);
       InferenceResult<BoundedSort> unsimplifiedRes =
@@ -168,9 +173,8 @@ public class SortInferencer {
               + lhs
               + " for term parsed as production "
               + pr.production()
-              + ". Expected "
-              + rhs
-              + ".";
+              + ". Expected: "
+              + rhs;
       return new SortInferenceError(msg, Optional.of(pr));
     }
 
@@ -193,13 +197,16 @@ public class SortInferencer {
 
   /**
    * @param t - The term we want to infer the type of
-   * @param isAnywhereRule - Whether t is an anywhere rule
+   * @param directChildOfRule - Whether t is the direct child of a rule, i.e., is part of a
+   *     production expecting a #RuleContent or #RuleBody
+   * @param isAnywhereRule - Whether t is part of an anywhere rule
    * @param inferState - All state maintained during inference, which will be updated throughout
    *     with sorts for all contained variables
    * @return The unsimplified sort of the input term
    * @throws SortInferenceError - an exception indicating that the term is not well-typed
    */
-  private BoundedSort infer(Term t, boolean isAnywhereRule, InferenceState inferState)
+  private BoundedSort infer(
+      Term t, boolean directChildOfRule, boolean isAnywhereRule, InferenceState inferState)
       throws SortInferenceError {
     if (t instanceof Ambiguity) {
       throw new AssertionError("Ambiguities are not yet supported!");
@@ -230,27 +237,25 @@ public class SortInferencer {
     }
 
     TermCons tc = (TermCons) pr;
-    if (tc.production().klabel().isDefined()) {
+    if (directChildOfRule
+        && tc.production().klabel().isDefined()
+        && tc.production().klabel().get().head().equals(KLabels.KREWRITE)
+        && (isAnywhereRule || isFunctionOrMacro(tc.get(0)))) {
       // For function, macro, and anywhere rules, the overall sort cannot be wider than the LHS
-      if (tc.production().klabel().get().head().equals(KLabels.KREWRITE)) {
-
-        if (isAnywhereRule || isFunctionOrMacro(tc.get(0))) {
-          BoundedSort lhsSort = infer(tc.get(0), isAnywhereRule, inferState);
-          // To prevent widening, we constrain RHS's inferred sort <: LHS's declared sort.
-          //
-          // Note that we do actually need the LHS's declared sort. The LHS's inferred sort
-          // is a variable X with a bound L <: X, and constraining against X would just add a
-          // new lower bound aka permit widening.
-          BoundedSort lhsDeclaredSort =
-              sortToBoundedSort(
-                  ((ProductionReference) stripBrackets(tc.get(0))).production().sort(),
-                  pr,
-                  inferState.params());
-          BoundedSort rhsSort = infer(tc.get(1), isAnywhereRule, inferState);
-          constrain(rhsSort, lhsDeclaredSort, inferState, (ProductionReference) tc.get(1));
-          return lhsSort;
-        }
-      }
+      BoundedSort lhsSort = infer(tc.get(0), false, isAnywhereRule, inferState);
+      // To prevent widening, we constrain RHS's inferred sort <: LHS's declared sort.
+      //
+      // Note that we do actually need the LHS's declared sort. The LHS's inferred sort
+      // is a variable X with a bound L <: X, and constraining against X would just add a
+      // new lower bound aka permit widening.
+      BoundedSort lhsDeclaredSort =
+          sortToBoundedSort(
+              ((ProductionReference) stripBrackets(tc.get(0))).production().sort(),
+              pr,
+              inferState.params());
+      BoundedSort rhsSort = infer(tc.get(1), false, isAnywhereRule, inferState);
+      constrain(rhsSort, lhsDeclaredSort, inferState, (ProductionReference) tc.get(1));
+      return lhsSort;
     }
 
     for (int prodI = 0, tcI = 0; prodI < tc.production().items().size(); prodI++) {
@@ -258,7 +263,12 @@ public class SortInferencer {
         continue;
       }
       BoundedSort expectedSort = sortToBoundedSort(nt.sort(), pr, inferState.params());
-      BoundedSort childSort = infer(tc.get(tcI), isAnywhereRule, inferState);
+      BoundedSort childSort =
+          infer(
+              tc.get(tcI),
+              nt.sort().equals(Sorts.RuleContent()) || nt.sort().name().equals("#RuleBody"),
+              isAnywhereRule,
+              inferState);
       constrain(childSort, expectedSort, inferState, pr);
       tcI++;
     }
@@ -317,7 +327,7 @@ public class SortInferencer {
       return;
     }
 
-    // If they are primitive sorts, we can directly check the sort poset directly
+    // If they are primitive sorts, we can check the sort poset directly
     BoundedSort.Constructor lhsCtor = (BoundedSort.Constructor) lhs;
     BoundedSort.Constructor rhsCtor = (BoundedSort.Constructor) rhs;
     if (lhsCtor.head().params() == 0 && rhsCtor.head().params() == 0) {
