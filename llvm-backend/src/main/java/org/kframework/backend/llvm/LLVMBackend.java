@@ -124,6 +124,10 @@ public class LLVMBackend extends KoreBackend {
       args.add(files.resolveKompiled("dt").getCanonicalPath());
       args.add(type);
 
+      if (options.enableProofHints) {
+        args.add("--proof-hint-instrumentation");
+      }
+
       // Arguments after this point are passed on to Clang.
       args.add("--");
 
