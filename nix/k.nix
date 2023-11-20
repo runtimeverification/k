@@ -29,7 +29,7 @@ let
 
   which-python = ''
       #!${runtimeShell}
-      echo "${lib.makeBinPath [python3]}"
+      echo "${lib.makeBinPath [python3]}/python3"
       '';
 
 
