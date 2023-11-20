@@ -34,8 +34,8 @@ public class AddImplicitCounterCell {
       visitor.apply(claim.body());
       visitor.apply(claim.requires());
       visitor.apply(claim.ensures());
-      // do not add <generatedCounter> if the claim doesn't contain fresh vars
-      if (anonVars.isEmpty()) return s;
+      // do not add <generatedCounter> if the claim doesn't contain cells or fresh vars
+      if (!ConcretizeCells.hasCells(claim.body()) && anonVars.isEmpty()) return s;
       return claim.newInstance(
           apply(claim.body(), m), claim.requires(), claim.ensures(), claim.att());
     }
