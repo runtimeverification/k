@@ -100,4 +100,10 @@ public class LLVMKompileOptions {
       descriptionKey = "file",
       hidden = true)
   public String llvmKompileOutput = null;
+
+  @Parameter(
+      names = "--llvm-proof-hint-instrumentation",
+      description = "Emit proof hint instrumentation code into the generated interpreter",
+      hidden = true)
+  public boolean enableProofHints;
 }
