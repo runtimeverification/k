@@ -1,7 +1,7 @@
 { src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
 , pkgconfig, python3, z3, haskell-backend, booster, prelude-kore, llvm-backend
-, debugger, version, llvm-kompile-libs }:
+, debugger, version, llvm-kompile-libs, runtimeShell }:
 
 let
   runtimeInputs = [
@@ -26,6 +26,13 @@ let
     llvm-backend
   ] ++ lib.optional (debugger != null) debugger;
   runtimePath = lib.makeBinPath runtimeInputs;
+
+  which-python = ''
+      #!${runtimeShell}
+      echo "${lib.makeBinPath [python3]}/python3"
+      '';
+
+
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
@@ -46,6 +53,9 @@ let
       installPhase = ''
         mkdir -p $out/bin-unwrapped
         mkdir -p $out/bin
+        echo -n "${which-python}" > $out/bin/k-which-python
+        chmod +x $out/bin/k-which-python
+
         cp -r k-distribution/target/release/k/bin/* $out/bin-unwrapped/
         cp -r k-distribution/target/release/k/{include,lib} $out/
 
