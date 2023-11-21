@@ -57,6 +57,7 @@ let
         chmod +x $out/bin/k-which-python
 
         cp -r k-distribution/target/release/k/bin/* $out/bin-unwrapped/
+        cp -r k-distribution/target/release/k/lib/kframework/bin/* $out/bin-unwrapped/
         cp -r k-distribution/target/release/k/{include,lib} $out/
 
         mkdir -p $out/lib/cmake/kframework
