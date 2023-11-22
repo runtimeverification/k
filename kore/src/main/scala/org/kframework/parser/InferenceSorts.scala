@@ -1,6 +1,6 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser
 
-import org.kframework.attributes.Location
 import org.kframework.kore.Sort
 import org.kframework.kore.SortHead
 

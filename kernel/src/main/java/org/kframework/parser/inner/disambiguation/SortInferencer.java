@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import static org.kframework.Collections.*;
