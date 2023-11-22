@@ -2,11 +2,8 @@
 package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -412,42 +409,43 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      PrintWriter debug = null;
-      try {
-        File debugFile = files.resolveKompiled("inference/" + disambModule.name() + ".log");
-        debugFile.getParentFile().mkdirs();
-        debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-        boolean supported = !alwaysZ3TypeInference && SortInferencer.isSupported(rez3);
-        debug.println(
-            rez3.source().map(Object::toString).orElse("None")
-                + ", "
-                + rez3.location().map(Object::toString).orElse("None")
-                + ", "
-                + (supported ? "Supported" : "Z3"));
-        if (supported) {
-          rez = new SortInferencer(disambModule, debug).apply(rez3, startSymbol, isAnywhere);
+      //      PrintWriter debug = null;
+      //      try {
+      //        File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() +
+      // ".log");
+      //        debugFile.getParentFile().mkdirs();
+      //        debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
+      boolean supported = !alwaysZ3TypeInference && SortInferencer.isSupported(rez3);
+      //        debug.println(
+      //            rez3.source().map(Object::toString).orElse("None")
+      //                + ", "
+      //                + rez3.location().map(Object::toString).orElse("None")
+      //                + ", "
+      //                + (supported ? "Supported" : "Z3"));
+      if (supported) {
+        rez = new SortInferencer(disambModule).apply(rez3, startSymbol, isAnywhere);
+      } else {
+        TypeInferencer currentInferencer;
+        if (isDebug(source, startLine)) {
+          currentInferencer = new TypeInferencer(disambModule, true);
+          inferencers.add(currentInferencer);
         } else {
-          TypeInferencer currentInferencer;
-          if (isDebug(source, startLine)) {
-            currentInferencer = new TypeInferencer(disambModule, true);
+          currentInferencer = inferencer.get();
+          if (currentInferencer == null) {
+            currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+            inferencer.set(currentInferencer);
             inferencers.add(currentInferencer);
-          } else {
-            currentInferencer = inferencer.get();
-            if (currentInferencer == null) {
-              currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
-              inferencer.set(currentInferencer);
-              inferencers.add(currentInferencer);
-            }
           }
-          rez = new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
         }
-      } catch (java.io.IOException e) {
-        throw KEMException.criticalError(e.getMessage());
-      } finally {
-        if (debug != null) {
-          debug.close();
-        }
+        rez = new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
       }
+      //      } catch (java.io.IOException e) {
+      //        throw KEMException.criticalError(e.getMessage());
+      //      } finally {
+      //        if (debug != null) {
+      //          debug.close();
+      //        }
+      //      }
 
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
