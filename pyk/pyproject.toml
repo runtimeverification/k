@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.512"
+version = "0.1.513"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",

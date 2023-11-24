@@ -659,7 +659,7 @@ class TestKonvertSimpleProofs(KPrintTest):
 
     @pytest.fixture(scope='class')
     def kompiled_kore(self, definition_dir: Path) -> KompiledKore:
-        return KompiledKore(definition_dir)
+        return KompiledKore.load(definition_dir)
 
     @pytest.mark.parametrize(
         'test_id,sort,kore_text,kast',

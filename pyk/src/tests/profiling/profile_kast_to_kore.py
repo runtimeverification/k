@@ -12,10 +12,12 @@ from pyk.kore.kompiled import KompiledKore
 from .utils import TEST_DATA_DIR
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pyk.testing import Profiler
 
 
-def test_kast_to_kore(profile: Profiler) -> None:
+def test_kast_to_kore(profile: Profiler, tmp_path: Path) -> None:
     kast_to_kore_dir = TEST_DATA_DIR / 'kast-to-kore'
     kast_defn_file = kast_to_kore_dir / 'compiled.json'
     kinner_file = kast_to_kore_dir / 'kinner.json'
@@ -26,8 +28,11 @@ def test_kast_to_kore(profile: Profiler) -> None:
         kast_defn = read_kast_definition(kast_defn_file)
 
     with profile('init-kore-defn.prof', sort_keys=('cumtime',), limit=50):
-        kore_defn = KompiledKore(kast_to_kore_dir)
-        kore_defn.definition
+        kore_defn = KompiledKore.load(kast_to_kore_dir)  # first time from KORE
+
+    kore_defn.write(tmp_path)
+    with profile('reinit-kore-defn.prof', sort_keys=('cumtime',), limit=25):
+        kore_defn = KompiledKore.load(tmp_path)  # second time from JSON
 
     kast = KInner.from_json(kinner_file.read_text())
 
