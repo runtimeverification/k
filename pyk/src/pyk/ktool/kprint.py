@@ -227,7 +227,7 @@ class KPrint:
 
     @cached_property
     def kompiled_kore(self) -> KompiledKore:
-        return KompiledKore(self.definition_dir)
+        return KompiledKore.load(self.definition_dir)
 
     @property
     def definition_hash(self) -> str:
