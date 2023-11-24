@@ -6,7 +6,6 @@ import org.kframework.attributes.{Source, Location, HasLocation}
 import org.kframework.definition.Production
 import org.kframework.kore.KORE.Sort
 import java.util._
-import java.lang.Iterable
 import org.pcollections.{ConsPStack, PStack}
 import collection.JavaConverters._
 import org.kframework.utils.StringUtil
@@ -22,42 +21,43 @@ trait ProductionReference extends Term {
   val production: Production
   var id: Optional[Integer] = Optional.empty()
 
-  def setId(id: Optional[Integer]) {
+  def setId(id: Optional[Integer]): Unit = {
     this.id = id
   }
 }
 
 trait HasChildren {
-  def items: Iterable[Term]
+  def items: java.lang.Iterable[Term]
 
-  def replaceChildren(newChildren: Collection[Term]): Term
+  def replaceChildren(newChildren: java.util.Collection[Term]): Term
 }
 
 case class Constant private (value: String, production: Production) extends ProductionReference {
-  override def toString = "#token(" + production.sort + "," + StringUtil.enquoteKString(value) + ")"
+  override def toString: String =
+    "#token(" + production.sort + "," + StringUtil.enquoteKString(value) + ")"
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Constant.this);
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Constant.this)
 }
 
 // note that items is reversed because it is more efficient to generate it this way during parsing
 case class TermCons private (items: PStack[Term], production: Production)
     extends ProductionReference
     with HasChildren {
-  def get(i: Int) = items.get(items.size() - 1 - i)
+  def get(i: Int): Term = items.get(items.size() - 1 - i)
 
-  def `with`(i: Int, e: Term) =
+  def `with`(i: Int, e: Term): TermCons =
     TermCons(items.`with`(items.size() - 1 - i, e), production, location, source, id)
 
-  def replaceChildren(newChildren: Collection[Term]) =
+  def replaceChildren(newChildren: java.util.Collection[Term]): TermCons =
     TermCons(ConsPStack.from(newChildren), production, location, source, id)
 
-  override def toString() = new TreeNodesToKORE(s => Sort(s)).apply(this).toString()
+  override def toString: String = new TreeNodesToKORE(s => Sort(s)).apply(this).toString()
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(TermCons.this);
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(TermCons.this)
 }
 
-case class Ambiguity(items: Set[Term]) extends Term with HasChildren {
-  def replaceChildren(newChildren: java.util.Collection[Term]) =
+case class Ambiguity(items: java.util.Set[Term]) extends Term with HasChildren {
+  def replaceChildren(newChildren: java.util.Collection[Term]): Ambiguity =
     Ambiguity(new java.util.HashSet[Term](newChildren), location, source)
 
   override def toString: String = "amb(" + (items.asScala mkString ",") + ")"
