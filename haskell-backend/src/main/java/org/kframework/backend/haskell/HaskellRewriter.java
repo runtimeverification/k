@@ -384,8 +384,8 @@ public record HaskellRewriter(
                 kompiledModule,
                 def.topCellInitializer,
                 kompileOptions,
-                // this enables ModuleToKore to print functional claims
-                kProveOptions.allowFuncClaims ? null : kem);
+                kem,
+                kProveOptions.allowFuncClaims);
         String defPath =
             reuseDef
                 ? files.resolveKompiled("definition.kore").getAbsolutePath()

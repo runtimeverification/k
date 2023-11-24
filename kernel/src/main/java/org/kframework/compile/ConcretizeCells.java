@@ -64,7 +64,9 @@ public class ConcretizeCells {
   }
 
   public Sentence concretize(Module m, Sentence s) {
-    if (s instanceof Claim c && !hasCells(c.body())) return s;
+    if (s instanceof Claim c && !hasCells(c.body())) {
+      return s;
+    }
     s = addRootCell.addImplicitCells(s, m);
     s = addParentCells.concretize(s);
     s = closeCells.close(s);
@@ -81,7 +83,7 @@ public class ConcretizeCells {
       return true;
     }
 
-    if (item instanceof final KRewrite rew) {
+    if (item instanceof KRewrite rew) {
       return Stream.concat(
               IncompleteCellUtils.flattenCells(rew.left()).stream(),
               IncompleteCellUtils.flattenCells(rew.right()).stream())

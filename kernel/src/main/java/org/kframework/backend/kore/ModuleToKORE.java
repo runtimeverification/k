@@ -117,15 +117,22 @@ public class ModuleToKORE {
   private final Set<String> mlBinders = new HashSet<>();
   private final KompileOptions options;
 
+  // for now these two variables are coupled to enable the functional claim check
   private final KExceptionManager kem;
+  private final boolean allowFuncClaims;
 
   public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
-    this(module, topCellInitializer, options, null);
+    this(module, topCellInitializer, options, null, false);
   }
 
   public ModuleToKORE(
-      Module module, KLabel topCellInitializer, KompileOptions options, KExceptionManager kem) {
+      Module module,
+      KLabel topCellInitializer,
+      KompileOptions options,
+      KExceptionManager kem,
+      boolean allowFuncClaims) {
     this.kem = kem;
+    this.allowFuncClaims = allowFuncClaims;
     this.module = module;
     this.addSortInjections = new AddSortInjections(module);
     this.topCellInitializer = topCellInitializer;
@@ -1110,7 +1117,7 @@ public class ModuleToKORE {
       assertNoExistentials(rule, existentials);
       if (rule instanceof Claim) {
         sb.append("  claim{R");
-        if (kem != null) // TODO: remove once
+        if (!allowFuncClaims) // TODO: remove once
           // https://github.com/runtimeverification/haskell-backend/issues/3010 is
           // implemented
           kem.registerCompilerWarning(
