@@ -2,14 +2,14 @@
 
 package org.kframework.parser
 
-import org.kframework.attributes.{Source, Location, HasLocation}
+import org.kframework.attributes.{HasLocation, Location, Source}
 import org.kframework.definition.Production
 import org.kframework.kore.KORE.Sort
-import java.util._
-import org.pcollections.{ConsPStack, PStack}
-import collection.JavaConverters._
 import org.kframework.utils.StringUtil
+import org.pcollections.{ConsPStack, PStack}
 
+import java.util._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 trait Term extends HasLocation {
@@ -19,11 +19,6 @@ trait Term extends HasLocation {
 
 trait ProductionReference extends Term {
   val production: Production
-  var id: Optional[Integer] = Optional.empty()
-
-  def setId(id: Optional[Integer]): Unit = {
-    this.id = id
-  }
 }
 
 trait HasChildren {
@@ -46,10 +41,10 @@ case class TermCons private (items: PStack[Term], production: Production)
   def get(i: Int): Term = items.get(items.size() - 1 - i)
 
   def `with`(i: Int, e: Term): TermCons =
-    TermCons(items.`with`(items.size() - 1 - i, e), production, location, source, id)
+    TermCons(items.`with`(items.size() - 1 - i, e), production, location, source)
 
   def replaceChildren(newChildren: java.util.Collection[Term]): TermCons =
-    TermCons(ConsPStack.from(newChildren), production, location, source, id)
+    TermCons(ConsPStack.from(newChildren), production, location, source)
 
   override def toString: String = new TreeNodesToKORE(s => Sort(s)).apply(this).toString()
 
@@ -84,23 +79,12 @@ object TermCons {
       items: PStack[Term],
       production: Production,
       location: Optional[Location],
-      source: Optional[Source],
-      id: Optional[Integer]
+      source: Optional[Source]
   ): TermCons = {
     val res = TermCons(items, production)
     res.location = location
     res.source = source
-    res.id = id
     res
-  }
-
-  def apply(
-      items: PStack[Term],
-      production: Production,
-      location: Optional[Location],
-      source: Optional[Source]
-  ): TermCons = {
-    TermCons(items, production, location, source, Optional.empty())
   }
 
   def apply(
@@ -112,9 +96,7 @@ object TermCons {
     items,
     production,
     Optional.of(location),
-    Optional.of(source),
-    Optional
-      .empty()
+    Optional.of(source)
   )
 }
 
