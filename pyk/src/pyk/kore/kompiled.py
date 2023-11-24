@@ -1,58 +1,113 @@
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
-from functools import cached_property
 from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, final
 
-from ..cli.utils import check_dir_path, check_file_path
+from ..utils import check_dir_path, check_file_path
 from .parser import KoreParser
-from .syntax import DV, ML_SYMBOL_DECLS, App, MLPattern, MLQuant, SortApp, SortVar, WithSort
+from .syntax import (
+    DV,
+    ML_SYMBOL_DECLS,
+    App,
+    MLPattern,
+    MLQuant,
+    Pattern,
+    SortApp,
+    SortVar,
+    Symbol,
+    SymbolDecl,
+    WithSort,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from typing import Any
 
-    from .syntax import Definition, Pattern, Sort, SymbolDecl
+    from .syntax import Definition, Kore, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+_PYK_DEFINITION_NAME: Final = 'pyk-definition.json'
 
 
 @final
 @dataclass(frozen=True)
 class KompiledKore:
-    path: Path
-    timestamp: int
+    sort_table: KoreSortTable
+    symbol_table: KoreSymbolTable
 
-    def __init__(self, definition_dir: str | Path):
+    @staticmethod
+    def load(definition_dir: str | Path) -> KompiledKore:
         definition_dir = Path(definition_dir)
         check_dir_path(definition_dir)
 
-        path = (definition_dir / 'definition.kore').resolve()
-        check_file_path(path)
+        json_file = definition_dir / _PYK_DEFINITION_NAME
+        if json_file.exists():
+            return KompiledKore.load_from_json(json_file)
 
-        timestamp_file = definition_dir / 'timestamp'
-        check_file_path(timestamp_file)
-        timestamp = timestamp_file.stat().st_mtime_ns
+        kore_file = definition_dir / 'definition.kore'
+        return KompiledKore.load_from_kore(kore_file)
 
-        object.__setattr__(self, 'path', path)
-        object.__setattr__(self, 'timestamp', timestamp)
+    @staticmethod
+    def load_from_kore(kore_file: str | Path) -> KompiledKore:
+        kore_file = Path(kore_file)
+        check_file_path(kore_file)
 
-    @cached_property
-    def definition(self) -> Definition:
-        _LOGGER.info(f'Loading kore definition: {self.path}')
-        kore_text = self.path.read_text()
-        _LOGGER.info(f'Parsing kore definition: {self.path}')
-        return KoreParser(kore_text).definition()
+        _LOGGER.info(f'Reading KORE definition: {kore_file}')
+        kore_text = kore_file.read_text()
 
-    @cached_property
-    def sort_table(self) -> KoreSortTable:
-        return KoreSortTable.for_definition(self.definition)
+        _LOGGER.info(f'Parsing KORE definition: {kore_file}')
+        definition = KoreParser(kore_text).definition()
 
-    @cached_property
-    def symbol_table(self) -> KoreSymbolTable:
-        return KoreSymbolTable.for_definition(self.definition)
+        return KompiledKore.for_definition(definition)
+
+    @staticmethod
+    def load_from_json(json_file: str | Path) -> KompiledKore:
+        json_file = Path(json_file)
+        check_file_path(json_file)
+        _LOGGER.info(f'Reading JSON definition: {json_file}')
+        with json_file.open() as f:
+            json_data = json.load(f)
+        return KompiledKore.from_dict(json_data)
+
+    @staticmethod
+    def for_definition(definition: Definition) -> KompiledKore:
+        return KompiledKore(
+            sort_table=KoreSortTable.for_definition(definition),
+            symbol_table=KoreSymbolTable.for_definition(definition),
+        )
+
+    @staticmethod
+    def from_dict(dct: dict[str, Any]) -> KompiledKore:
+        return KompiledKore(
+            sort_table=KoreSortTable(
+                (_sort_from_dict(subsort), _sort_from_dict(supersort)) for subsort, supersort in dct['sorts']
+            ),
+            symbol_table=KoreSymbolTable(_symbol_decl_from_dict(symbol_decl) for symbol_decl in dct['symbols']),
+        )
+
+    def write(self, definition_dir: str | Path) -> None:
+        definition_dir = Path(definition_dir)
+        check_dir_path(definition_dir)
+        json_data = self.to_dict()
+        json_file = definition_dir / _PYK_DEFINITION_NAME
+        with json_file.open('w') as f:
+            json.dump(json_data, f)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            'sorts': [
+                [_to_dict(subsort), _to_dict(supersort)]
+                for supersort, subsorts in self.sort_table._subsort_table.items()
+                for subsort in subsorts
+            ],
+            'symbols': [_to_dict(symbol_decl) for symbol_decl in self.symbol_table._symbol_table.values()],
+        }
 
     def add_injections(self, pattern: Pattern, sort: Sort | None = None) -> Pattern:
         if sort is None:
@@ -74,6 +129,49 @@ class KompiledKore:
         raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}: {pattern}')
 
 
+def _to_dict(kore: Kore) -> Any:
+    match kore:
+        case Pattern():
+            return kore.dict
+        case SortVar(name):
+            return name
+        case SortApp(name, sorts):
+            return {'name': name, 'sorts': [_to_dict(sort) for sort in sorts]}
+        case Symbol(name, vars):
+            return {'name': name, 'vars': [_to_dict(var) for var in vars]}
+        case SymbolDecl(symbol, param_sorts, sort, attrs, hooked):
+            return {
+                'symbol': _to_dict(symbol),
+                'param-sorts': [_to_dict(sort) for sort in param_sorts],
+                'sort': _to_dict(sort),
+                'attrs': [_to_dict(attr) for attr in attrs],
+                'hooked': hooked,
+            }
+        case _:
+            raise AssertionError()
+
+
+def _sort_from_dict(obj: Any) -> Sort:
+    if isinstance(obj, str):
+        return SortVar(obj)
+    return SortApp(name=obj['name'], sorts=tuple(_to_dict(sort) for sort in obj['sorts']))
+
+
+def _symbol_decl_from_dict(dct: Any) -> SymbolDecl:
+    return SymbolDecl(
+        symbol=Symbol(
+            name=dct['symbol']['name'],
+            vars=tuple(SortVar(var) for var in dct['symbol']['vars']),
+        ),
+        param_sorts=tuple(_sort_from_dict(sort) for sort in dct['param-sorts']),
+        sort=_sort_from_dict(dct['sort']),
+        attrs=tuple(App.from_dict(attr) for attr in dct['attrs']),
+        hooked=dct['hooked'],
+    )
+
+
+@final
+@dataclass
 class KoreSortTable:
     _subsort_table: dict[Sort, set[Sort]]
 
@@ -140,6 +238,8 @@ class KoreSortTable:
         return subsort
 
 
+@final
+@dataclass
 class KoreSymbolTable:
     _symbol_table: dict[str, SymbolDecl]
 
