@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from dataclasses import dataclass
-from functools import cached_property, reduce
+from functools import cached_property
 from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, final
 
 from ..cli.utils import check_dir_path, check_file_path
-from ..utils import FrozenDict
 from .parser import KoreParser
 from .syntax import DV, ML_SYMBOL_DECLS, App, MLPattern, MLQuant, SortApp, SortVar, WithSort
 
@@ -49,32 +47,67 @@ class KompiledKore:
         return KoreParser(kore_text).definition()
 
     @cached_property
+    def sort_table(self) -> KoreSortTable:
+        return KoreSortTable.for_definition(self.definition)
+
+    @cached_property
     def symbol_table(self) -> KoreSymbolTable:
         return KoreSymbolTable.for_definition(self.definition)
 
-    @cached_property
-    def _subsort_table(self) -> FrozenDict[Sort, frozenset[Sort]]:
-        axioms = (axiom for module in self.definition for axiom in module.axioms)
+    def add_injections(self, pattern: Pattern, sort: Sort | None = None) -> Pattern:
+        if sort is None:
+            sort = SortApp('SortK')
+        patterns = pattern.patterns
+        sorts = self.symbol_table.pattern_sorts(pattern)
+        pattern = pattern.let_patterns(self.add_injections(p, s) for p, s in zip(patterns, sorts, strict=True))
+        return self._inject(pattern, sort)
+
+    def _inject(self, pattern: Pattern, sort: Sort) -> Pattern:
+        actual_sort = self.symbol_table.infer_sort(pattern)
+
+        if actual_sort == sort:
+            return pattern
+
+        if self.sort_table.is_subsort(actual_sort, sort):
+            return App('inj', (actual_sort, sort), (pattern,))
+
+        raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}: {pattern}')
+
+
+class KoreSortTable:
+    _subsort_table: dict[Sort, set[Sort]]
+
+    def __init__(self, subsorts: Iterable[tuple[Sort, Sort]]):
+        self._subsort_table = self._create_subsort_table(subsorts)
+
+    @staticmethod
+    def _create_subsort_table(subsorts: Iterable[tuple[Sort, Sort]]) -> dict[Sort, set[Sort]]:
+        res: dict[Sort, set[Sort]] = {}
+
+        for subsort, supersort in subsorts:
+            if supersort not in res:
+                res[supersort] = set()
+            res[supersort].add(subsort)
+
+        supersorts = res.keys()
+        for sort_k in supersorts:
+            for sort_j in supersorts:
+                if sort_k not in res[sort_j]:
+                    continue
+
+                for sort_i in res[sort_k]:
+                    res[sort_j].add(sort_i)
+
+        return res
+
+    @staticmethod
+    def for_definition(definition: Definition) -> KoreSortTable:
+        axioms = (axiom for module in definition for axiom in module.axioms)
         attrs = (attr for axiom in axioms for attr in axiom.attrs)
         subsort_attrs = (attr for attr in attrs if attr.symbol == 'subsort')
         subsort_attr_sorts = (attr.sorts for attr in subsort_attrs)
-
-        direct_subsorts: dict[Sort, set[Sort]] = defaultdict(set)
-        for subsort, supersort in subsort_attr_sorts:
-            direct_subsorts[supersort].add(subsort)
-
-        supersorts = direct_subsorts.keys()
-
-        subsort_table = dict(direct_subsorts)
-        for sort_k in supersorts:
-            for sort_j in supersorts:
-                if sort_k not in subsort_table[sort_j]:
-                    continue
-
-                for sort_i in subsort_table[sort_k]:
-                    subsort_table[sort_j].add(sort_i)
-
-        return FrozenDict((supersort, frozenset(subsorts)) for supersort, subsorts in subsort_table.items())
+        subsorts = ((subsort, supersort) for subsort, supersort in subsort_attr_sorts)
+        return KoreSortTable(subsorts)
 
     def is_subsort(self, sort1: Sort, sort2: Sort) -> bool:
         if sort1 == sort2:
@@ -86,9 +119,9 @@ class KompiledKore:
         if sort1 == SortApp('SortK'):
             return False
 
-        return sort1 in self._subsort_table.get(sort2, frozenset())
+        return sort1 in self._subsort_table.get(sort2, ())
 
-    def meet_sorts(self, sort1: Sort, sort2: Sort) -> Sort:
+    def meet(self, sort1: Sort, sort2: Sort) -> Sort:
         if self.is_subsort(sort1, sort2):
             return sort1
 
@@ -105,29 +138,6 @@ class KompiledKore:
         max_subsorts = {sort for sort, n in nr_subsorts.items() if n == max_subsort_nr}
         (subsort,) = max_subsorts
         return subsort
-
-    def meet_all_sorts(self, sorts: Iterable[Sort]) -> Sort:
-        unit: Sort = SortApp('SortK')
-        return reduce(self.meet_sorts, sorts, unit)
-
-    def add_injections(self, pattern: Pattern, sort: Sort | None = None) -> Pattern:
-        if sort is None:
-            sort = SortApp('SortK')
-        patterns = pattern.patterns
-        sorts = self.symbol_table.pattern_sorts(pattern)
-        pattern = pattern.let_patterns(self.add_injections(p, s) for p, s in zip(patterns, sorts, strict=True))
-        return self._inject(pattern, sort)
-
-    def _inject(self, pattern: Pattern, sort: Sort) -> Pattern:
-        actual_sort = self.symbol_table.infer_sort(pattern)
-
-        if actual_sort == sort:
-            return pattern
-
-        if self.is_subsort(actual_sort, sort):
-            return App('inj', (actual_sort, sort), (pattern,))
-
-        raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}: {pattern}')
 
 
 class KoreSymbolTable:
