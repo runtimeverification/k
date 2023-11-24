@@ -4,18 +4,19 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property, reduce
+from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, final
 
 from ..cli.utils import check_dir_path, check_file_path
 from ..utils import FrozenDict
 from .parser import KoreParser
-from .syntax import App, SortApp
+from .syntax import DV, ML_SYMBOL_DECLS, App, MLPattern, MLQuant, SortApp, SortVar, WithSort
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from .syntax import Definition, Pattern, Sort
+    from .syntax import Definition, Pattern, Sort, SymbolDecl
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -46,6 +47,10 @@ class KompiledKore:
         kore_text = self.path.read_text()
         _LOGGER.info(f'Parsing kore definition: {self.path}')
         return KoreParser(kore_text).definition()
+
+    @cached_property
+    def symbol_table(self) -> KoreSymbolTable:
+        return KoreSymbolTable.for_definition(self.definition)
 
     @cached_property
     def _subsort_table(self) -> FrozenDict[Sort, frozenset[Sort]]:
@@ -109,12 +114,12 @@ class KompiledKore:
         if sort is None:
             sort = SortApp('SortK')
         patterns = pattern.patterns
-        sorts = self.definition.pattern_sorts(pattern)
+        sorts = self.symbol_table.pattern_sorts(pattern)
         pattern = pattern.let_patterns(self.add_injections(p, s) for p, s in zip(patterns, sorts, strict=True))
         return self._inject(pattern, sort)
 
     def _inject(self, pattern: Pattern, sort: Sort) -> Pattern:
-        actual_sort = self.definition.infer_sort(pattern)
+        actual_sort = self.symbol_table.infer_sort(pattern)
 
         if actual_sort == sort:
             return pattern
@@ -123,3 +128,74 @@ class KompiledKore:
             return App('inj', (actual_sort, sort), (pattern,))
 
         raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}: {pattern}')
+
+
+class KoreSymbolTable:
+    _symbol_table: dict[str, SymbolDecl]
+
+    def __init__(self, symbol_decls: Iterable[SymbolDecl] = ()):
+        self._symbol_table = {symbol_decl.symbol.name: symbol_decl for symbol_decl in symbol_decls}
+
+    @staticmethod
+    def for_definition(definition: Definition, *, with_ml_symbols: bool = True) -> KoreSymbolTable:
+        return KoreSymbolTable(
+            chain(
+                (symbol_decl for module in definition for symbol_decl in module.symbol_decls),
+                ML_SYMBOL_DECLS if with_ml_symbols else (),
+            )
+        )
+
+    def resolve(self, symbol_id: str, sorts: Iterable[Sort] = ()) -> tuple[Sort, tuple[Sort, ...]]:
+        symbol_decl = self._symbol_table.get(symbol_id)
+        if not symbol_decl:
+            raise ValueError(f'Undeclared symbol: {symbol_id}')
+
+        symbol = symbol_decl.symbol
+        sorts = tuple(sorts)
+
+        nr_sort_vars = len(symbol.vars)
+        nr_sorts = len(sorts)
+        if nr_sort_vars != nr_sorts:
+            raise ValueError(f'Expected {nr_sort_vars} sort parameters, got {nr_sorts} for: {symbol_id}')
+
+        sort_table: dict[Sort, Sort] = dict(zip(symbol.vars, sorts, strict=True))
+
+        def resolve_sort(sort: Sort) -> Sort:
+            if type(sort) is SortVar:
+                return sort_table.get(sort, sort)
+            return sort
+
+        sort = resolve_sort(symbol_decl.sort)
+        param_sorts = tuple(resolve_sort(sort) for sort in symbol_decl.param_sorts)
+
+        return sort, param_sorts
+
+    def infer_sort(self, pattern: Pattern) -> Sort:
+        if isinstance(pattern, WithSort):
+            return pattern.sort
+
+        if type(pattern) is App:
+            sort, _ = self.resolve(pattern.symbol, pattern.sorts)
+            return sort
+
+        raise ValueError(f'Cannot infer sort: {pattern}')
+
+    def pattern_sorts(self, pattern: Pattern) -> tuple[Sort, ...]:
+        sorts: tuple[Sort, ...]
+        if isinstance(pattern, DV):
+            sorts = ()
+
+        elif isinstance(pattern, MLQuant):
+            sorts = (pattern.sort,)
+
+        elif isinstance(pattern, MLPattern):
+            _, sorts = self.resolve(pattern.symbol(), pattern.sorts)
+
+        elif isinstance(pattern, App):
+            _, sorts = self.resolve(pattern.symbol, pattern.sorts)
+
+        else:
+            sorts = ()
+
+        assert len(sorts) == len(pattern.patterns)
+        return sorts
