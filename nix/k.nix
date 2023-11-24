@@ -1,7 +1,7 @@
 { src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
 , pkgconfig, python3, z3, haskell-backend, booster, prelude-kore, llvm-backend
-, debugger, version, llvm-kompile-libs }:
+, debugger, version, llvm-kompile-libs, runtimeShell }:
 
 let
   runtimeInputs = [
@@ -26,6 +26,13 @@ let
     llvm-backend
   ] ++ lib.optional (debugger != null) debugger;
   runtimePath = lib.makeBinPath runtimeInputs;
+
+  which-python = ''
+      #!${runtimeShell}
+      echo "${lib.makeBinPath [python3]}/python3"
+      '';
+
+
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
@@ -46,6 +53,9 @@ let
       installPhase = ''
         mkdir -p $out/bin-unwrapped
         mkdir -p $out/bin
+        echo -n "${which-python}" > $out/bin/k-which-python
+        chmod +x $out/bin/k-which-python
+
         cp -r k-distribution/target/release/k/bin/* $out/bin-unwrapped/
         cp -r k-distribution/target/release/k/{include,lib} $out/
 
@@ -55,7 +65,6 @@ let
         ln -sf ${llvm-backend}/include/kllvm-c $out/include/
         ln -sf ${llvm-backend}/lib/kllvm $out/lib/
         ln -sf ${llvm-backend}/lib/scripts $out/lib/
-        ln -sf ${llvm-backend}/bin/* $out/bin/
 
         ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
         ln -sf ${haskell-backend}/bin/kore-exec $out/bin/kore-exec
@@ -80,6 +89,18 @@ let
                 }"''
             }
         done
+
+        ${if (current-llvm-kompile-libs == [ ]) then ''
+          ln -sf ${llvm-backend}/bin/* $out/bin/
+        '' else ''
+          for prog in ${llvm-backend}/bin/*
+          do
+            makeWrapper $prog $out/bin/$(basename $prog) \
+              --set NIX_LLVM_KOMPILE_LIBS "${
+                lib.strings.concatStringsSep " "
+                (lib.lists.unique current-llvm-kompile-libs)
+              }"
+          done''}
       '';
 
       preFixup = lib.optionalString (!stdenv.isDarwin) ''
