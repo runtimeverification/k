@@ -43,6 +43,7 @@ import org.kframework.compile.checks.CheckK;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
 import org.kframework.compile.checks.CheckRHSVariables;
+import org.kframework.compile.checks.CheckRawTerm;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
@@ -655,6 +656,9 @@ public class Kompile {
 
     stream(modules)
         .forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
+
+    stream(modules)
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckRawTerm(errors)::check));
 
     Set<String> moduleNames = new HashSet<>();
     stream(modules)
