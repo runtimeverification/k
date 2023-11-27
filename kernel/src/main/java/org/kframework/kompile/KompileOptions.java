@@ -3,7 +3,9 @@ package org.kframework.kompile;
 
 import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;
 
+import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
 import java.io.Serializable;
@@ -245,9 +247,34 @@ public class KompileOptions implements Serializable {
       hidden = true)
   public boolean enableKoreAntileft;
 
+  public enum TypeInferenceMode {
+    Z3,
+    SIMPLE_SUB,
+    CHECKED,
+  }
+
+  public class TypeInferenceModeConverter implements IStringConverter<TypeInferenceMode> {
+    @Override
+    public TypeInferenceMode convert(String s) {
+      if (s.equals("z3")) {
+        return TypeInferenceMode.Z3;
+      }
+      if (s.equals("simple-sub")) {
+        return TypeInferenceMode.SIMPLE_SUB;
+      }
+      if (s.equals("checked")) {
+        return TypeInferenceMode.CHECKED;
+      }
+      throw new ParameterException("--type-inference-mode must be one of [z3|simple-sub|checked].");
+    }
+  }
+
   @Parameter(
-      names = "--z3-type-inference",
-      description = "Always used the Z3-based type inference algorithm.",
+      names = "--type-inference-mode",
+      description =
+          "Choose between the Z3-based and SimpleSub-based type inference algorithms, "
+              + "or run both and check that their results are equal. Must be one of [z3|simple-sub|checked].",
+      converter = TypeInferenceModeConverter.class,
       hidden = true)
-  public boolean alwaysZ3TypeInference;
+  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.SIMPLE_SUB;
 }
