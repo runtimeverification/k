@@ -1,0 +1,11 @@
+[Error] Compiler: Found usage of #rawTerm; this production is reserved for K backend usage and cannot appear in user code.
+	Source(checkRawTerm.k)
+	Location(10,17,10,32)
+	10 |	  rule foo() => #rawTerm(foo())
+	   .	                ^~~~~~~~~~~~~~~
+[Error] Compiler: Found usage of #rawTerm; this production is reserved for K backend usage and cannot appear in user code.
+	Source(checkRawTerm.k)
+	Location(11,8,11,23)
+	11 |	  rule #rawTerm(foo()) => bar()
+	   .	       ^~~~~~~~~~~~~~~
+[Error] Compiler: Had 2 structural errors.

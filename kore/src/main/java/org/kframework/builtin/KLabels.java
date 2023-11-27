@@ -76,5 +76,7 @@ public class KLabels {
   public static final KLabel SET_REMOVE_ALL = KLabel("Set:difference");
   public static final KLabel MAP_KEYS = KLabel("keys");
 
+  public static final KLabel RAW_TERM = KLabel("#rawTerm");
+
   public static final String INJ = "inj";
 }
