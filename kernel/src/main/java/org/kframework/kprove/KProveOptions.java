@@ -109,4 +109,10 @@ public class KProveOptions {
       descriptionKey = "file",
       description = "If set, emit the JSON serialization of the spec module to the specified file.")
   public String emitJsonSpec = null;
+
+  @Parameter(
+      names = "--allow-func-claims",
+      description = "Allow functional claims to be printed in kore format. Use with --dry-run.",
+      hidden = true)
+  public boolean allowFuncClaims = false;
 }
