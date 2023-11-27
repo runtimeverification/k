@@ -57,7 +57,6 @@ let
         chmod +x $out/bin/k-which-python
 
         cp -r k-distribution/target/release/k/bin/* $out/bin-unwrapped/
-        cp -r k-distribution/target/release/k/lib/kframework/bin/* $out/bin-unwrapped/
         cp -r k-distribution/target/release/k/{include,lib} $out/
 
         mkdir -p $out/lib/cmake/kframework
@@ -105,7 +104,7 @@ let
       '';
 
       preFixup = lib.optionalString (!stdenv.isDarwin) ''
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin-unwrapped/ng"
+        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/lib/kframework/bin/ng"
       '';
 
       passthru =
