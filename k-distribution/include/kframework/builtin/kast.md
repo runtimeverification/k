@@ -39,6 +39,16 @@ module BASIC-K
   syntax K     ::= KItem
   syntax KConfigVar [token]
   syntax KItem ::= KConfigVar
+```
+
+The `#rawTerm` constructor is an internal implementation detail used to work around limitations in
+the LLVM backend's printing and serialization code. It should never appear in a definition.
+
+```k
+  syntax KItem ::= #rawTerm(KItem) [klabel(#rawTerm), symbol]
+```
+
+```k  
 endmodule
 ```
 
