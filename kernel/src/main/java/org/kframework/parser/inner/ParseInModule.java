@@ -411,20 +411,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      //      PrintWriter debug = null;
-      //      try {
-      //        File debugFile = files.resolveWorkingDirectory("inference/" + disambModule.name() +
-      // ".log");
-      //        debugFile.getParentFile().mkdirs();
-      //        debug = new PrintWriter(new BufferedWriter(new FileWriter(debugFile, true)));
-
-      //        debug.println(
-      //            rez3.source().map(Object::toString).orElse("None")
-      //                + ", "
-      //                + rez3.location().map(Object::toString).orElse("None")
-      //                + ", "
-      //                + (supported ? "Supported" : "Z3"));
-
       KompileOptions.TypeInferenceMode infModeForTerm =
           SortInferencer.isSupported(rez3)
               ? typeInferenceMode
@@ -462,14 +448,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
           rez = z3Rez;
         }
       }
-
-      //      } catch (java.io.IOException e) {
-      //        throw KEMException.criticalError(e.getMessage());
-      //      } finally {
-      //        if (debug != null) {
-      //          debug.close();
-      //        }
-      //      }
 
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
