@@ -4,6 +4,10 @@ import java.util.Objects;
 import org.kframework.kore.Sort;
 import org.kframework.parser.ProductionReference;
 
+/**
+ * A class representing a particular usage of a production's parameter. Effectively, a pair
+ * (ProductionReference, Sort) with reference semantics for the ProductionReference.
+ */
 public final class ParamId {
   private final ProductionReference pr;
   private final Sort param;

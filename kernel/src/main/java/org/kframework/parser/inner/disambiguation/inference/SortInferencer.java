@@ -87,9 +87,8 @@ public class SortInferencer {
   }
 
   /**
-   * @param t - A Term
-   * @return Whether t is a Term which SortInferencer can currently handle. Supported terms can
-   *     contain neither ambiguities, strict casts, nor parametric sorts.
+   * Determine whether a Term is supported by the current SortInferencer algorithm. Supported terms
+   * can contain neither ambiguities, strict casts, nor parametric sorts.
    */
   public static boolean isSupported(Term t) {
     return !hasAmbiguity(t) && !hasStrictCast(t) && !hasParametricSorts(t);
@@ -147,10 +146,8 @@ public class SortInferencer {
    * Determine if a term is a rule which can be applied anywhere in a configuration, and thus does
    * not permit the RHS sort to be wider than the LHS.
    *
-   * @param t - The Term to inspect
-   * @param isAnywhere - Whether t was explicitly marked with an attribute such as anywhere,
+   * @param isAnywhere - Whether the Term was explicitly marked with an attribute such as anywhere,
    *     simplification, macro, etc. indicating that it is a rule which applies anywhere
-   * @return Whether t is a rule which applies anywhere
    */
   private static boolean isAnywhereRule(Term t, boolean isAnywhere) {
     if (t instanceof Ambiguity) {
@@ -209,7 +206,7 @@ public class SortInferencer {
       driver.constrain(itemSort, topBoundedSort, (ProductionReference) t);
       TermSort<BoundedSort> unsimplifiedRes = driver.getResult(t, topBoundedSort);
       TermSort<CompactSort> res = simplify(unsimplifiedRes.mapSorts(CompactSort::makeCompact));
-      monoRes = monomorphize(res, t);
+      monoRes = monomorphize(res);
     } catch (SortInferenceError e) {
       Set<KEMException> errs = new HashSet<>();
       errs.add(e.asInnerParseError(t));
@@ -228,10 +225,12 @@ public class SortInferencer {
   }
 
   /**
+   * Infer an unsimplified BoundedSort for a term.
+   *
    * @param t - The term we want to infer the type of
    * @param isAnywhereRule - Whether t is a rule which can be applied anywhere in a configuration
-   * @param driver - All state maintained during inference, which will be updated throughout with
-   *     sorts for all contained variables
+   * @param driver - A driver maintaining all state during inference, including the sort of all
+   *     variables as they are encountered.
    * @return The unsimplified sort of the input term
    * @throws SortInferenceError - an exception indicating that the term is not well-typed
    */
@@ -283,7 +282,7 @@ public class SortInferencer {
 
   private TermSort<CompactSort> simplify(TermSort<CompactSort> res) throws SortInferenceError {
 
-    Map<Tuple2<SortVariable, Boolean>, CompactSort> coOccurrences =
+    Map<Tuple2<SortVariable, Boolean>, CoOccurrences> coOccurrences =
         analyzeCoOccurrences(res, CoOccurMode.ALWAYS);
     Map<SortVariable, Optional<CompactSort>> varSubst = new HashMap<>();
     // Simplify away all those variables that only occur in negative (resp. positive) position.
@@ -307,8 +306,8 @@ public class SortInferencer {
         if (!coOccurrences.containsKey(Tuple2.apply(v, pol))) {
           continue;
         }
-        CompactSort vCoOccurs = coOccurrences.get(Tuple2.apply(v, pol));
-        CompactSort vOpCoOccurs = coOccurrences.get(Tuple2.apply(v, !pol));
+        CoOccurrences vCoOccurs = coOccurrences.get(Tuple2.apply(v, pol));
+        CoOccurrences vOpCoOccurs = coOccurrences.get(Tuple2.apply(v, !pol));
         for (SortVariable w : vCoOccurs.vars()) {
           if (v.equals(w) || varSubst.containsKey(w)) {
             continue;
@@ -319,7 +318,7 @@ public class SortInferencer {
             varSubst.put(w, Optional.of(new CompactSort(v)));
             // we also need to update v's co-occurrences correspondingly
             // (intersecting with w's)
-            CompactSort wOpCoOccurs = coOccurrences.get(Tuple2.apply(w, !pol));
+            CoOccurrences wOpCoOccurs = coOccurrences.get(Tuple2.apply(w, !pol));
             vOpCoOccurs.vars().retainAll(wOpCoOccurs.vars());
             vOpCoOccurs.ctors().retainAll(wOpCoOccurs.ctors());
             vOpCoOccurs.vars().add(v);
@@ -341,15 +340,30 @@ public class SortInferencer {
 
   /** Modes for the co-occurrence analysis. */
   private enum CoOccurMode {
-    /** Record only those sorts which always co-occur with a given variable and polarity. */
+    /**
+     * Record only those sorts which always co-occur with a given variable and polarity a la
+     * SimpleSub
+     */
     ALWAYS,
-    /** Record any sort that ever co-occurs with a given variable and polarity. */
+    /**
+     * Record any sort that ever co-occurs with a given variable and polarity, in effect, recording
+     * all the bounds on the given variable.
+     */
     EVER
   }
 
-  private Map<Tuple2<SortVariable, Boolean>, CompactSort> analyzeCoOccurrences(
+  private record CoOccurrences(Set<SortVariable> vars, Set<SortHead> ctors) {}
+
+  /**
+   * Compute the co-occurrences based on the given mode.
+   *
+   * @param res - The TermSort to analyze
+   * @param mode - Mode indicating what type of analysis to perform.
+   * @return The result of the co-occurrence analysis.
+   */
+  private Map<Tuple2<SortVariable, Boolean>, CoOccurrences> analyzeCoOccurrences(
       TermSort<CompactSort> res, CoOccurMode mode) {
-    Map<Tuple2<SortVariable, Boolean>, CompactSort> coOccurrences = new HashMap<>();
+    Map<Tuple2<SortVariable, Boolean>, CoOccurrences> coOccurrences = new HashMap<>();
     res.forEachSort((s, pol) -> updateCoOccurrences(s, pol, mode, coOccurrences));
     return coOccurrences;
   }
@@ -365,11 +379,11 @@ public class SortInferencer {
       CompactSort sort,
       boolean polarity,
       CoOccurMode mode,
-      Map<Tuple2<SortVariable, Boolean>, CompactSort> coOccurrences) {
+      Map<Tuple2<SortVariable, Boolean>, CoOccurrences> coOccurrences) {
     for (SortVariable var : sort.vars()) {
       Tuple2<SortVariable, Boolean> polVar = Tuple2.apply(var, polarity);
       if (coOccurrences.containsKey(polVar)) {
-        CompactSort coOccurs = coOccurrences.get(polVar);
+        CoOccurrences coOccurs = coOccurrences.get(polVar);
         switch (mode) {
           case ALWAYS -> {
             coOccurs.vars().retainAll(sort.vars());
@@ -382,21 +396,21 @@ public class SortInferencer {
         }
       } else {
         coOccurrences.put(
-            polVar, new CompactSort(new HashSet<>(sort.vars()), new HashSet<>(sort.ctors())));
+            polVar, new CoOccurrences(new HashSet<>(sort.vars()), new HashSet<>(sort.ctors())));
       }
     }
   }
 
   /**
+   * Monomorphize a TermSort.
+   *
    * @param res - The result to monomorphize
-   * @param t - The term whose inference result is res. Only used for error reporting
    * @return A set of all possible monomorphizations of the input result
    * @throws SortInferenceError - An error if there are no monomorphizations which can actually be
    *     produced from the subsort lattice.
    */
-  private Set<TermSort<Sort>> monomorphize(TermSort<CompactSort> res, Term t)
-      throws SortInferenceError {
-    Map<Tuple2<SortVariable, Boolean>, CompactSort> bounds =
+  private Set<TermSort<Sort>> monomorphize(TermSort<CompactSort> res) throws SortInferenceError {
+    Map<Tuple2<SortVariable, Boolean>, CoOccurrences> bounds =
         analyzeCoOccurrences(res, CoOccurMode.EVER);
     Set<SortVariable> allVars =
         bounds.keySet().stream().map(Tuple2::_1).collect(Collectors.toSet());
@@ -408,7 +422,7 @@ public class SortInferencer {
         newInstantiations.addAll(monomorphizeInVar(instant, var, bounds));
       }
       if (newInstantiations.isEmpty()) {
-        throw new AssertionError();
+        throw new MonomorphizationError(res.term());
       }
       instantiations = newInstantiations;
     }
@@ -416,7 +430,7 @@ public class SortInferencer {
     Set<TermSort<Sort>> monos = new HashSet<>();
     SortInferenceError lastError = null;
     for (Map<SortVariable, Sort> inst : instantiations) {
-      Either<SortInferenceError, TermSort<Sort>> monoRes = realizeTermSort(res, inst, t);
+      Either<SortInferenceError, TermSort<Sort>> monoRes = realizeTermSort(res, inst);
       if (monoRes.isLeft()) {
         lastError = monoRes.left().get();
       } else {
@@ -430,11 +444,22 @@ public class SortInferencer {
     return monos;
   }
 
+  /**
+   * Update the instantiation of variables so far to also include all possible instantiations of the
+   * provided variable.
+   *
+   * @param instantiation - A particular instantiation for some SortVariables
+   * @param var - A Variable that we wish to add to our instantiation
+   * @param bounds - A map of entries (v, p) |-> C where C records every sort that ever co-occurs
+   *     with the Variable v in the polarity p.
+   * @return A set of all possible new instantiations accounting for var
+   */
   private Set<Map<SortVariable, Sort>> monomorphizeInVar(
       Map<SortVariable, Sort> instantiation,
       SortVariable var,
-      Map<Tuple2<SortVariable, Boolean>, CompactSort> bounds) {
+      Map<Tuple2<SortVariable, Boolean>, CoOccurrences> bounds) {
 
+    // Record the bounds in each polarity, then intersect to determine possible instantiations
     Map<Boolean, Set<Sort>> polBounds = new HashMap<>();
     polBounds.put(true, new HashSet<>());
     polBounds.put(false, new HashSet<>());
@@ -444,7 +469,7 @@ public class SortInferencer {
       if (!bounds.containsKey(polVar)) {
         continue;
       }
-      CompactSort bound = bounds.get(polVar);
+      CoOccurrences bound = bounds.get(polVar);
       for (SortVariable bVar : bound.vars()) {
         if (instantiation.containsKey(bVar)) {
           polBound.getValue().add(instantiation.get(bVar));
@@ -467,12 +492,20 @@ public class SortInferencer {
     return insts;
   }
 
+  /**
+   * Apply an instantiation to a {@code TermSort<CompactSort>}, then compute type joins/meets to
+   * collapse it to a {@code TermSort<Sort>}.
+   *
+   * @param res - The provided TermSort to realize
+   * @param instantiation - A concrete value for each variable occurring in res
+   * @return An equivalent {@code TermSort<Sort>}
+   */
   private Either<SortInferenceError, TermSort<Sort>> realizeTermSort(
-      TermSort<CompactSort> res, Map<SortVariable, Sort> instantiation, Term t) {
+      TermSort<CompactSort> res, Map<SortVariable, Sort> instantiation) {
     Either<CompactSort.LatticeOpError, Sort> sortRes =
         res.sort().asSort(true, instantiation, mod.subsorts());
     if (sortRes.isLeft()) {
-      return Left.apply(new LatticeOpError(sortRes.left().get(), t, Optional.empty()));
+      return Left.apply(new LatticeOpError(sortRes.left().get(), res.term(), Optional.empty()));
     }
     Sort sort = sortRes.right().get();
     Map<VariableId, Sort> varSorts = new HashMap<>();
@@ -487,13 +520,13 @@ public class SortInferencer {
         }
         if (entry.getKey() instanceof VariableId.Named named) {
           return Left.apply(
-              new LatticeOpError(latticeErr, t, Optional.of("variable " + named.name())));
+              new LatticeOpError(latticeErr, res.term(), Optional.of("variable " + named.name())));
         }
         throw new AssertionError("VariableId should be either Anon or Named");
       }
       varSorts.put(entry.getKey(), varRes.right().get());
     }
-    return Right.apply(new TermSort<>(t, sort, varSorts));
+    return Right.apply(new TermSort<>(res.term(), sort, varSorts));
   }
 
   private Term insertCasts(Term t, TermSort<Sort> sorts, boolean existingCast) {

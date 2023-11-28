@@ -48,3 +48,10 @@ final class ConstraintError extends SortInferenceError {
         pr);
   }
 }
+
+final class MonomorphizationError extends SortInferenceError {
+  // TODO: Produce better error messages!
+  public MonomorphizationError(HasLocation loc) {
+    super("Term is not well-sorted due to monomorphization failure.", loc);
+  }
+}

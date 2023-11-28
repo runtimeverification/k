@@ -6,7 +6,18 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.kframework.parser.Term;
 
+/**
+ * @param term - The term which has this particular sort
+ * @param sort - The top level sort of the overall term
+ * @param varSorts - The sort of each variable occurring in the term
+ * @param <S> The particular type of sort we are considering
+ */
 public record TermSort<S>(Term term, S sort, Map<VariableId, ? extends S> varSorts) {
+  /**
+   * Map over all contained sorts in their polarity.
+   *
+   * @param func - A map taking both a sort and a polarity then producing a new sort.
+   */
   public <T> TermSort<T> mapSorts(BiFunction<? super S, Boolean, ? extends T> func) {
     T newSort = func.apply(sort, true);
     Map<VariableId, ? extends T> newVarSorts =
@@ -15,6 +26,7 @@ public record TermSort<S>(Term term, S sort, Map<VariableId, ? extends S> varSor
     return new TermSort<>(term, newSort, newVarSorts);
   }
 
+  /** Apply an action to all contained sorts in their polarity. */
   public void forEachSort(BiConsumer<? super S, Boolean> action) {
     action.accept(sort, true);
     varSorts().values().forEach((v) -> action.accept(v, false));

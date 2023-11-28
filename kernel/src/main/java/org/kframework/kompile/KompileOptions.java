@@ -276,5 +276,5 @@ public class KompileOptions implements Serializable {
               + "or run both and check that their results are equal. Must be one of [z3|simple-sub|checked].",
       converter = TypeInferenceModeConverter.class,
       hidden = true)
-  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.SIMPLE_SUB;
+  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.CHECKED;
 }

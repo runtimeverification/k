@@ -5,6 +5,15 @@ import org.kframework.compile.ResolveAnonVar;
 import org.kframework.kore.ADT.KVariable;
 import org.kframework.parser.Constant;
 
+/**
+ * A type representing a particular variable. Specifically, either
+ *
+ * <ul>
+ *   <li>Named, which just records the variable Name
+ *   <li>Anon, which wraps the particular Constant of an anonymous variable in order to provide it
+ *       reference semantics (lest all vars named "_" compare equal).
+ * </ul>
+ */
 public sealed interface VariableId {
   static VariableId apply(Constant var) {
     if (ResolveAnonVar.isAnonVarOrNamedAnonVar(new KVariable(var.value(), Att.empty()))) {
@@ -15,17 +24,7 @@ public sealed interface VariableId {
 
   record Named(String name) implements VariableId {}
 
-  final class Anon implements VariableId {
-    private final Constant constant;
-
-    public Anon(Constant constant) {
-      this.constant = constant;
-    }
-
-    public Constant constant() {
-      return constant;
-    }
-
+  record Anon(Constant constant) implements VariableId {
     @Override
     public boolean equals(Object o) {
       if (o instanceof Anon a) {
