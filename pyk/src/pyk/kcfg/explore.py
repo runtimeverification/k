@@ -20,7 +20,7 @@ from ..kast.manip import (
 )
 from ..kast.outer import KRule
 from ..konvert import krule_to_kore
-from ..kore.rpc import SatResult, StopReason, UnknownResult, UnsatResult
+from ..kore.rpc import AbortedResult, SatResult, StopReason, UnknownResult, UnsatResult
 from ..kore.syntax import Import, Module
 from ..prelude import k
 from ..prelude.k import GENERATED_TOP_CELL
@@ -91,6 +91,11 @@ class KCFGExplore:
             log_successful_simplifications=self._trace_rewrites if self._trace_rewrites else None,
             log_failed_simplifications=self._trace_rewrites if self._trace_rewrites else None,
         )
+
+        if isinstance(er, AbortedResult):
+            unknown_predicate = er.unknown_predicate.text if er.unknown_predicate else None
+            raise ValueError(f'Backend responded with aborted state. Unknown predicate: {unknown_predicate}')
+
         _is_vacuous = er.reason is StopReason.VACUOUS
         depth = er.depth
         next_state = CTerm.from_kast(self.kprint.kore_to_kast(er.state.kore))
