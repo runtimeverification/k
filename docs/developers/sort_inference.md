@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Design
 The overall design of the new sort inference algorithm (`SortInferencer.java`) is based on the paper [The Simple Essence of Algebraic Subtyping: Principal Type Inference with Subtyping Made Easy](https://infoscience.epfl.ch/record/278576) by Lionel Parreaux. We summarize the relevant parts below, but it's a short and enlightening paper that's worth reading if you want a deeper understanding.
 
@@ -17,7 +21,7 @@ The inferred types have the following syntax
     | 𝜏 ⊔ 𝜏                     // type unions / joins
     | 𝜏 ⊓ 𝜏                     // type intersections / meets
     | 𝜇𝛼.𝜏                      // recursive types (won't be relevant for us)
-````
+```
 which is additionally subject to a *polarity* restriction. Informally, for a type `𝜏` which is a syntactic subcomponent of some other type `T`, the polarity of `𝜏` is
 - *negative*, if `𝜏` describes a value given as an input to a term with type `T`
 - *positive*, if `𝜏` describes a value produced by a term with type `T`
