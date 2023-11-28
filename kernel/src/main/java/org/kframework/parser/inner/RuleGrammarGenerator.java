@@ -203,7 +203,7 @@ public record RuleGrammarGenerator(Definition baseK) {
   /* use this overload if you don't need to profile rule parse times. */
   public static ParseInModule getCombinedGrammar(Module mod, FileUtil files) {
     return getCombinedGrammar(
-        mod, false, false, false, files, null, KompileOptions.TypeInferenceMode.SIMPLE_SUB, false);
+        mod, false, false, false, files, null, KompileOptions.TypeInferenceMode.SIMPLESUB, false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -215,13 +215,13 @@ public record RuleGrammarGenerator(Definition baseK) {
         false,
         files,
         null,
-        KompileOptions.TypeInferenceMode.SIMPLE_SUB,
+        KompileOptions.TypeInferenceMode.SIMPLESUB,
         partialParseDebug);
   }
 
   public static ParseInModule getCombinedGrammar(Module mod, boolean timing, FileUtil files) {
     return getCombinedGrammar(
-        mod, timing, false, false, files, null, KompileOptions.TypeInferenceMode.SIMPLE_SUB, false);
+        mod, timing, false, false, files, null, KompileOptions.TypeInferenceMode.SIMPLESUB, false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -243,7 +243,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         false,
         files,
         null,
-        KompileOptions.TypeInferenceMode.SIMPLE_SUB,
+        KompileOptions.TypeInferenceMode.SIMPLESUB,
         false);
   }
 
@@ -256,7 +256,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         forGlobalScanner,
         files,
         null,
-        KompileOptions.TypeInferenceMode.SIMPLE_SUB,
+        KompileOptions.TypeInferenceMode.SIMPLESUB,
         false);
   }
 
@@ -269,7 +269,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         isBison,
         files,
         null,
-        KompileOptions.TypeInferenceMode.SIMPLE_SUB,
+        KompileOptions.TypeInferenceMode.SIMPLESUB,
         false);
   }
 

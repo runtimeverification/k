@@ -430,7 +430,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
               ? typeInferenceMode
               : KompileOptions.TypeInferenceMode.Z3;
 
-      if (infModeForTerm == KompileOptions.TypeInferenceMode.SIMPLE_SUB
+      if (infModeForTerm == KompileOptions.TypeInferenceMode.SIMPLESUB
           || infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
         rez = new SortInferencer(disambModule).apply(rez3, startSymbol, isAnywhere);
       }
