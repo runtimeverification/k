@@ -8,6 +8,7 @@ import pytest
 
 from pyk.kore.prelude import INT, int_dv
 from pyk.kore.rpc import (
+    AbortedResult,
     ImpliesResult,
     JsonRpcClient,
     KoreClient,
@@ -105,6 +106,22 @@ EXECUTE_TEST_DATA: Final = (
             'reason': 'vacuous',
         },
         VacuousResult(State(int_dv(2), int_top, int_top), 1, logs=()),
+    ),
+    (
+        int_dv(0),
+        {'state': kore(int_dv(0))},
+        {
+            'state': {'term': kore(int_dv(1)), 'substitution': kore(int_dv(2)), 'predicate': kore(int_dv(3))},
+            'depth': 4,
+            'unknown-predicate': kore(int_dv(5)),
+            'reason': 'aborted',
+        },
+        AbortedResult(
+            state=State(term=int_dv(1), substitution=int_dv(2), predicate=int_dv(3)),
+            depth=4,
+            unknown_predicate=int_dv(5),
+            logs=(),
+        ),
     ),
 )
 

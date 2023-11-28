@@ -355,6 +355,7 @@ class StopReason(str, Enum):
     CUT_POINT_RULE = 'cut-point-rule'
     TERMINAL_RULE = 'terminal-rule'
     VACUOUS = 'vacuous'
+    ABORTED = 'aborted'
 
 
 @final
@@ -506,6 +507,7 @@ class ExecuteResult(ABC):  # noqa: B024
         StopReason.CUT_POINT_RULE: 'CutPointResult',
         StopReason.TERMINAL_RULE: 'TerminalResult',
         StopReason.VACUOUS: 'VacuousResult',
+        StopReason.ABORTED: 'AbortedResult',
     }
 
     reason: ClassVar[StopReason]
@@ -524,7 +526,7 @@ class ExecuteResult(ABC):  # noqa: B024
     def _check_reason(cls: type[ER], dct: Mapping[str, Any]) -> None:
         reason = StopReason(dct['reason'])
         if reason is not cls.reason:
-            raise ValueError(f"Expected {cls.reason} as 'reason', found: {reason}")
+            raise AssertionError(f"Expected {cls.reason} as 'reason', found: {reason}")
 
 
 @final
@@ -656,6 +658,30 @@ class VacuousResult(ExecuteResult):
         return VacuousResult(
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
+            logs=logs,
+        )
+
+
+@final
+@dataclass(frozen=True)
+class AbortedResult(ExecuteResult):
+    reason = StopReason.ABORTED
+    next_states = None
+    rule = None
+
+    state: State
+    depth: int
+    unknown_predicate: Pattern | None
+    logs: tuple[LogEntry, ...]
+
+    @classmethod
+    def from_dict(cls: type[AbortedResult], dct: Mapping[str, Any]) -> AbortedResult:
+        cls._check_reason(dct)
+        logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
+        return AbortedResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            unknown_predicate=kore_term(dct['unknown-predicate'], Pattern) if dct.get('unknown-predicate') else None,  # type: ignore
             logs=logs,
         )
 
