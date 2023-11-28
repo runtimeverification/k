@@ -117,15 +117,22 @@ public class ModuleToKORE {
   private final Set<String> mlBinders = new HashSet<>();
   private final KompileOptions options;
 
+  // for now these two variables are coupled to enable the functional claim check
   private final KExceptionManager kem;
+  private final boolean allowFuncClaims;
 
   public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
-    this(module, topCellInitializer, options, null);
+    this(module, topCellInitializer, options, null, false);
   }
 
   public ModuleToKORE(
-      Module module, KLabel topCellInitializer, KompileOptions options, KExceptionManager kem) {
+      Module module,
+      KLabel topCellInitializer,
+      KompileOptions options,
+      KExceptionManager kem,
+      boolean allowFuncClaims) {
     this.kem = kem;
+    this.allowFuncClaims = allowFuncClaims;
     this.module = module;
     this.addSortInjections = new AddSortInjections(module);
     this.topCellInitializer = topCellInitializer;
@@ -1057,6 +1064,9 @@ public class ModuleToKORE {
         productionSortStr = topCellSortStr;
       }
       owise = rule.att().contains(Att.OWISE());
+    } else if (leftPattern instanceof KToken kt) {
+      productionSort = kt.sort();
+      productionSortStr = getSortStr(productionSort);
     }
 
     return new RuleInfo(
@@ -1107,7 +1117,7 @@ public class ModuleToKORE {
       assertNoExistentials(rule, existentials);
       if (rule instanceof Claim) {
         sb.append("  claim{R");
-        if (kem != null) // TODO: remove once
+        if (!allowFuncClaims) // TODO: remove once
           // https://github.com/runtimeverification/haskell-backend/issues/3010 is
           // implemented
           kem.registerCompilerWarning(
@@ -1348,9 +1358,9 @@ public class ModuleToKORE {
       } else {
         // LHS for claims
         sb.append("  claim{} ");
-        sb.append(String.format("\\implies{%s} (\n    ", topCellSortStr));
-        sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
-        convertSideCondition(requires, topCellSortStr, sb);
+        sb.append(String.format("\\implies{%s} (\n    ", ruleInfo.productionSortStr));
+        sb.append(String.format("  \\and{%s} (\n      ", ruleInfo.productionSortStr));
+        convertSideCondition(requires, ruleInfo.productionSortStr, sb);
         sb.append(", ");
         convert(left, sb);
         sb.append("), ");
@@ -1358,28 +1368,28 @@ public class ModuleToKORE {
 
       // generate rule RHS
       if (sentenceType == SentenceType.ALL_PATH) {
-        sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, topCellSortStr));
+        sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, ruleInfo.productionSortStr));
       } else if (sentenceType == SentenceType.ONE_PATH) {
-        sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, topCellSortStr));
+        sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, ruleInfo.productionSortStr));
       }
       if (!existentials.isEmpty()) {
         for (KVariable exists : existentials) {
-          sb.append(String.format(" \\exists{%s} (", topCellSortStr));
+          sb.append(String.format(" \\exists{%s} (", ruleInfo.productionSortStr));
           convert((K) exists, sb);
           sb.append(", ");
         }
         sb.append("\n      ");
       }
-      sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
+      sb.append(String.format("\\and{%s} (\n      ", ruleInfo.productionSortStr));
 
       if (options.enableKoreAntileft) {
-        convertSideCondition(ensures, topCellSortStr, sb);
+        convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
         sb.append(", ");
         convert(right, sb);
       } else {
         convert(right, sb);
         sb.append(", ");
-        convertSideCondition(ensures, topCellSortStr, sb);
+        convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
       }
 
       sb.append(')');

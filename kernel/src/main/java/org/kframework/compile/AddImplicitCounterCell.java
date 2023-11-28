@@ -21,6 +21,21 @@ public class AddImplicitCounterCell {
 
   public Sentence apply(Module m, Sentence s) {
     if (s instanceof Claim claim) {
+      Set<KVariable> freshVars = new HashSet<>();
+      VisitK visitor =
+          new VisitK() {
+            @Override
+            public void apply(KVariable var) {
+              if (ResolveFreshConstants.isFreshVar(var)) freshVars.add(var);
+            }
+          };
+      visitor.apply(claim.body());
+      visitor.apply(claim.requires());
+      visitor.apply(claim.ensures());
+      // do not add <generatedCounter> if the claim doesn't contain cells or fresh vars
+      if (!ConcretizeCells.hasCells(claim.body()) && freshVars.isEmpty()) {
+        return s;
+      }
       return claim.newInstance(
           apply(claim.body(), m), claim.requires(), claim.ensures(), claim.att());
     }

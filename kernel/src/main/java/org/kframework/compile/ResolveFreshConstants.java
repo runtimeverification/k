@@ -102,11 +102,15 @@ public class ResolveFreshConstants {
     return withFresh;
   }
 
+  public static boolean isFreshVar(KVariable kvar) {
+    return kvar.name().startsWith("!");
+  }
+
   private void analyze(K term) {
     new VisitK() {
       @Override
       public void apply(KVariable k) {
-        if (k.name().startsWith("!")) {
+        if (isFreshVar(k)) {
           freshVars.add(k);
         }
         super.apply(k);
