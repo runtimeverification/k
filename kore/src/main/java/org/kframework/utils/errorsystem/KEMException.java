@@ -5,7 +5,6 @@ import java.util.Objects;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.parser.Term;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
@@ -138,14 +137,14 @@ public class KEMException extends RuntimeException {
         ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, location, source);
   }
 
-  public static KEMException innerParserError(String message, Term t) {
+  public static KEMException innerParserError(String message, HasLocation node) {
     return create(
         ExceptionType.ERROR,
         KExceptionGroup.INNER_PARSER,
         message,
         null,
-        t.location().orElse(null),
-        t.source().orElse(null));
+        node.location().orElse(null),
+        node.source().orElse(null));
   }
 
   public static KEMException innerParserError(
