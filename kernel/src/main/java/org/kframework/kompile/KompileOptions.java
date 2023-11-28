@@ -272,8 +272,8 @@ public class KompileOptions implements Serializable {
   @Parameter(
       names = "--type-inference-mode",
       description =
-          "Choose between the Z3-based and SimpleSub-based type inference algorithms, "
-              + "or run both and check that their results are equal. Must be one of [z3|simple-sub|checked].",
+          "Choose between the Z3-based and SimpleSub-based type inference algorithms, or run both"
+              + " and check that their results are equal. Must be one of [z3|simple-sub|checked].",
       converter = TypeInferenceModeConverter.class,
       hidden = true)
   public TypeInferenceMode typeInferenceMode = TypeInferenceMode.CHECKED;
