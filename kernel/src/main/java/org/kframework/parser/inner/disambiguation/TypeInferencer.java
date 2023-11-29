@@ -66,6 +66,7 @@ public class TypeInferencer implements AutoCloseable {
   private final boolean debug;
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
+  private final Map<ProductionReference, Integer> prIds = new IdentityHashMap<>();
 
   // logic QF_DT is best if it exists as it will be faster than ALL. However, some z3 versions do
   // not have this logic.
@@ -593,7 +594,7 @@ public class TypeInferencer implements AutoCloseable {
       boolean isTopSort =
           expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
       int id = nextId;
-      boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
+      boolean shared = prIds.containsKey(pr) && variablesById.size() > prIds.get(pr);
       if (!shared) {
         // if this is the first time reaching this term, initialize data structures with the
         // variables associated with
@@ -601,7 +602,7 @@ public class TypeInferencer implements AutoCloseable {
         nextId++;
         variablesById.add(new ArrayList<>());
         cacheById.add(new HashSet<>());
-        pr.setId(Optional.of(id));
+        prIds.put(pr, id);
         for (Sort param : iterable(pr.production().params())) {
           String name = "FreshVar" + param.name() + locStr(pr);
           if (!variables.contains(name)) {
@@ -612,7 +613,7 @@ public class TypeInferencer implements AutoCloseable {
         }
       } else {
         // get cached id
-        id = pr.id().get();
+        id = prIds.get(pr);
       }
       if (pr instanceof TermCons tc) {
         boolean wasStrict = isStrictEquality;
@@ -682,7 +683,7 @@ public class TypeInferencer implements AutoCloseable {
             nextId++;
             variablesById.add(new ArrayList<>());
             cacheById.add(new HashSet<>());
-            pr.setId(Optional.of(id));
+            prIds.put(pr, id);
             if (isAnonVar(c)) {
               name = "Var" + c.value() + locStr(c);
               isStrictEquality = true;
@@ -799,7 +800,7 @@ public class TypeInferencer implements AutoCloseable {
     Map<Sort, String> params = new HashMap<>();
     if (t.isPresent()) {
       if (t.get().production().params().nonEmpty()) {
-        int id = t.get().id().get();
+        int id = prIds.get(t.get());
         List<String> names = variablesById.get(id);
         Seq<Sort> formalParams = t.get().production().params();
         assert (names.size() == formalParams.size());
@@ -945,8 +946,8 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   public Seq<Sort> getArgs(ProductionReference pr) {
-    if (pr.id().isPresent()) {
-      int id = pr.id().get();
+    if (prIds.containsKey(pr)) {
+      int id = prIds.get(pr);
       List<String> names = variablesById.get(id);
       return names.stream().map(this::getValue).collect(Collections.toList());
     } else {
@@ -1023,7 +1024,7 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
-  private static String locStr(ProductionReference pr) {
+  private String locStr(ProductionReference pr) {
     String suffix = "";
     if (pr.production().klabel().isDefined()) {
       suffix = "_" + pr.production().klabel().get().name().replace("|", "");
@@ -1040,7 +1041,7 @@ public class TypeInferencer implements AutoCloseable {
           + l.endColumn()
           + suffix;
     }
-    return pr.id().get() + suffix;
+    return prIds.get(pr) + suffix;
   }
 
   private StringBuilder sb = new StringBuilder();
