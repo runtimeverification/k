@@ -305,8 +305,11 @@ public class SortInferencer {
     pols.add(false);
     pols.add(true);
 
-    for (Boolean pol : pols) {
-      for (SortVariable v : allVars) {
+    for (SortVariable v : allVars) {
+      if (varSubst.containsKey(v)) {
+        continue;
+      }
+      for (Boolean pol : pols) {
         if (!coOccurrences.containsKey(Tuple2.apply(v, pol))) {
           continue;
         }
@@ -333,8 +336,7 @@ public class SortInferencer {
         for (SortHead ctor : vCoOccurs.ctors()) {
           // This is not a variable, so check if we have a sandwich ctor <: v <: ctor
           // and can thus simplify away v
-          if (coOccurrences.containsKey(Tuple2.apply(v, !pol))
-              && coOccurrences.get(Tuple2.apply(v, !pol)).ctors().contains(ctor)) {
+          if (vOpCoOccurs.ctors().contains(ctor)) {
             varSubst.put(v, Optional.empty());
           }
         }
