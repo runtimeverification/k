@@ -104,7 +104,7 @@ let
       '';
 
       preFixup = lib.optionalString (!stdenv.isDarwin) ''
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin-unwrapped/ng"
+        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/lib/kframework/bin/ng"
       '';
 
       passthru =
