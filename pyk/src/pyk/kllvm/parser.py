@@ -8,11 +8,15 @@ from _kllvm.parser import Parser  # type: ignore
 from ..cli.utils import check_file_path
 
 if TYPE_CHECKING:
-    from .ast import Definition, Pattern
+    from .ast import Definition, Pattern, Sort
 
 
 def parse_pattern(text: str) -> Pattern:
     return Parser.from_string(text).pattern()
+
+
+def parse_sort(text: str) -> Sort:
+    return Parser.from_string(text).sort()
 
 
 def parse_definition(text: str) -> Definition:
@@ -21,6 +25,10 @@ def parse_definition(text: str) -> Definition:
 
 def parse_pattern_file(path: str | Path) -> Pattern:
     return _parser_from_path(path).pattern()
+
+
+def parse_sort_file(path: str | Path) -> Pattern:
+    return _parser_from_path(path).sort()
 
 
 def parse_definition_file(path: str | Path) -> Definition:
