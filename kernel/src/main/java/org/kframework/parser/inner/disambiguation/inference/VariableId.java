@@ -10,7 +10,7 @@ import org.kframework.parser.Constant;
  * A type representing a particular variable. Specifically, either
  *
  * <ul>
- *   <li>Named, which just records the variable Name
+ *   <li>Named, which just records the variable's name
  *   <li>Anon, which wraps the particular Constant of an anonymous variable in order to provide it
  *       reference semantics (lest all vars named "_" compare equal).
  * </ul>

@@ -7,6 +7,12 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.ProductionReference;
 import org.kframework.utils.errorsystem.KEMException;
 
+/**
+ * The parent class of all errors thrown by SortInferencer. We use our own exceptions here rather
+ * than KEMException because a SortInferenceError may not indicate an actual error by the user,
+ * e.g., it may be thrown for a type error in one branch of an Ambiguity to indicate that it should
+ * be pruned.
+ */
 abstract sealed class SortInferenceError extends Exception {
   private final Optional<HasLocation> loc;
 
@@ -20,6 +26,7 @@ abstract sealed class SortInferenceError extends Exception {
   }
 }
 
+/** An error indicating that we could not compute some type join / meet. */
 final class LatticeOpError extends SortInferenceError {
   public LatticeOpError(CompactSort.LatticeOpError err, HasLocation loc, Optional<String> name) {
     super(
@@ -37,6 +44,7 @@ final class LatticeOpError extends SortInferenceError {
   }
 }
 
+/** An error indicating that a sub-typing constraint is invalid. */
 final class ConstraintError extends SortInferenceError {
   public ConstraintError(Sort lhs, Sort rhs, ProductionReference pr) {
     super(
@@ -50,9 +58,13 @@ final class ConstraintError extends SortInferenceError {
   }
 }
 
+/** An error indicating that some type variable cannot be monomorphized as an actual K sort. */
 final class MonomorphizationError extends SortInferenceError {
   // TODO: Produce better error messages!
   public MonomorphizationError(HasLocation loc) {
-    super("Term is not well-sorted due to monomorphization failure.", loc);
+    super(
+        "Term is not well-sorted due to monomorphization failure. Add sort annotations to "
+            + "produce a better error message.",
+        loc);
   }
 }

@@ -144,7 +144,8 @@ public class SortInferencer {
 
   /**
    * Determine if a term is a rule which can be applied anywhere in a configuration, and thus does
-   * not permit the RHS sort to be wider than the LHS.
+   * not permit the RHS sort to be wider than the LHS. Such a rule is either explicitly marked with
+   * an attribute, or is a function or macro rule.
    *
    * @param isAnywhere - Whether the Term was explicitly marked with an attribute such as anywhere,
    *     simplification, macro, etc. indicating that it is a rule which applies anywhere
@@ -280,8 +281,11 @@ public class SortInferencer {
     return resSort;
   }
 
-  private TermSort<CompactSort> simplify(TermSort<CompactSort> res) throws SortInferenceError {
-
+  /**
+   * Perform co-occurrence analysis to remove redundant type variables and unify those that are
+   * indistinguishable.
+   */
+  private TermSort<CompactSort> simplify(TermSort<CompactSort> res) {
     Map<Tuple2<SortVariable, Boolean>, CoOccurrences> coOccurrences =
         analyzeCoOccurrences(res, CoOccurMode.ALWAYS);
     Map<SortVariable, Optional<CompactSort>> varSubst = new HashMap<>();
@@ -307,6 +311,8 @@ public class SortInferencer {
           continue;
         }
         CoOccurrences vCoOccurs = coOccurrences.get(Tuple2.apply(v, pol));
+        // v is not in varSubst already, so it must occur in both polarities
+        // thus this access is valid
         CoOccurrences vOpCoOccurs = coOccurrences.get(Tuple2.apply(v, !pol));
         for (SortVariable w : vCoOccurs.vars()) {
           if (v.equals(w) || varSubst.containsKey(w)) {
@@ -338,16 +344,19 @@ public class SortInferencer {
     return res.mapSorts((c, p) -> c.substitute(varSubst));
   }
 
-  /** Modes for the co-occurrence analysis. */
+  /**
+   * Modes for the co-occurrence analysis. A variable is said to co-occur positively (resp.
+   * negatively) with another type if they occur in the same type union (resp. intersection).
+   */
   private enum CoOccurMode {
     /**
-     * Record only those sorts which always co-occur with a given variable and polarity a la
-     * SimpleSub
+     * For each variable and polarity, record only those sorts which always co-occur with the in
+     * every single position. This is the co-occurrence analysis described in SimpleSub.
      */
     ALWAYS,
     /**
-     * Record any sort that ever co-occurs with a given variable and polarity, in effect, recording
-     * all the bounds on the given variable.
+     * For each variable and polarity, record any sort that ever co-occurs with the variable in at
+     * least one position. In effect, this records all the bounds on the given variable.
      */
     EVER
   }
@@ -355,10 +364,11 @@ public class SortInferencer {
   private record CoOccurrences(Set<SortVariable> vars, Set<SortHead> ctors) {}
 
   /**
-   * Compute the co-occurrences based on the given mode.
+   * Compute the co-occurrences within a TermSort based on the given mode.
    *
    * @param res - The TermSort to analyze
-   * @param mode - Mode indicating what type of analysis to perform.
+   * @param mode - Mode indicating what type of analysis to perform. See documentation for the
+   *     CoOccurMode enum above.
    * @return The result of the co-occurrence analysis.
    */
   private Map<Tuple2<SortVariable, Boolean>, CoOccurrences> analyzeCoOccurrences(
@@ -373,7 +383,7 @@ public class SortInferencer {
    *
    * @param sort - The sort which we are processing
    * @param polarity - The polarity of the provided sort
-   * @param coOccurrences - mutated to record all co-occurrences in each variable occurring in sort
+   * @param coOccurrences - mutated to record all co-occurrences for each variable occurring in sort
    */
   private void updateCoOccurrences(
       CompactSort sort,
@@ -412,6 +422,8 @@ public class SortInferencer {
   private Set<TermSort<Sort>> monomorphize(TermSort<CompactSort> res) throws SortInferenceError {
     Map<Tuple2<SortVariable, Boolean>, CoOccurrences> bounds =
         analyzeCoOccurrences(res, CoOccurMode.EVER);
+
+    // Produce all valid instantiations by monomorphizing one variable at a time
     Set<SortVariable> allVars =
         bounds.keySet().stream().map(Tuple2::_1).collect(Collectors.toSet());
     Set<Map<SortVariable, Sort>> instantiations = new HashSet<>();
@@ -446,12 +458,13 @@ public class SortInferencer {
 
   /**
    * Update the instantiation of variables so far to also include all possible instantiations of the
-   * provided variable.
+   * provided sort variable.
    *
-   * @param instantiation - A particular instantiation for some SortVariables
-   * @param var - A Variable that we wish to add to our instantiation
+   * @param instantiation - A particular instantiation for some subset of the SortVariables
+   *     occurring in our term.
+   * @param var - A SortVariable that we wish to add to our instantiation
    * @param bounds - A map of entries (v, p) |-> C where C records every sort that ever co-occurs
-   *     with the Variable v in the polarity p.
+   *     with the Variable v in the polarity p in our term.
    * @return A set of all possible new instantiations accounting for var
    */
   private Set<Map<SortVariable, Sort>> monomorphizeInVar(
@@ -459,7 +472,8 @@ public class SortInferencer {
       SortVariable var,
       Map<Tuple2<SortVariable, Boolean>, CoOccurrences> bounds) {
 
-    // Record the bounds in each polarity, then intersect to determine possible instantiations
+    // Record the bounds in each polarity, then search the subsort poset for all solutions
+    // that satisfy these bounds
     Map<Boolean, Set<Sort>> polBounds = new HashMap<>();
     polBounds.put(true, new HashSet<>());
     polBounds.put(false, new HashSet<>());
@@ -471,6 +485,9 @@ public class SortInferencer {
       }
       CoOccurrences bound = bounds.get(polVar);
       for (SortVariable bVar : bound.vars()) {
+        // If bVar hasn't been instantiated yet, we can simply ignore it. If any instantiation we
+        // produce here is invalid when considering bVar, we will prune it later when bVar
+        // is actually instantiated.
         if (instantiation.containsKey(bVar)) {
           polBound.getValue().add(instantiation.get(bVar));
         }
@@ -529,6 +546,13 @@ public class SortInferencer {
     return Right.apply(new TermSort<>(res.term(), sort, varSorts));
   }
 
+  /**
+   * Insert SemanticCasts around each variable casting it to the appropriate Sort.
+   *
+   * @param t - The term to insert casts on
+   * @param sorts - The inferred sorts of t
+   * @param existingCast - Whether t is already wrapped in an existing cast
+   */
   private Term insertCasts(Term t, TermSort<Sort> sorts, boolean existingCast) {
     if (t instanceof Ambiguity) {
       throw new AssertionError("Ambiguities are not yet supported!");

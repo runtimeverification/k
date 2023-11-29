@@ -8,10 +8,13 @@ import java.util.stream.Collectors;
 import org.kframework.parser.Term;
 
 /**
+ * The sort of a Term and all its variables.
+ *
  * @param term - The term which has this particular sort
  * @param sort - The top level sort of the overall term
  * @param varSorts - The sort of each variable occurring in the term
- * @param <S> The particular type of sort we are considering
+ * @param <S> The particular type of sort we are considering (will be BoundedSort, CompactSort, and
+ *     Sort depending on the stage of inference).
  */
 public record TermSort<S>(Term term, S sort, Map<VariableId, ? extends S> varSorts) {
   /**

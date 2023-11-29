@@ -17,6 +17,10 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+/**
+ * A sort which, depending on the polarity where it occurs, represents either an intersection or a
+ * union of component sorts (variables and constructors). Analogous to CompactType from SimpleSub.
+ */
 public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
 
   public CompactSort(SortVariable var) {
@@ -30,7 +34,7 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
   }
 
   /**
-   * Compactify a BoundedSort, chasing all transitive bounds
+   * Compact a BoundedSort, converting all transitive bounds into a single intersection / union.
    *
    * @param sort - The BoundedSort to make compact
    * @param polarity - The polarity where sort occurs
@@ -61,7 +65,7 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
   }
 
   /**
-   * Substitute variables for CompactSorts
+   * Substitute variables for CompactSorts.
    *
    * @param subst - A map where an entry v |-> Optional.of(t) indicates that the variable v should
    *     be replaced by t, and an entry v |-> Optional.empty() indicates that v should be removed
@@ -95,8 +99,8 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
   public record LatticeOpError(Set<Sort> sorts, Set<Sort> candidates, boolean polarity) {}
 
   /**
-   * Convert to an equivalent Sort, instantiating variables and actually computing a type join/meet
-   * as appropriate.
+   * Convert to an equivalent Sort, instantiating variables and actually computing the type
+   * join/meet on the provided subsort.
    *
    * @param polarity - The polarity where this CompactSort occurs.
    * @param instantiation - A map indicating how variables should be instantiated

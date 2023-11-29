@@ -14,16 +14,35 @@ import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import scala.Tuple2;
 
+/**
+ * A driver which manages all state during the initial phase of SortInferencer where we infer
+ * unsimplified BoundedSorts.
+ */
 public final class InferenceDriver {
+  /** The POSet of sorts ordered by the sub-sort relation. */
   private final POSet<Sort> subsorts;
-  private final Map<VariableId, BoundedSort> varSorts = new HashMap<>();
+
+  /** A unique sort variable for every variable that inference encounters. */
+  private final Map<VariableId, BoundedSort.Variable> varSorts = new HashMap<>();
+
+  /** A unique sort variable for every parameter that inference encounters. */
   private final Map<ParamId, BoundedSort.Variable> paramSorts = new HashMap<>();
+
+  /**
+   * A cache of all subtyping constraints that have already been processed. Pairs (t1, t2) represent
+   * a constraint t1 <: t2.
+   */
   private final Set<Tuple2<BoundedSort, BoundedSort>> constraintCache = new HashSet<>();
 
   public InferenceDriver(POSet<Sort> subsorts) {
     this.subsorts = subsorts;
   }
 
+  /**
+   * Get the BoundedSort.Variable instance for a variable. Unlike SimpleSub, we don't have explicit
+   * binders at the top of the Term introducing every variable, so these BoundedSort.Variable
+   * instances must be created on the fly when each variable is first encountered during inference.
+   */
   public BoundedSort varSort(Constant var) {
     VariableId varId = VariableId.apply(var);
     if (!varSorts.containsKey(varId)) {
@@ -33,9 +52,12 @@ public final class InferenceDriver {
   }
 
   /**
-   * Convert a Sort to a BoundedSort
+   * Convert a Sort to a BoundedSort, which may be a sort parameter from the provided
+   * ProductionReference.
    *
    * @param sort - The Sort to convert
+   * @param prOrNull - The ProductionReference where this Sort occurs, or null if sort is guaranteed
+   *     not to be a sort parameter.
    * @return A BoundedSort representing sort
    */
   public BoundedSort sortToBoundedSort(Sort sort, ProductionReference prOrNull) {
@@ -49,8 +71,18 @@ public final class InferenceDriver {
     return new BoundedSort.Constructor(sort.head());
   }
 
+  /**
+   * Update sub-/super-type constraints to record the fact that lhs <: rhs.
+   *
+   * @param pr - The ProductionReference where this constraint originated. This is only necessary
+   *     for error reporting.
+   * @throws ConstraintError - An error if lhs <: rhs induces some subsort relation which is invalid
+   *     based on the subsort poset.
+   */
   public void constrain(BoundedSort lhs, BoundedSort rhs, ProductionReference pr)
       throws ConstraintError {
+    // This cache is necessary to prevent exponential blow-up and avoid loops like
+    // loops like a <: b <: a <: b ...
     if (lhs.equals(rhs) || constraintCache.contains(Tuple2.apply(lhs, rhs))) {
       return;
     }
@@ -88,6 +120,12 @@ public final class InferenceDriver {
     throw new AssertionError("Parametric sorts are not yet supported!");
   }
 
+  /**
+   * After inference is complete, get the final TermSort result recording the sorts of variables.
+   *
+   * @param term - The term that we ran the driver on.
+   * @param sort - The inferred sort of the overall term.
+   */
   public TermSort<BoundedSort> getResult(Term term, BoundedSort sort) {
     return new TermSort<>(term, sort, varSorts);
   }
