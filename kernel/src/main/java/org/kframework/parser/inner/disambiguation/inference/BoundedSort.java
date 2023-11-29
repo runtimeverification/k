@@ -5,27 +5,25 @@ import java.util.ArrayList;
 import java.util.List;
 import org.kframework.kore.SortHead;
 
+/** An unsimplified sort analogous to SimpleSub's SimpleType. */
 public sealed interface BoundedSort {
+  /** A primitive sort */
   record Constructor(SortHead head) implements BoundedSort {}
 
-  // This is a class rather than a record because we want reference equality
-  final class Variable implements BoundedSort {
-    private final SortVariable sortVar = new SortVariable();
-    private final List<BoundedSort> lowerBounds = new ArrayList<>();
-    private final List<BoundedSort> upperBounds = new ArrayList<>();
+  /**
+   * A sort variable with sub- and super-type constraints.
+   *
+   * @param sortVar - The underlying SortVariable. This holds no real information, but is needed to
+   *     prevent distinct Variables with the same bounds from comparing equal.
+   * @param lowerBounds - All those sorts which must be a sub-type of this variable
+   * @param upperBounds - All those sorts which must be a super-type of this variable
+   */
+  record Variable(
+      SortVariable sortVar, List<BoundedSort> lowerBounds, List<BoundedSort> upperBounds)
+      implements BoundedSort {
 
-    public Variable() {}
-
-    public SortVariable sortVar() {
-      return sortVar;
-    }
-
-    public List<BoundedSort> lowerBounds() {
-      return lowerBounds;
-    }
-
-    public List<BoundedSort> upperBounds() {
-      return upperBounds;
+    Variable() {
+      this(new SortVariable(), new ArrayList<>(), new ArrayList<>());
     }
   }
 }
