@@ -19,13 +19,13 @@ from ..ktool.krun import KRun
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path
-    from types import ModuleType
     from typing import Any, ClassVar
 
     from pytest import TempPathFactory
 
     from ..kast.outer import KDefinition
     from ..kcfg.semantics import KCFGSemantics
+    from ..kllvm.runtime import Runtime
     from ..ktool.kprint import SymbolTable
     from ..utils import BugReport
 
@@ -212,6 +212,6 @@ class RuntimeTest(KompiledTest):
     KOMPILE_BACKEND = 'llvm'
 
     @pytest.fixture(scope='class')
-    def runtime(self, definition_dir: Path) -> ModuleType:
+    def runtime(self, definition_dir: Path) -> Runtime:
         compile_runtime(definition_dir)
         return import_runtime(definition_dir)
