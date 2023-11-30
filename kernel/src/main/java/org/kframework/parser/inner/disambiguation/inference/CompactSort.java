@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.kframework.POSet;
 import org.kframework.builtin.Sorts;
 import org.kframework.kore.Sort;
@@ -24,13 +25,7 @@ import scala.util.Right;
 public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
 
   public CompactSort(SortVariable var) {
-    this(
-        new HashSet<>() {
-          {
-            add(var);
-          }
-        },
-        new HashSet<>());
+    this(Stream.of(var).collect(Collectors.toCollection(HashSet::new)), new HashSet<>());
   }
 
   /**
