@@ -32,7 +32,7 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
    * Compact a BoundedSort, converting all transitive bounds into a single intersection / union.
    *
    * @param sort - The BoundedSort to make compact
-   * @param polarity - The polarity where sort occurs
+   * @param polarity - The polarity where sort occurs. True for positive, false for negative.
    * @return A CompactSort containing all bounds represented by sort
    */
   public static CompactSort makeCompact(BoundedSort sort, boolean polarity) {
@@ -44,8 +44,8 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
       }
       throw new AssertionError("Parametric sorts are not yet supported!");
     }
-    BoundedSort.Variable var = (BoundedSort.Variable) sort;
 
+    BoundedSort.Variable var = (BoundedSort.Variable) sort;
     List<BoundedSort> bounds = polarity ? var.lowerBounds() : var.upperBounds();
 
     Set<SortVariable> vars = new HashSet<>();
