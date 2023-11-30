@@ -11,7 +11,7 @@ from pyk.testing import RuntimeTest
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    from types import ModuleType
+    from pyk.kllvm.runtime import Runtime
 
 
 class TestTerm(RuntimeTest):
@@ -21,14 +21,14 @@ class TestTerm(RuntimeTest):
     }
 
     @pytest.mark.parametrize('ctor', ('one', 'two', 'three'))
-    def test_construct(self, runtime: ModuleType, ctor: str) -> None:
+    def test_construct(self, runtime: Runtime, ctor: str) -> None:
         # Given
         label = f"Lbl{ctor}'LParRParUnds'CTOR'Unds'Foo"
         pattern = CompositePattern(label)
-        term = runtime.Term(pattern)
+        term = runtime.term(pattern)
 
         # Then
         assert str(term) == str(pattern)
         assert str(term.pattern) == str(pattern)
         assert term.serialize() == pattern.serialize()
-        assert str(runtime.Term.deserialize(pattern.serialize())) == str(term)
+        assert str(runtime.deserialize(pattern.serialize())) == str(term)

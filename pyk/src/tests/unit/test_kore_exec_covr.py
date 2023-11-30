@@ -7,8 +7,6 @@ import pytest
 from pyk.kore_exec_covr.kore_exec_covr import HaskellLogEntry, _parse_haskell_oneline_log, parse_rule_applications
 
 if TYPE_CHECKING:
-    pass
-
     from pytest import TempPathFactory
 
 

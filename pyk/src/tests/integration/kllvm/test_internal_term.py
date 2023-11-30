@@ -9,17 +9,16 @@ from pyk.testing import RuntimeTest
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    from types import ModuleType
-
     from pyk.kllvm.ast import Pattern
+    from pyk.kllvm.runtime import Runtime
 
 
 class TestInternalTerm(RuntimeTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
-    def test_str_llvm_backend_issue_724(self, runtime: ModuleType) -> None:
+    def test_str_llvm_backend_issue_724(self, runtime: Runtime) -> None:
         for _ in range(10000):
-            term = runtime.InternalTerm(start_pattern())
+            term = runtime._module.InternalTerm(start_pattern())
             term.step(-1)
             # just checking that str doesn't crash
             str(term)

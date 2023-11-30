@@ -24,8 +24,6 @@ from pyk.utils import chain
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    pass
-
     from pyk.kore.pool import KoreServerPool
 
 
