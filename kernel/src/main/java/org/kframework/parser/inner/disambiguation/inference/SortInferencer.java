@@ -105,8 +105,8 @@ public class SortInferencer {
   }
 
   private static boolean hasStrictCast(Term t) {
-    if (t instanceof Ambiguity) {
-      return ((Ambiguity) t).items().stream().anyMatch(SortInferencer::hasStrictCast);
+    if (t instanceof Ambiguity amb) {
+      return amb.items().stream().anyMatch(SortInferencer::hasStrictCast);
     }
     ProductionReference pr = (ProductionReference) t;
     if (pr.production().klabel().isDefined()) {
@@ -123,8 +123,8 @@ public class SortInferencer {
   }
 
   private static boolean hasParametricSorts(Term t) {
-    if (t instanceof Ambiguity) {
-      return ((Ambiguity) t).items().stream().anyMatch(SortInferencer::hasParametricSorts);
+    if (t instanceof Ambiguity amb) {
+      return amb.items().stream().anyMatch(SortInferencer::hasParametricSorts);
     }
     ProductionReference pr = (ProductionReference) t;
     if (stream(pr.production().items())
