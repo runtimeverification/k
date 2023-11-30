@@ -438,10 +438,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
         Either<Set<KEMException>, Term> z3Rez =
             new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
         if (infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
-          if (!((rez.isLeft() && z3Rez.isLeft())
-              || (rez.isRight()
-                  && z3Rez.isRight()
-                  && rez.right().get().equals(z3Rez.right().get())))) {
+          boolean bothLeft = rez.isLeft() && z3Rez.isLeft();
+          boolean equalRight =
+              rez.isRight() && z3Rez.isRight() && rez.right().get().equals(z3Rez.right().get());
+          if (!(bothLeft || equalRight)) {
             throw KEMException.criticalError("Z3 and SimpleSub algorithms differ!");
           }
         } else {
