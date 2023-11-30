@@ -8,8 +8,6 @@ from .kint import intToken
 from .string import stringToken
 
 if TYPE_CHECKING:
-    pass
-
     from ..kast.inner import KToken
 
 

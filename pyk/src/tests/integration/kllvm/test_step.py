@@ -9,16 +9,15 @@ from pyk.testing import RuntimeTest
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    from types import ModuleType
-
     from pyk.kllvm.ast import Pattern
+    from pyk.kllvm.runtime import Runtime
 
 
 class TestStep(RuntimeTest):
     KOMPILE_MAIN_FILE = K_FILES / 'steps.k'
 
-    def test_steps_1(self, runtime: ModuleType) -> None:
-        term = runtime.Term(start_pattern())
+    def test_steps_1(self, runtime: Runtime) -> None:
+        term = runtime.term(start_pattern())
         term.step(0)
         assert str(term) == foo_output(0)
         term.step()
@@ -27,27 +26,23 @@ class TestStep(RuntimeTest):
         term.step(200)
         assert str(term) == bar_output()
 
-    def test_steps_2(self, runtime: ModuleType) -> None:
-        term = runtime.Term(start_pattern())
+    def test_steps_2(self, runtime: Runtime) -> None:
+        term = runtime.term(start_pattern())
         assert str(term) == foo_output(0)
         term.step(50)
         assert str(term) == foo_output(50)
         term.step(-1)
         assert str(term) == bar_output()
 
-    def test_steps_3(self, runtime: ModuleType) -> None:
-        term = runtime.Term(start_pattern())
+    def test_steps_3(self, runtime: Runtime) -> None:
+        term = runtime.term(start_pattern())
         term.run()
         assert str(term) == bar_output()
 
-    def test_steps_to_pattern(self, runtime: ModuleType) -> None:
-        term = runtime.Term(start_pattern())
+    def test_steps_to_pattern(self, runtime: Runtime) -> None:
+        term = runtime.term(start_pattern())
         term.run()
         pattern = term.pattern
-        assert str(pattern) == bar_output()
-
-    def test_interpret(self, runtime: ModuleType) -> None:
-        pattern = runtime.interpret(start_pattern())
         assert str(pattern) == bar_output()
 
 
