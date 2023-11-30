@@ -61,6 +61,20 @@ final class ConstraintError extends SortInferenceError {
 /** An error indicating that some type variable cannot be monomorphized as an actual K sort. */
 final class MonomorphizationError extends SortInferenceError {
   // TODO: Produce better error messages!
+  //
+  // Type variables can originate from three places:
+  // - variables
+  // - sort parameters
+  // - as a generalization of the sort of a production
+  //
+  // For the first two cases, we could provide nicer error messages by pointing to the
+  // location where the type variable originated, reporting all bounds on the
+  // variable, and stating that they cannot be satisfied.
+  //
+  // However, it's unclear how to easily explain errors in the third case.
+  //
+  // Additionally, there are cases where two type variables may be individually but
+  // not mutually monomorphized, so its not clear how to report the root cause.
   public MonomorphizationError(HasLocation loc) {
     super(
         "Term is not well-sorted due to monomorphization failure. Add sort annotations to "
