@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pyk.kllvm.load  # noqa: F401
-from pyk.kllvm.parser import Parser
+from pyk.kllvm.parser import parse_pattern
 from pyk.testing import RuntimeTest
 
 from ..utils import K_FILES
@@ -65,7 +65,7 @@ def start_pattern() -> Pattern:
             )
         )
     """
-    return Parser.from_string(text).pattern()
+    return parse_pattern(text)
 
 
 def foo_output(n: int) -> str:
