@@ -106,15 +106,15 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   def lowerBounds(sorts: util.Collection[T]): util.Set[T] =
     Collections.mutable(lowerBounds(Collections.immutable(sorts)))
 
-  lazy val lub: Option[T] = {
-    val mins = minimal(upperBounds(elements))
-    if (mins.size == 1) Some(mins.head) else None
-  }
+  lazy val minimalElements: Set[T] = minimal(elements)
 
-  lazy val glb: Option[T] = {
-    val maxs = maximal(lowerBounds(elements))
-    if (maxs.size == 1) Some(maxs.head) else None
-  }
+  lazy val maximalElements: Set[T] = maximal(elements)
+
+  lazy val maximum: Option[T] =
+    if (maximalElements.size == 1) Some(maximalElements.head) else None
+
+  lazy val minimum: Option[T] =
+    if (minimalElements.size == 1) Some(minimalElements.head) else None
 
   lazy val asOrdering: Ordering[T] = (x: T, y: T) => if (lessThanEq(x, y)) -1 else if (lessThanEq(y, x)) 1 else 0
 
@@ -167,6 +167,5 @@ object POSet {
    * using the provided relations map. Input must be non-empty.
    */
   private def upperBounds[T](sorts: Iterable[T], relations: Map[T, Set[T]]): Set[T] =
-    (((sorts filterNot relations.keys.toSet[T]) map {Set.empty + _}) ++
-      ((relations filterKeys sorts.toSet) map { case (k, v) => v + k })) reduce { (a, b) => a & b }
+    sorts map { s => relations.getOrElse(s, Set.empty) + s } reduce { (a, b) => a & b }
 }
