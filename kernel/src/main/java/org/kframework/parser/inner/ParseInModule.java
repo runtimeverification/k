@@ -140,7 +140,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
     this.forGlobalScanner = forGlobalScanner;
     this.files = files;
     this.typeInferenceDebug = typeInferenceDebug;
-    this.typeInferenceMode = typeInferenceMode;
+    this.typeInferenceMode =
+        typeInferenceMode == KompileOptions.TypeInferenceMode.DEFAULT
+            ? KompileOptions.TypeInferenceMode.Z3
+            : typeInferenceMode;
     this.partialParseDebug = partialParseDebug;
   }
 
