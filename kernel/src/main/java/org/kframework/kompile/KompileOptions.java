@@ -257,5 +257,5 @@ public class KompileOptions implements Serializable {
           "Choose between the Z3-based and SimpleSub-based type inference algorithms, or run both"
               + " and check that their results are equal. Must be one of [z3|simplesub|checked].",
       hidden = true)
-  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.SIMPLESUB;
+  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.Z3;
 }

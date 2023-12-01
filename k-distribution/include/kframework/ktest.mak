@@ -52,7 +52,7 @@ ifeq ($(UNAME), Darwin)
 	KOMPILE_FLAGS+=--no-haskell-binary
 endif
 
-KOMPILE_FLAGS+=--no-exc-wrap
+KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode simplesub
 KPROVE_FLAGS+=--no-exc-wrap
 KRUN_FLAGS+=--no-exc-wrap
 
