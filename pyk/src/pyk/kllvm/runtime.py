@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from types import ModuleType
     from typing import Any
 
-    from .ast import Pattern
+    from .ast import Pattern, Sort
 
 
 class Runtime:
@@ -31,6 +31,12 @@ class Runtime:
 
     def run(self, pattern: Pattern) -> Pattern:
         return self.step(pattern, depth=None)
+
+    def simplify(self, pattern: Pattern, sort: Sort) -> Pattern:
+        return self._module.simplify_pattern(pattern, sort)
+
+    def simplify_bool(self, pattern: Pattern) -> bool:
+        return self._module.simplify_bool_pattern(pattern)
 
 
 class Term:
