@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.523"
+version = "0.1.524"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -20,6 +20,7 @@ psutil = "5.9.5"
 pybind11 = "^2.10.3"
 textual = "^0.27.0"
 tomli = "^2.0.1"
+xdg-base-dirs = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"
@@ -43,6 +44,7 @@ types-psutil = "^5.9.5.10"
 pyk = "pyk.__main__:main"
 pyk-covr = "pyk.kcovr:main"
 kbuild = "pyk.kbuild.__main__:main"
+kdist = "pyk.kdist.__main__:main"
 krepl = "pyk.krepl.__main__:main"
 kore-exec-covr = "pyk.kore_exec_covr.__main__:main"
 
