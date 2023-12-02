@@ -14,7 +14,7 @@ TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 KOMPILE_BACKEND?=llvm
 KAST_TESTS?=$(wildcard ./*.kast)
 
-KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode simplesub
+KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked
 KPROVE_FLAGS+=--no-exc-wrap
 KRUN_FLAGS+=--no-exc-wrap
 
