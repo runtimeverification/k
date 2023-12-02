@@ -1,8 +1,8 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation.inference;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.kframework.kore.SortHead;
 
 /** An unsimplified sort analogous to SimpleSub's SimpleType. */
@@ -18,12 +18,11 @@ public sealed interface BoundedSort {
    * @param lowerBounds - All those sorts which must be a sub-type of this variable
    * @param upperBounds - All those sorts which must be a super-type of this variable
    */
-  record Variable(
-      SortVariable sortVar, List<BoundedSort> lowerBounds, List<BoundedSort> upperBounds)
+  record Variable(SortVariable sortVar, Set<BoundedSort> lowerBounds, Set<BoundedSort> upperBounds)
       implements BoundedSort {
 
     Variable() {
-      this(new SortVariable(), new ArrayList<>(), new ArrayList<>());
+      this(new SortVariable(), new HashSet<>(), new HashSet<>());
     }
   }
 }

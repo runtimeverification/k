@@ -4,7 +4,6 @@ package org.kframework.parser.inner.disambiguation.inference;
 import static org.kframework.Collections.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -46,7 +45,7 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
     }
 
     BoundedSort.Variable var = (BoundedSort.Variable) sort;
-    List<BoundedSort> bounds = polarity ? var.lowerBounds() : var.upperBounds();
+    Set<BoundedSort> bounds = polarity ? var.lowerBounds() : var.upperBounds();
 
     Set<SortVariable> vars = new HashSet<>();
     Set<SortHead> ctors = new HashSet<>();
@@ -109,20 +108,15 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
         ctors.stream()
             .map(h -> new org.kframework.kore.ADT.Sort(h.name(), Seq()))
             .collect(Collectors.toSet()));
-    Set<Sort> bounds = polarity ? subsorts.upperBounds(sorts) : subsorts.lowerBounds(sorts);
-
-    // Nothing should ever be KBott
-    bounds.removeIf(s -> subsorts.lessThanEq(s, Sorts.KBott()));
-    // Presumably this is user syntax, so we only want sorts <= K
-    Set<Sort> filteredBounds =
-        bounds.stream().filter(s -> subsorts.lessThanEq(s, Sorts.K())).collect(Collectors.toSet());
-    // However, if no sort <= K is possible, this must be a piece of K syntax not user syntax
-    if (filteredBounds.isEmpty() && !sorts.isEmpty()) {
-      filteredBounds = bounds;
+    // WLOG upper/lower bound of a set is the upper/lower bound of its maximal/minimal elements.
+    // This is useful to prune the search space as the POSet operations can be quite expensive
+    sorts = polarity ? subsorts.maximal(sorts) : subsorts.minimal(sorts);
+    if (sorts.size() == 1) {
+      return Right.apply(sorts.iterator().next());
     }
-
-    Set<Sort> candidates =
-        polarity ? subsorts.minimal(filteredBounds) : subsorts.maximal(filteredBounds);
+    Set<Sort> bounds = polarity ? subsorts.upperBounds(sorts) : subsorts.lowerBounds(sorts);
+    bounds.removeIf(s -> subsorts.lessThanEq(s, Sorts.KBott()));
+    Set<Sort> candidates = polarity ? subsorts.minimal(bounds) : subsorts.maximal(bounds);
     if (candidates.size() != 1) {
       return Left.apply(new LatticeOpError(sorts, candidates, polarity));
     }

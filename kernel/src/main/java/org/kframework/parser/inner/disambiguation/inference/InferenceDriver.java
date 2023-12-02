@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.kframework.POSet;
+import org.kframework.builtin.Sorts;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
@@ -46,7 +47,10 @@ public final class InferenceDriver {
   public BoundedSort varSort(Constant var) {
     VariableId varId = VariableId.apply(var);
     if (!varSorts.containsKey(varId)) {
-      varSorts.put(varId, new BoundedSort.Variable());
+      // Every variable must be assigned a user sort <=K
+      BoundedSort.Variable sort = new BoundedSort.Variable();
+      sort.upperBounds().add(sortToBoundedSort(Sorts.K(), null));
+      varSorts.put(varId, sort);
     }
     return varSorts.get(varId);
   }
