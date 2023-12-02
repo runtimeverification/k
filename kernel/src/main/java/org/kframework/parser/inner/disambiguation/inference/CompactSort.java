@@ -110,12 +110,19 @@ public record CompactSort(Set<SortVariable> vars, Set<SortHead> ctors) {
             .map(h -> new org.kframework.kore.ADT.Sort(h.name(), Seq()))
             .collect(Collectors.toSet()));
     Set<Sort> bounds = polarity ? subsorts.upperBounds(sorts) : subsorts.lowerBounds(sorts);
-    bounds.removeIf(
-        s ->
-            subsorts.lessThanEq(s, Sorts.KLabel())
-                || subsorts.lessThanEq(s, Sorts.KBott())
-                || subsorts.greaterThan(s, Sorts.K()));
-    Set<Sort> candidates = polarity ? subsorts.minimal(bounds) : subsorts.maximal(bounds);
+
+    // Nothing should ever be KBott
+    bounds.removeIf(s -> subsorts.lessThanEq(s, Sorts.KBott()));
+    // Presumably this is user syntax, so we only want sorts <= K
+    Set<Sort> filteredBounds =
+        bounds.stream().filter(s -> subsorts.lessThanEq(s, Sorts.K())).collect(Collectors.toSet());
+    // However, if no sort <= K is possible, this must be a piece of K syntax not user syntax
+    if (filteredBounds.isEmpty() && !sorts.isEmpty()) {
+      filteredBounds = bounds;
+    }
+
+    Set<Sort> candidates =
+        polarity ? subsorts.minimal(filteredBounds) : subsorts.maximal(filteredBounds);
     if (candidates.size() != 1) {
       return Left.apply(new LatticeOpError(sorts, candidates, polarity));
     }
