@@ -119,7 +119,7 @@ jobs:
           retention-days: 1
 
   performance-tests:
-    name: 'Performace Tests'
+    name: 'Performance Tests'
     runs-on: [self-hosted, linux, performance]
     needs: test-package-ubuntu-jammy
     steps:
