@@ -85,9 +85,9 @@
       <version>${scala.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-reflect</artifactId>
-        <version>${scala.version}</version>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -203,7 +203,7 @@
               <sourceDirectories>
                 <sourceDirectory>${project.basedir}</sourceDirectory>
               </sourceDirectories>
-	      <includes>**/*.xml,**/*.xsd,**/*.md,**/*.k,**/*.kore,**/*.java,**/*.scala,**/*.jj,**/*.jjt,**/*.str,**/*.css,**/*.sty,**/*.tex,**/*.cls</includes>
+              <includes>**/*.xml,**/*.xsd,**/*.md,**/*.k,**/*.kore,**/*.java,**/*.scala,**/*.jj,**/*.jjt,**/*.str,**/*.css,**/*.sty,**/*.tex,**/*.cls</includes>
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
