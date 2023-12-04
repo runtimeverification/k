@@ -66,7 +66,7 @@ public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelI
   // cell mentioned is the automatically-added <generatedCounter> cell.
   private boolean shouldConsider(List<K> items, boolean isClaim) {
     if (items.size() == 1) {
-      return true;
+      return !isClaim;
     } else if (items.size() == 2 && isClaim) {
       K second = items.get(1);
       if (second instanceof KApply app) {

@@ -441,7 +441,7 @@ public class DefinitionParsing {
               ParseCache cache = loadCache(configParserModule);
               try (ParseInModule parser =
                   RuleGrammarGenerator.getCombinedGrammar(
-                      cache.module(), true, profileRules, files, options.debugTypeInference)) {
+                      cache.module(), profileRules, files, options.debugTypeInference)) {
                 // each parser gets its own scanner because config labels can conflict with user
                 // tokens
                 parser.getScanner(globalOptions);
@@ -507,7 +507,6 @@ public class DefinitionParsing {
               Module extMod =
                   RuleGrammarGenerator.getCombinedGrammar(
                           gen.getConfigGrammar(module),
-                          true,
                           profileRules,
                           files,
                           options.debugTypeInference)
@@ -551,14 +550,7 @@ public class DefinitionParsing {
     ParseCache cache = loadCache(ruleParserModule);
     try (ParseInModule parser =
         RuleGrammarGenerator.getCombinedGrammar(
-            cache.module(),
-            true,
-            profileRules,
-            false,
-            true,
-            files,
-            options.debugTypeInference,
-            false)) {
+            cache.module(), profileRules, false, true, files, options.debugTypeInference, false)) {
       Scanner scanner;
       if (deserializeScanner) {
         scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
@@ -590,11 +582,10 @@ public class DefinitionParsing {
     try (ParseInModule parser =
         needNewScanner
             ? RuleGrammarGenerator.getCombinedGrammar(
-                cache.module(), true, profileRules, files, options.debugTypeInference)
+                cache.module(), profileRules, files, options.debugTypeInference)
             : RuleGrammarGenerator.getCombinedGrammar(
                 cache.module(),
                 scanner,
-                true,
                 profileRules,
                 false,
                 files,
@@ -682,8 +673,7 @@ public class DefinitionParsing {
                               registerWarnings(parse.warnings());
                               KApply k =
                                   (KApply)
-                                      new TreeNodesToKORE(Outer::parseSort, true)
-                                          .down(parse.parse());
+                                      new TreeNodesToKORE(Outer::parseSort).down(parse.parse());
                               return Stream.of(Pair.of(b, upSentence(k, b.sentenceType())));
                             }
                             return Stream.of();
@@ -794,7 +784,6 @@ public class DefinitionParsing {
     try (ParseInModule parser =
         RuleGrammarGenerator.getCombinedGrammar(
             gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()),
-            true,
             profileRules,
             false,
             true,
@@ -940,7 +929,6 @@ public class DefinitionParsing {
             source,
             startLine,
             startColumn,
-            true,
             isAnywhere);
     parsedBubbles.getAndIncrement();
     registerWarnings(result._2());
@@ -961,7 +949,7 @@ public class DefinitionParsing {
           b.contents(),
           new ParsedSentence(
               k, new HashSet<>(result._2()), new HashSet<>(), startLine, startColumn, source));
-      k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(k);
+      k = (KApply) new TreeNodesToKORE(Outer::parseSort).down(k);
       return Stream.of(k);
     } else {
       cache.put(

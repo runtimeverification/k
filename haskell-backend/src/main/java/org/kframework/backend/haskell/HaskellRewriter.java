@@ -380,7 +380,12 @@ public record HaskellRewriter(
       public RewriterResult prove(Module rules, Boolean reuseDef) {
         Module kompiledModule = KoreBackend.getKompiledModule(module, true);
         ModuleToKORE converter =
-            new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions, kem);
+            new ModuleToKORE(
+                kompiledModule,
+                def.topCellInitializer,
+                kompileOptions,
+                kem,
+                kProveOptions.allowFuncClaims);
         String defPath =
             reuseDef
                 ? files.resolveKompiled("definition.kore").getAbsolutePath()

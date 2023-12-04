@@ -57,9 +57,8 @@ public class SortInfo {
     joinOps
         .asMap()
         .forEach(
-            (sort, labels) -> {
-              info.closeOperators.put(sort, Iterators.getNext(labels.iterator(), null));
-            });
+            (sort, labels) ->
+                info.closeOperators.put(sort, Iterators.getNext(labels.iterator(), null)));
     return info;
   }
 }

@@ -503,16 +503,14 @@ public class AddSortInjections {
     assert !entries.isEmpty();
     entries = new HashSet<>(entries);
     Collection<Sort> filteredEntries =
-        entries.stream()
-            .filter(s -> s != null && !s.name().equals(SORTPARAM_NAME))
-            .collect(Collectors.toList());
+        entries.stream().filter(s -> s != null && !s.name().equals(SORTPARAM_NAME)).toList();
     if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
       return entries.iterator().next();
     }
 
     Set<Sort> nonParametric =
         filteredEntries.stream().filter(s -> s.params().isEmpty()).collect(Collectors.toSet());
-    Set<Sort> bounds = mutable(mod.subsorts().upperBounds(immutable(nonParametric)));
+    Set<Sort> bounds = mod.subsorts().upperBounds(nonParametric);
     // Anything less than KBott or greater than K is a syntactic sort from kast.md which should not
     // be considered
     bounds.removeIf(

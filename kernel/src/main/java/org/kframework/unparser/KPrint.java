@@ -158,13 +158,13 @@ public class KPrint {
         return serialize(result, outputMode);
       case PRETTY:
         Module prettyUnparsingModule =
-            RuleGrammarGenerator.getCombinedGrammar(module, false, files).getExtensionModule();
+            RuleGrammarGenerator.getCombinedGrammar(module, files).getExtensionModule();
         return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
       case PROGRAM:
         {
           RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
           Module programUnparsingModule =
-              RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false, files)
+              RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), files)
                   .getParsingModule();
           return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
         }
@@ -312,7 +312,7 @@ public class KPrint {
         return Optional.of(term);
       }
       Set<KVariable> leftVars = vars(kapp.items().get(0));
-      if (leftVars.stream().filter(v -> !v.att().contains(Att.ANONYMOUS())).findAny().isPresent()) {
+      if (leftVars.stream().anyMatch(v -> !v.att().contains(Att.ANONYMOUS()))) {
         return Optional.of(term);
       }
       for (KVariable var : leftVars) {
@@ -328,7 +328,7 @@ public class KPrint {
 
   private K sortCollections(Module mod, K input) {
     Module unparsingModule =
-        RuleGrammarGenerator.getCombinedGrammar(mod, false, files).getExtensionModule();
+        RuleGrammarGenerator.getCombinedGrammar(mod, files).getExtensionModule();
     return new TransformK() {
       @Override
       public K apply(KApply k) {
@@ -408,7 +408,7 @@ public class KPrint {
 
   private K tokenizeTerm(Module mod, KApply kapp) {
     Module unparsingModule =
-        RuleGrammarGenerator.getCombinedGrammar(mod, false, files).getExtensionModule();
+        RuleGrammarGenerator.getCombinedGrammar(mod, files).getExtensionModule();
     String tokenizedTerm = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
     Sort finalSort = Sorts.K();
     Option<Sort> termSort = mod.sortFor().get(kapp.klabel());

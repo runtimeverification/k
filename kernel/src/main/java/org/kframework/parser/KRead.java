@@ -66,7 +66,6 @@ public record KRead(
           mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
       case RULE -> throw KEMException.internalError(
           "Should have been handled directly by the kast front end: " + inputMode);
-      default -> throw KEMException.criticalError("Unsupported input mode: " + inputMode);
     };
   }
 
@@ -80,7 +79,7 @@ public record KRead(
       boolean library) {
     Stopwatch sw = new Stopwatch(globalOptions);
     try (ParseInModule parseInModule =
-        RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true, false, files)) {
+        RuleGrammarGenerator.getCombinedGrammar(mod, false, true, false, files)) {
       try (Scanner scanner = parseInModule.getScanner(kem.options)) {
         File scannerFile = files.resolveTemp("scanner.l");
         File scanHdr = files.resolveTemp("scanner.h");

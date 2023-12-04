@@ -17,11 +17,7 @@ import scala.util.Left;
 /** Report remaining ambiguities as errors. */
 public class AmbFilterError extends SetsTransformerWithErrors<KEMException> {
 
-  private final boolean strict;
-
-  public AmbFilterError(boolean strict) {
-    this.strict = strict;
-  }
+  public AmbFilterError() {}
 
   @Override
   public Either<Set<KEMException>, Term> apply(Ambiguity amb) {
@@ -34,7 +30,7 @@ public class AmbFilterError extends SetsTransformerWithErrors<KEMException> {
         return candidate;
       }
       K next =
-          new TreeNodesToKORE(Outer::parseSort, strict)
+          new TreeNodesToKORE(Outer::parseSort)
               .apply(new RemoveBracketVisitor().apply(candidate.right().get()));
       if (last != null) {
         if (!last.equals(next)) {
