@@ -39,7 +39,7 @@ jobs:
           fi
 
   post-performance-tests:
-    name: 'Performace Tests'
+    name: 'Performance Tests'
     runs-on: [self-hosted, linux, normal]
     continue-on-error: true
     steps:
