@@ -15,17 +15,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1701231950,
-        "narHash": "sha256-tDMOnzs4qv7EYygfhYuEvuTK96GJBS5IAC2c8KesB/U=",
+        "lastModified": 1701697362,
+        "narHash": "sha256-qNfcZztLN+FudC5cXdKQew9/YViIa5AQ5t6Yo0O+s7U=",
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "f2ae5990cc61618e97c0350ffea7485574b246d1",
+        "rev": "ea9dd2f94ef55e9c7d254da8fcb98fbe4bb65d03",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "f2ae5990cc61618e97c0350ffea7485574b246d1",
+        "rev": "ea9dd2f94ef55e9c7d254da8fcb98fbe4bb65d03",
         "type": "github"
       }
     },
@@ -34,11 +34,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1694529238,
-        "narHash": "sha256-zsNZZGTGnMOf9YpHKJqMSsa0dXbfmxeoJ7xHlrt+xmY=",
+        "lastModified": 1701680307,
+        "narHash": "sha256-kAuep2h5ajznlPMD9rnQyffWG8EM/C73lejGofXvdM8=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "ff7b65b44d01cf9ba6a71320833626af21126384",
+        "rev": "4022d587cbbfd70fe950c1e2083a02621806a725",
         "type": "github"
       },
       "original": {
@@ -71,17 +71,17 @@
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1701192512,
-        "narHash": "sha256-VWytUWtgTCaEYuRlFdRMQxt+La/xaPbC8KlxemyMBf0=",
+        "lastModified": 1701257709,
+        "narHash": "sha256-WoZ+XLi48Uqo558muURSY+SeThu2+VrO699r8UQI81g=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "827252a324f651f361ac62de40dbf8888a089503",
+        "rev": "0be07d293a1167615ef9342bb1820350f794e893",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "827252a324f651f361ac62de40dbf8888a089503",
+        "rev": "0be07d293a1167615ef9342bb1820350f794e893",
         "type": "github"
       }
     },
@@ -243,11 +243,11 @@
     },
     "stacklock2nix": {
       "locked": {
-        "lastModified": 1696895532,
-        "narHash": "sha256-QXQ7frsy7D8V81oE6HQBZhlL48Vr7iPR5fSZfNaTdg0=",
+        "lastModified": 1700633677,
+        "narHash": "sha256-ATrA3tZZYo9aj9IAZZNqyvtkz4Ub1Q3q5OgADwxImTA=",
         "owner": "cdepillabout",
         "repo": "stacklock2nix",
-        "rev": "10d531672cada2e02ac49b1b18293e7a94938a38",
+        "rev": "84694f48ddd8e49b96a02216ca2ab406fba25e65",
         "type": "github"
       },
       "original": {
