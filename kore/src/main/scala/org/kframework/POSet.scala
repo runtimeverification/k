@@ -49,7 +49,7 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    */
   private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]): Unit = {
     val currentPath = path :+ current
-    val succs = directRelationsMap.getOrElse(current, Set())
+    val succs       = directRelationsMap.getOrElse(current, Set())
     if (succs.contains(start)) {
       throw KEMException.compilerError(
         "Illegal circular relation: " + (currentPath :+ start).mkString(" < ")
@@ -82,21 +82,21 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   /**
    * Returns true if x < y
    */
-  def lessThan(x: T, y: T): Boolean = <(x, y)
-  def lessThanEq(x: T, y: T): Boolean = x == y || <(x, y)
+  def lessThan(x: T, y: T): Boolean         = <(x, y)
+  def lessThanEq(x: T, y: T): Boolean       = x == y || <(x, y)
   def directlyLessThan(x: T, y: T): Boolean = directRelationsMap.get(x).exists(_.contains(y))
 
   /**
    * Returns true if y < x
    */
-  def greaterThan(x: T, y: T): Boolean = >(x, y)
-  def greaterThanEq(x: T, y: T): Boolean = x == y || >(x, y)
+  def greaterThan(x: T, y: T): Boolean         = >(x, y)
+  def greaterThanEq(x: T, y: T): Boolean       = x == y || >(x, y)
   def directlyGreaterThan(x: T, y: T): Boolean = directRelationsMap.get(y).exists(_.contains(x))
 
   /**
    * Returns true if y < x or y < x
    */
-  def inSomeRelation(x: T, y: T): Boolean = this.~(x, y)
+  def inSomeRelation(x: T, y: T): Boolean   = this.~(x, y)
   def inSomeRelationEq(x: T, y: T): Boolean = x == y || this.~(x, y)
 
   /**
@@ -157,13 +157,13 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
 
   override def equals(that: Any): Boolean = that match {
     case that: POSet[_] => relations == that.relations
-    case _ => false
+    case _              => false
   }
 }
 
 object POSet {
   def apply[T](relations: (T, T)*) = new POSet(relations.toSet)
-  def apply[T](s: Set[(T, T)]) = new POSet(s)
+  def apply[T](s: Set[(T, T)])     = new POSet(s)
 
   /**
    * Import this for Scala syntactic sugar.

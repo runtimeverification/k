@@ -60,9 +60,9 @@ object ModuleTransformer {
   def fromRuleBodyTransformerWithRule(f: (RuleOrClaim, K) => K, name: String): ModuleTransformer =
     fromSentenceTransformer(
       _ match {
-        case r: Rule => r.copy(body = f(r, r.body));
+        case r: Rule  => r.copy(body = f(r, r.body));
         case c: Claim => c.copy(body = f(c, c.body));
-        case s => s
+        case s        => s
       },
       name
     )
@@ -88,7 +88,7 @@ object ModuleTransformer {
 
   def apply(f: Module => Module, name: String): ModuleTransformer = f match {
     case f: ModuleTransformer => f
-    case _ => new ModuleTransformer(f, name)
+    case _                    => new ModuleTransformer(f, name)
   }
 }
 
@@ -164,7 +164,7 @@ object KViz {
 
   def apply(f: K => K, name: String): KViz = f match {
     case f: KViz => f
-    case _ => new KViz(f, name)
+    case _       => new KViz(f, name)
   }
 }
 

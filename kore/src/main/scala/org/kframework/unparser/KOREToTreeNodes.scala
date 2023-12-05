@@ -50,9 +50,9 @@ object KOREToTreeNodes {
       )
     case a: KApply =>
       val scalaChildren = a.klist.items.asScala.map { i: K => apply(i, mod).asInstanceOf[Term] }
-      val children = ConsPStack.from(scalaChildren.reverse asJava)
-      val loc = t.att.getOptional(classOf[Location])
-      val source = t.att.getOptional(classOf[Source])
+      val children      = ConsPStack.from(scalaChildren.reverse asJava)
+      val loc           = t.att.getOptional(classOf[Location])
+      val source        = t.att.getOptional(classOf[Source])
       val p =
         mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains(Att.UNPARSE_AVOID)).head
       val subst = if (a.klabel.params.nonEmpty) {
@@ -81,7 +81,7 @@ object KOREToTreeNodes {
         KApply(KLabel("#KSequence"), KList(k1, k2), s.att)
       )
     case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(mod)(r.left), up(mod)(r.right)), r.att)
-    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala), t.att)
+    case t: KApply   => KApply(t.klabel, upList(mod)(t.klist.items.asScala), t.att)
   }
 
   def upList(mod: Module)(items: Seq[K]): Seq[K] =

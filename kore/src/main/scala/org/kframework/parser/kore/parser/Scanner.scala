@@ -11,9 +11,9 @@ package org.kframework.parser.kore.parser
  */
 class Scanner {
 
-  private var stream: io.Source = _
+  private var stream: io.Source       = _
   private var lines: Iterator[String] = _
-  private var input: Iterator[Char] = _
+  private var input: Iterator[Char]   = _
 
   /** The string of the line that this scanner currently reads. */
   var line: String = _
@@ -58,7 +58,7 @@ class Scanner {
     }
 
   private var lookahead: Option[Char] = None
-  private var yieldEOL: Boolean = false
+  private var yieldEOL: Boolean       = false
 
   /**
    * Returns the next character from the stream. Returns '\n' when a newline is encountered.
@@ -106,10 +106,10 @@ class Scanner {
   def skipWhitespaces(): Unit =
     next() match {
       case ' ' | '\n' => skipWhitespaces()
-      case '\t' => columnNum += 3; skipWhitespaces()
-      case '\r' => ??? // skipWhitespaces() // shouldn't be reachable.
-      case '/' => skipComments(); skipWhitespaces()
-      case c => putback(c)
+      case '\t'       => columnNum += 3; skipWhitespaces()
+      case '\r'       => ??? // skipWhitespaces() // shouldn't be reachable.
+      case '/'        => skipComments(); skipWhitespaces()
+      case c          => putback(c)
     }
 
   /**
@@ -128,7 +128,7 @@ class Scanner {
     def skipLineComment(): Unit =
       next() match {
         case '\n' => ;
-        case c => skipLineComment()
+        case c    => skipLineComment()
       }
 
     /**
@@ -148,7 +148,7 @@ class Scanner {
       next() match {
         case '/' => ;
         case '*' => skipBlockCommentAfterStar()
-        case c => skipBlockComment()
+        case c   => skipBlockComment()
       }
   }
 
@@ -170,7 +170,7 @@ class Scanner {
       false
     } catch {
       case _: java.io.EOFException => true
-      case _: Throwable => ??? // shouldn't be reachable
+      case _: Throwable            => ??? // shouldn't be reachable
     }
 
 }

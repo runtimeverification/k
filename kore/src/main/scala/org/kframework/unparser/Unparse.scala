@@ -72,9 +72,9 @@ object ToKast {
    *   The term to print
    */
   def unparse(accumulator: String => Unit, inParen: Boolean, prec: Int, k: K): Unit = k match {
-    case KToken(s, sort) => accumulator("#token(" + escape(s) + "," + escape(sort.toString) + ")")
+    case KToken(s, sort)   => accumulator("#token(" + escape(s) + "," + escape(sort.toString) + ")")
     case InjectedKLabel(l) => accumulator("#klabel(" + apply(l) + ")")
-    case KVariable(v) => accumulator(v.toString)
+    case KVariable(v)      => accumulator(v.toString)
     case KApply(l, List()) => accumulator(unparse(inParen, l) + "(.KList)")
     case KApply(l, args) =>
       accumulator(unparse(inParen, l))

@@ -19,7 +19,7 @@ import org.kframework.kore.Unapply.KApply
 import org.kframework.kore.Unapply.KLabel
 
 object Strategy {
-  val strategyCellName = "<s>"
+  val strategyCellName  = "<s>"
   val strategyCellLabel = KORE.KLabel(strategyCellName)
 
   def addStrategyRuleToMainModule(mainModuleName: String) =

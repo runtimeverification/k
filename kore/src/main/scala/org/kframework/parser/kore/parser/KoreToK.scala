@@ -83,8 +83,8 @@ class KoreToK(sortAtt: Map[String, String]) {
       extractKLabel(head.substring(3))
     } else {
       var literal = true
-      var result = new StringBuilder()
-      var i = 0
+      var result  = new StringBuilder()
+      var i       = 0
       while (i < head.length)
         if (head(i) == '\'') {
           literal = !literal

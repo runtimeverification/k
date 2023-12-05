@@ -23,7 +23,7 @@ trait K extends Serializable with HasLocation with AttValue {
   def computeHashCode: Int
 
   def location: Optional[Location] = att.getOptional(classOf[Location])
-  def source: Optional[Source] = att.getOptional(classOf[Source])
+  def source: Optional[Source]     = att.getOptional(classOf[Source])
 }
 
 object K {
@@ -45,20 +45,20 @@ object K {
         case (c: KRewrite, d: KRewrite) =>
           Ordering.Tuple2(this, this).compare((c.left, c.right), (d.left, d.right))
         case (c: InjectedKLabel, d: InjectedKLabel) => KLabelOrdering.compare(c.klabel, d.klabel)
-        case (_: KToken, _) => 1
-        case (_, _: KToken) => -1
-        case (_: KApply, _) => 1
-        case (_, _: KApply) => -1
-        case (_: KSequence, _) => 1
-        case (_, _: KSequence) => -1
-        case (_: KVariable, _) => 1
-        case (_, _: KVariable) => -1
-        case (_: KAs, _) => 1
-        case (_, _: KAs) => -1
-        case (_: KRewrite, _) => 1
-        case (_, _: KRewrite) => -1
-        case (_: InjectedKLabel, _) => 1
-        case (_, _: InjectedKLabel) => -1
+        case (_: KToken, _)                         => 1
+        case (_, _: KToken)                         => -1
+        case (_: KApply, _)                         => 1
+        case (_, _: KApply)                         => -1
+        case (_: KSequence, _)                      => 1
+        case (_, _: KSequence)                      => -1
+        case (_: KVariable, _)                      => 1
+        case (_, _: KVariable)                      => -1
+        case (_: KAs, _)                            => 1
+        case (_, _: KAs)                            => -1
+        case (_: KRewrite, _)                       => 1
+        case (_, _: KRewrite)                       => -1
+        case (_: InjectedKLabel, _)                 => 1
+        case (_, _: InjectedKLabel)                 => -1
         case (_, _) =>
           throw KEMException.internalError(
             "Cannot order these terms:\n" + a.toString() + "\n" + b.toString()
@@ -75,7 +75,7 @@ trait KLabel extends AttValue {
   def params: Seq[Sort]
   override def equals(other: Any) = other match {
     case l: KLabel => name == l.name && params == l.params
-    case _ => false
+    case _         => false
   }
   override def hashCode = name.hashCode * 29 + params.hashCode
 
@@ -98,7 +98,7 @@ trait KToken extends KItem {
   def s: String
   override def equals(other: Any) = other match {
     case other: KToken => sort == other.sort && s == other.s
-    case _ => false
+    case _             => false
   }
   def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
@@ -108,7 +108,7 @@ trait Sort extends Ordered[Sort] with AttValue {
   def params: Seq[Sort]
   override def equals(other: Any) = other match {
     case other: Sort => name == other.name && params == other.params
-    case _ => false
+    case _           => false
   }
   override def hashCode = name.hashCode * 23 + params.hashCode
 
@@ -143,7 +143,7 @@ trait SortHead extends Ordered[SortHead] {
   def params: Int
   override def equals(other: Any) = other match {
     case other: SortHead => name == other.name && params == other.params
-    case _ => false
+    case _               => false
   }
   override def hashCode = name.hashCode * 23 + params.hashCode
 
@@ -163,8 +163,8 @@ trait KCollection {
   override def equals(that: Any): Boolean =
     hashCode == that.hashCode && (that match {
       case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KCollection => this.items == that.items
-      case _ => false
+      case that: KCollection                                 => this.items == that.items
+      case _                                                 => false
     })
 
   def computeHashCode = items.hashCode
@@ -203,7 +203,7 @@ trait KAs extends K {
     hashCode == that.hashCode && (that match {
       case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
       case that: KAs => this.pattern == that.pattern && this.alias == that.alias
-      case _ => false
+      case _         => false
     })
 
   def computeHashCode = pattern.hashCode * 19 + alias.hashCode
@@ -217,7 +217,7 @@ trait KRewrite extends K {
     hashCode == that.hashCode && (that match {
       case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
       case that: KRewrite => this.left == that.left && this.right == that.right
-      case _ => false
+      case _              => false
     })
 
   def computeHashCode = left.hashCode * 19 + right.hashCode
@@ -229,8 +229,8 @@ trait InjectedKLabel extends KItem {
   override def equals(that: Any): Boolean =
     hashCode == that.hashCode && (that match {
       case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: InjectedKLabel => this.klabel == that.klabel
-      case _ => false
+      case that: InjectedKLabel                              => this.klabel == that.klabel
+      case _                                                 => false
     })
 
   def computeHashCode = klabel.hashCode

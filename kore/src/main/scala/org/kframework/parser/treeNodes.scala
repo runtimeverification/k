@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 
 trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
-  var source: Optional[Source] = Optional.empty()
+  var source: Optional[Source]     = Optional.empty()
 }
 
 trait ProductionReference extends Term {

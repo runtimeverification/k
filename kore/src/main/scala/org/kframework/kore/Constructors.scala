@@ -22,7 +22,7 @@ trait Constructors {
   @annotation.varargs
   def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), Att.empty)
   @annotation.varargs
-  def KSequence(list: K*): KSequence = KSequence(list.toList.asJava, Att.empty)
+  def KSequence(list: K*): KSequence     = KSequence(list.toList.asJava, Att.empty)
   def KVariable(name: String): KVariable = KVariable(name, Att.empty)
 
   def convert(l: KLabel): KLabel = l match {
@@ -30,11 +30,11 @@ trait Constructors {
   }
 
   def convert(k: K): K = k match {
-    case t @ Unapply.KVariable(name) => KVariable(name, t.att)
-    case t @ Unapply.KToken(v, s) => KToken(v, s, t.att)
+    case t @ Unapply.KVariable(name)       => KVariable(name, t.att)
+    case t @ Unapply.KToken(v, s)          => KToken(v, s, t.att)
     case t @ Unapply.KRewrite(left, right) => KRewrite(convert(left), convert(right), t.att)
-    case t @ Unapply.KSequence(s) => KSequence(s.map(convert).asJava, t.att)
-    case t @ Unapply.KApply(label, list) => KApply(label, KList(list.map(convert).asJava), t.att)
+    case t @ Unapply.KSequence(s)          => KSequence(s.map(convert).asJava, t.att)
+    case t @ Unapply.KApply(label, list)   => KApply(label, KList(list.map(convert).asJava), t.att)
   }
 }
 

@@ -29,10 +29,10 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
     extends Function[Module, Module] {
 
   object ML {
-    val and = KLabels.ML_AND
-    val or = KLabels.ML_OR
-    val True = KApply(KLabels.ML_TRUE)
-    val False = KApply(KLabels.ML_FALSE)
+    val and          = KLabels.ML_AND
+    val or           = KLabels.ML_OR
+    val True         = KApply(KLabels.ML_TRUE)
+    val False        = KApply(KLabels.ML_FALSE)
     val TrueToken: K = KToken("true", Sorts.Bool, Att.empty)
   }
 
@@ -59,8 +59,8 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
 
   private def convertKRewriteToKApply(k: K): K = k match {
     case Unapply.KApply(label, children) => KApply(label, children.map(convertKRewriteToKApply): _*)
-    case Unapply.KRewrite(l, r) => KApply(KLabels.KREWRITE, l, r)
-    case other => other
+    case Unapply.KRewrite(l, r)          => KApply(KLabels.KREWRITE, l, r)
+    case other                           => other
   }
 
   private def makeOr(ks: K*): K =
@@ -75,7 +75,7 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
 
     val termsWithoutRewrites: Set[(K, K)] = terms.map {
       case (Unapply.KApply(`rwLabel`, children), ruleP) => (children.head, ruleP)
-      case other => other
+      case other                                        => other
     }
 
     val theRewrites: Set[(K, K)] = terms.collect {

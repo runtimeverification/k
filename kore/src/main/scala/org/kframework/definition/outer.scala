@@ -59,7 +59,7 @@ case class Definition(mainModule: Module, entryModules: Set[Module], att: Att)
 
   override def equals(that: Any) = that match {
     case Definition(`mainModule`, `entryModules`, _) => true
-    case _ => false
+    case _                                           => false
   }
 
   def parMap(f: Module => Module): java.util.Map[String, Module] =
@@ -91,7 +91,7 @@ trait Sorting {
         p1 != p2
     val prodsForOverloads = prods.toSeq.filter(_.klabelAtt.isDefined).groupBy(_.klabelAtt)
     val pairs: Iterable[(Production, Production)] = for {
-      x <- prodsForOverloads.values
+      x  <- prodsForOverloads.values
       p1 <- x
       p2 <- x if isLessThan(p1, p2)
     } yield (p1, p2)
@@ -157,9 +157,9 @@ case class Module(
 
   def isFunction(t: K): Boolean =
     t match {
-      case Unapply.KApply(lbl, _) if functions(lbl) => true
+      case Unapply.KApply(lbl, _) if functions(lbl)                      => true
       case Unapply.KRewrite(Unapply.KApply(lbl, _), _) if functions(lbl) => true
-      case _ => false
+      case _                                                             => false
     }
 
   lazy val sortedProductions: Seq[Production] = productions.toSeq.sorted
@@ -273,11 +273,11 @@ case class Module(
 
   def isSort(klabel: KLabel, s: Sort): Boolean = subsorts.<(sortFor(klabel), s)
 
-  lazy val claims: Set[Claim] = sentences.collect { case c: Claim => c }
-  lazy val rules: Set[Rule] = sentences.collect { case r: Rule => r }
+  lazy val claims: Set[Claim]               = sentences.collect { case c: Claim => c }
+  lazy val rules: Set[Rule]                 = sentences.collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
-  lazy val macroKLabels: Set[KLabel] = macroKLabelsFromRules ++ macroKLabelsFromProductions
+  lazy val macroKLabels: Set[KLabel]        = macroKLabelsFromRules ++ macroKLabelsFromProductions
   lazy val macroKLabelsFromRules: Set[KLabel] =
     rules.filter(r => r.isMacro).map(r => matchKLabel(r))
   lazy val macroKLabelsFromProductions: Set[KLabel] =
@@ -290,14 +290,14 @@ case class Module(
           Unapply.KRewrite(Unapply.KApply(s, _), _) :: _
         ) =>
       s
-    case Unapply.KApply(s, _) => s
+    case Unapply.KApply(s, _)                      => s
     case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
-    case _ => KORE.KLabel("")
+    case _                                         => KORE.KLabel("")
   }
 
   private def matchKLabel(p: Production) = p.klabel match {
     case Some(klabel) => klabel
-    case _ => KORE.KLabel("")
+    case _            => KORE.KLabel("")
   }
 
   def ruleLhsHasMacroKLabel(r: Rule): Boolean = r.body match {
@@ -310,8 +310,8 @@ case class Module(
 
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
-  lazy val localRules: Set[Rule] = localSentences.collect { case r: Rule => r }
-  lazy val localClaims: Set[Claim] = localSentences.collect { case r: Claim => r }
+  lazy val localRules: Set[Rule]                 = localSentences.collect { case r: Rule => r }
+  lazy val localClaims: Set[Claim]               = localSentences.collect { case r: Claim => r }
   lazy val localRulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(localClaims).++(localRules)
 
   // Check that productions with the same klabel have identical attributes
@@ -334,8 +334,8 @@ case class Module(
         }
     }
 
-  lazy val sortDeclarations: Set[SyntaxSort] = sentences.collect { case s: SyntaxSort => s }
-  lazy val sortSynonyms: Set[SortSynonym] = sentences.collect { case s: SortSynonym => s }
+  lazy val sortDeclarations: Set[SyntaxSort]      = sentences.collect { case s: SyntaxSort => s }
+  lazy val sortSynonyms: Set[SortSynonym]         = sentences.collect { case s: SortSynonym => s }
   lazy val lexicalIdentifiers: Set[SyntaxLexical] = sentences.collect { case s: SyntaxLexical => s }
 
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
@@ -373,7 +373,7 @@ case class Module(
     Sort(_)
   ) ++ definedInstantiations.values.flatten
   lazy val sortedDefinedSorts: Seq[SortHead] = definedSorts.toSeq.sorted
-  lazy val sortedAllSorts: Seq[Sort] = allSorts.toSeq.sorted
+  lazy val sortedAllSorts: Seq[Sort]         = allSorts.toSeq.sorted
   lazy val usedCellSorts: Set[Sort] = productions.flatMap { p =>
     p.items
       .collect { case NonTerminal(s, _) => s }
@@ -385,9 +385,9 @@ case class Module(
       srt
   }
 
-  lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences, false)
+  lazy val subsorts: POSet[Sort]          = computeSubsortPOSet(sentences, false)
   lazy val syntacticSubsorts: POSet[Sort] = computeSubsortPOSet(sentences, true)
-  lazy val overloads: POSet[Production] = computeOverloadPOSet(subsorts, productions)
+  lazy val overloads: POSet[Production]   = computeOverloadPOSet(subsorts, productions)
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
@@ -406,7 +406,7 @@ case class Module(
       }
       .flatten
   lazy val priorities = POSet(expressedPriorities)
-  lazy val leftAssoc = buildAssoc(Associativity.Left)
+  lazy val leftAssoc  = buildAssoc(Associativity.Left)
   lazy val rightAssoc = buildAssoc(Associativity.Right)
 
   private def buildAssoc(side: Associativity): Set[(Tag, Tag)] =
@@ -479,9 +479,9 @@ case class Module(
       .filter(_.name.isDefined)
       .map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get)
   )
-  lazy val semanticCasts = allSorts.map("#SemanticCastTo" + _)
+  lazy val semanticCasts   = allSorts.map("#SemanticCastTo" + _)
   lazy val sortProjections = allSorts.map("project:" + _)
-  lazy val sortPredicates = allSorts.map("is" + _)
+  lazy val sortPredicates  = allSorts.map("is" + _)
 
   override lazy val hashCode: Int = name.hashCode
 
@@ -509,45 +509,45 @@ trait Sentence extends HasLocation with HasAtt with AttValue {
   val att: Att
   def withAtt(att: Att): Sentence
   def location: Optional[Location] = att.getOptional(classOf[Location])
-  def source: Optional[Source] = att.getOptional(classOf[Source])
-  def label: Optional[String] = att.getOptional(Att.LABEL)
+  def source: Optional[Source]     = att.getOptional(classOf[Source])
+  def label: Optional[String]      = att.getOptional(Att.LABEL)
 }
 
 object Sentence {
   implicit val ord = new Ordering[Sentence] {
     def compare(a: Sentence, b: Sentence): Int =
       (a, b) match {
-        case (c: SyntaxSort, d: SyntaxSort) => Ordering[SyntaxSort].compare(c, d)
-        case (c: SortSynonym, d: SortSynonym) => Ordering[SortSynonym].compare(c, d)
+        case (c: SyntaxSort, d: SyntaxSort)       => Ordering[SyntaxSort].compare(c, d)
+        case (c: SortSynonym, d: SortSynonym)     => Ordering[SortSynonym].compare(c, d)
         case (c: SyntaxLexical, d: SyntaxLexical) => Ordering[SyntaxLexical].compare(c, d)
-        case (c: Production, d: Production) => Ordering[Production].compare(c, d)
+        case (c: Production, d: Production)       => Ordering[Production].compare(c, d)
         case (c: SyntaxAssociativity, d: SyntaxAssociativity) =>
           Ordering[SyntaxAssociativity].compare(c, d)
         case (c: SyntaxPriority, d: SyntaxPriority) => Ordering[SyntaxPriority].compare(c, d)
-        case (c: ContextAlias, d: ContextAlias) => Ordering[ContextAlias].compare(c, d)
-        case (c: Context, d: Context) => Ordering[Context].compare(c, d)
-        case (c: Rule, d: Rule) => Ordering[Rule].compare(c, d)
-        case (c: Claim, d: Claim) => Ordering[Claim].compare(c, d)
-        case (_: SyntaxSort, _) => -1
-        case (_, _: SyntaxSort) => 1
-        case (_: SortSynonym, _) => -1
-        case (_, _: SortSynonym) => 1
-        case (_: SyntaxLexical, _) => -1
-        case (_, _: SyntaxLexical) => 1
-        case (_: Production, _) => -1
-        case (_, _: Production) => 1
-        case (_: SyntaxAssociativity, _) => -1
-        case (_, _: SyntaxAssociativity) => 1
-        case (_: SyntaxPriority, _) => -1
-        case (_, _: SyntaxPriority) => 1
-        case (_: ContextAlias, _) => -1
-        case (_, _: ContextAlias) => 1
-        case (_: Context, _) => -1
-        case (_, _: Context) => 1
-        case (_: Rule, _) => -1
-        case (_, _: Rule) => 1
-        case (_: Claim, _) => -1
-        case (_, _: Claim) => 1
+        case (c: ContextAlias, d: ContextAlias)     => Ordering[ContextAlias].compare(c, d)
+        case (c: Context, d: Context)               => Ordering[Context].compare(c, d)
+        case (c: Rule, d: Rule)                     => Ordering[Rule].compare(c, d)
+        case (c: Claim, d: Claim)                   => Ordering[Claim].compare(c, d)
+        case (_: SyntaxSort, _)                     => -1
+        case (_, _: SyntaxSort)                     => 1
+        case (_: SortSynonym, _)                    => -1
+        case (_, _: SortSynonym)                    => 1
+        case (_: SyntaxLexical, _)                  => -1
+        case (_, _: SyntaxLexical)                  => 1
+        case (_: Production, _)                     => -1
+        case (_, _: Production)                     => 1
+        case (_: SyntaxAssociativity, _)            => -1
+        case (_, _: SyntaxAssociativity)            => 1
+        case (_: SyntaxPriority, _)                 => -1
+        case (_, _: SyntaxPriority)                 => 1
+        case (_: ContextAlias, _)                   => -1
+        case (_, _: ContextAlias)                   => 1
+        case (_: Context, _)                        => -1
+        case (_, _: Context)                        => 1
+        case (_: Rule, _)                           => -1
+        case (_, _: Rule)                           => 1
+        case (_: Claim, _)                          => -1
+        case (_, _: Claim)                          => 1
         case (_, _) =>
           throw KEMException.internalError(
             "Cannot order these sentences:\n" + a.toString() + "\n" + b.toString()
@@ -561,8 +561,8 @@ case class Context(body: K, requires: K, att: Att = Att.empty)
     extends Sentence
     with OuterKORE
     with ContextToString {
-  override val isSyntax = false
-  override val isNonSyntax = true
+  override val isSyntax          = false
+  override val isNonSyntax       = true
   override def withAtt(att: Att) = Context(body, requires, att)
 }
 object Context {
@@ -574,8 +574,8 @@ case class ContextAlias(body: K, requires: K, att: Att = Att.empty)
     extends Sentence
     with OuterKORE
     with ContextAliasToString {
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = ContextAlias(body, requires, att)
 }
 object ContextAlias {
@@ -587,7 +587,7 @@ abstract class RuleOrClaim extends Sentence {
   def body: K
   def requires: K
   def ensures: K
-  override val isSyntax = false
+  override val isSyntax    = false
   override val isNonSyntax = true
   def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): RuleOrClaim
 }
@@ -627,8 +627,8 @@ case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
     extends Sentence
     with SyntaxPriorityToString
     with OuterKORE {
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = SyntaxPriority(priorities, att)
 }
 object SyntaxPriority {
@@ -644,8 +644,8 @@ case class SyntaxAssociativity(assoc: Associativity, tags: Set[Tag], att: Att = 
     extends Sentence
     with SyntaxAssociativityToString
     with OuterKORE {
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = SyntaxAssociativity(assoc, tags, att)
 }
 object SyntaxAssociativity {
@@ -677,8 +677,8 @@ case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty)
     with OuterKORE {
   def items = Seq()
 
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = SyntaxSort(params, sort, att)
 }
 object SyntaxSort {
@@ -695,8 +695,8 @@ case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty)
     with SortSynonymToString
     with OuterKORE {
 
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = SortSynonym(newSort, oldSort, att)
 }
 object SortSynonym {
@@ -709,8 +709,8 @@ case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty)
     with SyntaxLexicalToString
     with OuterKORE {
 
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = SyntaxLexical(name, regex, att)
 }
 object SyntaxLexical {
@@ -728,7 +728,7 @@ case class Production(
     with ProductionToString {
 
   lazy val klabelAtt: Option[String] = att.getOption(Att.KLABEL).orElse(klabel.map(_.name))
-  lazy val parseLabel: KLabel = klabel.getOrElse(att.get(Att.BRACKET_LABEL, classOf[KLabel]))
+  lazy val parseLabel: KLabel        = klabel.getOrElse(att.get(Att.BRACKET_LABEL, classOf[KLabel]))
 
   override def equals(that: Any): Boolean = that match {
     case p @ Production(`klabel`, `params`, `sort`, `items`, _) => (
@@ -782,28 +782,28 @@ case class Production(
         // some sequence of terminals ending in an open parens
         item match {
           case terminal: Terminal if terminal.value == "(" => state = 1
-          case _: Terminal =>
-          case _ => return false
+          case _: Terminal                                 =>
+          case _                                           => return false
         }
       } else if (state == 1) {
         // a nonterminal or a close paren
         item match {
-          case _: NonTerminal => state = 2
+          case _: NonTerminal                              => state = 2
           case terminal: Terminal if terminal.value == ")" => state = 4
-          case _ => return false
+          case _                                           => return false
         }
       } else if (state == 2) {
         // a close paren or a comma
         item match {
           case terminal: Terminal if terminal.value == "," => state = 3
           case terminal: Terminal if terminal.value == ")" => state = 4
-          case _ => return false
+          case _                                           => return false
         }
       } else if (state == 3) {
         // a nonterminal
         item match {
           case _: NonTerminal => state = 2
-          case _ => return false
+          case _              => return false
         }
       } else {
         return false
@@ -896,8 +896,8 @@ case class Production(
       namedItems + main + empty + subsort + repeat + subsort2
     }
   }
-  override val isSyntax = true
-  override val isNonSyntax = false
+  override val isSyntax          = true
+  override val isNonSyntax       = false
   override def withAtt(att: Att) = Production(klabel, params, sort, items, att)
 }
 
@@ -923,7 +923,7 @@ object Production {
 
 // a way to deterministically generate unique IDs dependent on module name
 case class UidProvider(modName: String) {
-  private var uid = 0
+  private var uid               = 0
   override def toString: String = { uid = uid + 1; modName + "+" + uid }
 }
 
@@ -942,7 +942,7 @@ case class NonTerminal(sort: Sort, name: Option[String])
 case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String)
     extends TerminalLike
     with RegexTerminalToString {
-  lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)
+  lazy val pattern       = new RunAutomaton(new RegExp(regex).toAutomaton, false)
   lazy val followPattern = new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
   lazy val precedePattern = {
     val unreversed = new RegExp(precedeRegex).toAutomaton

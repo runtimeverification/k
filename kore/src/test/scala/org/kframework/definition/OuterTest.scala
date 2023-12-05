@@ -12,7 +12,7 @@ import org.kframework.kore.KORE.Sort
 class OuterTest {
   @Test def isPrefixTest(): Unit = {
     val sort = Sort("foo")
-    val nt = NonTerminal(sort, None)
+    val nt   = NonTerminal(sort, None)
     val prod1 =
       Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(")")), Att.empty)
     Assert.assertTrue(prod1.isPrefixProduction)
@@ -46,18 +46,18 @@ class OuterTest {
   }
 
   @Test def recordProductions1(): Unit = {
-    val uid = UidProvider("")
+    val uid   = UidProvider("")
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
-    val nt1 = NonTerminal(sort1, Some("bar"))
-    val nt2 = NonTerminal(sort2, Some("baz"))
+    val nt1   = NonTerminal(sort1, Some("bar"))
+    val nt2   = NonTerminal(sort2, Some("baz"))
     val prod = Production(
       Seq(),
       sort1,
       Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
       Att.empty
     )
-    val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
+    val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
     val records = prod.recordProductions(uid)
     Assert.assertEquals(7, records.size)
     Assert.assertEquals(
@@ -73,7 +73,7 @@ class OuterTest {
             Terminal(")")
           ),
           newAtt
-        ), // main
+        ),                                                            // main
         Production(Seq(), Sort("foo-+1"), Seq(Terminal("")), newAtt), // empty
         Production(
           Seq(),
@@ -115,18 +115,18 @@ class OuterTest {
   }
 
   @Test def recordProductions2(): Unit = {
-    val uid = UidProvider("")
+    val uid   = UidProvider("")
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
-    val nt1 = NonTerminal(sort1, None)
-    val nt2 = NonTerminal(sort2, Some("baz"))
+    val nt1   = NonTerminal(sort1, None)
+    val nt2   = NonTerminal(sort2, Some("baz"))
     val prod = Production(
       Seq(),
       sort1,
       Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
       Att.empty
     )
-    val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
+    val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
     val records = prod.recordProductions(uid)
     Assert.assertEquals(2, records.size)
     Assert.assertEquals(
@@ -157,18 +157,18 @@ class OuterTest {
   }
 
   @Test def recordProductions3(): Unit = {
-    val uid = UidProvider("")
+    val uid   = UidProvider("")
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
-    val nt1 = NonTerminal(sort1, None)
-    val nt2 = NonTerminal(sort2, None)
+    val nt1   = NonTerminal(sort1, None)
+    val nt2   = NonTerminal(sort2, None)
     val prod = Production(
       Seq(),
       sort1,
       Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
       Att.empty
     )
-    val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
+    val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
     val records = prod.recordProductions(uid)
     Assert.assertEquals(1, records.size)
     Assert.assertEquals(
@@ -194,15 +194,15 @@ class OuterTest {
 
   // Create multiple versions of this sentence with attributes added
   def toSentenceAttList(sentence: Sentence): List[Sentence] = {
-    val att1 = Att.empty.add(Att.ASSOC).add(Att.BAG)
-    val att2 = Att.empty.add(Att.ASSOC).add(Att.CELL)
-    val att3 = Att.empty.add(Att.BAG).add(Att.CELL)
-    val att4 = Att.empty.add(Att.BAG).add(Att.HOOK, "A")
-    val att5 = Att.empty.add(Att.BAG).add(Att.HOOK, "B")
-    val att6 = Att.empty.add(Att.BAG).add(Att.LABEL, "A")
-    val att7 = Att.empty.add(Att.BAG).add(Att.LABEL, "B")
-    val att8 = Att.empty.add(Att.HOOK, "A").add(Att.LABEL, "B")
-    val att9 = Att.empty.add(Att.HOOK, "B").add(Att.LABEL, "A")
+    val att1             = Att.empty.add(Att.ASSOC).add(Att.BAG)
+    val att2             = Att.empty.add(Att.ASSOC).add(Att.CELL)
+    val att3             = Att.empty.add(Att.BAG).add(Att.CELL)
+    val att4             = Att.empty.add(Att.BAG).add(Att.HOOK, "A")
+    val att5             = Att.empty.add(Att.BAG).add(Att.HOOK, "B")
+    val att6             = Att.empty.add(Att.BAG).add(Att.LABEL, "A")
+    val att7             = Att.empty.add(Att.BAG).add(Att.LABEL, "B")
+    val att8             = Att.empty.add(Att.HOOK, "A").add(Att.LABEL, "B")
+    val att9             = Att.empty.add(Att.HOOK, "B").add(Att.LABEL, "A")
     val sentenceWithAtt1 = sentence.withAtt(att1)
     val sentenceWithAtt2 = sentence.withAtt(att2)
     val sentenceWithAtt3 = sentence.withAtt(att3)

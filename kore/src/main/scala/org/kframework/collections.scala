@@ -16,13 +16,13 @@ import scala.collection.mutable.SetBuilder
 
 object Collections {
   def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala
-  def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
-  def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
-  def immutable[K, V](s: java.util.Map[K, V]): Map[K, V] = s.asScala
-  def immutable[T](s: Array[T]): Seq[T] = s
+  def immutable[T](s: java.util.Set[T]): Set[T]           = s.asScala.toSet
+  def immutable[T](s: java.util.List[T]): Seq[T]          = s.asScala
+  def immutable[K, V](s: java.util.Map[K, V]): Map[K, V]  = s.asScala
+  def immutable[T](s: Array[T]): Seq[T]                   = s
 
-  def mutable[T](s: scala.List[T]): java.util.List[T] = s.asJava
-  def mutable[T](s: Seq[T]): java.util.List[T] = s.asJava
+  def mutable[T](s: scala.List[T]): java.util.List[T]  = s.asJava
+  def mutable[T](s: Seq[T]): java.util.List[T]         = s.asJava
   def mutable[K, V](s: Map[K, V]): java.util.Map[K, V] = s.asJava
   def mutable[T](s: Set[T]): java.util.Set[T] = {
     val x = new util.HashSet[T]()
@@ -39,8 +39,8 @@ object Collections {
     s.map(x => f(x))
   def map[T](f: java.util.function.Function[T, T])(s: Seq[T]): Seq[T] = s.map(x => f(x))
 
-  def add[T](e: T)(s: Set[T]): Set[T] = s + e
-  def minus[T](e: T)(s: Set[T]): Set[T] = s - e
+  def add[T](e: T)(s: Set[T]): Set[T]     = s + e
+  def minus[T](e: T)(s: Set[T]): Set[T]   = s - e
   def or[T](a: Set[T], b: Set[T]): Set[T] = a | b
 
   def cons[T](e: T)(s: Seq[T]): Seq[T] = e +: s

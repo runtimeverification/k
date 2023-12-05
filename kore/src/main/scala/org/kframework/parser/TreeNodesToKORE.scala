@@ -76,7 +76,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
       KSequence(List.empty[K].asJava, t.att)
 
     case t @ KApply(KLabel("#KRewrite"), items) =>
-      val it = items.iterator
+      val it  = items.iterator
       val res = KRewrite(down(it.next()), down(it.next()), t.att)
       assert(!it.hasNext)
       res
@@ -89,7 +89,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
       )
 
     case t @ KApply(KLabel("#KAs"), items) =>
-      val it = items.iterator
+      val it  = items.iterator
       val res = KAs(down(it.next()), down(it.next()), t.att)
       assert(!it.hasNext)
       res

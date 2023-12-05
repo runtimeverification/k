@@ -27,7 +27,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellBagProductionsSet: Set[(Sort, Production)] =
     m.productions.filter(_.att.contains(Att.CELL_COLLECTION)).map(p => (p.sort, p))
 
-  private val cellSorts: Set[Sort] = cellProductionsSet.map(sp => sp._1)
+  private val cellSorts: Set[Sort]    = cellProductionsSet.map(sp => sp._1)
   private val cellBagSorts: Set[Sort] = cellBagProductionsSet.map(sp => sp._1)
 
   private def buildCellProductionMap(cells: Set[(Sort, Production)]): Map[Sort, Production] = {
@@ -54,7 +54,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val cellBagSubsorts: Map[Sort, Set[Sort]] =
     cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
-  private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
+  private val cellLabels: Map[Sort, KLabel]        = cellProductions.mapValues(_.klabel.get)
   private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
 
   private val cellFragmentLabel: Map[Sort, KLabel] =
@@ -113,7 +113,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     mainCells.head
   }
 
-  override def getLevel(k: Sort): Int = levels.getOrElse(k, -1)
+  override def getLevel(k: Sort): Int         = levels.getOrElse(k, -1)
   override def isParentCell(k: Sort): Boolean = edges.exists { case (c, _) => c == k }
 
   override def getMultiplicity(k: Sort): Multiplicity =
@@ -124,11 +124,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     else
       Multiplicity.ONE
 
-  override def getParent(k: Sort): Sort = edges.collectFirst { case (p, `k`) => p } get
-  override def isCell(k: Sort): Boolean = cellSorts.contains(k)
-  override def isCellCollection(s: Sort): Boolean = cellBagSorts.contains(s)
+  override def getParent(k: Sort): Sort             = edges.collectFirst { case (p, `k`) => p } get
+  override def isCell(k: Sort): Boolean             = cellSorts.contains(k)
+  override def isCellCollection(s: Sort): Boolean   = cellBagSorts.contains(s)
   override def isCellLabel(kLabel: KLabel): Boolean = cellLabelsToSorts.contains(kLabel)
-  override def isLeafCell(k: Sort): Boolean = !isParentCell(k)
+  override def isLeafCell(k: Sort): Boolean         = !isParentCell(k)
 
   override def getChildren(k: Sort): util.List[Sort] = cellProductions(k).items
     .filter(_.isInstanceOf[NonTerminal])
@@ -150,11 +150,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def isConstantInitializer(k: Sort): Boolean =
     !m.productionsFor(getDefaultCell(k).klabel).exists(_.items.exists(_.isInstanceOf[NonTerminal]))
 
-  override def getCellLabel(k: Sort): KLabel = cellLabels(k)
+  override def getCellLabel(k: Sort): KLabel     = cellLabels(k)
   override def getCellSort(kLabel: KLabel): Sort = cellLabelsToSorts(kLabel)
 
   override def getCellFragmentLabel(k: Sort): KLabel = cellFragmentLabel(k)
-  override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k)
+  override def getCellAbsentLabel(k: Sort): KLabel   = cellAbsentLabel(k)
 
   override def getRootCell: Sort = {
     if (topCells.size > 1)
@@ -162,7 +162,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     topCells.head
   }
 
-  override def getComputationCell: Sort = mainCell
+  override def getComputationCell: Sort     = mainCell
   override def getCellSorts: util.Set[Sort] = cellSorts.asJava
 
   override def getUnit(k: Sort): KApply =
@@ -207,7 +207,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     val transformer = new FoldK[Set[KToken]] {
       override def apply(k: KToken): Set[KToken] =
         if (k.sort == Sorts.KConfigVar) Set(k) else unit
-      def unit = Set()
+      def unit                                        = Set()
       def merge(set1: Set[KToken], set2: Set[KToken]) = set1 | set2
     }
     initRules

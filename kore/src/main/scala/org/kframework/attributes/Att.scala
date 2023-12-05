@@ -49,7 +49,7 @@ class Att private (val att: Map[(Att.Key, String), Any])
   override lazy val hashCode: Int = att.hashCode()
   override def equals(that: Any): Boolean = that match {
     case a: Att => a.att == att
-    case _ => false
+    case _      => false
   }
 
   // Remove all UserGroups and replace them with a group(_) attribute
@@ -109,11 +109,11 @@ class Att private (val att: Map[(Att.Key, String), Any])
 
   def contains(cls: Class[_]): Boolean =
     att.contains((Att.getInternalKeyOrAssert(cls.getName), cls.getName))
-  def contains(key: Att.Key): Boolean = att.contains((key, Att.stringClassName))
+  def contains(key: Att.Key): Boolean                = att.contains((key, Att.stringClassName))
   def contains(key: Att.Key, cls: Class[_]): Boolean = att.contains((key, cls.getName))
 
-  def get[T](key: Class[T]): T = getOption(key).get
-  def get(key: Att.Key): String = getOption(key).get
+  def get[T](key: Class[T]): T               = getOption(key).get
+  def get(key: Att.Key): String              = getOption(key).get
   def get[T](key: Att.Key, cls: Class[T]): T = getOption(key, cls).get
   def getOption(key: Att.Key): Option[String] =
     att.get((key, Att.stringClassName)).asInstanceOf[Option[String]]
@@ -122,7 +122,7 @@ class Att private (val att: Map[(Att.Key, String), Any])
   def getOption[T](key: Att.Key, cls: Class[T]): Option[T] =
     att.get((key, cls.getName)).asInstanceOf[Option[T]]
   def getOptional(key: Att.Key): Optional[String] = optionToOptional(getOption(key))
-  def getOptional[T](key: Class[T]): Optional[T] = optionToOptional(getOption(key))
+  def getOptional[T](key: Class[T]): Optional[T]  = optionToOptional(getOption(key))
   def getOptional[T](key: Att.Key, cls: Class[T]): Optional[T] = optionToOptional(
     getOption(key, cls)
   )
@@ -130,25 +130,25 @@ class Att private (val att: Map[(Att.Key, String), Any])
   private def optionToOptional[T](option: Option[T]): Optional[T] =
     option match { case None => Optional.empty(); case Some(x) => Optional.of(x); }
 
-  def add(key: Att.Key): Att = add(key, "")
+  def add(key: Att.Key): Att                = add(key, "")
   def add(key: Att.Key, value: String): Att = add(key, Att.stringClassName, value)
-  def add(key: Att.Key, value: Int): Att = add(key, Att.intClassName, value)
+  def add(key: Att.Key, value: Int): Att    = add(key, Att.intClassName, value)
   def add[T <: AttValue](key: Class[T], value: T): Att =
     add(Att.getInternalKeyOrAssert(key.getName), key.getName, value)
   def add[T <: AttValue](key: Att.Key, cls: Class[T], value: T): Att = add(key, cls.getName, value)
 
   private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = key.keyParam match {
     case Att.KeyParameter.Forbidden => throwForbidden(key)
-    case _ => Att(att + ((key, clsStr) -> value))
+    case _                          => Att(att + ((key, clsStr) -> value))
   }
   private def add(key: Att.Key, clsStr: String, value: String): Att = key.keyParam match {
     case Att.KeyParameter.Forbidden if value != "" => throwForbidden(key)
-    case Att.KeyParameter.Required if value == "" => throwRequired(key)
-    case _ => Att(att + ((key, clsStr) -> value))
+    case Att.KeyParameter.Required if value == ""  => throwRequired(key)
+    case _                                         => Att(att + ((key, clsStr) -> value))
   }
   private def add(key: Att.Key, clsStr: String, value: Int): Att = key.keyParam match {
     case Att.KeyParameter.Forbidden => throwForbidden(key)
-    case _ => Att(att + ((key, clsStr) -> value))
+    case _                          => Att(att + ((key, clsStr) -> value))
   }
 
   private def throwRequired(key: Att.Key) =
@@ -156,10 +156,10 @@ class Att private (val att: Map[(Att.Key, String), Any])
   private def throwForbidden(key: Att.Key) =
     throw KEMException.compilerError("Parameters for the attribute '" + key + "' are forbidden.")
 
-  def addAll(thatAtt: Att): Att = Att(att ++ thatAtt.att)
-  def remove(key: Att.Key): Att = remove(key, Att.stringClassName)
+  def addAll(thatAtt: Att): Att  = Att(att ++ thatAtt.att)
+  def remove(key: Att.Key): Att  = remove(key, Att.stringClassName)
   def remove(key: Class[_]): Att = remove(Att.getInternalKeyOrAssert(key.getName), key.getName)
-  def remove(key: Att.Key, cls: Class[_]): Att = remove(key, cls.getName)
+  def remove(key: Att.Key, cls: Class[_]): Att          = remove(key, cls.getName)
   private def remove(key: Att.Key, clsStr: String): Att = Att(att - ((key, clsStr)))
 }
 
@@ -231,7 +231,7 @@ object Att {
 
   // Some helpers with scala reflection to make declaring class object sets more compact
   // If these break for some reason, replace their usage with Set(classOf[T1], classOf[T2], ...)
-  private def onlyon[T: ClassTag](): Set[Class[_]] = Set(classTag[T].runtimeClass)
+  private def onlyon[T: ClassTag](): Set[Class[_]]                 = Set(classTag[T].runtimeClass)
   private def onlyon2[T1: ClassTag, T2: ClassTag](): Set[Class[_]] = onlyon[T1] ++ onlyon[T2]
   private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag](): Set[Class[_]] =
     onlyon2[T1, T2] ++ onlyon[T3]
@@ -241,170 +241,170 @@ object Att {
   /*
    * Built-in attribute keys which can appear in user source code
    */
-  final val ALIAS = Key.builtin("alias", KeyParameter.Forbidden, onlyon2[Production, Rule])
+  final val ALIAS     = Key.builtin("alias", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val ALIAS_REC = Key.builtin("alias-rec", KeyParameter.Forbidden, onlyon2[Production, Rule])
-  final val ALL_PATH = Key.builtin("all-path", KeyParameter.Forbidden, onlyon[Claim])
-  final val ANYWHERE = Key.builtin("anywhere", KeyParameter.Forbidden, onlyon[Rule])
+  final val ALL_PATH  = Key.builtin("all-path", KeyParameter.Forbidden, onlyon[Claim])
+  final val ANYWHERE  = Key.builtin("anywhere", KeyParameter.Forbidden, onlyon[Rule])
   final val APPLY_PRIORITY = Key.builtin("applyPriority", KeyParameter.Required, onlyon[Production])
-  final val ASSOC = Key.builtin("assoc", KeyParameter.Forbidden, onlyon[Production])
-  final val AVOID = Key.builtin("avoid", KeyParameter.Forbidden, onlyon[Production])
-  final val BAG = Key.builtin("bag", KeyParameter.Forbidden, onlyon[Production])
-  final val BINDER = Key.builtin("binder", KeyParameter.Optional, onlyon[Production])
-  final val BRACKET = Key.builtin("bracket", KeyParameter.Forbidden, onlyon[Production])
-  final val CELL = Key.builtin("cell", KeyParameter.Forbidden, onlyon[Production])
+  final val ASSOC          = Key.builtin("assoc", KeyParameter.Forbidden, onlyon[Production])
+  final val AVOID          = Key.builtin("avoid", KeyParameter.Forbidden, onlyon[Production])
+  final val BAG            = Key.builtin("bag", KeyParameter.Forbidden, onlyon[Production])
+  final val BINDER         = Key.builtin("binder", KeyParameter.Optional, onlyon[Production])
+  final val BRACKET        = Key.builtin("bracket", KeyParameter.Forbidden, onlyon[Production])
+  final val CELL           = Key.builtin("cell", KeyParameter.Forbidden, onlyon[Production])
   final val CELL_COLLECTION =
     Key.builtin("cellCollection", KeyParameter.Forbidden, onlyon2[Production, SyntaxSort])
-  final val CELL_NAME = Key.builtin("cellName", KeyParameter.Required, onlyon[Production])
+  final val CELL_NAME   = Key.builtin("cellName", KeyParameter.Required, onlyon[Production])
   final val CIRCULARITY = Key.builtin("circularity", KeyParameter.Forbidden, onlyon[Claim])
-  final val COLOR = Key.builtin("color", KeyParameter.Required, onlyon[Production])
-  final val COLORS = Key.builtin("colors", KeyParameter.Required, onlyon[Production])
-  final val COMM = Key.builtin("comm", KeyParameter.Forbidden, onlyon2[Production, Rule])
+  final val COLOR       = Key.builtin("color", KeyParameter.Required, onlyon[Production])
+  final val COLORS      = Key.builtin("colors", KeyParameter.Required, onlyon[Production])
+  final val COMM        = Key.builtin("comm", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val CONCRETE =
     Key.builtin("concrete", KeyParameter.Optional, onlyon3[Module, Production, Rule])
   final val CONSTRUCTOR = Key.builtin("constructor", KeyParameter.Forbidden, onlyon[Production])
-  final val CONTEXT = Key.builtin("context", KeyParameter.Required, onlyon[ContextAlias])
-  final val COOL = Key.builtin("cool", KeyParameter.Forbidden, onlyon[Rule])
-  final val DEPENDS = Key.builtin("depends", KeyParameter.Required, onlyon[Claim])
-  final val ELEMENT = Key.builtin("element", KeyParameter.Required, onlyon[Production])
-  final val EXIT = Key.builtin("exit", KeyParameter.Forbidden, onlyon[Production])
-  final val FORMAT = Key.builtin("format", KeyParameter.Required, onlyon[Production])
+  final val CONTEXT     = Key.builtin("context", KeyParameter.Required, onlyon[ContextAlias])
+  final val COOL        = Key.builtin("cool", KeyParameter.Forbidden, onlyon[Rule])
+  final val DEPENDS     = Key.builtin("depends", KeyParameter.Required, onlyon[Claim])
+  final val ELEMENT     = Key.builtin("element", KeyParameter.Required, onlyon[Production])
+  final val EXIT        = Key.builtin("exit", KeyParameter.Forbidden, onlyon[Production])
+  final val FORMAT      = Key.builtin("format", KeyParameter.Required, onlyon[Production])
   final val FRESH_GENERATOR =
     Key.builtin("freshGenerator", KeyParameter.Forbidden, onlyon[Production])
-  final val FUNCTION = Key.builtin("function", KeyParameter.Forbidden, onlyon[Production])
+  final val FUNCTION   = Key.builtin("function", KeyParameter.Forbidden, onlyon[Production])
   final val FUNCTIONAL = Key.builtin("functional", KeyParameter.Forbidden, onlyon[Production])
-  final val GROUP = Key.builtin("group", KeyParameter.Required, onlyon[Sentence])
-  final val HASKELL = Key.builtin("haskell", KeyParameter.Forbidden, onlyon[Module])
-  final val HEAT = Key.builtin("heat", KeyParameter.Forbidden, onlyon[Rule])
-  final val HOOK = Key.builtin("hook", KeyParameter.Required, onlyon2[Production, SyntaxSort])
-  final val HYBRID = Key.builtin("hybrid", KeyParameter.Optional, onlyon[Production])
-  final val IDEM = Key.builtin("idem", KeyParameter.Forbidden, onlyon[Production])
-  final val IMPURE = Key.builtin("impure", KeyParameter.Forbidden, onlyon[Production])
-  final val INDEX = Key.builtin("index", KeyParameter.Required, onlyon[Production])
-  final val INITIAL = Key.builtin("initial", KeyParameter.Forbidden, onlyon[Production])
+  final val GROUP      = Key.builtin("group", KeyParameter.Required, onlyon[Sentence])
+  final val HASKELL    = Key.builtin("haskell", KeyParameter.Forbidden, onlyon[Module])
+  final val HEAT       = Key.builtin("heat", KeyParameter.Forbidden, onlyon[Rule])
+  final val HOOK       = Key.builtin("hook", KeyParameter.Required, onlyon2[Production, SyntaxSort])
+  final val HYBRID     = Key.builtin("hybrid", KeyParameter.Optional, onlyon[Production])
+  final val IDEM       = Key.builtin("idem", KeyParameter.Forbidden, onlyon[Production])
+  final val IMPURE     = Key.builtin("impure", KeyParameter.Forbidden, onlyon[Production])
+  final val INDEX      = Key.builtin("index", KeyParameter.Required, onlyon[Production])
+  final val INITIAL    = Key.builtin("initial", KeyParameter.Forbidden, onlyon[Production])
   final val INITIALIZER =
     Key.builtin("initializer", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val INJECTIVE = Key.builtin("injective", KeyParameter.Forbidden, onlyon[Production])
-  final val INTERNAL = Key.builtin("internal", KeyParameter.Forbidden, onlyon[Production])
-  final val KAST = Key.builtin("kast", KeyParameter.Forbidden, onlyon[Module])
-  final val KLABEL = Key.builtin("klabel", KeyParameter.Required, onlyon[Production])
-  final val KORE = Key.builtin("kore", KeyParameter.Forbidden, onlyon2[RuleOrClaim, Module])
-  final val LABEL = Key.builtin("label", KeyParameter.Required, onlyon[Sentence])
-  final val LATEX = Key.builtin("latex", KeyParameter.Required, onlyon[Production])
-  final val LEFT = Key.builtin("left", KeyParameter.Forbidden, onlyon[Production])
+  final val INTERNAL  = Key.builtin("internal", KeyParameter.Forbidden, onlyon[Production])
+  final val KAST      = Key.builtin("kast", KeyParameter.Forbidden, onlyon[Module])
+  final val KLABEL    = Key.builtin("klabel", KeyParameter.Required, onlyon[Production])
+  final val KORE      = Key.builtin("kore", KeyParameter.Forbidden, onlyon2[RuleOrClaim, Module])
+  final val LABEL     = Key.builtin("label", KeyParameter.Required, onlyon[Sentence])
+  final val LATEX     = Key.builtin("latex", KeyParameter.Required, onlyon[Production])
+  final val LEFT      = Key.builtin("left", KeyParameter.Forbidden, onlyon[Production])
   final val LOCATIONS = Key.builtin("locations", KeyParameter.Forbidden, onlyon[SyntaxSort])
-  final val MACRO = Key.builtin("macro", KeyParameter.Forbidden, onlyon2[Production, Rule])
+  final val MACRO     = Key.builtin("macro", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val MACRO_REC = Key.builtin("macro-rec", KeyParameter.Forbidden, onlyon2[Production, Rule])
-  final val MAINCELL = Key.builtin("maincell", KeyParameter.Forbidden, onlyon[Production])
-  final val MEMO = Key.builtin("memo", KeyParameter.Forbidden, onlyon[Production])
+  final val MAINCELL  = Key.builtin("maincell", KeyParameter.Forbidden, onlyon[Production])
+  final val MEMO      = Key.builtin("memo", KeyParameter.Forbidden, onlyon[Production])
   final val ML_BINDER = Key.builtin("mlBinder", KeyParameter.Forbidden, onlyon[Production])
-  final val ML_OP = Key.builtin("mlOp", KeyParameter.Forbidden, onlyon[Production])
-  final val MULTIPLICITY = Key.builtin("multiplicity", KeyParameter.Required, onlyon[Production])
-  final val NON_ASSOC = Key.builtin("non-assoc", KeyParameter.Forbidden, onlyon[Production])
+  final val ML_OP     = Key.builtin("mlOp", KeyParameter.Forbidden, onlyon[Production])
+  final val MULTIPLICITY   = Key.builtin("multiplicity", KeyParameter.Required, onlyon[Production])
+  final val NON_ASSOC      = Key.builtin("non-assoc", KeyParameter.Forbidden, onlyon[Production])
   final val NON_EXECUTABLE = Key.builtin("non-executable", KeyParameter.Forbidden, onlyon[Rule])
-  final val NOT_LR1 = Key.builtin("not-lr1", KeyParameter.Forbidden, onlyon[Module])
+  final val NOT_LR1        = Key.builtin("not-lr1", KeyParameter.Forbidden, onlyon[Module])
   final val NO_EVALUATORS = Key.builtin("no-evaluators", KeyParameter.Forbidden, onlyon[Production])
-  final val ONE_PATH = Key.builtin("one-path", KeyParameter.Forbidden, onlyon[Claim])
-  final val OWISE = Key.builtin("owise", KeyParameter.Forbidden, onlyon[Rule])
-  final val PARSER = Key.builtin("parser", KeyParameter.Required, onlyon[Production])
-  final val PREC = Key.builtin("prec", KeyParameter.Required, onlyon[Production])
-  final val PREFER = Key.builtin("prefer", KeyParameter.Forbidden, onlyon[Production])
+  final val ONE_PATH      = Key.builtin("one-path", KeyParameter.Forbidden, onlyon[Claim])
+  final val OWISE         = Key.builtin("owise", KeyParameter.Forbidden, onlyon[Rule])
+  final val PARSER        = Key.builtin("parser", KeyParameter.Required, onlyon[Production])
+  final val PREC          = Key.builtin("prec", KeyParameter.Required, onlyon[Production])
+  final val PREFER        = Key.builtin("prefer", KeyParameter.Forbidden, onlyon[Production])
   final val PRESERVES_DEFINEDNESS =
     Key.builtin("preserves-definedness", KeyParameter.Forbidden, onlyon[Rule])
   final val PRIORITY =
     Key.builtin("priority", KeyParameter.Required, onlyon4[Context, ContextAlias, Production, Rule])
   final val PRIVATE = Key.builtin("private", KeyParameter.Forbidden, onlyon2[Module, Production])
-  final val PUBLIC = Key.builtin("public", KeyParameter.Forbidden, onlyon2[Module, Production])
+  final val PUBLIC  = Key.builtin("public", KeyParameter.Forbidden, onlyon2[Module, Production])
   final val RESULT =
     Key.builtin("result", KeyParameter.Required, onlyon4[Context, ContextAlias, Production, Rule])
-  final val RETURNS_UNIT = Key.builtin("returnsUnit", KeyParameter.Forbidden, onlyon[Production])
-  final val RIGHT = Key.builtin("right", KeyParameter.Forbidden, onlyon[Production])
-  final val SEQSTRICT = Key.builtin("seqstrict", KeyParameter.Optional, onlyon[Production])
+  final val RETURNS_UNIT   = Key.builtin("returnsUnit", KeyParameter.Forbidden, onlyon[Production])
+  final val RIGHT          = Key.builtin("right", KeyParameter.Forbidden, onlyon[Production])
+  final val SEQSTRICT      = Key.builtin("seqstrict", KeyParameter.Optional, onlyon[Production])
   final val SIMPLIFICATION = Key.builtin("simplification", KeyParameter.Optional, onlyon[Rule])
-  final val SMTLIB = Key.builtin("smtlib", KeyParameter.Required, onlyon[Production])
-  final val SMT_HOOK = Key.builtin("smt-hook", KeyParameter.Required, onlyon[Production])
-  final val SMT_LEMMA = Key.builtin("smt-lemma", KeyParameter.Forbidden, onlyon[Rule])
-  final val STREAM = Key.builtin("stream", KeyParameter.Optional, onlyon2[Production, Rule])
-  final val STRICT = Key.builtin("strict", KeyParameter.Optional, onlyon[Production])
-  final val SYMBOL = Key.builtin("symbol", KeyParameter.Forbidden, onlyon[Production])
+  final val SMTLIB         = Key.builtin("smtlib", KeyParameter.Required, onlyon[Production])
+  final val SMT_HOOK       = Key.builtin("smt-hook", KeyParameter.Required, onlyon[Production])
+  final val SMT_LEMMA      = Key.builtin("smt-lemma", KeyParameter.Forbidden, onlyon[Rule])
+  final val STREAM         = Key.builtin("stream", KeyParameter.Optional, onlyon2[Production, Rule])
+  final val STRICT         = Key.builtin("strict", KeyParameter.Optional, onlyon[Production])
+  final val SYMBOL         = Key.builtin("symbol", KeyParameter.Forbidden, onlyon[Production])
   final val SYMBOLIC =
     Key.builtin("symbolic", KeyParameter.Optional, onlyon3[Module, Production, Rule])
-  final val TAG = Key.builtin("tag", KeyParameter.Required, onlyon[Rule])
-  final val TOKEN = Key.builtin("token", KeyParameter.Forbidden, onlyon2[SyntaxSort, Production])
-  final val TOTAL = Key.builtin("total", KeyParameter.Forbidden, onlyon[Production])
+  final val TAG     = Key.builtin("tag", KeyParameter.Required, onlyon[Rule])
+  final val TOKEN   = Key.builtin("token", KeyParameter.Forbidden, onlyon2[SyntaxSort, Production])
+  final val TOTAL   = Key.builtin("total", KeyParameter.Forbidden, onlyon[Production])
   final val TRUSTED = Key.builtin("trusted", KeyParameter.Forbidden, onlyon[Claim])
-  final val TYPE = Key.builtin("type", KeyParameter.Required, onlyon[Production])
+  final val TYPE    = Key.builtin("type", KeyParameter.Required, onlyon[Production])
   final val UNBOUND_VARIABLES = Key.builtin(
     "unboundVariables",
     KeyParameter.Required,
     onlyon4[Context, ContextAlias, Production, RuleOrClaim]
   )
-  final val UNIT = Key.builtin("unit", KeyParameter.Required, onlyon[Production])
+  final val UNIT          = Key.builtin("unit", KeyParameter.Required, onlyon[Production])
   final val UNPARSE_AVOID = Key.builtin("unparseAvoid", KeyParameter.Forbidden, onlyon[Production])
-  final val UNUSED = Key.builtin("unused", KeyParameter.Forbidden, onlyon[Production])
-  final val WRAP_ELEMENT = Key.builtin("wrapElement", KeyParameter.Required, onlyon[Production])
+  final val UNUSED        = Key.builtin("unused", KeyParameter.Forbidden, onlyon[Production])
+  final val WRAP_ELEMENT  = Key.builtin("wrapElement", KeyParameter.Required, onlyon[Production])
 
   /*
    * Internal attribute keys which cannot appear in user source code
    */
-  final val ANONYMOUS = Key("anonymous", KeyType.Internal)
-  final val BRACKET_LABEL = Key("bracketLabel", KeyType.Internal)
-  final val CELL_FRAGMENT = Key("cellFragment", KeyType.Internal)
-  final val CELL_OPT_ABSENT = Key("cellOptAbsent", KeyType.Internal)
-  final val CELL_SORT = Key("cellSort", KeyType.Internal)
-  final val CONCAT = Key("concat", KeyType.Internal)
-  final val CONTENT_START_COLUMN = Key("contentStartColumn", KeyType.Internal)
-  final val CONTENT_START_LINE = Key("contentStartLine", KeyType.Internal)
-  final val COOL_LIKE = Key("cool-like", KeyType.Internal)
-  final val DENORMAL = Key("denormal", KeyType.Internal)
-  final val DIGEST = Key("digest", KeyType.Internal)
-  final val DUMMY_CELL = Key("dummy_cell", KeyType.Internal)
-  final val FILTER_ELEMENT = Key("filterElement", KeyType.Internal)
-  final val FRESH = Key("fresh", KeyType.Internal)
+  final val ANONYMOUS                    = Key("anonymous", KeyType.Internal)
+  final val BRACKET_LABEL                = Key("bracketLabel", KeyType.Internal)
+  final val CELL_FRAGMENT                = Key("cellFragment", KeyType.Internal)
+  final val CELL_OPT_ABSENT              = Key("cellOptAbsent", KeyType.Internal)
+  final val CELL_SORT                    = Key("cellSort", KeyType.Internal)
+  final val CONCAT                       = Key("concat", KeyType.Internal)
+  final val CONTENT_START_COLUMN         = Key("contentStartColumn", KeyType.Internal)
+  final val CONTENT_START_LINE           = Key("contentStartLine", KeyType.Internal)
+  final val COOL_LIKE                    = Key("cool-like", KeyType.Internal)
+  final val DENORMAL                     = Key("denormal", KeyType.Internal)
+  final val DIGEST                       = Key("digest", KeyType.Internal)
+  final val DUMMY_CELL                   = Key("dummy_cell", KeyType.Internal)
+  final val FILTER_ELEMENT               = Key("filterElement", KeyType.Internal)
+  final val FRESH                        = Key("fresh", KeyType.Internal)
   final val GENERATED_BY_LIST_SUBSORTING = Key("generatedByListSubsorting", KeyType.Internal)
-  final val HAS_DOMAIN_VALUES = Key("hasDomainValues", KeyType.Internal)
-  final val LEFT_INTERNAL = Key("left", KeyType.Internal)
-  final val LOCATION = Key(classOf[Location].getName, KeyType.Internal)
-  final val NAT = Key("nat", KeyType.Internal)
-  final val NOT_INJECTION = Key("notInjection", KeyType.Internal)
-  final val NOT_LR1_MODULES = Key("not-lr1-modules", KeyType.Internal)
-  final val ORIGINAL_NAME = Key("originalName", KeyType.Internal)
-  final val ORIGINAL_PRD = Key("originalPrd", KeyType.Internal)
-  final val PATTERN = Key("pattern", KeyType.Internal)
-  final val PATTERN_FOLDING = Key("pattern-folding", KeyType.Internal)
-  final val PREDICATE = Key("predicate", KeyType.Internal)
+  final val HAS_DOMAIN_VALUES            = Key("hasDomainValues", KeyType.Internal)
+  final val LEFT_INTERNAL                = Key("left", KeyType.Internal)
+  final val LOCATION                     = Key(classOf[Location].getName, KeyType.Internal)
+  final val NAT                          = Key("nat", KeyType.Internal)
+  final val NOT_INJECTION                = Key("notInjection", KeyType.Internal)
+  final val NOT_LR1_MODULES              = Key("not-lr1-modules", KeyType.Internal)
+  final val ORIGINAL_NAME                = Key("originalName", KeyType.Internal)
+  final val ORIGINAL_PRD                 = Key("originalPrd", KeyType.Internal)
+  final val PATTERN                      = Key("pattern", KeyType.Internal)
+  final val PATTERN_FOLDING              = Key("pattern-folding", KeyType.Internal)
+  final val PREDICATE                    = Key("predicate", KeyType.Internal)
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
     Key("prettyPrintWithSortAnnotation", KeyType.Internal)
-  final val PRIORITIES = Key("priorities", KeyType.Internal)
-  final val PRODUCTION = Key(classOf[Production].getName, KeyType.Internal)
-  final val PRODUCTION_ID = Key("productionId", KeyType.Internal)
-  final val PROJECTION = Key("projection", KeyType.Internal)
-  final val RECORD_PRD = Key("recordPrd", KeyType.Internal)
-  final val RECORD_PRD_ZERO = Key("recordPrd-zero", KeyType.Internal)
-  final val RECORD_PRD_ONE = Key("recordPrd-one", KeyType.Internal)
-  final val RECORD_PRD_MAIN = Key("recordPrd-main", KeyType.Internal)
-  final val RECORD_PRD_EMPTY = Key("recordPrd-empty", KeyType.Internal)
-  final val RECORD_PRD_SUBSORT = Key("recordPrd-subsort", KeyType.Internal)
-  final val RECORD_PRD_REPEAT = Key("recordPrd-repeat", KeyType.Internal)
-  final val RECORD_PRD_ITEM = Key("recordPrd-item", KeyType.Internal)
-  final val REFRESHED = Key("refreshed", KeyType.Internal)
-  final val REGEX = Key("regex", KeyType.Internal)
-  final val REJECT = Key("reject", KeyType.Internal)
-  final val REMOVE = Key("remove", KeyType.Internal)
-  final val RIGHT_INTERNAL = Key("right", KeyType.Internal)
-  final val SMT_PRELUDE = Key("smt-prelude", KeyType.Internal)
-  final val SORT = Key(classOf[Sort].getName, KeyType.Internal)
-  final val SORT_PARAMS = Key("sortParams", KeyType.Internal)
-  final val SOURCE = Key(classOf[Source].getName, KeyType.Internal)
-  final val SYNTAX_MODULE = Key("syntaxModule", KeyType.Internal)
+  final val PRIORITIES               = Key("priorities", KeyType.Internal)
+  final val PRODUCTION               = Key(classOf[Production].getName, KeyType.Internal)
+  final val PRODUCTION_ID            = Key("productionId", KeyType.Internal)
+  final val PROJECTION               = Key("projection", KeyType.Internal)
+  final val RECORD_PRD               = Key("recordPrd", KeyType.Internal)
+  final val RECORD_PRD_ZERO          = Key("recordPrd-zero", KeyType.Internal)
+  final val RECORD_PRD_ONE           = Key("recordPrd-one", KeyType.Internal)
+  final val RECORD_PRD_MAIN          = Key("recordPrd-main", KeyType.Internal)
+  final val RECORD_PRD_EMPTY         = Key("recordPrd-empty", KeyType.Internal)
+  final val RECORD_PRD_SUBSORT       = Key("recordPrd-subsort", KeyType.Internal)
+  final val RECORD_PRD_REPEAT        = Key("recordPrd-repeat", KeyType.Internal)
+  final val RECORD_PRD_ITEM          = Key("recordPrd-item", KeyType.Internal)
+  final val REFRESHED                = Key("refreshed", KeyType.Internal)
+  final val REGEX                    = Key("regex", KeyType.Internal)
+  final val REJECT                   = Key("reject", KeyType.Internal)
+  final val REMOVE                   = Key("remove", KeyType.Internal)
+  final val RIGHT_INTERNAL           = Key("right", KeyType.Internal)
+  final val SMT_PRELUDE              = Key("smt-prelude", KeyType.Internal)
+  final val SORT                     = Key(classOf[Sort].getName, KeyType.Internal)
+  final val SORT_PARAMS              = Key("sortParams", KeyType.Internal)
+  final val SOURCE                   = Key(classOf[Source].getName, KeyType.Internal)
+  final val SYNTAX_MODULE            = Key("syntaxModule", KeyType.Internal)
   final val TEMPORARY_CELL_SORT_DECL = Key("temporary-cell-sort-decl", KeyType.Internal)
-  final val TERMINALS = Key("terminals", KeyType.Internal)
-  final val UNIQUE_ID = Key("UNIQUE_ID", KeyType.Internal)
-  final val USER_LIST = Key("userList", KeyType.Internal)
-  final val USER_LIST_TERMINATOR = Key("userListTerminator", KeyType.Internal)
-  final val WITH_CONFIG = Key("withConfig", KeyType.Internal)
+  final val TERMINALS                = Key("terminals", KeyType.Internal)
+  final val UNIQUE_ID                = Key("UNIQUE_ID", KeyType.Internal)
+  final val USER_LIST                = Key("userList", KeyType.Internal)
+  final val USER_LIST_TERMINATOR     = Key("userListTerminator", KeyType.Internal)
+  final val WITH_CONFIG              = Key("withConfig", KeyType.Internal)
 
   private val stringClassName = classOf[String].getName
-  private val intClassName = classOf[java.lang.Integer].getName
+  private val intClassName    = classOf[java.lang.Integer].getName
 
   // All Key fields with UPPER_CASE naming
   private val pat = Pattern.compile("[A-Z]+(_[A-Z0-9]+)*")
@@ -414,7 +414,7 @@ object Att {
       .map(_.get(this).asInstanceOf[Key])
       .groupBy(_.keyType)
 
-  private val builtinKeys: Map[String, Key] = keys(KeyType.BuiltIn).map(k => (k.key, k)).toMap
+  private val builtinKeys: Map[String, Key]  = keys(KeyType.BuiltIn).map(k => (k.key, k)).toMap
   private val internalKeys: Map[String, Key] = keys(KeyType.Internal).map(k => (k.key, k)).toMap
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
@@ -454,7 +454,7 @@ object Att {
     new Att(thatAtt)
 
   def mergeAttributes(p: Set[Att]): Att = {
-    val union = p.flatMap(_.att)
+    val union  = p.flatMap(_.att)
     val attMap = union.groupBy { case ((name, _), _) => name }
     Att(union.filter(key => attMap(key._1._1).size == 1).toMap)
   }
@@ -486,7 +486,7 @@ trait AttributesToString {
       .filter { case ((Att.PRODUCTION_ID, _), _) => false; case _ => true }
       .map {
         case ((attKey, `stringClassName`), "") => attKey.key
-        case ((attKey, _), value) => attKey.key + "(" + value + ")"
+        case ((attKey, _), value)              => attKey.key + "(" + value + ")"
       } toList
   }
 }

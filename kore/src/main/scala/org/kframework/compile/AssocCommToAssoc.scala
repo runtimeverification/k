@@ -76,7 +76,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
 
     val (elements: Seq[K], nonElements: Seq[K]) = children.partition {
       case v: SortedKVariable => m.subsorts.lessThan(v.sort, opSort);
-      case _ => true
+      case _                  => true
     }
 
     assert(nonElements.size <= 1)
@@ -113,7 +113,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
 
     val (elements: Seq[K], nonElements: Seq[K]) = children.partition {
       case v: SortedKVariable => m.subsorts.lessThan(v.sort, opSort);
-      case _ => true
+      case _                  => true
     }
 
     assert(nonElements.size <= 1)
@@ -133,14 +133,14 @@ class AssocCommToAssoc extends Function[Module, Module] {
     case Unapply.KApply(label: KLabel, children: List[K]) =>
       KApply(label, children.map(substituteFrame(_, name, substitute)): _*)
     case Unapply.KVariable(`name`) => substitute
-    case _: K => k
+    case _: K                      => k
   }
 
   private def crossProduct[T](lls: List[List[T]]): List[List[T]] =
     lls match {
       case (head: List[T]) :: (tail: List[List[T]]) =>
         for {
-          x <- head
+          x             <- head
           (xs: List[T]) <- crossProduct(tail)
         } yield x :: xs
       case List() => List(List())

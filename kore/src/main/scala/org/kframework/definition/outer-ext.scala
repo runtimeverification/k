@@ -14,20 +14,20 @@ import scala.collection.Set
 case class Configuration(body: K, ensures: K, att: Att = Att.empty)
     extends Sentence
     with OuterKORE {
-  override val isSyntax = true
-  override val isNonSyntax = true
+  override val isSyntax          = true
+  override val isNonSyntax       = true
   override def withAtt(att: Att) = Configuration(body, ensures, att)
 }
 
 case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) extends Sentence {
-  override val isSyntax = sentenceType == "config" || sentenceType == "alias"
-  override val isNonSyntax = sentenceType != "alias"
+  override val isSyntax          = sentenceType == "config" || sentenceType == "alias"
+  override val isNonSyntax       = sentenceType != "alias"
   override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }
 
 case class FlatImport(name: String, isPublic: Boolean, att: Att = Att.empty) extends HasLocation {
   override def location(): Optional[Location] = att.getOptional(classOf[Location])
-  override def source(): Optional[Source] = att.getOptional(classOf[Source])
+  override def source(): Optional[Source]     = att.getOptional(classOf[Source])
 }
 
 case class FlatModule(
@@ -83,7 +83,7 @@ object FlatModule {
               i.isPublic
             )
           val newImports = m.imports.map(f)
-          val newM = new Module(m.name, newImports, m.localSentences, m.att)
+          val newM       = new Module(m.name, newImports, m.localSentences, m.att)
           newM.checkSorts()
           newM.checkUserLists()
           newM

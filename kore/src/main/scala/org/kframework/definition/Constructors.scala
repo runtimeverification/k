@@ -58,8 +58,8 @@ object Constructors {
       att: attributes.Att
   ) = definition.Production(klabel, params, sort, items, att)
 
-  def Terminal(s: String) = definition.Terminal(s)
-  def NonTerminal(sort: Sort) = definition.NonTerminal(sort, None)
+  def Terminal(s: String)                           = definition.Terminal(s)
+  def NonTerminal(sort: Sort)                       = definition.NonTerminal(sort, None)
   def NonTerminal(sort: Sort, name: Option[String]) = definition.NonTerminal(sort, name)
   def RegexTerminal(regexString: String) = definition.RegexTerminal("#", regexString, "#")
   def RegexTerminal(precedeRegexString: String, regexString: String, followRegexString: String) =

@@ -23,7 +23,7 @@ class KoreTest {
 
   val files: FileUtil = {
     val tempRoot = Files.createTempDirectory("kore-test").toFile
-    val tempDir = new File(tempRoot, "tmp")
+    val tempDir  = new File(tempRoot, "tmp")
     tempDir.mkdirs()
     val kompiledDir = new File(tempRoot, "kompiled")
     kompiledDir.mkdirs()
@@ -125,7 +125,7 @@ class KoreTest {
             ) =>
           Some(eq)
         case eq @ Equals(_, _, Application(_, _), _) => Some(eq)
-        case _ => None
+        case _                                       => None
 
       }
     go(axiom.pattern)
@@ -136,21 +136,21 @@ class KoreTest {
 
   def symbols(pat: Pattern): Seq[SymbolOrAlias] =
     pat match {
-      case And(_, ps) => ps.flatMap(symbols)
-      case Application(s, ps) => Seq(s).filter(isConcrete) ++ ps.flatMap(symbols)
-      case Ceil(_, _, p) => symbols(p)
+      case And(_, ps)           => ps.flatMap(symbols)
+      case Application(s, ps)   => Seq(s).filter(isConcrete) ++ ps.flatMap(symbols)
+      case Ceil(_, _, p)        => symbols(p)
       case Equals(_, _, p1, p2) => symbols(p1) ++ symbols(p2)
-      case Exists(_, _, p) => symbols(p)
-      case Floor(_, _, p) => symbols(p)
-      case Forall(_, _, p) => symbols(p)
-      case Iff(_, p1, p2) => symbols(p1) ++ symbols(p2)
-      case Implies(_, p1, p2) => symbols(p1) ++ symbols(p2)
-      case Mem(_, _, p1, p2) => symbols(p1) ++ symbols(p2)
+      case Exists(_, _, p)      => symbols(p)
+      case Floor(_, _, p)       => symbols(p)
+      case Forall(_, _, p)      => symbols(p)
+      case Iff(_, p1, p2)       => symbols(p1) ++ symbols(p2)
+      case Implies(_, p1, p2)   => symbols(p1) ++ symbols(p2)
+      case Mem(_, _, p1, p2)    => symbols(p1) ++ symbols(p2)
 //      case Next(_, p) => symbols(p)
-      case Not(_, p) => symbols(p)
-      case Or(_, ps) => ps.flatMap(symbols)
+      case Not(_, p)           => symbols(p)
+      case Or(_, ps)           => ps.flatMap(symbols)
       case Rewrites(_, p1, p2) => symbols(p1) ++ symbols(p2)
-      case _ => Seq()
+      case _                   => Seq()
     }
 
 }

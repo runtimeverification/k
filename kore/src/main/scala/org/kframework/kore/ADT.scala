@@ -28,28 +28,28 @@ object ADT {
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty)
       extends kore.KApply {
-    def items = klist.items
-    def size = klist.size
+    def items      = klist.items
+    def size       = klist.size
     def asIterable = klist.asIterable
   }
 
   class KSequence private (val elements: List[K], val att: Att = Att.empty) extends kore.KSequence {
-    val items: java.util.List[K] = elements.asJava
-    val size: Int = elements.size
+    val items: java.util.List[K]          = elements.asJava
+    val size: Int                         = elements.size
     val asIterable: java.lang.Iterable[K] = new org.kframework.List(elements)
     lazy val kApply: kore.KApply =
       items.asScala.reduceRightOption((a, b) => KLabels.KSEQ.apply(a, b)).getOrElse {
         KLabels.DOTK.apply()
       } match {
         case k: kore.KApply => k
-        case x => KLabels.KSEQ(x, KLabels.DOTK())
+        case x              => KLabels.KSEQ(x, KLabels.DOTK())
       }
 
     def iterator: Iterator[K] = elements.iterator
 
     override def equals(that: Any) = that match {
       case s: KSequence => s.elements == elements
-      case _ => false
+      case _            => false
     }
   }
 
@@ -63,7 +63,7 @@ object ADT {
       new KSequence(
         elements.foldLeft(List[K]()) {
           case (sum, s: KSequence) => sum ++ s.items.asScala
-          case (sum, t) => sum :+ t
+          case (sum, t)            => sum :+ t
         },
         att
       )
@@ -94,9 +94,9 @@ object ADT {
 
   case class KList(elements: List[K]) extends kore.KList {
     lazy val items: java.util.List[K] = elements.asJava
-    def iterator: Iterator[K] = elements.iterator
-    lazy val size = elements.size
-    lazy val asIterable = new org.kframework.List(elements)
+    def iterator: Iterator[K]         = elements.iterator
+    lazy val size                     = elements.size
+    lazy val asIterable               = new org.kframework.List(elements)
   }
 
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att.empty) extends kore.KRewrite
