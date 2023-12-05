@@ -2,6 +2,9 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+// NOTE: this definition is not runnable as it
+// It is intended for documentation and academic purposes only.
+
 # LOGIK
 
 Author: Grigore Roșu (grosu@illinois.edu)  
