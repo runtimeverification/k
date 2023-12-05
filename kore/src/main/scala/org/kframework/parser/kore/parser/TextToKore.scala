@@ -1,8 +1,8 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
-import org.kframework.parser.kore._
 import org.kframework.parser.kore
+import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.DefaultBuilders
 import org.kframework.utils.StringUtil
 
@@ -14,23 +14,23 @@ case class ParseError(msg: String) extends Exception(msg) { // ParseError.msg eq
   }
 }
 
-/** A parser for [[kore.Pattern]].
-  *
-  * @constructor Creates a new parser.
-  */
+/**
+ * A parser for [[kore.Pattern]].
+ *
+ * @constructor
+ *   Creates a new parser.
+ */
 class TextToKore(b: Builders = DefaultBuilders) {
 
-  def this() {
+  def this() =
     this(DefaultBuilders)
-  }
 
   private val scanner = new Scanner()
 
   /**
-    * ParsingLevel ::= None        // both meta-level and object-level are allowed
-    *                | Some(true)  // only accept meta-level
-    *                | Some(false) // only accept object-level
-    */
+   * ParsingLevel ::= None // both meta-level and object-level are allowed \| Some(true) // only
+   * accept meta-level \| Some(false) // only accept object-level
+   */
 
   private type ParsingLevel = Option[Boolean]
 
@@ -49,104 +49,91 @@ class TextToKore(b: Builders = DefaultBuilders) {
 
   /** Parses the file and returns [[kore.Definition]]. */
   @throws(classOf[ParseError])
-  def parse(file: java.io.File): Definition = {
+  def parse(file: java.io.File): Definition =
     parse(io.Source.fromFile(file))
-  }
 
   /** Parses the file and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
-  def parsePattern(file: java.io.File, line: Integer): Pattern = {
+  def parsePattern(file: java.io.File, line: Integer): Pattern =
     parsePattern(io.Source.fromFile(file), line)
-  }
 
   /** Parses the string and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
-  def parsePattern(str: String): Pattern = {
+  def parsePattern(str: String): Pattern =
     parsePattern(io.Source.fromString(str), 0)
-  }
 
   /** Parses the file and returns [[kore.Module]]. */
   @throws(classOf[ParseError])
-  def parseModule(file: java.io.File, line: Integer): Module = {
+  def parseModule(file: java.io.File, line: Integer): Module =
     parseModule(io.Source.fromFile(file), line)
-  }
 
   /** Parses the string and returns [[kore.Module]]. */
   @throws(classOf[ParseError])
-  def parseModule(str: String): Module = {
+  def parseModule(str: String): Module =
     parseModule(io.Source.fromString(str), 0)
-  }
 
   /** Parses from the stream and returns [[kore.Definition]]. */
   @throws(classOf[ParseError])
-  def parse(src: io.Source): Definition = {
+  def parse(src: io.Source): Definition =
     try {
       scanner.init(src, 0)
       parseDefinition()
     } catch {
-      case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
-    } finally {
+      case e: java.io.EOFException =>
+        throw new ParseError("ERROR: Unexpected end of file while parsing", e)
+    } finally
       scanner.close()
-    }
-  }
 
   /** Parses from the stream and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
-  def parsePattern(src: io.Source, line: Integer): Pattern = {
+  def parsePattern(src: io.Source, line: Integer): Pattern =
     try {
       scanner.init(src, line)
       parsePattern()
     } catch {
-      case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
-    } finally {
+      case e: java.io.EOFException =>
+        throw new ParseError("ERROR: Unexpected end of file while parsing", e)
+    } finally
       scanner.close()
-    }
-  }
 
   /** Parses from the stream and returns [[kore.Module]]. */
   @throws(classOf[ParseError])
-  def parseModule(src: io.Source, line: Integer): Module = {
+  def parseModule(src: io.Source, line: Integer): Module =
     try {
       scanner.init(src, line)
       parseModule()
     } catch {
-      case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
-    } finally {
+      case e: java.io.EOFException =>
+        throw new ParseError("ERROR: Unexpected end of file while parsing", e)
+    } finally
       scanner.close()
-    }
-  }
 
-  /** Read from the stream and return a canonical form [[String]],
-    * in which all consecutive whitespaces are deleted.
-    * FIXME:: should return a canonical form [[String]] in which all
-    *         consecutive whitespaces are replaced by ' '
-    * Mainly used for testing. */
+  /**
+   * Read from the stream and return a canonical form [[String]], in which all consecutive
+   * whitespaces are deleted. FIXME:: should return a canonical form [[String]] in which all
+   * consecutive whitespaces are replaced by ' ' Mainly used for testing.
+   */
   @throws(classOf[java.io.IOException])
-  def canonicalString(file: java.io.File): String = {
+  def canonicalString(file: java.io.File): String =
     canonicalString(io.Source.fromFile(file))
-  }
 
   @throws(classOf[java.io.IOException])
-  def canonicalString(s: String): String = {
+  def canonicalString(s: String): String =
     canonicalString(io.Source.fromString(s))
-  }
 
   @throws(classOf[java.io.IOException])
   def canonicalString(src: io.Source): String = {
-    def loop(s: StringBuilder): String = {
+    def loop(s: StringBuilder): String =
       if (scanner.isEOF()) {
         return s.toString()
-      }
-      else {
+      } else {
         s += scanner.next() // s must be a nonwhitespace character
-        loop(s)             // tail recursive
+        loop(s) // tail recursive
       }
-    }
     try {
       scanner.init(src, 0)
       loop(new StringBuilder(""))
-    }
-    catch {
+    } catch {
       case e: java.io.EOFException => throw e
     }
   }
@@ -186,16 +173,15 @@ class TextToKore(b: Builders = DefaultBuilders) {
     b.Module(name, decls, att)
   }
 
-  private def parseModules() : Seq[Module] = {
+  private def parseModules(): Seq[Module] = {
     var ms = Seq.empty[Module]
-    while(!scanner.isEOF()) {
+    while (!scanner.isEOF()) {
       val leading_char = scanner.nextWithSkippingWhitespaces()
       if (leading_char == 'm') { // a module starts
         scanner.putback('m')
         val m = parseModule()
         ms = ms :+ m
-      }
-      else
+      } else
         throw error('m', leading_char)
     }
     ms
@@ -213,16 +199,15 @@ class TextToKore(b: Builders = DefaultBuilders) {
     if (c1 == 'e') { // endmodule
       scanner.putback('e')
       decls
-    }
-    else {
+    } else {
       val c2 = scanner.nextWithSkippingWhitespaces()
       (c1, c2) match {
-         case ('i', 'm') => // import
-           consume("port")
-           val nameStr = parseId()
-           val att = parseAttributes()
-           val decl = b.Import(nameStr, att)
-           parseDeclarations(decl +: decls)
+        case ('i', 'm') => // import
+          consume("port")
+          val nameStr = parseId()
+          val att = parseAttributes()
+          val decl = b.Import(nameStr, att)
+          parseDeclarations(decl +: decls)
         case ('s', 'o') => // sort declaration
           consume("rt")
           val ctr = parseId(parsingLevel = objt)
@@ -236,7 +221,8 @@ class TextToKore(b: Builders = DefaultBuilders) {
           consume("mbol")
           val ctr = parseId() // previousParsingLevel is set here
           consumeWithLeadingWhitespaces("{")
-          val params = parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
+          val params =
+            parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
           consumeWithLeadingWhitespaces("}")
           val symbol = b.Symbol(ctr, params)
           consumeWithLeadingWhitespaces("(")
@@ -265,11 +251,13 @@ class TextToKore(b: Builders = DefaultBuilders) {
               consume("mbol")
               val ctr = parseId() // previousParsingLevel is set here
               consumeWithLeadingWhitespaces("{")
-              val params = parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
+              val params =
+                parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
               consumeWithLeadingWhitespaces("}")
               val symbol = b.Symbol(ctr, params)
               consumeWithLeadingWhitespaces("(")
-              val argSorts = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', ')')
+              val argSorts =
+                parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', ')')
               consumeWithLeadingWhitespaces(")")
               consumeWithLeadingWhitespaces(":")
               val returnSort = parseSort(parsingLevel = previousParsingLevel)
@@ -283,7 +271,8 @@ class TextToKore(b: Builders = DefaultBuilders) {
           consume("ias")
           val ctr = parseId() // previousParsingLevel is set here
           consumeWithLeadingWhitespaces("{")
-          val params = parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
+          val params =
+            parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
           consumeWithLeadingWhitespaces("}")
           val alias = b.Alias(ctr, params)
           consumeWithLeadingWhitespaces("(")
@@ -307,7 +296,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
           val att = parseAttributes()
           val decl = b.AxiomDeclaration(params, pattern, att)
           parseDeclarations(decl +: decls)
-        case  ('c', 'l') => // claim declaration
+        case ('c', 'l') => // claim declaration
           consume("aim")
           consumeWithLeadingWhitespaces("{")
           val params = parseList(() => parseSortVariable(parsingLevel = both), ',', '}')
@@ -316,12 +305,11 @@ class TextToKore(b: Builders = DefaultBuilders) {
           val att = parseAttributes()
           val decl = b.ClaimDeclaration(params, pattern, att)
           parseDeclarations(decl +: decls)
-         case (e1, e2) =>
+        case (e1, e2) =>
           throw error("sort, symbol, alias, axiom", e1)
       }
     }
   }
-
 
   // Import = ModuleName Attributes
   // private def parseImport(): Declaration = {
@@ -528,9 +516,11 @@ class TextToKore(b: Builders = DefaultBuilders) {
                 scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
                 consumeWithLeadingWhitespaces("{")
-                val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
+                val params =
+                  parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
                 consumeWithLeadingWhitespaces("}")
-                (p1: kore.Pattern, p2: kore.Pattern) => b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
+                (p1: kore.Pattern, p2: kore.Pattern) =>
+                  b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
             }
             consumeWithLeadingWhitespaces("(")
             val args = parseList(() => parsePattern(), ',', ')')
@@ -547,9 +537,11 @@ class TextToKore(b: Builders = DefaultBuilders) {
                 scanner.putback(c)
                 val id = parseId() // previousParsingLevel is set here
                 consumeWithLeadingWhitespaces("{")
-                val params = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
+                val params =
+                  parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', '}')
                 consumeWithLeadingWhitespaces("}")
-                (p1: kore.Pattern, p2: kore.Pattern) => b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
+                (p1: kore.Pattern, p2: kore.Pattern) =>
+                  b.Application(b.SymbolOrAlias(id, params), Seq(p1, p2))
             }
             consumeWithLeadingWhitespaces("(")
             val args = parseList(() => parsePattern(), ',', ')')
@@ -579,9 +571,19 @@ class TextToKore(b: Builders = DefaultBuilders) {
           //   b.DomainValue(sortStr, valueStr)
           case (err1, err2) =>
             val known = Seq(
-              "\\top", "\\bottom", "\\and", "\\or", "\\implies",
-              "\\iff", "\\exists", "\\forall", "\\ceil", "\\floor",
-              "\\equals", "\\in")
+              "\\top",
+              "\\bottom",
+              "\\and",
+              "\\or",
+              "\\implies",
+              "\\iff",
+              "\\exists",
+              "\\forall",
+              "\\ceil",
+              "\\floor",
+              "\\equals",
+              "\\in"
+            )
             throw error(known.mkString(","), "'\\" + err1 + err2 + "'")
         }
       case '@' => // set variable
@@ -628,17 +630,17 @@ class TextToKore(b: Builders = DefaultBuilders) {
       val c = scanner.next()
       s += c;
       c match {
-         case '\\' =>
-           // Always grab one character after the escaping backslash. We do not
-           // need to grab the entire escape sequence now, because actual
-           // unquoting does not happen until we have the entire string literal;
-           // this is only to prevent parsing the final quote prematurely.
-           s += scanner.next();
-           loop(s)
-         case '"' =>
-           StringUtil.unquoteKString(s.toString())
-         case c =>
-           loop(s)
+        case '\\' =>
+          // Always grab one character after the escaping backslash. We do not
+          // need to grab the entire escape sequence now, because actual
+          // unquoting does not happen until we have the entire string literal;
+          // this is only to prevent parsing the final quote prematurely.
+          s += scanner.next();
+          loop(s)
+        case '"' =>
+          StringUtil.unquoteKString(s.toString())
+        case c =>
+          loop(s)
       }
     }
 
@@ -651,24 +653,32 @@ class TextToKore(b: Builders = DefaultBuilders) {
     }
   }
 
-
   // Sort = SortVariable | Name { List{Sort, ",", ")"} }
   private def parseSort(parsingLevel: ParsingLevel = both): Sort = {
     val name = parseId(parsingLevel)
     scanner.nextWithSkippingWhitespaces() match {
       case '{' =>
         if (previousParsingLevel == meta) { // name is a meta-level id
-          val metalevelSorts = Seq("#Char", "#CharList", "#String", "#Sort", "#SortList",
-            "#Symbol", "#SymbolList", "#Variable", "#VariableList", "#Pattern", "#PatternList")
+          val metalevelSorts = Seq(
+            "#Char",
+            "#CharList",
+            "#String",
+            "#Sort",
+            "#SortList",
+            "#Symbol",
+            "#SymbolList",
+            "#Variable",
+            "#VariableList",
+            "#Pattern",
+            "#PatternList"
+          )
           if (metalevelSorts.contains(name)) {
             consumeWithLeadingWhitespaces("}") // no params
             b.CompoundSort(name, Seq.empty[Sort])
-          }
-          else {
+          } else {
             throw error("<Meta-Sort>", name) // not a valid meta-level sort
           }
-        }
-        else { // name is an object-level id
+        } else { // name is an object-level id
           val params = parseList(() => parseSort(objt), ',', '}') // params should be object-level
           consumeWithLeadingWhitespaces("}")
           b.CompoundSort(name, params)
@@ -701,14 +711,14 @@ class TextToKore(b: Builders = DefaultBuilders) {
   }
 
   private def parseId(parsingLevel: ParsingLevel = both): String = {
-    def loop(s: StringBuilder): String = {
+    def loop(s: StringBuilder): String =
       scanner.next() match {
         case c if isObjectIdChar(c) =>
           s += c; loop(s)
-        case c => scanner.putback(c)
+        case c =>
+          scanner.putback(c)
           s.toString()
       }
-    }
 
     scanner.nextWithSkippingWhitespaces() match {
       case '#' => // going to parse a meta-level id: either #ID or #`ID
@@ -732,8 +742,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
               "#" + loop(new StringBuilder(c.toString()))
             case err => throw error("<Meta-Identifier>", err)
           }
-        }
-        else {
+        } else {
           // expect only object-level
           throw error("<Object-Identifier>", '#')
         }
@@ -747,8 +756,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
             throw error("<Object-Identifier> should not be keywords", id)
           }
           id
-        }
-        else {
+        } else {
           // expect only meta-level
           throw error("<Meta-Identifier>", c)
         }
@@ -756,7 +764,8 @@ class TextToKore(b: Builders = DefaultBuilders) {
     }
   }
 
-  private def isObjectIdChar(c: Char): Boolean = TextToKore.isObjectIdChar(c) // TODO(Daejun): more efficient way?
+  private def isObjectIdChar(c: Char): Boolean =
+    TextToKore.isObjectIdChar(c) // TODO(Daejun): more efficient way?
 
   private def isLetter(c: Char): Boolean = TextToKore.isLetter(c)
 
@@ -787,21 +796,23 @@ class TextToKore(b: Builders = DefaultBuilders) {
   private def parseList[T](parseElem: () => T, sep: Char, endsWith: Char): Seq[T] = {
     assert(sep != endsWith)
 
-    def parseList2(lst: Seq[T]): Seq[T] = {
+    def parseList2(lst: Seq[T]): Seq[T] =
       scanner.nextWithSkippingWhitespaces() match {
-        case c if c == endsWith => scanner.putback(c)
+        case c if c == endsWith =>
+          scanner.putback(c)
           lst
         case c if c == sep =>
           val elem = parseElem()
           parseList2(lst :+ elem)
         case err => throw error("'" + endsWith + "' or '" + sep + "'", err)
       }
-    }
 
     scanner.nextWithSkippingWhitespaces() match {
-      case c if c == endsWith => scanner.putback(c)
+      case c if c == endsWith =>
+        scanner.putback(c)
         Seq()
-      case c => scanner.putback(c)
+      case c =>
+        scanner.putback(c)
         val elem = parseElem()
         parseList2(Seq(elem))
     }
@@ -812,36 +823,32 @@ class TextToKore(b: Builders = DefaultBuilders) {
     consume(str)
   }
 
-  private def consume(str: String): Unit = {
+  private def consume(str: String): Unit =
     for (c <- str) {
       val n = scanner.next()
       if (n == c) ()
       else throw error(c, n)
     }
-  }
 
   //////////////////////////////////////////////////////////
 
-  private def error(expected: String, actual: String): ParseError = {
+  private def error(expected: String, actual: String): ParseError =
     ParseError(
       "ERROR: " + "Line " + scanner.lineNum + ": Column " + scanner.columnNum + ": " +
         "Expected " + expected + ", but " + actual
         + System.lineSeparator() + scanner.line + System.lineSeparator() +
         List.fill(scanner.columnNum - 1)(' ').mkString + "^"
     )
-  }
 
-  private def error(expected: String, actual: Char): ParseError = {
+  private def error(expected: String, actual: Char): ParseError =
     error(expected, "'" + actual + "'")
-  }
 
   //  private def error(expected: Char, actual: String): ParseError = {
   //    error("'" + expected + "'", actual)
   //  }
 
-  private def error(expected: Char, actual: Char): ParseError = {
+  private def error(expected: Char, actual: Char): ParseError =
     error("'" + expected + "'", "'" + actual + "'")
-  }
 }
 
 /** Collection of static methods. */
@@ -850,16 +857,13 @@ object TextToKore {
 
   // Lexicon checkers
 
-  def isLetter(c: Char): Boolean = {
+  def isLetter(c: Char): Boolean =
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
-  }
 
-  def isDigit(c: Char): Boolean = {
+  def isDigit(c: Char): Boolean =
     '0' <= c && c <= '9'
-  }
 
-  def isObjectIdChar(c: Char): Boolean = {
+  def isObjectIdChar(c: Char): Boolean =
     isLetter(c) || isDigit(c) || c == '\'' || c == '-'
-  }
 
 }

@@ -1,16 +1,17 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile
 
-import org.kframework.Collections._
 import org.kframework.attributes.Att
-import org.kframework.definition.{Module, Rule, Sentence}
+import org.kframework.definition.Module
+import org.kframework.definition.Rule
+import org.kframework.definition.Sentence
 import org.kframework.kore._
-
+import org.kframework.Collections._
 
 /**
  * Compiler pass flattening associative collections
  */
-class NormalizeAssoc(c: Constructors) extends ((Module, Sentence )=> Sentence) {
+class NormalizeAssoc(c: Constructors) extends ((Module, Sentence) => Sentence) {
 
   import c._
 
@@ -26,16 +27,21 @@ class NormalizeAssoc(c: Constructors) extends ((Module, Sentence )=> Sentence) {
         val opKLabel: KLabel = kApply.klabel
         val unitKLabel: KLabel = KLabel(m.attributesFor(opKLabel).get(Att.UNIT))
         val flattenChildren = flatten(kApply, opKLabel, unitKLabel)
-        if (flattenChildren exists {_.isInstanceOf[KRewrite]}) {
+        if (flattenChildren.exists(_.isInstanceOf[KRewrite])) {
           KRewrite(
-            KApply(opKLabel, KList(flatten(RewriteToTop.toLeft(k), opKLabel, unitKLabel) map apply: _*), kApply.att),
+            KApply(
+              opKLabel,
+              KList(flatten(RewriteToTop.toLeft(k), opKLabel, unitKLabel).map(apply): _*),
+              kApply.att
+            ),
             RewriteToTop.toRight(k),
-            Att.empty)
+            Att.empty
+          )
         } else {
-          KApply(opKLabel, KList(flattenChildren map apply: _*), kApply.att)
+          KApply(opKLabel, KList(flattenChildren.map(apply): _*), kApply.att)
         }
       } else {
-        KApply(kApply.klabel, KList(immutable(kApply.klist.items) map apply: _*), kApply.att)
+        KApply(kApply.klabel, KList(immutable(kApply.klist.items).map(apply): _*), kApply.att)
       }
     case kRewrite: KRewrite => KRewrite(apply(kRewrite.left), kRewrite.right, kRewrite.att)
     case _ => k
@@ -43,10 +49,10 @@ class NormalizeAssoc(c: Constructors) extends ((Module, Sentence )=> Sentence) {
 
   def flatten(k: K, op: KLabel, unit: KLabel): Seq[K] = k match {
     case Unapply.KApply(`op`, children: List[K]) =>
-      children flatMap {flatten(_, op, unit)}
+      children.flatMap(flatten(_, op, unit))
     case Unapply.KApply(`unit`, List()) =>
       Seq()
-    //case kRewrite: KRewrite =>
+    // case kRewrite: KRewrite =>
     //  (flatten(kRewrite.left, op, unit) map {KRewrite(_, KApply(unit), kRewrite.att)}) :+ KRewrite(KApply(unit), kRewrite.right, kRewrite.att)
     case _ =>
       Seq(k)

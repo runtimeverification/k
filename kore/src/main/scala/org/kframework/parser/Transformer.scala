@@ -2,11 +2,9 @@
 
 package org.kframework.parser
 
-import org.kframework.Collections._
-
 import java.util
+import org.kframework.Collections._
 import scala.collection.JavaConverters._
-
 
 class Ignore
 
@@ -16,49 +14,52 @@ abstract class ChildrenMapping[E, W] {
 
   def applyTerm(t: Term): (Either[E, Term], W)
 
-  protected def simpleError(err:E) : (Either[E, Term], W) = (Left(err),warningUnit)
-  protected def simpleResult(result:Term): (Either[E, Term], W) = (Right(result),warningUnit)
+  protected def simpleError(err: E): (Either[E, Term], W) = (Left(err), warningUnit)
+  protected def simpleResult(result: Term): (Either[E, Term], W) = (Right(result), warningUnit)
 
   /**
-   * Transforms all children of the current item. If any of them is problematic,
-   * it merge(...)es all problems and returns Left(...).
-   * If everything is ok, replace children, and merge all warnings.
+   * Transforms all children of the current item. If any of them is problematic, it merge(...)es all
+   * problems and returns Left(...). If everything is ok, replace children, and merge all warnings.
    */
   def mapChildrenStrict(t: HasChildren): (Either[E, Term], W) = {
     val allResults = t.items.asScala.map(applyTerm) // visit all children
     val (eithers: Iterable[Either[E, Term]], warnings: Iterable[W]) = allResults.unzip
     val mergedWarnings = warnings.foldLeft(warningUnit)(mergeWarnings)
 
-    if (eithers.exists { t => t.isLeft }) {
-      val mergedErrors = (eithers collect { case Left(err) => err }).foldLeft(errorUnit)(mergeErrors)
+    if (eithers.exists(t => t.isLeft)) {
+      val mergedErrors = eithers.collect { case Left(err) => err }.foldLeft(errorUnit)(mergeErrors)
       (Left(mergedErrors), mergedWarnings)
     } else {
-      val newChildren: Iterable[Term] = eithers map { _.right.get }
+      val newChildren: Iterable[Term] = eithers.map(_.right.get)
       (Right(t.replaceChildren(newChildren.asJavaCollection)), mergedWarnings)
     }
   }
 
   /**
    * Transforms all children of the current item:
-   * - if all children are problematic (i.e., Left(...)), then return the
-   * merge(...) of all problems.
-   * - if one child is left, return that child.
-   * - otherwise, i.e., a few of the children are correct, disregard all problems and
-   * replace the children of the current element with the correct transformed children.
+   *   - if all children are problematic (i.e., Left(...)), then return the merge(...) of all
+   *     problems.
+   *   - if one child is left, return that child.
+   *   - otherwise, i.e., a few of the children are correct, disregard all problems and replace the
+   *     children of the current element with the correct transformed children.
    */
   def mapChildren(t: HasChildren): (Either[E, Term], W) = {
     val allResults1 = t.items.asScala.map(applyTerm) // visit all children
-    val allResults = allResults1 flatMap {
-        case (Right(Ambiguity(items)), warns) => immutable(items) map { t => (Right(t): Either[E, Term], warns) }
-        case x => Set(x)
-      }
+    val allResults = allResults1.flatMap {
+      case (Right(Ambiguity(items)), warns) =>
+        immutable(items).map(t => (Right(t): Either[E, Term], warns))
+      case x => Set(x)
+    }
 
     val (eithers: Iterable[Either[E, Term]], warnings: Iterable[W]) = allResults.unzip
-    val newCorrectItems: List[(Term, W)] = allResults.collect { case (Right(v), w) => (v, w) }.toList
+    val newCorrectItems: List[(Term, W)] = allResults.collect { case (Right(v), w) =>
+      (v, w)
+    }.toList
     newCorrectItems match {
       case List() =>
         val mergedWarnings = warnings.foldLeft(warningUnit)(mergeWarnings)
-        val mergedErrors = (eithers collect { case Left(err) => err }).foldLeft(errorUnit)(mergeErrors)
+        val mergedErrors =
+          eithers.collect { case Left(err) => err }.foldLeft(errorUnit)(mergeErrors)
         (Left(mergedErrors), mergedWarnings)
       case List((term, w)) => (Right(term), w)
       case l =>
@@ -75,6 +76,7 @@ abstract class ChildrenMapping[E, W] {
   val warningUnit: W
 
   val errorUnit: E
+
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
@@ -82,11 +84,12 @@ abstract class ChildrenMapping[E, W] {
 }
 
 /**
- * Visitor pattern for the front end classes.
- * Applies the visitor transformation on each node, and returns a tuple of either a term, or a set of errors, and
- * a set of possible warnings.
- * @tparam E container for errors.
- * @tparam W container for warnings.
+ * Visitor pattern for the front end classes. Applies the visitor transformation on each node, and
+ * returns a tuple of either a term, or a set of errors, and a set of possible warnings.
+ * @tparam E
+ *   container for errors.
+ * @tparam W
+ *   container for warnings.
  */
 abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   // we expect this data structures to represent a DAG, so we
@@ -119,7 +122,8 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
 }
 
 abstract class SetsGeneralTransformer[E, W]
-  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] {
+    extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] {
+
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
@@ -144,9 +148,10 @@ abstract class SetsGeneralTransformer[E, W]
 }
 
 /**
- * Visitor pattern for the front end classes.
- * Applies the visitor transformation on each node, and returns either a term, or a set of errors. (no warnings)
- * @tparam E container for errors.
+ * Visitor pattern for the front end classes. Applies the visitor transformation on each node, and
+ * returns either a term, or a set of errors. (no warnings)
+ * @tparam E
+ *   container for errors.
  */
 abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
@@ -181,8 +186,8 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
   override val warningUnit: Ignore = Ignore
 }
 
-abstract class SetsTransformerWithErrors[E]
-  extends TransformerWithErrors[java.util.Set[E]] {
+abstract class SetsTransformerWithErrors[E] extends TransformerWithErrors[java.util.Set[E]] {
+
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
@@ -196,8 +201,8 @@ abstract class SetsTransformerWithErrors[E]
 }
 
 /**
- * Visitor pattern for the front end classes.
- * Applies the visitor transformation on each node, and returns a term. (no errors and no warnings)
+ * Visitor pattern for the front end classes. Applies the visitor transformation on each node, and
+ * returns a term. (no errors and no warnings)
  */
 abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
 

@@ -1,46 +1,49 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kore
 
-import org.kframework.builtin.{KLabels, Sorts}
+import collection.JavaConverters._
+import org.kframework.attributes._
+import org.kframework.builtin.KLabels
+import org.kframework.builtin.Sorts
 import org.kframework.kore
 import org.kframework.kore.KORE.Sort
-import org.kframework.attributes._
-
-import collection.JavaConverters._
 
 /**
  * Abstract Data Types: basic implementations for the inner KORE interfaces.
  *
- * Tools using inner KORE data structures can either use these classes directly or have their own implementations.
+ * Tools using inner KORE data structures can either use these classes directly or have their own
+ * implementations.
  */
-
 
 object ADT {
 
   case class KLabel(name: String, params: kore.Sort*) extends kore.KLabel {
-    override def toString = {
+    override def toString =
       if (params.isEmpty) {
         name
       } else {
         name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
       }
-    }
   }
 
-  case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty) extends kore.KApply {
+  case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty)
+      extends kore.KApply {
     def items = klist.items
     def size = klist.size
     def asIterable = klist.asIterable
   }
 
-  class KSequence private(val elements: List[K], val att: Att = Att.empty) extends kore.KSequence {
+  class KSequence private (val elements: List[K], val att: Att = Att.empty) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava
     val size: Int = elements.size
     val asIterable: java.lang.Iterable[K] = new org.kframework.List(elements)
-    lazy val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabels.KSEQ.apply(a, b) } getOrElse { KLabels.DOTK.apply() } match {
-      case k: kore.KApply => k
-      case x => KLabels.KSEQ(x, KLabels.DOTK())
-    }
+    lazy val kApply: kore.KApply =
+      items.asScala.reduceRightOption((a, b) => KLabels.KSEQ.apply(a, b)).getOrElse {
+        KLabels.DOTK.apply()
+      } match {
+        case k: kore.KApply => k
+        case x => KLabels.KSEQ(x, KLabels.DOTK())
+      }
 
     def iterator: Iterator[K] = elements.iterator
 
@@ -57,10 +60,13 @@ object ADT {
       new KSequence(elements, emptyAtt)
 
     def apply(elements: List[K], att: Att = Att.empty): KSequence =
-      new KSequence(elements.foldLeft(List[K]()) {
-        case (sum, s: KSequence) => sum ++ s.items.asScala
-        case (sum, t) => sum :+ t
-      }, att)
+      new KSequence(
+        elements.foldLeft(List[K]()) {
+          case (sum, s: KSequence) => sum ++ s.items.asScala
+          case (sum, t) => sum :+ t
+        },
+        att
+      )
   }
 
   case class KVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
@@ -68,23 +74,21 @@ object ADT {
   }
 
   case class Sort(name: String, params: kore.Sort*) extends kore.Sort {
-    override def toString = {
+    override def toString =
       if (params.isEmpty) {
         name
       } else {
         name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
       }
-    }
   }
 
   case class SortHead(name: String, params: Int) extends kore.SortHead {
-    override def toString = {
+    override def toString =
       if (params == 0) {
         name
       } else {
         name + "{" + (0 until params).map("S" + _.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
       }
-    }
   }
   case class KToken(s: String, sort: kore.Sort, att: Att = Att.empty) extends kore.KToken
 
@@ -106,7 +110,8 @@ object ADT {
 object SortedADT {
 
   case class SortedKVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
-    val sort: Sort = if (att.contains(Att.CELL_SORT)) Sorts.K else att.getOptional(classOf[Sort]).orElse(Sorts.K)
+    val sort: Sort =
+      if (att.contains(Att.CELL_SORT)) Sorts.K else att.getOptional(classOf[Sort]).orElse(Sorts.K)
 
     def params = Seq()
 
@@ -118,4 +123,3 @@ object SortedADT {
   }
 
 }
-

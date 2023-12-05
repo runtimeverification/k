@@ -2,16 +2,13 @@
 package org.kframework.kore
 
 import java.util.Optional
-
 import org.kframework.attributes._
 import org.kframework.unparser.ToKast
 import org.kframework.utils.errorsystem.KEMException
-
 import scala.collection.JavaConverters._
 
 /**
- * This file contains all inner KORE interfaces.
- * The the wiki for documentation:
+ * This file contains all inner KORE interfaces. The the wiki for documentation:
  * https://github.com/runtimeverification/k/wiki/KORE-data-structures-guide
  */
 
@@ -34,28 +31,38 @@ object K {
     def compare(a: K, b: K): Int = {
       import scala.math.Ordering.Implicits._
       (a, b) match {
-        case (c: KToken, d: KToken) => Ordering.Tuple2(Ordering[String], Ordering[Sort]).compare((c.s, c.sort), (d.s, d.sort))
-        case (c: KApply, d: KApply) => Ordering.Tuple2(KLabelOrdering, seqDerivedOrdering[Seq, K](this)).compare((c.klabel, c.klist.items.asScala), (d.klabel, d.klist.items.asScala))
-        case (c: KSequence, d: KSequence) => seqDerivedOrdering(this).compare(c.items.asScala, d.items.asScala)
+        case (c: KToken, d: KToken) =>
+          Ordering.Tuple2(Ordering[String], Ordering[Sort]).compare((c.s, c.sort), (d.s, d.sort))
+        case (c: KApply, d: KApply) =>
+          Ordering
+            .Tuple2(KLabelOrdering, seqDerivedOrdering[Seq, K](this))
+            .compare((c.klabel, c.klist.items.asScala), (d.klabel, d.klist.items.asScala))
+        case (c: KSequence, d: KSequence) =>
+          seqDerivedOrdering(this).compare(c.items.asScala, d.items.asScala)
         case (c: KVariable, d: KVariable) => Ordering[String].compare(c.name, d.name)
-        case (c: KAs, d: KAs) => Ordering.Tuple2(this, this).compare((c.pattern, c.alias), (d.pattern, d.alias))
-        case (c: KRewrite, d: KRewrite) => Ordering.Tuple2(this, this).compare((c.left, c.right), (d.left, d.right))
+        case (c: KAs, d: KAs) =>
+          Ordering.Tuple2(this, this).compare((c.pattern, c.alias), (d.pattern, d.alias))
+        case (c: KRewrite, d: KRewrite) =>
+          Ordering.Tuple2(this, this).compare((c.left, c.right), (d.left, d.right))
         case (c: InjectedKLabel, d: InjectedKLabel) => KLabelOrdering.compare(c.klabel, d.klabel)
-        case (_:KToken, _) => 1
-        case (_, _:KToken) => -1
-        case (_:KApply, _) => 1
-        case (_, _:KApply) => -1
-        case (_:KSequence, _) => 1
-        case (_, _:KSequence) => -1
-        case (_:KVariable, _) => 1
-        case (_, _:KVariable) => -1
-        case (_:KAs, _) => 1
-        case (_, _:KAs) => -1
-        case (_:KRewrite, _) => 1
-        case (_, _:KRewrite) => -1
-        case (_:InjectedKLabel, _) => 1
-        case (_, _:InjectedKLabel) => -1
-        case (_, _) => throw KEMException.internalError("Cannot order these terms:\n" + a.toString() + "\n" + b.toString())
+        case (_: KToken, _) => 1
+        case (_, _: KToken) => -1
+        case (_: KApply, _) => 1
+        case (_, _: KApply) => -1
+        case (_: KSequence, _) => 1
+        case (_, _: KSequence) => -1
+        case (_: KVariable, _) => 1
+        case (_, _: KVariable) => -1
+        case (_: KAs, _) => 1
+        case (_, _: KAs) => -1
+        case (_: KRewrite, _) => 1
+        case (_, _: KRewrite) => -1
+        case (_: InjectedKLabel, _) => 1
+        case (_, _: InjectedKLabel) => -1
+        case (_, _) =>
+          throw KEMException.internalError(
+            "Cannot order these terms:\n" + a.toString() + "\n" + b.toString()
+          )
       }
     }
   }
@@ -80,7 +87,9 @@ trait KLabel extends AttValue {
 object KLabelOrdering extends Ordering[KLabel] {
   def compare(a: KLabel, b: KLabel): Int = {
     import scala.math.Ordering.Implicits._
-    Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering[Sort])).compare((a.name, a.params), (b.name, b.params))
+    Ordering
+      .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering[Sort]))
+      .compare((a.name, a.params), (b.name, b.params))
   }
 }
 
@@ -102,32 +111,31 @@ trait Sort extends Ordered[Sort] with AttValue {
     case _ => false
   }
   override def hashCode = name.hashCode * 23 + params.hashCode
-    
+
   def compare(that: Sort): Int = {
     import scala.math.Ordering.Implicits._
-    Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
+    Ordering
+      .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity)))
+      .compare((this.name, this.params), (this.name, this.params))
   }
 
   def head: SortHead = ADT.SortHead(name, params.size)
 
-  def substitute(subst: Map[Sort, Sort]): Sort = {
-    ADT.Sort(name, params.map(p => subst.getOrElse(p, p.substitute(subst))):_*)
-  }
+  def substitute(subst: Map[Sort, Sort]): Sort =
+    ADT.Sort(name, params.map(p => subst.getOrElse(p, p.substitute(subst))): _*)
 
-  def contains(sort: Sort): Boolean = {
+  def contains(sort: Sort): Boolean =
     this == sort || params.exists(_.contains(sort))
-  }
 
   override def toString: String = name + (if (params.nonEmpty) "{" + params.mkString(",") + "}")
 
-  lazy val isNat: Boolean = {
+  lazy val isNat: Boolean =
     try {
       name.toInt
       true
     } catch {
-      case _:NumberFormatException => false
+      case _: NumberFormatException => false
     }
-  }
 }
 
 trait SortHead extends Ordered[SortHead] {
@@ -139,10 +147,10 @@ trait SortHead extends Ordered[SortHead] {
   }
   override def hashCode = name.hashCode * 23 + params.hashCode
 
-  def compare(that: SortHead): Int = {
-    Ordering.Tuple2(Ordering[String], Ordering[Int]).compare((this.name, this.params), (this.name, this.params))
-  }
-
+  def compare(that: SortHead): Int =
+    Ordering
+      .Tuple2(Ordering[String], Ordering[Int])
+      .compare((this.name, this.params), (this.name, this.params))
 
 }
 
@@ -162,8 +170,7 @@ trait KCollection {
   def computeHashCode = items.hashCode
 }
 
-trait KList extends KCollection with AttValue {
-}
+trait KList extends KCollection with AttValue {}
 
 trait KApply extends KItem with KCollection {
   def klabel: KLabel

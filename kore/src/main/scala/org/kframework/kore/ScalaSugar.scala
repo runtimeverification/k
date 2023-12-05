@@ -2,9 +2,9 @@
 package org.kframework.kore
 
 import org.kframework.attributes.Att
-import org.kframework.builtin.{KLabels, Sorts}
+import org.kframework.builtin.KLabels
+import org.kframework.builtin.Sorts
 import org.kframework.kore
-
 import scala.collection.JavaConverters._
 
 trait ScalaSugared {
@@ -36,5 +36,6 @@ trait ScalaSugared {
 
   def KList(ks: Seq[K]): KList = c.KList(ks.asJava)
 
-  def KApply(klabel: KLabel, ks: Seq[K], att: Att = Att.empty): KApply = c.KApply(klabel, c.KList(ks.asJava), att)
+  def KApply(klabel: KLabel, ks: Seq[K], att: Att = Att.empty): KApply =
+    c.KApply(klabel, c.KList(ks.asJava), att)
 }

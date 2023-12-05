@@ -2,15 +2,17 @@
 
 package org.kframework.parser
 
-import org.kframework.attributes.{HasLocation, Location, Source}
+import java.util._
+import org.kframework.attributes.HasLocation
+import org.kframework.attributes.Location
+import org.kframework.attributes.Source
 import org.kframework.definition.Production
 import org.kframework.kore.KORE.Sort
 import org.kframework.utils.StringUtil
-import org.pcollections.{ConsPStack, PStack}
-
-import java.util._
-import scala.collection.JavaConverters._
+import org.pcollections.ConsPStack
+import org.pcollections.PStack
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
@@ -55,7 +57,7 @@ case class Ambiguity(items: java.util.Set[Term]) extends Term with HasChildren {
   def replaceChildren(newChildren: java.util.Collection[Term]): Ambiguity =
     Ambiguity(new java.util.HashSet[Term](newChildren), location, source)
 
-  override def toString: String = "amb(" + (items.asScala mkString ",") + ")"
+  override def toString: String = "amb(" + (items.asScala.mkString(",")) + ")"
 
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Ambiguity.this)
 }
