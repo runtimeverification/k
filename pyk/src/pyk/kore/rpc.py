@@ -1054,8 +1054,7 @@ class BoosterServer(KoreServer):
         check_dir_path(llvm_dt)
 
         if bug_report:
-            bug_report.add_file(llvm_definition, Path('llvm_definition/definition.kore'))
-            bug_report.add_file(llvm_dt, Path('llvm_definition/dt'))
+            self._gather_booster_report(llvm_kompiled_dir, llvm_definition, llvm_dt, bug_report)
 
         self._check_none_or_positive(smt_timeout, 'smt_timeout')
         self._check_none_or_positive(smt_retry_limit, 'smt_retry_limit')
@@ -1082,6 +1081,15 @@ class BoosterServer(KoreServer):
             haskell_log_entries=haskell_log_entries,
             log_axioms_file=log_axioms_file,
         )
+
+    @staticmethod
+    def _gather_booster_report(
+        llvm_kompiled_dir: Path, llvm_definition: Path, llvm_dt: Path, bug_report: BugReport
+    ) -> None:
+        bug_report.add_file(llvm_definition, Path('llvm_definition/definition.kore'))
+        bug_report.add_file(llvm_dt, Path('llvm_definition/dt'))
+        llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
 
 def kore_server(
