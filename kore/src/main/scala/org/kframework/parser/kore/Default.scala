@@ -228,11 +228,13 @@ object implementation {
 
     def DomainValue(s: i.Sort, str: String): i.Pattern = d.DomainValue(s, str)
 
-    // def Subset(s: i.Sort, rs: i.Sort, _1: Pattern, _2: Pattern): i.Pattern = d.Subset(s, rs, _1, _2)
+    // def Subset(s: i.Sort, rs: i.Sort, _1: Pattern, _2: Pattern): i.Pattern = d.Subset(s, rs, _1,
+    // _2)
 
     def StringLiteral(str: String): i.Pattern = d.StringLiteral(str)
 
-    // def DomainValue(sortStr: String, valueStr: String): Pattern = d.DomainValue(sortStr, valueStr)
+    // def DomainValue(sortStr: String, valueStr: String): Pattern = d.DomainValue(sortStr,
+    // valueStr)
 
     def SortVariable(name: String): i.SortVariable = d.SortVariable(name)
 

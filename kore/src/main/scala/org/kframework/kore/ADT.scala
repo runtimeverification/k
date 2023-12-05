@@ -117,7 +117,8 @@ object SortedADT {
 
     override def equals(other: Any) = other match {
       case v: SortedKVariable => name == v.name && sort == v.sort
-      //      case v: KVariable => throw new UnsupportedOperationException(s"should not mix SortedKVariables with KVariables for variable $this and $v")
+      // case v: KVariable => throw new UnsupportedOperationException(s"should not mix
+      // SortedKVariables with KVariables for variable $this and $v")
       case _ => false
     }
   }

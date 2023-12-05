@@ -174,11 +174,13 @@ object Att {
     // Attributes which represent user-defined groups via group(_).
     //
     // WARNING: Although we treat the arguments to group(_) as individual attributes internally,
-    // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the group(_) attribute,
+    // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the
+    // group(_) attribute,
     // else there will be conflicts when a user group has the same name as an internal attribute.
     case object UserGroup extends KeyType;
     // Attributes from user source code which are not recognized as built-ins
-    // This is only used to delay error reporting until after parsing, allowing us to report multiple errors
+    // This is only used to delay error reporting until after parsing, allowing us to report
+    // multiple errors
     case object Unrecognized extends KeyType;
   }
 
@@ -195,8 +197,8 @@ object Att {
   /* The Key class can only be constructed within Att. To enforce this, we must
    * - Make the constructor private
    * - Manually declare apply() and make it private, lest a public one is generated
-   * - Manually declare copy() and make it private, preventing constructions like Att.GOOD_KEY.copy(key="bad-att")
-   */
+   * - Manually declare copy() and make it private, preventing constructions like
+   * Att.GOOD_KEY.copy(key="bad-att") */
   case class Key private[Att] (
       key: String,
       keyType: KeyType,
@@ -238,9 +240,7 @@ object Att {
   private def onlyon4[T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag](): Set[Class[_]] =
     onlyon3[T1, T2, T3] ++ onlyon[T4]
 
-  /*
-   * Built-in attribute keys which can appear in user source code
-   */
+  /* Built-in attribute keys which can appear in user source code */
   final val ALIAS     = Key.builtin("alias", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val ALIAS_REC = Key.builtin("alias-rec", KeyParameter.Forbidden, onlyon2[Production, Rule])
   final val ALL_PATH  = Key.builtin("all-path", KeyParameter.Forbidden, onlyon[Claim])
@@ -343,9 +343,7 @@ object Att {
   final val UNUSED        = Key.builtin("unused", KeyParameter.Forbidden, onlyon[Production])
   final val WRAP_ELEMENT  = Key.builtin("wrapElement", KeyParameter.Required, onlyon[Production])
 
-  /*
-   * Internal attribute keys which cannot appear in user source code
-   */
+  /* Internal attribute keys which cannot appear in user source code */
   final val ANONYMOUS                    = Key("anonymous", KeyType.Internal)
   final val BRACKET_LABEL                = Key("bracketLabel", KeyType.Internal)
   final val CELL_FRAGMENT                = Key("cellFragment", KeyType.Internal)

@@ -7,7 +7,8 @@ import org.kframework.parser.kore.implementation.DefaultBuilders
 import org.kframework.utils.StringUtil
 
 /** Parsing error exception. */
-case class ParseError(msg: String) extends Exception(msg) { // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
+case class ParseError(msg: String) extends Exception(msg) {
+  // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
   def this(message: String, cause: Throwable) {
     this(message)
     initCause(cause)
@@ -42,7 +43,8 @@ class TextToKore(b: Builders = DefaultBuilders) {
 
   // Whenever a syntactic category is parsed, its parsing level (either object or meta) is
   // stored in previousParsingLevel.
-  // Recall that Identifier is the only lexicon syntactic category that decides if a syntactic category
+  // Recall that Identifier is the only lexicon syntactic category that decides if a syntactic
+  // category
   // (such as Sort or Variable) is object-level or meta-level.
   // Therefore, [[parseId]] is the only method that directly modifies previousParsingLevel.
   private var previousParsingLevel: ParsingLevel = both

@@ -53,7 +53,8 @@ class NormalizeAssoc(c: Constructors) extends ((Module, Sentence) => Sentence) {
     case Unapply.KApply(`unit`, List()) =>
       Seq()
     // case kRewrite: KRewrite =>
-    //  (flatten(kRewrite.left, op, unit) map {KRewrite(_, KApply(unit), kRewrite.att)}) :+ KRewrite(KApply(unit), kRewrite.right, kRewrite.att)
+    // (flatten(kRewrite.left, op, unit) map {KRewrite(_, KApply(unit), kRewrite.att)}) :+
+    // KRewrite(KApply(unit), kRewrite.right, kRewrite.att)
     case _ =>
       Seq(k)
   }

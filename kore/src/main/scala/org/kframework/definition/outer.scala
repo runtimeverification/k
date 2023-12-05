@@ -2,29 +2,20 @@
 
 package org.kframework.definition
 
-import collection._
-import dk.brics.automaton.BasicAutomata
 import dk.brics.automaton.RegExp
 import dk.brics.automaton.RunAutomaton
 import dk.brics.automaton.SpecialOperations
-import java.lang.Comparable
 import java.util.Optional
 import javax.annotation.Nonnull
-import org.kframework.attributes.Att
-import org.kframework.attributes.AttValue
-import org.kframework.attributes.HasLocation
-import org.kframework.attributes.Location
-import org.kframework.attributes.Source
+import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.definition.Constructors._
-import org.kframework.kore
 import org.kframework.kore._
 import org.kframework.kore.KORE.Sort
-import org.kframework.kore.Unapply.KApply
-import org.kframework.kore.Unapply.KLabel
 import org.kframework.utils.errorsystem.KEMException
 import org.kframework.POSet
 import scala.annotation.meta.param
+import scala.collection._
 import scala.collection.JavaConverters._
 import scala.collection.Set
 
@@ -827,9 +818,8 @@ case class Production(
     val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
     val suffix = items.last
     val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], this)
-    if (
-      namedNts.isEmpty
-    ) // if it doesn't contain named NTs, don't generate the extra list productions
+    if (namedNts.isEmpty)
+      // if it doesn't contain named NTs, don't generate the extra list productions
       Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add(Att.RECORD_PRD_ZERO)))
     else if (namedNts.size == 1) {
       val main = Production(klabel, params, sort, prefix :+ suffix, newAtt.add(Att.RECORD_PRD_ZERO))
