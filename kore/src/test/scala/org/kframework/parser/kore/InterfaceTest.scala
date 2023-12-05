@@ -4,7 +4,7 @@ package org.kframework.parser.kore
 
 import org.junit.Assert
 import org.junit.Test
-import org.kframework.parser.kore.implementation.{DefaultBuilders => b}
+import org.kframework.parser.kore.implementation.{ DefaultBuilders => b }
 
 class InterfaceTest {
 

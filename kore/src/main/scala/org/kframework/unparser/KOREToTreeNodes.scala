@@ -20,7 +20,7 @@ import JavaConverters._
 
 object KOREToTreeNodes {
 
-  import org.kframework.kore.KORE.{Att => _, _}
+  import org.kframework.kore.KORE.{ Att => _, _ }
 
   def wellTyped(
       args: Seq[Sort],

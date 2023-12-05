@@ -9,7 +9,7 @@ import org.kframework.kompile.KompileOptions
 import org.kframework.main.GlobalOptions
 import org.kframework.main.Tool
 import org.kframework.parser.kore._
-import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
+import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 import org.kframework.parser.kore.parser.TextToKore
 import org.kframework.utils.errorsystem.KExceptionManager
 import org.kframework.utils.file.FileUtil

@@ -3,7 +3,7 @@ package org.kframework.parser
 
 import java.util
 import java.util.Optional
-import org.kframework.{kore => k}
+import org.kframework.{ kore => k }
 import org.kframework.attributes.Att
 import org.kframework.attributes.Location
 import org.kframework.attributes.Source

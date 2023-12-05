@@ -1,7 +1,7 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
-import org.kframework.{kore => k}
+import org.kframework.{ kore => k }
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts

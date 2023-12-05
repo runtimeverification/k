@@ -3,7 +3,7 @@ package org.kframework.backend.kore
 
 import org.junit.Assert._
 import org.junit.Test
-import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
+import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 
 class NoAppendIT extends KoreTest {
 
