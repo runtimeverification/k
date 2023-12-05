@@ -23,8 +23,9 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    * Internal private method. Computes the transitive closer of the initial relations. It also
    * checks for cycles during construction and throws an exception if it finds any.
    *
-   * The implementation is simple. It links each element to the successors of its successors. TODO:
-   * there may be a more efficient algorithm (low priority)
+   * The implementation is simple. It links each element to the successors of its successors.
+   *
+   * TODO: there may be a more efficient algorithm (low priority)
    */
   @tailrec
   private def transitiveClosure(relations: Map[T, Set[T]]): Map[T, Set[T]] = {

@@ -317,8 +317,8 @@ object Iff {
 }
 
 trait Exists extends Pattern {
-  def s
-      : Sort // this is the sort of the whole exists pattern, not the sort of the binding variable v
+  // this is the sort of the whole exists pattern, not the sort of the binding variable v
+  def s: Sort
 
   def v: Variable
 

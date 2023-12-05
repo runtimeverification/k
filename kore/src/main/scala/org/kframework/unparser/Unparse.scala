@@ -2,9 +2,7 @@
 package org.kframework.unparser
 
 import java.io.PrintStream
-import org.kframework.kore.InjectedKLabel
 import org.kframework.kore.K
-import org.kframework.kore.KApply
 import org.kframework.kore.KLabel
 import org.kframework.kore.Unapply._
 import org.kframework.utils.StringUtil
@@ -52,9 +50,11 @@ object ToKast {
    * Recursive worker function for printing KAST terms. The extra arguments are needed to respect
    * precedence and the lexical syntax.
    *
-   * <ul> <li>Precedence level 0 is for the top of a term or within an argument list. <li>Precedence
-   * level 1 is for arguments of a KRewrite. <li>Precedence level 2 is for entries in a KSequence,
-   * </ul> The only case where braces may be needed is around a KSequence which is an argument of a
+   *   - Precedence level 0 is for the top of a term or within an argument list.
+   *   - Precedence level 1 is for arguments of a KRewrite.
+   *   - Precedence level 2 is for entries in a KSequence,
+   *
+   * The only case where braces may be needed is around a KSequence which is an argument of a
    * KRewrite.
    *
    * When a label that requires quotes is the first item inside a backquote bracket whitespace is
