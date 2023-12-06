@@ -61,6 +61,7 @@
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/hs-backend-booster" failonerror="true">
                   <arg value="install" />
+                  <arg value="hs-backend-booster" />
                   <arg line="${stack.extra-opts}" />
                   <arg value="--local-bin-path=${project.build.directory}/stack-install" />
                 </exec>
