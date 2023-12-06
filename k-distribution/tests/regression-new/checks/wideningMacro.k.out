@@ -1,4 +1,4 @@
-[Error] Inner Parser: Unexpected sort Int for term parsed as production syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]. Expected: Bool
+[Error] Inner Parser: Sort of variable X inferred as greatest lower bound of [Bool, Int], but no such bound exists.
 	Source(wideningMacro.k)
 	Location(8,10,8,25)
 	8 |	    rule #bar ( X ) => X
