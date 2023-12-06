@@ -2,10 +2,10 @@
 
 package org.kframework.parser
 
-import java.util
-
-import collection.JavaConverters._
 import org.kframework.Collections._
+
+import java.util
+import scala.collection.JavaConverters._
 
 
 class Ignore
@@ -89,8 +89,6 @@ abstract class ChildrenMapping[E, W] {
  * @tparam W container for warnings.
  */
 abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
-
-  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = new util.IdentityHashMap[Term, (Either[E, Term], W)]()
@@ -99,7 +97,7 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
 
   def apply(t: Term): (Either[E, Term], W) = {
     if (cache.containsKey(t)) {
-      return cache.get(t);
+      return cache.get(t)
     }
     val res =
       t match {
@@ -120,33 +118,30 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
   def apply(c: Constant): (Either[E, Term], W) = simpleResult(c)
 }
 
-trait EAsSet[E] {
+abstract class SetsGeneralTransformer[E, W]
+  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] {
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
   def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = {
-    val c = new java.util.HashSet[E](a);
-    c.addAll(b);
+    val c = new java.util.HashSet[E](a)
+    c.addAll(b)
     c
   }
 
   val errorUnit: java.util.Set[E] = new java.util.HashSet[E]()
-}
 
-trait WAsSet[W] {
   val warningUnit: java.util.Set[W] = new java.util.HashSet[W]()
+
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
   def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = {
-    val c = new java.util.HashSet[W](a);
-    c.addAll(b);
+    val c = new java.util.HashSet[W](a)
+    c.addAll(b)
     c
   }
 }
-
-abstract class SetsGeneralTransformer[E, W]
-  extends GeneralTransformer[java.util.Set[E], java.util.Set[W]] with EAsSet[E] with WAsSet[W]
 
 /**
  * Visitor pattern for the front end classes.
@@ -156,15 +151,13 @@ abstract class SetsGeneralTransformer[E, W]
 abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
   def applyTerm(t: Term): (Either[E, Term], Ignore) = (apply(t), Ignore)
-
-  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = new util.IdentityHashMap[Term, Either[E, Term]]
 
   def apply(t: Term): Either[E, Term] = {
     if (cache.containsKey(t)) {
-      return cache.get(t);
+      return cache.get(t)
     }
     val res =
       t match {
@@ -184,12 +177,23 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
   def apply(tc: TermCons): Either[E, Term] = mapChildrenStrict(tc)._1
   def apply(c: Constant): Either[E, Term] = Right(c)
 
-  override def mergeWarnings(a: Ignore, b: Ignore) = Ignore
-  override val warningUnit = Ignore
+  override def mergeWarnings(a: Ignore, b: Ignore): Ignore = Ignore
+  override val warningUnit: Ignore = Ignore
 }
 
 abstract class SetsTransformerWithErrors[E]
-  extends TransformerWithErrors[java.util.Set[E]] with EAsSet[E]
+  extends TransformerWithErrors[java.util.Set[E]] {
+  /**
+   * Merges the set of problematic (i.e., Left) results.
+   */
+  def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = {
+    val c = new java.util.HashSet[E](a)
+    c.addAll(b)
+    c
+  }
+
+  val errorUnit: java.util.Set[E] = new java.util.HashSet[E]()
+}
 
 /**
  * Visitor pattern for the front end classes.
@@ -198,15 +202,13 @@ abstract class SetsTransformerWithErrors[E]
 abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
 
   def applyTerm(t: Term): (Either[Ignore, Term], Ignore) = (Right(apply(t)), Ignore)
-
-  import collection.mutable
   // we expect this data structures to represent a DAG, so we
   // use a cache to remember nodes that we already visited.
   val cache = new util.IdentityHashMap[Term, Term]
 
   def apply(t: Term): Term = {
     if (cache.containsKey(t)) {
-      return cache.get(t);
+      return cache.get(t)
     }
     val res =
       t match {
@@ -226,8 +228,8 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
   def apply(tc: TermCons): Term = mapChildrenStrict(tc)._1.right.get
   def apply(c: Constant): Term = c
 
-  def mergeWarnings(a: Ignore, b: Ignore) = Ignore
-  val warningUnit = Ignore
-  def mergeErrors(a: Ignore, b: Ignore) = Ignore
-  val errorUnit = Ignore
+  def mergeWarnings(a: Ignore, b: Ignore): Ignore = Ignore
+  val warningUnit: Ignore = Ignore
+  def mergeErrors(a: Ignore, b: Ignore): Ignore = Ignore
+  val errorUnit: Ignore = Ignore
 }

@@ -2,6 +2,10 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+// NOTE: this definition is not up to date with the latest version of K, as it
+// uses both substitution and symbolic reasoning.
+// It is intended for documentation and academic purposes only.
+
 # FUN — Untyped — Substitution
 
 Author: Grigore Roșu (grosu@illinois.edu)  
