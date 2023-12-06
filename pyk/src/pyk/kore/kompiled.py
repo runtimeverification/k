@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-_PYK_DEFINITION_NAME: Final = 'pyk-definition.json'
+_PYK_DEFINITION_NAME: Final = 'pyk-definition.kore.json'
 
 
 @final
@@ -46,11 +46,19 @@ class KompiledKore:
         definition_dir = Path(definition_dir)
         check_dir_path(definition_dir)
 
+        kore_file = definition_dir / 'definition.kore'
+        check_file_path(kore_file)
+
         json_file = definition_dir / _PYK_DEFINITION_NAME
         if json_file.exists():
-            return KompiledKore.load_from_json(json_file)
+            kore_timestamp = kore_file.stat().st_mtime_ns
+            json_timestamp = json_file.stat().st_mtime_ns
 
-        kore_file = definition_dir / 'definition.kore'
+            if kore_timestamp < json_timestamp:
+                return KompiledKore.load_from_json(json_file)
+
+            _LOGGER.warning(f'File is out of date: {json_file}')
+
         return KompiledKore.load_from_kore(kore_file)
 
     @staticmethod
