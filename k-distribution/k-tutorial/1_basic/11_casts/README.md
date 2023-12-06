@@ -94,16 +94,18 @@ example, consider the following definition:
 module LESSON-11-C
   imports INT
 
-  syntax Exp ::= Int | Exp "+" Exp [group(exp)]
-  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [group(exp2)]
+  syntax Exp ::= Int
+               | "add[" Exp "," Exp "]"   [group(exp)]
+  syntax Exp2 ::= Exp
+               | "add[" Exp2 "," Exp2 "]" [group(exp2)]
 endmodule
 ```
 
 This grammar is a little ambiguous and contrived, but it serves to demonstrate
 how a semantic cast might be insufficient to disambiguate a term. If we were
-to write the term `(I1:Int + I2:Int):Exp2`, the term would be ambiguous,
+to write the term `add[ I1:Int , I2:Int ]:Exp2`, the term would be ambiguous,
 because the cast is not sufficiently strict to determine whether you mean
-to derive the "+" production in the group `exp` or the one in the group `exp2`.
+to derive the "add" production defined in group `exp` or the one in group `exp2`.
 
 In this situation, there is a solution: the **strict cast**. For every sort
 `S` in your grammar, K also defines the following production:
@@ -120,9 +122,39 @@ in the **type system** of K: namely, the term inside the cast cannot be a
 `syntax S ::= S2` exists.
 
 As a result, if we were to write in the above grammar the term
-`(I1:Int + I2:Int)::Exp2`, then we would know that the second derivation above
+`add[ I1:Int , I2:Int ]::Exp2`, then we would know that the second derivation above
 should be chosen, whereas if we want the first derivation, we could write
-`(I1:Int + I2:Int)::Exp`.
+`add[ I1:Int , I2:Int ]::Exp`.
+
+Care must be taken when using a strict cast with brackets. For example, consider a
+similar grammar but using an infix "+":
+
+```k
+module LESSON-11-D
+  imports INT
+
+  syntax Exp ::= Int
+               | Exp "+" Exp   [group(exp)]
+  syntax Exp2 ::= Exp
+               | Exp2 "+" Exp2 [group(exp2)]
+               | "(" Exp2 ")"  [bracket]
+endmodule
+```
+
+The term `I1:Int + I2:Int` is ambiguous and could refer to either the production
+in group `exp` or the one in group `exp2`. To differentiate, you might try to write
+`(I1:Int + I2:Int)::Exp2` similarly to the previous example.
+
+Unfortunately though, this is still ambiguous. Here, the strict cast `::Exp2` applies
+directly to the brackets themselves rather than the underlying term within those brackets.
+As a result, it enforces that `(I1:Int + I2:Int)` cannot be a strict subsort of `Exp2`, but
+it has no effect on the sort of the subterm `I1:Int + I2:Int`.
+
+For cases like this, K provides an alternative syntax for strict casts:
+```
+  syntax S ::= "{" S "}<:S"
+```
+The ambiguity can then be resolved with `{I1:Int + I2:Int}<:Exp` or `{I1:Int + I2:Int}<:Exp2`.
 
 ### Projection casts
 
@@ -162,7 +194,7 @@ inserted into the code that runs when the rule applies.
 For example, here is a module that makes use of projection casts:
 
 ```k
-module LESSON-11-D
+module LESSON-11-E
   imports INT
   imports BOOL
 
@@ -186,12 +218,12 @@ the projection cast will fail.
 
 ## Exercises
 
-1. Extend the `eval` function in `LESSON-11-D` to include Strings and add a `.`
+1. Extend the `eval` function in `LESSON-11-E` to include Strings and add a `.`
 operator which concatenates them.
 
 2. Modify your solution from Lesson 1.9, Exercise 2 by using an `Exp` sort to
 express the integer and Boolean expressions that it supports, in the same style
-as `LESSON-11-D`. Then write an `eval` function that evaluates all terms of
+as `LESSON-11-E`. Then write an `eval` function that evaluates all terms of
 sort `Exp` to either a `Bool` or an `Int`.
 
 ## Next lesson
