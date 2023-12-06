@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import sys
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
 def test_kast_to_kore(profile: Profiler, tmp_path: Path) -> None:
     kast_to_kore_dir = TEST_DATA_DIR / 'kast-to-kore'
     kast_defn_file = kast_to_kore_dir / 'compiled.json'
+    kore_defn_file = kast_to_kore_dir / 'definition.kore'
     kinner_file = kast_to_kore_dir / 'kinner.json'
 
     sys.setrecursionlimit(10**8)
@@ -27,8 +29,9 @@ def test_kast_to_kore(profile: Profiler, tmp_path: Path) -> None:
     with profile('init-kast-defn.prof', sort_keys=('cumtime',), limit=50):
         kast_defn = read_kast_definition(kast_defn_file)
 
+    shutil.copy(kore_defn_file, tmp_path)
     with profile('init-kore-defn.prof', sort_keys=('cumtime',), limit=50):
-        kore_defn = KompiledKore.load(kast_to_kore_dir)  # first time from KORE
+        kore_defn = KompiledKore.load(tmp_path)  # first time from KORE
 
     kore_defn.write(tmp_path)
     with profile('reinit-kore-defn.prof', sort_keys=('cumtime',), limit=25):
