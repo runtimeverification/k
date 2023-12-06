@@ -152,9 +152,9 @@ it has no effect on the sort of the subterm `I1:Int + I2:Int`.
 
 For cases like this, K provides an alternative syntax for strict casts:
 ```
-  syntax S ::= "{" S "}<:S"
+  syntax S ::= "{" S "}::S"
 ```
-The ambiguity can then be resolved with `{I1:Int + I2:Int}<:Exp` or `{I1:Int + I2:Int}<:Exp2`.
+The ambiguity can then be resolved with `{I1:Int + I2:Int}::Exp` or `{I1:Int + I2:Int}::Exp2`.
 
 ### Projection casts
 
