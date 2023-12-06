@@ -441,7 +441,11 @@ public class DefinitionParsing {
               ParseCache cache = loadCache(configParserModule);
               try (ParseInModule parser =
                   RuleGrammarGenerator.getCombinedGrammar(
-                      cache.module(), profileRules, files, options.debugTypeInference)) {
+                      cache.module(),
+                      profileRules,
+                      files,
+                      options.debugTypeInference,
+                      options.typeInferenceMode)) {
                 // each parser gets its own scanner because config labels can conflict with user
                 // tokens
                 parser.getScanner(globalOptions);
@@ -509,7 +513,8 @@ public class DefinitionParsing {
                           gen.getConfigGrammar(module),
                           profileRules,
                           files,
-                          options.debugTypeInference)
+                          options.debugTypeInference,
+                          options.typeInferenceMode)
                       .getExtensionModule();
               Set<Sentence> configDeclProductions =
                   stream(module.localSentences())
@@ -550,7 +555,14 @@ public class DefinitionParsing {
     ParseCache cache = loadCache(ruleParserModule);
     try (ParseInModule parser =
         RuleGrammarGenerator.getCombinedGrammar(
-            cache.module(), profileRules, false, true, files, options.debugTypeInference, false)) {
+            cache.module(),
+            profileRules,
+            false,
+            true,
+            files,
+            options.debugTypeInference,
+            options.typeInferenceMode,
+            false)) {
       Scanner scanner;
       if (deserializeScanner) {
         scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
@@ -582,7 +594,11 @@ public class DefinitionParsing {
     try (ParseInModule parser =
         needNewScanner
             ? RuleGrammarGenerator.getCombinedGrammar(
-                cache.module(), profileRules, files, options.debugTypeInference)
+                cache.module(),
+                profileRules,
+                files,
+                options.debugTypeInference,
+                options.typeInferenceMode)
             : RuleGrammarGenerator.getCombinedGrammar(
                 cache.module(),
                 scanner,
@@ -590,6 +606,7 @@ public class DefinitionParsing {
                 false,
                 files,
                 options.debugTypeInference,
+                options.typeInferenceMode,
                 false)) {
       if (needNewScanner) parser.getScanner(globalOptions);
       parser.initialize();
@@ -789,6 +806,7 @@ public class DefinitionParsing {
             true,
             files,
             options.debugTypeInference,
+            options.typeInferenceMode,
             false)) {
       parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
       java.util.Set<K> res =
