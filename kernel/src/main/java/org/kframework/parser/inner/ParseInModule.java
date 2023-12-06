@@ -15,12 +15,14 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
+import org.kframework.parser.inner.disambiguation.inference.SortInferencer;
 import org.kframework.parser.inner.kernel.EarleyParser;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
@@ -39,6 +41,7 @@ import scala.util.Right;
  */
 public class ParseInModule implements Serializable, AutoCloseable {
   private final Module seedModule;
+
   private Module extensionModule;
 
   /**
@@ -62,6 +65,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
   private final boolean forGlobalScanner;
   private final FileUtil files;
   private final String typeInferenceDebug;
+  private final KompileOptions.TypeInferenceMode typeInferenceMode;
   private final boolean partialParseDebug;
 
   ParseInModule(
@@ -71,6 +75,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
+      KompileOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     this(
         seedModule,
@@ -83,6 +88,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         forGlobalScanner,
         files,
         typeInferenceDebug,
+        typeInferenceMode,
         partialParseDebug);
   }
 
@@ -94,6 +100,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
+      KompileOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     this(
         seedModule,
@@ -106,6 +113,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         forGlobalScanner,
         files,
         typeInferenceDebug,
+        typeInferenceMode,
         partialParseDebug);
   }
 
@@ -120,6 +128,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
+      KompileOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     this.seedModule = seedModule;
     this.extensionModule = extensionModule;
@@ -131,6 +140,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
     this.forGlobalScanner = forGlobalScanner;
     this.files = files;
     this.typeInferenceDebug = typeInferenceDebug;
+    this.typeInferenceMode =
+        typeInferenceMode == KompileOptions.TypeInferenceMode.DEFAULT
+            ? KompileOptions.TypeInferenceMode.Z3
+            : typeInferenceMode;
     this.partialParseDebug = partialParseDebug;
   }
 
@@ -401,20 +414,44 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      TypeInferencer currentInferencer;
-      if (isDebug(source, startLine)) {
-        currentInferencer = new TypeInferencer(disambModule, true);
-        inferencers.add(currentInferencer);
-      } else {
-        currentInferencer = inferencer.get();
-        if (currentInferencer == null) {
-          currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
-          inferencer.set(currentInferencer);
+      KompileOptions.TypeInferenceMode infModeForTerm =
+          SortInferencer.isSupported(rez3)
+              ? typeInferenceMode
+              : KompileOptions.TypeInferenceMode.Z3;
+
+      if (infModeForTerm == KompileOptions.TypeInferenceMode.SIMPLESUB
+          || infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
+        rez = new SortInferencer(disambModule).apply(rez3, startSymbol, isAnywhere);
+      }
+      if (infModeForTerm == KompileOptions.TypeInferenceMode.Z3
+          || infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
+
+        TypeInferencer currentInferencer;
+        if (isDebug(source, startLine)) {
+          currentInferencer = new TypeInferencer(disambModule, true);
           inferencers.add(currentInferencer);
+        } else {
+          currentInferencer = inferencer.get();
+          if (currentInferencer == null) {
+            currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+            inferencer.set(currentInferencer);
+            inferencers.add(currentInferencer);
+          }
+        }
+        Either<Set<KEMException>, Term> z3Rez =
+            new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
+        if (infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
+          boolean bothLeft = rez.isLeft() && z3Rez.isLeft();
+          boolean equalRight =
+              rez.isRight() && z3Rez.isRight() && rez.right().get().equals(z3Rez.right().get());
+          if (!(bothLeft || equalRight)) {
+            throw KEMException.criticalError("Z3 and SimpleSub algorithms differ!");
+          }
+        } else {
+          rez = z3Rez;
         }
       }
 
-      rez = new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
