@@ -1,7 +1,7 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/0be07d293a1167615ef9342bb1820350f794e893";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/a5847301404583e16d55cd4d051b8e605d704fbc";
     booster-backend = {
       url = "github:runtimeverification/hs-backend-booster/52fffafcc061ab5e8aab61be1c94280685815923";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
