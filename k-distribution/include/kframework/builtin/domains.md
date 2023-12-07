@@ -2315,14 +2315,9 @@ It is not recommended to use any of them directly as they are largely
 unsupported in modern K. There are a few exceptions:
 
 * `#getenv` - Returns the value of an environment variable
-* `#parseKORE` - Takes a String containing a K intermediate representation of
-  a term such as is returned by `kast -o kore` and converts it to a term.
-  This is NOT type-safe. The responsibility is on the user to ensure that the
-  string they provide is a valid representation of a term of the sort *exactly*
-  equal to the sort where the function appears.
 * `#kompiledDirectory` - Returns the path to the current compiled K definition
   directory.
-* `#unparseKORE` = Takes a K term and converts it to a string.
+* `#unparseKORE` - Takes a K term and converts it to a string.
 
 ```k
 module K-REFLECTION
@@ -2342,8 +2337,6 @@ module K-REFLECTION
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
-  // Takes as input a string and returns a K term
-  syntax {Sort} Sort ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE)]
   syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
