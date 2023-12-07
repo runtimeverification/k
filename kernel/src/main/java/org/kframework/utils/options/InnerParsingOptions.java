@@ -34,11 +34,11 @@ public class InnerParsingOptions implements Serializable {
   }
 
   @Parameter(
-          names = "--type-inference-mode",
-          description =
-                  "Choose between the Z3-based and SimpleSub-based type inference algorithms, or run both"
-                          + " and check that their results are equal. Must be one of "
-                          + "[z3|simplesub|checked|default].",
-          hidden = true)
+      names = "--type-inference-mode",
+      description =
+          "Choose between the Z3-based and SimpleSub-based type inference algorithms, or run both"
+              + " and check that their results are equal. Must be one of "
+              + "[z3|simplesub|checked|default].",
+      hidden = true)
   public TypeInferenceMode typeInferenceMode = TypeInferenceMode.DEFAULT;
 }

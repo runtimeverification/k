@@ -15,7 +15,6 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
