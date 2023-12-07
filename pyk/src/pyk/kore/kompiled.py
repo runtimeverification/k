@@ -122,7 +122,7 @@ class KompiledKore:
             sort = SortApp('SortK')
         patterns = pattern.patterns
         sorts = self.symbol_table.pattern_sorts(pattern)
-        pattern = pattern.let_patterns(self.add_injections(p, s) for p, s in zip(patterns, sorts, strict=True))
+        pattern = pattern.let_patterns(tuple(self.add_injections(p, s) for p, s in zip(patterns, sorts, strict=True)))
         return self._inject(pattern, sort)
 
     def _inject(self, pattern: Pattern, sort: Sort) -> Pattern:
