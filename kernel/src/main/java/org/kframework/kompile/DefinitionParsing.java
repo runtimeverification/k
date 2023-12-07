@@ -445,7 +445,7 @@ public class DefinitionParsing {
                       profileRules,
                       files,
                       options.debugTypeInference,
-                      options.innerParsing.typeInferenceMode)) {
+                      innerParsingOptions.typeInferenceMode)) {
                 // each parser gets its own scanner because config labels can conflict with user
                 // tokens
                 parser.getScanner(globalOptions);
@@ -514,7 +514,7 @@ public class DefinitionParsing {
                           profileRules,
                           files,
                           options.debugTypeInference,
-                          options.innerParsing.typeInferenceMode)
+                          innerParsingOptions.typeInferenceMode)
                       .getExtensionModule();
               Set<Sentence> configDeclProductions =
                   stream(module.localSentences())
@@ -561,7 +561,7 @@ public class DefinitionParsing {
             true,
             files,
             options.debugTypeInference,
-            options.innerParsing.typeInferenceMode,
+            innerParsingOptions.typeInferenceMode,
             false)) {
       Scanner scanner;
       if (deserializeScanner) {
@@ -598,7 +598,7 @@ public class DefinitionParsing {
                 profileRules,
                 files,
                 options.debugTypeInference,
-                options.innerParsing.typeInferenceMode)
+                innerParsingOptions.typeInferenceMode)
             : RuleGrammarGenerator.getCombinedGrammar(
                 cache.module(),
                 scanner,
@@ -606,7 +606,7 @@ public class DefinitionParsing {
                 false,
                 files,
                 options.debugTypeInference,
-                options.innerParsing.typeInferenceMode,
+                innerParsingOptions.typeInferenceMode,
                 false)) {
       if (needNewScanner) parser.getScanner(globalOptions);
       parser.initialize();
@@ -806,7 +806,7 @@ public class DefinitionParsing {
             true,
             files,
             options.debugTypeInference,
-            options.innerParsing.typeInferenceMode,
+            innerParsingOptions.typeInferenceMode,
             false)) {
       parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
       java.util.Set<K> res =
