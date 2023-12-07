@@ -33,4 +33,5 @@ RUN cd /home/$USER/.tmp-haskell && stack build --only-snapshot
 ENV LC_ALL=C.UTF-8
 ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/stack.yaml                    /home/$USER/.tmp-booster/
 ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/package.yaml                  /home/$USER/.tmp-booster/
+ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/dev-tools/package.yaml        /home/$USER/.tmp-booster/dev-tools/
 RUN cd /home/$USER/.tmp-booster && stack build --only-snapshot

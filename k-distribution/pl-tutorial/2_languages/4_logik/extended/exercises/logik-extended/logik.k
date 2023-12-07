@@ -1,4 +1,8 @@
 // Copyright (c) K Team. All Rights Reserved.
+
+// NOTE: this definition is not runnable as is.
+// It is intended for documentation and academic purposes only.
+
 require "unification.k"
 
 module LOGIK-COMMON
