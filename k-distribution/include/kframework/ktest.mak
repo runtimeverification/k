@@ -53,7 +53,7 @@ ifeq ($(UNAME), Darwin)
 endif
 
 KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked
-KPROVE_FLAGS+=--no-exc-wrap
+KPROVE_FLAGS+=--no-exc-wrap --type-inference-mode checked
 KRUN_FLAGS+=--no-exc-wrap
 
 KRUN_OR_LEGACY=$(KRUN)
