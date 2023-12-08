@@ -387,7 +387,7 @@ module AUTO-CASTS
   // generates, for all sorts, productions of the form:
   // Sort  ::= Sort ":Sort"  // semantic cast - force the inner term to be `Sort` or a subsort
   // Sort  ::= Sort "::Sort" // strict cast - force the inner term to be exactly `Sort`. Useful for disambiguation
-  // Sort ::= "{" Sort "}" "<:Sort" // synonym for strict cast
+  // Sort ::= "{" Sort "}" "::Sort" // synonym for strict cast
   // Sort  ::= "{" K "}"    ":>Sort" // projection cast. Allows any term to be placed in a context that expects `Sort`
   // this is part of the mechanism that allows concrete user syntax in K
 endmodule

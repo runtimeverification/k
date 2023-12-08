@@ -443,7 +443,7 @@ public class TypeInferencer implements AutoCloseable {
       case "#SyntacticCast":
       case "#OuterCast":
         return tc.production().sort();
-      case "#InnerCast":
+      case "#SyntacticCastBraced":
         return ((NonTerminal) tc.production().items().apply(1)).sort();
       default:
         if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
@@ -628,11 +628,11 @@ public class TypeInferencer implements AutoCloseable {
             if (tc.production().klabel().isDefined()
                 && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
+                    || tc.production().klabel().get().name().equals("#SyntacticCastBraced"))) {
               expectedSort = getSortOfCast(tc);
               isStrictEquality =
                   tc.production().klabel().get().name().equals("#SyntacticCast")
-                      || tc.production().klabel().get().name().equals("#InnerCast");
+                      || tc.production().klabel().get().name().equals("#SyntacticCastBraced");
               if (tc.get(0) instanceof Constant child) {
                 if (child.production().sort().equals(Sorts.KVariable())
                     || child.production().sort().equals(Sorts.KConfigVar())) {

@@ -785,16 +785,16 @@ public record RuleGrammarGenerator(Definition baseK) {
             attrs1.add(Att.FORMAT(), "%1%2")));
     prods.add(
         Production(
+            KLabel("#SyntacticCastBraced"),
+            castSort,
+            Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("::" + castSort)),
+            attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
+    prods.add(
+        Production(
             KLabel("#SemanticCastTo" + labelSort.toString()),
             labelSort,
             Seq(NonTerminal(labelSort), Terminal(":" + castSort)),
             attrs1.add(Att.FORMAT(), "%1%2")));
-    prods.add(
-        Production(
-            KLabel("#InnerCast"),
-            castSort,
-            Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort)),
-            attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
     prods.add(
         Production(
             KLabel("#OuterCast"),
