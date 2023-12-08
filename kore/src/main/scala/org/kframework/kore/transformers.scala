@@ -8,13 +8,13 @@ import JavaConverters._
 trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
   def apply(k: K): T = k match {
-    case k: KApply => apply(k: KApply)
-    case k: KRewrite => apply(k)
-    case k: KToken => apply(k)
-    case k: KVariable => apply(k)
-    case k: KSequence => apply(k: KSequence)
+    case k: KApply         => apply(k: KApply)
+    case k: KRewrite       => apply(k)
+    case k: KToken         => apply(k)
+    case k: KVariable      => apply(k)
+    case k: KSequence      => apply(k: KSequence)
     case k: InjectedKLabel => apply(k)
-    case k: KAs => apply(k)
+    case k: KAs            => apply(k)
   }
 
   def apply(k: KApply): T
@@ -33,8 +33,9 @@ trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] 
 }
 
 /**
-  * Folds a K term into a T. T must be a monoid with the identity defined by unit and the operation by merge.
-  */
+ * Folds a K term into a T. T must be a monoid with the identity defined by unit and the operation
+ * by merge.
+ */
 abstract class FoldK[T] extends KTransformer[T] {
 
   def apply(k: KApply): T = merge(
@@ -56,7 +57,7 @@ abstract class FoldK[T] extends KTransformer[T] {
 
   def apply(k: InjectedKLabel): T = k match {
     case v: KVariable => apply(v.asInstanceOf[KVariable])
-    case _ => unit
+    case _            => unit
   }
 
   def unit: T
@@ -64,9 +65,7 @@ abstract class FoldK[T] extends KTransformer[T] {
   def merge(a: T, b: T): T
 }
 
-trait FoldKSetTransformer[E] extends FoldK[Set[E]] {
-
-}
+trait FoldKSetTransformer[E] extends FoldK[Set[E]] {}
 
 class KVisitor extends java.util.function.Consumer[K] {
 
@@ -74,22 +73,22 @@ class KVisitor extends java.util.function.Consumer[K] {
 
   def apply(k: K) {
     k match {
-      case k: KApply => apply(k: KApply)
-      case k: KRewrite => apply(k)
-      case k: KToken => apply(k)
-      case k: KVariable => apply(k)
-      case k: KSequence => apply(k: KSequence)
+      case k: KApply         => apply(k: KApply)
+      case k: KRewrite       => apply(k)
+      case k: KToken         => apply(k)
+      case k: KVariable      => apply(k)
+      case k: KSequence      => apply(k: KSequence)
       case k: InjectedKLabel => apply(k)
-      case k: KAs => apply(k)
+      case k: KAs            => apply(k)
     }
   }
 
   def apply(k: KApply): Unit = {
     k.klabel match {
       case k: InjectedKLabel => apply(k)
-      case _ =>
+      case _                 =>
     }
-    k.items forEach apply
+    k.items.forEach(apply)
   }
 
   def apply(k: KRewrite): Unit = {
@@ -106,13 +105,12 @@ class KVisitor extends java.util.function.Consumer[K] {
 
   def apply(k: KVariable): Unit = {}
 
-  def apply(k: KSequence): Unit = {
-    k.items forEach apply
-  }
+  def apply(k: KSequence): Unit =
+    k.items.forEach(apply)
 
   def apply(k: InjectedKLabel): Unit = k match {
     case v: KVariable => apply(v.asInstanceOf[KVariable])
-    case _ =>
+    case _            =>
   }
 }
 
