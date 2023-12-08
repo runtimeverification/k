@@ -33,12 +33,12 @@ import org.kframework.definition.SortSynonym;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.UidProvider;
 import org.kframework.definition.UserList;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.InnerParsingOptions;
 import scala.Option;
 import scala.Tuple3;
 import scala.collection.Seq;
@@ -203,7 +203,14 @@ public record RuleGrammarGenerator(Definition baseK) {
   /* use this overload if you don't need to profile rule parse times. */
   public static ParseInModule getCombinedGrammar(Module mod, FileUtil files) {
     return getCombinedGrammar(
-        mod, false, false, false, files, null, KompileOptions.TypeInferenceMode.DEFAULT, false);
+        mod,
+        false,
+        false,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -215,13 +222,20 @@ public record RuleGrammarGenerator(Definition baseK) {
         false,
         files,
         null,
-        KompileOptions.TypeInferenceMode.DEFAULT,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
         partialParseDebug);
   }
 
   public static ParseInModule getCombinedGrammar(Module mod, boolean timing, FileUtil files) {
     return getCombinedGrammar(
-        mod, timing, false, false, files, null, KompileOptions.TypeInferenceMode.DEFAULT, false);
+        mod,
+        timing,
+        false,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -229,7 +243,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean timing,
       FileUtil files,
       String debugTypeInference,
-      KompileOptions.TypeInferenceMode typeInferenceMode) {
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode) {
     return getCombinedGrammar(
         mod, timing, false, false, files, debugTypeInference, typeInferenceMode, false);
   }
@@ -237,7 +251,14 @@ public record RuleGrammarGenerator(Definition baseK) {
   public static ParseInModule getCombinedGrammar(
       Module mod, boolean timing, boolean isBison, FileUtil files) {
     return getCombinedGrammar(
-        mod, timing, isBison, false, files, null, KompileOptions.TypeInferenceMode.DEFAULT, false);
+        mod,
+        timing,
+        isBison,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
   }
 
   public static ParseInModule getCombinedGrammar(
@@ -249,7 +270,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         forGlobalScanner,
         files,
         null,
-        KompileOptions.TypeInferenceMode.DEFAULT,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
         false);
   }
 
@@ -262,7 +283,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         isBison,
         files,
         null,
-        KompileOptions.TypeInferenceMode.DEFAULT,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
         false);
   }
 
@@ -291,7 +312,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean forGlobalScanner,
       FileUtil files,
       String debugTypeInference,
-      KompileOptions.TypeInferenceMode typeInferenceMode,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     return new ParseInModule(
         mod,
@@ -311,7 +332,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       boolean isBison,
       FileUtil files,
       String debugTypeInference,
-      KompileOptions.TypeInferenceMode typeInferenceMode,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     return new ParseInModule(
         mod,
