@@ -32,6 +32,7 @@ kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11
 kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-B --syntax-module LESSON-11-B --output-definition build/11b
 kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-C --syntax-module LESSON-11-C --output-definition build/11c
 kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-D --syntax-module LESSON-11-D --output-definition build/11d
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-E --syntax-module LESSON-11-E --output-definition build/11e
 kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-A --output-definition build/12a
 kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-B --output-definition build/12b
 kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-C --syntax-module LESSON-12-C --output-definition build/12c

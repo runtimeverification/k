@@ -74,8 +74,13 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.12.18</scala.version>
     <project.build.type>FastBuild</project.build.type>
+    <scala.majorVersion>2.12</scala.majorVersion>
+    <scala.minorVersion>18</scala.minorVersion>
+    <scala.version>${scala.majorVersion}.${scala.minorVersion}</scala.version>
+    <spotless.version>2.41.1</spotless.version>
+    <googleJavaFormat.version>1.18.1</googleJavaFormat.version>
+    <scalafmt.version>3.7.17</scalafmt.version>
   </properties>
 
   <dependencies>
@@ -85,9 +90,9 @@
       <version>${scala.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-reflect</artifactId>
-        <version>${scala.version}</version>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -100,6 +105,21 @@
       <artifactId>mockito-core</artifactId>
       <version>2.23.4</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.diffplug.spotless</groupId>
+      <artifactId>spotless-maven-plugin</artifactId>
+      <version>${spotless.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>${googleJavaFormat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalameta</groupId>
+      <artifactId>scalafmt-core_${scala.majorVersion}</artifactId>
+      <version>${scalafmt.version}</version>
     </dependency>
   </dependencies>
 
@@ -203,7 +223,7 @@
               <sourceDirectories>
                 <sourceDirectory>${project.basedir}</sourceDirectory>
               </sourceDirectories>
-	      <includes>**/*.xml,**/*.xsd,**/*.md,**/*.k,**/*.kore,**/*.java,**/*.scala,**/*.jj,**/*.jjt,**/*.str,**/*.css,**/*.sty,**/*.tex,**/*.cls</includes>
+              <includes>**/*.xml,**/*.xsd,**/*.md,**/*.k,**/*.kore,**/*.java,**/*.scala,**/*.jj,**/*.jjt,**/*.str,**/*.css,**/*.sty,**/*.tex,**/*.cls</includes>
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
@@ -276,16 +296,37 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>com.spotify.fmt</groupId>
-        <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.21.1</version>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <inherited>false</inherited>
         <executions>
           <execution>
             <goals>
-              <goal>format</goal>
+              <goal>apply</goal>
             </goals>
+            <phase>process-sources</phase>
           </execution>
         </executions>
+        <configuration>
+          <java>
+            <includes>**/*.java</includes>
+            <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**</excludes>
+            <googleJavaFormat>
+              <version>${googleJavaFormat.version}</version>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+          </java>
+          <scala>
+            <includes>**/*.scala,**/*.sbt</includes>
+            <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**</excludes>
+            <scalafmt>
+              <version>${scalafmt.version}</version>
+              <file>src/main/config/.scalafmt.conf</file>
+              <scalaMajorVersion>${scala.majorVersion}</scalaMajorVersion>
+            </scalafmt>
+          </scala>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -244,22 +244,4 @@ public class KompileOptions implements Serializable {
       description = "Enable generation of legacy antileft priority predicates.",
       hidden = true)
   public boolean enableKoreAntileft;
-
-  public enum TypeInferenceMode {
-    Z3,
-    SIMPLESUB,
-    CHECKED,
-    // We use an explicit DEFAULT option here so that ParseInModule can set a default which
-    // applies even for those codepaths that don't rely on KompileOptions
-    DEFAULT,
-  }
-
-  @Parameter(
-      names = "--type-inference-mode",
-      description =
-          "Choose between the Z3-based and SimpleSub-based type inference algorithms, or run both"
-              + " and check that their results are equal. Must be one of "
-              + "[z3|simplesub|checked|default].",
-      hidden = true)
-  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.DEFAULT;
 }

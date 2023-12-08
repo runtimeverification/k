@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 
-resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += "Sonatype snapshots".at("https://oss.sonatype.org/content/repositories/snapshots/")
 
 addSbtPlugin("com.github.shivawu" %% "sbt-maven-plugin" % "0.1.3-SNAPSHOT")
 

@@ -15,7 +15,6 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
@@ -29,6 +28,7 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.InnerParsingOptions;
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.util.Either;
@@ -65,7 +65,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
   private final boolean forGlobalScanner;
   private final FileUtil files;
   private final String typeInferenceDebug;
-  private final KompileOptions.TypeInferenceMode typeInferenceMode;
+  private final InnerParsingOptions.TypeInferenceMode typeInferenceMode;
   private final boolean partialParseDebug;
 
   ParseInModule(
@@ -75,7 +75,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
-      KompileOptions.TypeInferenceMode typeInferenceMode,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     this(
         seedModule,
@@ -100,7 +100,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
-      KompileOptions.TypeInferenceMode typeInferenceMode,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     this(
         seedModule,
@@ -128,7 +128,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       boolean forGlobalScanner,
       FileUtil files,
       String typeInferenceDebug,
-      KompileOptions.TypeInferenceMode typeInferenceMode,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     this.seedModule = seedModule;
     this.extensionModule = extensionModule;
@@ -141,8 +141,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
     this.files = files;
     this.typeInferenceDebug = typeInferenceDebug;
     this.typeInferenceMode =
-        typeInferenceMode == KompileOptions.TypeInferenceMode.DEFAULT
-            ? KompileOptions.TypeInferenceMode.Z3
+        typeInferenceMode == InnerParsingOptions.TypeInferenceMode.DEFAULT
+            ? InnerParsingOptions.TypeInferenceMode.Z3
             : typeInferenceMode;
     this.partialParseDebug = partialParseDebug;
   }
@@ -414,17 +414,17 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez3 = new PushTopAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-      KompileOptions.TypeInferenceMode infModeForTerm =
+      InnerParsingOptions.TypeInferenceMode infModeForTerm =
           SortInferencer.isSupported(rez3)
               ? typeInferenceMode
-              : KompileOptions.TypeInferenceMode.Z3;
+              : InnerParsingOptions.TypeInferenceMode.Z3;
 
-      if (infModeForTerm == KompileOptions.TypeInferenceMode.SIMPLESUB
-          || infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
+      if (infModeForTerm == InnerParsingOptions.TypeInferenceMode.SIMPLESUB
+          || infModeForTerm == InnerParsingOptions.TypeInferenceMode.CHECKED) {
         rez = new SortInferencer(disambModule).apply(rez3, startSymbol, isAnywhere);
       }
-      if (infModeForTerm == KompileOptions.TypeInferenceMode.Z3
-          || infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
+      if (infModeForTerm == InnerParsingOptions.TypeInferenceMode.Z3
+          || infModeForTerm == InnerParsingOptions.TypeInferenceMode.CHECKED) {
 
         TypeInferencer currentInferencer;
         if (isDebug(source, startLine)) {
@@ -440,7 +440,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
         Either<Set<KEMException>, Term> z3Rez =
             new TypeInferenceVisitor(currentInferencer, startSymbol, isAnywhere).apply(rez3);
-        if (infModeForTerm == KompileOptions.TypeInferenceMode.CHECKED) {
+        if (infModeForTerm == InnerParsingOptions.TypeInferenceMode.CHECKED) {
           boolean bothLeft = rez.isLeft() && z3Rez.isLeft();
           boolean equalRight =
               rez.isRight() && z3Rez.isRight() && rez.right().get().equals(z3Rez.right().get());
