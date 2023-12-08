@@ -2,7 +2,8 @@
 
 package org.kframework.definition
 
-import org.junit.{Assert, Test}
+import org.junit.Assert
+import org.junit.Test
 
 trait Foo {
   def accept(x: DoubleDispatchVisitor)
@@ -30,8 +31,4 @@ class FooDoubleDispatchVisitor extends DoubleDispatchVisitor {
   def visitBuz(x: Buz.type) {}
 }
 
-
-
-class VisitorTest {
-
-}
+class VisitorTest {}

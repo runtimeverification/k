@@ -2,17 +2,19 @@
 
 package org.kframework.definition
 
-import org.junit.{Assert, Test}
+import org.junit.Assert
+import org.junit.Test
 import org.kframework.attributes.Att
 import org.kframework.kore.ADT.KToken
-import org.kframework.kore.KORE.Sort
 import org.kframework.kore.KORE.KLabel
+import org.kframework.kore.KORE.Sort
 
 class OuterTest {
   @Test def isPrefixTest(): Unit = {
     val sort = Sort("foo")
-    val nt = NonTerminal(sort, None)
-    val prod1 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(")")), Att.empty)
+    val nt   = NonTerminal(sort, None)
+    val prod1 =
+      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(")")), Att.empty)
     Assert.assertTrue(prod1.isPrefixProduction)
     val prod2 = Production(Seq(), sort, Seq(Terminal("foo")), Att.empty)
     Assert.assertFalse(prod2.isPrefixProduction)
@@ -20,89 +22,187 @@ class OuterTest {
     Assert.assertFalse(prod3.isPrefixProduction)
     val prod4 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt), Att.empty)
     Assert.assertFalse(prod4.isPrefixProduction)
-    val prod5 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(",")), Att.empty)
+    val prod5 =
+      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(",")), Att.empty)
     Assert.assertFalse(prod5.isPrefixProduction)
-    val prod6 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), nt), Att.empty)
+    val prod6 =
+      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), nt), Att.empty)
     Assert.assertFalse(prod6.isPrefixProduction)
-    val prod7 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), Terminal(")")), Att.empty)
+    val prod7 = Production(
+      Seq(),
+      sort,
+      Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), Terminal(")")),
+      Att.empty
+    )
     Assert.assertFalse(prod7.isPrefixProduction)
-    val prod8 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), Terminal(")")), Att.empty)
+    val prod8 =
+      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), Terminal(")")), Att.empty)
     Assert.assertTrue(prod8.isPrefixProduction)
     val prod9 = Production(Seq(), sort, Seq(Terminal("("), Terminal(")")), Att.empty)
     Assert.assertTrue(prod9.isPrefixProduction)
-    val prod10 = Production(Seq(), sort, Seq(Terminal("("), nt, Terminal(","), nt, Terminal(")")), Att.empty)
+    val prod10 =
+      Production(Seq(), sort, Seq(Terminal("("), nt, Terminal(","), nt, Terminal(")")), Att.empty)
     Assert.assertTrue(prod10.isPrefixProduction)
   }
 
   @Test def recordProductions1(): Unit = {
-    val uid = UidProvider("")
+    val uid   = UidProvider("")
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
-    val nt1 = NonTerminal(sort1, Some("bar"))
-    val nt2 = NonTerminal(sort2, Some("baz"))
-    val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att.empty)
-    val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
+    val nt1   = NonTerminal(sort1, Some("bar"))
+    val nt2   = NonTerminal(sort2, Some("baz"))
+    val prod = Production(
+      Seq(),
+      sort1,
+      Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
+      Att.empty
+    )
+    val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
     val records = prod.recordProductions(uid)
     Assert.assertEquals(7, records.size)
-    Assert.assertEquals(Set(
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), NonTerminal(Sort("foo-+1"), None), Terminal(")")), newAtt), // main
-      Production(Seq(), Sort("foo-+1"), Seq(Terminal("")), newAtt), // empty
-      Production(Seq(), Sort("foo-+1"), Seq(NonTerminal(Sort("foo-+1Ne"), None)), newAtt), // subsort
-      Production(Seq(), Sort("foo-+1Ne"), Seq(NonTerminal(Sort("foo-+1Ne"), None), Terminal(","), NonTerminal(Sort("foo-+1Item"), None)), newAtt), // repeat
-      Production(Seq(), Sort("foo-+1Ne"), Seq(NonTerminal(Sort("foo-+1Item"), None)), newAtt), // subsort2
-      Production(Seq(), Sort("foo-+1Item"), Seq(Terminal("bar"), Terminal(":"), NonTerminal(sort1, None)), newAtt), // item
-      Production(Seq(), Sort("foo-+1Item"), Seq(Terminal("baz"), Terminal(":"), NonTerminal(sort2, None)), newAtt), // item
-    ), records)
+    Assert.assertEquals(
+      Set(
+        Production(
+          Seq(),
+          sort1,
+          Seq(
+            Terminal("foo"),
+            Terminal("("),
+            Terminal("..."),
+            NonTerminal(Sort("foo-+1"), None),
+            Terminal(")")
+          ),
+          newAtt
+        ),                                                            // main
+        Production(Seq(), Sort("foo-+1"), Seq(Terminal("")), newAtt), // empty
+        Production(
+          Seq(),
+          Sort("foo-+1"),
+          Seq(NonTerminal(Sort("foo-+1Ne"), None)),
+          newAtt
+        ), // subsort
+        Production(
+          Seq(),
+          Sort("foo-+1Ne"),
+          Seq(
+            NonTerminal(Sort("foo-+1Ne"), None),
+            Terminal(","),
+            NonTerminal(Sort("foo-+1Item"), None)
+          ),
+          newAtt
+        ), // repeat
+        Production(
+          Seq(),
+          Sort("foo-+1Ne"),
+          Seq(NonTerminal(Sort("foo-+1Item"), None)),
+          newAtt
+        ), // subsort2
+        Production(
+          Seq(),
+          Sort("foo-+1Item"),
+          Seq(Terminal("bar"), Terminal(":"), NonTerminal(sort1, None)),
+          newAtt
+        ), // item
+        Production(
+          Seq(),
+          Sort("foo-+1Item"),
+          Seq(Terminal("baz"), Terminal(":"), NonTerminal(sort2, None)),
+          newAtt
+        ) // item
+      ),
+      records
+    )
   }
 
   @Test def recordProductions2(): Unit = {
-    val uid = UidProvider("")
+    val uid   = UidProvider("")
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
-    val nt1 = NonTerminal(sort1, None)
-    val nt2 = NonTerminal(sort2, Some("baz"))
-    val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att.empty)
-    val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
+    val nt1   = NonTerminal(sort1, None)
+    val nt2   = NonTerminal(sort2, Some("baz"))
+    val prod = Production(
+      Seq(),
+      sort1,
+      Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
+      Att.empty
+    )
+    val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
     val records = prod.recordProductions(uid)
     Assert.assertEquals(2, records.size)
-    Assert.assertEquals(Set(
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")), newAtt),
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("baz"), Terminal(":"), nt2, Terminal(")")), newAtt),
-    ), records)
+    Assert.assertEquals(
+      Set(
+        Production(
+          Seq(),
+          sort1,
+          Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")),
+          newAtt
+        ),
+        Production(
+          Seq(),
+          sort1,
+          Seq(
+            Terminal("foo"),
+            Terminal("("),
+            Terminal("..."),
+            Terminal("baz"),
+            Terminal(":"),
+            nt2,
+            Terminal(")")
+          ),
+          newAtt
+        )
+      ),
+      records
+    )
   }
 
   @Test def recordProductions3(): Unit = {
-    val uid = UidProvider("")
+    val uid   = UidProvider("")
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
-    val nt1 = NonTerminal(sort1, None)
-    val nt2 = NonTerminal(sort2, None)
-    val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att.empty)
-    val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
+    val nt1   = NonTerminal(sort1, None)
+    val nt2   = NonTerminal(sort2, None)
+    val prod = Production(
+      Seq(),
+      sort1,
+      Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
+      Att.empty
+    )
+    val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
     val records = prod.recordProductions(uid)
     Assert.assertEquals(1, records.size)
-    Assert.assertEquals(Set(
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")), newAtt)
-    ), records)
+    Assert.assertEquals(
+      Set(
+        Production(
+          Seq(),
+          sort1,
+          Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")),
+          newAtt
+        )
+      ),
+      records
+    )
   }
 
   @Test def klabelAttEquality(): Unit = {
-    val prod1 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "foo"))
-    val prod2 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "bar"))
+    val prod1 =
+      Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "foo"))
+    val prod2 =
+      Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "bar"))
     Assert.assertNotEquals(prod1, prod2)
   }
 
   // Create multiple versions of this sentence with attributes added
   def toSentenceAttList(sentence: Sentence): List[Sentence] = {
-    val att1 = Att.empty.add(Att.ASSOC).add(Att.BAG)
-    val att2 = Att.empty.add(Att.ASSOC).add(Att.CELL)
-    val att3 = Att.empty.add(Att.BAG).add(Att.CELL)
-    val att4 = Att.empty.add(Att.BAG).add(Att.HOOK, "A")
-    val att5 = Att.empty.add(Att.BAG).add(Att.HOOK, "B")
-    val att6 = Att.empty.add(Att.BAG).add(Att.LABEL, "A")
-    val att7 = Att.empty.add(Att.BAG).add(Att.LABEL, "B")
-    val att8 = Att.empty.add(Att.HOOK, "A").add(Att.LABEL, "B")
-    val att9 = Att.empty.add(Att.HOOK, "B").add(Att.LABEL, "A")
+    val att1             = Att.empty.add(Att.ASSOC).add(Att.BAG)
+    val att2             = Att.empty.add(Att.ASSOC).add(Att.CELL)
+    val att3             = Att.empty.add(Att.BAG).add(Att.CELL)
+    val att4             = Att.empty.add(Att.BAG).add(Att.HOOK, "A")
+    val att5             = Att.empty.add(Att.BAG).add(Att.HOOK, "B")
+    val att6             = Att.empty.add(Att.BAG).add(Att.LABEL, "A")
+    val att7             = Att.empty.add(Att.BAG).add(Att.LABEL, "B")
+    val att8             = Att.empty.add(Att.HOOK, "A").add(Att.LABEL, "B")
+    val att9             = Att.empty.add(Att.HOOK, "B").add(Att.LABEL, "A")
     val sentenceWithAtt1 = sentence.withAtt(att1)
     val sentenceWithAtt2 = sentence.withAtt(att2)
     val sentenceWithAtt3 = sentence.withAtt(att3)
@@ -113,15 +213,17 @@ class OuterTest {
     val sentenceWithAtt8 = sentence.withAtt(att8)
     val sentenceWithAtt9 = sentence.withAtt(att9)
 
-    List(sentenceWithAtt1,
-         sentenceWithAtt2,
-         sentenceWithAtt3,
-         sentenceWithAtt4,
-         sentenceWithAtt5,
-         sentenceWithAtt6,
-         sentenceWithAtt7,
-         sentenceWithAtt8,
-         sentenceWithAtt9)
+    List(
+      sentenceWithAtt1,
+      sentenceWithAtt2,
+      sentenceWithAtt3,
+      sentenceWithAtt4,
+      sentenceWithAtt5,
+      sentenceWithAtt6,
+      sentenceWithAtt7,
+      sentenceWithAtt8,
+      sentenceWithAtt9
+    )
   }
 
   // Asserts that S1 < S2 < ... < Sn
@@ -234,7 +336,8 @@ class OuterTest {
       claim2,
       claim3,
       claim4,
-      claim5)
+      claim5
+    )
 
     val sentenceListWithAtts = sentenceList.flatMap(toSentenceAttList(_))
 

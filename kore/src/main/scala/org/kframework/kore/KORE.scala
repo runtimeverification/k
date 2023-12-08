@@ -1,22 +1,20 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kore
 
-import org.kframework.{CombinerFromBuilder, Collector, attributes}
-import org.kframework.attributes.Att
-
-import scala.collection.mutable.ListBuffer
-import collection.JavaConverters._
 import collection._
+import collection.JavaConverters._
+import org.kframework.attributes
+import org.kframework.attributes.Att
+import org.kframework.Collector
+import org.kframework.CombinerFromBuilder
+import scala.collection.mutable.ListBuffer
 
 /**
- *
- * Basic implementation of a Constructor of inner KORE classes.
- * It can be used by either creating a KORE object, or by importing
- * the class statically.
+ * Basic implementation of a Constructor of inner KORE classes. It can be used by either creating a
+ * KORE object, or by importing the class statically.
  *
  * See the wiki for more details:
  * https://github.com/runtimeverification/k/wiki/KORE-data-structures-guide
- *
  */
 object KORE extends Constructors with ScalaSugared {
   val c = KORE
@@ -25,8 +23,8 @@ object KORE extends Constructors with ScalaSugared {
 
   lazy val Att = attributes.Att.empty
 
-  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = attributes.Location(startLine,
-    startColumn, endLine, endColumn)
+  def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) =
+    attributes.Location(startLine, startColumn, endLine, endColumn)
 
   def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Att)
 
@@ -46,23 +44,26 @@ object KORE extends Constructors with ScalaSugared {
   //  def toKSequence: Collector[K, KSequence] =
   //    Collector(() => new CombinerFromBuilder(KSequence.newBuilder()))
 
-  @annotation.varargs override def KLabel(name: String, params: Sort*): KLabel = ADT.KLabel(name, params:_*)
+  @annotation.varargs
+  override def KLabel(name: String, params: Sort*): KLabel = ADT.KLabel(name, params: _*)
 
-  override def KApply(klabel: KLabel, klist: KList, att: Att): KApply = ADT.KApply(klabel, klist, att)
+  override def KApply(klabel: KLabel, klist: KList, att: Att): KApply =
+    ADT.KApply(klabel, klist, att)
 
-  override def KSequence(items: java.util.List[K], att: Att): KSequence = ADT.KSequence(items.asScala
-    .toList, att)
+  override def KSequence(items: java.util.List[K], att: Att): KSequence =
+    ADT.KSequence(items.asScala.toList, att)
 
   override def KVariable(name: String, att: Att): KVariable = ADT.KVariable(name, att)
 
-  @annotation.varargs override def Sort(name: String, params: Sort*): Sort = ADT.Sort(name, params:_*)
+  @annotation.varargs
+  override def Sort(name: String, params: Sort*): Sort = ADT.Sort(name, params: _*)
 
   def Sort(name: SortHead): Sort = {
     assert(name.params == 0)
     ADT.Sort(name.name)
   }
 
-  def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala:_*)
+  def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala: _*)
 
   def SortHead(name: String, params: Int): SortHead = ADT.SortHead(name, params)
 
@@ -76,9 +77,11 @@ object KORE extends Constructors with ScalaSugared {
 
   def KList(items: List[K]): KList = ADT.KList(items)
 
-  override def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel = ADT.InjectedKLabel(klabel, att)
+  override def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel =
+    ADT.InjectedKLabel(klabel, att)
 
   def self = this
 
-  @annotation.varargs override def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), Att)
+  @annotation.varargs
+  override def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), Att)
 }
