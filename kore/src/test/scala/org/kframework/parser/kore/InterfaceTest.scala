@@ -2,8 +2,9 @@
 
 package org.kframework.parser.kore
 
-import org.junit.{Assert, Test}
-import org.kframework.parser.kore.implementation.{DefaultBuilders => b}
+import org.junit.Assert
+import org.junit.Test
+import org.kframework.parser.kore.implementation.{ DefaultBuilders => b }
 
 class InterfaceTest {
 
@@ -171,4 +172,3 @@ class InterfaceTest {
     }
   }
 }
-

@@ -40,6 +40,7 @@ call/cc.
 
 ## Resources
 
+- K Approach and Vision (2020): [slide presentation](https://drive.google.com/file/d/1iXda2NyGzKVWxkd02IlXj5Tq5cOM_gNd/view)
 - A set of <a href="/k-distribution/pl-tutorial/README.md">reference implementations and tutorials</a> for common programming language features and paradigms is available, although parts of these implementations may not be fully up to date with modern K features.
 - Read some papers about K on the [Formal Systems Laboratory (FSL)](https://fsl.cs.illinois.edu/publications/).
 - [Matching logic](http://matching-logic.org/) webpage at UIUC (USA).

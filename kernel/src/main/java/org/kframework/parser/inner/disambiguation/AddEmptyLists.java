@@ -112,7 +112,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
       // Never add a list wrapper between a sort annotation and the annotated term
       if (tcLabelName.equals("#SyntacticCast")
           || tcLabelName.startsWith("#SemanticCastTo")
-          || tcLabelName.equals("#InnerCast")) {
+          || tcLabelName.equals("#SyntacticCastBraced")) {
         return superApply(tc);
       }
     }
