@@ -117,7 +117,7 @@ Haskell Backend which performs **symbolic execution**.
 ### Exercise
 
 Pass a program containing no functions to `krun`. You can use a term of sort
-`Exp` from `LESSON-11-D`. Observe the output and try to understand why you get
+`Exp` from `LESSON-11-E`. Observe the output and try to understand why you get
 the output you do. Then write two rules that rewrite that program to another.
 Run `krun --search` on that program and observe both results. Then add a third
 rule that rewrites one of those results again. Test that that rule applies as

@@ -112,7 +112,7 @@ public class SortInferencer {
     if (pr.production().klabel().isDefined()) {
       KLabel klabel = pr.production().klabel().get();
       String label = klabel.name();
-      if (label.equals("#SyntacticCast") || label.equals("#InnerCast")) {
+      if (label.equals("#SyntacticCast") || label.equals("#SyntacticCastBraced")) {
         return true;
       }
     }
