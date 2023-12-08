@@ -250,7 +250,7 @@ class SortApp(Sort):
     @classmethod
     def from_dict(cls: type[SortApp], dct: Mapping[str, Any]) -> SortApp:
         cls._check_tag(dct)
-        return SortApp(name=dct['name'], sorts=(Sort.from_dict(arg) for arg in dct['args']))
+        return SortApp(name=dct['name'], sorts=tuple(Sort.from_dict(arg) for arg in dct['args']))
 
     @property
     def dict(self) -> dict[str, Any]:
@@ -449,8 +449,8 @@ class App(Pattern):
         cls._check_tag(dct)
         return App(
             symbol=dct['name'],
-            sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
-            args=(Pattern.from_dict(arg) for arg in dct['args']),
+            sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
+            args=tuple(Pattern.from_dict(arg) for arg in dct['args']),
         )
 
     @property
@@ -847,9 +847,10 @@ class And(MultiaryConn):
     @classmethod
     def from_dict(cls: type[And], dct: Mapping[str, Any]) -> And:
         cls._check_tag(dct)
-        sort = Sort.from_dict(dct['sort'])
-        ops = [Pattern.from_dict(op) for op in dct['patterns']]
-        return And(sort=sort, ops=ops)
+        return And(
+            sort=Sort.from_dict(dct['sort']),
+            ops=tuple(Pattern.from_dict(op) for op in dct['patterns']),
+        )
 
 
 @final
@@ -895,9 +896,10 @@ class Or(MultiaryConn):
     @classmethod
     def from_dict(cls: type[Or], dct: Mapping[str, Any]) -> Or:
         cls._check_tag(dct)
-        sort = Sort.from_dict(dct['sort'])
-        ops = [Pattern.from_dict(op) for op in dct['patterns']]
-        return Or(sort=sort, ops=ops)
+        return Or(
+            sort=Sort.from_dict(dct['sort']),
+            ops=tuple(Pattern.from_dict(op) for op in dct['patterns']),
+        )
 
 
 class MLQuant(MLPattern, WithSort):
