@@ -1,8 +1,8 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kore
 
-import org.kframework.kore
 import collection.JavaConverters._
+import org.kframework.kore
 
 /**
  * Scala deconstructors for inner KORE objects.
