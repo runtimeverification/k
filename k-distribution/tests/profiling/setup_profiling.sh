@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-export BENCHER_VERSION="0.3.15"
+export BENCHER_VERSION="0.3.23"
 apt-get update
 apt-get upgrade --yes
 apt-get install --yes python3 python3-pip git curl make time sudo wget
