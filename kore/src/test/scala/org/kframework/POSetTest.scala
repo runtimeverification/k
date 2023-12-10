@@ -1,10 +1,9 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework
 
-import org.kframework.utils.errorsystem.KEMException
-
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
+import org.kframework.utils.errorsystem.KEMException
 
 class POSetTest {
   case class Bar(x: Int)

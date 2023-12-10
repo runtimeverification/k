@@ -260,7 +260,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
               castContext = CastContext.SEMANTIC;
             } else if (substituted.klabel().isDefined()
                 && (substituted.klabel().get().name().equals("#SyntacticCast")
-                    || substituted.klabel().get().name().equals("#InnerCast"))) {
+                    || substituted.klabel().get().name().equals("#SyntacticCastBraced"))) {
               castContext = CastContext.STRICT;
             } else {
               castContext = CastContext.NONE;
