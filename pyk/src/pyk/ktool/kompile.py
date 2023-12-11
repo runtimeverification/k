@@ -30,12 +30,20 @@ class KompileNotFoundError(RuntimeError):
         super().__init__(f'Kompile command not found: {str}')
 
 
+class TypeInferenceMode(Enum):
+    Z3 = 'z3'
+    SIMPLESUB = 'simplesub'
+    CHECKED = 'checked'
+    DEFAULT = 'default'
+
+
 def kompile(
     main_file: str | Path,
     *,
     command: Iterable[str] = ('kompile',),
     output_dir: str | Path | None = None,
     temp_dir: str | Path | None = None,
+    type_inference_mode: str | TypeInferenceMode | None = None,
     debug: bool = False,
     verbose: bool = False,
     cwd: Path | None = None,
@@ -48,6 +56,7 @@ def kompile(
         command=command,
         output_dir=output_dir,
         temp_dir=temp_dir,
+        type_inference_mode=type_inference_mode,
         debug=debug,
         verbose=verbose,
         cwd=cwd,
@@ -115,6 +124,7 @@ class Kompile(ABC):
         *,
         output_dir: str | Path | None = None,
         temp_dir: str | Path | None = None,
+        type_inference_mode: str | TypeInferenceMode | None = None,
         debug: bool = False,
         verbose: bool = False,
         cwd: Path | None = None,
@@ -137,6 +147,10 @@ class Kompile(ABC):
         if temp_dir is not None:
             temp_dir = Path(temp_dir)
             args += ['--temp-dir', str(temp_dir)]
+
+        if type_inference_mode is not None:
+            type_inference_mode = TypeInferenceMode(type_inference_mode)
+            args += ['--type-inference-mode', type_inference_mode.value]
 
         if debug:
             args += ['--debug']

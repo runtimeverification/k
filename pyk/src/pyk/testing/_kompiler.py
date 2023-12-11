@@ -11,7 +11,7 @@ from ..kllvm.compiler import compile_runtime
 from ..kllvm.importer import import_runtime
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
-from ..ktool.kompile import DefinitionInfo, Kompile
+from ..ktool.kompile import DefinitionInfo, Kompile, TypeInferenceMode
 from ..ktool.kprint import KPrint
 from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
@@ -43,7 +43,7 @@ class Kompiler:
         kompile = Kompile.from_dict(kwargs)
         if kompile not in self._cache:
             output_dir = self._path / self._uid(kompile)
-            self._cache[kompile] = kompile(output_dir=output_dir)
+            self._cache[kompile] = kompile(output_dir=output_dir, type_inference_mode=TypeInferenceMode.CHECKED)
 
         return self._cache[kompile]
 
