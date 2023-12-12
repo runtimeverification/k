@@ -104,10 +104,9 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         expected_k, _, _ = expected_post
 
         # When
-        _, actual_depth, actual_post_term, _, _logs = kcfg_explore.cterm_execute(
-            self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth
-        )
-        actual_k = kcfg_explore.kprint.pretty_print(actual_post_term.cell('K_CELL'))
+        exec_res = kcfg_explore.cterm_execute(self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth)
+        actual_k = kcfg_explore.kprint.pretty_print(exec_res.state.cell('K_CELL'))
+        actual_depth = exec_res.depth
 
         # Then
         assert actual_depth == expected_depth
