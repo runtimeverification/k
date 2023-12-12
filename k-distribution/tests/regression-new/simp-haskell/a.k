@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module A
   import INT
   syntax Int ::= abs(Int) [function, total]

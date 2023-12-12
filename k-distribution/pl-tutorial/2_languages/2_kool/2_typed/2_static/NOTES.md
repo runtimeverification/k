@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 Why is the following happening at line 347?  It should infer the sort Stmts for S:
@@ -10,4 +10,3 @@ Why is the following happening at line 347?  It should infer the sort Stmts for 
   [Error] Critical: Could not infer a sort for variable 'S' to match every location.
 
 Similarly at line 517.
-

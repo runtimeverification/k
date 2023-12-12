@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 Define `callcc` in terms of `callCC`, where `callCC` is explained in the

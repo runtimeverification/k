@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import static org.kframework.Collections.*;

@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 * Cut-and-paste is a poor-man's approach to reuse.

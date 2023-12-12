@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 // K ITP proof script language
 
 module PROOF-SCRIPT

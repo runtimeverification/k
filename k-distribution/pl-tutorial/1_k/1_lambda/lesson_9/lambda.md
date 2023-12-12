@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 **K** code can be nested inside Markdown using annotated code blocks.

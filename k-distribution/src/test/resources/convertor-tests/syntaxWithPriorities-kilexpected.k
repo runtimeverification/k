@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 DEF: null -> null
 module TEST
   syntax Foo ::= "t"

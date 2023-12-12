@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module NOIMPORTFLOAT-SYNTAX
   imports DOMAINS-SYNTAX
    syntax Pgm ::= foo(x:Float) | bar()

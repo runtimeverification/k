@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # Parallel Type Checkers/Inferencers
@@ -121,4 +121,3 @@ limitations in terms of polymorphism. The next lessons are dedicated
 to polymorphic type inferencers.
 
 Go to [Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer](../lesson_7/README.md).  
-

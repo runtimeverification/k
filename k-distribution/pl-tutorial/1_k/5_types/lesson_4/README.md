@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # A Naive Substitution-Based Type Inferencer
@@ -233,4 +233,3 @@ the naive substitution-based type inferencer discussed in this lesson
 into a similarly naive, but environment-based type inferencer.
 
 Go to [Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer](../lesson_5/README.md).
-
