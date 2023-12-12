@@ -304,6 +304,8 @@
           <java>
             <includes>**/*.java</includes>
             <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**</excludes>
+            <lineEndings>UNIX</lineEndings>
+            <trimTrailingWhitespace/>
             <googleJavaFormat>
               <version>${googleJavaFormat.version}</version>
               <style>GOOGLE</style>
