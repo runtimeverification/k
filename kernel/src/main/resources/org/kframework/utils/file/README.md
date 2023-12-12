@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 Description of files contained in the `-kompiled` directory.
 While most files are binaries, some are user readable and contain useful debugging information.
 Most notably `parsed.txt` and `compiled.txt`.
