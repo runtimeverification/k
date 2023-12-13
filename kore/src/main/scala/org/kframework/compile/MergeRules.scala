@@ -1,24 +1,16 @@
 // Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile
 
-import collection._
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
 import org.kframework.definition.Module
-import org.kframework.definition.ModuleTransformer
 import org.kframework.definition.Rule
 import org.kframework.kore._
-import org.kframework.kore.Assoc
-import org.kframework.kore.K
-import org.kframework.kore.KApply
-import org.kframework.kore.KLabel
 import org.kframework.kore.KORE.KApply
 import org.kframework.kore.KORE.KLabel
 import org.kframework.kore.KORE.KToken
-import org.kframework.kore.KORE.Sort
-import org.kframework.kore.KVariable
-import org.kframework.kore.Unapply
+import scala.collection._
 import scala.collection.immutable.Iterable
 import scala.collection.JavaConverters._
 
@@ -47,7 +39,7 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
       val newBody = pushDisjunction(rulesToMerge.map { r =>
         (
           convertKRewriteToKApply(r.body),
-          KApply(isRulePredicate, KToken(r.hashCode.toString, Sorts.K, Att.empty))
+          KApply(isRulePredicate, KToken(r.hashCode.toString, Sorts.K, Att.empty)).asInstanceOf[K]
         )
       })(m)
       val automatonRule = Rule(newBody, TrueToken, TrueToken, Att.empty.add(automatonAttribute))
@@ -58,7 +50,7 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
   }
 
   private def convertKRewriteToKApply(k: K): K = k match {
-    case Unapply.KApply(label, children) => KApply(label, children.map(convertKRewriteToKApply): _*)
+    case Unapply.KApply(label, children) => KApply(label, children.map(convertKRewriteToKApply))
     case Unapply.KRewrite(l, r)          => KApply(KLabels.KREWRITE, l, r)
     case other                           => other
   }
@@ -67,7 +59,7 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
     if (ks.size == 1) {
       ks.head
     } else {
-      KApply(or, ks: _*)
+      KApply(or, ks)
     }
 
   private def pushDisjunction(terms: Set[(K, K)])(implicit m: Module): K = {
@@ -114,7 +106,7 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
             .map(pushDisjunction)
         val rulePs = ks.map(_._2) toSeq
 
-        (KApply(klabel, childrenDisjunctionsOfklabel: _*), KApply(or, rulePs: _*))
+        (KApply(klabel, childrenDisjunctionsOfklabel), KApply(or, rulePs))
       }
 
     val disjunctionOfVarKApplies: Iterable[(K, K)] = termsWithoutRewrites.collect {

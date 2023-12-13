@@ -213,7 +213,7 @@ public class StringUtil {
    * \xFF Codepoints between 256 and 65535 are stored as \uFFFF Codepoints above 65536 are stored as
    * \u0010FFFF
    *
-   * @param value a Unicode codepoint
+   * @param codepoint a Unicode codepoint
    * @return representation of the codepoint as an escaped string
    */
   public static String getUnicodeEscape(int codepoint) {
@@ -503,7 +503,7 @@ public class StringUtil {
    *
    * <p>Used by the KAST pretty printer.
    *
-   * @param str A string value corresponding to a KLabel.
+   * @param value A string value corresponding to a KLabel.
    * @return A string which can be parsed back by a KORE parser to reach the original KLabel.
    */
   public static String escapeKoreKLabel(String value) {
