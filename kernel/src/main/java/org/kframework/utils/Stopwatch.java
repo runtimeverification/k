@@ -6,7 +6,6 @@ import java.util.Formatter;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 
-/** To use, access {@link #instance()} after calling {@link #init(GlobalOptions) init()}. */
 @RequestScoped
 public class Stopwatch {
   private final long start;

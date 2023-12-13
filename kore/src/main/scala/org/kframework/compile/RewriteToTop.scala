@@ -87,7 +87,7 @@ object RewriteToTop {
             "Injection compaction error: found nested injections with incompatible sorts"
           )
         }
-        KApply(KLabel("inj", List(sortInnerIn, sortOuterOut): _*), kappInner.klist, kapp.att)
+        KApply(KLabel("inj", List(sortInnerIn, sortOuterOut)), kappInner.klist, kapp.att)
       } else {
         kapp
       }
