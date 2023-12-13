@@ -213,7 +213,6 @@ module KSEQ-SYMBOLIC
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\$)([A-Z][A-Za-z0-9'_]*)"            [token]
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
-  syntax KLabel     ::= #KVariable
 endmodule
 ```
 
