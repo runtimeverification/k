@@ -7,11 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Represents a language definition. Includes contents from all {@code required}-d files.
- *
- * @see DefinitionLoader
- */
+/** Represents a language definition. Includes contents from all {@code required}-d files. */
 public class Definition extends ASTNode {
 
   private List<DefinitionItem> items;

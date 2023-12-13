@@ -201,7 +201,6 @@ public class Kompile {
    * @param definitionFile
    * @param mainModuleName
    * @param mainProgramsModuleName
-   * @param programStartSymbol
    * @return
    */
   public CompiledDefinition run(
