@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -127,7 +128,7 @@ public class LSPTests {
     Optional<Path> cacheFile =
         Files.walk(Path.of(URI.create(workspaceFolder.getUri())))
             .filter(p -> p.endsWith(Kompile.CACHE_FILE_NAME))
-            .findFirst();
+            .min(Comparator.comparing(Path::getNameCount, Comparator.naturalOrder()));
     if (cacheFile.isPresent())
       caches = loader.loadCache(java.util.Map.class, cacheFile.get().toFile());
 
