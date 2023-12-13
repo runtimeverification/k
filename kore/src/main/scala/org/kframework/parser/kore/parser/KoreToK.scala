@@ -8,7 +8,6 @@ import org.kframework.builtin.Sorts
 import org.kframework.kore.ADT.KVariable
 import org.kframework.kore.Assoc
 import org.kframework.kore.KORE
-import org.kframework.kore.KVariable
 import org.kframework.parser.kore
 import org.kframework.utils.StringUtil
 import scala.collection.JavaConverters._
@@ -71,12 +70,12 @@ class KoreToK(sortAtt: Map[String, String]) {
       Sorts.K
     case kore.CompoundSort(ctr, params) =>
       assert(ctr.startsWith("Sort"))
-      KORE.Sort(ctr.substring(4), params.map(apply): _*);
+      KORE.Sort(ctr.substring(4), params.map(apply));
   }
 
   /** Returns a [[k.KLabel]] from [[kore.SymbolOrAlias]] */
   def apply(head: kore.SymbolOrAlias): k.KLabel =
-    KORE.KLabel(extractKLabel(head.ctr), head.params.map(p => apply(p)): _*)
+    KORE.KLabel(extractKLabel(head.ctr), head.params.map(p => apply(p)))
 
   private def extractKLabel(head: String): String =
     if (head.startsWith("Lbl")) {
@@ -123,9 +122,9 @@ class KoreToK(sortAtt: Map[String, String]) {
             case body => body
           }
         case "kseq" =>
-          KORE.KSequence(args.map(apply(_)): _*)
+          KORE.KSequence(args.map(apply(_)))
         case "append" =>
-          KORE.KSequence(args.map(apply(_)): _*)
+          KORE.KSequence(args.map(apply(_)))
         case "dotk" =>
           KORE.KSequence()
         case _ =>

@@ -9,7 +9,8 @@ import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 
 /**
- * A production. Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
+ * A production. Any explicit attributes on the production are stored in {@link
+ * ASTNode#getAttributes()}.
  */
 public class Production extends ASTNode {
 
