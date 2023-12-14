@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 Description of files contained in the `-kompiled` directory.
@@ -38,8 +38,11 @@ List of files:
 - `kore-exec.tar.gz` - archive with the input of the haskell backend in case it crashes. Useful
   for submitting bug reports.
 
-Note that right now, we need to kompile the definition separately for each backend because the
+Note 1: right now, we need to kompile the definition separately for each backend because the
 compilation pipeline is very rigid. The differences between the backends start right from the very
 first step, choosing what modules to include. That affects the syntax/functions/hooks available
 in your definition, and mixing those can cause the backends to crash or, worse, give unsound
 results.
+
+Note 2: the content and the format of these files are subject to change without warning and they
+should not be relied on for automation outside of what is already tested on CI.
