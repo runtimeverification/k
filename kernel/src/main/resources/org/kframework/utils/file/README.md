@@ -1,5 +1,5 @@
 ---
-Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 Description of files contained in the `-kompiled` directory.
