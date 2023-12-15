@@ -8,6 +8,7 @@ from .cterm import CTerm
 from .kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
 from .kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
 from .kore.prelude import BYTES as KORE_BYTES
+from .kore.prelude import DOTK, SORT_K
 from .kore.prelude import STRING as KORE_STRING
 from .kore.syntax import (
     DV,
@@ -137,17 +138,42 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     return axiom
 
 
-def _kast_to_kore(kast: KInner) -> Pattern:
-    if type(kast) is KToken:
-        return _ktoken_to_kore(kast)
-    elif type(kast) is KVariable:
-        return _kvariable_to_kore(kast)
-    elif type(kast) is KSequence:
-        return _ksequence_to_kore(kast)
-    elif type(kast) is KApply:
-        return _kapply_to_kore(kast)
+def _ksort_to_kore(ksort: KSort) -> SortApp:
+    return SortApp('Sort' + ksort.name)
 
-    raise ValueError(f'Unsupported KInner: {kast}')
+
+def _kast_to_kore(term: KInner) -> Pattern:
+    stack: list = [term, []]
+    while True:
+        patterns = stack[-1]
+        term = stack[-2]
+        idx = len(patterns) - len(term.terms)
+        if not idx:
+            stack.pop()
+            stack.pop()
+            pattern = _kinner_to_kore(term, patterns)
+            if not stack:
+                return pattern
+            stack[-1].append(pattern)
+        else:
+            stack.append(term.terms[idx])
+            stack.append([])
+
+
+def _kinner_to_kore(kinner: KInner, patterns: list[Pattern]) -> Pattern:
+    match kinner:
+        case KToken():
+            assert not patterns
+            return _ktoken_to_kore(kinner)
+        case KVariable():
+            assert not patterns
+            return _kvariable_to_kore(kinner)
+        case KSequence():
+            return _ksequence_to_kore(kinner, patterns)
+        case KApply():
+            return _kapply_to_kore(kinner, patterns)
+        case _:
+            raise ValueError(f'Unsupported KInner: {kinner}')
 
 
 def _ktoken_to_kore(ktoken: KToken) -> DV:
@@ -164,61 +190,52 @@ def _ktoken_to_kore(ktoken: KToken) -> DV:
     return DV(sort, value)
 
 
-def _ksort_to_kore(ksort: KSort) -> SortApp:
-    return SortApp('Sort' + ksort.name)
-
-
 def _kvariable_to_kore(kvar: KVariable) -> EVar:
     sort: Sort
     if kvar.sort:
         sort = _ksort_to_kore(kvar.sort)
     else:
-        sort = SortApp('SortK')
+        sort = SORT_K
     return EVar('Var' + munge(kvar.name), sort)
 
 
-def _ksequence_to_kore(kseq: KSequence) -> Pattern:
-    if not kseq:
-        return App('dotk')
+def _ksequence_to_kore(kseq: KSequence, patterns: list[Pattern]) -> Pattern:
+    if not patterns:
+        return DOTK
 
     unit: Pattern
-    items: tuple[KInner, ...]
+    args: list[Pattern]
 
-    last = kseq[-1]
-    if type(last) is KVariable and (not last.sort or last.sort == KSort('K')):
-        unit = _kvariable_to_kore(last)
-        items = kseq[:-1]
+    last = patterns[-1]
+    if type(last) is EVar and last.sort == SORT_K:
+        unit = last
+        args = patterns[:-1]
     else:
-        unit = App('dotk')
-        items = kseq.items
+        unit = DOTK
+        args = patterns
 
-    patterns = tuple(_kast_to_kore(item) for item in items)
-    return reduce(lambda x, y: App('kseq', (), (y, x)), reversed(patterns), unit)
+    args.reverse()
+    return reduce(lambda x, y: App('kseq', (), (y, x)), args, unit)
 
 
-def _kapply_to_kore(kapply: KApply) -> Pattern:
+def _kapply_to_kore(kapply: KApply, patterns: list[Pattern]) -> Pattern:
     if kapply.label.name in ML_QUANT_LABELS:
-        return _kapply_to_ml_quant(kapply)
+        return _kapply_to_ml_quant(kapply, patterns)
 
-    return _kapply_to_pattern(kapply)
+    return _kapply_to_pattern(kapply, patterns)
 
 
-def _kapply_to_ml_quant(kapply: KApply) -> MLQuant:
+def _kapply_to_ml_quant(kapply: KApply, patterns: list[Pattern]) -> MLQuant:
     label = kapply.label
     symbol = ML_QUANT_LABELS[label.name]
     sorts = tuple(_ksort_to_kore(ksort) for ksort in label.params)
-    kvar, kast = kapply.args
-    var = _kast_to_kore(kvar)
-    pattern = _kast_to_kore(kast)
-    patterns = (var, pattern)
     return MLQuant.of(symbol, sorts, patterns)
 
 
-def _kapply_to_pattern(kapply: KApply) -> Pattern:
+def _kapply_to_pattern(kapply: KApply, patterns: list[Pattern]) -> Pattern:
     label = kapply.label
     symbol = _label_to_kore(label.name)
     sorts = tuple(_ksort_to_kore(ksort) for ksort in label.params)
-    patterns = tuple(_kast_to_kore(kast) for kast in kapply.args)
 
     if label.name in ML_PATTERN_LABELS:
         return MLPattern.of(symbol, sorts, patterns)
@@ -243,94 +260,133 @@ def kore_to_kast(kast_defn: KDefinition, kore: Pattern) -> KInner:
     return kast_defn.remove_cell_map_items(kast)
 
 
-def _kore_to_kast(kore: Pattern) -> KInner:
-    if type(kore) is DV and kore.sort.name.startswith('Sort'):
-        if kore.sort == KORE_STRING:
-            return stringToken(kore.value.value)
-        if kore.sort == KORE_BYTES:
-            return bytesToken_from_str(kore.value.value)  # noqa: N802(kore.value.value)
-        return KToken(kore.value.value, KSort(kore.sort.name[4:]))
+def _kore_to_kast(pattern: Pattern) -> KInner:
+    stack: list = [
+        pattern,
+        (pattern.app,) if isinstance(pattern, Assoc) else pattern.patterns,
+        [],
+    ]
 
-    elif type(kore) is EVar:
-        vname = unmunge(kore.name[3:])
-        return KVariable(vname, sort=KSort(kore.sort.name[4:]))
+    while True:
+        terms = stack[-1]
+        patterns = stack[-2]
+        pattern = stack[-3]
+        idx = len(terms) - len(patterns)
+        if not idx:
+            stack.pop()
+            stack.pop()
+            stack.pop()
+            term = _pattern_to_kast(pattern, terms)
+            if not stack:
+                return term
+            stack[-1].append(term)
+        else:
+            pattern = patterns[idx]
+            stack.append(pattern)
+            stack.append((pattern.app,) if isinstance(pattern, Assoc) else pattern.patterns)
+            stack.append([])
 
-    elif type(kore) is App:
-        if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.args) == 1:
-            return _kore_to_kast(kore.args[0])
 
-        elif len(kore.sorts) == 0:
-            if kore.symbol == 'dotk' and len(kore.args) == 0:
-                return KSequence(())
+def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
+    match pattern:
+        case DV(sort, String(value)):
+            assert not terms
+            if sort == KORE_STRING:
+                return stringToken(value)
+            if sort == KORE_BYTES:
+                return bytesToken_from_str(value)
+            return KToken(value, _sort_to_kast(sort))
 
-            elif kore.symbol == 'kseq' and len(kore.args) == 2:
-                p0 = _kore_to_kast(kore.args[0])
-                p1 = _kore_to_kast(kore.args[1])
-                return KSequence((p0, p1))
+        case EVar(name, sort):
+            assert not terms
+            return KVariable(name=unmunge(name[3:]), sort=_sort_to_kast(sort))
+
+        case App(symbol, sorts, _):
+            if symbol == 'inj':
+                _, _ = sorts
+                (term,) = terms
+                return term
+
+            elif not sorts:
+                if symbol == 'dotk':
+                    () = terms
+                    return KSequence(())
+
+                elif symbol == 'kseq':
+                    _, _ = terms
+                    return KSequence(terms)
+
+                else:
+                    klabel = KLabel(unmunge(symbol[3:]))
+                    return KApply(klabel, terms)
+
+            # hardcoded polymorphic operators
+            elif (
+                symbol
+                == "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
+            ):
+                (sort,) = sorts
+                klabel = KLabel(unmunge(symbol[3:]), (_sort_to_kast(sort),))
+                return KApply(klabel, terms)
 
             else:
-                _label_name = unmunge(kore.symbol[3:])
-                klabel = KLabel(_label_name, [KSort(k.name[4:]) for k in kore.sorts])
-                args = tuple(_kore_to_kast(_a) for _a in kore.args)
-                return KApply(klabel, args)
+                raise ValueError(f'Unsupported polymorphic operator: {symbol}')
 
-        # hardcoded polymorphic operators
-        elif (
-            len(kore.sorts) == 1
-            and kore.symbol
-            == "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
-        ):
-            _label_name = unmunge(kore.symbol[3:])
-            klabel = KLabel(_label_name, [KSort(kore.sorts[0].name[4:])])
-            args = tuple(_kore_to_kast(_a) for _a in kore.args)
-            return KApply(klabel, args)
+        case Top(sort):
+            assert not terms
+            return mlTop(sort=_sort_to_kast(sort))
 
-    elif type(kore) is Top:
-        return mlTop(sort=KSort(kore.sort.name[4:]))
+        case Bottom(sort):
+            assert not terms
+            return mlBottom(sort=_sort_to_kast(sort))
 
-    elif type(kore) is Bottom:
-        return mlBottom(sort=KSort(kore.sort.name[4:]))
+        case And(sort, _):
+            return mlAnd(terms, sort=_sort_to_kast(sort))
 
-    elif type(kore) is And:
-        psort = KSort(kore.sort.name[4:])
-        args = tuple(_kore_to_kast(op) for op in kore.ops)
-        return mlAnd(args, sort=psort)
+        case Implies(sort, left, right):
+            larg = _kore_to_kast(left)
+            rarg = _kore_to_kast(right)
+            return mlImplies(larg, rarg, sort=_sort_to_kast(sort))
 
-    elif type(kore) is Implies:
-        psort = KSort(kore.sort.name[4:])
-        larg = _kore_to_kast(kore.left)
-        rarg = _kore_to_kast(kore.right)
-        return mlImplies(larg, rarg, sort=psort)
+        case Not(sort, pattern):
+            karg = _kore_to_kast(pattern)
+            return mlNot(karg, sort=_sort_to_kast(sort))
 
-    elif type(kore) is Not:
-        psort = KSort(kore.sort.name[4:])
-        arg = _kore_to_kast(kore.pattern)
-        return mlNot(arg, sort=psort)
+        case Exists(sort, var, pattern):
+            kvar = _kore_to_kast(var)
+            body = _kore_to_kast(pattern)
+            assert isinstance(kvar, KVariable)
+            return mlExists(kvar, body, sort=_sort_to_kast(sort))
 
-    elif type(kore) is Exists:
-        psort = KSort(kore.sort.name[4:])
-        var = _kore_to_kast(kore.var)
-        assert type(var) is KVariable
-        body = _kore_to_kast(kore.pattern)
-        return mlExists(var, body, sort=psort)
+        case Equals(op_sort, sort, left, right):
+            larg = _kore_to_kast(left)
+            rarg = _kore_to_kast(right)
+            return mlEquals(
+                larg,
+                rarg,
+                arg_sort=_sort_to_kast(op_sort),
+                sort=_sort_to_kast(sort),
+            )
 
-    elif type(kore) is Equals:
-        osort = KSort(kore.op_sort.name[4:])
-        psort = KSort(kore.sort.name[4:])
-        larg = _kore_to_kast(kore.left)
-        rarg = _kore_to_kast(kore.right)
-        return mlEquals(larg, rarg, arg_sort=osort, sort=psort)
+        case Ceil(op_sort, sort, pattern):
+            karg = _kore_to_kast(pattern)
+            return mlCeil(
+                karg,
+                arg_sort=_sort_to_kast(op_sort),
+                sort=_sort_to_kast(sort),
+            )
 
-    elif type(kore) is Ceil:
-        osort = KSort(kore.op_sort.name[4:])
-        psort = KSort(kore.sort.name[4:])
-        arg = _kore_to_kast(kore.pattern)
-        return mlCeil(arg, arg_sort=osort, sort=psort)
+        case Assoc():
+            return _kore_to_kast(pattern.pattern)
 
-    elif isinstance(kore, Assoc):
-        return _kore_to_kast(kore.pattern)
+        case _:
+            raise ValueError(f'Unsupported Pattern: {pattern}')
 
-    raise ValueError(f'Unsupported Pattern: {kore}')
+
+def _sort_to_kast(sort: Sort) -> KSort:
+    if not isinstance(sort, SortApp) or not sort.name.startswith('Sort'):
+        raise ValueError(f'Unsupported Sort: {sort}')
+    return KSort(sort.name[4:])
 
 
 # --------------
