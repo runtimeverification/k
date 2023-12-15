@@ -6,7 +6,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from ..prelude.kbool import TRUE
-from .inner import KApply, KAs, KInner, KRewrite, KSequence, KSort, KToken, KVariable
+from .inner import KApply, KAs, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from .kast import KAtt
 from .manip import flatten_label, sort_ac_collections, undo_aliases
 from .outer import (
@@ -84,6 +84,10 @@ class PrettyPrinter:
         _LOGGER.debug(f'Unparsing: {kast}')
         if type(kast) is KAtt:
             return self._print_katt(kast)
+        if type(kast) is KSort:
+            return self._print_ksort(kast)
+        if type(kast) is KLabel:
+            return self._print_klabel(kast)
         elif isinstance(kast, KOuter):
             return self._print_kouter(kast)
         elif isinstance(kast, KInner):
@@ -137,8 +141,6 @@ class PrettyPrinter:
         match kast:
             case KVariable():
                 return self._print_kvariable(kast)
-            case KSort():
-                return self._print_ksort(kast)
             case KToken():
                 return self._print_ktoken(kast)
             case KApply():
@@ -152,14 +154,17 @@ class PrettyPrinter:
             case _:
                 raise AssertionError(f'Error unparsing: {kast}')
 
+    def _print_ksort(self, ksort: KSort) -> str:
+        return ksort.name
+
+    def _print_klabel(self, klabel: KLabel) -> str:
+        return klabel.name
+
     def _print_kvariable(self, kvariable: KVariable) -> str:
         sort = kvariable.sort
         if not sort:
             return kvariable.name
-        return kvariable.name + ':' + self._print_kinner(sort)
-
-    def _print_ksort(self, ksort: KSort) -> str:
-        return ksort.name
+        return kvariable.name + ':' + sort.name
 
     def _print_ktoken(self, ktoken: KToken) -> str:
         return ktoken.token

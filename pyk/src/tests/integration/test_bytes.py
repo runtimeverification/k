@@ -158,7 +158,7 @@ def test_cli_kore_to_kast(llvm_dir: Path, value: bytes) -> None:
         output='json',
     )
     kast_json = proc_res.stdout
-    kast = kast_term(json.loads(kast_json), KInner)  # type: ignore
+    kast = KInner.from_dict(kast_term(json.loads(kast_json)))
 
     # Then
     assert kast == bytesToken(value)
@@ -179,7 +179,7 @@ def test_cli_rule_to_kast(llvm_dir: Path, value: bytes) -> None:
         output='json',
     )
     kast_json = proc_res.stdout
-    output_kast = kast_term(json.loads(kast_json), KInner)  # type: ignore
+    output_kast = KInner.from_dict(kast_term(json.loads(kast_json)))
 
     # Then
     assert input_kast == output_kast

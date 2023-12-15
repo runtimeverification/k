@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast import KAst, KAtt
+from pyk.kast import KInner
 from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable, build_assoc
-from pyk.kast.outer import KDefinition, KFlatModule, KImport, KTerminal
+from pyk.kast.outer import KDefinition, KFlatModule, KImport
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
@@ -16,10 +16,7 @@ from pyk.prelude.utils import token
 from ..utils import f, x, y, z
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
     from typing import Any, Final
-
-    from pyk.kast import KInner
 
 
 KVARIABLE_TEST_DATA: Final = (
@@ -43,7 +40,7 @@ KVARIABLE_TEST_DATA: Final = (
 )
 def test_kvariable_to_dict(test_id: str, var: KVariable, dct: dict[str, Any]) -> None:
     # When
-    actual_var = KVariable.from_dict(dct)
+    actual_var = KInner.from_dict(dct)
     actual_dct = var.to_dict()
 
     # Then
@@ -279,25 +276,6 @@ def test_build_assoc(terms: tuple[KInner, ...], expected: KInner) -> None:
 
     # Then
     assert actual == expected
-
-
-KAST_FROM_DICT_TEST_DATA: Final = (
-    ({'node': 'KAtt', 'att': {'foo': 0}}, KAtt({'foo': 0})),
-    ({'node': 'KVariable', 'name': 'X'}, KVariable('X')),
-    ({'node': 'KTerminal', 'value': 'foo'}, KTerminal('foo')),
-    ({'node': 'Foo'}, None),
-)
-
-
-@pytest.mark.parametrize('dct,expected', KAST_FROM_DICT_TEST_DATA, ids=count())
-def test_kast_from_dict(dct: Mapping[str, Any], expected: KAst | None) -> None:
-    if expected is None:
-        with pytest.raises(ValueError):
-            KAst.from_dict(dct)
-
-    else:
-        actual = KAst.from_dict(dct)
-        assert actual == expected
 
 
 KAST_COMPARE_TEST_DATA: Final = (

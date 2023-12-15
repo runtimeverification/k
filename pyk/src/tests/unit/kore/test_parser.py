@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import And, App, Kore, Or, Pattern, SortVar, kore_term
+from pyk.kore.syntax import And, App, Or, Pattern, SortVar, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -83,10 +83,10 @@ def test_parse_pattern(kore_file: Path) -> None:
 )
 def test_parse_json(json_file: Path, i: int, dct: Mapping[str, Any]) -> None:
     # When
-    kore1: Kore = kore_term(dct)  # TODO type hint should be unnecessary
+    kore1 = kore_term(dct)
     parser = KoreParser(kore1.text)
     kore2 = parser.pattern()
-    kore3 = Kore.from_json(kore1.json)
+    kore3 = Pattern.from_json(kore1.json)
 
     # Then
     assert parser.eof

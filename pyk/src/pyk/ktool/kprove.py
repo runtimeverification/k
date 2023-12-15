@@ -248,7 +248,7 @@ class KProve(KPrint):
             return [CTerm.bottom()]
 
         debug_log = _get_rule_log(log_file)
-        final_state = kast_term(json.loads(proc_result.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
+        final_state = KInner.from_dict(kast_term(json.loads(proc_result.stdout)))
         if is_top(final_state) and len(debug_log) == 0 and not allow_zero_step:
             raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
         return [CTerm.from_kast(disjunct) for disjunct in flatten_label('#Or', final_state)]
@@ -328,7 +328,7 @@ class KProve(KPrint):
                 dry_run=True,
                 args=['--emit-json-spec', ntf.name],
             )
-            return kast_term(json.loads(Path(ntf.name).read_text()), KFlatModuleList)
+            return KFlatModuleList.from_dict(kast_term(json.loads(Path(ntf.name).read_text())))
 
     def get_claims(
         self,
