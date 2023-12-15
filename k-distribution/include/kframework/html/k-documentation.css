@@ -86,7 +86,7 @@ top : 3px;
 {
 color : black;
 border-width: 3px;
-display: inline-block; 
+display: inline-block;
 padding: 10px;
 padding-left: 20px;
 padding-right: 20px;
@@ -99,7 +99,7 @@ text-align: left;
 {
 /*color : black;
 border-width: 1px;
-display: inline-block; 
+display: inline-block;
 padding: 10px;
 padding-left: 20px;
 padding-right: 20px;

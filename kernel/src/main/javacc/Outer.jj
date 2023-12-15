@@ -427,7 +427,7 @@ PARSER_END(Outer)
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }
 
-<DEFAULT> TOKEN : 
+<DEFAULT> TOKEN :
 {
   <RULE: "rule"> : BUBBLE_STATE
 | <CONTEXT: "context"> : CONTEXT_STATE
@@ -749,7 +749,7 @@ void Sentence(Module module) :
     if (type.equals("configuration")) { type = "config"; } }
   ss = Bubble(type) { module.appendModuleItem(markLoc(loc, ss)); }
 
-| "syntax" 
+| "syntax"
   ( { List<Sort> params = new ArrayList<Sort>(); } ( "{" param = SimpleSort() { params.add(param); } ( "," param = SimpleSort() { params.add(param); })* "}" )? nonTerminal = SortID() {ModuleItem syn = new Syntax(nonTerminal, params); }
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*

@@ -9,7 +9,7 @@
 % \RequirePackage{etextools} % for xifstrequal
 % \RequirePackage{stringstrings} % for \stringlength
 
-\SetupKeyvalOptions{family=k,prefix=k@} 
+\SetupKeyvalOptions{family=k,prefix=k@}
 
 
 \DeclareStringOption[bubble]{style}  % the default style for cells & stuff
@@ -19,7 +19,7 @@
 \ProcessKeyvalOptions*
 
 % Usage Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Next command uses the default style (bubble) with tight edges for cells. 
+% Next command uses the default style (bubble) with tight edges for cells.
 % \usepackage[tight]{k}
 %
 % Next command changes the default style to mathematic cells.
@@ -41,7 +41,7 @@
 % If the default was set to math, use bubble instead of math above.
 
 % Some exported commands (useful for manually writing K):
-% \kall, \kprefix, \ksuffix, and \kmiddle are used to specify cells which are 
+% \kall, \kprefix, \ksuffix, and \kmiddle are used to specify cells which are
 % either complete, open to the right, open to the left, and open both ways,
 % respectively .
 
@@ -89,7 +89,7 @@
 
 \RequirePackage[small,compact]{titlesec}
 %\titleformat{command}[shape]{format}{label}{sep}{before}[after]
-% shape ::= hang | block | display | runin | leftmargin | rightmargin 
+% shape ::= hang | block | display | runin | leftmargin | rightmargin
 %         | drop | wrap | frame
 % sep is mandatory to be a length.
 % more on http://www.ctex.org/documents/packages/layout/titlesec.pdf
@@ -745,7 +745,7 @@ $\mid\;{#2}$ \ifthenelse{\equal{#3}{}}{}{[#3]\;}%
                                         {\pgfpointanchor{current bounding box}{north east}}}
     \pgfextractx{\k@cellContentWidth}{\k@cellContentBBox}%
     \pgfextracty{\k@cellContentHeight}{\k@cellContentBBox}%
-    
+
     \begin{pgfonlayer}{background}
       \ifdraft{%
         \path (cell content.center)
@@ -826,7 +826,7 @@ rectangle,rectangle
                       \setlength{\k@ruptureStepSize}{\n3}%
                       \setlength{\k@ruptureStepSize}{.25\k@ruptureStepSize}%
                      }%
-                     
+
                     % Draw counter-clock-wise, starting from the
                     % lower right corner.
                     (cell body.south east)
@@ -849,7 +849,7 @@ rectangle,rectangle
                     % Bottom (just close the path)
                     -- cycle;
     \end{pgfonlayer}
-    
+
     % Add extra space above and below the cell.
     \path[use as bounding box] (current bounding box.south west) ++(0,-.3333em)
                                rectangle (current bounding box.north east) ++(0,.3333em);
@@ -918,12 +918,12 @@ rectangle,rectangle
 \newcommand{\ksentence}[7][]{%
   \par\indent
   \k@ruleLabel{#3}{#2}\hspace{1em}$%
-  \ifthenelse{\equal{#1}{}}{}{%  
-   \left(% 
+  \ifthenelse{\equal{#1}{}}{}{%
+   \left(%
   }%
   #4%
-  \ifthenelse{\equal{#1}{}}{}{%  
-   \right)% 
+  \ifthenelse{\equal{#1}{}}{}{%
+   \right)%
   }%
     $%
   \ifthenelse{\equal{#5}{}}{}{%
@@ -933,8 +933,8 @@ rectangle,rectangle
     \whenEns{#6}%
   }%
   \k@markPosition%
-  \ifthenelse{\equal{#7}{}}{}{%  
-   \ruleAttributes{#7}% 
+  \ifthenelse{\equal{#7}{}}{}{%
+   \ruleAttributes{#7}%
   }%
   \par\ \par
 }
@@ -974,39 +974,38 @@ rectangle,rectangle
                %frame=tb,
                columns=flexible,
                mathescape=false,
-			   upquote=true,
+               upquote=true,
 % 				literate=
 % 	   			{"}{\textquotedbl}1
        }
 }{}
 \lstdefinelanguage{k}{
-		upquote=true,
+       upquote=true,
        morekeywords={kompile, kast, krun, require, HOLE, configuration, module, end, imports, rule, macro, op, ops, syntax, sort, sorts, subsort, subsorts, context, HOLE, hybrid, strict, seqstrict, binder, color, latex, kvar, transition, superheat, supercool, search, rewrite, prec, gather, stream, multiplicity, when},
-        emph={[3]Map, Set, Bag, List, K, KLabel, KResult, KProper, CellLabel, SetItem, BagItem, ListItem, MapItem, Int, Bool, String, Id},
+       emph={[3]Map, Set, Bag, List, K, KLabel, KResult, KProper, CellLabel, SetItem, BagItem, ListItem, MapItem, Int, Bool, String, Id},
        emphstyle={[3]\textit},
        literate=
        {LT}{$<$}3
-       {LEQ}{$<=$}4 
-%       {.K}{$\kdot{\it K}$}2 
-%       {.List}{$\kdot{\it List}$}4 
+       {LEQ}{$<=$}4
+%       {.K}{$\kdot{\it K}$}2
+%       {.List}{$\kdot{\it List}$}4
        {PROMPT}{\$}1
        {...<}{${\ellipses}\langle$}2
-       {>}{$\rangle$}1 
+       {>}{$\rangle$}1
        {>...}{$\rangle{\ellipses}$}2
-       {+Int}{$+{\rm\scriptstyle Int}$}4 
-       {*Int}{$*{\rm\scriptstyle Int}$}4 
-       {/Int}{$/{\rm\scriptstyle Int}$}4 
-       {LeqInt}{${<}{=}{\rm\scriptstyle Int}$}9 
-       {!=Int}{${!}{=}{\rm\scriptstyle Int}$}5 
-       {==Bool}{${=}{=}{\rm\scriptstyle Bool}$}7 
-       {=/=Bool}{${=}{/}{=}{\rm\scriptstyle Bool}$}9 
-       {notBool}{${\tt not}{\rm\scriptstyle Bool}$}5 
-       {<}{$\langle$}1 
-       {_}{$\_$}1 {~}{$\_$}1 
-       {=>}{$\;=\!>$}5 
-       {->}{{$->$}}3 
-       {~>}{{$\sim\!\!>$}}3  
-       {|->}{$\;|-\!\!>$}5 
+       {+Int}{$+{\rm\scriptstyle Int}$}4
+       {*Int}{$*{\rm\scriptstyle Int}$}4
+       {/Int}{$/{\rm\scriptstyle Int}$}4
+       {LeqInt}{${<}{=}{\rm\scriptstyle Int}$}9
+       {!=Int}{${!}{=}{\rm\scriptstyle Int}$}5
+       {==Bool}{${=}{=}{\rm\scriptstyle Bool}$}7
+       {=/=Bool}{${=}{/}{=}{\rm\scriptstyle Bool}$}9
+       {notBool}{${\tt not}{\rm\scriptstyle Bool}$}5
+       {<}{$\langle$}1
+       {_}{$\_$}1 {~}{$\_$}1
+       {=>}{$\;=\!>$}5
+       {->}{{$->$}}3
+       {~>}{{$\sim\!\!>$}}3
+       {|->}{$\;|-\!\!>$}5
 }
 \newcommand{\ka}[1]{\mbox{\lstinline[language=k]{#1}}}
-

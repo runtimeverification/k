@@ -284,6 +284,7 @@
               </indent>
               <lineEndings>UNIX</lineEndings>
               <trimTrailingWhitespace/>
+              <endWithNewline/>
               <licenseHeader>
                 <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
                 <delimiter>(?!//\sCopyright)</delimiter>
@@ -292,6 +293,12 @@
             <format>
               <includes>**/*.xml,**/*.xsd</includes>
               <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
               <licenseHeader>
                 <skipLinesMatching>^&lt;\?xml.*\?&gt;$</skipLinesMatching>
                 <content>&lt;!-- Copyright (c) Runtime Verification, Inc. All Rights Reserved. --&gt;</content>
@@ -301,6 +308,8 @@
             <format>
               <includes>**/*.md</includes>
               <excludes>${spotless.excludes}</excludes>
+              <lineEndings>UNIX</lineEndings>
+              <endWithNewline/>
               <licenseHeader>
                 <skipLinesMatching>^---$</skipLinesMatching>
                 <content>copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
@@ -310,6 +319,12 @@
             <format>
               <includes>**/*.kore,**/*.jj,**/*.jjt,**/*.str</includes>
               <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
               <licenseHeader>
                 <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
                 <delimiter>(?!//\sCopyright)</delimiter>
@@ -318,6 +333,12 @@
             <format>
               <includes>**/*.css</includes>
               <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
               <licenseHeader>
                 <content>/* Copyright (c) Runtime Verification, Inc. All Rights Reserved. */</content>
                 <delimiter>(?!/\*\sCopyright)</delimiter>
@@ -326,6 +347,12 @@
             <format>
               <includes>**/*.sty,**/*.tex,**/*.cls</includes>
               <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
               <licenseHeader>
                 <content>% Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
                 <delimiter>(?!%\sCopyright)</delimiter>
@@ -337,6 +364,7 @@
             <excludes>${spotless.excludes}</excludes>
             <lineEndings>UNIX</lineEndings>
             <trimTrailingWhitespace/>
+            <endWithNewline/>
             <licenseHeader>
               <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
               <delimiter>(?!//\sCopyright)</delimiter>
@@ -349,6 +377,9 @@
           <scala>
             <includes>**/*.scala,**/*.sbt</includes>
             <excludes>${spotless.excludes}</excludes>
+            <lineEndings>UNIX</lineEndings>
+            <trimTrailingWhitespace/>
+            <endWithNewline/>
             <licenseHeader>
               <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
               <delimiter>(?!//\sCopyright)</delimiter>

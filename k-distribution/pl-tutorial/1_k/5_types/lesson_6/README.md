@@ -120,4 +120,4 @@ Lesson 5, not to improve its expressiveness; it still has the same
 limitations in terms of polymorphism. The next lessons are dedicated
 to polymorphic type inferencers.
 
-Go to [Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer](../lesson_7/README.md).  
+Go to [Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer](../lesson_7/README.md).
