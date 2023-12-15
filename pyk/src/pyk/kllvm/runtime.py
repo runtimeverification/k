@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from types import ModuleType
     from typing import Any
 
-    from .ast import Pattern, Sort
+    from .ast import CompositePattern, Pattern, Sort
 
 
 class Runtime:
@@ -40,6 +40,11 @@ class Runtime:
 
     def simplify_bool(self, pattern: Pattern) -> bool:
         res = self._module.simplify_bool_pattern(pattern)
+        self._module.free_all_gc_memory()
+        return res
+
+    def evaluate(self, pattern: CompositePattern) -> Pattern:
+        res = self._module.evaluate_function(pattern)
         self._module.free_all_gc_memory()
         return res
 
