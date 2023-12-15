@@ -68,6 +68,7 @@ class Target:
     hook_namespaces: tuple[str, ...] | None
     emit_json: bool | None
     gen_bison_parser: bool | None
+    gen_glr_bison_parser: bool | None
     bison_parser_library: bool | None
     # LLVM backend
     opt_level: int | None
@@ -93,6 +94,7 @@ class Target:
         hook_namespaces: Iterable[str] | None = None,
         emit_json: bool | None = None,
         gen_bison_parser: bool | None = None,
+        gen_glr_bison_parser: bool | None = None,
         bison_parser_library: bool | None = None,
         opt_level: int | None = None,
         ccopts: Iterable[str] | None = None,
@@ -115,6 +117,7 @@ class Target:
         object.__setattr__(self, 'hook_namespaces', tuple(hook_namespaces) if hook_namespaces is not None else None)
         object.__setattr__(self, 'emit_json', emit_json)
         object.__setattr__(self, 'gen_bison_parser', gen_bison_parser)
+        object.__setattr__(self, 'gen_glr_bison_parser', gen_glr_bison_parser)
         object.__setattr__(self, 'bison_parser_library', bison_parser_library)
         object.__setattr__(self, 'opt_level', opt_level)
         object.__setattr__(self, 'ccopts', tuple(ccopts) if ccopts is not None else None)
@@ -138,6 +141,7 @@ class Target:
             hook_namespaces=dct.get('hook-namespaces'),
             emit_json=dct.get('emit-json'),
             gen_bison_parser=dct.get('gen-bison-parser'),
+            gen_glr_bison_parser=dct.get('gen-glr-bison-parser'),
             bison_parser_library=dct.get('bison-parser-library'),
             opt_level=dct.get('opt-level'),
             ccopts=dct.get('ccopts'),
