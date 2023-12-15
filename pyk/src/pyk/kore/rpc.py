@@ -19,14 +19,14 @@ from psutil import Process
 
 from ..ktool.kprove import KoreExecLogFormat
 from ..utils import check_dir_path, check_file_path, filter_none, run_process
-from .syntax import And, Pattern, SortApp, kore_term
+from .syntax import And, SortApp, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from typing import Any, ClassVar, Final, TextIO, TypeVar
 
     from ..utils import BugReport
-    from .syntax import Module
+    from .syntax import Module, Pattern
 
     ER = TypeVar('ER', bound='ExecuteResult')
     RR = TypeVar('RR', bound='RewriteResult')
@@ -368,10 +368,9 @@ class State:
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> State:
         return State(
-            # https://github.com/python/mypy/issues/4717
-            term=kore_term(dct['term'], Pattern),  # type: ignore
-            substitution=kore_term(dct['substitution'], Pattern) if 'substitution' in dct else None,  # type: ignore
-            predicate=kore_term(dct['predicate'], Pattern) if 'predicate' in dct else None,  # type: ignore
+            term=kore_term(dct['term']),
+            substitution=kore_term(dct['substitution']) if 'substitution' in dct else None,
+            predicate=kore_term(dct['predicate']) if 'predicate' in dct else None,
         )
 
     @property
@@ -411,7 +410,7 @@ class RewriteSuccess(RewriteResult):
     def from_dict(cls: type[RewriteSuccess], dct: Mapping[str, Any]) -> RewriteSuccess:
         return RewriteSuccess(
             rule_id=dct['rule-id'],
-            rewritten_term=kore_term(dct['rewritten-term'], Pattern) if 'rewritten-term' in dct else None,  # type: ignore
+            rewritten_term=kore_term(dct['rewritten-term']) if 'rewritten-term' in dct else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -490,7 +489,7 @@ class LogSimplification(LogEntry):
         return LogSimplification(
             origin=LogOrigin(dct['origin']),
             result=RewriteResult.from_dict(dct['result']),
-            original_term=kore_term(dct['original-term'], Pattern) if 'original-term' in dct else None,  # type: ignore
+            original_term=kore_term(dct['original-term']) if 'original-term' in dct else None,
             original_term_index=None,  # TODO fixme
         )
 
@@ -681,7 +680,7 @@ class AbortedResult(ExecuteResult):
         return AbortedResult(
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
-            unknown_predicate=kore_term(dct['unknown-predicate'], Pattern) if dct.get('unknown-predicate') else None,  # type: ignore
+            unknown_predicate=kore_term(dct['unknown-predicate']) if dct.get('unknown-predicate') else None,
             logs=logs,
         )
 
@@ -702,10 +701,9 @@ class ImpliesResult:
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
         return ImpliesResult(
             satisfiable=dct['satisfiable'],
-            # https://github.com/python/mypy/issues/4717
-            implication=kore_term(dct['implication'], Pattern),  # type: ignore
-            substitution=kore_term(substitution, Pattern) if substitution is not None else None,  # type: ignore
-            predicate=kore_term(predicate, Pattern) if predicate is not None else None,  # type: ignore
+            implication=kore_term(dct['implication']),
+            substitution=kore_term(substitution) if substitution is not None else None,
+            predicate=kore_term(predicate) if predicate is not None else None,
             logs=logs,
         )
 
@@ -721,7 +719,7 @@ class GetModelResult(ABC):  # noqa: B024
                 return UnsatResult()
             case 'Sat':
                 substitution = dct.get('substitution')
-                return SatResult(model=kore_term(substitution, Pattern) if substitution else None)  # type: ignore
+                return SatResult(model=kore_term(substitution) if substitution else None)
             case _:
                 raise ValueError(f'Unknown status: {status}')
 
@@ -861,7 +859,7 @@ class KoreClient(ContextManager['KoreClient']):
 
         result = self._request('simplify', **params)
         logs = tuple(LogEntry.from_dict(l) for l in result['logs']) if 'logs' in result else ()
-        return kore_term(result['state'], Pattern), logs  # type: ignore # https://github.com/python/mypy/issues/4717
+        return kore_term(result['state']), logs
 
     def get_model(self, pattern: Pattern, module_name: str | None = None) -> GetModelResult:
         params = filter_none(

@@ -25,30 +25,9 @@ class KAst(ABC):
     def version() -> int:
         return 3
 
-    @classmethod
-    def from_dict(cls: type[T], d: Mapping[str, Any]) -> T:
-        from . import inner, outer
-
-        node = d['node']
-
-        if node == 'KAtt':
-            return KAtt.from_dict(d)  # type: ignore
-
-        if node in inner.KInner._INNER_NODES:
-            return getattr(inner, node).from_dict(d)
-
-        if node in outer.KOuter._OUTER_NODES:
-            return getattr(outer, node).from_dict(d)
-
-        raise ValueError(f'Expected KAst label as "node" value, found: {node}')
-
     @abstractmethod
     def to_dict(self) -> dict[str, Any]:
         ...
-
-    @classmethod
-    def from_json(cls: type[T], s: str) -> T:
-        return cls.from_dict(json.loads(s))
 
     @final
     def to_json(self) -> str:
@@ -59,23 +38,16 @@ class KAst(ABC):
     def hash(self) -> str:
         return hash_str(self.to_json())
 
-    @classmethod
-    def _check_node(cls: type[T], d: Mapping[str, Any], expected: str | None = None) -> None:
-        expected = expected if expected is not None else cls.__name__
-        actual = d['node']
-        if actual != expected:
-            raise ValueError(f'Expected "node" value: {expected}, got: {actual}')
-
-    def _as_shallow_tuple(self) -> tuple[Any, ...]:
-        # shallow copy version of dataclass.astuple.
-        return tuple(self.__dict__[field.name] for field in fields(type(self)))  # type: ignore
-
     def __lt__(self, other: Any) -> bool:
         if not isinstance(other, KAst):
             return NotImplemented
         if type(self) == type(other):
             return self._as_shallow_tuple() < other._as_shallow_tuple()
         return type(self).__name__ < type(other).__name__
+
+    def _as_shallow_tuple(self) -> tuple[Any, ...]:
+        # shallow copy version of dataclass.astuple.
+        return tuple(self.__dict__[field.name] for field in fields(type(self)))  # type: ignore
 
 
 @final
@@ -116,16 +88,16 @@ class KAtt(KAst, Mapping[str, Any]):
 
     @classmethod
     def from_dict(cls: type[KAtt], d: Mapping[str, Any]) -> KAtt:
-        cls._check_node(d)
         return KAtt(atts=d['att'])
 
     def to_dict(self) -> dict[str, Any]:
-        def _to_dict(m: Any) -> Any:
-            if isinstance(m, FrozenDict):
-                return {k: _to_dict(v) for (k, v) in m.items()}
-            return m
+        return {'node': 'KAtt', 'att': KAtt._unfreeze(self.atts)}
 
-        return {'node': 'KAtt', 'att': _to_dict(self.atts)}
+    @staticmethod
+    def _unfreeze(x: Any) -> Any:
+        if isinstance(x, FrozenDict):
+            return {k: KAtt._unfreeze(v) for (k, v) in x.items()}
+        return x
 
     def let(self, *, atts: Mapping[str, Any] | None = None) -> KAtt:
         atts = atts if atts is not None else self.atts
@@ -174,12 +146,11 @@ class WithKAtt(ABC):
         return self.let_att(att=self.att.update(atts))
 
 
-# TODO fix typing (maybe just return Mapping)
-def kast_term(dct: Mapping[str, Any], cls: type[T] = KAst) -> T:  # type: ignore
+def kast_term(dct: Mapping[str, Any]) -> Mapping[str, Any]:
     if dct['format'] != 'KAST':
         raise ValueError(f"Invalid format: {dct['format']}")
 
     if dct['version'] != KAst.version():
         raise ValueError(f"Invalid version: {dct['version']}")
 
-    return cls.from_dict(dct['term'])
+    return dct['term']

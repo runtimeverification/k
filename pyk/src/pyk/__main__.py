@@ -117,7 +117,7 @@ def exec_rpc_print(args: Namespace) -> None:
         non_state_keys = set(request_params.keys()).difference(['state'])
         for key in non_state_keys:
             output_buffer.append(f'{key}: {request_params[key]}')
-        state = CTerm.from_kast(printer.kore_to_kast(kore_term(request_params['state'])))  # type: ignore
+        state = CTerm.from_kast(printer.kore_to_kast(kore_term(request_params['state'])))
         output_buffer.append('State:')
         output_buffer.append(printer.pretty_print(state.kast, sort_collections=True))
         return output_buffer
@@ -163,7 +163,7 @@ def exec_rpc_print(args: Namespace) -> None:
             output_buffer.append(f'id: {input_dict["id"]}')
             if list(input_dict['result'].keys()) == ['state']:  # this is a "simplify" response
                 output_buffer.append('Method: simplify')
-                state = CTerm.from_kast(printer.kore_to_kast(kore_term(input_dict['result']['state'])))  # type: ignore
+                state = CTerm.from_kast(printer.kore_to_kast(kore_term(input_dict['result']['state'])))
                 output_buffer.append('State:')
                 output_buffer.append(printer.pretty_print(state.kast, sort_collections=True))
             elif list(input_dict['result'].keys()) == ['module']:  # this is an "add-module" response

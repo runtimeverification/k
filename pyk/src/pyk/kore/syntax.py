@@ -78,84 +78,7 @@ class SetVarId:
 # TODO Constructor @overloads
 
 
-def unsupported() -> Any:
-    raise RuntimeError('Unsupported operation')
-
-
 class Kore(ABC):
-    _TAGS: Final = {
-        'SortVar',
-        'SortApp',
-        'String',
-        'EVar',
-        'SVar',
-        'App',
-        'Top',
-        'Bottom',
-        'Not',
-        'And',
-        'Or',
-        'Implies',
-        'Iff',
-        'Exists',
-        'Forall',
-        'Mu',
-        'Nu',
-        'Ceil',
-        'Floor',
-        'Equals',
-        'In',
-        'Next',
-        'Rewrites',
-        'DV',
-        'LeftAssoc',
-        'RightAssoc',
-    }
-
-    @classmethod
-    @abstractmethod
-    def _tag(cls) -> str:  # TODO This should be an abstract immutable class attribute for efficiency
-        ...
-
-    @classmethod
-    def from_dict(cls: type[T], dct: Mapping[str, Any]) -> T:
-        tag = Kore._get_tag(dct)
-
-        if tag not in Kore._TAGS:
-            raise ValueError(f'Invalid Kore tag: {tag}')
-
-        actual_cls = globals()[tag]
-
-        if not issubclass(actual_cls, cls):
-            raise ValueError(f'Expected {cls.__name__} tag, found: {tag}')
-
-        return actual_cls.from_dict(dct)
-
-    @classmethod
-    def from_json(cls: type[T], s: str) -> T:
-        return cls.from_dict(json.loads(s))
-
-    @staticmethod
-    def _get_tag(dct: Mapping[str, Any]) -> str:
-        if 'tag' not in dct:
-            raise ValueError("Attribute 'tag' is missing")
-        return dct['tag']
-
-    @classmethod
-    def _check_tag(cls: type[T], dct: Mapping[str, Any]) -> None:
-        tag = cls._get_tag(dct)
-        if tag != cls._tag():
-            raise ValueError(f'Expected "tag" value: {cls._tag()}, got: {tag}')
-
-    @property
-    def json(self) -> str:
-        return json.dumps(self.dict, sort_keys=True)
-
-    @property
-    @abstractmethod
-    def dict(self) -> dict[str, Any]:
-        ...
-
     @property
     def text(self) -> str:
         str_io = StringIO()
@@ -180,6 +103,30 @@ def _write_sep_by_comma(kores: Iterable[Kore], output: IO[str]) -> None:
 
 class Sort(Kore):
     name: str
+
+    @property
+    def json(self) -> str:
+        return json.dumps(self.dict, sort_keys=True)
+
+    @property
+    @abstractmethod
+    def dict(self) -> dict[str, Any]:
+        ...
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> Sort:
+        tag = dct['tag']
+        match tag:
+            case 'SortVar':
+                return SortVar(name=dct['name'])
+            case 'SortApp':
+                return SortApp(name=dct['name'], sorts=tuple(Sort.from_dict(arg) for arg in dct['args']))
+            case _:
+                raise ValueError(f'Unknown Sort tag value: {tag!r}')
+
+    @staticmethod
+    def from_json(s: str) -> Sort:
+        return Sort.from_dict(json.loads(s))
 
 
 class WithSort(ABC):
@@ -208,18 +155,9 @@ class SortVar(Sort):
         name = name if name is not None else self.name
         return SortVar(name=name)
 
-    @classmethod
-    def _tag(cls) -> str:
-        return 'SortVar'
-
-    @classmethod
-    def from_dict(cls: type[SortVar], dct: Mapping[str, Any]) -> SortVar:
-        cls._check_tag(dct)
-        return SortVar(name=dct['name'])
-
     @property
     def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'name': self.name}
+        return {'tag': 'SortVar', 'name': self.name}
 
     def write(self, output: IO[str]) -> None:
         output.write(self.name)
@@ -243,18 +181,9 @@ class SortApp(Sort):
         sorts = sorts if sorts is not None else self.sorts
         return SortApp(name=name, sorts=sorts)
 
-    @classmethod
-    def _tag(cls) -> str:
-        return 'SortApp'
-
-    @classmethod
-    def from_dict(cls: type[SortApp], dct: Mapping[str, Any]) -> SortApp:
-        cls._check_tag(dct)
-        return SortApp(name=dct['name'], sorts=tuple(Sort.from_dict(arg) for arg in dct['args']))
-
     @property
     def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'name': self.name, 'args': [sort.dict for sort in self.sorts]}
+        return {'tag': 'SortApp', 'name': self.name, 'args': [sort.dict for sort in self.sorts]}
 
     def write(self, output: IO[str]) -> None:
         output.write(self.name)
@@ -264,6 +193,115 @@ class SortApp(Sort):
 
 
 class Pattern(Kore):
+    _TAGS: Final[dict[str, str | list[str]]] = {
+        # Helper structure for from_dict(dct)
+        # keys are Pattern subclass names, which coincides with the tag 'field' in dct
+        # list value indicates fields in dct that transform to Pattern
+        # str value indicates a field in dct that transforms to list[Pattern]
+        'String': [],
+        'EVar': [],
+        'SVar': [],
+        'App': 'args',
+        'Top': [],
+        'Bottom': [],
+        'Not': ['arg'],
+        'Implies': ['first', 'second'],
+        'Iff': ['first', 'second'],
+        'And': 'patterns',
+        'Or': 'patterns',
+        'Exists': ['arg'],
+        'Forall': ['arg'],
+        'Mu': ['arg'],
+        'Nu': ['arg'],
+        'Ceil': ['arg'],
+        'Floor': ['arg'],
+        'Equals': ['first', 'second'],
+        'In': ['first', 'second'],
+        'Next': ['dest'],
+        'Rewrites': ['source', 'dest'],
+        'DV': [],
+        'LeftAssoc': ['app'],
+        'RightAssoc': ['app'],
+    }
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> Pattern:
+        stack: list = [dct, Pattern._extract_dicts(dct), []]
+        while True:
+            patterns = stack[-1]
+            dcts = stack[-2]
+            dct = stack[-3]
+            idx = len(patterns) - len(dcts)
+            if not idx:
+                stack.pop()
+                stack.pop()
+                stack.pop()
+                cls = globals()[dct['tag']]
+                pattern = cls._from_dict(dct, patterns)
+                if not stack:
+                    return pattern
+                stack[-1].append(pattern)
+            else:
+                dct = dcts[idx]
+                stack.append(dct)
+                stack.append(Pattern._extract_dicts(dct))
+                stack.append([])
+
+    @staticmethod
+    def _extract_dicts(dct: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+        keys = Pattern._TAGS[dct['tag']]
+        return dct[keys] if isinstance(keys, str) else [dct[key] for key in keys]
+
+    @staticmethod
+    def from_json(s: str) -> Pattern:
+        return Pattern.from_dict(json.loads(s))
+
+    @classmethod
+    @abstractmethod
+    def _from_dict(cls: type[P], dct: Mapping[str, Any], patterns: list[Pattern]) -> P:
+        ...
+
+    @property
+    def json(self) -> str:
+        return json.dumps(self.dict, sort_keys=True)
+
+    @abstractmethod
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def _tag(cls) -> str:  # TODO This should be an abstract immutable class attribute for efficiency
+        ...
+
+    @final
+    @property
+    def dict(self) -> dict[str, Any]:
+        stack: list = [
+            self,
+            (self.app,) if isinstance(self, Assoc) else self.patterns,
+            [],
+        ]
+
+        while True:
+            dicts = stack[-1]
+            patterns = stack[-2]
+            pattern = stack[-3]
+            idx = len(dicts) - len(patterns)
+            if not idx:
+                stack.pop()
+                stack.pop()
+                stack.pop()
+                dct = pattern._dict(dicts)
+                if not stack:
+                    return dct
+                stack[-1].append(dct)
+            else:
+                pattern = patterns[idx]
+                stack.append(pattern)
+                stack.append((pattern.app,) if isinstance(pattern, Assoc) else pattern.patterns)
+                stack.append([])
+
     @property
     @abstractmethod
     def patterns(self) -> tuple[Pattern, ...]:
@@ -277,10 +315,38 @@ class Pattern(Kore):
         return self.let_patterns(patterns=(f(pattern) for pattern in self.patterns))
 
     def bottom_up(self, f: Callable[[Pattern], Pattern]) -> Pattern:
-        return f(self.map_patterns(lambda pattern: pattern.bottom_up(f)))
+        stack: list = [self, []]
+        while True:
+            patterns = stack[-1]
+            pattern = stack[-2]
+            idx = len(patterns) - len(pattern.patterns)
+            if not idx:
+                stack.pop()
+                stack.pop()
+                pattern = f(pattern.let_patterns(patterns))
+                if not stack:
+                    return pattern
+                stack[-1].append(pattern)
+            else:
+                stack.append(pattern.patterns[idx])
+                stack.append([])
 
     def top_down(self, f: Callable[[Pattern], Pattern]) -> Pattern:
-        return f(self).map_patterns(lambda pattern: pattern.top_down(f))
+        stack: list = [f(self), []]
+        while True:
+            patterns = stack[-1]
+            pattern = stack[-2]
+            idx = len(patterns) - len(pattern.patterns)
+            if not idx:
+                stack.pop()
+                stack.pop()
+                pattern = pattern.let_patterns(patterns)
+                if not stack:
+                    return pattern
+                stack[-1].append(pattern)
+            else:
+                stack.append(f(pattern.patterns[idx]))
+                stack.append([])
 
 
 class VarPattern(Pattern, WithSort):
@@ -293,8 +359,8 @@ class VarPattern(Pattern, WithSort):
     def patterns(self) -> tuple[()]:
         return ()
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        assert not dicts
         return {'tag': self._tag(), 'name': self.name, 'sort': self.sort.dict}
 
     def write(self, output: IO[str]) -> None:
@@ -333,8 +399,8 @@ class EVar(VarPattern):
         return 'EVar'
 
     @classmethod
-    def from_dict(cls: type[EVar], dct: Mapping[str, Any]) -> EVar:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[EVar], dct: Mapping[str, Any], patterns: list[Pattern]) -> EVar:
+        assert not patterns
         return EVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
 
@@ -368,8 +434,8 @@ class SVar(VarPattern):
         return 'SVar'
 
     @classmethod
-    def from_dict(cls: type[SVar], dct: Mapping[str, Any]) -> SVar:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[SVar], dct: Mapping[str, Any], patterns: list[Pattern]) -> SVar:
+        assert not patterns
         return SVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
 
@@ -391,17 +457,17 @@ class String(Pattern):
         return 'String'
 
     @classmethod
-    def from_dict(cls: type[String], dct: Mapping[str, Any]) -> String:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[String], dct: Mapping[str, Any], patterns: list[Pattern]) -> String:
+        assert not patterns
         return String(value=dct['value'])
 
     @property
     def patterns(self) -> tuple[()]:
         return ()
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'value': self.value}
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        assert not dicts
+        return {'tag': 'String', 'value': self.value}
 
     def write(self, output: IO[str]) -> None:
         output.write('"')
@@ -445,25 +511,23 @@ class App(Pattern):
         return 'App'
 
     @classmethod
-    def from_dict(cls: type[App], dct: Mapping[str, Any]) -> App:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[App], dct: Mapping[str, Any], patterns: list[Pattern]) -> App:
         return App(
             symbol=dct['name'],
             sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
-            args=tuple(Pattern.from_dict(arg) for arg in dct['args']),
+            args=patterns,
         )
 
     @property
     def patterns(self) -> tuple[Pattern, ...]:
         return self.args
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
         return {
-            'tag': self._tag(),
+            'tag': 'App',
             'name': self.symbol,
             'sorts': [sort.dict for sort in self.sorts],
-            'args': [pattern.dict for pattern in self.args],
+            'args': dicts,
         }
 
     def write(self, output: IO[str]) -> None:
@@ -527,8 +591,8 @@ class MLConn(MLPattern, WithSort):
 
 
 class NullaryConn(MLConn):
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        assert not dicts
         return {'tag': self._tag(), 'sort': self.sort.dict}
 
     @property
@@ -568,8 +632,8 @@ class Top(NullaryConn):
         return Top(sort=sort)
 
     @classmethod
-    def from_dict(cls: type[Top], dct: Mapping[str, Any]) -> Top:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Top], dct: Mapping[str, Any], patterns: list[Pattern]) -> Top:
+        assert not patterns
         return Top(sort=Sort.from_dict(dct['sort']))
 
 
@@ -605,8 +669,8 @@ class Bottom(NullaryConn):
         return Bottom(sort=sort)
 
     @classmethod
-    def from_dict(cls: type[Bottom], dct: Mapping[str, Any]) -> Bottom:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Bottom], dct: Mapping[str, Any], patterns: list[Pattern]) -> Bottom:
+        assert not patterns
         return Bottom(sort=Sort.from_dict(dct['sort']))
 
 
@@ -617,9 +681,9 @@ class UnaryConn(MLConn):
     def patterns(self) -> tuple[Pattern]:
         return (self.pattern,)
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'sort': self.sort.dict, 'arg': self.pattern.dict}
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        (arg,) = dicts
+        return {'tag': self._tag(), 'sort': self.sort.dict, 'arg': arg}
 
 
 @final
@@ -656,9 +720,9 @@ class Not(UnaryConn):
         return Not(sort=sort, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Not], dct: Mapping[str, Any]) -> Not:
-        cls._check_tag(dct)
-        return Not(sort=Sort.from_dict(dct['sort']), pattern=Pattern.from_dict(dct['arg']))
+    def _from_dict(cls: type[Not], dct: Mapping[str, Any], patterns: list[Pattern]) -> Not:
+        (pattern,) = patterns
+        return Not(sort=Sort.from_dict(dct['sort']), pattern=pattern)
 
 
 class BinaryConn(MLConn):
@@ -673,14 +737,9 @@ class BinaryConn(MLConn):
     def patterns(self) -> tuple[Pattern, Pattern]:
         return (self.left, self.right)
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {
-            'tag': self._tag(),
-            'sort': self.sort.dict,
-            'first': self.left.dict,
-            'second': self.right.dict,
-        }
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        first, second = dicts
+        return {'tag': self._tag(), 'sort': self.sort.dict, 'first': first, 'second': second}
 
 
 @final
@@ -725,13 +784,9 @@ class Implies(BinaryConn):
         return Implies(sort=sort, left=left, right=right)
 
     @classmethod
-    def from_dict(cls: type[Implies], dct: Mapping[str, Any]) -> Implies:
-        cls._check_tag(dct)
-        return Implies(
-            sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['first']),
-            right=Pattern.from_dict(dct['second']),
-        )
+    def _from_dict(cls: type[Implies], dct: Mapping[str, Any], patterns: list[Pattern]) -> Implies:
+        left, right = patterns
+        return Implies(sort=Sort.from_dict(dct['sort']), left=left, right=right)
 
 
 @final
@@ -776,13 +831,9 @@ class Iff(BinaryConn):
         return Iff(sort=sort, left=left, right=right)
 
     @classmethod
-    def from_dict(cls: type[Iff], dct: Mapping[str, Any]) -> Iff:
-        cls._check_tag(dct)
-        return Iff(
-            sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['first']),
-            right=Pattern.from_dict(dct['second']),
-        )
+    def _from_dict(cls: type[Iff], dct: Mapping[str, Any], patterns: list[Pattern]) -> Iff:
+        left, right = patterns
+        return Iff(sort=Sort.from_dict(dct['sort']), left=left, right=right)
 
 
 class MultiaryConn(MLConn):
@@ -795,13 +846,8 @@ class MultiaryConn(MLConn):
     def patterns(self) -> tuple[Pattern, ...]:
         return self.ops
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {
-            'tag': self._tag(),
-            'sort': self.sort.dict,
-            'patterns': [op.dict for op in self.ops],
-        }
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        return {'tag': self._tag(), 'sort': self.sort.dict, 'patterns': dicts}
 
 
 @final
@@ -845,12 +891,8 @@ class And(MultiaryConn):
         return And(sort=sort, ops=patterns)
 
     @classmethod
-    def from_dict(cls: type[And], dct: Mapping[str, Any]) -> And:
-        cls._check_tag(dct)
-        return And(
-            sort=Sort.from_dict(dct['sort']),
-            ops=tuple(Pattern.from_dict(op) for op in dct['patterns']),
-        )
+    def _from_dict(cls: type[And], dct: Mapping[str, Any], patterns: list[Pattern]) -> And:
+        return And(sort=Sort.from_dict(dct['sort']), ops=patterns)
 
 
 @final
@@ -894,12 +936,8 @@ class Or(MultiaryConn):
         return Or(sort=sort, ops=patterns)
 
     @classmethod
-    def from_dict(cls: type[Or], dct: Mapping[str, Any]) -> Or:
-        cls._check_tag(dct)
-        return Or(
-            sort=Sort.from_dict(dct['sort']),
-            ops=tuple(Pattern.from_dict(op) for op in dct['patterns']),
-        )
+    def _from_dict(cls: type[Or], dct: Mapping[str, Any], patterns: list[Pattern]) -> Or:
+        return Or(sort=Sort.from_dict(dct['sort']), ops=patterns)
 
 
 class MLQuant(MLPattern, WithSort):
@@ -919,14 +957,14 @@ class MLQuant(MLPattern, WithSort):
     def ctor_patterns(self) -> tuple[EVar, Pattern]:
         return (self.var, self.pattern)
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        (arg,) = dicts
         return {
             'tag': self._tag(),
             'sort': self.sort.dict,
             'var': self.var.name,
             'varSort': self.var.sort.dict,
-            'arg': self.pattern.dict,
+            'arg': arg,
         }
 
 
@@ -973,12 +1011,12 @@ class Exists(MLQuant):
         return Exists(sort=sort, var=var, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Exists], dct: Mapping[str, Any]) -> Exists:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Exists], dct: Mapping[str, Any], patterns: list[Pattern]) -> Exists:
+        (pattern,) = patterns
         return Exists(
             sort=Sort.from_dict(dct['sort']),
             var=EVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
-            pattern=Pattern.from_dict(dct['arg']),
+            pattern=pattern,
         )
 
 
@@ -1025,12 +1063,12 @@ class Forall(MLQuant):
         return Forall(sort=sort, var=var, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Forall], dct: Mapping[str, Any]) -> Forall:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Forall], dct: Mapping[str, Any], patterns: list[Pattern]) -> Forall:
+        (pattern,) = patterns
         return Forall(
             sort=Sort.from_dict(dct['sort']),
             var=EVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
-            pattern=Pattern.from_dict(dct['arg']),
+            pattern=pattern,
         )
 
 
@@ -1050,13 +1088,13 @@ class MLFixpoint(MLPattern):
     def ctor_patterns(self) -> tuple[SVar, Pattern]:
         return (self.var, self.pattern)
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        (arg,) = dicts
         return {
             'tag': self._tag(),
             'var': self.var.name,
             'varSort': self.var.sort.dict,
-            'arg': self.pattern.dict,
+            'arg': arg,
         }
 
 
@@ -1092,11 +1130,11 @@ class Mu(MLFixpoint):
         return Mu(var=var, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Mu], dct: Mapping[str, Any]) -> Mu:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Mu], dct: Mapping[str, Any], patterns: list[Pattern]) -> Mu:
+        (pattern,) = patterns
         return Mu(
             var=SVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
-            pattern=Pattern.from_dict(dct['arg']),
+            pattern=pattern,
         )
 
 
@@ -1132,11 +1170,11 @@ class Nu(MLFixpoint):
         return Nu(var=var, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Nu], dct: Mapping[str, Any]) -> Nu:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Nu], dct: Mapping[str, Any], patterns: list[Pattern]) -> Nu:
+        (pattern,) = patterns
         return Nu(
             var=SVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
-            pattern=Pattern.from_dict(dct['arg']),
+            pattern=pattern,
         )
 
 
@@ -1155,13 +1193,13 @@ class RoundPred(MLPred):
     def patterns(self) -> tuple[Pattern]:
         return (self.pattern,)
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        (arg,) = dicts
         return {
             'tag': self._tag(),
             'argSort': self.op_sort.dict,
             'sort': self.sort.dict,
-            'arg': self.pattern.dict,
+            'arg': arg,
         }
 
 
@@ -1207,12 +1245,12 @@ class Ceil(RoundPred):
         return Ceil(op_sort=op_sort, sort=sort, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Ceil], dct: Mapping[str, Any]) -> Ceil:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Ceil], dct: Mapping[str, Any], patterns: list[Pattern]) -> Ceil:
+        (pattern,) = patterns
         return Ceil(
             op_sort=Sort.from_dict(dct['argSort']),
             sort=Sort.from_dict(dct['sort']),
-            pattern=Pattern.from_dict(dct['arg']),
+            pattern=pattern,
         )
 
 
@@ -1258,12 +1296,12 @@ class Floor(RoundPred):
         return Floor(op_sort=op_sort, sort=sort, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Floor], dct: Mapping[str, Any]) -> Floor:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Floor], dct: Mapping[str, Any], patterns: list[Pattern]) -> Floor:
+        (pattern,) = patterns
         return Floor(
             op_sort=Sort.from_dict(dct['argSort']),
             sort=Sort.from_dict(dct['sort']),
-            pattern=Pattern.from_dict(dct['arg']),
+            pattern=pattern,
         )
 
 
@@ -1279,14 +1317,14 @@ class BinaryPred(MLPred):
     def patterns(self) -> tuple[Pattern, Pattern]:
         return (self.left, self.right)
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        first, second = dicts
         return {
             'tag': self._tag(),
             'argSort': self.op_sort.dict,
             'sort': self.sort.dict,
-            'first': self.left.dict,
-            'second': self.right.dict,
+            'first': first,
+            'second': second,
         }
 
 
@@ -1335,13 +1373,13 @@ class Equals(BinaryPred):
         return Equals(op_sort=op_sort, sort=sort, left=left, right=right)
 
     @classmethod
-    def from_dict(cls: type[Equals], dct: Mapping[str, Any]) -> Equals:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Equals], dct: Mapping[str, Any], patterns: list[Pattern]) -> Equals:
+        left, right = patterns
         return Equals(
             op_sort=Sort.from_dict(dct['argSort']),
             sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['first']),
-            right=Pattern.from_dict(dct['second']),
+            left=left,
+            right=right,
         )
 
 
@@ -1390,13 +1428,13 @@ class In(BinaryPred):
         return In(op_sort=op_sort, sort=sort, left=left, right=right)
 
     @classmethod
-    def from_dict(cls: type[In], dct: Mapping[str, Any]) -> In:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[In], dct: Mapping[str, Any], patterns: list[Pattern]) -> In:
+        left, right = patterns
         return In(
             op_sort=Sort.from_dict(dct['argSort']),
             sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['first']),
-            right=Pattern.from_dict(dct['second']),
+            left=left,
+            right=right,
         )
 
 
@@ -1440,20 +1478,20 @@ class Next(MLRewrite):
         return Next(sort=sort, pattern=pattern)
 
     @classmethod
-    def from_dict(cls: type[Next], dct: Mapping[str, Any]) -> Next:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Next], dct: Mapping[str, Any], patterns: list[Pattern]) -> Next:
+        (pattern,) = patterns
         return Next(
             sort=Sort.from_dict(dct['sort']),
-            pattern=Pattern.from_dict(dct['dest']),
+            pattern=pattern,
         )
 
     @property
     def patterns(self) -> tuple[Pattern]:
         return (self.pattern,)
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'sort': self.sort.dict, 'dest': self.pattern.dict}
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        (dest,) = dicts
+        return {'tag': 'Next', 'sort': self.sort.dict, 'dest': dest}
 
 
 @final
@@ -1498,25 +1536,25 @@ class Rewrites(MLRewrite):
         return Rewrites(sort=sort, left=left, right=right)
 
     @classmethod
-    def from_dict(cls: type[Rewrites], dct: Mapping[str, Any]) -> Rewrites:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[Rewrites], dct: Mapping[str, Any], patterns: list[Pattern]) -> Rewrites:
+        left, right = patterns
         return Rewrites(
             sort=Sort.from_dict(dct['sort']),
-            left=Pattern.from_dict(dct['source']),
-            right=Pattern.from_dict(dct['dest']),
+            left=left,
+            right=right,
         )
 
     @property
     def patterns(self) -> tuple[Pattern, Pattern]:
         return (self.left, self.right)
 
-    @property
-    def dict(self) -> dict[str, Any]:
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        source, dest = dicts
         return {
-            'tag': self._tag(),
+            'tag': 'Rewrites',
             'sort': self.sort.dict,
-            'source': self.left.dict,
-            'dest': self.right.dict,
+            'source': source,
+            'dest': dest,
         }
 
 
@@ -1555,8 +1593,8 @@ class DV(MLPattern, WithSort):
         return DV(sort=sort, value=value)
 
     @classmethod
-    def from_dict(cls: type[DV], dct: Mapping[str, Any]) -> DV:
-        cls._check_tag(dct)
+    def _from_dict(cls: type[DV], dct: Mapping[str, Any], patterns: list[Pattern]) -> DV:
+        assert not patterns
         return DV(
             sort=Sort.from_dict(dct['sort']),
             value=String(dct['value']),
@@ -1574,9 +1612,9 @@ class DV(MLPattern, WithSort):
     def ctor_patterns(self) -> tuple[String]:
         return (self.value,)
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'sort': self.sort.dict, 'value': self.value.value}
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        assert not dicts
+        return {'tag': 'DV', 'sort': self.sort.dict, 'value': self.value.value}
 
 
 class MLSyntaxSugar(MLPattern):
@@ -1604,9 +1642,9 @@ class Assoc(MLSyntaxSugar):
     def ctor_patterns(self) -> tuple[App]:
         return (self.app,)
 
-    @property
-    def dict(self) -> dict[str, Any]:
-        return {'tag': self._tag(), 'app': self.app.dict}
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        (app,) = dicts
+        return {'tag': self._tag(), 'app': app}
 
 
 @final
@@ -1630,7 +1668,7 @@ class LeftAssoc(Assoc):
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
         ret = self.app.args[0]
         for a in self.app.args[1:]:
-            ret = App(self.app.symbol, [], [ret, a])
+            ret = App(self.app.symbol, (), (ret, a))
         return ret
 
     @classmethod
@@ -1655,9 +1693,10 @@ class LeftAssoc(Assoc):
         return LeftAssoc(app=app)
 
     @classmethod
-    def from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any]) -> LeftAssoc:
-        cls._check_tag(dct)
-        return LeftAssoc(app=App.from_dict(dct['app']))
+    def _from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> LeftAssoc:
+        (app,) = patterns
+        assert isinstance(app, App)
+        return LeftAssoc(app=app)
 
 
 @final
@@ -1681,7 +1720,7 @@ class RightAssoc(Assoc):
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
         ret = self.app.args[-1]
         for a in reversed(self.app.args[:-1]):
-            ret = App(self.app.symbol, [], [a, ret])
+            ret = App(self.app.symbol, (), (a, ret))
         return ret
 
     @classmethod
@@ -1706,9 +1745,10 @@ class RightAssoc(Assoc):
         return RightAssoc(app=app)
 
     @classmethod
-    def from_dict(cls: type[RightAssoc], dct: Mapping[str, Any]) -> RightAssoc:
-        cls._check_tag(dct)
-        return RightAssoc(app=App.from_dict(dct['app']))
+    def _from_dict(cls: type[RightAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> RightAssoc:
+        (app,) = patterns
+        assert isinstance(app, App)
+        return RightAssoc(app=app)
 
 
 ML_SYMBOLS: Final = {
@@ -1747,9 +1787,7 @@ class WithAttrs(ABC):
 
 
 class Sentence(Kore, WithAttrs):
-    @classmethod
-    def from_dict(cls: type[Sentence], dct: Mapping[str, Any]) -> Sentence:
-        return unsupported()
+    ...
 
 
 @final
@@ -1772,18 +1810,6 @@ class Import(Sentence):
 
     def let_attrs(self: Import, attrs: Iterable[App]) -> Import:
         return self.let(attrs=attrs)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Import'
-
-    @classmethod
-    def from_dict(cls: type[Import], dct: Mapping[str, Any]) -> Import:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
 
     def write(self, output: IO[str]) -> None:
         output.write('import ')
@@ -1834,18 +1860,6 @@ class SortDecl(Sentence):
     def let_attrs(self: SortDecl, attrs: Iterable[App]) -> SortDecl:
         return self.let(attrs=attrs)
 
-    @classmethod
-    def _tag(cls) -> str:
-        return 'SortDecl'
-
-    @classmethod
-    def from_dict(cls: type[SortDecl], dct: Mapping[str, Any]) -> SortDecl:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
-
     def write(self, output: IO[str]) -> None:
         keyword = 'hooked-sort ' if self.hooked else 'sort '
         output.write(keyword)
@@ -1874,18 +1888,6 @@ class Symbol(Kore):
         name = name if name is not None else self.name
         vars = vars if vars is not None else self.vars
         return Symbol(name=name, vars=vars)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Symbol'
-
-    @classmethod
-    def from_dict(cls: type[Symbol], dct: Mapping[str, Any]) -> Symbol:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
 
     def write(self, output: IO[str]) -> None:
         output.write(self.name)
@@ -1936,18 +1938,6 @@ class SymbolDecl(Sentence):
 
     def let_attrs(self: SymbolDecl, attrs: Iterable[App]) -> SymbolDecl:
         return self.let(attrs=attrs)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'SymbolDecl'
-
-    @classmethod
-    def from_dict(cls: type[SymbolDecl], dct: Mapping[str, Any]) -> SymbolDecl:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
 
     def write(self, output: IO[str]) -> None:
         keyword = 'hooked-symbol ' if self.hooked else 'symbol '
@@ -2030,18 +2020,6 @@ class AliasDecl(Sentence):
     def let_attrs(self: AliasDecl, attrs: Iterable[App]) -> AliasDecl:
         return self.let(attrs=attrs)
 
-    @classmethod
-    def _tag(cls) -> str:
-        return 'AliasDecl'
-
-    @classmethod
-    def from_dict(cls: type[AliasDecl], dct: Mapping[str, Any]) -> AliasDecl:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
-
     def write(self, output: IO[str]) -> None:
         output.write('alias ')
         self.alias.write(output)
@@ -2063,10 +2041,6 @@ class AxiomLike(Sentence):
 
     vars: tuple[SortVar, ...]
     pattern: Pattern
-
-    @classmethod
-    def from_dict(cls: type[AxiomLike], dct: Mapping[str, Any]) -> AxiomLike:
-        return unsupported()
 
     def write(self, output: IO[str]) -> None:
         output.write(self._label)
@@ -2108,18 +2082,6 @@ class Axiom(AxiomLike):
     def let_attrs(self: Axiom, attrs: Iterable[App]) -> Axiom:
         return self.let(attrs=attrs)
 
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Axiom'
-
-    @classmethod
-    def from_dict(cls: type[Axiom], dct: Mapping[str, Any]) -> Axiom:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
-
 
 @final
 @dataclass(frozen=True)
@@ -2149,18 +2111,6 @@ class Claim(AxiomLike):
 
     def let_attrs(self: Claim, attrs: Iterable[App]) -> Claim:
         return self.let(attrs=attrs)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Claim'
-
-    @classmethod
-    def from_dict(cls: type[Claim], dct: Mapping[str, Any]) -> Claim:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
 
 
 @final
@@ -2195,18 +2145,6 @@ class Module(Kore, WithAttrs, Iterable[Sentence]):
 
     def let_attrs(self: Module, attrs: Iterable[App]) -> Module:
         return self.let(attrs=attrs)
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Module'
-
-    @classmethod
-    def from_dict(cls: type[Module], dct: Mapping[str, Any]) -> Module:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
 
     def write(self, output: IO[str]) -> None:
         output.write('module ')
@@ -2248,18 +2186,6 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
     def let_attrs(self: Definition, attrs: Iterable[App]) -> Definition:
         return self.let(attrs=attrs)
 
-    @classmethod
-    def _tag(cls) -> str:
-        return 'Definition'
-
-    @classmethod
-    def from_dict(cls: type[Definition], dct: Mapping[str, Any]) -> Definition:
-        return unsupported()
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        return unsupported()
-
     def write(self, output: IO[str]) -> None:
         output.write('[')
         _write_sep_by_comma(self.attrs, output)
@@ -2269,11 +2195,11 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
             module.write(output)
 
 
-def kore_term(dct: Mapping[str, Any], cls: type[T] = Kore) -> T:  # type: ignore
+def kore_term(dct: Mapping[str, Any]) -> Pattern:
     if dct['format'] != 'KORE':
         raise ValueError(f"Invalid format: {dct['format']}")
 
     if dct['version'] != 1:
         raise ValueError(f"Invalid version: {dct['version']}")
 
-    return cls.from_dict(dct['term'])
+    return Pattern.from_dict(dct['term'])

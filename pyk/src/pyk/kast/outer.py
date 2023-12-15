@@ -46,120 +46,21 @@ class KOuter(KAst):
     Outer syntax is K specific datastructures, including modules, definitions, imports, user-syntax declarations, rules, contexts, and claims.
     """
 
-    _OUTER_NODES: Final = {
-        'KTerminal',
-        'KRegexTerminal',
-        'KNonTerminal',
-        'KProduction',
-        'KSyntaxSort',
-        'KSortSynonym',
-        'KSyntaxLexical',
-        'KSyntaxAssociativity',
-        'KSyntaxPriority',
-        'KBubble',
-        'KRule',
-        'KClaim',
-        'KContext',
-        'KImport',
-        'KFlatModule',
-        'KFlatModuleList',
-        'KRequire',
-        'KDefinition',
-    }
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls: type[KOuter], d: Mapping[str, Any]) -> KOuter:
-        """Deserialize a `KOuter` from dictionary representation."""
-        node = d['node']
-        if node in KOuter._OUTER_NODES:
-            return globals()[node].from_dict(d)
-
-        raise ValueError(f'Expected "node" value in: {KOuter._OUTER_NODES}, got: {node}')
+    ...
 
 
 class KProductionItem(KOuter):
     """Represents the elements used to declare components of productions in EBNF style."""
 
-    _PRODUCTION_ITEM_NODES: Final = {'KTerminal', 'KRegexTerminal', 'KNonTerminal'}
+    _NODES: Final = {'KTerminal', 'KRegexTerminal', 'KNonTerminal'}
 
-    @classmethod
-    @abstractmethod
-    def from_dict(cls: type[KProductionItem], d: Mapping[str, Any]) -> KProductionItem:
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KProductionItem:
         node = d['node']
-        if node in KProductionItem._PRODUCTION_ITEM_NODES:
-            return globals()[node].from_dict(d)
-
-        raise ValueError(f'Expected "node" value in: {KProductionItem._PRODUCTION_ITEM_NODES}, got: {node}')
-
-
-class KSentence(KOuter, WithKAtt):
-    """Represents an individual declaration in a K module."""
-
-    _SENTENCE_NODES: Final = {
-        'KProduction',
-        'KSyntaxSort',
-        'KSortSynonym',
-        'KSyntaxLexical',
-        'KSyntaxAssociativity',
-        'KSyntaxPriority',
-        'KBubble',
-        'KRule',
-        'KClaim',
-        'KContext',
-    }
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls: type[KSentence], d: Mapping[str, Any]) -> KSentence:
-        node = d['node']
-        if node in KSentence._SENTENCE_NODES:
-            return globals()[node].from_dict(d)
-
-        raise ValueError(f'Expected "node" value in: {KSentence._SENTENCE_NODES}, got: {node}')
-
-    @property
-    def label(self) -> str:
-        """Return a (hopefully) unique label associated with the given `KSentence`.
-
-        :return: Unique label for the given sentence, either (in order):
-          - User supplied `label` attribute (or supplied in rule label),
-          - Unique identifier computed and inserted by the frontend, or
-          - Source location for the sentence.
-        """
-        if 'label' in self.att:
-            return self.att['label']
-        elif 'UNIQUE_ID' in self.att:
-            return self.att['UNIQUE_ID']
-        else:
-            _LOGGER.warning(f'Found a sentence without label or UNIQUE_ID: {self}')
-            if KAtt.SOURCE in self.att and KAtt.LOCATION in self.att:
-                return f'{self.att[KAtt.SOURCE]}:{self.att[KAtt.LOCATION]}'
-            else:
-                raise ValueError(f'Found sentence without label, UNIQUE_ID, or SOURCE:LOCATION: {self}')
-
-
-@final
-@dataclass(frozen=True)
-class KTerminal(KProductionItem):
-    """Represents a string literal component of a production in EBNF grammar."""
-
-    value: str
-
-    def __init__(self, value: str):
-        object.__setattr__(self, 'value', value)
-
-    @classmethod
-    def from_dict(cls: type[KTerminal], d: Mapping[str, Any]) -> KTerminal:
-        cls._check_node(d)
-        return KTerminal(value=d['value'])
-
-    def to_dict(self) -> dict[str, Any]:
-        return {'node': 'KTerminal', 'value': self.value}
-
-    def let(self, *, value: str | None = None) -> KTerminal:
-        value = value if value is not None else self.value
-        return KTerminal(value=value)
+        if node not in KProductionItem._NODES:
+            raise ValueError(f'Invalid KProductionItem node: {node!r}')
+        cls = globals()[node]
+        return cls._from_dict(d)
 
 
 @final
@@ -177,8 +78,7 @@ class KRegexTerminal(KProductionItem):
         object.__setattr__(self, 'follow_regex', follow_regex)
 
     @classmethod
-    def from_dict(cls: type[KRegexTerminal], d: Mapping[str, Any]) -> KRegexTerminal:
-        cls._check_node(d)
+    def _from_dict(cls: type[KRegexTerminal], d: Mapping[str, Any]) -> KRegexTerminal:
         return KRegexTerminal(
             regex=d['regex'],
             precede_regex=d['precedeRegex'],
@@ -215,8 +115,7 @@ class KNonTerminal(KProductionItem):
         object.__setattr__(self, 'name', name)
 
     @classmethod
-    def from_dict(cls: type[KNonTerminal], d: Mapping[str, Any]) -> KNonTerminal:
-        cls._check_node(d)
+    def _from_dict(cls: type[KNonTerminal], d: Mapping[str, Any]) -> KNonTerminal:
         name = d['name'] if 'name' in d else None
         return KNonTerminal(sort=KSort.from_dict(d['sort']), name=name)
 
@@ -230,6 +129,73 @@ class KNonTerminal(KProductionItem):
         sort = sort or self.sort
         name = name or self.name
         return KNonTerminal(sort=sort, name=name)
+
+
+@final
+@dataclass(frozen=True)
+class KTerminal(KProductionItem):
+    """Represents a string literal component of a production in EBNF grammar."""
+
+    value: str
+
+    def __init__(self, value: str):
+        object.__setattr__(self, 'value', value)
+
+    @classmethod
+    def _from_dict(cls: type[KTerminal], d: Mapping[str, Any]) -> KTerminal:
+        return KTerminal(value=d['value'])
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'node': 'KTerminal', 'value': self.value}
+
+    def let(self, *, value: str | None = None) -> KTerminal:
+        value = value if value is not None else self.value
+        return KTerminal(value=value)
+
+
+class KSentence(KOuter, WithKAtt):
+    """Represents an individual declaration in a K module."""
+
+    _NODES: Final = {
+        'KProduction',
+        'KSyntaxSort',
+        'KSortSynonym',
+        'KSyntaxLexical',
+        'KSyntaxAssociativity',
+        'KSyntaxPriority',
+        'KBubble',
+        'KRule',
+        'KClaim',
+        'KContext',
+    }
+
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KSentence:
+        node = d['node']
+        if node not in KSentence._NODES:
+            raise ValueError(f'Invalid KSentence node: {node!r}')
+        cls = globals()[node]
+        return cls._from_dict(d)
+
+    @property
+    def label(self) -> str:
+        """Return a (hopefully) unique label associated with the given `KSentence`.
+
+        :return: Unique label for the given sentence, either (in order):
+          - User supplied `label` attribute (or supplied in rule label),
+          - Unique identifier computed and inserted by the frontend, or
+          - Source location for the sentence.
+        """
+        if 'label' in self.att:
+            return self.att['label']
+        elif 'UNIQUE_ID' in self.att:
+            return self.att['UNIQUE_ID']
+        else:
+            _LOGGER.warning(f'Found a sentence without label or UNIQUE_ID: {self}')
+            if KAtt.SOURCE in self.att and KAtt.LOCATION in self.att:
+                return f'{self.att[KAtt.SOURCE]}:{self.att[KAtt.LOCATION]}'
+            else:
+                raise ValueError(f'Found sentence without label, UNIQUE_ID, or SOURCE:LOCATION: {self}')
 
 
 @final
@@ -276,8 +242,7 @@ class KProduction(KSentence):
         return [knt.sort for knt in self.items if type(knt) is KNonTerminal]
 
     @classmethod
-    def from_dict(cls: type[KProduction], d: Mapping[str, Any]) -> KProduction:
-        cls._check_node(d)
+    def _from_dict(cls: type[KProduction], d: Mapping[str, Any]) -> KProduction:
         return KProduction(
             sort=KSort.from_dict(d['sort']),
             items=(KProductionItem.from_dict(item) for item in d['productionItems']),
@@ -334,8 +299,7 @@ class KSyntaxSort(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KSyntaxSort], d: Mapping[str, Any]) -> KSyntaxSort:
-        cls._check_node(d)
+    def _from_dict(cls: type[KSyntaxSort], d: Mapping[str, Any]) -> KSyntaxSort:
         return KSyntaxSort(
             sort=KSort.from_dict(d['sort']),
             params=(KSort.from_dict(param) for param in d['params']),
@@ -381,8 +345,7 @@ class KSortSynonym(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KSortSynonym], d: Mapping[str, Any]) -> KSortSynonym:
-        cls._check_node(d)
+    def _from_dict(cls: type[KSortSynonym], d: Mapping[str, Any]) -> KSortSynonym:
         return KSortSynonym(
             new_sort=KSort.from_dict(d['newSort']),
             old_sort=KSort.from_dict(d['oldSort']),
@@ -424,8 +387,7 @@ class KSyntaxLexical(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KSyntaxLexical], d: Mapping[str, Any]) -> KSyntaxLexical:
-        cls._check_node(d)
+    def _from_dict(cls: type[KSyntaxLexical], d: Mapping[str, Any]) -> KSyntaxLexical:
         return KSyntaxLexical(
             name=d['name'],
             regex=d['regex'],
@@ -471,8 +433,7 @@ class KSyntaxAssociativity(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KSyntaxAssociativity], d: Mapping[str, Any]) -> KSyntaxAssociativity:
-        cls._check_node(d)
+    def _from_dict(cls: type[KSyntaxAssociativity], d: Mapping[str, Any]) -> KSyntaxAssociativity:
         return KSyntaxAssociativity(
             assoc=KAssoc(d['assoc']),
             tags=d['tags'],
@@ -512,8 +473,7 @@ class KSyntaxPriority(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KSyntaxPriority], d: Mapping[str, Any]) -> KSyntaxPriority:
-        cls._check_node(d)
+    def _from_dict(cls: type[KSyntaxPriority], d: Mapping[str, Any]) -> KSyntaxPriority:
         return KSyntaxPriority(
             priorities=d['priorities'],
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
@@ -550,8 +510,7 @@ class KBubble(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KBubble], d: Mapping[str, Any]) -> KBubble:
-        cls._check_node(d)
+    def _from_dict(cls: type[KBubble], d: Mapping[str, Any]) -> KBubble:
         return KBubble(
             sentence_type=d['sentenceType'],
             content=d['content'],
@@ -583,17 +542,6 @@ class KRuleLike(KSentence):
     requires: KInner
     ensures: KInner
 
-    _RULE_LIKE_NODES: Final = {'KRule', 'KClaim'}
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls: type[KRuleLike], d: Mapping[str, Any]) -> KRuleLike:
-        node = d['node']
-        if node in KRuleLike._RULE_LIKE_NODES:
-            return globals()[node].from_dict(d)
-
-        raise ValueError(f'Expected "node" value in: {KRuleLike._RULE_LIKE_NODES}, got: {node}')
-
     @abstractmethod
     def let(
         self: RL,
@@ -623,8 +571,7 @@ class KRule(KRuleLike):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KRule], d: Mapping[str, Any]) -> KRule:
-        cls._check_node(d)
+    def _from_dict(cls: type[KRule], d: Mapping[str, Any]) -> KRule:
         return KRule(
             body=KInner.from_dict(d['body']),
             requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
@@ -680,8 +627,7 @@ class KClaim(KRuleLike):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KClaim], d: Mapping[str, Any]) -> KClaim:
-        cls._check_node(d)
+    def _from_dict(cls: type[KClaim], d: Mapping[str, Any]) -> KClaim:
         return KClaim(
             body=KInner.from_dict(d['body']),
             requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
@@ -749,8 +695,7 @@ class KContext(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: type[KContext], d: Mapping[str, Any]) -> KContext:
-        cls._check_node(d)
+    def _from_dict(cls: type[KContext], d: Mapping[str, Any]) -> KContext:
         return KContext(
             body=KInner.from_dict(d['body']),
             requires=KInner.from_dict(d['requires']) if d.get('requires') else TRUE,
@@ -787,9 +732,8 @@ class KImport(KOuter):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'public', public)
 
-    @classmethod
-    def from_dict(cls: type[KImport], d: Mapping[str, Any]) -> KImport:
-        cls._check_node(d)
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KImport:
         return KImport(name=d['name'], public=d['isPublic'])
 
     def to_dict(self) -> dict[str, Any]:
@@ -868,9 +812,8 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
         """Return all the `KClaim` declared in this module."""
         return tuple(sentence for sentence in self if type(sentence) is KClaim)
 
-    @classmethod
-    def from_dict(cls: type[KFlatModule], d: Mapping[str, Any]) -> KFlatModule:
-        cls._check_node(d)
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KFlatModule:
         return KFlatModule(
             name=d['name'],
             sentences=(KSentence.from_dict(sentence) for sentence in d['localSentences']),
@@ -917,9 +860,8 @@ class KFlatModuleList(KOuter):
         object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, 'modules', tuple(modules))
 
-    @classmethod
-    def from_dict(cls: type[KFlatModuleList], d: Mapping[str, Any]) -> KFlatModuleList:
-        cls._check_node(d)
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KFlatModuleList:
         return KFlatModuleList(main_module=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
     def to_dict(self) -> dict[str, Any]:
@@ -945,9 +887,8 @@ class KRequire(KOuter):
     def __init__(self, require: str):
         object.__setattr__(self, 'require', require)
 
-    @classmethod
-    def from_dict(cls: type[KRequire], d: Mapping[str, Any]) -> KRequire:
-        cls._check_node(d)
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KRequire:
         return KRequire(require=d['require'])
 
     def to_dict(self) -> dict[str, Any]:
@@ -1005,9 +946,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     def __iter__(self) -> Iterator[KFlatModule]:
         return iter(self.all_modules)
 
-    @classmethod
-    def from_dict(cls: type[KDefinition], d: Mapping[str, Any]) -> KDefinition:
-        cls._check_node(d)
+    @staticmethod
+    def from_dict(d: Mapping[str, Any]) -> KDefinition:
         return KDefinition(
             main_module_name=d['mainModule'],
             all_modules=(KFlatModule.from_dict(module) for module in d['modules']),
@@ -1521,4 +1461,4 @@ def read_kast_definition(path: str | PathLike) -> KDefinition:
         _LOGGER.info(f'Loading JSON definition: {path}')
         json_defn = json.load(f)
         _LOGGER.info(f'Converting JSON definition to Kast: {path}')
-        return kast_term(json_defn, KDefinition)
+        return KDefinition.from_dict(kast_term(json_defn))
