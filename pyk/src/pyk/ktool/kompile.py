@@ -326,6 +326,7 @@ class KompileArgs:
     hook_namespaces: tuple[str, ...]
     emit_json: bool
     gen_bison_parser: bool
+    gen_glr_bison_parser: bool
     bison_parser_library: bool
     post_process: str | None
     read_only: bool
@@ -341,6 +342,7 @@ class KompileArgs:
         hook_namespaces: Iterable[str] = (),
         emit_json: bool = True,
         gen_bison_parser: bool = False,
+        gen_glr_bison_parser: bool = False,
         bison_parser_library: bool = False,
         post_process: str | None = None,
         read_only: bool = False,
@@ -357,6 +359,7 @@ class KompileArgs:
         object.__setattr__(self, 'hook_namespaces', hook_namespaces)
         object.__setattr__(self, 'emit_json', emit_json)
         object.__setattr__(self, 'gen_bison_parser', gen_bison_parser)
+        object.__setattr__(self, 'gen_glr_bison_parser', gen_glr_bison_parser)
         object.__setattr__(self, 'bison_parser_library', bison_parser_library)
         object.__setattr__(self, 'post_process', post_process)
         object.__setattr__(self, 'read_only', read_only)
@@ -384,6 +387,9 @@ class KompileArgs:
 
         if self.gen_bison_parser:
             args += ['--gen-bison-parser']
+
+        if self.gen_glr_bison_parser:
+            args += ['--gen-glr-bison-parser']
 
         if self.bison_parser_library:
             args += ['--bison-parser-library']
