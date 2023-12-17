@@ -259,12 +259,21 @@ public class SortInferencer {
       // Note that we do actually need the LHS's declared sort. The LHS's inferred sort
       // is a variable X with a bound L <: X, and constraining against X would just add a
       // new lower bound aka permit widening.
+      //
+      // It's also safe to assume the LHS is not an Ambiguity due to PushTopAmbiguitiesUp
       ProductionReference lhsDeclaredPr = (ProductionReference) stripBrackets(tc.get(0));
       BoundedSort lhsDeclaredSort =
           driver.sortToBoundedSort(lhsDeclaredPr.production().sort(), lhsDeclaredPr);
       BoundedSort rhsSort = infer(tc.get(1), false, driver);
       driver.constrain(rhsSort, lhsDeclaredSort, (ProductionReference) tc.get(1));
-      return lhsSort;
+
+      // Handle usual production constraints
+      BoundedSort rewriteParam = driver.sortToBoundedSort(tc.production().sort(), tc);
+      driver.constrain(lhsSort, rewriteParam, tc);
+      driver.constrain(rhsSort, rewriteParam, tc);
+      BoundedSort resSort = new BoundedSort.Variable();
+      driver.constrain(rewriteParam, resSort, tc);
+      return resSort;
     }
 
     for (int prodI = 0, tcI = 0; prodI < tc.production().items().size(); prodI++) {
