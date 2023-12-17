@@ -142,7 +142,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     this.typeInferenceDebug = typeInferenceDebug;
     this.typeInferenceMode =
         typeInferenceMode == InnerParsingOptions.TypeInferenceMode.DEFAULT
-            ? InnerParsingOptions.TypeInferenceMode.Z3
+            ? InnerParsingOptions.TypeInferenceMode.CHECKED
             : typeInferenceMode;
     this.partialParseDebug = partialParseDebug;
   }
