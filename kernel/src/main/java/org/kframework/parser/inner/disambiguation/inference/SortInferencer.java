@@ -19,7 +19,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.parser.Ambiguity;
@@ -88,10 +87,10 @@ public class SortInferencer {
 
   /**
    * Determine whether a Term is supported by the current SortInferencer algorithm. Supported terms
-   * can contain neither ambiguities, strict casts, nor parametric sorts.
+   * can contain neither ambiguities nor parametric sorts.
    */
   public static boolean isSupported(Term t) {
-    return !hasAmbiguity(t) && !hasStrictCast(t) && !hasParametricSorts(t);
+    return !hasAmbiguity(t) && !hasParametricSorts(t);
   }
 
   private static boolean hasAmbiguity(Term t) {
@@ -102,24 +101,6 @@ public class SortInferencer {
       return false;
     }
     return ((TermCons) t).items().stream().anyMatch(SortInferencer::hasAmbiguity);
-  }
-
-  private static boolean hasStrictCast(Term t) {
-    if (t instanceof Ambiguity amb) {
-      return amb.items().stream().anyMatch(SortInferencer::hasStrictCast);
-    }
-    ProductionReference pr = (ProductionReference) t;
-    if (pr.production().klabel().isDefined()) {
-      KLabel klabel = pr.production().klabel().get();
-      String label = klabel.name();
-      if (label.equals("#SyntacticCast") || label.equals("#SyntacticCastBraced")) {
-        return true;
-      }
-    }
-    if (t instanceof Constant) {
-      return false;
-    }
-    return ((TermCons) t).items().stream().anyMatch(SortInferencer::hasStrictCast);
   }
 
   private static boolean hasParametricSorts(Term t) {
@@ -271,23 +252,30 @@ public class SortInferencer {
       BoundedSort rewriteParam = driver.sortToBoundedSort(tc.production().sort(), tc);
       driver.constrain(lhsSort, rewriteParam, tc);
       driver.constrain(rhsSort, rewriteParam, tc);
-      BoundedSort resSort = new BoundedSort.Variable();
-      driver.constrain(rewriteParam, resSort, tc);
-      return resSort;
+      return driver.returnSort(tc);
+    }
+
+    if (tc.production()
+        .klabel()
+        .filter(k -> k.name().equals("#SyntacticCast") || k.name().equals("#SyntacticCastBraced"))
+        .isDefined()) {
+      BoundedSort castedSort = driver.sortToBoundedSort(tc.production().sort(), tc);
+      BoundedSort childSort = infer(tc.get(0), isAnywhereRule, driver);
+      driver.constrain(castedSort, childSort, tc);
+      driver.constrain(childSort, castedSort, tc);
+      return driver.returnSort(tc);
     }
 
     for (int prodI = 0, tcI = 0; prodI < tc.production().items().size(); prodI++) {
       if (!(tc.production().items().apply(prodI) instanceof NonTerminal nt)) {
         continue;
       }
-      BoundedSort expectedSort = driver.sortToBoundedSort(nt.sort(), pr);
+      BoundedSort expectedSort = driver.sortToBoundedSort(nt.sort(), tc);
       BoundedSort childSort = infer(tc.get(tcI), isAnywhereRule, driver);
-      driver.constrain(childSort, expectedSort, pr);
+      driver.constrain(childSort, expectedSort, tc);
       tcI++;
     }
-    BoundedSort resSort = new BoundedSort.Variable();
-    driver.constrain(driver.sortToBoundedSort(tc.production().sort(), pr), resSort, pr);
-    return resSort;
+    return driver.returnSort(tc);
   }
 
   /**

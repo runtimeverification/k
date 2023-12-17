@@ -75,6 +75,12 @@ public final class InferenceDriver {
     return new BoundedSort.Constructor(sort.head());
   }
 
+  public BoundedSort returnSort(ProductionReference pr) throws ConstraintError {
+    BoundedSort resSort = new BoundedSort.Variable();
+    constrain(sortToBoundedSort(pr.production().sort(), pr), resSort, pr);
+    return resSort;
+  }
+
   /**
    * Update sub-/super-type constraints to record the fact that lhs <: rhs.
    *
