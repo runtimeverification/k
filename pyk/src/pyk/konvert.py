@@ -261,19 +261,13 @@ def kore_to_kast(kast_defn: KDefinition, kore: Pattern) -> KInner:
 
 
 def _kore_to_kast(pattern: Pattern) -> KInner:
-    stack: list = [
-        pattern,
-        (pattern.app,) if isinstance(pattern, Assoc) else pattern.patterns,
-        [],
-    ]
-
+    stack: list = [pattern.pattern if isinstance(pattern, Assoc) else pattern, []]
     while True:
         terms = stack[-1]
-        patterns = stack[-2]
-        pattern = stack[-3]
+        pattern = stack[-2]
+        patterns = pattern.patterns
         idx = len(terms) - len(patterns)
         if not idx:
-            stack.pop()
             stack.pop()
             stack.pop()
             term = _pattern_to_kast(pattern, terms)
@@ -282,8 +276,7 @@ def _kore_to_kast(pattern: Pattern) -> KInner:
             stack[-1].append(term)
         else:
             pattern = patterns[idx]
-            stack.append(pattern)
-            stack.append((pattern.app,) if isinstance(pattern, Assoc) else pattern.patterns)
+            stack.append(pattern.pattern if isinstance(pattern, Assoc) else pattern)
             stack.append([])
 
 
@@ -343,24 +336,21 @@ def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
         case And(sort, _):
             return mlAnd(terms, sort=_sort_to_kast(sort))
 
-        case Implies(sort, left, right):
-            larg = _kore_to_kast(left)
-            rarg = _kore_to_kast(right)
+        case Implies(sort, _, _):
+            larg, rarg = terms
             return mlImplies(larg, rarg, sort=_sort_to_kast(sort))
 
-        case Not(sort, pattern):
-            karg = _kore_to_kast(pattern)
+        case Not(sort, _):
+            (karg,) = terms
             return mlNot(karg, sort=_sort_to_kast(sort))
 
-        case Exists(sort, var, pattern):
-            kvar = _kore_to_kast(var)
-            body = _kore_to_kast(pattern)
-            assert isinstance(kvar, KVariable)
+        case Exists(sort, EVar(vname, vsort), _):
+            kvar = KVariable(name=unmunge(vname[3:]), sort=_sort_to_kast(vsort))
+            (body,) = terms
             return mlExists(kvar, body, sort=_sort_to_kast(sort))
 
-        case Equals(op_sort, sort, left, right):
-            larg = _kore_to_kast(left)
-            rarg = _kore_to_kast(right)
+        case Equals(op_sort, sort, _, _):
+            larg, rarg = terms
             return mlEquals(
                 larg,
                 rarg,
@@ -368,16 +358,13 @@ def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
                 sort=_sort_to_kast(sort),
             )
 
-        case Ceil(op_sort, sort, pattern):
-            karg = _kore_to_kast(pattern)
+        case Ceil(op_sort, sort, _):
+            (karg,) = terms
             return mlCeil(
                 karg,
                 arg_sort=_sort_to_kast(op_sort),
                 sort=_sort_to_kast(sort),
             )
-
-        case Assoc():
-            return _kore_to_kast(pattern.pattern)
 
         case _:
             raise ValueError(f'Unsupported Pattern: {pattern}')
