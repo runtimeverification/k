@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # Environment-Based Higher-Order Type Systems
@@ -64,4 +64,3 @@ therefore quite systematic: each substitution invocation was replaced with
 an appropriate type environment update/recovery.
 
 Go to [Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer](../lesson_4/README.md).
-

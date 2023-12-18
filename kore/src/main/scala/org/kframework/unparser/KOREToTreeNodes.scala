@@ -1,22 +1,17 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.unparser
 
-import collection._
-import java.util
 import org.kframework.attributes.Att
 import org.kframework.attributes.Location
 import org.kframework.attributes.Source
 import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore._
-import org.kframework.kore.KApply
-import org.kframework.kore.KToken
-import org.kframework.kore.KVariable
 import org.kframework.parser._
-import org.kframework.utils.StringUtil
 import org.kframework.POSet
 import org.pcollections.ConsPStack
-import JavaConverters._
+import scala.collection._
+import scala.collection.JavaConverters._
 
 object KOREToTreeNodes {
 
@@ -74,7 +69,7 @@ object KOREToTreeNodes {
       else
         KToken(v.name, Sorts.KVariable, v.att)
     case t: KToken =>
-      val sort = Sort(t.sort.name, t.sort.params: _*)
+      val sort = Sort(t.sort.name, t.sort.params)
       KToken(t.s, sort, t.att)
     case s: KSequence =>
       upList(mod)(s.items.asScala).foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) =>

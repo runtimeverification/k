@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner;
 
 import static org.kframework.kore.KORE.*;
@@ -36,7 +36,7 @@ public class RuleGrammarTest {
   private FileUtil files;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     gen = makeRuleGrammarGenerator();
   }
 
@@ -268,8 +268,10 @@ public class RuleGrammarTest {
             + "syntax Exp ::= Exp \",\" Exp [klabel('Plus), prefer] "
             + "| Exp \"*\" Exp [klabel('Mul)] "
             + "| r\"[0-9]+\" [token] "
+            + "| Foo(K, K, K) "
+            + "syntax K "
             + "endmodule";
-    parseRule("A::KLabel(B::K, C::K, D::K)", def, 0, false);
+    parseRule("Foo(B::K, C::K, D::K)", def, 0, false);
   }
 
   // test config cells

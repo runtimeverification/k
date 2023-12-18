@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 // NOTE: this definition is not runnable as is.
 // It is intended for documentation and academic purposes only.

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation.inference;
 
 import static org.kframework.Collections.*;
@@ -73,6 +73,12 @@ public final class InferenceDriver {
       return paramSorts.get(paramId);
     }
     return new BoundedSort.Constructor(sort.head());
+  }
+
+  public BoundedSort returnSort(ProductionReference pr) throws ConstraintError {
+    BoundedSort resSort = new BoundedSort.Variable();
+    constrain(sortToBoundedSort(pr.production().sort(), pr), resSort, pr);
+    return resSort;
   }
 
   /**

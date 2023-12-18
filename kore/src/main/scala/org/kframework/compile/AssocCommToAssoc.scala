@@ -1,7 +1,6 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile
 
-import collection.JavaConverters._
 import org.kframework.attributes.Att
 import org.kframework.definition.Module
 import org.kframework.definition.Rule
@@ -11,7 +10,7 @@ import org.kframework.kore.KORE.KApply
 import org.kframework.kore.KORE.KRewrite
 import org.kframework.kore.SortedADT.SortedKVariable
 import org.kframework.Collections._
-import scala.collection.Set
+import scala.collection.JavaConverters._
 
 /**
  * Compiler pass for merging the rules as expected by FastRuleMatcher
@@ -59,7 +58,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
     case Unapply.KApply(label: KLabel, children: List[K]) if isAssocComm(label) =>
       convert(label, children)
     case Unapply.KApply(label: KLabel, children: List[K]) =>
-      crossProduct(children.map(apply)).map(KApply(label, _: _*))
+      crossProduct(children.map(apply)).map(KApply(label, _))
     case Unapply.KRewrite(left: K, right: K) =>
       apply(left).map(KRewrite(_, right, Att.empty))
     case _ =>
@@ -103,7 +102,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
         elements.toList.permutations.toList
     }
 
-    convertedChildren.flatMap(cs => crossProduct(cs.map(apply))).map(KApply(label, _: _*))
+    convertedChildren.flatMap(cs => crossProduct(cs.map(apply))).map(KApply(label, _))
   }
 
   private def computeSubstitution(label: KLabel, children: List[K])(implicit
@@ -124,14 +123,14 @@ class AssocCommToAssoc extends Function[Module, Module] {
 
     frameOption match {
       case Some(v: KVariable) if v.name.startsWith("_DotVar") || v.att.contains(Att.ANONYMOUS) =>
-        Map(v -> KApply(label, (0 to elements.size).map(dotVariable(opSort, _)): _*))
+        Map(v -> KApply(label, (0 to elements.size).map(dotVariable(opSort, _))))
       case _ => Map()
     }
   }
 
   private def substituteFrame(k: K, name: String, substitute: K): K = k match {
     case Unapply.KApply(label: KLabel, children: List[K]) =>
-      KApply(label, children.map(substituteFrame(_, name, substitute)): _*)
+      KApply(label, children.map(substituteFrame(_, name, substitute)))
     case Unapply.KVariable(`name`) => substitute
     case _: K                      => k
   }

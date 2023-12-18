@@ -1,12 +1,11 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kore
 
-import collection.JavaConverters._
 import org.kframework.attributes._
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
 import org.kframework.kore
-import org.kframework.kore.KORE.Sort
+import scala.collection.JavaConverters._
 
 /**
  * Abstract Data Types: basic implementations for the inner KORE interfaces.
@@ -69,9 +68,7 @@ object ADT {
       )
   }
 
-  case class KVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
-    def params = Seq()
-  }
+  case class KVariable(name: String, att: Att = Att.empty) extends kore.KVariable {}
 
   case class Sort(name: String, params: kore.Sort*) extends kore.Sort {
     override def toString =
@@ -112,8 +109,6 @@ object SortedADT {
   case class SortedKVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
     val sort: Sort =
       if (att.contains(Att.CELL_SORT)) Sorts.K else att.getOptional(classOf[Sort]).orElse(Sorts.K)
-
-    def params = Seq()
 
     override def equals(other: Any) = other match {
       case v: SortedKVariable => name == v.name && sort == v.sort

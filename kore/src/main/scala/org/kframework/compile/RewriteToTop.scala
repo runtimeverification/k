@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile
 
 import org.kframework.kore._
@@ -87,7 +87,7 @@ object RewriteToTop {
             "Injection compaction error: found nested injections with incompatible sorts"
           )
         }
-        KApply(KLabel("inj", List(sortInnerIn, sortOuterOut): _*), kappInner.klist, kapp.att)
+        KApply(KLabel("inj", List(sortInnerIn, sortOuterOut)), kappInner.klist, kapp.att)
       } else {
         kapp
       }

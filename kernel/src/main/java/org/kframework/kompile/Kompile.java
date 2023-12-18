@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kompile;
 
 import static org.kframework.Collections.*;
@@ -201,7 +201,6 @@ public class Kompile {
    * @param definitionFile
    * @param mainModuleName
    * @param mainProgramsModuleName
-   * @param programStartSymbol
    * @return
    */
   public CompiledDefinition run(

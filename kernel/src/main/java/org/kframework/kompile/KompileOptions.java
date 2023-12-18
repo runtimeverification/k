@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kompile;
 
 import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;

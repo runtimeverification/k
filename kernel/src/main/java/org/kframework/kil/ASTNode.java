@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import java.io.Serializable;
@@ -15,8 +15,8 @@ public abstract class ASTNode implements Serializable, HasLocation {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Used on any node for metadata also used on {@link Rule} and {@link Production} for the
-   * attribute list.
+   * Used on any node for metadata also used on {@link org.kframework.definition.Rule} and {@link
+   * Production} for the attribute list.
    */
   private Att att = Att.empty();
 
@@ -28,12 +28,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
     this(null, null);
   }
 
-  /**
-   * Constructor with specified location and filename.
-   *
-   * @param loc
-   * @param file
-   */
+  /** Constructor with specified location and filename. */
   public ASTNode(Location loc, Source source) {
     setLocation(loc);
     setSource(source);
@@ -48,11 +43,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
     return location;
   }
 
-  /**
-   * Sets the location or removes it if appropriate.
-   *
-   * @param loc
-   */
+  /** Sets the location or removes it if appropriate. */
   public void setLocation(Location location) {
     this.location = location;
   }
@@ -66,11 +57,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
     return source;
   }
 
-  /**
-   * Sets the source or removes it if appropriate.
-   *
-   * @param file
-   */
+  /** Sets the source or removes it if appropriate. */
   public void setSource(Source source) {
     this.source = source;
   }

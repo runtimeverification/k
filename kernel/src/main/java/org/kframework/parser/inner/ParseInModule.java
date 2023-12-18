@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
@@ -445,7 +445,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
           boolean equalRight =
               rez.isRight() && z3Rez.isRight() && rez.right().get().equals(z3Rez.right().get());
           if (!(bothLeft || equalRight)) {
-            throw KEMException.criticalError("Z3 and SimpleSub algorithms differ!");
+            throw typeInferenceCheckError(rez3, z3Rez, rez);
           }
         } else {
           rez = z3Rez;
@@ -493,6 +493,32 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
       }
     }
+  }
+
+  private static KEMException typeInferenceCheckError(
+      Term term, Either<Set<KEMException>, Term> z3, Either<Set<KEMException>, Term> simple) {
+    StringBuilder msg = new StringBuilder("Z3 and SimpleSub sort inference algorithms differ!\n");
+    msg.append(term.source().isPresent() ? term.source().get().toString() : "").append("\n");
+    msg.append(term.location().isPresent() ? term.location().get().toString() : "").append("\n");
+    msg.append("\nZ3:\n");
+    if (z3.isLeft()) {
+      msg.append(
+          z3.left().get().stream().map(KEMException::getMessage).collect(Collectors.joining("\n")));
+    } else {
+      msg.append(z3.right().get());
+    }
+    msg.append("\n");
+    msg.append("\nSimpleSub:\n");
+    if (simple.isLeft()) {
+      msg.append(
+          simple.left().get().stream()
+              .map(KEMException::getMessage)
+              .collect(Collectors.joining("\n")));
+    } else {
+      msg.append(simple.right().get());
+    }
+    msg.append("\n");
+    return KEMException.criticalError(msg.toString());
   }
 
   private boolean isDebug(Source source, int startLine) {

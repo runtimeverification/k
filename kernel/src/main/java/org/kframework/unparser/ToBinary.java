@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.unparser;
 
 import java.io.ByteArrayOutputStream;
@@ -32,8 +32,8 @@ public class ToBinary {
       data.writeBytes("KAST");
       // version
       data.writeByte(4);
-      data.writeByte(0);
       data.writeByte(1);
+      data.writeByte(0);
       new ToBinary(data).traverse(k);
       data.writeByte(BinaryParser.END);
     } catch (IOException e) {
@@ -78,7 +78,6 @@ public class ToBinary {
       data.writeByte(BinaryParser.KAPPLY);
       add_intern(k);
       writeString(app.klabel().name());
-      data.writeBoolean(app.klabel() instanceof KVariable);
       data.writeInt(app.size());
 
     } else if (k instanceof KSequence seq) {
@@ -108,7 +107,6 @@ public class ToBinary {
       data.writeByte(BinaryParser.INJECTEDKLABEL);
       add_intern(k);
       writeString(inj.klabel().name());
-      data.writeBoolean(inj.klabel() instanceof KVariable);
 
     } else {
       throw KEMException.criticalError("Unimplemented for Binary serialization: ", k);

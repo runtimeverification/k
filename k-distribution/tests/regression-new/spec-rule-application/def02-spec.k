@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 require "def.k"
 
 // `requires Z ==Int incPos(Y)` - Function in requires, used in RHS. Does not affect matching.

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kore
 
 import java.util.Optional
@@ -189,10 +189,15 @@ trait KApply extends KItem with KCollection {
 
 trait KSequence extends KCollection with K
 
-trait KVariable extends KItem with KLabel {
+trait KVariable extends KItem {
   def name: String
 
-  def computeHashCode = name.hashCode
+  override def equals(other: Any): Boolean = other match {
+    case l: KVariable => this.name == l.name
+    case _            => false
+  }
+
+  override def computeHashCode: Int = name.hashCode
 }
 
 trait KAs extends K {

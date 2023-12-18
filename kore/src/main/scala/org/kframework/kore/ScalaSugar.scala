@@ -1,10 +1,9 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kore
 
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
-import org.kframework.kore
 import scala.collection.JavaConverters._
 
 trait ScalaSugared {
@@ -18,7 +17,7 @@ trait ScalaSugared {
   implicit def intToToken(n: Int): K    = KToken(n.toString, Sorts.Int, Att.empty)
 
   implicit class ApplicableKLabel(klabel: KLabel) {
-    def apply(l: K*): K = c.KApply(klabel, l: _*)
+    def apply(l: K*): K = c.KApply(klabel, l)
   }
 
   implicit class EnhancedK(k: K) {
@@ -33,8 +32,6 @@ trait ScalaSugared {
     def &&(other: K)  = KLabels.AND.apply(k, other)
     def ||(other: K)  = KLabels.OR.apply(k, other)
   }
-
-  def KList(ks: Seq[K]): KList = c.KList(ks.asJava)
 
   def KApply(klabel: KLabel, ks: Seq[K], att: Att = Att.empty): KApply =
     c.KApply(klabel, c.KList(ks.asJava), att)

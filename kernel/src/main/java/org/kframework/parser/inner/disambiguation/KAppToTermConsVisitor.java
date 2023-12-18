@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import static org.kframework.Collections.*;
@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kframework.builtin.KLabels;
-import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
@@ -48,15 +47,10 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
     assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
     if (tc.production().klabel().isDefined()
         && tc.production().klabel().get().equals(KLabels.KAPP)) {
-      if (!(tc.get(0) instanceof Constant kl)
-          || !((Constant) tc.get(0)).production().sort().equals(Sorts.KLabel()))
-        // TODO: remove check once the java backend is no longer supported.
-        return super.apply(
-            tc); // don't do anything if the label is not a token KLabel (in case of variable or
-      // casted variable)
+      Constant kl = (Constant) tc.get(0);
       String klvalue = kl.value();
       try {
-        klvalue = StringUtil.unescapeKoreKLabel(kl.value());
+        klvalue = StringUtil.unescapeKoreKLabel(klvalue);
       } catch (IllegalArgumentException e) {
         /* ignore */
       } // if possible, unescape
@@ -81,7 +75,7 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
           sol.add(TermCons.apply(terms, prd, tc.location(), tc.source()));
 
       if (sol.size() == 0) {
-        String msg = "Could not find any suitable production for label " + kl.value();
+        String msg = "Could not find any suitable productions for label " + kl.value();
         return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, kl)));
       } else if (sol.size() == 1) {
         return super.apply(sol.iterator().next());

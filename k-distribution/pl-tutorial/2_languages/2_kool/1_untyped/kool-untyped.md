@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # KOOL — Untyped
@@ -1053,5 +1053,4 @@ starting with the most concrete class and going up in the hierarchy.
 endmodule
 ```
 
-Go to [Lesson 2, KOOL typed dynamic](../2_typed/1_dynamic/kool-typed-dynamic.md).  
-
+Go to [Lesson 2, KOOL typed dynamic](../2_typed/1_dynamic/kool-typed-dynamic.md).

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile
 
 import org.kframework.attributes.Att
@@ -31,17 +31,17 @@ class NormalizeAssoc(c: Constructors) extends ((Module, Sentence) => Sentence) {
           KRewrite(
             KApply(
               opKLabel,
-              KList(flatten(RewriteToTop.toLeft(k), opKLabel, unitKLabel).map(apply): _*),
+              KList(flatten(RewriteToTop.toLeft(k), opKLabel, unitKLabel).map(apply)),
               kApply.att
             ),
             RewriteToTop.toRight(k),
             Att.empty
           )
         } else {
-          KApply(opKLabel, KList(flattenChildren.map(apply): _*), kApply.att)
+          KApply(opKLabel, KList(flattenChildren.map(apply)), kApply.att)
         }
       } else {
-        KApply(kApply.klabel, KList(immutable(kApply.klist.items).map(apply): _*), kApply.att)
+        KApply(kApply.klabel, KList(immutable(kApply.klist.items).map(apply)), kApply.att)
       }
     case kRewrite: KRewrite => KRewrite(apply(kRewrite.left), kRewrite.right, kRewrite.att)
     case _                  => k

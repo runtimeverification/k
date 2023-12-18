@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # KOOL — Typed — Dynamic
@@ -870,4 +870,4 @@ only if a prefix guard evaluates to true.
 endmodule
 ```
 
-Go to [Lesson 3, KOOL typed static](../2_static/kool-typed-static.md).  
+Go to [Lesson 3, KOOL typed static](../2_static/kool-typed-static.md).
