@@ -57,7 +57,7 @@ public class KPrintTest {
         KApply(
             KLabel("<T>"),
             terms.get(3),
-            KApply(KVariable("Lbl"), terms.get(0), terms.get(0), terms.get(1), terms.get(0))));
+            KApply(KLabel("Lbl"), terms.get(0), terms.get(0), terms.get(1), terms.get(0))));
 
     for (K term : terms) {
       for (OutputModes outputMode : outputModes) {

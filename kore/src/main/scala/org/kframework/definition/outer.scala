@@ -427,9 +427,21 @@ case class Module(
           set.head
       }
 
-  // check that non-terminals have a defined sort
+  private def throwIfUserParametricSort(sort: Sort, loc: HasLocation): Unit =
+    if (sort.head.params != 0 && sort.name != Sorts.MInt.name)
+      throw KEMException.compilerError(
+        "User-defined parametric sorts are currently " +
+          "unsupported: " + sort,
+        loc
+      )
+
+  // Check that user-defined sorts are non-parametric and that
+  // each non-terminal has a defined sort
   def checkSorts(): Unit = localSentences.foreach {
-    case p @ Production(_, params, _, items, _) =>
+    case s @ SyntaxSort(_, sort, _)     => throwIfUserParametricSort(sort, s)
+    case s @ SortSynonym(newSort, _, _) => throwIfUserParametricSort(newSort, s)
+    case p @ Production(_, params, sort, items, _) =>
+      throwIfUserParametricSort(sort, p)
       val res = items.collect {
         case nt: NonTerminal
             if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap

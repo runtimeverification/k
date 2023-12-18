@@ -1,0 +1,5 @@
+[Error] Compiler: User-defined parametric sorts are currently unsupported: Foo{S}
+	Source(checkParametricSort.k)
+	Location(7,1,7,18)
+	7 |	syntax {S} Foo{S}
+	  .	^~~~~~~~~~~~~~~~~

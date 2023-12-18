@@ -8,6 +8,7 @@ import java.io.File;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.kore.K;
+import org.kframework.kore.KLabel;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.utils.file.FileUtil;
 
@@ -26,17 +27,17 @@ public class BinaryKASTTest {
                   KRewrite(KVariable("Baz"), KVariable("Baz2")),
                   InjectedKLabel(KLabel("_+_")),
                   KApply(KLabel("foo")))),
-          KApply(KVariable("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
+          KApply(KLabel("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
 
   @Test
-  public void testWriteThenRead() throws Exception {
+  public void testWriteThenRead() {
     byte[] str = ToBinary.apply(term);
     K result2 = BinaryParser.parse(str);
     assertEquals(term, result2);
   }
 
   @Test
-  public void testConcatenate() throws Exception {
+  public void testConcatenate() {
     byte[] str = ToBinary.apply(term);
     byte[] krewrite = new byte[str.length * 2 - 8];
     System.arraycopy(str, 0, krewrite, 0, str.length - 1);
@@ -49,7 +50,7 @@ public class BinaryKASTTest {
 
   @Test
   @Ignore
-  public void testLarger() throws Exception {
+  public void testLarger() {
     FileUtil.testFileUtil();
     byte[] kast = FileUtil.loadBytes(new File("/home/dwightguth/c-semantics/tmp-kcc-FzjROvt"));
     K result = BinaryParser.parse(kast);

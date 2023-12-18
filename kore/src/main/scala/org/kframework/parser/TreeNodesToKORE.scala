@@ -117,14 +117,8 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
     items.map(down _)
 
   def downKLabel(t: K): KLabel = t match {
-    case t @ KToken(s, sort) if sort == Sorts.KVariable =>
-      KVariable(s.trim, t.att)
-
     case t @ KToken(s, sort) if sort == Sorts.KLabel =>
       KLabel(unquote(t))
-
-    case t @ KApply(KLabel(s), items) if s.startsWith("#SemanticCastTo") =>
-      downKLabel(items.head)
   }
 
   def locationToAtt(l: Optional[Location], s: Optional[Source]): Att = {
