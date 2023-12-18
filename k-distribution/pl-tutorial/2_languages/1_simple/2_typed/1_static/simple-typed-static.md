@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # SIMPLE — Typed — Static
@@ -656,4 +656,3 @@ endmodule
 ```
 
 Go to [Lesson 3, SIMPLE typed dynamic](../2_dynamic/simple-typed-dynamic.md)
-

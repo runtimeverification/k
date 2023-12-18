@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 require "def.k"
 
 // inc(Y) in pattern LHS. Function with no side conditions.

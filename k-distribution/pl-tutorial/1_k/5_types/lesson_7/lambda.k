@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 // NOTE: this definition is not up to date with the latest version of K, as it
 // uses both substitution and symbolic reasoning.

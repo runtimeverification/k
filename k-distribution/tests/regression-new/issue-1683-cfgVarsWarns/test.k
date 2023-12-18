@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 // error if a config variable is not initialized in command line
 // warning if a variable is specified but not declared in the configuration
 

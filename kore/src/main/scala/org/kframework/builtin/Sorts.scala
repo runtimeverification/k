@@ -1,8 +1,7 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.builtin
 
-import org.kframework.kore.ADT
 import org.kframework.kore.KORE.Sort
 
 object Sorts {

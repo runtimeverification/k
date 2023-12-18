@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # A Naive Environment-based Polymorphic Type Inferencer
@@ -51,4 +51,3 @@ classic Damas-Hindley-Milner type system, which maximizes the reuse of
 typing work by means of parametric types.
 
 Go to [Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)](../lesson_9/README.md).
-

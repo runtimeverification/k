@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 /*
     Coq-style proof of `ancestor_means`
     https://github.com/runtimeverification/casper-proofs/blob/master/Core/AccountableSafety.v
