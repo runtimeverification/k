@@ -15,6 +15,7 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, final
 
 from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process
+from . import TypeInferenceMode
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -28,13 +29,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 class KompileNotFoundError(RuntimeError):
     def __init__(self, kompile_command: str):
         super().__init__(f'Kompile command not found: {str}')
-
-
-class TypeInferenceMode(Enum):
-    Z3 = 'z3'
-    SIMPLESUB = 'simplesub'
-    CHECKED = 'checked'
-    DEFAULT = 'default'
 
 
 def kompile(

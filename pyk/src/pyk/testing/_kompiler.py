@@ -11,7 +11,8 @@ from ..kllvm.compiler import compile_runtime
 from ..kllvm.importer import import_runtime
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
-from ..ktool.kompile import DefinitionInfo, Kompile, TypeInferenceMode
+from ..ktool import TypeInferenceMode
+from ..ktool.kompile import DefinitionInfo, Kompile
 from ..ktool.kprint import KPrint
 from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
