@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module CHECKBRACKETFINE-SYNTAX
   syntax Exp ::= "(" Exp [bracket]
   syntax Exp ::= Exp ")" [bracket]

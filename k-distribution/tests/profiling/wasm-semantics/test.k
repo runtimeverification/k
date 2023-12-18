@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 module WASM-DATA-SYNTAX
   imports public WASM-DATA-COMMON-SYNTAX

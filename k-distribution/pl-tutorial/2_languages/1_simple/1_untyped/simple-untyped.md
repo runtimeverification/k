@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # SIMPLE — Untyped
@@ -1169,4 +1169,3 @@ endmodule
 ```
 
 Go to [Lesson 2, SIMPLE typed static](../2_typed/1_static/simple-typed-static.md)
-
