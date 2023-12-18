@@ -383,4 +383,3 @@ with the kserver active it takes 2m. You can start the kserver in two ways.
 
 Because we reuse caches, you should stop and restart the server between runs.
 The Nailgun implementation hasn't been updated in the last 3-5 years, and it's not compatible with Java 18 onwards.
-

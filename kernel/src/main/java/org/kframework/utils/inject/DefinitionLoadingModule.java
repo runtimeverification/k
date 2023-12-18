@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.utils.inject;
 
 import static org.kframework.utils.errorsystem.KException.ExceptionType.*;

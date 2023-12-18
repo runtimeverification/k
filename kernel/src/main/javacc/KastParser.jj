@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 // Represents the grammar of the KSEQ module in kast.k
 options {
   STATIC = false;
@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 import static org.kframework.kore.KORE.*;
 
 public class KastParser {
-	public static K parse(String kast, Source source) {
-		KastParser parser = new KastParser(new StringReader(kast));
-		try {
-			return parser.k();
-		} catch (ParseException e) {
-			throw KEMException.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
+    public static K parse(String kast, Source source) {
+        KastParser parser = new KastParser(new StringReader(kast));
+        try {
+            return parser.k();
+        } catch (ParseException e) {
+            throw KEMException.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
                     + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
                     // using an anonymous class because JavaCC doesn't support Java 8 syntax.
                       .map(new Function<int[], String>() {
@@ -53,28 +53,28 @@ public class KastParser {
         } catch (TokenMgrException e) {
             throw KEMException.innerParserError(e.getMessage(), e, source, null);
         }
-	}
+    }
 
 }
 PARSER_END(KastParser)
 
 SKIP :
 {
-	" "
-|	"\t"
-|	"\r"
-|	"\n"
+    " "
+|   "\t"
+|   "\r"
+|   "\n"
 }
 
 TOKEN :
 {
-	<KSEQ: "~>">
-|	<DOTK: ".::K" | ".K">
-|	<LPAREN: "(">
-|	<RPAREN: ")">
-|	<COMMA: ",">
-|	<DOTKLIST: ".::KList" | ".KList">
-|	<TOKENLABEL: "#token">
+    <KSEQ: "~>">
+|   <DOTK: ".::K" | ".K">
+|   <LPAREN: "(">
+|   <RPAREN: ")">
+|   <COMMA: ",">
+|   <DOTKLIST: ".::KList" | ".KList">
+|   <TOKENLABEL: "#token">
 |   <KLABELLABEL: "#klabel">
 |   <ID_KLABEL: ["#","a"-"z"](["a"-"z","A"-"Z","0"-"9"])*>
 |   <KVARIABLE: (["A"-"Z"](["a"-"z","A"-"Z","0"-"9","'","_"])*) | "_">
@@ -82,87 +82,87 @@ TOKEN :
 
 MORE :
 {
-	"\"": STRING_STATE
-|	"`": KLABEL_STATE
+    "\"": STRING_STATE
+|   "`": KLABEL_STATE
 }
 
 <STRING_STATE> MORE :
 {
-	<"\\" ~[]>
-|	<~["\"", "\\"]>
+    <"\\" ~[]>
+|   <~["\"", "\\"]>
 }
 
 <STRING_STATE> TOKEN :
 {
-	<STRING: "\"">: DEFAULT
+    <STRING: "\"">: DEFAULT
 }
 
 <KLABEL_STATE> MORE :
 {
-	<"\\" ~[]>
-|	<~["`", "\\"]>
+    <"\\" ~[]>
+|   <~["`", "\\"]>
 }
 
 <KLABEL_STATE> TOKEN :
 {
-	<KLABEL: "`">: DEFAULT
+    <KLABEL: "`">: DEFAULT
 }
 
 K k() :
 {
-	List<K> items = new ArrayList<K>();
-	K current;
+    List<K> items = new ArrayList<K>();
+    K current;
 }
 {
-	current = kitem()
-	{
-		items.add(current);
-	}
-	(<KSEQ> current = kitem()
-	{
-		items.add(current);
-	}
-	)*
-	{
-	    if (items.size() == 1)
-	        return items.get(0);
-		return KSequence(items);
-	}
-|	<DOTK>
-	{
-		return KSequence();
-	}
+    current = kitem()
+    {
+        items.add(current);
+    }
+    (<KSEQ> current = kitem()
+    {
+        items.add(current);
+    }
+    )*
+    {
+        if (items.size() == 1)
+            return items.get(0);
+        return KSequence(items);
+    }
+|   <DOTK>
+    {
+        return KSequence();
+    }
 }
 
 K kitem() :
 {
-	KLabel label;
-	KList list;
-	String sort;
-	String value;
+    KLabel label;
+    KList list;
+    String sort;
+    String value;
 }
 {
-	label = klabel() <LPAREN> list
-	 = klist() <RPAREN>
-	{
-		return KApply(label, list);
-	}
+    label = klabel() <LPAREN> list
+    = klist() <RPAREN>
+    {
+        return KApply(label, list);
+    }
 |   <KLABELLABEL> <LPAREN> label = klabel() <RPAREN>
     {
         return InjectedKLabel(label);
     }
-| 	<TOKENLABEL> <LPAREN> <STRING>
-	{
-		value = StringUtil.unquoteCString(token.image);
-	}
-	<COMMA> <STRING>
-	{
-		sort = StringUtil.unquoteCString(token.image);
-	}
-	<RPAREN>
-	{
-		return KToken(value, Sort(sort));
-	}
+|   <TOKENLABEL> <LPAREN> <STRING>
+    {
+        value = StringUtil.unquoteCString(token.image);
+    }
+    <COMMA> <STRING>
+    {
+        sort = StringUtil.unquoteCString(token.image);
+    }
+    <RPAREN>
+    {
+        return KToken(value, Sort(sort));
+    }
 |   <KVARIABLE>
     {
         return KVariable(token.image);
@@ -171,36 +171,36 @@ K kitem() :
 
 KList klist() :
 {
-	List<K> items = new ArrayList<K>();
-	K current;
+    List<K> items = new ArrayList<K>();
+    K current;
 }
 {
-	current = k()
-	{
-		items.add(current);
-	}
-	((LOOKAHEAD(2) <COMMA> | <COMMA> <COMMA>) current = k()
-	{
-		items.add(current);
-	}
-	)*
-	{
-		return KList(items);
-	}
-|	<DOTKLIST>
-	{
-		return KList();
-	}
+    current = k()
+    {
+        items.add(current);
+    }
+    ((LOOKAHEAD(2) <COMMA> | <COMMA> <COMMA>) current = k()
+    {
+        items.add(current);
+    }
+    )*
+    {
+        return KList(items);
+    }
+|   <DOTKLIST>
+    {
+        return KList();
+    }
 }
 
 KLabel klabel() :
 {
 }
 {
-	<KLABEL>
-	{
-		return KLabel(StringUtil.unescapeKoreKLabel(token.image));
-	}
+    <KLABEL>
+    {
+        return KLabel(StringUtil.unescapeKoreKLabel(token.image));
+    }
 |   <ID_KLABEL>
     {
         return KLabel(token.image);

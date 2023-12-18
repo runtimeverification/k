@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 //
 // This should kompile just fine for the haskell backend, variables
 // in the requires clause should be considered as part of LHS for haskell backend.

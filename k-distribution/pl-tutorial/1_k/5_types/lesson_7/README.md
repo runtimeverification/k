@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 # A Naive Substitution-based Polymorphic Type Inferencer
@@ -126,4 +126,3 @@ step, namely a naive environment-based variant of the inferencer
 defined here.
 
 Go to [Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer](../lesson_8/README.md).
-

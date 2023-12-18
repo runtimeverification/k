@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 module KVAR-SYNTAX
   syntax KVar [hook(KVAR.KVar), token]

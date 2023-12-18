@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 1
@@ -28,4 +28,3 @@ module MARKDOWNERRORLOCATION
 
 ```{.y .k}
 endmodule // pandoc would miss this last unfinished block
-

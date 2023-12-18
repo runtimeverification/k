@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 require "def.k"
 
 // X (in term) = Y-1 (in pattern) matching.
