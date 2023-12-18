@@ -19,6 +19,7 @@ from ..kast.manip import extract_subst, flatten_label, free_vars
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
 from ..prelude.ml import is_top, mlAnd
 from ..utils import gen_file_timestamp, run_process, unique
+from . import TypeInferenceMode
 from .kprint import KPrint
 
 if TYPE_CHECKING:
@@ -61,6 +62,7 @@ def _kprove(
     output: KProveOutput | None = None,
     depth: int | None = None,
     claims: Iterable[str] = (),
+    type_inference_mode: str | TypeInferenceMode | None = None,
     temp_dir: Path | None = None,
     haskell_backend_command: str | None = None,
     dry_run: bool = False,
@@ -78,6 +80,9 @@ def _kprove(
     if depth is not None and depth < 0:
         raise ValueError(f'Argument "depth" must be non-negative, got: {depth}')
 
+    if type_inference_mode is not None:
+        type_inference_mode = TypeInferenceMode(type_inference_mode)
+
     typed_args = _build_arg_list(
         kompiled_dir=kompiled_dir,
         spec_module_name=spec_module_name,
@@ -87,6 +92,7 @@ def _kprove(
         output=output,
         depth=depth,
         claims=claims,
+        type_inference_mode=type_inference_mode,
         temp_dir=temp_dir,
         haskell_backend_command=haskell_backend_command,
         dry_run=dry_run,
@@ -111,6 +117,7 @@ def _build_arg_list(
     output: KProveOutput | None,
     depth: int | None,
     claims: Iterable[str],
+    type_inference_mode: TypeInferenceMode | None,
     temp_dir: Path | None,
     haskell_backend_command: str | None,
     dry_run: bool,
@@ -135,9 +142,11 @@ def _build_arg_list(
     if output:
         args += ['--output', output.value]
 
-    claims = list(claims)
     if claims:
         args += ['--claims', ','.join(claims)]
+
+    if type_inference_mode:
+        args += ['--type-inference-mode', type_inference_mode.value]
 
     if temp_dir:
         args += ['--temp-dir', str(temp_dir)]
