@@ -138,7 +138,7 @@ class KRun(KPrint):
                 case KRunOutput.KORE:
                     print(output_kore.text)
                 case KRunOutput.PRETTY | KRunOutput.PROGRAM | KRunOutput.KAST | KRunOutput.BINARY | KRunOutput.LATEX:
-                    print(kore_print(output_kore, self.definition_dir, PrintOutput(output.value)))
+                    print(kore_print(output_kore, definition_dir=self.definition_dir, output=PrintOutput(output.value)))
                 case KRunOutput.NONE:
                     raise AssertionError()
 

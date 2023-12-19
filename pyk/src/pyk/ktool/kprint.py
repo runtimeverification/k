@@ -259,7 +259,9 @@ class KPrint:
             _LOGGER.warning(err)
 
         _LOGGER.warning(f'Falling back to using `kore-print` for Kore -> Kast: {kore.text}')
-        return KInner.from_dict(kast_term(json.loads(kore_print(kore, self.definition_dir, PrintOutput.JSON))))
+        return KInner.from_dict(
+            kast_term(json.loads(kore_print(kore, definition_dir=self.definition_dir, output=PrintOutput.JSON)))
+        )
 
     def kast_to_kore(self, kast: KInner, sort: KSort | None = None, *, force_kast: bool = False) -> Pattern:
         if not force_kast:
