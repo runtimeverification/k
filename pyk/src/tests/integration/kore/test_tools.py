@@ -37,7 +37,7 @@ def test_kore_print(imp_kompiled: Path, kore_text: str, expected: str) -> None:
     pattern = KoreParser(kore_text).pattern()
 
     # When
-    actual = kore_print(pattern, imp_kompiled, PrintOutput.PRETTY)
+    actual = kore_print(pattern, definition_dir=imp_kompiled, output=PrintOutput.PRETTY)
 
     # Then
     assert actual == expected
