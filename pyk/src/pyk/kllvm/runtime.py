@@ -13,6 +13,7 @@ class Runtime:
     _module: ModuleType
 
     def __init__(self, module: ModuleType):
+        module.init_static_objects()
         self._module = module
 
     def term(self, pattern: Pattern) -> Term:
@@ -33,10 +34,14 @@ class Runtime:
         return self.step(pattern, depth=None)
 
     def simplify(self, pattern: Pattern, sort: Sort) -> Pattern:
-        return self._module.simplify_pattern(pattern, sort)
+        res = self._module.simplify_pattern(pattern, sort)
+        self._module.free_all_gc_memory()
+        return res
 
     def simplify_bool(self, pattern: Pattern) -> bool:
-        return self._module.simplify_bool_pattern(pattern)
+        res = self._module.simplify_bool_pattern(pattern)
+        self._module.free_all_gc_memory()
+        return res
 
 
 class Term:
