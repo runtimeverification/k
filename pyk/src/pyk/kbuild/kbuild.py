@@ -127,8 +127,7 @@ class KBuildEnv:
             )
 
     def _kompile_args(self, target: Target) -> dict[str, Any]:
-        args = target.dict
-        args.pop('name')
+        args = dict(target.args)
         args['main_file'] = self._source_dir(self.project) / args['main_file']
 
         if 'ccopts' in args:

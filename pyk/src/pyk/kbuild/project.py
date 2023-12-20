@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
@@ -11,7 +10,6 @@ from typing import TYPE_CHECKING, final
 import tomli
 
 from ..cli.utils import relative_path
-from ..ktool.kompile import KompileBackend, LLVMKompileType
 from ..utils import FrozenDict, abs_or_rel_to, check_dir_path, check_file_path, check_relative_path, single
 from .config import PROJECT_FILE_NAME
 
@@ -60,104 +58,21 @@ class PackageSource(Source):
 class Target:
     name: str  # TODO Maybe remove name and store in project as Dict
 
-    main_file: Path  # relative to source folder
-    backend: KompileBackend
-    main_module: str | None
-    syntax_module: str | None
-    md_selector: str | None
-    hook_namespaces: tuple[str, ...] | None
-    emit_json: bool | None
-    gen_bison_parser: bool | None
-    gen_glr_bison_parser: bool | None
-    bison_parser_library: bool | None
-    # LLVM backend
-    opt_level: int | None
-    ccopts: tuple[str, ...] | None
-    no_llvm_kompile: bool | None
-    enable_search: bool | None
-    enable_llvm_debug: bool | None
-    llvm_kompile_type: LLVMKompileType | None
-    llvm_kompile_output: str | None
-    # Haskell backend
-    concrete_rules: tuple[str, ...] | None
-    haskell_binary: bool | None
+    args: dict[str, Any]
 
     def __init__(
         self,
         *,
         name: str,
-        main_file: str | Path,
-        backend: KompileBackend,
-        main_module: str | None = None,
-        syntax_module: str | None = None,
-        md_selector: str | None = None,
-        hook_namespaces: Iterable[str] | None = None,
-        emit_json: bool | None = None,
-        gen_bison_parser: bool | None = None,
-        gen_glr_bison_parser: bool | None = None,
-        bison_parser_library: bool | None = None,
-        opt_level: int | None = None,
-        ccopts: Iterable[str] | None = None,
-        no_llvm_kompile: bool | None = None,
-        enable_search: bool | None = None,
-        enable_llvm_debug: bool | None = None,
-        llvm_kompile_type: LLVMKompileType | None = None,
-        llvm_kompile_output: str | None = None,
-        concrete_rules: Iterable[str] | None = None,
-        haskell_binary: bool | None = None,
+        args: Mapping[str, Any],
     ):
-        main_file = Path(main_file)
-        check_relative_path(main_file)
+        if args['main-file']:
+            main_file = Path(args['main-file'])
+            check_relative_path(main_file)
+        newargs = {key.replace('-', '_'): value for key, value in args.items()}
+        newargs['main_file'] = main_file
         object.__setattr__(self, 'name', name)
-        object.__setattr__(self, 'main_file', main_file)
-        object.__setattr__(self, 'backend', backend)
-        object.__setattr__(self, 'main_module', main_module)
-        object.__setattr__(self, 'syntax_module', syntax_module)
-        object.__setattr__(self, 'md_selector', md_selector)
-        object.__setattr__(self, 'hook_namespaces', tuple(hook_namespaces) if hook_namespaces is not None else None)
-        object.__setattr__(self, 'emit_json', emit_json)
-        object.__setattr__(self, 'gen_bison_parser', gen_bison_parser)
-        object.__setattr__(self, 'gen_glr_bison_parser', gen_glr_bison_parser)
-        object.__setattr__(self, 'bison_parser_library', bison_parser_library)
-        object.__setattr__(self, 'opt_level', opt_level)
-        object.__setattr__(self, 'ccopts', tuple(ccopts) if ccopts is not None else None)
-        object.__setattr__(self, 'no_llvm_kompile', no_llvm_kompile)
-        object.__setattr__(self, 'enable_search', enable_search)
-        object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
-        object.__setattr__(self, 'llvm_kompile_type', llvm_kompile_type)
-        object.__setattr__(self, 'llvm_kompile_output', llvm_kompile_output)
-        object.__setattr__(self, 'concrete_rules', tuple(concrete_rules) if concrete_rules is not None else None)
-        object.__setattr__(self, 'haskell_binary', haskell_binary if haskell_binary is not None else None)
-
-    @staticmethod
-    def from_dict(name: str, dct: Mapping[str, Any]) -> Target:
-        return Target(
-            name=name,
-            main_file=Path(dct['main-file']),
-            backend=KompileBackend(dct['backend']),
-            main_module=dct.get('main-module'),
-            syntax_module=dct.get('syntax-module'),
-            md_selector=dct.get('md-selector'),
-            hook_namespaces=dct.get('hook-namespaces'),
-            emit_json=dct.get('emit-json'),
-            gen_bison_parser=dct.get('gen-bison-parser'),
-            gen_glr_bison_parser=dct.get('gen-glr-bison-parser'),
-            bison_parser_library=dct.get('bison-parser-library'),
-            opt_level=dct.get('opt-level'),
-            ccopts=dct.get('ccopts'),
-            no_llvm_kompile=dct.get('no-llvm-kompile'),
-            enable_search=dct.get('enable-search'),
-            enable_llvm_debug=dct.get('enable-llvm-debug'),
-            llvm_kompile_type=LLVMKompileType(dct['llvm-kompile-type']) if 'llvm-kompile-type' in dct else None,
-            llvm_kompile_output=dct.get('llvm-kompile-output'),
-            concrete_rules=dct.get('concrete-rules'),
-            haskell_binary=dct.get('haskell-binary'),
-        )
-
-    @property
-    def dict(self) -> dict[str, Any]:
-        dct = dataclasses.asdict(self)
-        return {key: value for key, value in dct.items() if value is not None}
+        object.__setattr__(self, 'args', newargs)
 
 
 @final
@@ -227,7 +142,7 @@ class Project:
             dependencies=tuple(
                 _load_dependency(name, source_dct) for name, source_dct in dct.get('dependencies', {}).items()
             ),
-            targets=tuple(Target.from_dict(name, target) for name, target in dct.get('targets', {}).items()),
+            targets=tuple(Target(name=name, args=target) for name, target in dct.get('targets', {}).items()),
         )
 
         return project
