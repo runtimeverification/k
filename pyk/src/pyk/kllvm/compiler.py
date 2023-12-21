@@ -39,7 +39,7 @@ def compile_kllvm(target_dir: str | Path, *, verbose: bool = False) -> Path:
     _LOGGER.info(f'Compiling pythonast extension: {module_file.name}')
     run_process(args, logger=_LOGGER)
 
-    assert module_file.exists()
+    assert module_file.is_file()
     return module_file
 
 
@@ -61,7 +61,9 @@ def compile_runtime(
     definition_dir = Path(definition_dir).resolve()
     check_dir_path(definition_dir)
 
-    if target_dir is not None:
+    if target_dir is None:
+        target_dir = definition_dir
+    else:
         target_dir = Path(target_dir).resolve()
         check_dir_path(target_dir)
 
@@ -73,7 +75,7 @@ def compile_runtime(
     dt_dir = definition_dir / 'dt'
     check_dir_path(dt_dir)
 
-    module_file = definition_dir / RUNTIME_MODULE_FILE_NAME
+    module_file = target_dir / RUNTIME_MODULE_FILE_NAME
 
     args = ['llvm-kompile', str(defn_file), str(dt_dir), 'python', '--python', sys.executable]
     if target_dir:
@@ -87,5 +89,5 @@ def compile_runtime(
     _LOGGER.info(f'Compiling python extension: {module_file.name}')
     run_process(args, logger=_LOGGER)
 
-    assert module_file.exists()
+    assert module_file.is_file()
     return module_file
