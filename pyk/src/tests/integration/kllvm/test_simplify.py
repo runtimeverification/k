@@ -15,11 +15,11 @@ if TYPE_CHECKING:
 
 
 SIMPLIFY_TEST_DATA = (
-    ('literal', r'\dv{SortInt{}}("0")', r'inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("0"))'),
+    ('literal', r'\dv{SortInt{}}("0")', r'\dv{SortInt{}}("0")'),
     (
         'plus',
         r"""Lbl'UndsPlus'Int'Unds'{}(\dv{SortInt{}}("1"), \dv{SortInt{}}("2"))""",
-        r'inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("3"))',
+        r'\dv{SortInt{}}("3")',
     ),
 )
 
