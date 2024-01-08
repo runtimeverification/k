@@ -140,73 +140,7 @@ Note the following:
 
 Therefore, interesting behaviors may happen; we would like to see them all!
 
-Based on prior experience with `krun`'s search option, we would hope that
-
     krun spawn.imp --search
-
-shows all the behaviors. However, the above does not work, for two reasons.
-
-First, `spawn.imp` is an interactive program, which reads a number from the
-standard input. When analyzing programs exhaustively using the search option,
-`krun` has to disable the streaming capabilities (just think about it and you
-will realize why). The best you can do in terms of interactivity with search
-is to pipe some input to `krun`: `krun` will flush the standard input buffer
-into the cells connected to it when creating the initial configuration (will
-do that no matter whether you run it with or without the `--search` option).
-For example:
-
-    echo 23 | krun spawn.imp --search
-
-puts `23` in the standard input buffer, which is then transferred in the
-`<in/>` cell as a list item, and then the exhaustive search procedure is
-invoked.
-
-Second, even after piping some input, the `spawn.imp` program still manifests
-only one behavior, which does not seem right. There should be many more.
-
-As explained in Lesson 3, by default `kompile` optimizes the generated
-language model for execution. In particular, it does not insert any
-backtracking markers where transition attempts should be made, so `krun`
-lacks the information it needs to exhaustively search the generated language
-model. Like we did in Lesson 3 with the language constructs, we also have
-to explicitly tell `kompile` which rules should be considered as actual
-transitions. A theoretically correct but practically unfeasible approach
-to search all possible behaviors is to consider all rules as transitions.
-Even more than with the non-deterministic strictness of language constructs
-in Lesson 3, such a naive solution would make the number of behaviors, and
-thus `krun`, explode. Remember that a two-thread program with 150 statements
-each manifests more behaviors than particles in the known universe!
-Consequently, unless your multi-threaded programs are very small, you will
-most likely want to control which rules should be considered transitions and
-which should not.
-
-A good rule of thumb is to include as transitions only those rules which
-_compete for behaviors_. That is, those rules which may yield a different
-behavior if we choose to apply them when other rules match as well.
-The rule for addition, for example, is a clear example of a rule which
-should not be a transition: indeed, `3+7` will rewrite to `10` now and also
-later. On the other hand, the lookup rule should be a transition. Indeed,
-if we delay the lookup of variable `x`, then other threads may write `x` in the
-meanwhile (with an increment or an assignment rule) and thus yield a
-different behavior.
-
-Let us discuss and tag those rules which should be transitions: lookup and
-increment need to be transitions and we already tagged them in Lesson 3;
-the read rule needs to also be a transition, because it may complete with
-other instances of itself in other threads; assignment needs to also be a
-transition, and so should be the first rule for `print`.
-
-Let us now `kompile` with the transition option set as desired:
-
-    kompile imp --transition "lookup increment assignment read print"
-
-Now `echo 23 | krun spawn.imp --search` gives us all 12 behaviors of the
-`spawn.imp` program.
-
-Like for non-deterministically strict operations which can be tagged as
-transitions, it is highly non-trivial to say precisely which rules need
-to be transitions. So `krun` makes no attempt to automatically detect it.
-Instead, it provides the functionality to let you decide it.
 
 We currently have no mechanism for thread synchronization. In the next lesson
 we add a `join` statement, which allows a thread to wait until another completes.

@@ -1,10 +1,7 @@
 Add "spawn" and "join" constructs to environment-based FUN.  To
 facilitate testing, this exercise should extend the "io" exercise of
 environment-based FUN.  Also, to see the various non-deterministic
-behaviors due to concurrency, you should label several rules, then
-kompile with the option --transition, and then krun with option
---search.  See texts/config.xml for details, and recall that several
-rules can have the same label.
+behaviors due to concurrency, krun with the option --search.
 
 The following program should have 4 different outputs ("22", "23",
 "32", and "33"), although these can be reached through more than four
