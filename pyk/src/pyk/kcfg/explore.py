@@ -25,6 +25,7 @@ from ..kore.syntax import Import, Module
 from ..prelude import k
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import notBool
+from ..prelude.kint import leInt, ltInt
 from ..prelude.ml import is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot, mlTop
 from ..utils import shorten_hashes, single
 from .kcfg import KCFG
@@ -444,6 +445,18 @@ class KCFGExplore:
             mlAnd([mlEqualsFalse(KVariable('B')), mlEqualsTrue(KVariable('B'))]),
             mlAnd([mlNot(KVariable('B')), KVariable('B')]),
             mlAnd([KVariable('B'), mlNot(KVariable('B'))]),
+            mlAnd(
+                [
+                    mlEqualsTrue(ltInt(KVariable('I1'), KVariable('I2'))),
+                    mlEqualsTrue(leInt(KVariable('I2'), KVariable('I1'))),
+                ]
+            ),
+            mlAnd(
+                [
+                    mlEqualsTrue(leInt(KVariable('I1'), KVariable('I2'))),
+                    mlEqualsTrue(ltInt(KVariable('I2'), KVariable('I1'))),
+                ]
+            ),
         ]
 
         # Split on branch patterns

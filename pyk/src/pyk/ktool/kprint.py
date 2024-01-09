@@ -290,9 +290,13 @@ class KPrint:
             )
         return App('inj', [SortApp('Sort' + isort.name), SortApp('Sort' + osort.name)], [pat])
 
-    def pretty_print(self, kast: KAst, *, unalias: bool = True, sort_collections: bool = False) -> str:
+    def pretty_print(
+        self, kast: KAst, *, in_module: str | None = None, unalias: bool = True, sort_collections: bool = False
+    ) -> str:
+        defn = self.definition.let(main_module_name=in_module)
+
         return PrettyPrinter(
-            self.definition,
+            defn,
             extra_unparsing_modules=self._extra_unparsing_modules,
             patch_symbol_table=self._patch_symbol_table,
             unalias=unalias,
