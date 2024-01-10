@@ -1,1 +1,0 @@
-Solution ==K ( S:Term |-> [ 3 , .Vals | [ 5 , .Vals | [ .Vals ] ] ] )

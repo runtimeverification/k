@@ -1,2 +1,0 @@
-let id = lambda x . x
-in id id
