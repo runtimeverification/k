@@ -351,6 +351,7 @@ class KoreClientError(Exception):  # TODO refine
 class StopReason(str, Enum):
     STUCK = 'stuck'
     DEPTH_BOUND = 'depth-bound'
+    TIMEOUT = 'timeout'
     BRANCHING = 'branching'
     CUT_POINT_RULE = 'cut-point-rule'
     TERMINAL_RULE = 'terminal-rule'
@@ -502,6 +503,7 @@ class ExecuteResult(ABC):  # noqa: B024
     _TYPES: Mapping[StopReason, str] = {
         StopReason.STUCK: 'StuckResult',
         StopReason.DEPTH_BOUND: 'DepthBoundResult',
+        StopReason.TIMEOUT: 'TimeoutResult',
         StopReason.BRANCHING: 'BranchingResult',
         StopReason.CUT_POINT_RULE: 'CutPointResult',
         StopReason.TERMINAL_RULE: 'TerminalResult',
@@ -568,6 +570,28 @@ class DepthBoundResult(ExecuteResult):
         cls._check_reason(dct)
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
         return DepthBoundResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            logs=logs,
+        )
+
+
+@final
+@dataclass(frozen=True)
+class TimeoutResult(ExecuteResult):
+    reason = StopReason.TIMEOUT
+    next_states = None
+    rule = None
+
+    state: State
+    depth: int
+    logs: tuple[LogEntry, ...]
+
+    @classmethod
+    def from_dict(cls: type[TimeoutResult], dct: Mapping[str, Any]) -> TimeoutResult:
+        cls._check_reason(dct)
+        logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
+        return TimeoutResult(
             state=State.from_dict(dct['state']),
             depth=dct['depth'],
             logs=logs,
@@ -799,25 +823,33 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         max_depth: int | None = None,
+        assume_state_defined: bool | None = None,
         cut_point_rules: Iterable[str] | None = None,
         terminal_rules: Iterable[str] | None = None,
+        moving_average_step_timeout: bool | None = None,
+        step_timeout: int | None = None,
         module_name: str | None = None,
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
         log_successful_simplifications: bool | None = None,
         log_failed_simplifications: bool | None = None,
+        log_timing: bool | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
                 'max-depth': max_depth,
+                'assume-state-defined': assume_state_defined,
                 'cut-point-rules': list(cut_point_rules) if cut_point_rules is not None else None,
                 'terminal-rules': list(terminal_rules) if terminal_rules is not None else None,
-                'state': self._state(pattern),
+                'moving-average-step-timeout': moving_average_step_timeout,
+                'step-timeout': step_timeout,
                 'module': module_name,
+                'state': self._state(pattern),
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
                 'log-successful-simplifications': log_successful_simplifications,
                 'log-failed-simplifications': log_failed_simplifications,
+                'log-timing': log_timing,
             }
         )
 
@@ -826,15 +858,18 @@ class KoreClient(ContextManager['KoreClient']):
 
     def implies(
         self,
-        ant: Pattern,
-        con: Pattern,
+        antecedent: Pattern,
+        consequent: Pattern,
+        *,
+        module_name: str | None = None,
         log_successful_simplifications: bool | None = None,
         log_failed_simplifications: bool | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
-                'antecedent': self._state(ant),
-                'consequent': self._state(con),
+                'antecedent': self._state(antecedent),
+                'consequent': self._state(consequent),
+                'module': module_name,
                 'log-successful-simplifications': log_successful_simplifications,
                 'log-failed-simplifications': log_failed_simplifications,
             }
@@ -846,12 +881,15 @@ class KoreClient(ContextManager['KoreClient']):
     def simplify(
         self,
         pattern: Pattern,
+        *,
+        module_name: str | None = None,
         log_successful_simplifications: bool | None = None,
         log_failed_simplifications: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
+                'module': module_name,
                 'log-successful-simplifications': log_successful_simplifications,
                 'log-failed-simplifications': log_failed_simplifications,
             }
