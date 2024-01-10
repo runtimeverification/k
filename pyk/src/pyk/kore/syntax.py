@@ -220,8 +220,8 @@ class Pattern(Kore):
         'Next': ['dest'],
         'Rewrites': ['source', 'dest'],
         'DV': [],
-        'LeftAssoc': ['app'],
-        'RightAssoc': ['app'],
+        'LeftAssoc': 'argss',
+        'RightAssoc': 'argss',
     }
 
     @staticmethod
@@ -279,7 +279,7 @@ class Pattern(Kore):
     def dict(self) -> dict[str, Any]:
         stack: list = [
             self,
-            (self.app,) if isinstance(self, Assoc) else self.patterns,
+            self.app.args if isinstance(self, Assoc) else self.patterns,
             [],
         ]
 
@@ -299,7 +299,7 @@ class Pattern(Kore):
             else:
                 pattern = patterns[idx]
                 stack.append(pattern)
-                stack.append((pattern.app,) if isinstance(pattern, Assoc) else pattern.patterns)
+                stack.append(pattern.app.args if isinstance(pattern, Assoc) else pattern.patterns)
                 stack.append([])
 
     @property
@@ -1643,8 +1643,12 @@ class Assoc(MLSyntaxSugar):
         return (self.app,)
 
     def _dict(self, dicts: list) -> dict[str, Any]:
-        (app,) = dicts
-        return {'tag': self._tag(), 'app': app}
+        return {
+            'tag': self._tag(),
+            'symbol': self.app.symbol,
+            'sorts': [sort.dict for sort in self.app.sorts],
+            'argss': dicts,
+        }
 
 
 @final
@@ -1694,9 +1698,13 @@ class LeftAssoc(Assoc):
 
     @classmethod
     def _from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> LeftAssoc:
-        (app,) = patterns
-        assert isinstance(app, App)
-        return LeftAssoc(app=app)
+        return LeftAssoc(
+            app=App(
+                symbol=dct['symbol'],
+                sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
+                args=patterns,
+            ),
+        )
 
 
 @final
@@ -1746,9 +1754,13 @@ class RightAssoc(Assoc):
 
     @classmethod
     def _from_dict(cls: type[RightAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> RightAssoc:
-        (app,) = patterns
-        assert isinstance(app, App)
-        return RightAssoc(app=app)
+        return RightAssoc(
+            app=App(
+                symbol=dct['symbol'],
+                sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
+                args=patterns,
+            ),
+        )
 
 
 ML_SYMBOLS: Final = {
