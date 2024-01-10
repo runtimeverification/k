@@ -18,6 +18,7 @@ from pyk.kore.rpc import (
     State,
     StuckResult,
     TerminalResult,
+    TimeoutResult,
     UnknownResult,
     UnsatResult,
     VacuousResult,
@@ -82,6 +83,7 @@ EXECUTE_TEST_DATA: Final[tuple[tuple[str, int, Mapping[str, Any], ExecuteResult]
         TerminalResult(state=state(6), depth=2, rule='KORE-RPC-TEST.r56', logs=()),
     ),
     ('vacuous', 3, {}, VacuousResult(state=state(3), depth=0, logs=())),
+    ('timeout', 0, {'step_timeout': 0}, TimeoutResult(state=state(0), depth=0, logs=())),
 )
 
 
