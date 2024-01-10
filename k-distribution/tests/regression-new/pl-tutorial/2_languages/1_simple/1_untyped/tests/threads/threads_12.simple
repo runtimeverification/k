@@ -1,0 +1,46 @@
+// This program shows an interesting situation which can happen in many
+// language designs: something which looks correct is actually wrong:
+
+var x;
+
+function main() {
+  var n = 5;
+  x = 1;
+  for (var i = 1; i <= n; ++i) {
+    var t=i;
+    spawn {
+      multX(t);
+    };
+  }
+  for (var i=1; i<=n; ++i) {
+    rendezvous i;
+  }
+  print(x,"\n");
+}
+
+function multX(v) {
+  acquire 0;
+  x = x*v;
+  release 0;
+  rendezvous v;
+}
+
+// 120, but also many many other behaviors ...
+
+// The problem is that "spawn multX(i);" does not evaluate the "i" argument,
+// it only spawns a thread calculating the expression statement "multX(i);".
+// It can be possible that the loop counter "i" is incremented right after the
+// spawning but before the evaluation of the expression "multX(i)".  In fact,
+// it can be the case that all the spawned "multX(i);" statements will evaluate
+// their "multX(i)" function calls after the main loop terminates.  The threads
+// will still see the "i" counter in their environments, but that will hold
+// the value 6.  Thus, in this case, all threads compute "multX(6)"!  You can
+// see all these "unexpected" behaviors if you use the search option in krun.
+// (please make n smaller, e.g. 2, because theare are LOTS of behaviors here!)
+//
+// To fix this problem , replace loop "for(i=1;i<=n;++i) {spawn {multX(i);};}"
+// with "for(i=1;i<=n;++i) {var t=i; spawn {multX(t);};}".  Now, each thread
+// sees its own local "t", which has the right value and does not change.
+// Now the search option in krun only shows you solutions which output the
+// correct factorial.  (like before, please make n smaller (2?) when running
+// the search option in krun, because theare are LOTS of behaviors here!)

@@ -1,0 +1,5 @@
+{
+  V:K
+#Equals
+  x ~> #freezer_,__FUN-UNTYPED-COMMON_Exps_Exp_Exps0_ ( .Bottoms ~> . ) ~> #freezer_,__FUN-UNTYPED-COMMON_Exps_Exp_Exps1_ ( 2 ~> . ) ~> #freezerassignTo(_,_)_FUN-UNTYPED_KItem_Names_Exps1_ ( x , y , .Bottoms ~> . ) ~> y ~> setEnv ( x |-> 0 ) ~> setEnv ( .Map ) ~> .
+}
