@@ -2164,6 +2164,8 @@ together in O(N) time.
 ```k
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, total, hook(BYTES.concat), right]
 
+  syntax Bytes ::= copyBytes(Bytes) [function, total, klabel(copyBytes), symbol]
+  rule copyBytes(B) => B +Bytes .Bytes
 endmodule
 ```
 

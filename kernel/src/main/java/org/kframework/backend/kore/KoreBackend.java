@@ -233,6 +233,10 @@ public class KoreBackend extends AbstractBackend {
                     this::removeAnywhereRules, "removing anywhere rules for the Haskell backend")
                 .apply(d);
 
+    DefinitionTransformer copyBytes =
+        DefinitionTransformer.fromSentenceTransformer(
+            CopyDuplicateBytes::apply, "copy duplicated byte references");
+
     return def ->
         resolveComm
             .andThen(resolveIO)
@@ -243,6 +247,7 @@ public class KoreBackend extends AbstractBackend {
             .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
             .andThen(numberSentences)
             .andThen(resolveHeatCoolAttribute)
+            .andThen(copyBytes)
             .andThen(resolveSemanticCasts)
             .andThen(subsortKItem)
             .andThen(generateSortPredicateSyntax)
