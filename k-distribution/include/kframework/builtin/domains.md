@@ -1884,8 +1884,8 @@ of the above operations in K.
   rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) =>
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
-        requires Count >Int 0
-  rule replace(Source:String, _, _, 0) => Source
+        requires Count >Int 0 andBool findString(Source, ToReplace, 0) >=Int 0
+  rule replace(Source:String, _, _, _) => Source [owise]
   rule replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
 endmodule
