@@ -73,6 +73,13 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
           path: k-exercises
+      - name: 'Check out pl-tutorial'
+        uses: actions/checkout@v3
+        with:
+          repository: runtimeverification/pl-tutorial
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          submodules: recursive
+          path: k-distribution/pl-tutorial
       - name: 'Tutorial Integration Tests'
         run: |
           docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
