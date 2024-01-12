@@ -1,5 +1,5 @@
 #!/bin/sh -ex
-cp -r `pwd`/k-distribution/tests/regression-new/pl-tutorial ~
+cp -r /usr/share/kframework/pl-tutorial ~
 WD=`pwd`
 cd
 echo 'Starting kserver...'
