@@ -1,6 +1,0 @@
-{
-  V:K
-#Equals
-  closure ( $exit |-> 0
-  x |-> 2 , y , x y ) ~> .
-}

@@ -1,2 +1,0 @@
-Solution ==K ( Y:Term |-> V0 )
-Z:Term |-> cons ( a , V0 , .Vals )

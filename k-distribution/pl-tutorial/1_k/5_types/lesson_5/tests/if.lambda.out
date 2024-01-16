@@ -1,5 +1,0 @@
-{
-  T:Type
-#Equals
-  bool -> ( ?T1:Type -> ( ?T1:Type -> ?T1:Type ) )
-}
