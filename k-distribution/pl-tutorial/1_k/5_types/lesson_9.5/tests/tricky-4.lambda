@@ -1,3 +1,0 @@
-lambda x . let f = lambda x . x
-           in let d = (f x) + 1
-              in x

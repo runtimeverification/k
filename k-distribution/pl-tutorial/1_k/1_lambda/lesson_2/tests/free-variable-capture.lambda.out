@@ -1,3 +1,0 @@
-<k>
-  a ( ( lambda x . lambda y . x ) y0 z ) ~> .
-</k>

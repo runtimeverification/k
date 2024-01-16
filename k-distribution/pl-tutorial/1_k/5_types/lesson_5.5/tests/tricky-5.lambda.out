@@ -1,5 +1,0 @@
-{
-  T:Type
-#Equals
-  ( int -> T2:Type ) -> ( int -> T2:Type )
-}

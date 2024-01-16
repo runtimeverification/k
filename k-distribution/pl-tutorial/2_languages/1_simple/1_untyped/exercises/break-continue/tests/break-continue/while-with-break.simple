@@ -1,6 +1,0 @@
-function main() {
-  while(true) {
-    break;
-  }
-  print("OK\n");
-}
