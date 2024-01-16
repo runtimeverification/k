@@ -29,6 +29,8 @@ version_sub() {
     local version
     version="$(cat $version_file)"
     sed --in-place 's/^version = ".*"$/version = "'${version}'"/' pyproject.toml
+    sed --in-place "s/^version = '.*'$/version = '${version}'/" docs/conf.py
+    sed --in-place "s/^release = '.*'$/release = '${version}'/" docs/conf.py
 }
 
 version_command="$1" ; shift
