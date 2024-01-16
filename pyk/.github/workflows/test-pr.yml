@@ -43,6 +43,18 @@ jobs:
       - name: 'Run pyupgrade'
         run: make pyupgrade
 
+  build-docs:
+    needs: code-quality-checks
+    name: 'Build Documentation'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
+      - name: 'Build documentation'
+        run: make docs
+
   unit-tests:
     needs: code-quality-checks
     name: 'Unit Tests'
