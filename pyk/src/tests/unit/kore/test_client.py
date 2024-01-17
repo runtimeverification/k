@@ -9,9 +9,16 @@ import pytest
 from pyk.kore.prelude import INT, int_dv
 from pyk.kore.rpc import (
     AbortedResult,
+    DefaultError,
+    ImplicationError,
     ImpliesResult,
     JsonRpcClient,
+    JsonRpcError,
     KoreClient,
+    KoreClientError,
+    ModuleError,
+    ParseError,
+    PatternError,
     SatResult,
     State,
     StuckResult,
@@ -50,6 +57,9 @@ class MockClient:
 
     def assume_response(self, response: Any) -> None:
         self.mock.request.return_value = response
+
+    def assume_raises(self, error: JsonRpcError) -> None:
+        self.mock.request.side_effect = error
 
     def assert_request(self, method: str, **params: Any) -> None:
         self.mock.request.assert_called_with(method, **params)
@@ -286,3 +296,94 @@ def test_add_module(
     # Then
     rpc_client.assert_request('add-module', **params)
     assert actual == expected
+
+
+ERROR_TEST_DATA: Final = (
+    (
+        'parse-error',
+        JsonRpcError(message='foo', code=1, data=':21:286: unexpected token TokenIdent "hasDomainValues"'),
+        ParseError(error=':21:286: unexpected token TokenIdent "hasDomainValues"'),
+        'Could not parse pattern: :21:286: unexpected token TokenIdent "hasDomainValues"',
+    ),
+    (
+        'pattern-error',
+        JsonRpcError(
+            message='foo',
+            code=2,
+            data={
+                'error': "Sort 'IntSort' not defined.",
+                'context': [
+                    r'\top (<unknown location>)',
+                    "sort 'IntSort' (<unknown location>)",
+                    '(<unknown location>)',
+                ],
+            },
+        ),
+        PatternError(
+            error="Sort 'IntSort' not defined.",
+            context=(
+                r'\top (<unknown location>)',
+                "sort 'IntSort' (<unknown location>)",
+                '(<unknown location>)',
+            ),
+        ),
+        r"Could not verify pattern: Sort 'IntSort' not defined. Context: \top (<unknown location>) ;; sort 'IntSort' (<unknown location>) ;; (<unknown location>)",
+    ),
+    (
+        'module-error',
+        JsonRpcError(message='foo', code=3, data='MODULE-NAME'),
+        ModuleError(module_name='MODULE-NAME'),
+        'Could not find module: MODULE-NAME',
+    ),
+    (
+        'implication-error',
+        JsonRpcError(
+            message='foo',
+            code=4,
+            data={
+                'error': 'The check implication step expects the antecedent term to be function-like.',
+                'context': [r'/* Sfa */ \mu{}( Config@A:SortK{}, /* Sfa */ Config@A:SortK{} )'],
+            },
+        ),
+        ImplicationError(
+            error='The check implication step expects the antecedent term to be function-like.',
+            context=(r'/* Sfa */ \mu{}( Config@A:SortK{}, /* Sfa */ Config@A:SortK{} )',),
+        ),
+        r'Implication check error: The check implication step expects the antecedent term to be function-like. Context: /* Sfa */ \mu{}( Config@A:SortK{}, /* Sfa */ Config@A:SortK{} )',
+    ),
+    (
+        'default-error',
+        JsonRpcError(message='foo', code=100, data={'bar': 1, 'baz': [2, 3]}),
+        DefaultError(message='foo', code=100, data={'bar': 1, 'baz': [2, 3]}),
+        "foo | code: 100 | data: {'bar': 1, 'baz': [2, 3]}",
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,rpc_err,expected_err,expected_str',
+    ERROR_TEST_DATA,
+    ids=[test_id for test_id, *_ in ERROR_TEST_DATA],
+)
+def test_error(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    test_id: str,
+    rpc_err: JsonRpcError,
+    expected_err: KoreClientError,
+    expected_str: str,
+) -> None:
+    # Given
+    rpc_client.assume_raises(rpc_err)
+
+    # Then
+    with pytest.raises(KoreClientError) as excinfo:
+        # When
+        kore_client.simplify(int_top)  # Transport is mocked, could be anything
+
+    actual_err = excinfo.value
+    actual_str = str(actual_err)
+
+    # Then
+    assert actual_err == expected_err
+    assert actual_str == expected_str
