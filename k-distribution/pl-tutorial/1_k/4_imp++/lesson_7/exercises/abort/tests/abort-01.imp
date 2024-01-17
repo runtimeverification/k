@@ -1,5 +1,0 @@
-int x;
-x=7;
-print(x,"\n");
-abort;
-print(x);

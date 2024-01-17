@@ -1,5 +1,0 @@
-{
-  S:String
-#Equals
-  "child spawned\nchild halted\n"
-}

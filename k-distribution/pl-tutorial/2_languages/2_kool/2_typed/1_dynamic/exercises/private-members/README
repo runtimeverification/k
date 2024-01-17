@@ -1,7 +1,0 @@
-This exercise is almost the same as the "private-members" exercise of
-untyped KOOL, but for the typed KOOL language.  The difference is that
-now we follow the Java model and do override private methods.  For
-example, if a class A declares a private method f and a public method
-g that invokes f, and if a class B extends A and defines a public method
-also called f, then the f called by g will continue to be A's private f
-even in instances of B.  See programs ex13.kool and ex19.kool.

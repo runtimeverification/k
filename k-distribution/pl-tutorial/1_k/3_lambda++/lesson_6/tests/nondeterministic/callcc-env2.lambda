@@ -1,4 +1,0 @@
-let x = 1 in
-  let a = callcc lambda k . (let x = 2 in (k x)) in
-    let b = x in
-	  (a + b)

@@ -24,18 +24,6 @@
       </includes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}</directory>
-      <outputDirectory>/share/kframework</outputDirectory>
-      <includes>
-        <include>pl-tutorial/**</include>
-        <include>INSTALL*</include>
-      </includes>
-      <excludes>
-        <exclude>**/.*/**</exclude>
-        <exclude>**/*-kompiled/**</exclude>
-      </excludes>
-    </fileSet>
-    <fileSet>
       <directory>${project.basedir}/include</directory>
       <outputDirectory>/include</outputDirectory>
       <excludes>
