@@ -338,14 +338,70 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         raise JsonRpcError(**response['error'])
 
 
+class KoreClientError(Exception, ABC):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 @final
 @dataclass
-class KoreClientError(Exception):  # TODO refine
+class ParseError(KoreClientError):
+    error: str
+
+    def __init__(self, error: str):
+        self.error = error
+        super().__init__(f'Could not parse pattern: {self.error}')
+
+
+@final
+@dataclass
+class PatternError(KoreClientError):
+    error: str
+    context: tuple[str, ...]
+
+    def __init__(self, error: str, context: Iterable[str]):
+        self.error = error
+        self.context = tuple(context)
+        context_str = ' ;; '.join(self.context)
+        super().__init__(f'Could not verify pattern: {self.error} Context: {context_str}')
+
+
+@final
+@dataclass
+class ModuleError(KoreClientError):
+    module_name: str
+
+    def __init__(self, module_name: str):
+        self.module_name = module_name
+        super().__init__(f'Could not find module: {self.module_name}')
+
+
+@final
+@dataclass
+class ImplicationError(KoreClientError):
+    error: str
+    context: tuple[str, ...]
+
+    def __init__(self, error: str, context: Iterable[str]):
+        self.error = error
+        self.context = tuple(context)
+        context_str = ' ;; '.join(self.context)
+        super().__init__(f'Implication check error: {self.error} Context: {context_str}')
+
+
+@final
+@dataclass
+class DefaultError(KoreClientError):
+    message: str
+    code: int
+    data: Any
+
     def __init__(self, message: str, code: int, data: Any = None):
-        super().__init__(message)
         self.message = message
         self.code = code
         self.data = data
+        message = f'{self.message} | code: {self.code}' + (f' | data: {self.data}' if data is not None else '')
+        super().__init__(message)
 
 
 class StopReason(str, Enum):
@@ -807,8 +863,21 @@ class KoreClient(ContextManager['KoreClient']):
         try:
             return self._client.request(method, **params)
         except JsonRpcError as err:
-            assert err.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
-            raise KoreClientError(message=err.message, code=err.code, data=err.data) from err
+            raise self._error(err) from err
+
+    def _error(self, err: JsonRpcError) -> KoreClientError:
+        assert err.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
+        match err.code:
+            case 1:
+                return ParseError(error=err.data)
+            case 2:
+                return PatternError(error=err.data['error'], context=err.data['context'])
+            case 3:
+                return ModuleError(module_name=err.data)
+            case 4:
+                return ImplicationError(error=err.data['error'], context=err.data['context'])
+            case _:
+                return DefaultError(message=err.message, code=err.code, data=err.data)
 
     @staticmethod
     def _state(pattern: Pattern) -> dict[str, Any]:

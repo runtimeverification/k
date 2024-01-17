@@ -12,8 +12,8 @@ from pyk.kore.rpc import (
     BranchingResult,
     CutPointResult,
     DepthBoundResult,
+    ImplicationError,
     ImpliesResult,
-    KoreClientError,
     SatResult,
     State,
     StuckResult,
@@ -312,12 +312,10 @@ class TestKoreClient(KoreClientTest):
         antecedent: Pattern,
         consequent: Pattern,
     ) -> None:
-        with pytest.raises(KoreClientError) as excinfo:
+        # Then
+        with pytest.raises(ImplicationError):
             # When
             kore_client.implies(antecedent, consequent)
-
-        # Then
-        assert excinfo.value.code == 4
 
     @pytest.mark.parametrize(
         'test_id,pattern,expected',
