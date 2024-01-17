@@ -1,9 +1,0 @@
-  Solution ==K ( L:Term |-> cons ( V0 , nil , .Terms ) )
-#Or
-  Solution ==K ( L:Term |-> cons ( V1 , cons ( V1 , nil , .Terms ) , .Terms ) )
-#Or
-  Solution ==K ( L:Term |-> cons ( V2 , cons ( V1 , cons ( V2 , nil , .Terms ) , .Terms ) , .Terms ) )
-#Or
-  Solution ==K ( L:Term |-> cons ( V3 , cons ( V2 , cons ( V2 , cons ( V3 , nil , .Terms ) , .Terms ) , .Terms ) , .Terms ) )
-#Or
-  Solution ==K ( L:Term |-> nil )
