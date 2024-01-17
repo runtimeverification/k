@@ -9,8 +9,8 @@
 project = 'pyk'
 author = 'Runtime Verification, Inc'
 copyright = '2024, Runtime Verification, Inc'
-version = '0.1.578'
-release = '0.1.578'
+version = '0.1.579'
+release = '0.1.579'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
