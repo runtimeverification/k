@@ -299,7 +299,7 @@ class NodeView(Widget):
                 # To appease the type-checker
                 if type(self._element) is KCFG.Node:
                     custom_str = '\n'.join(self._custom_view(self._element))
-                elif type(self._element) is KCFG.Successor:
+                elif isinstance(self._element, KCFG.Successor):
                     custom_str = '\n'.join(self._custom_view(self._element))
 
         self.query_one('#info', Info).text = self._info_text()

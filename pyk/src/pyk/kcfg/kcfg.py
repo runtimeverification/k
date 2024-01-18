@@ -78,12 +78,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         source: KCFG.Node
         target: KCFG.Node
         depth: int
+        rules: tuple[str, ...]
 
         def to_dict(self) -> dict[str, Any]:
             return {
                 'source': self.source.id,
                 'target': self.target.id,
                 'depth': self.depth,
+                'rules': list(self.rules),
             }
 
         def to_rule(self, label: str, claim: bool = False, priority: int | None = None) -> KRuleLike:
@@ -194,7 +196,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         @property
         def edges(self) -> tuple[KCFG.Edge, ...]:
-            return tuple(KCFG.Edge(self.source, target, 1) for target in self.targets)
+            return tuple(KCFG.Edge(self.source, target, 1, ()) for target in self.targets)
 
     _node_id: int
     _nodes: dict[int, Node]
@@ -359,7 +361,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             source_id = edge_dict['source']
             target_id = edge_dict['target']
             depth = edge_dict['depth']
-            cfg.create_edge(source_id, target_id, depth)
+            rules = edge_dict['rules']
+            cfg.create_edge(source_id, target_id, depth, rules=rules)
 
         for cover_dict in dct.get('covers') or []:
             source_id = cover_dict['source']
@@ -564,7 +567,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return edge == other
         return False
 
-    def create_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, depth: int) -> Edge:
+    def create_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, depth: int, rules: Iterable[str] = ()) -> Edge:
         self._check_no_successors(source_id)
         self._check_no_zero_loops(source_id, [target_id])
 
@@ -577,7 +580,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         if source.id not in self._edges:
             self._edges[source.id] = {}
 
-        edge = KCFG.Edge(source, target, depth)
+        edge = KCFG.Edge(source, target, depth, tuple(rules))
         self._edges[source.id][target.id] = edge
         return edge
 
@@ -990,7 +993,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             source_id = edge_dict['source']
             target_id = edge_dict['target']
             depth = edge_dict['depth']
-            cfg.create_edge(source_id, target_id, depth)
+            rules = edge_dict['rules']
+            cfg.create_edge(source_id, target_id, depth, rules=rules)
 
         for cover_dict in dct.get('covers') or []:
             source_id = cover_dict['source']
