@@ -1881,6 +1881,9 @@ of the above operations in K.
         requires findString(Source, ToReplace, 0) <Int 0
 
 
+  // Note that the replace function is undefined when Count < 0. This allows different backends to
+  // implement their own behavior without contradicting these semantics. For instance, a symbolic
+  // backend can return #Bottom for that case, while a concrete backend can throw an exception.
   rule replace(Source:String, ToReplace:String, Replacement:String, Count:Int) =>
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
