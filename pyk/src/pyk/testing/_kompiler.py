@@ -180,9 +180,7 @@ class BoosterClientTest:
         return kompile(**kwargs)
 
     @pytest.fixture
-    def booster_client(
-        self, haskell_dir: Path, llvm_dir: Path, bug_report: BugReport | None = None
-    ) -> Iterator[KoreClient]:
+    def booster_client(self, haskell_dir: Path, llvm_dir: Path, bug_report: BugReport | None) -> Iterator[KoreClient]:
         server = BoosterServer(haskell_dir, llvm_dir, self.MODULE_NAME, bug_report=bug_report, command=None)
         client = KoreClient('localhost', server.port, timeout=self.KORE_CLIENT_TIMEOUT, bug_report=bug_report)
         yield client
