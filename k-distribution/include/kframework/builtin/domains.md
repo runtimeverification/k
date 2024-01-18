@@ -1889,7 +1889,7 @@ of the above operations in K.
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
         requires Count >Int 0 andBool findString(Source, ToReplace, 0) >=Int 0
   rule replace(Source:String, _, _, Count) => Source
-        requires Count >= 0 [owise]
+        requires Count >=Int 0 [owise]
   rule replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
 endmodule
