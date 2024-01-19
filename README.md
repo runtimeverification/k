@@ -425,7 +425,7 @@ Common build-time error messages:
         ```
 
         copy the `got:` hash (`sha256-fFlRqlLDZnVuoJniPvXjqdYEjnKxmFCEniavau/1gcQ=`) and replace it in `flake.nix`:
-        
+
         ```nix
         k-framework = { haskell-backend-bins, llvm-kompile-libs }:
             prev.callPackage ./nix/k.nix {
