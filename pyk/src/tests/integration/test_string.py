@@ -232,7 +232,7 @@ def test_kore_rpc(haskell_dir: Path, text: str) -> None:
     expected = kore_config(None, text)
 
     # When
-    with KoreServer(haskell_dir, KOMPILE_MAIN_MODULE) as server:
+    with KoreServer({'kompiled_dir': haskell_dir, 'module_name': KOMPILE_MAIN_MODULE}) as server:
         with KoreClient('localhost', server.port) as client:
             result = client.execute(kore)
 
