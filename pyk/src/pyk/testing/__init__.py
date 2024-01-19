@@ -1,5 +1,4 @@
 from ._kompiler import (
-    BoosterClientTest,
     KCFGExploreTest,
     KompiledTest,
     Kompiler,
