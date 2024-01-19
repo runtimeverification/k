@@ -49,6 +49,7 @@ def leaf_number(proof: APRProof) -> int:
 
 
 class TestMiniKEVM(KCFGExploreTest, KProveTest):
+    DISABLE_BOOSTER = True
     KOMPILE_MAIN_FILE = K_FILES / 'mini-kevm.k'
 
     @pytest.mark.parametrize(

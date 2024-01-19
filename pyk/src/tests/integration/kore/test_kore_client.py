@@ -24,7 +24,7 @@ from pyk.kore.rpc import (
     VacuousResult,
 )
 from pyk.kore.syntax import And, App, Bottom, Equals, EVar, Implies, Module, Top
-from pyk.testing import BoosterClientTest, KoreClientTest
+from pyk.testing import KoreClientTest
 
 from ..utils import K_FILES
 
@@ -235,32 +235,8 @@ def assert_execute_result_equals(actual: ExecuteResult, expected: ExecuteResult)
     assert actual_dict == expected_dict
 
 
-class TestBooster(BoosterClientTest):
-    MAIN_FILE = K_FILES / 'kore-rpc-test.k'
-    MODULE_NAME = 'KORE-RPC-TEST'
-
-    @pytest.mark.parametrize(
-        'test_id,n,params,expected',
-        EXECUTE_TEST_DATA,
-        ids=[test_id for test_id, *_ in EXECUTE_TEST_DATA],
-    )
-    def test_execute_booster(
-        self,
-        booster_client: KoreClient,
-        test_id: str,
-        n: int,
-        params: Mapping[str, Any],
-        expected: ExecuteResult,
-    ) -> None:
-        # When
-        actual = booster_client.execute(term(n), **params)
-        # Then
-        assert_execute_result_equals(actual, expected)
-
-
 class TestKoreClient(KoreClientTest):
     KOMPILE_MAIN_FILE = K_FILES / 'kore-rpc-test.k'
-    KORE_MODULE_NAME = 'KORE-RPC-TEST'
 
     @pytest.mark.parametrize(
         'test_id,n,params,expected',
@@ -377,7 +353,6 @@ class TestKoreClient(KoreClientTest):
 
 class TestKoreClientWithSMTLemmas(KoreClientTest):
     KOMPILE_MAIN_FILE = K_FILES / 'smt.k'
-    KORE_MODULE_NAME = 'SMT'
 
     @pytest.mark.parametrize(
         'test_id,pattern,module_name,expected',
