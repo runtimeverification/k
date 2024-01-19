@@ -13,7 +13,7 @@ from pathlib import Path
 from signal import SIGINT
 from subprocess import Popen
 from time import sleep
-from typing import TYPE_CHECKING, ContextManager, final
+from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
@@ -24,6 +24,8 @@ from .syntax import And, SortApp, kore_term
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from typing import Any, ClassVar, Final, TextIO, TypeVar
+
+    from typing_extensions import Required
 
     from ..utils import BugReport
     from .syntax import Module, Pattern
@@ -984,108 +986,171 @@ class KoreClient(ContextManager['KoreClient']):
         return result['module']
 
 
+class KoreServerArgs(TypedDict, total=False):
+    kompiled_dir: Required[str | Path]
+    module_name: Required[str]
+    port: int | None
+    command: str | Iterable[str] | None
+    smt_timeout: int | None
+    smt_retry_limit: int | None
+    smt_reset_interval: int | None
+    smt_tactic: str | None
+    log_axioms_file: Path | None
+    haskell_log_format: KoreExecLogFormat | None
+    haskell_log_entries: Iterable[str] | None
+    bug_report: BugReport | None
+
+
+class KoreServerInfo(NamedTuple):
+    pid: int
+    host: str
+    port: int
+
+
 class KoreServer(ContextManager['KoreServer']):
     _proc: Popen
-    _pid: int
-    _host: str
+    _info: KoreServerInfo
+
+    _kompiled_dir: Path
+    _definition_file: Path
+    _module_name: str
     _port: int
+    _command: list[str]
+    _smt_timeout: int | None
+    _smt_retry_limit: int | None
+    _smt_reset_interval: int | None
+    _smt_tactic: str | None
+    _log_axioms_file: Path | None
+    _haskell_log_format: KoreExecLogFormat
+    _haskell_log_entries: list[str]
 
-    def __init__(
-        self,
-        kompiled_dir: str | Path,
-        module_name: str,
-        *,
-        port: int | None = None,
-        smt_timeout: int | None = None,
-        smt_retry_limit: int | None = None,
-        smt_reset_interval: int | None = None,
-        smt_tactic: str | None = None,
-        command: str | Iterable[str] | None = None,
-        bug_report: BugReport | None = None,
-        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
-        haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Path | None = None,
-    ):
-        kompiled_dir = Path(kompiled_dir)
-        check_dir_path(kompiled_dir)
+    _bug_report: BugReport | None
 
-        definition_file = kompiled_dir / 'definition.kore'
-        check_file_path(definition_file)
+    def __init__(self, args: KoreServerArgs):
+        self._kompiled_dir = Path(args['kompiled_dir'])
+        self._definition_file = self._kompiled_dir / 'definition.kore'
+        self._module_name = args['module_name']
+        self._port = args.get('port') or 0
 
-        self._check_none_or_positive(smt_timeout, 'smt_timeout')
-        self._check_none_or_positive(smt_retry_limit, 'smt_retry_limit')
-        self._check_none_or_positive(smt_reset_interval, 'smt_reset_interval')
-
-        if not command:
-            command = ('kore-rpc',)
+        if not (command := args.get('command')):
+            self._command = ['kore-rpc']
         elif type(command) is str:
-            command = (command,)
+            self._command = [command]
+        else:
+            self._command = list(command)
 
-        args = list(command)
-        args += [str(definition_file)]
-        server_args = ['--module', module_name, '--server-port', str(port or 0)]
-        smt_server_args = []
-        if smt_timeout:
-            smt_server_args += ['--smt-timeout', str(smt_timeout)]
-        if smt_retry_limit:
-            smt_server_args += ['--smt-retry-limit', str(smt_retry_limit)]
-        if smt_reset_interval:
-            smt_server_args += ['--smt-reset-interval', str(smt_reset_interval)]
-        if smt_tactic:
-            smt_server_args += ['--smt-tactic', smt_tactic]
+        self._smt_timeout = args.get('smt_timeout')
+        self._smt_retry_limit = args.get('smt_retry_limit')
+        self._smt_reset_interval = args.get('smt_reset_interval')
+        self._smt_tactic = args.get('smt_tactic')
+        self._log_axioms_file = args.get('log_axioms_file')
 
-        haskell_log_args = (
-            [
-                '--log',
-                str(log_axioms_file),
-                '--log-format',
-                haskell_log_format.value,
-                '--log-entries',
-                ','.join(haskell_log_entries),
-            ]
-            if log_axioms_file
-            else []
-        )
-        args += server_args
-        args += smt_server_args
-        args += haskell_log_args
+        self._haskell_log_format = args.get('haskell_log_format') or KoreExecLogFormat.ONELINE
 
-        if bug_report:
-            self._gather_server_report(
-                module_name,
-                list(command)[0],
-                bug_report,
-                definition_file,
-                list(command)[1:] + smt_server_args + haskell_log_args,
-            )
+        if haskell_log_entries := args.get('haskell_log_entries'):
+            self._haskell_log_entries = list(haskell_log_entries)
+        else:
+            self._haskell_log_entries = []
 
-        _LOGGER.info(f'Starting KoreServer: {" ".join(args)}')
+        self._bug_report = args.get('bug_report')
 
-        self._proc = Popen(args)
-        self._pid = self._proc.pid
-        self._host, self._port = self._get_host_and_port(self._pid)
-        if port:
-            assert self.port == port
+        self._validate()
+        self.start()
+
+    @property
+    def pid(self) -> int:
+        return self._info.pid
+
+    @property
+    def host(self) -> str:
+        return self._info.host
+
+    @property
+    def port(self) -> int:
+        return self._info.port
+
+    def __enter__(self) -> KoreServer:
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        self.close()
+
+    def start(self) -> None:
+        if self._bug_report:
+            self._populate_bug_report(self._bug_report)
+
+        cli_args = self._cli_args()
+        _LOGGER.info(f'Starting KoreServer: {" ".join(cli_args)}')
+        self._proc = Popen(cli_args)
+        pid = self._proc.pid
+        host, port = self._get_host_and_port(pid)
+        if self._port:
+            assert port == self._port
+        self._info = KoreServerInfo(pid=pid, host=host, port=port)
         _LOGGER.info(f'KoreServer started: {self.host}:{self.port}, pid={self.pid}')
 
-    @staticmethod
-    def _gather_server_report(
-        module_name: str, prog_name: str, bug_report: BugReport, definition_file: Path, extra_args: list[str]
-    ) -> None:
-        bug_report.add_file(definition_file, Path('definition.kore'))
+    def close(self) -> None:
+        _LOGGER.info(f'Stopping KoreServer: {self.host}:{self.port}, pid={self.pid}')
+        self._proc.send_signal(SIGINT)
+        self._proc.wait()
+        _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
+
+    def _validate(self) -> None:
+        def _check_none_or_positive(n: int | None, param_name: str) -> None:
+            if n is not None and n <= 0:
+                raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
+
+        check_dir_path(self._kompiled_dir)
+        check_file_path(self._definition_file)
+        _check_none_or_positive(self._smt_timeout, 'smt_timeout')
+        _check_none_or_positive(self._smt_retry_limit, 'smt_retry_limit')
+        _check_none_or_positive(self._smt_reset_interval, 'smt_reset_interval')
+
+    def _cli_args(self) -> list[str]:
+        server_args = ['--module', self._module_name, '--server-port', str(self._port)]
+        res = list(self._command)
+        res += [str(self._definition_file)]
+        res += server_args
+        res += self._extra_args()
+        return res
+
+    def _extra_args(self) -> list[str]:
+        """Command line arguments that are intended to be included in the bug report"""
+        smt_server_args = []
+        if self._smt_timeout:
+            smt_server_args += ['--smt-timeout', str(self._smt_timeout)]
+        if self._smt_retry_limit:
+            smt_server_args += ['--smt-retry-limit', str(self._smt_retry_limit)]
+        if self._smt_reset_interval:
+            smt_server_args += ['--smt-reset-interval', str(self._smt_reset_interval)]
+        if self._smt_tactic:
+            smt_server_args += ['--smt-tactic', self._smt_tactic]
+
+        if self._log_axioms_file:
+            haskell_log_args = [
+                '--log',
+                str(self._log_axioms_file),
+                '--log-format',
+                self._haskell_log_format.value,
+                '--log-entries',
+                ','.join(self._haskell_log_entries),
+            ]
+        else:
+            haskell_log_args = []
+
+        return smt_server_args + haskell_log_args
+
+    def _populate_bug_report(self, bug_report: BugReport) -> None:
+        prog_name = self._command[0]
+        bug_report.add_file(self._definition_file, Path('definition.kore'))
         version_info = run_process((prog_name, '--version'), pipe_stderr=True, logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(version_info, Path('server_version.txt'))
         server_instance = {
             'exe': prog_name,
-            'module': module_name,
-            'extra_args': extra_args,
+            'module': self._module_name,
+            'extra_args': self._command[1:] + self._extra_args(),
         }
         bug_report.add_file_contents(json.dumps(server_instance), Path('server_instance.json'))
-
-    @staticmethod
-    def _check_none_or_positive(n: int | None, param_name: str) -> None:
-        if n is not None and n <= 0:
-            raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
 
     @staticmethod
     def _get_host_and_port(pid: int) -> tuple[str, int]:
@@ -1097,50 +1162,19 @@ class KoreServer(ContextManager['KoreServer']):
         conn = conns[0]
         return conn.laddr
 
-    @property
-    def pid(self) -> int:
-        return self._pid
 
-    @property
-    def host(self) -> str:
-        return self._host
-
-    @property
-    def port(self) -> int:
-        return self._port
-
-    def __enter__(self) -> KoreServer:
-        return self
-
-    def __exit__(self, *args: Any) -> None:
-        self.close()
-
-    def close(self) -> None:
-        self._proc.send_signal(SIGINT)
-        self._proc.wait()
-        _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
+class BoosterServerArgs(KoreServerArgs):
+    llvm_kompiled_dir: Required[str | Path]
 
 
 class BoosterServer(KoreServer):
-    def __init__(
-        self,
-        kompiled_dir: str | Path,
-        llvm_kompiled_dir: str | Path,
-        module_name: str,
-        *,
-        port: int | None = None,
-        smt_timeout: int | None = None,
-        smt_retry_limit: int | None = None,
-        smt_reset_interval: int | None = None,
-        smt_tactic: str | None = None,
-        command: str | Iterable[str] | None,
-        bug_report: BugReport | None = None,
-        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
-        haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Path | None = None,
-    ):
-        llvm_kompiled_dir = Path(llvm_kompiled_dir)
-        check_dir_path(llvm_kompiled_dir)
+    _llvm_kompiled_dir: Path
+    _dylib: Path
+    _llvm_definition: Path
+    _llvm_dt: Path
+
+    def __init__(self, args: BoosterServerArgs):
+        self._llvm_kompiled_dir = Path(args['llvm_kompiled_dir'])
 
         ext: str
         match sys.platform:
@@ -1151,48 +1185,30 @@ class BoosterServer(KoreServer):
             case _:
                 raise ValueError('Unsupported platform: {sys.platform}')
 
-        dylib = llvm_kompiled_dir / f'interpreter.{ext}'
-        check_file_path(dylib)
-        llvm_definition = llvm_kompiled_dir / 'definition.kore'
-        check_file_path(llvm_definition)
-        llvm_dt = llvm_kompiled_dir / 'dt'
-        check_dir_path(llvm_dt)
+        self._dylib = self._llvm_kompiled_dir / f'interpreter.{ext}'
+        self._llvm_definition = self._llvm_kompiled_dir / 'definition.kore'
+        self._llvm_dt = self._llvm_kompiled_dir / 'dt'
 
-        if bug_report:
-            self._gather_booster_report(llvm_kompiled_dir, llvm_definition, llvm_dt, bug_report)
+        if not args.get('command'):
+            args['command'] = 'kore-rpc-booster'
 
-        self._check_none_or_positive(smt_timeout, 'smt_timeout')
-        self._check_none_or_positive(smt_retry_limit, 'smt_retry_limit')
-        self._check_none_or_positive(smt_reset_interval, 'smt_reset_interval')
+        super().__init__(args)
 
-        if not command:
-            command = ('kore-rpc-booster',)
-        elif type(command) is str:
-            command = (command,)
+    def _validate(self) -> None:
+        check_dir_path(self._llvm_kompiled_dir)
+        check_file_path(self._dylib)
+        check_file_path(self._llvm_definition)
+        check_dir_path(self._llvm_dt)
 
-        args = list(command)
-        args += ['--llvm-backend-library', str(dylib)]
-        super().__init__(
-            kompiled_dir=kompiled_dir,
-            module_name=module_name,
-            port=port,
-            smt_timeout=smt_timeout,
-            smt_retry_limit=smt_retry_limit,
-            smt_reset_interval=smt_reset_interval,
-            smt_tactic=smt_tactic,
-            command=args,
-            bug_report=bug_report,
-            haskell_log_format=haskell_log_format,
-            haskell_log_entries=haskell_log_entries,
-            log_axioms_file=log_axioms_file,
-        )
+    def _extra_args(self) -> list[str]:
+        res = super()._extra_args()
+        res += ['--llvm-backend-library', str(self._dylib)]
+        return res
 
-    @staticmethod
-    def _gather_booster_report(
-        llvm_kompiled_dir: Path, llvm_definition: Path, llvm_dt: Path, bug_report: BugReport
-    ) -> None:
-        bug_report.add_file(llvm_definition, Path('llvm_definition/definition.kore'))
-        bug_report.add_file(llvm_dt, Path('llvm_definition/dt'))
+    def _populate_bug_report(self, bug_report: BugReport) -> None:
+        super()._populate_bug_report(bug_report)
+        bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
+        bug_report.add_file(self._llvm_dt, Path('llvm_definition/dt'))
         llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
@@ -1204,40 +1220,28 @@ def kore_server(
     llvm_definition_dir: Path | None = None,
     port: int | None = None,
     command: str | Iterable[str] | None = None,
-    bug_report: BugReport | None = None,
     smt_timeout: int | None = None,
     smt_retry_limit: int | None = None,
     smt_tactic: str | None = None,
-    haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
-    haskell_log_entries: Iterable[str] = (),
     log_axioms_file: Path | None = None,
+    haskell_log_format: KoreExecLogFormat | None = None,
+    haskell_log_entries: Iterable[str] | None = None,
+    bug_report: BugReport | None = None,
 ) -> KoreServer:
+    kore_args: KoreServerArgs = {
+        'kompiled_dir': definition_dir,
+        'module_name': module_name,
+        'port': port,
+        'command': command,
+        'smt_timeout': smt_timeout,
+        'smt_retry_limit': smt_retry_limit,
+        'log_axioms_file': log_axioms_file,
+        'smt_tactic': smt_tactic,
+        'haskell_log_format': haskell_log_format,
+        'haskell_log_entries': haskell_log_entries,
+        'bug_report': bug_report,
+    }
     if llvm_definition_dir:
-        return BoosterServer(
-            kompiled_dir=definition_dir,
-            llvm_kompiled_dir=llvm_definition_dir,
-            module_name=module_name,
-            port=port,
-            command=command,
-            bug_report=bug_report,
-            smt_timeout=smt_timeout,
-            smt_retry_limit=smt_retry_limit,
-            smt_tactic=smt_tactic,
-            haskell_log_format=haskell_log_format,
-            haskell_log_entries=haskell_log_entries,
-            log_axioms_file=log_axioms_file,
-        )
-
-    return KoreServer(
-        kompiled_dir=definition_dir,
-        module_name=module_name,
-        port=port,
-        command=command,
-        bug_report=bug_report,
-        smt_timeout=smt_timeout,
-        smt_retry_limit=smt_retry_limit,
-        smt_tactic=smt_tactic,
-        haskell_log_format=haskell_log_format,
-        haskell_log_entries=haskell_log_entries,
-        log_axioms_file=log_axioms_file,
-    )
+        booster_args: BoosterServerArgs = {'llvm_kompiled_dir': llvm_definition_dir, **kore_args}
+        return BoosterServer(booster_args)
+    return KoreServer(kore_args)
