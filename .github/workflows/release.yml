@@ -436,6 +436,12 @@ jobs:
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           fetch-depth: 0
+      - name: 'Checkout PL Tutorial code'
+        uses: actions/checkout@v3
+        with:
+          repository: runtimeverification/pl-tutorial
+          path: gh-pages/k-distribution/pl-tutorial
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
       - working-directory: gh-pages
         run: |
           git config --global user.name rv-jenkins
