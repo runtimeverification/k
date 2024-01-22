@@ -43,7 +43,7 @@ public class GenerateSortPredicateRules {
         mod.imports(),
         (Set<Sentence>)
             mod.localSentences()
-                .$bar(stream(mod.allSorts()).flatMap(this::gen).collect(Collections.toSet())),
+                .$bar(stream(mod.localSorts()).flatMap(this::gen).collect(Collections.toSet())),
         mod.att());
   }
 
