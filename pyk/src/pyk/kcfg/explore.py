@@ -476,6 +476,18 @@ class KCFGExplore:
         def log(message: str, *, warning: bool = False) -> None:
             _LOGGER.log(logging.WARNING if warning else logging.INFO, f'Extend result for {self.id}: {message}')
 
+        def extract_rule_labels(_logs: tuple[LogEntry, ...]) -> list[str]:
+            _rule_lines = []
+            for node_log in _logs:
+                if type(node_log.result) is RewriteSuccess:
+                    if node_log.result.rule_id in self.kprint.definition.sentence_by_unique_id:
+                        sent = self.kprint.definition.sentence_by_unique_id[node_log.result.rule_id]
+                        _rule_lines.append(f'{sent.label}:{sent.source}')
+                    else:
+                        _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
+                        _rule_lines.append('UNKNOWN')
+            return _rule_lines
+
         match extend_result:
             case Vacuous():
                 kcfg.add_vacuous(node.id)
@@ -493,16 +505,7 @@ class KCFGExplore:
             case Step(cterm, depth, next_node_logs, cut):
                 next_node = kcfg.create_node(cterm)
                 logs[next_node.id] = next_node_logs
-                rule_lines = []
-                for node_log in next_node_logs:
-                    if type(node_log.result) is RewriteSuccess:
-                        if node_log.result.rule_id in self.kprint.definition.sentence_by_unique_id:
-                            sent = self.kprint.definition.sentence_by_unique_id[node_log.result.rule_id]
-                            rule_lines.append(f'{sent.label}:{sent.source}')
-                        else:
-                            _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
-                            rule_lines.append('UNKNOWN')
-                kcfg.create_edge(node.id, next_node.id, depth, rules=rule_lines)
+                kcfg.create_edge(node.id, next_node.id, depth, rules=extract_rule_labels(next_node_logs))
                 cut_str = 'cut-rule ' if cut else ''
                 log(f'{cut_str}basic block at depth {depth}: {node.id} -> {next_node.id}')
 
@@ -516,7 +519,7 @@ class KCFGExplore:
                 next_ids = [kcfg.create_node(cterm).id for cterm in cterms]
                 for i in next_ids:
                     logs[i] = next_node_logs
-                kcfg.create_ndbranch(node.id, next_ids)
+                kcfg.create_ndbranch(node.id, next_ids, rules=extract_rule_labels(next_node_logs))
                 log(f'{len(next_ids)} non-deterministic branches: {node.id} -> {next_ids}')
 
             case _:

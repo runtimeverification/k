@@ -1221,16 +1221,16 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     def add_ksequence_under_k_productions(self, kast: KInner) -> KInner:
         """Inject a `KSequence` under the given term if it's a subsort of `K` and is being used somewhere that sort `K` is expected (determined by inspecting the definition)."""
 
-        def _add_ksequence_under_k_productions(kast: KInner) -> KInner:
-            if type(kast) is not KApply:
-                return kast
+        def _add_ksequence_under_k_productions(_kast: KInner) -> KInner:
+            if type(_kast) is not KApply:
+                return _kast
 
-            prod = self.production_for_klabel(kast.label)
+            prod = self.production_for_klabel(_kast.label)
             return KApply(
-                kast.label,
+                _kast.label,
                 [
                     KSequence(arg) if sort.name == 'K' and not self.sort(arg) == KSort('K') else arg
-                    for arg, sort in zip(kast.args, prod.argument_sorts, strict=True)
+                    for arg, sort in zip(_kast.args, prod.argument_sorts, strict=True)
                 ],
             )
 
