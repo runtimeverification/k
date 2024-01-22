@@ -58,7 +58,7 @@ def split(i: int, js: Iterable[int]) -> KCFG.Split:
 
 
 def ndbranch(i: int, js: Iterable[int]) -> KCFG.NDBranch:
-    return KCFG.NDBranch(node(i), tuple(node(j) for j in js))
+    return KCFG.NDBranch(node(i), tuple(node(j) for j in js), ())
 
 
 def node_dicts(n: int, start: int = 1) -> list[dict[str, Any]]:
