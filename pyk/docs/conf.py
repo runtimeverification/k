@@ -9,8 +9,8 @@
 project = 'pyk'
 author = 'Runtime Verification, Inc'
 copyright = '2024, Runtime Verification, Inc'
-version = '0.1.589'
-release = '0.1.589'
+version = '0.1.590'
+release = '0.1.590'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -23,6 +23,7 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 add_module_names = False
+autodoc_inherit_docstrings = False
 viewcode_line_numbers = True
 
 # -- Options for HTML output -------------------------------------------------
