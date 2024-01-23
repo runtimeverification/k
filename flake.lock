@@ -15,17 +15,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1705919184,
-        "narHash": "sha256-0FxX/avC5zEPck5uPDzGEiXFviKFrSiqHfIWgzeb3pk=",
+        "lastModified": 1706019921,
+        "narHash": "sha256-PYwAOxFJqj16ulRb6pwrh7bLdHsg1pxkuA01FGguOFM=",
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "f295a6a99b9cf6e8ebc33f553373fa41c1270f90",
+        "rev": "889e046ed9878418f0a422d7aca856fe134bf69d",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "f295a6a99b9cf6e8ebc33f553373fa41c1270f90",
+        "rev": "889e046ed9878418f0a422d7aca856fe134bf69d",
         "type": "github"
       }
     },
@@ -71,17 +71,17 @@
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1704880250,
-        "narHash": "sha256-ceadOtMF3ML1Gk1gjX3lKTGN5juZ46WYBroGMBZ5AAg=",
+        "lastModified": 1706005587,
+        "narHash": "sha256-G88EU1c2iO0cmN580/svZIAsoJpPlVv/rU1DjV5qTfs=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "25f07c8b37b85bf19c8ec0894b60a51cb5e73842",
+        "rev": "d9fa6aeb36407193b701059a54307b6368841632",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "25f07c8b37b85bf19c8ec0894b60a51cb5e73842",
+        "rev": "d9fa6aeb36407193b701059a54307b6368841632",
         "type": "github"
       }
     },
