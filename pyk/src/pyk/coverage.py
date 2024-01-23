@@ -111,8 +111,8 @@ def translate_coverage_from_paths(src_kompiled_dir: str, dst_kompiled_dir: str, 
 
     Input:
 
-        -   src_kompiled_dir: Path to *-kompiled directory of source.
-        -   dst_kompiled_dir: Path to *-kompiled directory of destination.
+        -   src_kompiled_dir: Path to kompiled directory of source.
+        -   dst_kompiled_dir: Path to kompiled directory of destination.
         -   src_rules_file: Path to generated rules coverage file.
 
     Output: Translated list of rules with non-semantic rules stripped out.
