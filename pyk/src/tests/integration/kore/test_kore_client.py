@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from itertools import count
 from string import Template
 from typing import TYPE_CHECKING
 
@@ -9,6 +10,7 @@ import pytest
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import BOOL, INT, TRUE, and_bool, eq_int, gt_int, int_dv, le_int
 from pyk.kore.rpc import (
+    BoosterServer,
     BranchingResult,
     CutPointResult,
     DepthBoundResult,
@@ -30,10 +32,12 @@ from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from pathlib import Path
     from typing import Any, Final
 
-    from pyk.kore.rpc import ExecuteResult, GetModelResult, KoreClient
+    from pyk.kore.rpc import BoosterServerArgs, ExecuteResult, GetModelResult, KoreClient
     from pyk.kore.syntax import Pattern
+    from pyk.testing import Kompiler
 
 int_top = Top(INT)
 int_bottom = Bottom(INT)
@@ -372,3 +376,36 @@ class TestKoreClientWithSMTLemmas(KoreClientTest):
 
         # Then
         assert actual == expected
+
+
+START_BOOSTER_SERVER_TEST_DATA: Final[tuple[dict[str, Any], ...]] = (
+    {},
+    {'fallback_on': ['Aborted', 'Stuck']},
+    {'interim_simplification': 3},
+    {'no_post_exec_simpify': True},
+)
+
+
+@pytest.fixture(scope='module')
+def imp_dir(kompile: Kompiler) -> Path:
+    return kompile(K_FILES / 'imp.k', backend='haskell')
+
+
+@pytest.fixture(scope='module')
+def imp_llvm_dir(kompile: Kompiler) -> Path:
+    return kompile(K_FILES / 'imp.k', backend='llvm', llvm_kompile_type='c')
+
+
+@pytest.mark.parametrize('args', START_BOOSTER_SERVER_TEST_DATA, ids=count())
+def test_start_booster_server(imp_dir: Path, imp_llvm_dir: Path, args: dict) -> None:
+    # Given
+    booster_args: BoosterServerArgs = {
+        'kompiled_dir': imp_dir,
+        'llvm_kompiled_dir': imp_llvm_dir,
+        'module_name': 'IMP',
+        **args,
+    }
+
+    # When
+    with BoosterServer(booster_args):
+        pass
