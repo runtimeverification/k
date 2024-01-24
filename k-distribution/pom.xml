@@ -16,6 +16,7 @@
   <properties>
     <config>tests/config.xml</config>
     <ktestDir>${project.basedir}</ktestDir>
+    <coreFactor>1</coreFactor>
   </properties>
 
   <dependencies>
@@ -56,6 +57,9 @@
             <goals>
               <goal>cpu-count</goal>
             </goals>
+            <configuration>
+              <factor>${coreFactor}</factor>
+            </configuration>
           </execution>
         </executions>
       </plugin>
