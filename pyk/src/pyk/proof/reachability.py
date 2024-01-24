@@ -643,7 +643,7 @@ class APRProver(Prover):
             _kore_module = kflatmodule_to_kore(
                 self.kcfg_explore.kprint.definition, self.kcfg_explore.kprint.kompiled_kore, _module
             )
-            self.kcfg_explore._kore_client.add_module(_kore_module)
+            self.kcfg_explore._kore_client.add_module(_kore_module, name_as_id=True)
 
         super().__init__(kcfg_explore)
         self.proof = proof
