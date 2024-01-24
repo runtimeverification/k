@@ -1,2 +1,0 @@
-letrec f x = 3
-in f

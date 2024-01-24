@@ -1,8 +1,0 @@
-int x;
-print("x = ");
-x=read();
-int t1; t1 = spawn {x=x/2;};
-int t2; t2 = spawn { /* join(t1); */ x=x+10;};  // uncomment for fully sync
-join(t1);
-join(t2);
-print(x,"\n");
