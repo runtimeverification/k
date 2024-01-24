@@ -370,12 +370,35 @@ class PatternError(KoreClientError):
 
 @final
 @dataclass
-class ModuleError(KoreClientError):
+class UnknownModuleError(KoreClientError):
     module_name: str
 
     def __init__(self, module_name: str):
         self.module_name = module_name
         super().__init__(f'Could not find module: {self.module_name}')
+
+
+@final
+@dataclass
+class InvalidModuleError(KoreClientError):
+    error: str
+    context: tuple[str, ...] | None
+
+    def __init__(self, error: str, context: Iterable[str] | None):
+        self.error = error
+        self.context = tuple(context) if context else None
+        context_str = ' Context: ' + ' ;; '.join(self.context) if self.context else ''
+        super().__init__(f'Could not verify module: {self.error}{context_str}')
+
+
+@final
+@dataclass
+class DuplicateModuleError(KoreClientError):
+    module_name: str
+
+    def __init__(self, module_name: str):
+        self.module_name = module_name
+        super().__init__(f'Duplicate module name: {self.module_name}')
 
 
 @final
@@ -875,9 +898,13 @@ class KoreClient(ContextManager['KoreClient']):
             case 2:
                 return PatternError(error=err.data['error'], context=err.data['context'])
             case 3:
-                return ModuleError(module_name=err.data)
+                return UnknownModuleError(module_name=err.data)
             case 4:
                 return ImplicationError(error=err.data['error'], context=err.data['context'])
+            case 8:
+                return InvalidModuleError(error=err.data['error'], context=err.data.get('context'))
+            case 9:
+                return DuplicateModuleError(module_name=err.data)
             case _:
                 return DefaultError(message=err.message, code=err.code, data=err.data)
 
@@ -981,8 +1008,14 @@ class KoreClient(ContextManager['KoreClient']):
         result = self._request('get-model', **params)
         return GetModelResult.from_dict(result)
 
-    def add_module(self, module: Module) -> str:
-        result = self._request('add-module', module=module.text)
+    def add_module(self, module: Module, *, name_as_id: bool | None = None) -> str:
+        params = filter_none(
+            {
+                'module': module.text,
+                'name-as-id': name_as_id,
+            }
+        )
+        result = self._request('add-module', **params)
         return result['module']
 
 

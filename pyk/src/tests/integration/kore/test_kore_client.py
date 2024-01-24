@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from dataclasses import asdict
 from itertools import count
 from string import Template
@@ -8,24 +9,43 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kore.parser import KoreParser
-from pyk.kore.prelude import BOOL, INT, TRUE, and_bool, eq_int, gt_int, int_dv, le_int
+from pyk.kore.prelude import (
+    BOOL,
+    INT,
+    SORT_GENERATED_TOP_CELL,
+    SORT_K_ITEM,
+    TRUE,
+    and_bool,
+    eq_int,
+    generated_counter,
+    generated_top,
+    gt_int,
+    inj,
+    int_dv,
+    k,
+    kseq,
+    le_int,
+)
 from pyk.kore.rpc import (
     BoosterServer,
     BranchingResult,
     CutPointResult,
     DepthBoundResult,
+    DuplicateModuleError,
     ImplicationError,
     ImpliesResult,
+    InvalidModuleError,
     SatResult,
     State,
     StuckResult,
     TerminalResult,
     TimeoutResult,
+    UnknownModuleError,
     UnknownResult,
     UnsatResult,
     VacuousResult,
 )
-from pyk.kore.syntax import And, App, Bottom, Equals, EVar, Implies, Module, Top
+from pyk.kore.syntax import And, App, Axiom, Bottom, Equals, EVar, Implies, Import, Module, Rewrites, Top
 from pyk.testing import KoreClientTest
 
 from ..utils import K_FILES
@@ -346,7 +366,8 @@ class TestKoreClient(KoreClientTest):
         module: Module,
     ) -> None:
         # Given
-        expected = module.name
+        module_hash = hashlib.sha256(module.text.encode()).hexdigest()
+        expected = f'm{module_hash}'
 
         # When
         actual = kore_client.add_module(module)
@@ -376,6 +397,295 @@ class TestKoreClientWithSMTLemmas(KoreClientTest):
 
         # Then
         assert actual == expected
+
+
+class TestAddModule(KoreClientTest):
+    KOMPILE_MAIN_FILE = K_FILES / 'int-config.k'
+
+    MAIN_MODULE = 'INT-CONFIG'
+
+    @staticmethod
+    def config(i: int) -> Pattern:
+        return generated_top((k(kseq((inj(INT, SORT_K_ITEM, int_dv(i)),))), generated_counter(int_dv(0))))
+
+    @staticmethod
+    def rule(lhs: int, rhs: int) -> Axiom:
+        return Axiom(
+            (),
+            Rewrites(
+                SORT_GENERATED_TOP_CELL,
+                And(SORT_GENERATED_TOP_CELL, (TestAddModule.config(lhs), Top(SORT_GENERATED_TOP_CELL))),
+                And(SORT_GENERATED_TOP_CELL, (TestAddModule.config(rhs), Top(SORT_GENERATED_TOP_CELL))),
+            ),
+        )
+
+    def test_base_module(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        expected = StuckResult(State(term=config, substitution=None, predicate=None), depth=0, logs=())
+
+        # When
+        actual = kore_client.execute(config)
+
+        # Then
+        assert actual == expected
+
+    def test_base_module_explicitly(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        expected = StuckResult(State(term=config, substitution=None, predicate=None), depth=0, logs=())
+
+        # When
+        actual = kore_client.execute(config, module_name=self.MAIN_MODULE)
+
+        # Then
+        assert actual == expected
+
+    def test_add_a_single_module(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        module_id = kore_client.add_module(module)
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected
+
+    def test_add_a_single_module_but_dont_use_it(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(0), substitution=None, predicate=None), depth=0, logs=())
+
+        # When
+        kore_client.add_module(module)
+        actual = kore_client.execute(config)
+
+        # Then
+        assert actual == expected
+
+    def test_name_as_id(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        kore_client.add_module(module, name_as_id=True)
+        actual = kore_client.execute(config, module_name='A')
+
+        # Then
+        assert actual == expected
+
+    def test_without_name_as_id_fails(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+
+        # When + Then
+        kore_client.add_module(module)
+        with pytest.raises(UnknownModuleError):
+            kore_client.execute(config, module_name='A')
+
+    def test_add_module_twice(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        module_id = kore_client.add_module(module)
+        module_id_2 = kore_client.add_module(module)
+
+        # Then
+        assert module_id == module_id_2
+
+        # And when
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected
+
+    def test_add_module_twice_with_name(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        module_id = kore_client.add_module(module, name_as_id=True)
+        module_id_2 = kore_client.add_module(module, name_as_id=True)
+
+        # Then
+        assert module_id == module_id_2
+
+        # And when
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected
+
+    def test_add_module_without_name_then_with_name(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        module_id = kore_client.add_module(module)
+        module_id_2 = kore_client.add_module(module, name_as_id=True)
+
+        # Then
+        assert module_id == module_id_2
+
+        # And when
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected
+
+        # And when
+        actual = kore_client.execute(config, module_name='A')
+
+        # Then
+        assert actual == expected
+
+    def test_add_module_with_name_then_without_name(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        module_id = kore_client.add_module(module, name_as_id=True)
+        module_id_2 = kore_client.add_module(module)
+
+        # Then
+        assert module_id == module_id_2
+
+        # And when
+        actual = kore_client.execute(config, module_name='A')
+
+        # Then
+        assert actual == expected
+
+        # And when
+        actual = kore_client.execute(config, module_name='A')
+
+        # Then
+        assert actual == expected
+
+        # And when
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected
+
+    def test_add_different_modules_with_same_name_as_id_fails(self, kore_client: KoreClient) -> None:
+        # Given
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+
+        # When-Then
+        kore_client.add_module(module_1, name_as_id=True)
+        with pytest.raises(DuplicateModuleError):
+            kore_client.add_module(module_2, name_as_id=True)
+
+    def test_add_two_modules_second_with_same_name_as_id(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+        expected_1 = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected_2 = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        module_id = kore_client.add_module(module_1)
+        kore_client.add_module(module_2, name_as_id=True)
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected_1
+
+        # And when
+        actual = kore_client.execute(config, module_name='A')
+
+        # Then
+        assert actual == expected_2
+
+    def test_add_two_modules_first_with_same_name_as_id(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+        expected_1 = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected_2 = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=1, logs=())
+
+        # When
+        kore_client.add_module(module_1, name_as_id=True)
+        module_id = kore_client.add_module(module_2)
+        actual = kore_client.execute(config, module_name='A')
+
+        # Then
+        assert actual == expected_1
+
+        # And when
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected_2
+
+    def test_add_module_with_import(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        expected = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=2, logs=())
+
+        # When
+        module_1_id = kore_client.add_module(module_1)
+        module_2 = Module('B', sentences=(Import(module_1_id), self.rule(1, 2)))
+        module_2_id = kore_client.add_module(module_2)
+        actual = kore_client.execute(config, module_name=module_2_id)
+
+        # Then
+        assert actual == expected
+
+    def test_add_module_with_named_import(self, kore_client: KoreClient) -> None:
+        # Given
+        config = self.config(0)
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module('B', sentences=(Import('A'), self.rule(1, 2)))
+        expected = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=2, logs=())
+
+        # When
+        kore_client.add_module(module_1, name_as_id=True)
+        module_id = kore_client.add_module(module_2)
+        actual = kore_client.execute(config, module_name=module_id)
+
+        # Then
+        assert actual == expected
+
+    def test_add_module_with_unknown_import_fails(self, kore_client: KoreClient) -> None:
+        # Given
+        module = Module('B', sentences=(Import('A'), self.rule(0, 1)))
+
+        # Then
+        with pytest.raises(InvalidModuleError):
+            # When
+            kore_client.add_module(module)
+
+    def test_add_module_with_unknown_named_import_fails(self, kore_client: KoreClient) -> None:
+        # Given
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+
+        # When-Then
+        kore_client.add_module(module_1)
+        module_2 = Module('B', sentences=(Import('A'), self.rule(1, 2)))
+        with pytest.raises(InvalidModuleError):
+            kore_client.add_module(module_2)
 
 
 START_BOOSTER_SERVER_TEST_DATA: Final[tuple[dict[str, Any], ...]] = (
