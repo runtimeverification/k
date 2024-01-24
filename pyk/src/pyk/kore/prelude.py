@@ -142,6 +142,7 @@ def le_int(left: Pattern, right: Pattern) -> Pattern:
 SORT_K: Final = SortApp('SortK')
 SORT_K_ITEM: Final = SortApp('SortKItem')
 SORT_K_CONFIG_VAR: Final = SortApp('SortKConfigVar')
+SORT_GENERATED_TOP_CELL: Final = SortApp('SortGeneratedTopCell')
 
 LBL_INIT_GENERATED_TOP_CELL: Final = SymbolId('LblinitGeneratedTopCell')
 LBL_GENERATED_TOP: Final = SymbolId("Lbl'-LT-'generatedTop'-GT-'")
