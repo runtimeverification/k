@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from .cterm import CTerm
 from .kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
 from .kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
+from .kast.outer import KRule
 from .kore.prelude import BYTES as KORE_BYTES
 from .kore.prelude import DOTK, SORT_K
 from .kore.prelude import STRING as KORE_STRING
@@ -22,8 +23,10 @@ from .kore.syntax import (
     EVar,
     Exists,
     Implies,
+    Import,
     MLPattern,
     MLQuant,
+    Module,
     Not,
     Rewrites,
     SortApp,
@@ -41,9 +44,9 @@ if TYPE_CHECKING:
     from typing import Final
 
     from .kast import KInner
-    from .kast.outer import KDefinition, KRule
+    from .kast.outer import KDefinition, KFlatModule, KImport
     from .kore.kompiled import KompiledKore
-    from .kore.syntax import Pattern, Sort
+    from .kore.syntax import Pattern, Sentence, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -136,6 +139,20 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
         attrs=attrs,
     )
     return axiom
+
+
+def kflatmodule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, kflatmodule: KFlatModule) -> Module:
+    kore_axioms: list[Sentence] = []
+    for sent in kflatmodule.sentences:
+        if type(sent) is not KRule:
+            raise ValueError(f'Cannot convert sentence to Kore: {sent}')
+        kore_axioms.append(krule_to_kore(kast_defn, kompiled_kore, sent))
+    imports: list[Sentence] = [_kimport_to_kore(kimport) for kimport in kflatmodule.imports]
+    return Module(name=kflatmodule.name, sentences=(imports + kore_axioms))
+
+
+def _kimport_to_kore(kimport: KImport) -> Import:
+    return Import(module_name=kimport.name, attrs=())
 
 
 def _ksort_to_kore(ksort: KSort) -> SortApp:
