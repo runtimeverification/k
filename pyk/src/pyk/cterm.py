@@ -13,10 +13,8 @@ from .kast.manip import (
     count_vars,
     flatten_label,
     free_vars,
-    minimize_rule,
     ml_pred_to_bool,
     push_down_rewrites,
-    remove_generated_cells,
     simplify_bool,
     split_config_and_constraints,
     split_config_from,
@@ -429,7 +427,7 @@ def build_rule(
     (init_config, init_constraint) = split_config_and_constraints(init_term)
     (final_config, final_constraint) = split_config_and_constraints(final_term)
 
-    rule_body = remove_generated_cells(push_down_rewrites(KRewrite(init_config, final_config)))
+    rule_body = push_down_rewrites(KRewrite(init_config, final_config))
     rule_requires = simplify_bool(ml_pred_to_bool(init_constraint))
     rule_ensures = simplify_bool(ml_pred_to_bool(final_constraint))
     att_dict = {} if priority is None else {'priority': str(priority)}
@@ -437,5 +435,5 @@ def build_rule(
 
     rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
     rule = rule.update_atts({'label': rule_id})
-    new_keep_vars = [v_subst[v].name if v in v_subst else v for v in keep_vars]
-    return (minimize_rule(rule, keep_vars=new_keep_vars), Subst(vremap_subst))
+
+    return (rule, Subst(vremap_subst))
