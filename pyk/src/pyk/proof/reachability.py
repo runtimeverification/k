@@ -3,16 +3,18 @@ from __future__ import annotations
 import graphlib
 import json
 import logging
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
 
-from ..kast.inner import KInner, KRewrite, KSort, Subst
+from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, ml_pred_to_bool
-from ..kast.outer import KClaim
+from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG
 from ..kcfg.exploration import KCFGExploration
+from ..konvert import kflatmodule_to_kore
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import mlAnd, mlEquals, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
@@ -24,11 +26,9 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
-    from ..cterm import CTerm
-    from ..kast.outer import KDefinition, KFlatModuleList
+    from ..kast.outer import KClaim, KDefinition, KFlatModuleList
     from ..kcfg import KCFGExplore
     from ..kcfg.kcfg import NodeIdLike
-    from ..ktool.kprint import KPrint
 
     T = TypeVar('T', bound='Proof')
 
@@ -206,17 +206,11 @@ class APRProof(Proof, KCFGExploration):
             **kwargs,
         )
 
-    def as_claim(self, kprint: KPrint) -> KClaim:
-        fr: CTerm = self.kcfg.node(self.init).cterm
-        to: CTerm = self.kcfg.node(self.target).cterm
-        fr_config_sorted = kprint.definition.sort_vars(fr.config, sort=KSort('GeneratedTopCell'))
-        to_config_sorted = kprint.definition.sort_vars(to.config, sort=KSort('GeneratedTopCell'))
-        kc = KClaim(
-            body=KRewrite(fr_config_sorted, to_config_sorted),
-            requires=ml_pred_to_bool(mlAnd(fr.constraints)),
-            ensures=ml_pred_to_bool(mlAnd(to.constraints)),
-        )
-        return kc
+    def as_rule(self, priority: int = 20) -> KRule:
+        _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
+        _rule = _edge.to_rule('BASIC-BLOCK', priority=priority)
+        assert type(_rule) is KRule
+        return _rule
 
     @staticmethod
     def from_spec_modules(
@@ -644,6 +638,13 @@ class APRProver(Prover):
         always_check_subsumption: bool = True,
         fast_check_subsumption: bool = False,
     ) -> None:
+        def _inject_module(module_name: str, import_name: str, sentences: list[KRule]) -> None:
+            _module = KFlatModule(module_name, sentences, [KImport(import_name)])
+            _kore_module = kflatmodule_to_kore(
+                self.kcfg_explore.kprint.definition, self.kcfg_explore.kprint.kompiled_kore, _module
+            )
+            self.kcfg_explore._kore_client.add_module(_kore_module)
+
         super().__init__(kcfg_explore)
         self.proof = proof
         self.main_module_name = self.kcfg_explore.kprint.definition.main_module_name
@@ -659,22 +660,14 @@ class APRProver(Prover):
 
         apr_subproofs: list[APRProof] = [pf for pf in subproofs if isinstance(pf, APRProof)]
 
-        dependencies_as_claims: list[KClaim] = [d.as_claim(self.kcfg_explore.kprint) for d in apr_subproofs]
+        dependencies_as_rules: list[KRule] = [d.as_rule(priority=20) for d in apr_subproofs]
+        circularity_rule = proof.as_rule(priority=20)
 
-        self.dependencies_module_name = self.main_module_name + '-DEPENDS-MODULE'
-        self.kcfg_explore.add_dependencies_module(
-            self.main_module_name,
-            self.dependencies_module_name,
-            dependencies_as_claims,
-            priority=1,
-        )
-        self.circularities_module_name = self.main_module_name + '-CIRCULARITIES-MODULE'
-        self.kcfg_explore.add_dependencies_module(
-            self.main_module_name,
-            self.circularities_module_name,
-            dependencies_as_claims + ([proof.as_claim(self.kcfg_explore.kprint)] if proof.circularity else []),
-            priority=1,
-        )
+        module_name = re.sub(r'[%().:,]+', '-', self.proof.id.upper())
+        self.dependencies_module_name = module_name + '-DEPENDS-MODULE'
+        self.circularities_module_name = module_name + '-CIRCULARITIES-MODULE'
+        _inject_module(self.dependencies_module_name, self.main_module_name, dependencies_as_rules)
+        _inject_module(self.circularities_module_name, self.dependencies_module_name, [circularity_rule])
 
         self._checked_for_terminal = set()
         self._checked_for_subsumption = set()
