@@ -665,7 +665,7 @@ class APRProver(Prover):
                 dependencies_as_rules.append(apr_subproof.as_rule(priority=20))
         circularity_rule = proof.as_rule(priority=20)
 
-        module_name = re.sub(r'[_%().:,]+', '-', self.proof.id.upper())
+        module_name = 'M-' + re.sub(r'[_%().:,]+', '-', self.proof.id.upper())
         self.dependencies_module_name = module_name + '-DEPENDS-MODULE'
         self.circularities_module_name = module_name + '-CIRCULARITIES-MODULE'
         _inject_module(self.dependencies_module_name, self.main_module_name, dependencies_as_rules)
