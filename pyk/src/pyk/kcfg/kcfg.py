@@ -407,16 +407,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def from_json(s: str) -> KCFG:
         return KCFG.from_dict(json.loads(s))
 
+    def to_rules(self, priority: int = 20) -> list[KRuleLike]:
+        return [e.to_rule('BASIC-BLOCK', priority=priority) for e in self.edges()]
+
     def to_module(
         self,
         module_name: str | None = None,
         imports: Iterable[KImport] = (),
+        priority: int = 20,
         att: KAtt = EMPTY_ATT,
     ) -> KFlatModule:
-        module_name = module_name if module_name is not None else 'KCFG'
-        rules = [e.to_rule('BASIC-BLOCK') for e in self.edges()]
-        nd_steps = [edge.to_rule('ND-STEP') for ndbranch in self.ndbranches() for edge in ndbranch.edges]
-        return KFlatModule(module_name, rules + nd_steps, imports=imports, att=att)
+        module_name = 'KCFG' if module_name is None else module_name
+        return KFlatModule(module_name, self.to_rules(priority=priority), imports=imports, att=att)
 
     def _resolve_or_none(self, id_like: NodeIdLike) -> int | None:
         if type(id_like) is int:
