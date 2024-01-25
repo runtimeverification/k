@@ -559,7 +559,7 @@ APR_PROVE_TEST_DATA: Iterable[
         None,
         [],
         False,
-        ProofStatus.PENDING,  # because we do NOT admit the dependency
+        ProofStatus.FAILED,  # because we do NOT admit the dependency
         1,
     ),
     (
