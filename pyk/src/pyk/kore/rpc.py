@@ -1293,9 +1293,9 @@ def kore_server(
     haskell_log_entries: Iterable[str] | None = None,
     # booster
     llvm_definition_dir: Path | None = None,
-    fallback_on: Iterable[str | FallbackReason] | None,
-    interim_simplification: int | None,
-    no_post_exec_simplify: bool | None,
+    fallback_on: Iterable[str | FallbackReason] | None = None,
+    interim_simplification: int | None = None,
+    no_post_exec_simplify: bool | None = None,
     # ---
     bug_report: BugReport | None = None,
 ) -> KoreServer:
