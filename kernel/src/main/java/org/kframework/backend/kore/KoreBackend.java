@@ -74,10 +74,8 @@ public class KoreBackend extends AbstractBackend {
 
   public static String getKompiledString(
       ModuleToKORE converter, FileUtil files, boolean heatCoolEquations, Tool t) {
-    StringBuilder sb = new StringBuilder();
-    String kompiledString =
-        getKompiledStringAndWriteSyntaxMacros(converter, files, heatCoolEquations, sb, t);
-    return kompiledString;
+    return getKompiledStringAndWriteSyntaxMacros(
+        converter, files, heatCoolEquations, new StringBuilder(), t);
   }
 
   public static String getKompiledStringAndWriteSyntaxMacros(
