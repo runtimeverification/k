@@ -411,7 +411,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
       rez = new KAppToTermConsVisitor(disambModule).apply(rez.right().get());
       if (rez.isLeft()) return new Tuple2<>(rez, warn);
       rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
-      rez3 = new PushTopAmbiguityUp().apply(rez3);
+      rez3 = new PushTopLHSAmbiguityUp().apply(rez3);
       startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
       InnerParsingOptions.TypeInferenceMode infModeForTerm =
