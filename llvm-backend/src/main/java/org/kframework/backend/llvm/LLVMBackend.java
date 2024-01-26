@@ -128,6 +128,10 @@ public class LLVMBackend extends KoreBackend {
         args.add("--proof-hint-instrumentation");
       }
 
+      if (options.useKSemantics) {
+        args.add("--use-k-semantics");
+      }
+
       // Arguments after this point are passed on to Clang.
       args.add("--");
 

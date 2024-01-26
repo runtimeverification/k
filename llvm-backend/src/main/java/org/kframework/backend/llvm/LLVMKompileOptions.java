@@ -106,4 +106,10 @@ public class LLVMKompileOptions {
       description = "Emit proof hint instrumentation code into the generated interpreter",
       hidden = true)
   public boolean enableProofHints;
+
+  @Parameter(
+      names = "--llvm-use-k-semantics",
+      description = "Disable potentially unsound optimizations in the LLVM backend",
+      hidden = true)
+  public boolean useKSemantics;
 }
