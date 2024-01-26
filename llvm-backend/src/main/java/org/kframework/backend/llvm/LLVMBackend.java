@@ -51,7 +51,7 @@ public class LLVMBackend extends KoreBackend {
   @Override
   public void accept(Backend.Holder h) {
     Stopwatch sw = new Stopwatch(globalOptions);
-    String kore = getKompiledString(h.def, true);
+    String kore = getKompiledString(h.def);
     h.def = null;
     files.saveToKompiled("definition.kore", kore);
     sw.printIntermediate("  Print definition.kore");

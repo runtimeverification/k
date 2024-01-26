@@ -378,7 +378,7 @@ public record HaskellRewriter(
 
       @Override
       public RewriterResult prove(Module rules, Boolean reuseDef) {
-        Module kompiledModule = KoreBackend.getKompiledModule(module, true);
+        Module kompiledModule = KoreBackend.getKompiledModule(module);
         ModuleToKORE converter =
             new ModuleToKORE(
                 kompiledModule,
