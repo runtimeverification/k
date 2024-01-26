@@ -363,6 +363,7 @@ case class Module(
   lazy val allSorts: Set[Sort] = (definedSorts -- definedInstantiations.keys).map(
     Sort(_)
   ) ++ definedInstantiations.values.flatten
+  lazy val localSorts: Set[Sort]             = allSorts -- fullImports.flatMap(_.allSorts)
   lazy val sortedDefinedSorts: Seq[SortHead] = definedSorts.toSeq.sorted
   lazy val sortedAllSorts: Seq[Sort]         = allSorts.toSeq.sorted
   lazy val usedCellSorts: Set[Sort] = productions.flatMap { p =>
