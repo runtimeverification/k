@@ -5,9 +5,10 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 from .cterm import CTerm
+from .kast import EMPTY_ATT, KAtt, KInner
 from .kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
 from .kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
-from .kast.outer import KRule
+from .kast.outer import KRule, KSyntaxSort
 from .kore.prelude import BYTES as KORE_BYTES
 from .kore.prelude import DOTK, SORT_K
 from .kore.prelude import STRING as KORE_STRING
@@ -30,25 +31,297 @@ from .kore.syntax import (
     Not,
     Rewrites,
     SortApp,
+    SortDecl,
     String,
     Top,
 )
 from .prelude.bytes import BYTES, bytesToken_from_str, pretty_bytes_str
-from .prelude.k import K
+from .prelude.k import K_ITEM, K
 from .prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
 from .prelude.string import STRING, pretty_string, stringToken
 from .utils import FrozenDict
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
-    from typing import Final
+    from collections.abc import Iterable, Iterator, Mapping
+    from typing import Any, Final
 
-    from .kast import KInner
-    from .kast.outer import KDefinition, KFlatModule, KImport
+    from .kast.outer import KDefinition, KFlatModule, KImport, KProduction, KSentence
     from .kore.kompiled import KompiledKore
     from .kore.syntax import Pattern, Sentence, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+# --------------
+# Module to KORE
+# --------------
+
+
+KORE_KEYWORDS: Final = {
+    'alias',
+    'axiom',
+    'endmodule',
+    'hooked-sort',
+    'hooked-symbol',
+    'module',
+    'sort',
+    'symbol',
+}
+
+
+def module_to_kore(definition: KDefinition) -> Module:
+    """Convert the main module of a kompiled KAST definition to KORE format."""
+
+    module = simplified_module(definition)
+
+    name = name_to_kore(module.name)
+    attrs = atts_to_kore({key: value for key, value in module.att.items() if key != 'digest'})  # filter digest
+
+    imports = [Import('K')]
+    sort_decls = [
+        sort_decl_to_kore(syntax_sort)
+        for syntax_sort in module.syntax_sorts
+        if syntax_sort.sort.name not in [K.name, K_ITEM.name]
+    ]
+
+    sentences: list[Sentence] = []
+    sentences += imports
+    sentences += sort_decls
+
+    return Module(name=name, sentences=sentences, attrs=attrs)
+
+
+# TODO should this be used in _klabel_to_kore?
+def name_to_kore(name: str) -> str:
+    if name in KORE_KEYWORDS:
+        return f"{name}'Kywd'"
+    return munge(name)
+
+
+def atts_to_kore(att: Mapping[str, Any]) -> list[App]:
+    res = [att_to_kore(key, value) for key, value in att.items()]
+    res.sort(key=lambda app: app.symbol)
+    return res
+
+
+def att_to_kore(key: str, value: Any) -> App:
+    symbol = name_to_kore(key)
+
+    if value == '':
+        return App(symbol)
+
+    parse_res = _parse_special_att_value(key, value)
+    if parse_res is not None:
+        sorts, args = parse_res
+        return App(symbol, sorts, args)
+
+    if isinstance(value, str):
+        return App(symbol, (), (String(value),))
+
+    if isinstance(value, FrozenDict) and 'node' in value:
+        # TODO Should be kast_to_kore, but we do not have a KompiledKore.
+        # TODO We should be able to add injections based on info in KDefinition.
+        pattern = _kast_to_kore(KInner.from_dict(value))
+        if not isinstance(pattern, App):
+            raise ValueError('Expected application as attribure, got: {pattern.text}')
+        return App(symbol, (), (pattern,))
+
+    raise ValueError(f'Attribute conversion is not implemented for: {key}: {value}')
+
+
+def _parse_special_att_value(key: str, value: Any) -> tuple[tuple[Sort, ...], tuple[Pattern, ...]] | None:
+    if key == KAtt.LOCATION:
+        assert isinstance(value, tuple)
+        assert len(value) == 4
+        loc_str = ','.join(str(loc) for loc in value)
+        return (), (String(f'Location({loc_str})'),)
+    if key == KAtt.SOURCE:
+        assert isinstance(value, str)
+        return (), (String(f'Source({value})'),)
+    return None
+
+
+def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
+    name = 'Sort' + name_to_kore(syntax_sort.sort.name)
+    attrs = atts_to_kore(syntax_sort.att)
+    hooked = KAtt.HOOK in syntax_sort.att
+    return SortDecl(name, (), attrs=attrs, hooked=hooked)
+
+
+# ----------------------------------
+# Module to KORE: KAST preprocessing
+# ----------------------------------
+
+
+COLLECTION_HOOKS: Final = {
+    'SET.Set',
+    'MAP.Map',
+    'LIST.List',
+    'ARRAY.Array',
+    'RANGEMAP.RangeMap',
+}
+
+
+def simplified_module(definition: KDefinition, module_name: str | None = None) -> KFlatModule:
+    """
+    In ModuleToKORE.java, there are some implicit KAST-to-KAST kompilation
+    steps hidden in the conversion. In particular, the kompiled KAST definition
+    (compiled.json) is modular, whereas the kompiled definition
+    (definition.kore) is flat.
+
+    This function aims to factor out these hidden KAST-to-KAST kompilation
+    steps so that our implementation of module_to_kore can be as simple as
+    possible. Moreover, this has the potential to shed some light on how
+    modules can be kompiled incrementally.
+
+    This function is an approximation, i.e. there might be cases where it
+    produces a different result to what would be expected based on kompile's
+    output. These discrepancies should be analyzed and fixed.
+    """
+    module_name = module_name or definition.main_module_name
+    module = _flatten_module(definition, module_name)  # TODO KORE supports imports, why is definition.kore flat?
+    module = _add_syntax_sorts(module)
+    module = _add_collection_atts(module)
+    module = _add_domain_value_atts(module)
+    return module
+
+
+def _flatten_module(definition: KDefinition, module_name: str) -> KFlatModule:
+    """Return a flat module with all sentences included and without imports"""
+    module = definition.module(module_name)
+    sentences = _imported_sentences(definition, module_name)
+    return module.let(sentences=sentences, imports=())
+
+
+def _imported_sentences(definition: KDefinition, module_name: str) -> list[KSentence]:
+    """Return all sentences from imported modules, including the module itself."""
+
+    pending: list[str] = [module_name]
+    imported: set[str] = set()
+
+    res: list[KSentence] = []
+    while pending:
+        module_name = pending.pop()
+        if module_name in imported:
+            continue
+        module = definition.module(module_name)
+        res += module.sentences
+        pending += (importt.name for importt in module.imports)
+        imported.add(module_name)
+
+    return res
+
+
+def _add_syntax_sorts(module: KFlatModule) -> KFlatModule:
+    """Return a module with explicit syntax declarations: each sort is declared with the union of its attributes"""
+    sentences = [sentence for sentence in module if not isinstance(sentence, KSyntaxSort)]
+    sentences += _syntax_sorts(module)
+    return module.let(sentences=sentences)
+
+
+def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
+    """Return a declaration for each sort in the module"""
+    declarations: dict[KSort, KAtt] = {}
+
+    def is_higher_order(production: KProduction) -> bool:
+        # Example: syntax {Sort} Sort ::= Sort "#as" Sort
+        return production.sort in production.params
+
+    # Merge attributes from KSyntaxSort instances
+    for syntax_sort in module.syntax_sorts:
+        sort = syntax_sort.sort
+        if sort not in declarations:
+            declarations[sort] = syntax_sort.att
+        else:
+            assert declarations[sort].keys().isdisjoint(syntax_sort.att)
+            declarations[sort] = declarations[sort].update(syntax_sort.att)
+
+    # Also consider production sorts
+    for production in module.productions:
+        if is_higher_order(production):
+            continue
+
+        sort = production.sort
+        if sort not in declarations:
+            declarations[sort] = EMPTY_ATT
+
+    return [KSyntaxSort(sort, att=att) for sort, att in declarations.items()]
+
+
+def _add_collection_atts(module: KFlatModule) -> KFlatModule:
+    """Return a module where concat, element and unit attributes are added to collection sort declarations"""
+
+    # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
+    concat_prods = {prod.sort: prod for prod in module.productions if KAtt.ELEMENT in prod.att}
+
+    assert all(
+        KAtt.UNIT in prod.att for _, prod in concat_prods.items()
+    )  # TODO Could be saved with a different attribute structure: concat(Element, Unit)
+
+    def update_att(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KSyntaxSort):
+            return sentence
+
+        syntax_sort: KSyntaxSort = sentence
+
+        if syntax_sort.att.get(KAtt.HOOK) not in COLLECTION_HOOKS:
+            return syntax_sort
+
+        prod_att = concat_prods[syntax_sort.sort].att
+
+        # TODO Here, attriubtes are stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
+        return syntax_sort.let(
+            att=syntax_sort.att.update(
+                {
+                    KAtt.CONCAT: KApply(prod_att[KAtt.KLABEL]).to_dict(),
+                    KAtt.ELEMENT: KApply(prod_att[KAtt.ELEMENT]).to_dict(),
+                    KAtt.UNIT: KApply(prod_att[KAtt.UNIT]).to_dict(),
+                }
+            )
+        )
+
+    sentences = tuple(update_att(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _add_domain_value_atts(module: KFlatModule) -> KFlatModule:
+    """
+    Return a module where attribute "hasDomainValues" is added to all
+    sort declarations that either have the "token" attribute directly,
+    or on a corresponding production.
+    """
+
+    token_sorts = _token_sorts(module)
+
+    def update_att(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KSyntaxSort):
+            return sentence
+
+        syntax_sort: KSyntaxSort = sentence
+
+        if syntax_sort.sort not in token_sorts:
+            return syntax_sort
+
+        return syntax_sort.let(att=syntax_sort.att.update({KAtt.HAS_DOMAIN_VALUES: ''}))
+
+    sentences = tuple(update_att(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _token_sorts(module: KFlatModule) -> set[KSort]:
+    res: set[KSort] = set()
+
+    # TODO "token" should be an attribute of only productions
+    for syntax_sort in module.syntax_sorts:
+        if KAtt.TOKEN in syntax_sort.att:
+            res.add(syntax_sort.sort)
+
+    for production in module.productions:
+        if KAtt.TOKEN in production.att:
+            res.add(production.sort)
+
+    return res
+
 
 # ------------
 # KAST-to-KORE

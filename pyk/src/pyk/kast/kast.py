@@ -58,6 +58,13 @@ class KAtt(KAst, Mapping[str, Any]):
     SORT: ClassVar[str] = 'org.kframework.kore.Sort'
     LOCATION: ClassVar[str] = 'org.kframework.attributes.Location'
     SOURCE: ClassVar[str] = 'org.kframework.attributes.Source'
+    HOOK: ClassVar[str] = 'hook'
+    CONCAT: ClassVar[str] = 'concat'
+    ELEMENT: ClassVar[str] = 'element'
+    UNIT: ClassVar[str] = 'unit'
+    KLABEL: ClassVar[str] = 'klabel'
+    HAS_DOMAIN_VALUES: ClassVar[str] = 'hasDomainValues'
+    TOKEN: ClassVar[str] = 'token'
 
     def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
         def _freeze(m: Any) -> Any:
