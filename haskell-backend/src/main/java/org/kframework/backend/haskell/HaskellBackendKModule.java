@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.main.AbstractKModule;
 import org.kframework.rewriter.Rewriter;
@@ -33,8 +34,8 @@ public class HaskellBackendKModule extends AbstractKModule {
   }
 
   private void installHaskellBackend(Binder binder) {
-    MapBinder<String, org.kframework.compile.Backend> mapBinder =
-        MapBinder.newMapBinder(binder, String.class, org.kframework.compile.Backend.class);
+    MapBinder<String, Backend> mapBinder =
+        MapBinder.newMapBinder(binder, String.class, Backend.class);
     mapBinder.addBinding("haskell").to(HaskellBackend.class);
   }
 

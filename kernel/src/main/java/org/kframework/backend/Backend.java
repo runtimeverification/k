@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-package org.kframework.compile;
+package org.kframework.backend;
 
 import java.util.Set;
 import java.util.function.Function;

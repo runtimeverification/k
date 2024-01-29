@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.google.inject.util.Providers;
 import java.io.IOException;
 import org.junit.Test;
+import org.kframework.backend.Backend;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.IOTestCase;
 import org.kframework.utils.file.FileUtil;
@@ -17,7 +18,7 @@ import org.mockito.Mock;
 
 public class KompileFrontEndTest extends IOTestCase {
 
-  @Mock org.kframework.compile.Backend koreBackend;
+  @Mock Backend koreBackend;
 
   @Mock JarInfo jarInfo;
 

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.attributes.Att;
-import org.kframework.compile.Backend;
+import org.kframework.backend.Backend;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;

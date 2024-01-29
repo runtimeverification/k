@@ -3,7 +3,7 @@ package org.kframework.backend.kore
 
 import java.io.File
 import java.nio.file.Files
-import org.kframework.compile.Backend
+import org.kframework.backend.Backend
 import org.kframework.kompile.Kompile
 import org.kframework.kompile.KompileOptions
 import org.kframework.main.GlobalOptions

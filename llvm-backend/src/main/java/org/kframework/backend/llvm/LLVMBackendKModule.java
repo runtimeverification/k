@@ -7,6 +7,7 @@ import com.google.inject.multibindings.MapBinder;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.backend.Backend;
 import org.kframework.main.AbstractKModule;
 
 /** Created by traiansf on 9/13/18. */
@@ -21,9 +22,8 @@ public class LLVMBackendKModule extends AbstractKModule {
           protected void configure() {
             bindOptions(LLVMBackendKModule.this::kompileOptions, binder());
 
-            MapBinder<String, org.kframework.compile.Backend> mapBinder =
-                MapBinder.newMapBinder(
-                    binder(), String.class, org.kframework.compile.Backend.class);
+            MapBinder<String, Backend> mapBinder =
+                MapBinder.newMapBinder(binder(), String.class, Backend.class);
             mapBinder.addBinding("llvm").to(LLVMBackend.class);
           }
         });
