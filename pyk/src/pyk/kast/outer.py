@@ -815,6 +815,11 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
         )
 
     @cached_property
+    def syntax_sorts(self) -> tuple[KSyntaxSort, ...]:
+        """Return all the `KSyntaxSort` sentences from this module."""
+        return tuple(sentence for sentence in self if isinstance(sentence, KSyntaxSort))
+
+    @cached_property
     def rules(self) -> tuple[KRule, ...]:
         """Return all the `KRule` declared in this module."""
         return tuple(sentence for sentence in self if type(sentence) is KRule)

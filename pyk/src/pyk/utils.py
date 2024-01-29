@@ -109,6 +109,12 @@ def merge_with(f: Callable[[V, V], V], d1: Mapping[K, V], d2: Mapping[K, V]) -> 
     return res
 
 
+def not_none(x: T | None) -> T:
+    if x is None:
+        raise ValueError('Expected value other than None')
+    return x
+
+
 def filter_none(mapping: Mapping[K, V]) -> dict[K, V]:
     return {k: v for k, v in mapping.items() if v is not None}
 
