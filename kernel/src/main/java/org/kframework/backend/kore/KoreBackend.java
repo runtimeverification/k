@@ -27,7 +27,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
 
-public class KoreBackend extends AbstractBackend {
+public class KoreBackend implements Backend {
 
   private final KompileOptions kompileOptions;
   protected final FileUtil files;
