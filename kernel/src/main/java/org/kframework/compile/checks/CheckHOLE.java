@@ -8,13 +8,12 @@ import java.util.List;
 import java.util.Set;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ResolveStrict;
+import org.kframework.compile.passes.ResolveStrict;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 

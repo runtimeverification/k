@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.passes.SortCells;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;

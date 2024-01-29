@@ -2,7 +2,7 @@
 package org.kframework.parser.inner.disambiguation.inference;
 
 import org.kframework.attributes.Att;
-import org.kframework.compile.ResolveAnonVar;
+import org.kframework.compile.passes.ResolveAnonVar;
 import org.kframework.kore.ADT.KVariable;
 import org.kframework.parser.Constant;
 

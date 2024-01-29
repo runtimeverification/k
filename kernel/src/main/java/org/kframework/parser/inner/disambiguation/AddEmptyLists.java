@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import org.kframework.POSet;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.passes.AddSortInjections;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.kframework.attributes.Att;
-import org.kframework.compile.ResolveAnonVar;
+import org.kframework.compile.passes.ResolveAnonVar;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;

@@ -3,6 +3,7 @@ package org.kframework.compile;
 
 import java.util.Set;
 import org.kframework.builtin.KLabels;
+import org.kframework.compile.passes.ResolveAnonVar;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;

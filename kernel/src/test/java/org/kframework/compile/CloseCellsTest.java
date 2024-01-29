@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.passes.CloseCells;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
 

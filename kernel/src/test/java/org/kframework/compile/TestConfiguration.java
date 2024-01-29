@@ -18,7 +18,7 @@ import org.kframework.kore.Sort;
 import scala.Option;
 
 /** Created by brandon on 3/24/15. */
-class TestConfiguration implements ConfigurationInfo {
+public class TestConfiguration implements ConfigurationInfo {
 
   Map<Sort, Integer> levels = Maps.newHashMap();
   Map<Sort, Sort> parents = Maps.newHashMap();

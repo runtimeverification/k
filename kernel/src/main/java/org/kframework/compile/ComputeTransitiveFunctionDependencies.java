@@ -14,6 +14,7 @@ import java.util.Queue;
 import java.util.Set;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
+import org.kframework.compile.passes.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;

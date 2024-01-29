@@ -22,7 +22,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.compile.ProcessGroupAttributes;
+import org.kframework.compile.passes.ProcessGroupAttributes;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
