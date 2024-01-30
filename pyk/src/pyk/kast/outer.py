@@ -5,6 +5,7 @@ import logging
 from abc import abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
+from dataclasses import InitVar  # noqa: TC003
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -31,7 +32,6 @@ from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt, kast_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
-    from dataclasses import InitVar
     from os import PathLike
     from typing import Any, Final, TypeVar
 
