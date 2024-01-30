@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import cached_property
 from io import StringIO
+from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, final
 
 from ..dequote import enquoted
@@ -14,7 +15,7 @@ from ..utils import check_type
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
-    from typing import IO, Any, ClassVar, Final, TypeVar
+    from typing import IO, Any, Final, TypeVar
 
     T = TypeVar('T', bound='Kore')
     P = TypeVar('P', bound='Pattern')

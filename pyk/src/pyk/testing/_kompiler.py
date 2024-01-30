@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING
 
 import pytest
@@ -21,7 +22,7 @@ from ..ktool.krun import KRun
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path
-    from typing import Any, ClassVar
+    from typing import Any
 
     from pytest import FixtureRequest, TempPathFactory
 
