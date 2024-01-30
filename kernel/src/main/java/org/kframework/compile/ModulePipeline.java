@@ -6,9 +6,11 @@ import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 
 public class ModulePipeline {
-  private ArrayList<ModuleTransformer> passes;
+  private final ArrayList<ModuleTransformer> passes;
 
-  ModulePipeline() {}
+  public ModulePipeline() {
+    this.passes = new ArrayList<>();
+  }
 
   public void add(ModuleTransformer pass) {
     passes.add(pass);

@@ -292,86 +292,113 @@ public class KoreBackend implements Backend {
             .apply(def);
   }
 
+  ModuleTransformer resolveComm() {
+    return ModuleTransformer.from(
+        new ResolveComm(kem)::resolve, "resolve comm simplification rules");
+  }
+
+  ModuleTransformer resolveAnonVars() {
+    return ModuleTransformer.fromSentenceTransformer(
+        new ResolveAnonVar()::resolve, "resolving \"_\" vars");
+  }
+
+  ModuleTransformer addImplicitCounterCell() {
+    return ModuleTransformer.fromSentenceTransformer(
+        new AddImplicitCounterCell()::apply, "adding <generatedCounter> to claims if necessary");
+  }
+
+  ModuleTransformer numberSentences() {
+    return ModuleTransformer.fromSentenceTransformer(
+        NumberSentences::number, "number sentences uniquely");
+  }
+
+  ModuleTransformer resolveSemanticCasts() {
+    return ModuleTransformer.fromSentenceTransformer(
+        new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
+  }
+
+  ModuleTransformer generateSortProjections() {
+    return ModuleTransformer.from(
+        new GenerateSortProjections(false)::gen, "adding sort projections");
+  }
+
+  ModuleTransformer propagateMacroToRules() {
+    return ModuleTransformer.fromSentenceTransformer(
+        (m, s) -> new PropagateMacro(m).propagate(s),
+        "propagate macro labels from production to rules");
+  }
+
+  ModuleTransformer expandMacros(ResolveFunctionWithConfig transformer) {
+    return ModuleTransformer.fromSentenceTransformer(
+        (m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s),
+        "expand macros");
+  }
+
+  ModuleTransformer checkSimplificationRules() {
+    return ModuleTransformer.from(
+        m -> {
+          m.localRules().foreach(r -> checkSimpIsFunc(m, r));
+          return m;
+        },
+        "Check simplification rules");
+  }
+
+  ModuleTransformer addImplicitComputationCell(
+      ConfigurationInfoFromModule configInfo, LabelInfo labelInfo) {
+    return ModuleTransformer.fromSentenceTransformer(
+        new AddImplicitComputationCell(configInfo, labelInfo)::apply, "concretizing configuration");
+  }
+
+  ModuleTransformer resolveFreshConstants(Definition def) {
+    return ModuleTransformer.from(
+        new ResolveFreshConstants(def, kompileOptions.topCell, files)::resolve,
+        "resolving !Var variables");
+  }
+
+  ModuleTransformer concretizeCells(
+      Module mod, ConfigurationInfoFromModule configInfo, LabelInfo labelInfo, SortInfo sortInfo) {
+    return ModuleTransformer.fromSentenceTransformer(
+        new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+        "concretizing configuration");
+  }
+
+  ModuleTransformer subsortKItem() {
+    return ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
+  }
+
+  ModuleTransformer restoreDefinitionModules(Definition def) {
+    return ModuleTransformer.from(
+        mod -> def.getModule(mod.name()).isDefined() ? def.getModule(mod.name()).get() : mod,
+        "restore definition modules to same state as in definition");
+  }
+
   @Override
   public Function<Module, Module> specificationSteps(Definition def) {
-    ModuleTransformer resolveComm =
-        ModuleTransformer.from(new ResolveComm(kem)::resolve, "resolve comm simplification rules");
+    var mp = new ModulePipeline();
+
     Module mod = def.mainModule();
+    ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(def);
     ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
     LabelInfo labelInfo = new LabelInfoFromModule(mod);
     SortInfo sortInfo = SortInfo.fromModule(mod);
-    ModuleTransformer resolveAnonVars =
-        ModuleTransformer.fromSentenceTransformer(
-            new ResolveAnonVar()::resolve, "resolving \"_\" vars");
-    ModuleTransformer numberSentences =
-        ModuleTransformer.fromSentenceTransformer(
-            NumberSentences::number, "number sentences uniquely");
-    ModuleTransformer resolveSemanticCasts =
-        ModuleTransformer.fromSentenceTransformer(
-            new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
-    Function1<Module, Module> propagateMacroToRules =
-        m ->
-            ModuleTransformer.fromSentenceTransformer(
-                    (m2, s) -> new PropagateMacro(m2).propagate(s),
-                    "propagate macro labels from production to rules")
-                .apply(m);
-    Function1<Module, Module> expandMacros =
-        m -> {
-          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m);
-          return ModuleTransformer.fromSentenceTransformer(
-                  (m2, s) ->
-                      new ExpandMacros(transformer, m2, files, kem, kompileOptions, false)
-                          .expand(s),
-                  "expand macros")
-              .apply(m);
-        };
-    Function1<Module, Module> checkSimplificationRules =
-        ModuleTransformer.from(
-            m -> {
-              m.localRules().foreach(r -> checkSimpIsFunc(m, r));
-              return m;
-            },
-            "Check simplification rules");
-    ModuleTransformer subsortKItem =
-        ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
-    ModuleTransformer addImplicitComputationCell =
-        ModuleTransformer.fromSentenceTransformer(
-            new AddImplicitComputationCell(configInfo, labelInfo)::apply,
-            "concretizing configuration");
-    Function1<Module, Module> resolveFreshConstants =
-        d ->
-            ModuleTransformer.from(
-                    new ResolveFreshConstants(def, kompileOptions.topCell, files)::resolve,
-                    "resolving !Var variables")
-                .apply(d);
-    Function1<Module, Module> addImplicitCounterCell =
-        ModuleTransformer.fromSentenceTransformer(
-            new AddImplicitCounterCell()::apply,
-            "adding <generatedCounter> to claims if necessary");
-    ModuleTransformer concretizeCells =
-        ModuleTransformer.fromSentenceTransformer(
-            new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
-            "concretizing configuration");
-    ModuleTransformer generateSortProjections =
-        ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
-    return m ->
-        resolveComm
-            .andThen(addImplicitCounterCell)
-            .andThen(resolveAnonVars)
-            .andThen(numberSentences)
-            .andThen(resolveSemanticCasts)
-            .andThen(generateSortProjections)
-            .andThen(propagateMacroToRules)
-            .andThen(expandMacros)
-            .andThen(checkSimplificationRules)
-            .andThen(addImplicitComputationCell)
-            .andThen(resolveFreshConstants)
-            .andThen(concretizeCells)
-            .andThen(subsortKItem)
-            .andThen(restoreDefinitionModulesTransformer(def))
-            .andThen(numberSentences)
-            .apply(m);
+    mp.add(resolveComm());
+    mp.add(addImplicitCounterCell());
+    mp.add(resolveAnonVars());
+    mp.add(numberSentences());
+    mp.add(resolveSemanticCasts());
+    mp.add(generateSortProjections());
+    mp.add(propagateMacroToRules());
+    mp.add(expandMacros(transformer));
+    mp.add(checkSimplificationRules());
+    mp.add(addImplicitComputationCell(configInfo, labelInfo));
+    mp.add(resolveFreshConstants(def));
+    mp.add(concretizeCells(mod, configInfo, labelInfo, sortInfo));
+    mp.add(subsortKItem());
+    mp.add(restoreDefinitionModules(def));
+    mp.add(numberSentences());
+
+    return mp::apply;
   }
 
   // check that simplification rules have a functional symbol on the LHS
