@@ -10,14 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.PosterBackend;
 import org.kframework.utils.inject.Options;
 
 public abstract class AbstractKModule implements KModule {
-
-  public List<Pair<String, Class<? extends PosterBackend>>> posterTypes() {
-    return Collections.emptyList();
-  }
 
   public List<Pair<Class<?>, Boolean>> kompileOptions() {
     return Collections.emptyList();
