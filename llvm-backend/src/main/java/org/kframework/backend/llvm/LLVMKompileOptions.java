@@ -106,4 +106,10 @@ public class LLVMKompileOptions {
       description = "Emit proof hint instrumentation code into the generated interpreter",
       hidden = true)
   public boolean enableProofHints;
+
+  @Parameter(
+      names = "--llvm-mutable-bytes",
+      description = "Use a faster, unsound representation for byte arrays on the LLVM backend",
+      hidden = true)
+  public boolean llvmMutableBytes;
 }
