@@ -13,6 +13,7 @@ from pathlib import Path
 from signal import SIGINT
 from subprocess import Popen
 from time import sleep
+from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
@@ -23,7 +24,7 @@ from .syntax import And, SortApp, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
-    from typing import Any, ClassVar, Final, TextIO, TypeVar
+    from typing import Any, Final, TextIO, TypeVar
 
     from typing_extensions import Required
 

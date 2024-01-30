@@ -6,13 +6,14 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from functools import cached_property
+from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, Any, final
 
 from ..utils import EMPTY_FROZEN_DICT, FrozenDict, hash_str
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
-    from typing import ClassVar, Final, TypeVar
+    from typing import Final, TypeVar
 
     T = TypeVar('T', bound='KAst')
     W = TypeVar('W', bound='WithKAtt')

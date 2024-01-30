@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import shutil
 from dataclasses import dataclass
+from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, final
 
 from ..cli.utils import check_dir_path, check_file_path
@@ -11,7 +12,6 @@ from ..utils import run_process
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
-    from typing import ClassVar
 
 
 @final
