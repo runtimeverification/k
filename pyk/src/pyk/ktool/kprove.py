@@ -347,6 +347,7 @@ class KProve(KPrint):
         md_selector: str | None = None,
         claim_labels: Iterable[str] | None = None,
         exclude_claim_labels: Iterable[str] | None = None,
+        include_dependencies: bool = True,
     ) -> list[KClaim]:
         flat_module_list = self.get_claim_modules(
             spec_file=spec_file,
@@ -355,16 +356,51 @@ class KProve(KPrint):
             md_selector=md_selector,
         )
 
-        all_claims = {c.label: c for m in flat_module_list.modules for c in m.claims}
-        unfound_labels = []
-        claim_labels = list(all_claims.keys()) if claim_labels is None else claim_labels
-        exclude_claim_labels = [] if exclude_claim_labels is None else exclude_claim_labels
-        unfound_labels.extend([cl for cl in claim_labels if cl not in all_claims])
-        unfound_labels.extend([cl for cl in exclude_claim_labels if cl not in all_claims])
+        _module_names = [module.name for module in flat_module_list.modules]
+
+        def _get_claim_module(_label: str) -> str | None:
+            if _label.find('.') > 0 and _label.split('.')[0] in _module_names:
+                return _label.split('.')[0]
+            return None
+
+        all_claims = {
+            claim.label: (claim, _get_claim_module(claim.label))
+            for module in flat_module_list.modules
+            for claim in module.claims
+            if _get_claim_module(claim.label) is not None
+        }
+
+        claim_labels = list(all_claims.keys()) if claim_labels is None else list(claim_labels)
+        exclude_claim_labels = [] if exclude_claim_labels is None else list(exclude_claim_labels)
+
+        final_claims: dict[str, KClaim] = {}
+        unfound_labels: list[str] = []
+        while len(claim_labels) > 0:
+            claim_label = claim_labels.pop(0)
+            if claim_label in final_claims or claim_label in exclude_claim_labels:
+                continue
+            if claim_label not in all_claims:
+                claim_label = f'{flat_module_list.main_module}.{claim_label}'
+            if claim_label not in all_claims:
+                unfound_labels.append(claim_label)
+                continue
+
+            _claim, _module_name = all_claims[claim_label]
+            _updated_dependencies: list[str] = []
+            for _dependency_label in _claim.dependencies:
+                if _get_claim_module(_dependency_label) is None:
+                    _dependency_label = f'{_module_name}.{_dependency_label}'
+                _updated_dependencies.append(_dependency_label)
+            if len(_updated_dependencies) > 0:
+                claim_labels.extend(_updated_dependencies)
+                _claim = _claim.let(att=_claim.att.update({'depends': ','.join(_updated_dependencies)}))
+
+            final_claims[claim_label] = _claim
+
         if len(unfound_labels) > 0:
             raise ValueError(f'Claim labels not found: {unfound_labels}')
 
-        return [all_claims[cl] for cl in all_claims if cl in claim_labels and cl not in exclude_claim_labels]
+        return list(final_claims.values())
 
     @contextmanager
     def _tmp_claim_definition(
