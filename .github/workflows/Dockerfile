@@ -55,6 +55,7 @@ RUN    apt-get update              \
         lld-${LLVM_VERSION}        \
         llvm-${LLVM_VERSION}-tools \
         locales                    \
+        lsof                       \
         maven                      \
         openjdk-${JDK_VERSION}-jdk \
         parallel                   \
