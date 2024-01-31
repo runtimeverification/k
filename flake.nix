@@ -3,7 +3,7 @@
   inputs = {
     haskell-backend.url = "github:runtimeverification/haskell-backend/3779155b609ae78c928d7b47c541b9b6ca969181";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/0ef6ecd37e193a736ddc1d9dc047c24646c4a324";
+      url = "github:runtimeverification/hs-backend-booster/697de694edffc904c10e27540bd5037cbba18e41";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
