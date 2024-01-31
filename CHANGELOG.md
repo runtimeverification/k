@@ -2,6 +2,45 @@
 copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
+K Framework 6.2.0
+=================
+
+Major Changes
+-------------
+
+- The `Bytes` sort no longer represents mutable buffers of bytes by default.
+  Hooks that would previously have mutated a buffer when executing with the LLVM
+  backend will now perform a transparent copy of the underlying buffer. This
+  aligns the LLVM backend's behaviour with that of the Haskell backend and K. To
+  opt out of this change if performance when operating on large buffers is
+  important, semantics can pass the flag `--llvm-mutable-bytes` to `kompile`.
+
+Minor Changes
+-------------
+
+- Removed the `#parseKORE` hook (which presented a hole in the K type system) in
+  favour of modern, Pyk-based solutions to deserializing intermediate K states.
+
+- Added `k-which-python` tool to Nix builds of K, which helps to resolve
+  incompatibilities in Pyk-based applications that use K via `kup`.
+
+- Strict casts now use the `::S` syntax everywhere; a legacy use case for the
+  syntax `{...}<:S` is no longer required.
+
+- Improvements to the deterministic type inferencing algorithm; strict casts are
+  now handled and the new inferencer is enabled when typing proof claims.
+
+- Better integration between the Booster and LLVM backend in the presence of
+  partial functions and run-time errors.
+
+- The PL tutorial that was previously bundled with K will now be developed and
+  tested in its own repository.
+
+- Substantial improvements to K developer experience (code cleanup, auditing and
+  automatic tooling).
+
+- Bug fixes and feature requests supporting RV-internal projects.
+
 K Framework 6.1.0
 =================
 
