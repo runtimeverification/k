@@ -11,9 +11,11 @@ RPC_CLIENT=$(K_BIN)/kore-rpc-client
 INPUTS=$(wildcard *-request.json)
 TESTS=$(INPUTS:-request.json=.rpc)
 
-.phony: clean all regenerate $(TEST)
+.phony: clean all update-results $(TESTS)
 
 all: $(TESTS)
+
+update-results: $(TESTS:.rpc=.update)
 
 ####################
 KOMPILED_DIR=imp-kompiled
@@ -48,5 +50,5 @@ $(TESTS): %.rpc: %-request.json %-response.json kompile kompile-llvm
 	@echo "Server running as process $$(cat server.pid)"
 	bash -c "trap 'kill -2 $$(cat server.pid); rm server.pid' ERR EXIT; $(RPC_CLIENT) send $*-request.json --expect $*-response.json $(REGENERATE)"
 
-$(TESTS:.rpc=.regenerate): %.regenerate:
+$(TESTS:.rpc=.update): %.update:
 	$(MAKE) $*.rpc REGENERATE="--regenerate"
