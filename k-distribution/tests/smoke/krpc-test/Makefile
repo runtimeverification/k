@@ -46,7 +46,7 @@ $(TESTS): %.rpc: %-request.json %-response.json kompile kompile-llvm
 		$(KOMPILED_DIR)/definition.kore --module IMP --server-port 0 \
 		--llvm-backend-library ./$(KOMPILED_LLVM_DIR)/interpreter.$(LIB_SUFFIX) & \
 		echo $$! > $*.server.pid)
-	bash -c "while ! lsof -a -p$$(cat $*.server.pid) -sTCP:LISTEN -iTCP; do echo .; sleep 1; done"
+	timeout 10 bash -c "while ! lsof -a -p$$(cat $*.server.pid) -sTCP:LISTEN -iTCP; do echo .; sleep 1; done"
 	lsof -a -p$$(cat $*.server.pid) -sTCP:LISTEN -iTCP | grep $$(cat $*.server.pid) | sed -e 's/.* TCP \*:\([0-9]*\).*$$/\1/' > $*.server.port
 
 	@echo "Server running as process $$(cat $*.server.pid) on port $$(cat $*.server.port)"
