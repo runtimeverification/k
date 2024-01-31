@@ -43,12 +43,14 @@ clean:
 ####################
 $(TESTS): %.rpc: %-request.json %-response.json kompile kompile-llvm
 	($(BOOSTER) \
-		$(KOMPILED_DIR)/definition.kore --module IMP \
+		$(KOMPILED_DIR)/definition.kore --module IMP --server-port 0 \
 		--llvm-backend-library ./$(KOMPILED_LLVM_DIR)/interpreter.$(LIB_SUFFIX) & \
-		echo $$! > server.pid\
-	)
-	@echo "Server running as process $$(cat server.pid)"
-	bash -c "trap 'kill -2 $$(cat server.pid); rm server.pid' ERR EXIT; $(RPC_CLIENT) send $*-request.json --expect $*-response.json $(REGENERATE)"
+		echo $$! > $*.server.pid)
+	bash -c "while ! lsof -a -p$$(cat $*.server.pid) -sTCP:LISTEN -iTCP; do echo .; sleep 1; done"
+	lsof -a -p$$(cat $*.server.pid) -sTCP:LISTEN -iTCP | grep $$(cat $*.server.pid) | sed -e 's/.* TCP \*:\([0-9]*\).*$$/\1/' > $*.server.port
+
+	@echo "Server running as process $$(cat $*.server.pid) on port $$(cat $*.server.port)"
+	bash -c "trap 'kill -2 $$(cat $*.server.pid); rm $*.server.{pid,port}' EXIT; $(RPC_CLIENT) --port $$(cat $*.server.port) send $*-request.json --expect $*-response.json $(REGENERATE)"
 
 $(TESTS:.rpc=.update): %.update:
 	$(MAKE) $*.rpc REGENERATE="--regenerate"
