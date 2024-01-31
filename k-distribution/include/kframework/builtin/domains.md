@@ -1961,12 +1961,13 @@ Byte Arrays
 -----------
 
 Provided here is the syntax of an implementation of fixed-width arrays of Bytes
-in K. This type is hooked to an implementation of bytes provided by the
-backend. In concrete backends, this representation is mutable and thus multiple
-references can occur to the same `Bytes` object and when one is modified, the
-others are also modified. Care should be taken not to rely on this fact however
-as this is not the case in symbolic backends and thus you will experience
-divergent behavior unless the `Bytes` type is used in a manner that preserves
+in K. This type is hooked to an implementation of bytes provided by the backend.
+On the LLVM backend, it is possible to opt in to a faster, mutable
+representation (using the `--llvm-mutable-bytes` flag to `kompile`) where
+multiple references can occur to the same `Bytes` object and when one is
+modified, the others are also modified. Care should be taken when using this
+feature, however, as it is possible to experience divergent behavior with
+symbolic backends unless the `Bytes` type is used in a manner that preserves
 consistency.
 
 ```k
@@ -2103,11 +2104,11 @@ The result is `#False` if `startIndex` or `endIndex` are not valid.
 
 ### Multiple bytes update
 
-You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except
-the `N` elements starting at `index` are replaced with the contents of `src` in
-O(N) time. This does not create a new `Bytes` object and will instead modify
-the original on concrete backends. The result is `#False` if `index` + `N`
-is not a valid index.
+You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except the
+`N` elements starting at `index` are replaced with the contents of `src` in O(N)
+time. If `--llvm-mutable-bytes` is active, this will not create a new `Bytes`
+object and will instead modify the original on concrete backends. The result is
+`#False` if `index` + `N` is not a valid index.
 
 ```k
   syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
@@ -2115,14 +2116,13 @@ is not a valid index.
 
 ### Multiple bytes update
 
-You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except
-the `count` bytes starting at `index` are replaced with `count` bytes of value
+You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except the
+`count` bytes starting at `index` are replaced with `count` bytes of value
 `Int2Bytes(1, v, LE/BE)` in O(count) time. This does not create a new `Bytes`
-object and will instead modify the original on concrete backends.
-This will throw an exception if `index` + `count` is not a valid index.
-The acceptable range of values for `v` is -128 to 127. This will throw an
-exception if `v` is outside of this range.
-This is implemented only for the LLVM backend.
+object and will instead modify the original if `--llvm-mutable-bytes` is active.
+This will throw an exception if `index` + `count` is not a valid index. The
+acceptable range of values for `v` is -128 to 127. This will throw an exception
+if `v` is outside of this range. This is implemented only for the LLVM backend.
 
 ```k
   syntax Bytes ::= memsetBytes(dest: Bytes, index: Int, count: Int, v: Int) [function, hook(BYTES.memset)]
@@ -2130,12 +2130,12 @@ This is implemented only for the LLVM backend.
 
 ### Bytes padding
 
-You can create a new `Bytes` object which is at least `length` bytes long
-by taking the input sequence and padding it on the right (respectively, on the
-left) with the specified `value`. This does not create a new `Bytes` object
-if the input is already at least `length` bytes long, and will instead
-return the input unchanged. The result is `#False` if `value` is not in the
-range `[0..255]`, or if the length is negative.
+You can create a new `Bytes` object which is at least `length` bytes long by
+taking the input sequence and padding it on the right (respectively, on the
+left) with the specified `value`. If `--llvm-mutable-bytes` is active, this does
+not create a new `Bytes` object if the input is already at least `length` bytes
+long, and will instead return the input unchanged. The result is `#False` if
+`value` is not in the range `[0..255]`, or if the length is negative.
 
 ```k
   syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
@@ -2144,8 +2144,9 @@ range `[0..255]`, or if the length is negative.
 
 ### Bytes reverse
 
-You can reverse a `Bytes` object in O(N) time. This does not create a new
-`Bytes` object and will instead modify the original on concrete backends.
+You can reverse a `Bytes` object in O(N) time. If `--llvm-mutable-bytes` is
+active, this will not create a new `Bytes` object and will instead modify the
+original.
 
 ```k
   syntax Bytes ::= reverseBytes(Bytes) [function, total, hook(BYTES.reverse)]

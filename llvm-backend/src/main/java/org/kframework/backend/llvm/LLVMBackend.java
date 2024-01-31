@@ -128,6 +128,10 @@ public class LLVMBackend extends KoreBackend {
         args.add("--proof-hint-instrumentation");
       }
 
+      if (options.llvmMutableBytes) {
+        args.add("--mutable-bytes");
+      }
+
       // Arguments after this point are passed on to Clang.
       args.add("--");
 
