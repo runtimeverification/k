@@ -57,8 +57,7 @@ public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelI
   private boolean skipSentence(Sentence s) {
     return ExpandMacros.isMacro(s)
         || s.att().contains(Att.ANYWHERE())
-        || s.att().contains(Att.SIMPLIFICATION())
-        || s.att().contains(Att.KORE());
+        || s.att().contains(Att.SIMPLIFICATION());
   }
 
   // If there are multiple cells mentioned in the split configuration, we don't
