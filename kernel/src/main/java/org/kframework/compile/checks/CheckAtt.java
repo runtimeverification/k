@@ -11,6 +11,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Att.Key;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.HasAtt;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
@@ -21,46 +22,77 @@ import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import scala.Tuple2;
 
-/** Created by dwightguth on 1/25/16. */
+/** Check that attributes are well-formed and placed on the correct syntactic elements. */
 public class CheckAtt {
   private final scala.collection.Set<KLabel> macros;
   private final Set<KEMException> errors;
   private final KExceptionManager kem;
   private final Module m;
-  private final boolean isSymbolicKast;
 
-  public CheckAtt(
-      Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast) {
+  public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m) {
     this.errors = errors;
     this.kem = kem;
     this.m = m;
-    this.isSymbolicKast = isSymbolicKast;
     this.macros = m.macroKLabels();
   }
 
-  public void checkUnrecognizedModuleAtts() {
-    if (!m.att().unrecognizedKeys().isEmpty()) {
-      errors.add(
-          KEMException.compilerError(
-              "Unrecognized attributes on module "
-                  + m.name()
-                  + ": "
-                  + stream(m.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
-                  + "\nHint: User-defined groups can be added with the group(_) attribute."));
+  public void check() {
+    checkUnrecognizedAtts(m);
+    checkRestrictedAtts(m);
+    stream(m.localSentences()).forEach(this::checkSentence);
+  }
+
+  private void checkSentence(Sentence sentence) {
+    checkUnrecognizedAtts(sentence);
+    checkRestrictedAtts(sentence);
+    checkLabel(sentence);
+
+    if (sentence instanceof Rule rule) {
+      checkRule(rule);
+    } else if (sentence instanceof Production prod) {
+      checkProduction(prod);
     }
   }
 
-  public void check(Sentence sentence) {
-    checkUnrecognizedAtts(sentence);
-    checkRestrictedAtts(sentence);
-    if (sentence instanceof Rule) {
-      check(sentence.att(), sentence);
-      check((Rule) sentence);
-    } else if (sentence instanceof Production) {
-      check((Production) sentence);
+  private void checkRule(Rule rule) {
+    checkMacro(rule);
+    checkNonExecutable(rule);
+    checkSimplification(rule);
+    checkSymbolic(rule);
+  }
+
+  private void checkProduction(Production prod) {
+    checkHookedSortConstructors(prod);
+    checkBinder(prod);
+    checkFormat(prod);
+    checkFunctional(prod);
+    checkTotal(prod);
+  }
+
+  private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
+    if (!term.att().unrecognizedKeys().isEmpty()) {
+      errors.add(
+          KEMException.compilerError(
+              "Unrecognized attributes: "
+                  + stream(term.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
+                  + "\nHint: User-defined groups can be added with the group(_) attribute.",
+              term));
     }
-    checkLabel(sentence);
+  }
+
+  private <T extends HasAtt & HasLocation> void checkRestrictedAtts(T term) {
+    Class<?> cls = term.getClass();
+    Att att = term.att();
+    Set<Key> keys = stream(att.att().keySet()).map(Tuple2::_1).collect(Collectors.toSet());
+    keys.removeIf(k -> k.allowedSentences().exists(c -> c.isAssignableFrom(cls)));
+    if (!keys.isEmpty()) {
+      List<String> sortedKeys = keys.stream().map(Key::toString).sorted().toList();
+      errors.add(
+          KEMException.compilerError(
+              cls.getSimpleName() + " cannot have the following attributes: " + sortedKeys, term));
+    }
   }
 
   private static final Pattern whitespace = Pattern.compile("\\s");
@@ -71,85 +103,114 @@ public class CheckAtt {
       if (label.contains("`") || whitespace.matcher(label).find()) {
         errors.add(
             KEMException.compilerError(
-                "Rule label '" + label + "' cannot contain whitespace or backticks.", sentence));
+                "Label '" + label + "' cannot contain whitespace or backticks.", sentence));
       }
     }
   }
 
-  private void checkUnrecognizedAtts(Sentence sentence) {
-    if (!sentence.att().unrecognizedKeys().isEmpty()) {
-      errors.add(
-          KEMException.compilerError(
-              "Unrecognized attributes: "
-                  + stream(sentence.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
-                  + "\nHint: User-defined groups can be added with the group(_) attribute.",
-              sentence));
+  private void checkMacro(Rule rule) {
+    if (rule.isMacro()) {
+      kem.registerCompilerWarning(
+          ExceptionType.FUTURE_ERROR,
+          errors,
+          "The attribute ["
+              + rule.att().getMacro().get()
+              + "] has been deprecated on rules. Use this label on syntax declarations instead.",
+          rule);
     }
   }
 
-  private void checkRestrictedAtts(Sentence sentence) {
-    Class<?> cls = sentence.getClass();
-    Att att = sentence.att();
-    Set<Key> keys = stream(att.att().keySet()).map(k -> k._1()).collect(Collectors.toSet());
-    keys.removeIf(k -> k.allowedSentences().exists(c -> c.isAssignableFrom(cls)));
-    if (!keys.isEmpty()) {
-      List<String> sortedKeys = keys.stream().map(k -> k.toString()).sorted().toList();
+  private void checkNonExecutable(Rule rule) {
+    boolean isNonExecutable = rule.att().contains(Att.NON_EXECUTABLE());
+    boolean isFunction =
+        m.attributesFor().getOrElse(m.matchKLabel(rule), Att::empty).contains(Att.FUNCTION());
+
+    if (isNonExecutable && !isFunction) {
       errors.add(
           KEMException.compilerError(
-              cls.getSimpleName()
-                  + " sentences can not have the following attributes: "
-                  + sortedKeys,
-              sentence));
+              "non-executable attribute is only supported on function rules.", rule));
     }
   }
 
-  private void check(Production prod) {
-    if (!prod.sort().equals(Sorts.KItem())) {
-      Att sortAtt = m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
-      if (sortAtt.contains(Att.HOOK())
-          && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")
-          && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
-        if (!prod.att().contains(Att.FUNCTION())
-            && !prod.att().contains(Att.BRACKET())
-            && !prod.att().contains(Att.TOKEN())
-            && !prod.att().contains(Att.MACRO())
-            && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
-          if (!(prod.sort().equals(Sorts.K())
-              && ((prod.klabel().isDefined()
-                      && (prod.klabel().get().name().equals("#EmptyK")
-                          || prod.klabel().get().name().equals("#KSequence")))
-                  || prod.isSubsort()))) {
-            if (!(sortAtt.contains(Att.CELL_COLLECTION()) && prod.isSubsort())) {
-              errors.add(
-                  KEMException.compilerError(
-                      "Cannot add new constructors to hooked sort " + prod.sort(), prod));
-            }
+  private void checkSimplification(Rule rule) {
+    Att att = rule.att();
+    if (att.contains(Att.OWISE()) && att.contains(Att.SIMPLIFICATION())) {
+      errors.add(
+          KEMException.compilerError(
+              "owise attribute is not supported on simplification rules.", rule));
+    }
+    if (att.contains(Att.PRIORITY()) && att.contains(Att.SIMPLIFICATION())) {
+      errors.add(
+          KEMException.compilerError(
+              "priority attribute is not supported on simplification rules.", rule));
+    }
+    if (att.contains(Att.ANYWHERE()) && att.contains(Att.SIMPLIFICATION())) {
+      errors.add(
+          KEMException.compilerError(
+              "anywhere attribute is not supported on simplification rules.", rule));
+    }
+  }
+
+  private void checkSymbolic(Rule rule) {
+    if (rule.att().contains(Att.ANYWHERE()) && rule.att().contains(Att.SYMBOLIC())) {
+      errors.add(
+          KEMException.compilerError(
+              "anywhere attribute is not supported on symbolic rules.", rule));
+    }
+  }
+
+  private void checkHookedSortConstructors(Production prod) {
+    if (prod.sort().equals(Sorts.KItem())) {
+      return;
+    }
+    Att sortAtt = m.sortAttributesFor().getOrElse(prod.sort().head(), Att::empty);
+    if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
+      if (!prod.att().contains(Att.FUNCTION())
+          && !prod.att().contains(Att.BRACKET())
+          && !prod.att().contains(Att.TOKEN())
+          && !prod.att().contains(Att.MACRO())
+          && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
+        if (!(prod.sort().equals(Sorts.K())
+            && ((prod.klabel().isDefined()
+                    && (prod.klabel().get().name().equals("#EmptyK")
+                        || prod.klabel().get().name().equals("#KSequence")))
+                || prod.isSubsort()))) {
+          if (!(sortAtt.contains(Att.CELL_COLLECTION()) && prod.isSubsort())) {
+            errors.add(
+                KEMException.compilerError(
+                    "Cannot add new constructors to hooked sort " + prod.sort(), prod));
           }
         }
       }
     }
-    if (prod.att().contains(Att.BINDER()) && !isSymbolicKast) {
-      if (!prod.att().get(Att.BINDER()).equals("")) {
-        errors.add(
-            KEMException.compilerError(
-                "Attribute value for 'binder' attribute is not supported.", prod));
-      }
-      if (prod.nonterminals().size() < 2) {
-        errors.add(
-            KEMException.compilerError(
-                "Binder productions must have at least two nonterminals.", prod));
-      } else if (!m.sortAttributesFor()
-          .get(prod.nonterminals().apply(0).sort().head())
-          .getOrElse(() -> Att.empty())
-          .getOptional(Att.HOOK())
-          .orElse("")
-          .equals("KVAR.KVar")) {
-        errors.add(
-            KEMException.compilerError(
-                "First child of binder must have a sort with the 'KVAR.KVar' hook attribute.",
-                prod));
-      }
+  }
+
+  private void checkBinder(Production prod) {
+    if (!prod.att().contains(Att.BINDER())) {
+      return;
     }
+    if (!prod.att().get(Att.BINDER()).equals("")) {
+      errors.add(
+          KEMException.compilerError(
+              "Attribute value for 'binder' attribute is not supported.", prod));
+    }
+    if (prod.nonterminals().size() < 2) {
+      errors.add(
+          KEMException.compilerError(
+              "Binder productions must have at least two nonterminals.", prod));
+    } else if (!m.sortAttributesFor()
+        .get(prod.nonterminals().apply(0).sort().head())
+        .getOrElse(Att::empty)
+        .getOptional(Att.HOOK())
+        .orElse("")
+        .equals("KVAR.KVar")) {
+      errors.add(
+          KEMException.compilerError(
+              "First child of binder must have a sort with the 'KVAR.KVar' hook attribute.", prod));
+    }
+  }
+
+  private void checkFormat(Production prod) {
     boolean hasColors = false;
     int ncolors = 0;
     if (prod.att().contains(Att.COLORS())) {
@@ -252,6 +313,9 @@ public class CheckAtt {
                   + " colors instead.",
               prod));
     }
+  }
+
+  private void checkFunctional(Production prod) {
     if (prod.att().contains(Att.FUNCTIONAL())) {
       kem.registerCompilerWarning(
           ExceptionType.FUTURE_ERROR,
@@ -260,61 +324,15 @@ public class CheckAtt {
               + " attributes 'function' and 'total' instead.",
           prod);
     }
+  }
+
+  private void checkTotal(Production prod) {
     if (prod.att().contains(Att.TOTAL()) && !prod.att().contains(Att.FUNCTION())) {
       errors.add(
           KEMException.compilerError(
               "The attribute 'total' cannot be applied to a production which does not have the"
                   + " 'function' attribute.",
               prod));
-    }
-  }
-
-  private void check(Rule rule) {
-    if (rule.isMacro()) {
-      kem.registerCompilerWarning(
-          ExceptionType.FUTURE_ERROR,
-          errors,
-          "The attribute ["
-              + rule.att().getMacro().get()
-              + "] has been deprecated on rules. Use this label on syntax declarations instead.",
-          rule);
-    }
-
-    checkNonExecutable(rule);
-  }
-
-  private void checkNonExecutable(Rule rule) {
-    boolean isNonExecutable = rule.att().contains(Att.NON_EXECUTABLE());
-    boolean isFunction =
-        m.attributesFor().getOrElse(m.matchKLabel(rule), Att::empty).contains(Att.FUNCTION());
-
-    if (isNonExecutable && !isFunction) {
-      errors.add(
-          KEMException.compilerError(
-              "non-executable attribute is only supported on function rules.", rule));
-    }
-  }
-
-  private void check(Att att, HasLocation loc) {
-    if (att.contains(Att.OWISE()) && att.contains(Att.SIMPLIFICATION())) {
-      errors.add(
-          KEMException.compilerError(
-              "owise attribute is not supported on simplification rules.", loc));
-    }
-    if (att.contains(Att.PRIORITY()) && att.contains(Att.SIMPLIFICATION())) {
-      errors.add(
-          KEMException.compilerError(
-              "priority attribute is not supported on simplification rules.", loc));
-    }
-    if (att.contains(Att.ANYWHERE()) && att.contains(Att.SIMPLIFICATION())) {
-      errors.add(
-          KEMException.compilerError(
-              "anywhere attribute is not supported on simplification rules.", loc));
-    }
-    if (att.contains(Att.ANYWHERE()) && att.contains(Att.SYMBOLIC())) {
-      errors.add(
-          KEMException.compilerError(
-              "anywhere attribute is not supported on symbolic rules.", loc));
     }
   }
 }
