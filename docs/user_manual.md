@@ -363,14 +363,14 @@ Here, we have that:
     as the symbol name.
 
 The `symbol` provided *must* be unique to this definition. This is enforced by K.
-In general, it's recommended to use `symbol` attribute whenever you use `klabel`
-unless you explicitely have a reason not to (eg. you want to *overload* symbols,
+In general, it's recommended to use the `symbol` attribute whenever you use `klabel`
+unless you explicitly have a reason not to (eg. you want to *overload* symbols,
 or you're using a deprecated backend). It can be very helpful use the `symbol`
 attribute for debugging, as many debugging messages are printed in Kast format
-which will be more readable with the `symbol` names you explicitely declare.
+which will be more readable with the `symbol` names you explicitly declare.
 In addition, if you are programatically manipulating definitions via the JSON
 Kast format, building terms using the user-provided pretty
-`symbol, klabel(...)` is easier and less error-prone when the auto-generation
+`symbol, klabel(...)` is easier and less error-prone if the auto-generation
 process for klabels changes.
 
 ### Parametric productions and `bracket` attributes
