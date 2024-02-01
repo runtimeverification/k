@@ -189,11 +189,6 @@ public class CheckAtt {
     if (!prod.att().contains(Att.BINDER())) {
       return;
     }
-    if (!prod.att().get(Att.BINDER()).equals("")) {
-      errors.add(
-          KEMException.compilerError(
-              "Attribute value for 'binder' attribute is not supported.", prod));
-    }
     if (prod.nonterminals().size() < 2) {
       errors.add(
           KEMException.compilerError(

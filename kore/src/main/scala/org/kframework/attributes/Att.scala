@@ -249,7 +249,7 @@ object Att {
   final val ASSOC          = Key.builtin("assoc", KeyParameter.Forbidden, onlyon[Production])
   final val AVOID          = Key.builtin("avoid", KeyParameter.Forbidden, onlyon[Production])
   final val BAG            = Key.builtin("bag", KeyParameter.Forbidden, onlyon[Production])
-  final val BINDER         = Key.builtin("binder", KeyParameter.Optional, onlyon[Production])
+  final val BINDER         = Key.builtin("binder", KeyParameter.Forbidden, onlyon[Production])
   final val BRACKET        = Key.builtin("bracket", KeyParameter.Forbidden, onlyon[Production])
   final val CELL           = Key.builtin("cell", KeyParameter.Forbidden, onlyon[Production])
   final val CELL_COLLECTION =
