@@ -189,7 +189,7 @@ module ARRAY-SYMBOLIC [symbolic]
   imports ARRAY-IN-K
 endmodule
 
-module ARRAY-KORE [kore]
+module ARRAY-KORE
   imports ARRAY-IN-K
 endmodule
 
@@ -403,7 +403,7 @@ simplify terms.
 ```k
 endmodule
 
-module MAP-KORE-SYMBOLIC [kore,symbolic,haskell]
+module MAP-KORE-SYMBOLIC [symbolic,haskell]
   imports MAP
   imports private K-EQUAL
   imports private BOOL
@@ -814,7 +814,7 @@ The following lemmas are simplifications that the Haskell backend can
 apply to simplify expressions of sort `Set`.
 
 ```k
-module SET-KORE-SYMBOLIC [kore,symbolic,haskell]
+module SET-KORE-SYMBOLIC [symbolic,haskell]
   imports SET
   imports private K-EQUAL
   imports private BOOL
@@ -1150,7 +1150,7 @@ operations listed above.
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
 endmodule
 
-module BOOL-KORE [kore, symbolic]
+module BOOL-KORE [symbolic]
   imports BOOL-COMMON
 
   rule {true #Equals notBool @B} => {false #Equals @B} [simplification]
@@ -1359,7 +1359,7 @@ module INT-SYMBOLIC [symbolic]
   rule 0 >>Int _ => 0 [simplification]
 endmodule
 
-module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
+module INT-SYMBOLIC-KORE [symbolic, haskell]
   imports INT-COMMON
   imports ML-SYNTAX
   imports private BOOL
@@ -1389,7 +1389,7 @@ module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
 
 endmodule
 
-module INT-KORE [kore, symbolic]
+module INT-KORE [symbolic]
   imports private K-EQUAL
   imports private BOOL
   imports INT-COMMON
@@ -1892,7 +1892,7 @@ of the above operations in K.
 
 endmodule
 
-module STRING-KORE [kore, symbolic]
+module STRING-KORE [symbolic]
   imports private K-EQUAL
   imports STRING-COMMON
 
@@ -1977,7 +1977,7 @@ endmodule
 ```
 
 ```k
-module BYTES-STRING-ENCODE [kore, symbolic]
+module BYTES-STRING-ENCODE [symbolic]
   imports BYTES-SYNTAX
 ```
 ### Encoding/decoding between Bytes and String
@@ -2164,12 +2164,12 @@ module BYTES-CONCRETE [concrete]
   imports BYTES-HOOKED
 endmodule
 
-module BYTES-KORE [kore]
+module BYTES-KORE
   imports BYTES-HOOKED
   imports BYTES-SYMBOLIC-CEIL
 endmodule
 
-module BYTES-SYMBOLIC-CEIL [symbolic, kore]
+module BYTES-SYMBOLIC-CEIL [symbolic]
   imports BYTES-HOOKED
   imports private INT
   imports private BOOL
@@ -2265,7 +2265,7 @@ module K-EQUAL-SYNTAX
 
 endmodule
 
-module K-EQUAL-KORE [kore, symbolic]
+module K-EQUAL-KORE [symbolic]
   import private BOOL
   import K-EQUAL-SYNTAX
 
