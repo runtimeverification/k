@@ -9,9 +9,11 @@ from ..kast.inner import KApply, KRewrite, top_down
 from ..kast.manip import (
     flatten_label,
     inline_cell_maps,
+    minimize_rule,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
+    remove_generated_cells,
     sort_ac_collections,
 )
 from ..kast.outer import KRule
@@ -91,17 +93,6 @@ class KCFGShow:
         if omit_cells:
             return top_down(_hide_cells, term)
         return term
-
-    @staticmethod
-    def hide_cells_in_rules(
-        module: KFlatModule, module_name: str | None = None, omit_cells: Iterable[str] = ()
-    ) -> KFlatModule:
-        def _hide_cells_in_rule(_sent: KSentence) -> KSentence:
-            if type(_sent) is KRule:
-                return _sent.let(body=KCFGShow.hide_cells(_sent.body, omit_cells))
-            return _sent
-
-        return module.let(sentences=map(_hide_cells_in_rule, module.sentences))
 
     @staticmethod
     def simplify_config(config: KInner, omit_cells: Iterable[str]) -> KInner:
@@ -302,8 +293,23 @@ class KCFGShow:
     ) -> Iterable[str]:
         return (line for _, seg_lines in self.pretty_segments(kcfg, minimize=minimize) for line in seg_lines)
 
-    def to_module(self, cfg: KCFG, module_name: str | None = None, omit_cells: Iterable[str] = ()) -> KFlatModule:
-        return KCFGShow.hide_cells_in_rules(cfg.to_module(module_name), omit_cells=omit_cells)
+    def to_module(
+        self,
+        cfg: KCFG,
+        module_name: str | None = None,
+        omit_cells: Iterable[str] = (),
+        parseable_output: bool = True,
+    ) -> KFlatModule:
+        def _process_sentence(sent: KSentence) -> KSentence:
+            if type(sent) is KRule:
+                sent = sent.let(body=KCFGShow.hide_cells(sent.body, omit_cells))
+                if parseable_output:
+                    sent = sent.let(body=remove_generated_cells(sent.body))
+                    sent = minimize_rule(sent)
+            return sent
+
+        module = cfg.to_module(module_name)
+        return module.let(sentences=[_process_sentence(sent) for sent in module.sentences])
 
     def show(
         self,
