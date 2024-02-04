@@ -607,13 +607,7 @@ public class Kompile {
         new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
     stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-    stream(modules)
-        .forEach(
-            m -> {
-              CheckAtt checkAtt = new CheckAtt(errors, kem, m, isSymbolic && isKast);
-              checkAtt.checkUnrecognizedModuleAtts();
-              stream(m.localSentences()).forEach(checkAtt::check);
-            });
+    stream(modules).forEach(m -> new CheckAtt(errors, kem, m).check());
 
     stream(modules)
         .forEach(

@@ -1,9 +1,9 @@
-[Error] Compiler: Production sentences can not have the following attributes: [cool, kore]
+[Error] Compiler: Production cannot have the following attributes: [cool, kore]
 	Source(restrictedAtts.k)
 	Location(4,19,4,41)
 	4 |	  syntax Foo  ::= a() [cool, kore, left]
 	  .	                  ^~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Rule sentences can not have the following attributes: [idem]
+[Error] Compiler: Rule cannot have the following attributes: [idem]
 	Source(restrictedAtts.k)
 	Location(5,8,5,17)
 	5 |	  rule a() => .K [idem, owise]
