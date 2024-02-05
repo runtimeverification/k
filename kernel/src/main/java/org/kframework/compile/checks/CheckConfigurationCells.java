@@ -21,12 +21,9 @@ public class CheckConfigurationCells {
 
   private final Module module;
 
-  private final boolean isSymbolicKast;
-
-  public CheckConfigurationCells(Set<KEMException> errors, Module module, boolean isSymbolicKast) {
+  public CheckConfigurationCells(Set<KEMException> errors, Module module) {
     this.errors = errors;
     this.module = module;
-    this.isSymbolicKast = isSymbolicKast;
   }
 
   public void check(Sentence s) {
@@ -60,15 +57,13 @@ public class CheckConfigurationCells {
       }
       if (p.att().getOptional(Att.MULTIPLICITY()).orElse("").equals("*")
           && p.att().getOptional(Att.TYPE()).orElse("Bag").equals("Bag")) {
-        if (!isSymbolicKast) {
-          errors.add(
-              KEMException.compilerError(
-                  "Cell bags are only supported on the Java backend. If you want this feature,"
-                      + " comment on https://github.com/runtimeverification/k/issues/1419 . As a"
-                      + " workaround, you can add the attribute type=\"Set\" and add a unique"
-                      + " identifier to each element in the set.",
-                  p));
-        }
+        errors.add(
+            KEMException.compilerError(
+                "Cell bags are only supported on the Java backend. If you want this feature,"
+                    + " comment on https://github.com/runtimeverification/k/issues/1419 . As a"
+                    + " workaround, you can add the attribute type=\"Set\" and add a unique"
+                    + " identifier to each element in the set.",
+                p));
       }
     }
   }
