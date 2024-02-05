@@ -2973,10 +2973,8 @@ arguments. A legend describing how to interpret the index follows.
 | `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
 | `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
-| `kast`                | mod   | all     | Specify that this module should only be included in KAST backends (Java backend).                                                               |
-| `kore`                | mod   | all     | Specify that this module should only be included in Kore backends (Haskell/LLVM backend).                                                       |
 | `concrete`            | mod   | all     | Specify that this module should only be included in concrete backends (LLVM backend).                                                           |
-| `symbolic`            | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell/Java backend).                                                   |
+| `symbolic`            | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell backend).                                                        |
 | `stream = "_"`        | cell  | all     | Specify that this cell should be hooked up to a stream, either `stdin`, `stdout`, or `stderr`.                                                  |
 
 ### Internal Attribute Index

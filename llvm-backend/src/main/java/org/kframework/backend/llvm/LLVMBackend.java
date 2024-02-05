@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -187,6 +187,6 @@ public class LLVMBackend extends KoreBackend {
 
   @Override
   public Set<Att.Key> excludedModuleTags() {
-    return new HashSet<>(Arrays.asList(Att.SYMBOLIC(), Att.KAST()));
+    return new HashSet<>(Collections.singletonList(Att.SYMBOLIC()));
   }
 }

@@ -4,6 +4,7 @@ package org.kframework.kil;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import org.kframework.kore.Sort;
@@ -73,7 +74,9 @@ public class Module extends DefinitionItem {
       toString(mod);
       MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
       messageDigest.update(mod.toString().getBytes());
-      return new String(messageDigest.digest());
+
+      var textDigest = Base64.getEncoder().encode(messageDigest.digest());
+      return new String(textDigest);
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
