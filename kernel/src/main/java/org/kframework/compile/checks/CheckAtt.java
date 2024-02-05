@@ -48,6 +48,7 @@ public class CheckAtt {
     checkUnrecognizedAtts(sentence);
     checkRestrictedAtts(sentence);
     checkLabel(sentence);
+    checkMacro(sentence);
 
     if (sentence instanceof Rule rule) {
       checkRule(rule);
@@ -57,7 +58,6 @@ public class CheckAtt {
   }
 
   private void checkRule(Rule rule) {
-    checkMacro(rule);
     checkNonExecutable(rule);
     checkSimplification(rule);
     checkSymbolic(rule);
@@ -108,15 +108,14 @@ public class CheckAtt {
     }
   }
 
-  private void checkMacro(Rule rule) {
-    if (rule.isMacro()) {
-      kem.registerCompilerWarning(
-          ExceptionType.FUTURE_ERROR,
-          errors,
-          "The attribute ["
-              + rule.att().getMacro().get()
-              + "] has been deprecated on rules. Use this label on syntax declarations instead.",
-          rule);
+  private void checkMacro(Sentence sentence) {
+    if (!(sentence instanceof Production) && sentence.isMacro()) {
+      errors.add(
+          KEMException.compilerError(
+              "The attribute ["
+                  + sentence.att().getMacro().get()
+                  + "] may only appear on syntax productions.",
+              sentence));
     }
   }
 
