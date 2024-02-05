@@ -69,6 +69,7 @@ public class CheckAtt {
     checkFormat(prod);
     checkFunctional(prod);
     checkTotal(prod);
+    checkTerminatorKLabel(prod);
   }
 
   private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
@@ -327,6 +328,15 @@ public class CheckAtt {
           KEMException.compilerError(
               "The attribute 'total' cannot be applied to a production which does not have the"
                   + " 'function' attribute.",
+              prod));
+    }
+  }
+
+  private void checkTerminatorKLabel(Production prod) {
+    if (!prod.att().contains(Att.USER_LIST()) && prod.att().contains(Att.TERMINATOR_KLABEL())) {
+      errors.add(
+          KEMException.compilerError(
+              "The attribute 'terminator-klabel' cannot be applied to a production that does not declare a syntactic list.",
               prod));
     }
   }
