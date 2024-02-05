@@ -243,8 +243,7 @@ public class Kompile {
     ConfigurationInfoFromModule configInfo =
         new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-    Sort rootCell;
-    rootCell = Sorts.GeneratedTopCell();
+    Sort rootCell = Sorts.GeneratedTopCell();
     CompiledDefinition def =
         new CompiledDefinition(
             kompileOptions,
