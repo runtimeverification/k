@@ -287,6 +287,8 @@ object Att {
   final val INTERNAL  = Key.builtin("internal", KeyParameter.Forbidden, onlyon[Production])
   final val KAST      = Key.builtin("kast", KeyParameter.Forbidden, onlyon[Module])
   final val KLABEL    = Key.builtin("klabel", KeyParameter.Required, onlyon[Production])
+  final val TERMINATOR_KLABEL =
+    Key.builtin("terminator-klabel", KeyParameter.Required, onlyon[Production])
   final val KORE      = Key.builtin("kore", KeyParameter.Forbidden, onlyon2[RuleOrClaim, Module])
   final val LABEL     = Key.builtin("label", KeyParameter.Required, onlyon[Sentence])
   final val LATEX     = Key.builtin("latex", KeyParameter.Required, onlyon[Production])
