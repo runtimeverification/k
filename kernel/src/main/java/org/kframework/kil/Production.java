@@ -36,10 +36,11 @@ public class Production extends ASTNode {
    */
   public String getTerminatorKLabel(boolean kore) {
     assert isListDecl();
+    boolean isSymbol = getAttribute(Att.SYMBOL()) != null;
     return ".List{"
         + StringUtil.enquoteCString(getKLabel(kore))
         + "}"
-        + (kore ? "_" + getSort().name() : "");
+        + (kore && !isSymbol ? "_" + getSort().name() : "");
   }
 
   /**
