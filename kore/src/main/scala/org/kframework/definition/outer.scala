@@ -106,9 +106,14 @@ case class Module(
     with OuterKORE
     with Sorting
     with Serializable
-    with AttValue {
+    with AttValue
+    with HasAtt
+    with HasLocation {
 
   assert(att != null)
+
+  def location: Optional[Location] = att.getOptional(classOf[Location])
+  def source: Optional[Source]     = att.getOptional(classOf[Source])
 
   lazy val fullImports: Set[Module] = imports.map(_.module)
 

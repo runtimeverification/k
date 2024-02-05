@@ -3,14 +3,9 @@
 	Location(7,20,7,34)
 	7 |	  syntax Error ::= foo() [binder]
 	  .	                   ^~~~~~~~~~~~~~
-[Error] Compiler: Attribute value for 'binder' attribute is not supported.
-	Source(binder.k)
-	Location(9,20,9,53)
-	9 |	  syntax Error ::= foo(KVar, Error) [binder(1 -> 2)]
-	  .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: First child of binder must have a sort with the 'KVAR.KVar' hook attribute.
 	Source(binder.k)
-	Location(11,20,11,46)
-	11 |	  syntax Error ::= foo(Error, Error) [binder]
-	   .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 3 structural errors.
+	Location(9,20,9,46)
+	9 |	  syntax Error ::= foo(Error, Error) [binder]
+	  .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 2 structural errors.
