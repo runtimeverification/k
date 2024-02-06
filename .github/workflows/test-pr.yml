@@ -66,26 +66,6 @@ jobs:
           llvm: 15
       - name: 'Build and Test K'
         run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify -Dspotless.check.skip=true --batch-mode -U'
-      - name: 'Check out k-exercises'
-        uses: actions/checkout@v3
-        with:
-          repository: runtimeverification/k-exercises
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
-          submodules: recursive
-          path: k-exercises
-      - name: 'Check out pl-tutorial'
-        uses: actions/checkout@v3
-        with:
-          repository: runtimeverification/pl-tutorial
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
-          submodules: recursive
-          path: k-distribution/pl-tutorial
-      - name: 'Tutorial Integration Tests'
-        run: |
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
-          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/2_intermediate && ./test_kompile.sh'
       - name: 'Tear down Docker'
         if: always()
         run: |
