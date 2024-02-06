@@ -373,6 +373,34 @@ the JSON Kast format, building terms using the user-provided pretty
 `symbol, klabel(...)` is easier and less error-prone if the auto-generation
 process for klabels changes.
 
+#### Syntactic Lists
+
+When using K's support for syntactic lists, a production like:
+```k
+syntax Ints ::= List{Int, ","} [klabel(ints), symbol]
+```
+will desugar into two productions:
+```k
+syntax Ints ::= Int "," Ints [klabel(ints), symbol]
+syntax Ints ::= ".Ints"      [klabel(List{"ints"}), symbol]
+```
+
+Note that the label for the _terminator_ of the list has been generated
+automatically from the label on the original production. It is possible to
+control what the terminator's label is using the `terminator-klabel(_)`
+attribute. For example:
+```k
+syntax Ints ::= List{Int, ","} [klabel(ints), terminator-klabel(.ints), symbol]
+```
+will desugar into two productions:
+```k
+syntax Ints ::= Int "," Ints [klabel(ints),  symbol]
+syntax Ints ::= ".Ints"      [klabel(.ints), symbol]
+```
+
+It is an error to apply `terminator-klabel(_)` to a non-production sentence, or
+to a production that does not declare a syntactic list.
+
 ### Parametric productions and `bracket` attributes
 
 Some syntax productions, like the rewrite operator, the bracket operator, and
@@ -2966,6 +2994,7 @@ arguments. A legend describing how to interpret the index follows.
 | `symbolic`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `symbolic(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `terminator-klabel(_)` | prod  | all     | [`klabel(_)` and `symbol` attributes](...)                                                                                                      |
 | `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `total`               | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
@@ -2973,10 +3002,8 @@ arguments. A legend describing how to interpret the index follows.
 | `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
 | `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
-| `kast`                | mod   | all     | Specify that this module should only be included in KAST backends (Java backend).                                                               |
-| `kore`                | mod   | all     | Specify that this module should only be included in Kore backends (Haskell/LLVM backend).                                                       |
 | `concrete`            | mod   | all     | Specify that this module should only be included in concrete backends (LLVM backend).                                                           |
-| `symbolic`            | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell/Java backend).                                                   |
+| `symbolic`            | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell backend).                                                        |
 | `stream = "_"`        | cell  | all     | Specify that this cell should be hooked up to a stream, either `stdin`, `stdout`, or `stderr`.                                                  |
 
 ### Internal Attribute Index
