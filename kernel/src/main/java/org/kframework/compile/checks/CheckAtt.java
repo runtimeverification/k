@@ -48,7 +48,6 @@ public class CheckAtt {
     checkUnrecognizedAtts(sentence);
     checkRestrictedAtts(sentence);
     checkLabel(sentence);
-    checkMacro(sentence);
 
     if (sentence instanceof Rule rule) {
       checkRule(rule);
@@ -105,17 +104,6 @@ public class CheckAtt {
             KEMException.compilerError(
                 "Label '" + label + "' cannot contain whitespace or backticks.", sentence));
       }
-    }
-  }
-
-  private void checkMacro(Sentence sentence) {
-    if (!(sentence instanceof Production) && sentence.isMacro()) {
-      errors.add(
-          KEMException.compilerError(
-              "The attribute ["
-                  + sentence.att().getMacro().get()
-                  + "] may only appear on syntax productions.",
-              sentence));
     }
   }
 
