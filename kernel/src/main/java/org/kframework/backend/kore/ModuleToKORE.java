@@ -72,7 +72,6 @@ import scala.collection.Seq;
 class RuleInfo {
   boolean isEquation;
   boolean isOwise;
-  boolean isKore;
   boolean isCeil;
   Production production;
   String productionSortStr;
@@ -83,7 +82,6 @@ class RuleInfo {
   public RuleInfo(
       boolean equation,
       boolean owise,
-      boolean kore,
       boolean ceil,
       Production production,
       String prodSortStr,
@@ -92,7 +90,6 @@ class RuleInfo {
       List<K> leftChildren) {
     this.isEquation = equation;
     this.isOwise = owise;
-    this.isKore = kore;
     this.isCeil = ceil;
     this.production = production;
     this.productionSortStr = prodSortStr;
@@ -407,7 +404,7 @@ public class ModuleToKORE {
       collectAttributes(attributes, att);
       RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
       // only collect priorities of semantics rules
-      if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
+      if (!ruleInfo.isEquation && !ExpandMacros.isMacro(r)) {
         priorities.add(getPriority(att));
       }
     }
@@ -1025,7 +1022,6 @@ public class ModuleToKORE {
   private RuleInfo getRuleInfo(RuleOrClaim rule, boolean heatCoolEq, String topCellSortStr) {
     boolean equation = false;
     boolean owise = false;
-    boolean kore = rule.att().contains(Att.KORE());
     boolean ceil = false;
     Production production = null;
     Sort productionSort = null;
@@ -1055,7 +1051,7 @@ public class ModuleToKORE {
       }
       if (isFunction(production)
           || rule.att().contains(Att.SIMPLIFICATION())
-          || rule.att().contains(Att.ANYWHERE()) && !kore) {
+          || rule.att().contains(Att.ANYWHERE())) {
         leftChildren = ((KApply) leftPattern).items();
         equation = true;
       } else if ((rule.att().contains(Att.HEAT()) || rule.att().contains(Att.COOL()))
@@ -1072,7 +1068,6 @@ public class ModuleToKORE {
     return new RuleInfo(
         equation,
         owise,
-        kore,
         ceil,
         production,
         productionSortStr,
@@ -1308,17 +1303,6 @@ public class ModuleToKORE {
         convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
         sb.append("\n\n");
       }
-    } else if (ruleInfo.isKore) {
-      assertNoExistentials(rule, existentials);
-      if (rule instanceof Claim) {
-        sb.append("  claim{} ");
-      } else {
-        sb.append("  axiom{} ");
-      }
-      convert(left, sb);
-      sb.append("\n  ");
-      convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
-      sb.append("\n\n");
     } else if (!ExpandMacros.isMacro(rule)) {
       // generate rule LHS
       if (!(rule instanceof Claim)) {
