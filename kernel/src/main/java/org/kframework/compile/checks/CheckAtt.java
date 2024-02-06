@@ -57,7 +57,6 @@ public class CheckAtt {
   }
 
   private void checkRule(Rule rule) {
-    checkMacro(rule);
     checkNonExecutable(rule);
     checkSimplification(rule);
     checkSymbolic(rule);
@@ -106,18 +105,6 @@ public class CheckAtt {
             KEMException.compilerError(
                 "Label '" + label + "' cannot contain whitespace or backticks.", sentence));
       }
-    }
-  }
-
-  private void checkMacro(Rule rule) {
-    if (rule.isMacro()) {
-      kem.registerCompilerWarning(
-          ExceptionType.FUTURE_ERROR,
-          errors,
-          "The attribute ["
-              + rule.att().getMacro().get()
-              + "] has been deprecated on rules. Use this label on syntax declarations instead.",
-          rule);
     }
   }
 
