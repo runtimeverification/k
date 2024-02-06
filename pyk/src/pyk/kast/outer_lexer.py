@@ -723,7 +723,7 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
 
 
 def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
-    # ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9"])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?
+    # ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9", "."])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?
 
     consumed: list[str] = []
     if la not in _LOWER and la not in _DIGIT:
@@ -732,7 +732,7 @@ def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
     consumed.append(la)
     la = next(it, '')
 
-    while la in _ALNUM or la == '-':
+    while la in _ALNUM or la == '-' or la == '.':
         consumed.append(la)
         la = next(it, '')
 
@@ -740,13 +740,13 @@ def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
 
-        if not la in _ALNUM and la != '-':
+        if not la in _ALNUM and la != '-' and la != '.':
             raise _unexpected_character(la)
 
         consumed.append(la)
         la = next(it, '')
 
-        while la in _ALNUM or la == '-':
+        while la in _ALNUM or la == '-' or la == '.':
             consumed.append(la)
             la = next(it, '')
 
