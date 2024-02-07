@@ -4,7 +4,6 @@ package org.kframework.compile.checks;
 import java.util.Set;
 import org.kframework.attributes.Att;
 import org.kframework.compile.RewriteAwareVisitor;
-import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
@@ -21,63 +20,14 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
   public void check(Sentence sentence) {
     if (sentence instanceof Rule rl) {
       checkFuncAtt(rl);
-      if (!rl.att().contains(Att.SIMPLIFICATION()))
+      if (!rl.att().contains(Att.SIMPLIFICATION())) {
         // functions are allowed on the LHS of simplification rules
         check(rl.body());
-    } else if (sentence instanceof Claim c) {
-      // functions are allowed on LHS of claims
-      if (c.att().contains(Att.MACRO())
-          || c.att().contains(Att.MACRO_REC())
-          || c.att().contains(Att.ALIAS())
-          || c.att().contains(Att.ALIAS_REC()))
-        errors.add(
-            KEMException.compilerError(
-                "Attributes "
-                    + Att.MACRO()
-                    + "|"
-                    + Att.MACRO_REC()
-                    + "|"
-                    + Att.ALIAS()
-                    + "|"
-                    + Att.ALIAS_REC()
-                    + " are not allowed on claims.",
-                c));
+      }
     } else if (sentence instanceof Context ctx) {
       check(ctx.body());
-      if (ctx.att().contains(Att.MACRO())
-          || ctx.att().contains(Att.MACRO_REC())
-          || ctx.att().contains(Att.ALIAS())
-          || ctx.att().contains(Att.ALIAS_REC()))
-        errors.add(
-            KEMException.compilerError(
-                "Attributes "
-                    + Att.MACRO()
-                    + "|"
-                    + Att.MACRO_REC()
-                    + "|"
-                    + Att.ALIAS()
-                    + "|"
-                    + Att.ALIAS_REC()
-                    + " are not allowed on contexts.",
-                ctx));
     } else if (sentence instanceof ContextAlias ctx) {
       check(ctx.body());
-      if (ctx.att().contains(Att.MACRO())
-          || ctx.att().contains(Att.MACRO_REC())
-          || ctx.att().contains(Att.ALIAS())
-          || ctx.att().contains(Att.ALIAS_REC()))
-        errors.add(
-            KEMException.compilerError(
-                "Attributes "
-                    + Att.MACRO()
-                    + "|"
-                    + Att.MACRO_REC()
-                    + "|"
-                    + Att.ALIAS()
-                    + "|"
-                    + Att.ALIAS_REC()
-                    + " are not allowed on contexts.",
-                ctx));
     }
   }
 
@@ -140,31 +90,6 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
       public void apply(KApply k) {
         if (k.klabel().name().equals("#withConfig")) {
           super.apply(k);
-          return;
-        }
-        if ((isRHS() && !isLHS())
-            || k.klabel() instanceof KVariable
-            || !m.attributesFor().contains(k.klabel())) {
-          return;
-        }
-        Att attributes = m.attributesFor().apply(k.klabel());
-        if (attributes.contains(Att.FUNCTION())
-            && (r.att().contains(Att.MACRO())
-                || r.att().contains(Att.MACRO_REC())
-                || r.att().contains(Att.ALIAS())
-                || r.att().contains(Att.ALIAS_REC()))) {
-          errors.add(
-              KEMException.compilerError(
-                  "Attributes "
-                      + Att.MACRO()
-                      + "|"
-                      + Att.MACRO_REC()
-                      + "|"
-                      + Att.ALIAS()
-                      + "|"
-                      + Att.ALIAS_REC()
-                      + " are not allowed on function rules.",
-                  r));
         }
       }
     }.apply(r.body());
