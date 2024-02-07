@@ -397,6 +397,72 @@ class APRProof(Proof, KCFGExploration):
         _LOGGER.info(f'Wrote proof data for {self.id}: {proof_json}')
         self.kcfg.write_cfg_data()
 
+    def refute_node(self, node: KCFG.Node) -> RefutationProof | None:
+        _LOGGER.info(f'Attempting to refute node {node.id}')
+        refutation = self.construct_node_refutation(node)
+        if refutation is None:
+            _LOGGER.error(f'Failed to refute node {node.id}')
+            return None
+        refutation.write_proof_data()
+
+        self.node_refutations[node.id] = refutation
+
+        self.write_proof_data()
+
+        return refutation
+
+    def unrefute_node(self, node: KCFG.Node) -> None:
+        self.remove_subproof(self.get_refutation_id(node.id))
+        del self.node_refutations[node.id]
+        self.write_proof_data()
+        _LOGGER.info(f'Disabled refutation of node {node.id}.')
+
+    def construct_node_refutation(self, node: KCFG.Node) -> RefutationProof | None:  # TODO put into prover class
+        path = single(self.kcfg.paths_between(source_id=self.init, target_id=node.id))
+        branches_on_path = list(filter(lambda x: type(x) is KCFG.Split or type(x) is KCFG.NDBranch, reversed(path)))
+        if len(branches_on_path) == 0:
+            _LOGGER.error(f'Cannot refute node {node.id} in linear KCFG')
+            return None
+        closest_branch = branches_on_path[0]
+        if type(closest_branch) is KCFG.NDBranch:
+            _LOGGER.error(f'Cannot refute node {node.id} following a non-deterministic branch: not yet implemented')
+            return None
+
+        assert type(closest_branch) is KCFG.Split
+        refuted_branch_root = closest_branch.targets[0]
+        csubst = closest_branch.splits[refuted_branch_root.id]
+        if len(csubst.subst) > 0:
+            _LOGGER.error(
+                f'Cannot refute node {node.id}: unexpected non-empty substitution {csubst.subst} in Split from {closest_branch.source.id}'
+            )
+            return None
+        if len(csubst.constraints) > 1:
+            _LOGGER.error(
+                f'Cannot refute node {node.id}: unexpected non-singleton constraints {csubst.constraints} in Split from {closest_branch.source.id}'
+            )
+            return None
+
+        # extract the path condition prior to the Split that leads to the node-to-refute
+        pre_split_constraints = [
+            mlEquals(TRUE, ml_pred_to_bool(c), arg_sort=BOOL) for c in closest_branch.source.cterm.constraints
+        ]
+
+        # extract the constriant added by the Split that leads to the node-to-refute
+        last_constraint = mlEquals(TRUE, ml_pred_to_bool(csubst.constraints[0]), arg_sort=BOOL)
+
+        refutation_id = self.get_refutation_id(node.id)
+        _LOGGER.info(f'Adding refutation proof {refutation_id} as subproof of {self.id}')
+        refutation = RefutationProof(
+            id=refutation_id,
+            sort=BOOL,
+            pre_constraints=pre_split_constraints,
+            last_constraint=last_constraint,
+            proof_dir=self.proof_dir,
+        )
+
+        self.add_subproof(refutation)
+        return refutation
+
 
 class APRBMCProof(APRProof):
     """APRBMCProof and APRBMCProver perform bounded model-checking of an all-path reachability logic claim."""
@@ -787,72 +853,6 @@ class APRProver(Prover):
             self.save_failure_info()
 
         self.proof.write_proof_data()
-
-    def refute_node(self, node: KCFG.Node) -> RefutationProof | None:
-        _LOGGER.info(f'Attempting to refute node {node.id}')
-        refutation = self.construct_node_refutation(node)
-        if refutation is None:
-            _LOGGER.error(f'Failed to refute node {node.id}')
-            return None
-        refutation.write_proof_data()
-
-        self.proof.node_refutations[node.id] = refutation
-
-        self.proof.write_proof_data()
-
-        return refutation
-
-    def unrefute_node(self, node: KCFG.Node) -> None:
-        self.proof.remove_subproof(self.proof.get_refutation_id(node.id))
-        del self.proof.node_refutations[node.id]
-        self.proof.write_proof_data()
-        _LOGGER.info(f'Disabled refutation of node {node.id}.')
-
-    def construct_node_refutation(self, node: KCFG.Node) -> RefutationProof | None:  # TODO put into prover class
-        path = single(self.proof.kcfg.paths_between(source_id=self.proof.init, target_id=node.id))
-        branches_on_path = list(filter(lambda x: type(x) is KCFG.Split or type(x) is KCFG.NDBranch, reversed(path)))
-        if len(branches_on_path) == 0:
-            _LOGGER.error(f'Cannot refute node {node.id} in linear KCFG')
-            return None
-        closest_branch = branches_on_path[0]
-        if type(closest_branch) is KCFG.NDBranch:
-            _LOGGER.error(f'Cannot refute node {node.id} following a non-deterministic branch: not yet implemented')
-            return None
-
-        assert type(closest_branch) is KCFG.Split
-        refuted_branch_root = closest_branch.targets[0]
-        csubst = closest_branch.splits[refuted_branch_root.id]
-        if len(csubst.subst) > 0:
-            _LOGGER.error(
-                f'Cannot refute node {node.id}: unexpected non-empty substitution {csubst.subst} in Split from {closest_branch.source.id}'
-            )
-            return None
-        if len(csubst.constraints) > 1:
-            _LOGGER.error(
-                f'Cannot refute node {node.id}: unexpected non-singleton constraints {csubst.constraints} in Split from {closest_branch.source.id}'
-            )
-            return None
-
-        # extract the path condition prior to the Split that leads to the node-to-refute
-        pre_split_constraints = [
-            mlEquals(TRUE, ml_pred_to_bool(c), arg_sort=BOOL) for c in closest_branch.source.cterm.constraints
-        ]
-
-        # extract the constriant added by the Split that leads to the node-to-refute
-        last_constraint = mlEquals(TRUE, ml_pred_to_bool(csubst.constraints[0]), arg_sort=BOOL)
-
-        refutation_id = self.proof.get_refutation_id(node.id)
-        _LOGGER.info(f'Adding refutation proof {refutation_id} as subproof of {self.proof.id}')
-        refutation = RefutationProof(
-            id=refutation_id,
-            sort=BOOL,
-            pre_constraints=pre_split_constraints,
-            last_constraint=last_constraint,
-            proof_dir=self.proof.proof_dir,
-        )
-
-        self.proof.add_subproof(refutation)
-        return refutation
 
     def save_failure_info(self) -> None:
         self.proof.failure_info = self.failure_info()

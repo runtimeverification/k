@@ -121,8 +121,8 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
 
         assert len(frontier_nodes)
         frontier_node = frontier_nodes[0]
-        prover.refute_node(frontier_node)
-        prover.unrefute_node(frontier_node)
+        prover.proof.refute_node(frontier_node)
+        prover.proof.unrefute_node(frontier_node)
 
         prover.advance_proof()
 
@@ -172,7 +172,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         assert prover.proof.status == ProofStatus.FAILED
 
         failing_node = single(prover.proof.failing)
-        refutation = prover.refute_node(failing_node)
+        refutation = prover.proof.refute_node(failing_node)
         assert refutation is not None
         refutation_prover = RefutationProver(refutation, kcfg_explore)
         refutation_prover.advance_proof()
