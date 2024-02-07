@@ -364,10 +364,7 @@ class KProve(KPrint):
             return None
 
         all_claims = {
-            claim.label: (claim, _get_claim_module(claim.label))
-            for module in flat_module_list.modules
-            for claim in module.claims
-            if _get_claim_module(claim.label) is not None
+            claim.label: (claim, module.name) for module in flat_module_list.modules for claim in module.claims
         }
 
         claim_labels = list(all_claims.keys()) if claim_labels is None else list(claim_labels)
