@@ -245,7 +245,7 @@ etc.
 The map with zero elements is represented by `.Map`.
 
 ```k
-  syntax Map ::= ".Map"                         [function, total, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
+  syntax Map ::= ".Map"                         [function, total, hook(MAP.unit), klabel(.Map), symbol]
 ```
 
 ### Map elements
@@ -254,7 +254,7 @@ An element of a `Map` is constructed via the `|->` operator. The key is on the
 left and the value is on the right.
 
 ```k
-  syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2}), injective]
+  syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), klabel(_|->_), symbol, injective]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
@@ -308,7 +308,7 @@ in both maps are removed. To remove all the keys in one map from another map,
 you can say `removeAll(M1, keys(M2))`.
 
 ```k
-  syntax Map ::= Map "-Map" Map                 [function, total, hook(MAP.difference), latex({#1}-_{\it Map}{#2})]
+  syntax Map ::= Map "-Map" Map                 [function, total, hook(MAP.difference)]
 ```
 
 ### Multiple map update
@@ -513,7 +513,7 @@ the size of the smaller map and M is the size of the larger map).
 The `RangeMap` with zero elements is represented by `.RangeMap`.
 
 ```k
-  syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol, latex(\dotCt{RangeMap})]
+  syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol]
 ```
 
 ### Range map elements
@@ -522,7 +522,7 @@ An element of a `RangeMap` is constructed via the `r|->` operator. The range
 of keys is on the left, and the value is on the right.
 
 ```k
-  syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
+  syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, injective]
 
   syntax priorities _r|->_ > _RangeMap_ .RangeMap
   syntax non-assoc _r|->_
@@ -588,7 +588,7 @@ the parts of overlapping ranges whose value is the same in both range maps
 will be removed.
 
 ```k
-  syntax RangeMap ::= RangeMap "-RangeMap" RangeMap                 [function, total, hook(RANGEMAP.difference), latex({#1}-_{\it RangeMap}{#2})]
+  syntax RangeMap ::= RangeMap "-RangeMap" RangeMap                 [function, total, hook(RANGEMAP.difference)]
 ```
 
 ### Multiple range map update
@@ -726,7 +726,7 @@ linear, two is quadratic, three is cubic, etc.
 The set with zero elements is represented by `.Set`.
 
 ```k
-  syntax Set ::= ".Set"                   [function, total, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
+  syntax Set ::= ".Set"                   [function, total, hook(SET.unit), klabel(.Set), symbol]
 ```
 
 ### Set elements
@@ -766,7 +766,7 @@ N is the size of the second set), or effectively linear. This is the set of
 elements in the first set that are not present in the second set.
 
 ```k
-  syntax Set ::= Set "-Set" Set           [function, total, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
+  syntax Set ::= Set "-Set" Set           [function, total, hook(SET.difference), klabel(Set:difference), symbol]
 ```
 
 ### Set membership
@@ -934,7 +934,7 @@ back of the list.
 The list with zero elements is represented by `.List`.
 
 ```k
-  syntax List ::= ".List"                 [function, total, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
+  syntax List ::= ".List"                 [function, total, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil)]
 ```
 
 ### List elements
@@ -1097,11 +1097,11 @@ and `orBool` may be short-circuited in concrete backends, but in symbolic
 backends, both arguments will be evaluated.
 
 ```k
-  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), group(boolOperation), latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.and)]
                 | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.andThen)]
                 | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), group(boolOperation), hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), group(boolOperation), latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.or)]
                 | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.orElse)]
                 | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), group(boolOperation), hook(BOOL.implies)]
                 > left:
@@ -1225,31 +1225,31 @@ You can:
 * Compute the bitwise inclusive-or of two integers in twos-complement.
 
 ```k
-  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, total, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
+  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, total, hook(INT.not), smtlib(notInt)]
                > left:
-                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, total, klabel(_*Int_), symbol, left, comm, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, total, klabel(_*Int_), symbol, left, comm, smt-hook(*), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division, which rounds towards 0 */
-               | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
+               | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), hook(INT.tmod)]
                /* divInt and modInt implement e-division according to the Euclidean division theorem, therefore the remainder is always positive */
                | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, total, klabel(_+Int_), symbol, left, comm, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
-               | Int "-Int" Int                 [function, total, klabel(_-Int_), symbol, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
+                 Int "+Int" Int                 [function, total, klabel(_+Int_), symbol, left, comm, smt-hook(+), hook(INT.add)]
+               | Int "-Int" Int                 [function, total, klabel(_-Int_), symbol, left, smt-hook(-), hook(INT.sub)]
                > left:
-                 Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr), smtlib(shrInt)]
-               | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl), smtlib(shlInt)]
+                 Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, hook(INT.shr), smtlib(shrInt)]
+               | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, hook(INT.shl), smtlib(shlInt)]
                > left:
-                 Int "&Int" Int                 [function, total, klabel(_&Int_), symbol, left, comm, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and), smtlib(andInt)]
+                 Int "&Int" Int                 [function, total, klabel(_&Int_), symbol, left, comm, hook(INT.and), smtlib(andInt)]
                > left:
-                 Int "xorInt" Int               [function, total, klabel(_xorInt_), symbol, left, comm, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
+                 Int "xorInt" Int               [function, total, klabel(_xorInt_), symbol, left, comm, hook(INT.xor), smtlib(xorInt)]
                > left:
-                 Int "|Int" Int                 [function, total, klabel(_|Int_), symbol, left, comm, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
+                 Int "|Int" Int                 [function, total, klabel(_|Int_), symbol, left, comm, hook(INT.or), smtlib(orInt)]
 ```
 
 ### Integer minimum and maximum
@@ -1301,12 +1301,12 @@ You can compute whether two integers are less than or equal to, less than,
 greater than or equal to, greater than, equal, or unequal to another integer.
 
 ```k
-  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, comm, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
-                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, comm, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, smt-hook(<=), hook(INT.le)]
+                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, smt-hook(<), hook(INT.lt)]
+                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, smt-hook(>=), hook(INT.ge)]
+                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, smt-hook(>), hook(INT.gt)]
+                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, comm, smt-hook(=), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, comm, smt-hook(distinct), hook(INT.ne)]
 ```
 
 ### Divides
@@ -1536,14 +1536,14 @@ You can:
 
 ```k
   syntax Float ::= "--Float" Float             [function, total, smt-hook(fp.neg), hook(FLOAT.neg)]
-                 > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
+                 > Float "^Float" Float        [function, left, hook(FLOAT.pow)]
                  > left:
-                   Float "*Float" Float        [function, left, smt-hook((fp.mul roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
-                 | Float "/Float" Float        [function, left, smt-hook((fp.div roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
-                 | Float "%Float" Float        [function, left, smt-hook((fp.rem roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
+                   Float "*Float" Float        [function, left, smt-hook((fp.mul roundNearestTiesToEven #1 #2)), hook(FLOAT.mul)]
+                 | Float "/Float" Float        [function, left, smt-hook((fp.div roundNearestTiesToEven #1 #2)), hook(FLOAT.div)]
+                 | Float "%Float" Float        [function, left, smt-hook((fp.rem roundNearestTiesToEven #1 #2)), hook(FLOAT.rem)]
                  > left:
-                   Float "+Float" Float        [function, left, smt-hook((fp.add roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
-                 | Float "-Float" Float        [function, left, smt-hook((fp.sub roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
+                   Float "+Float" Float        [function, left, smt-hook((fp.add roundNearestTiesToEven #1 #2)), hook(FLOAT.add)]
+                 | Float "-Float" Float        [function, left, smt-hook((fp.sub roundNearestTiesToEven #1 #2)), hook(FLOAT.sub)]
 ```
 
 ### Floating-point mathematics
@@ -1614,12 +1614,12 @@ is true, because `NaN` compares unequal to all values, including itself, in
 IEEE 754 arithmetic. `0.0 ==Float -0.0` is also true.
 
 ```k
-  syntax Bool ::= Float "<=Float" Float       [function, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
-                | Float "<Float" Float        [function, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
-                | Float ">=Float" Float       [function, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
-                | Float ">Float" Float        [function, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, comm, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
-                | Float "=/=Float" Float      [function, comm, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+  syntax Bool ::= Float "<=Float" Float       [function, smt-hook(fp.leq), hook(FLOAT.le)]
+                | Float "<Float" Float        [function, smt-hook(fp.lt), hook(FLOAT.lt)]
+                | Float ">=Float" Float       [function, smt-hook(fp.geq), hook(FLOAT.ge)]
+                | Float ">Float" Float        [function, smt-hook(fg.gt), hook(FLOAT.gt)]
+                | Float "==Float" Float       [function, comm, smt-hook(fp.eq), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "=/=Float" Float      [function, comm, smt-hook((not (fp.eq #1 #2)))]
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
 ```
@@ -1634,8 +1634,8 @@ if the nearest integer is not representable in the specified floating-point
 type.
 
 ```k
-  syntax Float ::= Int2Float(Int, precision: Int, exponentBits: Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
-  syntax Int ::= Float2Int(Float)    [function, total, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
+  syntax Float ::= Int2Float(Int, precision: Int, exponentBits: Int)    [function, hook(FLOAT.int2float)]
+  syntax Int ::= Float2Int(Float)    [function, total, hook(FLOAT.float2int)]
 ```
 
 ### Implementation of Floats
@@ -1698,7 +1698,7 @@ You can concatenate two strings in O(N) time. For successive concatenation
 operations, it may be better to use the `STRING-BUFFER` module.
 
 ```k
-  syntax String ::= String "+String" String    [function, total, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
+  syntax String ::= String "+String" String    [function, total, left, hook(STRING.concat)]
 ```
 
 ### String length
@@ -2274,8 +2274,8 @@ module K-EQUAL-SYNTAX
   imports private BASIC-K
 
   syntax Bool ::= left:
-                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), group(equalEqualK)]
-                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), group(notEqualEqualK)]
+                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, group(equalEqualK)]
+                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, group(notEqualEqualK)]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
 
