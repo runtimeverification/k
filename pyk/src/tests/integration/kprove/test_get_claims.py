@@ -95,3 +95,11 @@ class TestGetClaims(KProveTest):
             assert set(expected_graph.keys()) == set(actual_graph.keys())
             for claim_label, deps in expected_graph.items():
                 assert set(deps) == set(actual_graph[claim_label])
+
+    def test_get_claims_unlabeled(self, kprove: KProve) -> None:
+        claims = kprove.get_claims(self.KOMPILE_MAIN_FILE, self.SPEC_MODULE_NAME)
+        assert len(claims) == 10
+
+    def test_get_claims_broken(self, kprove: KProve) -> None:
+        with pytest.raises(ValueError):
+            kprove.get_claims(self.KOMPILE_MAIN_FILE, 'MULTI-CLAIM-BROKEN-SPEC')
