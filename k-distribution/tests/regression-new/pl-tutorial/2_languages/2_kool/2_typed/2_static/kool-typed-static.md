@@ -891,7 +891,7 @@ is co-variant in the codomain and contra-variant in the domain).
 ## Generic operations which could be part of the **K** framework
 
 ```k
-  syntax KItem ::= stuck(K)  [latex(\framebox{${#1}$})]
+  syntax KItem ::= stuck(K)
 
   syntax KItem ::= "discard"
   rule _:KResult ~> discard => .

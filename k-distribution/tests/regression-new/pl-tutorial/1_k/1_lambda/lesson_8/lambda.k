@@ -7,7 +7,7 @@ module LAMBDA-SYNTAX
   imports KVAR-SYNTAX
 
   syntax Val ::= KVar
-               | "lambda" KVar "." Exp  [binder, latex(\lambda{#1}.{#2})]
+               | "lambda" KVar "." Exp  [binder]
   syntax Exp ::= Val
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
@@ -25,7 +25,7 @@ module LAMBDA-SYNTAX
   rule let X = E in E':Exp => (lambda X . E') E
 
   syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp [macro]
-               | "mu" KVar "." Exp                   [binder, latex(\mu{#1}.{#2})]
+               | "mu" KVar "." Exp                   [binder]
   rule letrec F:KVar X = E in E' => let F = mu F . lambda X . E in E'
 endmodule
 

@@ -438,7 +438,7 @@ not mention these: the configuration context of the rule is
 automatically transformed to match the declared configuration
 structure.
 ```k
-  syntax KItem ::= "undefined"  [latex(\bot)]
+  syntax KItem ::= "undefined"
 
   rule <k> var X:Id; => . ...</k>
        <env> Env => Env[X <- L] </env>
@@ -1152,8 +1152,7 @@ corresponding store lookup operation.
 The following operation initializes a sequence of locations with the same
 value:
 ```k
-  syntax Map ::= Int "..." Int "|->" K
-    [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  syntax Map ::= Int "..." Int "|->" K [function]
   rule N...M |-> _ => .Map  requires N >Int M
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  requires N <=Int M
 ```
