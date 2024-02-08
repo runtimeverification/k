@@ -448,7 +448,7 @@ public class ExpandMacros {
     } else if (s instanceof Claim) {
       return transformer.resolve(expand((Claim) s), mod);
     } else if (s instanceof Context) {
-      return transformer.resolve(expand((Context) s), mod);
+      return transformer.resolve(expand((Context) s));
     } else {
       return s;
     }

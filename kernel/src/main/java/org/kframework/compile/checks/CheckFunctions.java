@@ -82,7 +82,7 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
   }
 
   public void check(K body) {
-    new RewriteAwareVisitor(true, errors) {
+    new RewriteAwareVisitor(true) {
       boolean atTop = true;
 
       @Override
@@ -135,7 +135,7 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
   }
 
   public void checkFuncAtt(Rule r) {
-    new RewriteAwareVisitor(true, errors) {
+    new RewriteAwareVisitor(true) {
       @Override
       public void apply(KApply k) {
         if (k.klabel().name().equals("#withConfig")) {

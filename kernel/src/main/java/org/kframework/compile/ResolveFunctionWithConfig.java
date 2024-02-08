@@ -58,7 +58,7 @@ public class ResolveFunctionWithConfig {
                         .anyMatch(r -> ruleNeedsConfig(r)))
             .collect(Collectors.toSet()));
     withConfigFunctions.addAll(deps.ancestors(withConfigFunctions));
-    ConfigurationInfoFromModule info = new ConfigurationInfoFromModule(mod);
+    new ConfigurationInfoFromModule(mod);
     topCell = Sorts.GeneratedTopCell();
     topCellLabel = KLabels.GENERATED_TOP_CELL;
     CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add(Att.WITH_CONFIG()));
@@ -92,25 +92,24 @@ public class ResolveFunctionWithConfig {
 
   public RuleOrClaim resolve(RuleOrClaim rule, Module m) {
     return rule.newInstance(
-        transform(resolve(rule.body(), m), m),
-        transform(rule.requires(), m),
-        transform(rule.ensures(), m),
+        transform(resolve(rule.body(), m)),
+        transform(rule.requires()),
+        transform(rule.ensures()),
         rule.att());
   }
 
-  public Context resolve(Context context, Module m) {
-    return new Context(
-        transform(context.body(), m), transform(context.requires(), m), context.att());
+  public Context resolve(Context context) {
+    return new Context(transform(context.body()), transform(context.requires()), context.att());
   }
 
-  public ContextAlias resolve(ContextAlias context, Module m) {
+  public ContextAlias resolve(ContextAlias context) {
     return new ContextAlias(
-        transform(context.body(), m), transform(context.requires(), m), context.att());
+        transform(context.body()), transform(context.requires()), context.att());
   }
 
   public final KVariable CONFIG_VAR;
 
-  private K transform(K term, Module module) {
+  private K transform(K term) {
     return new TransformK() {
       @Override
       public K apply(KApply kapp) {
@@ -247,9 +246,9 @@ public class ResolveFunctionWithConfig {
       if (s instanceof RuleOrClaim) {
         newSentences.add(resolve((RuleOrClaim) s, m));
       } else if (s instanceof Context) {
-        newSentences.add(resolve((Context) s, m));
+        newSentences.add(resolve((Context) s));
       } else if (s instanceof ContextAlias) {
-        newSentences.add(resolve((ContextAlias) s, m));
+        newSentences.add(resolve((ContextAlias) s));
       } else if (s instanceof Production) {
         Production prd = resolve((Production) s);
         newSentences.add(prd);

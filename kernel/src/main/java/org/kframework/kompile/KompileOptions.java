@@ -137,13 +137,6 @@ public class KompileOptions implements Serializable {
   public boolean bisonLists;
 
   @Parameter(
-      names = "--read-only-kompiled-directory",
-      description =
-          "Files in the generated kompiled directory should be read-only to other frontend tools.",
-      hidden = true)
-  public boolean readOnlyKompiledDirectory = false;
-
-  @Parameter(
       names = "--concrete-rules",
       description =
           "List of rule labels to be considered concrete, in addition to rules marked with"

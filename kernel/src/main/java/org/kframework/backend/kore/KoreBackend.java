@@ -123,8 +123,7 @@ public class KoreBackend extends AbstractBackend {
     Function1<Definition, Definition> resolveStrict =
         d ->
             DefinitionTransformer.from(
-                    new ResolveStrict(kompileOptions, d)::resolve,
-                    "resolving strict and seqstrict attributes")
+                    new ResolveStrict(d)::resolve, "resolving strict and seqstrict attributes")
                 .apply(d);
     DefinitionTransformer resolveHeatCoolAttribute =
         DefinitionTransformer.fromSentenceTransformer(
@@ -240,7 +239,7 @@ public class KoreBackend extends AbstractBackend {
             .andThen(resolveFunctionWithConfig)
             .andThen(resolveStrict)
             .andThen(resolveAnonVars)
-            .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
+            .andThen(d -> new ResolveContexts().resolve(d))
             .andThen(numberSentences)
             .andThen(resolveHeatCoolAttribute)
             .andThen(resolveSemanticCasts)
