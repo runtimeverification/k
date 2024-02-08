@@ -86,7 +86,7 @@ public class ParserUtils {
     Context context = new Context();
     new CollectProductionsVisitor(context).visit(def);
 
-    KILtoKORE kilToKore = new KILtoKORE(context, false, false);
+    KILtoKORE kilToKore = new KILtoKORE(context, false);
     return kilToKore.apply(def).getModule(mainModule).get();
   }
 
@@ -295,7 +295,7 @@ public class ParserUtils {
       System.out.println(def);
     }
 
-    KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc);
+    KILtoKORE kilToKore = new KILtoKORE(context, leftAssoc);
     // Order modules by name to stabilize the error message for circular imports
     java.util.List<FlatModule> flatModules =
         kilModules.stream()

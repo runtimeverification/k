@@ -42,12 +42,6 @@ public class GuardOrPatterns {
         transform(context.body(), m), transform(context.requires(), m), context.att());
   }
 
-  public K resolveK(Module m, K k) {
-    resetVars();
-    gatherVars(k);
-    return transform(k, m);
-  }
-
   public synchronized Sentence resolve(Module m, Sentence s) {
     if (s instanceof Rule) {
       return resolve(m, (Rule) s);

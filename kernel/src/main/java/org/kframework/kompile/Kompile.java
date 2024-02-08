@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,7 +52,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
@@ -67,8 +65,6 @@ import org.kframework.utils.RunProcess;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -454,16 +450,6 @@ public class Kompile {
     return excludeModules.andThen(walkModules);
   }
 
-  public static Sentence removePolyKLabels(Sentence s) {
-    if (s instanceof Production p) {
-      if (!p.isSyntacticSubsort() && p.params().nonEmpty()) {
-        p = p.substitute(immutable(Collections.nCopies(p.params().size(), Sorts.K())));
-        return Production(p.klabel().map(KLabel::head), Seq(), p.sort(), p.items(), p.att());
-      }
-    }
-    return s;
-  }
-
   public static Module subsortKItem(Module module) {
     java.util.Set<Sentence> prods = new HashSet<>();
     for (Sort srt : iterable(module.allSorts())) {
@@ -518,43 +504,6 @@ public class Kompile {
                             KEMException.compilerError(
                                 "Claims are not allowed in the definition.", s));
                     }));
-  }
-
-  // Extra checks just for the prover specification.
-  public Module proverChecks(Module specModule, Module mainDefModule) {
-    // check rogue syntax in spec module
-    Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
-    for (Sentence s : toCheck)
-      if (s.isSyntax() && !s.att().contains(Att.TOKEN()))
-        kem.registerCompilerWarning(
-            ExceptionType.FUTURE_ERROR,
-            errors,
-            "Found syntax declaration in proof module. This will not be visible from the main"
-                + " module.",
-            s);
-
-    // TODO: remove once transition to claim rules is done
-    // transform rules into claims if
-    // - they are in the spec modules but not in the definition modules
-    // - they don't contain the `simplification` attribute
-    ModuleTransformer mt =
-        ModuleTransformer.fromSentenceTransformer(
-            (m, s) -> {
-              if (m.name().equals(mainDefModule.name())
-                  || mainDefModule.importedModuleNames().contains(m.name())) return s;
-              if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION())) {
-                kem.registerCompilerWarning(
-                    KException.ExceptionType.FUTURE_ERROR,
-                    errors,
-                    "Deprecated: use claim instead of rule to specify proof objectives.",
-                    s);
-                return new Claim(
-                    ((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att());
-              }
-              return s;
-            },
-            "rules to claim");
-    return mt.apply(specModule);
   }
 
   // Extra checks just for the prover specification.

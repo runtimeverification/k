@@ -199,8 +199,6 @@ public class KompileOptions implements Serializable {
       hidden = true)
   public boolean genBisonParserLibrary;
 
-  public static final String DEFAULT_TRANSITION = "transition";
-
   @Parameter(
       names = "--top-cell",
       description =

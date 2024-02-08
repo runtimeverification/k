@@ -36,14 +36,11 @@ import scala.collection.Seq;
 public class KILtoKORE extends KILTransformation<Object> {
 
   private final org.kframework.kil.loader.Context context;
-  private final boolean syntactic;
   private String moduleName;
   private final boolean bisonLists;
 
-  public KILtoKORE(
-      org.kframework.kil.loader.Context context, boolean syntactic, boolean bisonLists) {
+  public KILtoKORE(org.kframework.kil.loader.Context context, boolean bisonLists) {
     this.context = context;
-    this.syntactic = syntactic;
     this.bisonLists = bisonLists;
   }
 
@@ -355,7 +352,6 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     org.kframework.attributes.Att attrs =
         convertAttributes(p).add(Att.USER_LIST(), userList.getListType());
-    String kilProductionId = "" + System.identityHashCode(p);
     org.kframework.definition.Production prod1, prod3;
 
     if (bisonLists) {
