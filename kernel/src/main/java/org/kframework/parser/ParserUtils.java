@@ -81,7 +81,6 @@ public class ParserUtils {
     Definition def = new Definition();
     def.setItems(Outer.parse(source, definitionText, null));
     def.setMainModule(mainModule);
-    def.setMainSyntaxModule(mainModule);
 
     ProcessGroupAttributes.apply(def);
     Context context = new Context();

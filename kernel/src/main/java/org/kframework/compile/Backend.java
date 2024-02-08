@@ -1,10 +1,8 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -25,9 +23,6 @@ public interface Backend {
   void accept(Holder def);
 
   Function<Definition, Definition> steps();
-
-  Function<Definition, Definition> proofDefinitionNonCachedSteps(
-      @Nullable List<String> extraConcreteRuleLabels);
 
   Function<Module, Module> specificationSteps(Definition def);
 

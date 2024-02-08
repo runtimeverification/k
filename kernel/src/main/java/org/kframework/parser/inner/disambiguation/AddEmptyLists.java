@@ -2,7 +2,6 @@
 package org.kframework.parser.inner.disambiguation;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
 
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.kframework.POSet;
@@ -25,9 +23,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.UserList;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
@@ -213,94 +209,5 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
                     fresh.nonterminals().apply(i).sort()),
             child)
         .sort();
-  }
-
-  /**
-   * Returns an element of sorts which is related to and no greater than every other element of
-   * sorts, if any exists.
-   */
-  private Optional<Sort> least(Iterable<Sort> sorts) {
-    Iterator<Sort> iter = sorts.iterator();
-    if (!iter.hasNext()) {
-      return Optional.empty();
-    }
-    Sort min = iter.next();
-    while (iter.hasNext()) {
-      Sort next = iter.next();
-      if (!subsorts.lessThanEq(min, next)) {
-        // if min is unrelated to next, it can't be the least sort so
-        // we also might as well switch
-        min = next;
-      }
-    }
-    for (Sort s : sorts) {
-      if (!subsorts.lessThanEq(min, s)) {
-        return Optional.empty();
-      }
-    }
-    return Optional.of(min);
-  }
-
-  /**
-   * Returns an element of sorts which is related to and no less than every other element of sorts,
-   * if any exists.
-   */
-  private Optional<Sort> greatest(Iterable<Sort> sorts) {
-    Iterator<Sort> iter = sorts.iterator();
-    if (!iter.hasNext()) {
-      return Optional.empty();
-    }
-    Sort max = iter.next();
-    while (iter.hasNext()) {
-      Sort next = iter.next();
-      if (!subsorts.greaterThanEq(max, next)) {
-        // if min is unrelated to next, it can't be the least sort so
-        // we also might as well switch
-        max = next;
-      }
-    }
-    for (Sort s : sorts) {
-      if (!subsorts.greaterThanEq(max, s)) {
-        return Optional.empty();
-      }
-    }
-    return Optional.of(max);
-  }
-
-  private Optional<KLabel> klabelFromTerm(Term labelTerm) {
-    if (labelTerm instanceof Constant labelCon) {
-      if (labelCon.production().sort().equals(Sorts.KLabel())) {
-        String labelVal = labelCon.value();
-        if (labelVal.charAt(0) == '`') {
-          return Optional.of(KLabel(labelVal.substring(1, labelVal.length() - 1)));
-        } else {
-          return Optional.of(KLabel(labelVal));
-        }
-      }
-    }
-    return Optional.empty();
-  }
-
-  private List<Term> lowerKList(Term listTerm) {
-    List<Term> items = new ArrayList<>();
-    lowerKListAcc(listTerm, items);
-    return items;
-  }
-
-  private void lowerKListAcc(Term term, List<Term> items) {
-    if (term instanceof TermCons cons) {
-      if (cons.production().klabel().isDefined()) {
-        String labelName = cons.production().klabel().get().name();
-        if (labelName.equals("#KList")) {
-          assert cons.items().size() == 2;
-          lowerKListAcc(cons.get(0), items);
-          lowerKListAcc(cons.get(1), items);
-          return;
-        } else if (labelName.equals("#EmptyKList")) {
-          return;
-        }
-      }
-    }
-    items.add(term);
   }
 }

@@ -253,7 +253,6 @@ public class Kompile {
             parsedDef,
             kompiledDefinition,
             files,
-            kem,
             configInfo.getDefaultCell(rootCell).klabel());
 
     if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
@@ -264,7 +263,7 @@ public class Kompile {
         File linkFile = files.resolveKompiled("parser_PGM");
         new KRead(kem, files, InputModes.PROGRAM, globalOptions)
             .createBisonParser(
-                def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(),
+                def.programParsingModuleFor(def.mainSyntaxModuleName()).get(),
                 def.programStartSymbol,
                 outputFile,
                 kompileOptions.genGlrBisonParser,
@@ -290,7 +289,7 @@ public class Kompile {
             }
             String name = part[0];
             String module = part[1];
-            Option<Module> mod = def.programParsingModuleFor(module, kem);
+            Option<Module> mod = def.programParsingModuleFor(module);
             if (!mod.isDefined()) {
               throw KEMException.compilerError(
                   "Could not find module referenced by parser attribute: " + module, prod);
@@ -628,8 +627,7 @@ public class Kompile {
         .forEach(m -> stream(m.localSentences()).forEach(new CheckFunctions(errors, m)::check));
 
     stream(modules)
-        .forEach(
-            m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, kem)::check));
 
     stream(modules)
         .forEach(

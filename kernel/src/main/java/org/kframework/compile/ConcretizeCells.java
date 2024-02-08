@@ -41,16 +41,6 @@ public class ConcretizeCells {
         .apply(input);
   }
 
-  public static Module transformModule(Module mod) {
-    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-    LabelInfo labelInfo = new LabelInfoFromModule(mod);
-    SortInfo sortInfo = SortInfo.fromModule(mod);
-    return ModuleTransformer.fromSentenceTransformer(
-            new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
-            "concretizing configuration")
-        .apply(mod);
-  }
-
   public ConcretizeCells(
       ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, Module module) {
     this.configurationInfo = configurationInfo;
