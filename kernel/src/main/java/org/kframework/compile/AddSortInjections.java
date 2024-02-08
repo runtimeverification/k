@@ -15,12 +15,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -40,7 +38,6 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
-import scala.Tuple2;
 
 public class AddSortInjections {
 
@@ -174,7 +171,6 @@ public class AddSortInjections {
                   adjustedExpectedSort = k.att().get(Sort.class);
                 }
                 Production prod = production(k);
-                List<K> children = new ArrayList<>();
                 Production substituted =
                     substituteProd(
                         prod,
@@ -204,13 +200,6 @@ public class AddSortInjections {
           KList(visitChildren(term, actualSort, expectedSort)),
           Att.empty().add(Sort.class, expectedSort));
     }
-  }
-
-  private Context addInjections(Context context) {
-    return new Context(
-        internalAddSortInjections(context.body(), Sorts.K()),
-        internalAddSortInjections(context.requires(), Sorts.Bool()),
-        context.att());
   }
 
   private void initSortParams() {
@@ -353,14 +342,6 @@ public class AddSortInjections {
         }
       }
     }
-  }
-
-  private Set<Integer> getPositions(Sort param, Production prod) {
-    return IntStream.range(0, prod.nonterminals().size())
-        .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
-        .filter(t -> t._1().sort().equals(param))
-        .map(t -> t._2())
-        .collect(Collectors.toSet());
   }
 
   /**

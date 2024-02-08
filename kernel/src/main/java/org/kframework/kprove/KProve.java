@@ -44,10 +44,7 @@ public record KProve(
     }
 
     Tuple2<Definition, Module> compiled =
-        proofDefinitionBuilder.build(
-            kproveOptions.specFile(files),
-            kproveOptions.specModule,
-            compiledDefinition.kompileOptions.readOnlyKompiledDirectory);
+        proofDefinitionBuilder.build(kproveOptions.specFile(files), kproveOptions.specModule);
 
     Rewriter rewriter = rewriterGenerator.apply(compiled._1());
     Module specModule = compiled._2();

@@ -45,11 +45,4 @@ public class Stopwatch {
     if (m > 0) return String.format("%02dm %02ds", m, (long) s);
     return String.format("%6.3fs", s);
   }
-
-  public long getIntermediateMilliseconds() {
-    long endd = System.currentTimeMillis();
-    long rez = lastIntermediate - endd;
-    lastIntermediate = endd;
-    return rez;
-  }
 }

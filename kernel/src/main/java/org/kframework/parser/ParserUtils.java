@@ -81,13 +81,12 @@ public class ParserUtils {
     Definition def = new Definition();
     def.setItems(Outer.parse(source, definitionText, null));
     def.setMainModule(mainModule);
-    def.setMainSyntaxModule(mainModule);
 
     ProcessGroupAttributes.apply(def);
     Context context = new Context();
     new CollectProductionsVisitor(context).visit(def);
 
-    KILtoKORE kilToKore = new KILtoKORE(context, false, false);
+    KILtoKORE kilToKore = new KILtoKORE(context, false);
     return kilToKore.apply(def).getModule(mainModule).get();
   }
 
@@ -296,7 +295,7 @@ public class ParserUtils {
       System.out.println(def);
     }
 
-    KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc);
+    KILtoKORE kilToKore = new KILtoKORE(context, leftAssoc);
     // Order modules by name to stabilize the error message for circular imports
     java.util.List<FlatModule> flatModules =
         kilModules.stream()

@@ -36,8 +36,6 @@ public class KProveOptions {
 
   @ParametersDelegate public InnerParsingOptions innerParsing = new InnerParsingOptions();
 
-  private File specFile;
-
   public synchronized File specFile(FileUtil files) {
     return outerParsing.mainDefinitionFile(files);
   }

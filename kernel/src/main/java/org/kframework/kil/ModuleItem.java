@@ -12,12 +12,4 @@ public abstract class ModuleItem extends ASTNode {
   public ModuleItem(Location loc, Source source) {
     super(loc, source);
   }
-
-  public java.util.List<String> getLabels() {
-    return null;
-  }
-
-  public java.util.List<String> getKLabels() {
-    return null;
-  }
 }

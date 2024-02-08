@@ -29,7 +29,7 @@ public class ComputeUnboundVariables extends RewriteAwareVisitor {
       Set<KEMException> errors,
       Set<KVariable> vars,
       Consumer<KVariable> reporter) {
-    super(isBody, errors);
+    super(isBody);
     this.lambda = lambda;
     this.vars = vars;
     this.reporter = reporter;

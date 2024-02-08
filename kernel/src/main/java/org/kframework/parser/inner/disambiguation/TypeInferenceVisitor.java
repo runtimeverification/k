@@ -66,13 +66,8 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
 
   @Override
   public Either<Set<KEMException>, Term> apply(Term t) {
-    Term loc = t;
-    if (loc instanceof Ambiguity) {
-      loc = ((Ambiguity) loc).items().iterator().next();
-    }
     // add constraints to inferencer
     inferencer.push(t, topSort, isAnywhere);
-    Either<Set<KEMException>, Term> typed;
     try {
       if (inferencer.hasNoVariables()) {
         // skip the rest as there is nothing to infer

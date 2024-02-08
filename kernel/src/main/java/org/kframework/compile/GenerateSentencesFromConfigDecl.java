@@ -98,8 +98,7 @@ public class GenerateSentencesFromConfigDecl {
             if (startLabel instanceof KToken label) {
               if (label.sort().equals(Sort("#CellName"))) {
                 String cellName = label.s();
-                Att cellProperties =
-                    getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
+                Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName);
                 Multiplicity multiplicity =
                     convertStringMultiplicity(cellProperties.getOption(Att.MULTIPLICITY()), term);
                 boolean isStream = cellProperties.getOption(Att.STREAM()).isDefined();
@@ -203,13 +202,13 @@ public class GenerateSentencesFromConfigDecl {
       // particular sort.
       // A leaf cell initializes to the value specified in the configuration declaration.
       Sort sort = kapp.att().get(Production.class).sort();
-      Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+      Tuple2<K, Set<Sentence>> res = getLeafInitializer(term);
       return Tuple4.apply(res._2(), Lists.newArrayList(sort), res._1(), true);
     } else if (term instanceof KToken ktoken) {
       // child of a leaf cell. Generate no productions, but inform parent that it has a child of a
       // particular sort.
       // A leaf cell initializes to the value specified in the configuration declaration.
-      Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+      Tuple2<K, Set<Sentence>> res = getLeafInitializer(term);
       return Tuple4.apply(res._2(), Lists.newArrayList(ktoken.sort()), res._1(), true);
     } else if (term instanceof KSequence
         || term instanceof KVariable
@@ -217,7 +216,7 @@ public class GenerateSentencesFromConfigDecl {
       // child of a leaf cell. Generate no productions, but inform parent that it has a child of a
       // particular sort.
       // A leaf cell initializes to the value specified in the configuration declaration.
-      Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+      Tuple2<K, Set<Sentence>> res = getLeafInitializer(term);
       return Tuple4.apply(res._2(), Lists.newArrayList(Sorts.K()), res._1(), true);
     } else {
       throw KEMException.compilerError(
@@ -300,7 +299,7 @@ public class GenerateSentencesFromConfigDecl {
    * @param leafContents
    * @return
    */
-  private static Tuple2<K, Set<Sentence>> getLeafInitializer(K leafContents, Module m) {
+  private static Tuple2<K, Set<Sentence>> getLeafInitializer(K leafContents) {
     class Holder {
       Set<Sentence> sentences = Set();
     }
@@ -322,11 +321,11 @@ public class GenerateSentencesFromConfigDecl {
             if (k.sort().equals(Sorts.KConfigVar())) {
               if (sort == null || sort.equals(Sorts.K())) {
                 return KApply(
-                    GenerateSortProjections.getProjectLbl(Sorts.KItem(), m),
+                    GenerateSortProjections.getProjectLbl(Sorts.KItem()),
                     KApply(KLabel("Map:lookup"), INIT, k));
               } else {
                 return KApply(
-                    GenerateSortProjections.getProjectLbl(sort, m),
+                    GenerateSortProjections.getProjectLbl(sort),
                     KApply(KLabel("Map:lookup"), INIT, k));
               }
             }
@@ -758,7 +757,7 @@ public class GenerateSentencesFromConfigDecl {
     }
   }
 
-  private static Att getCellPropertiesAsAtt(K k, String cellName, K ensures) {
+  private static Att getCellPropertiesAsAtt(K k, String cellName) {
     Att att = Att();
     if (cellName.equals("k")) {
       att = att.add(Att.MAINCELL());

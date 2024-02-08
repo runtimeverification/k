@@ -31,10 +31,6 @@ public class PriorityBlock extends ASTNode {
     return assoc;
   }
 
-  public void setAssoc(String assoc) {
-    this.assoc = assoc;
-  }
-
   public PriorityBlock() {
     super();
     this.assoc = "";

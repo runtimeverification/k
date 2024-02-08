@@ -1,7 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
-import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
 import org.kframework.attributes.Att;
@@ -22,7 +21,6 @@ public class Production extends ASTNode {
   protected Sort sort;
   protected List<Sort> params;
   protected String ownerModuleName;
-  private Multimap<Integer, Integer> binderMap;
 
   public boolean isListDecl() {
     return items.size() == 1 && items.get(0) instanceof UserList;
@@ -194,24 +192,6 @@ public class Production extends ASTNode {
     this.params = params;
   }
 
-  public ASTNode getChildNode(int idx) {
-    int arity = -1;
-    if (items.get(0) instanceof UserList) {
-      if (idx == 0) {
-        return items.get(0);
-      } else {
-        return this;
-      }
-    }
-    for (ProductionItem i : items) {
-      if (!(i instanceof Terminal)) arity++;
-      if (arity == idx) {
-        return i;
-      }
-    }
-    return null;
-  }
-
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
@@ -227,9 +207,7 @@ public class Production extends ASTNode {
     if (sort == null) {
       if (other.sort != null) return false;
     } else if (!sort.equals(other.sort)) return false;
-    if (binderMap == null) {
-      return other.binderMap == null;
-    } else return binderMap.equals(other.binderMap);
+    return true;
   }
 
   @Override
@@ -241,7 +219,6 @@ public class Production extends ASTNode {
         prime * result
             + ((getAttribute(Att.KLABEL()) == null) ? 0 : getAttribute(Att.KLABEL()).hashCode());
     result = prime * result + ((sort == null) ? 0 : sort.hashCode());
-    result = prime * result + ((binderMap == null) ? 0 : binderMap.hashCode());
     return result;
   }
 

@@ -126,7 +126,6 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def getParent(k: Sort): Sort             = edges.collectFirst { case (p, `k`) => p } get
   override def isCell(k: Sort): Boolean             = cellSorts.contains(k)
-  override def isCellCollection(s: Sort): Boolean   = cellBagSorts.contains(s)
   override def isCellLabel(kLabel: KLabel): Boolean = cellLabelsToSorts.contains(kLabel)
   override def isLeafCell(k: Sort): Boolean         = !isParentCell(k)
 
@@ -162,8 +161,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     topCells.head
   }
 
-  override def getComputationCell: Sort     = mainCell
-  override def getCellSorts: util.Set[Sort] = cellSorts.asJava
+  override def getComputationCell: Sort = mainCell
 
   override def getUnit(k: Sort): KApply =
     if (getMultiplicity(k) == Multiplicity.OPTIONAL)

@@ -6,16 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Set;
-import org.kframework.kore.Sort;
 
 /** A module. */
 public class Module extends DefinitionItem {
   private String name;
   private List<ModuleItem> items = new ArrayList<>();
-
-  // lazily computed set of sorts.
-  private Set<Sort> sorts;
 
   public Module() {
     super();
@@ -28,7 +23,6 @@ public class Module extends DefinitionItem {
 
   public void appendModuleItem(ModuleItem item) {
     this.items.add(item);
-    this.sorts = null;
   }
 
   public void setName(String name) {
@@ -41,7 +35,6 @@ public class Module extends DefinitionItem {
 
   public void setItems(List<ModuleItem> items) {
     this.items = items;
-    this.sorts = null;
   }
 
   public List<ModuleItem> getItems() {
