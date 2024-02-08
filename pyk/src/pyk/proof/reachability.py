@@ -93,6 +93,10 @@ class APRProof(Proof, KCFGExploration):
                 self.node_refutations[node_id] = subproof
 
     @property
+    def module_name(self) -> str:
+        return self._make_module_name(self.id)
+
+    @property
     def pending(self) -> list[KCFG.Node]:
         return [node for node in self.explorable if self.is_pending(node.id)]
 
@@ -129,6 +133,12 @@ class APRProof(Proof, KCFGExploration):
     def prune(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[int]:
         pruned_nodes = super().prune(node_id, keep_nodes=list(keep_nodes) + [self.init, self.target])
         return pruned_nodes
+
+    @staticmethod
+    def _make_module_name(proof_id: str) -> str:
+        return 'M-' + re.sub(
+            r'[\[\]]|[_%().:,]+', lambda match: 'bkt' if match.group(0) in ['[', ']'] else '-', proof_id.upper()
+        )
 
     @staticmethod
     def read_proof(id: str, proof_dir: Path) -> APRProof:
@@ -731,7 +741,7 @@ class APRProver(Prover):
                 dependencies_as_rules.append(apr_subproof.as_rule(priority=20))
         circularity_rule = proof.as_rule(priority=20)
 
-        module_name = 'M-' + re.sub(r'[_%().:,]+', '-', self.proof.id.upper())
+        module_name = self.proof.module_name
         self.dependencies_module_name = module_name + '-DEPENDS-MODULE'
         self.circularities_module_name = module_name + '-CIRCULARITIES-MODULE'
         _inject_module(self.dependencies_module_name, self.main_module_name, dependencies_as_rules)
