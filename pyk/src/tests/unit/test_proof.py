@@ -15,6 +15,7 @@ from .test_kcfg import node, node_dicts, term
 
 if TYPE_CHECKING:
     from pathlib import Path
+    from typing import Final
 
     from pytest import TempPathFactory
 
@@ -217,6 +218,25 @@ def test_apr_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None:
 
     # Then
     assert proof.dict == proof_from_disk.dict
+
+
+MODULE_NAME_TEST_DATA: Final = (
+    ('sq-bracket', 'TEST-KONTROL-TEST-UINT256-BYTES[]-0', 'M-TEST-KONTROL-TEST-UINT256-BYTESbktbkt-0'),
+    ('underscore', 'TEST_KONTROL_%)_UINT256-1', 'M-TEST-KONTROL-UINT256-1'),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,proof_id,expected',
+    MODULE_NAME_TEST_DATA,
+    ids=[test_id for test_id, *_ in MODULE_NAME_TEST_DATA],
+)
+def test_proof_module_name(test_id: str, proof_id: str, expected: str) -> None:
+    # Given
+    output = APRProof._make_module_name(proof_id)
+
+    # Then
+    assert output == expected
 
 
 #### APRBMCProof
