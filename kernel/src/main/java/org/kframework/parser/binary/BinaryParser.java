@@ -66,15 +66,14 @@ public class BinaryParser {
 
   public static final byte[] MAGIC = {0x7f, 'K', 'A', 'S', 'T'};
 
-  public static final int BEGIN = 0,
-      KTOKEN = 1,
-      KAPPLY = 2,
-      KSEQUENCE = 3,
-      KVARIABLE = 4,
-      KREWRITE = 5,
-      INJECTEDKLABEL = 6,
-      END = 7,
-      BACK_REFERENCE = 8;
+  public static final int KTOKEN = 1;
+  public static final int KAPPLY = 2;
+  public static final int KSEQUENCE = 3;
+  public static final int KVARIABLE = 4;
+  public static final int KREWRITE = 5;
+  public static final int INJECTEDKLABEL = 6;
+  public static final int END = 7;
+  public static final int BACK_REFERENCE = 8;
 
   private final ByteBuffer data;
   private final List<String> interns = new ArrayList<>();

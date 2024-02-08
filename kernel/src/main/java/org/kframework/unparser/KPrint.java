@@ -131,16 +131,6 @@ public class KPrint {
             def, module, result, s, options.color(tty.stdout(), files.getEnv()), options.output));
   }
 
-  public byte[] prettyPrint(Definition def, Module module, K result) {
-    return prettyPrint(
-        def,
-        module,
-        result,
-        Sorts.GeneratedTopCell(),
-        options.color(tty.stdout(), files.getEnv()),
-        options.output);
-  }
-
   public byte[] prettyPrint(
       Definition def,
       Module module,
@@ -210,7 +200,7 @@ public class KPrint {
     return unparseInternal(test, input, colorize);
   }
 
-  private Term disambiguateForUnparse(Module mod, Term t) {
+  private Term disambiguateForUnparse(Term t) {
     return t;
   }
 
@@ -221,7 +211,6 @@ public class KPrint {
             .addBrackets(
                 (ProductionReference)
                     disambiguateForUnparse(
-                        mod,
                         KOREToTreeNodes.apply(
                             KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))),
         colorize);

@@ -12,10 +12,6 @@ public class PrintOptions {
 
   public PrintOptions() {}
 
-  public PrintOptions(ColorSetting color) {
-    this.color = color;
-  }
-
   public PrintOptions(OutputModes output) {
     this.output = output;
   }

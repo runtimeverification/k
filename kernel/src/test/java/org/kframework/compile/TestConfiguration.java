@@ -11,7 +11,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
@@ -114,11 +113,6 @@ class TestConfiguration implements ConfigurationInfo {
   }
 
   @Override
-  public boolean isCellCollection(Sort s) {
-    return cellCollectionSorts.containsKey(s);
-  }
-
-  @Override
   public boolean isCellLabel(KLabel kLabel) {
     return getCellSort(kLabel) != null;
   }
@@ -184,11 +178,6 @@ class TestConfiguration implements ConfigurationInfo {
   @Override
   public Sort getComputationCell() {
     return computationCell;
-  }
-
-  @Override
-  public Set<Sort> getCellSorts() {
-    return cellLabels.keySet();
   }
 
   @Override

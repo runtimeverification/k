@@ -7,8 +7,6 @@ import org.kframework.definition.Rule
 import org.kframework.kore
 import org.kframework.RewriterResult
 
-trait RewriterConstructor extends (Module => Rewriter)
-
 trait Rewriter {
   //  def normalize(k: K): K
   //  def substitute(k: K, s: KVariable => K): K
@@ -45,22 +43,9 @@ trait Rewriter {
       initialConfiguration: kore.K,
       depth: Optional[Integer],
       bound: Optional[Integer],
-      pattern: Rule,
-      searchType: SearchType
+      pattern: Rule
   ): kore.K
-
-  def executeAndMatch(
-      k: kore.K,
-      depth: Optional[Integer],
-      rule: Rule
-  ): Tuple2[RewriterResult, kore.K]
 
   def prove(rules: Module, reuseDef: java.lang.Boolean): RewriterResult
 
-  def equivalence(
-      firstDef: Rewriter,
-      secondDef: Rewriter,
-      firstSpec: Module,
-      secondSpec: Module
-  ): Boolean
 }

@@ -53,7 +53,6 @@ public class KServerFrontEnd extends FrontEnd {
   }
 
   private static KServerFrontEnd instance;
-  private static Thread threadInstance;
   private static final ImmutableList<String> tools =
       ImmutableList.of(
           "-kompile", "-kast", "-kdep", "-kprove", "-kserver", "-k-compile-search-pattern");
@@ -100,7 +99,6 @@ public class KServerFrontEnd extends FrontEnd {
     }
     Thread t = new Thread(server);
     instance = this;
-    threadInstance = t;
     t.start();
 
     if (isLocal()) {

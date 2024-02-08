@@ -25,10 +25,6 @@ public record ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
     }
   }
 
-  public ConfigurationInfo.Multiplicity getMultiplicity(KLabel label) {
-    return cfg.getMultiplicity(labels.getCodomain(label));
-  }
-
   public ConfigurationInfo.Multiplicity getMultiplicity(Sort sort) {
     return cfg.getMultiplicity(sort);
   }
@@ -70,11 +66,6 @@ public record ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
   public K getCellAbsentTerm(Sort cellSort) {
     KLabel l = cfg.getCellAbsentLabel(cellSort);
     return l == null ? null : KApply(l);
-  }
-
-  public boolean isCellCollection(KLabel klabel) {
-    Sort s = labels.getCodomain(klabel);
-    return cfg.isCellCollection(s);
   }
 
   public boolean isCell(KLabel klabel) {

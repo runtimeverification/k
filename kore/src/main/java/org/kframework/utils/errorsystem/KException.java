@@ -149,10 +149,6 @@ public class KException implements Serializable, HasLocation {
 
   @Override
   public String toString() {
-    return toString(false);
-  }
-
-  public String toString(boolean verbose) {
     return "["
         + (type == ExceptionType.ERROR ? "Error" : "Warning")
         + "] "
