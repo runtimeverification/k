@@ -15,21 +15,4 @@ public enum OutputModes {
   LATEX,
   KORE,
   NONE;
-
-  private String extension;
-
-  static {
-    PRETTY.extension = "kpretty";
-    PROGRAM.extension = "pgm";
-    KAST.extension = "kast";
-    BINARY.extension = "kbin";
-    JSON.extension = "json";
-    LATEX.extension = "tex";
-    KORE.extension = "kore";
-    NONE.extension = "";
-  }
-
-  public String ext() {
-    return extension;
-  }
 }

@@ -5,7 +5,7 @@ import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.kframework.utils.inject.RequestScoped;
 
@@ -31,7 +31,7 @@ public class LLVMKompileOptions {
   public static class SingletonListConverter implements IStringConverter<List<String>> {
     @Override
     public List<String> convert(String str) {
-      return Arrays.asList(str);
+      return Collections.singletonList(str);
     }
   }
 

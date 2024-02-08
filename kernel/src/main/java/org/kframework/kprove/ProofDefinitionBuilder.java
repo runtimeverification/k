@@ -39,8 +39,7 @@ public record ProofDefinitionBuilder(
    * @param specFile File containing specification rules to prove. Not part of definition.
    * @param specModuleName Module containing specifications to prove
    */
-  public Tuple2<Definition, Module> build(
-      File specFile, String specModuleName, boolean readOnlyCache) {
+  public Tuple2<Definition, Module> build(File specFile, String specModuleName) {
     String defModuleNameUpdated = compiledDefinition.kompiledDefinition.mainModule().name();
     String specModuleNameUpdated =
         specModuleName == null

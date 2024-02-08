@@ -30,7 +30,6 @@ public class LLVMBackend extends KoreBackend {
   private final LLVMKompileOptions options;
   private final KExceptionManager kem;
   private final KompileOptions kompileOptions;
-  private final Tool tool;
 
   @Inject
   public LLVMBackend(
@@ -45,7 +44,6 @@ public class LLVMBackend extends KoreBackend {
     this.options = options;
     this.kompileOptions = kompileOptions;
     this.kem = kem;
-    this.tool = tool;
   }
 
   @Override
