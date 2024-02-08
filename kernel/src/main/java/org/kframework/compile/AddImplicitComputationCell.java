@@ -27,15 +27,6 @@ public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelI
         .apply(input);
   }
 
-  public static Module transformModule(Module mod) {
-    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-    LabelInfo labelInfo = new LabelInfoFromModule(mod);
-    return ModuleTransformer.fromSentenceTransformer(
-            new AddImplicitComputationCell(configInfo, labelInfo)::apply,
-            "concretizing configuration")
-        .apply(mod);
-  }
-
   public Sentence apply(Module m, Sentence s) {
     if (skipSentence(s)) {
       return s;

@@ -72,8 +72,4 @@ public class AttCompare {
   public int hashCode() {
     return k.hashCode();
   }
-
-  public K get() {
-    return k;
-  }
 }

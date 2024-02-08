@@ -35,14 +35,6 @@ public class Lexical extends ProductionItem {
     return this.lexicalRule.hashCode();
   }
 
-  public void setFollow(String follow) {
-    this.follow = follow;
-  }
-
-  public String getFollow() {
-    return follow;
-  }
-
   public String getLexicalRule() {
     return lexicalRule;
   }

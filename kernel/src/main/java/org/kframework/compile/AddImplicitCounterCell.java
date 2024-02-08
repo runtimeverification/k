@@ -7,7 +7,6 @@ import static org.kframework.kore.KORE.*;
 import java.util.*;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Claim;
-import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 
@@ -19,7 +18,7 @@ public class AddImplicitCounterCell {
 
   public AddImplicitCounterCell() {}
 
-  public Sentence apply(Module m, Sentence s) {
+  public Sentence apply(Sentence s) {
     if (s instanceof Claim claim) {
       Set<KVariable> freshVars = new HashSet<>();
       VisitK visitor =
@@ -36,8 +35,7 @@ public class AddImplicitCounterCell {
       if (!ConcretizeCells.hasCells(claim.body()) && freshVars.isEmpty()) {
         return s;
       }
-      return claim.newInstance(
-          apply(claim.body(), m), claim.requires(), claim.ensures(), claim.att());
+      return claim.newInstance(apply(claim.body()), claim.requires(), claim.ensures(), claim.att());
     }
     return s;
   }
@@ -50,7 +48,7 @@ public class AddImplicitCounterCell {
         .anyMatch(cell -> ((KApply) cell).klabel().equals(KLabels.GENERATED_COUNTER_CELL));
   }
 
-  private K apply(K term, Module m) {
+  private K apply(K term) {
     List<K> items = IncompleteCellUtils.flattenCells(term);
     if (alreadyHasGeneratedCounter(items)) {
       return term;

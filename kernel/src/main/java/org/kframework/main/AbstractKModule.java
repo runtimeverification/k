@@ -53,36 +53,6 @@ public abstract class AbstractKModule implements KModule {
   }
 
   @Override
-  public List<Module> getKRunModules() {
-    return Lists.newArrayList(
-        new AbstractModule() {
-
-          @Override
-          protected void configure() {
-            bindOptions(AbstractKModule.this::krunOptions, binder());
-          }
-        });
-  }
-
-  @Override
-  public List<Module> getKEqModules(List<Module> definitionSpecificModules) {
-    return Lists.newArrayList();
-  }
-
-  @Override
-  public List<Module> getDefinitionSpecificKEqModules() {
-    return Lists.newArrayList(
-        new AbstractModule() {
-
-          @Override
-          protected void configure() {
-            binder().requireAtInjectOnConstructors();
-            // bind backend implementations of tools to their interfaces
-          }
-        });
-  }
-
-  @Override
   public List<Module> getKProveModules() {
     return Lists.newArrayList(
         new AbstractModule() {

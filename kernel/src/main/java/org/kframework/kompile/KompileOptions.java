@@ -137,13 +137,6 @@ public class KompileOptions implements Serializable {
   public boolean bisonLists;
 
   @Parameter(
-      names = "--read-only-kompiled-directory",
-      description =
-          "Files in the generated kompiled directory should be read-only to other frontend tools.",
-      hidden = true)
-  public boolean readOnlyKompiledDirectory = false;
-
-  @Parameter(
       names = "--concrete-rules",
       description =
           "List of rule labels to be considered concrete, in addition to rules marked with"
@@ -198,8 +191,6 @@ public class KompileOptions implements Serializable {
       description = "Generate a shared library rather than an executable for Bison parsers",
       hidden = true)
   public boolean genBisonParserLibrary;
-
-  public static final String DEFAULT_TRANSITION = "transition";
 
   @Parameter(
       names = "--top-cell",

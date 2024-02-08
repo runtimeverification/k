@@ -567,7 +567,7 @@ public class TypeInferencer implements AutoCloseable {
           return apply(amb.items().iterator().next());
         }
         // compute name of expected sort for use in cache.
-        String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
+        String expected = printSort(expectedSort, expectedParams).replace("|", "");
         Map<String, Integer> contexts = ambCache.computeIfAbsent(amb, amb2 -> new HashMap<>());
         int id = contexts.computeIfAbsent(expected, expected2 -> ambId);
         boolean cached = id != ambId;
@@ -656,7 +656,7 @@ public class TypeInferencer implements AutoCloseable {
         expectedParams = oldExpectedParams;
       }
       // compute name of expected sort for use in cache.
-      String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
+      String expected = printSort(expectedSort, expectedParams).replace("|", "");
       boolean cached = !cacheById.get(id).add(expected);
       if (!isIncremental && (!shared || !cached)) {
         // if we are in non-incremental mode and this is the first time reaching this term under
@@ -736,12 +736,12 @@ public class TypeInferencer implements AutoCloseable {
         } else {
           sb.append("(<=Sort ");
         }
-        sb.append(printSort(actualSort, actualParams, isIncremental));
+        sb.append(printSort(actualSort, actualParams));
         sb.append(" ");
         if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
         }
-        sb.append(printSort(expectedSort, expectedParams, isIncremental));
+        sb.append(printSort(expectedSort, expectedParams));
         sb.append(") ");
       }
       if (isIncremental) {
@@ -765,7 +765,7 @@ public class TypeInferencer implements AutoCloseable {
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
         expectedSort = Sorts.K();
       }
-      sb.append(printSort(expectedSort, expectedParams, isIncremental));
+      sb.append(printSort(expectedSort, expectedParams));
       sb.append(") ");
       if (isIncremental) {
         saveConstraint(name, loc);
@@ -796,7 +796,7 @@ public class TypeInferencer implements AutoCloseable {
     return stream(actualSort.params()).anyMatch(this::isBadNatSort);
   }
 
-  private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
+  private String printSort(Sort s, Optional<ProductionReference> t) {
     Map<Sort, String> params = new HashMap<>();
     if (t.isPresent()) {
       if (t.get().production().params().nonEmpty()) {
@@ -809,10 +809,10 @@ public class TypeInferencer implements AutoCloseable {
         }
       }
     }
-    return printSort(s, params, isIncremental);
+    return printSort(s, params);
   }
 
-  private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
+  private String printSort(Sort s, Map<Sort, String> params) {
     StringBuilder sb = new StringBuilder();
     if (params.containsKey(s)) {
       sb.append("|").append(params.get(s)).append("|");
@@ -825,7 +825,7 @@ public class TypeInferencer implements AutoCloseable {
     sb.append("(|Sort").append(s.name()).append("|");
     for (Sort param : iterable(s.params())) {
       sb.append(" ");
-      sb.append(printSort(param, params, isIncremental));
+      sb.append(printSort(param, params));
     }
     sb.append(")");
     return sb.toString();
@@ -964,7 +964,7 @@ public class TypeInferencer implements AutoCloseable {
   private Sort eval(Sort s, Optional<ProductionReference> params) {
     if (isBadNatSort(s)) return s;
     print("(eval ");
-    print(printSort(s, params, true));
+    print(printSort(s, params));
     println(")");
     return readSort(false);
   }

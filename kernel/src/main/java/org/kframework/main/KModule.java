@@ -10,11 +10,5 @@ public interface KModule {
 
   List<Module> getKastModules();
 
-  List<Module> getKRunModules();
-
-  List<Module> getKEqModules(List<Module> definitionSpecificModules);
-
-  List<Module> getDefinitionSpecificKEqModules();
-
   List<Module> getKProveModules();
 }

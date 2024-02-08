@@ -54,7 +54,7 @@ public class GenerateSortProjections {
         mod.att());
   }
 
-  public static KLabel getProjectLbl(Sort sort, Module m) {
+  public static KLabel getProjectLbl(Sort sort) {
     KLabel lbl;
     lbl = KLabel("project:" + sort.toString());
     return lbl;
@@ -70,7 +70,7 @@ public class GenerateSortProjections {
         && !sort.equals(Sorts.K())) {
       return Stream.empty();
     }
-    KLabel lbl = getProjectLbl(sort, mod);
+    KLabel lbl = getProjectLbl(sort);
     KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
     Rule r =
         Rule(

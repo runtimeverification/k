@@ -41,9 +41,4 @@ public class KoreParser {
     Pattern kore = textToKore.parsePattern(koreFile, 0);
     return koreToK.apply(kore);
   }
-
-  public K parseFile(File koreFile, int line) throws ParseError {
-    Pattern kore = textToKore.parsePattern(koreFile, line);
-    return koreToK.apply(kore);
-  }
 }

@@ -19,7 +19,6 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Hooks;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -33,13 +32,11 @@ import scala.Option;
 
 public class ResolveStrict {
 
-  private final KompileOptions kompileOptions;
   private final Definition d;
 
   private Module currentModule;
 
-  public ResolveStrict(KompileOptions kompileOptions, Definition d) {
-    this.kompileOptions = kompileOptions;
+  public ResolveStrict(Definition d) {
     this.d = d;
   }
 

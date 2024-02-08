@@ -16,11 +16,6 @@ public class KPos {
   /** Character offset on a line in a document (one-based). */
   private int character;
 
-  public KPos() {
-    line = 0;
-    character = 0;
-  }
-
   public KPos(int line, int character) {
     this.line = line;
     this.character = character;
@@ -29,10 +24,6 @@ public class KPos {
   public KPos(Position pos) {
     this.line = pos.getLine() + 1;
     this.character = pos.getCharacter() + 1;
-  }
-
-  public Position toPosition() {
-    return new Position(line - 1, character - 1);
   }
 
   public int getLine() {

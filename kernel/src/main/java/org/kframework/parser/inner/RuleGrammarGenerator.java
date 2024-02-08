@@ -65,19 +65,12 @@ public record RuleGrammarGenerator(Definition baseK) {
     kSorts.add(Sorts.KString());
   }
 
-  private static Set<Sort> kSorts() {
-    return java.util.Collections.unmodifiableSet(kSorts);
-  }
-
   /// modules that have a meaning:
   public static final String DEFAULT_LAYOUT = "DEFAULT-LAYOUT";
   public static final String RULE_CELLS = "RULE-CELLS";
   public static final String CONFIG_CELLS = "CONFIG-CELLS";
   public static final String K = "K";
   public static final String AUTO_CASTS = "AUTO-CASTS";
-  public static final String KSEQ_SYMBOLIC = "KSEQ-SYMBOLIC";
-  public static final String K_TOP_SORT = "K-TOP-SORT";
-  public static final String K_BOTTOM_SORT = "K-BOTTOM-SORT";
   public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
   public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
   public static final String RULE_LISTS = "RULE-LISTS";
@@ -86,7 +79,6 @@ public record RuleGrammarGenerator(Definition baseK) {
 
   public static final String POSTFIX = "-PROGRAM-PARSING";
 
-  public static final String NOT_INJECTION = "notInjection";
   public static final String ID = "ID";
   private static final String ID_SYNTAX = "ID-SYNTAX";
   public static final String ID_PROGRAM_PARSING = ID_SYNTAX + POSTFIX;
@@ -98,11 +90,6 @@ public record RuleGrammarGenerator(Definition baseK) {
    *     syntax is defined in include/kast.k.
    */
   public RuleGrammarGenerator {}
-
-  private Set<Module> renameKItem2Bottom(Set<Module> def) {
-    // TODO: do renaming of KItem and K in the LHS to KBott?
-    return def;
-  }
 
   /**
    * Creates the seed module that can be used to parse rules. Imports module markers RULE-CELLS and
@@ -372,19 +359,18 @@ public record RuleGrammarGenerator(Definition baseK) {
     }
 
     if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
-      Set<Sentence> temp;
       for (Sort srt : iterable(mod.allSorts())) {
         if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
           // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-          prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt, srt));
+          prods.addAll(makeCasts(Sorts.K(), srt, srt));
         }
       }
-      prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
-      prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList(), Sorts.KList()));
-      prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem(), Sorts.KItem()));
-      prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K(), Sorts.K()));
+      prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
+      prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList()));
+      prods.addAll(makeCasts(Sorts.K(), Sorts.KItem(), Sorts.KItem()));
+      prods.addAll(makeCasts(Sorts.K(), Sorts.K(), Sorts.K()));
       for (SortSynonym syn : iterable(mod.sortSynonyms())) {
-        prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), syn.newSort(), syn.oldSort()));
+        prods.addAll(makeCasts(Sorts.K(), syn.newSort(), syn.oldSort()));
       }
     }
 
@@ -501,7 +487,7 @@ public record RuleGrammarGenerator(Definition baseK) {
           // syntax {P} Int ::= P "+" Int
           // syntax     Int ::= K "+" Int
           List<Sort> instantiationMask = new ArrayList<>();
-          for (Sort param : mutable(p.params())) instantiationMask.add(Sorts.K());
+          for (Sort ignored : mutable(p.params())) instantiationMask.add(Sorts.K());
           Production subst = p.substitute(immutable(instantiationMask));
           Production p1 =
               Production(
@@ -794,8 +780,7 @@ public record RuleGrammarGenerator(Definition baseK) {
     }
   }
 
-  private static Set<Sentence> makeCasts(
-      Sort outerSort, Sort innerSort, Sort castSort, Sort labelSort) {
+  private static Set<Sentence> makeCasts(Sort innerSort, Sort castSort, Sort labelSort) {
     Set<Sentence> prods = new HashSet<>();
     Att attrs1 = Att().add(Sort.class, castSort);
     prods.add(
