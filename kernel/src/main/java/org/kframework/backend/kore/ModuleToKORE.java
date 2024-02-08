@@ -1673,14 +1673,15 @@ public class ModuleToKORE {
     // injective.
     boolean isInjective = isConstructor;
 
-    boolean isMacro = false;
+    boolean isMacro = prod.isMacro();
     boolean isAnywhere = overloads.contains(prod);
+
     if (prod.klabel().isDefined()) {
       for (Rule r : functionRules.get(prod.klabel().get())) {
-        isMacro |= ExpandMacros.isMacro(r);
         isAnywhere |= r.att().contains(Att.ANYWHERE());
       }
     }
+
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
