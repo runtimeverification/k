@@ -219,7 +219,7 @@ public class KastFrontEnd extends FrontEnd {
         unparsingMod = maybeUnparsingMod.get();
       }
 
-      Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
+      Option<Module> maybeMod = def.programParsingModuleFor(options.module);
       if (maybeMod.isEmpty()) {
         throw KEMException.innerParserError(
             "Module " + options.module + " not found. Specify a module with -m.");

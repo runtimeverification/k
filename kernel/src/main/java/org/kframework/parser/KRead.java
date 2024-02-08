@@ -1,16 +1,11 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -180,30 +175,5 @@ public record KRead(
       default -> throw KEMException.criticalError(
           "Unsupported input mode for deserialization: " + inputMode);
     };
-  }
-
-  public static K autoDeserialize(byte[] kast, Source source) {
-    if (BinaryParser.isBinaryKast(kast)) return BinaryParser.parse(kast);
-
-    InputStream input = new ByteArrayInputStream(kast);
-    int c;
-    try {
-      while (Character.isWhitespace(c = input.read()))
-        ;
-    } catch (IOException e) {
-      throw KEMException.criticalError("Could not read output from parser: ", e);
-    }
-
-    if (c == '{') {
-      JsonReader reader = Json.createReader(new ByteArrayInputStream(kast));
-      JsonObject data = reader.readObject();
-      return JsonParser.parseJson(data);
-    }
-
-    try {
-      return KastParser.parse(new String(kast), source);
-    } catch (KEMException e) {
-      throw KEMException.criticalError("Could not read input: " + source.source());
-    }
   }
 }

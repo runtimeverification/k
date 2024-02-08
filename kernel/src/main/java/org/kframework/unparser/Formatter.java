@@ -2,7 +2,6 @@
 
 package org.kframework.unparser;
 
-import static org.fusesource.jansi.Ansi.*;
 import static org.kframework.Collections.*;
 
 import org.kframework.attributes.Att;

@@ -27,7 +27,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
 
-public class KoreBackend extends AbstractBackend {
+public class KoreBackend implements Backend {
 
   private final KompileOptions kompileOptions;
   protected final FileUtil files;
@@ -57,20 +57,16 @@ public class KoreBackend extends AbstractBackend {
   @Override
   public void accept(Backend.Holder h) {
     CompiledDefinition def = h.def;
-    String kore = getKompiledString(def, true);
+    String kore = getKompiledString(def);
     File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
     String name = defFile.getName();
     String basename = FilenameUtils.removeExtension(name);
     files.saveToDefinitionDirectory(basename + ".kore", kore);
   }
 
-  /**
-   * Convert a CompiledDefinition to a String of a KORE definition.
-   *
-   * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
-   */
-  protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
-    Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
+  /** Convert a CompiledDefinition to a String of a KORE definition. */
+  protected String getKompiledString(CompiledDefinition def) {
+    Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
     ModuleToKORE converter =
         new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
     return getKompiledString(converter, files, heatCoolEquations, tool);
@@ -98,7 +94,7 @@ public class KoreBackend extends AbstractBackend {
     return semantics.toString();
   }
 
-  public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
+  public static Module getKompiledModule(Module mainModule) {
     mainModule =
         ModuleTransformer.fromSentenceTransformer(
                 new AddSortInjections(mainModule)::addInjections, "Add sort injections")
@@ -106,12 +102,10 @@ public class KoreBackend extends AbstractBackend {
     mainModule =
         ModuleTransformer.from(new RemoveUnit()::apply, "Remove unit applications for collections")
             .apply(mainModule);
-    if (hasAnd) {
-      mainModule =
-          ModuleTransformer.fromSentenceTransformer(
-                  new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction")
-              .apply(mainModule);
-    }
+    mainModule =
+        ModuleTransformer.fromSentenceTransformer(
+                new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction")
+            .apply(mainModule);
     return mainModule;
   }
 
@@ -123,8 +117,7 @@ public class KoreBackend extends AbstractBackend {
     Function1<Definition, Definition> resolveStrict =
         d ->
             DefinitionTransformer.from(
-                    new ResolveStrict(kompileOptions, d)::resolve,
-                    "resolving strict and seqstrict attributes")
+                    new ResolveStrict(d)::resolve, "resolving strict and seqstrict attributes")
                 .apply(d);
     DefinitionTransformer resolveHeatCoolAttribute =
         DefinitionTransformer.fromSentenceTransformer(
@@ -240,7 +233,7 @@ public class KoreBackend extends AbstractBackend {
             .andThen(resolveFunctionWithConfig)
             .andThen(resolveStrict)
             .andThen(resolveAnonVars)
-            .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
+            .andThen(d -> new ResolveContexts().resolve(d))
             .andThen(numberSentences)
             .andThen(resolveHeatCoolAttribute)
             .andThen(resolveSemanticCasts)

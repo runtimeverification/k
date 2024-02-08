@@ -48,18 +48,6 @@ public class HaskellBackendKModule extends AbstractKModule {
     return Collections.singletonList(Pair.of(HaskellKompileOptions.class, true));
   }
 
-  @Override
-  public List<Module> getKRunModules() {
-    return Collections.singletonList(
-        new AbstractModule() {
-          @Override
-          protected void configure() {
-            binder().requireAtInjectOnConstructors();
-            installHaskellRewriter(binder());
-          }
-        });
-  }
-
   private void installHaskellRewriter(Binder binder) {
     bindOptions(HaskellBackendKModule.this::krunOptions, binder);
 

@@ -32,31 +32,6 @@ public class NormalizeVariables {
     return KVariable(vars.get(var), var.att().add(Att.DENORMAL(), var.name()));
   }
 
-  /**
-   * Applies the normalization existing in a particular set of normalized terms to a denormal term
-   *
-   * @param denormal The term to be normalized. Only variables which exist in the specified {@code
-   *     normals} are normalized.
-   * @param normals A list of terms that have previously been normalized using this class, or which
-   *     have been constructed manually with all variables given the "denormal" attribute specifying
-   *     their denormal name. The term to be normalized will be normalized according to the same
-   *     normalization as these terms.
-   * @return The normalized version of {@code denormal}, in which each variable present in the
-   *     denormal version of the specified {@code normals} is replaced with its normalized name.
-   */
-  public K applyNormalization(K denormal, K... normals) {
-    Map<KVariable, String> normalization = inferNormalizationFromTerm(normals);
-    return new TransformK() {
-      @Override
-      public K apply(KVariable k) {
-        if (normalization.containsKey(k)) {
-          return KVariable(normalization.get(k), k.att().add(Att.DENORMAL(), k.name()));
-        }
-        return super.apply(k);
-      }
-    }.apply(denormal);
-  }
-
   private Map<KVariable, String> inferNormalizationFromTerm(K[] normals) {
     Map<KVariable, String> normalization = new HashMap<>();
     for (K normal : normals) {
@@ -70,14 +45,6 @@ public class NormalizeVariables {
       }.apply(normal);
     }
     return normalization;
-  }
-
-  public Rule applyNormalization(Rule denormal, K... normals) {
-    return Rule(
-        applyNormalization(denormal.body(), normals),
-        applyNormalization(denormal.requires(), normals),
-        applyNormalization(denormal.ensures(), normals),
-        denormal.att());
   }
 
   public K normalize(K term, K... normals) {

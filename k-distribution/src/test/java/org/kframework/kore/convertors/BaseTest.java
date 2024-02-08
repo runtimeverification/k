@@ -99,7 +99,6 @@ public abstract class BaseTest {
     }
     def.setItems(Outer.parse(Source.apply(definitionFile.getPath()), definitionText, null));
     def.setMainModule("TEST");
-    def.setMainSyntaxModule("TEST");
 
     ProcessGroupAttributes.apply(def);
     Context context = new Context();

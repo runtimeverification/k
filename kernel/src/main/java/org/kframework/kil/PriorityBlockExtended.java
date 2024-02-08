@@ -17,10 +17,6 @@ public class PriorityBlockExtended extends ASTNode {
     return productions;
   }
 
-  public void setProductions(java.util.List<Tag> productions) {
-    this.productions = productions;
-  }
-
   public PriorityBlockExtended(java.util.List<Tag> productions) {
     super();
     this.productions.addAll(productions);

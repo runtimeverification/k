@@ -39,19 +39,4 @@ public enum OS {
   public List<String> getSharedLibraryCompilerFlags() {
     return Arrays.asList("-fPIC", "-shared");
   }
-
-  public String getNativeExecutable(String executable) {
-    if (this == UNKNOWN) {
-      throw KEMException.internalError(
-          "Unknown OS type. "
-              + System.getProperty("os.name")
-              + " not recognized. "
-              + "Please contact K developers with details of your OS.");
-    }
-    if (this == WINDOWS) {
-      throw KEMException.internalError(
-          "K is not supported on native windows. Please use the Windows Subsystem for Linux.");
-    }
-    return executable;
-  }
 }

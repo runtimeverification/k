@@ -278,7 +278,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
               "|-%s|--%s|-%s|\n",
               "-".repeat(maxTokenLen), "-".repeat(maxLocLen), "-".repeat(maxTerminalLen)));
       for (int i = 0; i < words.size(); i++) {
-        Scanner.Token word = words.get(i);
         sb.append(
             String.format(
                 "|%-" + maxTokenLen + "s | %-" + maxLocLen + "s | %-" + maxTerminalLen + "s|\n",
@@ -359,7 +358,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
   /**
    * Parse the given input. This function is private because the final disambiguation in {@link
-   * AmbFilter} eliminates ambiguities that will be equivalent only after calling {@link
+   * AmbFilterError} eliminates ambiguities that will be equivalent only after calling {@link
    * TreeNodesToKORE#apply(Term)}, but returns a result that is somewhat arbitrary as an actual
    * parser {@link Term}. Fortunately all callers want the result as a K, and can use the public
    * version of this method.
