@@ -39,7 +39,6 @@ import org.kframework.main.Tool;
 import org.kframework.parser.KoreParser;
 import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.rewriter.Rewriter;
-import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.RunProcess;
@@ -50,7 +49,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.SMTOptions;
-import scala.Tuple2;
 
 @RequestScoped
 public record HaskellRewriter(
@@ -136,22 +134,12 @@ public record HaskellRewriter(
 
       @Override
       public K match(K k, Rule rule) {
-        return search(k, Optional.of(0), Optional.empty(), rule, SearchType.STAR);
-      }
-
-      @Override
-      public Tuple2<RewriterResult, K> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
-        RewriterResult res = execute(k, depth);
-        return Tuple2.apply(res, match(res.k(), rule));
+        return search(k, Optional.of(0), Optional.empty(), rule);
       }
 
       @Override
       public K search(
-          K initialConfiguration,
-          Optional<Integer> depth,
-          Optional<Integer> bound,
-          Rule pattern,
-          SearchType searchType) {
+          K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern) {
         Module mod = getExecutionModule(module);
         String koreOutput =
             getKoreString(
@@ -216,8 +204,7 @@ public record HaskellRewriter(
                 pgmPath,
                 "--output",
                 koreOutputFile.getAbsolutePath(),
-                "--searchType",
-                searchType.toString(),
+                "--searchType STAR",
                 "--search",
                 patternPath));
         if (depth.isPresent()) {
@@ -423,12 +410,6 @@ public record HaskellRewriter(
         }
 
         return executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
-      }
-
-      @Override
-      public boolean equivalence(
-          Rewriter firstDef, Rewriter secondDef, Module firstSpec, Module secondSpec) {
-        throw new UnsupportedOperationException();
       }
     };
   }
