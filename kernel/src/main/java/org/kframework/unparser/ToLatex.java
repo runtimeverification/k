@@ -6,7 +6,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import org.kframework.attributes.Att;
 import org.kframework.kore.InjectedKLabel;
@@ -97,12 +96,7 @@ public class ToLatex {
 
     } else if (k instanceof KVariable var) {
 
-      Optional<String> origName = var.att().getOptional(Att.ORIGINAL_NAME());
-      if (origName.isPresent()) {
-        writeString(out, origName.get());
-      } else {
-        writeString(out, var.name());
-      }
+      writeString(out, var.name());
 
     } else if (k instanceof KRewrite rew) {
 

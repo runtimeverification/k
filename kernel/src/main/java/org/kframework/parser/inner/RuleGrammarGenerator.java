@@ -725,11 +725,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       }
       res.addAll(
           prods3.stream()
-              .filter(
-                  p ->
-                      !(p instanceof Production
-                          && (p.att().contains(Att.GENERATED_BY_LIST_SUBSORTING())
-                              || p.att().contains(Att.USER_LIST()))))
+              .filter(p -> !(p instanceof Production && p.att().contains(Att.USER_LIST())))
               .collect(Collectors.toSet()));
       parseProds = res;
     }
