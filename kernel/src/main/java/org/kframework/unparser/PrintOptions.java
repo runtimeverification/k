@@ -122,12 +122,6 @@ public class PrintOptions {
   public boolean noFilterSubstitution = false;
 
   @Parameter(
-      names = {"--restore-original-names"},
-      listConverter = StringListConverter.class,
-      description = "Restore original variable names when provided by attributes.")
-  public boolean restoreOriginalNames = false;
-
-  @Parameter(
       names = {"--no-sort-collections"},
       listConverter = StringListConverter.class,
       description = "Do not sort collections before printing (for speed).")
