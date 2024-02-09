@@ -5,16 +5,16 @@
 	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Warning] Compiler: Non exhaustive match detected: `notKat_`(_)
 	Source(kat.k)
-	Location(21,19,21,174)
-	21 |	                | "notKat" Kat          [function, total, klabel(notKat_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Kat}{#1}), hook(KAT.not)]
-	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(21,19,21,135)
+	21 |	                | "notKat" Kat          [function, total, klabel(notKat_), symbol, smt-hook(not), group(boolOperation), hook(KAT.not)]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Warning] Compiler: Non exhaustive match detected: `_andKat_`(_,_)
 	Source(kat.k)
-	Location(22,19,22,186)
-	22 |	                > Kat "andKat" Kat     [function, total, klabel(_andKat_), symbol, left, smt-hook(and), group(boolOperation), latex({#1}\wedge_{\scriptstyle\it Kat}{#2}), hook(KAT.and)]
-	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(22,19,22,141)
+	22 |	                > Kat "andKat" Kat     [function, total, klabel(_andKat_), symbol, left, smt-hook(and), group(boolOperation), hook(KAT.and)]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Warning] Compiler: Non exhaustive match detected: `_orKat__KAT_Kat_Kat_Kat`(_,_)
 	Source(kat.k)
-	Location(23,19,23,173)
-	23 |	                | Kat "orKat" Kat      [function, total, klabel(_orKat_), left, smt-hook(or), group(boolOperation), latex({#1}\vee_{\scriptstyle\it Kat}{#2}), hook(KAT.or)]
-	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(23,19,23,130)
+	23 |	                | Kat "orKat" Kat      [function, total, klabel(_orKat_), left, smt-hook(or), group(boolOperation), hook(KAT.or)]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -247,7 +247,7 @@ KOOL).
   syntax KResult ::= Vals
 
 
-  syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
+  syntax KItem ::= undefined(Type)
 
   rule <k> T:Type X:Id; => . ...</k>
        <env> Env => Env[X <- L] </env>
@@ -402,8 +402,7 @@ KOOL).
   rule T:Type<_,Vs:Vals> => T[]<Vs>
   rule T:Type<.Vals> => T
 
-  syntax Map ::= Int "..." Int "|->" K
-    [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  syntax Map ::= Int "..." Int "|->" K [function]
   rule N...M |-> _ => .Map  requires N >Int M
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  requires N <=Int M
 
