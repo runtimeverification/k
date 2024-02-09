@@ -57,16 +57,21 @@ public class KoreBackend implements Backend {
   @Override
   public void accept(Backend.Holder h) {
     CompiledDefinition def = h.def;
-    String kore = getKompiledString(def);
+    String kore = getKompiledString(def, true);
     File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
     String name = defFile.getName();
     String basename = FilenameUtils.removeExtension(name);
     files.saveToDefinitionDirectory(basename + ".kore", kore);
   }
 
-  /** Convert a CompiledDefinition to a String of a KORE definition. */
-  protected String getKompiledString(CompiledDefinition def) {
-    Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
+  /**
+   * Convert a CompiledDefinition to a String of a KORE definition.
+   *
+   * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
+   */
+  protected String getKompiledString(
+      CompiledDefinition def, @SuppressWarnings("unused") boolean hasAnd) {
+    Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
     ModuleToKORE converter =
         new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
     return getKompiledString(converter, files, heatCoolEquations, tool);
@@ -94,7 +99,7 @@ public class KoreBackend implements Backend {
     return semantics.toString();
   }
 
-  public static Module getKompiledModule(Module mainModule) {
+  public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
     mainModule =
         ModuleTransformer.fromSentenceTransformer(
                 new AddSortInjections(mainModule)::addInjections, "Add sort injections")
@@ -102,10 +107,12 @@ public class KoreBackend implements Backend {
     mainModule =
         ModuleTransformer.from(new RemoveUnit()::apply, "Remove unit applications for collections")
             .apply(mainModule);
-    mainModule =
-        ModuleTransformer.fromSentenceTransformer(
-                new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction")
-            .apply(mainModule);
+    if (hasAnd) {
+      mainModule =
+          ModuleTransformer.fromSentenceTransformer(
+                  new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction")
+              .apply(mainModule);
+    }
     return mainModule;
   }
 
