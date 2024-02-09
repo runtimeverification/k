@@ -12,7 +12,7 @@ class LabelInfoFromModule(module: Module) extends LabelInfo {
       label.toString,
       att(Att.ASSOC),
       att(Att.COMM),
-      att(Att.FUNCTION) || att(Att.PATTERN),
+      att(Att.FUNCTION),
       prods.head
     )
   }
