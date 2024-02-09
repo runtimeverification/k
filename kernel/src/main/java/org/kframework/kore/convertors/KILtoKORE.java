@@ -264,9 +264,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             } else if (it instanceof UserList) {
               throw new AssertionError("Lists should have applied before.");
             } else if (it instanceof Lexical) {
-              String regex;
-              if (p.containsAttribute(Att.REGEX())) regex = p.getAttribute(Att.REGEX());
-              else regex = ((Lexical) it).getLexicalRule();
+              String regex = ((Lexical) it).getLexicalRule();
               RegexTerminal regexTerminal = getRegexTerminal(regex);
 
               items.add(regexTerminal);
