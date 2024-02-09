@@ -2118,7 +2118,7 @@ module LIST-BYTES
   syntax ListBytes  ::=
     ListBytes ListBytes [assoc, element(ListBytesItem), format(%1%n%2), function, hook(LIST.concat), klabel(_ListBytes_), left, smtlib(smt_seq_concat), symbol, total, unit(.ListBytes)]
   syntax ListBytes  ::=
-    ".ListBytes" [function, hook(LIST.unit), klabel(.ListBytes), latex(\dotCt{ListBytes}), smtlib(smt_seq_nil), symbol, total]
+    ".ListBytes" [function, hook(LIST.unit), klabel(.ListBytes), smtlib(smt_seq_nil), symbol, total]
   syntax ListBytes  ::=
     "ListItem" "(" WrappedBytes ")" [function, hook(LIST.element), klabel(ListBytesItem), smtlib(smt_seq_elem), symbol, total]
   syntax WrappedBytes  ::=
@@ -2185,9 +2185,9 @@ module MAP-BYTES-TO-BYTES
   syntax MapBytesToBytes  ::=
     MapBytesToBytes MapBytesToBytes [assoc, comm, element(_Bytes2Bytes|->_), format(%1%n%2), function, hook(MAP.concat), index(0), klabel(_MapBytesToBytes_), left, symbol, unit(.MapBytesToBytes)]
   syntax MapBytesToBytes  ::=
-    ".MapBytesToBytes" [function, hook(MAP.unit), klabel(.MapBytesToBytes), latex(\dotCt{MapBytesToBytes}), symbol, total]
+    ".MapBytesToBytes" [function, hook(MAP.unit), klabel(.MapBytesToBytes), symbol, total]
   syntax MapBytesToBytes  ::=
-    WrappedBytes "Bytes2Bytes|->" WrappedBytes [function, hook(MAP.element), injective, klabel(_Bytes2Bytes|->_), latex({#1}\mapsto{#2}), symbol, total]
+    WrappedBytes "Bytes2Bytes|->" WrappedBytes [function, hook(MAP.element), injective, klabel(_Bytes2Bytes|->_), symbol, total]
   syntax priorities _Bytes2Bytes|->_  > _MapBytesToBytes_ .MapBytesToBytes
   syntax non-assoc _Bytes2Bytes|->_
   syntax WrappedBytes  ::=
@@ -2199,7 +2199,7 @@ module MAP-BYTES-TO-BYTES
   syntax MapBytesToBytes  ::=
     MapBytesToBytes "[" WrappedBytes "<-" "undef" "]" [function, hook(MAP.remove), klabel(_MapBytesToBytes[_<-undef]), symbol, total]
   syntax MapBytesToBytes  ::=
-    MapBytesToBytes "-Map" MapBytesToBytes [function, hook(MAP.difference), latex({#1}-_{\it MapBytesToBytesMap}{#2}), total]
+    MapBytesToBytes "-Map" MapBytesToBytes [function, hook(MAP.difference), total]
   syntax MapBytesToBytes  ::=
     "updateMap" "(" MapBytesToBytes "," MapBytesToBytes ")" [function, hook(MAP.updateAll), klabel(updateMap), total]
   syntax MapBytesToBytes  ::=
@@ -2567,9 +2567,9 @@ module MAP-INT-TO-BYTES
   syntax MapIntToBytes  ::=
     MapIntToBytes MapIntToBytes [assoc, comm, element(_Int2Bytes|->_), format(%1%n%2), function, hook(MAP.concat), index(0), klabel(_MapIntToBytes_), left, symbol, unit(.MapIntToBytes)]
   syntax MapIntToBytes  ::=
-    ".MapIntToBytes" [function, hook(MAP.unit), klabel(.MapIntToBytes), latex(\dotCt{MapIntToBytes}), symbol, total]
+    ".MapIntToBytes" [function, hook(MAP.unit), klabel(.MapIntToBytes), symbol, total]
   syntax MapIntToBytes  ::=
-    WrappedInt "Int2Bytes|->" WrappedBytes [function, hook(MAP.element), injective, klabel(_Int2Bytes|->_), latex({#1}\mapsto{#2}), symbol, total]
+    WrappedInt "Int2Bytes|->" WrappedBytes [function, hook(MAP.element), injective, klabel(_Int2Bytes|->_), symbol, total]
   syntax priorities _Int2Bytes|->_  > _MapIntToBytes_ .MapIntToBytes
   syntax non-assoc _Int2Bytes|->_
   syntax WrappedBytes  ::=
@@ -2581,7 +2581,7 @@ module MAP-INT-TO-BYTES
   syntax MapIntToBytes  ::=
     MapIntToBytes "[" WrappedInt "<-" "undef" "]" [function, hook(MAP.remove), klabel(_MapIntToBytes[_<-undef]), symbol, total]
   syntax MapIntToBytes  ::=
-    MapIntToBytes "-Map" MapIntToBytes [function, hook(MAP.difference), latex({#1}-_{\it MapIntToBytesMap}{#2}), total]
+    MapIntToBytes "-Map" MapIntToBytes [function, hook(MAP.difference), total]
   syntax MapIntToBytes  ::=
     "updateMap" "(" MapIntToBytes "," MapIntToBytes ")" [function, hook(MAP.updateAll), klabel(updateMap), total]
   syntax MapIntToBytes  ::=

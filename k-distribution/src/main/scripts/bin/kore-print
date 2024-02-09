@@ -50,7 +50,7 @@ $KORE_PRINT arguments:
                                    variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
-                           latex, kore, and none
+                           kore, and none
       --output-file FILE   Print converted term to FILE
       --save-temps         Do not delete temporary files when $KORE_PRINT
                            terminates
@@ -114,12 +114,11 @@ do
         kast) ;;
         binary) ;;
         json) ;;
-        latex) ;;
         kore) ;;
         none) ;;
 
         *)
-        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "kore", or "none".'
         ;;
       esac
       outputMode="$2"

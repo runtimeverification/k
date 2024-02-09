@@ -10,7 +10,7 @@ module LAMBDA
                 </T>
 
   syntax Exp ::= Id
-               | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
+               | "lambda" Id "." Exp
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
 
@@ -46,7 +46,7 @@ module LAMBDA
   rule let X = E in E':Exp => (lambda X . E') E
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp  [macro]
-               | "mu" Id "." Exp                  [latex(\mu{#1}.{#2})]
+               | "mu" Id "." Exp
   rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 
   syntax Exp ::= muclosure(Map,Exp)
