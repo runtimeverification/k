@@ -380,7 +380,6 @@ object Att {
   final val RECORD_PRD_REPEAT        = Key("recordPrd-repeat", KeyType.Internal)
   final val RECORD_PRD_ITEM          = Key("recordPrd-item", KeyType.Internal)
   final val REFRESHED                = Key("refreshed", KeyType.Internal)
-  final val REJECT                   = Key("reject", KeyType.Internal)
   final val REMOVE                   = Key("remove", KeyType.Internal)
   final val RIGHT_INTERNAL           = Key("right", KeyType.Internal)
   final val SMT_PRELUDE              = Key("smt-prelude", KeyType.Internal)

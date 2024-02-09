@@ -250,8 +250,6 @@ public class KILtoKORE extends KILTransformation<Object> {
       }
 
       for (Production p : b.getProductions()) {
-        if (p.containsAttribute(Att.REJECT())) // skip productions of the old reject type
-        continue;
         // Handle a special case first: List productions have only
         // one item.
         if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
