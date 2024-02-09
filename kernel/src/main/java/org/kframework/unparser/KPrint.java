@@ -144,7 +144,6 @@ public class KPrint {
       case NONE:
       case BINARY:
       case JSON:
-      case LATEX:
         return serialize(result, outputMode);
       case PRETTY:
         Module prettyUnparsingModule =
@@ -187,7 +186,6 @@ public class KPrint {
       case NONE -> "".getBytes();
       case BINARY -> ToBinary.apply(term);
       case JSON -> ToJson.apply(term);
-      case LATEX -> ToLatex.apply(term);
       default -> throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
     };
   }

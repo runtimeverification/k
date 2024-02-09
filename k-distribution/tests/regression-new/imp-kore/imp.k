@@ -31,7 +31,7 @@ argument, because we want to give it a short-circuit semantics. */
                  | "(" AExp ")"               [bracket]
                  > AExp "+" AExp              [left, strict, color(pink)]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2}), color(pink)]
+                 | AExp "<=" AExp             [seqstrict, color(pink)]
                  | "!" BExp                   [strict, color(pink)]
                  | "(" BExp ")"               [bracket]
                  > BExp "&&" BExp             [left, strict(1), color(pink)]

@@ -9,7 +9,7 @@ module IMP-SYNTAX
                  > AExp "+" AExp              [left, strict, color(pink)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2}), color(pink)]
+                 | AExp "<=" AExp             [seqstrict, color(pink)]
                  | "!" BExp                   [strict, color(pink)]
                  > BExp "&&" BExp             [left, strict(1), color(pink)]
                  | "(" BExp ")"               [bracket]
