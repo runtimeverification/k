@@ -365,7 +365,6 @@ object Att {
   final val NOT_INJECTION        = Key("notInjection", KeyType.Internal)
   final val NOT_LR1_MODULES      = Key("not-lr1-modules", KeyType.Internal)
   final val ORIGINAL_PRD         = Key("originalPrd", KeyType.Internal)
-  final val PATTERN_FOLDING      = Key("pattern-folding", KeyType.Internal)
   final val PREDICATE            = Key("predicate", KeyType.Internal)
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
     Key("prettyPrintWithSortAnnotation", KeyType.Internal)
