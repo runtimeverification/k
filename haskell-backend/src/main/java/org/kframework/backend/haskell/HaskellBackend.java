@@ -44,7 +44,7 @@ public class HaskellBackend extends KoreBackend {
   @Override
   public void accept(Backend.Holder h) {
     Stopwatch sw = new Stopwatch(globalOptions);
-    String kore = getKompiledString(h.def);
+    String kore = getKompiledString(h.def, true);
     h.def = null;
     files.saveToKompiled("definition.kore", kore);
     sw.printIntermediate("  Print definition.kore");
