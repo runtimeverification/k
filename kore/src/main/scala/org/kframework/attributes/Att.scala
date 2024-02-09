@@ -370,7 +370,6 @@ object Att {
     Key("prettyPrintWithSortAnnotation", KeyType.Internal)
   final val PRIORITIES               = Key("priorities", KeyType.Internal)
   final val PRODUCTION               = Key(classOf[Production].getName, KeyType.Internal)
-  final val PRODUCTION_ID            = Key("productionId", KeyType.Internal)
   final val PROJECTION               = Key("projection", KeyType.Internal)
   final val RECORD_PRD               = Key("recordPrd", KeyType.Internal)
   final val RECORD_PRD_ZERO          = Key("recordPrd-zero", KeyType.Internal)
@@ -476,11 +475,9 @@ trait AttributesToString {
 
   lazy val toStrings: List[String] = {
     val stringClassName = classOf[String].getName
-    att
-      .filter { case ((Att.PRODUCTION_ID, _), _) => false; case _ => true }
-      .map {
-        case ((attKey, `stringClassName`), "") => attKey.key
-        case ((attKey, _), value)              => attKey.key + "(" + value + ")"
-      } toList
+    att.map {
+      case ((attKey, `stringClassName`), "") => attKey.key
+      case ((attKey, _), value)              => attKey.key + "(" + value + ")"
+    } toList
   }
 }
