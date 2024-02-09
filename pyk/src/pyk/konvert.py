@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 from .cterm import CTerm
 from .kast import EMPTY_ATT, KAtt, KInner
-from .kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
+from .kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from .kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
-from .kast.outer import KRule, KSyntaxSort
+from .kast.outer import KDefinition, KProduction, KRule, KSyntaxSort
 from .kore.prelude import BYTES as KORE_BYTES
 from .kore.prelude import DOTK, SORT_K
 from .kore.prelude import STRING as KORE_STRING
@@ -32,7 +32,10 @@ from .kore.syntax import (
     Rewrites,
     SortApp,
     SortDecl,
+    SortVar,
     String,
+    Symbol,
+    SymbolDecl,
     Top,
 )
 from .prelude.bytes import BYTES, bytesToken_from_str, pretty_bytes_str
@@ -42,10 +45,10 @@ from .prelude.string import STRING, pretty_string, stringToken
 from .utils import FrozenDict
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping
+    from collections.abc import Callable, Iterable, Iterator, Mapping
     from typing import Any, Final
 
-    from .kast.outer import KDefinition, KFlatModule, KImport, KProduction, KSentence
+    from .kast.outer import KFlatModule, KImport, KSentence
     from .kore.kompiled import KompiledKore
     from .kore.syntax import Pattern, Sentence, Sort
 
@@ -69,6 +72,24 @@ KORE_KEYWORDS: Final = {
 }
 
 
+BUILTIN_LABELS: Final = {
+    '#Bottom',
+    '#Top',
+    '#Not',
+    '#Or',
+    '#And',
+    '#Implies',
+    '#Equals',
+    '#Ceil',
+    '#Floor',
+    '#Exists',
+    '#Forall',
+    '#AG',
+    'weakExistsFinally',
+    'weakAlwaysFinally',
+}
+
+
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
 
@@ -83,10 +104,16 @@ def module_to_kore(definition: KDefinition) -> Module:
         for syntax_sort in module.syntax_sorts
         if syntax_sort.sort.name not in [K.name, K_ITEM.name]
     ]
+    symbol_decls = [
+        symbol_prod_to_kore(sentence)
+        for sentence in module.sentences
+        if isinstance(sentence, KProduction) and sentence.klabel and sentence.klabel.name not in BUILTIN_LABELS
+    ]
 
     sentences: list[Sentence] = []
     sentences += imports
     sentences += sort_decls
+    sentences += symbol_decls
 
     return Module(name=name, sentences=sentences, attrs=attrs)
 
@@ -119,6 +146,10 @@ def att_to_kore(key: str, value: Any) -> App:
         return App(symbol, (), (String(value),))
 
     if isinstance(value, FrozenDict) and 'node' in value:
+        if value['node'] == 'KSort':
+            sort_name = name_to_kore(KSort.from_dict(value).name)  # 'Sort' is not prepended by ModuleToKORE
+            return App(symbol, (), (String(sort_name),))
+
         # TODO Should be kast_to_kore, but we do not have a KompiledKore.
         # TODO We should be able to add injections based on info in KDefinition.
         pattern = _kast_to_kore(KInner.from_dict(value))
@@ -138,19 +169,89 @@ def _parse_special_att_value(key: str, value: Any) -> tuple[tuple[Sort, ...], tu
     if key == KAtt.SOURCE:
         assert isinstance(value, str)
         return (), (String(f'Source({value})'),)
+    if key == KAtt.ELEMENT:
+        # TODO avoid special casing by pre-processing the attribute into a KApply
+        # This should be handled by the frontend
+        assert isinstance(value, str)
+        return (), (App(_label_name(value)),)
+    if key == KAtt.UNIT:  # TODO same here
+        assert isinstance(value, str)
+        return (), (App(_label_name(value)),)
     return None
 
 
 def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
-    name = 'Sort' + name_to_kore(syntax_sort.sort.name)
+    name = _sort_name(syntax_sort.sort.name)
     attrs = atts_to_kore(syntax_sort.att)
     hooked = KAtt.HOOK in syntax_sort.att
     return SortDecl(name, (), attrs=attrs, hooked=hooked)
 
 
+def sort_to_kore(sort: KSort) -> SortApp:
+    return SortApp(_sort_name(sort.name))
+
+
+def _sort_name(name: str) -> str:
+    return 'Sort' + name_to_kore(name)
+
+
+def _label_name(name: str) -> str:
+    return 'Lbl' + name_to_kore(name)
+
+
+def symbol_prod_to_kore(production: KProduction) -> SymbolDecl:
+    if not production.klabel:
+        raise ValueError(f'Expected symbol production, got: {production}')
+
+    symbol_name = _label_name(production.klabel.name)
+    symbol_vars = tuple(SortVar(_sort_name(sort.name)) for sort in production.params)
+    symbol = Symbol(symbol_name, symbol_vars)
+
+    def to_sort(sort: KSort) -> Sort:
+        name = _sort_name(sort.name)
+        if sort in production.params:
+            return SortVar(name)
+        return SortApp(name)
+
+    param_sorts = tuple(to_sort(sort) for sort in production.argument_sorts)
+    sort = to_sort(production.sort)
+    attrs = atts_to_kore(production.att)
+    hooked = KAtt.HOOK in production.att
+    return SymbolDecl(
+        symbol=symbol,
+        param_sorts=param_sorts,
+        sort=sort,
+        attrs=attrs,
+        hooked=hooked,
+    )
+
+
 # ----------------------------------
 # Module to KORE: KAST preprocessing
 # ----------------------------------
+
+
+HOOK_NAMESPACES: Final = {
+    'ARRAY',
+    'BOOL',
+    'BUFFER',
+    'BYTES',
+    'FFI',
+    'FLOAT',
+    'INT',
+    'IO',
+    'JSON',
+    'KEQUAL',
+    'KREFLECTION',
+    'LIST',
+    'MAP',
+    'MINT',
+    'RANGEMAP',
+    'SET',
+    'STRING',
+    'SUBSTITUTION',
+    'UNIFICATION',
+}
 
 
 COLLECTION_HOOKS: Final = {
@@ -180,9 +281,22 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
     """
     module_name = module_name or definition.main_module_name
     module = _flatten_module(definition, module_name)  # TODO KORE supports imports, why is definition.kore flat?
+
+    # sorts
     module = _add_syntax_sorts(module)
     module = _add_collection_atts(module)
     module = _add_domain_value_atts(module)
+
+    # symbols
+    module = _pull_up_rewrites(module)
+    module = _discard_symbol_atts(module, [KAtt.PRODUCTION])
+    module = _discard_hook_atts(module)
+    module = _add_anywhere_atts(module)
+    module = _add_symbol_atts(module, KAtt.MACRO, _is_macro)
+    module = _add_symbol_atts(module, KAtt.FUNCTIONAL, _is_functional)
+    module = _add_symbol_atts(module, KAtt.INJECTIVE, _is_injective)
+    module = _add_symbol_atts(module, KAtt.CONSTRUCTOR, _is_constructor)
+
     return module
 
 
@@ -213,14 +327,14 @@ def _imported_sentences(definition: KDefinition, module_name: str) -> list[KSent
 
 
 def _add_syntax_sorts(module: KFlatModule) -> KFlatModule:
-    """Return a module with explicit syntax declarations: each sort is declared with the union of its attributes"""
+    """Return a module with explicit syntax declarations: each sort is declared with the union of its attributes."""
     sentences = [sentence for sentence in module if not isinstance(sentence, KSyntaxSort)]
     sentences += _syntax_sorts(module)
     return module.let(sentences=sentences)
 
 
 def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
-    """Return a declaration for each sort in the module"""
+    """Return a declaration for each sort in the module."""
     declarations: dict[KSort, KAtt] = {}
 
     def is_higher_order(production: KProduction) -> bool:
@@ -249,7 +363,7 @@ def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
 
 
 def _add_collection_atts(module: KFlatModule) -> KFlatModule:
-    """Return a module where concat, element and unit attributes are added to collection sort declarations"""
+    """Return a module where concat, element and unit attributes are added to collection sort declarations."""
 
     # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
     concat_prods = {prod.sort: prod for prod in module.productions if KAtt.ELEMENT in prod.att}
@@ -269,13 +383,14 @@ def _add_collection_atts(module: KFlatModule) -> KFlatModule:
 
         prod_att = concat_prods[syntax_sort.sort].att
 
-        # TODO Here, attriubtes are stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
         return syntax_sort.let(
             att=syntax_sort.att.update(
                 {
+                    # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
                     KAtt.CONCAT: KApply(prod_att[KAtt.KLABEL]).to_dict(),
-                    KAtt.ELEMENT: KApply(prod_att[KAtt.ELEMENT]).to_dict(),
-                    KAtt.UNIT: KApply(prod_att[KAtt.UNIT]).to_dict(),
+                    # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
+                    KAtt.ELEMENT: prod_att[KAtt.ELEMENT],
+                    KAtt.UNIT: prod_att[KAtt.UNIT],
                 }
             )
         )
@@ -285,9 +400,9 @@ def _add_collection_atts(module: KFlatModule) -> KFlatModule:
 
 
 def _add_domain_value_atts(module: KFlatModule) -> KFlatModule:
-    """
-    Return a module where attribute "hasDomainValues" is added to all
-    sort declarations that either have the "token" attribute directly,
+    """Return a module where attribute "hasDomainValues" is added to all sort declarations that apply.
+
+    The requirement on a sort declaration is to either have the "token" attribute directly
     or on a corresponding production.
     """
 
@@ -321,6 +436,203 @@ def _token_sorts(module: KFlatModule) -> set[KSort]:
             res.add(production.sort)
 
     return res
+
+
+def _pull_up_rewrites(module: KFlatModule) -> KFlatModule:
+    """Ensure that each rule is of the form X => Y."""
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KRule):
+            return sentence
+        if isinstance(sentence.body, KRewrite):
+            return sentence
+        rewrite = KRewrite(
+            lhs=extract_lhs(sentence.body),
+            rhs=extract_rhs(sentence.body),
+        )
+        return sentence.let(body=rewrite)
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _add_anywhere_atts(module: KFlatModule) -> KFlatModule:
+    """Add the anywhere attribute to all symbol productions that are overloads or have a corresponding anywhere rule."""
+
+    rules = _rules_by_klabel(module)
+    productions_by_klabel_att = _productions_by_klabel_att(module.productions)
+    defn = KDefinition(module.name, (module,))  # for getting the sort lattice
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        klabel = sentence.klabel
+        if any(KAtt.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
+            return sentence.let(att=sentence.att.update({KAtt.ANYWHERE: ''}))
+
+        if KAtt.KLABEL not in sentence.att:
+            return sentence
+
+        productions = productions_by_klabel_att.get(sentence.att[KAtt.KLABEL], [])
+        if any(_is_overloaded_by(defn, production, sentence) for production in productions):
+            return sentence.let(att=sentence.att.update({KAtt.ANYWHERE: ''}))
+
+        return sentence
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
+    """Return a dict that maps a label l to the list of all rules l => X.
+
+    If a label does not have a matching rule, it will be not contained in the dict.
+    The function expects that all rules have a rewrite on top.
+    """
+    res: dict[KLabel, list[KRule]] = {}
+    for rule in module.rules:
+        assert isinstance(rule.body, KRewrite)
+        if not isinstance(rule.body.lhs, KApply):
+            continue
+        label = rule.body.lhs.label
+        res.setdefault(label, []).append(rule)
+    return res
+
+
+def _add_symbol_atts(module: KFlatModule, att: str, pred: Callable[[KAtt], bool]) -> KFlatModule:
+    """Add attribute to symbol productions based on a predicate predicate."""
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:  # filter for symbol productions
+            return sentence
+
+        if pred(sentence.att):
+            return sentence.let(att=sentence.att.update({att: ''}))
+
+        return sentence
+
+    return module.let(sentences=tuple(update(sent) for sent in module))
+
+
+def _is_macro(att: KAtt) -> bool:
+    return any(key in att for key in [KAtt.ALIAS, KAtt.ALIAS_REC, KAtt.MACRO, KAtt.MACRO_REC])
+
+
+def _is_functional(att: KAtt) -> bool:
+    return KAtt.FUNCTION not in att or KAtt.TOTAL in att
+
+
+def _is_injective(att: KAtt) -> bool:
+    return not any(
+        key in att
+        for key in [
+            KAtt.FUNCTION,
+            KAtt.ASSOC,
+            KAtt.COMM,
+            KAtt.IDEM,
+            KAtt.UNIT,
+        ]
+    )
+
+
+def _is_constructor(att: KAtt) -> bool:
+    return not any(
+        key in att
+        for key in [
+            KAtt.FUNCTION,
+            KAtt.ASSOC,
+            KAtt.COMM,
+            KAtt.IDEM,
+            KAtt.UNIT,
+            KAtt.MACRO,
+            KAtt.ANYWHERE,
+        ]
+    )
+
+
+def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = ()) -> KFlatModule:
+    """Remove hooks attributes from symbol productions that are either 1) array hooks or 2) not built in and not activated."""
+
+    def is_real_hook(hook: str) -> bool:
+        if hook.startswith('ARRAY.'):
+            return False
+        namespaces = (*hook_namespaces, *HOOK_NAMESPACES)
+        return hook.startswith(tuple(f'{namespace}.' for namespace in namespaces))
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        if not KAtt.HOOK in sentence.att:
+            return sentence
+
+        hook = sentence.att[KAtt.HOOK]
+        if not is_real_hook(hook):
+            return sentence.let(att=sentence.att.remove([KAtt.HOOK]))
+
+        return sentence
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _discard_symbol_atts(module: KFlatModule, atts: Iterable[str]) -> KFlatModule:
+    """Remove certain attributes from symbol productions."""
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        return sentence.let(att=sentence.att.remove(atts))
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _productions_by_klabel_att(productions: Iterable[KProduction]) -> dict[str, list[KProduction]]:
+    res: dict[str, list[KProduction]] = {}
+    for production in productions:
+        if not production.klabel:
+            continue
+        if KAtt.KLABEL not in production.att:
+            continue
+        res.setdefault(production.att[KAtt.KLABEL], []).append(production)
+    return res
+
+
+def _is_overloaded_by(defn: KDefinition, prod1: KProduction, prod2: KProduction) -> bool:
+    if not prod1.klabel:
+        raise ValueError(f'Expected symbol production, got: {prod1}')
+    if not prod2.klabel:
+        raise ValueError(f'Expected symbol production, got: {prod2}')
+    if KAtt.KLABEL not in prod1.att:
+        return False
+    if KAtt.KLABEL not in prod2.att:
+        return False
+    if prod1.att[KAtt.KLABEL] != prod2.att[KAtt.KLABEL]:
+        return False
+    arg_sorts1 = prod1.argument_sorts
+    arg_sorts2 = prod2.argument_sorts
+    if len(arg_sorts1) != len(arg_sorts2):
+        return False
+    if prod1.sort not in defn.subsorts(prod2.sort):
+        return False
+    if any(sort1 not in defn.subsorts(sort2) for sort1, sort2 in zip(arg_sorts1, arg_sorts2, strict=True)):
+        return False
+    return prod1 != prod2
 
 
 # ------------
