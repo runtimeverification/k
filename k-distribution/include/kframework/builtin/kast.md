@@ -546,7 +546,7 @@ regular K rules to disambiguate as necessary.
 ```k
 module K-AMBIGUITIES
 
-  syntax {Sort} Sort ::= amb(Sort, Sort) [symbol]
+  syntax {Sort} Sort ::= amb(Sort, Sort) [klabel(amb), symbol]
 
 endmodule
 ```
@@ -566,7 +566,7 @@ module K-LOCATIONS
   imports INT-SYNTAX
 
   // filename, startLine, startCol, endLine, endCol
-  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [symbol, format(%3)]
+  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [klabel(#location), symbol, format(%3)]
 
 endmodule
 ```

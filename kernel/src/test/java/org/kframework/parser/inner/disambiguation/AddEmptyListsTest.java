@@ -97,7 +97,7 @@ public class AddEmptyListsTest {
           + "syntax As ::= List{A,\",\"} [klabel(as)]\n"
           + "syntax Bs ::= List{B,\",\"} [klabel(as)]\n"
           + "syntax As ::= Bs\n"
-          + "syntax K ::= f(As) [symbol] | g(A) [symbol] | h(Bs) [symbol]"
+          + "syntax K ::= f(As) [klabel(f), symbol] | g(A) [klabel(g), symbol] | h(Bs) [klabel(h), symbol]"
           + "endmodule\n";
 
   public static final KApply NIL = KApply(KLabel(".List{\"_,__TEST_Bs_B_Bs\"}_Bs"));
