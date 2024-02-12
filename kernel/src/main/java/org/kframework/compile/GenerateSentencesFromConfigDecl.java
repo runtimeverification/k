@@ -793,12 +793,7 @@ public class GenerateSentencesFromConfigDecl {
                       .orElseThrow(
                           () ->
                               KEMException.compilerError(
-                                  "Unrecognized attribute: "
-                                      + keyToken.s()
-                                      + "\n"
-                                      + "Hint: User-defined groups can be added with the"
-                                      + " group=\"...\" attribute.",
-                                  k));
+                                  "Unrecognized property: " + keyToken.s(), k));
               if (kapp.klist().items().get(0) instanceof KToken) {
                 KToken valueToken = (KToken) kapp.klist().items().get(1);
                 if (valueToken.sort().equals(Sorts.KString())) {

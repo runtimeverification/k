@@ -356,10 +356,7 @@ public class JsonParser {
                             "Unrecognized attribute "
                                 + key
                                 + " found in KAST Json term when unparsing KATT: "
-                                + attMap
-                                + "\n"
-                                + "Hint: User-defined groups can be added with the group(_)"
-                                + " attribute."));
+                                + attMap));
         newAtt = newAtt.add(attKey, attMap.getString(key));
       }
     }
