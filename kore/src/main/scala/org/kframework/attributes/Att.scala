@@ -344,37 +344,32 @@ object Att {
   final val WRAP_ELEMENT  = Key.builtin("wrapElement", KeyParameter.Required, onlyon[Production])
 
   /* Internal attribute keys which cannot appear in user source code */
-  final val ANONYMOUS                    = Key("anonymous", KeyType.Internal)
-  final val BRACKET_LABEL                = Key("bracketLabel", KeyType.Internal)
-  final val CELL_FRAGMENT                = Key("cellFragment", KeyType.Internal)
-  final val CELL_OPT_ABSENT              = Key("cellOptAbsent", KeyType.Internal)
-  final val CELL_SORT                    = Key("cellSort", KeyType.Internal)
-  final val CONCAT                       = Key("concat", KeyType.Internal)
-  final val CONTENT_START_COLUMN         = Key("contentStartColumn", KeyType.Internal)
-  final val CONTENT_START_LINE           = Key("contentStartLine", KeyType.Internal)
-  final val COOL_LIKE                    = Key("cool-like", KeyType.Internal)
-  final val DENORMAL                     = Key("denormal", KeyType.Internal)
-  final val DIGEST                       = Key("digest", KeyType.Internal)
-  final val DUMMY_CELL                   = Key("dummy_cell", KeyType.Internal)
-  final val FILTER_ELEMENT               = Key("filterElement", KeyType.Internal)
-  final val FRESH                        = Key("fresh", KeyType.Internal)
-  final val GENERATED_BY_LIST_SUBSORTING = Key("generatedByListSubsorting", KeyType.Internal)
-  final val HAS_DOMAIN_VALUES            = Key("hasDomainValues", KeyType.Internal)
-  final val LEFT_INTERNAL                = Key("left", KeyType.Internal)
-  final val LOCATION                     = Key(classOf[Location].getName, KeyType.Internal)
-  final val NAT                          = Key("nat", KeyType.Internal)
-  final val NOT_INJECTION                = Key("notInjection", KeyType.Internal)
-  final val NOT_LR1_MODULES              = Key("not-lr1-modules", KeyType.Internal)
-  final val ORIGINAL_NAME                = Key("originalName", KeyType.Internal)
-  final val ORIGINAL_PRD                 = Key("originalPrd", KeyType.Internal)
-  final val PATTERN                      = Key("pattern", KeyType.Internal)
-  final val PATTERN_FOLDING              = Key("pattern-folding", KeyType.Internal)
-  final val PREDICATE                    = Key("predicate", KeyType.Internal)
+  final val ANONYMOUS            = Key("anonymous", KeyType.Internal)
+  final val BRACKET_LABEL        = Key("bracketLabel", KeyType.Internal)
+  final val CELL_FRAGMENT        = Key("cellFragment", KeyType.Internal)
+  final val CELL_OPT_ABSENT      = Key("cellOptAbsent", KeyType.Internal)
+  final val CELL_SORT            = Key("cellSort", KeyType.Internal)
+  final val CONCAT               = Key("concat", KeyType.Internal)
+  final val CONTENT_START_COLUMN = Key("contentStartColumn", KeyType.Internal)
+  final val CONTENT_START_LINE   = Key("contentStartLine", KeyType.Internal)
+  final val COOL_LIKE            = Key("cool-like", KeyType.Internal)
+  final val DENORMAL             = Key("denormal", KeyType.Internal)
+  final val DIGEST               = Key("digest", KeyType.Internal)
+  final val DUMMY_CELL           = Key("dummy_cell", KeyType.Internal)
+  final val FILTER_ELEMENT       = Key("filterElement", KeyType.Internal)
+  final val FRESH                = Key("fresh", KeyType.Internal)
+  final val HAS_DOMAIN_VALUES    = Key("hasDomainValues", KeyType.Internal)
+  final val LEFT_INTERNAL        = Key("left", KeyType.Internal)
+  final val LOCATION             = Key(classOf[Location].getName, KeyType.Internal)
+  final val NAT                  = Key("nat", KeyType.Internal)
+  final val NOT_INJECTION        = Key("notInjection", KeyType.Internal)
+  final val NOT_LR1_MODULES      = Key("not-lr1-modules", KeyType.Internal)
+  final val ORIGINAL_PRD         = Key("originalPrd", KeyType.Internal)
+  final val PREDICATE            = Key("predicate", KeyType.Internal)
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
     Key("prettyPrintWithSortAnnotation", KeyType.Internal)
   final val PRIORITIES               = Key("priorities", KeyType.Internal)
   final val PRODUCTION               = Key(classOf[Production].getName, KeyType.Internal)
-  final val PRODUCTION_ID            = Key("productionId", KeyType.Internal)
   final val PROJECTION               = Key("projection", KeyType.Internal)
   final val RECORD_PRD               = Key("recordPrd", KeyType.Internal)
   final val RECORD_PRD_ZERO          = Key("recordPrd-zero", KeyType.Internal)
@@ -385,9 +380,6 @@ object Att {
   final val RECORD_PRD_REPEAT        = Key("recordPrd-repeat", KeyType.Internal)
   final val RECORD_PRD_ITEM          = Key("recordPrd-item", KeyType.Internal)
   final val REFRESHED                = Key("refreshed", KeyType.Internal)
-  final val REGEX                    = Key("regex", KeyType.Internal)
-  final val REJECT                   = Key("reject", KeyType.Internal)
-  final val REMOVE                   = Key("remove", KeyType.Internal)
   final val RIGHT_INTERNAL           = Key("right", KeyType.Internal)
   final val SMT_PRELUDE              = Key("smt-prelude", KeyType.Internal)
   final val SORT                     = Key(classOf[Sort].getName, KeyType.Internal)
@@ -480,11 +472,9 @@ trait AttributesToString {
 
   lazy val toStrings: List[String] = {
     val stringClassName = classOf[String].getName
-    att
-      .filter { case ((Att.PRODUCTION_ID, _), _) => false; case _ => true }
-      .map {
-        case ((attKey, `stringClassName`), "") => attKey.key
-        case ((attKey, _), value)              => attKey.key + "(" + value + ")"
-      } toList
+    att.map {
+      case ((attKey, `stringClassName`), "") => attKey.key
+      case ((attKey, _), value)              => attKey.key + "(" + value + ")"
+    } toList
   }
 }

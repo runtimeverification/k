@@ -144,7 +144,6 @@ public class KPrint {
       case NONE:
       case BINARY:
       case JSON:
-      case LATEX:
         return serialize(result, outputMode);
       case PRETTY:
         Module prettyUnparsingModule =
@@ -187,7 +186,6 @@ public class KPrint {
       case NONE -> "".getBytes();
       case BINARY -> ToBinary.apply(term);
       case JSON -> ToJson.apply(term);
-      case LATEX -> ToLatex.apply(term);
       default -> throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
     };
   }
@@ -218,9 +216,8 @@ public class KPrint {
 
   public K abstractTerm(Module mod, K term) {
     K filteredSubst = options.noFilterSubstitution ? term : filterSubst(term, mod);
-    K origNames =
-        options.restoreOriginalNames ? restoreOriginalNameIfPresent(filteredSubst) : filteredSubst;
-    K collectionsSorted = options.noSortCollections ? origNames : sortCollections(mod, origNames);
+    K collectionsSorted =
+        options.noSortCollections ? filteredSubst : sortCollections(mod, filteredSubst);
     // non-determinism is still possible if associative/commutative collection terms start with
     // anonymous vars
     K alphaRenamed = options.noAlphaRenaming ? collectionsSorted : alphaRename(collectionsSorted);
@@ -354,18 +351,6 @@ public class KPrint {
       public K apply(KVariable k) {
         if (k.att().contains(Att.ANONYMOUS())) {
           return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
-        }
-        return k;
-      }
-    }.apply(input);
-  }
-
-  private K restoreOriginalNameIfPresent(K input) {
-    return new TransformK() {
-      @Override
-      public K apply(KVariable k) {
-        if (k.att().contains(Att.ORIGINAL_NAME())) {
-          return KVariable(k.att().get(Att.ORIGINAL_NAME()), k.att());
         }
         return k;
       }

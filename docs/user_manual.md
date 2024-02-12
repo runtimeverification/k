@@ -2961,7 +2961,6 @@ arguments. A legend describing how to interpret the index follows.
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `klabel(_)`           | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
-| `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
 | `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
 | `macro-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |

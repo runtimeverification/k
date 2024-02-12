@@ -12,7 +12,6 @@ public enum OutputModes {
   KAST,
   BINARY,
   JSON,
-  LATEX,
   KORE,
   NONE;
 }

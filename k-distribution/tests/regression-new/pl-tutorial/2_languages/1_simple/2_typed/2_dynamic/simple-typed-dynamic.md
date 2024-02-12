@@ -222,7 +222,7 @@ location and then never allow that type to change.  The typed
 undefined values effectively assign both a type and an undefined value
 to a location.
 ```k
-  syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
+  syntax KItem ::= undefined(Type)
 
   rule <k> T:Type X:Id; => . ...</k>
        <env> Env => Env[X <- L] </env>
@@ -578,8 +578,7 @@ Adds the corresponding depth to an array type
 ```
 Sequences of locations.
 ```k
-  syntax Map ::= Int "..." Int "|->" K
-    [function, latex({#1}\ldots{#2}\mapsto{#3})]
+  syntax Map ::= Int "..." Int "|->" K [function]
   rule N...M |-> _ => .Map  when N >Int M
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 

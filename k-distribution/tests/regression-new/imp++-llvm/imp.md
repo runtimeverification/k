@@ -131,7 +131,7 @@ of statements surrounded by curly brackets.
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
+                 | AExp "<=" AExp             [seqstrict]
                  | "!" BExp                   [strict]
                  | "(" BExp ")"               [bracket]
                  > BExp "&&" BExp             [left, strict(1)]
