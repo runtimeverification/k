@@ -325,7 +325,7 @@ object Att {
   final val SMT_LEMMA      = Key.builtin("smt-lemma", KeyParameter.Forbidden, onlyon[Rule])
   final val STREAM         = Key.builtin("stream", KeyParameter.Optional, onlyon2[Production, Rule])
   final val STRICT         = Key.builtin("strict", KeyParameter.Optional, onlyon[Production])
-  final val SYMBOL         = Key.builtin("symbol", KeyParameter.Forbidden, onlyon[Production])
+  final val SYMBOL         = Key.builtin("symbol", KeyParameter.Optional, onlyon[Production])
   final val SYMBOLIC =
     Key.builtin("symbolic", KeyParameter.Optional, onlyon3[Module, Production, Rule])
   final val TAG     = Key.builtin("tag", KeyParameter.Required, onlyon[Rule])
