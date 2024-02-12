@@ -105,6 +105,31 @@ public class Production extends ASTNode {
   }
 
   /**
+   * Gets the effective KLabel declared by the user, taking the `klabel` and `symbol` attributes
+   * into account.
+   *
+   * <p>The effective label is specified as follows:
+   *
+   * <ul>
+   *   <li>If the production has a `symbol(X)` attribute, the effective label is `X`.
+   *   <li>If the production has `klabel(X)`, then the effective label is `X`. This syntax will be
+   *       deprecated in the future.
+   *   <li>Otherwise, return null.
+   * </ul>
+   *
+   * @return A string representing the effective label, or null.
+   */
+  private String getDeclaredLabel() {
+    String symbol = getAttribute(Att.SYMBOL());
+
+    if (symbol != null && !symbol.isEmpty()) {
+      return symbol;
+    }
+
+    return getAttribute(Att.KLABEL());
+  }
+
+  /**
    * Gets the KLabel corresponding to this production. A production has a KLabel if and only if the
    * production flattens in KORE to a term which is of sort KItem (ie, is a function or a
    * constructor).
@@ -112,7 +137,7 @@ public class Production extends ASTNode {
    * @return
    */
   public String getKLabel(boolean kore) {
-    String klabel = getAttribute(Att.KLABEL());
+    String klabel = getDeclaredLabel();
     if (klabel == null
         && (isSyntacticSubsort()
             || containsAttribute(Att.TOKEN())
@@ -125,7 +150,7 @@ public class Production extends ASTNode {
   }
 
   public String getBracketLabel(boolean kore) {
-    String klabel = getAttribute(Att.KLABEL());
+    String klabel = getDeclaredLabel();
     if (klabel == null || (kore && getAttribute(Att.SYMBOL()) == null)) {
       klabel = getPrefixLabel(kore);
     }
