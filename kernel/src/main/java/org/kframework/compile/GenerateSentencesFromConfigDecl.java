@@ -773,11 +773,9 @@ public class GenerateSentencesFromConfigDecl {
       } else if (kapp.klabel().name().equals("#cellPropertyList")) {
         if (kapp.klist().size() == 2) {
           Tuple2<Att.Key, String> attribute = getCellProperty(kapp.klist().items().get(0));
-          return ProcessGroupAttributes.getProcessedAtt(
-              Att()
-                  .add(attribute._1(), attribute._2())
-                  .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1))),
-              k);
+          return Att()
+              .add(attribute._1(), attribute._2())
+              .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1)));
         }
       }
     }

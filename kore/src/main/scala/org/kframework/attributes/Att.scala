@@ -36,8 +36,6 @@ trait AttValue
  *   - Att.getBuiltInKeyOptional(myAttStr), if checking a user-supplied attribute string. Be sure to
  *     report an error if the lookup fails
  *   - Att.getInternalKeyOptional(myAttStr), if expecting an internal key
- *   - Att.getUserGroupOptional(myAttStr), if expecting a user-group, enforcing that it is not a
- *     built-in
  *
  * During parsing, you may also use Att.unrecognizedKey(myAttStr) to delay error reporting on an
  * unrecognized attribute
@@ -52,42 +50,6 @@ class Att private (val att: Map[(Att.Key, String), Any])
     case _      => false
   }
 
-  // Remove all UserGroups and replace them with a group(_) attribute
-  def withUserGroupsAsGroupAtt: Att = {
-    val groups = att.keys.filter(_._1.keyType.equals(Att.KeyType.UserGroup)).toSet
-    if (groups.isEmpty)
-      this
-    else
-      Att(att -- groups).add(Att.GROUP, groups.map(_._1.key).mkString(","))
-  }
-
-  // Remove the group(_) attribute and insert each of its arguments as a UserGroup
-  // Returns either Left of an error message or Right of the result
-  def withGroupAttAsUserGroups: Either[String, Att] = {
-    if (!contains(Att.GROUP, classOf[String]))
-      return Right(this)
-    val groups = get(Att.GROUP).trim
-    if (groups.isEmpty)
-      return Left("group(_) attribute expects a comma-separated list of arguments.")
-    val badComma = Left("Extraneous ',' in group(_) attribute.")
-    if (groups.startsWith(",") || groups.endsWith(","))
-      return badComma
-    var att = this
-    for (group <- groups.split("\\s*,\\s*")) {
-      if (group.isEmpty)
-        return badComma
-      val groupKey = Att.getUserGroupOptional(group)
-      if (groupKey.isEmpty)
-        return Left("User-defined group '" + group + "' conflicts with a built-in attribute.")
-      if (!group.matches("[a-z][a-zA-Z0-9-]*"))
-        return Left(
-          "Invalid argument '" + group + "' in group(_) attribute. " +
-            "Expected a lower case letter followed by any number of alphanumeric or '-' characters."
-        )
-      att = att.add(groupKey.get)
-    }
-    Right(att.remove(Att.GROUP))
-  }
   val unrecognizedKeys: Set[Att.Key] =
     att.map(_._1._1).filter(_.keyType.equals(Att.KeyType.Unrecognized)).toSet
 
@@ -171,13 +133,6 @@ object Att {
     case object BuiltIn extends KeyType
     // Attributes which are compiler-internal and cannot appear in user source code
     case object Internal extends KeyType
-    // Attributes which represent user-defined groups via group(_).
-    //
-    // WARNING: Although we treat the arguments to group(_) as individual attributes internally,
-    // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the
-    // group(_) attribute,
-    // else there will be conflicts when a user group has the same name as an internal attribute.
-    case object UserGroup extends KeyType
     // Attributes from user source code which are not recognized as built-ins
     // This is only used to delay error reporting until after parsing, allowing us to report
     // multiple errors
@@ -416,13 +371,6 @@ object Att {
   def getInternalKeyOptional(key: String): Optional[Key] =
     if (internalKeys.contains(key)) {
       Optional.of(internalKeys(key))
-    } else {
-      Optional.empty()
-    }
-
-  def getUserGroupOptional(group: String): Optional[Key] =
-    if (!builtinKeys.contains(group)) {
-      Optional.of(Key(group, KeyType.UserGroup, KeyParameter.Optional, onlyon[AnyRef]))
     } else {
       Optional.empty()
     }
