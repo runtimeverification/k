@@ -2617,7 +2617,7 @@ containing `name` in its name. The file is only flushed to disk when rewriting
 finishes.
 
 ```k
-  syntax K ::= #logToFile(name: String, value: String) [function, total, hook(IO.log), impure, returnsUnit, symbol]
+  syntax K ::= #logToFile(name: String, value: String) [function, total, hook(IO.log), impure, returnsUnit, klabel(#logToFile), symbol]
 ```
 
 Strings can also be logged via the logging mechanisms available to the backend.
@@ -2626,7 +2626,7 @@ Haskell backend, a log message of type InfoUserLog is created with the
 specified text.
 
 ```k
-  syntax K ::= #log(value: String) [function, total, hook(IO.logString), impure, returnsUnit, symbol]
+  syntax K ::= #log(value: String) [function, total, hook(IO.logString), impure, returnsUnit, klabel(#log), symbol]
 ```
 
 Terms can also be logged to standard error in _surface syntax_, rather than as
@@ -2637,8 +2637,8 @@ logged, which requires re-parsing the underlying K definition. Subsequent calls
 do not incur this overhead again; the definition is cached.
 
 ```k
-  syntax K ::= #trace(value: KItem) [function, total, hook(IO.traceTerm), impure, returnsUnit, symbol]
-             | #traceK(value: K)    [function, total, hook(IO.traceTerm), impure, returnsUnit, symbol]
+  syntax K ::= #trace(value: KItem) [function, total, hook(IO.traceTerm), impure, returnsUnit, klabel(#trace), symbol]
+             | #traceK(value: K)    [function, total, hook(IO.traceTerm), impure, returnsUnit, klabel(#traceK), symbol]
 ```
 
 ### Implementation of high-level I/O streams in K
@@ -3037,7 +3037,7 @@ module STRATEGY
 
     syntax #RuleTag ::= #KVariable
 
-    syntax Strategy ::= #STUCK()    [symbol]
+    syntax Strategy ::= #STUCK()    [symbol, klabel(#STUCK)]
                       | "^" #RuleTag [symbol, klabel(#applyRule)]
                       | "~" #RuleTag [symbol, klabel(#appliedRule)]
 
