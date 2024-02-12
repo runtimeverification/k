@@ -478,8 +478,8 @@ add more values later.
 
 ```k
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule I1 / I2 => I1 /Int I2 requires I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 requires I2 =/=K 0
   rule I1 + I2 => I1 +Int I2
   rule S1 ^ S2 => S1 +String S2
   rule I1 - I2 => I1 -Int I2
@@ -570,8 +570,8 @@ to the next one.
   rule (matchFailure => .) ~> closure(_, (_->_ | Cs:Cases => Cs)) _
 //  rule <k> closure(Rho, P->E | _) V:Val
 //           => bindMap(getMatching(P,V)) ~> E ~> setEnv(Rho') ...</k>
-//       <env> Rho' => Rho </env>  when isMatching(P,V)
-//  rule closure(_, (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
+//       <env> Rho' => Rho </env>  requires isMatching(P,V)
+//  rule closure(_, (P->_ | Cs:Cases => Cs)) V:Val  requires notBool isMatching(P,V)
 ```
 
 ## Let and Letrec
