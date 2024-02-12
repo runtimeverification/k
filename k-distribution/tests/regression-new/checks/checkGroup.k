@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-module TEST
+module CHECKGROUP
   syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token, prec(2)]
-               | Int "+" Int [group(function)]
+               | Int "+" Int [group(fun,)]
 endmodule
