@@ -4,8 +4,8 @@ module TEST-SYNTAX
 
   syntax Exp ::= Val
                | Exp "+" Exp
-               | foo(Exp, Exp, Int)
-  syntax Val ::= foo(Val, Val, Int)
+               | foo(Exp, Exp, Int) [klabel(foo)]
+  syntax Val ::= foo(Val, Val, Int) [klabel(foo)]
                | Int
 
 endmodule
