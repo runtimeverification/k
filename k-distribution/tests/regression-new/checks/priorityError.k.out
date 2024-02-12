@@ -9,10 +9,10 @@
 	22 |	    rule . => 1 r + 2 // unable to disambiguate - error
 	   .	              ^~~
 [Error] Inner Parser: Parsing ambiguity.
-1: syntax Exp ::= Exp "r" [klabel(rguard), symbol]
-    rguard(lguard(#token("1","Int")))
-2: syntax Exp ::= "l" Exp [klabel(lguard), symbol]
+1: syntax Exp ::= "l" Exp [klabel(lguard), symbol]
     lguard(rguard(#token("1","Int")))
+2: syntax Exp ::= Exp "r" [klabel(rguard), symbol]
+    rguard(lguard(#token("1","Int")))
 	Source(priorityError.k)
 	Location(23,15,23,20)
 	23 |	    rule . => l 1 r   // ambiguous - error

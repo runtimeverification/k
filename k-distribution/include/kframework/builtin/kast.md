@@ -88,7 +88,6 @@ module KAST
 
   syntax KList ::= K
                  | ".KList"          [klabel(#EmptyKList), symbol]
-                 | ".::KList"        [klabel(#EmptyKList), symbol]
                  | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), symbol, prefer]
 endmodule
 
@@ -140,8 +139,6 @@ module ML-SYNTAX [not-lr1]
 
   syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, group(mlUnary)]
                        | "#Bottom" [klabel(#Bottom), symbol, group(mlUnary)]
-                       | "#True" [klabel(#Top), symbol, group(mlUnary), unparseAvoid]
-                       | "#False" [klabel(#Bottom), symbol, group(mlUnary), unparseAvoid]
                        | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary)]
 
   syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary)]
@@ -349,10 +346,8 @@ module REQUIRES-ENSURES
 
   syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
                         | #RuleBody "requires" Bool                 [klabel("#ruleRequires"), symbol]
-                        | #RuleBody "when" Bool                     [klabel("#ruleRequires"), symbol]
                         | #RuleBody "ensures"  Bool                 [klabel("#ruleEnsures"), symbol]
                         | #RuleBody "requires" Bool "ensures" Bool  [klabel("#ruleRequiresEnsures"), symbol]
-                        | #RuleBody "when" Bool "ensures" Bool      [klabel("#ruleRequiresEnsures"), symbol]
 endmodule
 ```
 
