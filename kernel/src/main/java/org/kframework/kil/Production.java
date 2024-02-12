@@ -111,8 +111,7 @@ public class Production extends ASTNode {
    * <p>The effective label is specified as follows:
    *
    * <ul>
-   *   <li>If the production has a `symbol(X)` attribute, the effective label is `X` and `klabel` is
-   *       ignored.
+   *   <li>If the production has a `symbol(X)` attribute, the effective label is `X`.
    *   <li>If the production has `klabel(X)`, then the effective label is `X`. This syntax will be
    *       deprecated in the future.
    *   <li>Otherwise, return null.
