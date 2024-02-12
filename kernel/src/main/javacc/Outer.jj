@@ -788,12 +788,11 @@ void PriorityBlock(List<PriorityBlock> pblocks) :
 /** Parses a Production and adds it to 'prods' */
 void Production(List<Production> prods) :
 { Location loc = startLoc(); NonTerminal nonTerminal;
-  List<ProductionItem> items = new ArrayList<ProductionItem>();
-  String klabel = null; }
+  List<ProductionItem> items = new ArrayList<ProductionItem>(); }
 {
 ( LOOKAHEAD((UpperId() | <LOWER_ID>) "(")
   (UpperId() | <LOWER_ID>)
-  { items.add(tokenLoc(new Terminal(image()))); klabel = image(); }
+  { items.add(tokenLoc(new Terminal(image()))); }
   "("              { items.add(tokenLoc(new Terminal(image()))); }
   (nonTerminal = SortID()  { items.add(nonTerminal); }
   (","             { items.add(tokenLoc(new Terminal(image()))); }
@@ -809,10 +808,7 @@ void Production(List<Production> prods) :
 | (ProductionItem(items))+
 ) { Production prod = new Production(new NonTerminal(Sort(""), Optional.empty()), items); }
   (Attributes(prod))?
-  { if (klabel != null && prod.getAttribute(Att.KLABEL()) == null) {
-      prod.addAttribute(Att.KLABEL(), klabel);
-    }
-    prods.add(markLoc(loc, prod)); }
+  { prods.add(markLoc(loc, prod)); }
 }
 
 /** Parses a ProductionItem and adds it to 'items' */
