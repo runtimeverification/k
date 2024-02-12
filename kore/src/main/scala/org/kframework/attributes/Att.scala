@@ -54,7 +54,7 @@ class Att private (val att: Map[(Att.Key, String), Any])
 
   // Remove all UserGroups and replace them with a group(_) attribute
   def withUserGroupsAsGroupAtt: Att = {
-    val groups = att.keys.filter(_._1.keyType.equals(Att.KeyType.UserGroup)).toSet;
+    val groups = att.keys.filter(_._1.keyType.equals(Att.KeyType.UserGroup)).toSet
     if (groups.isEmpty)
       this
     else
@@ -168,30 +168,30 @@ object Att {
   sealed trait KeyType
   private object KeyType extends Serializable {
     // Attributes which are built-in and can appear in user source code
-    case object BuiltIn extends KeyType;
+    case object BuiltIn extends KeyType
     // Attributes which are compiler-internal and cannot appear in user source code
-    case object Internal extends KeyType;
+    case object Internal extends KeyType
     // Attributes which represent user-defined groups via group(_).
     //
     // WARNING: Although we treat the arguments to group(_) as individual attributes internally,
     // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the
     // group(_) attribute,
     // else there will be conflicts when a user group has the same name as an internal attribute.
-    case object UserGroup extends KeyType;
+    case object UserGroup extends KeyType
     // Attributes from user source code which are not recognized as built-ins
     // This is only used to delay error reporting until after parsing, allowing us to report
     // multiple errors
-    case object Unrecognized extends KeyType;
+    case object Unrecognized extends KeyType
   }
 
   sealed trait KeyParameter
   private object KeyParameter extends Serializable {
     // Attributes that must have parameters passed in (ie. [prec(25)]
-    case object Required extends KeyParameter;
+    case object Required extends KeyParameter
     // Attributes which may or may not have a parameter
-    case object Optional extends KeyParameter;
+    case object Optional extends KeyParameter
     // Attributes which may not have a parameter (ie. [function])
-    case object Forbidden extends KeyParameter;
+    case object Forbidden extends KeyParameter
   }
 
   /* The Key class can only be constructed within Att. To enforce this, we must
@@ -232,11 +232,11 @@ object Att {
 
   // Some helpers with scala reflection to make declaring class object sets more compact
   // If these break for some reason, replace their usage with Set(classOf[T1], classOf[T2], ...)
-  private def onlyon[T: ClassTag](): Set[Class[_]]                 = Set(classTag[T].runtimeClass)
-  private def onlyon2[T1: ClassTag, T2: ClassTag](): Set[Class[_]] = onlyon[T1] ++ onlyon[T2]
-  private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag](): Set[Class[_]] =
+  private def onlyon[T: ClassTag]: Set[Class[_]]                 = Set(classTag[T].runtimeClass)
+  private def onlyon2[T1: ClassTag, T2: ClassTag]: Set[Class[_]] = onlyon[T1] ++ onlyon[T2]
+  private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag]: Set[Class[_]] =
     onlyon2[T1, T2] ++ onlyon[T3]
-  private def onlyon4[T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag](): Set[Class[_]] =
+  private def onlyon4[T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag]: Set[Class[_]] =
     onlyon3[T1, T2, T3] ++ onlyon[T4]
 
   /* Built-in attribute keys which can appear in user source code */
@@ -408,14 +408,14 @@ object Att {
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
     if (builtinKeys.contains(key)) {
-      Optional.of(builtinKeys.get(key).get)
+      Optional.of(builtinKeys(key))
     } else {
       Optional.empty()
     }
 
   def getInternalKeyOptional(key: String): Optional[Key] =
     if (internalKeys.contains(key)) {
-      Optional.of(internalKeys.get(key).get)
+      Optional.of(internalKeys(key))
     } else {
       Optional.empty()
     }
