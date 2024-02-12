@@ -70,6 +70,7 @@ public class CheckAtt {
     checkTotal(prod);
     checkTerminatorKLabel(prod);
     checkLatex(prod);
+    checkSymbolKLabel(prod);
   }
 
   private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
@@ -336,6 +337,17 @@ public class CheckAtt {
           errors,
           "The attribute 'latex' has been deprecated and all of its functionality has been removed. Using it will be an error in the future.",
           prod);
+    }
+  }
+
+  private void checkSymbolKLabel(Production prod) {
+    if (prod.att().contains(Att.SYMBOL()) && prod.att().contains(Att.KLABEL())) {
+      if (!prod.att().get(Att.SYMBOL()).isEmpty()) {
+        errors.add(
+            KEMException.compilerError(
+                "The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.",
+                prod));
+      }
     }
   }
 }
