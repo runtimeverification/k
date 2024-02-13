@@ -71,6 +71,7 @@ public class CheckAtt {
     checkTerminatorKLabel(prod);
     checkLatex(prod);
     checkSymbolKLabel(prod);
+    checkKLabelOverload(prod);
   }
 
   private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
@@ -348,6 +349,14 @@ public class CheckAtt {
                 "The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.",
                 prod));
       }
+    }
+  }
+
+  private void checkKLabelOverload(Production prod) {
+    if (prod.att().contains(Att.KLABEL()) && prod.att().contains(Att.OVERLOAD())) {
+      errors.add(
+          KEMException.compilerError(
+              "The attributes `klabel(_)` and `overload(_)` may not occur together.", prod));
     }
   }
 }
