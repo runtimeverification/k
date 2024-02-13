@@ -128,8 +128,7 @@ public class KoreBackend implements Backend {
                 .apply(d);
     DefinitionTransformer resolveHeatCoolAttribute =
         DefinitionTransformer.fromSentenceTransformer(
-            new ResolveHeatCoolAttribute(new HashSet<>())::resolve,
-            "resolving heat and cool attributes");
+            ResolveHeatCoolAttribute::resolve, "resolving heat and cool attributes");
     DefinitionTransformer resolveAnonVars =
         DefinitionTransformer.fromSentenceTransformer(
             new ResolveAnonVar()::resolve, "resolving \"_\" vars");
