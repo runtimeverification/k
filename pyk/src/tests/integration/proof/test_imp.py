@@ -14,8 +14,8 @@ from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
-from pyk.proof import APRBMCProof, APRBMCProver, APRProof, APRProver, ProofStatus
-from pyk.proof.show import APRBMCProofNodePrinter, APRProofNodePrinter
+from pyk.proof import APRProof, APRProver, ProofStatus
+from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
@@ -944,11 +944,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         )
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
-        prover = APRProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
-
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(
             max_iterations=max_iterations,
             execute_depth=max_depth,
@@ -986,13 +982,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
 
-        proof = APRBMCProof.from_claim_with_bmc_depth(kprove.definition, claim, bmc_depth)
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, bmc_depth=bmc_depth)
         kcfg_explore.simplify(proof.kcfg, {})
-
-        prover = APRBMCProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(
             max_iterations=max_iterations,
             execute_depth=max_depth,
@@ -1001,7 +993,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         )
 
         kcfg_show = KCFGShow(
-            kcfg_explore.kprint, node_printer=APRBMCProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
+            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
@@ -1032,10 +1024,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={})
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof()
 
         failure_info = prover.failure_info()
@@ -1066,12 +1055,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         )
         proofs_dir = proof_dir
 
-        proof = APRProof.from_claim(kprove.definition, claim, proof_dir=proofs_dir, logs={})
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proofs_dir)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(execute_depth=1)
 
         proof_from_disk = APRProof.read_proof_data(proof_dir=proofs_dir, id=proof.id)
@@ -1094,15 +1080,12 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         )
         proofs_dir = proof_dir
 
-        proof = APRBMCProof.from_claim_with_bmc_depth(kprove.definition, claim, proof_dir=proofs_dir, bmc_depth=3)
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proofs_dir, bmc_depth=3)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRBMCProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(execute_depth=1)
 
-        proof_from_disk = APRBMCProof.read_proof_data(proof_dir=proofs_dir, id=proof.id)
+        proof_from_disk = APRProof.read_proof_data(proof_dir=proofs_dir, id=proof.id)
 
         assert proof.dict == proof_from_disk.dict
         assert proof.kcfg.nodes == proof_from_disk.kcfg.nodes
@@ -1121,18 +1104,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             )
         )
 
-        proof = APRProof.from_claim(
-            kprove.definition,
-            claim,
-            logs={},
-            proof_dir=proof_dir,
-        )
-
-        prover = APRProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
-
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(fail_fast=False)
 
         # Both branches will be checked and fail (fail_fast=False)
@@ -1141,17 +1114,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert len(proof._terminal) == 3
         assert len(proof.failing) == 2
 
-        proof = APRProof.from_claim(
-            kprove.definition,
-            claim,
-            logs={},
-            proof_dir=proof_dir,
-        )
-
-        prover = APRProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
 
         prover.advance_proof(fail_fast=True)
 
