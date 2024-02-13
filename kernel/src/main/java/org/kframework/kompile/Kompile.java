@@ -65,6 +65,7 @@ import org.kframework.utils.RunProcess;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -543,6 +544,8 @@ public class Kompile {
       Option<Module> kModule,
       Set<Att.Key> excludedModuleTags) {
     checkAnywhereRules(modules);
+    checkOverloads(modules);
+
     boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
     CheckRHSVariables checkRHSVariables =
         new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
@@ -625,6 +628,26 @@ public class Kompile {
       kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
       throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
     }
+  }
+
+  private void checkOverloads(Module module) {
+    var withOverload = module.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
+
+    stream(withOverload)
+        .forEach(
+            p -> {
+              if (!module.overloads().elements().contains(p)) {
+                kem.registerCompilerWarning(
+                    KException.ExceptionType.SINGLETON_OVERLOAD,
+                    errors,
+                    "Production has an `overload(_)` attribute but is not an overload of any other production.",
+                    p);
+              }
+            });
+  }
+
+  private void checkOverloads(scala.collection.Set<Module> modules) {
+    stream(modules).forEach(this::checkOverloads);
   }
 
   private void checkAnywhereRules(scala.collection.Set<Module> modules) {
