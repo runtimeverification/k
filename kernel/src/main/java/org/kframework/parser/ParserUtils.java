@@ -22,7 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -82,7 +81,6 @@ public class ParserUtils {
     def.setItems(Outer.parse(source, definitionText, null));
     def.setMainModule(mainModule);
 
-    ProcessGroupAttributes.apply(def);
     Context context = new Context();
     new CollectProductionsVisitor(context).visit(def);
 
@@ -117,9 +115,6 @@ public class ParserUtils {
       }
     }
     List<DefinitionItem> items = Outer.parse(source, definitionText, null);
-    items.stream()
-        .filter((d) -> d instanceof org.kframework.kil.Module)
-        .forEach((m) -> ProcessGroupAttributes.apply((org.kframework.kil.Module) m));
 
     if (options.verbose) {
       System.out.println("Importing: " + source);
@@ -227,7 +222,6 @@ public class ParserUtils {
     Definition def = new Definition();
     def.setItems((List<DefinitionItem>) (Object) kilModules);
 
-    ProcessGroupAttributes.apply(def);
     new CollectProductionsVisitor(context).visit(def);
 
     // Tuple4 of moduleName, Source, Location, digest

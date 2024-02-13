@@ -773,11 +773,9 @@ public class GenerateSentencesFromConfigDecl {
       } else if (kapp.klabel().name().equals("#cellPropertyList")) {
         if (kapp.klist().size() == 2) {
           Tuple2<Att.Key, String> attribute = getCellProperty(kapp.klist().items().get(0));
-          return ProcessGroupAttributes.getProcessedAtt(
-              Att()
-                  .add(attribute._1(), attribute._2())
-                  .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1))),
-              k);
+          return Att()
+              .add(attribute._1(), attribute._2())
+              .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1)));
         }
       }
     }
@@ -795,12 +793,7 @@ public class GenerateSentencesFromConfigDecl {
                       .orElseThrow(
                           () ->
                               KEMException.compilerError(
-                                  "Unrecognized attribute: "
-                                      + keyToken.s()
-                                      + "\n"
-                                      + "Hint: User-defined groups can be added with the"
-                                      + " group=\"...\" attribute.",
-                                  k));
+                                  "Unrecognized property: " + keyToken.s(), k));
               if (kapp.klist().items().get(0) instanceof KToken) {
                 KToken valueToken = (KToken) kapp.klist().items().get(1);
                 if (valueToken.sort().equals(Sorts.KString())) {
