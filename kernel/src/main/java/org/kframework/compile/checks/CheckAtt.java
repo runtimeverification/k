@@ -79,8 +79,7 @@ public class CheckAtt {
       errors.add(
           KEMException.compilerError(
               "Unrecognized attributes: "
-                  + stream(term.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
-                  + "\nHint: User-defined groups can be added with the group(_) attribute.",
+                  + stream(term.att().unrecognizedKeys()).map(Key::toString).sorted().toList(),
               term));
     }
   }

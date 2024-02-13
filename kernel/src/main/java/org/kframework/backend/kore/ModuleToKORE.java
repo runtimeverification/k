@@ -1863,8 +1863,7 @@ public class ModuleToKORE {
   }
 
   private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
-    for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
-        iterable(att.withUserGroupsAsGroupAtt().att())) {
+    for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.att())) {
       Att.Key name = attribute._1._1;
       Object val = attribute._2;
       String strVal = val.toString();
@@ -2023,9 +2022,6 @@ public class ModuleToKORE {
       HasLocation location) {
     sb.append("[");
     String conn = "";
-
-    // Emit user groups as group(_) to prevent conflicts between user groups and internals
-    att = att.withUserGroupsAsGroupAtt();
 
     for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
         // Sort to stabilize error messages

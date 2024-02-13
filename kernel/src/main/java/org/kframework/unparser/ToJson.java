@@ -128,9 +128,6 @@ public class ToJson {
   }
 
   public static JsonStructure toJson(Att att) {
-    // Emit user groups as group(_) to prevent conflicts between user groups and internals
-    att = att.withUserGroupsAsGroupAtt();
-
     JsonObjectBuilder jatt = factory.createObjectBuilder();
     jatt.add("node", JsonParser.KATT);
 

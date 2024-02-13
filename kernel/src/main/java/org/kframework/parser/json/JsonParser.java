@@ -47,7 +47,6 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.collection.JavaConverters;
-import scala.util.Either;
 
 /** Parses a Json term into the KORE data structures. */
 public class JsonParser {
@@ -357,21 +356,11 @@ public class JsonParser {
                             "Unrecognized attribute "
                                 + key
                                 + " found in KAST Json term when unparsing KATT: "
-                                + attMap
-                                + "\n"
-                                + "Hint: User-defined groups can be added with the group(_)"
-                                + " attribute."));
+                                + attMap));
         newAtt = newAtt.add(attKey, attMap.getString(key));
       }
     }
-    Either<String, Att> newAttOrError = newAtt.withGroupAttAsUserGroups();
-    if (newAttOrError.isLeft()) {
-      throw KEMException.criticalError(
-          newAttOrError.left().get()
-              + "\nOccurred in KAST Json term when unparsing KATT: "
-              + attMap);
-    }
-    return newAttOrError.right().get();
+    return newAtt;
   }
 
   ////////////////////

@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.compile.checks.CheckBracket;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
@@ -384,9 +383,7 @@ public class KILtoKORE extends KILTransformation<Object> {
   }
 
   public static org.kframework.attributes.Att convertAttributes(ASTNode t) {
-    Att attributes = ProcessGroupAttributes.getProcessedAtt(t.getAttributes(), t);
-
-    return attributes
+    return t.getAttributes()
         .addAll(attributesFromLocation(t.getLocation()))
         .addAll(attributesFromSource(t.getSource()));
   }
