@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from ..kcfg import KCFG
     from ..kcfg.kcfg import NodeIdLike
     from ..ktool.kprint import KPrint
-    from .reachability import APRBMCProof, APRProof
+    from .reachability import APRProof
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -40,17 +40,6 @@ class APRProofNodePrinter(NodePrinter):
             attrs.append('terminal')
             if 'stuck' in attrs:
                 attrs.remove('stuck')
-        return attrs
-
-
-class APRBMCProofNodePrinter(APRProofNodePrinter):
-    proof: APRBMCProof
-
-    def __init__(self, proof: APRBMCProof, kprint: KPrint, full_printer: bool = False, minimize: bool = False):
-        super().__init__(proof, kprint, full_printer=full_printer, minimize=minimize)
-
-    def node_attrs(self, kcfg: KCFG, node: KCFG.Node) -> list[str]:
-        attrs = super().node_attrs(kcfg, node)
         if self.proof.is_bounded(node.id):
             attrs.append('bounded')
             if 'stuck' in attrs:
