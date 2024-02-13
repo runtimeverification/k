@@ -1088,7 +1088,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         for module in self.all_modules:
             for unique_id, sent in module.sentence_by_unique_id.items():
                 if unique_id in unique_id_map and sent != unique_id_map[unique_id]:
-                    _LOGGER.warning(
+                    _LOGGER.debug(
                         f'Same UNIQUE_ID found for two different sentences: {(sent, unique_id_map[unique_id])}'
                     )
                 else:
