@@ -349,11 +349,96 @@ this way; it would be an error to apply `symbol(foo)` to another production in
 the module above. Additionally, `symbol(_)` with an argument may not co-occur
 with the `klabel(_)` attribute (see below).
 
+### `overload` attribute
+
+K supports _subsort overloading_[^maude-overload] on symbols, whereby a 
+constructor can have a more specific sort for certain arguments. For example,
+consider the following productions derived from a C-like language semantics:
+```k
+syntax Exp  ::= LVal
+              | Exp  "." Id
+syntax LVal ::= LVal "." Id
+```
+
+Here, it is useful for the result of the dot operator to be an `LVal` if the
+left-hand side is itself an `LVal`. However, there is an issue with the code
+as written: if `L()` is a term of sort `LVal`, then the program `L() . x` has a
+parsing ambiguity between the two productions for the dot operator. To resolve
+this, we can mark the productions as _overloads_:
+```k
+syntax Exp  ::= LVal
+              | Exp  "." Id [overload(_._)]
+syntax LVal ::= LVal "." Id [overload(_._)]
+```
+
+Now, the parser will select the _most specific_ overloaded production when it
+resolves ambiguities in `L() . x` (that is, `L() . x` parses to a term of sort
+`LVal`.
+
+Formally, the compiler organises productions into a partial order that defines
+the overload relation as follows. We say that `P` is a more specific overload
+of `Q` if:
+* `P` and `Q` have the same `overload(_)` attribute. Note that the argument
+  supplied has no semantic meaning other than as a key grouping productions 
+  together.
+* Let `S_P` be the sort of `P`, and `S_p1` etc. be the sorts of its arguments
+  (c.f. for `Q`). The tuple `(S_P, S_p1, ..., S_pN)` must be lexicographically
+  _strictly less than_ `(S_Q, S_q1, ..., S_qN)` according to the definition's
+  subsorting relationship. That is, a term from production `P` must be
+  substitutable where one from `Q` is expected, but cannot be identically
+  sorted.
+
+Care should be taken when the partial order defined by this relationship is not
+also a total order. For example, consider the following
+definition:[^overload-issue]
+```k
+module NUMBERS-SYNTAX
+    imports INT-SYNTAX
+    imports FLOAT-SYNTAX
+
+    syntax IValType ::= "i32" | "i64"
+    syntax FValType ::= "f32" | "f64"
+    syntax AValType ::= IValType | FValType
+    syntax Number ::= Int | Float
+    syntax IVal ::= "<" IValType ">" Int    [overload(<_>_)]
+    syntax FVal ::= "<" FValType ">" Float  [overload(<_>_)]
+    syntax  Val ::= IVal | FVal
+    // the problematic constructor:
+    syntax  Val ::= "<" AValType ">" Number [overload(<_>_)]
+endmodule
+```
+
+The overloading partial order defined by this definition is:
+```
+                  < AValType > Number
+                           │
+                           │
+                           │
+         ┌─────────────────┴────────────────────┐
+         │                                      │
+         ▼                                      ▼
+< IValType > Int                       < FValType > Float
+```
+
+Here, the most general (problematic) constructor can be used to construct terms
+that are ill-typed with respect to the "real" integer and float constructors:
+```
+// creates ill-formed values
+syntax Val ::= creature32 ( Number ) [function, total]
+rule creature32(I:Int) => <f32> I
+rule creature32(F:Float) => <i32> F
+```
+
 ### `klabel(_)` and `symbol` attributes
 
 **Note: the `klabel(_), symbol` approach described in this section is a legacy
-feature that will be removed in the future. In new code, it should currently
-only be used to opt in to symbol overloading.**
+feature that will be removed in the future. New code should use the `symbol(_)`
+and `overload(_)` attributes to opt into explicit naming and overloading
+respectively.**
+
+_References here to "overloading" are explained in the section above; the use
+of the `klabel(_)` attribute without `symbol` is equivalent to the new
+`overload(_)` syntax._
 
 By default K generates for each syntax definition a long and obfuscated klabel
 string, which serves as a unique internal identifier and also is used in kast
@@ -2969,7 +3054,7 @@ multiple times to indicate its effect in different contexts or with/without
 arguments. A legend describing how to interpret the index follows.
 
 | Name                  | Type  | Backend | Reference                                                                                                                                       |
-| --------------------- | ----- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------- | ----- | ------- |-------------------------------------------------------------------------------------------------------------------------------------------------|
 | `alias-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `alias`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `all-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
@@ -3001,6 +3086,7 @@ arguments. A legend describing how to interpret the index follows.
 | `multiplicity = "_"`  | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `non-assoc`           | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `one-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `overload(_)`         | prod  | all     | [`overload(_)` attribute](#overload-attribute)                                                                                                  |
 | `owise`               | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
 | `prec(_)`             | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
 | `prefer`              | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
@@ -3138,3 +3224,8 @@ All of these hooks will also eventually need documentation.
   API.
 [^unique-symbol]: Except for in a very limited number of special cases from the
   K standard library.
+[^overload-issue]: See https://github.com/runtimeverification/hs-backend-booster/issues/492
+  for full context and links to related discussion.
+[^maude-overload]: The [Maude documentation](https://maude.lcc.uma.es/maude-manual/maude-manualch3.html#x15-310003.6)
+  has an example in a context that's somewhat similar to K; discussion of
+  _ad-hoc_ overloading is not relevant.
