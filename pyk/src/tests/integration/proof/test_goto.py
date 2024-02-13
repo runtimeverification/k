@@ -11,8 +11,8 @@ from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.prelude.ml import mlEqualsTrue
 from pyk.prelude.utils import token
-from pyk.proof import APRBMCProof, APRBMCProver, ProofStatus
-from pyk.proof.show import APRBMCProofNodePrinter
+from pyk.proof import APRProof, APRProver, ProofStatus
+from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprove import KProve
-    from pyk.proof import APRProof
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -115,12 +114,9 @@ class TestGoToProof(KCFGExploreTest, KProveTest):
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
 
-        proof = APRBMCProof.from_claim_with_bmc_depth(kprove.definition, claim, bmc_depth)
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, bmc_depth=bmc_depth)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRBMCProver(
-            proof,
-            kcfg_explore=kcfg_explore,
-        )
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof(
             max_iterations=max_iterations,
             execute_depth=max_depth,
@@ -129,7 +125,7 @@ class TestGoToProof(KCFGExploreTest, KProveTest):
         )
 
         kcfg_show = KCFGShow(
-            kcfg_explore.kprint, node_printer=APRBMCProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
+            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
         )
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
