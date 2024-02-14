@@ -17,13 +17,6 @@
   {
     true
   #Equals
-    X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- undef ]
-    ( y |-> 4 ) )
-  }
-#And
-  {
-    true
-  #Equals
     X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- undef ] )
   }
 [Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.
