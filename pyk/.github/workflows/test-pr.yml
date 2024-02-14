@@ -59,6 +59,7 @@ jobs:
     needs: code-quality-checks
     name: 'Unit Tests'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -71,6 +72,7 @@ jobs:
     needs: code-quality-checks
     name: 'Profiling'
     runs-on: [self-hosted, linux, normal-ephemeral]
+    timeout-minutes: 10
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -97,6 +99,7 @@ jobs:
     needs: code-quality-checks
     name: 'Integration Tests'
     runs-on: [self-hosted, linux, normal-ephemeral]
+    timeout-minutes: 30
     strategy:
       matrix:
         python-version: ['3.10', '3.11']
@@ -118,7 +121,7 @@ jobs:
           sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
           kompile --version
       - name: 'Run integration tests'
-        run: make cov-integration COV_ARGS='-n8'
+        run: make cov-integration COV_ARGS='-n8 --timeout 300'
 
   build-on-nix:
     needs: code-quality-checks
