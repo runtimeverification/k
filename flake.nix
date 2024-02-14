@@ -95,16 +95,18 @@
       "aarch64-darwin"
     ] (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-
-          # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
-          # https://github.com/NixOS/nixpkgs/pull/172397
-          config.allowBroken = system == "aarch64-darwin";
-          overlays =
-            [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
-            ++ allOverlays;
-        };
+        pkgs = nixpkgs.lib.trivial.warnIf (llvm-backend.inputs.nixpkgs.rev
+          != haskell-backend.inputs.nixpkgs.rev)
+          "The version of nixpkgs in Haskell backend and LLVM backend has diverged!"
+          import nixpkgs {
+            inherit system;
+            # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
+            # https://github.com/NixOS/nixpkgs/pull/172397
+            config.allowBroken = system == "aarch64-darwin";
+            overlays =
+              [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
+              ++ allOverlays;
+          };
 
         haskell-backend-bins = pkgs.symlinkJoin {
           name = "kore-${haskell-backend.sourceInfo.shortRev or "local"}";

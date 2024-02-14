@@ -69,6 +69,8 @@ public class CheckAtt {
     checkFunctional(prod);
     checkTotal(prod);
     checkTerminatorKLabel(prod);
+    checkLatex(prod);
+    checkSymbolKLabel(prod);
   }
 
   private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
@@ -76,8 +78,7 @@ public class CheckAtt {
       errors.add(
           KEMException.compilerError(
               "Unrecognized attributes: "
-                  + stream(term.att().unrecognizedKeys()).map(Key::toString).sorted().toList()
-                  + "\nHint: User-defined groups can be added with the group(_) attribute.",
+                  + stream(term.att().unrecognizedKeys()).map(Key::toString).sorted().toList(),
               term));
     }
   }
@@ -325,6 +326,27 @@ public class CheckAtt {
           KEMException.compilerError(
               "The attribute 'terminator-klabel' cannot be applied to a production that does not declare a syntactic list.",
               prod));
+    }
+  }
+
+  private void checkLatex(Production prod) {
+    if (prod.att().contains(Att.LATEX())) {
+      kem.registerCompilerWarning(
+          ExceptionType.FUTURE_ERROR,
+          errors,
+          "The attribute 'latex' has been deprecated and all of its functionality has been removed. Using it will be an error in the future.",
+          prod);
+    }
+  }
+
+  private void checkSymbolKLabel(Production prod) {
+    if (prod.att().contains(Att.SYMBOL()) && prod.att().contains(Att.KLABEL())) {
+      if (!prod.att().get(Att.SYMBOL()).isEmpty()) {
+        errors.add(
+            KEMException.compilerError(
+                "The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.",
+                prod));
+      }
     }
   }
 }

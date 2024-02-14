@@ -321,7 +321,39 @@ name: Sort
 
 This syntax can be used anywhere in a K definition that expects a non-terminal.
 
+### `symbol(_)` attribute
+
+By default, when compiling a definition, K generates a unique "mangled" label
+identifier for each syntactic production. These identifiers can be used to
+reference productions externally, for example when constructing terms by hand
+or programmatically via Pyk.
+
+The `symbol(_)` attribute can be applied to a production to control the precise
+identifier for a production that appears in a compiled definition. For example:
+
+```k
+module SYMBOLS
+    syntax Foo ::= foo() [symbol(foo)]
+                 | bar()
+endmodule
+```
+
+Here, the compiled definition will contain the following symbol declarations:
+```
+  symbol Lblfoo{}() ...
+  symbol Lblbar'LParRParUnds'SYMBOLS'Unds'Foo{}() ...
+```
+
+The compiler enforces uniqueness[^unique-symbol] of symbol names specified in
+this way; it would be an error to apply `symbol(foo)` to another production in
+the module above. Additionally, `symbol(_)` with an argument may not co-occur
+with the `klabel(_)` attribute (see below).
+
 ### `klabel(_)` and `symbol` attributes
+
+**Note: the `klabel(_), symbol` approach described in this section is a legacy
+feature that will be removed in the future. In new code, it should currently
+only be used to opt in to symbol overloading.**
 
 By default K generates for each syntax definition a long and obfuscated klabel
 string, which serves as a unique internal identifier and also is used in kast
@@ -334,9 +366,9 @@ given symbol.
 If you only provide the `klabel` attribute, you can use the provided `klabel` to
 refer to that symbol anywhere in the frontend K code. However, the internal
 identifier seen by the backend for that symbol will still be the long obfuscated
-generated string. Sometimes you want control over the internal identfier used as
+generated string. Sometimes you want control over the internal identifier used as
 well, in which case you use the `symbol` attribute. This tells the frontend to
-use whatever the declared `klabel` is directly as the internal identfier.
+use whatever the declared `klabel` is directly as the internal identifier.
 
 For example:
 
@@ -364,7 +396,7 @@ Here, we have that:
 
 The `symbol` provided *must* be unique to this definition. This is enforced by
 K. In general, it's recommended to use the `symbol` attribute whenever you use
-`klabel` unless you explicitly have a reason not to (eg. you want to *overload*
+`klabel` unless you explicitly have a reason not to (e.g. you want to *overload*
 symbols, or you're using a deprecated backend). It can be very helpful use the
 `symbol` attribute for debugging, as many debugging messages are printed in
 Kast format which will be more readable with the `symbol` names you explicitly
@@ -2961,7 +2993,6 @@ arguments. A legend describing how to interpret the index follows.
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `klabel(_)`           | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
-| `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
 | `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
 | `macro-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
@@ -3105,3 +3136,5 @@ All of these hooks will also eventually need documentation.
 
 [^1]: More precisely, a lightly-customized debugger built using the LLDB Python
   API.
+[^unique-symbol]: Except for in a very limited number of special cases from the
+  K standard library.

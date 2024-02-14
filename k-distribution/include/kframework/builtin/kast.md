@@ -142,26 +142,26 @@ module ML-SYNTAX [not-lr1]
                        | "#Bottom" [klabel(#Bottom), symbol, group(mlUnary)]
                        | "#True" [klabel(#Top), symbol, group(mlUnary), unparseAvoid]
                        | "#False" [klabel(#Bottom), symbol, group(mlUnary), unparseAvoid]
-                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary)]
+                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary, mlOp)]
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary)]
-                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary)]
-                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary, mlOp)]
+                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary, mlOp)]
+                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals, mlOp), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
 
   syntax priorities mlUnary > mlEquals > mlAnd
 
-  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd), format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies), format(%i%1%d%n%2%n%i%3%d)]
+  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd, mlOp), format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, group(mlOp), format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies, mlOp), format(%i%1%d%n%2%n%i%3%d)]
 
   syntax priorities mlImplies > mlQuantifier
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier)]
-                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
+                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
 
-  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp]
-                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp]
-                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp, group(mlOp)]
+                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, group(mlOp)]
+                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp, group(mlOp)]
 endmodule
 ```
 
@@ -552,7 +552,7 @@ regular K rules to disambiguate as necessary.
 ```k
 module K-AMBIGUITIES
 
-  syntax {Sort} Sort ::= amb(Sort, Sort) [symbol]
+  syntax {Sort} Sort ::= amb(Sort, Sort) [klabel(amb), symbol]
 
 endmodule
 ```
@@ -572,7 +572,7 @@ module K-LOCATIONS
   imports INT-SYNTAX
 
   // filename, startLine, startCol, endLine, endCol
-  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [symbol, format(%3)]
+  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [klabel(#location), symbol, format(%3)]
 
 endmodule
 ```

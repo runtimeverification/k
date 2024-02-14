@@ -66,7 +66,7 @@ public class PrintOptions {
       converter = OutputModeConverter.class,
       description =
           "How to display krun results. <mode> is either"
-              + " [pretty|program|kast|binary|json|latex|kore|none].")
+              + " [pretty|program|kast|binary|json|kore|none].")
   public OutputModes output = OutputModes.PRETTY;
 
   public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
@@ -120,12 +120,6 @@ public class PrintOptions {
       listConverter = StringListConverter.class,
       description = "Do not remove conjuncts of anonymous variables from substitution in output.")
   public boolean noFilterSubstitution = false;
-
-  @Parameter(
-      names = {"--restore-original-names"},
-      listConverter = StringListConverter.class,
-      description = "Restore original variable names when provided by attributes.")
-  public boolean restoreOriginalNames = false;
 
   @Parameter(
       names = {"--no-sort-collections"},

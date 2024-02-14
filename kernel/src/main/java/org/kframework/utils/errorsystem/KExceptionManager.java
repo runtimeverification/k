@@ -91,6 +91,11 @@ public class KExceptionManager {
     register(type, KExceptionGroup.CRITICAL, message, e, null, null);
   }
 
+  @SuppressWarnings("unused")
+  public void registerInternalWarning(ExceptionType type, String message) {
+    register(type, KExceptionGroup.INTERNAL, message, null, null, null);
+  }
+
   public void registerInternalWarning(ExceptionType type, String message, Throwable e) {
     register(type, KExceptionGroup.INTERNAL, message, e, null, null);
   }
