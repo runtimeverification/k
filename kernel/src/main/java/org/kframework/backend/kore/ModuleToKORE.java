@@ -937,12 +937,11 @@ public class ModuleToKORE {
       conn = ",";
     }
     sb.append("))) ");
-    Att att = Att.empty();
-    att =
-        att.add(
-            Att.OVERLOAD(),
-            KList.class,
-            KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get())));
+    final var args = KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get()));
+    final var att =
+        Att.empty()
+            .add(Att.OVERLOAD(), KList.class, args)
+            .add(Att.SYMBOL_OVERLOAD(), KList.class, args);
     convert(new HashMap<>(), att, sb, null, null);
     sb.append(" // overloaded production\n");
   }

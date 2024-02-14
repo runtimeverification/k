@@ -340,6 +340,7 @@ object Att {
   final val SORT                     = Key.internal(classOf[Sort].getName)
   final val SORT_PARAMS              = Key.internal("sortParams")
   final val SOURCE                   = Key.internal(classOf[Source].getName)
+  final val SYMBOL_OVERLOAD          = Key.internal("symbol-overload")
   final val SYNTAX_MODULE            = Key.internal("syntaxModule")
   final val TEMPORARY_CELL_SORT_DECL = Key.internal("temporary-cell-sort-decl")
   final val TERMINALS                = Key.internal("terminals")
