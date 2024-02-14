@@ -219,6 +219,7 @@ object Att {
   final val CONTEXT     = Key.builtin("context", KeyParameter.Required, onlyon[ContextAlias])
   final val COOL        = Key.builtin("cool", KeyParameter.Forbidden, onlyon[Rule])
   final val DEPENDS     = Key.builtin("depends", KeyParameter.Required, onlyon[Claim])
+  final val DEPRECATED  = Key.builtin("deprecated", KeyParameter.Forbidden, onlyon[Production])
   final val ELEMENT     = Key.builtin("element", KeyParameter.Required, onlyon[Production])
   final val EXIT        = Key.builtin("exit", KeyParameter.Forbidden, onlyon[Production])
   final val FORMAT      = Key.builtin("format", KeyParameter.Required, onlyon[Production])
@@ -319,6 +320,7 @@ object Att {
   final val NOT_INJECTION        = Key.internal("notInjection")
   final val NOT_LR1_MODULES      = Key.internal("not-lr1-modules")
   final val ORIGINAL_PRD         = Key.internal("originalPrd")
+  final val OVERLOAD             = Key.internal("overload")
   final val PREDICATE            = Key.internal("predicate")
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
     Key.internal("prettyPrintWithSortAnnotation")
@@ -339,6 +341,7 @@ object Att {
   final val SORT                     = Key.internal(classOf[Sort].getName)
   final val SORT_PARAMS              = Key.internal("sortParams")
   final val SOURCE                   = Key.internal(classOf[Source].getName)
+  final val SYMBOL_OVERLOAD          = Key.internal("symbol-overload")
   final val SYNTAX_MODULE            = Key.internal("syntaxModule")
   final val TEMPORARY_CELL_SORT_DECL = Key.internal("temporary-cell-sort-decl")
   final val TERMINALS                = Key.internal("terminals")
