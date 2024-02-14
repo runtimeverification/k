@@ -936,11 +936,14 @@ public class ModuleToKORE {
       convert(lesser.nonterminal(i).sort(), lesser, sb);
       conn = ",";
     }
-    sb.append("))) [overload{}(");
-    convert(greater.klabel().get(), greater, sb);
-    sb.append("(), ");
-    convert(lesser.klabel().get(), lesser, sb);
-    sb.append("())] // overloaded production\n");
+    sb.append("))) ");
+    final var args = KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get()));
+    final var att =
+        Att.empty()
+            .add(Att.OVERLOAD(), KList.class, args)
+            .add(Att.SYMBOL_OVERLOAD(), KList.class, args);
+    convert(new HashMap<>(), att, sb, null, null);
+    sb.append(" // overloaded production\n");
   }
 
   private boolean isRealHook(Att att) {
@@ -1863,8 +1866,7 @@ public class ModuleToKORE {
   }
 
   private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
-    for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
-        iterable(att.withUserGroupsAsGroupAtt().att())) {
+    for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.att())) {
       Att.Key name = attribute._1._1;
       Object val = attribute._2;
       String strVal = val.toString();
@@ -2023,9 +2025,6 @@ public class ModuleToKORE {
       HasLocation location) {
     sb.append("[");
     String conn = "";
-
-    // Emit user groups as group(_) to prevent conflicts between user groups and internals
-    att = att.withUserGroupsAsGroupAtt();
 
     for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
         // Sort to stabilize error messages

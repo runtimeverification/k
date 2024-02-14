@@ -36,6 +36,7 @@ import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckAssoc;
 import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckConfigurationCells;
+import org.kframework.compile.checks.CheckDeprecated;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckK;
@@ -584,6 +585,9 @@ public class Kompile {
 
     stream(modules)
         .forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
+
+    stream(modules)
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckDeprecated(errors, kem)::check));
 
     Set<String> moduleNames = new HashSet<>();
     stream(modules)

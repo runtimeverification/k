@@ -257,9 +257,7 @@ public class CheckKLabels {
     }
   }
 
-  private static final ImmutableSet<String> internalDuplicates =
-      ImmutableSet.of(
-          "#EmptyKList", "#EmptyK", "#ruleRequires", "#ruleRequiresEnsures", "#Top", "#Bottom");
+  private static final ImmutableSet<String> internalDuplicates = ImmutableSet.of("#EmptyK");
 
   private static final ImmutableSet<String> internalNames =
       ImmutableSet.of(

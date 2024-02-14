@@ -128,8 +128,7 @@ public class KoreBackend implements Backend {
                 .apply(d);
     DefinitionTransformer resolveHeatCoolAttribute =
         DefinitionTransformer.fromSentenceTransformer(
-            new ResolveHeatCoolAttribute(new HashSet<>())::resolve,
-            "resolving heat and cool attributes");
+            ResolveHeatCoolAttribute::resolve, "resolving heat and cool attributes");
     DefinitionTransformer resolveAnonVars =
         DefinitionTransformer.fromSentenceTransformer(
             new ResolveAnonVar()::resolve, "resolving \"_\" vars");
@@ -245,18 +244,18 @@ public class KoreBackend implements Backend {
             .andThen(resolveHeatCoolAttribute)
             .andThen(resolveSemanticCasts)
             .andThen(subsortKItem)
-            .andThen(generateSortPredicateSyntax)
-            .andThen(generateSortProjections)
             .andThen(constantFolding)
             .andThen(propagateMacroToRules)
-            .andThen(expandMacros)
-            .andThen(checkSimplificationRules)
             .andThen(guardOrs)
-            .andThen(AddImplicitComputationCell::transformDefinition)
             .andThen(resolveFreshConfigConstants)
+            .andThen(generateSortPredicateSyntax)
+            .andThen(generateSortProjections)
+            .andThen(expandMacros)
+            .andThen(AddImplicitComputationCell::transformDefinition)
             .andThen(resolveFreshConstants)
             .andThen(generateSortPredicateSyntax)
             .andThen(generateSortProjections)
+            .andThen(checkSimplificationRules)
             .andThen(subsortKItem)
             .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
             .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))

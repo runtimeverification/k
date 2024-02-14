@@ -36,8 +36,6 @@ trait AttValue
  *   - Att.getBuiltInKeyOptional(myAttStr), if checking a user-supplied attribute string. Be sure to
  *     report an error if the lookup fails
  *   - Att.getInternalKeyOptional(myAttStr), if expecting an internal key
- *   - Att.getUserGroupOptional(myAttStr), if expecting a user-group, enforcing that it is not a
- *     built-in
  *
  * During parsing, you may also use Att.unrecognizedKey(myAttStr) to delay error reporting on an
  * unrecognized attribute
@@ -52,42 +50,6 @@ class Att private (val att: Map[(Att.Key, String), Any])
     case _      => false
   }
 
-  // Remove all UserGroups and replace them with a group(_) attribute
-  def withUserGroupsAsGroupAtt: Att = {
-    val groups = att.keys.filter(_._1.keyType.equals(Att.KeyType.UserGroup)).toSet;
-    if (groups.isEmpty)
-      this
-    else
-      Att(att -- groups).add(Att.GROUP, groups.map(_._1.key).mkString(","))
-  }
-
-  // Remove the group(_) attribute and insert each of its arguments as a UserGroup
-  // Returns either Left of an error message or Right of the result
-  def withGroupAttAsUserGroups: Either[String, Att] = {
-    if (!contains(Att.GROUP, classOf[String]))
-      return Right(this)
-    val groups = get(Att.GROUP).trim
-    if (groups.isEmpty)
-      return Left("group(_) attribute expects a comma-separated list of arguments.")
-    val badComma = Left("Extraneous ',' in group(_) attribute.")
-    if (groups.startsWith(",") || groups.endsWith(","))
-      return badComma
-    var att = this
-    for (group <- groups.split("\\s*,\\s*")) {
-      if (group.isEmpty)
-        return badComma
-      val groupKey = Att.getUserGroupOptional(group)
-      if (groupKey.isEmpty)
-        return Left("User-defined group '" + group + "' conflicts with a built-in attribute.")
-      if (!group.matches("[a-z][a-zA-Z0-9-]*"))
-        return Left(
-          "Invalid argument '" + group + "' in group(_) attribute. " +
-            "Expected a lower case letter followed by any number of alphanumeric or '-' characters."
-        )
-      att = att.add(groupKey.get)
-    }
-    Right(att.remove(Att.GROUP))
-  }
   val unrecognizedKeys: Set[Att.Key] =
     att.map(_._1._1).filter(_.keyType.equals(Att.KeyType.Unrecognized)).toSet
 
@@ -168,30 +130,23 @@ object Att {
   sealed trait KeyType
   private object KeyType extends Serializable {
     // Attributes which are built-in and can appear in user source code
-    case object BuiltIn extends KeyType;
+    case object BuiltIn extends KeyType
     // Attributes which are compiler-internal and cannot appear in user source code
-    case object Internal extends KeyType;
-    // Attributes which represent user-defined groups via group(_).
-    //
-    // WARNING: Although we treat the arguments to group(_) as individual attributes internally,
-    // for any external interface (emitting KORE, JSON, etc.), we must re-emit them under the
-    // group(_) attribute,
-    // else there will be conflicts when a user group has the same name as an internal attribute.
-    case object UserGroup extends KeyType;
+    case object Internal extends KeyType
     // Attributes from user source code which are not recognized as built-ins
     // This is only used to delay error reporting until after parsing, allowing us to report
     // multiple errors
-    case object Unrecognized extends KeyType;
+    case object Unrecognized extends KeyType
   }
 
   sealed trait KeyParameter
   private object KeyParameter extends Serializable {
     // Attributes that must have parameters passed in (ie. [prec(25)]
-    case object Required extends KeyParameter;
+    case object Required extends KeyParameter
     // Attributes which may or may not have a parameter
-    case object Optional extends KeyParameter;
+    case object Optional extends KeyParameter
     // Attributes which may not have a parameter (ie. [function])
-    case object Forbidden extends KeyParameter;
+    case object Forbidden extends KeyParameter
   }
 
   /* The Key class can only be constructed within Att. To enforce this, we must
@@ -209,35 +164,34 @@ object Att {
     private[Key] def copy(): Unit = ()
   }
   object Key {
-    private[Att] def apply(key: String, keyType: KeyType): Key =
-      Key(key, keyType, KeyParameter.Optional)
-    private[Att] def apply(key: String, keyType: KeyType, keyParam: KeyParameter): Key =
-      Key(key, keyType, keyParam, onlyon[AnyRef])
-    private[Att] def apply(
-        key: String,
-        keyType: KeyType,
-        keyParam: KeyParameter,
-        allowedSentences: Set[Class[_]]
-    ): Key = new Key(key, keyType, keyParam, allowedSentences)
     private[Att] def builtin(
         key: String,
         keyParam: KeyParameter,
         allowedSentences: Set[Class[_]]
     ): Key = Key(key, KeyType.BuiltIn, keyParam, allowedSentences)
+    private[Att] def internal(
+        key: String
+    ): Key =
+      Key(key, KeyType.Internal, KeyParameter.Optional, onlyon[AnyRef])
   }
 
   def unrecognizedKey(key: String): Att.Key =
-    Att.Key(key, KeyType.Unrecognized)
+    new Att.Key(
+      key,
+      KeyType.Unrecognized,
+      KeyParameter.Optional,
+      onlyon[AnyRef]
+    )
 
   val empty: Att = Att(Map.empty)
 
   // Some helpers with scala reflection to make declaring class object sets more compact
   // If these break for some reason, replace their usage with Set(classOf[T1], classOf[T2], ...)
-  private def onlyon[T: ClassTag](): Set[Class[_]]                 = Set(classTag[T].runtimeClass)
-  private def onlyon2[T1: ClassTag, T2: ClassTag](): Set[Class[_]] = onlyon[T1] ++ onlyon[T2]
-  private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag](): Set[Class[_]] =
+  private def onlyon[T: ClassTag]: Set[Class[_]]                 = Set(classTag[T].runtimeClass)
+  private def onlyon2[T1: ClassTag, T2: ClassTag]: Set[Class[_]] = onlyon[T1] ++ onlyon[T2]
+  private def onlyon3[T1: ClassTag, T2: ClassTag, T3: ClassTag]: Set[Class[_]] =
     onlyon2[T1, T2] ++ onlyon[T3]
-  private def onlyon4[T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag](): Set[Class[_]] =
+  private def onlyon4[T1: ClassTag, T2: ClassTag, T3: ClassTag, T4: ClassTag]: Set[Class[_]] =
     onlyon3[T1, T2, T3] ++ onlyon[T4]
 
   /* Built-in attribute keys which can appear in user source code */
@@ -265,6 +219,7 @@ object Att {
   final val CONTEXT     = Key.builtin("context", KeyParameter.Required, onlyon[ContextAlias])
   final val COOL        = Key.builtin("cool", KeyParameter.Forbidden, onlyon[Rule])
   final val DEPENDS     = Key.builtin("depends", KeyParameter.Required, onlyon[Claim])
+  final val DEPRECATED  = Key.builtin("deprecated", KeyParameter.Forbidden, onlyon[Production])
   final val ELEMENT     = Key.builtin("element", KeyParameter.Required, onlyon[Production])
   final val EXIT        = Key.builtin("exit", KeyParameter.Forbidden, onlyon[Production])
   final val FORMAT      = Key.builtin("format", KeyParameter.Required, onlyon[Production])
@@ -344,54 +299,56 @@ object Att {
   final val WRAP_ELEMENT  = Key.builtin("wrapElement", KeyParameter.Required, onlyon[Production])
 
   /* Internal attribute keys which cannot appear in user source code */
-  final val ANONYMOUS            = Key("anonymous", KeyType.Internal)
-  final val BRACKET_LABEL        = Key("bracketLabel", KeyType.Internal)
-  final val CELL_FRAGMENT        = Key("cellFragment", KeyType.Internal)
-  final val CELL_OPT_ABSENT      = Key("cellOptAbsent", KeyType.Internal)
-  final val CELL_SORT            = Key("cellSort", KeyType.Internal)
-  final val CONCAT               = Key("concat", KeyType.Internal)
-  final val CONTENT_START_COLUMN = Key("contentStartColumn", KeyType.Internal)
-  final val CONTENT_START_LINE   = Key("contentStartLine", KeyType.Internal)
-  final val COOL_LIKE            = Key("cool-like", KeyType.Internal)
-  final val DENORMAL             = Key("denormal", KeyType.Internal)
-  final val DIGEST               = Key("digest", KeyType.Internal)
-  final val DUMMY_CELL           = Key("dummy_cell", KeyType.Internal)
-  final val FILTER_ELEMENT       = Key("filterElement", KeyType.Internal)
-  final val FRESH                = Key("fresh", KeyType.Internal)
-  final val HAS_DOMAIN_VALUES    = Key("hasDomainValues", KeyType.Internal)
-  final val LEFT_INTERNAL        = Key("left", KeyType.Internal)
-  final val LOCATION             = Key(classOf[Location].getName, KeyType.Internal)
-  final val NAT                  = Key("nat", KeyType.Internal)
-  final val NOT_INJECTION        = Key("notInjection", KeyType.Internal)
-  final val NOT_LR1_MODULES      = Key("not-lr1-modules", KeyType.Internal)
-  final val ORIGINAL_PRD         = Key("originalPrd", KeyType.Internal)
-  final val PREDICATE            = Key("predicate", KeyType.Internal)
+  final val ANONYMOUS            = Key.internal("anonymous")
+  final val BRACKET_LABEL        = Key.internal("bracketLabel")
+  final val CELL_FRAGMENT        = Key.internal("cellFragment")
+  final val CELL_OPT_ABSENT      = Key.internal("cellOptAbsent")
+  final val CELL_SORT            = Key.internal("cellSort")
+  final val CONCAT               = Key.internal("concat")
+  final val CONTENT_START_COLUMN = Key.internal("contentStartColumn")
+  final val CONTENT_START_LINE   = Key.internal("contentStartLine")
+  final val COOL_LIKE            = Key.internal("cool-like")
+  final val DENORMAL             = Key.internal("denormal")
+  final val DIGEST               = Key.internal("digest")
+  final val DUMMY_CELL           = Key.internal("dummy_cell")
+  final val FILTER_ELEMENT       = Key.internal("filterElement")
+  final val FRESH                = Key.internal("fresh")
+  final val HAS_DOMAIN_VALUES    = Key.internal("hasDomainValues")
+  final val LEFT_INTERNAL        = Key.internal("left")
+  final val LOCATION             = Key.internal(classOf[Location].getName)
+  final val NAT                  = Key.internal("nat")
+  final val NOT_INJECTION        = Key.internal("notInjection")
+  final val NOT_LR1_MODULES      = Key.internal("not-lr1-modules")
+  final val ORIGINAL_PRD         = Key.internal("originalPrd")
+  final val OVERLOAD             = Key.internal("overload")
+  final val PREDICATE            = Key.internal("predicate")
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
-    Key("prettyPrintWithSortAnnotation", KeyType.Internal)
-  final val PRIORITIES               = Key("priorities", KeyType.Internal)
-  final val PRODUCTION               = Key(classOf[Production].getName, KeyType.Internal)
-  final val PROJECTION               = Key("projection", KeyType.Internal)
-  final val RECORD_PRD               = Key("recordPrd", KeyType.Internal)
-  final val RECORD_PRD_ZERO          = Key("recordPrd-zero", KeyType.Internal)
-  final val RECORD_PRD_ONE           = Key("recordPrd-one", KeyType.Internal)
-  final val RECORD_PRD_MAIN          = Key("recordPrd-main", KeyType.Internal)
-  final val RECORD_PRD_EMPTY         = Key("recordPrd-empty", KeyType.Internal)
-  final val RECORD_PRD_SUBSORT       = Key("recordPrd-subsort", KeyType.Internal)
-  final val RECORD_PRD_REPEAT        = Key("recordPrd-repeat", KeyType.Internal)
-  final val RECORD_PRD_ITEM          = Key("recordPrd-item", KeyType.Internal)
-  final val REFRESHED                = Key("refreshed", KeyType.Internal)
-  final val RIGHT_INTERNAL           = Key("right", KeyType.Internal)
-  final val SMT_PRELUDE              = Key("smt-prelude", KeyType.Internal)
-  final val SORT                     = Key(classOf[Sort].getName, KeyType.Internal)
-  final val SORT_PARAMS              = Key("sortParams", KeyType.Internal)
-  final val SOURCE                   = Key(classOf[Source].getName, KeyType.Internal)
-  final val SYNTAX_MODULE            = Key("syntaxModule", KeyType.Internal)
-  final val TEMPORARY_CELL_SORT_DECL = Key("temporary-cell-sort-decl", KeyType.Internal)
-  final val TERMINALS                = Key("terminals", KeyType.Internal)
-  final val UNIQUE_ID                = Key("UNIQUE_ID", KeyType.Internal)
-  final val USER_LIST                = Key("userList", KeyType.Internal)
-  final val USER_LIST_TERMINATOR     = Key("userListTerminator", KeyType.Internal)
-  final val WITH_CONFIG              = Key("withConfig", KeyType.Internal)
+    Key.internal("prettyPrintWithSortAnnotation")
+  final val PRIORITIES               = Key.internal("priorities")
+  final val PRODUCTION               = Key.internal(classOf[Production].getName)
+  final val PROJECTION               = Key.internal("projection")
+  final val RECORD_PRD               = Key.internal("recordPrd")
+  final val RECORD_PRD_ZERO          = Key.internal("recordPrd-zero")
+  final val RECORD_PRD_ONE           = Key.internal("recordPrd-one")
+  final val RECORD_PRD_MAIN          = Key.internal("recordPrd-main")
+  final val RECORD_PRD_EMPTY         = Key.internal("recordPrd-empty")
+  final val RECORD_PRD_SUBSORT       = Key.internal("recordPrd-subsort")
+  final val RECORD_PRD_REPEAT        = Key.internal("recordPrd-repeat")
+  final val RECORD_PRD_ITEM          = Key.internal("recordPrd-item")
+  final val REFRESHED                = Key.internal("refreshed")
+  final val RIGHT_INTERNAL           = Key.internal("right")
+  final val SMT_PRELUDE              = Key.internal("smt-prelude")
+  final val SORT                     = Key.internal(classOf[Sort].getName)
+  final val SORT_PARAMS              = Key.internal("sortParams")
+  final val SOURCE                   = Key.internal(classOf[Source].getName)
+  final val SYMBOL_OVERLOAD          = Key.internal("symbol-overload")
+  final val SYNTAX_MODULE            = Key.internal("syntaxModule")
+  final val TEMPORARY_CELL_SORT_DECL = Key.internal("temporary-cell-sort-decl")
+  final val TERMINALS                = Key.internal("terminals")
+  final val UNIQUE_ID                = Key.internal("UNIQUE_ID")
+  final val USER_LIST                = Key.internal("userList")
+  final val USER_LIST_TERMINATOR     = Key.internal("userListTerminator")
+  final val WITH_CONFIG              = Key.internal("withConfig")
 
   private val stringClassName = classOf[String].getName
   private val intClassName    = classOf[java.lang.Integer].getName
@@ -409,21 +366,14 @@ object Att {
 
   def getBuiltinKeyOptional(key: String): Optional[Key] =
     if (builtinKeys.contains(key)) {
-      Optional.of(builtinKeys.get(key).get)
+      Optional.of(builtinKeys(key))
     } else {
       Optional.empty()
     }
 
   def getInternalKeyOptional(key: String): Optional[Key] =
     if (internalKeys.contains(key)) {
-      Optional.of(internalKeys.get(key).get)
-    } else {
-      Optional.empty()
-    }
-
-  def getUserGroupOptional(group: String): Optional[Key] =
-    if (!builtinKeys.contains(group)) {
-      Optional.of(Key(group, KeyType.UserGroup, KeyParameter.Optional))
+      Optional.of(internalKeys(key))
     } else {
       Optional.empty()
     }
@@ -432,7 +382,8 @@ object Att {
     getInternalKeyOptional(key).orElseThrow(() =>
       new AssertionError(
         "Key '" + key + "' was not found among the internal attributes whitelist.\n" +
-          "To add a new internal attribute, create a field `final val MY_ATT = Key(\"my-att\", KeyType.Internal)` " +
+          "To add a new internal attribute, create a field `final val MY_ATT = Key.internal" +
+          "(\"my-att\")` " +
           "in the Att object."
       )
     )
