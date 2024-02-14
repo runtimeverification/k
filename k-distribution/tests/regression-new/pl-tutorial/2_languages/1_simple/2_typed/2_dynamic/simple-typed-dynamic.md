@@ -241,7 +241,7 @@ right type to the allocated locations.
        <store>... .Map => L |-> array(T, L +Int 1, N)
                           (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
-    when N >=Int 0
+    requires N >=Int 0
 
   context _:Type _::Exp[HOLE::Exps];
 ```
@@ -312,8 +312,8 @@ When done with the first pass, call `main()`.
   rule Str1 + Str2 => Str1 +String Str2
   rule I1 - I2 => I1 -Int I2
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule I1 / I2 => I1 /Int I2 requires I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 requires I2 =/=K 0
   rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -338,7 +338,7 @@ Check array bounds, as part of the dynamic typing policy.
 
 // Same comment as for simple untyped regarding [anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [anywhere]
+    requires N >=Int 0 andBool N <Int M  [anywhere]
 ```
 
 ### Size of an array
@@ -372,7 +372,7 @@ checks that that type of the returned value is expected one.
          (_ => C)
        </control>
        <env> _ => Env </env>
-    when typeOf(V) ==K T   // check the type of the returned value
+    requires typeOf(V) ==K T   // check the type of the returned value
 ```
 Like the `undefined` above, `nothing` also gets
 tagged with a type now.  The empty `return` statement is
@@ -396,7 +396,7 @@ preserved:
   context (HOLE => lvalue(HOLE)) = _
 
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (V' => V) ...</store>
-    when typeOf(V) ==K typeOf(V')  [group(assignment)]
+    requires typeOf(V) ==K typeOf(V')  [group(assignment)]
 ```
 
 ### Statements
@@ -438,7 +438,7 @@ preserved:
 We only allow printing integers and strings:
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    when typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
+    requires typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
   rule print(.Vals); => .
 ```
 
@@ -509,7 +509,7 @@ values, in which case our semantics below works fine:
    rule <k> acquire V:Val; => . ...</k>
         <holds>... .Map => V |-> 0 ...</holds>
         <busy> Busy (.Set => SetItem(V)) </busy>
-     when (notBool(V in Busy:Set))  [group(acquire)]
+     requires (notBool(V in Busy:Set))  [group(acquire)]
 
    rule <k> acquire V; => . ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
@@ -520,7 +520,7 @@ values, in which case our semantics below works fine:
 ```k
    rule <k> release V:Val; => . ...</k>
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
-      when N >Int 0
+      requires N >Int 0
 
    rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
         <busy>... SetItem(V) => .Set ...</busy>
@@ -579,8 +579,8 @@ Adds the corresponding depth to an array type
 Sequences of locations.
 ```k
   syntax Map ::= Int "..." Int "|->" K [function]
-  rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> _ => .Map  requires N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  requires N <=Int M
 
 // Type of a value.
   syntax Type ::= typeOf(K)  [function]
