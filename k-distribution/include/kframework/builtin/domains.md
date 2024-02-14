@@ -450,7 +450,7 @@ module MAP-KORE-SYMBOLIC [symbolic,haskell]
     [simplification] // preserves-definedness!
   rule K in_keys(K |-> _ M) => true ensures notBool (K in_keys(M))
     [simplification, preserves-definedness]
-  rule K in_keys(K' |-> _ M) => K in_keys(M) requires K =/=K K' ensures notBool (K in_keys(M))
+  rule K in_keys(K' |-> _ M) => K in_keys(M) requires K =/=K K' ensures notBool (K' in_keys(M))
     [simplification, preserves-definedness]
 
   rule {false #Equals @Key in_keys(.Map)} => #Ceil(@Key) [simplification]
