@@ -37,12 +37,12 @@ def mlEquals(  # noqa: N802
     return KLabel('#Equals', arg_sort, sort)(term1, term2)
 
 
-def mlEqualsTrue(term: KInner) -> KApply:  # noqa: N802
-    return mlEquals(TRUE, term, BOOL)
+def mlEqualsTrue(term: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KApply:  # noqa: N802
+    return mlEquals(TRUE, term, arg_sort=BOOL, sort=sort)
 
 
-def mlEqualsFalse(term: KInner) -> KApply:  # noqa: N802
-    return mlEquals(FALSE, term, BOOL)
+def mlEqualsFalse(term: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KApply:  # noqa: N802
+    return mlEquals(FALSE, term, arg_sort=BOOL, sort=sort)
 
 
 def mlTop(sort: str | KSort = GENERATED_TOP_CELL) -> KApply:  # noqa: N802

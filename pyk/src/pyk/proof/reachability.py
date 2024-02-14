@@ -518,7 +518,6 @@ class APRProof(Proof, KCFGExploration):
         _LOGGER.info(f'Adding refutation proof {refutation_id} as subproof of {self.id}')
         refutation = RefutationProof(
             id=refutation_id,
-            sort=BOOL,
             pre_constraints=pre_split_constraints,
             last_constraint=last_constraint,
             proof_dir=self.proof_dir,
