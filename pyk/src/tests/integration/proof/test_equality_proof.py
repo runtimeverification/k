@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.proof import EqualityProof, EqualityProver, ProofStatus
+from pyk.proof import EqualityProof, ImpliesProver, ProofStatus
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
@@ -138,7 +138,7 @@ class TestImpEqualityProof(KCFGExploreTest, KProveTest):
         )
 
         equality_proof = EqualityProof.from_claim(claim, kprove.definition)
-        equality_prover = EqualityProver(equality_proof, kcfg_explore)
+        equality_prover = ImpliesProver(equality_proof, kcfg_explore)
         equality_prover.advance_proof()
 
         assert equality_proof.status == proof_status
