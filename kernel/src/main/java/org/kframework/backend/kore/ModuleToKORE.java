@@ -936,11 +936,15 @@ public class ModuleToKORE {
       convert(lesser.nonterminal(i).sort(), lesser, sb);
       conn = ",";
     }
-    sb.append("))) [overload{}(");
-    convert(greater.klabel().get(), greater, sb);
-    sb.append("(), ");
-    convert(lesser.klabel().get(), lesser, sb);
-    sb.append("())] // overloaded production\n");
+    sb.append("))) ");
+    Att att = Att.empty();
+    att =
+        att.add(
+            Att.OVERLOAD(),
+            KList.class,
+            KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get())));
+    convert(new HashMap<>(), att, sb, null, null);
+    sb.append(" // overloaded production\n");
   }
 
   private boolean isRealHook(Att att) {
