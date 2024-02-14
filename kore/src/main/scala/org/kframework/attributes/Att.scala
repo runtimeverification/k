@@ -219,6 +219,7 @@ object Att {
   final val CONTEXT     = Key.builtin("context", KeyParameter.Required, onlyon[ContextAlias])
   final val COOL        = Key.builtin("cool", KeyParameter.Forbidden, onlyon[Rule])
   final val DEPENDS     = Key.builtin("depends", KeyParameter.Required, onlyon[Claim])
+  final val DEPRECATED  = Key.builtin("deprecated", KeyParameter.Forbidden, onlyon[Production])
   final val ELEMENT     = Key.builtin("element", KeyParameter.Required, onlyon[Production])
   final val EXIT        = Key.builtin("exit", KeyParameter.Forbidden, onlyon[Production])
   final val FORMAT      = Key.builtin("format", KeyParameter.Required, onlyon[Production])
