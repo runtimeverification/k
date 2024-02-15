@@ -8,11 +8,10 @@
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
     };
-    nixpkgs.follows = "haskell-backend/nixpkgs";
+    nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
       url = "github:runtimeverification/llvm-backend";
-      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";

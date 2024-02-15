@@ -1,6 +1,6 @@
 { src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
-, pkgconfig, python3, z3, haskell-backend, booster, prelude-kore, llvm-backend
+, pkg-config, python3, z3, haskell-backend, booster, prelude-kore, llvm-backend
 , debugger, version, llvm-kompile-libs, runtimeShell }:
 
 let
@@ -19,7 +19,7 @@ let
       }))
     mpfr
     ncurses
-    pkgconfig
+    pkg-config
     python3
     z3
     haskell-backend
