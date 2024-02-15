@@ -125,7 +125,8 @@
         "immer-src": "immer-src",
         "mavenix": "mavenix",
         "nixpkgs": [
-          "haskell-backend",
+          "llvm-backend",
+          "rv-utils",
           "nixpkgs"
         ],
         "pybind11-src": "pybind11-src",
@@ -270,7 +271,7 @@
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",
         "nixpkgs": [
-          "haskell-backend",
+          "llvm-backend",
           "nixpkgs"
         ],
         "rv-utils": "rv-utils_2"
