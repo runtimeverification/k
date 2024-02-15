@@ -62,6 +62,10 @@ class ImpliesProof(Proof):
         else:
             return ProofStatus.PASSED
 
+    @property
+    def can_progress(self) -> bool:
+        return self.simplified_antecedent is None or self.simplified_consequent is None
+
     def write_proof_data(self, subproofs: bool = False) -> None:
         super().write_proof_data()
         if not self.proof_dir:
@@ -352,7 +356,7 @@ class ImpliesProver(Prover):
         super().__init__(kcfg_explore)
         self.proof = proof
 
-    def advance_proof(self) -> None:
+    def step_proof(self) -> None:
         proof_type = type(self.proof).__name__
         _LOGGER.info(f'Attempting {proof_type} {self.proof.id}')
 
@@ -388,4 +392,3 @@ class ImpliesProver(Prover):
                 self.proof.csubst = result
 
         _LOGGER.info(f'{proof_type} finished {self.proof.id}: {self.proof.status}')
-        self.proof.write_proof_data()
