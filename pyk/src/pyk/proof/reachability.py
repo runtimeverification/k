@@ -186,6 +186,10 @@ class APRProof(Proof, KCFGExploration):
         else:
             return ProofStatus.PASSED
 
+    @property
+    def can_progress(self) -> bool:
+        return len(self.pending) > 0
+
     @classmethod
     def from_dict(cls: type[APRProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> APRProof:
         kcfg = KCFG.from_dict(dct['kcfg'])
@@ -533,6 +537,9 @@ class APRProver(Prover):
     main_module_name: str
     dependencies_module_name: str
     circularities_module_name: str
+    execute_depth: int | None
+    cut_point_rules: Iterable[str]
+    terminal_rules: Iterable[str]
     counterexample_info: bool
     always_check_subsumption: bool
     fast_check_subsumption: bool
@@ -545,6 +552,9 @@ class APRProver(Prover):
         self,
         proof: APRProof,
         kcfg_explore: KCFGExplore,
+        execute_depth: int | None = None,
+        cut_point_rules: Iterable[str] = (),
+        terminal_rules: Iterable[str] = (),
         counterexample_info: bool = False,
         always_check_subsumption: bool = True,
         fast_check_subsumption: bool = False,
@@ -559,6 +569,9 @@ class APRProver(Prover):
         super().__init__(kcfg_explore)
         self.proof = proof
         self.main_module_name = self.kcfg_explore.kprint.definition.main_module_name
+        self.execute_depth = execute_depth
+        self.cut_point_rules = cut_point_rules
+        self.terminal_rules = terminal_rules
         self.counterexample_info = counterexample_info
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
@@ -672,57 +685,33 @@ class APRProver(Prover):
             module_name=module_name,
         )
 
-    def advance_proof(
-        self,
-        max_iterations: int | None = None,
-        execute_depth: int | None = None,
-        cut_point_rules: Iterable[str] = (),
-        terminal_rules: Iterable[str] = (),
-        fail_fast: bool = False,
-    ) -> None:
-        iterations = 0
+    def step_proof(self) -> None:
+        self._check_all_terminals()
+
+        if not self.proof.pending:
+            return
+        curr_node = self.proof.pending[0]
+
+        self.advance_pending_node(
+            node=curr_node,
+            execute_depth=self.execute_depth,
+            cut_point_rules=self.cut_point_rules,
+            terminal_rules=self.terminal_rules,
+        )
 
         self._check_all_terminals()
 
-        while self.proof.pending:
-            self.proof.write_proof_data()
-            if fail_fast and self.proof.failed:
-                _LOGGER.warning(
-                    f'Terminating proof early because fail_fast is set {self.proof.id}, failing nodes: {[nd.id for nd in self.proof.failing]}'
-                )
-                break
-
-            if max_iterations is not None and max_iterations <= iterations:
-                _LOGGER.warning(f'Reached iteration bound {self.proof.id}: {max_iterations}')
-                break
-            iterations += 1
-            curr_node = self.proof.pending[0]
-
-            self.advance_pending_node(
-                node=curr_node,
-                execute_depth=execute_depth,
-                cut_point_rules=cut_point_rules,
-                terminal_rules=terminal_rules,
-            )
-
-            self._check_all_terminals()
-
-            for node in self.proof.terminal:
-                if (
-                    not node.id in self._checked_for_subsumption
-                    and self.proof.kcfg.is_leaf(node.id)
-                    and not self.proof.is_target(node.id)
-                ):
-                    self._checked_for_subsumption.add(node.id)
-                    self._check_subsume(node)
+        for node in self.proof.terminal:
+            if (
+                not node.id in self._checked_for_subsumption
+                and self.proof.kcfg.is_leaf(node.id)
+                and not self.proof.is_target(node.id)
+            ):
+                self._checked_for_subsumption.add(node.id)
+                self._check_subsume(node)
 
         if self.proof.failed:
-            self.save_failure_info()
-
-        self.proof.write_proof_data()
-
-    def save_failure_info(self) -> None:
-        self.proof.failure_info = self.failure_info()
+            self.proof.failure_info = self.failure_info()
 
     def failure_info(self) -> APRFailureInfo:
         return APRFailureInfo.from_proof(self.proof, self.kcfg_explore, counterexample_info=self.counterexample_info)

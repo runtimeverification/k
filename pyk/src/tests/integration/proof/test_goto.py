@@ -116,13 +116,14 @@ class TestGoToProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, bmc_depth=bmc_depth)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(proof, kcfg_explore=kcfg_explore)
-        prover.advance_proof(
-            max_iterations=max_iterations,
+        prover = APRProver(
+            proof,
+            kcfg_explore=kcfg_explore,
             execute_depth=max_depth,
             cut_point_rules=cut_rules,
             terminal_rules=terminal_rules,
         )
+        prover.advance_proof(max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(
             kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)

@@ -175,6 +175,11 @@ class Proof(ABC):
         ...
 
     @property
+    @abstractmethod
+    def can_progress(self) -> bool:
+        ...
+
+    @property
     def failed(self) -> bool:
         return self.status == ProofStatus.FAILED
 
@@ -283,6 +288,23 @@ class CompositeSummary(ProofSummary):
 
 class Prover:
     kcfg_explore: KCFGExplore
+    proof: Proof
 
     def __init__(self, kcfg_explore: KCFGExplore):
         self.kcfg_explore = kcfg_explore
+
+    @abstractmethod
+    def step_proof(self) -> None:
+        ...
+
+    def advance_proof(self, max_iterations: int | None = None, fail_fast: bool = False) -> None:
+        iterations = 0
+        while self.proof.can_progress:
+            if fail_fast and self.proof.failed:
+                _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
+                return
+            if max_iterations is not None and max_iterations <= iterations:
+                return
+            iterations += 1
+            self.step_proof()
+            self.proof.write_proof_data()
