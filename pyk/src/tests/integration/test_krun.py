@@ -50,7 +50,7 @@ class TestImpRun(KRunTest):
             k=KSequence(
                 KApply(
                     'int_;_',
-                    KApply('_,_', x, KApply('.List{"_,_"}_Ids')),
+                    KApply('_,_', x, KApply('.List{"_,_"}')),
                     KApply('_=_;', x, intToken(1)),
                 ),
             ),

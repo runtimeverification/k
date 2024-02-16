@@ -38,7 +38,7 @@ def start_pattern() -> Pattern:
                         Lblint'UndsSClnUnds'{}(
                             Lbl'UndsCommUnds'{}(
                                 \dv{SortId{}}("x"),
-                                Lbl'Stop'List'LBraQuotUndsCommUndsQuotRBraUnds'Ids{}()
+                                Lbl'Stop'List'LBraQuotUndsCommUndsQuotRBra'{}()
                             ),
                             Lbl'UndsEqlsUndsSCln'{}(
                                 \dv{SortId{}}("x"),

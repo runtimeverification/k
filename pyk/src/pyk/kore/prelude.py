@@ -263,7 +263,7 @@ LBL_JSON_OBJECT: Final = SymbolId('LblJSONObject')
 LBL_JSON_ENTRY: Final = SymbolId('LblJSONEntry')
 
 JSON_NULL: Final = App('LblJSONnull')
-STOP_JSONS: Final = App("Lbl'Stop'List'LBraQuot'JSONs'QuotRBraUnds'JSONs")
+STOP_JSONS: Final = App("Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'")
 
 LBL_STRING2JSON: Final = SymbolId("LblString2JSON'LParUndsRParUnds'JSON'Unds'JSON'Unds'String")
 LBL_JSON2STRING: Final = SymbolId("LblJSON2String'LParUndsRParUnds'JSON'Unds'String'Unds'JSON")
