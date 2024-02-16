@@ -9,7 +9,7 @@ from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
-from pyk.prelude.ml import mlEqualsTrue
+from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
@@ -73,7 +73,7 @@ class RefuteSemantics(KCFGSemantics):
 
 
 REFUTE_NODE_TEST_DATA: Iterable[tuple[str, Iterable[KInner], ProofStatus]] = (
-    ('refute-node-fail', (mlEqualsTrue(leInt(KVariable('N'), intToken(0))),), ProofStatus.FAILED),
+    ('refute-node-fail', (leInt(KVariable('N'), intToken(0)),), ProofStatus.FAILED),
 )
 
 
@@ -171,15 +171,15 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         assert prover.proof.status == ProofStatus.FAILED
 
         failing_node = single(prover.proof.failing)
-        refutation = prover.proof.refute_node(failing_node)
-        assert refutation is not None
-        refutation_prover = ImpliesProver(refutation, kcfg_explore)
+        prover.proof.refute_node(failing_node)
+        assert len(prover.proof.subproof_ids) == 1
+
+        subproof = single(prover.proof.subproofs)
+        assert type(subproof) is RefutationProof
+        refutation_prover = ImpliesProver(subproof, kcfg_explore)
         refutation_prover.advance_proof()
 
-        assert len(prover.proof.subproof_ids) == 1
-        subproof = single(prover.proof.subproofs)
-
-        assert type(subproof) is RefutationProof
+        assert subproof.status == ProofStatus.FAILED
 
         expected_subproof_constraints = tuple(
             [kprove.definition.sort_vars(constraint) for constraint in expected_subproof_constraints]
@@ -188,6 +188,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
             [
                 kprove.definition.sort_vars(constraint)
                 for constraint in (list(subproof.pre_constraints) + [subproof.last_constraint])
+                if not is_top(constraint)
             ]
         )
 

@@ -7,7 +7,8 @@ import pytest
 from pyk.kcfg.kcfg import KCFG
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import intToken
-from pyk.proof.equality import EqualityProof, EqualitySummary
+from pyk.proof import EqualityProof
+from pyk.proof.implies import EqualitySummary
 from pyk.proof.proof import CompositeSummary, Proof, ProofStatus
 from pyk.proof.reachability import APRFailureInfo, APRProof, APRSummary
 
