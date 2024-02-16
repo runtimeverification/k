@@ -201,7 +201,6 @@ public class ModuleToKORE {
     collectionSorts.add("SET.Set");
     collectionSorts.add("MAP.Map");
     collectionSorts.add("LIST.List");
-    collectionSorts.add("ARRAY.Array");
     collectionSorts.add("RANGEMAP.RangeMap");
     attributes.remove(Att.HAS_DOMAIN_VALUES());
     if (attributes.containsKey(Att.TOKEN())) {
@@ -420,26 +419,19 @@ public class ModuleToKORE {
         continue;
       }
       sb.append("  ");
-      Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+      Att att = module.sortAttributesFor().get(sort).getOrElse(KORE::Att);
       if (att.contains(Att.HOOK())) {
         if (collectionSorts.contains(att.get(Att.HOOK()))) {
-          if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
-            att = att.remove(Att.ELEMENT());
-            att = att.remove(Att.UNIT());
-            att = att.remove(Att.HOOK());
-          } else {
-            Production concatProd =
-                stream(module.productionsForSort().apply(sort))
-                    .filter(p -> p.att().contains(Att.ELEMENT()))
-                    .findAny()
-                    .get();
-            att =
-                att.add(
-                    Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
-            att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
-            att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
-            sb.append("hooked-");
-          }
+          Production concatProd =
+              stream(module.productionsForSort().apply(sort))
+                  .filter(p -> p.att().contains(Att.ELEMENT()))
+                  .findAny()
+                  .get();
+          att =
+              att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
+          att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
+          att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
+          sb.append("hooked-");
         } else {
           sb.append("hooked-");
         }
