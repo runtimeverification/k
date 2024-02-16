@@ -15,10 +15,9 @@ from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG
 from ..kcfg.exploration import KCFGExploration
 from ..konvert import kflatmodule_to_kore
-from ..prelude.kbool import BOOL, TRUE
-from ..prelude.ml import mlAnd, mlEquals, mlTop
+from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
-from .equality import ProofSummary, Prover, RefutationProof
+from .implies import ProofSummary, Prover, RefutationProof
 from .proof import CompositeSummary, Proof, ProofStatus
 
 if TYPE_CHECKING:
@@ -510,13 +509,8 @@ class APRProof(Proof, KCFGExploration):
             )
             return None
 
-        # extract the path condition prior to the Split that leads to the node-to-refute
-        pre_split_constraints = [
-            mlEquals(TRUE, ml_pred_to_bool(c), arg_sort=BOOL) for c in closest_branch.source.cterm.constraints
-        ]
-
-        # extract the constriant added by the Split that leads to the node-to-refute
-        last_constraint = mlEquals(TRUE, ml_pred_to_bool(csubst.constraints[0]), arg_sort=BOOL)
+        pre_split_constraints = [ml_pred_to_bool(c) for c in closest_branch.source.cterm.constraints]
+        last_constraint = ml_pred_to_bool(csubst.constraints[0])
 
         refutation_id = self.get_refutation_id(node.id)
         _LOGGER.info(f'Adding refutation proof {refutation_id} as subproof of {self.id}')

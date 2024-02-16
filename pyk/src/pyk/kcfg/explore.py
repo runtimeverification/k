@@ -156,15 +156,19 @@ class KCFGExplore:
         self,
         antecedent: CTerm,
         consequent: CTerm,
+        bind_universally: bool = False,
     ) -> CSubst | None:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
         fv_antecedent = free_vars(antecedent.kast)
         unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
         if len(unbound_consequent) > 0:
-            _LOGGER.debug(f'Binding variables in consequent: {unbound_consequent}')
+            bind_text, bind_label = ('existentially', '#Exists')
+            if bind_universally:
+                bind_text, bind_label = ('universally', '#Forall')
+            _LOGGER.debug(f'Binding variables in consequent {bind_text}: {unbound_consequent}')
             for uc in unbound_consequent:
-                _consequent = KApply(KLabel('#Exists', [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
+                _consequent = KApply(KLabel(bind_label, [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
         antecedent_kore = self.kprint.kast_to_kore(antecedent.kast, GENERATED_TOP_CELL)
         consequent_kore = self.kprint.kast_to_kore(_consequent, GENERATED_TOP_CELL)
         result = self._kore_client.implies(antecedent_kore, consequent_kore)

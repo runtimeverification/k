@@ -203,7 +203,7 @@ class Proof(ABC):
     @classmethod
     def read_proof(cls: type[Proof], id: str, proof_dir: Path) -> Proof:
         # these local imports allow us to call .to_dict() based on the proof type we read from JSON
-        from .equality import EqualityProof, RefutationProof  # noqa
+        from .implies import EqualityProof, RefutationProof  # noqa
         from .reachability import APRProof  # noqa
 
         proof_path = proof_dir / f'{hash_str(id)}.json'
@@ -220,7 +220,7 @@ class Proof(ABC):
     @staticmethod
     def read_proof_data(proof_dir: Path, id: str) -> Proof:
         # these local imports allow us to call .to_dict() based on the proof type we read from JSON
-        from .equality import EqualityProof, RefutationProof  # noqa
+        from .implies import EqualityProof, RefutationProof  # noqa
         from .reachability import APRProof  # noqa
 
         proof_path = proof_dir / id / 'proof.json'
