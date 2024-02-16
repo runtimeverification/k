@@ -87,17 +87,15 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
     def proof_dir(self, tmp_path_factory: TempPathFactory) -> Path:
         return tmp_path_factory.mktemp('proofs')
 
-    def test_apr_proof_unrefute_node(
+    def build_prover(
         self,
         kprove: KProve,
         proof_dir: Path,
         kcfg_explore: KCFGExplore,
-    ) -> None:
-        # Given
-        spec_file = K_FILES / 'refute-node-spec.k'
-        spec_module = 'REFUTE-NODE-SPEC'
-        claim_id = 'split-int-succeed'
-
+        spec_file: Path,
+        spec_module: str,
+        claim_id: str,
+    ) -> APRProver:
         claim = single(
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
@@ -111,14 +109,27 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
             logs={},
             proof_dir=proof_dir,
         )
-        prover = APRProver(proof, kcfg_explore)
+        return APRProver(proof, kcfg_explore)
+
+    def test_apr_proof_unrefute_node(
+        self,
+        kprove: KProve,
+        proof_dir: Path,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        spec_file = K_FILES / 'refute-node-spec.k'
+        spec_module = 'REFUTE-NODE-SPEC'
+        claim_id = 'split-int-succeed'
+
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
 
         # When
         prover.advance_proof(max_iterations=1)
         frontier_nodes = prover.proof.pending
         assert prover.proof.status == ProofStatus.PENDING
 
-        assert len(frontier_nodes)
+        assert len(frontier_nodes) == 2
         frontier_node = frontier_nodes[0]
         prover.proof.refute_node(frontier_node)
         prover.proof.unrefute_node(frontier_node)
@@ -147,23 +158,7 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         spec_module = 'REFUTE-NODE-SPEC'
         claim_id = 'split-int-fail'
 
-        claim = single(
-            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
-        )
-        kcfg_pre, init_node, target_node = KCFG.from_claim(kprove.definition, claim, proof_dir)
-        proof = APRProof(
-            f'{spec_module}.{claim_id}',
-            kcfg_pre,
-            [],
-            init=init_node,
-            target=target_node,
-            logs={},
-            proof_dir=proof_dir,
-        )
-        prover = APRProver(
-            proof,
-            kcfg_explore,
-        )
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
 
         # When
         prover.advance_proof()
@@ -196,3 +191,60 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
 
         # Then
         assert prover.proof.status == expected_status
+
+    def test_apr_proof_read_node_refutations(
+        self,
+        kprove: KProve,
+        proof_dir: Path,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        spec_file = K_FILES / 'refute-node-spec.k'
+        spec_module = 'REFUTE-NODE-SPEC'
+        claim_id = 'split-int-succeed'
+
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
+
+        # When
+        prover.advance_proof(max_iterations=1)
+        frontier_nodes = prover.proof.pending
+        assert prover.proof.status == ProofStatus.PENDING
+
+        assert len(frontier_nodes) == 2
+        frontier_node = frontier_nodes[0]
+        prover.proof.refute_node(frontier_node)
+
+        proof_from_file = APRProof.read_proof_data(proof_dir, prover.proof.id)
+        refutation_id = prover.proof.get_refutation_id(frontier_node.id)
+
+        # Then
+        assert len(proof_from_file.node_refutations) == 1
+        assert frontier_node.id in proof_from_file.node_refutations
+        assert proof_from_file.node_refutations[frontier_node.id].id == refutation_id
+
+    def test_apr_proof_refute_node_no_successors(
+        self,
+        kprove: KProve,
+        proof_dir: Path,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        spec_file = K_FILES / 'refute-node-spec.k'
+        spec_module = 'REFUTE-NODE-SPEC'
+        claim_id = 'split-int-fail'
+
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
+
+        # When
+        prover.advance_proof()
+        failing_node = single(prover.proof.failing)
+        predecessors = prover.proof.kcfg.predecessors(failing_node.id)
+        assert len(predecessors) == 1
+        predecessor_node = predecessors[0].source
+
+        result_predecessor = prover.proof.refute_node(predecessor_node)
+        result_successor = prover.proof.refute_node(failing_node)
+
+        # Then
+        assert result_predecessor is None  # fails because the node has successors
+        assert result_successor is not None  # succeeds because the node has no successors
