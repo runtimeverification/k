@@ -55,7 +55,7 @@ PARSE_TOKEN_TEST_DATA: Final = (
                     '<k>',
                     KApply(
                         'int_;_',
-                        KApply('_,_', KToken('x', 'Id'), KApply('.List{"_,_"}_Ids')),
+                        KApply('_,_', KToken('x', 'Id'), KApply('.List{"_,_"}')),
                         KApply('_=_;', KToken('x', 'Id'), KToken('0', 'Int')),
                     ),
                 ),

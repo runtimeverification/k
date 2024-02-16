@@ -40,8 +40,8 @@
 .List
 'Stop'List
 
-.List{"_,_"}_Ids
-'Stop'List'LBraQuotUndsCommUndsQuotRBraUnds'Ids
+.List{"_,_"}
+'Stop'List'LBraQuotUndsCommUndsQuotRBra'
 
 .Map
 'Stop'Map
