@@ -161,7 +161,7 @@ public class ModuleToKORE {
     // insert the location of the main module so the backend can provide better error location
     convert(
         considerSource,
-        Att.empty().add(Source.class, module.att().get(Source.class)),
+        Att.empty().add(Att.SOURCE(), Source.class, module.att().get(Att.SOURCE(), Source.class)),
         sb,
         null,
         null);
@@ -671,7 +671,7 @@ public class ModuleToKORE {
     // #Ceil(@K1) and #Ceil(@Rest).
     // [simplification]
 
-    K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
+    K restMapSet = KVariable("@Rest", Att.empty().add(Att.SORT(), Sort.class, mapSort));
     KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
     KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
 
@@ -680,7 +680,7 @@ public class ModuleToKORE {
     K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
     for (int i = 0; i < nonterminals.length(); i++) {
       Sort sort = nonterminals.apply(i).sort();
-      KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
+      KVariable setVar = KVariable("@K" + i, Att.empty().add(Att.SORT(), Sort.class, sort));
       setArgs.add(setVar);
       if (i > 0) {
         KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
@@ -959,7 +959,7 @@ public class ModuleToKORE {
     considerSource.put(Att.SOURCE(), true);
     convert(
         considerSource,
-        Att.empty().add(Source.class, spec.att().get(Source.class)),
+        Att.empty().add(Att.SOURCE(), Source.class, spec.att().get(Att.SOURCE(), Source.class)),
         sb,
         null,
         null);
@@ -1454,7 +1454,7 @@ public class ModuleToKORE {
     String conn = "";
     for (KVariable var : freeVars) {
       sb.append(conn);
-      convert(var.att().getOptional(Sort.class).orElse(Sorts.K()), sb);
+      convert(var.att().getOptional(Att.SORT(), Sort.class).orElse(Sorts.K()), sb);
       conn = ",";
     }
     sb.append(") : ");
@@ -2218,7 +2218,7 @@ public class ModuleToKORE {
       public void apply(KSequence k) {
         for (int i = 0; i < k.items().size(); i++) {
           K item = k.items().get(i);
-          boolean isList = item.att().get(Sort.class).equals(Sorts.K());
+          boolean isList = item.att().get(Att.SORT(), Sort.class).equals(Sorts.K());
           if (i == k.items().size() - 1) {
             if (isList) {
               apply(item);
@@ -2228,7 +2228,7 @@ public class ModuleToKORE {
               sb.append(",dotk{}())");
             }
           } else {
-            if (item.att().get(Sort.class).equals(Sorts.K())) {
+            if (item.att().get(Att.SORT(), Sort.class).equals(Sorts.K())) {
               sb.append("append{}(");
             } else {
               sb.append("kseq{}(");
@@ -2255,13 +2255,13 @@ public class ModuleToKORE {
         String name = setVar ? k.name().substring(1) : k.name();
         convert(name, sb);
         sb.append(":");
-        convert(k.att().getOptional(Sort.class).orElse(Sorts.K()), sb);
+        convert(k.att().getOptional(Att.SORT(), Sort.class).orElse(Sorts.K()), sb);
       }
 
       @Override
       public void apply(KRewrite k) {
         sb.append("\\rewrites{");
-        convert(k.att().get(Sort.class), sb);
+        convert(k.att().get(Att.SORT(), Sort.class), sb);
         sb.append("}(");
         apply(k.left());
         sb.append(",");
@@ -2271,7 +2271,7 @@ public class ModuleToKORE {
 
       @Override
       public void apply(KAs k) {
-        Sort sort = k.att().get(Sort.class);
+        Sort sort = k.att().get(Att.SORT(), Sort.class);
         sb.append("\\and{");
         convert(sort, sb);
         sb.append("}(");

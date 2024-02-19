@@ -69,22 +69,16 @@ class Att private (val att: Map[(Att.Key, String), Any])
     None
   }
 
-  def contains(cls: Class[_]): Boolean =
-    att.contains((Att.getInternalKeyOrAssert(cls.getName), cls.getName))
   def contains(key: Att.Key): Boolean                = att.contains((key, Att.stringClassName))
   def contains(key: Att.Key, cls: Class[_]): Boolean = att.contains((key, cls.getName))
 
-  def get[T](key: Class[T]): T               = getOption(key).get
   def get(key: Att.Key): String              = getOption(key).get
   def get[T](key: Att.Key, cls: Class[T]): T = getOption(key, cls).get
   def getOption(key: Att.Key): Option[String] =
     att.get((key, Att.stringClassName)).asInstanceOf[Option[String]]
-  def getOption[T](key: Class[T]): Option[T] =
-    att.get((Att.getInternalKeyOrAssert(key.getName), key.getName)).asInstanceOf[Option[T]]
   def getOption[T](key: Att.Key, cls: Class[T]): Option[T] =
     att.get((key, cls.getName)).asInstanceOf[Option[T]]
   def getOptional(key: Att.Key): Optional[String] = optionToOptional(getOption(key))
-  def getOptional[T](key: Class[T]): Optional[T]  = optionToOptional(getOption(key))
   def getOptional[T](key: Att.Key, cls: Class[T]): Optional[T] = optionToOptional(
     getOption(key, cls)
   )
@@ -95,8 +89,6 @@ class Att private (val att: Map[(Att.Key, String), Any])
   def add(key: Att.Key): Att                = add(key, "")
   def add(key: Att.Key, value: String): Att = add(key, Att.stringClassName, value)
   def add(key: Att.Key, value: Int): Att    = add(key, Att.intClassName, value)
-  def add[T <: AttValue](key: Class[T], value: T): Att =
-    add(Att.getInternalKeyOrAssert(key.getName), key.getName, value)
   def add[T <: AttValue](key: Att.Key, cls: Class[T], value: T): Att = add(key, cls.getName, value)
 
   private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = key.keyParam match {
@@ -118,9 +110,8 @@ class Att private (val att: Map[(Att.Key, String), Any])
   private def throwForbidden(key: Att.Key) =
     throw KEMException.compilerError("Parameters for the attribute '" + key + "' are forbidden.")
 
-  def addAll(thatAtt: Att): Att  = Att(att ++ thatAtt.att)
-  def remove(key: Att.Key): Att  = remove(key, Att.stringClassName)
-  def remove(key: Class[_]): Att = remove(Att.getInternalKeyOrAssert(key.getName), key.getName)
+  def addAll(thatAtt: Att): Att                         = Att(att ++ thatAtt.att)
+  def remove(key: Att.Key): Att                         = remove(key, Att.stringClassName)
   def remove(key: Att.Key, cls: Class[_]): Att          = remove(key, cls.getName)
   private def remove(key: Att.Key, clsStr: String): Att = Att(att - ((key, clsStr)))
 }

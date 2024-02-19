@@ -59,7 +59,9 @@ public class GenerateSortPredicateRules {
       res.add(
           Rule(
               KRewrite(
-                  KApply(KLabel("is" + sort), KVariable(sort.name(), Att().add(Sort.class, sort))),
+                  KApply(
+                      KLabel("is" + sort),
+                      KVariable(sort.name(), Att().add(Att.SORT(), Sort.class, sort))),
                   BooleanUtils.TRUE),
               BooleanUtils.TRUE,
               BooleanUtils.TRUE));

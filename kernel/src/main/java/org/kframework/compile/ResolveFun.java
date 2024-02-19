@@ -237,7 +237,7 @@ public class ResolveFun {
     pis.add(NonTerminal(arg));
     for (KVariable var : closure(k)) {
       pis.add(Terminal(","));
-      pis.add(NonTerminal(var.att().getOptional(Sort.class).orElse(Sorts.K())));
+      pis.add(NonTerminal(var.att().getOptional(Att.SORT(), Sort.class).orElse(Sorts.K())));
     }
     pis.add(Terminal(")"));
     return Production(fun, rhs, immutable(pis), att.add(Att.FUNCTION()));

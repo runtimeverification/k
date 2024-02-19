@@ -323,18 +323,23 @@ public class JsonParser {
     JsonObject attMap = data.getJsonObject("att");
     Att newAtt = Att.empty();
     for (String key : attMap.keySet()) {
-      if (key.equals(Location.class.getName())) {
+      if (key.equals(Att.LOCATION().key())) {
         JsonArray locarr = attMap.getJsonArray(Location.class.getName());
         newAtt =
             newAtt.add(
+                Att.LOCATION(),
                 Location.class,
                 Location(locarr.getInt(0), locarr.getInt(1), locarr.getInt(2), locarr.getInt(3)));
-      } else if (key.equals(Source.class.getName())) {
-        newAtt = newAtt.add(Source.class, Source.apply(attMap.getString(key)));
-      } else if (key.equals(Production.class.getName())) {
-        newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
-      } else if (key.equals(Sort.class.getName())) {
-        newAtt = newAtt.add(Sort.class, toSort(attMap.getJsonObject(key)));
+      } else if (key.equals(Att.SOURCE().key())) {
+        newAtt = newAtt.add(Att.SOURCE(), Source.class, Source.apply(attMap.getString(key)));
+      } else if (key.equals(Att.PRODUCTION().key())) {
+        newAtt =
+            newAtt.add(
+                Att.PRODUCTION(),
+                Production.class,
+                (Production) toSentence(attMap.getJsonObject(key)));
+      } else if (key.equals(Att.SORT().key())) {
+        newAtt = newAtt.add(Att.SORT(), Sort.class, toSort(attMap.getJsonObject(key)));
       } else if (key.equals(Att.BRACKET_LABEL().key())) {
         newAtt = newAtt.add(Att.BRACKET_LABEL(), KLabel.class, toKLabel(attMap.getJsonObject(key)));
       } else if (key.equals(Att.PREDICATE().key())) {
@@ -416,7 +421,7 @@ public class JsonParser {
       case KVARIABLE:
         Att varAtt = Att.empty();
         if (data.containsKey("sort")) {
-          varAtt = varAtt.add(Sort.class, toSort(data.getJsonObject("sort")));
+          varAtt = varAtt.add(Att.SORT(), Sort.class, toSort(data.getJsonObject("sort")));
         }
         return KVariable(data.getString("name"), varAtt);
 

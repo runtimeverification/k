@@ -61,7 +61,9 @@ public class ResolveFunctionWithConfig {
     new ConfigurationInfoFromModule(mod);
     topCell = Sorts.GeneratedTopCell();
     topCellLabel = KLabels.GENERATED_TOP_CELL;
-    CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add(Att.WITH_CONFIG()));
+    CONFIG_VAR =
+        KVariable(
+            "#Configuration", Att().add(Att.SORT(), Sort.class, topCell).add(Att.WITH_CONFIG()));
   }
 
   private boolean ruleNeedsConfig(RuleOrClaim r) {
