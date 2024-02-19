@@ -49,7 +49,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 ```
 
 ```keep
-    claim <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
+    claim <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => .K ... </k>
           <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
           <totalIssuance> TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
           <account>

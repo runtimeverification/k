@@ -49,7 +49,7 @@ rule <k> initConfigLoop(I, N) => initConfigLoop(I +Int 1, N) ... </k>
      <branch>     B => B[I <- 0] </branch>
      requires I <Int N
 
-rule initConfigLoop(I, N) => . requires I >=Int N
+rule initConfigLoop(I, N) => .K requires I >=Int N
 
 
 /*
@@ -68,7 +68,7 @@ rule <k> initLoop(I,        N)
      <zerohashes> Z => Z[I +Int 1 <- hash(Z[I], Z[I])] </zerohashes>
      requires I <Int N
 
-rule initLoop(I, N) => . requires I >=Int N
+rule initLoop(I, N) => .K requires I >=Int N
 
 
 /*
@@ -97,12 +97,12 @@ rule <k> depositLoop(I,        N, Size,        Value)
      requires I <Int N
       andBool Size %Int 2 =/=Int 1
 
-rule <k> depositLoop(I, N, Size, Value) => . ... </k>
+rule <k> depositLoop(I, N, Size, Value) => .K ... </k>
      <branch> B => B[I <- Value] </branch>
      requires I <Int N
       andBool Size %Int 2 ==Int 1
 
-rule <k> depositLoop(I, N, _Size, Value) => . ... </k>
+rule <k> depositLoop(I, N, _Size, Value) => .K ... </k>
      <branch> B => B[I <- Value] </branch>
      requires I >=Int N
 //     orBool Size %Int 2 ==Int 1

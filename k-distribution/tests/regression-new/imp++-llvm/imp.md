@@ -340,7 +340,7 @@ this syntactic restructuring has been explained in Lesson 7. Here is the
 semantics of the two constructs:
 
 ```k
-  rule _:Int; => .
+  rule _:Int; => .K
   rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>  [group(assignment)]
@@ -354,7 +354,7 @@ sequentialize a syntactic list of statements `s1 s2 ... sn..` into the
 corresponding computation `s1 ~> s2 ~> ... ~> sn`.
 
 ```k
-   rule .Stmts => .
+   rule .Stmts => .K
    rule S:Stmt Ss:Stmts => S ~> Ss
 ```
 
@@ -444,7 +444,7 @@ all behaviors.
 
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>  [group(print)]
-  rule print(.AExps); => .
+  rule print(.AExps); => .K
 ```
 
 ### Halt
@@ -458,7 +458,7 @@ terminates the entire program, no matter how many concurrent threads it has,
 because there is nothing else to rewrite.
 
 ```k
-  rule <k> halt; ~> _ => . </k>
+  rule <k> halt; ~> _ => .K </k>
 ```
 
 ### Spawn thread
@@ -502,7 +502,7 @@ join statement is simply dissolved. The terminated thread is not removed,
 because we want to allow possible other join statements to also dissolve.
 
 ```k
-  rule <k> join(T); => . ...</k> <thread>... <k>.</k> <id>T</id> ...</thread>
+  rule <k> join(T); => .K ...</k> <thread>... <k> .K </k> <id>T</id> ...</thread>
 ```
 
 ### Blocks
@@ -541,7 +541,7 @@ initialize it with 0.
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .
+  rule int .Ids; => .K
 ```
 
 ### Auxiliary operations
@@ -552,7 +552,7 @@ This rule is structural: we do not want them to count as computational
 steps in the transition system of a program.
 
 ```k
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>
+  rule <k> Rho => .K ...</k> <env> _ => Rho </env>
 ```
 
 If you want to avoid useless environment recovery steps and keep the size

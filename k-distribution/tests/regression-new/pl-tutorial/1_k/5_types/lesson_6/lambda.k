@@ -65,7 +65,7 @@ module LAMBDA
        (.Bag => <task> <k> E = ?T </k> <tenv> TEnv[X <- ?T] </tenv> </task>)
 
   syntax KItem ::= Exp "=" Exp  [seqstrict]
-  rule <k> T:Type = T:Type => . ...</k>
+  rule <k> T:Type = T:Type => .K ...</k>
 
-  rule <task>... <k> . </k> ...</task> => .Bag
+  rule <task>... <k> .K </k> ...</task> => .Bag
 endmodule

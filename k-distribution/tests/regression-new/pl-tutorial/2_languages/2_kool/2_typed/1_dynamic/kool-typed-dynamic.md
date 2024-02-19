@@ -249,13 +249,13 @@ KOOL).
 
   syntax KItem ::= undefined(Type)
 
-  rule <k> T:Type X:Id; => . ...</k>
+  rule <k> T:Type X:Id; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 
-  rule <k> T:Type X:Id[N:Int]; => . ...</k>
+  rule <k> T:Type X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(T, L +Int 1, N)
                           (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
@@ -326,14 +326,14 @@ KOOL).
   context (HOLE => lvalue(HOLE)) = _
 
 
-  rule {} => .
+  rule {} => .K
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 
 
   rule S1:Stmt S2:Stmt => S1 ~> S2
 
 
-  rule _:Val; => .
+  rule _:Val; => .K
 
 
   rule if ( true) S else _ => S
@@ -345,33 +345,33 @@ KOOL).
 
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     requires typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
-  rule print(.Vals); => .
+  rule print(.Vals); => .K
 
 
-  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
+  rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
        <busy> Busy => Busy -Set keys(H) </busy>
        <terminated>... .Set => SetItem(T) ...</terminated>
 
-  rule <k> join T:Int; => . ...</k>
+  rule <k> join T:Int; => .K ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
-  rule <k> acquire V:Val; => . ...</k>
+  rule <k> acquire V:Val; => .K ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy (.Set => SetItem(V)) </busy>
     requires (notBool(V in Busy:Set))  [group(acquire)]
 
-  rule <k> acquire V; => . ...</k>
+  rule <k> acquire V; => .K ...</k>
        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
-  rule <k> release V:Val; => . ...</k>
+  rule <k> release V:Val; => .K ...</k>
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
     requires N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+  rule <k> release V; => .K ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
        <busy>... SetItem(V) => .Set ...</busy>
 
-  rule <k> rendezvous V:Val; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [group(rendezvous)]
+  rule <k> rendezvous V:Val; => .K ...</k>
+       <k> rendezvous V; => .K ...</k>  [group(rendezvous)]
 ```
 
 ## Unchanged auxiliary operations from dynamically typed SIMPLE
@@ -386,8 +386,8 @@ KOOL).
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
-  rule (setEnv(_) => .) ~> setEnv(_)
+  rule <k> setEnv(Env) => .K ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .K) ~> setEnv(_)
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
@@ -532,7 +532,7 @@ encountered.
        </control>
        <env> Env </env>
 
-  rule <k> popx => . ...</k>
+  rule <k> popx => .K ...</k>
        <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _
@@ -568,7 +568,7 @@ Like in untyped KOOL.
 
 Like in untyped KOOL.
 ```k
-  rule <k> class Class1 extends Class2 { S } => . ...</k>
+  rule <k> class Class1 extends Class2 { S } => .K ...</k>
        <classes>... (.Bag => <classData>
                             <className> Class1 </className>
                             <baseClass> Class2 </baseClass>
@@ -584,7 +584,7 @@ closures, so that their type contract can be checked at invocation
 time.  The rule below is conceptually similar to that of untyped KOOL;
 the only difference is the addition of the types.
 ```k
-  rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
+  rule <k> T:Type F:Id(Ps:Params) S => .K ...</k>
        <crntClass> C </crntClass>
        <location> OL </location>
        <env> Env => Env[F <- L] </env>
@@ -628,23 +628,23 @@ those in untyped KOOL.
        <baseClass> Class1:Id </baseClass>
        <declarations> S </declarations>
 
-  rule <k> create(Object) => . ...</k>
+  rule <k> create(Object) => .K ...</k>
 
   syntax KItem ::= setCrntClass(Id)
 
-  rule <k> setCrntClass(C) => . ...</k>
+  rule <k> setCrntClass(C) => .K ...</k>
        <crntClass> _ => C </crntClass>
 
   syntax KItem ::= "addEnvLayer"
 
-  rule <k> addEnvLayer => . ...</k>
+  rule <k> addEnvLayer => .K ...</k>
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
        <envStack> .List => ListItem(envStackFrame(Class, Env)) ...</envStack>
 
   syntax KItem ::= "storeObj"
 
-  rule <k> storeObj => . ...</k>
+  rule <k> storeObj => .K ...</k>
        <crntObj>
          <crntClass> Class </crntClass>
          <envStack> EStack </envStack>
@@ -864,7 +864,7 @@ A generic computational guard: it allows the computation to continue
 only if a prefix guard evaluates to true.
 ```k
   syntax KItem ::= "true?"
-  rule true ~> true? => .
+  rule true ~> true? => .K
 
 endmodule
 ```

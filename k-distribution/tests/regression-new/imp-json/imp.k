@@ -51,10 +51,10 @@ module IMP
   rule true && B => B
   rule false && _ => false
 
-  rule {} => .
+  rule {} => .K
   rule {S} => S
 
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
+  rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
 
   rule S1:Stmt S2:Stmt => S1 ~> S2
 

@@ -33,13 +33,13 @@ imports DOMAINS
                | sequenceDefns  ( Defns  ) [function]
                | sequenceInstrs ( Instrs ) [function]
  // -------------------------------------------------
-    rule sequenceStmts(.Stmts) => .
+    rule sequenceStmts(.Stmts) => .K
     rule sequenceStmts(S SS  ) => S ~> sequenceStmts(SS)
 
-    rule sequenceDefns(.Defns) => .
+    rule sequenceDefns(.Defns) => .K
     rule sequenceDefns(D DS  ) => D ~> sequenceDefns(DS)
 
-    rule sequenceInstrs(.Instrs) => .
+    rule sequenceInstrs(.Instrs) => .K
     rule sequenceInstrs(I IS   ) => I ~> sequenceInstrs(IS)
 
 endmodule

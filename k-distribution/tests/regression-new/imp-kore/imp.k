@@ -143,7 +143,7 @@ Similarly, the non-empty blocks are dissolved and replaced by their statement
 contents, thus effectively giving them a bracket semantics; we can afford to
 do this only because we have no block-local variable declarations yet in IMP. */
 
-  rule {} => .
+  rule {} => .K
   rule {S} => S
 
 /*@ \subsubsection{Assignment}
@@ -151,7 +151,7 @@ The assigned variable is updated in the state.  The variable is expected
 to be declared, otherwise the semantics will get stuck.  At the same time,
 the assignment is dissolved. */
 
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
+  rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
 
 /*@ \subsubsection{Sequential composition}
 Sequential composition is simply structurally translated into \K's

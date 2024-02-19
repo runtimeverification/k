@@ -37,12 +37,12 @@ module NTH2-SPEC
      ~> apply("ih")
      ~> load("p2")
      ~> apply("lemma")
-     => . </k>
+     => .K </k>
         requires k(N) >Int 0 andBool const(N)
 
     // induction hypothesis
     claim
-    <k> apply("ih") => . ... </k>
+    <k> apply("ih") => .K ... </k>
     <g> nth(k(N), B1, B2) => B1 <~* B2 </g>
         requires k(N) >Int 0 andBool const(N)
         [trusted]
@@ -57,7 +57,7 @@ module NTH2-SPEC
         Qed.
     */
     claim
-    <k> apply("lemma") => . ... </k>
+    <k> apply("lemma") => .K ... </k>
     <g> B1 <~* B2 and B2 <~ B3 => B1 <~* B3 </g>
         [trusted]
 endmodule
