@@ -73,7 +73,7 @@ this module should import only the `ARRAY` module.
 module ARRAY-SYNTAX
   imports private LIST
 
-  syntax Array [hook(ARRAY.Array)]
+  syntax Array
 ```
 
 ### Array lookup
@@ -83,7 +83,7 @@ that the base of the logarithm is a relatively high number and thus the time is
 effectively constant.
 
 ```k
-  syntax KItem ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
+  syntax KItem ::= Array "[" Int "]" [function]
 ```
 
 ### Array update
@@ -92,7 +92,7 @@ You can create a new `Array` with a new value for a key in O(log(N)) time, or
 effectively constant.
 
 ```k
-  syntax Array ::= Array "[" key: Int "<-" value: KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
+  syntax Array ::= Array "[" key: Int "<-" value: KItem "]" [function, klabel(_[_<-_]), symbol]
 ```
 
 ### Array reset
@@ -101,7 +101,7 @@ You can create a new `Array` where a particular key is reset to its default
 value in O(log(N)) time, or effectively constant.
 
 ```k
-  syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
+  syntax Array ::= Array "[" Int "<-" "undef" "]" [function]
 ```
 
 ### Multiple array update
@@ -112,7 +112,7 @@ O(N*log(K)) time (where K is the size of the array), or effectively linear.
 Having `index + N > K` yields an exception.
 
 ```k
-  syntax Array ::= updateArray(Array, index: Int, List) [function, hook(ARRAY.updateAll)]
+  syntax Array ::= updateArray(Array, index: Int, List) [function]
 ```
 
 ### Array fill
@@ -121,7 +121,7 @@ You can create a new `Array` where the `length` elements starting at `index`
 are replaced with `value`, in O(length*log(N)) time, or effectively linear.
 
 ```k
-  syntax Array ::= fillArray(Array, index: Int, length: Int, value: KItem) [function, hook(ARRAY.fill)]
+  syntax Array ::= fillArray(Array, index: Int, length: Int, value: KItem) [function]
 ```
 
 ### Array range check
@@ -129,7 +129,7 @@ are replaced with `value`, in O(length*log(N)) time, or effectively linear.
 You can test whether an integer is within the bounds of an array in O(1) time.
 
 ```k
-  syntax Bool ::= Int "in_keys" "(" Array ")" [function, total, hook(ARRAY.in_keys)]
+  syntax Bool ::= Int "in_keys" "(" Array ")" [function, total]
 ```
 
 ```k
@@ -153,7 +153,7 @@ may incur a one-time O(N) resizing cost, possibly amortized across multiple
 operations.
 
 ```k
-  syntax Array ::= makeArray(length: Int, value: KItem) [function, hook(ARRAY.make), public]
+  syntax Array ::= makeArray(length: Int, value: KItem) [function, public]
 ```
 
 ### Implementation of Arrays
