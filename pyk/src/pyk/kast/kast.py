@@ -53,39 +53,61 @@ class KAst(ABC):
 
 @final
 @dataclass(frozen=True)
-class KAtt(KAst, Mapping[str, Any]):
-    atts: FrozenDict[str, Any]
+class AttKey:
+    name: str
 
-    ALIAS: ClassVar[str] = 'alias'
-    ALIAS_REC: ClassVar[str] = 'alias-rec'
-    ANYWHERE: ClassVar[str] = 'anywhere'
-    ASSOC: ClassVar[str] = 'assoc'
-    COLORS: ClassVar[str] = 'colors'
-    COMM: ClassVar[str] = 'comm'
-    CONCAT: ClassVar[str] = 'concat'
-    CONSTRUCTOR: ClassVar[str] = 'constructor'
-    ELEMENT: ClassVar[str] = 'element'
-    FORMAT: ClassVar[str] = 'format'
-    FUNCTION: ClassVar[str] = 'function'
-    FUNCTIONAL: ClassVar[str] = 'functional'
-    HAS_DOMAIN_VALUES: ClassVar[str] = 'hasDomainValues'
-    HOOK: ClassVar[str] = 'hook'
-    IDEM: ClassVar[str] = 'idem'
-    INJECTIVE: ClassVar[str] = 'injective'
-    KLABEL: ClassVar[str] = 'klabel'
-    LEFT: ClassVar[str] = 'left'
-    LOCATION: ClassVar[str] = 'org.kframework.attributes.Location'
-    MACRO: ClassVar[str] = 'macro'
-    MACRO_REC: ClassVar[str] = 'macro-rec'
-    PRODUCTION: ClassVar[str] = 'org.kframework.definition.Production'
-    RIGHT: ClassVar[str] = 'right'
-    SORT: ClassVar[str] = 'org.kframework.kore.Sort'
-    SOURCE: ClassVar[str] = 'org.kframework.attributes.Source'
-    TOKEN: ClassVar[str] = 'token'
-    TOTAL: ClassVar[str] = 'total'
-    UNIT: ClassVar[str] = 'unit'
 
-    def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
+@final
+@dataclass(frozen=True)
+class KAtt(KAst, Mapping[AttKey, Any]):
+    atts: FrozenDict[AttKey, Any]
+
+    ALIAS: ClassVar[AttKey] = AttKey('alias')
+    ALIAS_REC: ClassVar[AttKey] = AttKey('alias-rec')
+    ANYWHERE: ClassVar[AttKey] = AttKey('anywhere')
+    ASSOC: ClassVar[AttKey] = AttKey('assoc')
+    CIRCULARITY: ClassVar[AttKey] = AttKey('circularity')
+    CELL: ClassVar[AttKey] = AttKey('cell')
+    CELL_COLLECTION: ClassVar[AttKey] = AttKey('cellCollection')
+    COLORS: ClassVar[AttKey] = AttKey('colors')
+    COMM: ClassVar[AttKey] = AttKey('comm')
+    CONCAT: ClassVar[AttKey] = AttKey('concat')
+    CONSTRUCTOR: ClassVar[AttKey] = AttKey('constructor')
+    DEPENDS: ClassVar[AttKey] = AttKey('depends')
+    DIGEST: ClassVar[AttKey] = AttKey('digest')
+    ELEMENT: ClassVar[AttKey] = AttKey('element')
+    FORMAT: ClassVar[AttKey] = AttKey('format')
+    FUNCTION: ClassVar[AttKey] = AttKey('function')
+    FUNCTIONAL: ClassVar[AttKey] = AttKey('functional')
+    HAS_DOMAIN_VALUES: ClassVar[AttKey] = AttKey('hasDomainValues')
+    HOOK: ClassVar[AttKey] = AttKey('hook')
+    IDEM: ClassVar[AttKey] = AttKey('idem')
+    INITIALIZER: ClassVar[AttKey] = AttKey('initializer')
+    INJECTIVE: ClassVar[AttKey] = AttKey('injective')
+    KLABEL: ClassVar[AttKey] = AttKey('klabel')
+    LABEL: ClassVar[AttKey] = AttKey('label')
+    LEFT: ClassVar[AttKey] = AttKey('left')
+    LOCATION: ClassVar[AttKey] = AttKey('org.kframework.attributes.Location')
+    MACRO: ClassVar[AttKey] = AttKey('macro')
+    MACRO_REC: ClassVar[AttKey] = AttKey('macro-rec')
+    OWISE: ClassVar[AttKey] = AttKey('owise')
+    PRIORITY: ClassVar[AttKey] = AttKey('priority')
+    PRODUCTION: ClassVar[AttKey] = AttKey('org.kframework.definition.Production')
+    PROJECTION: ClassVar[AttKey] = AttKey('projection')
+    RIGHT: ClassVar[AttKey] = AttKey('right')
+    SIMPLIFICATION: ClassVar[AttKey] = AttKey('simplification')
+    SYMBOL: ClassVar[AttKey] = AttKey('symbol')
+    SORT: ClassVar[AttKey] = AttKey('org.kframework.kore.Sort')
+    SOURCE: ClassVar[AttKey] = AttKey('org.kframework.attributes.Source')
+    TOKEN: ClassVar[AttKey] = AttKey('token')
+    TOTAL: ClassVar[AttKey] = AttKey('total')
+    TRUSTED: ClassVar[AttKey] = AttKey('trusted')
+    UNIT: ClassVar[AttKey] = AttKey('unit')
+    UNIQUE_ID: ClassVar[AttKey] = AttKey('UNIQUE_ID')
+    UNPARSE_AVOID: ClassVar[AttKey] = AttKey('unparseAvoid')
+    WRAP_ELEMENT: ClassVar[AttKey] = AttKey('wrapElement')
+
+    def __init__(self, atts: Mapping[AttKey, Any] = EMPTY_FROZEN_DICT):
         def _freeze(m: Any) -> Any:
             if isinstance(m, (int, str, tuple, FrozenDict, frozenset)):
                 return m
@@ -99,25 +121,25 @@ class KAtt(KAst, Mapping[str, Any]):
         assert isinstance(frozen, FrozenDict)
         object.__setattr__(self, 'atts', frozen)
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> Iterator[AttKey]:
         return iter(self.atts)
 
     def __len__(self) -> int:
         return len(self.atts)
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: AttKey) -> Any:
         return self.atts[key]
 
     @staticmethod
     def of(**atts: Any) -> KAtt:
-        return KAtt(atts=atts)
+        return KAtt(atts={AttKey(key): value for key, value in atts.items()})
 
     @classmethod
     def from_dict(cls: type[KAtt], d: Mapping[str, Any]) -> KAtt:
-        return KAtt(atts=d['att'])
+        return KAtt(atts={AttKey(key): value for key, value in d['att'].items()})
 
     def to_dict(self) -> dict[str, Any]:
-        return {'node': 'KAtt', 'att': KAtt._unfreeze(self.atts)}
+        return {'node': 'KAtt', 'att': KAtt._unfreeze({key.name: value for key, value in self.atts.items()})}
 
     @staticmethod
     def _unfreeze(x: Any) -> Any:
@@ -125,14 +147,14 @@ class KAtt(KAst, Mapping[str, Any]):
             return {k: KAtt._unfreeze(v) for (k, v) in x.items()}
         return x
 
-    def let(self, *, atts: Mapping[str, Any] | None = None) -> KAtt:
+    def let(self, *, atts: Mapping[AttKey, Any] | None = None) -> KAtt:
         atts = atts if atts is not None else self.atts
         return KAtt(atts=atts)
 
-    def update(self, atts: Mapping[str, Any]) -> KAtt:
+    def update(self, atts: Mapping[AttKey, Any]) -> KAtt:
         return self.let(atts={k: v for k, v in {**self.atts, **atts}.items() if v is not None})
 
-    def remove(self, atts: Iterable[str]) -> KAtt:
+    def remove(self, atts: Iterable[AttKey]) -> KAtt:
         return KAtt({k: v for k, v in self.atts.items() if k not in atts})
 
     def drop_source(self) -> KAtt:
@@ -147,11 +169,11 @@ class KAtt(KAst, Mapping[str, Any]):
         for k, v in self.items():
             if k == self.LOCATION:
                 loc_ids = str(v).replace(' ', '')
-                att_strs.append(f'{self.LOCATION}{loc_ids}')
+                att_strs.append(f'{self.LOCATION.name}{loc_ids}')
             elif k == self.SOURCE:
-                att_strs.append(self.SOURCE + '("' + v + '")')
+                att_strs.append(self.SOURCE.name + '("' + v + '")')
             else:
-                att_strs.append(f'{k}({v})')
+                att_strs.append(f'{k.name}({v})')
         return f'[{", ".join(att_strs)}]'
 
 
@@ -168,7 +190,7 @@ class WithKAtt(ABC):
     def map_att(self: W, f: Callable[[KAtt], KAtt]) -> W:
         return self.let_att(att=f(self.att))
 
-    def update_atts(self: W, atts: Mapping[str, Any]) -> W:
+    def update_atts(self: W, atts: Mapping[AttKey, Any]) -> W:
         return self.let_att(att=self.att.update(atts))
 
 

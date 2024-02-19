@@ -28,7 +28,7 @@ class TestSimpleProof(KProveTest):
         lemma = KRule(
             KToken('pred1(3) => true', BOOL),
             requires=KToken('pred1(4)', BOOL),
-            att=KAtt(atts={'simplification': ''}),
+            att=KAtt(atts={KAtt.SIMPLIFICATION: ''}),
         )
 
         # When

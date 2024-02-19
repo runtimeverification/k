@@ -213,8 +213,8 @@ class PrettyPrinter:
         return self.print(knonterminal.sort)
 
     def _print_kproduction(self, kproduction: KProduction) -> str:
-        if 'klabel' not in kproduction.att and kproduction.klabel:
-            kproduction = kproduction.update_atts({'klabel': kproduction.klabel.name})
+        if KAtt.KLABEL not in kproduction.att and kproduction.klabel:
+            kproduction = kproduction.update_atts({KAtt.KLABEL: kproduction.klabel.name})
         syntax_str = 'syntax ' + self.print(kproduction.sort)
         if kproduction.items:
             syntax_str += ' ::= ' + ' '.join([self._print_kouter(pi) for pi in kproduction.items])
@@ -260,8 +260,8 @@ class PrettyPrinter:
     def _print_krule(self, kterm: KRule) -> str:
         body = '\n     '.join(self.print(kterm.body).split('\n'))
         rule_str = 'rule '
-        if 'label' in kterm.att:
-            rule_str = rule_str + '[' + kterm.att['label'] + ']:'
+        if KAtt.LABEL in kterm.att:
+            rule_str = rule_str + '[' + kterm.att[KAtt.LABEL] + ']:'
         rule_str = rule_str + ' ' + body
         atts_str = self.print(kterm.att)
         if kterm.requires != TRUE:
@@ -275,8 +275,8 @@ class PrettyPrinter:
     def _print_kclaim(self, kterm: KClaim) -> str:
         body = '\n     '.join(self.print(kterm.body).split('\n'))
         rule_str = 'claim '
-        if 'label' in kterm.att:
-            rule_str = rule_str + '[' + kterm.att['label'] + ']:'
+        if KAtt.LABEL in kterm.att:
+            rule_str = rule_str + '[' + kterm.att[KAtt.LABEL] + ']:'
         rule_str = rule_str + ' ' + body
         atts_str = self.print(kterm.att)
         if kterm.requires != TRUE:
@@ -368,8 +368,8 @@ def build_symbol_table(
             unparser = unparser_for_production(prod)
 
             symbol_table[label] = unparser
-            if 'symbol' in prod.att and 'klabel' in prod.att:
-                symbol_table[prod.att['klabel']] = unparser
+            if KAtt.SYMBOL in prod.att and KAtt.KLABEL in prod.att:
+                symbol_table[prod.att[KAtt.KLABEL]] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2

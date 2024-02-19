@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.kast import KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from pyk.kast.outer import KRule
 from pyk.konvert import kast_to_kore, kore_to_kast, krule_to_kore
@@ -746,7 +747,7 @@ class TestKonvertSimpleProofs(KPrintTest):
         kore_text: str,
     ) -> None:
         main_module = definition.all_modules_dict[definition.main_module_name]
-        rule = single(r for r in main_module.rules if 'label' in r.att and r.att['label'] == rule_id)
+        rule = single(r for r in main_module.rules if KAtt.LABEL in r.att and r.att[KAtt.LABEL] == rule_id)
 
         # When
         actual_kore_text = krule_to_kore(definition, kompiled_kore, rule).text
