@@ -135,7 +135,7 @@ public class SortCells {
       if (remainingCells == null) {
         remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
       }
-      if (var.att().contains(Sort.class)) {
+      if (var.att().contains(Att.SORT(), Sort.class)) {
         Sort sort = var.att().get(Att.SORT(), Sort.class);
         if (cfg.cfg().isCell(sort)) {
           remainingCells.removeIf(s -> !s.equals(sort));
@@ -148,7 +148,7 @@ public class SortCells {
             remainingCells.remove(s);
           }
         } else if (item instanceof KVariable && !item.equals(var)) {
-          if (item.att().contains(Sort.class)) {
+          if (item.att().contains(Att.SORT(), Sort.class)) {
             Sort sort = item.att().get(Att.SORT(), Sort.class);
             remainingCells.remove(sort);
           }
@@ -295,7 +295,7 @@ public class SortCells {
         List<KVariable> bagVars = new ArrayList<>();
         for (K item : items) {
           if (item instanceof KVariable var) {
-            if (var.att().contains(Sort.class)) {
+            if (var.att().contains(Att.SORT(), Sort.class)) {
               Sort sort = var.att().get(Att.SORT(), Sort.class);
               if (cfg.cfg().isCell(sort)) {
                 if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
@@ -690,10 +690,10 @@ public class SortCells {
                     if (variables.containsKey(var)) {
                       varinfo = variables.get(var);
                     }
-                    if (!var.att().contains(Sort.class) && varinfo != null) {
+                    if (!var.att().contains(Att.SORT(), Sort.class) && varinfo != null) {
                       if (varinfo.var != null) var = varinfo.var;
                     }
-                    if (var.att().contains(Sort.class)) {
+                    if (var.att().contains(Att.SORT(), Sort.class)) {
                       Sort sort = var.att().get(Att.SORT(), Sort.class);
                       if (cfg.cfg().isCell(sort)) {
                         if (!subcellSorts.contains(sort)) {
@@ -805,7 +805,7 @@ public class SortCells {
           for (int i = 0; i < k.klist().size(); i++) {
             K item = k.klist().items().get(i);
             if (item instanceof KVariable var) {
-              if (var.att().contains(Sort.class)) {
+              if (var.att().contains(Att.SORT(), Sort.class)) {
                 Sort sort = var.att().get(Att.SORT(), Sort.class);
                 if (!cfg.cfg().isCell(sort)) {
                   if (!cellFragmentVars.containsKey(var)) {

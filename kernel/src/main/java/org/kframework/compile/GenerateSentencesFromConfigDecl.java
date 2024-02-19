@@ -105,7 +105,7 @@ public class GenerateSentencesFromConfigDecl {
 
                 K cellContents = kapp.klist().items().get(2);
                 Att att = cfgAtt;
-                if (kapp.att().contains(Location.class))
+                if (kapp.att().contains(Att.LOCATION(), Location.class))
                   att =
                       cfgAtt.add(
                           Att.LOCATION(),

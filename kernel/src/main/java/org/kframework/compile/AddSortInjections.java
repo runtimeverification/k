@@ -167,7 +167,7 @@ public class AddSortInjections {
                           KList(visitChildren(k, actualSort, expectedSort)));
                 }
                 Sort adjustedExpectedSort = expectedSort;
-                if (k.att().contains(Sort.class)) {
+                if (k.att().contains(Att.SORT(), Sort.class)) {
                   adjustedExpectedSort = k.att().get(Att.SORT(), Sort.class);
                 }
                 Production prod = production(k);
@@ -216,7 +216,7 @@ public class AddSortInjections {
       if (kapp.klabel().name().equals("inj")) {
         return term;
       }
-      if (kapp.att().contains(Sort.class)) {
+      if (kapp.att().contains(Att.SORT(), Sort.class)) {
         expectedSort = kapp.att().get(Att.SORT(), Sort.class);
       }
       Production prod = production(kapp);
@@ -376,7 +376,7 @@ public class AddSortInjections {
       if (kapp.klabel().name().equals("_:/=K_")) {
         return Sorts.Bool();
       }
-      if (kapp.att().contains(Sort.class)) {
+      if (kapp.att().contains(Att.SORT(), Sort.class)) {
         expectedSort = kapp.att().get(Att.SORT(), Sort.class);
       }
       Production prod = production(kapp);

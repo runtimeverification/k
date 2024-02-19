@@ -389,7 +389,7 @@ public class ExpandMacros {
       if (subst.containsKey(pattern)) {
         return subst.get(pattern).equals(subject);
       } else {
-        if (pattern.att().contains(Sort.class)) {
+        if (pattern.att().contains(Att.SORT(), Sort.class)) {
           Sort patternSort = pattern.att().get(Att.SORT(), Sort.class);
           if (sort(subject, r).stream()
               .anyMatch(s -> s == null || mod.subsorts().lessThanEq(s, patternSort))) {

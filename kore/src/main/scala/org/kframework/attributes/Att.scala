@@ -69,8 +69,6 @@ class Att private (val att: Map[(Att.Key, String), Any])
     None
   }
 
-  def contains(cls: Class[_]): Boolean =
-    att.contains((Att.getInternalKeyOrAssert(cls.getName), cls.getName))
   def contains(key: Att.Key): Boolean                = att.contains((key, Att.stringClassName))
   def contains(key: Att.Key, cls: Class[_]): Boolean = att.contains((key, cls.getName))
 

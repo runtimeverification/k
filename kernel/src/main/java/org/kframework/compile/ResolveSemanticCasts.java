@@ -111,7 +111,7 @@ public class ResolveSemanticCasts {
                 var,
                 KVariable(
                     var.name(),
-                    var.att().contains(Sort.class)
+                    var.att().contains(Att.SORT(), Sort.class)
                         ? var.att()
                         : var.att()
                             .add(Att.SORT(), Sort.class, Outer.parseSort(getSortNameOfCast(v)))));

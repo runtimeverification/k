@@ -291,7 +291,7 @@ public class CloseCells {
     if (item instanceof KApply) {
       required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
     } else if (item instanceof KVariable) {
-      if (item.att().contains(Sort.class)) {
+      if (item.att().contains(Att.SORT(), Sort.class)) {
         Sort sort = item.att().get(Att.SORT(), Sort.class);
         if (cfg.cfg().isCell(sort)) {
           required.remove(sort);

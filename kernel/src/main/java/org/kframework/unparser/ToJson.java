@@ -456,7 +456,7 @@ public class ToJson {
 
       knode.add("node", JsonParser.KVARIABLE);
       knode.add("name", var.name());
-      if (k.att().contains(Sort.class)) {
+      if (k.att().contains(Att.SORT(), Sort.class)) {
         knode.add("sort", toJson(k.att().get(Att.SORT(), Sort.class)));
       }
 
