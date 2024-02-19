@@ -303,9 +303,10 @@ public class TextDocumentSyncHandler {
                                   ss.getContent(),
                                   ss.getAttributes()
                                       .add(
+                                          Att.LOCATION(),
                                           org.kframework.attributes.Location.class,
                                           ss.getLocation())
-                                      .add(Source.class, ss.getSource())
+                                      .add(Att.SOURCE(), Source.class, ss.getSource())
                                       .add(Att.CONTENT_START_LINE(), ss.getContentStartLine())
                                       .add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                           ParseCache.ParsedSentence parse =
@@ -444,9 +445,10 @@ public class TextDocumentSyncHandler {
                                                 ss.getContent(),
                                                 ss.getAttributes()
                                                     .add(
+                                                        Att.LOCATION(),
                                                         org.kframework.attributes.Location.class,
                                                         ss.getLocation())
-                                                    .add(Source.class, ss.getSource())
+                                                    .add(Att.SOURCE(), Source.class, ss.getSource())
                                                     .add(
                                                         Att.CONTENT_START_LINE(),
                                                         ss.getContentStartLine())
@@ -603,10 +605,14 @@ public class TextDocumentSyncHandler {
                                                           ss.getContent(),
                                                           ss.getAttributes()
                                                               .add(
+                                                                  Att.LOCATION(),
                                                                   org.kframework.attributes.Location
                                                                       .class,
                                                                   ss.getLocation())
-                                                              .add(Source.class, ss.getSource())
+                                                              .add(
+                                                                  Att.SOURCE(),
+                                                                  Source.class,
+                                                                  ss.getSource())
                                                               .add(
                                                                   Att.CONTENT_START_LINE(),
                                                                   ss.getContentStartLine())
@@ -736,9 +742,10 @@ public class TextDocumentSyncHandler {
                                     ss.getContent(),
                                     ss.getAttributes()
                                         .add(
+                                            Att.LOCATION(),
                                             org.kframework.attributes.Location.class,
                                             ss.getLocation())
-                                        .add(Source.class, ss.getSource())
+                                        .add(Att.SOURCE(), Source.class, ss.getSource())
                                         .add(Att.CONTENT_START_LINE(), ss.getContentStartLine())
                                         .add(
                                             Att.CONTENT_START_COLUMN(),

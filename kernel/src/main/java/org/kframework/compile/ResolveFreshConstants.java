@@ -126,7 +126,7 @@ public class ResolveFreshConstants {
   }
 
   private static final KVariable FRESH =
-      KVariable("#Fresh", Att.empty().add(Sort.class, Sorts.Int()));
+      KVariable("#Fresh", Att.empty().add(Att.SORT(), Sort.class, Sorts.Int()));
 
   private K transform(K term) {
     return new TransformK() {
@@ -244,9 +244,11 @@ public class ResolveFreshConstants {
                         KLabels.GENERATED_TOP_CELL,
                         true,
                         KVariable(
-                            "Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell())),
+                            "Cell",
+                            Att.empty().add(Att.SORT(), Sort.class, Sorts.GeneratedCounterCell())),
                         true)),
-                KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell()))),
+                KVariable(
+                    "Cell", Att.empty().add(Att.SORT(), Sort.class, Sorts.GeneratedCounterCell()))),
             BooleanUtils.TRUE,
             BooleanUtils.TRUE));
 

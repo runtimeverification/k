@@ -390,14 +390,14 @@ public class KILtoKORE extends KILTransformation<Object> {
 
   private static Att attributesFromSource(Source source) {
     if (source != null) {
-      return Att().add(Source.class, source);
+      return Att().add(Att.SOURCE(), Source.class, source);
     }
     return Att();
   }
 
   private static org.kframework.attributes.Att attributesFromLocation(Location location) {
     if (location != null) {
-      return Att().add(Location.class, location);
+      return Att().add(Att.LOCATION(), Location.class, location);
     } else return Att();
   }
 }

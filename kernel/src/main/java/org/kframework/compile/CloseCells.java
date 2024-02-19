@@ -86,7 +86,8 @@ public class CloseCells {
         newLabel = KVariable("_DotVar" + (counter++), Att().add(Att.ANONYMOUS()));
       } else {
         newLabel =
-            KVariable("_DotVar" + (counter++), Att().add(Att.ANONYMOUS()).add(Sort.class, s));
+            KVariable(
+                "_DotVar" + (counter++), Att().add(Att.ANONYMOUS()).add(Att.SORT(), Sort.class, s));
       }
     } while (vars.contains(newLabel));
     vars.add(newLabel);

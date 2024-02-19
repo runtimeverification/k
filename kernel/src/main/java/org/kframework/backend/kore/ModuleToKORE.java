@@ -161,7 +161,7 @@ public class ModuleToKORE {
     // insert the location of the main module so the backend can provide better error location
     convert(
         considerSource,
-        Att.empty().add(Source.class, module.att().get(Source.class)),
+        Att.empty().add(Att.SOURCE(), Source.class, module.att().get(Source.class)),
         sb,
         null,
         null);
@@ -671,7 +671,7 @@ public class ModuleToKORE {
     // #Ceil(@K1) and #Ceil(@Rest).
     // [simplification]
 
-    K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
+    K restMapSet = KVariable("@Rest", Att.empty().add(Att.SORT(), Sort.class, mapSort));
     KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
     KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
 
@@ -680,7 +680,7 @@ public class ModuleToKORE {
     K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
     for (int i = 0; i < nonterminals.length(); i++) {
       Sort sort = nonterminals.apply(i).sort();
-      KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
+      KVariable setVar = KVariable("@K" + i, Att.empty().add(Att.SORT(), Sort.class, sort));
       setArgs.add(setVar);
       if (i > 0) {
         KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
@@ -959,7 +959,7 @@ public class ModuleToKORE {
     considerSource.put(Att.SOURCE(), true);
     convert(
         considerSource,
-        Att.empty().add(Source.class, spec.att().get(Source.class)),
+        Att.empty().add(Att.SOURCE(), Source.class, spec.att().get(Source.class)),
         sb,
         null,
         null);

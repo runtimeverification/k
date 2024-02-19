@@ -135,7 +135,7 @@ public class AddSortInjections {
             KApply(
                 KLabel("inj", actualSort, Sorts.KItem()),
                 KList(visitChildren(term, actualSort, expectedSort)),
-                Att.empty().add(Sort.class, Sorts.KItem())));
+                Att.empty().add(Att.SORT(), Sort.class, Sorts.KItem())));
       }
     } else {
       String hookAtt =
@@ -184,12 +184,12 @@ public class AddSortInjections {
                     KList(
                         visitChildren(key, actualKeySort, expectedKeySort),
                         visitChildren(k, actualSort, expectedSort)),
-                    Att.empty().add(Sort.class, expectedSort));
+                    Att.empty().add(Att.SORT(), Sort.class, expectedSort));
               } else {
                 return KApply(
                     elementLabel,
                     KList(visitChildren(k, actualSort, expectedSort)),
-                    Att.empty().add(Sort.class, expectedSort));
+                    Att.empty().add(Att.SORT(), Sort.class, expectedSort));
               }
             }
           }
@@ -198,7 +198,7 @@ public class AddSortInjections {
       return KApply(
           KLabel("inj", actualSort, expectedSort),
           KList(visitChildren(term, actualSort, expectedSort)),
-          Att.empty().add(Sort.class, expectedSort));
+          Att.empty().add(Att.SORT(), Sort.class, expectedSort));
     }
   }
 
@@ -208,7 +208,7 @@ public class AddSortInjections {
   }
 
   private K visitChildren(K term, Sort actualSort, Sort expectedSort) {
-    Att att = term.att().add(Sort.class, actualSort);
+    Att att = term.att().add(Att.SORT(), Sort.class, actualSort);
     if (actualSort.name().equals(SORTPARAM_NAME)) {
       sortParams.add(actualSort.params().head().name());
     }

@@ -95,8 +95,6 @@ class Att private (val att: Map[(Att.Key, String), Any])
   def add(key: Att.Key): Att                = add(key, "")
   def add(key: Att.Key, value: String): Att = add(key, Att.stringClassName, value)
   def add(key: Att.Key, value: Int): Att    = add(key, Att.intClassName, value)
-  def add[T <: AttValue](key: Class[T], value: T): Att =
-    add(Att.getInternalKeyOrAssert(key.getName), key.getName, value)
   def add[T <: AttValue](key: Att.Key, cls: Class[T], value: T): Att = add(key, cls.getName, value)
 
   private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = key.keyParam match {

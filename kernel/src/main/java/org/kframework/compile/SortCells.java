@@ -191,16 +191,22 @@ public class SortCells {
         if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
           split =
               ImmutableMap.of(
-                  s, KVariable(var.name(), var.att().add(Sort.class, getPredicateSort(s))));
+                  s,
+                  KVariable(
+                      var.name(), var.att().add(Att.SORT(), Sort.class, getPredicateSort(s))));
         } else {
           split =
               ImmutableMap.of(
-                  s, KVariable(var.name(), var.att().add(Sort.class, s).add(Att.CELL_SORT())));
+                  s,
+                  KVariable(
+                      var.name(), var.att().add(Att.SORT(), Sort.class, s).add(Att.CELL_SORT())));
         }
       } else {
         split = new HashMap<>();
         for (Sort cell : remainingCells) {
-          split.put(cell, newDotVariable(var.att().add(Sort.class, cell).add(Att.CELL_SORT())));
+          split.put(
+              cell,
+              newDotVariable(var.att().add(Att.SORT(), Sort.class, cell).add(Att.CELL_SORT())));
         }
       }
       return split;

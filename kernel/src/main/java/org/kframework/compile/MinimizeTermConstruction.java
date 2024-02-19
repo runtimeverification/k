@@ -171,7 +171,7 @@ public class MinimizeTermConstruction {
             return KAs(
                 super.apply(k),
                 cache.get(k),
-                Att.empty().add(Sort.class, cache.get(k).att().get(Sort.class)));
+                Att.empty().add(Att.SORT(), Sort.class, cache.get(k).att().get(Sort.class)));
           }
         }
         return super.apply(k);
@@ -218,7 +218,7 @@ public class MinimizeTermConstruction {
   KVariable newDotVariable(Sort sort) {
     KVariable newLabel;
     do {
-      newLabel = KVariable("_Gen" + (counter++), Att().add(Sort.class, sort));
+      newLabel = KVariable("_Gen" + (counter++), Att().add(Att.SORT(), Sort.class, sort));
     } while (vars.contains(newLabel));
     vars.add(newLabel);
     return newLabel;

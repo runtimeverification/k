@@ -5,6 +5,7 @@ import static org.kframework.kore.KORE.*;
 
 import java.util.Set;
 import java.util.function.Consumer;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.RewriteAwareVisitor;
@@ -38,7 +39,7 @@ public class ComputeUnboundVariables extends RewriteAwareVisitor {
   @Override
   public void apply(KVariable k) {
     if (context != null) {
-      k = KVariable(k.name(), k.att().add(Sort.class, context));
+      k = KVariable(k.name(), k.att().add(Att.SORT(), Sort.class, context));
     }
     if (isRHS() && !isInKLhs) {
       if (!k.name().equals(KLabels.THIS_CONFIGURATION)

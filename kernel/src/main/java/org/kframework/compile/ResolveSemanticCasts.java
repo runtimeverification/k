@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.RuleOrClaim;
@@ -112,7 +113,8 @@ public class ResolveSemanticCasts {
                     var.name(),
                     var.att().contains(Sort.class)
                         ? var.att()
-                        : var.att().add(Sort.class, Outer.parseSort(getSortNameOfCast(v)))));
+                        : var.att()
+                            .add(Att.SORT(), Sort.class, Outer.parseSort(getSortNameOfCast(v)))));
           }
         }
         super.apply(v);
@@ -137,7 +139,7 @@ public class ResolveSemanticCasts {
           applied = super.apply(k);
         }
         if (oldSort != null) {
-          return new AddAtt(a -> a.add(Sort.class, oldSort)).apply(applied);
+          return new AddAtt(a -> a.add(Att.SORT(), Sort.class, oldSort)).apply(applied);
         }
         if (varToTypedVar.containsKey(applied)) {
           return varToTypedVar.get(applied);

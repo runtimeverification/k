@@ -33,6 +33,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
         p.sort,
         locationToAtt(c.location, c.source)
           .add(
+            Att.PRODUCTION,
             classOf[Production],
             c.production.att
               .getOption(Att.ORIGINAL_PRD, classOf[Production])
@@ -60,7 +61,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
     KApply(
       klabel.head,
       KList(new util.ArrayList(t.items).asScala.reverse.map(apply) asJava),
-      locationToAtt(t.location, t.source).add(classOf[Production], realProd)
+      locationToAtt(t.location, t.source).add(Att.PRODUCTION, classOf[Production], realProd)
     )
   }
 
@@ -123,8 +124,8 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
 
   def locationToAtt(l: Optional[Location], s: Optional[Source]): Att = {
     var a = Att.empty
-    if (l.isPresent) a = a.add(classOf[Location], l.get)
-    if (s.isPresent) a = a.add(classOf[Source], s.get)
+    if (l.isPresent) a = a.add(Att.LOCATION, classOf[Location], l.get)
+    if (s.isPresent) a = a.add(Att.SOURCE, classOf[Source], s.get)
     a
   }
 }

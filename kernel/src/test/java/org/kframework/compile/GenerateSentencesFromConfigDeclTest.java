@@ -78,12 +78,14 @@ public class GenerateSentencesFromConfigDeclTest {
                         KApply(
                             KLabel("#SemanticCastToKItem"),
                             KList(KToken("$PGM", Sorts.KConfigVar())),
-                            Att.empty().add(Production.class, prod2))),
+                            Att.empty().add(Att.PRODUCTION(), Production.class, prod2))),
                     cell(
                         "opt",
                         Collections.singletonMap("multiplicity", "?"),
                         KApply(
-                            KLabel(".Opt"), KList(), Att.empty().add(Production.class, prod))))));
+                            KLabel(".Opt"),
+                            KList(),
+                            Att.empty().add(Att.PRODUCTION(), Production.class, prod))))));
     Module m1 = Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att());
     RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
     Module m =

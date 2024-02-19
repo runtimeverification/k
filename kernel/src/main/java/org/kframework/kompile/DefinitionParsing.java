@@ -730,8 +730,9 @@ public class DefinitionParsing {
                             updateLocation(oldStartLine, lineOffset, columnOffset, loc);
                         return a.remove(Source.class)
                             .remove(Location.class)
-                            .add(Location.class, newLoc)
+                            .add(Att.LOCATION(), Location.class, newLoc)
                             .add(
+                                Att.SOURCE(),
                                 Source.class,
                                 b.source()
                                     .orElseThrow(
@@ -819,7 +820,7 @@ public class DefinitionParsing {
                       Att()
                           .add(Att.CONTENT_START_LINE(), 1)
                           .add(Att.CONTENT_START_COLUMN(), 1)
-                          .add(Source.class, source)))
+                          .add(Att.SOURCE(), Source.class, source)))
               .collect(Collectors.toSet());
       if (!errors.isEmpty()) {
         throw errors.iterator().next();

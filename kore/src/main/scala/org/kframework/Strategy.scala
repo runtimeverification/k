@@ -16,7 +16,6 @@ import org.kframework.kore.KApply
 import org.kframework.kore.KORE
 import org.kframework.kore.Sort
 import org.kframework.kore.Unapply.KApply
-import org.kframework.kore.Unapply.KLabel
 
 object Strategy {
   val strategyCellName  = "<s>"
@@ -35,17 +34,17 @@ object Strategy {
               KLabels.STRATEGY_CELL,
               KORE.KApply(KLabels.NO_DOTS),
               KORE.KRewrite(
-                KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem)),
+                KORE.KVariable("S", Att.empty.add(Att.SORT, classOf[Sort], Sorts.KItem)),
                 KORE.KSequence(
                   KORE.KApply(KORE.KLabel("#STUCK")),
-                  KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem))
+                  KORE.KVariable("S", Att.empty.add(Att.SORT, classOf[Sort], Sorts.KItem))
                 )
               ),
               KORE.KApply(KLabels.DOTS)
             ),
             KORE.KApply(
               KLabels.NOT_EQUALS_K,
-              KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem)),
+              KORE.KVariable("S", Att.empty.add(Att.SORT, classOf[Sort], Sorts.KItem)),
               KORE.KApply(KORE.KLabel("#STUCK"))
             ),
             BooleanUtils.TRUE,
