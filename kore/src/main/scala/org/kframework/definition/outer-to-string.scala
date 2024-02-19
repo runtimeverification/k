@@ -2,6 +2,7 @@
 package org.kframework.definition
 
 import collection._
+import org.kframework.attributes.Att
 import org.kframework.attributes.Location
 import org.kframework.attributes.Source
 import org.kframework.utils.StringUtil
@@ -39,7 +40,10 @@ trait ProductionToString {
   self: Production =>
   override def toString = "syntax " + (if (params.nonEmpty) { "{" + params.mkString(", ") + "} " }
                                        else "") + sort + " ::= " + items
-    .mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).postfixString
+    .mkString(" ") + att
+    .remove(Att.SOURCE, classOf[Source])
+    .remove(Att.LOCATION, classOf[Location])
+    .postfixString
 }
 
 trait SyntaxSortToString {

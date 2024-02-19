@@ -110,9 +110,8 @@ class Att private (val att: Map[(Att.Key, String), Any])
   private def throwForbidden(key: Att.Key) =
     throw KEMException.compilerError("Parameters for the attribute '" + key + "' are forbidden.")
 
-  def addAll(thatAtt: Att): Att  = Att(att ++ thatAtt.att)
-  def remove(key: Att.Key): Att  = remove(key, Att.stringClassName)
-  def remove(key: Class[_]): Att = remove(Att.getInternalKeyOrAssert(key.getName), key.getName)
+  def addAll(thatAtt: Att): Att                         = Att(att ++ thatAtt.att)
+  def remove(key: Att.Key): Att                         = remove(key, Att.stringClassName)
   def remove(key: Att.Key, cls: Class[_]): Att          = remove(key, cls.getName)
   private def remove(key: Att.Key, clsStr: String): Att = Att(att - ((key, clsStr)))
 }
