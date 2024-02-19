@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
     from typing import Any, Final
 
+    from ..kast import AttKey
     from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
@@ -60,7 +61,7 @@ def module_to_kore(definition: KDefinition) -> Module:
     module = simplified_module(definition)
 
     name = name_to_kore(module.name)
-    attrs = atts_to_kore({key: value for key, value in module.att.items() if key != 'digest'})  # filter digest
+    attrs = atts_to_kore({key: value for key, value in module.att.items() if key != KAtt.DIGEST})  # filter digest
 
     imports = [Import('K')]
     sort_decls = [
@@ -89,14 +90,14 @@ def name_to_kore(name: str) -> str:
     return munge(name)
 
 
-def atts_to_kore(att: Mapping[str, Any]) -> list[App]:
+def atts_to_kore(att: Mapping[AttKey, Any]) -> list[App]:
     res = [att_to_kore(key, value) for key, value in att.items()]
     res.sort(key=lambda app: app.symbol)
     return res
 
 
-def att_to_kore(key: str, value: Any) -> App:
-    symbol = name_to_kore(key)
+def att_to_kore(key: AttKey, value: Any) -> App:
+    symbol = name_to_kore(key.name)
 
     if value == '':
         return App(symbol)
@@ -124,7 +125,7 @@ def att_to_kore(key: str, value: Any) -> App:
     raise ValueError(f'Attribute conversion is not implemented for: {key}: {value}')
 
 
-def _parse_special_att_value(key: str, value: Any) -> tuple[tuple[Sort, ...], tuple[Pattern, ...]] | None:
+def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...], tuple[Pattern, ...]] | None:
     if key == KAtt.LOCATION:
         assert isinstance(value, tuple)
         assert len(value) == 4
@@ -467,7 +468,7 @@ def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
     return res
 
 
-def _add_symbol_atts(module: KFlatModule, att: str, pred: Callable[[KAtt], bool]) -> KFlatModule:
+def _add_symbol_atts(module: KFlatModule, att: AttKey, pred: Callable[[KAtt], bool]) -> KFlatModule:
     """Add attribute to symbol productions based on a predicate predicate."""
 
     def update(sentence: KSentence) -> KSentence:
@@ -550,7 +551,7 @@ def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = 
     return module.let(sentences=sentences)
 
 
-def _discard_symbol_atts(module: KFlatModule, atts: Iterable[str]) -> KFlatModule:
+def _discard_symbol_atts(module: KFlatModule, atts: Iterable[AttKey]) -> KFlatModule:
     """Remove certain attributes from symbol productions."""
 
     def update(sentence: KSentence) -> KSentence:

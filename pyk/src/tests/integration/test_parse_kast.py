@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pyk.kast import KAtt
 from pyk.kast.inner import KApply, KAs, KRewrite, KSort
 from pyk.kast.outer import KRegexTerminal, KSortSynonym, read_kast_definition
 from pyk.utils import single
@@ -33,7 +34,7 @@ def test_kas(kompile: Kompiler) -> None:
     module = definition.module('CONTEXTUAL-FUNCTION')
 
     # When
-    rule = single(rule for rule in module.rules if rule.att.get('label') == 'def-get-ctx')
+    rule = single(rule for rule in module.rules if rule.att.get(KAtt.LABEL) == 'def-get-ctx')
 
     # Then
     rewrite = rule.body

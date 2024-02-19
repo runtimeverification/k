@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
 from ..cterm import CTerm, build_claim
-from ..kast import kast_term
+from ..kast import KAtt, kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
@@ -390,7 +390,7 @@ class KProve(KPrint):
                 _updated_dependencies.append(_dependency_label)
             if len(_updated_dependencies) > 0:
                 claim_labels.extend(_updated_dependencies)
-                _claim = _claim.let(att=_claim.att.update({'depends': ','.join(_updated_dependencies)}))
+                _claim = _claim.let(att=_claim.att.update({KAtt.DEPENDS: ','.join(_updated_dependencies)}))
 
             final_claims[claim_label] = _claim
 
