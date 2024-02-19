@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
@@ -161,7 +162,7 @@ public class AddParentsCellsTest {
         cell(
             "<T>",
             KRewrite(
-                KVariable("KCell", Att().add(Sort.class, Sort("KCell"))),
+                KVariable("KCell", Att().add(Att.SORT(), Sort.class, Sort("KCell"))),
                 cell("<k>", intToToken(1))));
     K expected =
         cell(
@@ -171,7 +172,7 @@ public class AddParentsCellsTest {
                 cell(
                     "<t>",
                     KRewrite(
-                        KVariable("KCell", Att().add(Sort.class, Sort("KCell"))),
+                        KVariable("KCell", Att().add(Att.SORT(), Sort.class, Sort("KCell"))),
                         cell("<k>", intToToken(1))))));
     Assert.assertEquals(expected, pass.concretizeCell(term));
   }

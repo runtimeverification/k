@@ -71,7 +71,7 @@ public class GenerateSortProjections {
       return Stream.empty();
     }
     KLabel lbl = getProjectLbl(sort);
-    KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
+    KVariable var = KVariable("K", Att.empty().add(Att.SORT(), Sort.class, sort));
     Rule r =
         Rule(
             KRewrite(KApply(lbl, var), var),
@@ -105,7 +105,9 @@ public class GenerateSortProjections {
           Rule(
               KRewrite(
                   KApply(
-                      sideEffectLbl, KVariable("K2", Att.empty().add(Sort.class, Sorts.K())), var),
+                      sideEffectLbl,
+                      KVariable("K2", Att.empty().add(Att.SORT(), Sort.class, Sorts.K())),
+                      var),
                   var),
               BooleanUtils.TRUE,
               BooleanUtils.TRUE);
@@ -125,7 +127,7 @@ public class GenerateSortProjections {
     int i = 0;
     boolean hasName = false;
     for (NonTerminal nt : iterable(prod.nonterminals())) {
-      vars.add(KVariable("K" + i++, Att.empty().add(Sort.class, nt.sort())));
+      vars.add(KVariable("K" + i++, Att.empty().add(Att.SORT(), Sort.class, nt.sort())));
       hasName = hasName || nt.name().isDefined();
     }
     if (!hasName) {

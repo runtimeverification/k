@@ -151,7 +151,8 @@ public record HaskellRewriter(
         if (patternTerm instanceof KVariable) {
           patternTerm =
               KORE.KVariable(
-                  ((KVariable) patternTerm).name(), Att.empty().add(Sort.class, initializerSort));
+                  ((KVariable) patternTerm).name(),
+                  Att.empty().add(Att.SORT(), Sort.class, initializerSort));
         }
         K patternCondition = pattern.requires();
         String patternTermKore =

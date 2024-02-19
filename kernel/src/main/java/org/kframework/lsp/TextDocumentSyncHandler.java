@@ -75,7 +75,11 @@ public class TextDocumentSyncHandler {
     caches.forEach(
         (key, val) -> {
           String uri =
-              Path.of(val.module().att().get(org.kframework.attributes.Source.class).source())
+              Path.of(
+                      val.module()
+                          .att()
+                          .get(Att.SOURCE(), org.kframework.attributes.Source.class)
+                          .source())
                   .toUri()
                   .toString();
           // load into LSP all the files found in the caches, even if they are not open in the IDE.
@@ -303,9 +307,10 @@ public class TextDocumentSyncHandler {
                                   ss.getContent(),
                                   ss.getAttributes()
                                       .add(
+                                          Att.LOCATION(),
                                           org.kframework.attributes.Location.class,
                                           ss.getLocation())
-                                      .add(Source.class, ss.getSource())
+                                      .add(Att.SOURCE(), Source.class, ss.getSource())
                                       .add(Att.CONTENT_START_LINE(), ss.getContentStartLine())
                                       .add(Att.CONTENT_START_COLUMN(), ss.getContentStartColumn()));
                           ParseCache.ParsedSentence parse =
@@ -322,11 +327,15 @@ public class TextDocumentSyncHandler {
                           if (x.get() != null
                               && x.get()
                                   .att()
-                                  .get(org.kframework.definition.Production.class)
+                                  .get(Att.PRODUCTION(), org.kframework.definition.Production.class)
                                   .source()
                                   .isPresent()) {
                             org.kframework.definition.Production prd =
-                                x.get().att().get(org.kframework.definition.Production.class);
+                                x.get()
+                                    .att()
+                                    .get(
+                                        Att.PRODUCTION(),
+                                        org.kframework.definition.Production.class);
                             if (prd.source()
                                 .isPresent()) // exclude generated productions like casts
                             lls.add(
@@ -337,14 +346,18 @@ public class TextDocumentSyncHandler {
                                       loc2range(
                                           x.get()
                                               .att()
-                                              .get(org.kframework.attributes.Location.class))));
+                                              .get(
+                                                  Att.LOCATION(),
+                                                  org.kframework.attributes.Location.class))));
                           } else
                             clientLogger.logMessage(
                                 "definition failed no origin for prod: "
                                     + (x.get() != null
                                         ? x.get()
                                             .att()
-                                            .get(org.kframework.definition.Production.class)
+                                            .get(
+                                                Att.PRODUCTION(),
+                                                org.kframework.definition.Production.class)
                                         : null));
                         }
                       } else {
@@ -444,9 +457,10 @@ public class TextDocumentSyncHandler {
                                                 ss.getContent(),
                                                 ss.getAttributes()
                                                     .add(
+                                                        Att.LOCATION(),
                                                         org.kframework.attributes.Location.class,
                                                         ss.getLocation())
-                                                    .add(Source.class, ss.getSource())
+                                                    .add(Att.SOURCE(), Source.class, ss.getSource())
                                                     .add(
                                                         Att.CONTENT_START_LINE(),
                                                         ss.getContentStartLine())
@@ -578,7 +592,7 @@ public class TextDocumentSyncHandler {
                                     parseCache
                                         .module()
                                         .att()
-                                        .get(org.kframework.attributes.Source.class)
+                                        .get(Att.SOURCE(), org.kframework.attributes.Source.class)
                                         .source())
                                 .toUri()
                                 .toString();
@@ -603,10 +617,14 @@ public class TextDocumentSyncHandler {
                                                           ss.getContent(),
                                                           ss.getAttributes()
                                                               .add(
+                                                                  Att.LOCATION(),
                                                                   org.kframework.attributes.Location
                                                                       .class,
                                                                   ss.getLocation())
-                                                              .add(Source.class, ss.getSource())
+                                                              .add(
+                                                                  Att.SOURCE(),
+                                                                  Source.class,
+                                                                  ss.getSource())
                                                               .add(
                                                                   Att.CONTENT_START_LINE(),
                                                                   ss.getContentStartLine())
@@ -624,6 +642,7 @@ public class TextDocumentSyncHandler {
                                                                 dprd =
                                                                     t.att()
                                                                         .get(
+                                                                            Att.PRODUCTION(),
                                                                             org.kframework
                                                                                 .definition
                                                                                 .Production.class);
@@ -736,9 +755,10 @@ public class TextDocumentSyncHandler {
                                     ss.getContent(),
                                     ss.getAttributes()
                                         .add(
+                                            Att.LOCATION(),
                                             org.kframework.attributes.Location.class,
                                             ss.getLocation())
-                                        .add(Source.class, ss.getSource())
+                                        .add(Att.SOURCE(), Source.class, ss.getSource())
                                         .add(Att.CONTENT_START_LINE(), ss.getContentStartLine())
                                         .add(
                                             Att.CONTENT_START_COLUMN(),

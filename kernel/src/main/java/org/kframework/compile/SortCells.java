@@ -135,8 +135,8 @@ public class SortCells {
       if (remainingCells == null) {
         remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
       }
-      if (var.att().contains(Sort.class)) {
-        Sort sort = var.att().get(Sort.class);
+      if (var.att().contains(Att.SORT(), Sort.class)) {
+        Sort sort = var.att().get(Att.SORT(), Sort.class);
         if (cfg.cfg().isCell(sort)) {
           remainingCells.removeIf(s -> !s.equals(sort));
         }
@@ -148,8 +148,8 @@ public class SortCells {
             remainingCells.remove(s);
           }
         } else if (item instanceof KVariable && !item.equals(var)) {
-          if (item.att().contains(Sort.class)) {
-            Sort sort = item.att().get(Sort.class);
+          if (item.att().contains(Att.SORT(), Sort.class)) {
+            Sort sort = item.att().get(Att.SORT(), Sort.class);
             remainingCells.remove(sort);
           }
         }
@@ -191,16 +191,22 @@ public class SortCells {
         if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
           split =
               ImmutableMap.of(
-                  s, KVariable(var.name(), var.att().add(Sort.class, getPredicateSort(s))));
+                  s,
+                  KVariable(
+                      var.name(), var.att().add(Att.SORT(), Sort.class, getPredicateSort(s))));
         } else {
           split =
               ImmutableMap.of(
-                  s, KVariable(var.name(), var.att().add(Sort.class, s).add(Att.CELL_SORT())));
+                  s,
+                  KVariable(
+                      var.name(), var.att().add(Att.SORT(), Sort.class, s).add(Att.CELL_SORT())));
         }
       } else {
         split = new HashMap<>();
         for (Sort cell : remainingCells) {
-          split.put(cell, newDotVariable(var.att().add(Sort.class, cell).add(Att.CELL_SORT())));
+          split.put(
+              cell,
+              newDotVariable(var.att().add(Att.SORT(), Sort.class, cell).add(Att.CELL_SORT())));
         }
       }
       return split;
@@ -289,8 +295,8 @@ public class SortCells {
         List<KVariable> bagVars = new ArrayList<>();
         for (K item : items) {
           if (item instanceof KVariable var) {
-            if (var.att().contains(Sort.class)) {
-              Sort sort = var.att().get(Sort.class);
+            if (var.att().contains(Att.SORT(), Sort.class)) {
+              Sort sort = var.att().get(Att.SORT(), Sort.class);
               if (cfg.cfg().isCell(sort)) {
                 if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
                   Sort prevSort = cellVariables.get(var);
@@ -684,11 +690,11 @@ public class SortCells {
                     if (variables.containsKey(var)) {
                       varinfo = variables.get(var);
                     }
-                    if (!var.att().contains(Sort.class) && varinfo != null) {
+                    if (!var.att().contains(Att.SORT(), Sort.class) && varinfo != null) {
                       if (varinfo.var != null) var = varinfo.var;
                     }
-                    if (var.att().contains(Sort.class)) {
-                      Sort sort = var.att().get(Sort.class);
+                    if (var.att().contains(Att.SORT(), Sort.class)) {
+                      Sort sort = var.att().get(Att.SORT(), Sort.class);
                       if (cfg.cfg().isCell(sort)) {
                         if (!subcellSorts.contains(sort)) {
                           throw new IllegalArgumentException(
@@ -799,8 +805,8 @@ public class SortCells {
           for (int i = 0; i < k.klist().size(); i++) {
             K item = k.klist().items().get(i);
             if (item instanceof KVariable var) {
-              if (var.att().contains(Sort.class)) {
-                Sort sort = var.att().get(Sort.class);
+              if (var.att().contains(Att.SORT(), Sort.class)) {
+                Sort sort = var.att().get(Att.SORT(), Sort.class);
                 if (!cfg.cfg().isCell(sort)) {
                   if (!cellFragmentVars.containsKey(var)) {
                     cellFragmentVars.put(var, new HashSet<>());

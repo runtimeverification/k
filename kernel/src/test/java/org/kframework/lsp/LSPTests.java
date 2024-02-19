@@ -17,6 +17,7 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.definition.KViz;
 import org.kframework.definition.Production;
@@ -161,7 +162,7 @@ public class LSPTests {
                         + " loc: "
                         + t.location()
                         + " trm: "
-                        + t.att().get(Production.class));
+                        + t.att().get(Att.PRODUCTION(), Production.class));
               } else
                 System.out.println(
                     "Pos out loc: "
@@ -169,7 +170,7 @@ public class LSPTests {
                         + " loc: "
                         + t.location()
                         + " trm: "
-                        + t.att().get(Production.class));
+                        + t.att().get(Att.PRODUCTION(), Production.class));
               return t;
             },
             "test find")

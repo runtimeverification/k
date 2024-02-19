@@ -40,14 +40,14 @@ object KOREToTreeNodes {
       Constant(
         t.s,
         mod.tokenProductionFor(t.sort),
-        t.att.getOptional(classOf[Location]),
-        t.att.getOptional(classOf[Source])
+        t.att.getOptional(Att.LOCATION, classOf[Location]),
+        t.att.getOptional(Att.SOURCE, classOf[Source])
       )
     case a: KApply =>
       val scalaChildren = a.klist.items.asScala.map { i: K => apply(i, mod).asInstanceOf[Term] }
       val children      = ConsPStack.from(scalaChildren.reverse asJava)
-      val loc           = t.att.getOptional(classOf[Location])
-      val source        = t.att.getOptional(classOf[Source])
+      val loc           = t.att.getOptional(Att.LOCATION, classOf[Location])
+      val source        = t.att.getOptional(Att.SOURCE, classOf[Source])
       val p =
         mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains(Att.UNPARSE_AVOID)).head
       val subst = if (a.klabel.params.nonEmpty) {
@@ -63,7 +63,7 @@ object KOREToTreeNodes {
     case v: KVariable =>
       if (v.att.contains(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
         KORE.KApply(
-          KORE.KLabel("#SemanticCastTo" + v.att.get(classOf[org.kframework.kore.Sort])),
+          KORE.KLabel("#SemanticCastTo" + v.att.get(Att.SORT, classOf[org.kframework.kore.Sort])),
           KToken(v.name, Sorts.KVariable, v.att)
         )
       else

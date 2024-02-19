@@ -87,8 +87,8 @@ public record ResolveComm(KExceptionManager kem) {
                   "Used 'comm' attribute on simplification rule but "
                       + k.klabel().name()
                       + " is not comm.",
-                  k.att().getOptional(Source.class).orElse(null),
-                  k.att().getOptional(Location.class).orElse(null)));
+                  k.att().getOptional(Att.SOURCE(), Source.class).orElse(null),
+                  k.att().getOptional(Att.LOCATION(), Location.class).orElse(null)));
         return k;
       }
     }.apply(body);

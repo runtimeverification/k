@@ -136,18 +136,18 @@ public class ToJson {
         JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
       if (attKeyPair._1().key().equals(Location.class.getName())) {
         JsonArrayBuilder locarr = factory.createArrayBuilder();
-        Location loc = att.get(Location.class);
+        Location loc = att.get(Att.LOCATION(), Location.class);
         locarr.add(loc.startLine());
         locarr.add(loc.startColumn());
         locarr.add(loc.endLine());
         locarr.add(loc.endColumn());
         jattKeys.add(attKeyPair._1().key(), locarr.build());
       } else if (attKeyPair._1().key().equals(Source.class.getName())) {
-        jattKeys.add(attKeyPair._1().key(), att.get(Source.class).source());
+        jattKeys.add(attKeyPair._1().key(), att.get(Att.SOURCE(), Source.class).source());
       } else if (attKeyPair._1().key().equals(Production.class.getName())) {
-        jattKeys.add(attKeyPair._1().key(), toJson(att.get(Production.class)));
+        jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.PRODUCTION(), Production.class)));
       } else if (attKeyPair._1().key().equals(Sort.class.getName())) {
-        jattKeys.add(attKeyPair._1().key(), toJson(att.get(Sort.class)));
+        jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.SORT(), Sort.class)));
       } else if (attKeyPair._1().equals(Att.BRACKET_LABEL())) {
         jattKeys.add(attKeyPair._1().key(), toJson(att.get(Att.BRACKET_LABEL(), KLabel.class)));
       } else if (attKeyPair._1().equals(Att.PREDICATE())) {
@@ -456,8 +456,8 @@ public class ToJson {
 
       knode.add("node", JsonParser.KVARIABLE);
       knode.add("name", var.name());
-      if (k.att().contains(Sort.class)) {
-        knode.add("sort", toJson(k.att().get(Sort.class)));
+      if (k.att().contains(Att.SORT(), Sort.class)) {
+        knode.add("sort", toJson(k.att().get(Att.SORT(), Sort.class)));
       }
 
     } else if (k instanceof KRewrite rew) {

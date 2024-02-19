@@ -22,8 +22,8 @@ trait K extends Serializable with HasLocation with AttValue {
 
   def computeHashCode: Int
 
-  def location: Optional[Location] = att.getOptional(classOf[Location])
-  def source: Optional[Source]     = att.getOptional(classOf[Source])
+  def location: Optional[Location] = att.getOptional(Att.LOCATION, classOf[Location])
+  def source: Optional[Source]     = att.getOptional(Att.SOURCE, classOf[Source])
 }
 
 object K {

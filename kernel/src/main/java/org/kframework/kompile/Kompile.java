@@ -364,9 +364,9 @@ public class Kompile {
     List<String> ruleLocs = new ArrayList<String>();
     for (Sentence s : JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
       if (s instanceof RuleOrClaim) {
-        var optFile = s.att().getOptional(Source.class);
-        var optLine = s.att().getOptional(Location.class);
-        var optCol = s.att().getOptional(Location.class);
+        var optFile = s.att().getOptional(Att.SOURCE(), Source.class);
+        var optLine = s.att().getOptional(Att.LOCATION(), Location.class);
+        var optCol = s.att().getOptional(Att.LOCATION(), Location.class);
         var optId = s.att().getOptional(Att.UNIQUE_ID());
         if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
           String file = optFile.get().source();

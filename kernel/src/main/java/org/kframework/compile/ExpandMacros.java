@@ -345,7 +345,7 @@ public class ExpandMacros {
 
   private Set<Sort> sort(K k, RuleOrClaim r) {
     if (k instanceof KVariable) {
-      return Collections.singleton(k.att().getOptional(Sort.class).orElse(null));
+      return Collections.singleton(k.att().getOptional(Att.SORT(), Sort.class).orElse(null));
     } else if (k instanceof KToken) {
       return Collections.singleton(((KToken) k).sort());
     } else if (k instanceof KApply kapp) {
@@ -389,8 +389,8 @@ public class ExpandMacros {
       if (subst.containsKey(pattern)) {
         return subst.get(pattern).equals(subject);
       } else {
-        if (pattern.att().contains(Sort.class)) {
-          Sort patternSort = pattern.att().get(Sort.class);
+        if (pattern.att().contains(Att.SORT(), Sort.class)) {
+          Sort patternSort = pattern.att().get(Att.SORT(), Sort.class);
           if (sort(subject, r).stream()
               .anyMatch(s -> s == null || mod.subsorts().lessThanEq(s, patternSort))) {
             subst.put((KVariable) pattern, subject);
