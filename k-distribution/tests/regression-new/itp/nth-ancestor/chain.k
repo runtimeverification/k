@@ -47,11 +47,11 @@ module CHAIN
                   | Int "<~*" Int
 
     rule
-    <k> apply("<~*.i") => . ... </k>
+    <k> apply("<~*.i") => .K ... </k>
     <g> B1 <~ B2 => B1 <~* B2 </g>
 
     rule
-    <k> apply("<~*.i") => . ... </k>
+    <k> apply("<~*.i") => .K ... </k>
     <g> B1 <~ B2 and B2 <~* B3 => B1 <~* B3 </g>
 
     /*
@@ -68,20 +68,20 @@ module CHAIN
                   | Int "==" Int
 
     rule
-    <k> apply("nth.i") => . ... </k>
+    <k> apply("nth.i") => .K ... </k>
     <g> block(B) => nth(0, B, B) </g>
 
     rule
-    <k> apply("nth.i") => . ... </k>
+    <k> apply("nth.i") => .K ... </k>
     <g> nth(N, B1, B2) and B2 <~ B3
      => nth(N +Int 1, B1, B3) </g>
 
     rule
-    <k> apply("nth.e") => . ... </k>
+    <k> apply("nth.e") => .K ... </k>
     <g> nth(0, B1, B2) => B1 == B2 </g>
 
     rule
-    <k> apply("nth.e") => . ... </k>
+    <k> apply("nth.e") => .K ... </k>
     <g> nth(N, B1, B3)
      => nth(N -Int 1, B1, ?B2:Int) and ?B2 <~ B3 </g>
         requires N >Int 0
