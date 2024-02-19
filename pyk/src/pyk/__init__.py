@@ -6,4 +6,4 @@ if TYPE_CHECKING:
     from typing import Final
 
 
-K_VERSION: Final = '6.2.27'
+K_VERSION: Final = '6.2.30'
