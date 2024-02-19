@@ -6,7 +6,7 @@ endmodule
 module SUM-SPEC
   import VERIFICATION
 
-  claim  <k> addCounter(N:Int) => . ...</k>
+  claim  <k> addCounter(N:Int) => .K ...</k>
          <counter> C:Int => ?_ </counter>
          <sum> S:Int => ?S:Int </sum>
     requires

@@ -17,7 +17,7 @@ module TEST
 
     syntax KItem ::= "#putCells"
  // ----------------------------
-    rule <k> #putCells => . ... </k>
+    rule <k> #putCells => .K ... </k>
          <cells>
            (.Bag => #makeCell(0, 1))
            (.Bag => <cell> <num> 5 </num> <data> 6 </data> </cell>)

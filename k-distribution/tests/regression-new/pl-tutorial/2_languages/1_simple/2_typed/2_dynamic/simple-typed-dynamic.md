@@ -224,7 +224,7 @@ to a location.
 ```k
   syntax KItem ::= undefined(Type)
 
-  rule <k> T:Type X:Id; => . ...</k>
+  rule <k> T:Type X:Id; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -236,7 +236,7 @@ The dynamic semantics of typed array declarations is similar to that
 in untyped SIMPLE, but we have to make sure that we associate the
 right type to the allocated locations.
 ```k
-  rule <k> T:Type X:Id[N:Int]; => . ...</k>
+  rule <k> T:Type X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(T, L +Int 1, N)
                           (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
@@ -271,7 +271,7 @@ Store all function parameters, as well as the return type, as part
 of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked.
 ```k
-  rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
+  rule <k> T:Type F:Id(Ps:Params) S => .K ...</k>
        <env> Env => Env[F <- L] </env>
        <store>... .Map => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
@@ -404,7 +404,7 @@ preserved:
 ### Blocks
 
 ```k
-  rule {} => .
+  rule {} => .K
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 ```
 
@@ -417,7 +417,7 @@ preserved:
 ### Expression statements
 
 ```k
-  rule _:Val; => .
+  rule _:Val; => .K
 ```
 
 ### Conditional
@@ -439,7 +439,7 @@ We only allow printing integers and strings:
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     requires typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
-  rule print(.Vals); => .
+  rule print(.Vals); => .K
 ```
 
 ### Exceptions
@@ -461,7 +461,7 @@ values, in which case our semantics below works fine:
        </control>
        <env> Env </env>
 
-  rule <k> popx => . ...</k>
+  rule <k> popx => .K ...</k>
        <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { T X = V; S2 } ~> K </k>
@@ -491,7 +491,7 @@ values, in which case our semantics below works fine:
 ### Thread termination
 
 ```k
-   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
+   rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... .Set => SetItem(T) ...</terminated>
 ```
@@ -499,38 +499,38 @@ values, in which case our semantics below works fine:
 ### Thread joining
 
 ```k
-   rule <k> join T:Int; => . ...</k>
+   rule <k> join T:Int; => .K ...</k>
         <terminated>... SetItem(T) ...</terminated>
 ```
 
 ### Acquire lock
 
 ```k
-   rule <k> acquire V:Val; => . ...</k>
+   rule <k> acquire V:Val; => .K ...</k>
         <holds>... .Map => V |-> 0 ...</holds>
         <busy> Busy (.Set => SetItem(V)) </busy>
      requires (notBool(V in Busy:Set))  [group(acquire)]
 
-   rule <k> acquire V; => . ...</k>
+   rule <k> acquire V; => .K ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 ```
 
 ### Release lock
 
 ```k
-   rule <k> release V:Val; => . ...</k>
+   rule <k> release V:Val; => .K ...</k>
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
       requires N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+   rule <k> release V; => .K ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
         <busy>... SetItem(V) => .Set ...</busy>
 ```
 
 ### Rendezvous synchronization
 
 ```k
-   rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [group(rendezvous)]
+   rule <k> rendezvous V:Val; => .K ...</k>
+        <k> rendezvous V; => .K ...</k>  [group(rendezvous)]
 ```
 
 ### Auxiliary declarations and operations
@@ -553,8 +553,8 @@ Environment recovery.
 // TODO: same comment regarding setEnv(...) as for simple untyped
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
-  rule (setEnv(_) => .) ~> setEnv(_)
+  rule <k> setEnv(Env) => .K ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .K) ~> setEnv(_)
 ```
 lvalue and loc
 ```k

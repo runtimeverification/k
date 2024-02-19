@@ -46,10 +46,10 @@ module IMP
   rule true && B => B
   rule false && _ => false
 // Block
-  rule {} => .
+  rule {} => .K
   rule {S} => S
 // Stmt
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
+  rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
   rule S1:Stmt S2:Stmt => S1 ~> S2
   rule if (true)  S else _ => S
   rule if (false) _ else S => S

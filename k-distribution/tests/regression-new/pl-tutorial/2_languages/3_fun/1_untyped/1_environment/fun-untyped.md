@@ -563,11 +563,11 @@ making sure that the environment is properly recovered afterwards.
 If the first pattern does not match, then we drop it and thus move on
 to the next one.
 ```k
-  rule (. => getMatching(P, V)) ~> closure(_, P->_ | _) V:Val
+  rule (.K => getMatching(P, V)) ~> closure(_, P->_ | _) V:Val
   rule <k> matchResult(M:Map) ~> closure(Rho, _->E | _) _
            => bindMap(M) ~> E ~> setEnv(Rho') ...</k>
        <env> Rho' => Rho </env>
-  rule (matchFailure => .) ~> closure(_, (_->_ | Cs:Cases => Cs)) _
+  rule (matchFailure => .K) ~> closure(_, (_->_ | Cs:Cases => Cs)) _
 //  rule <k> closure(Rho, P->E | _) V:Val
 //           => bindMap(getMatching(P,V)) ~> E ~> setEnv(Rho') ...</k>
 //       <env> Rho' => Rho </env>  requires isMatching(P,V)
@@ -694,7 +694,7 @@ way to achieve the benefits of tail recursion in **K**.
 ```k
   syntax KItem ::= setEnv(Map)  // TODO: get rid of env
   //rule (setEnv(_) => .) ~> setEnv(_)  [anywhere]
-  rule <k> _:Val ~> (setEnv(Rho) => .) ...</k> <env> _ => Rho </env>
+  rule <k> _:Val ~> (setEnv(Rho) => .K) ...</k> <env> _ => Rho </env>
 ```
 
 ## `bindTo`, `bind` and `assignTo`
@@ -707,21 +707,21 @@ above.
                  | bindMap(Map)
                  | bind(Names)
 
-  rule (. => getMatchingAux(Xs,Vs)) ~> bindTo(Xs:Names,Vs:Vals)
+  rule (.K => getMatchingAux(Xs,Vs)) ~> bindTo(Xs:Names,Vs:Vals)
   rule matchResult(M:Map) ~> bindTo(_:Names, _:Vals) => bindMap(M)
 
-  rule bindMap(.Map) => .
+  rule bindMap(.Map) => .K
   rule <k> bindMap((X:Name |-> V:Val => .Map) _:Map) ...</k>
        <env> Rho => Rho[X <- !L:Int] </env>
        <store>... .Map => !L |-> V ...</store>
 
-  rule bind(.Names) => .
+  rule bind(.Names) => .K
   rule <k> bind(X:Name,Xs => Xs) ...</k>
        <env> Rho => Rho[X <- !_L:Int] </env>
 
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]
 
-  rule <k> assignTo(.Names,.Vals) => . ...</k>
+  rule <k> assignTo(.Names,.Vals) => .K ...</k>
   rule <k> assignTo((X:Name,Xs => Xs),(V:Val,Vs:Vals => Vs)) ...</k>
        <env>... X |-> L ...</env>
        <store>... .Map => L |-> V ...</store>

@@ -823,9 +823,9 @@ The subclass relation introduces a subtyping relation.
 ```k
   syntax KItem ::= checkSubtype(Types,Types)
 
-  rule checkSubtype(T:Type, T) => .
+  rule checkSubtype(T:Type, T) => .K
 
-  rule <k> checkSubtype(`class`(C:Id), `class`(C':Id)) => . ...</k>
+  rule <k> checkSubtype(`class`(C:Id), `class`(C':Id)) => .K ...</k>
        <className> C </className>
        <baseClasses>... SetItem(C') ...</baseClasses>
 
@@ -839,8 +839,8 @@ The subclass relation introduces a subtyping relation.
     => checkSubtype(T,T') ~> checkSubtype(Ts,Ts')
     requires Ts =/=K .Types
 
-  rule checkSubtype(.Types,.Types) => .
-  rule checkSubtype(.Types,void) => .
+  rule checkSubtype(.Types,.Types) => .K
+  rule checkSubtype(.Types,void) => .K
 ```
 
 ## Checking well-formedness of types
@@ -852,13 +852,13 @@ check that the types used in the program actually exists
 
   rule checkType(T:Type,Ts:Types) => checkType(T) ~> checkType(Ts)
     requires Ts =/=K .Types
-  rule checkType(.Types) => .
-  rule checkType(int) => .
-  rule checkType(bool) => .
-  rule checkType(string) => .
-  rule checkType(void) => .
-  rule <k> checkType(`class`(C:Id)) => . ...</k> <className> C </className>
-  rule checkType(`class`(Object)) => .
+  rule checkType(.Types) => .K
+  rule checkType(int) => .K
+  rule checkType(bool) => .K
+  rule checkType(string) => .K
+  rule checkType(void) => .K
+  rule <k> checkType(`class`(C:Id)) => .K ...</k> <className> C </className>
+  rule checkType(`class`(Object)) => .K
   rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)
   rule checkType(T:Type[]) => checkType(T)
 ```
@@ -885,7 +885,7 @@ is co-variant in the codomain and contra-variant in the domain).
        <ctenv> Rho </ctenv>
     requires notBool(F in keys(Rho))
 
-  rule checkMethod(_:Id,_,Object) => .
+  rule checkMethod(_:Id,_,Object) => .K
 ```
 
 ## Generic operations which could be part of the **K** framework
@@ -894,7 +894,7 @@ is co-variant in the codomain and contra-variant in the domain).
   syntax KItem ::= stuck(K)
 
   syntax KItem ::= "discard"
-  rule _:KResult ~> discard => .
+  rule _:KResult ~> discard => .K
 
 endmodule
 ```

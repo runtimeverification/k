@@ -38,10 +38,10 @@ module NTH1-SPEC
      ~> load("p2")
      ~> apply("lemma")
      ~> apply("<~*.i")
-     => . </k>
+     => .K </k>
 
     claim
-    <k> apply("lemma") => . ... </k>
+    <k> apply("lemma") => .K ... </k>
     <g> B1 == B2 and B2 <~ B3 => B1 <~ B3 </g>
         [trusted]
 endmodule
