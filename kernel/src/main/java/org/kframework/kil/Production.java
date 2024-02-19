@@ -1,7 +1,6 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
-import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
 import org.kframework.attributes.Att;
@@ -9,7 +8,8 @@ import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 
 /**
- * A production. Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
+ * A production. Any explicit attributes on the production are stored in {@link
+ * ASTNode#getAttributes()}.
  */
 public class Production extends ASTNode {
 
@@ -21,24 +21,33 @@ public class Production extends ASTNode {
   protected Sort sort;
   protected List<Sort> params;
   protected String ownerModuleName;
-  private Multimap<Integer, Integer> binderMap;
 
   public boolean isListDecl() {
     return items.size() == 1 && items.get(0) instanceof UserList;
   }
 
   /**
-   * Returns the KLabel for the list terminator. Constructed as '.List{"<list_klabel>"} Should be
-   * called only if isListDecl is true.
+   * Returns the KLabel for the list terminator.
    *
-   * @return String representation of the separator KLabel.
+   * <p>If a label has been specified using `terminator-klabel(...)` then use that; otherwise
+   * construct a new label based on the label for the non-terminator production. This new label is
+   * constructed as `.List{"<list_klabel>"}`. Should be called only if `isListDecl()` returns true.
+   *
+   * @return String representation of the terminator KLabel.
    */
   public String getTerminatorKLabel(boolean kore) {
     assert isListDecl();
-    return ".List{"
-        + StringUtil.enquoteCString(getKLabel(kore))
-        + "}"
-        + (kore ? "_" + getSort().name() : "");
+
+    String terminatorLabel = getAttribute(Att.TERMINATOR_KLABEL());
+    if (terminatorLabel == null) {
+      boolean isSymbol = getAttribute(Att.SYMBOL()) != null;
+      return ".List{"
+          + StringUtil.enquoteCString(getKLabel(kore))
+          + "}"
+          + (kore && !isSymbol ? "_" + getSort().name() : "");
+    }
+
+    return terminatorLabel.replace(" ", "");
   }
 
   /**
@@ -96,6 +105,31 @@ public class Production extends ASTNode {
   }
 
   /**
+   * Gets the effective KLabel declared by the user, taking the `klabel` and `symbol` attributes
+   * into account.
+   *
+   * <p>The effective label is specified as follows:
+   *
+   * <ul>
+   *   <li>If the production has a `symbol(X)` attribute, the effective label is `X`.
+   *   <li>If the production has `klabel(X)`, then the effective label is `X`. This syntax will be
+   *       deprecated in the future.
+   *   <li>Otherwise, return null.
+   * </ul>
+   *
+   * @return A string representing the effective label, or null.
+   */
+  private String getDeclaredLabel() {
+    String symbol = getAttribute(Att.SYMBOL());
+
+    if (symbol != null && !symbol.isEmpty()) {
+      return symbol;
+    }
+
+    return getAttribute(Att.KLABEL());
+  }
+
+  /**
    * Gets the KLabel corresponding to this production. A production has a KLabel if and only if the
    * production flattens in KORE to a term which is of sort KItem (ie, is a function or a
    * constructor).
@@ -103,7 +137,7 @@ public class Production extends ASTNode {
    * @return
    */
   public String getKLabel(boolean kore) {
-    String klabel = getAttribute(Att.KLABEL());
+    String klabel = getDeclaredLabel();
     if (klabel == null
         && (isSyntacticSubsort()
             || containsAttribute(Att.TOKEN())
@@ -116,7 +150,7 @@ public class Production extends ASTNode {
   }
 
   public String getBracketLabel(boolean kore) {
-    String klabel = getAttribute(Att.KLABEL());
+    String klabel = getDeclaredLabel();
     if (klabel == null || (kore && getAttribute(Att.SYMBOL()) == null)) {
       klabel = getPrefixLabel(kore);
     }
@@ -183,24 +217,6 @@ public class Production extends ASTNode {
     this.params = params;
   }
 
-  public ASTNode getChildNode(int idx) {
-    int arity = -1;
-    if (items.get(0) instanceof UserList) {
-      if (idx == 0) {
-        return items.get(0);
-      } else {
-        return this;
-      }
-    }
-    for (ProductionItem i : items) {
-      if (!(i instanceof Terminal)) arity++;
-      if (arity == idx) {
-        return i;
-      }
-    }
-    return null;
-  }
-
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
@@ -216,9 +232,7 @@ public class Production extends ASTNode {
     if (sort == null) {
       if (other.sort != null) return false;
     } else if (!sort.equals(other.sort)) return false;
-    if (binderMap == null) {
-      return other.binderMap == null;
-    } else return binderMap.equals(other.binderMap);
+    return true;
   }
 
   @Override
@@ -230,7 +244,6 @@ public class Production extends ASTNode {
         prime * result
             + ((getAttribute(Att.KLABEL()) == null) ? 0 : getAttribute(Att.KLABEL()).hashCode());
     result = prime * result + ((sort == null) ? 0 : sort.hashCode());
-    result = prime * result + ((binderMap == null) ? 0 : binderMap.hashCode());
     return result;
   }
 
@@ -240,7 +253,7 @@ public class Production extends ASTNode {
       i.toString(sb);
       sb.append(" ");
     }
-    sb.append(getAttributes().withUserGroupsAsGroupAtt());
+    sb.append(getAttributes());
   }
 
   public void setOwnerModuleName(String ownerModuleName) {

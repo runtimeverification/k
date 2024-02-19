@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.unparser;
 
 import static org.kframework.Collections.*;
@@ -128,9 +128,6 @@ public class ToJson {
   }
 
   public static JsonStructure toJson(Att att) {
-    // Emit user groups as group(_) to prevent conflicts between user groups and internals
-    att = att.withUserGroupsAsGroupAtt();
-
     JsonObjectBuilder jatt = factory.createObjectBuilder();
     jatt.add("node", JsonParser.KATT);
 

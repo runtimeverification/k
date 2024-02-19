@@ -1,18 +1,17 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
-import org.kframework.builtin.{KLabels, Sorts}
-import org.kframework.kore.Assoc
-import org.kframework.kore.KVariable
-import org.kframework.kore.KORE
+import org.kframework.{ kore => k }
 import org.kframework.attributes.Att
+import org.kframework.builtin.KLabels
+import org.kframework.builtin.Sorts
 import org.kframework.kore.ADT.KVariable
+import org.kframework.kore.Assoc
+import org.kframework.kore.KORE
 import org.kframework.parser.kore
 import org.kframework.utils.StringUtil
-import org.kframework.{kore => k}
-
-import scala.collection.Map
 import scala.collection.JavaConverters._
+import scala.collection.Map
 
 /** Translation error exception. */
 case class TranslationError(msg: String) extends RuntimeException(msg)
@@ -20,7 +19,7 @@ case class TranslationError(msg: String) extends RuntimeException(msg)
 /** Conversion function from Kore to K. */
 
 // sortAtt is a map from sort names to their hook attribute, if any
-class KoreToK (sortAtt : Map[String, String]) {
+class KoreToK(sortAtt: Map[String, String]) {
 
   val codes = Map(
     "Spce" -> " ",
@@ -54,39 +53,38 @@ class KoreToK (sortAtt : Map[String, String]) {
     "LBra" -> "{",
     "Pipe" -> "|",
     "RBra" -> "}",
-    "Tild" -> "~")
+    "Tild" -> "~"
+  )
 
-  def mapCode(code: String): String = {
+  def mapCode(code: String): String =
     try {
       val i = Integer.parseInt(code, 16)
       "\\u" + code
     } catch {
       case _: NumberFormatException => codes(code)
     }
-  }
 
   /** Returns a [[k.Sort]] from [[kore.Sort]]. */
   def apply(s: kore.Sort): k.Sort = s match {
-      case kore.SortVariable(name) =>
-        Sorts.K
-      case kore.CompoundSort(ctr, params) =>
-        assert(ctr.startsWith("Sort"))
-        KORE.Sort(ctr.substring( 4), params.map(apply): _*);
+    case kore.SortVariable(name) =>
+      Sorts.K
+    case kore.CompoundSort(ctr, params) =>
+      assert(ctr.startsWith("Sort"))
+      KORE.Sort(ctr.substring(4), params.map(apply));
   }
 
   /** Returns a [[k.KLabel]] from [[kore.SymbolOrAlias]] */
-  def apply(head: kore.SymbolOrAlias): k.KLabel = {
-    KORE.KLabel(extractKLabel(head.ctr), head.params.map(p => apply(p)): _*)
-  }
+  def apply(head: kore.SymbolOrAlias): k.KLabel =
+    KORE.KLabel(extractKLabel(head.ctr), head.params.map(p => apply(p)))
 
-  private def extractKLabel(head: String): String = {
+  private def extractKLabel(head: String): String =
     if (head.startsWith("Lbl")) {
       extractKLabel(head.substring(3))
     } else {
       var literal = true
-      var result = new StringBuilder()
-      var i = 0
-      while (i < head.length) {
+      var result  = new StringBuilder()
+      var i       = 0
+      while (i < head.length)
         if (head(i) == '\'') {
           literal = !literal
           i += 1
@@ -94,52 +92,60 @@ class KoreToK (sortAtt : Map[String, String]) {
           result.append(head(i))
           i += 1
         } else {
-          val code = head.substring(i, i+4)
+          val code = head.substring(i, i + 4)
           result.append(mapCode(code))
           i += 4
         }
-      }
       result.toString
     }
-  }
 
-  private def extractVarName(name: String): String = {
+  private def extractVarName(name: String): String =
     if (name.startsWith("Var")) {
       StringUtil.decodeKoreString(name.substring(3))
     } else {
       StringUtil.decodeKoreString(name)
     }
-  }
 
   /** Returns a [[k.K]] from [[kore.Pattern]]. */
   def apply(pat: kore.Pattern): k.K = pat match {
     case kore.Variable(name, sort) =>
-      KORE.KVariable(extractVarName(name), Att.empty.add(classOf[org.kframework.kore.Sort], apply(sort)))
-    case kore.Application(head, args) => head.ctr match {
-      case "inj" =>
-        apply(args.head) match {
-          case KVariable(name, att) => KORE.KVariable(name, att.add(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
-          case body => body
-        }
-      case "kseq" =>
-        KORE.KSequence(args.map(apply(_)): _*)
-      case "append" =>
-        KORE.KSequence(args.map(apply(_)): _*)
-      case "dotk" =>
-        KORE.KSequence()
-      case _ =>
-        KORE.KApply(apply(head), args.map((k) => apply(k)))
-    }
+      KORE.KVariable(
+        extractVarName(name),
+        Att.empty.add(classOf[org.kframework.kore.Sort], apply(sort))
+      )
+    case kore.Application(head, args) =>
+      head.ctr match {
+        case "inj" =>
+          apply(args.head) match {
+            case KVariable(name, att) =>
+              KORE.KVariable(name, att.add(Att.PRETTY_PRINT_WITH_SORT_ANNOTATION))
+            case body => body
+          }
+        case "kseq" =>
+          KORE.KSequence(args.map(apply(_)))
+        case "append" =>
+          KORE.KSequence(args.map(apply(_)))
+        case "dotk" =>
+          KORE.KSequence()
+        case _ =>
+          KORE.KApply(apply(head), args.map(k => apply(k)))
+      }
     case kore.Top(s) =>
       KORE.KApply(KORE.KLabel(KLabels.ML_TRUE.name, apply(s)))
     case kore.Bottom(s) =>
       KORE.KApply(KORE.KLabel(KLabels.ML_FALSE.name, apply(s)))
     case kore.And(s, items) =>
       val and = KORE.KLabel(KLabels.ML_AND.name, apply(s))
-      KORE.KApply(and,  Assoc.flatten(and, items.map(apply), KORE.KLabel(KLabels.ML_TRUE.name, apply(s))))
+      KORE.KApply(
+        and,
+        Assoc.flatten(and, items.map(apply), KORE.KLabel(KLabels.ML_TRUE.name, apply(s)))
+      )
     case kore.Or(s, items) =>
       val or = KORE.KLabel(KLabels.ML_OR.name, apply(s))
-      KORE.KApply(or,  Assoc.flatten(or, items.map(apply), KORE.KLabel(KLabels.ML_FALSE.name, apply(s))))
+      KORE.KApply(
+        or,
+        Assoc.flatten(or, items.map(apply), KORE.KLabel(KLabels.ML_FALSE.name, apply(s)))
+      )
     case kore.Not(s, p) =>
       KORE.KApply(KORE.KLabel(KLabels.ML_NOT.name, apply(s)), apply(p))
     case kore.Implies(s, p, q) =>
@@ -162,7 +168,12 @@ class KoreToK (sortAtt : Map[String, String]) {
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
       val hookAtt = sortAtt.get(apply(s).name).getOrElse("")
-      KORE.KToken(if (hookAtt == "STRING.String") StringUtil.enquoteKString(str) else if (hookAtt == "BYTES.Bytes") "b" + StringUtil.enquoteKString(str) else str, apply(s))
+      KORE.KToken(
+        if (hookAtt == "STRING.String") StringUtil.enquoteKString(str)
+        else if (hookAtt == "BYTES.Bytes") "b" + StringUtil.enquoteKString(str)
+        else str,
+        apply(s)
+      )
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
   }

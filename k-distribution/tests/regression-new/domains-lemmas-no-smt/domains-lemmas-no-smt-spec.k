@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 requires "domains-lemmas-no-smt.k"
 
 module DOMAINS-LEMMAS-NO-SMT-SPEC

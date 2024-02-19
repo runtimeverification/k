@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 IMP++
@@ -131,7 +131,7 @@ of statements surrounded by curly brackets.
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
+                 | AExp "<=" AExp             [seqstrict]
                  | "!" BExp                   [strict]
                  | "(" BExp ")"               [bracket]
                  > BExp "&&" BExp             [left, strict(1)]
@@ -318,7 +318,7 @@ them is chosen first.
 ### Arithmetic constructs
 
 ```k
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 / I2 => I1 /Int I2 requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
   rule - I => 0 -Int I
 ```

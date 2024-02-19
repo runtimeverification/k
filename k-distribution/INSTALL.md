@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 Installing the K Framework
 ==========================
@@ -175,27 +175,16 @@ Testing Packages
 The easiest way to test the K package is to copy a K tutorial language and
 check if you can compile and run an included example.
 
-1.  Start by copying the K tutorial to some work directory
-    (e.g. `$HOME/pl-tutorial`) from the K distribution root. Using a Linux
-    package, this command typically will be like:
+1.  Start by cloning the K tutorial from the [K PL Tutorial](https://www.github.com/runtimeverification/pl-tutorial). This command typically will be like:
 
     ```sh
-    $ cp -R /usr/share/kframework/pl-tutorial $HOME/pl-tutorial
+    $ git clone https://www.github.com/runtimeverification/pl-tutorial
     ```
-
-    On macOS/brew, this command typically will be like:
-
-    ```sh
-    $ cp -R /usr/local/share/kframework/pl-tutorial $HOME/pl-tutorial
-    ```
-
-    This step is needed because sometimes only the `root` user can run the
-    examples in the default installation directory.
 
 2.  Now you can try to run some programs:
 
     ```sh
-    $ cd $HOME/pl-tutorial/2_languages/1_simple/1_untyped
+    $ cd pl-tutorial/2_languages/1_simple/1_untyped
     $ make kompile
     $ krun tests/diverse/factorial.simple
     ```

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import java.util.ArrayList;
@@ -15,10 +15,6 @@ public class PriorityBlockExtended extends ASTNode {
 
   public java.util.List<Tag> getProductions() {
     return productions;
-  }
-
-  public void setProductions(java.util.List<Tag> productions) {
-    this.productions = productions;
   }
 
   public PriorityBlockExtended(java.util.List<Tag> productions) {

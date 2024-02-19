@@ -1,34 +1,21 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.utils.file;
 
 import com.google.inject.Inject;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.Reader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.attributes.Location;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -85,28 +72,12 @@ public class FileUtil {
     }
   }
 
-  /** Get language name in uppercase (main module name) given the filename of definition. */
-  public static String getMainModule(String filename) {
-    return FilenameUtils.getBaseName(filename).toUpperCase();
-  }
-
   // generate an unique name for a folder with the name dirName
   public static String generateUniqueFolderName(String dirName) {
     DateFormat df = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-SSS-");
     Date today = Calendar.getInstance().getTime();
     String reportDate = df.format(today);
     return dirName + reportDate + UUID.randomUUID();
-  }
-
-  /** Loads the properties from the given file into the given Properties object. */
-  public static void loadProperties(Properties properties, Class<?> cls, String resourcePath)
-      throws IOException {
-    try (InputStream inStream = cls.getResourceAsStream(resourcePath)) {
-      if (inStream == null) {
-        throw new IOException("Could not find resource " + resourcePath);
-      }
-      properties.load(inStream);
-    }
   }
 
   public void saveToDefinitionDirectory(String file, String content) {
@@ -117,35 +88,15 @@ public class FileUtil {
     return load(resolveWorkingDirectory(file));
   }
 
-  public void saveToWorkingDirectory(String file, String content) {
-    save(resolveWorkingDirectory(file), content);
-  }
-
   public void saveToWorkingDirectory(String file, byte[] content) {
     save(resolveWorkingDirectory(file), content);
-  }
-
-  public String loadFromKompiled(String file) {
-    return load(resolveKompiled(file));
   }
 
   public void saveToKompiled(String file, String content) {
     save(resolveKompiled(file), content);
   }
 
-  public String loadFromTemp(String file) {
-    return load(resolveTemp(file));
-  }
-
-  public byte[] loadBytesFromTemp(String file) {
-    return loadBytes(resolveTemp(file));
-  }
-
   public void saveToTemp(String file, String content) {
-    save(resolveTemp(file), content);
-  }
-
-  public void saveToTemp(String file, byte[] content) {
     save(resolveTemp(file), content);
   }
 
@@ -181,39 +132,6 @@ public class FileUtil {
     return new File(JarInfo.getKIncludeDir().toFile(), file);
   }
 
-  // don't use this if you want a file in the include directory. Use resolveKInclude.
-  public File resolveKBase(String file) {
-    return new File(JarInfo.getKBase(), file);
-  }
-
-  public void copyTempFileToDefinitionDirectory(String fromPath) {
-    copyFileToDirectory(resolveTemp(fromPath), resolveDefinitionDirectory("."));
-  }
-
-  public void copyTempFileToKompiledDirectory(String fromPath) {
-    copyFileToDirectory(resolveTemp(fromPath), resolveKompiled("."));
-  }
-
-  public void copyTempFileToKompiledFile(String fromPath, String toPath) {
-    copyFile(resolveTemp(fromPath), resolveKompiled(toPath));
-  }
-
-  private void copyFile(File from, File to) {
-    try {
-      FileUtils.copyFile(from, to);
-    } catch (IOException e) {
-      throw KEMException.criticalError("Could not copy " + from + " to " + to, e);
-    }
-  }
-
-  public void copyFileToDirectory(File from, File toDir) {
-    try {
-      FileUtils.copyFileToDirectory(from, toDir);
-    } catch (IOException e) {
-      throw KEMException.criticalError("Could not copy " + from + " to directory " + toDir, e);
-    }
-  }
-
   public static void save(File file, String content) {
     try {
       File dir = file.getAbsoluteFile().getParentFile();
@@ -246,57 +164,11 @@ public class FileUtil {
     }
   }
 
-  /**
-   * Loads the given fragment of a file to String.
-   *
-   * <p>Source: https://stackoverflow.com/a/4305478/4182868
-   */
-  public static String loadFragment(File file, int pos, int len) {
-    try (FileInputStream stream = new FileInputStream(file)) {
-      stream.skip(pos);
-      return IOUtils.toString(new BoundedInputStream(stream, len));
-    } catch (IOException e) {
-      throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
-    }
-  }
-
-  public static String loadFragment(File file, Location location) {
-    try (Stream<String> lines =
-        new BufferedReader(new InputStreamReader(new FileInputStream(file)))
-            .lines()
-            .skip(location.startLine() - 1)
-            .limit(location.endLine() - location.startLine() + 1)) {
-      return lines.collect(Collectors.joining("\n"));
-    } catch (IOException e) {
-      throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
-    }
-  }
-
   public static byte[] loadBytes(File file) {
     try {
       return FileUtils.readFileToByteArray(file);
     } catch (IOException e) {
       throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
-    }
-  }
-
-  public static Pair<PipedInputStream, PipedOutputStream> pipeOutputToInput() {
-    try {
-      PipedOutputStream out = new PipedOutputStream();
-      PipedInputStream in = new PipedInputStream(out);
-      return Pair.of(in, out);
-    } catch (IOException e) {
-      throw KEMException.internalError("Error creating input/output pipe", e);
-    }
-  }
-
-  public static Pair<PipedOutputStream, PipedInputStream> pipeInputToOutput() {
-    try {
-      PipedInputStream in = new PipedInputStream();
-      PipedOutputStream out = new PipedOutputStream(in);
-      return Pair.of(out, in);
-    } catch (IOException e) {
-      throw KEMException.internalError("Error creating input/output pipe", e);
     }
   }
 

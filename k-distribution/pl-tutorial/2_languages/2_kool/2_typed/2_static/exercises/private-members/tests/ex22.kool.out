@@ -1,1 +1,0 @@
-Method "get" cannot be private in class "A" because it is public in class "B"

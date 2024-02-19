@@ -1,25 +1,16 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import com.google.inject.Inject;
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Represents a language definition. Includes contents from all {@code required}-d files.
- *
- * @see DefinitionLoader
- */
+/** Represents a language definition. Includes contents from all {@code required}-d files. */
 public class Definition extends ASTNode {
 
   private List<DefinitionItem> items;
-  private File mainFile;
   private String mainModule;
-
-  /** An index of all modules in {@link #items} by name */
-  private String mainSyntaxModule;
 
   public Map<String, ASTNode> locations = new HashMap<>();
 
@@ -52,9 +43,5 @@ public class Definition extends ASTNode {
 
   public String getMainModule() {
     return mainModule;
-  }
-
-  public void setMainSyntaxModule(String mainSyntaxModule) {
-    this.mainSyntaxModule = mainSyntaxModule;
   }
 }

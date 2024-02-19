@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 // from https://github.com/google/guice/wiki/CustomScopes, used with permission
 package org.kframework.utils.inject;
 

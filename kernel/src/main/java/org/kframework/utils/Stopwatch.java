@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.utils;
 
 import com.google.inject.Inject;
@@ -6,7 +6,6 @@ import java.util.Formatter;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 
-/** To use, access {@link #instance()} after calling {@link #init(GlobalOptions) init()}. */
 @RequestScoped
 public class Stopwatch {
   private final long start;
@@ -45,12 +44,5 @@ public class Stopwatch {
     if (h > 0) return String.format("%dh %02dm %02ds", h, m, (long) s);
     if (m > 0) return String.format("%02dm %02ds", m, (long) s);
     return String.format("%6.3fs", s);
-  }
-
-  public long getIntermediateMilliseconds() {
-    long endd = System.currentTimeMillis();
-    long rez = lastIntermediate - endd;
-    lastIntermediate = endd;
-    return rez;
   }
 }

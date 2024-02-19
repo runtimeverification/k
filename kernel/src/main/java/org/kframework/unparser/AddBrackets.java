@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.unparser;
 
 import static org.kframework.Collections.*;
@@ -213,7 +213,6 @@ public record AddBrackets(Module m) {
   }
 
   private int getPosition(ProductionReference inner, ProductionReference outer) {
-    EnumSet<Fixity> set = EnumSet.noneOf(Fixity.class);
     assert outer instanceof TermCons;
     TermCons tc = (TermCons) outer;
     Production p = tc.production();

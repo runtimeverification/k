@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.kore.KORE.*;
@@ -57,9 +57,8 @@ public class SortInfo {
     joinOps
         .asMap()
         .forEach(
-            (sort, labels) -> {
-              info.closeOperators.put(sort, Iterators.getNext(labels.iterator(), null));
-            });
+            (sort, labels) ->
+                info.closeOperators.put(sort, Iterators.getNext(labels.iterator(), null)));
     return info;
   }
 }

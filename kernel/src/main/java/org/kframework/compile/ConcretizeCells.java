@@ -1,8 +1,12 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
+import java.util.stream.Stream;
+import org.kframework.attributes.Att;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
+import org.kframework.kore.K;
+import org.kframework.kore.KRewrite;
 
 /**
  * Apply the configuration concretization process. The implicit {@code <k>} cell is added by another
@@ -37,16 +41,6 @@ public class ConcretizeCells {
         .apply(input);
   }
 
-  public static Module transformModule(Module mod) {
-    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-    LabelInfo labelInfo = new LabelInfoFromModule(mod);
-    SortInfo sortInfo = SortInfo.fromModule(mod);
-    return ModuleTransformer.fromSentenceTransformer(
-            new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
-            "concretizing configuration")
-        .apply(mod);
-  }
-
   public ConcretizeCells(
       ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, Module module) {
     this.configurationInfo = configurationInfo;
@@ -60,6 +54,9 @@ public class ConcretizeCells {
   }
 
   public Sentence concretize(Module m, Sentence s) {
+    if (s instanceof Claim c && !hasCells(c.body())) {
+      return s;
+    }
     s = addRootCell.addImplicitCells(s, m);
     s = addParentCells.concretize(s);
     s = closeCells.close(s);
@@ -68,5 +65,21 @@ public class ConcretizeCells {
     s = sortCells.sortCells(s);
     s = sortCells.postprocess(s);
     return s;
+  }
+
+  public static boolean hasCells(K item) {
+    if (IncompleteCellUtils.flattenCells(item).stream()
+        .anyMatch(k -> k.att().get(Production.class).att().contains(Att.CELL()))) {
+      return true;
+    }
+
+    if (item instanceof KRewrite rew) {
+      return Stream.concat(
+              IncompleteCellUtils.flattenCells(rew.left()).stream(),
+              IncompleteCellUtils.flattenCells(rew.right()).stream())
+          .anyMatch(ConcretizeCells::hasCells);
+    }
+
+    return false;
   }
 }

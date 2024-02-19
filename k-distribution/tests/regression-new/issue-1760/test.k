@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module TEST-SYNTAX
 
   syntax TokKat ::= "ZERO"  [token]
@@ -18,9 +18,9 @@ module TEST
 // Boolean Algebra Part of KAT
 
   syntax Kat ::= Bool
-                | "notKat" Kat          [function, total, klabel(notKat_), symbol, smt-hook(not), group(boolOperation), latex(\neg_{\scriptstyle\it Kat}{#1}), hook(KAT.not)]
-                > Kat "andKat" Kat     [function, total, klabel(_andKat_), symbol, left, smt-hook(and), group(boolOperation), latex({#1}\wedge_{\scriptstyle\it Kat}{#2}), hook(KAT.and)]
-                | Kat "orKat" Kat      [function, total, klabel(_orKat_), left, smt-hook(or), group(boolOperation), latex({#1}\vee_{\scriptstyle\it Kat}{#2}), hook(KAT.or)]
+                | "notKat" Kat          [function, total, klabel(notKat_), symbol, smt-hook(not), group(boolOperation), hook(KAT.not)]
+                > Kat "andKat" Kat     [function, total, klabel(_andKat_), symbol, left, smt-hook(and), group(boolOperation), hook(KAT.and)]
+                | Kat "orKat" Kat      [function, total, klabel(_orKat_), left, smt-hook(or), group(boolOperation), hook(KAT.or)]
                 | Kat "=/=Kat" Kat     [function, total, klabel(_=/=Kat_), symbol, left, smt-hook(distinct), hook(KAT.ne)]
                 //| Kat "impliesKat" Kat [function, total, klabel(_impliesKat_), symbol, left, smt-hook(=>), group(boolOperation), hook(KAT.implies)]
 
@@ -66,19 +66,19 @@ module TEST
 /*
     syntax Kat ::= "(" Kat ")"         [bracket]
                  > left:
-                   Kat "Kat*"           [function, klabel(_starKat), symbol, left, smtlib(ka_star), latex({#1}\mathrel{\ast_{\scriptstyle\it Kat}}{#2}), hook(KAT.mul)]
+                   Kat "Kat*"           [function, klabel(_starKat), symbol, left, smtlib(ka_star), hook(KAT.mul)]
                  > left:
-                   Kat "Kat;" Kat       [function, klabel(_seqKat_), symbol, left, smtlib(ka_seq), latex({#1}\mathrel{+_{\scriptstyle\it Kat}}{#2}), hook(KAT.seq)]
+                   Kat "Kat;" Kat       [function, klabel(_seqKat_), symbol, left, smtlib(ka_seq), hook(KAT.seq)]
                  > left:
-                   Kat "Kat|" Kat       [function, klabel(_pllKat_), symbol, left, smtlib(ka_pll), latex({#1}\mathrel{|_{\scriptstyle\it Kat}}{#2}), hook(KAT.pll)]
+                   Kat "Kat|" Kat       [function, klabel(_pllKat_), symbol, left, smtlib(ka_pll), hook(KAT.pll)]
 
 */
 
     syntax Kat ::= "(" Kat ")"         [bracket]
                  > left:
-                   Kat "Kat*"           [function, klabel(_starKat), symbol, left, smtlib(ka_star), latex({#1}\mathrel{\ast_{\scriptstyle\it Kat}}{#2}), hook(KAT.mul)]
-                | Kat "Kat;" Kat       [function, klabel(_seqKat_), symbol, left, smtlib(ka_seq), latex({#1}\mathrel{+_{\scriptstyle\it Kat}}{#2}), hook(KAT.seq)]
-                | Kat "Kat|" Kat       [function, klabel(_pllKat_), symbol, left, smtlib(ka_pll), latex({#1}\mathrel{|_{\scriptstyle\it Kat}}{#2}), hook(KAT.pll)]
+                   Kat "Kat*"           [function, klabel(_starKat), symbol, left, smtlib(ka_star), hook(KAT.mul)]
+                | Kat "Kat;" Kat       [function, klabel(_seqKat_), symbol, left, smtlib(ka_seq), hook(KAT.seq)]
+                | Kat "Kat|" Kat       [function, klabel(_pllKat_), symbol, left, smtlib(ka_pll), hook(KAT.pll)]
 
 
      rule ONE Kat; B:Kat => B:Kat

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module CHECKSTRICTBOOLINCLUSION-SYNTAX
 // https://github.com/runtimeverification/k/issues/2564
 // imports BOOL

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.main;
 
 import com.beust.jcommander.ParameterException;
@@ -6,9 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.utils.ExitOnTimeoutThread;
 import org.kframework.utils.InterrupterRunnable;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -78,9 +76,5 @@ public abstract class FrontEnd {
       kem.print();
     }
     return retval;
-  }
-
-  public static void printBootError(String message) {
-    System.err.println(StringUtil.splitLines(KException.criticalError(message).toString()));
   }
 }

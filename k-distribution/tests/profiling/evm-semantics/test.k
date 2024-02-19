@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 module WORD
   imports public INT
@@ -3644,7 +3644,7 @@ module INT-SIMPLIFICATION
   imports public INT-SIMPLIFICATION-HASKELL
 endmodule
 
-module INT-SIMPLIFICATION-HASKELL [kore, symbolic]
+module INT-SIMPLIFICATION-HASKELL [symbolic]
   imports public INT-SIMPLIFICATION-COMMON
   rule A +Int B => B +Int A  [concrete(A), simplification(40), symbolic(B)]
   rule A +Int (B +Int C) => (A +Int B) +Int C  [simplification(40), symbolic(A, B)]
@@ -3750,7 +3750,7 @@ module INT-SIMPLIFICATION-COMMON
        [comm, simplification]
 endmodule
 
-module EVM-OPTIMIZATIONS-LEMMAS [kore, symbolic]
+module EVM-OPTIMIZATIONS-LEMMAS [symbolic]
   imports public EVM
   rule #sizeWordStack(WS           , N) => #sizeWordStack(WS, 0) +Int N requires N =/=Int 0                 [simplification]
   rule #sizeWordStack(WS [ I := _ ], N) => #sizeWordStack(WS, N)        requires I <Int #sizeWordStack(WS)  [simplification]
@@ -3758,7 +3758,7 @@ module EVM-OPTIMIZATIONS-LEMMAS [kore, symbolic]
   rule #sizeWordStack(_ , 0) <Int N     => false                        requires N <=Int 0                  [simplification]
 endmodule
 
-module EVM-OPTIMIZATIONS [kore]
+module EVM-OPTIMIZATIONS
   imports public EVM
   imports public EVM-OPTIMIZATIONS-LEMMAS
   imports public INT-SIMPLIFICATION

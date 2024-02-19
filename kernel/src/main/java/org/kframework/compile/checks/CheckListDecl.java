@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
@@ -21,7 +21,7 @@ import org.kframework.utils.errorsystem.KEMException;
 public class CheckListDecl {
 
   public static void check(Module m) {
-    m.getItems().stream().forEach(CheckListDecl::check); // i -> check(i)
+    m.getItems().forEach(CheckListDecl::check); // i -> check(i)
   }
 
   private static final Set<Sort> BASE_SORTS =

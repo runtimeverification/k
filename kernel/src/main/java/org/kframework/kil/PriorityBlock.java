@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import com.google.common.collect.Lists;
@@ -29,10 +29,6 @@ public class PriorityBlock extends ASTNode {
 
   public String getAssoc() {
     return assoc;
-  }
-
-  public void setAssoc(String assoc) {
-    this.assoc = assoc;
   }
 
   public PriorityBlock() {

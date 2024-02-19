@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.attributes.Location;
@@ -11,13 +11,5 @@ public abstract class ModuleItem extends ASTNode {
 
   public ModuleItem(Location loc, Source source) {
     super(loc, source);
-  }
-
-  public java.util.List<String> getLabels() {
-    return null;
-  }
-
-  public java.util.List<String> getKLabels() {
-    return null;
   }
 }

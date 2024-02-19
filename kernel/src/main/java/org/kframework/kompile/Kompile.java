@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kompile;
 
 import static org.kframework.Collections.*;
@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckAssoc;
 import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckConfigurationCells;
+import org.kframework.compile.checks.CheckDeprecated;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckK;
@@ -53,7 +53,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
@@ -67,8 +66,6 @@ import org.kframework.utils.RunProcess;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -201,7 +198,6 @@ public class Kompile {
    * @param definitionFile
    * @param mainModuleName
    * @param mainProgramsModuleName
-   * @param programStartSymbol
    * @return
    */
   public CompiledDefinition run(
@@ -244,13 +240,7 @@ public class Kompile {
     ConfigurationInfoFromModule configInfo =
         new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-    boolean isKast = excludedModuleTags.contains(Att.KORE());
-    Sort rootCell;
-    if (isKast) {
-      rootCell = configInfo.getRootCell();
-    } else {
-      rootCell = Sorts.GeneratedTopCell();
-    }
+    Sort rootCell = Sorts.GeneratedTopCell();
     CompiledDefinition def =
         new CompiledDefinition(
             kompileOptions,
@@ -260,7 +250,6 @@ public class Kompile {
             parsedDef,
             kompiledDefinition,
             files,
-            kem,
             configInfo.getDefaultCell(rootCell).klabel());
 
     if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
@@ -271,7 +260,7 @@ public class Kompile {
         File linkFile = files.resolveKompiled("parser_PGM");
         new KRead(kem, files, InputModes.PROGRAM, globalOptions)
             .createBisonParser(
-                def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(),
+                def.programParsingModuleFor(def.mainSyntaxModuleName()).get(),
                 def.programStartSymbol,
                 outputFile,
                 kompileOptions.genGlrBisonParser,
@@ -297,7 +286,7 @@ public class Kompile {
             }
             String name = part[0];
             String module = part[1];
-            Option<Module> mod = def.programParsingModuleFor(module, kem);
+            Option<Module> mod = def.programParsingModuleFor(module);
             if (!mod.isDefined()) {
               throw KEMException.compilerError(
                   "Could not find module referenced by parser attribute: " + module, prod);
@@ -462,16 +451,6 @@ public class Kompile {
     return excludeModules.andThen(walkModules);
   }
 
-  public static Sentence removePolyKLabels(Sentence s) {
-    if (s instanceof Production p) {
-      if (!p.isSyntacticSubsort() && p.params().nonEmpty()) {
-        p = p.substitute(immutable(Collections.nCopies(p.params().size(), Sorts.K())));
-        return Production(p.klabel().map(KLabel::head), Seq(), p.sort(), p.items(), p.att());
-      }
-    }
-    return s;
-  }
-
   public static Module subsortKItem(Module module) {
     java.util.Set<Sentence> prods = new HashSet<>();
     for (Sort srt : iterable(module.allSorts())) {
@@ -529,43 +508,6 @@ public class Kompile {
   }
 
   // Extra checks just for the prover specification.
-  public Module proverChecks(Module specModule, Module mainDefModule) {
-    // check rogue syntax in spec module
-    Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
-    for (Sentence s : toCheck)
-      if (s.isSyntax() && !s.att().contains(Att.TOKEN()))
-        kem.registerCompilerWarning(
-            ExceptionType.FUTURE_ERROR,
-            errors,
-            "Found syntax declaration in proof module. This will not be visible from the main"
-                + " module.",
-            s);
-
-    // TODO: remove once transition to claim rules is done
-    // transform rules into claims if
-    // - they are in the spec modules but not in the definition modules
-    // - they don't contain the `simplification` attribute
-    ModuleTransformer mt =
-        ModuleTransformer.fromSentenceTransformer(
-            (m, s) -> {
-              if (m.name().equals(mainDefModule.name())
-                  || mainDefModule.importedModuleNames().contains(m.name())) return s;
-              if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION())) {
-                kem.registerCompilerWarning(
-                    KException.ExceptionType.FUTURE_ERROR,
-                    errors,
-                    "Deprecated: use claim instead of rule to specify proof objectives.",
-                    s);
-                return new Claim(
-                    ((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att());
-              }
-              return s;
-            },
-            "rules to claim");
-    return mt.apply(specModule);
-  }
-
-  // Extra checks just for the prover specification.
   public void proverChecksX(Module specModule, Module mainDefModule) {
     // check rogue syntax in spec module
     Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
@@ -603,24 +545,15 @@ public class Kompile {
       Set<Att.Key> excludedModuleTags) {
     checkAnywhereRules(modules);
     boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
-    boolean isKast = excludedModuleTags.contains(Att.KORE());
     CheckRHSVariables checkRHSVariables =
         new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
     stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-    stream(modules)
-        .forEach(
-            m -> {
-              CheckAtt checkAtt = new CheckAtt(errors, kem, m, isSymbolic && isKast);
-              checkAtt.checkUnrecognizedModuleAtts();
-              stream(m.localSentences()).forEach(checkAtt::check);
-            });
+    stream(modules).forEach(m -> new CheckAtt(errors, kem, m).check());
 
     stream(modules)
         .forEach(
-            m ->
-                stream(m.localSentences())
-                    .forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
+            m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
 
     stream(modules)
         .forEach(
@@ -635,10 +568,8 @@ public class Kompile {
     stream(modules)
         .forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
-    if (!(isSymbolic && isKast)) { // if it's not the java backend
-      stream(modules)
-          .forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
-    }
+    stream(modules)
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
 
     stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
 
@@ -646,8 +577,7 @@ public class Kompile {
         .forEach(m -> stream(m.localSentences()).forEach(new CheckFunctions(errors, m)::check));
 
     stream(modules)
-        .forEach(
-            m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, kem)::check));
 
     stream(modules)
         .forEach(
@@ -655,6 +585,9 @@ public class Kompile {
 
     stream(modules)
         .forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
+
+    stream(modules)
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckDeprecated(errors, kem)::check));
 
     Set<String> moduleNames = new HashSet<>();
     stream(modules)
@@ -736,7 +669,6 @@ public class Kompile {
                     m.productionsForSort()
                         .getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
         .collect(Collectors.toSet())
-        .stream()
         .forEach(
             prod -> {
               Seq<ProductionItem> items = prod.items();

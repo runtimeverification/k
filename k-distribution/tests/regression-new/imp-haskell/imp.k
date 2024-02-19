@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
@@ -8,7 +8,7 @@ module IMP-SYNTAX
                  | "(" AExp ")"               [bracket]
                  > AExp "+" AExp              [left, seqstrict]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
+                 | AExp "<=" AExp             [seqstrict]
                  | "!" BExp                   [strict]
                  | "(" BExp ")"               [bracket]
                  > BExp "&&" BExp             [left, strict(1)]

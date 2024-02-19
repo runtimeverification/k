@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.outer;
 
 import org.junit.Assert;
@@ -68,14 +68,14 @@ public class MDsourceTest {
   public void test2() {
     String selectExp = "k|";
     KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-    ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(kem, selectExp);
+    new ExtractFencedKCodeFromMarkdown(kem, selectExp);
   }
 
   @Test(expected = KEMException.class)
   public void test3() {
     String selectExp = "k|a b";
     KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-    ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(kem, selectExp);
+    new ExtractFencedKCodeFromMarkdown(kem, selectExp);
   }
 
   @Test

@@ -16,7 +16,6 @@ import org.kframework.kompile.Kompile;
 /** TextDocumentService implementation for K. */
 public class KTextDocumentService implements TextDocumentService {
 
-  private final KLanguageServer languageServer;
   private final LSClientLogger clientLogger;
 
   public final TextDocumentSyncHandler memo;
@@ -41,7 +40,6 @@ public class KTextDocumentService implements TextDocumentService {
   }
 
   public KTextDocumentService(KLanguageServer languageServer) throws URISyntaxException {
-    this.languageServer = languageServer;
     this.clientLogger = LSClientLogger.getInstance();
     memo = new TextDocumentSyncHandler(clientLogger, languageServer);
     memo.add(domains.toString());

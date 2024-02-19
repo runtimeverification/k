@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 K Language Features
@@ -88,7 +88,6 @@ module KAST
 
   syntax KList ::= K
                  | ".KList"          [klabel(#EmptyKList), symbol]
-                 | ".::KList"        [klabel(#EmptyKList), symbol]
                  | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), symbol, prefer]
 endmodule
 
@@ -99,7 +98,6 @@ module KSEQ
   imports K-TOP-SORT
   syntax K ::= ".K"      [klabel(#EmptyK), symbol, unparseAvoid]
              | "."       [klabel(#EmptyK), symbol]
-             | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
   syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, group(defaultBracket), applyPriority(1)]
@@ -140,28 +138,26 @@ module ML-SYNTAX [not-lr1]
 
   syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, group(mlUnary)]
                        | "#Bottom" [klabel(#Bottom), symbol, group(mlUnary)]
-                       | "#True" [klabel(#Top), symbol, group(mlUnary), unparseAvoid]
-                       | "#False" [klabel(#Bottom), symbol, group(mlUnary), unparseAvoid]
-                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary)]
+                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary, mlOp)]
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary)]
-                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary)]
-                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary, mlOp)]
+                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary, mlOp)]
+                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals, mlOp), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
 
   syntax priorities mlUnary > mlEquals > mlAnd
 
-  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd), format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies), format(%i%1%d%n%2%n%i%3%d)]
+  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd, mlOp), format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, group(mlOp), format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies, mlOp), format(%i%1%d%n%2%n%i%3%d)]
 
   syntax priorities mlImplies > mlQuantifier
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier)]
-                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
+                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
 
-  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp]
-                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp]
-                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp, group(mlOp)]
+                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, group(mlOp)]
+                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp, group(mlOp)]
 endmodule
 ```
 
@@ -213,7 +209,6 @@ module KSEQ-SYMBOLIC
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\$)([A-Z][A-Za-z0-9'_]*)"            [token]
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
-  syntax KLabel     ::= #KVariable
 endmodule
 ```
 
@@ -350,10 +345,8 @@ module REQUIRES-ENSURES
 
   syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
                         | #RuleBody "requires" Bool                 [klabel("#ruleRequires"), symbol]
-                        | #RuleBody "when" Bool                     [klabel("#ruleRequires"), symbol]
                         | #RuleBody "ensures"  Bool                 [klabel("#ruleEnsures"), symbol]
                         | #RuleBody "requires" Bool "ensures" Bool  [klabel("#ruleRequiresEnsures"), symbol]
-                        | #RuleBody "when" Bool "ensures" Bool      [klabel("#ruleRequiresEnsures"), symbol]
 endmodule
 ```
 
@@ -387,7 +380,7 @@ module AUTO-CASTS
   // generates, for all sorts, productions of the form:
   // Sort  ::= Sort ":Sort"  // semantic cast - force the inner term to be `Sort` or a subsort
   // Sort  ::= Sort "::Sort" // strict cast - force the inner term to be exactly `Sort`. Useful for disambiguation
-  // Sort ::= "{" Sort "}" "<:Sort" // synonym for strict cast
+  // Sort ::= "{" Sort "}" "::Sort" // synonym for strict cast
   // Sort  ::= "{" K "}"    ":>Sort" // projection cast. Allows any term to be placed in a context that expects `Sort`
   // this is part of the mechanism that allows concrete user syntax in K
 endmodule
@@ -553,7 +546,7 @@ regular K rules to disambiguate as necessary.
 ```k
 module K-AMBIGUITIES
 
-  syntax {Sort} Sort ::= amb(Sort, Sort) [symbol]
+  syntax {Sort} Sort ::= amb(Sort, Sort) [klabel(amb), symbol]
 
 endmodule
 ```
@@ -573,7 +566,7 @@ module K-LOCATIONS
   imports INT-SYNTAX
 
   // filename, startLine, startCol, endLine, endCol
-  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [symbol, format(%3)]
+  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [klabel(#location), symbol, format(%3)]
 
 endmodule
 ```

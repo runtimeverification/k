@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.kprove;
 
@@ -35,8 +35,6 @@ public class KProveOptions {
   @ParametersDelegate public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
   @ParametersDelegate public InnerParsingOptions innerParsing = new InnerParsingOptions();
-
-  private File specFile;
 
   public synchronized File specFile(FileUtil files) {
     return outerParsing.mainDefinitionFile(files);
@@ -109,4 +107,10 @@ public class KProveOptions {
       descriptionKey = "file",
       description = "If set, emit the JSON serialization of the spec module to the specified file.")
   public String emitJsonSpec = null;
+
+  @Parameter(
+      names = "--allow-func-claims",
+      description = "Allow functional claims to be printed in kore format. Use with --dry-run.",
+      hidden = true)
+  public boolean allowFuncClaims = false;
 }

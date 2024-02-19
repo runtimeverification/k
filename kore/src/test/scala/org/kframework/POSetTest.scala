@@ -1,10 +1,9 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework
 
-import org.kframework.utils.errorsystem.KEMException
-
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
+import org.kframework.utils.errorsystem.KEMException
 
 class POSetTest {
   case class Bar(x: Int)
@@ -39,18 +38,18 @@ class POSetTest {
   }
 
   @Test def lub() {
-    assertEquals(Some(b2), POSet(b1 -> b2).lub)
-    assertEquals(Some(b3), POSet(b1 -> b3, b2 -> b3).lub)
-    assertEquals(Some(b4), POSet(b1 -> b3, b2 -> b3, b3 -> b4).lub)
-    assertEquals(None, POSet(b1 -> b2, b2 -> b3, b4 -> b5).lub)
-    assertEquals(None, POSet(b1 -> b2, b2 -> b3, b2 -> b4).lub)
+    assertEquals(Some(b2), POSet(b1 -> b2).maximum)
+    assertEquals(Some(b3), POSet(b1 -> b3, b2 -> b3).maximum)
+    assertEquals(Some(b4), POSet(b1 -> b3, b2 -> b3, b3 -> b4).maximum)
+    assertEquals(None, POSet(b1 -> b2, b2 -> b3, b4 -> b5).maximum)
+    assertEquals(None, POSet(b1 -> b2, b2 -> b3, b2 -> b4).maximum)
   }
 
   @Test def glb() {
-    assertEquals(Some(b2), POSet(b2 -> b1).glb)
-    assertEquals(Some(b3), POSet(b3 -> b1, b3 -> b2).glb)
-    assertEquals(Some(b4), POSet(b3 -> b1, b3 -> b2, b4 -> b3).glb)
-    assertEquals(None, POSet(b2 -> b1, b3 -> b2, b5 -> b4).glb)
-    assertEquals(None, POSet(b2 -> b1, b3 -> b2, b4 -> b2).glb)
+    assertEquals(Some(b2), POSet(b2 -> b1).minimum)
+    assertEquals(Some(b3), POSet(b3 -> b1, b3 -> b2).minimum)
+    assertEquals(Some(b4), POSet(b3 -> b1, b3 -> b2, b4 -> b3).minimum)
+    assertEquals(None, POSet(b2 -> b1, b3 -> b2, b5 -> b4).minimum)
+    assertEquals(None, POSet(b2 -> b1, b3 -> b2, b4 -> b2).minimum)
   }
 }

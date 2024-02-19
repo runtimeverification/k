@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import static org.kframework.kore.KORE.*;
@@ -29,7 +29,7 @@ public class ComputeUnboundVariables extends RewriteAwareVisitor {
       Set<KEMException> errors,
       Set<KVariable> vars,
       Consumer<KVariable> reporter) {
-    super(isBody, errors);
+    super(isBody);
     this.lambda = lambda;
     this.vars = vars;
     this.reporter = reporter;

@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 Rational Numbers in K
@@ -100,7 +100,7 @@ module RAT-COMMON
   syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
 endmodule
 
-module RAT-SYMBOLIC [symbolic, kore]
+module RAT-SYMBOLIC [symbolic]
   imports private RAT-COMMON
   imports ML-SYNTAX
   imports private BOOL
@@ -112,7 +112,7 @@ module RAT-SYMBOLIC [symbolic, kore]
   [simplification]
 endmodule
 
-module RAT-KORE [kore]
+module RAT-KORE
   imports private RAT-COMMON
   imports private K-EQUAL
 

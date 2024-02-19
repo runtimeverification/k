@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 require "def.k"
 
 // X = Y-1, `mid Y => end incPos(Y)` - Function in pattern RHS.

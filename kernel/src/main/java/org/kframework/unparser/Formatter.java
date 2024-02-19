@@ -1,8 +1,7 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.unparser;
 
-import static org.fusesource.jansi.Ansi.*;
 import static org.kframework.Collections.*;
 
 import org.kframework.attributes.Att;

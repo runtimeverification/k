@@ -1,9 +1,16 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.attributes
 
-case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) extends Comparable[Location] with AttValue {
+case class Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int)
+    extends Comparable[Location]
+    with AttValue {
   import scala.math.Ordered.orderingToOrdered
-  def compareTo(that: Location): Int = (startLine, startColumn, endLine, endColumn) compare (that.startLine, that.startColumn, that.endLine, that.endColumn)
+  def compareTo(that: Location): Int = (startLine, startColumn, endLine, endColumn).compare(
+    that.startLine,
+    that.startColumn,
+    that.endLine,
+    that.endColumn
+  )
 }
 
 case class Source(source: String) extends Comparable[Source] with AttValue {

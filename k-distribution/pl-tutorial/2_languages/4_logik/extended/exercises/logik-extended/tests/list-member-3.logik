@@ -1,5 +1,0 @@
-member(X, [X|_]).
-member(X, [_|T]) :- member(X,T).
-
-// Next has 2 solutions
-?- member([3,X], [[1,a],[2,b],[3,c],[4,d],[3,e]]).

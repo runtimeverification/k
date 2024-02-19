@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -15,12 +15,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -40,7 +38,6 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
-import scala.Tuple2;
 
 public class AddSortInjections {
 
@@ -174,7 +171,6 @@ public class AddSortInjections {
                   adjustedExpectedSort = k.att().get(Sort.class);
                 }
                 Production prod = production(k);
-                List<K> children = new ArrayList<>();
                 Production substituted =
                     substituteProd(
                         prod,
@@ -204,13 +200,6 @@ public class AddSortInjections {
           KList(visitChildren(term, actualSort, expectedSort)),
           Att.empty().add(Sort.class, expectedSort));
     }
-  }
-
-  private Context addInjections(Context context) {
-    return new Context(
-        internalAddSortInjections(context.body(), Sorts.K()),
-        internalAddSortInjections(context.requires(), Sorts.Bool()),
-        context.att());
   }
 
   private void initSortParams() {
@@ -355,14 +344,6 @@ public class AddSortInjections {
     }
   }
 
-  private Set<Integer> getPositions(Sort param, Production prod) {
-    return IntStream.range(0, prod.nonterminals().size())
-        .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
-        .filter(t -> t._1().sort().equals(param))
-        .map(t -> t._2())
-        .collect(Collectors.toSet());
-  }
-
   /**
    * Compute the sort of a term in a context where there is no expected sort, i.e., at the top of a
    * rule body.
@@ -483,9 +464,6 @@ public class AddSortInjections {
   }
 
   private Production production(KApply term) {
-    if (term.klabel() instanceof KVariable) {
-      throw KEMException.internalError("KORE does not yet support KLabel variables.", term);
-    }
     Option<scala.collection.Set<Production>> prods = mod.productionsFor().get(term.klabel().head());
     if (prods.isEmpty()) {
       throw KEMException.compilerError(
@@ -503,16 +481,14 @@ public class AddSortInjections {
     assert !entries.isEmpty();
     entries = new HashSet<>(entries);
     Collection<Sort> filteredEntries =
-        entries.stream()
-            .filter(s -> s != null && !s.name().equals(SORTPARAM_NAME))
-            .collect(Collectors.toList());
+        entries.stream().filter(s -> s != null && !s.name().equals(SORTPARAM_NAME)).toList();
     if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
       return entries.iterator().next();
     }
 
     Set<Sort> nonParametric =
         filteredEntries.stream().filter(s -> s.params().isEmpty()).collect(Collectors.toSet());
-    Set<Sort> bounds = mutable(mod.subsorts().upperBounds(immutable(nonParametric)));
+    Set<Sort> bounds = mod.subsorts().upperBounds(nonParametric);
     // Anything less than KBott or greater than K is a syntactic sort from kast.md which should not
     // be considered
     bounds.removeIf(

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kore;
 
 import java.util.Arrays;
@@ -71,9 +71,5 @@ public class AttCompare {
   @Override
   public int hashCode() {
     return k.hashCode();
-  }
-
-  public K get() {
-    return k;
   }
 }

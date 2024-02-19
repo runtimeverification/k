@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.kernel;
 
 import static org.kframework.Collections.*;
@@ -153,7 +153,7 @@ public class Scanner implements AutoCloseable {
     List<TerminalLike> ordered =
         tokens.keySet().stream()
             .sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2())
-            .collect(Collectors.toList());
+            .toList();
     for (TerminalLike key : ordered) {
       if (key instanceof Terminal t) {
         flex.append(StringUtil.enquoteCString(t.value()));

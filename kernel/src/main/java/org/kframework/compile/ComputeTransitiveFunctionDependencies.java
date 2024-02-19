@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -6,7 +6,6 @@ import static org.kframework.Collections.*;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -97,10 +96,6 @@ public class ComputeTransitiveFunctionDependencies {
       }
     }
     return visited;
-  }
-
-  public Set<KLabel> ancestors(KLabel label) {
-    return ancestors(Collections.singleton(label), dependencies);
   }
 
   public Set<KLabel> ancestors(Set<KLabel> labels) {

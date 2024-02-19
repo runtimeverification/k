@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.compile;
 
@@ -60,10 +60,7 @@ public class AddParentCells {
     List<K> children =
         allChildren.stream().filter(t -> !(t instanceof KRewrite)).collect(Collectors.toList());
     List<KRewrite> rewrites =
-        allChildren.stream()
-            .filter(t -> t instanceof KRewrite)
-            .map(t -> (KRewrite) t)
-            .collect(Collectors.toList());
+        allChildren.stream().filter(t -> t instanceof KRewrite).map(t -> (KRewrite) t).toList();
 
     // see if all children can fit together
     Set<Sort> usedCells = Sets.newHashSet();
@@ -200,10 +197,10 @@ public class AddParentCells {
       Optional<Integer> level = Optional.empty();
       for (K item : cells) {
         Optional<Integer> level2 = getLevel(item);
-        if (item instanceof KVariable && !level2.isPresent()) {
+        if (item instanceof KVariable && level2.isEmpty()) {
           continue;
         }
-        if (!level.isPresent()) {
+        if (level.isEmpty()) {
           level = level2;
         } else if (!level.equals(level2)) {
           throw KEMException.criticalError("Can't mix cells at different levels under a rewrite");
@@ -247,10 +244,10 @@ public class AddParentCells {
     } else {
       Optional<KLabel> leftParent = getParent(((KRewrite) k).left());
       Optional<KLabel> rightParent = getParent(((KRewrite) k).right());
-      if (!leftParent.isPresent()) {
+      if (leftParent.isEmpty()) {
         return rightParent;
       }
-      if (!rightParent.isPresent()) {
+      if (rightParent.isEmpty()) {
         return leftParent;
       }
       if (leftParent.equals(rightParent)) {

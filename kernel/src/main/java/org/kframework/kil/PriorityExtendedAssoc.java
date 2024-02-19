@@ -1,10 +1,10 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.definition.Tag;
 
 /**
- * An associativity declaration, one of {@code syntax left}, {@code syntax right}, or {@ code syntax
+ * An associativity declaration, one of {@code syntax left}, {@code syntax right}, or {@code syntax
  * non-assoc}.
  */
 public class PriorityExtendedAssoc extends ModuleItem {
@@ -18,16 +18,8 @@ public class PriorityExtendedAssoc extends ModuleItem {
     return assoc;
   }
 
-  public void setAssoc(String assoc) {
-    this.assoc = assoc;
-  }
-
   public java.util.List<Tag> getTags() {
     return tags;
-  }
-
-  public void setTags(java.util.List<Tag> tags) {
-    this.tags = tags;
   }
 
   public PriorityExtendedAssoc(String assoc, java.util.List<Tag> tags) {

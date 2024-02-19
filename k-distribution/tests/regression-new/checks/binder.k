@@ -1,12 +1,10 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 require "substitution.md"
 
 module BINDER
   imports KVAR
 
   syntax Error ::= foo() [binder]
-
-  syntax Error ::= foo(KVar, Error) [binder(1 -> 2)]
 
   syntax Error ::= foo(Error, Error) [binder]
 

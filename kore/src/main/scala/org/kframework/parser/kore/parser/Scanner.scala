@@ -1,35 +1,40 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
-/** A scanner of an input stream.
-  *
-  * Should be initialized by [[init]] before use,
-  * and closed by [[close]] after use.
-  *
-  * @constructor Creates a new scanner.
-  */
+/**
+ * A scanner of an input stream.
+ *
+ * Should be initialized by [[init]] before use, and closed by [[close]] after use.
+ *
+ * @constructor
+ *   Creates a new scanner.
+ */
 class Scanner {
 
-  private var stream: io.Source = _
+  private var stream: io.Source       = _
   private var lines: Iterator[String] = _
-  private var input: Iterator[Char] = _
+  private var input: Iterator[Char]   = _
+
   /** The string of the line that this scanner currently reads. */
   var line: String = _
+
   /** The line number of the current line. */
   var lineNum: Int = _
+
   /** The column position of this scanner in the line. */
   var columnNum: Int = _
 
-  /** Initializes this scanner.
-    *
-    * @param src The stream to associate with this scanner.
-    */
+  /**
+   * Initializes this scanner.
+   *
+   * @param src
+   *   The stream to associate with this scanner.
+   */
   def init(src: io.Source, firstLine: Integer): Unit = {
     stream = src
     lines = stream.getLines()
-    for (i <- 0 until firstLine) {
+    for (i <- 0 until firstLine)
       lines.next()
-    }
     line = ""
     lineNum = 0
     columnNum = 0
@@ -37,12 +42,11 @@ class Scanner {
   }
 
   /** Closes the stream associated with this scanner. */
-  def close(): Unit = {
+  def close(): Unit =
     stream.close()
-  }
 
   @throws(classOf[java.io.EOFException])
-  private def readLine(): Unit = {
+  private def readLine(): Unit =
     if (lines.hasNext) {
       line = lines.next() // each line doesn't contain newline characters
       input = line.iterator
@@ -52,14 +56,13 @@ class Scanner {
       // end of file
       throw new java.io.EOFException()
     }
-  }
 
   private var lookahead: Option[Char] = None
-  private var yieldEOL: Boolean = false
+  private var yieldEOL: Boolean       = false
 
-  /** Returns the next character from the stream.
-    * Returns '\n' when a newline is encountered.
-    */
+  /**
+   * Returns the next character from the stream. Returns '\n' when a newline is encountered.
+   */
   @throws(classOf[java.io.EOFException])
   def next(): Char = {
     columnNum += 1
@@ -82,10 +85,11 @@ class Scanner {
     }
   }
 
-  /** Puts back the character into the stream.
-    *
-    * Cannot put other characters until the inserted character has been read by [[next]].
-    */
+  /**
+   * Puts back the character into the stream.
+   *
+   * Cannot put other characters until the inserted character has been read by [[next]].
+   */
   def putback(c: Char): Unit = {
     columnNum -= 1
     lookahead match {
@@ -95,22 +99,22 @@ class Scanner {
     }
   }
 
-  /** Consumes the whitespace characters until a non-whitespace character is met.
-    */
+  /**
+   * Consumes the whitespace characters until a non-whitespace character is met.
+   */
   @throws(classOf[java.io.EOFException])
-  def skipWhitespaces(): Unit = {
+  def skipWhitespaces(): Unit =
     next() match {
       case ' ' | '\n' => skipWhitespaces()
-      case '\t' => columnNum += 3; skipWhitespaces()
-      case '\r' => ??? // skipWhitespaces() // shouldn't be reachable.
-      case '/' => skipComments(); skipWhitespaces()
-      case c => putback(c)
+      case '\t'       => columnNum += 3; skipWhitespaces()
+      case '\r'       => ??? // skipWhitespaces() // shouldn't be reachable.
+      case '/'        => skipComments(); skipWhitespaces()
+      case c          => putback(c)
     }
-  }
 
   /**
-    * Consumes a comment
-    */
+   * Consumes a comment
+   */
   @throws(classOf[java.io.IOException])
   def skipComments(): Unit = {
     next() match {
@@ -121,34 +125,31 @@ class Scanner {
       case c => throw new ParseError("Invalid comments. Expect '/' or '*'")
     }
 
-    def skipLineComment(): Unit = {
+    def skipLineComment(): Unit =
       next() match {
         case '\n' => ;
-        case c => skipLineComment()
+        case c    => skipLineComment()
       }
-    }
 
     /**
-      * Skip all until seeing STAR(*) SLASH(/)
-      */
-    def skipBlockComment(): Unit = {
+     * Skip all until seeing STAR(*) SLASH(/)
+     */
+    def skipBlockComment(): Unit =
       next() match {
         case '*' =>
           skipBlockCommentAfterStar()
         case c => skipBlockComment()
       }
-    }
 
     /**
-      * Have seen a STAR(*)
-      */
-    def skipBlockCommentAfterStar(): Unit = {
+     * Have seen a STAR(*)
+     */
+    def skipBlockCommentAfterStar(): Unit =
       next() match {
         case '/' => ;
         case '*' => skipBlockCommentAfterStar()
-        case c => skipBlockComment()
+        case c   => skipBlockComment()
       }
-    }
   }
 
   /** Returns the next non-whitespace character. */
@@ -157,20 +158,19 @@ class Scanner {
     next()
   }
 
-  /** Checks if EOF is reached.
-    *
-    * Side effect
-    * Consumes the whitespace characters until either a non-whitespace character or EOF is met.
-    */
-  def isEOF(): Boolean = {
+  /**
+   * Checks if EOF is reached.
+   *
+   * Side effect Consumes the whitespace characters until either a non-whitespace character or EOF
+   * is met.
+   */
+  def isEOF(): Boolean =
     try {
       putback(nextWithSkippingWhitespaces())
       false
     } catch {
       case _: java.io.EOFException => true
-      case _: Throwable => ??? // shouldn't be reachable
+      case _: Throwable            => ??? // shouldn't be reachable
     }
-  }
 
 }
-

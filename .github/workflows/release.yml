@@ -102,7 +102,7 @@ jobs:
         with:
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
@@ -179,6 +179,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Mac Dependencies
+        run: |
+          # Via: https://github.com/ledger/ledger/commit/1eec9f86667cad3b0bbafb82a83739a0d30ca09f
+          # Unlink and re-link to prevent errors when github mac runner images
+          # install python outside of brew, for example:
+          # https://github.com/orgs/Homebrew/discussions/3895
+          # https://github.com/actions/setup-python/issues/577
+          # https://github.com/actions/runner-images/issues/6459
+          # https://github.com/actions/runner-images/issues/6507
+          # https://github.com/actions/runner-images/issues/2322
+          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
+
       - name: Build brew bottle
         id: build
         env:
@@ -254,6 +266,18 @@ jobs:
         with:
           name: homebrew
           path: homebrew-k-old
+
+      - name: Mac Dependencies
+        run: |
+          # Via: https://github.com/ledger/ledger/commit/1eec9f86667cad3b0bbafb82a83739a0d30ca09f
+          # Unlink and re-link to prevent errors when github mac runner images
+          # install python outside of brew, for example:
+          # https://github.com/orgs/Homebrew/discussions/3895
+          # https://github.com/actions/setup-python/issues/577
+          # https://github.com/actions/runner-images/issues/6459
+          # https://github.com/actions/runner-images/issues/6507
+          # https://github.com/actions/runner-images/issues/2322
+          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
 
       - name: 'Test brew bottle'
         id: test
@@ -349,7 +373,7 @@ jobs:
           tag: k-release-ci-${{ github.sha }}
           os: ubuntu
           distro: jammy
-          llvm: 14
+          llvm: 15
 
       - name: 'Push Maven Packages'
         shell: bash {0}
@@ -412,6 +436,12 @@ jobs:
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           fetch-depth: 0
+      - name: 'Checkout PL Tutorial code'
+        uses: actions/checkout@v3
+        with:
+          repository: runtimeverification/pl-tutorial
+          path: gh-pages/k-distribution/pl-tutorial
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
       - working-directory: gh-pages
         run: |
           git config --global user.name rv-jenkins

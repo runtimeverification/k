@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.json;
 
 import static org.kframework.Collections.*;
@@ -47,39 +47,37 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.collection.JavaConverters;
-import scala.util.Either;
 
 /** Parses a Json term into the KORE data structures. */
 public class JsonParser {
 
-  public static final String INJECTEDKLABEL = "InjectedKLabel",
-      KAPPLY = "KApply",
-      KAS = "KAs",
-      KATT = "KAtt",
-      KBUBBLE = "KBubble",
-      KCONFIGURATION = "KConfiguration",
-      KCONTEXT = "KContext",
-      KDEFINITION = "KDefinition",
-      KNONTERMINAL = "KNonTerminal",
-      KMODULE = "KModule",
-      KFLATMODULE = "KFlatModule",
-      KFLATMODULELIST = "KFlatModuleList",
-      KIMPORT = "KImport",
-      KPRODUCTION = "KProduction",
-      KREGEXTERMINAL = "KRegexTerminal",
-      KREWRITE = "KRewrite",
-      KRULE = "KRule",
-      KCLAIM = "KClaim",
-      KSEQUENCE = "KSequence",
-      KSORT = "KSort",
-      KSORTSYNONYM = "KSortSynonym",
-      KSYNTAXLEXICAL = "KSyntaxLexical",
-      KSYNTAXASSOCIATIVITY = "KSyntaxAssociativity",
-      KSYNTAXPRIORITY = "KSyntaxPriority",
-      KSYNTAXSORT = "KSyntaxSort",
-      KTERMINAL = "KTerminal",
-      KTOKEN = "KToken",
-      KVARIABLE = "KVariable";
+  public static final String INJECTEDKLABEL = "InjectedKLabel";
+  public static final String KAPPLY = "KApply";
+  public static final String KAS = "KAs";
+  public static final String KATT = "KAtt";
+  public static final String KBUBBLE = "KBubble";
+  public static final String KCONFIGURATION = "KConfiguration";
+  public static final String KCONTEXT = "KContext";
+  public static final String KDEFINITION = "KDefinition";
+  public static final String KNONTERMINAL = "KNonTerminal";
+  public static final String KFLATMODULE = "KFlatModule";
+  public static final String KFLATMODULELIST = "KFlatModuleList";
+  public static final String KIMPORT = "KImport";
+  public static final String KPRODUCTION = "KProduction";
+  public static final String KREGEXTERMINAL = "KRegexTerminal";
+  public static final String KREWRITE = "KRewrite";
+  public static final String KRULE = "KRule";
+  public static final String KCLAIM = "KClaim";
+  public static final String KSEQUENCE = "KSequence";
+  public static final String KSORT = "KSort";
+  public static final String KSORTSYNONYM = "KSortSynonym";
+  public static final String KSYNTAXLEXICAL = "KSyntaxLexical";
+  public static final String KSYNTAXASSOCIATIVITY = "KSyntaxAssociativity";
+  public static final String KSYNTAXPRIORITY = "KSyntaxPriority";
+  public static final String KSYNTAXSORT = "KSyntaxSort";
+  public static final String KTERMINAL = "KTerminal";
+  public static final String KTOKEN = "KToken";
+  public static final String KVARIABLE = "KVariable";
 
   /////////////////////////////
   // Parsing Definition Json //
@@ -150,7 +148,7 @@ public class JsonParser {
   // Parsing Module Json //
   /////////////////////////
 
-  public static FlatModule toFlatModule(JsonObject data) throws IOException {
+  public static FlatModule toFlatModule(JsonObject data) {
     if (!data.getString("node").equals(KFLATMODULE))
       throw KEMException.criticalError(
           "Unexpected node found in KAST Json term: " + data.getString("node"));
@@ -358,21 +356,11 @@ public class JsonParser {
                             "Unrecognized attribute "
                                 + key
                                 + " found in KAST Json term when unparsing KATT: "
-                                + attMap
-                                + "\n"
-                                + "Hint: User-defined groups can be added with the group(_)"
-                                + " attribute."));
+                                + attMap));
         newAtt = newAtt.add(attKey, attMap.getString(key));
       }
     }
-    Either<String, Att> newAttOrError = newAtt.withGroupAttAsUserGroups();
-    if (newAttOrError.isLeft()) {
-      throw KEMException.criticalError(
-          newAttOrError.left().get()
-              + "\nOccurred in KAST Json term when unparsing KATT: "
-              + attMap);
-    }
-    return newAttOrError.right().get();
+    return newAtt;
   }
 
   ////////////////////

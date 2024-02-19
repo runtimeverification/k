@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kast;
 
 import com.google.common.collect.Lists;
@@ -139,8 +139,7 @@ public class KastFrontEnd extends FrontEnd {
         String stringToParse = FileUtil.read(options.stringToParse());
         Source source = options.source();
 
-        try (ParseInModule parseInModule =
-            RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, null)) {
           if (options.debugTokens)
             System.out.println(parseInModule.tokenizeString(stringToParse, source));
           else {
@@ -155,7 +154,7 @@ public class KastFrontEnd extends FrontEnd {
             // syntax
             // like casts, projections and others
             Module unparsingMod = parseInModule.getExtensionModule();
-            K parsed = new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
+            K parsed = new TreeNodesToKORE(Outer::parseSort).down(res._1().right().get());
 
             if (options.expandMacros) {
               parsed =
@@ -220,7 +219,7 @@ public class KastFrontEnd extends FrontEnd {
         unparsingMod = maybeUnparsingMod.get();
       }
 
-      Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
+      Option<Module> maybeMod = def.programParsingModuleFor(options.module);
       if (maybeMod.isEmpty()) {
         throw KEMException.innerParserError(
             "Module " + options.module + " not found. Specify a module with -m.");

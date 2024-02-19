@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.compile.checks.CheckBracket;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
@@ -36,14 +35,11 @@ import scala.collection.Seq;
 public class KILtoKORE extends KILTransformation<Object> {
 
   private final org.kframework.kil.loader.Context context;
-  private final boolean syntactic;
   private String moduleName;
   private final boolean bisonLists;
 
-  public KILtoKORE(
-      org.kframework.kil.loader.Context context, boolean syntactic, boolean bisonLists) {
+  public KILtoKORE(org.kframework.kil.loader.Context context, boolean bisonLists) {
     this.context = context;
-    this.syntactic = syntactic;
     this.bisonLists = bisonLists;
   }
 
@@ -253,8 +249,6 @@ public class KILtoKORE extends KILTransformation<Object> {
       }
 
       for (Production p : b.getProductions()) {
-        if (p.containsAttribute(Att.REJECT())) // skip productions of the old reject type
-        continue;
         // Handle a special case first: List productions have only
         // one item.
         if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) {
@@ -267,9 +261,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             } else if (it instanceof UserList) {
               throw new AssertionError("Lists should have applied before.");
             } else if (it instanceof Lexical) {
-              String regex;
-              if (p.containsAttribute(Att.REGEX())) regex = p.getAttribute(Att.REGEX());
-              else regex = ((Lexical) it).getLexicalRule();
+              String regex = ((Lexical) it).getLexicalRule();
               RegexTerminal regexTerminal = getRegexTerminal(regex);
 
               items.add(regexTerminal);
@@ -355,7 +347,6 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     org.kframework.attributes.Att attrs =
         convertAttributes(p).add(Att.USER_LIST(), userList.getListType());
-    String kilProductionId = "" + System.identityHashCode(p);
     org.kframework.definition.Production prod1, prod3;
 
     if (bisonLists) {
@@ -392,9 +383,7 @@ public class KILtoKORE extends KILTransformation<Object> {
   }
 
   public static org.kframework.attributes.Att convertAttributes(ASTNode t) {
-    Att attributes = ProcessGroupAttributes.getProcessedAtt(t.getAttributes(), t);
-
-    return attributes
+    return t.getAttributes()
         .addAll(attributesFromLocation(t.getLocation()))
         .addAll(attributesFromSource(t.getSource()));
   }

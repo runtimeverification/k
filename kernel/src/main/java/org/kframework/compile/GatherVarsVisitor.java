@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import java.util.Set;
@@ -17,7 +17,7 @@ public class GatherVarsVisitor extends RewriteAwareVisitor {
 
   public GatherVarsVisitor(
       boolean isBody, Set<KEMException> errors, Set<KVariable> vars, boolean errorExistential) {
-    super(isBody, errors);
+    super(isBody);
     this.errors = errors;
     this.vars = vars;
     this.errorExistential = errorExistential;

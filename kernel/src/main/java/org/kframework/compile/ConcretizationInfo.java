@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.kore.KORE.*;
@@ -23,10 +23,6 @@ public record ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
       throw new AssertionError(
           "expected KApply or KVariable, found " + k.getClass().getSimpleName());
     }
-  }
-
-  public ConfigurationInfo.Multiplicity getMultiplicity(KLabel label) {
-    return cfg.getMultiplicity(labels.getCodomain(label));
   }
 
   public ConfigurationInfo.Multiplicity getMultiplicity(Sort sort) {
@@ -70,11 +66,6 @@ public record ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
   public K getCellAbsentTerm(Sort cellSort) {
     KLabel l = cfg.getCellAbsentLabel(cellSort);
     return l == null ? null : KApply(l);
-  }
-
-  public boolean isCellCollection(KLabel klabel) {
-    Sort s = labels.getCodomain(klabel);
-    return cfg.isCellCollection(s);
   }
 
   public boolean isCell(KLabel klabel) {

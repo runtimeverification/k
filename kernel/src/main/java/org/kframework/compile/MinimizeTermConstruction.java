@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.kore.KORE.*;
@@ -92,7 +92,7 @@ public class MinimizeTermConstruction {
   }
 
   void gatherTerms(K term, boolean body) {
-    new RewriteAwareVisitor(body, new HashSet<>()) {
+    new RewriteAwareVisitor(body) {
       @Override
       public void apply(K k) {
         if (isLHS()
@@ -145,7 +145,7 @@ public class MinimizeTermConstruction {
   }
 
   void filterTerms(K term, boolean body) {
-    new RewriteAwareVisitor(body, new HashSet<>()) {
+    new RewriteAwareVisitor(body) {
       @Override
       public void apply(K k) {
         if (isRHS() && !isLHS() && cache.containsKey(k)) {

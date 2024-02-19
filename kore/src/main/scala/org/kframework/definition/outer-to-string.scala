@@ -1,21 +1,21 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.definition
 
-import org.kframework.attributes.{Location,Source}
-import org.kframework.utils.StringUtil
 import collection._
+import org.kframework.attributes.Location
+import org.kframework.attributes.Source
+import org.kframework.utils.StringUtil
 
 trait ModuleToString {
   self: Module =>
   override def toString = "module " + name + att.postfixString + "\n" +
-    prettyPrintSet(fullImports map {"imports " + _.name}) +
+    prettyPrintSet(fullImports.map("imports " + _.name)) +
     prettyPrintSet(localSentences) +
     "endmodule"
 
-  def prettyPrintSet(s: Set[_]) = {
+  def prettyPrintSet(s: Set[_]) =
     s.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") +
       (if (s.size > 0) "\n" else "")
-  }
 }
 
 trait DefinitionToString {
@@ -25,17 +25,21 @@ trait DefinitionToString {
 
 trait RuleToString {
   self: Rule =>
-  override def toString = Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
+  override def toString =
+    Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
 trait ClaimToString {
   self: Claim =>
-  override def toString = Seq("claim", body, "requires", requires, "ensures", ensures, att).mkString(" ")
+  override def toString =
+    Seq("claim", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
 trait ProductionToString {
   self: Production =>
-  override def toString = "syntax " + (if (params.nonEmpty) { "{" + params.mkString(", ") + "} " } else "") + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).postfixString
+  override def toString = "syntax " + (if (params.nonEmpty) { "{" + params.mkString(", ") + "} " }
+                                       else "") + sort + " ::= " + items
+    .mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).postfixString
 }
 
 trait SyntaxSortToString {
@@ -50,7 +54,8 @@ trait SortSynonymToString {
 
 trait SyntaxLexicalToString {
   self: SyntaxLexical =>
-  override def toString() = "syntax lexical " + name + " = r" + StringUtil.enquoteKString(regex) + att.postfixString
+  override def toString() =
+    "syntax lexical " + name + " = r" + StringUtil.enquoteKString(regex) + att.postfixString
 }
 
 trait TerminalToString {
@@ -65,21 +70,20 @@ trait NonTerminalToString {
 
 trait RegexTerminalToString {
   self: RegexTerminal =>
-  override def toString = {
+  override def toString =
     "r" + StringUtil.enquoteKString(
-      (if ("#" == precedeRegex) "" else "(?<!" + precedeRegex + ")" ) +
-      regex +
-      (if ("#" == followRegex) "" else "(?!" + followRegex + ")" )
+      (if ("#" == precedeRegex) "" else "(?<!" + precedeRegex + ")") +
+        regex +
+        (if ("#" == followRegex) "" else "(?!" + followRegex + ")")
     )
-  }
 }
 
 trait SyntaxAssociativityToString {
   self: SyntaxAssociativity =>
   override def toString = {
     val assocString = assoc match {
-      case Associativity.Left => "left"
-      case Associativity.Right => "right"
+      case Associativity.Left     => "left"
+      case Associativity.Right    => "right"
       case Associativity.NonAssoc => "non-assoc"
     }
     "syntax associativity " + assocString + " " + tags.mkString(" ") + att.postfixString
@@ -98,7 +102,7 @@ trait ContextAliasToString {
 
 trait SyntaxPriorityToString {
   self: SyntaxPriority =>
-  override def toString = "syntax priority " + priorities.map {_.mkString(" ")}.mkString(" > ")
+  override def toString = "syntax priority " + priorities.map(_.mkString(" ")).mkString(" > ")
 }
 
 trait TagToString {

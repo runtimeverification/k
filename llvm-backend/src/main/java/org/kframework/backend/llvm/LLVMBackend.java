@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +30,6 @@ public class LLVMBackend extends KoreBackend {
   private final LLVMKompileOptions options;
   private final KExceptionManager kem;
   private final KompileOptions kompileOptions;
-  private final Tool tool;
 
   @Inject
   public LLVMBackend(
@@ -45,7 +44,6 @@ public class LLVMBackend extends KoreBackend {
     this.options = options;
     this.kompileOptions = kompileOptions;
     this.kem = kem;
-    this.tool = tool;
   }
 
   @Override
@@ -124,6 +122,14 @@ public class LLVMBackend extends KoreBackend {
       args.add(files.resolveKompiled("dt").getCanonicalPath());
       args.add(type);
 
+      if (options.enableProofHints) {
+        args.add("--proof-hint-instrumentation");
+      }
+
+      if (options.llvmMutableBytes) {
+        args.add("--mutable-bytes");
+      }
+
       // Arguments after this point are passed on to Clang.
       args.add("--");
 
@@ -179,6 +185,6 @@ public class LLVMBackend extends KoreBackend {
 
   @Override
   public Set<Att.Key> excludedModuleTags() {
-    return new HashSet<>(Arrays.asList(Att.SYMBOLIC(), Att.KAST()));
+    return new HashSet<>(Collections.singletonList(Att.SYMBOLIC()));
   }
 }

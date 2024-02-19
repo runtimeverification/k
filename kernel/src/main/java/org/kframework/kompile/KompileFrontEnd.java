@@ -1,9 +1,13 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.kframework.compile.Backend;
@@ -93,6 +97,14 @@ public class KompileFrontEnd extends FrontEnd {
     kompile = null;
     files.get().saveToKompiled("mainModule.txt", def.executionModule().name());
     files.get().saveToKompiled("mainSyntaxModule.txt", def.mainSyntaxModuleName());
+    try {
+      URL rdmUrl = JarInfo.class.getResource("README.md");
+      if (rdmUrl != null) {
+        String rdm = FileUtil.read(new BufferedReader(new InputStreamReader(rdmUrl.openStream())));
+        files.get().saveToKompiled("README.md", rdm);
+      }
+    } catch (IOException ignored) {
+    }
     sw.printIntermediate("Kompile to kore");
     loader.saveOrDie(files.get().resolveKompiled("compiled.bin"), def);
     files.get().saveToKompiled("backend.txt", options.backend); // used by the krun script

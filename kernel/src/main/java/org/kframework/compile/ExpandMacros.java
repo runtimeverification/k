@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -67,17 +67,7 @@ public class ExpandMacros {
   private final FileChannel channel;
   private final boolean reverse;
   private final ResolveFunctionWithConfig transformer;
-  private final KompileOptions kompileOptions;
   private final KExceptionManager kem;
-
-  public static ExpandMacros fromMainModule(
-      Module mod,
-      FileUtil files,
-      KExceptionManager kem,
-      KompileOptions kompileOptions,
-      boolean reverse) {
-    return new ExpandMacros(mod, files, kem, kompileOptions, reverse, true);
-  }
 
   public static ExpandMacros forNonSentences(
       Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
@@ -110,14 +100,13 @@ public class ExpandMacros {
     this.mod = mod;
     this.reverse = reverse;
     this.cover = kompileOptions.coverage;
-    this.kompileOptions = kompileOptions;
     this.kem = kem;
     files.resolveKompiled(".").mkdirs();
     List<Rule> allMacros =
         stream(mod.rules())
             .filter(r -> isMacro(r.att(), reverse))
             .sorted(Comparator.comparingInt(r -> ModuleToKORE.getPriority(r.att())))
-            .collect(Collectors.toList());
+            .toList();
     macros =
         allMacros.stream()
             .filter(r -> getLeft(r, reverse) instanceof KApply)
@@ -459,7 +448,7 @@ public class ExpandMacros {
     } else if (s instanceof Claim) {
       return transformer.resolve(expand((Claim) s), mod);
     } else if (s instanceof Context) {
-      return transformer.resolve(expand((Context) s), mod);
+      return transformer.resolve(expand((Context) s));
     } else {
       return s;
     }

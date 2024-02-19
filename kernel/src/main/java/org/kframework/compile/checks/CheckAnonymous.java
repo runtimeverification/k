@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import static org.kframework.kore.KORE.*;
@@ -12,7 +12,6 @@ import org.kframework.attributes.Att;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
-import org.kframework.definition.Module;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.InjectedKLabel;
@@ -28,12 +27,10 @@ public class CheckAnonymous {
 
   private final Set<KEMException> errors;
   private final KExceptionManager kem;
-  private final Module module;
 
-  public CheckAnonymous(Set<KEMException> errors, Module module, KExceptionManager kem) {
+  public CheckAnonymous(Set<KEMException> errors, KExceptionManager kem) {
     this.errors = errors;
     this.kem = kem;
-    this.module = module;
   }
 
   private final Multiset<String> vars = HashMultiset.create();
@@ -98,8 +95,9 @@ public class CheckAnonymous {
               && entry.getElement().equals("HOLE")) {
             continue;
           }
-          if (loc.get(entry.getElement()).location().isPresent()) // ignore generated variables
-          kem.registerCompilerWarning(
+          if (loc.get(entry.getElement()).location().isPresent()) {
+            // ignore generated variables
+            kem.registerCompilerWarning(
                 ExceptionType.UNUSED_VAR,
                 errors,
                 "Variable '"
@@ -107,6 +105,7 @@ public class CheckAnonymous {
                     + "' defined but not used. Prefix variable name with underscore if this is"
                     + " intentional.",
                 loc.get(entry.getElement()));
+          }
         }
       } else if (entry.getCount() > 1) {
         if ((entry.getElement().startsWith("_")

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 /* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
@@ -427,7 +427,7 @@ PARSER_END(Outer)
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }
 
-<DEFAULT> TOKEN : 
+<DEFAULT> TOKEN :
 {
   <RULE: "rule"> : BUBBLE_STATE
 | <CONTEXT: "context"> : CONTEXT_STATE
@@ -645,7 +645,7 @@ List<Tag> KLabels() :
 | "]" { matchedToken.kind = RSQUARE; }
 | "(" { matchedToken.kind = LPAREN; }
 | ")" { matchedToken.kind = RPAREN; }
-| <KEY: ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9"])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?>
+| <KEY: ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9", "."])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?>
 }
 
 /** The same as 'Attributes()', but requires that the entire input be
@@ -749,7 +749,7 @@ void Sentence(Module module) :
     if (type.equals("configuration")) { type = "config"; } }
   ss = Bubble(type) { module.appendModuleItem(markLoc(loc, ss)); }
 
-| "syntax" 
+| "syntax"
   ( { List<Sort> params = new ArrayList<Sort>(); } ( "{" param = SimpleSort() { params.add(param); } ( "," param = SimpleSort() { params.add(param); })* "}" )? nonTerminal = SortID() {ModuleItem syn = new Syntax(nonTerminal, params); }
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
@@ -788,12 +788,11 @@ void PriorityBlock(List<PriorityBlock> pblocks) :
 /** Parses a Production and adds it to 'prods' */
 void Production(List<Production> prods) :
 { Location loc = startLoc(); NonTerminal nonTerminal;
-  List<ProductionItem> items = new ArrayList<ProductionItem>();
-  String klabel = null; }
+  List<ProductionItem> items = new ArrayList<ProductionItem>(); }
 {
 ( LOOKAHEAD((UpperId() | <LOWER_ID>) "(")
   (UpperId() | <LOWER_ID>)
-  { items.add(tokenLoc(new Terminal(image()))); klabel = image(); }
+  { items.add(tokenLoc(new Terminal(image()))); }
   "("              { items.add(tokenLoc(new Terminal(image()))); }
   (nonTerminal = SortID()  { items.add(nonTerminal); }
   (","             { items.add(tokenLoc(new Terminal(image()))); }
@@ -809,10 +808,7 @@ void Production(List<Production> prods) :
 | (ProductionItem(items))+
 ) { Production prod = new Production(new NonTerminal(Sort(""), Optional.empty()), items); }
   (Attributes(prod))?
-  { if (klabel != null && prod.getAttribute(Att.KLABEL()) == null) {
-      prod.addAttribute(Att.KLABEL(), klabel);
-    }
-    prods.add(markLoc(loc, prod)); }
+  { prods.add(markLoc(loc, prod)); }
 }
 
 /** Parses a ProductionItem and adds it to 'items' */

@@ -1,20 +1,16 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
-import java.util.Set;
-import org.kframework.kore.Sort;
 
 /** A module. */
 public class Module extends DefinitionItem {
   private String name;
   private List<ModuleItem> items = new ArrayList<>();
-
-  // lazily computed set of sorts.
-  private Set<Sort> sorts;
 
   public Module() {
     super();
@@ -27,7 +23,6 @@ public class Module extends DefinitionItem {
 
   public void appendModuleItem(ModuleItem item) {
     this.items.add(item);
-    this.sorts = null;
   }
 
   public void setName(String name) {
@@ -40,7 +35,6 @@ public class Module extends DefinitionItem {
 
   public void setItems(List<ModuleItem> items) {
     this.items = items;
-    this.sorts = null;
   }
 
   public List<ModuleItem> getItems() {
@@ -49,11 +43,7 @@ public class Module extends DefinitionItem {
 
   @Override
   public void toString(StringBuilder sb) {
-    sb.append("module ")
-        .append(name)
-        .append(" ")
-        .append(getAttributes().withUserGroupsAsGroupAtt())
-        .append("\n");
+    sb.append("module ").append(name).append(" ").append(getAttributes()).append("\n");
     for (ModuleItem i : items) {
       i.toString(sb);
       sb.append("\n");
@@ -73,7 +63,9 @@ public class Module extends DefinitionItem {
       toString(mod);
       MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
       messageDigest.update(mod.toString().getBytes());
-      return new String(messageDigest.digest());
+
+      var textDigest = Base64.getEncoder().encode(messageDigest.digest());
+      return new String(textDigest);
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }

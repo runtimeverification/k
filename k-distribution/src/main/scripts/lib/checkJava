@@ -23,17 +23,18 @@ function setarch {
   fi
 }
 
+NG="$(dirname "${BASH_SOURCE[0]}")/bin/ng"
 KSERVER_SOCKET="${KSERVER_SOCKET:-$HOME/.kserver}"
-KSERVER_INSTANCE="ng --nailgun-server local:$KSERVER_SOCKET/socket"
+KSERVER_INSTANCE="$NG --nailgun-server local:$KSERVER_SOCKET/socket"
 version=$($KSERVER_INSTANCE org.kframework.main.JavaVersion 2>&1)
 if [ $? -eq 0 ]; then
   setarch
   JAVA="$KSERVER_INSTANCE"
 else
-  version=$(ng org.kframework.main.JavaVersion 2>&1)
+  version=$($NG org.kframework.main.JavaVersion 2>&1)
   if [ $? -eq 0 ]; then
     setarch
-    JAVA=ng
+    JAVA=$NG
   else
     version=$("$_java" -version 2>&1)
     setarch
@@ -41,7 +42,7 @@ else
       TIERED=-XX:+TieredCompilation
     fi
     export K_OPTS="-Xms64m -Xmx4096m -Xss32m $TIERED $K_OPTS"
-    JAVA="java -Dfile.encoding=UTF-8 -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$BASH_SOURCE")/java/*\""
+    JAVA="java -Dfile.encoding=UTF-8 -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$BASH_SOURCE")/java/*:$HOME/.local/lib/kframework/java/*\""
   fi
 fi
 

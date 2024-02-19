@@ -1,12 +1,10 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
-import java.util.Set;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
-import org.kframework.utils.errorsystem.KEMException;
 
 /**
  * A visitor designed to track whether we are currently in the left hand side or right hand side of
@@ -18,10 +16,7 @@ import org.kframework.utils.errorsystem.KEMException;
  */
 public class RewriteAwareVisitor extends VisitK {
 
-  private final Set<KEMException> errors;
-
-  public RewriteAwareVisitor(boolean isBody, Set<KEMException> errors) {
-    this.errors = errors;
+  public RewriteAwareVisitor(boolean isBody) {
     if (isBody) {
       isRHS = true;
       isLHS = true;

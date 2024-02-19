@@ -61,7 +61,8 @@ public class TextDocumentSyncHandler {
       cacheFile =
           Files.walk(Path.of(URI.create(workspaceFolder.getUri())))
               .filter(p -> p.endsWith(CACHE_FILE_NAME))
-              .findFirst();
+              .min(Comparator.comparing(Path::getNameCount, Comparator.naturalOrder()));
+      clientLogger.logMessage("Found cache file: " + cacheFile);
       loadCaches();
     } catch (IOException e) {
       clientLogger.logMessage("findCachesException: " + e);
@@ -81,7 +82,7 @@ public class TextDocumentSyncHandler {
           // this way we can find all the updated locations when finding references
           if (!files.containsKey(uri)) add(uri);
         });
-    clientLogger.logMessage("loaded cached modules: " + caches.size());
+    clientLogger.logMessage("Loaded cached modules: " + caches.size());
   }
 
   public void add(String uri) {
@@ -523,9 +524,7 @@ public class TextDocumentSyncHandler {
 
               if (isPositionOverLocation(pos, nameLoc)) {
                 List<DefinitionItem> allDi =
-                    files.values().stream()
-                        .flatMap(doc -> doc.dis.stream())
-                        .collect(Collectors.toList());
+                    files.values().stream().flatMap(doc -> doc.dis.stream()).toList();
                 allDi.stream()
                     .filter(ddi -> ddi instanceof Module)
                     .map(ddi -> ((Module) ddi))
@@ -787,9 +786,7 @@ public class TextDocumentSyncHandler {
                   + " #poss: "
                   + poss
                   + " rezDepth: "
-                  + lloc.stream()
-                      .map(TextDocumentSyncHandler::getSelectionRangeDepth)
-                      .collect(Collectors.toList()));
+                  + lloc.stream().map(TextDocumentSyncHandler::getSelectionRangeDepth).toList());
 
           return lloc;
         });

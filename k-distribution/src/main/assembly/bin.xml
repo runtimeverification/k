@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) K Team. All Rights Reserved. -->
-<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" 
+<!-- Copyright (c) Runtime Verification, Inc. All Rights Reserved. -->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
   <id>bin</id>
   <baseDirectory>k</baseDirectory>
     <dependencySets>
       <dependencySet>
-        <outputDirectory>/bin</outputDirectory>
+        <outputDirectory>/lib/kframework/bin</outputDirectory>
         <includes>
           <include>*:uexe:${native.os.classifier}:*</include>
         </includes>
@@ -22,18 +22,6 @@
       <includes>
         <include>README*</include>
       </includes>
-    </fileSet>
-    <fileSet>
-      <directory>${project.basedir}</directory>
-      <outputDirectory>/share/kframework</outputDirectory>
-      <includes>
-        <include>pl-tutorial/**</include>
-        <include>INSTALL*</include>
-      </includes>
-      <excludes>
-        <exclude>**/.*/**</exclude>
-        <exclude>**/*-kompiled/**</exclude>
-      </excludes>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/include</directory>

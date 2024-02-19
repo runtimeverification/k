@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.builtin;
 
@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Hooks {
-  public static final String ARRAY = "ARRAY";
   public static final String BOOL = "BOOL";
   public static final String BUFFER = "BUFFER";
   public static final String BYTES = "BYTES";
@@ -32,7 +31,6 @@ public class Hooks {
       Collections.unmodifiableSet(
           new HashSet<>(
               Arrays.asList(
-                  ARRAY,
                   BOOL,
                   BUFFER,
                   BYTES,

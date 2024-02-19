@@ -321,7 +321,39 @@ name: Sort
 
 This syntax can be used anywhere in a K definition that expects a non-terminal.
 
+### `symbol(_)` attribute
+
+By default, when compiling a definition, K generates a unique "mangled" label
+identifier for each syntactic production. These identifiers can be used to
+reference productions externally, for example when constructing terms by hand
+or programmatically via Pyk.
+
+The `symbol(_)` attribute can be applied to a production to control the precise
+identifier for a production that appears in a compiled definition. For example:
+
+```k
+module SYMBOLS
+    syntax Foo ::= foo() [symbol(foo)]
+                 | bar()
+endmodule
+```
+
+Here, the compiled definition will contain the following symbol declarations:
+```
+  symbol Lblfoo{}() ...
+  symbol Lblbar'LParRParUnds'SYMBOLS'Unds'Foo{}() ...
+```
+
+The compiler enforces uniqueness[^unique-symbol] of symbol names specified in
+this way; it would be an error to apply `symbol(foo)` to another production in
+the module above. Additionally, `symbol(_)` with an argument may not co-occur
+with the `klabel(_)` attribute (see below).
+
 ### `klabel(_)` and `symbol` attributes
+
+**Note: the `klabel(_), symbol` approach described in this section is a legacy
+feature that will be removed in the future. In new code, it should currently
+only be used to opt in to symbol overloading.**
 
 By default K generates for each syntax definition a long and obfuscated klabel
 string, which serves as a unique internal identifier and also is used in kast
@@ -334,9 +366,9 @@ given symbol.
 If you only provide the `klabel` attribute, you can use the provided `klabel` to
 refer to that symbol anywhere in the frontend K code. However, the internal
 identifier seen by the backend for that symbol will still be the long obfuscated
-generated string. Sometimes you want control over the internal identfier used as
+generated string. Sometimes you want control over the internal identifier used as
 well, in which case you use the `symbol` attribute. This tells the frontend to
-use whatever the declared `klabel` is directly as the internal identfier.
+use whatever the declared `klabel` is directly as the internal identifier.
 
 For example:
 
@@ -362,16 +394,44 @@ Here, we have that:
     `'Hash'Baz'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
     as the symbol name.
 
-The `symbol` provided *must* be unique to this definition. This is enforced by K.
-In general, it's recommended to use `symbol` attribute whenever you use `klabel`
-unless you explicitely have a reason not to (eg. you want to *overload* symbols,
-or you're using a deprecated backend). It can be very helpful use the `symbol`
-attribute for debugging, as many debugging messages are printed in Kast format
-which will be more readable with the `symbol` names you explicitely declare.
-In addition, if you are programatically manipulating definitions via the JSON
-Kast format, building terms using the user-provided pretty
-`symbol, klabel(...)` is easier and less error-prone when the auto-generation
+The `symbol` provided *must* be unique to this definition. This is enforced by
+K. In general, it's recommended to use the `symbol` attribute whenever you use
+`klabel` unless you explicitly have a reason not to (e.g. you want to *overload*
+symbols, or you're using a deprecated backend). It can be very helpful use the
+`symbol` attribute for debugging, as many debugging messages are printed in
+Kast format which will be more readable with the `symbol` names you explicitly
+declare. In addition, if you are programatically manipulating definitions via
+the JSON Kast format, building terms using the user-provided pretty
+`symbol, klabel(...)` is easier and less error-prone if the auto-generation
 process for klabels changes.
+
+#### Syntactic Lists
+
+When using K's support for syntactic lists, a production like:
+```k
+syntax Ints ::= List{Int, ","} [klabel(ints), symbol]
+```
+will desugar into two productions:
+```k
+syntax Ints ::= Int "," Ints [klabel(ints), symbol]
+syntax Ints ::= ".Ints"      [klabel(List{"ints"}), symbol]
+```
+
+Note that the label for the _terminator_ of the list has been generated
+automatically from the label on the original production. It is possible to
+control what the terminator's label is using the `terminator-klabel(_)`
+attribute. For example:
+```k
+syntax Ints ::= List{Int, ","} [klabel(ints), terminator-klabel(.ints), symbol]
+```
+will desugar into two productions:
+```k
+syntax Ints ::= Int "," Ints [klabel(ints),  symbol]
+syntax Ints ::= ".Ints"      [klabel(.ints), symbol]
+```
+
+It is an error to apply `terminator-klabel(_)` to a non-production sentence, or
+to a production that does not declare a syntactic list.
 
 ### Parametric productions and `bracket` attributes
 
@@ -617,6 +677,18 @@ cell.
 syntax Foo ::= foo() [unused]
 
 configuration <foo unused=""> .K </foo>
+```
+
+### `deprecated` attribute
+
+Symbols can be marked as deprecated by adding the `deprecated` attribute to
+their declaration. If that symbol subsequently appears in the definition (in a
+rule, context, context alias or configuration), the compiler will issue a
+warning.
+
+```k
+syntax Foo ::= foo() [deprecated]
+rule foo() => . // warning on this line
 ```
 
 ### Symbol priority and associativity
@@ -2908,76 +2980,75 @@ brief description of each. Note that the same attribute may appear in the index
 multiple times to indicate its effect in different contexts or with/without
 arguments. A legend describing how to interpret the index follows.
 
-| Name                  | Type  | Backend | Reference                                                                                                                                       |
-| --------------------- | ----- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `alias-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `alias`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `all-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
-| `anywhere`            | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
-| `applyPriority(_)`    | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `avoid`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `binder`              | prod  | all     | No reference yet.                                                                                                                               |
-| `bracket`             | prod  | all     | [Parametric productions and `bracket` attributes](#parametric-productions-and-bracket-attributes)                                               |
-| `color(_)`            | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
-| `colors(_)`           | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
-| `concrete`            | mod   | llvm    | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
-| `concrete(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
-| `concrete`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
-| `context(_)`          | alias | all     | [Context aliases](#context-aliases)                                                                                                             |
-| `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
-| `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
-| `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
-| `function`            | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
-| `group(_)`            | all   | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
-| `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
-| `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
-| `klabel(_)`           | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
-| `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
-| `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
-| `macro-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `macro`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `memo`                | rule  | haskell | [The `memo` attribute](#the-memo-attribute)                                                                                                     |
-| `multiplicity = "_"`  | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
-| `non-assoc`           | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `one-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
-| `owise`               | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
-| `prec(_)`             | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
-| `prefer`              | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `priority(_)`         | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
-| `private`             | mod   | all     | [`private` attribute](#private-attribute)                                                                                                       |
-| `private`             | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
-| `public`              | mod   | all     | No reference yet.                                                                                                                               |
-| `public`              | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
-| `result(_)`           | ctxt  | all     | [`result` attribute](#result-attribute)                                                                                                         |
-| `result(_)`           | rule  | all     | [`result` attribute](#result-attribute)                                                                                                         |
-| `right`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `seqstrict(_)`        | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
-| `seqstrict`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
-| `simplification`      | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
-| `simplification(_)`   | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
-| `smt-hook(_)`         | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
-| `smtlib(_)`           | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
-| `smt-lemma`           | rule  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
-| `strict`              | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
-| `strict(_)`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
-| `symbolic`            | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
-| `symbolic`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
-| `symbolic(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
-| `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
-| `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
-| `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
-| `total`               | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
-| `trusted`             | claim | haskell | [`trusted` attribute](#trusted-claims)                                                                                                          |
-| `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
-| `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
-| `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
-| `kast`                | mod   | all     | Specify that this module should only be included in KAST backends (Java backend).                                                               |
-| `kore`                | mod   | all     | Specify that this module should only be included in Kore backends (Haskell/LLVM backend).                                                       |
-| `concrete`            | mod   | all     | Specify that this module should only be included in concrete backends (LLVM backend).                                                           |
-| `symbolic`            | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell/Java backend).                                                   |
-| `stream = "_"`        | cell  | all     | Specify that this cell should be hooked up to a stream, either `stdin`, `stdout`, or `stderr`.                                                  |
+| Name                   | Type  | Backend | Reference                                                                                                                                       |
+|------------------------|-------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `alias-rec`            | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias`                | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `all-path`             | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `anywhere`             | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
+| `applyPriority(_)`     | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `avoid`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `binder`               | prod  | all     | No reference yet.                                                                                                                               |
+| `bracket`              | prod  | all     | [Parametric productions and `bracket` attributes](#parametric-productions-and-bracket-attributes)                                               |
+| `color(_)`             | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
+| `colors(_)`            | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
+| `concrete`             | mod   | llvm    | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
+| `concrete(_)`          | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `concrete`             | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `context(_)`           | alias | all     | [Context aliases](#context-aliases)                                                                                                             |
+| `deprecated`           | prod  | all     | [`deprecated` attribute](#deprecated-attribute)                                                                                                 |
+| `exit = ""`            | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
+| `format`               | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
+| `freshGenerator`       | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
+| `function`             | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
+| `group(_)`             | all   | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `hook(_)`              | prod  | all     | No reference yet                                                                                                                                |
+| `hybrid(_)`            | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
+| `hybrid`               | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
+| `klabel(_)`            | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `left`                 | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `locations`            | sort  | all     | [Location Information](#location-information)                                                                                                   |
+| `macro-rec`            | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro`                | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `memo`                 | rule  | haskell | [The `memo` attribute](#the-memo-attribute)                                                                                                     |
+| `multiplicity = "_"`   | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
+| `non-assoc`            | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `one-path`             | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `owise`                | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
+| `prec(_)`              | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
+| `prefer`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `priority(_)`          | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
+| `private`              | mod   | all     | [`private` attribute](#private-attribute)                                                                                                       |
+| `private`              | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
+| `public`               | mod   | all     | No reference yet.                                                                                                                               |
+| `public`               | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
+| `result(_)`            | ctxt  | all     | [`result` attribute](#result-attribute)                                                                                                         |
+| `result(_)`            | rule  | all     | [`result` attribute](#result-attribute)                                                                                                         |
+| `right`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `seqstrict(_)`         | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `seqstrict`            | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `simplification`       | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
+| `simplification(_)`    | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
+| `smt-hook(_)`          | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `smtlib(_)`            | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `smt-lemma`            | rule  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `strict`               | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `strict(_)`            | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `symbolic`             | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
+| `symbolic`             | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `symbolic(_)`          | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `symbol`               | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `terminator-klabel(_)` | prod  | all     | [`klabel(_)` and `symbol` attributes](...)                                                                                                      |
+| `token`                | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `token`                | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `total`                | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
+| `trusted`              | claim | haskell | [`trusted` attribute](#trusted-claims)                                                                                                          |
+| `type = "_"`           | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
+| `unboundVariables(_)`  | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
+| `unused`               | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
+| `concrete`             | mod   | all     | Specify that this module should only be included in concrete backends (LLVM backend).                                                           |
+| `symbolic`             | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell backend).                                                        |
+| `stream = "_"`         | cell  | all     | Specify that this cell should be hooked up to a stream, either `stdin`, `stdout`, or `stderr`.                                                  |
 
 ### Internal Attribute Index
 
@@ -3078,3 +3149,5 @@ All of these hooks will also eventually need documentation.
 
 [^1]: More precisely, a lightly-customized debugger built using the LLDB Python
   API.
+[^unique-symbol]: Except for in a very limited number of special cases from the
+  K standard library.

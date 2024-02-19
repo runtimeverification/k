@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import java.util.List;
@@ -27,15 +27,6 @@ public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelI
         .apply(input);
   }
 
-  public static Module transformModule(Module mod) {
-    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-    LabelInfo labelInfo = new LabelInfoFromModule(mod);
-    return ModuleTransformer.fromSentenceTransformer(
-            new AddImplicitComputationCell(configInfo, labelInfo)::apply,
-            "concretizing configuration")
-        .apply(mod);
-  }
-
   public Sentence apply(Module m, Sentence s) {
     if (skipSentence(s)) {
       return s;
@@ -57,8 +48,7 @@ public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelI
   private boolean skipSentence(Sentence s) {
     return ExpandMacros.isMacro(s)
         || s.att().contains(Att.ANYWHERE())
-        || s.att().contains(Att.SIMPLIFICATION())
-        || s.att().contains(Att.KORE());
+        || s.att().contains(Att.SIMPLIFICATION());
   }
 
   // If there are multiple cells mentioned in the split configuration, we don't
@@ -66,7 +56,7 @@ public record AddImplicitComputationCell(ConfigurationInfo cfg, LabelInfo labelI
   // cell mentioned is the automatically-added <generatedCounter> cell.
   private boolean shouldConsider(List<K> items, boolean isClaim) {
     if (items.size() == 1) {
-      return true;
+      return !isClaim;
     } else if (items.size() == 2 && isClaim) {
       K second = items.get(1);
       if (second instanceof KApply app) {

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kompile;
 
 import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;
@@ -137,13 +137,6 @@ public class KompileOptions implements Serializable {
   public boolean bisonLists;
 
   @Parameter(
-      names = "--read-only-kompiled-directory",
-      description =
-          "Files in the generated kompiled directory should be read-only to other frontend tools.",
-      hidden = true)
-  public boolean readOnlyKompiledDirectory = false;
-
-  @Parameter(
       names = "--concrete-rules",
       description =
           "List of rule labels to be considered concrete, in addition to rules marked with"
@@ -199,8 +192,6 @@ public class KompileOptions implements Serializable {
       hidden = true)
   public boolean genBisonParserLibrary;
 
-  public static final String DEFAULT_TRANSITION = "transition";
-
   @Parameter(
       names = "--top-cell",
       description =
@@ -241,7 +232,7 @@ public class KompileOptions implements Serializable {
 
   @Parameter(
       names = "--enable-kore-antileft",
-      description = "Enable generation of legacy antileft priority predicates ",
+      description = "Enable generation of legacy antileft priority predicates.",
       hidden = true)
   public boolean enableKoreAntileft;
 }

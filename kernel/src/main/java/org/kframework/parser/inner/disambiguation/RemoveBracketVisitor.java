@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import org.kframework.attributes.Att;
@@ -11,7 +11,7 @@ public class RemoveBracketVisitor extends SafeTransformer {
   public Term apply(TermCons tc) {
     if (tc.production().att().contains(Att.BRACKET())
         || tc.production().klabel().get().name().equals("#SyntacticCast")
-        || tc.production().klabel().get().name().equals("#InnerCast")) {
+        || tc.production().klabel().get().name().equals("#SyntacticCastBraced")) {
       return apply(tc.get(0));
     }
     return super.apply(tc);

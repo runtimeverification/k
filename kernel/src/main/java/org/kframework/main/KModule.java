@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.main;
 
 import com.google.inject.Module;
@@ -9,12 +9,6 @@ public interface KModule {
   List<Module> getKompileModules();
 
   List<Module> getKastModules();
-
-  List<Module> getKRunModules();
-
-  List<Module> getKEqModules(List<Module> definitionSpecificModules);
-
-  List<Module> getDefinitionSpecificKEqModules();
 
   List<Module> getKProveModules();
 }

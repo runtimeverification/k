@@ -1,7 +1,0 @@
-  Solution ==K ( L:Term |-> cons ( a , cons ( b , cons ( c , cons ( d , nil , .Vals ) , .Vals ) , .Vals ) , .Vals ) )
-#Or
-  Solution ==K ( L:Term |-> cons ( b , cons ( a , cons ( c , cons ( d , nil , .Vals ) , .Vals ) , .Vals ) , .Vals ) )
-#Or
-  Solution ==K ( L:Term |-> cons ( b , cons ( c , cons ( a , cons ( d , nil , .Vals ) , .Vals ) , .Vals ) , .Vals ) )
-#Or
-  Solution ==K ( L:Term |-> cons ( b , cons ( c , cons ( d , cons ( a , nil , .Vals ) , .Vals ) , .Vals ) , .Vals ) )

@@ -1,6 +1,104 @@
 ---
-copyright: Copyright (c) K Team. All Rights Reserved.
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
+
+K Framework 6.2.0
+=================
+
+Major Changes
+-------------
+
+- The `Bytes` sort no longer represents mutable buffers of bytes by default.
+  Hooks that would previously have mutated a buffer when executing with the LLVM
+  backend will now perform a transparent copy of the underlying buffer. This
+  aligns the LLVM backend's behaviour with that of the Haskell backend and K. To
+  opt out of this change if performance when operating on large buffers is
+  important, semantics can pass the flag `--llvm-mutable-bytes` to `kompile`.
+
+Minor Changes
+-------------
+
+- Removed the `#parseKORE` hook (which presented a hole in the K type system) in
+  favour of modern, Pyk-based solutions to deserializing intermediate K states.
+
+- Added `k-which-python` tool to Nix builds of K, which helps to resolve
+  incompatibilities in Pyk-based applications that use K via `kup`.
+
+- Strict casts now use the `::S` syntax everywhere; a legacy use case for the
+  syntax `{...}<:S` is no longer required.
+
+- Improvements to the deterministic type inferencing algorithm; strict casts are
+  now handled and the new inferencer is enabled when typing proof claims.
+
+- Better integration between the Booster and LLVM backend in the presence of
+  partial functions and run-time errors.
+
+- The PL tutorial that was previously bundled with K will now be developed and
+  tested in its own repository.
+
+- Substantial improvements to K developer experience (code cleanup, auditing and
+  automatic tooling).
+
+- Bug fixes and feature requests supporting RV-internal projects.
+
+K Framework 6.1.0
+=================
+
+Features
+--------
+- Added support for MacOS 13 Ventura. We dropped support for Ubuntu 20.04 Focal. 
+  K can now be built from source on Apple Silicon. See README for more details.
+
+- Updated dependency to Java version 17 or higher.
+
+- Added the Haskell Backend Booster as a dependency to K. This can improve performance
+  when running large proofs. It uses the LLVM Backend for concrete execution and
+  relies on the Haskell Backend to simplify terms when there is a split in the proof.
+
+- Optimized the kompiler by removing unit applications for collections.
+
+- Minimize JSON output by dropping unused attributes.
+
+- Added `--smt-timeout` flag to `krun` and `kprove`.
+
+- Changed the Maven repository to Cloudrepo for more stability and flexibility when
+  building K from sources.
+
+- Improved attribute error messages by creating a whitelist dependent on the context.
+  This check is now mandatory.
+
+- Rule label can no longer contain backticks (`) or whitespace.
+
+- Improved the help messages by adding a description of the expected parameter.
+
+- Documentation: Started work on Section 2 of the tutorial. Added a description for
+  `kserver`.
+
+- Added `--debugger-command` flag to krun.
+
+- Added two options `--debug-tokens` and `--debug-parse` to help with debugging
+  parsing errors. The first option will print a Markdown table with all the matched
+  tokens by the scanner. The second one will give more details about the partial parse
+  tree constructed before an error was encountered.
+
+Misc/Bug Fixes
+--------------
+- Fixed a bug where the LLVM backend would segfault because of badly initialized
+  fresh variables in the configuration.
+
+- Improved performance for JSON creation.
+
+- Remove old unused attributes.
+
+- Fix output sorting for KPrint. This will create a more stable pretty printed output.
+
+- Fix configuration pretty printing where `<generatedCounter>` would appear instead
+  of a closing cell.
+
+- Moved a README file from the `builtin` directory that could collide with users' files.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3706
 
 K Framework 6.0.0
 =================

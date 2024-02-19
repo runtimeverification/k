@@ -1,5 +1,0 @@
-{
-  T:Type
-#Equals
-  int -> ( int -> int )
-}

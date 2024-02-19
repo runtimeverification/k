@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -20,7 +20,7 @@ public class GenerateSortPredicateSyntax {
 
   public Module gen(Module mod) {
     Set<Sentence> res = new HashSet<>();
-    for (Sort sort : iterable(mod.allSorts())) {
+    for (Sort sort : iterable(mod.localSorts())) {
       res.addAll(gen(mod, sort));
     }
     if (!res.isEmpty()) {

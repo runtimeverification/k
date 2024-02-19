@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 require "c18-syntax.k"
 
 module C18-TRANSLATION-SYNTAX

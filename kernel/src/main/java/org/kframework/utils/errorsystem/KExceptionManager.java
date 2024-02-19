@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.utils.errorsystem;
 
 import com.google.inject.Inject;
@@ -91,28 +91,9 @@ public class KExceptionManager {
     register(type, KExceptionGroup.CRITICAL, message, e, null, null);
   }
 
-  public void registerCriticalWarning(ExceptionType type, String message, HasLocation node) {
-    register(
-        type,
-        KExceptionGroup.CRITICAL,
-        message,
-        null,
-        node.location().orElse(null),
-        node.source().orElse(null));
-  }
-
+  @SuppressWarnings("unused")
   public void registerInternalWarning(ExceptionType type, String message) {
     register(type, KExceptionGroup.INTERNAL, message, null, null, null);
-  }
-
-  public void registerInternalWarning(ExceptionType type, String message, HasLocation node) {
-    register(
-        type,
-        KExceptionGroup.INTERNAL,
-        message,
-        null,
-        node.location().orElse(null),
-        node.source().orElse(null));
   }
 
   public void registerInternalWarning(ExceptionType type, String message, Throwable e) {
@@ -174,22 +155,18 @@ public class KExceptionManager {
   }
 
   public void print() {
-    Collections.sort(
-        exceptions,
+    exceptions.sort(
         Comparator.comparing(KException::getSource, Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(KException::getLocation, Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(e -> e.toString(options.verbose)));
+            .thenComparing(KException::toString));
     KException last = null;
     synchronized (exceptions) {
       for (KException e : exceptions) {
-        if (last != null && last.toString(options.verbose).equals(e.toString(options.verbose))) {
+        if (last != null && last.toString().equals(e.toString())) {
           continue;
         }
         printStackTrace(e);
-        String msg =
-            options.noExcWrap
-                ? e.toString(options.verbose)
-                : StringUtil.splitLines(e.toString(options.verbose));
+        String msg = options.noExcWrap ? e.toString() : StringUtil.splitLines(e.toString());
         System.err.println(msg);
         last = e;
       }

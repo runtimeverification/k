@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import static org.kframework.Collections.*;
@@ -66,6 +66,7 @@ public class TypeInferencer implements AutoCloseable {
   private final boolean debug;
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
+  private final Map<ProductionReference, Integer> prIds = new IdentityHashMap<>();
 
   // logic QF_DT is best if it exists as it will be faster than ALL. However, some z3 versions do
   // not have this logic.
@@ -176,7 +177,7 @@ public class TypeInferencer implements AutoCloseable {
     for (Tuple2<Sort, Set<Sort>> relation :
         stream(relations.relations())
             .sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1().head(), 0)))
-            .collect(Collectors.toList())) {
+            .toList()) {
       if (!isRealSort(relation._1().head())) {
         continue;
       }
@@ -442,7 +443,7 @@ public class TypeInferencer implements AutoCloseable {
       case "#SyntacticCast":
       case "#OuterCast":
         return tc.production().sort();
-      case "#InnerCast":
+      case "#SyntacticCastBraced":
         return ((NonTerminal) tc.production().items().apply(1)).sort();
       default:
         if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
@@ -566,7 +567,7 @@ public class TypeInferencer implements AutoCloseable {
           return apply(amb.items().iterator().next());
         }
         // compute name of expected sort for use in cache.
-        String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
+        String expected = printSort(expectedSort, expectedParams).replace("|", "");
         Map<String, Integer> contexts = ambCache.computeIfAbsent(amb, amb2 -> new HashMap<>());
         int id = contexts.computeIfAbsent(expected, expected2 -> ambId);
         boolean cached = id != ambId;
@@ -593,7 +594,7 @@ public class TypeInferencer implements AutoCloseable {
       boolean isTopSort =
           expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
       int id = nextId;
-      boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
+      boolean shared = prIds.containsKey(pr) && variablesById.size() > prIds.get(pr);
       if (!shared) {
         // if this is the first time reaching this term, initialize data structures with the
         // variables associated with
@@ -601,7 +602,7 @@ public class TypeInferencer implements AutoCloseable {
         nextId++;
         variablesById.add(new ArrayList<>());
         cacheById.add(new HashSet<>());
-        pr.setId(Optional.of(id));
+        prIds.put(pr, id);
         for (Sort param : iterable(pr.production().params())) {
           String name = "FreshVar" + param.name() + locStr(pr);
           if (!variables.contains(name)) {
@@ -612,7 +613,7 @@ public class TypeInferencer implements AutoCloseable {
         }
       } else {
         // get cached id
-        id = pr.id().get();
+        id = prIds.get(pr);
       }
       if (pr instanceof TermCons tc) {
         boolean wasStrict = isStrictEquality;
@@ -627,11 +628,11 @@ public class TypeInferencer implements AutoCloseable {
             if (tc.production().klabel().isDefined()
                 && (tc.production().klabel().get().name().equals("#SyntacticCast")
                     || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
+                    || tc.production().klabel().get().name().equals("#SyntacticCastBraced"))) {
               expectedSort = getSortOfCast(tc);
               isStrictEquality =
                   tc.production().klabel().get().name().equals("#SyntacticCast")
-                      || tc.production().klabel().get().name().equals("#InnerCast");
+                      || tc.production().klabel().get().name().equals("#SyntacticCastBraced");
               if (tc.get(0) instanceof Constant child) {
                 if (child.production().sort().equals(Sorts.KVariable())
                     || child.production().sort().equals(Sorts.KConfigVar())) {
@@ -655,7 +656,7 @@ public class TypeInferencer implements AutoCloseable {
         expectedParams = oldExpectedParams;
       }
       // compute name of expected sort for use in cache.
-      String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
+      String expected = printSort(expectedSort, expectedParams).replace("|", "");
       boolean cached = !cacheById.get(id).add(expected);
       if (!isIncremental && (!shared || !cached)) {
         // if we are in non-incremental mode and this is the first time reaching this term under
@@ -682,7 +683,7 @@ public class TypeInferencer implements AutoCloseable {
             nextId++;
             variablesById.add(new ArrayList<>());
             cacheById.add(new HashSet<>());
-            pr.setId(Optional.of(id));
+            prIds.put(pr, id);
             if (isAnonVar(c)) {
               name = "Var" + c.value() + locStr(c);
               isStrictEquality = true;
@@ -735,12 +736,12 @@ public class TypeInferencer implements AutoCloseable {
         } else {
           sb.append("(<=Sort ");
         }
-        sb.append(printSort(actualSort, actualParams, isIncremental));
+        sb.append(printSort(actualSort, actualParams));
         sb.append(" ");
         if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
         }
-        sb.append(printSort(expectedSort, expectedParams, isIncremental));
+        sb.append(printSort(expectedSort, expectedParams));
         sb.append(") ");
       }
       if (isIncremental) {
@@ -764,7 +765,7 @@ public class TypeInferencer implements AutoCloseable {
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
         expectedSort = Sorts.K();
       }
-      sb.append(printSort(expectedSort, expectedParams, isIncremental));
+      sb.append(printSort(expectedSort, expectedParams));
       sb.append(") ");
       if (isIncremental) {
         saveConstraint(name, loc);
@@ -795,11 +796,11 @@ public class TypeInferencer implements AutoCloseable {
     return stream(actualSort.params()).anyMatch(this::isBadNatSort);
   }
 
-  private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
+  private String printSort(Sort s, Optional<ProductionReference> t) {
     Map<Sort, String> params = new HashMap<>();
     if (t.isPresent()) {
       if (t.get().production().params().nonEmpty()) {
-        int id = t.get().id().get();
+        int id = prIds.get(t.get());
         List<String> names = variablesById.get(id);
         Seq<Sort> formalParams = t.get().production().params();
         assert (names.size() == formalParams.size());
@@ -808,10 +809,10 @@ public class TypeInferencer implements AutoCloseable {
         }
       }
     }
-    return printSort(s, params, isIncremental);
+    return printSort(s, params);
   }
 
-  private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
+  private String printSort(Sort s, Map<Sort, String> params) {
     StringBuilder sb = new StringBuilder();
     if (params.containsKey(s)) {
       sb.append("|").append(params.get(s)).append("|");
@@ -824,7 +825,7 @@ public class TypeInferencer implements AutoCloseable {
     sb.append("(|Sort").append(s.name()).append("|");
     for (Sort param : iterable(s.params())) {
       sb.append(" ");
-      sb.append(printSort(param, params, isIncremental));
+      sb.append(printSort(param, params));
     }
     sb.append(")");
     return sb.toString();
@@ -945,8 +946,8 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   public Seq<Sort> getArgs(ProductionReference pr) {
-    if (pr.id().isPresent()) {
-      int id = pr.id().get();
+    if (prIds.containsKey(pr)) {
+      int id = prIds.get(pr);
       List<String> names = variablesById.get(id);
       return names.stream().map(this::getValue).collect(Collections.toList());
     } else {
@@ -963,7 +964,7 @@ public class TypeInferencer implements AutoCloseable {
   private Sort eval(Sort s, Optional<ProductionReference> params) {
     if (isBadNatSort(s)) return s;
     print("(eval ");
-    print(printSort(s, params, true));
+    print(printSort(s, params));
     println(")");
     return readSort(false);
   }
@@ -1023,7 +1024,7 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
-  private static String locStr(ProductionReference pr) {
+  private String locStr(ProductionReference pr) {
     String suffix = "";
     if (pr.production().klabel().isDefined()) {
       suffix = "_" + pr.production().klabel().get().name().replace("|", "");
@@ -1040,7 +1041,7 @@ public class TypeInferencer implements AutoCloseable {
           + l.endColumn()
           + suffix;
     }
-    return pr.id().get() + suffix;
+    return prIds.get(pr) + suffix;
   }
 
   private StringBuilder sb = new StringBuilder();

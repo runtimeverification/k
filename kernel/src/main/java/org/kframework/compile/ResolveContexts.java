@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -24,7 +24,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
 import org.kframework.kore.FoldK;
 import org.kframework.kore.K;
@@ -38,11 +37,7 @@ import org.kframework.utils.errorsystem.KEMException;
 
 public class ResolveContexts {
 
-  private final KompileOptions kompileOptions;
-
-  public ResolveContexts(KompileOptions kompileOptions) {
-    this.kompileOptions = kompileOptions;
-  }
+  public ResolveContexts() {}
 
   public Definition resolve(Definition d) {
     klabels = new HashSet<>();

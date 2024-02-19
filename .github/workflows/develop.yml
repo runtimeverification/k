@@ -39,7 +39,7 @@ jobs:
           fi
 
   post-performance-tests:
-    name: 'Performace Tests'
+    name: 'Performance Tests'
     runs-on: [self-hosted, linux, normal]
     continue-on-error: true
     steps:
@@ -65,11 +65,13 @@ jobs:
             -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
             -e GITHUB_ACTIONS=true                                             \
             -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
+            -e GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH                            \
             -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
             -e GITHUB_REF=$GITHUB_REF                                          \
             -e GITHUB_SHA=${GITHUB_SHA}                                        \
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
+            -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
             ${BASE_OS}:${BASE_DISTRO}
       - name: 'Setting up dependencies'
         run: |

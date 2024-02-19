@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser;
 
 import static org.kframework.Collections.*;
@@ -22,7 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -81,13 +80,11 @@ public class ParserUtils {
     Definition def = new Definition();
     def.setItems(Outer.parse(source, definitionText, null));
     def.setMainModule(mainModule);
-    def.setMainSyntaxModule(mainModule);
 
-    ProcessGroupAttributes.apply(def);
     Context context = new Context();
     new CollectProductionsVisitor(context).visit(def);
 
-    KILtoKORE kilToKore = new KILtoKORE(context, false, false);
+    KILtoKORE kilToKore = new KILtoKORE(context, false);
     return kilToKore.apply(def).getModule(mainModule).get();
   }
 
@@ -118,9 +115,6 @@ public class ParserUtils {
       }
     }
     List<DefinitionItem> items = Outer.parse(source, definitionText, null);
-    items.stream()
-        .filter((d) -> d instanceof org.kframework.kil.Module)
-        .forEach((m) -> ProcessGroupAttributes.apply((org.kframework.kil.Module) m));
 
     if (options.verbose) {
       System.out.println("Importing: " + source);
@@ -228,7 +222,6 @@ public class ParserUtils {
     Definition def = new Definition();
     def.setItems((List<DefinitionItem>) (Object) kilModules);
 
-    ProcessGroupAttributes.apply(def);
     new CollectProductionsVisitor(context).visit(def);
 
     // Tuple4 of moduleName, Source, Location, digest
@@ -254,7 +247,7 @@ public class ParserUtils {
         groupedModules.entrySet().stream()
             .filter(e -> e.getValue().size() > 1)
             .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+            .toList();
 
     int errors = 0;
     for (String moduleName : duplicateModules) {
@@ -296,7 +289,7 @@ public class ParserUtils {
       System.out.println(def);
     }
 
-    KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc);
+    KILtoKORE kilToKore = new KILtoKORE(context, leftAssoc);
     // Order modules by name to stabilize the error message for circular imports
     java.util.List<FlatModule> flatModules =
         kilModules.stream()
@@ -415,7 +408,7 @@ public class ParserUtils {
     Optional<Module> opt;
     opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
     Module syntaxModule;
-    if (!opt.isPresent()) {
+    if (opt.isEmpty()) {
       kem.registerCompilerWarning(
           ExceptionType.MISSING_SYNTAX_MODULE,
           "Could not find main syntax module with name "
@@ -435,7 +428,7 @@ public class ParserUtils {
   private Module getMainModule(String mainModuleName, Set<Module> modules) {
     Optional<Module> opt =
         modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
-    if (!opt.isPresent()) {
+    if (opt.isEmpty()) {
       throw KEMException.compilerError(
           "Could not find main module with name "
               + mainModuleName

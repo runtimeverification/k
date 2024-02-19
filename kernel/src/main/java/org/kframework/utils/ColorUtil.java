@@ -1,9 +1,8 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.utils;
 
 import java.awt.Color;
 import java.awt.color.ColorSpace;
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -373,7 +372,6 @@ public final class ColorUtil {
       case OFF -> "";
       case ON -> getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes);
       case EXTENDED -> getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes);
-      default -> throw new UnsupportedOperationException("colorSettung: " + colorSetting);
     };
   }
 
@@ -506,15 +504,5 @@ public final class ColorUtil {
     double h = deltaH / (kh * sh);
     double i = l * l + c * c + h * h;
     return i < 0 ? 0 : Math.sqrt(i);
-  }
-
-  public static Color getColorByName(String colorName) {
-    try {
-      // Find the field and value of colorName
-      Field field = Class.forName("java.awt.Color").getField(colorName);
-      return (Color) field.get(null);
-    } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-      return null;
-    }
   }
 }

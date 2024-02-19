@@ -27,7 +27,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
 
-public class KoreBackend extends AbstractBackend {
+public class KoreBackend implements Backend {
 
   private final KompileOptions kompileOptions;
   protected final FileUtil files;
@@ -69,7 +69,8 @@ public class KoreBackend extends AbstractBackend {
    *
    * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
    */
-  protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
+  protected String getKompiledString(
+      CompiledDefinition def, @SuppressWarnings("unused") boolean hasAnd) {
     Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
     ModuleToKORE converter =
         new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
@@ -123,13 +124,11 @@ public class KoreBackend extends AbstractBackend {
     Function1<Definition, Definition> resolveStrict =
         d ->
             DefinitionTransformer.from(
-                    new ResolveStrict(kompileOptions, d)::resolve,
-                    "resolving strict and seqstrict attributes")
+                    new ResolveStrict(d)::resolve, "resolving strict and seqstrict attributes")
                 .apply(d);
     DefinitionTransformer resolveHeatCoolAttribute =
         DefinitionTransformer.fromSentenceTransformer(
-            new ResolveHeatCoolAttribute(new HashSet<>())::resolve,
-            "resolving heat and cool attributes");
+            ResolveHeatCoolAttribute::resolve, "resolving heat and cool attributes");
     DefinitionTransformer resolveAnonVars =
         DefinitionTransformer.fromSentenceTransformer(
             new ResolveAnonVar()::resolve, "resolving \"_\" vars");
@@ -240,23 +239,23 @@ public class KoreBackend extends AbstractBackend {
             .andThen(resolveFunctionWithConfig)
             .andThen(resolveStrict)
             .andThen(resolveAnonVars)
-            .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
+            .andThen(d -> new ResolveContexts().resolve(d))
             .andThen(numberSentences)
             .andThen(resolveHeatCoolAttribute)
             .andThen(resolveSemanticCasts)
             .andThen(subsortKItem)
-            .andThen(generateSortPredicateSyntax)
-            .andThen(generateSortProjections)
             .andThen(constantFolding)
             .andThen(propagateMacroToRules)
-            .andThen(expandMacros)
-            .andThen(checkSimplificationRules)
             .andThen(guardOrs)
-            .andThen(AddImplicitComputationCell::transformDefinition)
             .andThen(resolveFreshConfigConstants)
+            .andThen(generateSortPredicateSyntax)
+            .andThen(generateSortProjections)
+            .andThen(expandMacros)
+            .andThen(AddImplicitComputationCell::transformDefinition)
             .andThen(resolveFreshConstants)
             .andThen(generateSortPredicateSyntax)
             .andThen(generateSortProjections)
+            .andThen(checkSimplificationRules)
             .andThen(subsortKItem)
             .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
             .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))

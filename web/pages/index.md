@@ -21,6 +21,7 @@ call/cc.
 ## K Tool Download
 
 - Install from the latest [K GitHub Release](https://github.com/runtimeverification/k/releases/latest).
+- Install [pyk](https://github.com/runtimeverification/pyk), K's scripting interface for Python. Check the [API documentation](https://runtimeverification.github.io/pyk/) for a complete reference of supported features.
 - Try our [Editor Support](./editor_support.md) page for links to K syntax highlighting definitions for various popular editors/IDEs. Please feel free to contribute.
 - Build or browse the code [on GitHub](https://github.com/runtimeverification/k), where you can also [report bugs](http://github.com/runtimeverification/k/issues).
 
@@ -40,6 +41,7 @@ call/cc.
 
 ## Resources
 
+- K Approach and Vision (2020): [slide presentation](https://drive.google.com/file/d/1iXda2NyGzKVWxkd02IlXj5Tq5cOM_gNd/view)
 - A set of <a href="/k-distribution/pl-tutorial/README.md">reference implementations and tutorials</a> for common programming language features and paradigms is available, although parts of these implementations may not be fully up to date with modern K features.
 - Read some papers about K on the [Formal Systems Laboratory (FSL)](https://fsl.cs.illinois.edu/publications/).
 - [Matching logic](http://matching-logic.org/) webpage at UIUC (USA).

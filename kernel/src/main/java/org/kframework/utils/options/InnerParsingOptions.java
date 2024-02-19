@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.utils.options;
 
 import com.beust.jcommander.Parameter;
@@ -23,4 +23,22 @@ public class InnerParsingOptions implements Serializable {
       descriptionKey = "file",
       hidden = true)
   public String profileRules;
+
+  public enum TypeInferenceMode {
+    Z3,
+    SIMPLESUB,
+    CHECKED,
+    // We use an explicit DEFAULT option here so that ParseInModule can set a default which
+    // applies even for those codepaths that don't rely on KompileOptions
+    DEFAULT,
+  }
+
+  @Parameter(
+      names = "--type-inference-mode",
+      description =
+          "Choose between the Z3-based and SimpleSub-based type inference algorithms, or run both"
+              + " and check that their results are equal. Must be one of "
+              + "[z3|simplesub|checked|default].",
+      hidden = true)
+  public TypeInferenceMode typeInferenceMode = TypeInferenceMode.DEFAULT;
 }

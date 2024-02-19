@@ -1,8 +1,7 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import java.util.List;
-import java.util.Set;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
@@ -28,9 +27,6 @@ public interface ConfigurationInfo {
 
   /** True if sort k is actually a cell sort */
   boolean isCell(Sort k);
-
-  /** True if sort s is the collection sort for a multiplicity star cell. */
-  boolean isCellCollection(Sort s);
 
   /** True if kLabel is the KLabel of a cell */
   boolean isCellLabel(KLabel kLabel);
@@ -77,9 +73,6 @@ public interface ConfigurationInfo {
 
   /** Return the declared computation cell, by default the k cell */
   Sort getComputationCell();
-
-  /** Returns the set of cell sorts in this configuration */
-  Set<Sort> getCellSorts();
 
   /** Returns the unit of a * or ? cell. */
   KApply getUnit(Sort k);

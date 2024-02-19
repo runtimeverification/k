@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -43,7 +43,7 @@ public class GenerateSortPredicateRules {
         mod.imports(),
         (Set<Sentence>)
             mod.localSentences()
-                .$bar(stream(mod.allSorts()).flatMap(this::gen).collect(Collections.toSet())),
+                .$bar(stream(mod.localSorts()).flatMap(this::gen).collect(Collections.toSet())),
         mod.att());
   }
 

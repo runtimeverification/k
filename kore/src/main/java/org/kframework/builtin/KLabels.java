@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.builtin;
 
@@ -31,7 +31,6 @@ public class KLabels {
   public static final KLabel INIT_GENERATED_COUNTER_CELL = KLabel("initGeneratedCounterCell");
   public static final String THIS_CONFIGURATION = "THIS_CONFIGURATION";
 
-  public static final String STRATEGY_CELL_NAME = "s";
   public static final KLabel STRATEGY_CELL = KLabel("<s>");
   public static final KLabel STUCK = KLabel("#STUCK");
 
@@ -60,21 +59,11 @@ public class KLabels {
   public static final KLabel Set = KLabel("_Set_");
   public static final KLabel DotSet = KLabel(".Set");
 
-  public static final KLabel EQUALS_K = KLabel("_==K_");
   public static final KLabel NOT_EQUALS_K = KLabel("_=/=K_");
   public static final KLabel IN_K = KLabel("_:=K_");
   public static final KLabel NOT_IN_K = KLabel("_:/=K_");
 
-  public static final KLabel MAP_CHOICE = KLabel("Map:choice");
-  public static final KLabel SET_CHOICE = KLabel("Set:choice");
-  public static final KLabel LIST_GET = KLabel("List:get");
   public static final KLabel MAP_LOOKUP = KLabel("Map:lookup");
-  public static final KLabel SET_MEMBERSHIP = KLabel("Set:in");
-  public static final KLabel LIST_RANGE = KLabel("List:range");
-  public static final KLabel MAP_UPDATE = KLabel("updateMap");
-  public static final KLabel MAP_REMOVE_ALL = KLabel("removeAll");
-  public static final KLabel SET_REMOVE_ALL = KLabel("Set:difference");
-  public static final KLabel MAP_KEYS = KLabel("keys");
 
   public static final String INJ = "inj";
 }

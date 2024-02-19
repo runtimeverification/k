@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) K Team. All Rights Reserved. -->
+<!-- Copyright (c) Runtime Verification, Inc. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.runtimeverification.k</groupId>
@@ -74,8 +74,15 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.12.18</scala.version>
     <project.build.type>FastBuild</project.build.type>
+    <scala.majorVersion>2.12</scala.majorVersion>
+    <scala.minorVersion>18</scala.minorVersion>
+    <scala.version>${scala.majorVersion}.${scala.minorVersion}</scala.version>
+    <spotless.version>2.41.1</spotless.version>
+    <googleJavaFormat.version>1.18.1</googleJavaFormat.version>
+    <scalafmt.version>3.7.17</scalafmt.version>
+    <nativeDirs>**/src/main/native/**</nativeDirs>
+    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</spotless.excludes>
   </properties>
 
   <dependencies>
@@ -85,9 +92,9 @@
       <version>${scala.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-reflect</artifactId>
-        <version>${scala.version}</version>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -100,6 +107,21 @@
       <artifactId>mockito-core</artifactId>
       <version>2.23.4</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.diffplug.spotless</groupId>
+      <artifactId>spotless-maven-plugin</artifactId>
+      <version>${spotless.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>${googleJavaFormat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalameta</groupId>
+      <artifactId>scalafmt-core_${scala.majorVersion}</artifactId>
+      <version>${scalafmt.version}</version>
     </dependency>
   </dependencies>
 
@@ -194,42 +216,6 @@
         <version>3.2.1</version>
         <executions>
           <execution>
-            <id>checkstyle-copyright</id>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <sourceDirectories>
-                <sourceDirectory>${project.basedir}</sourceDirectory>
-              </sourceDirectories>
-	      <includes>**/*.xml,**/*.xsd,**/*.md,**/*.k,**/*.kore,**/*.java,**/*.scala,**/*.jj,**/*.jjt,**/*.str,**/*.css,**/*.sty,**/*.tex,**/*.cls</includes>
-              <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
-              <failsOnError>true</failsOnError>
-              <consoleOutput>true</consoleOutput>
-              <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</excludes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>checkstyle-k</id>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <sourceDirectories>
-                <sourceDirectory>${project.basedir}</sourceDirectory>
-              </sourceDirectories>
-              <includeResources>false</includeResources>
-              <includeTestResources>false</includeTestResources>
-              <includes>**/*.k</includes>
-              <excludes>hs-backend-booster/src/main/native/**,haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,**/.kompile-*/**</excludes>
-              <configLocation>src/main/config/checkstyle-k.xml</configLocation>
-              <failsOnError>true</failsOnError>
-              <consoleOutput>true</consoleOutput>
-            </configuration>
-          </execution>
-          <execution>
             <id>checkstyle-java</id>
             <goals>
               <goal>check</goal>
@@ -274,6 +260,137 @@
             <id>enforce-java</id>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <goals>
+              <goal>apply</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <formats>
+            <format>
+              <includes>**/*.k</includes>
+              <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <licenseHeader>
+                <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
+                <delimiter>(?!//\sCopyright)</delimiter>
+              </licenseHeader>
+            </format>
+            <format>
+              <includes>**/*.xml,**/*.xsd</includes>
+              <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <licenseHeader>
+                <skipLinesMatching>^&lt;\?xml.*\?&gt;$</skipLinesMatching>
+                <content>&lt;!-- Copyright (c) Runtime Verification, Inc. All Rights Reserved. --&gt;</content>
+                <delimiter>&lt;(?!\!--)</delimiter>
+              </licenseHeader>
+            </format>
+            <format>
+              <includes>**/*.md</includes>
+              <excludes>${spotless.excludes}</excludes>
+              <lineEndings>UNIX</lineEndings>
+              <endWithNewline/>
+              <licenseHeader>
+                <skipLinesMatching>^---$</skipLinesMatching>
+                <content>copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
+                <delimiter>(?!copyright)</delimiter>
+              </licenseHeader>
+            </format>
+            <format>
+              <includes>**/*.kore,**/*.jj,**/*.jjt,**/*.str</includes>
+              <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <licenseHeader>
+                <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
+                <delimiter>(?!//\sCopyright)</delimiter>
+              </licenseHeader>
+            </format>
+            <format>
+              <includes>**/*.css</includes>
+              <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <licenseHeader>
+                <content>/* Copyright (c) Runtime Verification, Inc. All Rights Reserved. */</content>
+                <delimiter>(?!/\*\sCopyright)</delimiter>
+              </licenseHeader>
+            </format>
+            <format>
+              <includes>**/*.sty,**/*.tex,**/*.cls</includes>
+              <excludes>${spotless.excludes}</excludes>
+              <indent>
+                <spaces>true</spaces>
+              </indent>
+              <lineEndings>UNIX</lineEndings>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <licenseHeader>
+                <content>% Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
+                <delimiter>(?!%\sCopyright)</delimiter>
+              </licenseHeader>
+            </format>
+          </formats>
+          <java>
+            <includes>**/*.java</includes>
+            <excludes>${spotless.excludes}</excludes>
+            <lineEndings>UNIX</lineEndings>
+            <trimTrailingWhitespace/>
+            <endWithNewline/>
+            <licenseHeader>
+              <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
+              <delimiter>(?!//\sCopyright)</delimiter>
+            </licenseHeader>
+            <googleJavaFormat>
+              <version>${googleJavaFormat.version}</version>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+          </java>
+          <scala>
+            <includes>**/*.scala,**/*.sbt</includes>
+            <excludes>${spotless.excludes}</excludes>
+            <lineEndings>UNIX</lineEndings>
+            <trimTrailingWhitespace/>
+            <endWithNewline/>
+            <licenseHeader>
+              <content>// Copyright (c) Runtime Verification, Inc. All Rights Reserved.</content>
+              <delimiter>(?!//\sCopyright)</delimiter>
+            </licenseHeader>
+            <scalafmt>
+              <version>${scalafmt.version}</version>
+              <file>src/main/config/.scalafmt.conf</file>
+              <scalaMajorVersion>${scala.majorVersion}</scalaMajorVersion>
+            </scalafmt>
+          </scala>
+        </configuration>
       </plugin>
     </plugins>
   </build>

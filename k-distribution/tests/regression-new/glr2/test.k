@@ -1,11 +1,11 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module TEST-SYNTAX
   imports INT-SYNTAX
 
   syntax Exp ::= Val
                | Exp "+" Exp
-               | foo(Exp)
-  syntax Val ::= foo(Val)
+               | foo(Exp) [klabel(foo)]
+  syntax Val ::= foo(Val) [klabel(foo)]
                | Int
 
 endmodule

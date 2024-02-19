@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import static org.kframework.kore.KORE.*;
@@ -43,7 +43,7 @@ public class AddEmptyListsTest {
     Module test =
         ParserUtils.parseMainModuleOuterSyntax(
             DEF, Source.apply("AddEmptyListsTest test definition"), "TEST");
-    parser = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(test), true, files);
+    parser = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(test), files);
   }
 
   /*
@@ -82,7 +82,7 @@ public class AddEmptyListsTest {
     if (parseResult._1().isLeft()) {
       Assert.assertTrue("Unexpected parse errors" + parseResult._1().left().get(), false);
     }
-    K actual = new TreeNodesToKORE(Outer::parseSort, false).down(parseResult._1().right().get());
+    K actual = new TreeNodesToKORE(Outer::parseSort).down(parseResult._1().right().get());
     Assert.assertEquals(expected, actual);
     if (parseResult._2().size() != expectWarnings) {
       Assert.assertTrue("Unexpected parse warnings" + parseResult._2(), false);
@@ -97,7 +97,7 @@ public class AddEmptyListsTest {
           + "syntax As ::= List{A,\",\"} [klabel(as)]\n"
           + "syntax Bs ::= List{B,\",\"} [klabel(as)]\n"
           + "syntax As ::= Bs\n"
-          + "syntax K ::= f(As) [symbol] | g(A) [symbol] | h(Bs) [symbol]"
+          + "syntax K ::= f(As) [klabel(f), symbol] | g(A) [klabel(g), symbol] | h(Bs) [klabel(h), symbol]"
           + "endmodule\n";
 
   public static final KApply NIL = KApply(KLabel(".List{\"_,__TEST_Bs_B_Bs\"}_Bs"));

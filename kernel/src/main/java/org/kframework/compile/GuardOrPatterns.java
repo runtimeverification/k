@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.kore.KORE.*;
@@ -40,12 +40,6 @@ public class GuardOrPatterns {
     gatherVars(context.requires());
     return new Context(
         transform(context.body(), m), transform(context.requires(), m), context.att());
-  }
-
-  public K resolveK(Module m, K k) {
-    resetVars();
-    gatherVars(k);
-    return transform(k, m);
   }
 
   public synchronized Sentence resolve(Module m, Sentence s) {

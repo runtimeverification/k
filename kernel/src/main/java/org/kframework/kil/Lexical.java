@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kil;
 
 import org.kframework.utils.StringUtil;
@@ -33,14 +33,6 @@ public class Lexical extends ProductionItem {
   @Override
   public int hashCode() {
     return this.lexicalRule.hashCode();
-  }
-
-  public void setFollow(String follow) {
-    this.follow = follow;
-  }
-
-  public String getFollow() {
-    return follow;
   }
 
   public String getLexicalRule() {

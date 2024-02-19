@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.inner;
 
 import static org.kframework.Collections.*;
@@ -38,6 +38,7 @@ import org.kframework.kore.SortHead;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.InnerParsingOptions;
 import scala.Option;
 import scala.Tuple3;
 import scala.collection.Seq;
@@ -64,19 +65,12 @@ public record RuleGrammarGenerator(Definition baseK) {
     kSorts.add(Sorts.KString());
   }
 
-  private static Set<Sort> kSorts() {
-    return java.util.Collections.unmodifiableSet(kSorts);
-  }
-
   /// modules that have a meaning:
   public static final String DEFAULT_LAYOUT = "DEFAULT-LAYOUT";
   public static final String RULE_CELLS = "RULE-CELLS";
   public static final String CONFIG_CELLS = "CONFIG-CELLS";
   public static final String K = "K";
   public static final String AUTO_CASTS = "AUTO-CASTS";
-  public static final String KSEQ_SYMBOLIC = "KSEQ-SYMBOLIC";
-  public static final String K_TOP_SORT = "K-TOP-SORT";
-  public static final String K_BOTTOM_SORT = "K-BOTTOM-SORT";
   public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
   public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
   public static final String RULE_LISTS = "RULE-LISTS";
@@ -85,7 +79,6 @@ public record RuleGrammarGenerator(Definition baseK) {
 
   public static final String POSTFIX = "-PROGRAM-PARSING";
 
-  public static final String NOT_INJECTION = "notInjection";
   public static final String ID = "ID";
   private static final String ID_SYNTAX = "ID-SYNTAX";
   public static final String ID_PROGRAM_PARSING = ID_SYNTAX + POSTFIX;
@@ -97,11 +90,6 @@ public record RuleGrammarGenerator(Definition baseK) {
    *     syntax is defined in include/kast.k.
    */
   public RuleGrammarGenerator {}
-
-  private Set<Module> renameKItem2Bottom(Set<Module> def) {
-    // TODO: do renaming of KItem and K in the LHS to KBott?
-    return def;
-  }
 
   /**
    * Creates the seed module that can be used to parse rules. Imports module markers RULE-CELLS and
@@ -200,48 +188,90 @@ public record RuleGrammarGenerator(Definition baseK) {
   }
 
   /* use this overload if you don't need to profile rule parse times. */
-  public static ParseInModule getCombinedGrammar(Module mod, boolean strict, FileUtil files) {
-    return getCombinedGrammar(mod, strict, false, false, false, files, null, false);
+  public static ParseInModule getCombinedGrammar(Module mod, FileUtil files) {
+    return getCombinedGrammar(
+        mod,
+        false,
+        false,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, FileUtil files, boolean partialParseDebug) {
-    return getCombinedGrammar(mod, strict, false, false, false, files, null, partialParseDebug);
+      Module mod, FileUtil files, boolean partialParseDebug) {
+    return getCombinedGrammar(
+        mod,
+        false,
+        false,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        partialParseDebug);
   }
 
-  public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, boolean timing, FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, false, false, files, null, false);
-  }
-
-  public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, boolean timing, FileUtil files, String debugTypeInference) {
-    return getCombinedGrammar(mod, strict, timing, false, false, files, debugTypeInference, false);
-  }
-
-  public static ParseInModule getCombinedGrammar(
-      Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, isBison, false, files, null, false);
+  public static ParseInModule getCombinedGrammar(Module mod, boolean timing, FileUtil files) {
+    return getCombinedGrammar(
+        mod,
+        timing,
+        false,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
   }
 
   public static ParseInModule getCombinedGrammar(
       Module mod,
-      boolean strict,
       boolean timing,
-      boolean isBison,
-      boolean forGlobalScanner,
-      FileUtil files) {
-    return getCombinedGrammar(mod, strict, timing, isBison, forGlobalScanner, files, null, false);
+      FileUtil files,
+      String debugTypeInference,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode) {
+    return getCombinedGrammar(
+        mod, timing, false, false, files, debugTypeInference, typeInferenceMode, false);
   }
 
   public static ParseInModule getCombinedGrammar(
-      Module mod,
-      Scanner scanner,
-      boolean strict,
-      boolean timing,
-      boolean isBison,
-      FileUtil files) {
-    return getCombinedGrammar(mod, scanner, strict, timing, isBison, files, null, false);
+      Module mod, boolean timing, boolean isBison, FileUtil files) {
+    return getCombinedGrammar(
+        mod,
+        timing,
+        isBison,
+        false,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
+  }
+
+  public static ParseInModule getCombinedGrammar(
+      Module mod, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    return getCombinedGrammar(
+        mod,
+        timing,
+        isBison,
+        forGlobalScanner,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
+  }
+
+  public static ParseInModule getCombinedGrammar(
+      Module mod, Scanner scanner, boolean timing, boolean isBison, FileUtil files) {
+    return getCombinedGrammar(
+        mod,
+        scanner,
+        timing,
+        isBison,
+        files,
+        null,
+        InnerParsingOptions.TypeInferenceMode.DEFAULT,
+        false);
   }
 
   // the forGlobalScanner flag tells the ParseInModule class not to exclude
@@ -264,35 +294,43 @@ public record RuleGrammarGenerator(Definition baseK) {
    */
   public static ParseInModule getCombinedGrammar(
       Module mod,
-      boolean strict,
       boolean timing,
       boolean isBison,
       boolean forGlobalScanner,
       FileUtil files,
       String debugTypeInference,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     return new ParseInModule(
         mod,
-        strict,
         timing,
         isBison,
         forGlobalScanner,
         files,
         debugTypeInference,
+        typeInferenceMode,
         partialParseDebug);
   }
 
   public static ParseInModule getCombinedGrammar(
       Module mod,
       Scanner scanner,
-      boolean strict,
       boolean timing,
       boolean isBison,
       FileUtil files,
       String debugTypeInference,
+      InnerParsingOptions.TypeInferenceMode typeInferenceMode,
       boolean partialParseDebug) {
     return new ParseInModule(
-        mod, scanner, strict, timing, isBison, false, files, debugTypeInference, partialParseDebug);
+        mod,
+        scanner,
+        timing,
+        isBison,
+        false,
+        files,
+        debugTypeInference,
+        typeInferenceMode,
+        partialParseDebug);
   }
 
   public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(
@@ -321,19 +359,18 @@ public record RuleGrammarGenerator(Definition baseK) {
     }
 
     if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
-      Set<Sentence> temp;
       for (Sort srt : iterable(mod.allSorts())) {
         if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
           // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-          prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt, srt));
+          prods.addAll(makeCasts(Sorts.K(), srt, srt));
         }
       }
-      prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
-      prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList(), Sorts.KList()));
-      prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem(), Sorts.KItem()));
-      prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K(), Sorts.K()));
+      prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
+      prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList()));
+      prods.addAll(makeCasts(Sorts.K(), Sorts.KItem(), Sorts.KItem()));
+      prods.addAll(makeCasts(Sorts.K(), Sorts.K(), Sorts.K()));
       for (SortSynonym syn : iterable(mod.sortSynonyms())) {
-        prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), syn.newSort(), syn.oldSort()));
+        prods.addAll(makeCasts(Sorts.K(), syn.newSort(), syn.oldSort()));
       }
     }
 
@@ -375,7 +412,7 @@ public record RuleGrammarGenerator(Definition baseK) {
     List<Sort> allSorts =
         stream(mod.allSorts())
             .filter(s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
-            .collect(Collectors.toList());
+            .toList();
     for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
       for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
         // syntax MInt{K} ::= MInt{6}
@@ -450,7 +487,7 @@ public record RuleGrammarGenerator(Definition baseK) {
           // syntax {P} Int ::= P "+" Int
           // syntax     Int ::= K "+" Int
           List<Sort> instantiationMask = new ArrayList<>();
-          for (Sort param : mutable(p.params())) instantiationMask.add(Sorts.K());
+          for (Sort ignored : mutable(p.params())) instantiationMask.add(Sorts.K());
           Production subst = p.substitute(immutable(instantiationMask));
           Production p1 =
               Production(
@@ -583,18 +620,20 @@ public record RuleGrammarGenerator(Definition baseK) {
               .collect(Collectors.toSet());
     }
 
-    disambProds = parseProds.stream().collect(Collectors.toSet());
+    disambProds = new HashSet<>(parseProds);
     if (mod.importedModuleNames().contains(PROGRAM_LISTS)) {
       Set<Sentence> prods3 = new HashSet<>();
       // if no start symbol has been defined in the configuration, then use K
       for (Sort srt : iterable(mod.allSorts())) {
         if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
-          // K ::= Sort
+          // KItem ::= Sort
           prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
         }
       }
+      // Add KItem subsorts to disambiguation for use by sort inference
+      disambProds.addAll(prods3);
       // for each triple, generate a new pattern which works better for parsing lists in programs.
-      prods3.addAll(parseProds.stream().collect(Collectors.toSet()));
+      prods3.addAll(new HashSet<>(parseProds));
       Set<Sentence> res = new HashSet<>();
       for (UserList ul : UserList.getLists(prods3)) {
         Production prod1, prod2, prod3 = null, prod4 = null, prod5 = null;
@@ -686,11 +725,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       }
       res.addAll(
           prods3.stream()
-              .filter(
-                  p ->
-                      !(p instanceof Production
-                          && (p.att().contains(Att.GENERATED_BY_LIST_SUBSORTING())
-                              || p.att().contains(Att.USER_LIST()))))
+              .filter(p -> !(p instanceof Production && p.att().contains(Att.USER_LIST())))
               .collect(Collectors.toSet()));
       parseProds = res;
     }
@@ -714,7 +749,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         stream(mod.importedModules())
             .filter(m -> m.att().contains(Att.NOT_LR1()))
             .map(Module::name)
-            .collect(Collectors.toList());
+            .toList();
     if (!notLrModules.isEmpty()) {
       att = att.add(Att.NOT_LR1_MODULES(), notLrModules.toString());
     }
@@ -741,8 +776,7 @@ public record RuleGrammarGenerator(Definition baseK) {
     }
   }
 
-  private static Set<Sentence> makeCasts(
-      Sort outerSort, Sort innerSort, Sort castSort, Sort labelSort) {
+  private static Set<Sentence> makeCasts(Sort innerSort, Sort castSort, Sort labelSort) {
     Set<Sentence> prods = new HashSet<>();
     Att attrs1 = Att().add(Sort.class, castSort);
     prods.add(
@@ -753,16 +787,16 @@ public record RuleGrammarGenerator(Definition baseK) {
             attrs1.add(Att.FORMAT(), "%1%2")));
     prods.add(
         Production(
+            KLabel("#SyntacticCastBraced"),
+            castSort,
+            Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("::" + castSort)),
+            attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
+    prods.add(
+        Production(
             KLabel("#SemanticCastTo" + labelSort.toString()),
             labelSort,
             Seq(NonTerminal(labelSort), Terminal(":" + castSort)),
             attrs1.add(Att.FORMAT(), "%1%2")));
-    prods.add(
-        Production(
-            KLabel("#InnerCast"),
-            castSort,
-            Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort)),
-            attrs1.add(Att.FORMAT(), "%1 %2 %3%4")));
     prods.add(
         Production(
             KLabel("#OuterCast"),

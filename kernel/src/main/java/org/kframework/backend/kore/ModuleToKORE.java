@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
@@ -72,7 +73,6 @@ import scala.collection.Seq;
 class RuleInfo {
   boolean isEquation;
   boolean isOwise;
-  boolean isKore;
   boolean isCeil;
   Production production;
   String productionSortStr;
@@ -83,7 +83,6 @@ class RuleInfo {
   public RuleInfo(
       boolean equation,
       boolean owise,
-      boolean kore,
       boolean ceil,
       Production production,
       String prodSortStr,
@@ -92,7 +91,6 @@ class RuleInfo {
       List<K> leftChildren) {
     this.isEquation = equation;
     this.isOwise = owise;
-    this.isKore = kore;
     this.isCeil = ceil;
     this.production = production;
     this.productionSortStr = prodSortStr;
@@ -117,15 +115,22 @@ public class ModuleToKORE {
   private final Set<String> mlBinders = new HashSet<>();
   private final KompileOptions options;
 
+  // for now these two variables are coupled to enable the functional claim check
   private final KExceptionManager kem;
+  private final boolean allowFuncClaims;
 
   public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
-    this(module, topCellInitializer, options, null);
+    this(module, topCellInitializer, options, null, false);
   }
 
   public ModuleToKORE(
-      Module module, KLabel topCellInitializer, KompileOptions options, KExceptionManager kem) {
+      Module module,
+      KLabel topCellInitializer,
+      KompileOptions options,
+      KExceptionManager kem,
+      boolean allowFuncClaims) {
     this.kem = kem;
+    this.allowFuncClaims = allowFuncClaims;
     this.module = module;
     this.addSortInjections = new AddSortInjections(module);
     this.topCellInitializer = topCellInitializer;
@@ -197,7 +202,6 @@ public class ModuleToKORE {
     collectionSorts.add("SET.Set");
     collectionSorts.add("MAP.Map");
     collectionSorts.add("LIST.List");
-    collectionSorts.add("ARRAY.Array");
     collectionSorts.add("RANGEMAP.RangeMap");
     attributes.remove(Att.HAS_DOMAIN_VALUES());
     if (attributes.containsKey(Att.TOKEN())) {
@@ -400,7 +404,7 @@ public class ModuleToKORE {
       collectAttributes(attributes, att);
       RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
       // only collect priorities of semantics rules
-      if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
+      if (!ruleInfo.isEquation && !ExpandMacros.isMacro(r)) {
         priorities.add(getPriority(att));
       }
     }
@@ -419,23 +423,16 @@ public class ModuleToKORE {
       Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
       if (att.contains(Att.HOOK())) {
         if (collectionSorts.contains(att.get(Att.HOOK()))) {
-          if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
-            att = att.remove(Att.ELEMENT());
-            att = att.remove(Att.UNIT());
-            att = att.remove(Att.HOOK());
-          } else {
-            Production concatProd =
-                stream(module.productionsForSort().apply(sort))
-                    .filter(p -> p.att().contains(Att.ELEMENT()))
-                    .findAny()
-                    .get();
-            att =
-                att.add(
-                    Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
-            att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
-            att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
-            sb.append("hooked-");
-          }
+          Production concatProd =
+              stream(module.productionsForSort().apply(sort))
+                  .filter(p -> p.att().contains(Att.ELEMENT()))
+                  .findAny()
+                  .get();
+          att =
+              att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
+          att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
+          att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
+          sb.append("hooked-");
         } else {
           sb.append("hooked-");
         }
@@ -932,22 +929,20 @@ public class ModuleToKORE {
       convert(lesser.nonterminal(i).sort(), lesser, sb);
       conn = ",";
     }
-    sb.append("))) [overload{}(");
-    convert(greater.klabel().get(), greater, sb);
-    sb.append("(), ");
-    convert(lesser.klabel().get(), lesser, sb);
-    sb.append("())] // overloaded production\n");
+    sb.append("))) ");
+    final var args = KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get()));
+    final var att =
+        Att.empty()
+            .add(Att.OVERLOAD(), KList.class, args)
+            .add(Att.SYMBOL_OVERLOAD(), KList.class, args);
+    convert(new HashMap<>(), att, sb, null, null);
+    sb.append(" // overloaded production\n");
   }
 
   private boolean isRealHook(Att att) {
     String hook = att.get(Att.HOOK());
-    if (hook.startsWith("ARRAY.")) {
-      return false;
-    }
-    if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
-      return true;
-    }
-    return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
+    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
+        .anyMatch(ns -> hook.startsWith(ns + "."));
   }
 
   private static boolean isBuiltinProduction(Production prod) {
@@ -1018,7 +1013,6 @@ public class ModuleToKORE {
   private RuleInfo getRuleInfo(RuleOrClaim rule, boolean heatCoolEq, String topCellSortStr) {
     boolean equation = false;
     boolean owise = false;
-    boolean kore = rule.att().contains(Att.KORE());
     boolean ceil = false;
     Production production = null;
     Sort productionSort = null;
@@ -1048,7 +1042,7 @@ public class ModuleToKORE {
       }
       if (isFunction(production)
           || rule.att().contains(Att.SIMPLIFICATION())
-          || rule.att().contains(Att.ANYWHERE()) && !kore) {
+          || rule.att().contains(Att.ANYWHERE())) {
         leftChildren = ((KApply) leftPattern).items();
         equation = true;
       } else if ((rule.att().contains(Att.HEAT()) || rule.att().contains(Att.COOL()))
@@ -1057,12 +1051,14 @@ public class ModuleToKORE {
         productionSortStr = topCellSortStr;
       }
       owise = rule.att().contains(Att.OWISE());
+    } else if (leftPattern instanceof KToken kt) {
+      productionSort = kt.sort();
+      productionSortStr = getSortStr(productionSort);
     }
 
     return new RuleInfo(
         equation,
         owise,
-        kore,
         ceil,
         production,
         productionSortStr,
@@ -1107,7 +1103,7 @@ public class ModuleToKORE {
       assertNoExistentials(rule, existentials);
       if (rule instanceof Claim) {
         sb.append("  claim{R");
-        if (kem != null) // TODO: remove once
+        if (!allowFuncClaims) // TODO: remove once
           // https://github.com/runtimeverification/haskell-backend/issues/3010 is
           // implemented
           kem.registerCompilerWarning(
@@ -1298,17 +1294,6 @@ public class ModuleToKORE {
         convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
         sb.append("\n\n");
       }
-    } else if (ruleInfo.isKore) {
-      assertNoExistentials(rule, existentials);
-      if (rule instanceof Claim) {
-        sb.append("  claim{} ");
-      } else {
-        sb.append("  axiom{} ");
-      }
-      convert(left, sb);
-      sb.append("\n  ");
-      convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
-      sb.append("\n\n");
     } else if (!ExpandMacros.isMacro(rule)) {
       // generate rule LHS
       if (!(rule instanceof Claim)) {
@@ -1348,9 +1333,9 @@ public class ModuleToKORE {
       } else {
         // LHS for claims
         sb.append("  claim{} ");
-        sb.append(String.format("\\implies{%s} (\n    ", topCellSortStr));
-        sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
-        convertSideCondition(requires, topCellSortStr, sb);
+        sb.append(String.format("\\implies{%s} (\n    ", ruleInfo.productionSortStr));
+        sb.append(String.format("  \\and{%s} (\n      ", ruleInfo.productionSortStr));
+        convertSideCondition(requires, ruleInfo.productionSortStr, sb);
         sb.append(", ");
         convert(left, sb);
         sb.append("), ");
@@ -1358,28 +1343,28 @@ public class ModuleToKORE {
 
       // generate rule RHS
       if (sentenceType == SentenceType.ALL_PATH) {
-        sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, topCellSortStr));
+        sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, ruleInfo.productionSortStr));
       } else if (sentenceType == SentenceType.ONE_PATH) {
-        sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, topCellSortStr));
+        sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, ruleInfo.productionSortStr));
       }
       if (!existentials.isEmpty()) {
         for (KVariable exists : existentials) {
-          sb.append(String.format(" \\exists{%s} (", topCellSortStr));
+          sb.append(String.format(" \\exists{%s} (", ruleInfo.productionSortStr));
           convert((K) exists, sb);
           sb.append(", ");
         }
         sb.append("\n      ");
       }
-      sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
+      sb.append(String.format("\\and{%s} (\n      ", ruleInfo.productionSortStr));
 
       if (options.enableKoreAntileft) {
-        convertSideCondition(ensures, topCellSortStr, sb);
+        convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
         sb.append(", ");
         convert(right, sb);
       } else {
         convert(right, sb);
         sb.append(", ");
-        convertSideCondition(ensures, topCellSortStr, sb);
+        convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
       }
 
       sb.append(')');
@@ -1679,14 +1664,15 @@ public class ModuleToKORE {
     // injective.
     boolean isInjective = isConstructor;
 
-    boolean isMacro = false;
+    boolean isMacro = prod.isMacro();
     boolean isAnywhere = overloads.contains(prod);
+
     if (prod.klabel().isDefined()) {
       for (Rule r : functionRules.get(prod.klabel().get())) {
-        isMacro |= ExpandMacros.isMacro(r);
         isAnywhere |= r.att().contains(Att.ANYWHERE());
       }
     }
+
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
@@ -1868,8 +1854,7 @@ public class ModuleToKORE {
   }
 
   private void collectAttributes(Map<Att.Key, Boolean> attributes, Att att) {
-    for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
-        iterable(att.withUserGroupsAsGroupAtt().att())) {
+    for (Tuple2<Tuple2<Att.Key, String>, ?> attribute : iterable(att.att())) {
       Att.Key name = attribute._1._1;
       Object val = attribute._2;
       String strVal = val.toString();
@@ -2029,14 +2014,9 @@ public class ModuleToKORE {
     sb.append("[");
     String conn = "";
 
-    // Emit user groups as group(_) to prevent conflicts between user groups and internals
-    att = att.withUserGroupsAsGroupAtt();
-
     for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
         // Sort to stabilize error messages
-        stream(att.att())
-            .sorted(Comparator.comparing(Tuple2::toString))
-            .collect(Collectors.toList())) {
+        stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).toList()) {
       Att.Key key = attribute._1._1;
       String strKey = key.key();
       String clsName = attribute._1._2;
@@ -2095,7 +2075,7 @@ public class ModuleToKORE {
                   else
                     throw KEMException.criticalError("No free variable found for " + s, location);
                 })
-            .collect(Collectors.toList());
+            .toList();
     String conn = "";
     for (KVariable var : variables) {
       sb.append(conn);

@@ -1,42 +1,30 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/811e94fbcaef8550a6a709a9ce793f7166457911";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/e320d4b9dfe9fefa713311c99794ea5ba1950af1";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/d240f6e954bdbc16572259ac6fec70a66416e2d8";
+      url = "github:runtimeverification/hs-backend-booster/db11dddfb7d82ee95bb038787bff2b44a94c38d5";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
     };
-    nixpkgs.follows = "haskell-backend/nixpkgs";
+    nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
-    mavenix = {
-      url = "github:goodlyrottenapple/mavenix";
-      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-      inputs.utils.follows = "flake-utils";
-    };
     llvm-backend = {
       url = "github:runtimeverification/llvm-backend";
-      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-      inputs.mavenix.follows = "mavenix";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
-    # needed by nix/flake-compat-k-unwrapped.nix
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, booster-backend
-    , llvm-backend, mavenix, flake-compat }:
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+    , booster-backend, llvm-backend }:
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 13;
-          llvm-backend-build-type = "Release"; })
-        mavenix.overlay
+          llvm-version = 15;
+          llvm-backend-build-type = "Release";
+        })
         llvm-backend.overlays.default
         haskell-backend.overlays.z3
         haskell-backend.overlays.integration-tests
@@ -68,12 +56,23 @@
               '';
             };
           in {
+            # this version of maven from nixpkgs 23.11. we can remove this version of maven once our nixpkgs catches up
+            maven = prev.callPackage ./nix/maven.nix { };
+
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
+                mvnHash = "sha256-AMxXqu1bbpnmsmLTizNw1n2llSdvx6AuNZRGUHqPn14=";
+                manualMvnArtifacts = [
+                  "org.scala-lang:scala-compiler:2.12.18"
+                  "ant-contrib:ant-contrib:1.0b3"
+                  "org.apache.ant:ant-nodeps:1.8.1"
+                  "org.apache.maven.wagon:wagon-provider-api:1.0-alpha-6"
+                ];
+                inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
-                booster = booster-backend.packages.${prev.system}.kore-rpc-booster;
-                mavenix = { inherit (prev) buildMaven; };
+                booster =
+                  booster-backend.packages.${prev.system}.kore-rpc-booster;
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
@@ -95,20 +94,21 @@
       "aarch64-darwin"
     ] (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-
-          # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
-          # https://github.com/NixOS/nixpkgs/pull/172397
-          config.allowBroken = system == "aarch64-darwin";
-          overlays = [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
-            ++ allOverlays;
-        };
+        pkgs = nixpkgs.lib.trivial.warnIf (llvm-backend.inputs.nixpkgs.rev
+          != haskell-backend.inputs.nixpkgs.rev)
+          "The version of nixpkgs in Haskell backend and LLVM backend has diverged!"
+          import nixpkgs {
+            inherit system;
+            # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
+            # https://github.com/NixOS/nixpkgs/pull/172397
+            config.allowBroken = system == "aarch64-darwin";
+            overlays =
+              [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
+              ++ allOverlays;
+          };
 
         haskell-backend-bins = pkgs.symlinkJoin {
-          name = "kore-${
-              haskell-backend.sourceInfo.shortRev or "local"
-            }";
+          name = "kore-${haskell-backend.sourceInfo.shortRev or "local"}";
           paths = let p = haskell-backend.packages.${system};
           in [
             p.kore-exec
@@ -120,7 +120,8 @@
         };
 
       in rec {
-        k-version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
+        k-version =
+          pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
           k = pkgs.k-framework {
@@ -130,23 +131,6 @@
               openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
             };
           };
-
-          # This is a copy of the `nix/update-maven.sh` script, which should be
-          # eventually removed. Having this inside the flake provides a uniform
-          # interface, i.e. we have `update-maven` in k and
-          # `update-cabal` in the haskell-backend.
-          # The first `nix-build` command below ensures k source is loaded into the Nix store.
-          # This command will fail, but only after loading the source.
-          # mavenix will not do this automatically because we it uses restrict-eval,
-          # and we are using filterSource, which is disabled under restrict-eval.
-          update-maven = pkgs.writeShellScriptBin "update-maven" ''
-            #!/bin/sh
-            ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
-              || echo "^~~~ expected error"
-
-            export PATH="${pkgs.gnused}/bin:$PATH"
-            ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
-          '';
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend booster-backend;
@@ -207,7 +191,10 @@
             };
         };
         defaultPackage = packages.k;
-        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework { inherit haskell-backend-bins; llvm-kompile-libs = {}; });
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework {
+          inherit haskell-backend-bins;
+          llvm-kompile-libs = { };
+        });
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.z3 = haskell-backend.overlays.z3;

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module TEST
     configuration <foo group="foo"> .K </foo>
                   <k> .K </k>

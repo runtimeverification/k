@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import static org.kframework.Collections.*;
@@ -164,19 +164,17 @@ public class CheckKLabels {
       if (prod.att().contains(Att.MAINCELL())
           || prod.att().contains(Att.UNUSED())
           || symbol.equals("<generatedTop>")
-          || !s.isPresent()
+          || s.isEmpty()
           || (prod.att().contains(Att.CELL())
               && stream(prod.nonterminals())
-                  .filter(
+                  .anyMatch(
                       nt ->
                           klabels
                               .get(symbol)
                               .sortAttributesFor()
                               .get(nt.sort().head())
                               .getOrElse(() -> Att.empty())
-                              .contains(Att.CELL_COLLECTION()))
-                  .findAny()
-                  .isPresent())) {
+                              .contains(Att.CELL_COLLECTION())))) {
         continue;
       }
       if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {
@@ -259,9 +257,7 @@ public class CheckKLabels {
     }
   }
 
-  private static final ImmutableSet<String> internalDuplicates =
-      ImmutableSet.of(
-          "#EmptyKList", "#EmptyK", "#ruleRequires", "#ruleRequiresEnsures", "#Top", "#Bottom");
+  private static final ImmutableSet<String> internalDuplicates = ImmutableSet.of("#EmptyK");
 
   private static final ImmutableSet<String> internalNames =
       ImmutableSet.of(

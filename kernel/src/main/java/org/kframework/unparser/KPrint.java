@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.unparser;
 
 import static org.kframework.kore.KORE.*;
@@ -131,16 +131,6 @@ public class KPrint {
             def, module, result, s, options.color(tty.stdout(), files.getEnv()), options.output));
   }
 
-  public byte[] prettyPrint(Definition def, Module module, K result) {
-    return prettyPrint(
-        def,
-        module,
-        result,
-        Sorts.GeneratedTopCell(),
-        options.color(tty.stdout(), files.getEnv()),
-        options.output);
-  }
-
   public byte[] prettyPrint(
       Definition def,
       Module module,
@@ -154,17 +144,16 @@ public class KPrint {
       case NONE:
       case BINARY:
       case JSON:
-      case LATEX:
         return serialize(result, outputMode);
       case PRETTY:
         Module prettyUnparsingModule =
-            RuleGrammarGenerator.getCombinedGrammar(module, false, files).getExtensionModule();
+            RuleGrammarGenerator.getCombinedGrammar(module, files).getExtensionModule();
         return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
       case PROGRAM:
         {
           RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
           Module programUnparsingModule =
-              RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false, files)
+              RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), files)
                   .getParsingModule();
           return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
         }
@@ -197,7 +186,6 @@ public class KPrint {
       case NONE -> "".getBytes();
       case BINARY -> ToBinary.apply(term);
       case JSON -> ToJson.apply(term);
-      case LATEX -> ToLatex.apply(term);
       default -> throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
     };
   }
@@ -210,7 +198,7 @@ public class KPrint {
     return unparseInternal(test, input, colorize);
   }
 
-  private Term disambiguateForUnparse(Module mod, Term t) {
+  private Term disambiguateForUnparse(Term t) {
     return t;
   }
 
@@ -221,7 +209,6 @@ public class KPrint {
             .addBrackets(
                 (ProductionReference)
                     disambiguateForUnparse(
-                        mod,
                         KOREToTreeNodes.apply(
                             KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))),
         colorize);
@@ -229,9 +216,8 @@ public class KPrint {
 
   public K abstractTerm(Module mod, K term) {
     K filteredSubst = options.noFilterSubstitution ? term : filterSubst(term, mod);
-    K origNames =
-        options.restoreOriginalNames ? restoreOriginalNameIfPresent(filteredSubst) : filteredSubst;
-    K collectionsSorted = options.noSortCollections ? origNames : sortCollections(mod, origNames);
+    K collectionsSorted =
+        options.noSortCollections ? filteredSubst : sortCollections(mod, filteredSubst);
     // non-determinism is still possible if associative/commutative collection terms start with
     // anonymous vars
     K alphaRenamed = options.noAlphaRenaming ? collectionsSorted : alphaRename(collectionsSorted);
@@ -312,7 +298,7 @@ public class KPrint {
         return Optional.of(term);
       }
       Set<KVariable> leftVars = vars(kapp.items().get(0));
-      if (leftVars.stream().filter(v -> !v.att().contains(Att.ANONYMOUS())).findAny().isPresent()) {
+      if (leftVars.stream().anyMatch(v -> !v.att().contains(Att.ANONYMOUS()))) {
         return Optional.of(term);
       }
       for (KVariable var : leftVars) {
@@ -328,7 +314,7 @@ public class KPrint {
 
   private K sortCollections(Module mod, K input) {
     Module unparsingModule =
-        RuleGrammarGenerator.getCombinedGrammar(mod, false, files).getExtensionModule();
+        RuleGrammarGenerator.getCombinedGrammar(mod, files).getExtensionModule();
     return new TransformK() {
       @Override
       public K apply(KApply k) {
@@ -371,18 +357,6 @@ public class KPrint {
     }.apply(input);
   }
 
-  private K restoreOriginalNameIfPresent(K input) {
-    return new TransformK() {
-      @Override
-      public K apply(KVariable k) {
-        if (k.att().contains(Att.ORIGINAL_NAME())) {
-          return KVariable(k.att().get(Att.ORIGINAL_NAME()), k.att());
-        }
-        return k;
-      }
-    }.apply(input);
-  }
-
   private K squashTerms(Module mod, K input) {
     return new TransformK() {
       @Override
@@ -408,7 +382,7 @@ public class KPrint {
 
   private K tokenizeTerm(Module mod, KApply kapp) {
     Module unparsingModule =
-        RuleGrammarGenerator.getCombinedGrammar(mod, false, files).getExtensionModule();
+        RuleGrammarGenerator.getCombinedGrammar(mod, files).getExtensionModule();
     String tokenizedTerm = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
     Sort finalSort = Sorts.K();
     Option<Sort> termSort = mod.sortFor().get(kapp.klabel());

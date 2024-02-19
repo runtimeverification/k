@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -13,7 +13,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.attributes.Source;
-import org.kframework.compile.ProcessGroupAttributes;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.inner.CollectProductionsVisitor;
@@ -99,9 +98,7 @@ public abstract class BaseTest {
     }
     def.setItems(Outer.parse(Source.apply(definitionFile.getPath()), definitionText, null));
     def.setMainModule("TEST");
-    def.setMainSyntaxModule("TEST");
 
-    ProcessGroupAttributes.apply(def);
     Context context = new Context();
     return new DefinitionWithContext(def, context);
   }

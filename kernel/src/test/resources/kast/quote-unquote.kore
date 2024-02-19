@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 require "/modules/k-visitor.k"
 
@@ -17,7 +17,7 @@ module QUOTE-UNQUOTE
   syntax KItem ::= "qVisitor" "(" Int ")" [#KAttributes(klabel(qVisitor(.::KList)))]
 
   rule qVisitor(N) => #visitor(#klabel(quoteit),#klist(N),
-                                   #klabel(isQuoted),#klist(.::KList)) requires #token("true", "Bool") 
+                                   #klabel(isQuoted),#klist(.::KList)) requires #token("true", "Bool")
                                    ensures #token("true", "Bool") [#KAttributes(macro(.::KList))]
 
   syntax Exp ::= "mQuote" "(" K "," Int ")" [klabel(mQuote(.::KList))]
@@ -25,7 +25,7 @@ module QUOTE-UNQUOTE
 
   syntax KItem ::= "quoteit" "(" Int "," K ")" [#KAttributes(klabel(quoteit(.::KList)))]
   rule quote(E) => mQuote(E, #token("0", "Int")) requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
-  rule quoteit(N, quote(E))   => #visitingkapp(#klabel(quote),mQuote(E, `_+Int_`(N, #token("1", "Int")))) 
+  rule quoteit(N, quote(E))   => #visitingkapp(#klabel(quote),mQuote(E, `_+Int_`(N, #token("1", "Int"))))
     requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
   rule quoteit(#token("0", "Int"), unquote(E)) => E requires #token("true", "Bool") ensures #token("true", "Bool") [#KAttributes(.::KList)]
   rule quoteit(N, unquote(E)) => #visitingkapp(#klabel(unquote),mQuote(E, `_-Int_`(N, #token("1", "Int"))))

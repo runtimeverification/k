@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.unparser;
 
 /**
@@ -12,24 +12,6 @@ public enum OutputModes {
   KAST,
   BINARY,
   JSON,
-  LATEX,
   KORE,
   NONE;
-
-  private String extension;
-
-  static {
-    PRETTY.extension = "kpretty";
-    PROGRAM.extension = "pgm";
-    KAST.extension = "kast";
-    BINARY.extension = "kbin";
-    JSON.extension = "json";
-    LATEX.extension = "tex";
-    KORE.extension = "kore";
-    NONE.extension = "";
-  }
-
-  public String ext() {
-    return extension;
-  }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.binary;
 
 import static org.kframework.kore.KORE.*;
@@ -12,6 +12,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KToken;
@@ -24,25 +25,30 @@ import org.kframework.utils.errorsystem.KEMException;
  * <p>Format of the KAST binary term is as follows:
  *
  * <p>First five bytes are the magic header "\x7fKAST". Next 3 bytes are the major, minor, and
- * release version of the format. Currently they are set to "\x04\x00\x00".
+ * release version of the format. Currently, they are set to "\x04\x01\x00".
  *
  * <p>Subsequently, the format contains a post-order traversal of the term according to the
  * following rules:
  *
- * <p>* KToken: the byte "\x01" followed by a representation of the string of the token, and then
- * the sort of the token. * KApply: Representation of each child of the KApply followed by the byte
- * "\x02" followed by a representation of the klabel, followed by a 4-byte arity of the KApply. *
- * KSequence: Representation of each child of the KSequence followed by the byte "\x03" followed by
- * a 4-byte length of the KSequence. * KVariable: The byte "\x04" followed by a representation of
- * the name of the variable. * KRewrite: Representation of the LHS of the rewrite, followed by the
- * RHS, followed by the byte "\x05". * InjectedKLabel: The byte "\x06" followed by the
- * representation of the klabel. * KLabel: The representation of the string of the klabel, followed
- * by the byte "\x01" if the klabel is a variable, and "\x00" if it's a concrete klabel. * String: A
- * 4-byte offset in the string intern table. The intern table is commputed as the term is traversed.
- * An offset of 0 means that the string has not appeared before in this term, and is followed by a
- * 4-byte length of the string followed by the String in UTF-16. An offset of 1 means the string
- * refers to the most recent previous string in the intern table. An offset of 2 means the
- * next-most-recent, and so forth.
+ * <ul>
+ *   <li>KToken: the byte "\x01" followed by a representation of the string of the token, and then
+ *       the sort of the token.
+ *   <li>KApply: Representation of each child of the KApply followed by the byte "\x02" followed by
+ *       a representation of the klabel, followed by a 4-byte arity of the KApply.
+ *   <li>KSequence: Representation of each child of the KSequence followed by the byte "\x03"
+ *       followed by a 4-byte length of the KSequence.
+ *   <li>KVariable: The byte "\x04" followed by a representation of the name of the variable.
+ *   <li>KRewrite: Representation of the LHS of the rewrite, followed by the RHS, followed by the
+ *       byte "\x05".
+ *   <li>InjectedKLabel: The byte "\x06" followed by the representation of the klabel.
+ *   <li>KLabel: The representation of the string of the klabel, followed by the byte "\x01" if the
+ *       klabel is a variable, and "\x00" if it's a concrete klabel.
+ *   <li>String: A 4-byte offset in the string intern table. The intern table is computed as the
+ *       term is traversed. An offset of 0 means that the string has not appeared before in this
+ *       term, and is followed by a 4-byte length of the string followed by the String in UTF-16. An
+ *       offset of 1 means the string refers to the most recent previous string in the intern table.
+ *       An offset of 2 means the next-most-recent, and so forth.
+ * </ul>
  *
  * <p>Note one exception to this rule in binary format 4.0.1: if a term is encountered that has
  * already been serialized, instead of serializing it again we serialize the byte '\x08' followed by
@@ -60,15 +66,14 @@ public class BinaryParser {
 
   public static final byte[] MAGIC = {0x7f, 'K', 'A', 'S', 'T'};
 
-  public static final int BEGIN = 0,
-      KTOKEN = 1,
-      KAPPLY = 2,
-      KSEQUENCE = 3,
-      KVARIABLE = 4,
-      KREWRITE = 5,
-      INJECTEDKLABEL = 6,
-      END = 7,
-      BACK_REFERENCE = 8;
+  public static final int KTOKEN = 1;
+  public static final int KAPPLY = 2;
+  public static final int KSEQUENCE = 3;
+  public static final int KVARIABLE = 4;
+  public static final int KREWRITE = 5;
+  public static final int INJECTEDKLABEL = 6;
+  public static final int END = 7;
+  public static final int BACK_REFERENCE = 8;
 
   private final ByteBuffer data;
   private final List<String> interns = new ArrayList<>();
@@ -80,8 +85,24 @@ public class BinaryParser {
     this.data = data;
   }
 
-  private K read400(boolean _401) throws IOException {
+  // Version information ordered lexicographically by (major, minor, build)
+  private record BinaryVersion(Integer major, Integer minor, Integer build)
+      implements Comparable<BinaryVersion> {
+    @Override
+    public int compareTo(@NotNull BinaryVersion other) {
+      int majorComp = major.compareTo(other.major);
+      if (majorComp != 0) {
+        return majorComp;
+      }
+      int minorComp = minor.compareTo(other.minor);
+      if (minorComp != 0) {
+        return minorComp;
+      }
+      return build.compareTo(other.build);
+    }
+  }
 
+  private K read(BinaryVersion version) throws IOException {
     Deque<K> stack = new ArrayDeque<>();
     int type = 0;
     while (type != END) {
@@ -98,7 +119,7 @@ public class BinaryParser {
           stack.push(token);
           break;
         case KAPPLY:
-          KLabel lbl = readKLabel();
+          KLabel lbl = readKLabel(version);
           arity = data.getInt();
           if (arity == 0) items = EMPTY_KLIST;
           else items = new K[arity];
@@ -125,12 +146,12 @@ public class BinaryParser {
           stack.push(KRewrite(left, right));
           break;
         case INJECTEDKLABEL:
-          stack.push(InjectedKLabel(readKLabel()));
+          stack.push(InjectedKLabel(readKLabel(version)));
           break;
         case END:
           break;
         case BACK_REFERENCE:
-          if (!_401)
+          if (version.compareTo(new BinaryVersion(4, 0, 1)) < 0)
             throw KEMException.criticalError("Unexpected code found in KAST binary term: " + type);
           int idx = data.getInt();
           stack.push(kInterns.get(kInterns.size() - idx));
@@ -151,13 +172,18 @@ public class BinaryParser {
   private final Map<String, KLabel> klabelCache = new HashMap<>();
   private final Map<String, Map<String, KToken>> ktokenCache = new HashMap<>();
 
-  private KLabel readKLabel() throws IOException {
+  private KLabel readKLabel(BinaryVersion version) {
     String lbl = readString();
-    if (data.get() != 0) return KVariable(lbl);
+    if (version.compareTo(new BinaryVersion(4, 1, 0)) < 0) {
+      if (data.get() == 1) {
+        throw KEMException.compilerError(
+            "Binary data contains variable KLabel, but this is no longer supported.");
+      }
+    }
     return klabelCache.computeIfAbsent(lbl, org.kframework.kore.KORE::KLabel);
   }
 
-  private String readString() throws IOException {
+  private String readString() {
     int idx = data.getInt();
     if (idx == 0) {
       int len = data.getInt();
@@ -192,14 +218,13 @@ public class BinaryParser {
       int major = data.get();
       int minor = data.get();
       int build = data.get();
-      if (major == 4 && minor == 0 && build == 0) {
-        return new BinaryParser(data).read400(false);
-      } else if (major == 4 && minor == 0 && build == 1) {
-        return new BinaryParser(data).read400(true);
-      } else {
-        throw KEMException.compilerError(
-            "Unsupported version of KAST binary file: " + major + "." + minor + "." + build);
+      if ((major == 4 && minor == 0 && build == 0)
+          || (major == 4 && minor == 0 && build == 1)
+          || (major == 4 && minor == 1 && build == 0)) {
+        return new BinaryParser(data).read(new BinaryVersion(major, minor, build));
       }
+      throw KEMException.compilerError(
+          "Unsupported version of KAST binary file: " + major + "." + minor + "." + build);
     } catch (IOException e) {
       throw KEMException.criticalError("Could not read K term from binary", e);
     }

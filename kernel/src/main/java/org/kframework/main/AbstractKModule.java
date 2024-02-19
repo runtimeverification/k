@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.main;
 
 import com.google.common.collect.Lists;
@@ -10,14 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.PosterBackend;
 import org.kframework.utils.inject.Options;
 
 public abstract class AbstractKModule implements KModule {
-
-  public List<Pair<String, Class<? extends PosterBackend>>> posterTypes() {
-    return Collections.emptyList();
-  }
 
   public List<Pair<Class<?>, Boolean>> kompileOptions() {
     return Collections.emptyList();
@@ -55,36 +50,6 @@ public abstract class AbstractKModule implements KModule {
   @Override
   public List<Module> getKastModules() {
     return Lists.newArrayList();
-  }
-
-  @Override
-  public List<Module> getKRunModules() {
-    return Lists.newArrayList(
-        new AbstractModule() {
-
-          @Override
-          protected void configure() {
-            bindOptions(AbstractKModule.this::krunOptions, binder());
-          }
-        });
-  }
-
-  @Override
-  public List<Module> getKEqModules(List<Module> definitionSpecificModules) {
-    return Lists.newArrayList();
-  }
-
-  @Override
-  public List<Module> getDefinitionSpecificKEqModules() {
-    return Lists.newArrayList(
-        new AbstractModule() {
-
-          @Override
-          protected void configure() {
-            binder().requireAtInjectOnConstructors();
-            // bind backend implementations of tools to their interfaces
-          }
-        });
   }
 
   @Override

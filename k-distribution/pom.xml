@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) K Team. All Rights Reserved. -->
+<!-- Copyright (c) Runtime Verification, Inc. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -16,6 +16,7 @@
   <properties>
     <config>tests/config.xml</config>
     <ktestDir>${project.basedir}</ktestDir>
+    <coreFactor>1</coreFactor>
   </properties>
 
   <dependencies>
@@ -46,6 +47,22 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>get-cpu-count</id>
+            <goals>
+              <goal>cpu-count</goal>
+            </goals>
+            <configuration>
+              <factor>${coreFactor}</factor>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
@@ -108,7 +125,7 @@
             <configuration>
               <target>
                 <exec dir="${ktestDir}" executable="make" failonerror="true">
-                  <arg value="-j12" />
+                  <arg value="-j${cpu.count}" />
                   <arg line="${make.args}" />
                 </exec>
               </target>
@@ -233,4 +250,3 @@
     </plugins>
   </build>
 </project>
-

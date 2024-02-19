@@ -1,4 +1,4 @@
-// Copyright (c) K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile;
 
 import static org.kframework.Collections.*;
@@ -19,7 +19,6 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Hooks;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -33,13 +32,11 @@ import scala.Option;
 
 public class ResolveStrict {
 
-  private final KompileOptions kompileOptions;
   private final Definition d;
 
   private Module currentModule;
 
-  public ResolveStrict(KompileOptions kompileOptions, Definition d) {
-    this.kompileOptions = kompileOptions;
+  public ResolveStrict(Definition d) {
     this.d = d;
   }
 
@@ -167,7 +164,7 @@ public class ResolveStrict {
                 .map(j -> KApply(KLabel("is" + result.toString()), KVariable("K" + (j - 1))))
                 .reduce(BooleanUtils::and);
         K requires;
-        if (!sideCondition.isPresent() || !sequential) {
+        if (sideCondition.isEmpty() || !sequential) {
           requires = BooleanUtils.TRUE;
         } else {
           requires = sideCondition.get();
@@ -261,7 +258,7 @@ public class ResolveStrict {
                 .map(j -> KApply(result, KVariable("K" + (j - 1))))
                 .reduce(BooleanUtils::and);
         K requires;
-        if (!sideCondition.isPresent()) {
+        if (sideCondition.isEmpty()) {
           requires = BooleanUtils.TRUE;
         } else {
           requires = sideCondition.get();
