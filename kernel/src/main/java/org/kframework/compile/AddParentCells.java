@@ -19,6 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Context;
 import org.kframework.definition.RuleOrClaim;
@@ -184,7 +185,7 @@ public class AddParentCells {
       return getLevel((KApply) k);
     } else if (k instanceof KVariable) {
       if (k.att().contains(Sort.class)) {
-        Sort sort = k.att().get(Sort.class);
+        Sort sort = k.att().get(Att.SORT(), Sort.class);
         int level = cfg.cfg().getLevel(sort);
         if (level >= 0) {
           return Optional.of(level);
@@ -239,7 +240,7 @@ public class AddParentCells {
         return Optional.empty();
       }
     } else if (k instanceof KVariable) {
-      Sort sort = k.att().get(Sort.class);
+      Sort sort = k.att().get(Att.SORT(), Sort.class);
       return Optional.of(cfg.getParent(sort));
     } else {
       Optional<KLabel> leftParent = getParent(((KRewrite) k).left());

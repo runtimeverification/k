@@ -171,7 +171,8 @@ public class MinimizeTermConstruction {
             return KAs(
                 super.apply(k),
                 cache.get(k),
-                Att.empty().add(Att.SORT(), Sort.class, cache.get(k).att().get(Sort.class)));
+                Att.empty()
+                    .add(Att.SORT(), Sort.class, cache.get(k).att().get(Att.SORT(), Sort.class)));
           }
         }
         return super.apply(k);

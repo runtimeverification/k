@@ -106,7 +106,11 @@ public class GenerateSentencesFromConfigDecl {
                 K cellContents = kapp.klist().items().get(2);
                 Att att = cfgAtt;
                 if (kapp.att().contains(Location.class))
-                  att = cfgAtt.add(Att.LOCATION(), Location.class, kapp.att().get(Location.class));
+                  att =
+                      cfgAtt.add(
+                          Att.LOCATION(),
+                          Location.class,
+                          kapp.att().get(Att.LOCATION(), Location.class));
                 Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult =
                     genInternal(cellContents, null, att, m);
 
@@ -201,7 +205,7 @@ public class GenerateSentencesFromConfigDecl {
       // child of a leaf cell. Generate no productions, but inform parent that it has a child of a
       // particular sort.
       // A leaf cell initializes to the value specified in the configuration declaration.
-      Sort sort = kapp.att().get(Production.class).sort();
+      Sort sort = kapp.att().get(Att.PRODUCTION(), Production.class).sort();
       Tuple2<K, Set<Sentence>> res = getLeafInitializer(term);
       return Tuple4.apply(res._2(), Lists.newArrayList(sort), res._1(), true);
     } else if (term instanceof KToken ktoken) {
@@ -311,7 +315,7 @@ public class GenerateSentencesFromConfigDecl {
           @Override
           public K apply(KApply k) {
             if (k.klabel().name().startsWith("#SemanticCastTo")) {
-              sort = k.att().get(Production.class).sort();
+              sort = k.att().get(Att.PRODUCTION(), Production.class).sort();
             }
             return super.apply(k);
           }

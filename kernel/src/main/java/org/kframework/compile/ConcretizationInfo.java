@@ -4,6 +4,7 @@ package org.kframework.compile;
 import static org.kframework.kore.KORE.*;
 
 import java.util.List;
+import org.kframework.attributes.Att;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -18,7 +19,7 @@ public record ConcretizationInfo(ConfigurationInfo cfg, LabelInfo labels) {
     if (k instanceof KApply) {
       return labels.getCodomain(((KApply) k).klabel());
     } else if (k instanceof KVariable) {
-      return k.att().get(Sort.class);
+      return k.att().get(Att.SORT(), Sort.class);
     } else {
       throw new AssertionError(
           "expected KApply or KVariable, found " + k.getClass().getSimpleName());

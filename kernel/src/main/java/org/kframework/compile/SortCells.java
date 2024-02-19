@@ -136,7 +136,7 @@ public class SortCells {
         remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
       }
       if (var.att().contains(Sort.class)) {
-        Sort sort = var.att().get(Sort.class);
+        Sort sort = var.att().get(Att.SORT(), Sort.class);
         if (cfg.cfg().isCell(sort)) {
           remainingCells.removeIf(s -> !s.equals(sort));
         }
@@ -149,7 +149,7 @@ public class SortCells {
           }
         } else if (item instanceof KVariable && !item.equals(var)) {
           if (item.att().contains(Sort.class)) {
-            Sort sort = item.att().get(Sort.class);
+            Sort sort = item.att().get(Att.SORT(), Sort.class);
             remainingCells.remove(sort);
           }
         }
@@ -296,7 +296,7 @@ public class SortCells {
         for (K item : items) {
           if (item instanceof KVariable var) {
             if (var.att().contains(Sort.class)) {
-              Sort sort = var.att().get(Sort.class);
+              Sort sort = var.att().get(Att.SORT(), Sort.class);
               if (cfg.cfg().isCell(sort)) {
                 if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
                   Sort prevSort = cellVariables.get(var);
@@ -694,7 +694,7 @@ public class SortCells {
                       if (varinfo.var != null) var = varinfo.var;
                     }
                     if (var.att().contains(Sort.class)) {
-                      Sort sort = var.att().get(Sort.class);
+                      Sort sort = var.att().get(Att.SORT(), Sort.class);
                       if (cfg.cfg().isCell(sort)) {
                         if (!subcellSorts.contains(sort)) {
                           throw new IllegalArgumentException(
@@ -806,7 +806,7 @@ public class SortCells {
             K item = k.klist().items().get(i);
             if (item instanceof KVariable var) {
               if (var.att().contains(Sort.class)) {
-                Sort sort = var.att().get(Sort.class);
+                Sort sort = var.att().get(Att.SORT(), Sort.class);
                 if (!cfg.cfg().isCell(sort)) {
                   if (!cellFragmentVars.containsKey(var)) {
                     cellFragmentVars.put(var, new HashSet<>());

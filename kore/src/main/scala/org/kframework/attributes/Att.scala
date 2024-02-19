@@ -74,17 +74,13 @@ class Att private (val att: Map[(Att.Key, String), Any])
   def contains(key: Att.Key): Boolean                = att.contains((key, Att.stringClassName))
   def contains(key: Att.Key, cls: Class[_]): Boolean = att.contains((key, cls.getName))
 
-  def get[T](key: Class[T]): T               = getOption(key).get
   def get(key: Att.Key): String              = getOption(key).get
   def get[T](key: Att.Key, cls: Class[T]): T = getOption(key, cls).get
   def getOption(key: Att.Key): Option[String] =
     att.get((key, Att.stringClassName)).asInstanceOf[Option[String]]
-  def getOption[T](key: Class[T]): Option[T] =
-    att.get((Att.getInternalKeyOrAssert(key.getName), key.getName)).asInstanceOf[Option[T]]
   def getOption[T](key: Att.Key, cls: Class[T]): Option[T] =
     att.get((key, cls.getName)).asInstanceOf[Option[T]]
   def getOptional(key: Att.Key): Optional[String] = optionToOptional(getOption(key))
-  def getOptional[T](key: Class[T]): Optional[T]  = optionToOptional(getOption(key))
   def getOptional[T](key: Att.Key, cls: Class[T]): Optional[T] = optionToOptional(
     getOption(key, cls)
   )

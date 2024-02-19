@@ -725,7 +725,7 @@ public class DefinitionParsing {
           parse.parse() != null
               ? new AddAttRec(
                       a -> {
-                        Location loc = a.get(Location.class);
+                        Location loc = a.get(Att.LOCATION(), Location.class);
                         Location newLoc =
                             updateLocation(oldStartLine, lineOffset, columnOffset, loc);
                         return a.remove(Source.class)
@@ -934,7 +934,7 @@ public class DefinitionParsing {
       ParseInModule pim, Map<String, ParsedSentence> cache, Bubble b) {
     int startLine = b.att().get(Att.CONTENT_START_LINE(), Integer.class);
     int startColumn = b.att().get(Att.CONTENT_START_COLUMN(), Integer.class);
-    Source source = b.att().get(Source.class);
+    Source source = b.att().get(Att.SOURCE(), Source.class);
     boolean isAnywhere =
         b.att().contains(Att.ANYWHERE())
             || b.att().contains(Att.SIMPLIFICATION())

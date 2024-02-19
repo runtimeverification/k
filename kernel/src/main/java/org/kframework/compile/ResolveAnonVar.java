@@ -125,12 +125,12 @@ public class ResolveAnonVar {
             .flatMap(
                 att ->
                     k.att()
-                        .getOptional(Source.class)
+                        .getOptional(Att.SOURCE(), Source.class)
                         .map(s -> att.add(Att.SOURCE(), Source.class, s)))
             .flatMap(
                 att ->
                     k.att()
-                        .getOptional(Location.class)
+                        .getOptional(Att.LOCATION(), Location.class)
                         .map(l -> att.add(Att.LOCATION(), Location.class, l)))
             .orElse(Att());
     Att att = Att().add(Att.ANONYMOUS()).addAll(locInfo);

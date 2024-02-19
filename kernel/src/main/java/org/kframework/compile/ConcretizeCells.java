@@ -69,7 +69,8 @@ public class ConcretizeCells {
 
   public static boolean hasCells(K item) {
     if (IncompleteCellUtils.flattenCells(item).stream()
-        .anyMatch(k -> k.att().get(Production.class).att().contains(Att.CELL()))) {
+        .anyMatch(
+            k -> k.att().get(Att.PRODUCTION(), Production.class).att().contains(Att.CELL()))) {
       return true;
     }
 

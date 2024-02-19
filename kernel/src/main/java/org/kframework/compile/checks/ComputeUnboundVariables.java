@@ -72,7 +72,7 @@ public class ComputeUnboundVariables extends RewriteAwareVisitor {
     }
     if (k.klabel().name().startsWith("#SemanticCastTo")) {
       Sort savedContext = context;
-      context = k.att().get(Production.class).sort();
+      context = k.att().get(Att.PRODUCTION(), Production.class).sort();
       apply(k.items().get(0));
       context = savedContext;
       return;
