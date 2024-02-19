@@ -81,13 +81,13 @@ def build_rule_dict(
     rule_dict: dict[str, KRule] = {}
 
     for rule in definition.rules:
-        if skip_projections and 'projection' in rule.att.atts:
+        if skip_projections and KAtt.PROJECTION in rule.att:
             continue
-        if skip_initializers and 'initializer' in rule.att.atts:
+        if skip_initializers and KAtt.INITIALIZER in rule.att:
             continue
         try:
-            rule_source = rule.att.atts[KAtt.SOURCE]
-            rule_location = rule.att.atts[KAtt.LOCATION]
+            rule_source = rule.att[KAtt.SOURCE]
+            rule_location = rule.att[KAtt.LOCATION]
         except KeyError:
             _LOGGER.warning(f'Skipping rule with no location information {str(rule.body):.100}...<truncated>')
             rule_source = None
