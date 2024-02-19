@@ -18,11 +18,11 @@ module ITE-BUG
       <k> $PGM:Pgm </k>
       <pc> 0 </pc>
 
-    rule <k> JUMPI _DEST I => . ... </k>
+    rule <k> JUMPI _DEST I => .K ... </k>
          <pc> PCOUNT => PCOUNT +Int 1 </pc>
       requires I ==Int 0
 
-    rule <k> JUMPI DEST I => . ... </k>
+    rule <k> JUMPI DEST I => .K ... </k>
          <pc> _PCOUNT => DEST </pc>
       requires I =/=Int 0
 

@@ -30,5 +30,5 @@ module TEST-EXT
 
     syntax KItem ::= "step"
 
-    rule <k> step => . ... </k>
+    rule <k> step => .K ... </k>
 endmodule

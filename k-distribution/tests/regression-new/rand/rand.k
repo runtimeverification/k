@@ -16,6 +16,6 @@ module RAND
 
   rule <k> I ; P => srandInt(I) ~> runRand() ~> P ... </k>
 
-  rule <k> runRand() => . ... </k>
+  rule <k> runRand() => .K ... </k>
        <rands> ... .List => ListItem(randInt(1000)) </rands>
 endmodule

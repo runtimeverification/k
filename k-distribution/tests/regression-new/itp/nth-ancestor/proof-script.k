@@ -23,7 +23,7 @@ module PROOF-SCRIPT
                     | store2(String, String)
 
     rule [load]:
-    <k> load(N) => . ... </k>
+    <k> load(N) => .K ... </k>
     <g> X => #if X ==K none
              #then         M [ N ]
              #else X and { M [ N ] }:>Pred
@@ -31,12 +31,12 @@ module PROOF-SCRIPT
     <p> M </p>
 
     rule [store1]:
-    <k> store1(N) => . ... </k>
+    <k> store1(N) => .K ... </k>
     <g> X => none </g>
     <p> M => M [ N <- X ] </p>
 
     rule [store2]:
-    <k> store2(N1,N2) => . ... </k>
+    <k> store2(N1,N2) => .K ... </k>
     <g> X1 and X2 => none </g>
     <p> M => M [ N1 <- X1 ]
                [ N2 <- X2 ] </p>

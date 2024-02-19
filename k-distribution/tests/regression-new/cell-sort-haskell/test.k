@@ -25,14 +25,14 @@ module TEST
                   </functions>
                   <contracts color="orange">
                     <contract multiplicity = "*" type = "Map">
-                      <cName> . </cName>
+                      <cName> .K </cName>
                       <cFunctions> .Map </cFunctions>
                     </contract>
                   </contracts>
                 </T>
 
   rule
-    <k> addContract(ContractName:Id); => . ... </k>
+    <k> addContract(ContractName:Id); => .K ... </k>
     <contracts>
       ...
       (.Bag =>
@@ -44,7 +44,7 @@ module TEST
     </contracts>
 
 rule
-  <k> addFunction(ContractName:Id, FunctionName:Id); => . ... </k>
+  <k> addFunction(ContractName:Id, FunctionName:Id); => .K ... </k>
     <contracts>
       ...
       <contract>

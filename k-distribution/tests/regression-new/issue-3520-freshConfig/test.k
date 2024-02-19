@@ -36,16 +36,16 @@ module TEST
                  | assertNotEqual( List )
                  | assertNotEqual( Int, List )
 
-  rule assertEqual( .List ) => .
+  rule assertEqual( .List ) => .K
   rule assertEqual( ListItem(X:Int) REST )  => assertEqual( X, REST ) ~> assertEqual( REST )
 
-  rule assertEqual( _, .List ) => .
+  rule assertEqual( _, .List ) => .K
   rule assertEqual( X, ListItem( X ) REST ) => assertEqual( X, REST )
 
-  rule assertNotEqual( .List ) => .
+  rule assertNotEqual( .List ) => .K
   rule assertNotEqual( ListItem(X:Int) REST )  => assertNotEqual( X, REST ) ~> assertNotEqual( REST )
 
-  rule assertNotEqual( _, .List ) => .
+  rule assertNotEqual( _, .List ) => .K
   rule assertNotEqual( X, ListItem( Y ) REST ) => assertNotEqual( X, REST ) requires X =/=Int Y
 
   rule start => !_A:Int

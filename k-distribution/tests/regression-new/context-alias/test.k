@@ -27,8 +27,8 @@ syntax Expr ::= evalAndStop()
 
 syntax Expr ::= "(" Expr ")" [bracket]
 
-rule <k> enableHeating() => . ...</k> <shouldHeat> _ => true </shouldHeat>
-rule <k> disableHeating() => . ...</k> <shouldHeat> _ => false </shouldHeat>
+rule <k> enableHeating() => .K ...</k> <shouldHeat> _ => true </shouldHeat>
+rule <k> disableHeating() => .K ...</k> <shouldHeat> _ => false </shouldHeat>
 
 rule <k> evalAndStop() => 0 ...</k> <shouldHeat> _ => false </shouldHeat>
 

@@ -210,7 +210,7 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
 ```k
     syntax Action ::= "create_account" "(" AccountId ")"
  // ----------------------------------------------------
-    rule <k> create_account(WHO) => . ... </k>
+    rule <k> create_account(WHO) => .K ... </k>
          <accounts> ( .Bag => <account> <accountID> WHO </accountID> ... </account> ) ... </accounts>
 ```
 
@@ -223,11 +223,11 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
 ```k
     syntax Action ::= "set_free_balance" "(" AccountId "," Int ")"
  // --------------------------------------------------------------
-    rule <k> (. => create_account(WHO)) ~> set_free_balance(WHO, _) ... </k>
+    rule <k> (.K => create_account(WHO)) ~> set_free_balance(WHO, _) ... </k>
       requires notBool account_exists(WHO)
 
     rule [free-account-updated]:
-         <k> set_free_balance(WHO, BALANCE) => . ... </k>
+         <k> set_free_balance(WHO, BALANCE) => .K ... </k>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <account>
            <accountID> WHO </accountID>
@@ -237,7 +237,7 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
       requires EXISTENTIAL_DEPOSIT <=Int BALANCE
 
     rule [free-account-killed]:
-         <k> set_free_balance(WHO, BALANCE) => . ... </k>
+         <k> set_free_balance(WHO, BALANCE) => .K ... </k>
          <events> ... (.List => ListItem(DustEvent(FREE_BALANCE))) </events>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE -Int BALANCE </totalIssuance>
@@ -252,7 +252,7 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
        andBool 0 <Int RESERVED_BALANCE
 
     rule [free-account-reaped]:
-         <k> set_free_balance(WHO, BALANCE) => . ... </k>
+         <k> set_free_balance(WHO, BALANCE) => .K ... </k>
          <events> ... (.List => ListItem(DustEvent(FREE_BALANCE))) </events>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE -Int BALANCE </totalIssuance>
@@ -279,11 +279,11 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
 ```k
     syntax Action ::= "set_reserved_balance" "(" AccountId "," Int ")"
  // ------------------------------------------------------------------
-    rule <k> (. => create_account(WHO)) ~> set_reserved_balance(WHO, _) ... </k>
+    rule <k> (.K => create_account(WHO)) ~> set_reserved_balance(WHO, _) ... </k>
       requires notBool account_exists(WHO)
 
     rule [reserved-account-updated]:
-         <k> set_reserved_balance(WHO, BALANCE) => . ... </k>
+         <k> set_reserved_balance(WHO, BALANCE) => .K ... </k>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <account>
            <accountID> WHO </accountID>
@@ -293,7 +293,7 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
       requires EXISTENTIAL_DEPOSIT <=Int BALANCE
 
     rule [reserved-account-killed]:
-         <k> set_reserved_balance(WHO, BALANCE) => . ... </k>
+         <k> set_reserved_balance(WHO, BALANCE) => .K ... </k>
          <events> ... (.List => ListItem(DustEvent(RESERVED_BALANCE))) </events>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE -Int BALANCE </totalIssuance>
@@ -308,7 +308,7 @@ A `Result` is considered an `Action`, as is an `EntryAction`.
        andBool 0 <Int FREE_BALANCE
 
     rule [reserved-account-reaped]:
-         <k> set_reserved_balance(WHO, BALANCE) => . ... </k>
+         <k> set_reserved_balance(WHO, BALANCE) => .K ... </k>
          <events> ... (.List => ListItem(DustEvent(RESERVED_BALANCE))) </events>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE -Int BALANCE </totalIssuance>
@@ -398,12 +398,12 @@ The dispatch origin for this call must be `Signed` by the transactor.
          ...
          </k>
 
-    rule <k> (. => create_account(DESTINATION)) ~> rawTransfer(ORIGIN, DESTINATION, _, _) ... </k>
+    rule <k> (.K => create_account(DESTINATION)) ~> rawTransfer(ORIGIN, DESTINATION, _, _) ... </k>
       requires         account_exists(ORIGIN)
        andBool notBool account_exists(DESTINATION)
 
     rule [transfer-self]:
-         <k> rawTransfer(ORIGIN:AccountId, ORIGIN, _, _) => . ... </k>
+         <k> rawTransfer(ORIGIN:AccountId, ORIGIN, _, _) => .K ... </k>
       requires account_exists(ORIGIN)
 
     rule [transfer-existing-account]:
@@ -521,7 +521,7 @@ Function call and return.
          <call-stack> ListItem(frame(CONT)) => .List ... </call-stack>
 
     rule [return-unit]:
-         <k> . => CONT </k>
+         <k> .K => CONT </k>
          <return-value> _ => .Result </return-value>
          <call-stack> ListItem(frame(CONT)) => .List ... </call-stack>
 ```
@@ -751,7 +751,7 @@ Deposit into an existing account.
     syntax EntryAction ::= "deposit_into_existing" "(" AccountId "," Int ")"
  // ------------------------------------------------------------------------
     rule [deposit-into-existing]:
-         <k> deposit_into_existing(WHO, AMOUNT) => . ... </k>
+         <k> deposit_into_existing(WHO, AMOUNT) => .K ... </k>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE +Int AMOUNT </totalIssuance>
          <account>
            <accountID> WHO </accountID>
