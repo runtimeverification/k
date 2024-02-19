@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
@@ -201,7 +202,6 @@ public class ModuleToKORE {
     collectionSorts.add("SET.Set");
     collectionSorts.add("MAP.Map");
     collectionSorts.add("LIST.List");
-    collectionSorts.add("ARRAY.Array");
     collectionSorts.add("RANGEMAP.RangeMap");
     attributes.remove(Att.HAS_DOMAIN_VALUES());
     if (attributes.containsKey(Att.TOKEN())) {
@@ -423,23 +423,16 @@ public class ModuleToKORE {
       Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
       if (att.contains(Att.HOOK())) {
         if (collectionSorts.contains(att.get(Att.HOOK()))) {
-          if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
-            att = att.remove(Att.ELEMENT());
-            att = att.remove(Att.UNIT());
-            att = att.remove(Att.HOOK());
-          } else {
-            Production concatProd =
-                stream(module.productionsForSort().apply(sort))
-                    .filter(p -> p.att().contains(Att.ELEMENT()))
-                    .findAny()
-                    .get();
-            att =
-                att.add(
-                    Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
-            att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
-            att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
-            sb.append("hooked-");
-          }
+          Production concatProd =
+              stream(module.productionsForSort().apply(sort))
+                  .filter(p -> p.att().contains(Att.ELEMENT()))
+                  .findAny()
+                  .get();
+          att =
+              att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
+          att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
+          att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
+          sb.append("hooked-");
         } else {
           sb.append("hooked-");
         }
@@ -948,13 +941,8 @@ public class ModuleToKORE {
 
   private boolean isRealHook(Att att) {
     String hook = att.get(Att.HOOK());
-    if (hook.startsWith("ARRAY.")) {
-      return false;
-    }
-    if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
-      return true;
-    }
-    return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
+    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
+        .anyMatch(ns -> hook.startsWith(ns + "."));
   }
 
   private static boolean isBuiltinProduction(Production prod) {
