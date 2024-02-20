@@ -84,15 +84,16 @@ public class CheckAtt {
   }
 
   private <T extends HasAtt & HasLocation> void checkRestrictedAtts(T term) {
-    Class<?> cls = term.getClass();
-    Att att = term.att();
-    Set<Key> keys = stream(att.att().keySet()).map(Tuple2::_1).collect(Collectors.toSet());
-    keys.removeIf(k -> k.allowedSentences().exists(c -> c.isAssignableFrom(cls)));
-    if (!keys.isEmpty()) {
-      List<String> sortedKeys = keys.stream().map(Key::toString).sorted().toList();
+    Set<Key> badKeys =
+        stream(term.att().att().keySet())
+            .map(Tuple2::_1)
+            .filter(k -> k.visibility().isPermitted(term))
+            .collect(Collectors.toSet());
+    if (!badKeys.isEmpty()) {
+      List<String> sortedKeys = badKeys.stream().map(Key::toString).sorted().toList();
       errors.add(
           KEMException.compilerError(
-              cls.getSimpleName() + " cannot have the following attributes: " + sortedKeys, term));
+              "The following attributes are not permitted here: " + sortedKeys, term));
     }
   }
 
