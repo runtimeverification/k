@@ -13,7 +13,7 @@ Context:
     } )
 #And
   <k>
-    end ( barConcrete ( X ) ) ~> .
+    end ( barConcrete ( X ) ) ~> .K
   </k>
 #And
   {

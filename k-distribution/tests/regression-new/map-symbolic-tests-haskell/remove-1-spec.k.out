@@ -1,5 +1,5 @@
   <k>
-    removeResult ( MAP [ Z:MyId ] ~> . ) ~> .
+    removeResult ( MAP [ Z:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {
