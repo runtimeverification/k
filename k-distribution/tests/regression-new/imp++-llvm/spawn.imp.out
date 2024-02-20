@@ -5,7 +5,7 @@
       <threads>
         <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -17,7 +17,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -29,7 +29,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -46,14 +46,14 @@
         3 |-> 4
       </store>
       <input>
-        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( #buffer ( "" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "x = 11\n" ~> . ) )
+        ListItem ( #buffer ( "x = 11\n" ~> .K ) )
       </output>
     </T>
   }
@@ -65,7 +65,7 @@
       <threads>
         <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -77,7 +77,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -89,7 +89,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -106,14 +106,14 @@
         3 |-> 4
       </store>
       <input>
-        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( #buffer ( "" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "x = 16\n" ~> . ) )
+        ListItem ( #buffer ( "x = 16\n" ~> .K ) )
       </output>
     </T>
   }
@@ -125,7 +125,7 @@
       <threads>
         <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -137,7 +137,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -149,7 +149,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -166,14 +166,14 @@
         3 |-> 4
       </store>
       <input>
-        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( #buffer ( "" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "x = 21\n" ~> . ) )
+        ListItem ( #buffer ( "x = 21\n" ~> .K ) )
       </output>
     </T>
   }
@@ -185,7 +185,7 @@
       <threads>
         <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -197,7 +197,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -209,7 +209,7 @@
           </id>
         </thread> <thread>
           <k>
-            .
+            .K
           </k>
           <env>
             t1 |-> 1
@@ -226,14 +226,14 @@
         3 |-> 4
       </store>
       <input>
-        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( #buffer ( "" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "x = 33\n" ~> . ) )
+        ListItem ( #buffer ( "x = 33\n" ~> .K ) )
       </output>
     </T>
   }

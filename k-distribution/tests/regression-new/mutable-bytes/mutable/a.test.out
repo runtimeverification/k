@@ -1,6 +1,6 @@
 <test>
   <k>
-    d ~> .
+    d ~> .K
   </k>
   <mem>
     b"bob__"
