@@ -87,7 +87,7 @@ public class CheckAtt {
     Set<Key> badKeys =
         stream(term.att().att().keySet())
             .map(Tuple2::_1)
-            .filter(k -> k.visibility().isPermitted(term))
+            .filter(k -> !k.visibility().isPermitted(term))
             .collect(Collectors.toSet());
     if (!badKeys.isEmpty()) {
       List<String> sortedKeys = badKeys.stream().map(Key::toString).sorted().toList();
