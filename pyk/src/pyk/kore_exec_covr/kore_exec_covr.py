@@ -6,7 +6,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from ..kast import KAtt
+from ..kast import Atts
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -81,13 +81,13 @@ def build_rule_dict(
     rule_dict: dict[str, KRule] = {}
 
     for rule in definition.rules:
-        if skip_projections and KAtt.PROJECTION in rule.att:
+        if skip_projections and Atts.PROJECTION in rule.att:
             continue
-        if skip_initializers and KAtt.INITIALIZER in rule.att:
+        if skip_initializers and Atts.INITIALIZER in rule.att:
             continue
         try:
-            rule_source = rule.att[KAtt.SOURCE]
-            rule_location = rule.att[KAtt.LOCATION]
+            rule_source = rule.att[Atts.SOURCE]
+            rule_location = rule.att[Atts.LOCATION]
         except KeyError:
             _LOGGER.warning(f'Skipping rule with no location information {str(rule.body):.100}...<truncated>')
             rule_source = None

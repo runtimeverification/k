@@ -21,15 +21,15 @@ from .inner import (
     top_down,
     var_occurrences,
 )
-from .kast import EMPTY_ATT, KAtt, WithKAtt
+from .kast import EMPTY_ATT, WithKAtt
 from .outer import KDefinition, KFlatModule, KRuleLike
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
-    from typing import Any, Final, TypeVar
+    from typing import Final, TypeVar
 
     from .inner import KInner, KSort
-    from .kast import AttKey
+    from .kast import KAtt
 
     KI = TypeVar('KI', bound=KInner)
     W = TypeVar('W', bound=WithKAtt)
@@ -553,13 +553,10 @@ def remove_attrs(term: KInner) -> KInner:
 
 
 def remove_source_attributes(term: KInner) -> KInner:
-    def _is_not_source_att(att: tuple[AttKey, Any]) -> bool:
-        return att[0] not in (KAtt.SOURCE, KAtt.LOCATION)
-
     def _remove_source_attr(term: KInner) -> KInner:
         if not isinstance(term, WithKAtt):
             return term
-        return term.let_att(KAtt(dict(filter(_is_not_source_att, term.att.items()))))
+        return term.let_att(term.att.drop_source())
 
     return top_down(_remove_source_attr, term)
 

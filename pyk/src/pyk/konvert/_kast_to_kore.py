@@ -5,7 +5,7 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 from ..cterm import CTerm
-from ..kast import KAtt
+from ..kast import Atts
 from ..kast.inner import KApply, KSequence, KSort, KToken, KVariable
 from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
 from ..kast.outer import KRule
@@ -99,8 +99,8 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     kore_rhs = kompiled_kore.add_injections(kore_rhs0, sort=top_level_kore_sort)
     prio = krule.priority
     attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
-    if KAtt.LABEL in krule.att:
-        label = krule.att[KAtt.LABEL]
+    if Atts.LABEL in krule.att:
+        label = krule.att[Atts.LABEL]
         attrs.append(App(symbol='label', sorts=(), args=(String(label),)))
     axiom = Axiom(
         vars=(),
