@@ -8,8 +8,8 @@ from threading import RLock
 from typing import TYPE_CHECKING, List, Union, cast, final
 
 from ..cterm import CSubst, CTerm, build_claim, build_rule
+from ..kast import EMPTY_ATT
 from ..kast.inner import KApply
-from ..kast.kast import EMPTY_ATT
 from ..kast.manip import (
     bool_to_ml_pred,
     extract_lhs,

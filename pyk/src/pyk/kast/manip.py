@@ -8,6 +8,7 @@ from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
 from ..prelude.ml import mlAnd, mlEqualsTrue, mlOr
 from ..utils import find_common_items, hash_str
+from .att import EMPTY_ATT, WithKAtt
 from .inner import (
     KApply,
     KLabel,
@@ -21,15 +22,14 @@ from .inner import (
     top_down,
     var_occurrences,
 )
-from .kast import EMPTY_ATT, WithKAtt
 from .outer import KDefinition, KFlatModule, KRuleLike
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
     from typing import Final, TypeVar
 
+    from .att import KAtt
     from .inner import KInner, KSort
-    from .kast import KAtt
 
     KI = TypeVar('KI', bound=KInner)
     W = TypeVar('W', bound=WithKAtt)

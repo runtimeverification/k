@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, final
 from ..prelude.kbool import TRUE
 from ..prelude.ml import ML_QUANTIFIERS
 from ..utils import filter_none, single, unique
+from .att import EMPTY_ATT, Atts, KAst, KAtt, WithKAtt
 from .inner import (
     KApply,
     KInner,
@@ -28,7 +29,7 @@ from .inner import (
     bottom_up_with_summary,
     top_down,
 )
-from .kast import EMPTY_ATT, Atts, KAst, KAtt, WithKAtt, kast_term
+from .kast import kast_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
