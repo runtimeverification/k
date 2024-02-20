@@ -521,9 +521,9 @@ def _is_constructor(att: KAtt) -> bool:
 
 
 def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = ()) -> KFlatModule:
-    """Remove hooks attributes from symbol productions that are either 1) array hooks or 2) not built in and not activated."""
+    """Remove hooks attributes from symbol productions that are not built-in and not activated."""
 
-    def is_real_hook(hook: str) -> bool:
+    def is_active(hook: str) -> bool:
         namespaces = (*hook_namespaces, *HOOK_NAMESPACES)
         return hook.startswith(tuple(f'{namespace}.' for namespace in namespaces))
 
@@ -538,7 +538,7 @@ def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = 
             return sentence
 
         hook = sentence.att[KAtt.HOOK]
-        if not is_real_hook(hook):
+        if not is_active(hook):
             return sentence.let(att=sentence.att.remove([KAtt.HOOK]))
 
         return sentence
