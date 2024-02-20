@@ -6,7 +6,7 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from .kast.inner import KApply, KInner, KRewrite, KToken, KVariable, Subst, bottom_up
-from .kast.kast import KAtt
+from .kast.kast import Atts, KAtt
 from .kast.manip import (
     abstract_term_safely,
     apply_existential_substitutions,
@@ -430,10 +430,10 @@ def build_rule(
     rule_body = push_down_rewrites(KRewrite(init_config, final_config))
     rule_requires = simplify_bool(ml_pred_to_bool(init_constraint))
     rule_ensures = simplify_bool(ml_pred_to_bool(final_constraint))
-    att_dict = {} if priority is None else {KAtt.PRIORITY: str(priority)}
-    rule_att = KAtt(atts=att_dict)
+    att_entries = [] if priority is None else [Atts.PRIORITY(str(priority))]
+    rule_att = KAtt(entries=att_entries)
 
     rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
-    rule = rule.update_atts({KAtt.LABEL: rule_id})
+    rule = rule.update_atts([Atts.LABEL(rule_id)])
 
     return (rule, Subst(vremap_subst))

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm, build_claim, build_rule
-from pyk.kast import KAtt
+from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
@@ -117,26 +117,26 @@ BUILD_CLAIM_TEST_DATA: Final = (
         'sorted-var-1',
         mlAnd([k(v1_sorted), mlEqualsTrue(constraint(v1))]),
         k(v2),
-        KClaim(k(KRewrite(v1_sorted, ques_unds_v2)), requires=constraint(v1), att=KAtt({KAtt.LABEL: 'claim'})),
+        KClaim(k(KRewrite(v1_sorted, ques_unds_v2)), requires=constraint(v1), att=KAtt([Atts.LABEL('claim')])),
     ),
     (
         'sorted-var-2',
         mlAnd([k(v1), mlEqualsTrue(constraint(v1_sorted))]),
         k(v2),
-        KClaim(k(KRewrite(v1, ques_unds_v2)), requires=constraint(v1_sorted), att=KAtt({KAtt.LABEL: 'claim'})),
+        KClaim(k(KRewrite(v1, ques_unds_v2)), requires=constraint(v1_sorted), att=KAtt([Atts.LABEL('claim')])),
     ),
     (
         'req-rhs',
         mlAnd([k(v1), mlEqualsTrue(constraint(v2))]),
         k(v2),
-        KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({KAtt.LABEL: 'claim'})),
+        KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt([Atts.LABEL('claim')])),
     ),
-    ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({KAtt.LABEL: 'claim'}))),
+    ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt([Atts.LABEL('claim')]))),
     (
         'bound-rhs',
         k(v1),
         mlAnd([k(v2), mlEqualsTrue(constraint(v2))]),
-        KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({KAtt.LABEL: 'claim'})),
+        KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt([Atts.LABEL('claim')])),
     ),
 )
 

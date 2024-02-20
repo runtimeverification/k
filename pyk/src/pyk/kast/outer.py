@@ -28,7 +28,7 @@ from .inner import (
     bottom_up_with_summary,
     top_down,
 )
-from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt, kast_term
+from .kast import EMPTY_ATT, Atts, KAst, KAtt, WithKAtt, kast_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
@@ -180,13 +180,13 @@ class KSentence(KOuter, WithKAtt):
     @property
     def unique_id(self) -> str | None:
         """Return the unique ID assigned to this sentence, or None."""
-        return self.att.get(KAtt.UNIQUE_ID)
+        return self.att.get(Atts.UNIQUE_ID)
 
     @property
     def source(self) -> str | None:
         """Return the source assigned to this sentence, or None."""
-        if KAtt.SOURCE in self.att and KAtt.LOCATION in self.att:
-            return f'{self.att[KAtt.SOURCE]}:{self.att[KAtt.LOCATION]}'
+        if Atts.SOURCE in self.att and Atts.LOCATION in self.att:
+            return f'{self.att[Atts.SOURCE]}:{self.att[Atts.LOCATION]}'
         return None
 
     @property
@@ -198,8 +198,8 @@ class KSentence(KOuter, WithKAtt):
           - Unique identifier computed and inserted by the frontend, or
           - Source location for the sentence.
         """
-        if KAtt.LABEL in self.att:
-            return self.att[KAtt.LABEL]
+        if Atts.LABEL in self.att:
+            return self.att[Atts.LABEL]
         elif self.unique_id is not None:
             return self.unique_id
         elif self.source is not None:
@@ -617,7 +617,7 @@ class KRule(KRuleLike):
 
     @property
     def priority(self) -> int:
-        return self.att.get(KAtt.PRIORITY, 200 if KAtt.OWISE in self.att else 50)
+        return self.att.get(Atts.PRIORITY, 200 if Atts.OWISE in self.att else 50)
 
 
 @final
@@ -674,17 +674,17 @@ class KClaim(KRuleLike):
     @property
     def is_circularity(self) -> bool:
         """Return whether this claim is a circularity (must be used coinductively to prove itself)."""
-        return KAtt.CIRCULARITY in self.att
+        return Atts.CIRCULARITY in self.att
 
     @property
     def is_trusted(self) -> bool:
         """Return whether this claim is trusted (does not need to be proven to be considered true)."""
-        return KAtt.TRUSTED in self.att
+        return Atts.TRUSTED in self.att
 
     @property
     def dependencies(self) -> list[str]:
         """Return the dependencies of this claim (list of other claims needed to help prove this one or speed up this ones proof)."""
-        deps = self.att.get(KAtt.DEPENDS)
+        deps = self.att.get(Atts.DEPENDS)
         if deps is None:
             return []
         return [x.strip() for x in deps.split(',')]
@@ -799,7 +799,7 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
     @cached_property
     def cell_collection_productions(self) -> tuple[KProduction, ...]:
         """Return all the `KProduction` sentences from this module that are cell collection declarations."""
-        return tuple(prod for prod in self.syntax_productions if KAtt.CELL_COLLECTION in prod.att)
+        return tuple(prod for prod in self.syntax_productions if Atts.CELL_COLLECTION in prod.att)
 
     @staticmethod
     def _is_function(prod: KProduction) -> bool:
@@ -808,7 +808,7 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
             is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
             return is_cell_map_constructor or is_builtin_data_constructor
 
-        return (KAtt.FUNCTION in prod.att or KAtt.FUNCTIONAL in prod.att) and not (
+        return (Atts.FUNCTION in prod.att or Atts.FUNCTIONAL in prod.att) and not (
             prod.klabel and is_not_actually_function(prod.klabel.name)
         )
 
@@ -1060,12 +1060,12 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     @cached_property
     def alias_rules(self) -> tuple[KRule, ...]:
         """Returns the `KRule` sentences which are `alias` transitively imported by the main module of this definition."""
-        return tuple(rule for rule in self.rules if KAtt.ALIAS in rule.att)
+        return tuple(rule for rule in self.rules if Atts.ALIAS in rule.att)
 
     @cached_property
     def macro_rules(self) -> tuple[KRule, ...]:
         """Returns the `KRule` sentences which are `alias` or `macro` transitively imported by the main module of this definition."""
-        return tuple(rule for rule in self.rules if KAtt.MACRO in rule.att) + self.alias_rules
+        return tuple(rule for rule in self.rules if Atts.MACRO in rule.att) + self.alias_rules
 
     @cached_property
     def semantic_rules(self) -> tuple[KRule, ...]:
@@ -1097,7 +1097,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         """Returns the original production for a given `KLabel` (failing if 0 or >1 are returned)."""
         if klabel not in self._production_for_klabel:
             prods = [prod for prod in self.productions if prod.klabel and prod.klabel.name == klabel.name]
-            _prods = [prod for prod in prods if KAtt.UNPARSE_AVOID not in prod.att]
+            _prods = [prod for prod in prods if Atts.UNPARSE_AVOID not in prod.att]
             if len(_prods) < len(prods):
                 _LOGGER.warning(
                     f'Discarding {len(prods) - len(_prods)} productions with `unparseAvoid` attribute for label: {klabel}'
@@ -1129,7 +1129,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 f'Method production_for_cell_sort only intended to be called on sorts ending in "Cell", not: {sort}'
             )
         try:
-            return single(prod for prod in self.productions if prod.sort == sort and KAtt.CELL in prod.att)
+            return single(prod for prod in self.productions if prod.sort == sort and Atts.CELL in prod.att)
         except ValueError as err:
             raise ValueError(f'Expected a single cell production for sort {sort}') from err
 
@@ -1353,8 +1353,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
         cell_wrappers = {}
         for ccp in self.cell_collection_productions:
-            if KAtt.ELEMENT in ccp.att and KAtt.WRAP_ELEMENT in ccp.att:
-                cell_wrappers[ccp.att[KAtt.WRAP_ELEMENT]] = ccp.att[KAtt.ELEMENT]
+            if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
+                cell_wrappers[ccp.att[Atts.WRAP_ELEMENT]] = ccp.att[Atts.ELEMENT]
 
         def _wrap_elements(_k: KInner) -> KInner:
             if type(_k) is KApply and _k.label.name in cell_wrappers:
@@ -1374,8 +1374,8 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
         cell_wrappers = {}
         for ccp in self.cell_collection_productions:
-            if KAtt.ELEMENT in ccp.att and KAtt.WRAP_ELEMENT in ccp.att:
-                cell_wrappers[ccp.att[KAtt.ELEMENT]] = ccp.att[KAtt.WRAP_ELEMENT]
+            if Atts.ELEMENT in ccp.att and Atts.WRAP_ELEMENT in ccp.att:
+                cell_wrappers[ccp.att[Atts.ELEMENT]] = ccp.att[Atts.WRAP_ELEMENT]
 
         def _wrap_elements(_k: KInner) -> KInner:
             if (
@@ -1457,7 +1457,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                         return KVariable(_token_var.token)
             return _kast
 
-        init_prods = (prod for prod in self.syntax_productions if KAtt.INITIALIZER in prod.att)
+        init_prods = (prod for prod in self.syntax_productions if Atts.INITIALIZER in prod.att)
         try:
             init_prod = single(prod for prod in init_prods if prod.sort == sort)
         except ValueError as err:
@@ -1474,7 +1474,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         else:
             raise ValueError(f'Cannot handle initializer for label: {prod_klabel}')
 
-        init_rewrites = [rule.body for rule in self.rules if KAtt.INITIALIZER in rule.att]
+        init_rewrites = [rule.body for rule in self.rules if Atts.INITIALIZER in rule.att]
         old_init_config: KInner | None = None
         while init_config != old_init_config:
             old_init_config = init_config

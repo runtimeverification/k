@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from ..prelude.kbool import TRUE
 from .inner import KApply, KAs, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
-from .kast import KAtt
+from .kast import Atts, KAtt
 from .manip import flatten_label, sort_ac_collections, undo_aliases
 from .outer import (
     KBubble,
@@ -213,8 +213,8 @@ class PrettyPrinter:
         return self.print(knonterminal.sort)
 
     def _print_kproduction(self, kproduction: KProduction) -> str:
-        if KAtt.KLABEL not in kproduction.att and kproduction.klabel:
-            kproduction = kproduction.update_atts({KAtt.KLABEL: kproduction.klabel.name})
+        if Atts.KLABEL not in kproduction.att and kproduction.klabel:
+            kproduction = kproduction.update_atts([Atts.KLABEL(kproduction.klabel.name)])
         syntax_str = 'syntax ' + self.print(kproduction.sort)
         if kproduction.items:
             syntax_str += ' ::= ' + ' '.join([self._print_kouter(pi) for pi in kproduction.items])
@@ -260,8 +260,8 @@ class PrettyPrinter:
     def _print_krule(self, kterm: KRule) -> str:
         body = '\n     '.join(self.print(kterm.body).split('\n'))
         rule_str = 'rule '
-        if KAtt.LABEL in kterm.att:
-            rule_str = rule_str + '[' + kterm.att[KAtt.LABEL] + ']:'
+        if Atts.LABEL in kterm.att:
+            rule_str = rule_str + '[' + kterm.att[Atts.LABEL] + ']:'
         rule_str = rule_str + ' ' + body
         atts_str = self.print(kterm.att)
         if kterm.requires != TRUE:
@@ -275,8 +275,8 @@ class PrettyPrinter:
     def _print_kclaim(self, kterm: KClaim) -> str:
         body = '\n     '.join(self.print(kterm.body).split('\n'))
         rule_str = 'claim '
-        if KAtt.LABEL in kterm.att:
-            rule_str = rule_str + '[' + kterm.att[KAtt.LABEL] + ']:'
+        if Atts.LABEL in kterm.att:
+            rule_str = rule_str + '[' + kterm.att[Atts.LABEL] + ']:'
         rule_str = rule_str + ' ' + body
         atts_str = self.print(kterm.att)
         if kterm.requires != TRUE:
@@ -368,8 +368,8 @@ def build_symbol_table(
             unparser = unparser_for_production(prod)
 
             symbol_table[label] = unparser
-            if KAtt.SYMBOL in prod.att and KAtt.KLABEL in prod.att:
-                symbol_table[prod.att[KAtt.KLABEL]] = unparser
+            if Atts.SYMBOL in prod.att and Atts.KLABEL in prod.att:
+                symbol_table[prod.att[Atts.KLABEL]] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2

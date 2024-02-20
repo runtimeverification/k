@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from pyk.cterm import CTerm
-from pyk.kast import KAtt
+from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KToken
 from pyk.kast.outer import KClaim, KRule
 from pyk.prelude.kbool import BOOL
@@ -28,7 +28,7 @@ class TestSimpleProof(KProveTest):
         lemma = KRule(
             KToken('pred1(3) => true', BOOL),
             requires=KToken('pred1(4)', BOOL),
-            att=KAtt(atts={KAtt.SIMPLIFICATION: ''}),
+            att=KAtt(entries=[Atts.SIMPLIFICATION('')]),
         )
 
         # When
