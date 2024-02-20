@@ -145,13 +145,20 @@
           smoke-test = with pkgs;
             stdenv.mkDerivation {
               name = "k-${k-version}-${self.rev or "dirty"}-smoke-test";
-              unpackPhase = "true";
-              buildInputs = [ fmt gmp mpfr k ];
-              buildPhase = ''
-                echo "module TEST imports BOOL endmodule" > test.k
-                kompile test.k --syntax-module TEST --backend llvm
-                rm -rf test-kompiled
-                kompile test.k --syntax-module TEST --backend haskell
+              src = lib.cleanSource
+                (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
+                  ./k-distribution);
+              preferLocalBuild = true;
+              buildInputs = [ lsof fmt gmp mpfr k ];
+              buildFlags = [
+                "K_BIN=${k}/bin"
+                "KLLVMLIB=${k}/lib/kllvm"
+                "PACKAGE_VERSION=${k-version}"
+                "--output-sync"
+              ];
+              enableParallelBuilding = true;
+              preBuild = ''
+                cd tests/smoke
               '';
               installPhase = ''
                 runHook preInstall
