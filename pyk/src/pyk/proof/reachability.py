@@ -53,6 +53,7 @@ class APRProof(Proof, KCFGExploration):
     circularity: bool
     failure_info: APRFailureInfo | None
     _exec_time: float
+    error_info: Exception | None
 
     def __init__(
         self,
@@ -70,6 +71,7 @@ class APRProof(Proof, KCFGExploration):
         circularity: bool = False,
         admitted: bool = False,
         _exec_time: float = 0,
+        error_info: Exception | None = None,
     ):
         Proof.__init__(self, id, proof_dir=proof_dir, subproof_ids=subproof_ids, admitted=admitted)
         KCFGExploration.__init__(self, kcfg, terminal)
@@ -84,6 +86,7 @@ class APRProof(Proof, KCFGExploration):
         self.node_refutations = {}
         self.kcfg.cfg_dir = self.proof_subdir / 'kcfg' if self.proof_subdir else None
         self._exec_time = _exec_time
+        self.error_info = error_info
 
         if self.proof_dir is not None and self.proof_subdir is not None:
             ensure_dir_path(self.proof_dir)
