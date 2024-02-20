@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..kast import EMPTY_ATT, KAtt, KInner
+from ..kast import EMPTY_ATT, Atts, KInner
 from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import KDefinition, KProduction, KRule, KSyntaxSort
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
     from typing import Any, Final
 
-    from ..kast import AttKey
+    from ..kast import AttKey, KAtt
     from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
@@ -61,7 +62,7 @@ def module_to_kore(definition: KDefinition) -> Module:
     module = simplified_module(definition)
 
     name = name_to_kore(module.name)
-    attrs = atts_to_kore({key: value for key, value in module.att.items() if key != KAtt.DIGEST})  # filter digest
+    attrs = atts_to_kore({key: value for key, value in module.att.items() if key != Atts.DIGEST})  # filter digest
 
     imports = [Import('K')]
     sort_decls = [
@@ -110,7 +111,7 @@ def att_to_kore(key: AttKey, value: Any) -> App:
     if isinstance(value, str):
         return App(symbol, (), (String(value),))
 
-    if isinstance(value, FrozenDict) and 'node' in value:
+    if isinstance(value, (dict, FrozenDict)) and 'node' in value:
         if value['node'] == 'KSort':
             sort_name = name_to_kore(KSort.from_dict(value).name)  # 'Sort' is not prepended by ModuleToKORE
             return App(symbol, (), (String(sort_name),))
@@ -126,20 +127,20 @@ def att_to_kore(key: AttKey, value: Any) -> App:
 
 
 def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...], tuple[Pattern, ...]] | None:
-    if key == KAtt.LOCATION:
+    if key == Atts.LOCATION:
         assert isinstance(value, tuple)
         assert len(value) == 4
         loc_str = ','.join(str(loc) for loc in value)
         return (), (String(f'Location({loc_str})'),)
-    if key == KAtt.SOURCE:
-        assert isinstance(value, str)
+    if key == Atts.SOURCE:
+        assert isinstance(value, Path)
         return (), (String(f'Source({value})'),)
-    if key == KAtt.ELEMENT:
+    if key == Atts.ELEMENT:
         # TODO avoid special casing by pre-processing the attribute into a KApply
         # This should be handled by the frontend
         assert isinstance(value, str)
         return (), (App(_label_name(value)),)
-    if key == KAtt.UNIT:  # TODO same here
+    if key == Atts.UNIT:  # TODO same here
         assert isinstance(value, str)
         return (), (App(_label_name(value)),)
     return None
@@ -148,7 +149,7 @@ def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...],
 def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
     name = _sort_name(syntax_sort.sort.name)
     attrs = atts_to_kore(syntax_sort.att)
-    hooked = KAtt.HOOK in syntax_sort.att
+    hooked = Atts.HOOK in syntax_sort.att
     return SortDecl(name, (), attrs=attrs, hooked=hooked)
 
 
@@ -181,7 +182,7 @@ def symbol_prod_to_kore(production: KProduction) -> SymbolDecl:
     param_sorts = tuple(to_sort(sort) for sort in production.argument_sorts)
     sort = to_sort(production.sort)
     attrs = atts_to_kore(production.att)
-    hooked = KAtt.HOOK in production.att
+    hooked = Atts.HOOK in production.att
     return SymbolDecl(
         symbol=symbol,
         param_sorts=param_sorts,
@@ -252,13 +253,13 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
 
     # symbols
     module = _pull_up_rewrites(module)
-    module = _discard_symbol_atts(module, [KAtt.PRODUCTION])
+    module = _discard_symbol_atts(module, [Atts.PRODUCTION])
     module = _discard_hook_atts(module)
     module = _add_anywhere_atts(module)
-    module = _add_symbol_atts(module, KAtt.MACRO, _is_macro)
-    module = _add_symbol_atts(module, KAtt.FUNCTIONAL, _is_functional)
-    module = _add_symbol_atts(module, KAtt.INJECTIVE, _is_injective)
-    module = _add_symbol_atts(module, KAtt.CONSTRUCTOR, _is_constructor)
+    module = _add_symbol_atts(module, Atts.MACRO, _is_macro)
+    module = _add_symbol_atts(module, Atts.FUNCTIONAL, _is_functional)
+    module = _add_symbol_atts(module, Atts.INJECTIVE, _is_injective)
+    module = _add_symbol_atts(module, Atts.CONSTRUCTOR, _is_constructor)
 
     return module
 
@@ -311,7 +312,7 @@ def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
             declarations[sort] = syntax_sort.att
         else:
             assert declarations[sort].keys().isdisjoint(syntax_sort.att)
-            declarations[sort] = declarations[sort].update(syntax_sort.att)
+            declarations[sort] = declarations[sort].update(syntax_sort.att.entries())
 
     # Also consider production sorts
     for production in module.productions:
@@ -329,10 +330,10 @@ def _add_collection_atts(module: KFlatModule) -> KFlatModule:
     """Return a module where concat, element and unit attributes are added to collection sort declarations."""
 
     # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
-    concat_prods = {prod.sort: prod for prod in module.productions if KAtt.ELEMENT in prod.att}
+    concat_prods = {prod.sort: prod for prod in module.productions if Atts.ELEMENT in prod.att}
 
     assert all(
-        KAtt.UNIT in prod.att for _, prod in concat_prods.items()
+        Atts.UNIT in prod.att for _, prod in concat_prods.items()
     )  # TODO Could be saved with a different attribute structure: concat(Element, Unit)
 
     def update_att(sentence: KSentence) -> KSentence:
@@ -341,20 +342,20 @@ def _add_collection_atts(module: KFlatModule) -> KFlatModule:
 
         syntax_sort: KSyntaxSort = sentence
 
-        if syntax_sort.att.get(KAtt.HOOK) not in COLLECTION_HOOKS:
+        if syntax_sort.att.get(Atts.HOOK) not in COLLECTION_HOOKS:
             return syntax_sort
 
         prod_att = concat_prods[syntax_sort.sort].att
 
         return syntax_sort.let(
             att=syntax_sort.att.update(
-                {
+                [
                     # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
-                    KAtt.CONCAT: KApply(prod_att[KAtt.KLABEL]).to_dict(),
+                    Atts.CONCAT(KApply(prod_att[Atts.KLABEL]).to_dict()),
                     # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
-                    KAtt.ELEMENT: prod_att[KAtt.ELEMENT],
-                    KAtt.UNIT: prod_att[KAtt.UNIT],
-                }
+                    Atts.ELEMENT(prod_att[Atts.ELEMENT]),
+                    Atts.UNIT(prod_att[Atts.UNIT]),
+                ]
             )
         )
 
@@ -380,7 +381,7 @@ def _add_domain_value_atts(module: KFlatModule) -> KFlatModule:
         if syntax_sort.sort not in token_sorts:
             return syntax_sort
 
-        return syntax_sort.let(att=syntax_sort.att.update({KAtt.HAS_DOMAIN_VALUES: ''}))
+        return syntax_sort.let(att=syntax_sort.att.update([Atts.HAS_DOMAIN_VALUES('')]))
 
     sentences = tuple(update_att(sent) for sent in module)
     return module.let(sentences=sentences)
@@ -391,11 +392,11 @@ def _token_sorts(module: KFlatModule) -> set[KSort]:
 
     # TODO "token" should be an attribute of only productions
     for syntax_sort in module.syntax_sorts:
-        if KAtt.TOKEN in syntax_sort.att:
+        if Atts.TOKEN in syntax_sort.att:
             res.add(syntax_sort.sort)
 
     for production in module.productions:
-        if KAtt.TOKEN in production.att:
+        if Atts.TOKEN in production.att:
             res.add(production.sort)
 
     return res
@@ -434,15 +435,15 @@ def _add_anywhere_atts(module: KFlatModule) -> KFlatModule:
             return sentence
 
         klabel = sentence.klabel
-        if any(KAtt.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
-            return sentence.let(att=sentence.att.update({KAtt.ANYWHERE: ''}))
+        if any(Atts.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
+            return sentence.let(att=sentence.att.update([Atts.ANYWHERE('')]))
 
-        if KAtt.KLABEL not in sentence.att:
+        if Atts.KLABEL not in sentence.att:
             return sentence
 
-        productions = productions_by_klabel_att.get(sentence.att[KAtt.KLABEL], [])
+        productions = productions_by_klabel_att.get(sentence.att[Atts.KLABEL], [])
         if any(_is_overloaded_by(defn, production, sentence) for production in productions):
-            return sentence.let(att=sentence.att.update({KAtt.ANYWHERE: ''}))
+            return sentence.let(att=sentence.att.update([Atts.ANYWHERE('')]))
 
         return sentence
 
@@ -477,7 +478,7 @@ def _add_symbol_atts(module: KFlatModule, att: AttKey, pred: Callable[[KAtt], bo
             return sentence
 
         if pred(sentence.att):
-            return sentence.let(att=sentence.att.update({att: ''}))
+            return sentence.let(att=sentence.att.update([att('')]))
 
         return sentence
 
@@ -485,22 +486,22 @@ def _add_symbol_atts(module: KFlatModule, att: AttKey, pred: Callable[[KAtt], bo
 
 
 def _is_macro(att: KAtt) -> bool:
-    return any(key in att for key in [KAtt.ALIAS, KAtt.ALIAS_REC, KAtt.MACRO, KAtt.MACRO_REC])
+    return any(key in att for key in [Atts.ALIAS, Atts.ALIAS_REC, Atts.MACRO, Atts.MACRO_REC])
 
 
 def _is_functional(att: KAtt) -> bool:
-    return KAtt.FUNCTION not in att or KAtt.TOTAL in att
+    return Atts.FUNCTION not in att or Atts.TOTAL in att
 
 
 def _is_injective(att: KAtt) -> bool:
     return not any(
         key in att
         for key in [
-            KAtt.FUNCTION,
-            KAtt.ASSOC,
-            KAtt.COMM,
-            KAtt.IDEM,
-            KAtt.UNIT,
+            Atts.FUNCTION,
+            Atts.ASSOC,
+            Atts.COMM,
+            Atts.IDEM,
+            Atts.UNIT,
         ]
     )
 
@@ -509,19 +510,19 @@ def _is_constructor(att: KAtt) -> bool:
     return not any(
         key in att
         for key in [
-            KAtt.FUNCTION,
-            KAtt.ASSOC,
-            KAtt.COMM,
-            KAtt.IDEM,
-            KAtt.UNIT,
-            KAtt.MACRO,
-            KAtt.ANYWHERE,
+            Atts.FUNCTION,
+            Atts.ASSOC,
+            Atts.COMM,
+            Atts.IDEM,
+            Atts.UNIT,
+            Atts.MACRO,
+            Atts.ANYWHERE,
         ]
     )
 
 
 def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = ()) -> KFlatModule:
-    """Remove hooks attributes from symbol productions that are not built-in and not activated."""
+    """Remove hook attributes from symbol productions that are not built-in and not activated."""
 
     def is_active(hook: str) -> bool:
         namespaces = (*hook_namespaces, *HOOK_NAMESPACES)
@@ -534,12 +535,12 @@ def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = 
         if not sentence.klabel:
             return sentence
 
-        if not KAtt.HOOK in sentence.att:
+        if not Atts.HOOK in sentence.att:
             return sentence
 
-        hook = sentence.att[KAtt.HOOK]
+        hook = sentence.att[Atts.HOOK]
         if not is_active(hook):
-            return sentence.let(att=sentence.att.remove([KAtt.HOOK]))
+            return sentence.let(att=sentence.att.discard([Atts.HOOK]))
 
         return sentence
 
@@ -557,7 +558,7 @@ def _discard_symbol_atts(module: KFlatModule, atts: Iterable[AttKey]) -> KFlatMo
         if not sentence.klabel:
             return sentence
 
-        return sentence.let(att=sentence.att.remove(atts))
+        return sentence.let(att=sentence.att.discard(atts))
 
     sentences = tuple(update(sent) for sent in module)
     return module.let(sentences=sentences)
@@ -568,9 +569,9 @@ def _productions_by_klabel_att(productions: Iterable[KProduction]) -> dict[str, 
     for production in productions:
         if not production.klabel:
             continue
-        if KAtt.KLABEL not in production.att:
+        if Atts.KLABEL not in production.att:
             continue
-        res.setdefault(production.att[KAtt.KLABEL], []).append(production)
+        res.setdefault(production.att[Atts.KLABEL], []).append(production)
     return res
 
 
@@ -579,11 +580,11 @@ def _is_overloaded_by(defn: KDefinition, prod1: KProduction, prod2: KProduction)
         raise ValueError(f'Expected symbol production, got: {prod1}')
     if not prod2.klabel:
         raise ValueError(f'Expected symbol production, got: {prod2}')
-    if KAtt.KLABEL not in prod1.att:
+    if Atts.KLABEL not in prod1.att:
         return False
-    if KAtt.KLABEL not in prod2.att:
+    if Atts.KLABEL not in prod2.att:
         return False
-    if prod1.att[KAtt.KLABEL] != prod2.att[KAtt.KLABEL]:
+    if prod1.att[Atts.KLABEL] != prod2.att[Atts.KLABEL]:
         return False
     arg_sorts1 = prod1.argument_sorts
     arg_sorts2 = prod2.argument_sorts

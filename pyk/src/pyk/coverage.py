@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .kast import KAtt
+from .kast import Atts
 from .kast.inner import KApply, KRewrite, KSequence
 from .kast.outer import KRule, read_kast_definition
 
@@ -27,7 +27,7 @@ def get_rule_by_id(definition: KDefinition, rule_id: str) -> KRule:
     for module in definition.modules:
         for sentence in module.sentences:
             if type(sentence) is KRule:
-                if KAtt.UNIQUE_ID in sentence.att and sentence.att[KAtt.UNIQUE_ID] == rule_id:
+                if Atts.UNIQUE_ID in sentence.att and sentence.att[Atts.UNIQUE_ID] == rule_id:
                     return sentence
     raise ValueError(f'Could not find rule with ID: {rule_id}')
 
@@ -87,8 +87,8 @@ def translate_coverage(
                 if (type(body) is KApply and body.label.name == '<generatedTop>') or (
                     type(body) is KRewrite and type(body.lhs) is KApply and body.lhs.label.name == '<generatedTop>'
                 ):
-                    if KAtt.UNIQUE_ID in sentence.att:
-                        dst_non_function_rules.append(sentence.att[KAtt.UNIQUE_ID])
+                    if Atts.UNIQUE_ID in sentence.att:
+                        dst_non_function_rules.append(sentence.att[Atts.UNIQUE_ID])
 
     # Convert the src_coverage rules to dst_no_coverage rules via the maps generated above
     dst_rule_list = []

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast import KAtt
+from pyk.kast import Atts
 from pyk.ktool.kompile import KompileBackend, KompileNotFoundError, kompile
 from pyk.testing import KompiledTest
 
@@ -55,7 +55,7 @@ class TestKLabel(KompiledTest):
         module = definition.module('KLABEL')
 
         def klabel_defined_at_line(line: int) -> KLabel:
-            (prod,) = (prod for prod in module.productions if prod.att.get(KAtt.LOCATION, [None])[0] == line)
+            (prod,) = (prod for prod in module.productions if prod.att.get(Atts.LOCATION, [None])[0] == line)
             res = prod.klabel
             assert res is not None
             return res
