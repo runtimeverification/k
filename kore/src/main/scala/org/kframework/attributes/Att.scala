@@ -311,7 +311,6 @@ object Att {
   final val NOT_INJECTION        = Key.internal("notInjection")
   final val NOT_LR1_MODULES      = Key.internal("not-lr1-modules")
   final val ORIGINAL_PRD         = Key.internal("originalPrd")
-  final val OVERLOAD             = Key.internal("overload")
   final val PREDICATE            = Key.internal("predicate")
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
     Key.internal("prettyPrintWithSortAnnotation")
