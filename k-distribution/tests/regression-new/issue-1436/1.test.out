@@ -1,6 +1,6 @@
 <generatedTop>
   <k>
-    6 ~> .
+    6 ~> .K
   </k>
   <bar>
     6
@@ -8,6 +8,6 @@
   <log>
     ListItem ( #ostream ( 1 ) )
     ListItem ( "off" )
-    ListItem ( #buffer ( "0" ~> . ) )
+    ListItem ( #buffer ( "0" ~> .K ) )
   </log>
 </generatedTop>
