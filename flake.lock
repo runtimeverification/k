@@ -104,17 +104,17 @@
     "immer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1634324349,
-        "narHash": "sha256-1OicqmyM3Rcrs/jkRMip2pXITQnVDRrHbQbEpZZ4nnU=",
+        "lastModified": 1708038459,
+        "narHash": "sha256-aV/mQFuPzioy1PxROc85ypeP7/d0nn+xcBPzy9taw2s=",
         "owner": "runtimeverification",
         "repo": "immer",
-        "rev": "198c2ae260d49ef1800a2fe4433e07d7dec20059",
+        "rev": "4b0914f0b2acb33befe0ba4cd3a7954f2687e9bb",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "immer",
-        "rev": "198c2ae260d49ef1800a2fe4433e07d7dec20059",
+        "rev": "4b0914f0b2acb33befe0ba4cd3a7954f2687e9bb",
         "type": "github"
       }
     },
@@ -137,11 +137,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1708452206,
-        "narHash": "sha256-kJP1mYjTWlOuqEjwLNpadWlSdFCa7hx39dTvS52ErPE=",
+        "lastModified": 1708456971,
+        "narHash": "sha256-H1xfScCSkq92t0flofFBwdiR16Y3xe8ORNsXJs3Tcmg=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "b3eae3a88d012d9afbd711cdd10c418712c84941",
+        "rev": "0861085e8dec37c1feabdfeb83e2fe61483d154c",
         "type": "github"
       },
       "original": {
