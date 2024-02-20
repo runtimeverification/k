@@ -159,8 +159,8 @@ case class Module(
 
   assert(att != null)
 
-  def location: Optional[Location] = att.getOptional(classOf[Location])
-  def source: Optional[Source]     = att.getOptional(classOf[Source])
+  def location: Optional[Location] = att.getOptional(Att.LOCATION, classOf[Location])
+  def source: Optional[Source]     = att.getOptional(Att.SOURCE, classOf[Source])
 
   lazy val fullImports: Set[Module] = imports.map(_.module)
 
@@ -531,8 +531,8 @@ trait Sentence extends HasLocation with HasAtt with AttValue {
   val isNonSyntax: Boolean
   val att: Att
   def withAtt(att: Att): Sentence
-  def location: Optional[Location] = att.getOptional(classOf[Location])
-  def source: Optional[Source]     = att.getOptional(classOf[Source])
+  def location: Optional[Location] = att.getOptional(Att.LOCATION, classOf[Location])
+  def source: Optional[Source]     = att.getOptional(Att.SOURCE, classOf[Source])
   def label: Optional[String]      = att.getOptional(Att.LABEL)
 }
 

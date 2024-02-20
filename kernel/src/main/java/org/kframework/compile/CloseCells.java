@@ -86,7 +86,8 @@ public class CloseCells {
         newLabel = KVariable("_DotVar" + (counter++), Att().add(Att.ANONYMOUS()));
       } else {
         newLabel =
-            KVariable("_DotVar" + (counter++), Att().add(Att.ANONYMOUS()).add(Sort.class, s));
+            KVariable(
+                "_DotVar" + (counter++), Att().add(Att.ANONYMOUS()).add(Att.SORT(), Sort.class, s));
       }
     } while (vars.contains(newLabel));
     vars.add(newLabel);
@@ -290,8 +291,8 @@ public class CloseCells {
     if (item instanceof KApply) {
       required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
     } else if (item instanceof KVariable) {
-      if (item.att().contains(Sort.class)) {
-        Sort sort = item.att().get(Sort.class);
+      if (item.att().contains(Att.SORT(), Sort.class)) {
+        Sort sort = item.att().get(Att.SORT(), Sort.class);
         if (cfg.cfg().isCell(sort)) {
           required.remove(sort);
         } else {

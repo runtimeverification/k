@@ -47,7 +47,7 @@ public class ResolveFreshConfigConstants {
       @Override
       public K apply(KVariable k) {
         if (k.name().startsWith("!")) {
-          if (!k.att().get(Sort.class).equals(Sorts.Int())) {
+          if (!k.att().get(Att.SORT(), Sort.class).equals(Sorts.Int())) {
             throw KEMException.compilerError(
                 "Can't resolve fresh configuration variable not of sort Int", k);
           }

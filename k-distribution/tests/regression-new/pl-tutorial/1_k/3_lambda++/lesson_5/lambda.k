@@ -26,7 +26,7 @@ module LAMBDA
   rule <k> X => V ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
-  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
+  rule <k> _:Val ~> (Rho => .K) ...</k> <env> _ => Rho </env>
 
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]

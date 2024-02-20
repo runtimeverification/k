@@ -363,7 +363,7 @@ typed SIMPLE, so we do not discuss them much here.
 
   rule read() => int
 
-  rule print(T:Type, Ts => Ts); when T ==K int orBool T ==K string
+  rule print(T:Type, Ts => Ts); requires T ==K int orBool T ==K string
   rule print(.Types); => stmt
 
 
@@ -407,7 +407,7 @@ typed SIMPLE, so we do not discuss them much here.
 // We would like to say:
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
-  context ltype(HOLE) when isLValue(HOLE)
+  context ltype(HOLE) requires isLValue(HOLE)
 
 // OLD approach:
 //  syntax Exp ::= ltype(Exp)  [function]
@@ -459,7 +459,7 @@ at the end of this module).
 ```k
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
        <ctenvT> Rho (.Map => X |-> T) </ctenvT>
-    when notBool(X in keys(Rho))
+    requires notBool(X in keys(Rho))
 
   rule <k> T:Type X:Id; => stuck(T X;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
@@ -633,7 +633,7 @@ checks for cycles.
          <baseClasses> SetItem(C) Cs:Set (.Set => SetItem(C')) </baseClasses>
        ...</classData>
        <classData>... <className>C</className> <baseClass>C'</baseClass> ...</classData>
-    when notBool(C' in (SetItem(C) Cs))  [priority(25)]
+    requires notBool(C' in (SetItem(C) Cs))  [priority(25)]
 
   rule (<T>...
           <className> C </className>
@@ -713,7 +713,7 @@ wait.  Finally, the sixth rule below reports an error when the
 
   rule <k> X:Id => this . X ...</k>
        <tenv> Rho </tenv>
-    when notBool(X in keys(Rho))
+    requires notBool(X in keys(Rho))
 
 // OLD approach:
 //  rule ltype(E:Exp . X:Id) => E . X
@@ -726,7 +726,7 @@ wait.  Finally, the sixth rule below reports an error when the
        <className> C1 </className>
        <baseClass> C2:Id </baseClass>
        <ctenv> Rho </ctenv>
-    when notBool(X in keys(Rho))
+    requires notBool(X in keys(Rho))
 
   rule <k> `class`(Object) . X:Id => stuck(`class`(Object) . X) ...</k>
        <inClass> C:Id </inClass>
@@ -764,7 +764,7 @@ of the language need to insert runtime checks for downcasting to be safe.
        <output>... .List => ListItem("Classes \"" +String Id2String(C1)
                               +String "\" and \"" +String Id2String(C2)
                               +String "\" are incompatible!\n") </output>
-    when notBool(C1 in S2) andBool notBool(C2 in S1)
+    requires notBool(C1 in S2) andBool notBool(C2 in S1)
 ```
 
 ## Cleanup tasks
@@ -823,9 +823,9 @@ The subclass relation introduces a subtyping relation.
 ```k
   syntax KItem ::= checkSubtype(Types,Types)
 
-  rule checkSubtype(T:Type, T) => .
+  rule checkSubtype(T:Type, T) => .K
 
-  rule <k> checkSubtype(`class`(C:Id), `class`(C':Id)) => . ...</k>
+  rule <k> checkSubtype(`class`(C:Id), `class`(C':Id)) => .K ...</k>
        <className> C </className>
        <baseClasses>... SetItem(C') ...</baseClasses>
 
@@ -837,10 +837,10 @@ The subclass relation introduces a subtyping relation.
 
   rule checkSubtype((T:Type,Ts),(T':Type,Ts'))
     => checkSubtype(T,T') ~> checkSubtype(Ts,Ts')
-    when Ts =/=K .Types
+    requires Ts =/=K .Types
 
-  rule checkSubtype(.Types,.Types) => .
-  rule checkSubtype(.Types,void) => .
+  rule checkSubtype(.Types,.Types) => .K
+  rule checkSubtype(.Types,void) => .K
 ```
 
 ## Checking well-formedness of types
@@ -851,14 +851,14 @@ check that the types used in the program actually exists
   syntax KItem ::= checkType(Types)
 
   rule checkType(T:Type,Ts:Types) => checkType(T) ~> checkType(Ts)
-    when Ts =/=K .Types
-  rule checkType(.Types) => .
-  rule checkType(int) => .
-  rule checkType(bool) => .
-  rule checkType(string) => .
-  rule checkType(void) => .
-  rule <k> checkType(`class`(C:Id)) => . ...</k> <className> C </className>
-  rule checkType(`class`(Object)) => .
+    requires Ts =/=K .Types
+  rule checkType(.Types) => .K
+  rule checkType(int) => .K
+  rule checkType(bool) => .K
+  rule checkType(string) => .K
+  rule checkType(void) => .K
+  rule <k> checkType(`class`(C:Id)) => .K ...</k> <className> C </className>
+  rule checkType(`class`(Object)) => .K
   rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)
   rule checkType(T:Type[]) => checkType(T)
 ```
@@ -883,9 +883,9 @@ is co-variant in the codomain and contra-variant in the domain).
        <className> C </className>
        <baseClass> C':Id </baseClass>
        <ctenv> Rho </ctenv>
-    when notBool(F in keys(Rho))
+    requires notBool(F in keys(Rho))
 
-  rule checkMethod(_:Id,_,Object) => .
+  rule checkMethod(_:Id,_,Object) => .K
 ```
 
 ## Generic operations which could be part of the **K** framework
@@ -894,7 +894,7 @@ is co-variant in the codomain and contra-variant in the domain).
   syntax KItem ::= stuck(K)
 
   syntax KItem ::= "discard"
-  rule _:KResult ~> discard => .
+  rule _:KResult ~> discard => .K
 
 endmodule
 ```

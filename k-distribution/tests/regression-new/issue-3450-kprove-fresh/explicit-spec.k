@@ -5,8 +5,8 @@ require "test.k"
 module EXPLICIT-SPEC
     imports TEST
 
-    claim <k> quux => . </k>
-        <c1> . => ?C </c1>
-        <c2> . => ?C </c2>
+    claim <k> quux => .K </k>
+        <c1> .K => ?C </c1>
+        <c2> .K => ?C </c2>
         <generatedCounter> GC => GC +Int 1 </generatedCounter>
 endmodule

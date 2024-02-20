@@ -122,9 +122,16 @@ public class ResolveAnonVar {
     KVariable newLabel;
     Att locInfo =
         Optional.of(Att())
-            .flatMap(att -> k.att().getOptional(Source.class).map(s -> att.add(Source.class, s)))
             .flatMap(
-                att -> k.att().getOptional(Location.class).map(l -> att.add(Location.class, l)))
+                att ->
+                    k.att()
+                        .getOptional(Att.SOURCE(), Source.class)
+                        .map(s -> att.add(Att.SOURCE(), Source.class, s)))
+            .flatMap(
+                att ->
+                    k.att()
+                        .getOptional(Att.LOCATION(), Location.class)
+                        .map(l -> att.add(Att.LOCATION(), Location.class, l)))
             .orElse(Att());
     Att att = Att().add(Att.ANONYMOUS()).addAll(locInfo);
     if (prefix.equals("?")) {

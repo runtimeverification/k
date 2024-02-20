@@ -16,7 +16,7 @@ import org.kframework.utils.file.FileUtil;
 public record GenerateCoverage(boolean cover, FileUtil files) {
 
   public K gen(RuleOrClaim r, K body, Module mod) {
-    if (!cover || r.att().getOptional(Source.class).isEmpty()) {
+    if (!cover || r.att().getOptional(Att.SOURCE(), Source.class).isEmpty()) {
       return body;
     }
     K left = RewriteToTop.toLeft(body);

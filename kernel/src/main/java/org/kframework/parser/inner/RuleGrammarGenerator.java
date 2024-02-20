@@ -778,7 +778,7 @@ public record RuleGrammarGenerator(Definition baseK) {
 
   private static Set<Sentence> makeCasts(Sort innerSort, Sort castSort, Sort labelSort) {
     Set<Sentence> prods = new HashSet<>();
-    Att attrs1 = Att().add(Sort.class, castSort);
+    Att attrs1 = Att().add(Att.SORT(), Sort.class, castSort);
     prods.add(
         Production(
             KLabel("#SyntacticCast"),

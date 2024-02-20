@@ -135,7 +135,7 @@ public class AddSortInjections {
             KApply(
                 KLabel("inj", actualSort, Sorts.KItem()),
                 KList(visitChildren(term, actualSort, expectedSort)),
-                Att.empty().add(Sort.class, Sorts.KItem())));
+                Att.empty().add(Att.SORT(), Sort.class, Sorts.KItem())));
       }
     } else {
       String hookAtt =
@@ -167,8 +167,8 @@ public class AddSortInjections {
                           KList(visitChildren(k, actualSort, expectedSort)));
                 }
                 Sort adjustedExpectedSort = expectedSort;
-                if (k.att().contains(Sort.class)) {
-                  adjustedExpectedSort = k.att().get(Sort.class);
+                if (k.att().contains(Att.SORT(), Sort.class)) {
+                  adjustedExpectedSort = k.att().get(Att.SORT(), Sort.class);
                 }
                 Production prod = production(k);
                 Production substituted =
@@ -184,12 +184,12 @@ public class AddSortInjections {
                     KList(
                         visitChildren(key, actualKeySort, expectedKeySort),
                         visitChildren(k, actualSort, expectedSort)),
-                    Att.empty().add(Sort.class, expectedSort));
+                    Att.empty().add(Att.SORT(), Sort.class, expectedSort));
               } else {
                 return KApply(
                     elementLabel,
                     KList(visitChildren(k, actualSort, expectedSort)),
-                    Att.empty().add(Sort.class, expectedSort));
+                    Att.empty().add(Att.SORT(), Sort.class, expectedSort));
               }
             }
           }
@@ -198,7 +198,7 @@ public class AddSortInjections {
       return KApply(
           KLabel("inj", actualSort, expectedSort),
           KList(visitChildren(term, actualSort, expectedSort)),
-          Att.empty().add(Sort.class, expectedSort));
+          Att.empty().add(Att.SORT(), Sort.class, expectedSort));
     }
   }
 
@@ -208,7 +208,7 @@ public class AddSortInjections {
   }
 
   private K visitChildren(K term, Sort actualSort, Sort expectedSort) {
-    Att att = term.att().add(Sort.class, actualSort);
+    Att att = term.att().add(Att.SORT(), Sort.class, actualSort);
     if (actualSort.name().equals(SORTPARAM_NAME)) {
       sortParams.add(actualSort.params().head().name());
     }
@@ -216,8 +216,8 @@ public class AddSortInjections {
       if (kapp.klabel().name().equals("inj")) {
         return term;
       }
-      if (kapp.att().contains(Sort.class)) {
-        expectedSort = kapp.att().get(Sort.class);
+      if (kapp.att().contains(Att.SORT(), Sort.class)) {
+        expectedSort = kapp.att().get(Att.SORT(), Sort.class);
       }
       Production prod = production(kapp);
       List<K> children = new ArrayList<>();
@@ -376,8 +376,8 @@ public class AddSortInjections {
       if (kapp.klabel().name().equals("_:/=K_")) {
         return Sorts.Bool();
       }
-      if (kapp.att().contains(Sort.class)) {
-        expectedSort = kapp.att().get(Sort.class);
+      if (kapp.att().contains(Att.SORT(), Sort.class)) {
+        expectedSort = kapp.att().get(Att.SORT(), Sort.class);
       }
       Production prod = production(kapp);
       Production substituted = prod;
@@ -418,7 +418,7 @@ public class AddSortInjections {
     } else if (term instanceof KToken) {
       return ((KToken) term).sort();
     } else if (term instanceof KVariable) {
-      return term.att().getOptional(Sort.class).orElse(Sorts.K());
+      return term.att().getOptional(Att.SORT(), Sort.class).orElse(Sorts.K());
     } else if (term instanceof KSequence) {
       return Sorts.K();
     } else if (term instanceof InjectedKLabel) {

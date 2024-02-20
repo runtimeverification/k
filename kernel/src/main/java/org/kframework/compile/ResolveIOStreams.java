@@ -324,7 +324,7 @@ public record ResolveIOStreams(Definition definition, KExceptionManager kem) {
             sorts.add(sort);
           } else {
             if (k.att()
-                .getOption(Location.class)
+                .getOption(Att.LOCATION(), Location.class)
                 .isDefined()) { // warning only for user-provided rules
               throw KEMException.compilerError(
                   "Unsupported matching pattern in stdin stream cell.\n"

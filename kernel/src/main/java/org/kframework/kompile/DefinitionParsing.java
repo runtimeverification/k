@@ -674,13 +674,13 @@ public class DefinitionParsing {
                                   parse
                                       .parse()
                                       .att()
-                                      .remove(Source.class)
-                                      .remove(Location.class)
-                                      .remove(Production.class);
+                                      .remove(Att.SOURCE(), Source.class)
+                                      .remove(Att.LOCATION(), Location.class)
+                                      .remove(Att.PRODUCTION(), Production.class);
                               Att bubbleAtt =
                                   b.att()
-                                      .remove(Source.class)
-                                      .remove(Location.class)
+                                      .remove(Att.SOURCE(), Source.class)
+                                      .remove(Att.LOCATION(), Location.class)
                                       .remove(Att.CONTENT_START_LINE(), Integer.class)
                                       .remove(Att.CONTENT_START_COLUMN(), Integer.class);
                               if (!termAtt.equals(
@@ -725,13 +725,14 @@ public class DefinitionParsing {
           parse.parse() != null
               ? new AddAttRec(
                       a -> {
-                        Location loc = a.get(Location.class);
+                        Location loc = a.get(Att.LOCATION(), Location.class);
                         Location newLoc =
                             updateLocation(oldStartLine, lineOffset, columnOffset, loc);
-                        return a.remove(Source.class)
-                            .remove(Location.class)
-                            .add(Location.class, newLoc)
+                        return a.remove(Att.SOURCE(), Source.class)
+                            .remove(Att.LOCATION(), Location.class)
+                            .add(Att.LOCATION(), Location.class, newLoc)
                             .add(
+                                Att.SOURCE(),
                                 Source.class,
                                 b.source()
                                     .orElseThrow(
@@ -819,7 +820,7 @@ public class DefinitionParsing {
                       Att()
                           .add(Att.CONTENT_START_LINE(), 1)
                           .add(Att.CONTENT_START_COLUMN(), 1)
-                          .add(Source.class, source)))
+                          .add(Att.SOURCE(), Source.class, source)))
               .collect(Collectors.toSet());
       if (!errors.isEmpty()) {
         throw errors.iterator().next();
@@ -933,7 +934,7 @@ public class DefinitionParsing {
       ParseInModule pim, Map<String, ParsedSentence> cache, Bubble b) {
     int startLine = b.att().get(Att.CONTENT_START_LINE(), Integer.class);
     int startColumn = b.att().get(Att.CONTENT_START_COLUMN(), Integer.class);
-    Source source = b.att().get(Source.class);
+    Source source = b.att().get(Att.SOURCE(), Source.class);
     boolean isAnywhere =
         b.att().contains(Att.ANYWHERE())
             || b.att().contains(Att.SIMPLIFICATION())
@@ -961,8 +962,8 @@ public class DefinitionParsing {
                       b.att()
                           .remove(Att.CONTENT_START_LINE(), Integer.class)
                           .remove(Att.CONTENT_START_COLUMN(), Integer.class)
-                          .remove(Source.class)
-                          .remove(Location.class)));
+                          .remove(Att.SOURCE(), Source.class)
+                          .remove(Att.LOCATION(), Location.class)));
       cache.put(
           b.contents(),
           new ParsedSentence(

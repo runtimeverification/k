@@ -111,7 +111,7 @@ class KoreToK(sortAtt: Map[String, String]) {
     case kore.Variable(name, sort) =>
       KORE.KVariable(
         extractVarName(name),
-        Att.empty.add(classOf[org.kframework.kore.Sort], apply(sort))
+        Att.empty.add(Att.SORT, classOf[org.kframework.kore.Sort], apply(sort))
       )
     case kore.Application(head, args) =>
       head.ctr match {

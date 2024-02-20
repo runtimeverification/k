@@ -383,7 +383,7 @@ definition.
 ```k
   syntax KItem ::= "undefined"
 
-  rule <k> var X:Id; => . ...</k>
+  rule <k> var X:Id; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -391,12 +391,12 @@ definition.
 
   context var _:Id[HOLE];
 
-  rule <k> var X:Id[N:Int]; => . ...</k>
+  rule <k> var X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
                           (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
-    when N >=Int 0
+    requires N >=Int 0
 
 
   syntax Id ::= "$1" [token] | "$2" [token]
@@ -425,8 +425,8 @@ definition.
   rule Str1 + Str2 => Str1 +String Str2
   rule I1 - I2 => I1 -Int I2
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule I1 / I2 => I1 /Int I2 requires I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 requires I2 =/=K 0
   rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -477,13 +477,13 @@ interestingly, the semantics of return stays unchanged.
     [group(assignment)]
 
 
-  rule {} => .
+  rule {} => .K
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 
 
   rule S1::Stmt S2::Stmt => S1 ~> S2
 
-  rule _:Val; => .
+  rule _:Val; => .K
 
   rule if ( true) S else _ => S
   rule if (false) _ else S => S
@@ -492,7 +492,7 @@ interestingly, the semantics of return stays unchanged.
 
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     [group(print)]
-  rule print(.Vals); => .
+  rule print(.Vals); => .K
 
 
   syntax KItem ::= xstackFrame(Id,Stmt,K,Map,K)
@@ -508,7 +508,7 @@ interestingly, the semantics of return stays unchanged.
        </control>
        <env> Env </env>
 
-  rule <k> popx => . ...</k>
+  rule <k> popx => .K ...</k>
        <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
@@ -525,33 +525,33 @@ interestingly, the other concurrency constructs keep their semantics
 from SIMPLE unchanged.
 ```k
   // TODO(KORE): ..Bag should be . throughout this definition #1772
-  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
+  rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
   /*
   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
   */
        <busy> Busy => Busy -Set keys(H) </busy>
        <terminated>... .Set => SetItem(T) ...</terminated>
 
-  rule <k> join T:Int; => . ...</k>
+  rule <k> join T:Int; => .K ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
-  rule <k> acquire V:Val; => . ...</k>
+  rule <k> acquire V:Val; => .K ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
        <busy> Busy (.Set => SetItem(V)) </busy>
-    when (notBool(V in Busy:Set))  [group(acquire)]
+    requires (notBool(V in Busy:Set))  [group(acquire)]
 
-  rule <k> acquire V; => . ...</k>
+  rule <k> acquire V; => .K ...</k>
        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
-  rule <k> release V:Val; => . ...</k>
+  rule <k> release V:Val; => .K ...</k>
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
-    when N >Int 0
+    requires N >Int 0
 
-  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+  rule <k> release V; => .K ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
        <busy>... SetItem(V) => .Set ...</busy>
 
-  rule <k> rendezvous V:Val; => . ...</k>
-       <k> rendezvous V; => . ...</k>  [group(rendezvous)]
+  rule <k> rendezvous V:Val; => .K ...</k>
+       <k> rendezvous V; => .K ...</k>  [group(rendezvous)]
 ```
 
 ## Unchanged auxiliary operations from untyped SIMPLE
@@ -569,8 +569,8 @@ from SIMPLE unchanged.
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [group(lookup)]
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
-  rule (setEnv(_) => .) ~> setEnv(_)
+  rule <k> setEnv(Env) => .K ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .K) ~> setEnv(_)
   // TODO: How can we make sure that the second rule above applies before the first one?
   //       Probably we'll deal with this using strategies, eventually.
 
@@ -586,8 +586,8 @@ from SIMPLE unchanged.
 
 
   syntax Map ::= Int "..." Int "|->" K [function]
-  rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> _ => .Map  requires N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  requires N <=Int M
 ```
 
 ## Changes to the existing untyped SIMPLE semantics
@@ -705,7 +705,7 @@ environment.
 Initially, the classes forming the program are moved into their
 corresponding cells:
 ```k
-  rule <k> class Class1 extends Class2 { S } => . ...</k>
+  rule <k> class Class1 extends Class2 { S } => .K ...</k>
        <classes>... (.Bag => <classData>
                             <className> Class1 </className>
                             <baseClass> Class2 </baseClass>
@@ -731,7 +731,7 @@ This gives the KOOL programmer a lot of power; one should use this
 power wisely, though, because programs can become easily hard to
 understand and reason about if one overuses these features.
 ```k
-  rule <k> method F:Id(Xs:Ids) S => . ...</k>
+  rule <k> method F:Id(Xs:Ids) S => .K ...</k>
        <crntClass> Class:Id </crntClass>
        <location> OL:Int </location>
        <env> Env => Env[F <- L] </env>
@@ -790,7 +790,7 @@ members (both fields and methods) of that class.
        <baseClass> Class1:Id </baseClass>
        <declarations> S </declarations>
 
-  rule <k> create(Object) => . ...</k>
+  rule <k> create(Object) => .K ...</k>
 ```
 The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class
@@ -799,7 +799,7 @@ semantics of method declarations above).
 ```k
   syntax KItem ::= setCrntClass(Id)
 
-  rule <k> setCrntClass(C) => . ...</k>
+  rule <k> setCrntClass(C) => .K ...</k>
        <crntClass> _ => C </crntClass>
 ```
 The next operation adds a new tagged environment layer to the
@@ -809,7 +809,7 @@ empty).
 ```k
   syntax KItem ::= "addEnvLayer"
 
-  rule <k> addEnvLayer => . ...</k>
+  rule <k> addEnvLayer => .K ...</k>
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
        <envStack> .List => ListItem(envStackFrame(Class, Env)) ...</envStack>
@@ -824,7 +824,7 @@ the location is unnecessary and thus we delete it from the
 ```k
   syntax KItem ::= "storeObj"
 
-  rule <k> storeObj => . ...</k>
+  rule <k> storeObj => .K ...</k>
        <crntObj> <crntClass> CC </crntClass> <envStack> ES </envStack> (<location> L:Int </location> => .Bag) </crntObj>
        <store>... .Map => L |-> objectClosure(CC, ES) ...</store>
 ```
@@ -860,9 +860,9 @@ current object is not altered by `super`, so future method
 invocations see the entire object, as needed for dynamic method dispatch.
 ```k
   rule <k> X:Id => this . X ...</k> <env> Env:Map </env>
-    when notBool(X in keys(Env))
+    requires notBool(X in keys(Env))
 
-  context HOLE._::Id when (HOLE =/=K super)
+  context HOLE._::Id requires (HOLE =/=K super)
 
 // TODO: explain how Assoc matching has been replaced with two rules here.
 // Maybe also improve it a bit.
@@ -877,7 +877,7 @@ invocations see the entire object, as needed for dynamic method dispatch.
     => lookupMember(ListItem(envStackFrame(Class,Env)) EStack, X)
   rule objectClosure(Class:Id, (ListItem(envStackFrame(Class':Id,_)) => .List) _)
        . _X:Id
-    when Class =/=K Class'
+    requires Class =/=K Class'
 
 /*  rule <k> super . X => lookupMember(EStack, X) ...</k>
        <crntClass> Class </crntClass>
@@ -888,7 +888,7 @@ invocations see the entire object, as needed for dynamic method dispatch.
   rule <k> super . _X ...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
-    when Class =/=K Class'
+    requires Class =/=K Class'
 ```
 ## Method invocation
 
@@ -918,9 +918,9 @@ method call or the array access.
 
   rule <k> (X:Id => this . X)(_:Exps) ...</k>
        <env> Env </env>
-    when notBool(X in keys(Env))
+    requires notBool(X in keys(Env))
 
-  context HOLE._::Id(_) when HOLE =/=K super
+  context HOLE._::Id(_) requires HOLE =/=K super
 
   rule (objectClosure(_, EStack) . X
     => lookupMember(EStack, X:Id))(_:Exps)
@@ -936,7 +936,7 @@ method call or the array access.
   rule <k> (super . _X)(_:Exps) ...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
-    when Class =/=K Class'
+    requires Class =/=K Class'
 
   // TODO(KORE): fix getKLabel #1801
   rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
@@ -945,7 +945,7 @@ method call or the array access.
   syntax KItem ::= "#freezerFunCall" "(" K ")"
   /*
   context HOLE(_:Exps)
-    when getKLabel(HOLE) ==K #klabel(`_(_)`) orBool getKLabel(HOLE) ==K #klabel(`_[_]`)
+    requires getKLabel(HOLE) ==K #klabel(`_(_)`) orBool getKLabel(HOLE) ==K #klabel(`_[_]`)
   */
 ```
 Eventually, each of the rules above produces a `lookup(L)`
@@ -971,7 +971,7 @@ argument does not evaluate to an object.
        instanceOf C => true
 
   rule objectClosure(_, (ListItem(envStackFrame(C,_)) => .List) _)
-       instanceOf C'  when C =/=K C'
+       instanceOf C'  requires C =/=K C'
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
   rule objectClosure(_, .List) instanceOf _ => false
@@ -1008,7 +1008,7 @@ evaluated, and finally the second rule initiates the lookup for the
 member's location based on the current class of the object.
 ```k
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
-    when notBool(X in keys(Env))
+    requires notBool(X in keys(Env))
 
   context lvalue((HOLE . _)::Exp)
 
@@ -1023,7 +1023,7 @@ member's location based on the current class of the object.
                               X))
   rule lvalue(objectClosure(Class, (ListItem(envStackFrame(Class':Id,_)) => .List) _)
               . _X)
-    when Class =/=K Class'
+    requires Class =/=K Class'
 ```
 
 ## Lookup member
@@ -1043,10 +1043,10 @@ starting with the most concrete class and going up in the hierarchy.
     => lookup(L)
 
 //  rule lookupMember(<envStack> envStackFrame(_, <env> Env </env>) => .List ...</envStack>, X)
-//    when notBool(X in keys(Env))
+//    requires notBool(X in keys(Env))
   rule lookupMember(ListItem(envStackFrame(_, Env)) Rest, X) =>
        lookupMember(Rest, X)
-    when notBool(X in keys(Env))
+    requires notBool(X in keys(Env))
 //TODO: beautify the above
 
 endmodule

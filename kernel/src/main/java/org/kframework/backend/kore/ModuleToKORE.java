@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
@@ -160,7 +161,7 @@ public class ModuleToKORE {
     // insert the location of the main module so the backend can provide better error location
     convert(
         considerSource,
-        Att.empty().add(Source.class, module.att().get(Source.class)),
+        Att.empty().add(Att.SOURCE(), Source.class, module.att().get(Att.SOURCE(), Source.class)),
         sb,
         null,
         null);
@@ -201,7 +202,6 @@ public class ModuleToKORE {
     collectionSorts.add("SET.Set");
     collectionSorts.add("MAP.Map");
     collectionSorts.add("LIST.List");
-    collectionSorts.add("ARRAY.Array");
     collectionSorts.add("RANGEMAP.RangeMap");
     attributes.remove(Att.HAS_DOMAIN_VALUES());
     if (attributes.containsKey(Att.TOKEN())) {
@@ -423,23 +423,16 @@ public class ModuleToKORE {
       Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
       if (att.contains(Att.HOOK())) {
         if (collectionSorts.contains(att.get(Att.HOOK()))) {
-          if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
-            att = att.remove(Att.ELEMENT());
-            att = att.remove(Att.UNIT());
-            att = att.remove(Att.HOOK());
-          } else {
-            Production concatProd =
-                stream(module.productionsForSort().apply(sort))
-                    .filter(p -> p.att().contains(Att.ELEMENT()))
-                    .findAny()
-                    .get();
-            att =
-                att.add(
-                    Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
-            att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
-            att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
-            sb.append("hooked-");
-          }
+          Production concatProd =
+              stream(module.productionsForSort().apply(sort))
+                  .filter(p -> p.att().contains(Att.ELEMENT()))
+                  .findAny()
+                  .get();
+          att =
+              att.add(Att.ELEMENT(), K.class, KApply(KLabel(concatProd.att().get(Att.ELEMENT()))));
+          att = att.add(Att.CONCAT(), K.class, KApply(concatProd.klabel().get()));
+          att = att.add(Att.UNIT(), K.class, KApply(KLabel(concatProd.att().get(Att.UNIT()))));
+          sb.append("hooked-");
         } else {
           sb.append("hooked-");
         }
@@ -678,7 +671,7 @@ public class ModuleToKORE {
     // #Ceil(@K1) and #Ceil(@Rest).
     // [simplification]
 
-    K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
+    K restMapSet = KVariable("@Rest", Att.empty().add(Att.SORT(), Sort.class, mapSort));
     KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
     KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
 
@@ -687,7 +680,7 @@ public class ModuleToKORE {
     K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
     for (int i = 0; i < nonterminals.length(); i++) {
       Sort sort = nonterminals.apply(i).sort();
-      KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
+      KVariable setVar = KVariable("@K" + i, Att.empty().add(Att.SORT(), Sort.class, sort));
       setArgs.add(setVar);
       if (i > 0) {
         KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
@@ -936,22 +929,20 @@ public class ModuleToKORE {
       convert(lesser.nonterminal(i).sort(), lesser, sb);
       conn = ",";
     }
-    sb.append("))) [overload{}(");
-    convert(greater.klabel().get(), greater, sb);
-    sb.append("(), ");
-    convert(lesser.klabel().get(), lesser, sb);
-    sb.append("())] // overloaded production\n");
+    sb.append("))) ");
+    final var args = KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get()));
+    final var att =
+        Att.empty()
+            .add(Att.OVERLOAD(), KList.class, args)
+            .add(Att.SYMBOL_OVERLOAD(), KList.class, args);
+    convert(new HashMap<>(), att, sb, null, null);
+    sb.append(" // overloaded production\n");
   }
 
   private boolean isRealHook(Att att) {
     String hook = att.get(Att.HOOK());
-    if (hook.startsWith("ARRAY.")) {
-      return false;
-    }
-    if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
-      return true;
-    }
-    return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
+    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
+        .anyMatch(ns -> hook.startsWith(ns + "."));
   }
 
   private static boolean isBuiltinProduction(Production prod) {
@@ -968,7 +959,7 @@ public class ModuleToKORE {
     considerSource.put(Att.SOURCE(), true);
     convert(
         considerSource,
-        Att.empty().add(Source.class, spec.att().get(Source.class)),
+        Att.empty().add(Att.SOURCE(), Source.class, spec.att().get(Att.SOURCE(), Source.class)),
         sb,
         null,
         null);
@@ -1463,7 +1454,7 @@ public class ModuleToKORE {
     String conn = "";
     for (KVariable var : freeVars) {
       sb.append(conn);
-      convert(var.att().getOptional(Sort.class).orElse(Sorts.K()), sb);
+      convert(var.att().getOptional(Att.SORT(), Sort.class).orElse(Sorts.K()), sb);
       conn = ",";
     }
     sb.append(") : ");
@@ -2227,7 +2218,7 @@ public class ModuleToKORE {
       public void apply(KSequence k) {
         for (int i = 0; i < k.items().size(); i++) {
           K item = k.items().get(i);
-          boolean isList = item.att().get(Sort.class).equals(Sorts.K());
+          boolean isList = item.att().get(Att.SORT(), Sort.class).equals(Sorts.K());
           if (i == k.items().size() - 1) {
             if (isList) {
               apply(item);
@@ -2237,7 +2228,7 @@ public class ModuleToKORE {
               sb.append(",dotk{}())");
             }
           } else {
-            if (item.att().get(Sort.class).equals(Sorts.K())) {
+            if (item.att().get(Att.SORT(), Sort.class).equals(Sorts.K())) {
               sb.append("append{}(");
             } else {
               sb.append("kseq{}(");
@@ -2264,13 +2255,13 @@ public class ModuleToKORE {
         String name = setVar ? k.name().substring(1) : k.name();
         convert(name, sb);
         sb.append(":");
-        convert(k.att().getOptional(Sort.class).orElse(Sorts.K()), sb);
+        convert(k.att().getOptional(Att.SORT(), Sort.class).orElse(Sorts.K()), sb);
       }
 
       @Override
       public void apply(KRewrite k) {
         sb.append("\\rewrites{");
-        convert(k.att().get(Sort.class), sb);
+        convert(k.att().get(Att.SORT(), Sort.class), sb);
         sb.append("}(");
         apply(k.left());
         sb.append(",");
@@ -2280,7 +2271,7 @@ public class ModuleToKORE {
 
       @Override
       public void apply(KAs k) {
-        Sort sort = k.att().get(Sort.class);
+        Sort sort = k.att().get(Att.SORT(), Sort.class);
         sb.append("\\and{");
         convert(sort, sb);
         sb.append("}(");

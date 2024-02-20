@@ -154,7 +154,7 @@ public class CheckAtt {
       return;
     }
     Att sortAtt = m.sortAttributesFor().getOrElse(prod.sort().head(), Att::empty);
-    if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
+    if (sortAtt.contains(Att.HOOK())) {
       if (!prod.att().contains(Att.FUNCTION())
           && !prod.att().contains(Att.BRACKET())
           && !prod.att().contains(Att.TOKEN())

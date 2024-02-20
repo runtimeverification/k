@@ -69,22 +69,16 @@ class Att private (val att: Map[(Att.Key, String), Any])
     None
   }
 
-  def contains(cls: Class[_]): Boolean =
-    att.contains((Att.getInternalKeyOrAssert(cls.getName), cls.getName))
   def contains(key: Att.Key): Boolean                = att.contains((key, Att.stringClassName))
   def contains(key: Att.Key, cls: Class[_]): Boolean = att.contains((key, cls.getName))
 
-  def get[T](key: Class[T]): T               = getOption(key).get
   def get(key: Att.Key): String              = getOption(key).get
   def get[T](key: Att.Key, cls: Class[T]): T = getOption(key, cls).get
   def getOption(key: Att.Key): Option[String] =
     att.get((key, Att.stringClassName)).asInstanceOf[Option[String]]
-  def getOption[T](key: Class[T]): Option[T] =
-    att.get((Att.getInternalKeyOrAssert(key.getName), key.getName)).asInstanceOf[Option[T]]
   def getOption[T](key: Att.Key, cls: Class[T]): Option[T] =
     att.get((key, cls.getName)).asInstanceOf[Option[T]]
   def getOptional(key: Att.Key): Optional[String] = optionToOptional(getOption(key))
-  def getOptional[T](key: Class[T]): Optional[T]  = optionToOptional(getOption(key))
   def getOptional[T](key: Att.Key, cls: Class[T]): Optional[T] = optionToOptional(
     getOption(key, cls)
   )
@@ -95,8 +89,6 @@ class Att private (val att: Map[(Att.Key, String), Any])
   def add(key: Att.Key): Att                = add(key, "")
   def add(key: Att.Key, value: String): Att = add(key, Att.stringClassName, value)
   def add(key: Att.Key, value: Int): Att    = add(key, Att.intClassName, value)
-  def add[T <: AttValue](key: Class[T], value: T): Att =
-    add(Att.getInternalKeyOrAssert(key.getName), key.getName, value)
   def add[T <: AttValue](key: Att.Key, cls: Class[T], value: T): Att = add(key, cls.getName, value)
 
   private def add[T <: AttValue](key: Att.Key, clsStr: String, value: T): Att = key.keyParam match {
@@ -118,9 +110,8 @@ class Att private (val att: Map[(Att.Key, String), Any])
   private def throwForbidden(key: Att.Key) =
     throw KEMException.compilerError("Parameters for the attribute '" + key + "' are forbidden.")
 
-  def addAll(thatAtt: Att): Att  = Att(att ++ thatAtt.att)
-  def remove(key: Att.Key): Att  = remove(key, Att.stringClassName)
-  def remove(key: Class[_]): Att = remove(Att.getInternalKeyOrAssert(key.getName), key.getName)
+  def addAll(thatAtt: Att): Att                         = Att(att ++ thatAtt.att)
+  def remove(key: Att.Key): Att                         = remove(key, Att.stringClassName)
   def remove(key: Att.Key, cls: Class[_]): Att          = remove(key, cls.getName)
   private def remove(key: Att.Key, clsStr: String): Att = Att(att - ((key, clsStr)))
 }
@@ -219,6 +210,7 @@ object Att {
   final val CONTEXT     = Key.builtin("context", KeyParameter.Required, onlyon[ContextAlias])
   final val COOL        = Key.builtin("cool", KeyParameter.Forbidden, onlyon[Rule])
   final val DEPENDS     = Key.builtin("depends", KeyParameter.Required, onlyon[Claim])
+  final val DEPRECATED  = Key.builtin("deprecated", KeyParameter.Forbidden, onlyon[Production])
   final val ELEMENT     = Key.builtin("element", KeyParameter.Required, onlyon[Production])
   final val EXIT        = Key.builtin("exit", KeyParameter.Forbidden, onlyon[Production])
   final val FORMAT      = Key.builtin("format", KeyParameter.Required, onlyon[Production])
@@ -320,6 +312,7 @@ object Att {
   final val NOT_INJECTION        = Key.internal("notInjection")
   final val NOT_LR1_MODULES      = Key.internal("not-lr1-modules")
   final val ORIGINAL_PRD         = Key.internal("originalPrd")
+  final val OVERLOAD             = Key.internal("overload")
   final val PREDICATE            = Key.internal("predicate")
   final val PRETTY_PRINT_WITH_SORT_ANNOTATION =
     Key.internal("prettyPrintWithSortAnnotation")
@@ -340,6 +333,7 @@ object Att {
   final val SORT                     = Key.internal(classOf[Sort].getName)
   final val SORT_PARAMS              = Key.internal("sortParams")
   final val SOURCE                   = Key.internal(classOf[Source].getName)
+  final val SYMBOL_OVERLOAD          = Key.internal("symbol-overload")
   final val SYNTAX_MODULE            = Key.internal("syntaxModule")
   final val TEMPORARY_CELL_SORT_DECL = Key.internal("temporary-cell-sort-decl")
   final val TERMINALS                = Key.internal("terminals")

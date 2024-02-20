@@ -42,7 +42,7 @@ module CONFIG-COMP-1
 
     syntax Cmd ::= "Inc"
  // --------------------
-    rule <k> Inc => . ... </k>
+    rule <k> Inc => .K ... </k>
          <accumulator> I => I +Int 1 </accumulator>
 endmodule
 
@@ -57,10 +57,10 @@ module CONFIG-COMP-2
     syntax Cmd ::= "push" Int
                  | "pop"
  // -------------------------
-    rule <k> push I => . ... </k>
+    rule <k> push I => .K ... </k>
          <stack> (.List => ListItem( I )) ... </stack>
 
-    rule <k> pop => . ... </k>
+    rule <k> pop => .K ... </k>
          <output> ... (.List => ListItem( I )) </output>
          <stack> (ListItem( I ) => .List) ... </stack>
 endmodule

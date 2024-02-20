@@ -36,6 +36,7 @@ import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckAssoc;
 import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckConfigurationCells;
+import org.kframework.compile.checks.CheckDeprecated;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckK;
@@ -364,9 +365,9 @@ public class Kompile {
     List<String> ruleLocs = new ArrayList<String>();
     for (Sentence s : JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
       if (s instanceof RuleOrClaim) {
-        var optFile = s.att().getOptional(Source.class);
-        var optLine = s.att().getOptional(Location.class);
-        var optCol = s.att().getOptional(Location.class);
+        var optFile = s.att().getOptional(Att.SOURCE(), Source.class);
+        var optLine = s.att().getOptional(Att.LOCATION(), Location.class);
+        var optCol = s.att().getOptional(Att.LOCATION(), Location.class);
         var optId = s.att().getOptional(Att.UNIQUE_ID());
         if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
           String file = optFile.get().source();
@@ -587,6 +588,9 @@ public class Kompile {
 
     stream(modules)
         .forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
+
+    stream(modules)
+        .forEach(m -> stream(m.localSentences()).forEach(new CheckDeprecated(errors, kem)::check));
 
     Set<String> moduleNames = new HashSet<>();
     stream(modules)

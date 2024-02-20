@@ -224,7 +224,7 @@ to a location.
 ```k
   syntax KItem ::= undefined(Type)
 
-  rule <k> T:Type X:Id; => . ...</k>
+  rule <k> T:Type X:Id; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -236,12 +236,12 @@ The dynamic semantics of typed array declarations is similar to that
 in untyped SIMPLE, but we have to make sure that we associate the
 right type to the allocated locations.
 ```k
-  rule <k> T:Type X:Id[N:Int]; => . ...</k>
+  rule <k> T:Type X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(T, L +Int 1, N)
                           (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
-    when N >=Int 0
+    requires N >=Int 0
 
   context _:Type _::Exp[HOLE::Exps];
 ```
@@ -271,7 +271,7 @@ Store all function parameters, as well as the return type, as part
 of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked.
 ```k
-  rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
+  rule <k> T:Type F:Id(Ps:Params) S => .K ...</k>
        <env> Env => Env[F <- L] </env>
        <store>... .Map => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
@@ -312,8 +312,8 @@ When done with the first pass, call `main()`.
   rule Str1 + Str2 => Str1 +String Str2
   rule I1 - I2 => I1 -Int I2
   rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
-  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule I1 / I2 => I1 /Int I2 requires I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 requires I2 =/=K 0
   rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
@@ -338,7 +338,7 @@ Check array bounds, as part of the dynamic typing policy.
 
 // Same comment as for simple untyped regarding [anywhere]
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
-    when N >=Int 0 andBool N <Int M  [anywhere]
+    requires N >=Int 0 andBool N <Int M  [anywhere]
 ```
 
 ### Size of an array
@@ -372,7 +372,7 @@ checks that that type of the returned value is expected one.
          (_ => C)
        </control>
        <env> _ => Env </env>
-    when typeOf(V) ==K T   // check the type of the returned value
+    requires typeOf(V) ==K T   // check the type of the returned value
 ```
 Like the `undefined` above, `nothing` also gets
 tagged with a type now.  The empty `return` statement is
@@ -396,7 +396,7 @@ preserved:
   context (HOLE => lvalue(HOLE)) = _
 
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (V' => V) ...</store>
-    when typeOf(V) ==K typeOf(V')  [group(assignment)]
+    requires typeOf(V) ==K typeOf(V')  [group(assignment)]
 ```
 
 ### Statements
@@ -404,7 +404,7 @@ preserved:
 ### Blocks
 
 ```k
-  rule {} => .
+  rule {} => .K
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>
 ```
 
@@ -417,7 +417,7 @@ preserved:
 ### Expression statements
 
 ```k
-  rule _:Val; => .
+  rule _:Val; => .K
 ```
 
 ### Conditional
@@ -438,8 +438,8 @@ preserved:
 We only allow printing integers and strings:
 ```k
   rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    when typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
-  rule print(.Vals); => .
+    requires typeOf(V) ==K int orBool typeOf(V) ==K string  [group(print)]
+  rule print(.Vals); => .K
 ```
 
 ### Exceptions
@@ -461,7 +461,7 @@ values, in which case our semantics below works fine:
        </control>
        <env> Env </env>
 
-  rule <k> popx => . ...</k>
+  rule <k> popx => .K ...</k>
        <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { T X = V; S2 } ~> K </k>
@@ -491,7 +491,7 @@ values, in which case our semantics below works fine:
 ### Thread termination
 
 ```k
-   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
+   rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... .Set => SetItem(T) ...</terminated>
 ```
@@ -499,38 +499,38 @@ values, in which case our semantics below works fine:
 ### Thread joining
 
 ```k
-   rule <k> join T:Int; => . ...</k>
+   rule <k> join T:Int; => .K ...</k>
         <terminated>... SetItem(T) ...</terminated>
 ```
 
 ### Acquire lock
 
 ```k
-   rule <k> acquire V:Val; => . ...</k>
+   rule <k> acquire V:Val; => .K ...</k>
         <holds>... .Map => V |-> 0 ...</holds>
         <busy> Busy (.Set => SetItem(V)) </busy>
-     when (notBool(V in Busy:Set))  [group(acquire)]
+     requires (notBool(V in Busy:Set))  [group(acquire)]
 
-   rule <k> acquire V; => . ...</k>
+   rule <k> acquire V; => .K ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 ```
 
 ### Release lock
 
 ```k
-   rule <k> release V:Val; => . ...</k>
+   rule <k> release V:Val; => .K ...</k>
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
-      when N >Int 0
+      requires N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+   rule <k> release V; => .K ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
         <busy>... SetItem(V) => .Set ...</busy>
 ```
 
 ### Rendezvous synchronization
 
 ```k
-   rule <k> rendezvous V:Val; => . ...</k>
-        <k> rendezvous V; => . ...</k>  [group(rendezvous)]
+   rule <k> rendezvous V:Val; => .K ...</k>
+        <k> rendezvous V; => .K ...</k>  [group(rendezvous)]
 ```
 
 ### Auxiliary declarations and operations
@@ -553,8 +553,8 @@ Environment recovery.
 // TODO: same comment regarding setEnv(...) as for simple untyped
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>
-  rule (setEnv(_) => .) ~> setEnv(_)
+  rule <k> setEnv(Env) => .K ...</k>  <env> _ => Env </env>
+  rule (setEnv(_) => .K) ~> setEnv(_)
 ```
 lvalue and loc
 ```k
@@ -579,8 +579,8 @@ Adds the corresponding depth to an array type
 Sequences of locations.
 ```k
   syntax Map ::= Int "..." Int "|->" K [function]
-  rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> _ => .Map  requires N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  requires N <=Int M
 
 // Type of a value.
   syntax Type ::= typeOf(K)  [function]

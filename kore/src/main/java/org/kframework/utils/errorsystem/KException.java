@@ -138,6 +138,7 @@ public class KException implements Serializable, HasLocation {
     IGNORED_ATTRIBUTE,
     REMOVED_ANYWHERE,
     DEPRECATED_DIRECTORY_FLAG,
+    DEPRECATED_SYMBOL,
     MISSING_HOOK,
     SINGLETON_OVERLOAD,
     FIRST_HIDDEN, // warnings below here are hidden by default

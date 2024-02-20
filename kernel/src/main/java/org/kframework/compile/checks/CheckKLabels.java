@@ -75,7 +75,7 @@ public class CheckKLabels {
 
           private void apply(KLabel klabel, K k) {
             if (klabel instanceof KVariable) return;
-            Optional<Source> s = k.att().getOptional(Source.class);
+            Optional<Source> s = k.att().getOptional(Att.SOURCE(), Source.class);
             if (s.isPresent()) {
               usedLabels.add(klabel.name());
               if (m.definedKLabels().apply(klabel)) {
@@ -257,9 +257,7 @@ public class CheckKLabels {
     }
   }
 
-  private static final ImmutableSet<String> internalDuplicates =
-      ImmutableSet.of(
-          "#EmptyKList", "#EmptyK", "#ruleRequires", "#ruleRequiresEnsures", "#Top", "#Bottom");
+  private static final ImmutableSet<String> internalDuplicates = ImmutableSet.of("#EmptyK");
 
   private static final ImmutableSet<String> internalNames =
       ImmutableSet.of(

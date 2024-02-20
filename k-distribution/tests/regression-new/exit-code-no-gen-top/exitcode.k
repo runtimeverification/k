@@ -15,7 +15,7 @@ module EXITCODE
         <exit-code exit=""> 0 </exit-code>
       </actualTop>
 
-    rule <k> I:Int => . ... </k>
+    rule <k> I:Int => .K ... </k>
          <exit-code> _ => I </exit-code>
 
 endmodule

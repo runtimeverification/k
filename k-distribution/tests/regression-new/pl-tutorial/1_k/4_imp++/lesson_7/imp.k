@@ -72,9 +72,9 @@ module IMP
   rule false && _ => false
 // Block
   rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>
+  rule <k> Rho => .K ...</k> <env> _ => Rho </env>
 // Stmt
-  rule _:Int; => .
+  rule _:Int; => .K
   rule <k> X = I:Int => I ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> (_ => I) ...</store>  [group(assignment)]
@@ -85,7 +85,7 @@ module IMP
   rule <k> int (X,Xs => Xs); ...</k>
        <env> Rho => Rho[X <- !N:Int] </env>
        <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .
+  rule int .Ids; => .K
 
   syntax Printable ::= Int | String
 /* currently it is necessary to subsort Printable to AExp,
@@ -94,17 +94,17 @@ module IMP
   context print(HOLE:AExp, _AEs:AExps);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>  [group(print)]
-  rule print(.AExps); => .
+  rule print(.AExps); => .K
 
-  rule <k> halt; ~> _ => . </k>
+  rule <k> halt; ~> _ => .K </k>
 
   rule <k> spawn S => !T:Int +Int 1 ...</k> <env> Rho </env>
        (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
-  rule <k> join(T:Int); => . ...</k>
-       <thread>... <k> . </k> <id> T </id> ...</thread>
+  rule <k> join(T:Int); => .K ...</k>
+       <thread>... <k> .K </k> <id> T </id> ...</thread>
 
 // Stmts
-  rule .Stmts => .
+  rule .Stmts => .K
   rule S:Stmt Ss:Stmts => S ~> Ss
 
 // verification ids
