@@ -1,6 +1,6 @@
 <T>
   <k>
-    "done" ~> .
+    "done" ~> .K
   </k>
   <nextFunction>
     3
@@ -23,7 +23,7 @@
   <contracts>
     <contract>
       <cName>
-        foo ~> .
+        foo ~> .K
       </cName>
       <cFunctions>
         f1 |-> 0
