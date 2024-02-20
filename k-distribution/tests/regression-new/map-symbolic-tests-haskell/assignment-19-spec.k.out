@@ -1,6 +1,6 @@
   <k>
     assignmentResult ( MAP
-    Z:MyId |-> 3 ) ~> .
+    Z:MyId |-> 3 ) ~> .K
   </k>
 #And
   {
