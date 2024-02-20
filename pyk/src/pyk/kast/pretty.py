@@ -6,8 +6,8 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from ..prelude.kbool import TRUE
+from .att import Atts, KAtt
 from .inner import KApply, KAs, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
-from .kast import Atts, KAtt
 from .manip import flatten_label, sort_ac_collections, undo_aliases
 from .outer import (
     KBubble,
