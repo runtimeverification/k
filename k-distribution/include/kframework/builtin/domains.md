@@ -2284,8 +2284,8 @@ module K-EQUAL-SYNTAX
 endmodule
 
 module K-EQUAL-KORE [symbolic]
-  import private BOOL
-  import K-EQUAL-SYNTAX
+  imports private BOOL
+  imports K-EQUAL-SYNTAX
 
   rule K1:Bool ==K K2:Bool => K1 ==Bool K2 [simplification]
   rule {K1 ==K K2 #Equals true} => {K1 #Equals K2} [simplification]
@@ -2300,9 +2300,9 @@ module K-EQUAL-KORE [symbolic]
 endmodule
 
 module K-EQUAL
-  import private BOOL
-  import K-EQUAL-SYNTAX
-  import K-EQUAL-KORE
+  imports private BOOL
+  imports K-EQUAL-SYNTAX
+  imports K-EQUAL-KORE
 
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 

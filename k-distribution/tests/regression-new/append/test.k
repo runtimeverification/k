@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module TEAL-SYNTAX
-  import INT-SYNTAX
+  imports INT-SYNTAX
 endmodule
 
 module TEST-SYNTAX

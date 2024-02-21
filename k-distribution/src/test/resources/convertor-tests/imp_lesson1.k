@@ -2,9 +2,9 @@
 require "misc.k"
 
 module IMP-SYNTAX
-  import ID
-  import INT
-  import BOOL
+  imports ID
+  imports INT
+  imports BOOL
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
