@@ -388,47 +388,6 @@ of `Q` if:
   substitutable where one from `Q` is expected, but cannot be identically
   sorted.
 
-Care should be taken when the partial order defined by this relationship is not
-also a total order. For example, consider the following
-definition:[^overload-issue]
-```k
-module NUMBERS-SYNTAX
-    imports INT-SYNTAX
-    imports FLOAT-SYNTAX
-
-    syntax IValType ::= "i32" | "i64"
-    syntax FValType ::= "f32" | "f64"
-    syntax AValType ::= IValType | FValType
-    syntax Number ::= Int | Float
-    syntax IVal ::= "<" IValType ">" Int    [overload(<_>_)]
-    syntax FVal ::= "<" FValType ">" Float  [overload(<_>_)]
-    syntax  Val ::= IVal | FVal
-    // the problematic constructor:
-    syntax  Val ::= "<" AValType ">" Number [overload(<_>_)]
-endmodule
-```
-
-The overloading partial order defined by this definition is:
-```
-                  < AValType > Number
-                           │
-                           │
-                           │
-         ┌─────────────────┴────────────────────┐
-         │                                      │
-         ▼                                      ▼
-< IValType > Int                       < FValType > Float
-```
-
-Here, the most general (problematic) constructor can be used to construct terms
-that are ill-typed with respect to the "real" integer and float constructors:
-```
-// creates ill-formed values
-syntax Val ::= creature32 ( Number ) [function, total]
-rule creature32(I:Int) => <f32> I
-rule creature32(F:Float) => <i32> F
-```
-
 ### `klabel(_)` and `symbol` attributes
 
 **Note: the `klabel(_), symbol` approach described in this section is a legacy
