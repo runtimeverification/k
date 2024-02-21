@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "misc.k"
+requires "misc.k"
 
 module FUNC
     syntax Foo ::= "foo"

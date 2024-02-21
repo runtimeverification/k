@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "../test/deposit.k"
+requires "../test/deposit.k"
 
 module DEPOSIT-SYMBOLIC
 

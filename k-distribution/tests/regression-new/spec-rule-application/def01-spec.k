@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // inc(Y) in pattern LHS. Function with no side conditions.
 module DEF01-SPEC

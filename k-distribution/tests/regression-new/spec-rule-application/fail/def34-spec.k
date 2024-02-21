@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // X (in term) = Y-1 (in pattern) matching.
 // `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
