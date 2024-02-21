@@ -11,7 +11,7 @@
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
-      url = "github:runtimeverification/llvm-backend";
+      url = "github:runtimeverification/llvm-backend/reformat-dotk";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
