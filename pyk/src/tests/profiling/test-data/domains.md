@@ -3086,11 +3086,11 @@ module STRATEGY-ABSTRACT
     syntax Strategy ::= ".Strategy"
                       | "(" Strategy ")" [bracket]
  // ----------------------------------------------
-    rule <s> .Strategy => . ... </s>
+    rule <s> .Strategy => .K ... </s>
 
     syntax KItem ::= #catchSTUCK ( Strategy )
  // -----------------------------------------
-    rule <s> #catchSTUCK(_) => . ... </s>
+    rule <s> #catchSTUCK(_) => .K ... </s>
     rule <s> #STUCK() ~> (_S:Strategy => .) ... </s>
     rule <s> #STUCK() ~> #catchSTUCK(S) => S ... </s>
 
