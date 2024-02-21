@@ -9,6 +9,6 @@ module BYTES-REWRITE
     configuration <k> $PGM:Bytes </k>
                   <b> b"" </b>
 
-    rule <k> B => . ... </k>
-         <b> _ => B     </b>
+    rule <k> B => .K ... </k>
+         <b> _ => B      </b>
 endmodule

@@ -29,7 +29,7 @@ PARSE_TOKEN_TEST_DATA: Final = (
     ('id-token', False, KToken('abc', 'Id'), KToken('abc', 'Id')),
     ('add-aexp', False, KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
     ('add-int', True, KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V', sort=INT)])),
-    ('k-cell', True, KToken('<k> . </k>', 'KCell'), KApply('<k>', KSequence())),
+    ('k-cell', True, KToken('<k> .K </k>', 'KCell'), KApply('<k>', KSequence())),
     (
         'imp-config',
         True,

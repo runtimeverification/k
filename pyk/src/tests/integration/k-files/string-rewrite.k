@@ -9,6 +9,6 @@ module STRING-REWRITE
     configuration <k> $PGM:String </k>
                   <s> "" </s>
 
-    rule <k> S => . ... </k>
-         <s> _ => S     </s>
+    rule <k> S => .K ... </k>
+         <s> _ => S      </s>
 endmodule

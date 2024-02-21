@@ -7,7 +7,7 @@ module LOOPING-SPEC
                 $s = $s + $n ;
                 $n = $n + -1 ;
               }
-           => . ... </k>
+           => .K ... </k>
           <state> $s |-> (S:Int => S +Int ((N +Int 1) *Int N /Int 2))
                   $n |-> (N:Int => 0)
           </state>
