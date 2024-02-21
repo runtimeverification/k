@@ -7,6 +7,6 @@ module RETURN-CODE
 
   syntax Foo ::= foo(Int)
   rule
-    <k> foo(I) => . ...</k>
+    <k> foo(I) => .K ...</k>
     <rc> _ => I </rc>
 endmodule

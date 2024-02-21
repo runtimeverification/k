@@ -42,21 +42,21 @@ module GOTO
                   <return> 0 </return>
                 </goto>
 
-  rule <k> . => OP </k> <pc> PC => PC +Int 1 </pc> <pgm> ... PC |-> OP ... </pgm>
+  rule <k> .K => OP </k> <pc> PC => PC +Int 1 </pc> <pgm> ... PC |-> OP ... </pgm>
 
-  rule <k> PUSH  I => . ... </k> <stack> WS => I : WS </stack>
-  rule <k> POP     => . ... </k> <stack> _ : WS => WS </stack>
-  rule <k> ADD     => . ... </k> <stack> I1 : I2 : WS => I1 +Int I2 : WS </stack>
-  rule <k> SUB     => . ... </k> <stack> I1 : I2 : WS => I1 -Int I2 : WS </stack>
-  rule <k> DUP0    => . ... </k> <stack> I1 : WS => I1 : I1 : WS </stack>
-  rule <k> DUP1    => . ... </k> <stack> I1 : I2 : WS => I2 : I1 : I2 : WS </stack>
-  rule <k> SWAP    => . ... </k> <stack> I1 : I2 : WS => I2 : I1 : WS </stack>
-  rule <k> GT      => . ... </k> <stack> I1 : I2 : WS => I2 <Word I1 : WS </stack>
-  rule <k> JUMP  I => . ... </k> <pc> _ => I </pc>
-  rule <k> RETURN  => . ... </k> <stack> I : WS => WS </stack> <return> _ => I </return>
+  rule <k> PUSH  I => .K ... </k> <stack> WS => I : WS </stack>
+  rule <k> POP     => .K ... </k> <stack> _ : WS => WS </stack>
+  rule <k> ADD     => .K ... </k> <stack> I1 : I2 : WS => I1 +Int I2 : WS </stack>
+  rule <k> SUB     => .K ... </k> <stack> I1 : I2 : WS => I1 -Int I2 : WS </stack>
+  rule <k> DUP0    => .K ... </k> <stack> I1 : WS => I1 : I1 : WS </stack>
+  rule <k> DUP1    => .K ... </k> <stack> I1 : I2 : WS => I2 : I1 : I2 : WS </stack>
+  rule <k> SWAP    => .K ... </k> <stack> I1 : I2 : WS => I2 : I1 : WS </stack>
+  rule <k> GT      => .K ... </k> <stack> I1 : I2 : WS => I2 <Word I1 : WS </stack>
+  rule <k> JUMP  I => .K ... </k> <pc> _ => I </pc>
+  rule <k> RETURN  => .K ... </k> <stack> I : WS => WS </stack> <return> _ => I </return>
 
   rule [jumpi.true]:  <k> JUMPI I => JUMP I ... </k> <stack> W : WS => WS </stack> requires W =/=Int 0
-  rule [jumpi.false]: <k> JUMPI _ => .      ... </k> <stack> _ : WS => WS </stack> [owise]
+  rule [jumpi.false]: <k> JUMPI _ => .K     ... </k> <stack> _ : WS => WS </stack> [owise]
 
 endmodule
 
@@ -64,7 +64,7 @@ module GOTO-SPEC
   imports GOTO
 
   claim [sum-n]:
-        <k> . </k>
+        <k> .K </k>
         <pc> 1 => ?_ </pc>
         <stack> .Stack => ?_ </stack>
         <return> 0 => ?S </return>
