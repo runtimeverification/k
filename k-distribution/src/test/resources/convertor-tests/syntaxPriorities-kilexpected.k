@@ -15,7 +15,7 @@ module TEST
 
   syntax left t m
 
-  syntax prioritiesx
+  syntax priorityx
 > y z
 > t m
 > u

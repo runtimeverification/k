@@ -256,7 +256,7 @@ left and the value is on the right.
 ```k
   syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), klabel(_|->_), symbol, injective]
 
-  syntax priorities _|->_ > _Map_ .Map
+  syntax priority _|->_ > _Map_ .Map
   syntax non-assoc _|->_
 ```
 
@@ -524,7 +524,7 @@ of keys is on the left, and the value is on the right.
 ```k
   syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, injective]
 
-  syntax priorities _r|->_ > _RangeMap_ .RangeMap
+  syntax priority _r|->_ > _RangeMap_ .RangeMap
   syntax non-assoc _r|->_
 ```
 
@@ -2277,7 +2277,7 @@ module K-EQUAL-SYNTAX
                   K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, group(equalEqualK)]
                 | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, group(notEqualEqualK)]
 
-  syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
+  syntax priority equalEqualK notEqualEqualK > boolOperation mlOp
 
   syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi" [function, total, symbol(ite), smt-hook(ite), hook(KEQUAL.ite)]
 

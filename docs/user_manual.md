@@ -360,7 +360,7 @@ string, which serves as a unique internal identifier and also is used in kast
 format of that syntax. If we need to reference a certain syntax production
 externally, we have to manually define the klabels using the `klabel` attribute.
 One example of where you would want to do this is to be able to refer to a given
-symbol via the `syntax priorities` attribute, or to enable overloading of a
+symbol via the `syntax priority` attribute, or to enable overloading of a
 given symbol.
 
 If you only provide the `klabel` attribute, you can use the provided `klabel` to
@@ -810,7 +810,7 @@ modularity. As a result, it becomes infeasible to declare priority and
 associativity inline within a set of productions, because the productions
 are not contiguous within a single file.
 
-For this purpose, we introduce the equivalent `syntax priorities`,
+For this purpose, we introduce the equivalent `syntax priority`,
 `syntax left`, `syntax right`, and `syntax non-assoc` declarations. For
 example, the above grammar can be written equivalently as:
 
@@ -820,7 +820,7 @@ syntax Exp ::= Exp "*" Exp [group(mult)]
              | Exp "+" Exp [group(add)]
              | Exp "-" Exp [group(sub)]
 
-syntax priorities mult div > add sub
+syntax priority mult div > add sub
 syntax left mult div
 syntax right add sub
 ```
@@ -836,7 +836,7 @@ syntax Exp ::= Exp "*" Exp [group(mult)]
              | Exp "+" Exp [group(add)]
              | Exp "-" Exp [group(add)]
 
-syntax priorities mult > add
+syntax priority mult > add
 syntax left mult
 syntax right add
 ```
@@ -844,7 +844,7 @@ syntax right add
 Note that `syntax [left|right|non-assoc]` should not be used to group together
 productions with different priorities. For example, this code would be invalid:
 ```k
-syntax priorities mult > add
+syntax priority mult > add
 syntax left mult add
 ```
 

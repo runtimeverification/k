@@ -2,7 +2,7 @@
 package org.kframework.kil;
 
 /**
- * A priority declaration, {@code syntax priorities} <em>labels</em> {@code >} ... {@code >}
+ * A priority declaration, {@code syntax priority} <em>labels</em> {@code >} ... {@code >}
  * <em>labels</em>.
  *
  * @see PriorityBlockExtended
@@ -22,7 +22,7 @@ public class PriorityExtended extends ModuleItem {
 
   @Override
   public void toString(StringBuilder sb) {
-    sb.append("  syntax priorities ");
+    sb.append("  syntax priority ");
     String conn = "";
     for (PriorityBlockExtended pb : priorityBlocks) {
       sb.append(conn);
