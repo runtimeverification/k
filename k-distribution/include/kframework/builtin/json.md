@@ -40,8 +40,8 @@ the syntax of the `JSON` sort with their own constructors, any term of sort
 module JSON
     imports JSON-SYNTAX
 
-    syntax String ::= JSON2String(JSON) [function, hook(JSON.json2string)]
+    syntax String ::= JSON2String(JSON) [function, symbol(JSON2String), hook(JSON.json2string)]
 
-    syntax JSON ::= String2JSON(String) [function, hook(JSON.string2json)]
+    syntax JSON ::= String2JSON(String) [function, symbol(String2JSON), hook(JSON.string2json)]
 endmodule
 ```
