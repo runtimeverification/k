@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from ..kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
 from ..kore.prelude import BYTES as KORE_BYTES
+from ..kore.prelude import LBL_ITE
 from ..kore.prelude import STRING as KORE_STRING
 from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, SortApp, String, Top
 from ..prelude.bytes import bytesToken_from_str
@@ -81,10 +82,7 @@ def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
                     return KApply(klabel, terms)
 
             # hardcoded polymorphic operators
-            elif (
-                symbol
-                == "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
-            ):
+            elif symbol == LBL_ITE.value:
                 (sort,) = sorts
                 klabel = KLabel(unmunge(symbol[3:]), (_sort_to_kast(sort),))
                 return KApply(klabel, terms)

@@ -148,6 +148,9 @@ LBL_INIT_GENERATED_TOP_CELL: Final = SymbolId('LblinitGeneratedTopCell')
 LBL_GENERATED_TOP: Final = SymbolId("Lbl'-LT-'generatedTop'-GT-'")
 LBL_GENERATED_COUNTER: Final = SymbolId("Lbl'-LT-'generatedCounter'-GT-'")
 LBL_K: Final = SymbolId("Lbl'-LT-'k'-GT-'")
+LBL_ITE: Final = SymbolId(
+    "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
+)
 INJ: Final = SymbolId('inj')
 KSEQ: Final = SymbolId('kseq')
 
@@ -265,8 +268,8 @@ LBL_JSON_ENTRY: Final = SymbolId('LblJSONEntry')
 JSON_NULL: Final = App('LblJSONnull')
 STOP_JSONS: Final = App("Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'")
 
-LBL_STRING2JSON: Final = SymbolId("LblString2JSON'LParUndsRParUnds'JSON'Unds'JSON'Unds'String")
-LBL_JSON2STRING: Final = SymbolId("LblJSON2String'LParUndsRParUnds'JSON'Unds'String'Unds'JSON")
+LBL_STRING2JSON: Final = SymbolId('LblString2JSON')
+LBL_JSON2STRING: Final = SymbolId('LblJSON2String')
 
 
 def string2json(pattern: Pattern) -> App:
