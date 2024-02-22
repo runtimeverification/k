@@ -3,7 +3,7 @@ requires "test.k"
 
 
 module VERIFICATION
-  import TEST
+  imports TEST
 
   claim [s1]:
     <k> 1 => 2 </k> // should fail but marked as trusted whould pass
@@ -11,6 +11,6 @@ module VERIFICATION
 endmodule
 
 module A1-SPEC
-  import VERIFICATION
+  imports VERIFICATION
 
 endmodule

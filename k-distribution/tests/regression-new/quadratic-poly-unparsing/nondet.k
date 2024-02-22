@@ -1,7 +1,7 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module NONDET
 
-  import DOMAINS
+  imports DOMAINS
 
   syntax S
     ::= "initial"

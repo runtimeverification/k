@@ -1,7 +1,7 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
 DEF: null -> null
-require "include.k"
+requires "include.k"
 module INCLUDE
   syntax #Bool ::= "false"
 
