@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 /*
 Part 8. Initial simplification must have access to pattern constraint (e.g. spec rule side condition),

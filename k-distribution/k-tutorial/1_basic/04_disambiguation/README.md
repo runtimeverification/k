@@ -207,7 +207,7 @@ module LESSON-04-D
                    | Boolean "^" Boolean [group(xor), function]
                    | Boolean "||" Boolean [group(or), function]
 
-  syntax priorities literal atom > not > and > xor > or
+  syntax priority literal atom > not > and > xor > or
   syntax left and
   syntax left xor
   syntax left or
@@ -216,13 +216,13 @@ endmodule
 
 This introduces a couple of new features of K. First, the `group(_)` attribute
 is used to conceptually group together sets of sentences under a common
-user-defined name. For example, `literal` in the `syntax priorities` sentence is
+user-defined name. For example, `literal` in the `syntax priority` sentence is
 used to refer to all the productions marked with the `group(literal)` attribute,
 i.e., `true` and `false`. A production can belong to multiple groups using
 syntax such as `group(myGrp1,myGrp2)`.
 
 Once we understand this, it becomes relatively straightforward to understand
-the meaning of this grammar. Each `syntax priorities` sentence defines a
+the meaning of this grammar. Each `syntax priority` sentence defines a
 priority relation where `>` separates different priority groups. Each priority
 group is defined by a list of one or more group names, and consists of all
 productions which are members of at least one of those named groups.

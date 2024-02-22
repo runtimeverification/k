@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
-require "chain.k"
+requires "chain.k"
 
 module VERIFICATION-SYNTAX
 endmodule

@@ -2188,7 +2188,7 @@ module MAP-BYTES-TO-BYTES
     ".MapBytesToBytes" [function, hook(MAP.unit), klabel(.MapBytesToBytes), symbol, total]
   syntax MapBytesToBytes  ::=
     WrappedBytes "Bytes2Bytes|->" WrappedBytes [function, hook(MAP.element), injective, klabel(_Bytes2Bytes|->_), symbol, total]
-  syntax priorities _Bytes2Bytes|->_  > _MapBytesToBytes_ .MapBytesToBytes
+  syntax priority _Bytes2Bytes|->_  > _MapBytesToBytes_ .MapBytesToBytes
   syntax non-assoc _Bytes2Bytes|->_
   syntax WrappedBytes  ::=
     MapBytesToBytes "[" WrappedBytes "]" [function, hook(MAP.lookup), klabel(MapBytesToBytes:lookup), symbol]
@@ -2570,7 +2570,7 @@ module MAP-INT-TO-BYTES
     ".MapIntToBytes" [function, hook(MAP.unit), klabel(.MapIntToBytes), symbol, total]
   syntax MapIntToBytes  ::=
     WrappedInt "Int2Bytes|->" WrappedBytes [function, hook(MAP.element), injective, klabel(_Int2Bytes|->_), symbol, total]
-  syntax priorities _Int2Bytes|->_  > _MapIntToBytes_ .MapIntToBytes
+  syntax priority _Int2Bytes|->_  > _MapIntToBytes_ .MapIntToBytes
   syntax non-assoc _Int2Bytes|->_
   syntax WrappedBytes  ::=
     MapIntToBytes "[" WrappedInt "]" [function, hook(MAP.lookup), klabel(MapIntToBytes:lookup), symbol]

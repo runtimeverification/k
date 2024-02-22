@@ -97,8 +97,8 @@ module C18-COMMON
                | Exp "|=" Exp [group(assign)]
                > left:
                  Exp "," Exp [group(comma)]
-  syntax priorities assignExp > comma
-  syntax priorities constantExp > assign
+  syntax priority assignExp > comma
+  syntax priority constantExp > assign
 
   syntax GenericAssocs ::= NeList{GenericAssoc,","}
 

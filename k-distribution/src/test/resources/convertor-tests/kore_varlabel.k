@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "domains.md"
+requires "domains.md"
 
 module VARLABEL-SYNTAX
 

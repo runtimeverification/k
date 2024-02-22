@@ -3,7 +3,7 @@ copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
 ```k
-require "test.md"
+requires "test.md"
 
 module A-SPEC
 
