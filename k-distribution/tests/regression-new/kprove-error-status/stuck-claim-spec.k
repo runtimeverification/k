@@ -4,7 +4,7 @@ module VERIFICATION
 endmodule
 
 module STUCK-CLAIM-SPEC
-  import VERIFICATION
+  imports VERIFICATION
 
   claim  <k> addCounter(N:Int) => 1 ...</k>
          <counter> C:Int => ?_ </counter>

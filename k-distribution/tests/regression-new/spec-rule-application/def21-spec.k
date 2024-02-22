@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // X+1 (in term) = Y (in pattern) matching.
 // inc(Y) in pattern LHS. Function with no side conditions. Evaluation required for planned matching.

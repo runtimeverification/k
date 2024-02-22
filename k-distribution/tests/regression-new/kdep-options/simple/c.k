@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "d.k"
+requires "d.k"
 
 module C
   imports D

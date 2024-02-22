@@ -3,7 +3,7 @@ requires "test.k"
 
 
 module A3-SPEC
-  import TEST
+  imports TEST
 
   rule [unif-map]: { MAP [ K <- V ] #Equals MAP:Map [ K <- V' ] } => { V #Equals V' } [simplification]
 

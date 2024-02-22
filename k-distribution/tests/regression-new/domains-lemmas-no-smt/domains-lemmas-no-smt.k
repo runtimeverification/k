@@ -2,7 +2,7 @@
 requires "domains.md"
 
 module DOMAINS-LEMMAS-NO-SMT
-    import INT
+    imports INT
 
     configuration <k> $PGM:Pgm </k>
 
