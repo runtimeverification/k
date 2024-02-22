@@ -5,7 +5,7 @@
   } )
 #And
   <k>
-    lookupResult ( 1 ~> . ) ~> .
+    lookupResult ( 1 ~> .K ) ~> .K
   </k>
 #And
   {

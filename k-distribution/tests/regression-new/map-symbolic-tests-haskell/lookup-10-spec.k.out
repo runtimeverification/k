@@ -1,6 +1,6 @@
   <k>
     lookupResult ( ( MAP
-    Z:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ] ~> . ) ~> .
+    Z:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {
