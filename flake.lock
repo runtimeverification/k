@@ -15,17 +15,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1708422161,
-        "narHash": "sha256-0iGpmXEdDE0lK66slTyYlbylE4eVOM6nIEM9ffhWYsw=",
+        "lastModified": 1708611459,
+        "narHash": "sha256-8NYs2ZOlut2F5BkJt2oPVo9ySC7/Fdq8z6Uz6m4LEL0=",
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "54a1eb9c4278460b69b19d72280db54108f2d467",
+        "rev": "733dbd05bad933237ce995909d07d444358bdd77",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "hs-backend-booster",
-        "rev": "54a1eb9c4278460b69b19d72280db54108f2d467",
+        "rev": "733dbd05bad933237ce995909d07d444358bdd77",
         "type": "github"
       }
     },
@@ -82,22 +82,27 @@
     },
     "haskell-backend": {
       "inputs": {
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": [
+          "haskell-backend",
+          "rv-utils",
+          "nixpkgs"
+        ],
+        "rv-utils": "rv-utils",
         "stacklock2nix": "stacklock2nix",
         "z3": "z3"
       },
       "locked": {
-        "lastModified": 1708380172,
-        "narHash": "sha256-rIKNZKY+a2XX2MnUlMGeKT7kcsiX4BgoQoAQHqXk85w=",
+        "lastModified": 1708611633,
+        "narHash": "sha256-hDScMIfGH54CXR3xW8AGLKTMMm+lmlamRHOI6nOdw78=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "ac6908d0ca26f194802c72f66f200e7079139f1b",
+        "rev": "175f6f454daa2f51852d58f1860148d0c5a2bd5c",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "ac6908d0ca26f194802c72f66f200e7079139f1b",
+        "rev": "175f6f454daa2f51852d58f1860148d0c5a2bd5c",
         "type": "github"
       }
     },
@@ -125,13 +130,15 @@
         "immer-src": "immer-src",
         "mavenix": "mavenix",
         "nixpkgs": [
-          "llvm-backend",
-          "rv-utils",
+          "haskell-backend",
           "nixpkgs"
         ],
         "pybind11-src": "pybind11-src",
         "rapidjson-src": "rapidjson-src",
-        "rv-utils": "rv-utils",
+        "rv-utils": [
+          "haskell-backend",
+          "rv-utils"
+        ],
         "utils": [
           "flake-utils"
         ]
@@ -171,17 +178,18 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1704290814,
-        "narHash": "sha256-LWvKHp7kGxk/GEtlrGYV68qIvPHkU9iToomNFGagixU=",
-        "owner": "NixOS",
+        "lastModified": 1707163378,
+        "narHash": "sha256-oz+BzUDwtyircjjxv9aPYOS5gobxLCjD2il+gb/bCRo=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "70bdadeb94ffc8806c0570eb5c2695ad29f0e421",
+        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
         "type": "github"
       },
       "original": {
-        "id": "nixpkgs",
-        "ref": "nixos-23.05",
-        "type": "indirect"
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
+        "type": "github"
       }
     },
     "nixpkgs_2": {
@@ -196,38 +204,6 @@
       "original": {
         "id": "nixpkgs",
         "type": "indirect"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
-        "lastModified": 1707163378,
-        "narHash": "sha256-oz+BzUDwtyircjjxv9aPYOS5gobxLCjD2il+gb/bCRo=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
-        "type": "github"
-      }
-    },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1707163378,
-        "narHash": "sha256-oz+BzUDwtyircjjxv9aPYOS5gobxLCjD2il+gb/bCRo=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "e2ffefe304d941bb98989847944f3b58e0adcdd5",
-        "type": "github"
       }
     },
     "pybind11-src": {
@@ -274,30 +250,15 @@
           "llvm-backend",
           "nixpkgs"
         ],
-        "rv-utils": "rv-utils_2"
+        "rv-utils": [
+          "haskell-backend",
+          "rv-utils"
+        ]
       }
     },
     "rv-utils": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3"
-      },
-      "locked": {
-        "lastModified": 1707492220,
-        "narHash": "sha256-KRndaUPzUumDlNcKF7KzA8F/EZKLYCvurh7Z13sw2PI=",
-        "owner": "runtimeverification",
-        "repo": "rv-nix-tools",
-        "rev": "abf86805a623948c941e603e2fc4c26a06ea6eb6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "runtimeverification",
-        "repo": "rv-nix-tools",
-        "type": "github"
-      }
-    },
-    "rv-utils_2": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
         "lastModified": 1707492220,
