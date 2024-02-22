@@ -382,11 +382,11 @@ of `Q` if:
   supplied has no semantic meaning other than as a key grouping productions 
   together.
 * Let `S_P` be the sort of `P`, and `S_p1` etc. be the sorts of its arguments
-  (c.f. for `Q`). The tuple `(S_P, S_p1, ..., S_pN)` must be lexicographically
+  (c.f. for `Q`). The tuple `(S_P, S_p1, ..., S_pN)` must be elementwise
   _strictly less than_ `(S_Q, S_q1, ..., S_qN)` according to the definition's
-  subsorting relationship. That is, a term from production `P` must be
-  substitutable where one from `Q` is expected, but cannot be identically
-  sorted.
+  subsorting relationship. That is, a term from production `P` is a restriction
+  of one from production `Q`; when its arguments are more precise, we can give
+  the result a more precise sort.
 
 ### `klabel(_)` and `symbol` attributes
 
@@ -3192,12 +3192,8 @@ sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework
 
 All of these hooks will also eventually need documentation.
 
-[^1]: More precisely, a lightly-customized debugger built using the LLDB Python
-  API.
 [^unique-symbol]: Except for in a very limited number of special cases from the
   K standard library.
-[^overload-issue]: See https://github.com/runtimeverification/hs-backend-booster/issues/492
-  for full context and links to related discussion.
 [^maude-overload]: The [Maude documentation](https://maude.lcc.uma.es/maude-manual/maude-manualch3.html#x15-310003.6)
   has an example in a context that's somewhat similar to K; discussion of
   _ad-hoc_ overloading is not relevant.
