@@ -355,6 +355,7 @@ def test_apr_proof_summary(proof_dir: Path) -> None:
                 bmc_depth=None,
                 bounded=0,
                 subproofs=0,
+                exec_time=0.0,
             )
         ]
     )
@@ -380,6 +381,7 @@ def test_aprbmc_proof_summary(proof_dir: Path) -> None:
                 bmc_depth=1,
                 bounded=0,
                 subproofs=0,
+                exec_time=0.0,
             )
         ]
     )
@@ -418,6 +420,7 @@ def test_apr_proof_summary_subproofs(proof_dir: Path) -> None:
         bmc_depth=None,
         bounded=0,
         subproofs=1,
+        exec_time=0.0,
     )
 
     assert comp_summary.summaries[1] == CompositeSummary(
@@ -436,6 +439,7 @@ def test_apr_proof_summary_subproofs(proof_dir: Path) -> None:
                 bmc_depth=None,
                 bounded=0,
                 subproofs=1,
+                exec_time=0.0,
             ),
             EqualitySummary(
                 id='equality_proof_1',
