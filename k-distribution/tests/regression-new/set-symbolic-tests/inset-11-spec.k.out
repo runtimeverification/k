@@ -1,7 +1,7 @@
   <k>
     inSetResult ( Y:MyId in SET
     SetItem ( X:MyId )
-    SetItem ( Z:MyId ) ) ~> .
+    SetItem ( Z:MyId ) ) ~> .K
   </k>
 #And
   {

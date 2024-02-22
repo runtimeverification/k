@@ -5,7 +5,7 @@
   } )
 #And
   <k>
-    diffResult ( Z:MyId in S ) ~> .
+    diffResult ( Z:MyId in S ) ~> .K
   </k>
 #And
   {
