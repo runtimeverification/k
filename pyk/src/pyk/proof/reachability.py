@@ -689,15 +689,16 @@ class APRProver(Prover):
                 return
 
         module_name = self.circularities_module_name if self.nonzero_depth(node) else self.dependencies_module_name
-        self.kcfg_explore.extend(
-            self.proof,
-            node,
-            self.proof.logs,
-            execute_depth=execute_depth,
+        self.kcfg_explore.check_extendable(self.proof, node)
+        extend_result = self.kcfg_explore.extend_cterm(
+            node.cterm,
             cut_point_rules=cut_point_rules,
-            terminal_rules=terminal_rules,
+            execute_depth=execute_depth,
             module_name=module_name,
+            terminal_rules=terminal_rules,
+            node_id=node.id,
         )
+        self.proof.kcfg.extend(extend_result=extend_result, node=node, logs=self.proof.logs)
 
     def step_proof(self) -> None:
         self._check_all_terminals()

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 from collections.abc import Container
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from threading import RLock
 from typing import TYPE_CHECKING, List, Union, cast, final
 
@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     from types import TracebackType
     from typing import Any
+
+    from pyk.kore.rpc import LogEntry
 
     from ..kast import KAtt
     from ..kast.inner import KInner
@@ -320,6 +322,40 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         elif type(_path[0]) is KCFG.Edge:
             return _path[0].depth + KCFG.path_length(_path[1:])
         raise ValueError(f'Cannot handle Successor type: {type(_path[0])}')
+
+    def extend(
+        self,
+        extend_result: KCFGExtendResult,
+        node: KCFG.Node,
+        logs: dict[int, tuple[LogEntry, ...]],
+    ) -> None:
+        match extend_result:
+            case Vacuous():
+                self.add_vacuous(node.id)
+
+            case Stuck():
+                self.add_stuck(node.id)
+
+            case Abstract(cterm):
+                new_node = self.create_node(cterm)
+                self.create_cover(node.id, new_node.id)
+
+            case Step(cterm, depth, next_node_logs, rule_labels, _):
+                next_node = self.create_node(cterm)
+                logs[next_node.id] = next_node_logs
+                self.create_edge(node.id, next_node.id, depth, rules=rule_labels)
+
+            case Branch(constraints, _):
+                self.split_on_constraints(node.id, constraints)
+
+            case NDBranch(cterms, next_node_logs, rule_labels):
+                next_ids = [self.create_node(cterm).id for cterm in cterms]
+                for i in next_ids:
+                    logs[i] = next_node_logs
+                self.create_ndbranch(node.id, next_ids, rules=rule_labels)
+
+            case _:
+                raise AssertionError()
 
     def to_dict(self) -> dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
@@ -1031,3 +1067,59 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             cfg.create_ndbranch(source_id, target_ids)
 
         return cfg
+
+
+class KCFGExtendResult(ABC):
+    ...
+
+
+@final
+@dataclass(frozen=True)
+class Vacuous(KCFGExtendResult):
+    ...
+
+
+@final
+@dataclass(frozen=True)
+class Stuck(KCFGExtendResult):
+    ...
+
+
+@final
+@dataclass(frozen=True)
+class Abstract(KCFGExtendResult):
+    cterm: CTerm
+
+
+@final
+@dataclass(frozen=True)
+class Step(KCFGExtendResult):
+    cterm: CTerm
+    depth: int
+    logs: tuple[LogEntry, ...]
+    rule_labels: list[str]
+    cut: bool = field(default=False)
+
+
+@final
+@dataclass(frozen=True)
+class Branch(KCFGExtendResult):
+    constraints: tuple[KInner, ...]
+    heuristic: bool
+
+    def __init__(self, constraints: Iterable[KInner], *, heuristic: bool = False):
+        object.__setattr__(self, 'constraints', tuple(constraints))
+        object.__setattr__(self, 'heuristic', heuristic)
+
+
+@final
+@dataclass(frozen=True)
+class NDBranch(KCFGExtendResult):
+    cterms: tuple[CTerm, ...]
+    logs: tuple[LogEntry, ...]
+    rule_labels: tuple[str, ...]
+
+    def __init__(self, cterms: Iterable[CTerm], logs: Iterable[LogEntry,], rule_labels: Iterable[str]):
+        object.__setattr__(self, 'cterms', tuple(cterms))
+        object.__setattr__(self, 'logs', tuple(logs))
+        object.__setattr__(self, 'rule_labels', tuple(rule_labels))
