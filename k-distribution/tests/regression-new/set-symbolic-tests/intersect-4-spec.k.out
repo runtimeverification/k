@@ -1,5 +1,5 @@
   <k>
-    intersectResult ( SetItem ( X:MyId ) ) ~> .
+    intersectResult ( SetItem ( X:MyId ) ) ~> .K
   </k>
 #And
   {

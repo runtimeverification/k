@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // X+1 (in term) = Y (in pattern) matching.
 //`requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.

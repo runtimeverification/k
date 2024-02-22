@@ -5,7 +5,7 @@
   } )
 #And
   <k>
-    lookupResult ( ( X:MyId |-> 3 ) [ x <- 5 ] [ X:MyId ] ~> . ) ~> .
+    lookupResult ( ( X:MyId |-> 3 ) [ x <- 5 ] [ X:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {

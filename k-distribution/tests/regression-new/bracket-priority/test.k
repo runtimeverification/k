@@ -13,6 +13,6 @@ syntax BuiltinName ::= "+"
 
 rule (+ I1:Int I2:Int) => I1 +Int I2
 
-syntax priorities defaultBracket > expList
+syntax priority defaultBracket > expList
 
 endmodule

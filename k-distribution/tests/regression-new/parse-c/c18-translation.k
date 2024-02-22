@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "c18-syntax.k"
+requires "c18-syntax.k"
 
 module C18-TRANSLATION-SYNTAX
   imports C18-SYNTAX

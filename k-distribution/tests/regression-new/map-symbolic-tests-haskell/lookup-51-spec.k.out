@@ -17,6 +17,6 @@
   } )
 #And
   <k>
-    lookupResult ( 0 ~> . ) ~> .
+    lookupResult ( 0 ~> .K ) ~> .K
   </k>
 [Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

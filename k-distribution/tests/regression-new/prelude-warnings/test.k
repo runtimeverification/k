@@ -1,8 +1,8 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "ffi.md"
-require "json.md"
-require "rat.md"
-require "substitution.md"
+requires "ffi.md"
+requires "json.md"
+requires "rat.md"
+requires "substitution.md"
 
 module TEST-SYNTAX
 endmodule

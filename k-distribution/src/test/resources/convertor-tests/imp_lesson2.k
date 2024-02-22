@@ -1,10 +1,10 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "misc.k"
+requires "misc.k"
 
 module IMP-SYNTAX
-  import ID
-  import INT
-  import BOOL
+  imports ID
+  imports INT
+  imports BOOL
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
@@ -30,7 +30,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  import MAP
+  imports MAP
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">

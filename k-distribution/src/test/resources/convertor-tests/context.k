@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
-require "include.k"
+requires "include.k"
 
 module TEST
   imports INCLUDE

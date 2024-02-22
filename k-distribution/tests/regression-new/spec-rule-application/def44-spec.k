@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // 2 equalities can generate mutually exclusive substitutions.
 // Situation similar to what is found in ERC2.0 high-level contract

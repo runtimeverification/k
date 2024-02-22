@@ -7,7 +7,7 @@
   <k>
     inkeysResult ( Y:MyId in_keys ( M
     X:MyId |-> 0
-    ( Z:MyId |-> 1 ) ) ) ~> .
+    ( Z:MyId |-> 1 ) ) ) ~> .K
   </k>
 #And
   {
