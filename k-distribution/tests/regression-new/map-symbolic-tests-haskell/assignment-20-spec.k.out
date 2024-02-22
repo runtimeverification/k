@@ -6,7 +6,7 @@
 #And
   <k>
     assignmentResult ( MAP [ Z:MyId <- 3 ]
-    Y:MyId |-> 2 ) ~> .
+    Y:MyId |-> 2 ) ~> .K
   </k>
 #And
   {

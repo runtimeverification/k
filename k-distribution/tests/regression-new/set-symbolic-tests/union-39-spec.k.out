@@ -1,5 +1,5 @@
   <k>
-    unionResult ( true ) ~> .
+    unionResult ( true ) ~> .K
   </k>
 #And
   {

@@ -1,6 +1,6 @@
   <k>
     removeResult ( ( MAP
-    Z:MyId |-> 1 ) [ Y:MyId <- undef ] [ Z:MyId ] ~> . ) ~> .
+    Z:MyId |-> 1 ) [ Y:MyId <- undef ] [ Z:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {

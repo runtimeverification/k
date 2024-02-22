@@ -5,7 +5,7 @@
   } )
 #And
   <k>
-    inkeysResult ( true ) ~> .
+    inkeysResult ( true ) ~> .K
   </k>
 #And
   {

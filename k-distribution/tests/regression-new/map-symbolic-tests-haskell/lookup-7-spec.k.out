@@ -12,7 +12,7 @@
 #And
   <k>
     lookupResult ( MAP [ Y:MyId <- 2 ]
-    ( X:MyId |-> 1 ) [ Z:MyId ] ~> . ) ~> .
+    ( X:MyId |-> 1 ) [ Z:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {

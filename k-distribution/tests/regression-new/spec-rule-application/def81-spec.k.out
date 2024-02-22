@@ -14,7 +14,7 @@
 #And
   <T>
     <k>
-      mid X +Int 1 ~> .
+      mid X +Int 1 ~> .K
     </k>
     <var>
       binop X:Int X +Int 1

@@ -17,7 +17,7 @@
   } )
 #And
   <k>
-    lookupResult ( MAP [ Z:MyId ] ~> . ) ~> .
+    lookupResult ( MAP [ Z:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {
