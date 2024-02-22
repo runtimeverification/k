@@ -23,7 +23,7 @@ def imp_kompiled(kompile: Kompiler) -> Path:
 KORE_PRINT_TEST_DATA = (
     (r'\top{SortInt{}}()', '#Top'),
     (r'\dv{SortInt{}}("1")', '1'),
-    (r"Lbl'-LT-'k'-GT-'{}(dotk{}())", '<k>\n  .\n</k>'),
+    (r"Lbl'-LT-'k'-GT-'{}(dotk{}())", '<k>\n  .K\n</k>'),
 )
 
 

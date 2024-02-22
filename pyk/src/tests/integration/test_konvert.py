@@ -46,6 +46,7 @@ IGNORED_SYMBOL_ATTRS: Final = {
     'priorities',
     'right',
     'strict',
+    "symbol'Kywd'",
     'terminals',
 }
 
