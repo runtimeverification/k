@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "b.k"
-require "c.k"
+requires "b.k"
+requires "c.k"
 
 module A
   imports B

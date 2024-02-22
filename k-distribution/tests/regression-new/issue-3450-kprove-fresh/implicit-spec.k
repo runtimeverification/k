@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 
-require "test.k"
+requires "test.k"
 
 module IMPLICIT-SPEC
     imports TEST

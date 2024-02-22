@@ -13,7 +13,7 @@ module TEST
 
   syntax left x
 
-  syntax prioritiesx
+  syntax priorityx
 > y z
 > t
 > u

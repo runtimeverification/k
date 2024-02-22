@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module TEST
-  import INT
+  imports INT
 
   syntax IntList ::= List{Int, ""}
 

@@ -31,8 +31,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 public class LSPTests {
 
   String def =
-      "//require \"Copy (10) test.k\"\n"
-          + "require \"spec.k\"\n"
+      "//requires \"Copy (10) test.k\"\n"
+          + "requires \"spec.k\"\n"
           + "\n"
           + "module A\n"
           + "  syntax A ::= \"a\"\n"
@@ -63,7 +63,7 @@ public class LSPTests {
   public void testGetContext() {
     KTextDocument doc = new KTextDocument();
     doc.updateText(def);
-    Assert.assertEquals("require", doc.getContextAt(new KPos(2, 2)));
+    Assert.assertEquals("requires", doc.getContextAt(new KPos(2, 2)));
     Assert.assertEquals("module", doc.getContextAt(new KPos(4, 8)));
     Assert.assertEquals("imports", doc.getContextAt(new KPos(9, 21)));
     Assert.assertEquals("syntax", doc.getContextAt(new KPos(11, 18)));

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.kframework.definition.Tag;
 
 /**
- * A group within a {@code syntax priorities} declaration.
+ * A group within a {@code syntax priority} declaration.
  *
  * @see PriorityExtended
  */

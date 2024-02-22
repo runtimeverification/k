@@ -5,7 +5,7 @@ import org.kframework.utils.StringUtil;
 
 /** A require directive */
 public class Require extends DefinitionItem {
-  /** The string argument to {@code require}, as written in the input file. */
+  /** The string argument to {@code requires}, as written in the input file. */
   private String value;
 
   public Require(String value) {
@@ -23,7 +23,7 @@ public class Require extends DefinitionItem {
 
   @Override
   public void toString(StringBuilder sb) {
-    sb.append("require ");
+    sb.append("requires ");
     sb.append(StringUtil.enquoteCString(value));
   }
 }

@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // X+1 (in term) = Y (in pattern) matching.
 // `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.

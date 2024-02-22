@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "ffi.k"
+requires "ffi.k"
 
 module REQUIREBUILTINK-SYNTAX
 endmodule

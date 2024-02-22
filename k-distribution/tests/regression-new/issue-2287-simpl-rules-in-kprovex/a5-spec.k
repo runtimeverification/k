@@ -3,7 +3,7 @@ requires "test.k"
 // https://github.com/runtimeverification/k/issues/2587
 
 module A5-SPEC
-  import TEST
+  imports TEST
   imports ML-SYNTAX
 
   claim <k> c => 2 #And n +Int n </k>

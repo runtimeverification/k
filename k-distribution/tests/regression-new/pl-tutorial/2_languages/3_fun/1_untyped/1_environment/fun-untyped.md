@@ -363,16 +363,16 @@ a constructor for function types:
 ## Additional Priorities
 
 ```k
-  syntax priorities @__FUN-UNTYPED-COMMON
-                  > apply
-                  > arith
-                  > _:=__FUN-UNTYPED-COMMON
-                  > let_in__FUN-UNTYPED-COMMON
-                    letrec_in__FUN-UNTYPED-COMMON
-                    if_then_else__FUN-UNTYPED-COMMON
-                  > _;__FUN-UNTYPED-COMMON
-                  > fun__FUN-UNTYPED-COMMON
-                  > datatype_=___FUN-UNTYPED-COMMON
+  syntax priority @__FUN-UNTYPED-COMMON
+                > apply
+                > arith
+                > _:=__FUN-UNTYPED-COMMON
+                > let_in__FUN-UNTYPED-COMMON
+                  letrec_in__FUN-UNTYPED-COMMON
+                  if_then_else__FUN-UNTYPED-COMMON
+                > _;__FUN-UNTYPED-COMMON
+                > fun__FUN-UNTYPED-COMMON
+                > datatype_=___FUN-UNTYPED-COMMON
 endmodule
 
 module FUN-UNTYPED-MACROS

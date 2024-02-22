@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 /*
 Part 4. Substitutions of RHS vars must be preferred over LHS vars, for cases var = term

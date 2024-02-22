@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 // X = Y-1, `mid Y => end incPos(Y)` - Function in pattern RHS.
 module DEF032-SPEC
