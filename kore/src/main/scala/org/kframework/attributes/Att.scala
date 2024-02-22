@@ -251,6 +251,7 @@ object Att {
   final val NO_EVALUATORS = Key.builtin("no-evaluators", KeyParameter.Forbidden, onlyon[Production])
   final val ONE_PATH      = Key.builtin("one-path", KeyParameter.Forbidden, onlyon2[Claim, Module])
   final val OWISE         = Key.builtin("owise", KeyParameter.Forbidden, onlyon[Rule])
+  final val OVERLOAD      = Key.builtin("overload", KeyParameter.Required, onlyon[Production])
   final val PARSER        = Key.builtin("parser", KeyParameter.Required, onlyon[Production])
   final val PREC          = Key.builtin("prec", KeyParameter.Required, onlyon[Production])
   final val PREFER        = Key.builtin("prefer", KeyParameter.Forbidden, onlyon[Production])

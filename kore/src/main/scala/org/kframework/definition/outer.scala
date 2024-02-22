@@ -56,25 +56,85 @@ trait Sorting {
     POSet(subsortRelations)
   }
 
-  def computeOverloadPOSet(subsorts: POSet[Sort], prods: Set[Production]): POSet[Production] = {
-    def isLessThan(p1: Production, p2: Production): Boolean =
-      p1.klabel.isDefined &&
-        p1.klabelAtt == p2.klabelAtt &&
-        p1.nonterminals.size == p2.nonterminals.size &&
-        subsorts.lessThanEq(p1.sort, p2.sort) &&
-        p1.nonterminals
-          .zip(p2.nonterminals)
-          .forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
-        (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort)) &&
-        p1 != p2
+  /**
+   * Let `p` and `q` be the following productions:
+   * {{{
+   *   P ::= p(P1, ..., PN)
+   *   Q ::= q(Q1, ..., QN)
+   * }}}
+   * Let `<:` be the subsort relation for this definition. We say that `p` is strictly less than `q`
+   * with respect to the _overload partial order_ if:
+   *   - `p` and `q` are not the same production
+   *   - `P <: Q`
+   *   - for all n, `Pn <: Qn`
+   *   - `p` and `q` are not _identically_ sorted
+   * That is, a production `p` is substitutable where a production `q` is expected.
+   *
+   * This ordering defines which productions participate in overload selection with each other.
+   */
+  private def isLessThan(p1: Production, p2: Production, subsorts: POSet[Sort]): Boolean =
+    p1.nonterminals.size == p2.nonterminals.size &&
+      subsorts.lessThanEq(p1.sort, p2.sort) &&
+      p1.nonterminals
+        .zip(p2.nonterminals)
+        .forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
+      (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort)) &&
+      p1 != p2
+
+  /**
+   * Compute an overload ordering based on productions with the same `overload(_)` attribute.
+   */
+  private def computeAttributeOverloadPOSet(
+      subsorts: POSet[Sort],
+      prods: Set[Production]
+  ): Set[(Production, Production)] = {
+    val prodsToConsider =
+      prods.toSeq.filter(_.att.contains(Att.OVERLOAD)).groupBy(_.att.get(Att.OVERLOAD))
+    val pairs: Iterable[(Production, Production)] = for {
+      x  <- prodsToConsider.values
+      p1 <- x
+      p2 <- x if isLessThan(p1, p2, subsorts)
+    } yield (p1, p2)
+    pairs.toSet
+  }
+
+  /**
+   * Compute an overload ordering based on productions with the same `klabel`. This ordering will be
+   * deprecated in the future in favour of the explicit `overload(_)` attribute.
+   */
+  private def computeKLabelOverloadPOSet(
+      subsorts: POSet[Sort],
+      prods: Set[Production]
+  ): Set[(Production, Production)] = {
+    def areKLabelOverloadable(p1: Production, p2: Production): Boolean =
+      p1.klabel.isDefined && p1.klabelAtt == p2.klabelAtt && isLessThan(p1, p2, subsorts)
+
     val prodsForOverloads = prods.toSeq.filter(_.klabelAtt.isDefined).groupBy(_.klabelAtt)
     val pairs: Iterable[(Production, Production)] = for {
       x  <- prodsForOverloads.values
       p1 <- x
-      p2 <- x if isLessThan(p1, p2)
+      p2 <- x if areKLabelOverloadable(p1, p2)
     } yield (p1, p2)
-    POSet(pairs.toSet)
+    pairs.toSet
   }
+
+  /**
+   * Combine the orderings induced by `klabel(_)` and `overload(_)` to produce an overall partial
+   * ordering for production overloading.
+   *
+   * In the future, the `klabel(_)` mechanism will be removed.
+   *
+   * Note that for now, while the two methods are both supported, we rely here on the compiler
+   * rejecting productions that use both attributes to ensure that the two orderings are disjoint.
+   */
+  def computeOverloadPOSet(
+      subsorts: POSet[Sort],
+      prods: Set[Production]
+  ): POSet[Production] =
+    POSet(
+      computeAttributeOverloadPOSet(subsorts, prods) ++ computeKLabelOverloadPOSet(subsorts, prods)
+    )
+
 }
 
 object Module {
