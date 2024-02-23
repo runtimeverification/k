@@ -2013,7 +2013,10 @@ public class ModuleToKORE {
 
     for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
         // Sort to stabilize error messages
-        stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).toList()) {
+        stream(att.att())
+            .filter(e -> e._1._1.shouldEmit())
+            .sorted(Comparator.comparing(Tuple2::toString))
+            .toList()) {
       Att.Key key = attribute._1._1;
       String strKey = key.key();
       String clsName = attribute._1._2;
