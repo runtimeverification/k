@@ -229,11 +229,9 @@ object Att {
   final val INITIAL    = Key.builtin("initial", KeyParameter.Forbidden, onlyon[Production])
   final val INITIALIZER =
     Key.builtin("initializer", KeyParameter.Forbidden, onlyon2[Production, Rule])
-  final val INJECTIVE = Key.builtin("injective", KeyParameter.Forbidden, onlyon[Production])
-  final val INTERNAL  = Key.builtin("internal", KeyParameter.Forbidden, onlyon[Production])
-  final val KLABEL    = Key.builtin("klabel", KeyParameter.Required, onlyon[Production])
-  final val TERMINATOR_KLABEL =
-    Key.builtin("terminator-klabel", KeyParameter.Required, onlyon[Production])
+  final val INJECTIVE      = Key.builtin("injective", KeyParameter.Forbidden, onlyon[Production])
+  final val INTERNAL       = Key.builtin("internal", KeyParameter.Forbidden, onlyon[Production])
+  final val KLABEL         = Key.builtin("klabel", KeyParameter.Required, onlyon[Production])
   final val LABEL          = Key.builtin("label", KeyParameter.Required, onlyon[Sentence])
   final val LATEX          = Key.builtin("latex", KeyParameter.Required, onlyon[Production])
   final val LEFT           = Key.builtin("left", KeyParameter.Forbidden, onlyon[Production])
@@ -275,7 +273,9 @@ object Att {
   final val SYMBOL         = Key.builtin("symbol", KeyParameter.Optional, onlyon[Production])
   final val SYMBOLIC =
     Key.builtin("symbolic", KeyParameter.Optional, onlyon3[Module, Production, Rule])
-  final val TAG     = Key.builtin("tag", KeyParameter.Required, onlyon[Rule])
+  final val TAG = Key.builtin("tag", KeyParameter.Required, onlyon[Rule])
+  final val TERMINATOR_SYMBOL =
+    Key.builtin("terminator-symbol", KeyParameter.Required, onlyon[Production])
   final val TOKEN   = Key.builtin("token", KeyParameter.Forbidden, onlyon2[SyntaxSort, Production])
   final val TOTAL   = Key.builtin("total", KeyParameter.Forbidden, onlyon[Production])
   final val TRUSTED = Key.builtin("trusted", KeyParameter.Forbidden, onlyon[Claim])
