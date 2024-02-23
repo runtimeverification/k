@@ -75,6 +75,7 @@
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.type>FastBuild</project.build.type>
+    <java.version>17</java.version>
     <scala.majorVersion>2.12</scala.majorVersion>
     <scala.minorVersion>18</scala.minorVersion>
     <scala.version>${scala.majorVersion}.${scala.minorVersion}</scala.version>
@@ -167,8 +168,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.7.0</version>
           <configuration>
-            <source>17</source>
-            <target>17</target>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
           </configuration>
         </plugin>
         <!-- Antrun plugin for running arbitrary shell commands (building subprojects) -->
@@ -248,7 +249,7 @@
         <configuration>
           <rules>
             <requireJavaVersion>
-              <version>[11,)</version>
+              <version>[${java.version},)</version>
             </requireJavaVersion>
           </rules>
         </configuration>
