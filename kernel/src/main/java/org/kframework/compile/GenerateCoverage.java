@@ -19,39 +19,35 @@ import org.kframework.utils.file.FileUtil;
 import scala.Function1;
 import scala.collection.Set;
 
-public record GenerateCoverage(boolean cover, FileUtil files) {
+public class GenerateCoverage {
 
-  public Definition gen(Definition definition) {
-    if (cover) {
-      Module m = definition.mainModule();
-      Function1<Definition, Definition> addIOModule =
-          DefinitionTransformer.from(
-              mod -> {
-                if (mod.equals(m)) {
-                  return Module(
-                      m.name(),
-                      (Set<Import>)
-                          m.imports().$bar(Set(Import(definition.getModule("K-IO").get(), true))),
-                      m.localSentences(),
-                      m.att());
-                } else {
-                  return mod;
-                }
-              },
-              "Add K-IO Module for coverage instrumentation");
-      Function1<Definition, Definition> addInstrumentation =
-          d ->
-              DefinitionTransformer.fromRuleBodyTransformerWithRule(
-                      (r, body) -> gen(r, body, d.mainModule()),
-                      "generate coverage instrumentation")
-                  .apply(d);
-      return addIOModule.andThen(addInstrumentation).apply(definition);
-    } else {
-      return definition;
-    }
+  public static Definition gen(Definition definition, FileUtil files) {
+    Module m = definition.mainModule();
+    Function1<Definition, Definition> addIOModule =
+        DefinitionTransformer.from(
+            mod -> {
+              if (mod.equals(m)) {
+                return Module(
+                    m.name(),
+                    (Set<Import>)
+                        m.imports().$bar(Set(Import(definition.getModule("K-IO").get(), true))),
+                    m.localSentences(),
+                    m.att());
+              } else {
+                return mod;
+              }
+            },
+            "Add K-IO Module for coverage instrumentation");
+    Function1<Definition, Definition> addInstrumentation =
+        d ->
+            DefinitionTransformer.fromRuleBodyTransformerWithRule(
+                    (r, body) -> gen(r, body, d.mainModule(), files),
+                    "generate coverage instrumentation")
+                .apply(d);
+    return addIOModule.andThen(addInstrumentation).apply(definition);
   }
 
-  private K gen(RuleOrClaim r, K body, Module mod) {
+  private static K gen(RuleOrClaim r, K body, Module mod, FileUtil files) {
     if (r.att().getOptional(Att.SOURCE(), Source.class).isEmpty()) {
       return body;
     }
