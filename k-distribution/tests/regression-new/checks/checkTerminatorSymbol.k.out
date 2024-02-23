@@ -3,4 +3,9 @@
 	Location(4,20,4,50)
 	4 |	                 | bar() [terminator-symbol(bar)]
 	  .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 1 structural errors.
+[Error] Compiler: Symbol .pipe-ints is not unique. Previously defined as: syntax Oops ::= "oops" "(" ")" [symbol(.pipe-ints)]
+	Source(checkTerminatorSymbol.k)
+	Location(8,23,8,88)
+	8 |	  syntax PipeInts ::= List{Int, "|"} [symbol(pipe-ints), terminator-symbol(.pipe-ints)]
+	  .	                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 2 structural errors.
