@@ -307,7 +307,6 @@ object Att {
   final val KLABEL =
     Key.builtin("klabel", KeyParameter.Required, onlyon[Production], KeyRange.WholePipeline)
   final val TERMINATOR_KLABEL =
-
     Key.builtin(
       "terminator-klabel",
       KeyParameter.Required,
