@@ -5,9 +5,9 @@ from functools import cached_property
 from itertools import chain
 from typing import TYPE_CHECKING
 
-from .kast import Atts, KAtt, KInner
-from .kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up
-from .kast.manip import (
+from ..kast import Atts, KAtt, KInner
+from ..kast.inner import KApply, KRewrite, KToken, KVariable, Subst, bottom_up
+from ..kast.manip import (
     abstract_term_safely,
     apply_existential_substitutions,
     count_vars,
@@ -19,17 +19,17 @@ from .kast.manip import (
     split_config_and_constraints,
     split_config_from,
 )
-from .kast.outer import KClaim, KRule
-from .prelude.k import GENERATED_TOP_CELL
-from .prelude.kbool import andBool, orBool
-from .prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
-from .utils import single, unique
+from ..kast.outer import KClaim, KRule
+from ..prelude.k import GENERATED_TOP_CELL
+from ..prelude.kbool import andBool, orBool
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
+from ..utils import single, unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from typing import Any
 
-    from .kast.outer import KDefinition
+    from ..kast.outer import KDefinition
 
 
 @dataclass(frozen=True, order=True)
