@@ -12,7 +12,7 @@ module TEST-SYNTAX
                | Exp "/" Exp  [left, group(div)]
                | "(" Exp ")"  [bracket]
 
-  syntax priorities neg > mul div > add sub
+  syntax priority neg > mul div > add sub
 endmodule
 
 module TEST

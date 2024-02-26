@@ -13,7 +13,7 @@ Context:
     } )
 #And
   <k>
-    end ( bar ( X ) ) ~> .
+    end ( bar ( X ) ) ~> .K
   </k>
 #And
   {

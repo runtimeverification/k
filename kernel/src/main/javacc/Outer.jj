@@ -10,8 +10,6 @@ the behavior of the previous system.
 
 /* DISCUSSION ITEMS:
 
-Is one of "priorities" or "priority" depricated/preferred? If so, should the other trigger a warning?
-
 The PriorityBlockExtend class has an "assoc" field. Does this need to be set?  What should it be set to?
 
 inconsistency in whether comments are inside rule and lexical or not
@@ -438,13 +436,11 @@ PARSER_END(Outer)
 | <ENDMODULE: "endmodule">
 
 | <PRIORITY: "priority"> : KLABEL_STATE
-| <PRIORITIES: "priorities"> : KLABEL_STATE
 | <NON_ASSOC: "non-assoc"> // : KLABEL_STATE
 | <LEXICAL: "lexical">
 
 | <MODULE: "module"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
-| <IMPORTS2: "import"> : MODNAME_STATE
 
 | <STRING: "\"" (~["\"", "\\", "\n"] |
                  "\\\"" | "\\n" | "\\r" | "\\t" | "\\\\")* "\"">
@@ -473,7 +469,6 @@ PARSER_END(Outer)
 | "List"
 | "NeList"
 
-| "require"
 | "requires"
 
 | <UPPER_ID: ("#")?["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
@@ -709,7 +704,7 @@ List<DefinitionItem> Start() : {}
 void Require(List<DefinitionItem> items) :
 { Location loc = startLoc(); String str; }
 {
-  ("require" | "requires") str = String() { items.add(markLoc(loc, new Require(str))); }
+  "requires" str = String() { items.add(markLoc(loc, new Require(str))); }
 }
 
 /** Parses a Module and adds it to items */
@@ -729,7 +724,7 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 /** Parses an Import and adds it to module */
 void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute(Att.PRIVATE()) == null; }
 {
-  ("imports" | "import") ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME>
+  "imports" ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME>
   { module.appendModuleItem(markLoc(loc, new Import(image(), isPublic))); }
 }
 
@@ -758,7 +753,7 @@ void Sentence(Module module) :
     | "=" (oldSort = SortID()) { syn = new SortSynonym(nonTerminal, oldSort); }
       (Attributes(syn))?)?
     { module.appendModuleItem(markLoc(loc, syn)); }
-  | ("priority" | "priorities")
+  | "priority"
       { List<PriorityBlockExtended> pblocks =
           new ArrayList<PriorityBlockExtended>(); }
       list = KLabels() { pblocks.add(new PriorityBlockExtended(list)); }

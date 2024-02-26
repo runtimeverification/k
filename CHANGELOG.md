@@ -2,6 +2,46 @@
 copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
+K Framework 6.3.0
+=================
+
+Major Changes
+-------------
+
+- The syntax `.` to represent an empty K sequence has been deprecated in favour
+  of `.K`. Definitions using `.` will now emit a warning when they are compiled,
+  but will remain functional.
+
+- Added a new one-argument form of the `symbol(_)` attribute that replaces the
+  previous `klabel(_), symbol` combination that specified the KORE label for a
+  particular production.
+
+- The outer parser no longer applies an implicit `klabel(_)` attribute to
+  shorthand "unquoted" productions (e.g. `syntax Foo ::= foo()`); this can break
+  code if those productions were overloaded. Add an explicit `klabel(_)`
+  attribute to fix this.
+
+- The `macro` attribute family are now prohibited on rules, rather than just
+  emitting a warning.
+
+- Deprecation of K's support for LaTeX emission.
+
+Minor Changes
+-------------
+
+- Improvements to consistency within the compiler: fewer duplicated symbols are
+  present in compiled output, and the `ARRAY` module is no longer treated as
+  being hooked.
+
+- Better handling of the compiler's internal attribute data structures.
+
+- Optimization of the binary format for KORE used in the LLVM backend.
+
+- Better error handling when using the LLVM backend bindings from the Haskell
+  backend.
+
+- Substantial cleanup and dead code elimination in the compiler.
+
 K Framework 6.2.0
 =================
 

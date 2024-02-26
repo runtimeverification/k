@@ -1,5 +1,5 @@
   <k>
-    diffResult ( .Set ) ~> .
+    diffResult ( .Set ) ~> .K
   </k>
 #And
   {

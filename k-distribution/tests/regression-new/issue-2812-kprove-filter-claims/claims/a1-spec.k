@@ -3,7 +3,7 @@ requires "test.k"
 
 
 module VERIFICATION
-  import TEST
+  imports TEST
 
   rule (X +Int Y) +Int Z => Z +Int (X +Int Y) [simplification, symbolic(X), concrete(Y, Z)]
   rule (X +Int Y) +Int Z => Y +Int (X +Int Z) [simplification, concrete(X, Z), symbolic(Y)]
@@ -17,6 +17,6 @@ module VERIFICATION
 endmodule
 
 module A1-SPEC
-  import VERIFICATION
+  imports VERIFICATION
 
 endmodule

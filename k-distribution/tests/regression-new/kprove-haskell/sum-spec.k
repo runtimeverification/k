@@ -4,7 +4,7 @@ module VERIFICATION
 endmodule
 
 module SUM-SPEC
-  import VERIFICATION
+  imports VERIFICATION
 
   claim  <k> addCounter(N:Int) => .K ...</k>
          <counter> C:Int => ?_ </counter>

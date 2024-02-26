@@ -1,6 +1,6 @@
   <k>
     unionResult ( S1 |Set ( S2
-    SetItem ( X:MyId ) ) ) ~> .
+    SetItem ( X:MyId ) ) ) ~> .K
   </k>
 #And
   {

@@ -1,6 +1,6 @@
   <k>
     diffResult ( ( S1
-    SetItem ( X:MyId ) ) -Set S2 ) ~> .
+    SetItem ( X:MyId ) ) -Set S2 ) ~> .K
   </k>
 #And
   {

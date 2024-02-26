@@ -1,6 +1,6 @@
   <k>
     inkeysResult ( Y:MyId in_keys ( M
-    ( X:MyId |-> 0 ) ) ) ~> .
+    ( X:MyId |-> 0 ) ) ) ~> .K
   </k>
 #And
   {

@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "deposit-symbolic.k"
+requires "deposit-symbolic.k"
 
 module DEPOSIT-SPEC
 
