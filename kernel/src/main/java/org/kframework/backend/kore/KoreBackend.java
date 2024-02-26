@@ -207,13 +207,8 @@ public class KoreBackend implements Backend {
                             .resolve(m),
                     "resolving !Var variables")
                 .apply(d);
-    GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
     Function1<Definition, Definition> genCoverage =
-        d ->
-            DefinitionTransformer.fromRuleBodyTransformerWithRule(
-                    (r, body) -> cov.gen(r, body, d.mainModule()),
-                    "generate coverage instrumentation")
-                .apply(d);
+        kompileOptions.coverage ? d -> GenerateCoverage.gen(d, files) : d -> d;
     DefinitionTransformer numberSentences =
         DefinitionTransformer.fromSentenceTransformer(
             NumberSentences::number, "number sentences uniquely");
