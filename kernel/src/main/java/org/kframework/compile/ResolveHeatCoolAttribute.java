@@ -39,7 +39,9 @@ public class ResolveHeatCoolAttribute {
               + sort
               + " or declare 'syntax Bool ::= "
               + lbl.name()
-              + "(K) [symbol, function]'",
+              + "(K) [symbol("
+              + lbl.name()
+              + "), function]'",
           requires);
     }
     KApply predicate = KApply(lbl, KVariable("HOLE"));
