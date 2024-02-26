@@ -1,5 +1,5 @@
   <k>
-    inkeysResult ( Y:MyId in_keys ( M [ X:MyId <- 0 ] ) ) ~> .
+    inkeysResult ( Y:MyId in_keys ( M [ X:MyId <- 0 ] ) ) ~> .K
   </k>
 #And
   {

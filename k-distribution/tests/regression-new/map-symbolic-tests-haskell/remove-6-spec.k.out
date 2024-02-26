@@ -11,7 +11,7 @@
   } )
 #And
   <k>
-    removeResult ( MAP [ Y:MyId <- undef ] [ Z:MyId ] ~> . ) ~> .
+    removeResult ( MAP [ Y:MyId <- undef ] [ Z:MyId ] ~> .K ) ~> .K
   </k>
 #And
   {

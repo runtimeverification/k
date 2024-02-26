@@ -11,7 +11,7 @@
   } )
 #And
   <k>
-    lookupResult ( MAP [ Y:MyId <- 2 ] [ Z:MyId ] orDefault 0 ~> . ) ~> .
+    lookupResult ( MAP [ Y:MyId <- 2 ] [ Z:MyId ] orDefault 0 ~> .K ) ~> .K
   </k>
 #And
   {

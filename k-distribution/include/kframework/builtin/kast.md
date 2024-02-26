@@ -96,8 +96,8 @@ endmodule
 module KSEQ
   imports KAST
   imports K-TOP-SORT
-  syntax K ::= ".K"      [klabel(#EmptyK), symbol, unparseAvoid]
-             | "."       [klabel(#EmptyK), symbol]
+  syntax K ::= ".K"      [klabel(#EmptyK), symbol]
+             | "."       [klabel(#EmptyK), symbol, deprecated, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
   syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, group(defaultBracket), applyPriority(1)]
@@ -144,13 +144,13 @@ module ML-SYNTAX [not-lr1]
                                 | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary, mlOp)]
                                 | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals, mlOp), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
 
-  syntax priorities mlUnary > mlEquals > mlAnd
+  syntax priority mlUnary > mlEquals > mlAnd
 
   syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd, mlOp), format(%i%1%d%n%2%n%i%3%d)]
                        > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, group(mlOp), format(%i%1%d%n%2%n%i%3%d)]
                        > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies, mlOp), format(%i%1%d%n%2%n%i%3%d)]
 
-  syntax priorities mlImplies > mlQuantifier
+  syntax priority mlImplies > mlQuantifier
 
   syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
                                 | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]

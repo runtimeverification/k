@@ -7,7 +7,7 @@
   <k>
     assignmentResult ( MAP
     X:MyId |-> BAL_TO:Int
-    Y:MyId |-> BAL_FROM +Int -30 ) ~> .
+    Y:MyId |-> BAL_FROM +Int -30 ) ~> .K
   </k>
 #And
   {

@@ -23,14 +23,14 @@
         SetItem ( 1 )
       </terminated>
       <input>
-        ListItem ( #buffer ( "\n" ~> . ) )
+        ListItem ( #buffer ( "\n" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "0\n" ~> . ) )
+        ListItem ( #buffer ( "0\n" ~> .K ) )
       </output>
       <nextLoc>
         3
@@ -63,14 +63,14 @@
         SetItem ( 1 )
       </terminated>
       <input>
-        ListItem ( #buffer ( "\n" ~> . ) )
+        ListItem ( #buffer ( "\n" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "1\n" ~> . ) )
+        ListItem ( #buffer ( "1\n" ~> .K ) )
       </output>
       <nextLoc>
         3
@@ -103,14 +103,14 @@
         SetItem ( 1 )
       </terminated>
       <input>
-        ListItem ( #buffer ( "\n" ~> . ) )
+        ListItem ( #buffer ( "\n" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "2\n" ~> . ) )
+        ListItem ( #buffer ( "2\n" ~> .K ) )
       </output>
       <nextLoc>
         3
@@ -143,14 +143,14 @@
         SetItem ( 1 )
       </terminated>
       <input>
-        ListItem ( #buffer ( "\n" ~> . ) )
+        ListItem ( #buffer ( "\n" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "3\n" ~> . ) )
+        ListItem ( #buffer ( "3\n" ~> .K ) )
       </output>
       <nextLoc>
         3
@@ -183,14 +183,14 @@
         SetItem ( 1 )
       </terminated>
       <input>
-        ListItem ( #buffer ( "\n" ~> . ) )
+        ListItem ( #buffer ( "\n" ~> .K ) )
         ListItem ( "off" )
         ListItem ( #istream ( 0 ) )
       </input>
       <output>
         ListItem ( #ostream ( 1 ) )
         ListItem ( "off" )
-        ListItem ( #buffer ( "4\n" ~> . ) )
+        ListItem ( #buffer ( "4\n" ~> .K ) )
       </output>
       <nextLoc>
         3

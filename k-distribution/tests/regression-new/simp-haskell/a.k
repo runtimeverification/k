@@ -1,6 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module A
-  import INT
+  imports INT
   syntax Int ::= abs(Int) [function, total]
                | "error" [function, total]
   rule abs(X:Int) => X:Int requires X >Int 0

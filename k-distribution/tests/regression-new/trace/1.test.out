@@ -4,5 +4,5 @@ frob ( "Hello" , false )
 bar
   foo ( 2 ) * foo ( 0 )
 <k>
-  .
+  .K
 </k>

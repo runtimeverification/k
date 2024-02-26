@@ -1,5 +1,5 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
-require "def.k"
+requires "def.k"
 
 /*
 Part 7: Unification (with function evaluation) must be preferred over substitution, after each substituted var.

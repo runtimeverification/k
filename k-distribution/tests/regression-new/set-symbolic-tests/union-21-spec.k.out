@@ -1,6 +1,6 @@
   <k>
     unionResult ( Z:MyId in S
-    SetItem ( Y:MyId ) ) ~> .
+    SetItem ( Y:MyId ) ) ~> .K
   </k>
 #And
   {

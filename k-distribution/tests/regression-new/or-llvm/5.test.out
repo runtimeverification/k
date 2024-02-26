@@ -1,6 +1,6 @@
 <generatedTop>
   <k>
-    2 ~> test ( bar ~> . ) ~> .
+    2 ~> test ( bar ~> .K ) ~> .K
   </k>
   <c>
     0

@@ -349,18 +349,62 @@ this way; it would be an error to apply `symbol(foo)` to another production in
 the module above. Additionally, `symbol(_)` with an argument may not co-occur
 with the `klabel(_)` attribute (see below).
 
+### `overload` attribute
+
+K supports _subsort overloading_[^maude-overload] on symbols, whereby a 
+constructor can have a more specific sort for certain arguments. For example,
+consider the following productions derived from a C-like language semantics:
+```k
+syntax Exp  ::= LVal
+              | Exp  "." Id
+syntax LVal ::= LVal "." Id
+```
+
+Here, it is useful for the result of the dot operator to be an `LVal` if the
+left-hand side is itself an `LVal`. However, there is an issue with the code
+as written: if `L()` is a term of sort `LVal`, then the program `L() . x` has a
+parsing ambiguity between the two productions for the dot operator. To resolve
+this, we can mark the productions as _overloads_:
+```k
+syntax Exp  ::= LVal
+              | Exp  "." Id [overload(_._)]
+syntax LVal ::= LVal "." Id [overload(_._)]
+```
+
+Now, the parser will select the _most specific_ overloaded production when it
+resolves ambiguities in `L() . x` (that is, `L() . x` parses to a term of sort
+`LVal`.
+
+Formally, the compiler organises productions into a partial order that defines
+the overload relation as follows. We say that `P` is a more specific overload
+of `Q` if:
+* `P` and `Q` have the same `overload(_)` attribute. Note that the argument
+  supplied has no semantic meaning other than as a key grouping productions 
+  together.
+* Let `S_P` be the sort of `P`, and `S_p1` etc. be the sorts of its arguments
+  (c.f. for `Q`). The tuple `(S_P, S_p1, ..., S_pN)` must be elementwise
+  _strictly less than_ `(S_Q, S_q1, ..., S_qN)` according to the definition's
+  subsorting relationship. That is, a term from production `P` is a restriction
+  of one from production `Q`; when its arguments are more precise, we can give
+  the result a more precise sort.
+
 ### `klabel(_)` and `symbol` attributes
 
 **Note: the `klabel(_), symbol` approach described in this section is a legacy
-feature that will be removed in the future. In new code, it should currently
-only be used to opt in to symbol overloading.**
+feature that will be removed in the future. New code should use the `symbol(_)`
+and `overload(_)` attributes to opt into explicit naming and overloading
+respectively.**
+
+_References here to "overloading" are explained in the section above; the use
+of the `klabel(_)` attribute without `symbol` is equivalent to the new
+`overload(_)` syntax._
 
 By default K generates for each syntax definition a long and obfuscated klabel
 string, which serves as a unique internal identifier and also is used in kast
 format of that syntax. If we need to reference a certain syntax production
 externally, we have to manually define the klabels using the `klabel` attribute.
 One example of where you would want to do this is to be able to refer to a given
-symbol via the `syntax priorities` attribute, or to enable overloading of a
+symbol via the `syntax priority` attribute, or to enable overloading of a
 given symbol.
 
 If you only provide the `klabel` attribute, you can use the provided `klabel` to
@@ -810,7 +854,7 @@ modularity. As a result, it becomes infeasible to declare priority and
 associativity inline within a set of productions, because the productions
 are not contiguous within a single file.
 
-For this purpose, we introduce the equivalent `syntax priorities`,
+For this purpose, we introduce the equivalent `syntax priority`,
 `syntax left`, `syntax right`, and `syntax non-assoc` declarations. For
 example, the above grammar can be written equivalently as:
 
@@ -820,7 +864,7 @@ syntax Exp ::= Exp "*" Exp [group(mult)]
              | Exp "+" Exp [group(add)]
              | Exp "-" Exp [group(sub)]
 
-syntax priorities mult div > add sub
+syntax priority mult div > add sub
 syntax left mult div
 syntax right add sub
 ```
@@ -836,7 +880,7 @@ syntax Exp ::= Exp "*" Exp [group(mult)]
              | Exp "+" Exp [group(add)]
              | Exp "-" Exp [group(add)]
 
-syntax priorities mult > add
+syntax priority mult > add
 syntax left mult
 syntax right add
 ```
@@ -844,7 +888,7 @@ syntax right add
 Note that `syntax [left|right|non-assoc]` should not be used to group together
 productions with different priorities. For example, this code would be invalid:
 ```k
-syntax priorities mult > add
+syntax priority mult > add
 syntax left mult add
 ```
 
@@ -3014,6 +3058,7 @@ arguments. A legend describing how to interpret the index follows.
 | `multiplicity = "_"`   | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `non-assoc`            | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `one-path`             | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `overload(_)`          | prod  | all     | [`overload(_)` attribute](#overload-attribute)                                                                                                  |
 | `owise`                | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
 | `prec(_)`              | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
 | `prefer`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
@@ -3147,7 +3192,8 @@ sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework
 
 All of these hooks will also eventually need documentation.
 
-[^1]: More precisely, a lightly-customized debugger built using the LLDB Python
-  API.
 [^unique-symbol]: Except for in a very limited number of special cases from the
   K standard library.
+[^maude-overload]: The [Maude documentation](https://maude.lcc.uma.es/maude-manual/maude-manualch3.html#x15-310003.6)
+  has an example in a context that's somewhat similar to K; discussion of
+  _ad-hoc_ overloading is not relevant.
