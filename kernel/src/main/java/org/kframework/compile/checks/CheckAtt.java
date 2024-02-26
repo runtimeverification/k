@@ -72,6 +72,7 @@ public class CheckAtt {
     checkLatex(prod);
     checkSymbolKLabel(prod);
     checkKLabelOverload(prod);
+    checkNullarySymbol(prod);
   }
 
   private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
@@ -356,6 +357,18 @@ public class CheckAtt {
       errors.add(
           KEMException.compilerError(
               "The attributes `klabel(_)` and `overload(_)` may not occur together.", prod));
+    }
+  }
+
+  private void checkNullarySymbol(Production prod) {
+    if (prod.att().contains(Att.SYMBOL()) && !prod.att().contains(Att.KLABEL())) {
+      if (prod.att().get(Att.SYMBOL()).isEmpty()) {
+        kem.registerCompilerWarning(
+            ExceptionType.FUTURE_ERROR,
+            errors,
+            "Zero-argument `symbol` attribute used without a corresponding `klabel(_)`. Either remove `symbol`, or supply an argument.",
+            prod);
+      }
     }
   }
 }
