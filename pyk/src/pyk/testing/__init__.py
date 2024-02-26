@@ -1,4 +1,5 @@
 from ._kompiler import (
+    CTermSymbolicTest,
     KCFGExploreTest,
     KompiledTest,
     Kompiler,

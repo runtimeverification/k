@@ -1,27 +1,25 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING
 
-from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
+from ..cterm import CTerm
+from ..kast.inner import KApply, KRewrite, KVariable, Subst
 from ..kast.manip import (
     abstract_term_safely,
     bottom_up,
     extract_lhs,
     extract_rhs,
     flatten_label,
-    free_vars,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
 )
-from ..kore.rpc import AbortedResult, RewriteSuccess, SatResult, StopReason, UnknownResult, UnsatResult
+from ..kore.rpc import RewriteSuccess
 from ..prelude import k
-from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import notBool
 from ..prelude.kint import leInt, ltInt
-from ..prelude.ml import is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot, mlTop
+from ..prelude.ml import mlAnd, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot, mlTop
 from ..utils import shorten_hashes, single
 from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
 from .semantics import DefaultSemantics
@@ -30,9 +28,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
+    from ..cterm import CTermSymbolic
     from ..kast import KInner
     from ..kcfg.exploration import KCFGExploration
-    from ..kore.rpc import KoreClient, LogEntry
+    from ..kore.rpc import LogEntry
     from ..ktool.kprint import KPrint
     from .kcfg import KCFGExtendResult, NodeIdLike
     from .semantics import KCFGSemantics
@@ -41,159 +40,25 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-class CTermExecute(NamedTuple):
-    state: CTerm
-    next_states: tuple[CTerm, ...]
-    depth: int
-    vacuous: bool
-    logs: tuple[LogEntry, ...]
-
-
 class KCFGExplore:
     kprint: KPrint
-    _kore_client: KoreClient
+    cterm_symbolic: CTermSymbolic
 
     kcfg_semantics: KCFGSemantics
     id: str
-    _trace_rewrites: bool
 
     def __init__(
         self,
         kprint: KPrint,
-        kore_client: KoreClient,
+        cterm_symbolic: CTermSymbolic,
         *,
         kcfg_semantics: KCFGSemantics | None = None,
         id: str | None = None,
-        trace_rewrites: bool = False,
     ):
         self.kprint = kprint
-        self._kore_client = kore_client
+        self.cterm_symbolic = cterm_symbolic
         self.kcfg_semantics = kcfg_semantics if kcfg_semantics is not None else DefaultSemantics()
         self.id = id if id is not None else 'NO ID'
-        self._trace_rewrites = trace_rewrites
-
-    def cterm_execute(
-        self,
-        cterm: CTerm,
-        depth: int | None = None,
-        cut_point_rules: Iterable[str] | None = None,
-        terminal_rules: Iterable[str] | None = None,
-        module_name: str | None = None,
-    ) -> CTermExecute:
-        _LOGGER.debug(f'Executing: {cterm}')
-        kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
-        response = self._kore_client.execute(
-            kore,
-            max_depth=depth,
-            cut_point_rules=cut_point_rules,
-            terminal_rules=terminal_rules,
-            module_name=module_name,
-            log_successful_rewrites=True,
-            log_failed_rewrites=self._trace_rewrites,
-            log_successful_simplifications=self._trace_rewrites,
-            log_failed_simplifications=self._trace_rewrites,
-        )
-
-        if isinstance(response, AbortedResult):
-            unknown_predicate = response.unknown_predicate.text if response.unknown_predicate else None
-            raise ValueError(f'Backend responded with aborted state. Unknown predicate: {unknown_predicate}')
-
-        state = CTerm.from_kast(self.kprint.kore_to_kast(response.state.kore))
-        resp_next_states = response.next_states or ()
-        next_states = tuple(CTerm.from_kast(self.kprint.kore_to_kast(ns.kore)) for ns in resp_next_states)
-
-        assert all(not cterm.is_bottom for cterm in next_states)
-        assert len(next_states) != 1 or response.reason is StopReason.CUT_POINT_RULE
-
-        return CTermExecute(
-            state=state,
-            next_states=next_states,
-            depth=response.depth,
-            vacuous=response.reason is StopReason.VACUOUS,
-            logs=response.logs,
-        )
-
-    def cterm_simplify(self, cterm: CTerm) -> tuple[CTerm, tuple[LogEntry, ...]]:
-        _LOGGER.debug(f'Simplifying: {cterm}')
-        kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
-        kore_simplified, logs = self._kore_client.simplify(kore)
-        kast_simplified = self.kprint.kore_to_kast(kore_simplified)
-        return CTerm.from_kast(kast_simplified), logs
-
-    def kast_simplify(self, kast: KInner) -> tuple[KInner, tuple[LogEntry, ...]]:
-        _LOGGER.debug(f'Simplifying: {kast}')
-        kore = self.kprint.kast_to_kore(kast, GENERATED_TOP_CELL)
-        kore_simplified, logs = self._kore_client.simplify(kore)
-        kast_simplified = self.kprint.kore_to_kast(kore_simplified)
-        return kast_simplified, logs
-
-    def cterm_get_model(self, cterm: CTerm, module_name: str | None = None) -> Subst | None:
-        _LOGGER.info(f'Getting model: {cterm}')
-        kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
-        result = self._kore_client.get_model(kore, module_name=module_name)
-        if type(result) is UnknownResult:
-            _LOGGER.debug('Result is Unknown')
-            return None
-        elif type(result) is UnsatResult:
-            _LOGGER.debug('Result is UNSAT')
-            return None
-        elif type(result) is SatResult:
-            _LOGGER.debug('Result is SAT')
-            if not result.model:
-                return Subst({})
-            model_subst = self.kprint.kore_to_kast(result.model)
-            try:
-                return Subst.from_pred(model_subst)
-            except ValueError as err:
-                raise AssertionError(f'Received a non-substitution from get-model endpoint: {model_subst}') from err
-
-        else:
-            raise AssertionError('Received an invalid response from get-model endpoint')
-
-    def cterm_implies(
-        self,
-        antecedent: CTerm,
-        consequent: CTerm,
-        bind_universally: bool = False,
-    ) -> CSubst | None:
-        _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
-        _consequent = consequent.kast
-        fv_antecedent = free_vars(antecedent.kast)
-        unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
-        if len(unbound_consequent) > 0:
-            bind_text, bind_label = ('existentially', '#Exists')
-            if bind_universally:
-                bind_text, bind_label = ('universally', '#Forall')
-            _LOGGER.debug(f'Binding variables in consequent {bind_text}: {unbound_consequent}')
-            for uc in unbound_consequent:
-                _consequent = KApply(KLabel(bind_label, [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
-        antecedent_kore = self.kprint.kast_to_kore(antecedent.kast, GENERATED_TOP_CELL)
-        consequent_kore = self.kprint.kast_to_kore(_consequent, GENERATED_TOP_CELL)
-        result = self._kore_client.implies(antecedent_kore, consequent_kore)
-        if not result.satisfiable:
-            if result.substitution is not None:
-                _LOGGER.debug(f'Received a non-empty substitution for unsatisfiable implication: {result.substitution}')
-            if result.predicate is not None:
-                _LOGGER.debug(f'Received a non-empty predicate for unsatisfiable implication: {result.predicate}')
-            return None
-        if result.substitution is None:
-            raise ValueError('Received empty substutition for satisfiable implication.')
-        if result.predicate is None:
-            raise ValueError('Received empty predicate for satisfiable implication.')
-        ml_subst = self.kprint.kore_to_kast(result.substitution)
-        ml_pred = self.kprint.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
-        ml_preds = flatten_label('#And', ml_pred)
-        if is_top(ml_subst):
-            return CSubst(subst=Subst({}), constraints=ml_preds)
-        subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
-        _subst: dict[str, KInner] = {}
-        for subst_pred in flatten_label('#And', ml_subst):
-            m = subst_pattern.match(subst_pred)
-            if m is not None and type(m['###VAR']) is KVariable:
-                _subst[m['###VAR'].name] = m['###TERM']
-            else:
-                raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
-        return CSubst(subst=Subst(_subst), constraints=ml_preds)
 
     def implication_failure_reason(self, antecedent: CTerm, consequent: CTerm) -> tuple[bool, str]:
         def no_cell_rewrite_to_dots(term: KInner) -> KInner:
@@ -233,7 +98,9 @@ class KCFGExplore:
 
             return bottom_up(_replace_rewrites_with_implies, kast)
 
-        config_match = self.cterm_implies(CTerm.from_kast(antecedent.config), CTerm.from_kast(consequent.config))
+        config_match = self.cterm_symbolic.implies(
+            CTerm.from_kast(antecedent.config), CTerm.from_kast(consequent.config)
+        )
         if config_match is None:
             failing_cells = []
             curr_cell_match = Subst({})
@@ -273,19 +140,10 @@ class KCFGExplore:
                 return (False, f'Implication check failed, the following is the remaining implication:\n{fail_str}')
         return (True, '')
 
-    def cterm_assume_defined(self, cterm: CTerm) -> CTerm:
-        _LOGGER.debug(f'Computing definedness condition for: {cterm}')
-        kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.config])
-        kore = self.kprint.kast_to_kore(kast, GENERATED_TOP_CELL)
-        kore_simplified, _logs = self._kore_client.simplify(kore)
-        kast_simplified = self.kprint.kore_to_kast(kore_simplified)
-        _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
-        return cterm.add_constraint(kast_simplified)
-
     def simplify(self, cfg: KCFG, logs: dict[int, tuple[LogEntry, ...]]) -> None:
         for node in cfg.nodes:
             _LOGGER.info(f'Simplifying node {self.id}: {shorten_hashes(node.id)}')
-            new_term, next_node_logs = self.cterm_simplify(node.cterm)
+            new_term, next_node_logs = self.cterm_symbolic.simplify(node.cterm)
             if new_term != node.cterm:
                 cfg.replace_node(node.id, new_term)
                 if node.id in logs:
@@ -308,7 +166,7 @@ class KCFGExplore:
         if len(successors) != 0 and type(successors[0]) is KCFG.Split:
             raise ValueError(f'Cannot take step from split node {self.id}: {shorten_hashes(node.id)}')
         _LOGGER.info(f'Taking {depth} steps from node {self.id}: {shorten_hashes(node.id)}')
-        exec_res = self.cterm_execute(node.cterm, depth=depth, module_name=module_name)
+        exec_res = self.cterm_symbolic.execute(node.cterm, depth=depth, module_name=module_name)
         if exec_res.depth != depth:
             raise ValueError(f'Unable to take {depth} steps from node, got {exec_res.depth} steps {self.id}: {node.id}')
         if len(exec_res.next_states) > 0:
@@ -400,7 +258,7 @@ class KCFGExplore:
         branches = []
         for constraint in _branches:
             kast = mlAnd(list(_cterm.constraints) + [constraint])
-            kast, _ = self.kast_simplify(kast)
+            kast, _ = self.cterm_symbolic.kast_simplify(kast)
             if not CTerm._is_bottom(kast):
                 branches.append(constraint)
         if len(branches) > 1:
@@ -408,7 +266,7 @@ class KCFGExplore:
             log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
             return Branch(branches, heuristic=True)
 
-        cterm, next_cterms, depth, vacuous, next_node_logs = self.cterm_execute(
+        cterm, next_cterms, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
             _cterm,
             depth=execute_depth,
             cut_point_rules=cut_point_rules,
