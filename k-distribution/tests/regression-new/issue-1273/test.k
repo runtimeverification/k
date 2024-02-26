@@ -4,7 +4,7 @@ module TEST
     imports BOOL
 
     syntax FInt ::= "(" FInt ")"                   [bracket]
-                  | FInt ( value: Int , one: Int ) [klabel(FInt), symbol]
+                  | FInt ( value: Int , one: Int ) [symbol(FInt)]
  // ---------------------------------------------------------------------
 
     syntax FInt ::= "1FInt" "(" Int ")" [macro]

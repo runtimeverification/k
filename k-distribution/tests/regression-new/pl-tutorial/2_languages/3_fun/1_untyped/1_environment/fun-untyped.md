@@ -350,7 +350,7 @@ a constructor for function types:
                 | "(" Type ")"                             [bracket]
                 | TypeVar
                 | TypeName             [klabel(TypeName), avoid]
-                | Type TypeName   [klabel(Type-TypeName), symbol, macro]
+                | Type TypeName   [symbol(Type-TypeName), macro]
                 | "(" Types ")" TypeName                    [prefer]
   syntax Types ::= List{Type,","} [klabel(types)]
   syntax Types ::= TypeVars
