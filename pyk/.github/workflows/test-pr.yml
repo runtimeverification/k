@@ -71,34 +71,50 @@ jobs:
   profile:
     needs: code-quality-checks
     name: 'Profiling'
-    runs-on: [self-hosted, linux, normal-ephemeral]
+    runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
+    strategy:
+      matrix:
+        python-version: ['3.10']
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Install Python'
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
-      - name: 'Install K'
+      - name: 'Build Docker image'
         run: |
-          K_VERSION=$(cat deps/k_release)
-          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
-          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
-          sudo apt-get update
-          sudo apt-get -y install ./${DEB_PACKAGE_NAME}
-          kompile --version
-      - name: 'Run profiling'
+          COMMIT=$(git rev-parse --short=7 HEAD)
+          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
+
+          docker build .                                            \
+            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
+            --build-arg K_VERSION=${K_VERSION}                      \
+            --tag runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker run             \
+            --name pyk-ci        \
+            --rm                 \
+            --interactive        \
+            --tty                \
+            --detach             \
+            --workdir /home/user \
+            runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker cp . pyk-ci:/home/user
+          docker exec pyk-ci chown -R user:user /home/user
+      - name: 'Set Python version'
+        run: docker exec --user user pyk-ci poetry env use ${{ matrix.python-version }}
+      - name: 'Build and run integration tests'
         run: |
-          make profile
-          find /tmp/pytest-of-${USER}/pytest-current/ -type f -name '*.prof' | sort | xargs tail -n +1
+          docker exec --user user pyk-ci make profile
+          docker exec --user user pyk-ci bash -c "find /tmp/pytest-of-${USER}/pytest-current/ -type f -name '*.prof' | sort | xargs tail -n +1"
+      - name: 'Tear down Docker container'
+        if: always()
+        run: |
+          docker stop --time=0 pyk-ci
 
   integration-tests:
     needs: code-quality-checks
     name: 'Integration Tests'
-    runs-on: [self-hosted, linux, normal-ephemeral]
+    runs-on: [self-hosted, linux, normal]
     timeout-minutes: 30
     strategy:
       matrix:
@@ -106,22 +122,35 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Install Python'
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
-      - name: 'Install K'
+      - name: 'Build Docker image'
         run: |
-          K_VERSION=$(cat deps/k_release)
-          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
-          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
-          sudo apt-get update
-          sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
-          kompile --version
-      - name: 'Run integration tests'
-        run: make cov-integration COV_ARGS='-n8 --timeout 300'
+          COMMIT=$(git rev-parse --short=7 HEAD)
+          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
+
+          docker build .                                            \
+            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
+            --build-arg K_VERSION=${K_VERSION}                      \
+            --tag runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker run             \
+            --name pyk-ci        \
+            --rm                 \
+            --interactive        \
+            --tty                \
+            --detach             \
+            --workdir /home/user \
+            runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker cp . pyk-ci:/home/user
+          docker exec pyk-ci chown -R user:user /home/user
+      - name: 'Set Python version'
+        run: docker exec --user user pyk-ci poetry env use ${{ matrix.python-version }}
+      - name: 'Build and run integration tests'
+        run: docker exec --user user pyk-ci make cov-integration COV_ARGS='-n8 --timeout 300'
+      - name: 'Tear down Docker container'
+        if: always()
+        run: |
+          docker stop --time=0 pyk-ci
 
   build-on-nix:
     needs: code-quality-checks
