@@ -18,13 +18,13 @@ module JSON-SYNTAX
     imports BOOL-SYNTAX
     imports FLOAT-SYNTAX
 
-    syntax JSONs   ::= List{JSON,","}      [klabel(JSONs)      , symbol]
+    syntax JSONs   ::= List{JSON,","}      [symbol(JSONs)]
     syntax JSONKey ::= String
-    syntax JSON    ::= "null"              [klabel(JSONnull)   , symbol]
+    syntax JSON    ::= "null"              [symbol(JSONnull)]
                      | String | Int | Float | Bool
-                     | JSONKey ":" JSON    [klabel(JSONEntry)  , symbol]
-                     | "{" JSONs "}"       [klabel(JSONObject) , symbol]
-                     | "[" JSONs "]"       [klabel(JSONList)   , symbol]
+                     | JSONKey ":" JSON    [symbol(JSONEntry)]
+                     | "{" JSONs "}"       [symbol(JSONObject)]
+                     | "[" JSONs "]"       [symbol(JSONList)]
 endmodule
 ```
 
