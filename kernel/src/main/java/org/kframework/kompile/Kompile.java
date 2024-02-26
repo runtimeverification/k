@@ -545,7 +545,8 @@ public class Kompile {
       Option<Module> kModule,
       Set<Att.Key> excludedModuleTags) {
     checkAnywhereRules(modules);
-    checkOverloads(modules);
+    // checkOverloads(modules);
+    checkOverloads(mainModule);
 
     boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
     CheckRHSVariables checkRHSVariables =
