@@ -73,6 +73,8 @@
                 clang = prev."clang_${toString final.llvm-version}";
                 booster =
                   booster-backend.packages.${prev.system}.kore-rpc-booster;
+                rpc-client =
+                  booster-backend.packages.${prev.system}.kore-rpc-client;
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
