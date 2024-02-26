@@ -342,7 +342,17 @@ public class CheckAtt {
 
   private void checkSymbolKLabel(Production prod) {
     if (prod.att().contains(Att.SYMBOL()) && prod.att().contains(Att.KLABEL())) {
-      if (!prod.att().get(Att.SYMBOL()).isEmpty()) {
+      if (prod.att().get(Att.SYMBOL()).isEmpty()) {
+        var kLabelValue = prod.att().get(Att.KLABEL());
+        var message =
+            "The zero-argument form of `symbol` is deprecated. Replace `klabel("
+                + kLabelValue
+                + "), symbol` by `symbol("
+                + kLabelValue
+                + ")`.";
+
+        kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors, message, prod);
+      } else {
         errors.add(
             KEMException.compilerError(
                 "The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.",
