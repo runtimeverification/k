@@ -545,7 +545,6 @@ public class Kompile {
       Option<Module> kModule,
       Set<Att.Key> excludedModuleTags) {
     checkAnywhereRules(modules);
-    // checkOverloads(modules);
     checkOverloads(mainModule);
 
     boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
@@ -649,10 +648,6 @@ public class Kompile {
                     p);
               }
             });
-  }
-
-  private void checkOverloads(scala.collection.Set<Module> modules) {
-    stream(modules).forEach(this::checkOverloads);
   }
 
   private void checkAnywhereRules(scala.collection.Set<Module> modules) {
