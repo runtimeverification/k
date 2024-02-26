@@ -2380,7 +2380,8 @@ a library function. If the `errno` returned is not one of the below errnos
 known to K, `#unknownIOError` is returned along with the integer errno value.
 
 ```k
-  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(errno: Int) [symbol]
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] 
+                   | #unknownIOError(errno: Int) [klabel(#unknownIOError), symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
                    | "#EACCES" [klabel(#EACCES), symbol]
                    | "#EAGAIN" [klabel(#EAGAIN), symbol]
