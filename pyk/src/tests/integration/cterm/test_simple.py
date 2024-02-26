@@ -8,7 +8,7 @@ from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
 from pyk.prelude.ml import mlEqualsTrue, mlTop
-from pyk.testing import KCFGExploreTest
+from pyk.testing import CTermSymbolicTest, KPrintTest
 
 from ..utils import K_FILES
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final, Union
 
-    from pyk.kcfg import KCFGExplore
+    from pyk.cterm import CTermSymbolic
     from pyk.ktool.kprint import KPrint
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]
@@ -37,7 +37,7 @@ EXECUTE_TEST_DATA: Iterable[tuple[str, int, STATE, int, STATE, list[STATE]]] = (
 SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90\xa0\n\xa1\xf1a"', '.Map')),)
 
 
-class TestSimpleProof(KCFGExploreTest):
+class TestSimpleProof(CTermSymbolicTest, KPrintTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
 
     @staticmethod
@@ -66,7 +66,8 @@ class TestSimpleProof(KCFGExploreTest):
     )
     def test_execute(
         self,
-        kcfg_explore: KCFGExplore,
+        cterm_symbolic: CTermSymbolic,
+        kprint: KPrint,
         test_id: str,
         depth: int,
         pre: tuple[str, str],
@@ -78,14 +79,14 @@ class TestSimpleProof(KCFGExploreTest):
         expected_k, expected_state, *_ = expected_post
 
         # When
-        exec_res = kcfg_explore.cterm_execute(self.config(kcfg_explore.kprint, *pre), depth=depth)
-        actual_k = kcfg_explore.kprint.pretty_print(exec_res.state.cell('K_CELL'))
-        actual_state = kcfg_explore.kprint.pretty_print(exec_res.state.cell('STATE_CELL'))
+        exec_res = cterm_symbolic.execute(self.config(kprint, *pre), depth=depth)
+        actual_k = kprint.pretty_print(exec_res.state.cell('K_CELL'))
+        actual_state = kprint.pretty_print(exec_res.state.cell('STATE_CELL'))
         actual_depth = exec_res.depth
         actual_next_states = [
             (
-                kcfg_explore.kprint.pretty_print(s.cell('K_CELL')),
-                kcfg_explore.kprint.pretty_print(s.cell('STATE_CELL')),
+                kprint.pretty_print(s.cell('K_CELL')),
+                kprint.pretty_print(s.cell('STATE_CELL')),
             )
             for s in exec_res.next_states
         ]
@@ -103,7 +104,8 @@ class TestSimpleProof(KCFGExploreTest):
     )
     def test_simplify(
         self,
-        kcfg_explore: KCFGExplore,
+        cterm_symbolic: CTermSymbolic,
+        kprint: KPrint,
         test_id: str,
         pre: tuple[str, str],
         expected_post: tuple[str, str],
@@ -113,9 +115,9 @@ class TestSimpleProof(KCFGExploreTest):
         expected_k, expected_state, *_ = expected_post
 
         # When
-        actual_post, _logs = kcfg_explore.cterm_simplify(self.config(kcfg_explore.kprint, *pre))
-        actual_k = kcfg_explore.kprint.pretty_print(get_cell(actual_post.kast, 'K_CELL'))
-        actual_state = kcfg_explore.kprint.pretty_print(get_cell(actual_post.kast, 'STATE_CELL'))
+        actual_post, _logs = cterm_symbolic.simplify(self.config(kprint, *pre))
+        actual_k = kprint.pretty_print(get_cell(actual_post.kast, 'K_CELL'))
+        actual_state = kprint.pretty_print(get_cell(actual_post.kast, 'STATE_CELL'))
 
         # Then
         assert actual_k == expected_k

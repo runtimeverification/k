@@ -104,7 +104,9 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         expected_k, _, _ = expected_post
 
         # When
-        exec_res = kcfg_explore.cterm_execute(self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth)
+        exec_res = kcfg_explore.cterm_symbolic.execute(
+            self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth
+        )
         actual_k = kcfg_explore.kprint.pretty_print(exec_res.state.cell('K_CELL'))
         actual_depth = exec_res.depth
 
@@ -134,7 +136,7 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={})
         init = proof.kcfg.node(proof.init)
-        new_init_term = kcfg_explore.cterm_assume_defined(init.cterm)
+        new_init_term = kcfg_explore.cterm_symbolic.assume_defined(init.cterm)
         proof.kcfg.replace_node(init.id, new_init_term)
         prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=max_depth)
         prover.advance_proof(max_iterations=max_iterations)
