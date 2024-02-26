@@ -55,7 +55,7 @@ jobs:
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
