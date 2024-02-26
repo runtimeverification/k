@@ -86,7 +86,7 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
                 proof_dir=proof_dir,
             )
 
-            new_init_cterm = kcfg_explore.cterm_assume_defined(proof.kcfg.node(proof.init).cterm)
+            new_init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
             proof.kcfg.replace_node(proof.init, new_init_cterm)
             kcfg_explore.simplify(proof.kcfg, {})
 

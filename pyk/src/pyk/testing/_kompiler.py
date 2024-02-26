@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime
 from ..kllvm.importer import import_runtime
+from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
 from ..ktool import TypeInferenceMode
@@ -69,6 +71,10 @@ class KompiledTest:
     @pytest.fixture(scope='class')
     def definition(self, definition_dir: Path) -> KDefinition:
         return read_kast_definition(definition_dir / 'compiled.json')
+
+    @pytest.fixture(scope='class')
+    def kompiled_kore(self, definition_dir: Path) -> KompiledKore:
+        return KompiledKore.load(definition_dir)
 
     @pytest.fixture(scope='class')
     def definition_info(self, definition_dir: Path) -> DefinitionInfo:
@@ -226,7 +232,19 @@ class KoreClientTest(KompiledTest):
             yield client
 
 
-class KCFGExploreTest(KoreClientTest, KPrintTest):
+class CTermSymbolicTest(KoreClientTest):
+    @pytest.fixture
+    def cterm_symbolic(
+        self,
+        kore_client: KoreClient,
+        definition: KDefinition,
+        kompiled_kore: KompiledKore,
+        bug_report: BugReport | None,
+    ) -> CTermSymbolic:
+        return CTermSymbolic(kore_client, definition, kompiled_kore)
+
+
+class KCFGExploreTest(CTermSymbolicTest, KPrintTest):
     @abstractmethod
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
         ...
@@ -234,12 +252,12 @@ class KCFGExploreTest(KoreClientTest, KPrintTest):
     @pytest.fixture
     def kcfg_explore(
         self,
-        kore_client: KoreClient,
+        cterm_symbolic: CTermSymbolic,
         kprint: KProve,
         bug_report: BugReport | None,
     ) -> Iterator[KCFGExplore]:
         semantics = self.semantics(kprint.definition)
-        yield KCFGExplore(kprint, kore_client, kcfg_semantics=semantics)
+        yield KCFGExplore(kprint, cterm_symbolic, kcfg_semantics=semantics)
 
 
 class KoreServerPoolTest(KompiledTest, ABC):

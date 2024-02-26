@@ -578,7 +578,7 @@ class APRProver(Prover):
             _kore_module = kflatmodule_to_kore(
                 self.kcfg_explore.kprint.definition, self.kcfg_explore.kprint.kompiled_kore, _module
             )
-            self.kcfg_explore._kore_client.add_module(_kore_module, name_as_id=True)
+            self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
 
         super().__init__(kcfg_explore)
         self.proof = proof
@@ -648,7 +648,7 @@ class APRProver(Prover):
                 f'Skipping full subsumption check because of fast may subsume check {self.proof.id}: {node.id}'
             )
             return False
-        csubst = self.kcfg_explore.cterm_implies(node.cterm, self.proof.kcfg.node(self.proof.target).cterm)
+        csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, self.proof.kcfg.node(self.proof.target).cterm)
         if csubst is not None:
             self.proof.kcfg.create_cover(node.id, self.proof.target, csubst=csubst)
             _LOGGER.info(f'Subsumed into target node {self.proof.id}: {shorten_hashes((node.id, self.proof.target))}')
@@ -804,14 +804,14 @@ class APRFailureInfo:
         failure_reasons = {}
         models = {}
         for node in proof.failing:
-            node_cterm, _ = kcfg_explore.cterm_simplify(node.cterm)
-            target_cterm, _ = kcfg_explore.cterm_simplify(target.cterm)
+            node_cterm, _ = kcfg_explore.cterm_symbolic.simplify(node.cterm)
+            target_cterm, _ = kcfg_explore.cterm_symbolic.simplify(target.cterm)
             _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
             path_condition = kcfg_explore.kprint.pretty_print(proof.path_constraints(node.id))
             failure_reasons[node.id] = reason
             path_conditions[node.id] = path_condition
             if counterexample_info:
-                model_subst = kcfg_explore.cterm_get_model(node.cterm)
+                model_subst = kcfg_explore.cterm_symbolic.get_model(node.cterm)
                 if type(model_subst) is Subst:
                     model: list[tuple[str, str]] = []
                     for var, term in model_subst.to_dict().items():

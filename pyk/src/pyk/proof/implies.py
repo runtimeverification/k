@@ -389,8 +389,8 @@ class ImpliesProver(Prover):
 
         # to prove the equality, we check the implication of the form `constraints #Implies LHS #Equals RHS`, i.e.
         # "LHS equals RHS under these constraints"
-        antecedent_simplified_kast, _ = self.kcfg_explore.kast_simplify(self.proof.antecedent)
-        consequent_simplified_kast, _ = self.kcfg_explore.kast_simplify(self.proof.consequent)
+        antecedent_simplified_kast, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.antecedent)
+        consequent_simplified_kast, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.consequent)
         self.proof.simplified_antecedent = antecedent_simplified_kast
         self.proof.simplified_consequent = consequent_simplified_kast
         _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.kprint.pretty_print(antecedent_simplified_kast)}')
@@ -407,7 +407,7 @@ class ImpliesProver(Prover):
         else:
             # TODO: we should not be forced to include the dummy configuration in the antecedent and consequent
             dummy_config = self.kcfg_explore.kprint.definition.empty_config(sort=GENERATED_TOP_CELL)
-            result = self.kcfg_explore.cterm_implies(
+            result = self.kcfg_explore.cterm_symbolic.implies(
                 antecedent=CTerm(config=dummy_config, constraints=[self.proof.simplified_antecedent]),
                 consequent=CTerm(config=dummy_config, constraints=[self.proof.simplified_consequent]),
                 bind_universally=self.proof.bind_universally,
