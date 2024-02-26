@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: 'Check out code, set up Git'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
@@ -28,7 +28,7 @@ jobs:
 
       - name: 'Clone booster repo'
         run: echo "BOOSTER_VERSION=$(cat deps/hs-backend-booster_release)" >> ${GITHUB_ENV}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           repository: runtimeverification/hs-backend-booster
