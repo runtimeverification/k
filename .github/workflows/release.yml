@@ -25,7 +25,7 @@ jobs:
     environment: production
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: 'Create source tarball'
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 'Install Nix'
         if: ${{ !startsWith(matrix.os, 'self') }}
@@ -96,7 +96,7 @@ jobs:
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
@@ -150,13 +150,13 @@ jobs:
     needs: [set-release-id, source-tarball]
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           path: kframework
 
       - name: Check out matching homebrew repo branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         id: checkout
         with:
           repository: runtimeverification/homebrew-k
@@ -165,7 +165,7 @@ jobs:
         continue-on-error: true
 
       - name: Check out homebrew repo master branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
           repository: runtimeverification/homebrew-k
@@ -244,7 +244,7 @@ jobs:
     needs: [macos-build, set-release-id]
     steps:
       - name: 'Check out matching homebrew repo branch'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         id: checkout
         with:
           repository: runtimeverification/homebrew-k
@@ -254,7 +254,7 @@ jobs:
         continue-on-error: true
 
       - name: 'Check out homebrew repo master branch'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
           repository: runtimeverification/homebrew-k
@@ -309,7 +309,7 @@ jobs:
           kompile test.k --backend haskell
 
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: k-homebrew-checkout
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -352,7 +352,7 @@ jobs:
     needs: [cachix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, set-release-id]
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -430,14 +430,14 @@ jobs:
           sudo wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb
           sudo dpkg -i /tmp/pandoc.deb
       - name: 'Checkout code and set up web build'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           fetch-depth: 0
       - name: 'Checkout PL Tutorial code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: runtimeverification/pl-tutorial
           path: gh-pages/k-distribution/pl-tutorial
