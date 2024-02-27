@@ -17,6 +17,7 @@ from ..kast import Atts, kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
+from ..kore.rpc import KoreExecLogFormat
 from ..prelude.ml import is_top, mlAnd
 from ..utils import gen_file_timestamp, run_process, unique
 from . import TypeInferenceMode
@@ -43,11 +44,6 @@ class KProveOutput(Enum):
     LATEX = 'latex'
     KORE = 'kore'
     NONE = 'none'
-
-
-class KoreExecLogFormat(Enum):
-    STANDARD = 'standard'
-    ONELINE = 'oneline'
 
 
 def _kprove(
