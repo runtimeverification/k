@@ -88,14 +88,14 @@ jobs:
           test-package: package/debian/test-package
       - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: kore-exec.tar.gz
           path: |
             **/kore-exec.tar.gz
       - name: 'On Success, Upload the package built to the Summary Page'
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kframework.deb
           path: kframework.deb
@@ -109,7 +109,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: kframework.deb
       - name: 'Set up Docker Test Image'
