@@ -72,7 +72,7 @@ jobs:
 
       - name: 'Install Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v12
+        uses: cachix/cachix-action@v14
         with:
           name: k-framework-binary
 
@@ -136,7 +136,7 @@ jobs:
           docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
       - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: kore-exec.tar.gz
           path: |
@@ -217,7 +217,7 @@ jobs:
           echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
 
       - name: Upload bottle
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: homebrew
           path: homebrew-k
@@ -262,7 +262,7 @@ jobs:
           path: homebrew-k
 
       - name: 'Download bottle'
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: homebrew
           path: homebrew-k-old
