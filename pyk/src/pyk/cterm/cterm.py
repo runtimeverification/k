@@ -15,6 +15,7 @@ from ..kast.manip import (
     free_vars,
     ml_pred_to_bool,
     push_down_rewrites,
+    remove_useless_constraints,
     simplify_bool,
     split_config_and_constraints,
     split_config_from,
@@ -257,6 +258,16 @@ class CTerm:
             )
         return (new_cterm, self_csubst, other_csubst)
 
+    def remove_useless_constraints(self, keep_vars: Iterable[str] = ()) -> CTerm:
+        """Return a new `CTerm` with constraints over unbound variables removed.
+
+        :param keep_vars: List of variables to keep constraints for even if unbound in the `CTerm`.
+        :return: A `CTerm` with the constraints over unbound variables removed.
+        """
+        initial_vars = free_vars(self.config) + list(keep_vars)
+        new_constraints = remove_useless_constraints(self.constraints, initial_vars)
+        return CTerm(self.config, new_constraints)
+
 
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
     """Return a generalized state over the two input states.
@@ -336,28 +347,6 @@ class CSubst:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
         _kast = self.subst(cterm.kast)
         return CTerm(_kast, [self.constraint])
-
-
-def remove_useless_constraints(cterm: CTerm, keep_vars: Iterable[str] = ()) -> CTerm:
-    """Given a `CTerm`, return one with constraints over unbound variables removed.
-
-    :param cterm: Original `CTerm` potentially with constraints over unbound variables.
-    :param keep_vars: List of variables to keep constraints for even if unbound in the `cterm`.
-    :return: A `CTerm` with the constraints over unbound variables removed.
-    """
-    used_vars = free_vars(cterm.config) + list(keep_vars)
-    prev_len_unsed_vars = 0
-    new_constraints = []
-    while len(used_vars) > prev_len_unsed_vars:
-        prev_len_unsed_vars = len(used_vars)
-        for c in cterm.constraints:
-            if c not in new_constraints:
-                new_vars = free_vars(c)
-                if any(v in used_vars for v in new_vars):
-                    new_constraints.append(c)
-                    used_vars.extend(new_vars)
-        used_vars = list(set(used_vars))
-    return CTerm(cterm.config, new_constraints)
 
 
 def build_claim(

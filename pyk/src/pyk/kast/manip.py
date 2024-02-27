@@ -716,3 +716,25 @@ def rename_generated_vars(term: KInner) -> KInner:
         return k.map_inner(_rename_vars)
 
     return _rename_vars(term)
+
+
+def remove_useless_constraints(constraints: Iterable[KInner], initial_vars: Iterable[str]) -> list[KInner]:
+    """Given a list of constraints and a list of variables, return an updated list with only constraints that depend on these variables (directly or indirectly).
+
+    :param constraints: Original list of constraints to remove from.
+    :param initial_vars: Initial list of variables to keep constraints for.
+    :return: A list of constraints with only those constraints that contain the initial variables or variables that depend on those through other constraints in the list.
+    """
+    used_vars = list(initial_vars)
+    prev_len_used_vars = 0
+    new_constraints = []
+    while len(used_vars) > prev_len_used_vars:
+        prev_len_used_vars = len(used_vars)
+        for c in constraints:
+            if c not in new_constraints:
+                new_vars = free_vars(c)
+                if any(v in used_vars for v in new_vars):
+                    new_constraints.append(c)
+                    used_vars.extend(new_vars)
+        used_vars = list(set(used_vars))
+    return new_constraints
