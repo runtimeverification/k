@@ -394,6 +394,29 @@ def test_vacuous() -> None:
     assert cfg.vacuous, node(3)
 
 
+def test_replace_node() -> None:
+    # Given
+    d = {
+        'nodes': node_dicts(4),
+        'edges': edge_dicts((1, 2), (2, 3)),
+    }
+
+    cfg = KCFG.from_dict(d)
+    cfg.replace_node(2, term(5))
+
+    node = cfg.node(2)
+    assert node is not None
+    assert node.cterm == term(5)
+
+    first_edge = cfg.edge(1, 2)
+    assert first_edge is not None
+    assert first_edge.target.cterm == term(5)
+
+    second_edge = cfg.edge(2, 3)
+    assert second_edge is not None
+    assert second_edge.source.cterm == term(5)
+
+
 def test_aliases() -> None:
     # Given
     d = {

@@ -66,6 +66,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def target_ids(self) -> list[int]:
             return sorted(target.id for target in self.targets)
 
+        @abstractmethod
+        def replace_source(self, node: KCFG.Node) -> KCFG.Successor:
+            ...
+
+        @abstractmethod
+        def replace_target(self, node: KCFG.Node) -> KCFG.Successor:
+            ...
+
     class EdgeLike(Successor):
         source: KCFG.Node
         target: KCFG.Node
@@ -109,6 +117,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 rule, _ = build_rule(sentence_id, init_cterm, target_cterm, priority=priority)
             return rule
 
+        def replace_source(self, node: KCFG.Node) -> KCFG.Edge:
+            assert node.id == self.source.id
+            return KCFG.Edge(node, self.target, self.depth, self.rules)
+
+        def replace_target(self, node: KCFG.Node) -> KCFG.Edge:
+            assert node.id == self.target.id
+            return KCFG.Edge(self.source, node, self.depth, self.rules)
+
     @final
     @dataclass(frozen=True)
     class Cover(EdgeLike):
@@ -122,6 +138,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 'target': self.target.id,
                 'csubst': self.csubst.to_dict(),
             }
+
+        def replace_source(self, node: KCFG.Node) -> KCFG.Cover:
+            assert node.id == self.source.id
+            return KCFG.Cover(node, self.target, self.csubst)
+
+        def replace_target(self, node: KCFG.Node) -> KCFG.Cover:
+            assert node.id == self.target.id
+            return KCFG.Cover(self.source, node, self.csubst)
 
     @dataclass(frozen=True)
     class MultiEdge(Successor):
@@ -173,6 +197,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def covers(self) -> tuple[KCFG.Cover, ...]:
             return tuple(KCFG.Cover(target, self.source, csubst) for target, csubst in self._targets)
 
+        def replace_source(self, node: KCFG.Node) -> KCFG.Split:
+            assert node.id == self.source.id
+            return KCFG.Split(node, self._targets)
+
+        def replace_target(self, node: KCFG.Node) -> KCFG.Split:
+            assert node.id in self.target_ids
+            new_targets = [
+                (node, csubst) if node.id == target_node.id else (target_node, csubst)
+                for target_node, csubst in self._targets
+            ]
+            return KCFG.Split(self.source, tuple(new_targets))
+
     @final
     @dataclass(frozen=True)
     class NDBranch(MultiEdge):
@@ -201,6 +237,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         @property
         def edges(self) -> tuple[KCFG.Edge, ...]:
             return tuple(KCFG.Edge(self.source, target, 1, ()) for target in self.targets)
+
+        def replace_source(self, node: KCFG.Node) -> KCFG.NDBranch:
+            assert node.id == self.source.id
+            return KCFG.NDBranch(node, self._targets, self.rules)
+
+        def replace_target(self, node: KCFG.Node) -> KCFG.NDBranch:
+            assert node.id in self.target_ids
+            new_targets = [node if node.id == target_node.id else target_node for target_node in self._targets]
+            return KCFG.NDBranch(self.source, tuple(new_targets), self.rules)
 
     _node_id: int
     _nodes: MutableMapping[int, Node]
@@ -549,6 +594,28 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         node = KCFG.Node(node_id, cterm)
         self._nodes[node_id] = node
         self._created_nodes.add(node.id)
+
+        for succ in self.successors(node_id):
+            new_succ = succ.replace_source(node)
+            if type(new_succ) is KCFG.Edge:
+                self._edges[new_succ.source.id][new_succ.target.id] = new_succ
+            if type(new_succ) is KCFG.Cover:
+                self._covers[new_succ.source.id][new_succ.target.id] = new_succ
+            if type(new_succ) is KCFG.Split:
+                self._splits[new_succ.source.id] = new_succ
+            if type(new_succ) is KCFG.NDBranch:
+                self._ndbranches[new_succ.source.id] = new_succ
+
+        for pred in self.predecessors(node_id):
+            new_pred = pred.replace_target(node)
+            if type(new_pred) is KCFG.Edge:
+                self._edges[new_pred.source.id][new_pred.target.id] = new_pred
+            if type(new_pred) is KCFG.Cover:
+                self._covers[new_pred.source.id][new_pred.target.id] = new_pred
+            if type(new_pred) is KCFG.Split:
+                self._splits[new_pred.source.id] = new_pred
+            if type(new_pred) is KCFG.NDBranch:
+                self._ndbranches[new_pred.source.id] = new_pred
 
     def successors(
         self,
