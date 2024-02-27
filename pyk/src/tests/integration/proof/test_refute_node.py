@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KApply, KSequence, KVariable
+from pyk.kast.manip import free_vars
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
@@ -248,3 +249,34 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         # Then
         assert result_predecessor is None  # fails because the node has successors
         assert result_successor is not None  # succeeds because the node has no successors
+
+    def test_apr_proof_refute_node_no_useless_constraints(
+        self,
+        kprove: KProve,
+        proof_dir: Path,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        spec_file = K_FILES / 'refute-node-spec.k'
+        spec_module = 'REFUTE-NODE-SPEC'
+        claim_id = 'triple-split-int-fail'
+
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
+
+        # When
+        prover.advance_proof()
+        failing_node = single(prover.proof.failing)
+        all_free_vars = {v for c in failing_node.cterm.constraints for v in free_vars(c)}
+        assert all_free_vars == {'L', 'M', 'N'}
+
+        refutation = prover.proof.refute_node(failing_node)
+        assert refutation is not None
+
+        # Then
+
+        # last_constraint = (N <=Int 0)
+        # pre_constraints = [(L +Int N <=Int 0)]
+        # (M <=Int 0) has been removed from pre_constraints because it is independent from last_constraint
+        assert len(refutation.pre_constraints) == 1
+        refutation_free_vars = set(free_vars(refutation.pre_constraints[0]))
+        assert refutation_free_vars == {'L', 'N'}
