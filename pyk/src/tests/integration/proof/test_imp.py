@@ -130,7 +130,8 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
         ('int $n ; $n = 0 ;', '.Map'),
         ('int $n ; $n = 1 ;', '.Map'),
         (
-            'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n'
+            'Matching failed.\n'
+            'The following cells failed matching individually (antecedent #Implies consequent):\n'
             'K_CELL: int $n , .Ids ; $n = 0 ; #Implies int $n , .Ids ; $n = 1 ;'
         ),
     ),
@@ -139,7 +140,8 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
         ('int $n ; $n = X:Int ;', '.Map'),
         ('int $n ; $n = 1 ;', '.Map'),
         (
-            'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n'
+            'Matching failed.\n'
+            'The following cells failed matching individually (antecedent #Implies consequent):\n'
             'K_CELL: int $n , .Ids ; $n = X:Int ; #Implies int $n , .Ids ; $n = 1 ;'
         ),
     ),
@@ -151,7 +153,7 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
             mlAnd(
                 [
                     mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('2', 'Int')])),
                 ]
             ),
         ),
@@ -161,14 +163,15 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
             mlAnd(
                 [
                     mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('2', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         ),
         (
-            'Implication check failed, the following is the remaining implication:\n'
+            'Matching failed.\n'
+            'The remaining implication is:\n'
             '{ true #Equals A:Int <Int 1 }\n'
-            '#And { true #Equals B:Int <Int 1 } #Implies { true #Equals B:Int <Int 2 }'
+            '#And { true #Equals B:Int <Int 2 } #Implies { true #Equals B:Int <Int 1 }'
         ),
     ),
     (
@@ -179,7 +182,7 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
             mlAnd(
                 [
                     mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('2', 'Int')])),
                 ]
             ),
         ),
@@ -189,14 +192,15 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
             mlAnd(
                 [
                     mlEqualsTrue(KApply('_<Int_', [KVariable('A', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('2', 'Int')])),
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('B', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         ),
         (
-            'Implication check failed, the following is the remaining implication:\n'
+            'Matching failed.\n'
+            'The remaining implication is:\n'
             '{ true #Equals A:Int <Int 1 }\n'
-            '#And { true #Equals B:Int <Int 1 } #Implies { true #Equals B:Int <Int 2 }'
+            '#And { true #Equals B:Int <Int 2 } #Implies { true #Equals B:Int <Int 1 }'
         ),
     ),
     (
@@ -204,7 +208,8 @@ IMPLICATION_FAILURE_TEST_DATA: Final = (
         ('int $n ; $n = 5 ;', '3 |-> 6'),
         ('int $n ; $n = X:Int ;', '3 |-> X:Int'),
         (
-            'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\n'
+            'Matching failed.\n'
+            'The following cells failed matching individually (antecedent #Implies consequent):\n'
             'STATE_CELL: 3 |-> 6 #Implies X:Int'
         ),
     ),
@@ -845,7 +850,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         actual = kcfg_explore.cterm_symbolic.implies(antecedent_term, consequent_term)
 
         # Then
-        assert actual == expected
+        assert actual.csubst == expected
 
     def test_assume_defined(
         self,
@@ -1289,7 +1294,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         antecedent_term = self.config(kcfg_explore.kprint, *antecedent)
         consequent_term = self.config(kcfg_explore.kprint, *consequent)
 
-        failed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
+        passed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
 
-        assert not failed
+        assert not passed
         assert actual == expected
