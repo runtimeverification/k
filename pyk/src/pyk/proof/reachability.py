@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
 
+from ..cterm.cterm import remove_useless_constraints
 from ..kast.inner import KInner, Subst
-from ..kast.manip import flatten_label, ml_pred_to_bool
+from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG
 from ..kcfg.exploration import KCFGExploration
@@ -529,8 +530,12 @@ class APRProof(Proof, KCFGExploration):
             )
             return None
 
-        pre_split_constraints = [ml_pred_to_bool(c) for c in closest_branch.source.cterm.constraints]
         last_constraint = ml_pred_to_bool(csubst.constraints[0])
+        relevant_vars = free_vars(last_constraint)
+        pre_split_constraints = [
+            ml_pred_to_bool(c)
+            for c in remove_useless_constraints(closest_branch.source.cterm.constraints, relevant_vars)
+        ]
 
         refutation_id = self.get_refutation_id(node.id)
         _LOGGER.info(f'Adding refutation proof {refutation_id} as subproof of {self.id}')
