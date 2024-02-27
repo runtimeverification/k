@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from functools import cache
 from itertools import chain
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, final, overload
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, final, overload
 
 from ..utils import FrozenDict
 from .kast import KAst
@@ -38,17 +38,39 @@ class AttType(Generic[T], ABC):
         ...
 
 
-class NullaryType(AttType[Literal['']]):
-    def from_dict(self, obj: Any) -> Literal['']:
+class NoneType(AttType[None]):
+    def from_dict(self, obj: Any) -> None:
         assert obj == ''
-        return obj
-
-    def to_dict(self, value: Literal['']) -> Any:
-        assert value == ''
-        return value
-
-    def pretty(self, value: Literal['']) -> None:
         return None
+
+    def to_dict(self, value: None) -> Any:
+        assert value is None
+        return ''
+
+    def pretty(self, value: None) -> None:
+        return None
+
+
+class OptionalType(Generic[T], AttType[T | None]):
+    _value_type: AttType[T]
+
+    def __init__(self, value_type: AttType[T]):
+        self._value_type = value_type
+
+    def from_dict(self, obj: Any) -> T | None:
+        if obj == '':
+            return None
+        return self._value_type.from_dict(obj)
+
+    def to_dict(self, value: T | None) -> Any:
+        if value is None:
+            return ''
+        return self._value_type.to_dict(value)
+
+    def pretty(self, value: T | None) -> str | None:
+        if value is None:
+            return None
+        return self._value_type.pretty(value)
 
 
 class AnyType(AttType[Any]):
@@ -74,6 +96,18 @@ class AnyType(AttType[Any]):
         if isinstance(value, FrozenDict):
             return {k: AnyType._unfreeze(v) for (k, v) in value.items()}
         return value
+
+
+class StrType(AttType[str]):
+    def from_dict(self, obj: Any) -> str:
+        assert isinstance(obj, str)
+        return obj
+
+    def to_dict(self, value: str) -> Any:
+        return value
+
+    def pretty(self, value: str) -> str:
+        return f'"{value}"'
 
 
 class LocationType(AttType[tuple[int, int, int, int]]):
@@ -105,8 +139,9 @@ class PathType(AttType[Path]):
         return f'"{value}"'
 
 
-_NULLARY: Final = NullaryType()
+_NONE: Final = NoneType()
 _ANY: Final = AnyType()
+_STR: Final = StrType()
 _LOCATION: Final = LocationType()
 _PATH: Final = PathType()
 
@@ -129,49 +164,49 @@ class AttEntry(Generic[T]):
 
 
 class Atts:
-    ALIAS: Final = AttKey('alias', type=_NULLARY)
-    ALIAS_REC: Final = AttKey('alias-rec', type=_NULLARY)
-    ANYWHERE: Final = AttKey('anywhere', type=_NULLARY)
-    ASSOC: Final = AttKey('assoc', type=_NULLARY)
-    CIRCULARITY: Final = AttKey('circularity', type=_NULLARY)
-    CELL: Final = AttKey('cell', type=_NULLARY)
-    CELL_COLLECTION: Final = AttKey('cellCollection', type=_NULLARY)
+    ALIAS: Final = AttKey('alias', type=_NONE)
+    ALIAS_REC: Final = AttKey('alias-rec', type=_NONE)
+    ANYWHERE: Final = AttKey('anywhere', type=_NONE)
+    ASSOC: Final = AttKey('assoc', type=_NONE)
+    CIRCULARITY: Final = AttKey('circularity', type=_NONE)
+    CELL: Final = AttKey('cell', type=_NONE)
+    CELL_COLLECTION: Final = AttKey('cellCollection', type=_NONE)
     COLORS: Final = AttKey('colors', type=_ANY)
-    COMM: Final = AttKey('comm', type=_NULLARY)
+    COMM: Final = AttKey('comm', type=_NONE)
     CONCAT: Final = AttKey('concat', type=_ANY)
-    CONSTRUCTOR: Final = AttKey('constructor', type=_NULLARY)
+    CONSTRUCTOR: Final = AttKey('constructor', type=_NONE)
     DEPENDS: Final = AttKey('depends', type=_ANY)
     DIGEST: Final = AttKey('digest', type=_ANY)
     ELEMENT: Final = AttKey('element', type=_ANY)
     FORMAT: Final = AttKey('format', type=_ANY)
-    FUNCTION: Final = AttKey('function', type=_NULLARY)
-    FUNCTIONAL: Final = AttKey('functional', type=_NULLARY)
-    HAS_DOMAIN_VALUES: Final = AttKey('hasDomainValues', type=_NULLARY)
+    FUNCTION: Final = AttKey('function', type=_NONE)
+    FUNCTIONAL: Final = AttKey('functional', type=_NONE)
+    HAS_DOMAIN_VALUES: Final = AttKey('hasDomainValues', type=_NONE)
     HOOK: Final = AttKey('hook', type=_ANY)
-    IDEM: Final = AttKey('idem', type=_NULLARY)
-    INITIALIZER: Final = AttKey('initializer', type=_NULLARY)
-    INJECTIVE: Final = AttKey('injective', type=_NULLARY)
+    IDEM: Final = AttKey('idem', type=_NONE)
+    INITIALIZER: Final = AttKey('initializer', type=_NONE)
+    INJECTIVE: Final = AttKey('injective', type=_NONE)
     KLABEL: Final = AttKey('klabel', type=_ANY)
     LABEL: Final = AttKey('label', type=_ANY)
-    LEFT: Final = AttKey('left', type=_NULLARY)
+    LEFT: Final = AttKey('left', type=_NONE)
     LOCATION: Final = AttKey('org.kframework.attributes.Location', type=_LOCATION)
-    MACRO: Final = AttKey('macro', type=_NULLARY)
-    MACRO_REC: Final = AttKey('macro-rec', type=_NULLARY)
-    OWISE: Final = AttKey('owise', type=_NULLARY)
+    MACRO: Final = AttKey('macro', type=_NONE)
+    MACRO_REC: Final = AttKey('macro-rec', type=_NONE)
+    OWISE: Final = AttKey('owise', type=_NONE)
     PRIORITY: Final = AttKey('priority', type=_ANY)
     PRODUCTION: Final = AttKey('org.kframework.definition.Production', type=_ANY)
-    PROJECTION: Final = AttKey('projection', type=_NULLARY)
-    RIGHT: Final = AttKey('right', type=_NULLARY)
+    PROJECTION: Final = AttKey('projection', type=_NONE)
+    RIGHT: Final = AttKey('right', type=_NONE)
     SIMPLIFICATION: Final = AttKey('simplification', type=_ANY)
-    SYMBOL: Final = AttKey('symbol', type=_ANY)
+    SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
     SORT: Final = AttKey('org.kframework.kore.Sort', type=_ANY)
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
-    TOKEN: Final = AttKey('token', type=_NULLARY)
-    TOTAL: Final = AttKey('total', type=_NULLARY)
-    TRUSTED: Final = AttKey('trusted', type=_NULLARY)
+    TOKEN: Final = AttKey('token', type=_NONE)
+    TOTAL: Final = AttKey('total', type=_NONE)
+    TRUSTED: Final = AttKey('trusted', type=_NONE)
     UNIT: Final = AttKey('unit', type=_ANY)
     UNIQUE_ID: Final = AttKey('UNIQUE_ID', type=_ANY)
-    UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NULLARY)
+    UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NONE)
     WRAP_ELEMENT: Final = AttKey('wrapElement', type=_ANY)
 
     @classmethod
