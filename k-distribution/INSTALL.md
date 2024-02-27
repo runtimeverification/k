@@ -17,7 +17,7 @@ bash <(curl https://kframework.org/install)
 kup install k
 ```
 
-And list available versions with:
+List available versions with:
 
 ```shell
 kup list k
