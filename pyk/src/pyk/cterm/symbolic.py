@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, NamedTuple
 
 from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KVariable, Subst
+from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
 from ..kast.manip import flatten_label, free_vars
 from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.rpc import AbortedResult, SatResult, StopReason, UnknownResult, UnsatResult
@@ -30,6 +30,13 @@ class CTermExecute(NamedTuple):
     next_states: tuple[CTerm, ...]
     depth: int
     vacuous: bool
+    logs: tuple[LogEntry, ...]
+
+
+class CTermImplies(NamedTuple):
+    csubst: CSubst | None
+    failing_cells: tuple[tuple[str, KInner], ...]
+    remaining_implication: KInner | None
     logs: tuple[LogEntry, ...]
 
 
@@ -141,7 +148,8 @@ class CTermSymbolic:
         antecedent: CTerm,
         consequent: CTerm,
         bind_universally: bool = False,
-    ) -> CSubst | None:
+        failure_reason: bool = False,
+    ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
         fv_antecedent = free_vars(antecedent.kast)
@@ -161,7 +169,38 @@ class CTermSymbolic:
                 _LOGGER.debug(f'Received a non-empty substitution for unsatisfiable implication: {result.substitution}')
             if result.predicate is not None:
                 _LOGGER.debug(f'Received a non-empty predicate for unsatisfiable implication: {result.predicate}')
-            return None
+            failing_cells: list[tuple[str, KInner]] = []
+            remaining_implication: KInner | None = None
+            if failure_reason:
+                _config_match = self.implies(
+                    CTerm.from_kast(antecedent.config),
+                    CTerm.from_kast(consequent.config),
+                    bind_universally=bind_universally,
+                    failure_reason=False,
+                )
+                config_match = _config_match.csubst
+                if config_match is None:
+                    curr_cell_match = Subst({})
+                    for cell in antecedent.cells:
+                        antecedent_cell = antecedent.cell(cell)
+                        consequent_cell = consequent.cell(cell)
+                        cell_match = consequent_cell.match(antecedent_cell)
+                        if cell_match is not None:
+                            _curr_cell_match = curr_cell_match.union(cell_match)
+                            if _curr_cell_match is not None:
+                                curr_cell_match = _curr_cell_match
+                                continue
+                        failing_cells.append((cell, KRewrite(antecedent_cell, consequent_cell)))
+                else:
+                    consequent_constraints = list(
+                        filter(
+                            lambda x: not CTerm._is_spurious_constraint(x),
+                            map(config_match.subst, consequent.constraints),
+                        )
+                    )
+                    remaining_implication = CTerm._ml_impl(antecedent.constraints, consequent_constraints)
+            return CTermImplies(None, tuple(failing_cells), remaining_implication, result.logs)
+
         if result.substitution is None:
             raise ValueError('Received empty substutition for satisfiable implication.')
         if result.predicate is None:
@@ -170,7 +209,8 @@ class CTermSymbolic:
         ml_pred = self.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
         ml_preds = flatten_label('#And', ml_pred)
         if is_top(ml_subst):
-            return CSubst(subst=Subst({}), constraints=ml_preds)
+            csubst = CSubst(subst=Subst({}), constraints=ml_preds)
+            return CTermImplies(csubst, (), None, result.logs)
         subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
         _subst: dict[str, KInner] = {}
         for subst_pred in flatten_label('#And', ml_subst):
@@ -179,7 +219,8 @@ class CTermSymbolic:
                 _subst[m['###VAR'].name] = m['###TERM']
             else:
                 raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
-        return CSubst(subst=Subst(_subst), constraints=ml_preds)
+        csubst = CSubst(subst=Subst(_subst), constraints=ml_preds)
+        return CTermImplies(csubst, (), None, result.logs)
 
     def assume_defined(self, cterm: CTerm) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
