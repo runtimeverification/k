@@ -8,7 +8,7 @@ Fast Installation (preferred)
 -----------------------------
 
 The preferred way to install K is the `kup` tool, which is based on [Nix](https://nixos.org/download.html).
-No knowledge of Nix is required to use `kup`. If you are on Apple Silicon, `kup` is currently the only way to install K.
+No knowledge of Nix is required to use `kup`.
 
 Install `kup` and `K` by running the following:
 
