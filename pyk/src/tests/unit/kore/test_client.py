@@ -19,6 +19,7 @@ from pyk.kore.rpc import (
     ParseError,
     PatternError,
     SatResult,
+    SmtSolverError,
     State,
     StuckResult,
     TransportType,
@@ -350,6 +351,16 @@ ERROR_TEST_DATA: Final = (
             context=(r'/* Sfa */ \mu{}( Config@A:SortK{}, /* Sfa */ Config@A:SortK{} )',),
         ),
         r'Implication check error: The check implication step expects the antecedent term to be function-like. Context: /* Sfa */ \mu{}( Config@A:SortK{}, /* Sfa */ Config@A:SortK{} )',
+    ),
+    (
+        'smt-solver-error',
+        JsonRpcError(
+            message='foo',
+            code=5,
+            data=kore(int_dv(0)),
+        ),
+        SmtSolverError(int_dv(0)),
+        r'Smt solver error: \dv{SortInt{}}("0")',
     ),
     (
         'default-error',
