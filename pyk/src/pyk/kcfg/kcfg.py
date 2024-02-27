@@ -25,7 +25,7 @@ from ..prelude.kbool import andBool
 from ..utils import ensure_dir_path
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Iterable, Mapping, MutableMapping
     from pathlib import Path
     from types import TracebackType
     from typing import Any
@@ -203,7 +203,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return tuple(KCFG.Edge(self.source, target, 1, ()) for target in self.targets)
 
     _node_id: int
-    _nodes: dict[int, Node]
+    _nodes: MutableMapping[int, Node]
 
     _created_nodes: set[int]
     _deleted_nodes: set[int]
@@ -218,9 +218,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     _lock: RLock
     cfg_dir: Path | None
 
-    def __init__(self, cfg_dir: Path | None = None) -> None:
+    def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True) -> None:
         self._node_id = 1
-        self._nodes = {}
+        if optimize_memory:
+            from .store import OptimizedNodeStore
+
+            self._nodes = OptimizedNodeStore()
+        else:
+            self._nodes = {}
         self._created_nodes = set()
         self._deleted_nodes = set()
         self._edges = {}
@@ -293,9 +298,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     @staticmethod
     def from_claim(
-        defn: KDefinition, claim: KClaim, cfg_dir: Path | None = None
+        defn: KDefinition, claim: KClaim, cfg_dir: Path | None = None, optimize_memory: bool = True
     ) -> tuple[KCFG, NodeIdLike, NodeIdLike]:
-        cfg = KCFG(cfg_dir=cfg_dir)
+        cfg = KCFG(cfg_dir=cfg_dir, optimize_memory=optimize_memory)
         claim_body = claim.body
         claim_body = defn.instantiate_cell_vars(claim_body)
         claim_body = rename_generated_vars(claim_body)
@@ -382,8 +387,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return {k: v for k, v in res.items() if v}
 
     @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> KCFG:
-        cfg = KCFG()
+    def from_dict(dct: Mapping[str, Any], optimize_memory: bool = True) -> KCFG:
+        cfg = KCFG(optimize_memory=optimize_memory)
 
         max_id = 0
         for node_dict in dct.get('nodes') or []:
@@ -440,8 +445,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return json.dumps(self.to_dict(), sort_keys=True)
 
     @staticmethod
-    def from_json(s: str) -> KCFG:
-        return KCFG.from_dict(json.loads(s))
+    def from_json(s: str, optimize_memory: bool = True) -> KCFG:
+        return KCFG.from_dict(json.loads(s), optimize_memory=optimize_memory)
 
     def to_rules(self, priority: int = 20) -> list[KRuleLike]:
         return [e.to_rule('BASIC-BLOCK', priority=priority) for e in self.edges()]
