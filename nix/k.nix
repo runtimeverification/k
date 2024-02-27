@@ -1,6 +1,6 @@
 { src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
-, pkg-config, python3, z3, haskell-backend, booster, prelude-kore, llvm-backend
+, pkg-config, python3, z3, haskell-backend, booster, rpc-client, prelude-kore, llvm-backend
 , debugger, version, llvm-kompile-libs, runtimeShell }:
 
 let
@@ -73,6 +73,7 @@ let
         ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
 
         ln -sf ${booster}/bin/* $out/bin/
+        ln -sf ${rpc-client}/bin/* $out/bin/
 
         prelude_kore="$out/include/kframework/kore/prelude.kore"
         mkdir -p "$(dirname "$prelude_kore")"
