@@ -100,7 +100,7 @@ def atts_to_kore(att: Mapping[AttKey, Any]) -> list[App]:
 def att_to_kore(key: AttKey, value: Any) -> App:
     symbol = name_to_kore(key.name)
 
-    if value == '':
+    if value is None:
         return App(symbol)
 
     parse_res = _parse_special_att_value(key, value)
@@ -381,7 +381,7 @@ def _add_domain_value_atts(module: KFlatModule) -> KFlatModule:
         if syntax_sort.sort not in token_sorts:
             return syntax_sort
 
-        return syntax_sort.let(att=syntax_sort.att.update([Atts.HAS_DOMAIN_VALUES('')]))
+        return syntax_sort.let(att=syntax_sort.att.update([Atts.HAS_DOMAIN_VALUES(None)]))
 
     sentences = tuple(update_att(sent) for sent in module)
     return module.let(sentences=sentences)
@@ -436,14 +436,14 @@ def _add_anywhere_atts(module: KFlatModule) -> KFlatModule:
 
         klabel = sentence.klabel
         if any(Atts.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
-            return sentence.let(att=sentence.att.update([Atts.ANYWHERE('')]))
+            return sentence.let(att=sentence.att.update([Atts.ANYWHERE(None)]))
 
         if Atts.KLABEL not in sentence.att:
             return sentence
 
         productions = productions_by_klabel_att.get(sentence.att[Atts.KLABEL], [])
         if any(_is_overloaded_by(defn, production, sentence) for production in productions):
-            return sentence.let(att=sentence.att.update([Atts.ANYWHERE('')]))
+            return sentence.let(att=sentence.att.update([Atts.ANYWHERE(None)]))
 
         return sentence
 
@@ -467,7 +467,7 @@ def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
     return res
 
 
-def _add_symbol_atts(module: KFlatModule, att: AttKey, pred: Callable[[KAtt], bool]) -> KFlatModule:
+def _add_symbol_atts(module: KFlatModule, att: AttKey[None], pred: Callable[[KAtt], bool]) -> KFlatModule:
     """Add attribute to symbol productions based on a predicate predicate."""
 
     def update(sentence: KSentence) -> KSentence:
@@ -478,7 +478,7 @@ def _add_symbol_atts(module: KFlatModule, att: AttKey, pred: Callable[[KAtt], bo
             return sentence
 
         if pred(sentence.att):
-            return sentence.let(att=sentence.att.update([att('')]))
+            return sentence.let(att=sentence.att.update([att(None)]))
 
         return sentence
 
