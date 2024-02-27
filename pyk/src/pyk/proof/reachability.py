@@ -653,7 +653,8 @@ class APRProver(Prover):
                 f'Skipping full subsumption check because of fast may subsume check {self.proof.id}: {node.id}'
             )
             return False
-        csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, self.proof.kcfg.node(self.proof.target).cterm)
+        _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, self.proof.kcfg.node(self.proof.target).cterm)
+        csubst = _csubst.csubst
         if csubst is not None:
             self.proof.kcfg.create_cover(node.id, self.proof.target, csubst=csubst)
             _LOGGER.info(f'Subsumed into target node {self.proof.id}: {shorten_hashes((node.id, self.proof.target))}')
