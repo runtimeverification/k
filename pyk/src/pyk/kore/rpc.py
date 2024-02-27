@@ -417,6 +417,16 @@ class ImplicationError(KoreClientError):
 
 @final
 @dataclass
+class SmtSolverError(KoreClientError):
+    pattern: Pattern
+
+    def __init__(self, pattern: Pattern):
+        self.pattern = pattern
+        super().__init__(f'Smt solver error: {self.pattern.text}')
+
+
+@final
+@dataclass
 class DefaultError(KoreClientError):
     message: str
     code: int
@@ -902,6 +912,8 @@ class KoreClient(ContextManager['KoreClient']):
                 return UnknownModuleError(module_name=err.data)
             case 4:
                 return ImplicationError(error=err.data['error'], context=err.data['context'])
+            case 5:
+                return SmtSolverError(pattern=kore_term(err.data))
             case 8:
                 return InvalidModuleError(error=err.data['error'], context=err.data.get('context'))
             case 9:
