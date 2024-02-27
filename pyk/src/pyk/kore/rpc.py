@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
-from ..ktool.kprove import KoreExecLogFormat
 from ..utils import check_dir_path, check_file_path, filter_none, run_process
 from .syntax import And, SortApp, kore_term
 
@@ -36,6 +35,11 @@ if TYPE_CHECKING:
     LE = TypeVar('LE', bound='LogEntry')
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+class KoreExecLogFormat(Enum):
+    STANDARD = 'standard'
+    ONELINE = 'oneline'
 
 
 @final
