@@ -76,7 +76,6 @@
             <arg>-Werror</arg>
             <arg>-feature</arg>
             <arg>-deprecation</arg>
-            <arg>-language:implicitConversions</arg>
           </args>
         </configuration>
       </plugin>
