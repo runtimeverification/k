@@ -49,9 +49,6 @@ _STRING_SENTENCE: Final = {
     TokenType.KW_RULE.value: Rule,
 }
 
-_REQUIRES_TOKENS: Final = (TokenType.KW_REQUIRE, TokenType.KW_REQUIRES)
-_IMPORTS_TOKENS: Final = (TokenType.KW_IMPORT, TokenType.KW_IMPORTS)
-_PRIORITIES_TOKENS: Final = (TokenType.KW_PRIORITY, TokenType.KW_PRIORITIES)
 _ASSOC_TOKENS: Final = (TokenType.KW_LEFT, TokenType.KW_RIGHT, TokenType.KW_NONASSOC)
 _PRODUCTION_TOKENS: Final = (TokenType.ID_LOWER, TokenType.ID_UPPER, TokenType.STRING, TokenType.REGEX)
 _PRODUCTION_ITEM_TOKENS: Final = (TokenType.STRING, TokenType.ID_LOWER, TokenType.ID_UPPER)
@@ -95,7 +92,7 @@ class OuterParser:
 
     def definition(self) -> Definition:
         requires: list[Require] = []
-        while self._la.type in _REQUIRES_TOKENS:
+        while self._la.type is TokenType.KW_REQUIRES:
             requires.append(self.require())
 
         modules: list[Module] = []
@@ -105,7 +102,7 @@ class OuterParser:
         return Definition(modules, requires)
 
     def require(self) -> Require:
-        self._match_any(_REQUIRES_TOKENS)
+        self._match(TokenType.KW_REQUIRES)
         path = _dequote_string(self._match(TokenType.STRING))
         return Require(path)
 
@@ -116,7 +113,7 @@ class OuterParser:
         att = self._maybe_att()
 
         imports: list[Import] = []
-        while self._la.type in _IMPORTS_TOKENS:
+        while self._la.type is TokenType.KW_IMPORTS:
             imports.append(self.importt())
 
         sentences: list[Sentence] = []
@@ -128,7 +125,7 @@ class OuterParser:
         return Module(name, sentences, imports, att)
 
     def importt(self) -> Import:
-        self._match_any(_IMPORTS_TOKENS)
+        self._match(TokenType.KW_IMPORTS)
 
         public = True
         if self._la.type is TokenType.KW_PRIVATE:
@@ -171,7 +168,7 @@ class OuterParser:
             att = self._maybe_att()
             return SyntaxDecl(decl, att)
 
-        if self._la.type in _PRIORITIES_TOKENS:
+        if self._la.type is TokenType.KW_PRIORITY:
             self._consume()
             groups: list[list[str]] = []
             group: list[str] = []

@@ -1,10 +1,10 @@
-syntax priorities foo bar > baz
+syntax priority foo bar > baz
 ===
 KW_SYNTAX
 syntax
 
-KW_PRIORITIES
-priorities
+KW_PRIORITY
+priority
 
 KLABEL
 foo

@@ -11,7 +11,7 @@ module RANGEMAP
   syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol, latex(\dotCt{RangeMap})]
   syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
 
-  syntax priorities _r|->_ > _RangeMap_ .RangeMap
+  syntax priority _r|->_ > _RangeMap_ .RangeMap
   syntax non-assoc _r|->_
 
   syntax KItem ::= RangeMap "[" KItem "]"                    [function, hook(RANGEMAP.lookup), klabel(RangeMap:lookup), symbol]
@@ -448,8 +448,8 @@ RBRACK
 KW_SYNTAX
 syntax
 
-KW_PRIORITIES
-priorities
+KW_PRIORITY
+priority
 
 KLABEL
 _r|->_
