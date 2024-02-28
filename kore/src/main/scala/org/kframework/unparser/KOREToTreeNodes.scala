@@ -45,7 +45,7 @@ object KOREToTreeNodes {
       )
     case a: KApply =>
       val scalaChildren = a.klist.items.asScala.map { i: K => apply(i, mod).asInstanceOf[Term] }
-      val children      = ConsPStack.from(scalaChildren.reverse asJava)
+      val children      = ConsPStack.from(scalaChildren.reverse.asJava)
       val loc           = t.att.getOptional(Att.LOCATION, classOf[Location])
       val source        = t.att.getOptional(Att.SOURCE, classOf[Source])
       val p =
