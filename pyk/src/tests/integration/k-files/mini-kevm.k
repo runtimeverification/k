@@ -38,7 +38,7 @@ module MINI-KEVM
     // Buffers
 
     syntax Bytes ::= #bufStrict ( Int , Int ) [function]
-    syntax Bytes ::= #buf ( Int , Int ) [function, total, smtlib(buf)]
+    syntax Bytes ::= #buf ( Int , Int ) [function, total, smtlib(buf), no-evaluators]
 
     rule #bufStrict(SIZE, DATA) => #buf(SIZE, DATA)
       requires 0 <=Int DATA andBool DATA <Int (2 ^Int (SIZE *Int 8))
