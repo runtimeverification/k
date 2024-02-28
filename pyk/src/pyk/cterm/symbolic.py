@@ -106,17 +106,15 @@ class CTermSymbolic:
             logs=response.logs,
         )
 
-    def simplify(self, cterm: CTerm) -> tuple[CTerm, tuple[LogEntry, ...]]:
+    def simplify(self, cterm: CTerm, module_name: str | None = None) -> tuple[CTerm, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {cterm}')
-        kore = self.kast_to_kore(cterm.kast)
-        kore_simplified, logs = self._kore_client.simplify(kore)
-        kast_simplified = self.kore_to_kast(kore_simplified)
+        kast_simplified, logs = self.kast_simplify(cterm.kast, module_name=module_name)
         return CTerm.from_kast(kast_simplified), logs
 
-    def kast_simplify(self, kast: KInner) -> tuple[KInner, tuple[LogEntry, ...]]:
+    def kast_simplify(self, kast: KInner, module_name: str | None = None) -> tuple[KInner, tuple[LogEntry, ...]]:
         _LOGGER.debug(f'Simplifying: {kast}')
         kore = self.kast_to_kore(kast)
-        kore_simplified, logs = self._kore_client.simplify(kore)
+        kore_simplified, logs = self._kore_client.simplify(kore, module_name=module_name)
         kast_simplified = self.kore_to_kast(kore_simplified)
         return kast_simplified, logs
 
@@ -149,6 +147,7 @@ class CTermSymbolic:
         consequent: CTerm,
         bind_universally: bool = False,
         failure_reason: bool = False,
+        module_name: str | None = None,
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
@@ -163,7 +162,7 @@ class CTermSymbolic:
                 _consequent = KApply(KLabel(bind_label, [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
         antecedent_kore = self.kast_to_kore(antecedent.kast)
         consequent_kore = self.kast_to_kore(_consequent)
-        result = self._kore_client.implies(antecedent_kore, consequent_kore)
+        result = self._kore_client.implies(antecedent_kore, consequent_kore, module_name=module_name)
         if not result.satisfiable:
             if result.substitution is not None:
                 _LOGGER.debug(f'Received a non-empty substitution for unsatisfiable implication: {result.substitution}')
@@ -177,6 +176,7 @@ class CTermSymbolic:
                     CTerm.from_kast(consequent.config),
                     bind_universally=bind_universally,
                     failure_reason=False,
+                    module_name=module_name,
                 )
                 config_match = _config_match.csubst
                 if config_match is None:
@@ -222,11 +222,9 @@ class CTermSymbolic:
         csubst = CSubst(subst=Subst(_subst), constraints=ml_preds)
         return CTermImplies(csubst, (), None, result.logs)
 
-    def assume_defined(self, cterm: CTerm) -> CTerm:
+    def assume_defined(self, cterm: CTerm, module_name: str | None = None) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
         kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.config])
-        kore = self.kast_to_kore(kast)
-        kore_simplified, _logs = self._kore_client.simplify(kore)
-        kast_simplified = self.kore_to_kast(kore_simplified)
+        kast_simplified, logs = self.kast_simplify(kast, module_name=module_name)
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
