@@ -3,6 +3,7 @@ package org.kframework.kore
 
 import org.kframework.attributes
 import org.kframework.attributes.Att
+import org.kframework.builtin.KLabels
 import scala.collection._
 import scala.collection.JavaConverters._
 
@@ -13,15 +14,16 @@ import scala.collection.JavaConverters._
  * See the wiki for more details:
  * https://github.com/runtimeverification/k/wiki/KORE-data-structures-guide
  */
-object KORE extends Constructors with ScalaSugared {
-  val c = KORE
-
+object KORE extends Constructors {
   val constructor = this
 
   def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) =
     attributes.Location(startLine, startColumn, endLine, endColumn)
 
   def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Att.empty)
+
+  def KApply(klabel: KLabel, ks: Seq[K], att: Att = Att.empty): KApply =
+    KApply(klabel, KList(ks.asJava), att)
 
   def KToken(string: String, sort: Sort): KToken = KToken(string, sort, Att.empty)
 
@@ -74,4 +76,24 @@ object KORE extends Constructors with ScalaSugared {
     ADT.InjectedKLabel(klabel, att)
 
   def self = this
+
+  object Sugar {
+    def ~>(l: K, r: K): KSequence = KSequence(Seq(l, r).asJava, Att.empty)
+
+    def +(l: K, r: K): KApply = KApply(KLabel("+"), l, r)
+
+    def -(l: K, r: K): KApply = KApply(KLabel("-"), l, r)
+
+    def *(l: K, r: K): KApply = KApply(KLabel("*"), l, r)
+
+    def /(l: K, r: K): KApply = KApply(KLabel("/"), l, r)
+
+    def &(l: K, r: K): KApply = KApply(KLabel("&"), l, r)
+
+    def ~(l: K, r: K): KApply = KApply(KLabel("~"), l, r)
+
+    def &&(l: K, r: K): KApply = KApply(KLabels.AND, l, r)
+
+    def ||(l: K, r: K): KApply = KApply(KLabels.OR, l, r)
+  }
 }

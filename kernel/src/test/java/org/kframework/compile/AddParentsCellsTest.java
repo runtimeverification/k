@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -48,6 +49,10 @@ public class AddParentsCellsTest {
         }
       };
   final AddParentCells pass = new AddParentCells(cfgInfo, labelInfo);
+
+  private static KToken intToToken(int n) {
+    return KToken(Integer.toString(n), Sorts.Int(), Att.empty());
+  }
 
   @Test
   public void testOneLeafCellNoCompletion() {
