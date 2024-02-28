@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from ..cterm import CTerm
@@ -15,6 +16,7 @@ from ..kast.manip import (
     ml_pred_to_bool,
     push_down_rewrites,
 )
+from ..kast.pretty import PrettyPrinter
 from ..kore.rpc import RewriteSuccess
 from ..prelude.kbool import notBool
 from ..prelude.kint import leInt, ltInt
@@ -31,7 +33,6 @@ if TYPE_CHECKING:
     from ..kast import KInner
     from ..kcfg.exploration import KCFGExploration
     from ..kore.rpc import LogEntry
-    from ..ktool.kprint import KPrint
     from .kcfg import KCFGExtendResult, NodeIdLike
     from .semantics import KCFGSemantics
 
@@ -40,7 +41,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class KCFGExplore:
-    kprint: KPrint
     cterm_symbolic: CTermSymbolic
 
     kcfg_semantics: KCFGSemantics
@@ -48,16 +48,21 @@ class KCFGExplore:
 
     def __init__(
         self,
-        kprint: KPrint,
         cterm_symbolic: CTermSymbolic,
         *,
         kcfg_semantics: KCFGSemantics | None = None,
         id: str | None = None,
     ):
-        self.kprint = kprint
         self.cterm_symbolic = cterm_symbolic
         self.kcfg_semantics = kcfg_semantics if kcfg_semantics is not None else DefaultSemantics()
         self.id = id if id is not None else 'NO ID'
+
+    @cached_property
+    def _pretty_printer(self) -> PrettyPrinter:
+        return PrettyPrinter(self.cterm_symbolic._definition)
+
+    def pretty_print(self, kinner: KInner) -> str:
+        return self._pretty_printer.print(kinner)
 
     def implication_failure_reason(self, antecedent: CTerm, consequent: CTerm) -> tuple[bool, str]:
         def no_cell_rewrite_to_dots(term: KInner) -> KInner:
@@ -106,7 +111,7 @@ class KCFGExplore:
             failing_cell = push_down_rewrites(failing_cell)
             failing_cell = no_cell_rewrite_to_dots(failing_cell)
             failing_cell = replace_rewrites_with_implies(failing_cell)
-            failing_cells_strs.append(f'{name}: {self.kprint.pretty_print(minimize_term(failing_cell))}')
+            failing_cells_strs.append(f'{name}: {self.pretty_print(minimize_term(failing_cell))}')
 
         ret_str = 'Matching failed.'
         if len(failing_cells_strs) > 0:
@@ -114,15 +119,15 @@ class KCFGExplore:
             ret_str = f'{ret_str}\nThe following cells failed matching individually (antecedent #Implies consequent):\n{failing_cells_str}'
 
         if cterm_implies.remaining_implication is not None:
-            ret_str = f'{ret_str}\nThe remaining implication is:\n{self.kprint.pretty_print(cterm_implies.remaining_implication)}'
+            ret_str = (
+                f'{ret_str}\nThe remaining implication is:\n{self.pretty_print(cterm_implies.remaining_implication)}'
+            )
 
             if cterm_implies.csubst is not None and not is_top(cterm_implies.remaining_implication):
                 negative_cell_constraints = list(filter(_is_negative_cell_subst, antecedent.constraints))
 
                 if len(negative_cell_constraints) > 0:
-                    negative_cell_constraints_str = '\n'.join(
-                        self.kprint.pretty_print(cc) for cc in negative_cell_constraints
-                    )
+                    negative_cell_constraints_str = '\n'.join(self.pretty_print(cc) for cc in negative_cell_constraints)
                     ret_str = f'{ret_str}\nNegated cell substitutions found (consider using _ => ?_):\n{negative_cell_constraints_str}'
 
         return (False, ret_str)
@@ -228,8 +233,8 @@ class KCFGExplore:
             _rule_lines = []
             for node_log in _logs:
                 if type(node_log.result) is RewriteSuccess:
-                    if node_log.result.rule_id in self.kprint.definition.sentence_by_unique_id:
-                        sent = self.kprint.definition.sentence_by_unique_id[node_log.result.rule_id]
+                    if node_log.result.rule_id in self.cterm_symbolic._definition.sentence_by_unique_id:
+                        sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
                         _rule_lines.append(f'{sent.label}:{sent.source}')
                     else:
                         _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
@@ -249,7 +254,7 @@ class KCFGExplore:
             if not CTerm._is_bottom(kast):
                 branches.append(constraint)
         if len(branches) > 1:
-            constraint_strs = [self.kprint.pretty_print(bc) for bc in branches]
+            constraint_strs = [self.pretty_print(bc) for bc in branches]
             log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
             return Branch(branches, heuristic=True)
 
@@ -306,7 +311,7 @@ class KCFGExplore:
 
         # Split on branch patterns
         if any(branch_pattern.match(branch_and) for branch_pattern in branch_patterns):
-            constraint_strs = [self.kprint.pretty_print(bc) for bc in branches]
+            constraint_strs = [self.pretty_print(bc) for bc in branches]
             log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
             return Branch(branches)
 

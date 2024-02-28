@@ -244,7 +244,7 @@ class CTermSymbolicTest(KoreClientTest):
         return CTermSymbolic(kore_client, definition, kompiled_kore)
 
 
-class KCFGExploreTest(CTermSymbolicTest, KPrintTest):
+class KCFGExploreTest(CTermSymbolicTest):
     @abstractmethod
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
         ...
@@ -253,11 +253,10 @@ class KCFGExploreTest(CTermSymbolicTest, KPrintTest):
     def kcfg_explore(
         self,
         cterm_symbolic: CTermSymbolic,
-        kprint: KProve,
         bug_report: BugReport | None,
     ) -> Iterator[KCFGExplore]:
-        semantics = self.semantics(kprint.definition)
-        yield KCFGExplore(kprint, cterm_symbolic, kcfg_semantics=semantics)
+        semantics = self.semantics(cterm_symbolic._definition)
+        yield KCFGExplore(cterm_symbolic, kcfg_semantics=semantics)
 
 
 class KoreServerPoolTest(KompiledTest, ABC):
