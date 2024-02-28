@@ -125,9 +125,7 @@ class TestGoToProof(KCFGExploreTest, KProveTest):
         )
         prover.advance_proof(max_iterations=max_iterations)
 
-        kcfg_show = KCFGShow(
-            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
-        )
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 

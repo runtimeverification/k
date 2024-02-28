@@ -393,8 +393,8 @@ class ImpliesProver(Prover):
         consequent_simplified_kast, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.consequent)
         self.proof.simplified_antecedent = antecedent_simplified_kast
         self.proof.simplified_consequent = consequent_simplified_kast
-        _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.kprint.pretty_print(antecedent_simplified_kast)}')
-        _LOGGER.info(f'Simplified consequent: {self.kcfg_explore.kprint.pretty_print(consequent_simplified_kast)}')
+        _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.pretty_print(antecedent_simplified_kast)}')
+        _LOGGER.info(f'Simplified consequent: {self.kcfg_explore.pretty_print(consequent_simplified_kast)}')
 
         if is_bottom(antecedent_simplified_kast):
             _LOGGER.warning(f'Antecedent of implication (proof constraints) simplifies to #Bottom {self.proof.id}')
@@ -406,7 +406,7 @@ class ImpliesProver(Prover):
 
         else:
             # TODO: we should not be forced to include the dummy configuration in the antecedent and consequent
-            dummy_config = self.kcfg_explore.kprint.definition.empty_config(sort=GENERATED_TOP_CELL)
+            dummy_config = self.kcfg_explore.cterm_symbolic._definition.empty_config(sort=GENERATED_TOP_CELL)
             _result = self.kcfg_explore.cterm_symbolic.implies(
                 antecedent=CTerm(config=dummy_config, constraints=[self.proof.simplified_antecedent]),
                 consequent=CTerm(config=dummy_config, constraints=[self.proof.simplified_consequent]),

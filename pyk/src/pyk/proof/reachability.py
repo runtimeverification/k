@@ -581,13 +581,13 @@ class APRProver(Prover):
         def _inject_module(module_name: str, import_name: str, sentences: list[KRuleLike]) -> None:
             _module = KFlatModule(module_name, sentences, [KImport(import_name)])
             _kore_module = kflatmodule_to_kore(
-                self.kcfg_explore.kprint.definition, self.kcfg_explore.kprint.kompiled_kore, _module
+                self.kcfg_explore.cterm_symbolic._definition, self.kcfg_explore.cterm_symbolic._kompiled_kore, _module
             )
             self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
 
         super().__init__(kcfg_explore)
         self.proof = proof
-        self.main_module_name = self.kcfg_explore.kprint.definition.main_module_name
+        self.main_module_name = self.kcfg_explore.cterm_symbolic._definition.main_module_name
         self.execute_depth = execute_depth
         self.cut_point_rules = cut_point_rules
         self.terminal_rules = terminal_rules
@@ -813,7 +813,7 @@ class APRFailureInfo:
             node_cterm, _ = kcfg_explore.cterm_symbolic.simplify(node.cterm)
             target_cterm, _ = kcfg_explore.cterm_symbolic.simplify(target.cterm)
             _, reason = kcfg_explore.implication_failure_reason(node_cterm, target_cterm)
-            path_condition = kcfg_explore.kprint.pretty_print(proof.path_constraints(node.id))
+            path_condition = kcfg_explore.pretty_print(proof.path_constraints(node.id))
             failure_reasons[node.id] = reason
             path_conditions[node.id] = path_condition
             if counterexample_info:
@@ -822,7 +822,7 @@ class APRFailureInfo:
                     model: list[tuple[str, str]] = []
                     for var, term in model_subst.to_dict().items():
                         term_kast = KInner.from_dict(term)
-                        term_pretty = kcfg_explore.kprint.pretty_print(term_kast)
+                        term_pretty = kcfg_explore.pretty_print(term_kast)
                         model.append((var, term_pretty))
                     models[node.id] = model
         return APRFailureInfo(
