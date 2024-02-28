@@ -7,33 +7,35 @@ Installing the K Framework
 Fast Installation (preferred)
 -----------------------------
 
-If you're on a system that supports [Nix](https://nixos.org/download.html),
-use this command to install via Nix:
+The preferred way to install K is the `kup` tool, which is based on [Nix](https://nixos.org/download.html).
+No knowledge of Nix is required to use `kup`.
+
+Install `kup` and `K` by running the following:
 
 ```shell
 bash <(curl https://kframework.org/install)
 kup install k
 ```
 
-You can update K with:
+List available versions with:
 
 ```shell
-kup update k
+kup list k
 ```
 
-And list available versions with:
+If `kup` indicates that there's a newer version, you can update by simply running:
 
 ```shell
-kup list
+kup install k
 ```
 
-This will take care of all the dependencies and specific versions used by K.
-Note that the first run will take longer to fetch all the libraries and compile
-sources. (30m to 1h)
+To install a specific version, run:
 
-If you are on Apple Silicon, `kup` is currently the only way to install K
-because of upstream issues in the general Haskell ecosystem.
+```shell
+kup install k --version v6.3.11
+```
 
+Note that the versions marked as ✅ are cached in Runtime Verification's Nix binary cache and thus are the fastest to install.
 
 Install through packages
 ----------------
