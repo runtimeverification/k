@@ -62,13 +62,12 @@ SENTENCE_TEST_DATA: Final = (
     ('syntax right foo bar', SyntaxAssoc(Assoc.RIGHT, ('foo', 'bar'))),
     ('syntax non-assoc foo bar baz', SyntaxAssoc(Assoc.NON_ASSOC, ('foo', 'bar', 'baz'))),
     ('syntax priority foo', SyntaxPriority((('foo',),))),
-    ('syntax priorities foo', SyntaxPriority((('foo',),))),
-    ('syntax priorities foo bar', SyntaxPriority((('foo', 'bar'),))),
-    ('syntax priorities foo bar baz', SyntaxPriority((('foo', 'bar', 'baz'),))),
-    ('syntax priorities foo > bar', SyntaxPriority((('foo',), ('bar',)))),
-    ('syntax priorities foo > bar baz', SyntaxPriority((('foo',), ('bar', 'baz')))),
-    ('syntax priorities foo > bar > baz', SyntaxPriority((('foo',), ('bar',), ('baz',)))),
-    ('syntax priorities foo bar > baz', SyntaxPriority((('foo', 'bar'), ('baz',)))),
+    ('syntax priority foo bar', SyntaxPriority((('foo', 'bar'),))),
+    ('syntax priority foo bar baz', SyntaxPriority((('foo', 'bar', 'baz'),))),
+    ('syntax priority foo > bar', SyntaxPriority((('foo',), ('bar',)))),
+    ('syntax priority foo > bar baz', SyntaxPriority((('foo',), ('bar', 'baz')))),
+    ('syntax priority foo > bar > baz', SyntaxPriority((('foo',), ('bar',), ('baz',)))),
+    ('syntax priority foo bar > baz', SyntaxPriority((('foo', 'bar'), ('baz',)))),
     ('syntax Foo', SyntaxDecl(SortDecl('Foo'))),
     ('syntax {Bar} Foo', SyntaxDecl(SortDecl('Foo', params=('Bar',)))),
     ('syntax {Bar, Baz} Foo', SyntaxDecl(SortDecl('Foo', params=('Bar', 'Baz')))),
@@ -354,9 +353,6 @@ def test_sentence(k_text: str, expected: AST) -> None:
 
 
 IMPORT_TEST_DATA: Final = (
-    ('import TEST', Import('TEST', public=True)),
-    ('import public TEST', Import('TEST', public=True)),
-    ('import private TEST', Import('TEST', public=False)),
     ('imports TEST', Import('TEST', public=True)),
     ('imports public TEST', Import('TEST', public=True)),
     ('imports private TEST', Import('TEST', public=False)),
@@ -378,7 +374,6 @@ def test_import(k_text: str, expected: AST) -> None:
 MODULE_TEST_DATA: Final = (
     ('module FOO endmodule', Module('FOO')),
     ('module FOO [foo] endmodule', Module('FOO', att=Att((('foo', ''),)))),
-    ('module FOO import BAR endmodule', Module('FOO', imports=(Import('BAR'),))),
     ('module FOO imports BAR endmodule', Module('FOO', imports=(Import('BAR'),))),
     ('module FOO imports BAR imports BAZ endmodule', Module('FOO', imports=(Import('BAR'), Import('BAZ')))),
     ('module FOO rule x endmodule', Module('FOO', sentences=(Rule('x'),))),
@@ -402,16 +397,11 @@ def test_module(k_text: str, expected: AST) -> None:
     assert actual == expected
 
 
-REQUIRE_TEST_DATA: Final = (
-    ('require "foo.k"', Require('foo.k')),
-    ('requires "foo.k"', Require('foo.k')),
-)
-
-
-@pytest.mark.parametrize('k_text,expected', REQUIRE_TEST_DATA, ids=[k_text for k_text, _ in REQUIRE_TEST_DATA])
-def test_require(k_text: str, expected: AST) -> None:
+def test_require() -> None:
     # Given
+    k_text = 'requires "foo.k"'
     parser = OuterParser(k_text)
+    expected = Require('foo.k')
 
     # When
     actual = parser.require()
@@ -422,7 +412,6 @@ def test_require(k_text: str, expected: AST) -> None:
 
 DEFINITION_TEST_DATA: Final = (
     ('', Definition()),
-    ('require "foo.k"', Definition(requires=(Require('foo.k'),))),
     ('requires "foo.k"', Definition(requires=(Require('foo.k'),))),
     ('requires "foo.k" requires "bar.k"', Definition(requires=(Require('foo.k'), Require('bar.k')))),
     ('module FOO endmodule', Definition(modules=(Module('FOO'),))),

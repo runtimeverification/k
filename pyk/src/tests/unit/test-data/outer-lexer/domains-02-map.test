@@ -10,7 +10,7 @@ module MAP
   syntax Map ::= ".Map"                         [function, total, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
   syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2}), injective]
 
-  syntax priorities _|->_ > _Map_ .Map
+  syntax priority _|->_ > _Map_ .Map
   syntax non-assoc _|->_
 
   syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
@@ -467,8 +467,8 @@ RBRACK
 KW_SYNTAX
 syntax
 
-KW_PRIORITIES
-priorities
+KW_PRIORITY
+priority
 
 KLABEL
 _|->_

@@ -32,17 +32,14 @@ class TokenType(Enum):
     KW_CONFIG = auto()
     KW_CONTEXT = auto()
     KW_ENDMODULE = auto()
-    KW_IMPORT = auto()
     KW_IMPORTS = auto()
     KW_LEFT = auto()
     KW_LEXICAL = auto()
     KW_MODULE = auto()
     KW_NONASSOC = auto()
-    KW_PRIORITIES = auto()
     KW_PRIORITY = auto()
     KW_PRIVATE = auto()
     KW_PUBLIC = auto()
-    KW_REQUIRE = auto()
     KW_REQUIRES = auto()
     KW_RIGHT = auto()
     KW_RULE = auto()
@@ -98,17 +95,14 @@ _KEYWORDS: Final = {
     'configuration': Token('configuration', TokenType.KW_CONFIG),
     'context': Token('context', TokenType.KW_CONTEXT),
     'endmodule': Token('endmodule', TokenType.KW_ENDMODULE),
-    'import': Token('import', TokenType.KW_IMPORT),
     'imports': Token('imports', TokenType.KW_IMPORTS),
     'left': Token('left', TokenType.KW_LEFT),
     'lexical': Token('lexical', TokenType.KW_LEXICAL),
     'module': Token('module', TokenType.KW_MODULE),
     'non-assoc': Token('non-assoc', TokenType.KW_NONASSOC),
-    'priorities': Token('priorities', TokenType.KW_PRIORITIES),
     'priority': Token('priority', TokenType.KW_PRIORITY),
     'private': Token('private', TokenType.KW_PRIVATE),
     'public': Token('public', TokenType.KW_PUBLIC),
-    'require': Token('require', TokenType.KW_REQUIRE),
     'requires': Token('requires', TokenType.KW_REQUIRES),
     'right': Token('right', TokenType.KW_RIGHT),
     'rule': Token('rule', TokenType.KW_RULE),
@@ -152,7 +146,6 @@ _NEXT_STATE: Final = {
     (State.DEFAULT, TokenType.KW_CONFIG): State.BUBBLE,
     (State.DEFAULT, TokenType.KW_CONTEXT): State.CONTEXT,
     (State.DEFAULT, TokenType.KW_IMPORTS): State.MODNAME,
-    (State.DEFAULT, TokenType.KW_IMPORT): State.MODNAME,
     (State.DEFAULT, TokenType.KW_MODULE): State.MODNAME,
     (State.DEFAULT, TokenType.KW_RULE): State.BUBBLE,
     (State.DEFAULT, TokenType.KW_SYNTAX): State.SYNTAX,
@@ -168,7 +161,6 @@ _NEXT_STATE: Final = {
     (State.SYNTAX, TokenType.KW_LEFT): State.KLABEL,
     (State.SYNTAX, TokenType.KW_LEXICAL): State.DEFAULT,
     (State.SYNTAX, TokenType.KW_NONASSOC): State.KLABEL,
-    (State.SYNTAX, TokenType.KW_PRIORITIES): State.KLABEL,
     (State.SYNTAX, TokenType.KW_PRIORITY): State.KLABEL,
     (State.SYNTAX, TokenType.KW_RIGHT): State.KLABEL,
     (State.SYNTAX, TokenType.LBRACE): State.DEFAULT,

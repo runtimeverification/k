@@ -6,7 +6,7 @@ module K-EQUAL-SYNTAX
                   K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), group(equalEqualK)]
                 | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), group(notEqualEqualK)]
 
-  syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
+  syntax priority equalEqualK notEqualEqualK > boolOperation mlOp
 
   syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, total, smt-hook(ite), hook(KEQUAL.ite)]
 
@@ -14,8 +14,8 @@ endmodule
 
 
 module K-EQUAL-KORE [kore, symbolic]
-  import private BOOL
-  import K-EQUAL-SYNTAX
+  imports private BOOL
+  imports K-EQUAL-SYNTAX
 
   rule K1:Bool ==K K2:Bool => K1 ==Bool K2 [simplification]
   rule {K1 ==K K2 #Equals true} => {K1 #Equals K2} [simplification]
@@ -31,9 +31,9 @@ endmodule
 
 
 module K-EQUAL
-  import private BOOL
-  import K-EQUAL-SYNTAX
-  import K-EQUAL-KORE
+  imports private BOOL
+  imports K-EQUAL-SYNTAX
+  imports K-EQUAL-KORE
 
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
@@ -334,8 +334,8 @@ RBRACK
 KW_SYNTAX
 syntax
 
-KW_PRIORITIES
-priorities
+KW_PRIORITY
+priority
 
 KLABEL
 equalEqualK
@@ -460,8 +460,8 @@ symbolic
 RBRACK
 ]
 
-KW_IMPORT
-import
+KW_IMPORTS
+imports
 
 KW_PRIVATE
 private
@@ -469,8 +469,8 @@ private
 MODNAME
 BOOL
 
-KW_IMPORT
-import
+KW_IMPORTS
+imports
 
 MODNAME
 K-EQUAL-SYNTAX
@@ -619,8 +619,8 @@ module
 MODNAME
 K-EQUAL
 
-KW_IMPORT
-import
+KW_IMPORTS
+imports
 
 KW_PRIVATE
 private
@@ -628,14 +628,14 @@ private
 MODNAME
 BOOL
 
-KW_IMPORT
-import
+KW_IMPORTS
+imports
 
 MODNAME
 K-EQUAL-SYNTAX
 
-KW_IMPORT
-import
+KW_IMPORTS
+imports
 
 MODNAME
 K-EQUAL-KORE
