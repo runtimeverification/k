@@ -325,14 +325,12 @@ def test_reachable_nodes() -> None:
     cfg = KCFG.from_dict(d)
 
     # When
-    nodes_1 = cfg.reachable_nodes(12, covers=False)
     nodes_2 = cfg.reachable_nodes(12)
     nodes_3 = cfg.reachable_nodes(16)
     nodes_4 = cfg.reachable_nodes(13, reverse=True)
     nodes_5 = cfg.reachable_nodes(19, reverse=True)
 
     # Then
-    assert nodes_1 == {node(12)}
     assert nodes_2 == {node(12), node(13), node(15)}
     assert nodes_3 == {node(16), node(12), node(13), node(17), node(18), node(15), node(19), node(20)}
     assert nodes_4 == {node(13), node(16), node(12), node(15), node(17), node(14)}

@@ -552,15 +552,6 @@ def remove_attrs(term: KInner) -> KInner:
     return top_down(remove_attr, term)
 
 
-def remove_source_attributes(term: KInner) -> KInner:
-    def _remove_source_attr(term: KInner) -> KInner:
-        if not isinstance(term, WithKAtt):
-            return term
-        return term.let_att(term.att.drop_source())
-
-    return top_down(_remove_source_attr, term)
-
-
 def remove_generated_cells(term: KInner) -> KInner:
     """Remove <generatedTop> and <generatedCounter> from a configuration.
 
@@ -575,15 +566,6 @@ def is_anon_var(kast: KInner) -> bool:
     return type(kast) is KVariable and kast.name.startswith('_')
 
 
-def omit_large_tokens(kast: KInner, max_len: int = 78) -> KInner:
-    def _large_tokens_to_dots(_k: KInner) -> KInner:
-        if type(_k) is KToken and len(_k.token) > max_len:
-            return KToken('...', _k.sort)
-        return _k
-
-    return bottom_up(_large_tokens_to_dots, kast)
-
-
 def get_cell(constrained_term: KInner, cell_variable: str) -> KInner:
     state, _ = split_config_and_constraints(constrained_term)
     _, subst = split_config_from(state)
@@ -595,21 +577,6 @@ def set_cell(constrained_term: KInner, cell_variable: str, cell_value: KInner) -
     config, subst = split_config_from(state)
     subst[cell_variable] = cell_value
     return mlAnd([Subst(subst)(config), constraint])
-
-
-def remove_constraint_clauses_for(var_names: Collection[str], constraint: KInner) -> KInner:
-    constraints = flatten_label('#And', constraint)
-    new_constraints = []
-    for c in constraints:
-        if not any(v in var_names for v in free_vars(c)):
-            new_constraints.append(c)
-    return mlAnd(new_constraints)
-
-
-def remove_constraints_for(var_names: Collection[str], constrained_term: KInner) -> KInner:
-    state, constraint = split_config_and_constraints(constrained_term)
-    constraint = remove_constraint_clauses_for(var_names, constraint)
-    return mlAnd([state, constraint])
 
 
 def abstract_term_safely(
