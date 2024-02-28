@@ -4,15 +4,16 @@ import logging
 from functools import reduce
 from typing import TYPE_CHECKING
 
-from ..cterm import CTerm
 from ..kast import Atts
 from ..kast.inner import KApply, KSequence, KSort, KToken, KVariable
-from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs
+from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label
 from ..kast.outer import KRule
 from ..kore.prelude import DOTK, SORT_K
 from ..kore.syntax import DV, And, App, Axiom, EVar, Import, MLPattern, MLQuant, Module, Rewrites, SortApp, String, Top
 from ..prelude.bytes import BYTES, pretty_bytes_str
 from ..prelude.k import K
+from ..prelude.kbool import TRUE
+from ..prelude.ml import mlAnd
 from ..prelude.string import STRING, pretty_string
 from ._utils import munge
 
@@ -76,24 +77,28 @@ def kast_to_kore(
 # 'krule' should have sorts on variables
 def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KRule) -> Axiom:
     krule_body = krule.body
-    krule_lhs = CTerm(extract_lhs(krule_body), [bool_to_ml_pred(krule.requires)])
-    krule_rhs = CTerm(extract_rhs(krule_body), [bool_to_ml_pred(krule.ensures)])
+    krule_lhs_config = extract_lhs(krule_body)
+    krule_rhs_config = extract_rhs(krule_body)
+    krule_lhs_constraints = [bool_to_ml_pred(c) for c in flatten_label('_andBool_', krule.requires) if not c == TRUE]
+    krule_rhs_constraints = [bool_to_ml_pred(c) for c in flatten_label('_andBool_', krule.ensures) if not c == TRUE]
+    krule_lhs = mlAnd([krule_lhs_config] + krule_lhs_constraints)
+    krule_rhs = mlAnd([krule_rhs_config] + krule_rhs_constraints)
 
     top_level_kore_sort = SortApp('SortGeneratedTopCell')
     top_level_k_sort = KSort('GeneratedTopCell')
     # The backend does not like rewrite rules without a precondition
-    if len(krule_lhs.constraints) > 0:
-        kore_lhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_lhs.kast, sort=top_level_k_sort)
+    if len(krule_lhs_constraints) > 0:
+        kore_lhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_lhs, sort=top_level_k_sort)
     else:
         kore_lhs0 = And(
             top_level_kore_sort,
             (
-                kast_to_kore(kast_defn, kompiled_kore, krule_lhs.kast, sort=top_level_k_sort),
+                kast_to_kore(kast_defn, kompiled_kore, krule_lhs, sort=top_level_k_sort),
                 Top(top_level_kore_sort),
             ),
         )
 
-    kore_rhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_rhs.kast, sort=top_level_k_sort)
+    kore_rhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_rhs, sort=top_level_k_sort)
 
     kore_lhs = kompiled_kore.add_injections(kore_lhs0, sort=top_level_kore_sort)
     kore_rhs = kompiled_kore.add_injections(kore_rhs0, sort=top_level_kore_sort)
