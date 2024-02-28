@@ -1,4 +1,4 @@
-require "kast.md"
+requires "kast.md"
 
 
 module DOMAINS-SYNTAX
@@ -24,8 +24,8 @@ module DOMAINS
   imports K-EQUAL
 endmodule
 ===
-KW_REQUIRE
-require
+KW_REQUIRES
+requires
 
 STRING
 "kast.md"
