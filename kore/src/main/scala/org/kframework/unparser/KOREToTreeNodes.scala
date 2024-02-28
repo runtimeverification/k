@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
 
 object KOREToTreeNodes {
 
-  import org.kframework.kore.KORE.{ Att => _, _ }
+  import org.kframework.kore.KORE._
 
   def wellTyped(
       args: Seq[Sort],

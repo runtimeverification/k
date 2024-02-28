@@ -18,22 +18,20 @@ object KORE extends Constructors with ScalaSugared {
 
   val constructor = this
 
-  lazy val Att = attributes.Att.empty
-
   def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) =
     attributes.Location(startLine, startColumn, endLine, endColumn)
 
-  def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Att)
+  def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Att.empty)
 
-  def KToken(string: String, sort: Sort): KToken = KToken(string, sort, Att)
+  def KToken(string: String, sort: Sort): KToken = KToken(string, sort, Att.empty)
 
-  def KSequence(ks: java.util.List[K]): KSequence = KSequence(ks, Att)
+  def KSequence(ks: java.util.List[K]): KSequence = KSequence(ks, Att.empty)
 
-  def KRewrite(left: K, right: K): KRewrite = KRewrite(left, right, Att)
+  def KRewrite(left: K, right: K): KRewrite = KRewrite(left, right, Att.empty)
 
-  def KAs(pattern: K, alias: K): KAs = KAs(pattern, alias, Att)
+  def KAs(pattern: K, alias: K): KAs = KAs(pattern, alias, Att.empty)
 
-  def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, Att)
+  def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, Att.empty)
 
   //  def toKList: Collector[K, KList] =
   //    Collector(() => new CombinerFromBuilder(KList.newBuilder()))
