@@ -79,12 +79,6 @@
             <arg>-language:implicitConversions</arg>
             <arg>-language:postfixOps</arg>
           </args>
-          <javacArgs>
-            <javacArg>-source</javacArg>
-            <javacArg>${java.version}</javacArg>
-            <javacArg>-target</javacArg>
-            <javacArg>${java.version}</javacArg>
-          </javacArgs>
         </configuration>
       </plugin>
     </plugins>
