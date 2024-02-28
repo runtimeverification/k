@@ -91,6 +91,7 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
     )
     def test_execute(
         self,
+        kprove: KProve,
         kcfg_explore: KCFGExplore,
         test_id: str,
         depth: int,
@@ -104,10 +105,8 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         expected_k, _, _ = expected_post
 
         # When
-        exec_res = kcfg_explore.cterm_symbolic.execute(
-            self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth
-        )
-        actual_k = kcfg_explore.kprint.pretty_print(exec_res.state.cell('K_CELL'))
+        exec_res = kcfg_explore.cterm_symbolic.execute(self.config(kprove, k, aacounts, accounts), depth=depth)
+        actual_k = kcfg_explore.pretty_print(exec_res.state.cell('K_CELL'))
         actual_depth = exec_res.depth
 
         # Then
@@ -141,9 +140,7 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=max_depth)
         prover.advance_proof(max_iterations=max_iterations)
 
-        kcfg_show = KCFGShow(
-            kcfg_explore.kprint, node_printer=APRProofNodePrinter(proof, kcfg_explore.kprint, full_printer=True)
-        )
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
         cfg_lines = kcfg_show.show(proof.kcfg)
         _LOGGER.info('\n'.join(cfg_lines))
 

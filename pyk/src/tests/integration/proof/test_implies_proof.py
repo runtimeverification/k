@@ -169,6 +169,7 @@ class TestImpImpliesProof(KCFGExploreTest, KProveTest):
     )
     def test_implies_proof(
         self,
+        kprove: KProve,
         kcfg_explore: KCFGExplore,
         test_id: str,
         antecedents: Iterable[str],
@@ -179,12 +180,8 @@ class TestImpImpliesProof(KCFGExploreTest, KProveTest):
         if test_id in FAILING_TESTS:
             pytest.skip()
 
-        parsed_antecedents = [
-            kcfg_explore.kprint.parse_token(KToken(antecedent, BOOL), as_rule=True) for antecedent in antecedents
-        ]
-        parsed_consequents = [
-            kcfg_explore.kprint.parse_token(KToken(consequent, BOOL), as_rule=True) for consequent in consequents
-        ]
+        parsed_antecedents = [kprove.parse_token(KToken(antecedent, BOOL), as_rule=True) for antecedent in antecedents]
+        parsed_consequents = [kprove.parse_token(KToken(consequent, BOOL), as_rule=True) for consequent in consequents]
         antecedent = mlAnd(mlEqualsTrue(pa) for pa in parsed_antecedents)
         consequent = mlAnd(mlEqualsTrue(pc) for pc in parsed_consequents)
 
