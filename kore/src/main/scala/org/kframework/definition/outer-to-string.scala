@@ -1,11 +1,11 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.definition
 
-import collection._
 import org.kframework.attributes.Att
 import org.kframework.attributes.Location
 import org.kframework.attributes.Source
 import org.kframework.utils.StringUtil
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 
 trait ModuleToString {
   self: Module =>

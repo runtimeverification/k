@@ -14,7 +14,7 @@ import org.kframework.kore.KORE.Sort
 import org.kframework.utils.errorsystem.KEMException
 import org.kframework.POSet
 import scala.annotation.meta.param
-import scala.collection._
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.collection.JavaConverters._
 import scala.collection.Set
 

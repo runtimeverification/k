@@ -2,8 +2,8 @@
 
 package org.kframework.kore
 
-import collection._
-import JavaConverters._
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
+import scala.collection.JavaConverters._
 
 trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 

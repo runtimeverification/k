@@ -74,7 +74,6 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.Function1;
 import scala.Option;
 import scala.collection.JavaConverters;
-import scala.collection.Seq;
 import scala.collection.Set$;
 
 /**

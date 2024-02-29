@@ -30,7 +30,6 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.Seq;
 
 public class KILtoKORE extends KILTransformation<Object> {
 

@@ -40,7 +40,8 @@ import org.kframework.parser.TermCons;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.Seq;
+import scala.Tuple2;
+import scala.collection.Set;
 
 /**
  * Class to manage communication with z3 for the purposes of type inference. This class is driven by

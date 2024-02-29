@@ -2,17 +2,17 @@
 
 package org.kframework
 
-import collection._
-import collection.JavaConverters._
 import java.util
 import java.util.function.BiConsumer
 import java.util.function.BinaryOperator
 import java.util.function.Supplier
 import java.util.stream.StreamSupport
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.MapBuilder
 import scala.collection.mutable.SetBuilder
+import scala.collection.JavaConverters._
 
 object Collections {
   def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala

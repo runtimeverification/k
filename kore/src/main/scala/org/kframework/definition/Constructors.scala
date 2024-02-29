@@ -2,12 +2,11 @@
 
 package org.kframework.definition
 
-import collection._
-import java.util.Optional
 import org.kframework.attributes
 import org.kframework.attributes.Att
 import org.kframework.definition
 import org.kframework.kore._
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 
 /**
  * Helper constructors for KORE definition.classes. The class is meant to be imported statically.

@@ -66,7 +66,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
-import scala.collection.Seq;
 
 class RuleInfo {
   boolean isEquation;

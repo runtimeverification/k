@@ -4,7 +4,7 @@ package org.kframework.kore
 import org.kframework.attributes
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
-import scala.collection._
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.collection.JavaConverters._
 
 /**

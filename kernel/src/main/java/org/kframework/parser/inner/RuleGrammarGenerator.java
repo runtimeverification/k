@@ -41,7 +41,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.InnerParsingOptions;
 import scala.Option;
 import scala.Tuple3;
-import scala.collection.Seq;
 
 /**
  * Generator for rule and ground parsers. Takes as input a reference to a definition containing all

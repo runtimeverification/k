@@ -10,7 +10,7 @@ import org.kframework.kore._
 import org.kframework.parser._
 import org.kframework.POSet
 import org.pcollections.ConsPStack
-import scala.collection._
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.collection.JavaConverters._
 
 object KOREToTreeNodes {

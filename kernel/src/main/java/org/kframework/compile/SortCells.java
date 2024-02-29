@@ -38,7 +38,6 @@ import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
-import scala.collection.Seq;
 
 /**
  * Arrange cell contents and variables to match the klabels declared for cells. In Full K, cell

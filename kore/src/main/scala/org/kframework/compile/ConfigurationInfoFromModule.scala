@@ -16,9 +16,8 @@ import org.kframework.utils.errorsystem.KEMException
 import org.kframework.Collections
 import org.kframework.POSet
 import org.kframework.TopologicalSort._
-import scala.collection._
+import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.collection.JavaConverters._
-
 object ConfigurationInfoFromModule
 
 class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
