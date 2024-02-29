@@ -124,6 +124,11 @@
       <artifactId>scalafmt-core_${scala.majorVersion}</artifactId>
       <version>${scalafmt.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.scala-sbt</groupId>
+      <artifactId>compiler-bridge_2.12</artifactId>
+      <version>1.8.0</version>
+    </dependency>
   </dependencies>
 
   <reporting>

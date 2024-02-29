@@ -28,8 +28,10 @@ let
 
       for artifactId in ${builtins.toString manualMvnSourceArtifacts}
       do
+        group=$(echo $artifactId | cut -d':' -f1)
+        artifact=$(echo $artifactId | cut -d':' -f2)
         echo "downloading manual sources $artifactId"
-        mvn dependency:sources -Dartifact="$artifactId" -Dmaven.repo.local=$out/.m2
+        mvn dependency:sources -DincludeGroupIds=$group -DincludeArtifactIds=$artifact -Dmaven.repo.local=$out/.m2
       done
     '' + lib.optionalString (!buildOffline) ''
       mvn package -Dmaven.repo.local=$out/.m2 ${mvnParameters}
