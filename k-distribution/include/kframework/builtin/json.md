@@ -18,7 +18,7 @@ module JSON-SYNTAX
     imports BOOL-SYNTAX
     imports FLOAT-SYNTAX
 
-    syntax JSONs   ::= List{JSON,","}      [klabel(JSONs)      , symbol]
+    syntax JSONs   ::= List{JSON,","}      [symbol(JSONs)]
     syntax JSONKey ::= String
     syntax JSON    ::= "null"              [klabel(JSONnull)   , symbol]
                      | String | Int | Float | Bool

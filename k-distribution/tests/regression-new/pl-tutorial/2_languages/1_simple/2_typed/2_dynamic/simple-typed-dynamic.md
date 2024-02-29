@@ -47,7 +47,7 @@ constructs.
                 | Type "[" "]"
                 | "(" Type ")"           [bracket]
                 > Types "->" Type
-  syntax Types ::= List{Type,","}        [klabel(exps)]
+  syntax Types ::= List{Type,","}
 ```
 
 ## Declarations
@@ -95,9 +95,9 @@ constructs.
 Like in the static semantics, there is no need for lists of identifiers
 (because we now have lists of parameters).
 ```k
-  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
+  syntax Exps ::= List{Exp,","}          [strict, overload(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}          [klabel(exps)]
+  syntax Vals ::= List{Val,","}          [overload(exps)]
 ```
 
 ## Statements

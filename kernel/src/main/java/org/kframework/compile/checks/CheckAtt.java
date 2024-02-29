@@ -323,10 +323,10 @@ public class CheckAtt {
   }
 
   private void checkTerminatorKLabel(Production prod) {
-    if (!prod.att().contains(Att.USER_LIST()) && prod.att().contains(Att.TERMINATOR_KLABEL())) {
+    if (!prod.att().contains(Att.USER_LIST()) && prod.att().contains(Att.TERMINATOR_SYMBOL())) {
       errors.add(
           KEMException.compilerError(
-              "The attribute 'terminator-klabel' cannot be applied to a production that does not declare a syntactic list.",
+              "The attribute 'terminator-symbol' cannot be applied to a production that does not declare a syntactic list.",
               prod));
     }
   }

@@ -55,11 +55,7 @@ untyped KOOL.
                 | Type "[" "]"
                 | "(" Type ")"           [bracket]
                 > Types "->" Type
-  // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Types ::= List{Type,","}   [klabel(_,_::Types)]
-  /*
   syntax Types ::= List{Type,","}
-  */
 ```
 
 ## Declarations
@@ -112,9 +108,9 @@ untyped KOOL.
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
-  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
+  syntax Exps ::= List{Exp,","}          [strict, overload(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}          [klabel(exps)]
+  syntax Vals ::= List{Val,","}          [overload(exps)]
 ```
 
 ## Statements
