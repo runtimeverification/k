@@ -725,9 +725,11 @@ class APRProver(Prover):
                 return [APRProofBoundedResult(curr_node.id)]
 
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
-        target_is_terminal = (self.proof.target in self.proof._terminal,)
 
-        if target_is_terminal and self.always_check_subsumption:
+        target_is_terminal = self.proof.target in self.proof._terminal
+        check_subsume = (target_is_terminal and is_terminal) or (not target_is_terminal)
+
+        if check_subsume:
             csubst = self._check_subsume(curr_node)
             if csubst is not None:
                 return [APRProofSubsumeResult(csubst=csubst, node_id=curr_node.id)]
