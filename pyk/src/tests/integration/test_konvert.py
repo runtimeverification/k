@@ -39,21 +39,33 @@ def imp_kore(imp_dir: Path) -> Module:
 
 
 IGNORED_SYMBOL_ATTRS: Final = {
-    "org'Stop'kframework'Stop'definition'Stop'Production",
+    'cell',
+    'cellFragment',
+    'cellName',
+    'cellOptAbsent',
+    'color',
     'colors',
     'format',
     'freshGenerator',
+    'group',
     'impure',
+    'index',
+    'initializer',
+    'latex',
     'left',
     'maincell',
-    'private',
-    'priorities',
+    "org'Stop'kframework'Stop'definition'Stop'Production",
+    'predicate',
     'prefer',
+    'priorities',
+    'private',
+    'projection',
     'right',
     'seqstrict',
     'strict',
     "symbol'Kywd'",
     'terminals',
+    'userList',
 }
 
 
