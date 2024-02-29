@@ -63,6 +63,10 @@ class Proof(ABC):
         if self.proof_dir is not None:
             ensure_dir_path(self.proof_dir)
 
+    @abstractmethod
+    def commit(self, result: StepResult) -> None:
+        ...
+
     def admit(self) -> None:
         self.admitted = True
 
@@ -286,6 +290,10 @@ class CompositeSummary(ProofSummary):
         return [line for lines in (summary.lines for summary in self.summaries) for line in lines]
 
 
+class StepResult:
+    ...
+
+
 class Prover:
     kcfg_explore: KCFGExplore
     proof: Proof
@@ -294,7 +302,7 @@ class Prover:
         self.kcfg_explore = kcfg_explore
 
     @abstractmethod
-    def step_proof(self) -> None:
+    def step_proof(self) -> Iterable[StepResult]:
         ...
 
     def advance_proof(self, max_iterations: int | None = None, fail_fast: bool = False) -> None:
@@ -306,5 +314,7 @@ class Prover:
             if max_iterations is not None and max_iterations <= iterations:
                 return
             iterations += 1
-            self.step_proof()
+            results = self.step_proof()
+            for result in results:
+                self.proof.commit(result)
             self.proof.write_proof_data()
