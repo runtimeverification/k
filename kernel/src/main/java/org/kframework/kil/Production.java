@@ -27,18 +27,18 @@ public class Production extends ASTNode {
   }
 
   /**
-   * Returns the KLabel for the list terminator.
+   * Returns the symbol for the list terminator.
    *
-   * <p>If a label has been specified using `terminator-klabel(...)` then use that; otherwise
+   * <p>If a label has been specified using `terminator-symbol(...)` then use that; otherwise
    * construct a new label based on the label for the non-terminator production. This new label is
    * constructed as `.List{"<list_klabel>"}`. Should be called only if `isListDecl()` returns true.
    *
-   * @return String representation of the terminator KLabel.
+   * @return String representation of the terminator symbol.
    */
-  public String getTerminatorKLabel(boolean kore) {
+  public String getTerminatorSymbol(boolean kore) {
     assert isListDecl();
 
-    String terminatorLabel = getAttribute(Att.TERMINATOR_KLABEL());
+    String terminatorLabel = getAttribute(Att.TERMINATOR_SYMBOL());
     if (terminatorLabel == null) {
       boolean isSymbol = getAttribute(Att.SYMBOL()) != null;
       return ".List{"
