@@ -370,13 +370,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     // Es ::= ".Es"
     prod3 =
         Production(
-            KLabel(p.getTerminatorKLabel(true), immutable(p.getParams())),
+            KLabel(p.getTerminatorSymbol(true), immutable(p.getParams())),
             sort,
             Seq(Terminal("." + sort.toString())),
             attrs
                 .remove(Att.FORMAT())
                 .remove(Att.STRICT())
-                .add(Att.KLABEL(), p.getTerminatorKLabel(false)));
+                .remove(Att.TERMINATOR_SYMBOL())
+                .add(Att.SYMBOL(), p.getTerminatorSymbol(false)));
 
     res.add(prod1);
     res.add(prod3);

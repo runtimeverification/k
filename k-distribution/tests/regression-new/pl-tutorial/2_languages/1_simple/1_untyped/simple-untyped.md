@@ -175,13 +175,13 @@ whenever requested (e.g., when they appear as strict arguments of
 the constructs above).
 
 ```k
-  syntax Ids  ::= List{Id,","}           [klabel(Exps)]
-  syntax Exps ::= List{Exp,","}          [klabel(Exps), strict]  // automatically hybrid now
+  syntax Ids  ::= List{Id,","}           [overload(Exps)]
+  syntax Exps ::= List{Exp,","}          [overload(Exps), strict]  // automatically hybrid now
   syntax Exps ::= Ids
   syntax Val
-  syntax Vals ::= List{Val,","}          [klabel(Exps)]
+  syntax Vals ::= List{Val,","}          [overload(Exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom,","}    [klabel(Exps)]
+  syntax Bottoms ::= List{Bottom,","}    [overload(Exps)]
   syntax Ids ::= Bottoms
 ```
 
@@ -312,6 +312,7 @@ languages, we finally tell the tool that values are **K** results.
                | lambda(Ids,Stmt)
   syntax Exp ::= Val
   syntax Exps ::= Vals
+  syntax Val ::= Bottom
   syntax Vals ::= Bottoms
   syntax KResult ::= Val
                    | Vals  // TODO: should not need this
@@ -868,7 +869,7 @@ evaluated (recall that `print` is variadic).  We append each of
 its evaluated arguments to the output buffer, and discard the residual
 `print` statement with an empty list of arguments.
 ```k
-  rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
+  rule <k> print(V:Val, Es:Vals => Es); ...</k> <output>... .List => ListItem(V) </output>
     [group(print)]
   rule print(.Vals); => .K
 ```

@@ -209,9 +209,9 @@ syntax includes:
 
   syntax Ids  ::= List{Id,","}
 
-  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
+  syntax Exps ::= List{Exp,","}          [strict, overload(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}          [klabel(exps)]
+  syntax Vals ::= List{Val,","}          [overload(exps)]
 
   syntax Block ::= "{" "}"
                 | "{" Stmt "}"
