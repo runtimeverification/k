@@ -306,13 +306,6 @@ object Att {
     Key.builtin("internal", KeyParameter.Forbidden, onlyon[Production], KeyRange.FrontendOnly)
   final val KLABEL =
     Key.builtin("klabel", KeyParameter.Required, onlyon[Production], KeyRange.WholePipeline)
-  final val TERMINATOR_KLABEL =
-    Key.builtin(
-      "terminator-klabel",
-      KeyParameter.Required,
-      onlyon[Production],
-      KeyRange.WholePipeline
-    )
   final val LABEL =
     Key.builtin("label", KeyParameter.Required, onlyon[Sentence], KeyRange.WholePipeline)
   final val LATEX =
@@ -408,6 +401,13 @@ object Att {
     Key.builtin("strict", KeyParameter.Optional, onlyon[Production], KeyRange.FrontendOnly)
   final val SYMBOL =
     Key.builtin("symbol", KeyParameter.Optional, onlyon[Production], KeyRange.WholePipeline)
+  final val TERMINATOR_SYMBOL =
+    Key.builtin(
+      "terminator-symbol",
+      KeyParameter.Required,
+      onlyon[Production],
+      KeyRange.FrontendOnly
+    )
   final val SYMBOLIC =
     Key.builtin(
       "symbolic",

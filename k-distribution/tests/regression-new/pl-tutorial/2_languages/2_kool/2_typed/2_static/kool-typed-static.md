@@ -130,7 +130,7 @@ the wrapper in the generated documentation, we associate it an
                 | "(" Type ")"           [bracket]
                 > Types "->" Type
 
-  syntax Types ::= List{Type,","}        [klabel(exps)]
+  syntax Types ::= List{Type,","} [overload(exps)]
 ```
 
 ## Declarations
@@ -187,7 +187,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Exp ::= FieldReference | ArrayReference
   syntax priority _.__KOOL-TYPED-STATIC-SYNTAX > _[_]_KOOL-TYPED-STATIC-SYNTAX > _(_)_KOOL-TYPED-STATIC-SYNTAX
 
-  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
+  syntax Exps ::= List{Exp,","}          [strict, overload(exps)]
 ```
 
 ## Statements
