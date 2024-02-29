@@ -687,6 +687,54 @@ class TestAddModule(KoreClientTest):
         with pytest.raises(InvalidModuleError):
             kore_client.add_module(module_2)
 
+    def test_add_module_with_hash_name_not_as_id_first(self, kore_client: KoreClient) -> None:
+        # Given
+        expected_module_2_id = 'mb2dcdc14b22cf840e6270ac0ebd1d9448dad1a64f04413c20c1c87d687ac28c9'
+        module_1 = Module(expected_module_2_id, sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+
+        # When
+        kore_client.add_module(module_1)
+        actual_module_2_id = kore_client.add_module(module_2)
+
+        # Then
+        assert actual_module_2_id == expected_module_2_id
+
+    def test_add_module_with_hash_name_as_id_first_fails(self, kore_client: KoreClient) -> None:
+        # Given
+        module_2_id = 'mb2dcdc14b22cf840e6270ac0ebd1d9448dad1a64f04413c20c1c87d687ac28c9'
+        module_1 = Module(module_2_id, sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+
+        # When-Then
+        kore_client.add_module(module_1, name_as_id=True)
+        with pytest.raises(DuplicateModuleError):
+            kore_client.add_module(module_2)
+
+    def test_add_module_with_hash_name_not_as_id_second(self, kore_client: KoreClient) -> None:
+        # Given
+        expected_module_1_id = 'm33a3f42dd93f20505f7b1132dadc18fb4adc9882e0d55d9661cc1d77ad549b97'
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module(expected_module_1_id, sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+
+        # When
+        actual_module_1_id = kore_client.add_module(module_1)
+        kore_client.add_module(module_2)
+
+        # Then
+        assert actual_module_1_id == expected_module_1_id
+
+    def test_add_module_with_hash_name_as_id_second_fails(self, kore_client: KoreClient) -> None:
+        # Given
+        module_1_id = 'm33a3f42dd93f20505f7b1132dadc18fb4adc9882e0d55d9661cc1d77ad549b97'
+        module_1 = Module('A', sentences=(Import(self.MAIN_MODULE), self.rule(0, 1)))
+        module_2 = Module(module_1_id, sentences=(Import(self.MAIN_MODULE), self.rule(0, 2)))
+
+        # When-Then
+        kore_client.add_module(module_1)
+        with pytest.raises(DuplicateModuleError):
+            kore_client.add_module(module_2, name_as_id=True)
+
 
 START_BOOSTER_SERVER_TEST_DATA: Final[tuple[dict[str, Any], ...]] = (
     {},
