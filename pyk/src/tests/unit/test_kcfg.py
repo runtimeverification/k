@@ -112,6 +112,7 @@ def ndbranch_dicts(*edges: tuple[int, Iterable[tuple[int, bool]]]) -> list[dict[
         {
             'source': source_id,
             'targets': [target_id for target_id, _ in target_ids],
+            'rules': [],
         }
         for source_id, target_ids in edges
     ]
