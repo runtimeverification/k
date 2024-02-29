@@ -48,6 +48,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def to_dict(self) -> dict[str, Any]:
             return {'id': self.id, 'cterm': self.cterm.to_dict()}
 
+        @staticmethod
+        def from_dict(dct: dict[str, Any]) -> KCFG.Node:
+            return KCFG.Node(dct['id'], CTerm.from_dict(dct['cterm']))
+
     class Successor(ABC):
         source: KCFG.Node
 
@@ -77,6 +81,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def to_dict(self) -> dict[str, Any]:
             ...
 
+        @staticmethod
+        @abstractmethod
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Successor:
+            ...
+
     class EdgeLike(Successor):
         source: KCFG.Node
         target: KCFG.Node
@@ -100,6 +109,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 'depth': self.depth,
                 'rules': list(self.rules),
             }
+
+        @staticmethod
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Edge:
+            return KCFG.Edge(nodes[dct['source']], nodes[dct['target']], dct['depth'], tuple(dct['rules']))
 
         def to_rule(self, label: str, claim: bool = False, priority: int | None = None) -> KRuleLike:
             def is_ceil_condition(kast: KInner) -> bool:
@@ -141,6 +154,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 'target': self.target.id,
                 'csubst': self.csubst.to_dict(),
             }
+
+        @staticmethod
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Cover:
+            return KCFG.Cover(nodes[dct['source']], nodes[dct['target']], CSubst.from_dict(dct['csubst']))
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Cover:
             assert node.id == self.source.id
@@ -193,6 +210,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 ],
             }
 
+        @staticmethod
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Split:
+            _targets = [(nodes[target['target']], CSubst.from_dict(target['csubst'])) for target in dct['targets']]
+            return KCFG.Split(nodes[dct['source']], tuple(_targets))
+
         def with_single_target(self, target: KCFG.Node) -> KCFG.Split:
             return KCFG.Split(self.source, ((target, self.splits[target.id]),))
 
@@ -232,7 +254,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return {
                 'source': self.source.id,
                 'targets': [target.id for target in self.targets],
+                'rules': list(self.rules),
             }
+
+        @staticmethod
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.NDBranch:
+            return KCFG.NDBranch(
+                nodes[dct['source']], tuple([nodes[target] for target in dct['targets']]), tuple(dct['rules'])
+            )
 
         def with_single_target(self, target: KCFG.Node) -> KCFG.NDBranch:
             return KCFG.NDBranch(self.source, (target,), ())
@@ -256,8 +285,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     _created_nodes: set[int]
     _deleted_nodes: set[int]
 
-    _edges: dict[int, dict[int, Edge]]
-    _covers: dict[int, dict[int, Cover]]
+    _edges: dict[int, Edge]
+    _covers: dict[int, Cover]
     _splits: dict[int, Split]
     _ndbranches: dict[int, NDBranch]
     _vacuous: set[int]
@@ -438,28 +467,28 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def from_dict(dct: Mapping[str, Any], optimize_memory: bool = True) -> KCFG:
         cfg = KCFG(optimize_memory=optimize_memory)
 
-        max_id = 0
         for node_dict in dct.get('nodes') or []:
-            node_id = node_dict['id']
-            max_id = max(max_id, node_id)
-            cterm = CTerm.from_dict(node_dict['cterm'])
-            node = KCFG.Node(node_id, cterm)
+            node = KCFG.Node.from_dict(node_dict)
             cfg.add_node(node)
 
+        max_id = max([node.id for node in cfg.nodes], default=0)
         cfg._node_id = dct.get('next', max_id + 1)
 
         for edge_dict in dct.get('edges') or []:
-            source_id = edge_dict['source']
-            target_id = edge_dict['target']
-            depth = edge_dict['depth']
-            rules = edge_dict['rules']
-            cfg.create_edge(source_id, target_id, depth, rules=rules)
+            edge = KCFG.Edge.from_dict(edge_dict, cfg._nodes)
+            cfg.add_successor(edge)
 
         for cover_dict in dct.get('covers') or []:
-            source_id = cover_dict['source']
-            target_id = cover_dict['target']
-            csubst = CSubst.from_dict(cover_dict['csubst'])
-            cfg.create_cover(source_id, target_id, csubst=csubst)
+            cover = KCFG.Cover.from_dict(cover_dict, cfg._nodes)
+            cfg.add_successor(cover)
+
+        for split_dict in dct.get('splits') or []:
+            split = KCFG.Split.from_dict(split_dict, cfg._nodes)
+            cfg.add_successor(split)
+
+        for ndbranch_dict in dct.get('ndbranches') or []:
+            ndbranch = KCFG.NDBranch.from_dict(ndbranch_dict, cfg._nodes)
+            cfg.add_successor(ndbranch)
 
         for vacuous_id in dct.get('vacuous') or []:
             cfg.add_vacuous(vacuous_id)
@@ -469,19 +498,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         for alias, node_id in dct.get('aliases', {}).items():
             cfg.add_alias(alias=alias, node_id=node_id)
-
-        for split_dict in dct.get('splits') or []:
-            source_id = split_dict['source']
-            targets = [
-                (target_dict['target'], CSubst.from_dict(target_dict['csubst']))
-                for target_dict in split_dict['targets']
-            ]
-            cfg.create_split(source_id, targets)
-
-        for ndbranch_dict in dct.get('ndbranches') or []:
-            source_id = ndbranch_dict['source']
-            target_ids = ndbranch_dict['targets']
-            cfg.create_ndbranch(source_id, target_ids)
 
         return cfg
 
@@ -565,23 +581,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._created_nodes.discard(node_id)
         self._deleted_nodes.add(node.id)
 
-        self._edges.pop(node_id, None)
-        for source_id in list(self._edges):
-            self._edges[source_id].pop(node_id, None)
-            if not self._edges[source_id]:
-                self._edges.pop(source_id)
-
-        self._covers.pop(node_id, None)
-        for source_id in list(self._covers):
-            self._covers[source_id].pop(node_id, None)
-            if not self._covers[source_id]:
-                self._covers.pop(source_id)
-
-        self._vacuous.discard(node_id)
-        self._stuck.discard(node_id)
+        self._edges = {k: s for k, s in self._edges.items() if k != node_id and node_id not in s.target_ids}
+        self._covers = {k: s for k, s in self._covers.items() if k != node_id and node_id not in s.target_ids}
 
         self._splits = {k: s for k, s in self._splits.items() if k != node_id and node_id not in s.target_ids}
         self._ndbranches = {k: b for k, b in self._ndbranches.items() if k != node_id and node_id not in b.target_ids}
+
+        self._vacuous.discard(node_id)
+        self._stuck.discard(node_id)
 
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
             self.remove_alias(alias)
@@ -595,9 +602,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         for succ in self.successors(node_id):
             new_succ = succ.replace_source(node)
             if type(new_succ) is KCFG.Edge:
-                self._edges[new_succ.source.id][new_succ.target.id] = new_succ
+                self._edges[new_succ.source.id] = new_succ
             if type(new_succ) is KCFG.Cover:
-                self._covers[new_succ.source.id][new_succ.target.id] = new_succ
+                self._covers[new_succ.source.id] = new_succ
             if type(new_succ) is KCFG.Split:
                 self._splits[new_succ.source.id] = new_succ
             if type(new_succ) is KCFG.NDBranch:
@@ -606,9 +613,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         for pred in self.predecessors(node_id):
             new_pred = pred.replace_target(node)
             if type(new_pred) is KCFG.Edge:
-                self._edges[new_pred.source.id][new_pred.target.id] = new_pred
+                self._edges[new_pred.source.id] = new_pred
             if type(new_pred) is KCFG.Cover:
-                self._covers[new_pred.source.id][new_pred.target.id] = new_pred
+                self._covers[new_pred.source.id] = new_pred
             if type(new_pred) is KCFG.Split:
                 self._splits[new_pred.source.id] = new_pred
             if type(new_pred) is KCFG.NDBranch:
@@ -640,22 +647,37 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                     f'Adding successor would create zero-length loop with backedge: {source_id} -> {target_id}'
                 )
 
+    def add_successor(self, succ: KCFG.Successor) -> None:
+        self._check_no_successors(succ.source.id)
+        self._check_no_zero_loops(succ.source.id, succ.target_ids)
+        if type(succ) is KCFG.Edge:
+            self._edges[succ.source.id] = succ
+        elif type(succ) is KCFG.Cover:
+            self._covers[succ.source.id] = succ
+        else:
+            if len(succ.target_ids) <= 1:
+                raise ValueError(
+                    f'Cannot create {type(succ)} node with less than 2 targets: {succ.source.id} -> {succ.target_ids}'
+                )
+            if type(succ) is KCFG.Split:
+                self._splits[succ.source.id] = succ
+            elif type(succ) is KCFG.NDBranch:
+                self._ndbranches[succ.source.id] = succ
+
     def edge(self, source_id: NodeIdLike, target_id: NodeIdLike) -> Edge | None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
-        return self._edges.get(source_id, {}).get(target_id)
+        edge = self._edges.get(source_id, None)
+        return edge if edge is not None and edge.target.id == target_id else None
 
     def edges(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[Edge]:
         source_id = self._resolve(source_id) if source_id is not None else None
         target_id = self._resolve(target_id) if target_id is not None else None
-
-        res: Iterable[KCFG.Edge]
-        if source_id:
-            res = self._edges.get(source_id, {}).values()
-        else:
-            res = (edge for _, targets in self._edges.items() for _, edge in targets.items())
-
-        return [edge for edge in res if not target_id or target_id == edge.target.id]
+        return [
+            edge
+            for edge in self._edges.values()
+            if (source_id is None or source_id == edge.source.id) and (target_id is None or target_id == edge.target.id)
+        ]
 
     def contains_edge(self, edge: Edge) -> bool:
         if other := self.edge(source_id=edge.source.id, target_id=edge.target.id):
@@ -663,50 +685,37 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return False
 
     def create_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, depth: int, rules: Iterable[str] = ()) -> Edge:
-        self._check_no_successors(source_id)
-        self._check_no_zero_loops(source_id, [target_id])
-
         if depth <= 0:
             raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {depth}')
-
         source = self.node(source_id)
         target = self.node(target_id)
-
-        if source.id not in self._edges:
-            self._edges[source.id] = {}
-
         edge = KCFG.Edge(source, target, depth, tuple(rules))
-        self._edges[source.id][target.id] = edge
+        self.add_successor(edge)
         return edge
 
     def remove_edge(self, source_id: NodeIdLike, target_id: NodeIdLike) -> None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
         edge = self.edge(source_id, target_id)
-
         if not edge:
             raise ValueError(f'Edge does not exist: {source_id} -> {target_id}')
-
-        self._edges[source_id].pop(target_id)
-        if not self._edges[source_id]:
-            self._edges.pop(source_id)
+        self._edges.pop(source_id)
 
     def cover(self, source_id: NodeIdLike, target_id: NodeIdLike) -> Cover | None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
-        return self._covers.get(source_id, {}).get(target_id)
+        cover = self._covers.get(source_id, None)
+        return cover if cover is not None and cover.target.id == target_id else None
 
     def covers(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[Cover]:
         source_id = self._resolve(source_id) if source_id is not None else None
         target_id = self._resolve(target_id) if target_id is not None else None
-
-        res: Iterable[KCFG.Cover]
-        if source_id:
-            res = self._covers.get(source_id, {}).values()
-        else:
-            res = (cover for _, targets in self._covers.items() for _, cover in targets.items())
-
-        return [cover for cover in res if not target_id or target_id == cover.target.id]
+        return [
+            cover
+            for cover in self._covers.values()
+            if (source_id is None or source_id == cover.source.id)
+            and (target_id is None or target_id == cover.target.id)
+        ]
 
     def contains_cover(self, cover: Cover) -> bool:
         if other := self.cover(source_id=cover.source.id, target_id=cover.target.id):
@@ -714,35 +723,23 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return False
 
     def create_cover(self, source_id: NodeIdLike, target_id: NodeIdLike, csubst: CSubst | None = None) -> Cover:
-        self._check_no_successors(source_id)
-        self._check_no_zero_loops(source_id, [target_id])
-
         source = self.node(source_id)
         target = self.node(target_id)
-
         if csubst is None:
             csubst = target.cterm.match_with_constraint(source.cterm)
             if csubst is None:
                 raise ValueError(f'No matching between: {source.id} and {target.id}')
-
-        if source.id not in self._covers:
-            self._covers[source.id] = {}
-
         cover = KCFG.Cover(source, target, csubst=csubst)
-        self._covers[source.id][target.id] = cover
+        self.add_successor(cover)
         return cover
 
     def remove_cover(self, source_id: NodeIdLike, target_id: NodeIdLike) -> None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
         cover = self.cover(source_id, target_id)
-
         if not cover:
             raise ValueError(f'Cover does not exist: {source_id} -> {target_id}')
-
-        self._covers[source_id].pop(target_id)
-        if not self._covers[source_id]:
-            self._covers.pop(source_id)
+        self._covers.pop(source_id)
 
     def edge_likes(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[EdgeLike]:
         return cast('List[KCFG.EdgeLike]', self.edges(source_id=source_id, target_id=target_id)) + cast(
@@ -787,17 +784,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def contains_split(self, split: Split) -> bool:
         return split in self._splits
 
-    def create_split(self, source_id: NodeIdLike, splits: Iterable[tuple[NodeIdLike, CSubst]]) -> None:
-        splits = list(splits)
-        self._check_no_successors(source_id)
-        self._check_no_zero_loops(source_id, [id for id, _ in splits])
-
-        if len(splits) <= 1:
-            raise ValueError(f'Cannot create split node with less than 2 targets: {source_id} -> {splits}')
-
+    def create_split(self, source_id: NodeIdLike, splits: Iterable[tuple[NodeIdLike, CSubst]]) -> KCFG.Split:
         source_id = self._resolve(source_id)
-        split = KCFG.Split(self.node(source_id), tuple((self.node(nid), csubst) for nid, csubst in splits))
-        self._splits[source_id] = split
+        split = KCFG.Split(self.node(source_id), tuple((self.node(nid), csubst) for nid, csubst in list(splits)))
+        self.add_successor(split)
+        return split
 
     def ndbranches(self, *, source_id: NodeIdLike | None = None, target_id: NodeIdLike | None = None) -> list[NDBranch]:
         source_id = self._resolve(source_id) if source_id is not None else None
@@ -813,19 +804,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     def create_ndbranch(
         self, source_id: NodeIdLike, ndbranches: Iterable[NodeIdLike], rules: Iterable[str] = ()
-    ) -> None:
-        ndbranches = list(ndbranches)
-        self._check_no_successors(source_id)
-        self._check_no_zero_loops(source_id, ndbranches)
-
-        if len(ndbranches) <= 1:
-            raise ValueError(
-                f'Cannot create non-deterministic branches node with less than 2 targets: {source_id} -> {ndbranches}'
-            )
-
+    ) -> KCFG.NDBranch:
         source_id = self._resolve(source_id)
-        ndbranch = KCFG.NDBranch(self.node(source_id), tuple(self.node(nid) for nid in ndbranches), tuple(rules))
-        self._ndbranches[source_id] = ndbranch
+        ndbranch = KCFG.NDBranch(self.node(source_id), tuple(self.node(nid) for nid in list(ndbranches)), tuple(rules))
+        self.add_successor(ndbranch)
+        return ndbranch
 
     def split_on_constraints(self, source_id: NodeIdLike, constraints: Iterable[KInner]) -> list[int]:
         source = self.node(source_id)
@@ -1045,62 +1028,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     @staticmethod
     def read_cfg_data(cfg_dir: Path, id: str) -> KCFG:
-        cfg = KCFG(cfg_dir)
-
         assert cfg_dir is not None
-
         cfg_json = cfg_dir / 'kcfg.json'
         nodes_dir = cfg_dir / 'nodes'
         dct = json.loads(cfg_json.read_text())
-
+        nodes_dct = [
+            json.loads((nodes_dir / (str(node_id) + '.json')).read_text()) for node_id in dct.get('nodes') or []
+        ]
+        dct['nodes'] = nodes_dct
+        cfg = KCFG.from_dict(dct)
         cfg.cfg_dir = cfg_dir
-
-        max_id = 0
-        for node_id in dct.get('nodes') or []:
-            max_id = max(max_id, node_id)
-            node_json = nodes_dir / (str(node_id) + '.json')
-            node_dict = json.loads(node_json.read_text())
-            cterm = CTerm.from_dict(node_dict['cterm'])
-            node = KCFG.Node(node_id, cterm)
-            cfg.add_node(node)
-
-        cfg._node_id = dct.get('next', max_id + 1)
-
-        for edge_dict in dct.get('edges') or []:
-            source_id = edge_dict['source']
-            target_id = edge_dict['target']
-            depth = edge_dict['depth']
-            rules = edge_dict['rules']
-            cfg.create_edge(source_id, target_id, depth, rules=rules)
-
-        for cover_dict in dct.get('covers') or []:
-            source_id = cover_dict['source']
-            target_id = cover_dict['target']
-            csubst = CSubst.from_dict(cover_dict['csubst'])
-            cfg.create_cover(source_id, target_id, csubst=csubst)
-
-        for vacuous_id in dct.get('vacuous') or []:
-            cfg.add_vacuous(vacuous_id)
-
-        for stuck_id in dct.get('stuck') or []:
-            cfg.add_stuck(stuck_id)
-
-        for alias, node_id in dct.get('aliases', {}).items():
-            cfg.add_alias(alias=alias, node_id=node_id)
-
-        for split_dict in dct.get('splits') or []:
-            source_id = split_dict['source']
-            targets = [
-                (target_dict['target'], CSubst.from_dict(target_dict['csubst']))
-                for target_dict in split_dict['targets']
-            ]
-            cfg.create_split(source_id, targets)
-
-        for ndbranch_dict in dct.get('ndbranches') or []:
-            source_id = ndbranch_dict['source']
-            target_ids = ndbranch_dict['targets']
-            cfg.create_ndbranch(source_id, target_ids)
-
         return cfg
 
 
