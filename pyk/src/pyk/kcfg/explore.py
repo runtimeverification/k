@@ -219,12 +219,12 @@ class KCFGExplore:
     def extend_cterm(
         self,
         _cterm: CTerm,
+        node_id: int,
         *,
         execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         module_name: str | None = None,
-        node_id: int,
     ) -> KCFGExtendResult:
         def log(message: str, *, warning: bool = False) -> None:
             _LOGGER.log(logging.WARNING if warning else logging.INFO, f'Extend result for {self.id}: {message}')

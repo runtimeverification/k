@@ -12,7 +12,7 @@ from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
 from ..utils import ensure_dir_path
-from .proof import Proof, ProofStatus, ProofSummary, Prover
+from .proof import Proof, ProofStatus, ProofSummary, Prover, StepResult
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -54,6 +54,16 @@ class ImpliesProof(Proof):
         self.simplified_antecedent = simplified_antecedent
         self.simplified_consequent = simplified_consequent
         self.csubst = csubst
+
+    def commit(self, result: StepResult) -> None:
+        proof_type = type(self).__name__
+        if isinstance(result, ImpliesProofResult):
+            self.csubst = result.csubst
+            self.simplified_antecedent = result.simplified_antecedent
+            self.simplified_consequent = result.simplified_consequent
+            _LOGGER.info(f'{proof_type} finished {self.id}: {self.status}')
+        else:
+            raise ValueError(f'Incorrect result type, expected ImpliesProofResult: {result}')
 
     @property
     def status(self) -> ProofStatus:
@@ -372,6 +382,13 @@ class RefutationSummary(ProofSummary):
         ]
 
 
+@dataclass
+class ImpliesProofResult(StepResult):
+    csubst: CSubst | None
+    simplified_antecedent: KInner | None
+    simplified_consequent: KInner | None
+
+
 class ImpliesProver(Prover):
     proof: ImpliesProof
 
@@ -379,41 +396,46 @@ class ImpliesProver(Prover):
         super().__init__(kcfg_explore)
         self.proof = proof
 
-    def step_proof(self) -> None:
+    def step_proof(self) -> Iterable[StepResult]:
         proof_type = type(self.proof).__name__
         _LOGGER.info(f'Attempting {proof_type} {self.proof.id}')
 
         if self.proof.status is not ProofStatus.PENDING:
             _LOGGER.info(f'{proof_type} finished {self.proof.id}: {self.proof.status}')
-            return
+            return []
 
         # to prove the equality, we check the implication of the form `constraints #Implies LHS #Equals RHS`, i.e.
         # "LHS equals RHS under these constraints"
-        antecedent_simplified_kast, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.antecedent)
-        consequent_simplified_kast, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.consequent)
-        self.proof.simplified_antecedent = antecedent_simplified_kast
-        self.proof.simplified_consequent = consequent_simplified_kast
-        _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.pretty_print(antecedent_simplified_kast)}')
-        _LOGGER.info(f'Simplified consequent: {self.kcfg_explore.pretty_print(consequent_simplified_kast)}')
+        simplified_antecedent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.antecedent)
+        simplified_consequent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.consequent)
+        _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.pretty_print(simplified_antecedent)}')
+        _LOGGER.info(f'Simplified consequent: {self.kcfg_explore.pretty_print(simplified_consequent)}')
 
-        if is_bottom(antecedent_simplified_kast):
+        csubst: CSubst | None = None
+
+        if is_bottom(simplified_antecedent):
             _LOGGER.warning(f'Antecedent of implication (proof constraints) simplifies to #Bottom {self.proof.id}')
-            self.proof.csubst = CSubst(Subst({}), ())
+            csubst = CSubst(Subst({}), ())
 
-        elif is_top(consequent_simplified_kast):
+        elif is_top(simplified_consequent):
             _LOGGER.warning(f'Consequent of implication (proof equality) simplifies to #Top {self.proof.id}')
-            self.proof.csubst = CSubst(Subst({}), ())
+            csubst = CSubst(Subst({}), ())
 
         else:
             # TODO: we should not be forced to include the dummy configuration in the antecedent and consequent
             dummy_config = self.kcfg_explore.cterm_symbolic._definition.empty_config(sort=GENERATED_TOP_CELL)
             _result = self.kcfg_explore.cterm_symbolic.implies(
-                antecedent=CTerm(config=dummy_config, constraints=[self.proof.simplified_antecedent]),
-                consequent=CTerm(config=dummy_config, constraints=[self.proof.simplified_consequent]),
+                antecedent=CTerm(config=dummy_config, constraints=[simplified_antecedent]),
+                consequent=CTerm(config=dummy_config, constraints=[simplified_consequent]),
                 bind_universally=self.proof.bind_universally,
             )
             result = _result.csubst
             if result is not None:
-                self.proof.csubst = result
+                csubst = result
 
         _LOGGER.info(f'{proof_type} finished {self.proof.id}: {self.proof.status}')
+        return [
+            ImpliesProofResult(
+                csubst=csubst, simplified_antecedent=simplified_antecedent, simplified_consequent=simplified_consequent
+            )
+        ]
