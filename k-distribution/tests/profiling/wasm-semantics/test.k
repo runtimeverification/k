@@ -22,11 +22,11 @@ module WASM-DATA-COMMON-SYNTAX
   syntax String  ::=
     "#parseWasmString" "(" WasmStringToken ")" [function, hook(STRING.token2string), klabel(#parseWasmString), total]
   syntax DataString  ::=
-    List{WasmString,""} [klabel(listWasmString)]
+    List{WasmString,""} [symbol(listWasmString)]
   syntax Index  ::=
     WasmInt
   syntax ElemSegment  ::=
-    List{Index,""} [klabel(listIndex)]
+    List{Index,""} [symbol(listIndex)]
   syntax IValType  ::=
     "i32" [klabel(i32), symbol]
   | "i64" [klabel(i64), symbol]
@@ -37,7 +37,7 @@ module WASM-DATA-COMMON-SYNTAX
     IValType
   | FValType
   syntax ValTypes  ::=
-    List{ValType,""} [klabel(listValTypes), symbol]
+    List{ValType,""} [symbol(listValTypes)]
   syntax WasmInt  ::=
     Int
   syntax Mut  ::=
@@ -75,7 +75,7 @@ module WASM-DATA-COMMON
     "#ContextLookup" "(" Map "," Index ")" [function, klabel(#ContextLookup)]
   rule #ContextLookup(_IDS:Map, I:Int) => I
   syntax Ints  ::=
-    List{Int,""} [klabel(listInt), symbol]
+    List{Int,""} [symbol(listInt)]
   syntax Int  ::=
     "#lenElemSegment" "(" ElemSegment ")" [function, klabel(#lenElemSegment)]
   syntax Index  ::=
@@ -547,13 +547,13 @@ module WASM-COMMON-SYNTAX
     Instr
   | Defn
   syntax EmptyStmts  ::=
-    List{EmptyStmt,""} [klabel(listStmt), symbol]
+    List{EmptyStmt,""} [overload(listStmt), symbol(listStmt)]
   syntax Instrs  ::=
-    List{Instr,""} [klabel(listStmt)]
+    List{Instr,""} [overload(listStmt)]
   syntax Defns  ::=
-    List{Defn,""} [klabel(listStmt)]
+    List{Defn,""} [overload(listStmt)]
   syntax Stmts  ::=
-    List{Stmt,""} [klabel(listStmt)]
+    List{Stmt,""} [overload(listStmt)]
   syntax Instrs  ::=
     EmptyStmts
   syntax Defns  ::=
@@ -593,7 +593,7 @@ module WASM-COMMON-SYNTAX
   | TypeKeyWord ValTypes
   | "param" Identifier ValType
   syntax TypeDecls  ::=
-    List{TypeDecl,""} [klabel(listTypeDecl)]
+    List{TypeDecl,""} [symbol(listTypeDecl)]
   syntax StoreOp  ::=
     "store" [klabel(storeOpStore), symbol]
   | "store8" [klabel(storeOpStore8), symbol]
@@ -1563,7 +1563,7 @@ module WASM-TEXT-COMMON-SYNTAX
   | "local" ValTypes
   | "local" Identifier ValType
   syntax LocalDecls  ::=
-    List{LocalDecl,""} [klabel(listLocalDecl)]
+    List{LocalDecl,""} [symbol(listLocalDecl)]
   syntax TableDefn  ::=
     "(" "table" OptionalId TableSpec ")"
   syntax TableSpec  ::=

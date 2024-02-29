@@ -27,8 +27,8 @@ module IMP-SYNTAX
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}               [klabel(exps)]
-  syntax AExps ::= List{AExp,","}             [klabel(exps)]
+  syntax Ids   ::= List{Id,","}               [overload(exps)]
+  syntax AExps ::= List{AExp,","}             [overload(exps)]
   syntax Stmts ::= List{Stmt,""}
   syntax AExps ::= Ids
 endmodule

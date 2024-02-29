@@ -82,7 +82,7 @@ module IELE-COMMON
   syntax LocalName  ::=
     "%" IeleName
   syntax LocalNames  ::=
-    List{LocalName,","} [klabel(localNameList)]
+    List{LocalName,","}
   syntax Constant  ::=
     IntConstant
   | GlobalName
@@ -95,16 +95,16 @@ module IELE-COMMON
   syntax LValue  ::=
     LocalName
   syntax LValues  ::=
-    NeList{LValue,","} [klabel(lvalueList)]
+    NeList{LValue,","}
   syntax Operand  ::=
     LValue
   | Constant
   syntax Operands  ::=
-    List{Operand,","} [klabel(operandList)]
+    List{Operand,","} [overload(operandList)]
   syntax NonEmptyOperands  ::=
-    NeList{Operand,","} [klabel(operandList)]
+    NeList{Operand,","} [overload(operandList)]
   syntax Ints  ::=
-    List{Int,","} [klabel(operandList)]
+    List{Int,","} [overload(operandList)]
   syntax Operands  ::=
     Ints
   syntax Operands  ::=
@@ -114,7 +114,7 @@ module IELE-COMMON
   syntax NonEmptyOperands  ::=
     NonEmptyInts
   syntax NonEmptyInts  ::=
-    NeList{Int,","} [klabel(operandList)]
+    NeList{Int,","} [overload(operandList)]
   syntax AssignInst  ::=
     LValue "=" Operand
   syntax LoadInst  ::=
@@ -293,17 +293,17 @@ module IELE-COMMON
   | CreateInst
   | SelfdestructInst
   syntax Instructions  ::=
-    List{Instruction,""} [format(%1%2%n%3), klabel(instructionList)]
+    List{Instruction,""} [format(%1%2%n%3)]
   syntax TopLevelDefinition  ::=
     FunctionDefinition
   | GlobalDefinition
   | ContractDeclaration
   syntax TopLevelDefinitions  ::=
-    List{TopLevelDefinition,""} [format(%1%2%n%3), klabel(topLevelDefinitionList)]
+    List{TopLevelDefinition,""} [format(%1%2%n%3)]
   syntax ContractDefinition  ::=
     "contract" IeleName "{" TopLevelDefinitions "}" [format(%1 %2 %3%n%i%4%d%n%5)]
   syntax Contract  ::=
-    List{ContractDefinition,""} [klabel(contractDefinitionList)]
+    List{ContractDefinition,""}
   syntax ContractDeclaration  ::=
     "external" "contract" IeleName
   syntax GlobalDefinition  ::=
@@ -318,7 +318,7 @@ module IELE-COMMON
   syntax LabeledBlock  ::=
     IeleName ":" Instructions
   syntax LabeledBlocks  ::=
-    List{LabeledBlock,""} [klabel(labeledBlockList)]
+    List{LabeledBlock,""}
   syntax UnlabeledBlock  ::=
     Instructions
   syntax Blocks

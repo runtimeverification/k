@@ -766,7 +766,7 @@ module JSON-SYNTAX
   imports public BOOL-SYNTAX
   imports public FLOAT-SYNTAX
   syntax JSONs  ::=
-    List{JSON,","} [klabel(JSONs), symbol]
+    List{JSON,","} [symbol(JSONs)]
   syntax JSONKey  ::=
     String
   syntax JSON  ::=
