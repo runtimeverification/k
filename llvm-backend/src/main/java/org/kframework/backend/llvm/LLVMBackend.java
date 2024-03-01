@@ -186,8 +186,8 @@ public class LLVMBackend extends KoreBackend {
             ExceptionType.USELESS_RULE,
             KException.KExceptionGroup.COMPILER,
             ex.getMessage(),
-            ex.getSource().get(),
-            ex.getLocation().get());
+            ex.getSource().orElse(null),
+            ex.getLocation().orElse(null));
       }
 
       case NON_EXHAUSTIVE_MATCH -> {
@@ -195,8 +195,8 @@ public class LLVMBackend extends KoreBackend {
             ExceptionType.NON_EXHAUSTIVE_MATCH,
             KException.KExceptionGroup.COMPILER,
             ex.getMessage(),
-            ex.getSource().get(),
-            ex.getLocation().get());
+            ex.getSource().orElse(null),
+            ex.getLocation().orElse(null));
       }
 
       case INTERNAL_ERROR -> throw KEMException.internalError(
