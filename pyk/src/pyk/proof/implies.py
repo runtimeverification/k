@@ -12,7 +12,7 @@ from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, TRUE
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
 from ..utils import ensure_dir_path
-from .proof import Proof, ProofStatus, ProofSummary, Prover, StepResult
+from .proof import FailureInfo, Proof, ProofStatus, ProofSummary, Prover, StepResult
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -439,3 +439,7 @@ class ImpliesProver(Prover):
                 csubst=csubst, simplified_antecedent=simplified_antecedent, simplified_consequent=simplified_consequent
             )
         ]
+
+    def failure_info(self) -> FailureInfo:
+        # TODO add implementation
+        return FailureInfo()
