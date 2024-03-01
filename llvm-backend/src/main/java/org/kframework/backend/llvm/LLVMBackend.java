@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.llvm.matching.MatchingException;
@@ -179,6 +182,18 @@ public class LLVMBackend extends KoreBackend {
     sw.printIntermediate("  \u2514" + executable + ": " + type);
   }
 
+  private Optional<Source> getSource(MatchingException ex) {
+    return ex.getSource().map(s -> new Source(s.getSource()));
+  }
+
+  private Optional<Location> getLocation(MatchingException ex) {
+    return ex.getLocation()
+        .map(
+            l ->
+                new Location(
+                    l.getStartLine(), l.getEndLine(), l.getStartColumn(), l.getEndColumn()));
+  }
+
   private KException translateError(MatchingException ex) {
     switch (ex.getType()) {
       case USELESS_RULE -> {
@@ -186,8 +201,8 @@ public class LLVMBackend extends KoreBackend {
             ExceptionType.USELESS_RULE,
             KException.KExceptionGroup.COMPILER,
             ex.getMessage(),
-            ex.getSource().orElse(null),
-            ex.getLocation().orElse(null));
+            getSource(ex).orElse(null),
+            getLocation(ex).orElse(null));
       }
 
       case NON_EXHAUSTIVE_MATCH -> {
@@ -195,15 +210,15 @@ public class LLVMBackend extends KoreBackend {
             ExceptionType.NON_EXHAUSTIVE_MATCH,
             KException.KExceptionGroup.COMPILER,
             ex.getMessage(),
-            ex.getSource().orElse(null),
-            ex.getLocation().orElse(null));
+            getSource(ex).orElse(null),
+            getLocation(ex).orElse(null));
       }
 
       case INTERNAL_ERROR -> throw KEMException.internalError(
-          ex.getMessage(), ex, ex.getLocation(), ex.getSource());
+          ex.getMessage(), ex, getLocation(ex), getSource(ex));
 
       case COMPILER_ERROR -> throw KEMException.compilerError(
-          ex.getMessage(), ex, ex.getLocation(), ex.getSource());
+          ex.getMessage(), ex, getLocation(ex), getSource(ex));
     }
 
     throw KEMException.criticalError("Unhandled pattern matching exception", ex);
