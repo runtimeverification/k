@@ -14,12 +14,14 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.llvm.matching.Matching;
+import org.kframework.backend.llvm.matching.MatchingException;
 import org.kframework.compile.Backend;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -66,8 +68,9 @@ public class LLVMBackend extends KoreBackend {
         globalOptions.includesExceptionType(ExceptionType.USELESS_RULE),
         options.enableSearch,
         ex -> {
-          kem.addKException(ex);
-          if (globalOptions.includesExceptionType(ex.getType())) {
+          var translated = translateError(ex);
+          kem.addKException(translated);
+          if (globalOptions.includesExceptionType(translated.getType())) {
             warnings.increment();
           }
           return null;
@@ -174,6 +177,36 @@ public class LLVMBackend extends KoreBackend {
       throw KEMException.criticalError("Error with I/O while executing llvm-kompile", e);
     }
     sw.printIntermediate("  \u2514" + executable + ": " + type);
+  }
+
+  private KException translateError(MatchingException ex) {
+    switch (ex.getType()) {
+      case USELESS_RULE -> {
+        return new KException(
+            ExceptionType.USELESS_RULE,
+            KException.KExceptionGroup.COMPILER,
+            ex.getMessage(),
+            ex.getSource().get(),
+            ex.getLocation().get());
+      }
+
+      case NON_EXHAUSTIVE_MATCH -> {
+        return new KException(
+            ExceptionType.NON_EXHAUSTIVE_MATCH,
+            KException.KExceptionGroup.COMPILER,
+            ex.getMessage(),
+            ex.getSource().get(),
+            ex.getLocation().get());
+      }
+
+      case INTERNAL_ERROR -> throw KEMException.internalError(
+          ex.getMessage(), ex, ex.getLocation(), ex.getSource());
+
+      case COMPILER_ERROR -> throw KEMException.compilerError(
+          ex.getMessage(), ex, ex.getLocation(), ex.getSource());
+    }
+
+    throw KEMException.criticalError("Unhandled pattern matching exception", ex);
   }
 
   private String getThreshold() {
