@@ -2,8 +2,8 @@ module MULTIPLE-DEFINITIONS
   imports A
   imports B
   imports BOOL
-  
-  syntax KItem  ::= a(KItem) [klabel(a), symbol]
+
+  syntax KItem  ::= a(KItem) [symbol(a)]
                   | "b"
                   | "c"
   rule a(X) => b requires isInt(X)

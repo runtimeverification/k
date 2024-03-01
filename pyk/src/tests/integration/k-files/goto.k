@@ -15,9 +15,9 @@ module GOTO-SYNTAX
                   | "RETURN"
                   | "GT"
                   | "JUMP" Int
-                  | "JUMPI" Int [klabel(jumpi), symbol]
+                  | "JUMPI" Int [symbol(jumpi)]
 
-  syntax Stack ::= ".Stack" | Int ":" Stack [klabel(ws), symbol]
+  syntax Stack ::= ".Stack" | Int ":" Stack [symbol(ws)]
 
   syntax Int ::= Int "<Word" Int [function, total]
   rule I1 <Word I2 => #if I1 <Int I2 #then 1 #else 0 #fi

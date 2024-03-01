@@ -15,7 +15,7 @@ module CELL-MAP
                     </account>
                   </accounts>
 
-    syntax KItem ::= #accountNonexistent ( Int ) [klabel(accountNonexistent), symbol]
+    syntax KItem ::= #accountNonexistent ( Int ) [symbol(accountNonexistent)]
     rule <k> #accountNonexistent(I) => true ... </k>
          <activeAccounts> ACCTS </activeAccounts>
       requires notBool I in ACCTS
