@@ -35,6 +35,7 @@ class Proof(ABC):
     proof_dir: Path | None
     _subproofs: dict[str, Proof]
     admitted: bool
+    failure_info: FailureInfo | None
 
     @property
     def proof_subdir(self) -> Path | None:
@@ -294,12 +295,20 @@ class StepResult:
     ...
 
 
+class FailureInfo:
+    ...
+
+
 class Prover:
     kcfg_explore: KCFGExplore
     proof: Proof
 
     def __init__(self, kcfg_explore: KCFGExplore):
         self.kcfg_explore = kcfg_explore
+
+    @abstractmethod
+    def failure_info(self) -> FailureInfo:
+        ...
 
     @abstractmethod
     def step_proof(self) -> Iterable[StepResult]:
@@ -317,4 +326,6 @@ class Prover:
             results = self.step_proof()
             for result in results:
                 self.proof.commit(result)
+            if self.proof.failed:
+                self.proof.failure_info = self.failure_info()
             self.proof.write_proof_data()

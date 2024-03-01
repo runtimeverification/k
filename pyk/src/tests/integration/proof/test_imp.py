@@ -15,6 +15,7 @@ from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProof, APRProver, ProofStatus
+from pyk.proof.reachability import APRFailureInfo
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
@@ -1035,6 +1036,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         prover.advance_proof()
 
         failure_info = prover.failure_info()
+        assert isinstance(failure_info, APRFailureInfo)
 
         actual_pending = len(failure_info.pending_nodes)
         actual_failing = len(failure_info.failing_nodes)
