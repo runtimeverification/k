@@ -19,7 +19,7 @@ from ..konvert import kflatmodule_to_kore
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
-from .proof import CompositeSummary, Proof, ProofStatus, StepResult
+from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus, StepResult
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -78,7 +78,6 @@ class APRProof(Proof, KCFGExploration):
     _bounded: set[int]
     logs: dict[int, tuple[LogEntry, ...]]
     circularity: bool
-    failure_info: APRFailureInfo | None
     _exec_time: float
     error_info: Exception | None
 
@@ -750,7 +749,7 @@ class APRProver(Prover):
         )
         return [APRProofExtendResult(node_id=curr_node.id, extend_result=extend_result)]
 
-    def failure_info(self) -> APRFailureInfo:
+    def failure_info(self) -> FailureInfo:
         return APRFailureInfo.from_proof(self.proof, self.kcfg_explore, counterexample_info=self.counterexample_info)
 
 
@@ -794,7 +793,7 @@ class APRSummary(ProofSummary):
 
 
 @dataclass(frozen=True)
-class APRFailureInfo:
+class APRFailureInfo(FailureInfo):
     pending_nodes: frozenset[int]
     failing_nodes: frozenset[int]
     path_conditions: FrozenDict[int, str]
