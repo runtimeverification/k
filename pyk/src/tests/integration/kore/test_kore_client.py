@@ -197,9 +197,7 @@ GET_MODEL_WITH_SMT_TEST_DATA: Final = (
                     BOOL,
                     INT,
                     TRUE,
-                    eq_int(
-                        App("Lblchop'LParUndsRParUnds'SMT'Unds'Int'Unds'Int", (), (EVar('x', INT),)), EVar('x', INT)
-                    ),
+                    eq_int(App('Lblchop', (), (EVar('x', INT),)), EVar('x', INT)),
                 ),
                 Equals(BOOL, INT, TRUE, eq_int(EVar('x', INT), int_dv(1))),
             ),
@@ -220,7 +218,7 @@ GET_MODEL_WITH_SMT_TEST_DATA: Final = (
                     TRUE,
                     eq_int(
                         App(
-                            "Lblchop'LParUndsRParUnds'SMT'Unds'Int'Unds'Int",
+                            'Lblchop',
                             (),
                             (
                                 App(

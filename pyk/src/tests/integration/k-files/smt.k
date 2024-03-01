@@ -6,7 +6,7 @@ module SMT
 
     syntax Pgm ::= Bool | Int
 
-    syntax Int ::= chop ( Int )           [function, total, klabel(chop), smtlib(chop)]
+    syntax Int ::= chop ( Int )           [function, total, symbol(chop), smtlib(chop)]
     syntax Int ::= "pow256"               [alias] /* 2 ^Int 256 */
 
     rule pow256 => 115792089237316195423570985008687907853269984665640564039457584007913129639936
