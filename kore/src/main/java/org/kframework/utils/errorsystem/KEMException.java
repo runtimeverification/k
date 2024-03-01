@@ -2,6 +2,7 @@
 package org.kframework.utils.errorsystem;
 
 import java.util.Objects;
+import java.util.Optional;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -96,6 +97,17 @@ public class KEMException extends RuntimeException {
         node.source().orElse(null));
   }
 
+  public static KEMException internalError(
+      String message, Throwable e, Optional<Location> location, Optional<Source> source) {
+    return create(
+        ExceptionType.ERROR,
+        KExceptionGroup.INTERNAL,
+        message,
+        e,
+        location.orElse(null),
+        source.orElse(null));
+  }
+
   public static KEMException compilerError(String message) {
     return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null);
   }
@@ -122,6 +134,17 @@ public class KEMException extends RuntimeException {
         e,
         node.location().orElse(null),
         node.source().orElse(null));
+  }
+
+  public static KEMException compilerError(
+      String message, Throwable e, Optional<Location> location, Optional<Source> source) {
+    return create(
+        ExceptionType.ERROR,
+        KExceptionGroup.COMPILER,
+        message,
+        e,
+        location.orElse(null),
+        source.orElse(null));
   }
 
   public static KEMException innerParserError(String message) {
