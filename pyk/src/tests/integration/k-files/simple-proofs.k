@@ -9,17 +9,17 @@ module SIMPLE-PROOFS
     configuration <k> $PGM:KItem </k>
                   <state> .Map </state>
 
-    syntax Bool ::= pred1 ( Int ) [function, total, klabel(pred1), symbol, no-evaluators]
+    syntax Bool ::= pred1 ( Int ) [function, total, symbol(pred1), no-evaluators]
     syntax KItem ::= "foo" | "bar"
 
-    syntax Foo ::= foo ( Bar ) [klabel(foo), symbol]
+    syntax Foo ::= foo ( Bar ) [symbol(foo)]
 
     syntax Bar ::= Baz
 
-    syntax Baz ::= "foo-bar" | "baz" [klabel(baz), symbol]
+    syntax Baz ::= "foo-bar" | "baz" [symbol(baz)]
 
-    syntax BarHolder ::= hold ( Foo , Bar ) [klabel(barholder), symbol]
-                       | hold2 ( Bar , Baz ) [klabel(barholder2), symbol]
+    syntax BarHolder ::= hold ( Foo , Bar ) [symbol(barholder)]
+                       | hold2 ( Bar , Baz ) [symbol(barholder2)]
 
     rule [foo-to-bar]:
          <k> foo => bar ... </k>
@@ -44,9 +44,9 @@ module SIMPLE-PROOFS
     rule [c.e]: <k> c => e ... </k>
     rule [d.e]: <k> d => e ... </k>
 
-    syntax KItem ::= "mybytes" [symbol, klabel(mybytes), function, total]
+    syntax KItem ::= "mybytes" [symbol(mybytes), function, total]
     rule mybytes => b"\x00\x90\xa0\n\xa1\xf1\x61"
 
-    syntax Foo ::= abcd(K) [klabel(abcd), symbol]
+    syntax Foo ::= abcd(K) [symbol(abcd)]
 
 endmodule

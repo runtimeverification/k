@@ -45,11 +45,11 @@ module MINI-KEVM
 
     // Hashed Locations
 
-    syntax IntList ::= List{Int, ""} [klabel(intList), smtlib(intList)]
+    syntax IntList ::= List{Int, ""} [symbol(intList), smtlib(intList)]
 
     syntax Int ::= keccak ( Bytes ) [function, total, no-evaluators, smtlib(keccak)]
 
-    syntax Int ::= #hashedLocation( String , Int , IntList ) [function, klabel(hashLoc), smtlib(hashLoc)]
+    syntax Int ::= #hashedLocation( String , Int , IntList ) [function, symbol(hashLoc), smtlib(hashLoc)]
     rule #hashedLocation(_LANG, BASE, .IntList      ) => BASE
     rule #hashedLocation( LANG, BASE, OFFSET OFFSETS) => #hashedLocation(LANG, #hashedLocation(LANG, BASE, OFFSET .IntList), OFFSETS) requires OFFSETS =/=K .IntList
 
