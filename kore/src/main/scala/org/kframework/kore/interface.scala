@@ -5,6 +5,7 @@ import java.util.Optional
 import org.kframework.attributes._
 import org.kframework.unparser.ToKast
 import org.kframework.utils.errorsystem.KEMException
+import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 /**
@@ -72,7 +73,7 @@ trait KItem extends K
 
 trait KLabel extends AttValue {
   def name: String
-  def params: Seq[Sort]
+  def params: immutable.Seq[Sort]
   override def equals(other: Any) = other match {
     case l: KLabel => name == l.name && params == l.params
     case _         => false
@@ -105,7 +106,7 @@ trait KToken extends KItem {
 
 trait Sort extends Ordered[Sort] with AttValue {
   def name: String
-  def params: Seq[Sort]
+  def params: immutable.Seq[Sort]
   override def equals(other: Any) = other match {
     case other: Sort => name == other.name && params == other.params
     case _           => false
