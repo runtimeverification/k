@@ -38,6 +38,43 @@ if TYPE_CHECKING:
 NodeIdLike = int | str
 
 
+class KCFGStore:
+    store_path: Path
+
+    def __init__(self, store_path: Path) -> None:
+        self.store_path = store_path
+        ensure_dir_path(store_path)
+        ensure_dir_path(self.kcfg_node_dir)
+
+    @property
+    def kcfg_json_path(self) -> Path:
+        return self.store_path / 'kcfg.json'
+
+    @property
+    def kcfg_node_dir(self) -> Path:
+        return self.store_path / 'nodes'
+
+    def kcfg_node_path(self, node_id: int) -> Path:
+        return self.kcfg_node_dir / f'{node_id}.json'
+
+    def write_cfg_data(
+        self, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
+    ) -> None:
+        node_dict = {node_dct['id']: node_dct for node_dct in dct['nodes']}
+        for node_id in deleted_nodes:
+            self.kcfg_node_path(node_id).unlink(missing_ok=True)
+        for node_id in created_nodes:
+            self.kcfg_node_path(node_id).write_text(json.dumps(node_dict[node_id]))
+        dct['nodes'] = list(node_dict.keys())
+        self.kcfg_json_path.write_text(json.dumps(dct))
+
+    def read_cfg_data(self) -> dict[str, Any]:
+        dct = json.loads(self.kcfg_json_path.read_text())
+        nodes = [json.loads(self.kcfg_node_path(node_id).read_text()) for node_id in dct.get('nodes') or []]
+        dct['nodes'] = nodes
+        return dct
+
+
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     @final
     @dataclass(frozen=True, order=True)
@@ -293,7 +330,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     _stuck: set[int]
     _aliases: dict[str, int]
     _lock: RLock
-    cfg_dir: Path | None
+
+    _kcfg_store: KCFGStore | None
 
     def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True) -> None:
         self._node_id = 1
@@ -313,9 +351,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._stuck = set()
         self._aliases = {}
         self._lock = RLock()
-        self.cfg_dir = cfg_dir
-        if self.cfg_dir is not None:
-            ensure_dir_path(self.cfg_dir)
+        if cfg_dir is not None:
+            self._kcfg_store = KCFGStore(cfg_dir)
 
     def __contains__(self, item: object) -> bool:
         if type(item) is KCFG.Node:
@@ -974,70 +1011,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return visited
 
     def write_cfg_data(self) -> None:
-        assert self.cfg_dir is not None
-        cfg_json = self.cfg_dir / 'kcfg.json'
-        ensure_dir_path(self.cfg_dir)
-        nodes = [node.id for node in self.nodes]
-        edges = [edge.to_dict() for edge in self.edges()]
-        covers = [cover.to_dict() for cover in self.covers()]
-        splits = [split.to_dict() for split in self.splits()]
-        ndbranches = [ndbranch.to_dict() for ndbranch in self.ndbranches()]
-
-        vacuous = sorted(self._vacuous)
-        stuck = sorted(self._stuck)
-        aliases = dict(sorted(self._aliases.items()))
-        dct: dict[str, list[int] | int | dict[str, int] | list[dict[str, Any]]] = {}
-        dct['next'] = self._node_id
-        dct['nodes'] = nodes
-        dct['edges'] = edges
-        dct['covers'] = covers
-        dct['splits'] = splits
-        dct['ndbranches'] = ndbranches
-        dct['vacuous'] = vacuous
-        dct['stuck'] = stuck
-        dct['aliases'] = aliases
-        cfg_json.write_text(json.dumps(dct))
-
-        for node_id in self._deleted_nodes:
-            self._delete_node_data(node_id)
-        for node_id in self._created_nodes:
-            node = self.get_node(node_id)
-            assert node is not None
-            self._write_node_data(node)
+        assert self._kcfg_store is not None
+        self._kcfg_store.write_cfg_data(
+            self.to_dict(), deleted_nodes=self._deleted_nodes, created_nodes=self._created_nodes
+        )
         self._deleted_nodes.clear()
         self._created_nodes.clear()
 
-    def _write_node_data(self, node: KCFG.Node) -> None:
-        if self.cfg_dir is None:
-            return
-        nodes_dir = self.cfg_dir / 'nodes'
-        ensure_dir_path(nodes_dir)
-        node_json = nodes_dir / (str(node.id) + '.json')
-        node_dict = node.to_dict()
-        node_json.write_text(json.dumps(node_dict))
-
-    def _delete_node_data(self, node_id: int) -> None:
-        if self.cfg_dir is None:
-            return
-        nodes_dir = self.cfg_dir / 'nodes'
-        ensure_dir_path(nodes_dir)
-        node_json = nodes_dir / (str(node_id) + '.json')
-        if not node_json.exists():
-            return
-        node_json.unlink()
-
     @staticmethod
     def read_cfg_data(cfg_dir: Path, id: str) -> KCFG:
-        assert cfg_dir is not None
-        cfg_json = cfg_dir / 'kcfg.json'
-        nodes_dir = cfg_dir / 'nodes'
-        dct = json.loads(cfg_json.read_text())
-        nodes_dct = [
-            json.loads((nodes_dir / (str(node_id) + '.json')).read_text()) for node_id in dct.get('nodes') or []
-        ]
-        dct['nodes'] = nodes_dct
-        cfg = KCFG.from_dict(dct)
-        cfg.cfg_dir = cfg_dir
+        store = KCFGStore(cfg_dir)
+        cfg = KCFG.from_dict(store.read_cfg_data())
+        cfg._kcfg_store = store
         return cfg
 
 
