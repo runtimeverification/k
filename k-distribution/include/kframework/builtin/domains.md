@@ -945,6 +945,14 @@ An element of a `List` is constucted via the `ListItem` operator.
   syntax List ::= ListItem(KItem)             [function, total, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
 ```
 
+### List prepend
+
+An element can be added to the front of a `List` using the `pushList` operator.
+
+```k
+  syntax List ::= pushList(KItem, List)       [function, total, hook(LIST.push), klabel(pushList), symbol]
+```
+
 ### List indexing
 
 You can get an element of a list by its integer offset in O(log(N)) time, or
