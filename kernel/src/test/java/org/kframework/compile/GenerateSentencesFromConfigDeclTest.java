@@ -86,14 +86,15 @@ public class GenerateSentencesFromConfigDeclTest {
                             KLabel(".Opt"),
                             KList(),
                             Att.empty().add(Att.PRODUCTION(), Production.class, prod))))));
-    Module m1 = Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att());
+    Module m1 =
+        Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att.empty());
     RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
     Module m =
         RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), files)
             .getExtensionModule();
     Set<Sentence> gen =
-        GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
-    Att initializerAtts = Att().add(Att.INITIALIZER());
+        GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att.empty(), m);
+    Att initializerAtts = Att.empty().add(Att.INITIALIZER());
     Att productionAtts = initializerAtts.add(Att.FUNCTION());
     Set<Sentence> reference =
         Set(
@@ -104,19 +105,19 @@ public class GenerateSentencesFromConfigDeclTest {
                     Terminal("<threads>"),
                     NonTerminal(Sort("ThreadCellBag")),
                     Terminal("</threads>")),
-                Att()
+                Att.empty()
                     .add(Att.CELL())
                     .add(Att.CELL_NAME(), "threads")
                     .add(Att.FORMAT(), "%1%i%n%2%d%n%3")),
             SyntaxSort(
                 Seq(),
                 Sort("ThreadCellBag"),
-                Att().add(Att.HOOK(), "BAG.Bag").add(Att.CELL_COLLECTION())),
+                Att.empty().add(Att.HOOK(), "BAG.Bag").add(Att.CELL_COLLECTION())),
             Production(
                 KLabel("_ThreadCellBag_"),
                 Sort("ThreadCellBag"),
                 Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),
-                Att()
+                Att.empty()
                     .add(Att.ASSOC(), "")
                     .add(Att.COMM(), "")
                     .add(Att.UNIT(), ".ThreadCellBag")
@@ -131,7 +132,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 KLabel(".ThreadCellBag"),
                 Sort("ThreadCellBag"),
                 Seq(Terminal(".ThreadCellBag")),
-                Att().add(Att.FUNCTION()).add(Att.HOOK(), "BAG.unit")),
+                Att.empty().add(Att.FUNCTION()).add(Att.HOOK(), "BAG.unit")),
             Production(Seq(), Sort("ThreadCellBag"), Seq(NonTerminal(Sort("ThreadCell")))),
             Production(
                 KLabel("ThreadCellBagItem"),
@@ -141,7 +142,10 @@ public class GenerateSentencesFromConfigDeclTest {
                     Terminal("("),
                     NonTerminal(Sort("ThreadCell")),
                     Terminal(")")),
-                Att().add(Att.FUNCTION()).add(Att.HOOK(), "BAG.element").add(Att.FORMAT(), "%3")),
+                Att.empty()
+                    .add(Att.FUNCTION())
+                    .add(Att.HOOK(), "BAG.element")
+                    .add(Att.FORMAT(), "%3")),
             Production(
                 KLabel("<thread>"),
                 Sort("ThreadCell"),
@@ -150,7 +154,7 @@ public class GenerateSentencesFromConfigDeclTest {
                     NonTerminal(Sort("KCell")),
                     NonTerminal(Sort("OptCell")),
                     Terminal("</thread>")),
-                Att()
+                Att.empty()
                     .add(Att.CELL())
                     .add(Att.CELL_NAME(), "thread")
                     .add(Att.MULTIPLICITY(), "*")
@@ -159,7 +163,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 KLabel("<k>"),
                 Sort("KCell"),
                 Seq(Terminal("<k>"), NonTerminal(Sort("K")), Terminal("</k>")),
-                Att()
+                Att.empty()
                     .add(Att.CELL())
                     .add(Att.CELL_NAME(), "k")
                     .add(Att.MAINCELL())
@@ -168,7 +172,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 KLabel("<opt>"),
                 Sort("OptCell"),
                 Seq(Terminal("<opt>"), NonTerminal(Sort("OptCellContent")), Terminal("</opt>")),
-                Att()
+                Att.empty()
                     .add(Att.CELL())
                     .add(Att.CELL_NAME(), "opt")
                     .add(Att.MULTIPLICITY(), "?")
@@ -259,7 +263,7 @@ public class GenerateSentencesFromConfigDeclTest {
                     Terminal("<threads>-fragment"),
                     NonTerminal(Sort("ThreadCellBag")),
                     Terminal("</threads>-fragment")),
-                Att().add(Att.CELL_FRAGMENT(), Sort.class, Sort("ThreadsCell"))),
+                Att.empty().add(Att.CELL_FRAGMENT(), Sort.class, Sort("ThreadsCell"))),
             Production(
                 KLabel("<thread>-fragment"),
                 Sort("ThreadCellFragment"),
@@ -268,19 +272,19 @@ public class GenerateSentencesFromConfigDeclTest {
                     NonTerminal(Sort("KCellOpt")),
                     NonTerminal(Sort("OptCellOpt")),
                     Terminal("</thread>-fragment")),
-                Att().add(Att.CELL_FRAGMENT(), Sort.class, Sort("ThreadCell"))),
+                Att.empty().add(Att.CELL_FRAGMENT(), Sort.class, Sort("ThreadCell"))),
             Production(Seq(), Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
             Production(
                 KLabel("noOptCell"),
                 Sort("OptCellOpt"),
                 Seq(Terminal("noOptCell")),
-                Att().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("OptCell"))),
+                Att.empty().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("OptCell"))),
             Production(Seq(), Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
             Production(
                 KLabel("noKCell"),
                 Sort("KCellOpt"),
                 Seq(Terminal("noKCell")),
-                Att().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("KCell"))));
+                Att.empty().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("KCell"))));
 
     assertEquals("Produced unexpected productions", Set(), gen.$amp$tilde(reference));
     assertEquals("Missing expected productions", Set(), reference.$amp$tilde(gen));

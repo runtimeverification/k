@@ -53,7 +53,7 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>4.8.1</version>
         <executions>
           <execution>
             <id>scala-compile-first</id>
@@ -73,18 +73,10 @@
         </executions>
         <configuration>
           <args>
-            <arg>-Xexperimental</arg>
+            <arg>-Werror</arg>
             <arg>-feature</arg>
             <arg>-deprecation</arg>
-            <arg>-language:implicitConversions</arg>
-            <arg>-language:postfixOps</arg>
           </args>
-          <javacArgs>
-            <javacArg>-source</javacArg>
-            <javacArg>${java.version}</javacArg>
-            <javacArg>-target</javacArg>
-            <javacArg>${java.version}</javacArg>
-          </javacArgs>
         </configuration>
       </plugin>
     </plugins>

@@ -806,7 +806,7 @@ public class DefinitionParsing {
                   new Bubble(
                       rule,
                       contents,
-                      Att()
+                      Att.empty()
                           .add(Att.CONTENT_START_LINE(), 1)
                           .add(Att.CONTENT_START_COLUMN(), 1)
                           .add(Att.SOURCE(), Source.class, source)))
