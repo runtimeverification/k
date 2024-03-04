@@ -136,7 +136,6 @@ class APRProof(Proof, KCFGExploration):
             self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
         elif isinstance(result, APRProofSubsumeResult):
             self.kcfg.create_cover(result.node_id, self.target, csubst=result.csubst)
-            _LOGGER.info(f'Subsumed into target node {self.id}: {shorten_hashes((result.node_id, self.target))}')
         elif isinstance(result, APRProofTerminalResult):
             self._terminal.add(result.node_id)
         elif isinstance(result, APRProofBoundedResult):
@@ -723,18 +722,23 @@ class APRProver(Prover):
                 _LOGGER.warning(f'Bounded node {self.proof.id}: {curr_node.id} at bmc depth {self.proof.bmc_depth}')
                 return [APRProofBoundedResult(curr_node.id)]
 
+        # Terminal checks for current node and target node
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
-
         target_is_terminal = self.proof.target in self.proof._terminal
-        check_subsume = (target_is_terminal and is_terminal) or (not target_is_terminal)
 
-        if check_subsume:
+        terminal_result = [APRProofTerminalResult(node_id=curr_node.id)] if is_terminal else []
+
+        # Subsumption should be checked if and only if the target node
+        # and the current node are either both terminal or both not terminal
+        if is_terminal == target_is_terminal:
             csubst = self._check_subsume(curr_node)
             if csubst is not None:
-                return [APRProofSubsumeResult(csubst=csubst, node_id=curr_node.id)]
+                # Information about the subsumed node being terminal must be returned
+                # so that the set of terminal nodes is correctly updated
+                return terminal_result + [APRProofSubsumeResult(csubst=csubst, node_id=curr_node.id)]
 
         if is_terminal:
-            return [APRProofTerminalResult(node_id=curr_node.id)]
+            return terminal_result
 
         module_name = self.circularities_module_name if self.nonzero_depth(curr_node) else self.dependencies_module_name
 
