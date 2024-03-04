@@ -18,8 +18,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any
 
-    from pytest import MonkeyPatch
-
     from pyk.cterm import CSubst
     from pyk.kast import KInner
 
@@ -443,33 +441,21 @@ def test_aliases() -> None:
         cfg.add_alias('buzz', 10)
 
 
-def test_write_cfg_data(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
-    written_nodes = set()
-    deleted_nodes = set()
-
-    def write_node_data(node: KCFG.Node) -> None:
-        written_nodes.add(node.id)
-
-    def delete_node_data(node_id: int) -> None:
-        deleted_nodes.add(node_id)
+def test_write_cfg_data(tmp_path: Path) -> None:
+    def _written_nodes() -> set[str]:
+        return {nd_path.name for nd_path in (tmp_path / 'nodes').iterdir()}
 
     kcfg = KCFG(cfg_dir=tmp_path)
-    monkeypatch.setattr(kcfg, '_write_node_data', write_node_data)
-    monkeypatch.setattr(kcfg, '_delete_node_data', delete_node_data)
 
     kcfg.add_node(node(1))
     kcfg.add_node(node(2))
     kcfg.add_node(node(3))
 
-    assert written_nodes == set()
-    assert deleted_nodes == set()
+    assert _written_nodes() == set()
 
     kcfg.write_cfg_data()
 
-    assert written_nodes == {1, 2, 3}
-    assert deleted_nodes == set()
-
-    written_nodes.clear()
+    assert _written_nodes() == {'1.json', '2.json', '3.json'}
 
     kcfg.add_node(node(4))
     kcfg.remove_node(1)
@@ -477,13 +463,11 @@ def test_write_cfg_data(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
     kcfg.replace_node(3, node(3).cterm)
     kcfg.add_node(node(2))
 
-    assert written_nodes == set()
-    assert deleted_nodes == set()
+    assert _written_nodes() == {'1.json', '2.json', '3.json'}
 
     kcfg.write_cfg_data()
 
-    assert written_nodes == {2, 3, 4}
-    assert deleted_nodes == {1, 2}
+    assert _written_nodes() == {'2.json', '3.json', '4.json'}
 
 
 def test_pretty_print() -> None:
