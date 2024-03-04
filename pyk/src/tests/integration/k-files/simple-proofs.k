@@ -36,13 +36,14 @@ module SIMPLE-PROOFS
          <k> foo ~> foo ~> foo => baz ~> foo ~> foo ...</k> [owise]
 
     syntax KItem ::= Step
-    syntax Step ::= "a" | "b" | "c" | "d" | "e"
+    syntax Step ::= "a" | "b" | "c" | "d" | "e" | "f"
 
     rule [a.b]: <k> a => b ... </k>
     rule [b.c]: <k> b => c ... </k>
     rule [b.d]: <k> b => d ... </k>
     rule [c.e]: <k> c => e ... </k>
     rule [d.e]: <k> d => e ... </k>
+    rule [e.f]: <k> e => f ... </k>
 
     syntax KItem ::= "mybytes" [symbol(mybytes), function, total]
     rule mybytes => b"\x00\x90\xa0\n\xa1\xf1\x61"
