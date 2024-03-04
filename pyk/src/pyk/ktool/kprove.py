@@ -12,7 +12,7 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
-from ..cterm import CTerm, build_claim
+from ..cterm import CTerm, cterm_build_claim
 from ..kast import Atts, kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
@@ -299,7 +299,7 @@ class KProve(KPrint):
         allow_zero_step: bool = False,
         depth: int | None = None,
     ) -> list[CTerm]:
-        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
+        claim, var_map = cterm_build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
         next_state = self.prove_claim(
             claim,
             claim_id,
