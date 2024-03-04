@@ -5,8 +5,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KSequence, KVariable
+from pyk.kast import Atts, KAtt
+from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
+from pyk.kast.outer import KClaim
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
@@ -280,3 +282,38 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         assert len(refutation.pre_constraints) == 1
         refutation_free_vars = set(free_vars(refutation.pre_constraints[0]))
         assert refutation_free_vars == {'L', 'N'}
+
+    def test_apr_proof_refute_node_to_claim(
+        self,
+        kprove: KProve,
+        proof_dir: Path,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        spec_file = K_FILES / 'refute-node-spec.k'
+        spec_module = 'REFUTE-NODE-SPEC'
+        claim_id = 'triple-split-int-fail'
+
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
+
+        # When
+        prover.advance_proof()
+        failing_node = single(prover.proof.failing)
+        refutation = prover.proof.refute_node(failing_node)
+        assert refutation is not None
+
+        claim, _ = refutation.to_claim('refute-node-claim')
+
+        # Then
+
+        # claim ['refute-node-claim']: <k> ( N:Int <=Int 0 => false ) </k>
+        #   requires _L +Int N:Int <=Int 0 [label(refute-node-claim)]
+        expected = KClaim(
+            body=KRewrite(KApply('_<=Int_', KVariable('N', 'Int'), KToken('0', 'Int')), KToken('false', 'Bool')),
+            requires=KApply(
+                '_<=Int_', KApply('_+Int_', KVariable('_L', None), KVariable('N', 'Int')), KToken('0', 'Int')
+            ),
+            att=KAtt(entries=[Atts.LABEL('refute-node-claim')]),
+        )
+
+        assert claim == expected

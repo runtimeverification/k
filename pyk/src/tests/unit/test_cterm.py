@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cterm import CTerm, build_claim, build_rule
+from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
@@ -98,7 +98,7 @@ BUILD_RULE_TEST_DATA: Final = (
 @pytest.mark.parametrize('lhs,rhs,keep_vars,expected', BUILD_RULE_TEST_DATA, ids=count())
 def test_build_rule(lhs: KInner, rhs: KInner, keep_vars: list[str], expected: KInner) -> None:
     # When
-    rule, _ = build_rule('test-rule', CTerm.from_kast(lhs), CTerm.from_kast(rhs), keep_vars=keep_vars)
+    rule, _ = cterm_build_rule('test-rule', CTerm.from_kast(lhs), CTerm.from_kast(rhs), keep_vars=keep_vars)
     actual = rule.body
 
     # Then
@@ -152,7 +152,7 @@ def test_build_claim(test_id: str, init: KInner, target: KInner, expected: KClai
     target_cterm = CTerm.from_kast(target)
 
     # When
-    actual, _ = build_claim('claim', init_cterm, target_cterm)
+    actual, _ = cterm_build_claim('claim', init_cterm, target_cterm)
 
     # Then
     assert actual == expected

@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from threading import RLock
 from typing import TYPE_CHECKING, List, Union, cast, final
 
-from ..cterm import CSubst, CTerm, build_claim, build_rule
+from ..cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
 from ..kast import EMPTY_ATT
 from ..kast.inner import KApply
 from ..kast.manip import (
@@ -128,9 +128,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             target_cterm = CTerm(_simplify_config(self.target.cterm.config), target_constraints)
             rule: KRuleLike
             if claim:
-                rule, _ = build_claim(sentence_id, init_cterm, target_cterm)
+                rule, _ = cterm_build_claim(sentence_id, init_cterm, target_cterm)
             else:
-                rule, _ = build_rule(sentence_id, init_cterm, target_cterm, priority=priority)
+                rule, _ = cterm_build_rule(sentence_id, init_cterm, target_cterm, priority=priority)
             return rule
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Edge:
