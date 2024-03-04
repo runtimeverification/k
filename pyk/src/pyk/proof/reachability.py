@@ -13,7 +13,7 @@ from ..cterm.cterm import remove_useless_constraints
 from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
-from ..kcfg import KCFG
+from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
 from ..konvert import kflatmodule_to_kore
 from ..prelude.ml import mlAnd, mlTop
@@ -110,7 +110,7 @@ class APRProof(Proof, KCFGExploration):
         self.logs = logs
         self.circularity = circularity
         self.node_refutations = {}
-        self.kcfg.cfg_dir = self.proof_subdir / 'kcfg' if self.proof_subdir else None
+        self.kcfg._kcfg_store = KCFGStore(self.proof_subdir / 'kcfg') if self.proof_subdir else None
         self._exec_time = _exec_time
         self.error_info = error_info
 
