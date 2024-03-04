@@ -49,7 +49,7 @@
                   <arg value="-DCMAKE_PREFIX_PATH=${prefix.path}" />
                   <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
                   <arg value="-DCMAKE_INSTALL_PREFIX=${llvm.backend.prefix}" />
-                  <arg value="-DGC_INTERVAL=${llvm.backend.gc.interval}" />
+                  <arg value="-DK_LLVM_BACKEND_LTO=OFF" />
                   <arg value="${project.basedir}/src/main/native/llvm-backend" />
                 </exec>
                 <property environment="env"/>
