@@ -118,9 +118,7 @@ public class KoreBackend implements Backend {
 
   @Override
   public Function<Definition, Definition> steps() {
-    DefinitionTransformer resolveComm =
-        DefinitionTransformer.from(
-            new ResolveComm(kem)::resolve, "resolve comm simplification rules");
+    KorePipelineStage resolveComm = new ResolveComm(kem);
     Function1<Definition, Definition> resolveStrict =
         d ->
             DefinitionTransformer.from(
@@ -138,8 +136,7 @@ public class KoreBackend implements Backend {
     DefinitionTransformer resolveSemanticCasts =
         DefinitionTransformer.fromSentenceTransformer(
             new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
-    DefinitionTransformer resolveFun =
-        DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
+    KorePipelineStage resolveFun = new ResolveFun();
     Function1<Definition, Definition> resolveFunctionWithConfig =
         d ->
             DefinitionTransformer.from(
@@ -218,7 +215,12 @@ public class KoreBackend implements Backend {
                     new ResolveFunctionWithConfig(d)::resolveConfigVar,
                     "Adding configuration variable to lhs")
                 .apply(d);
-    Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
+    KorePipelineStage resolveIO =
+        new KorePipelineStage("ResolveIO", Set.of("ResolveComm")) {
+          public Definition apply(Definition d) {
+            return Kompile.resolveIOStreams(kem, d);
+          }
+        };
     Function1<Definition, Definition> markExtraConcreteRules =
         d -> MarkExtraConcreteRules.mark(d, kompileOptions.extraConcreteRuleLabels);
     Function1<Definition, Definition> removeAnywhereRules =
@@ -227,10 +229,15 @@ public class KoreBackend implements Backend {
                     this::removeAnywhereRules, "removing anywhere rules for the Haskell backend")
                 .apply(d);
 
+    KorePipeline pipeline = new KorePipeline();
+    pipeline.registerStage(resolveComm);
+    pipeline.registerStage(resolveIO);
+    pipeline.registerStage(resolveFun);
+
+    Function1<Definition, Definition> applyPipeline = pipeline::apply;
+
     return def ->
-        resolveComm
-            .andThen(resolveIO)
-            .andThen(resolveFun)
+        applyPipeline
             .andThen(resolveFunctionWithConfig)
             .andThen(resolveStrict)
             .andThen(resolveAnonVars)

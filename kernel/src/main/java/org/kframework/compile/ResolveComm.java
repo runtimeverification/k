@@ -22,7 +22,18 @@ import org.kframework.kore.KVariable;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-public record ResolveComm(KExceptionManager kem) {
+public class ResolveComm extends KorePipelineStage {
+
+  public KExceptionManager kem;
+
+  @Override
+  public Module apply(Module m) {
+    return resolve(m);
+  }
+
+  public ResolveComm(KExceptionManager kem) {
+    this.kem = kem;
+  }
 
   public Module resolve(Module m) {
     // generate a duplicate simplification rule for symbols that are labeled as `comm`

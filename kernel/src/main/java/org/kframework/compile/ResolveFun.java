@@ -58,13 +58,21 @@ import org.kframework.utils.errorsystem.KEMException;
  * <p>We purposely resolve this construct as early as possible in the pipeline so that later stages
  * which insert implicit side conditions into the rule insert them into the correct rule.
  */
-public class ResolveFun {
+public class ResolveFun extends KorePipelineStage {
 
   private final Set<Production> funProds = new HashSet<>();
   private final Set<Rule> funRules = new HashSet<>();
   private Module module;
   private AddSortInjections inj;
   private final Set<KLabel> klabels = new HashSet<>();
+
+  public ResolveFun() {
+    super("ResolveFun", Set.of("ResolveIO"));
+  }
+
+  public Module apply(Module m) {
+    return resolve(m);
+  }
 
   private KLabel getUniqueLambdaLabel(String nameHint1, String nameHint2) {
     if (klabels.isEmpty()) {
