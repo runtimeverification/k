@@ -121,7 +121,7 @@ public class ResolveAnonVar {
   KVariable newDotVariable(String prefix, K k) {
     KVariable newLabel;
     Att locInfo =
-        Optional.of(Att())
+        Optional.of(Att.empty())
             .flatMap(
                 att ->
                     k.att()
@@ -132,8 +132,8 @@ public class ResolveAnonVar {
                     k.att()
                         .getOptional(Att.LOCATION(), Location.class)
                         .map(l -> att.add(Att.LOCATION(), Location.class, l)))
-            .orElse(Att());
-    Att att = Att().add(Att.ANONYMOUS()).addAll(locInfo);
+            .orElse(Att.empty());
+    Att att = Att.empty().add(Att.ANONYMOUS()).addAll(locInfo);
     if (prefix.equals("?")) {
       att = att.add(Att.FRESH());
     }

@@ -77,7 +77,7 @@ public class GenerateSortProjections {
             KRewrite(KApply(lbl, var), var),
             BooleanUtils.TRUE,
             BooleanUtils.TRUE,
-            Att().add(Att.PROJECTION()));
+            Att.empty().add(Att.PROJECTION()));
     if (mod.definedKLabels().contains(lbl)) {
       return Stream.empty();
     }
@@ -86,7 +86,7 @@ public class GenerateSortProjections {
             lbl,
             sort,
             Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-            Att().add(Att.FUNCTION()).add(Att.PROJECTION()));
+            Att.empty().add(Att.FUNCTION()).add(Att.PROJECTION()));
     if (cover) {
       KLabel sideEffectLbl = KLabel("sideEffect:" + sort);
       Production sideEffect =
@@ -100,7 +100,7 @@ public class GenerateSortProjections {
                   Terminal(","),
                   NonTerminal(sort),
                   Terminal(")")),
-              Att().add(Att.FUNCTION()));
+              Att.empty().add(Att.FUNCTION()));
       Rule sideEffectR =
           Rule(
               KRewrite(
@@ -149,7 +149,7 @@ public class GenerateSortProjections {
                     Terminal("("),
                     NonTerminal(prod.sort()),
                     Terminal(")")),
-                Att().add(Att.FUNCTION())));
+                Att.empty().add(Att.FUNCTION())));
         sentences.add(
             Rule(
                 KRewrite(KApply(lbl, KApply(prod.klabel().get(), KList(vars))), vars.get(i)),
