@@ -218,7 +218,7 @@ public class ResolveFun {
   }
 
   private Production funProd(KLabel fun, K k, Sort arg, boolean total) {
-    Att att = total ? Att().add(Att.TOTAL()) : Att();
+    Att att = total ? Att.empty().add(Att.TOTAL()) : Att.empty();
     return lambdaProd(fun, k, arg, sort(RewriteToTop.toRight(k)), att);
   }
 
@@ -227,7 +227,7 @@ public class ResolveFun {
   }
 
   private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs) {
-    return lambdaProd(fun, k, arg, rhs, Att());
+    return lambdaProd(fun, k, arg, rhs, Att.empty());
   }
 
   private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs, Att att) {

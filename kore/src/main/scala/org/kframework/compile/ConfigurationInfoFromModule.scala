@@ -124,7 +124,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     else
       Multiplicity.ONE
 
-  override def getParent(k: Sort): Sort             = edges.collectFirst { case (p, `k`) => p } get
+  override def getParent(k: Sort): Sort             = edges.collectFirst { case (p, `k`) => p }.get
   override def isCell(k: Sort): Boolean             = cellSorts.contains(k)
   override def isCellLabel(kLabel: KLabel): Boolean = cellLabelsToSorts.contains(kLabel)
   override def isLeafCell(k: Sort): Boolean         = !isParentCell(k)
@@ -142,7 +142,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst {
     case NonTerminal(n, _) => n
-  } get
+  }.get
 
   override def getDefaultCell(k: Sort): KApply = cellInitializer(k)
 

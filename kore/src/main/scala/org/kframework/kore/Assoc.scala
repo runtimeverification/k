@@ -26,7 +26,7 @@ object Assoc extends {
         else
           List(k)
       case other => List(other)
-    } asJava
+    }.asJava
 
   def flatten(label: KLabel, list: java.util.List[K], unit: KLabel): java.util.List[K] =
     flatten(label, list.asScala, unit).asJava

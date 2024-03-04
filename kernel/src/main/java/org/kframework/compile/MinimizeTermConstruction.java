@@ -219,7 +219,7 @@ public class MinimizeTermConstruction {
   KVariable newDotVariable(Sort sort) {
     KVariable newLabel;
     do {
-      newLabel = KVariable("_Gen" + (counter++), Att().add(Att.SORT(), Sort.class, sort));
+      newLabel = KVariable("_Gen" + (counter++), Att.empty().add(Att.SORT(), Sort.class, sort));
     } while (vars.contains(newLabel));
     vars.add(newLabel);
     return newLabel;

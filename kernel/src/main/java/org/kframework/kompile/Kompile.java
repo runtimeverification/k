@@ -457,7 +457,7 @@ public class Kompile {
     for (Sort srt : iterable(module.allSorts())) {
       if (!RuleGrammarGenerator.isParserSort(srt)) {
         // KItem ::= Sort
-        Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att());
+        Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att.empty());
         if (!module.sentences().contains(prod)) {
           prods.add(prod);
         }
@@ -726,7 +726,7 @@ public class Kompile {
                 Import(d.getModule("K-TERM").get(), true),
                 Import(d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get(), true)),
             Set(),
-            Att());
+            Att.empty());
     allModules.add(languageParsingModule);
     return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
   }
