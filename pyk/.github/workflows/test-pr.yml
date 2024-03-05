@@ -176,3 +176,26 @@ jobs:
           authToken: '${{ secrets.CACHIX_PUBLIC_KEY }}'
       - name: 'Build pyk'
         run: GC_DONT_GC=1 nix build --print-build-logs .#${{ matrix.target }}
+
+  build-docker:
+    needs: integration-tests
+    name: 'Build docker image for release'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 10
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Build Docker image for release'
+        run: |
+          COMMIT=$(git rev-parse --short=7 HEAD)
+          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
+          PYK_VERSION=$(cat package/version)
+
+          docker build .                                 \
+            -f package/Dockerfile                        \
+            --build-arg K_VERSION=${K_VERSION}           \
+            --build-arg PYK_VERSION=${PYK_VERSION}       \
+            --tag runtimeverificationinc/kframework-pyk:${COMMIT}
+
+          docker run --rm runtimeverificationinc/kframework-pyk:${COMMIT}
+          docker run --rm runtimeverificationinc/kframework-pyk:${COMMIT} kompile --version
