@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.kore.*;
@@ -31,7 +30,7 @@ public class CloseCellsTest {
           addCell("ThreadCell", "EnvCell", "<env>", Sort("Map"));
           addCell(null, "ListCell", "<list>", Multiplicity.STAR, Sort("List"));
           addDefault("EnvCell", cell("<env>", KApply(KLabel(".Map"))));
-          addDefault("KCell", cell("<k>", KToken("defaultK", Sorts.String(), Att.empty())));
+          addDefault("KCell", cell("<k>", stringToToken("defaultK")));
         }
       };
   final LabelInfo labelInfo =
@@ -45,10 +44,6 @@ public class CloseCellsTest {
           addLabel(Sort("List"), "_List_", true, false, true);
         }
       };
-
-  private static KToken intToToken(int n) {
-    return KToken(Integer.toString(n), Sorts.Int(), Att.empty());
-  }
 
   @Test
   public void testSimpleClosure() {
@@ -147,7 +142,7 @@ public class CloseCellsTest {
                 ccell(
                     "<thread>",
                     ccell("<env>", intToToken(2)),
-                    ccell("<k>", KToken("defaultK", Sorts.String(), Att.empty())))));
+                    ccell("<k>", stringToToken("defaultK")))));
     Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
   }
 

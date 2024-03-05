@@ -56,7 +56,7 @@ public class ConstantFolding {
         if (isLHS() || !isRHS()) {
           return super.apply(k);
         }
-        Att att = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty());
+        Att att = module.attributesFor().get(k.klabel()).getOrElse(() -> Att());
         if (att.contains(Att.HOOK()) && !att.contains(Att.IMPURE())) {
           String hook = att.get(Att.HOOK());
           if (hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {

@@ -890,8 +890,7 @@ public class SortCells {
                                 .name()
                                 .substring(0, cellFragmentSort.name().indexOf("Fragment")));
                     KLabel cellLabel = cfg.cfg().getCellLabel(cellSort);
-                    klist0.set(
-                        idx, KApply(cellLabel, KList(item0), Att.empty().add(Att.DUMMY_CELL())));
+                    klist0.set(idx, KApply(cellLabel, KList(item0), Att().add(Att.DUMMY_CELL())));
                   }
                 }
               }
