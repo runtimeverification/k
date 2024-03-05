@@ -71,3 +71,32 @@ jobs:
           git add -A
           git commit -m "gh-pages: update to v${version}" || true
           git push
+
+  publish-docker:
+    name: 'Publish docker image'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 10
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Build Docker image for release'
+        run: |
+          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
+          PYK_VERSION=$(cat package/version)
+
+          docker image build .                              \
+            -f package/Dockerfile                           \
+            --build-arg K_VERSION=${K_VERSION}              \
+            --build-arg PYK_VERSION=${PYK_VERSIO            \
+            --tag runtimeverificationinc/kframework-pyk:${PYK_VERSION}
+
+          docker run --rm runtimeverificationinc/kframework-pyk:${PYK_VERSION}
+          docker run --rm runtimeverificationinc/kframework-pyk:${PYK_VERSION} kompile --version
+      - name: 'Push docker image'
+        env:
+          USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          PYK_VERSION=$(cat package/version)
+          docker login --username ${USERNAME} --password ${PASSWORD}
+          docker image push runtimeverificationinc/kframework-pyk:${PYK_VERSION}
