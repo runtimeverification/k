@@ -4,7 +4,6 @@ package org.kframework.unparser
 import org.junit.Assert
 import org.junit.Test
 import org.kframework.attributes.Att
-import org.kframework.builtin.Sorts
 import org.kframework.kore.ADT
 import org.kframework.kore.KORE._
 
@@ -18,18 +17,15 @@ class UnparseTest {
   }
 
   @Test def WrappedKLabel() {
-    Assert.assertEquals("#klabel(foo)", ToKast(InjectedKLabel(KLabel("foo"), Att.empty)))
+    Assert.assertEquals("#klabel(foo)", ToKast(InjectedKLabel('foo, Att.empty)))
   }
 
   @Test def EmptyApp() {
-    Assert.assertEquals("foo(.KList)", ToKast(KApply(KLabel("foo"))))
+    Assert.assertEquals("foo(.KList)", ToKast('foo()))
   }
 
   @Test def NestedApp() {
-    Assert.assertEquals(
-      "foo(a(.KList),b(.KList))",
-      ToKast(KApply(KLabel("foo"), KApply(KLabel("a")), KApply(KLabel("b"))))
-    )
+    Assert.assertEquals("foo(a(.KList),b(.KList))", ToKast('foo('a(), 'b())))
   }
 
   @Test def SequenceEmpty() {
@@ -37,23 +33,17 @@ class UnparseTest {
   }
 
   @Test def Sequence() {
-    Assert.assertEquals(
-      "a(.KList)~>b(.KList)~>c(.KList)",
-      ToKast(Sugar.~>(KApply(KLabel("a")), Sugar.~>(KApply(KLabel("b")), KApply(KLabel("c")))))
-    )
+    Assert.assertEquals("a(.KList)~>b(.KList)~>c(.KList)", ToKast('a() ~> 'b() ~> 'c()))
   }
 
   @Test def Rewrite() {
-    Assert.assertEquals(
-      "a(.KList)=>b(.KList)",
-      ToKast(KRewrite(KApply(KLabel("a")), KApply(KLabel("b"))))
-    )
+    Assert.assertEquals("a(.KList)=>b(.KList)", ToKast(KRewrite('a(), 'b())))
   }
 
   @Test def Tokens() {
     Assert.assertEquals(
       """#token("9","Int")~>#token("Test","String")""",
-      ToKast(Sugar.~>(KToken("9", Sorts.Int, Att.empty), KToken("Test", Sorts.String, Att.empty)))
+      ToKast(intToToken(9) ~> "Test")
     )
   }
 
@@ -62,23 +52,17 @@ class UnparseTest {
   }
 
   @Test def Precedence1() {
-    Assert.assertEquals(
-      "``a(.KList)=>b(.KList)``~>c(.KList)",
-      ToKast(Sugar.~>(KRewrite(KApply(KLabel("a")), KApply(KLabel("b"))), KApply(KLabel("c"))))
-    )
+    Assert.assertEquals("``a(.KList)=>b(.KList)``~>c(.KList)", ToKast(KRewrite('a(), 'b()) ~> 'c()))
   }
 
   @Test def Precedence2() {
-    Assert.assertEquals(
-      "a(.KList)=>b(.KList)~>c(.KList)",
-      ToKast(KRewrite(KApply(KLabel("a")), Sugar.~>(KApply(KLabel("b")), KApply(KLabel("c")))))
-    )
+    Assert.assertEquals("a(.KList)=>b(.KList)~>c(.KList)", ToKast(KRewrite('a(), 'b() ~> 'c())))
   }
 
   @Test def TickSpace() {
     Assert.assertEquals(
       "`` `_+_`(.KList)=>b(.KList)``~>c(.KList)",
-      ToKast(Sugar.~>(KRewrite(KApply(KLabel("_+_")), KApply(KLabel("b"))), KApply(KLabel("c"))))
+      ToKast(KRewrite(KLabel("_+_")(), 'b()) ~> 'c())
     )
   }
 
@@ -87,10 +71,10 @@ class UnparseTest {
       "#a(.KList)~>`#klabel`(.KList)~>#klabel(test)~>`#token`(.KList)~>#token(\"1\",\"Int\")",
       ToKast(
         KSequence(
-          KApply(KLabel("#a")),
-          KApply(KLabel("#klabel")),
+          KLabel("#a")(),
+          KLabel("#klabel")(),
           InjectedKLabel(KLabel("test"), Att.empty),
-          KApply(KLabel("#token")),
+          KLabel("#token")(),
           KToken("1", Sort("Int"))
         )
       )

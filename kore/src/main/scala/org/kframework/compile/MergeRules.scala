@@ -104,7 +104,7 @@ class MergeRules(val automatonAttribute: Att.Key, filterAttribute: Att.Key)
           setOfLists.head.indices
             .map(i => setOfLists.map(l => l(i)))
             .map(pushDisjunction)
-        val rulePs = ks.map(_._2).toSeq
+        val rulePs = ks.map(_._2) toSeq
 
         (KApply(klabel, childrenDisjunctionsOfklabel), KApply(or, rulePs))
       }

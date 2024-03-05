@@ -15,7 +15,7 @@ object RewriteToTop {
     case t: KRewrite => t.left
     case t: KApply =>
       compactInjections(KApply(t.klabel, immutable(t.klist.items).map(toLeft), t.att))
-    case t: KSequence => KSequence(mutable(immutable(t.items).map(toLeft).toList), t.att)
+    case t: KSequence => KSequence(mutable(immutable(t.items).map(toLeft) toList), t.att)
     case t: KAs       => KAs(toLeft(t.pattern), t.alias, t.att)
     case other        => other
   }
@@ -24,7 +24,7 @@ object RewriteToTop {
     case t: KRewrite => toRight(t.right) // recurse here because of KAs
     case t: KApply =>
       compactInjections(KApply(t.klabel, immutable(t.klist.items).map(toRight), t.att))
-    case t: KSequence => KSequence(mutable(immutable(t.items).map(toRight).toList), t.att)
+    case t: KSequence => KSequence(mutable(immutable(t.items).map(toRight) toList), t.att)
     case t: KAs       => t.alias
     case other        => other
   }

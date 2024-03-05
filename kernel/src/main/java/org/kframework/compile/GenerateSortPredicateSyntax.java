@@ -39,10 +39,7 @@ public class GenerateSortPredicateSyntax {
             KLabel("is" + sort.toString()),
             Sorts.Bool(),
             Seq(Terminal("is" + sort), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-            Att.empty()
-                .add(Att.FUNCTION())
-                .add(Att.TOTAL())
-                .add(Att.PREDICATE(), Sort.class, sort));
+            Att().add(Att.FUNCTION()).add(Att.TOTAL()).add(Att.PREDICATE(), Sort.class, sort));
     if (!mod.productions().contains(prod)) return Collections.singleton(prod);
     return Collections.emptySet();
   }
