@@ -13,7 +13,7 @@ from ..utils import FrozenDict
 from .kast import KAst
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator
+    from collections.abc import Callable, Container, Iterable, Iterator
     from typing import Final
 
     U = TypeVar('U')
@@ -98,6 +98,18 @@ class AnyType(AttType[Any]):
         return value
 
 
+class IntType(AttType[int]):
+    def from_dict(self, obj: Any) -> int:
+        assert isinstance(obj, str)
+        return int(obj)
+
+    def to_dict(self, value: int) -> str:
+        return str(value)
+
+    def pretty(self, value: int) -> str:
+        return str(value)
+
+
 class StrType(AttType[str]):
     def from_dict(self, obj: Any) -> str:
         assert isinstance(obj, str)
@@ -141,6 +153,7 @@ class PathType(AttType[Path]):
 
 _NONE: Final = NoneType()
 _ANY: Final = AnyType()
+_INT: Final = IntType()
 _STR: Final = StrType()
 _LOCATION: Final = LocationType()
 _PATH: Final = PathType()
@@ -171,6 +184,10 @@ class Atts:
     CIRCULARITY: Final = AttKey('circularity', type=_NONE)
     CELL: Final = AttKey('cell', type=_NONE)
     CELL_COLLECTION: Final = AttKey('cellCollection', type=_NONE)
+    CELL_FRAGMENT: Final = AttKey('cellFragment', type=_ANY)
+    CELL_NAME: Final = AttKey('cellName', type=_STR)
+    CELL_OPT_ABSENT: Final = AttKey('cellOptAbsent', type=_ANY)
+    COLOR: Final = AttKey('color', type=_STR)
     COLORS: Final = AttKey('colors', type=_ANY)
     COMM: Final = AttKey('comm', type=_NONE)
     CONCAT: Final = AttKey('concat', type=_ANY)
@@ -181,9 +198,12 @@ class Atts:
     FORMAT: Final = AttKey('format', type=_ANY)
     FUNCTION: Final = AttKey('function', type=_NONE)
     FUNCTIONAL: Final = AttKey('functional', type=_NONE)
+    GROUP: Final = AttKey('group', type=_STR)
     HAS_DOMAIN_VALUES: Final = AttKey('hasDomainValues', type=_NONE)
     HOOK: Final = AttKey('hook', type=_ANY)
     IDEM: Final = AttKey('idem', type=_NONE)
+    IMPURE: Final = AttKey('impure', type=_NONE)
+    INDEX: Final = AttKey('index', type=_INT)
     INITIALIZER: Final = AttKey('initializer', type=_NONE)
     INJECTIVE: Final = AttKey('injective', type=_NONE)
     KLABEL: Final = AttKey('klabel', type=_ANY)
@@ -192,21 +212,28 @@ class Atts:
     LOCATION: Final = AttKey('org.kframework.attributes.Location', type=_LOCATION)
     MACRO: Final = AttKey('macro', type=_NONE)
     MACRO_REC: Final = AttKey('macro-rec', type=_NONE)
+    MAINCELL: Final = AttKey('maincell', type=_NONE)
     OWISE: Final = AttKey('owise', type=_NONE)
+    PREDICATE: Final = AttKey('predicate', type=_ANY)
+    PREFER: Final = AttKey('prefer', type=_NONE)
     PRIORITY: Final = AttKey('priority', type=_ANY)
+    PRIVATE: Final = AttKey('private', type=_NONE)
     PRODUCTION: Final = AttKey('org.kframework.definition.Production', type=_ANY)
     PROJECTION: Final = AttKey('projection', type=_NONE)
     RIGHT: Final = AttKey('right', type=_NONE)
     SIMPLIFICATION: Final = AttKey('simplification', type=_ANY)
-    SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
+    SEQSTRICT: Final = AttKey('seqstrict', type=_NONE)
     SORT: Final = AttKey('org.kframework.kore.Sort', type=_ANY)
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
+    STRICT: Final = AttKey('strict', type=_ANY)
+    SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
     TOKEN: Final = AttKey('token', type=_NONE)
     TOTAL: Final = AttKey('total', type=_NONE)
     TRUSTED: Final = AttKey('trusted', type=_NONE)
     UNIT: Final = AttKey('unit', type=_ANY)
     UNIQUE_ID: Final = AttKey('UNIQUE_ID', type=_ANY)
     UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NONE)
+    USER_LIST: Final = AttKey('userList', type=_ANY)
     WRAP_ELEMENT: Final = AttKey('wrapElement', type=_ANY)
 
     @classmethod
@@ -279,7 +306,7 @@ class KAtt(KAst, Mapping[AttKey, Any]):
         entries = chain((AttEntry(key, value) for key, value in self.atts.items()), entries)
         return KAtt(entries=entries)
 
-    def discard(self, keys: Iterable[AttKey]) -> KAtt:
+    def discard(self, keys: Container[AttKey]) -> KAtt:
         entries = (AttEntry(key, value) for key, value in self.atts.items() if key not in keys)
         return KAtt(entries=entries)
 

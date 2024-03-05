@@ -15,7 +15,7 @@ from ._kast_to_kore import _kast_to_kore
 from ._utils import munge
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping
+    from collections.abc import Callable, Container, Iterable, Mapping
     from typing import Any, Final
 
     from ..kast import AttKey, KAtt
@@ -253,7 +253,29 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
 
     # symbols
     module = _pull_up_rewrites(module)
-    module = _discard_symbol_atts(module, [Atts.PRODUCTION])
+    module = _discard_symbol_atts(
+        module,
+        {
+            Atts.CELL,
+            Atts.CELL_FRAGMENT,
+            Atts.CELL_NAME,
+            Atts.CELL_OPT_ABSENT,
+            Atts.COLOR,
+            Atts.GROUP,
+            Atts.IMPURE,
+            Atts.INDEX,
+            Atts.INITIALIZER,
+            Atts.MAINCELL,
+            Atts.PREDICATE,
+            Atts.PREFER,
+            Atts.PRIVATE,
+            Atts.PRODUCTION,
+            Atts.PROJECTION,
+            Atts.SEQSTRICT,
+            Atts.STRICT,
+            Atts.USER_LIST,
+        },
+    )
     module = _discard_hook_atts(module)
     module = _add_anywhere_atts(module)
     module = _add_symbol_atts(module, Atts.MACRO, _is_macro)
@@ -548,7 +570,7 @@ def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = 
     return module.let(sentences=sentences)
 
 
-def _discard_symbol_atts(module: KFlatModule, atts: Iterable[AttKey]) -> KFlatModule:
+def _discard_symbol_atts(module: KFlatModule, atts: Container[AttKey]) -> KFlatModule:
     """Remove certain attributes from symbol productions."""
 
     def update(sentence: KSentence) -> KSentence:
