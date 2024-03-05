@@ -87,7 +87,7 @@ jobs:
           docker image build .                              \
             -f package/Dockerfile                           \
             --build-arg K_VERSION=${K_VERSION}              \
-            --build-arg PYK_VERSION=${PYK_VERSIO            \
+            --build-arg PYK_VERSION=${PYK_VERSION}          \
             --tag runtimeverificationinc/kframework-pyk:${PYK_VERSION}
 
           docker run --rm runtimeverificationinc/kframework-pyk:${PYK_VERSION}
