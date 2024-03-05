@@ -213,6 +213,18 @@ class APRProof(Proof, KCFGExploration):
     def set_exec_time(self, exec_time: float) -> None:
         self._exec_time = exec_time
 
+    def formatted_exec_time(self) -> str:
+        exec_time = round(self.exec_time)
+        h, remainder = divmod(exec_time, 3600)
+        m, s = divmod(remainder, 60)
+        formatted = []
+        if h:
+            formatted.append(f'{h}h')
+        if m or h:
+            formatted.append(f'{m}m')
+        formatted.append(f'{s}s')
+        return ' '.join(formatted)
+
     @staticmethod
     def _make_module_name(proof_id: str) -> str:
         return 'M-' + re.sub(
@@ -439,7 +451,7 @@ class APRProof(Proof, KCFGExploration):
                     self.bmc_depth,
                     len(self._bounded),
                     len(self.subproof_ids),
-                    round(self._exec_time),
+                    self.formatted_exec_time(),
                 ),
                 *subproofs_summaries,
             ]
@@ -772,7 +784,7 @@ class APRSummary(ProofSummary):
     bmc_depth: int | None
     bounded: int
     subproofs: int
-    exec_time: float
+    formatted_exec_time: str
 
     @property
     def lines(self) -> list[str]:
@@ -788,7 +800,7 @@ class APRSummary(ProofSummary):
             f'    terminal: {self.terminal}',
             f'    refuted: {self.refuted}',
             f'    bounded: {self.bounded}',
-            f'    execution time: {self.exec_time // 3600}h {(self.exec_time % 3600) // 60}m {self.exec_time % 60}s',
+            f'    execution time: {self.formatted_exec_time}',
         ]
         if self.bmc_depth is not None:
             _lines.append(f'    bmc depth: {self.bmc_depth}')
