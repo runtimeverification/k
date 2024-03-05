@@ -95,8 +95,7 @@ public class GuardOrPatterns {
     do {
       newLabel =
           KVariable(
-              "_Gen" + (counter++),
-              Att.empty().add(Att.ANONYMOUS()).add(Att.SORT(), Sort.class, s));
+              "_Gen" + (counter++), Att().add(Att.ANONYMOUS()).add(Att.SORT(), Sort.class, s));
     } while (vars.contains(newLabel));
     vars.add(newLabel);
     return newLabel;

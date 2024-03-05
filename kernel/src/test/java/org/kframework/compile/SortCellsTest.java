@@ -52,7 +52,7 @@ public class SortCellsTest {
 
   @Test
   public void testSimpleSplitting() {
-    KVariable Y = KVariable("Y", Att.empty().add(Att.SORT(), Sort.class, Sort("OptCell")));
+    KVariable Y = KVariable("Y", Att().add(Att.SORT(), Sort.class, Sort("OptCell")));
     K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), KVariable("X"));
     K expected =
         KRewrite(
@@ -69,7 +69,7 @@ public class SortCellsTest {
    */
   @Test
   public void testSortedVar() {
-    KVariable Y = KVariable("Y", Att.empty().add(Att.SORT(), Sort.class, Sort("OptCell")));
+    KVariable Y = KVariable("Y", Att().add(Att.SORT(), Sort.class, Sort("OptCell")));
     K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), Y);
     K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), Y);
     KExceptionManager kem = new KExceptionManager(new GlobalOptions());
@@ -433,25 +433,25 @@ public class SortCellsTest {
                     "<t>",
                     cell("<env>"),
                     KVariable("X"),
-                    KVariable("Y", Att.empty().add(Att.SORT(), Sort.class, Sort("OptCell")))),
+                    KVariable("Y", Att().add(Att.SORT(), Sort.class, Sort("OptCell")))),
                 KVariable("X")),
             app("isThreadCellFragment", KVariable("X")),
             BooleanUtils.TRUE,
-            Att.empty());
+            Att());
     K expectedBody =
         KRewrite(
             cell(
                 "<t>",
                 KVariable("X"),
                 cell("<env>"),
-                KVariable("Y", Att.empty().add(Att.SORT(), Sort.class, Sort("OptCell")))),
+                KVariable("Y", Att().add(Att.SORT(), Sort.class, Sort("OptCell")))),
             cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell")));
     Rule expected =
         new Rule(
             expectedBody,
             BooleanUtils.and(BooleanUtils.TRUE, app("isKCell", KVariable("X"))),
             BooleanUtils.TRUE,
-            Att.empty());
+            Att());
     KExceptionManager kem = new KExceptionManager(new GlobalOptions());
     Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
     Assert.assertEquals(0, kem.getExceptions().size());
@@ -471,11 +471,11 @@ public class SortCellsTest {
                     "<t>",
                     cell("<env>"),
                     KVariable("X"),
-                    KVariable("Y", Att.empty().add(Att.SORT(), Sort.class, Sort("OptCell")))),
+                    KVariable("Y", Att().add(Att.SORT(), Sort.class, Sort("OptCell")))),
                 KVariable("X")),
             app("isTopCellFragment", KVariable("X")),
             BooleanUtils.TRUE,
-            Att.empty());
+            Att());
     K replacement = app("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell"));
     K expectedBody =
         KRewrite(
@@ -483,11 +483,10 @@ public class SortCellsTest {
                 "<t>",
                 KVariable("X"),
                 cell("<env>"),
-                KVariable("Y", Att.empty().add(Att.SORT(), Sort.class, Sort("OptCell")))),
+                KVariable("Y", Att().add(Att.SORT(), Sort.class, Sort("OptCell")))),
             replacement);
     Rule expected =
-        new Rule(
-            expectedBody, app("isTopCellFragment", replacement), BooleanUtils.TRUE, Att.empty());
+        new Rule(expectedBody, app("isTopCellFragment", replacement), BooleanUtils.TRUE, Att());
     KExceptionManager kem = new KExceptionManager(new GlobalOptions());
     Assert.assertEquals(expected, new SortCells(cfgInfo, labelInfo).sortCells(term));
     Assert.assertEquals(0, kem.getExceptions().size());
@@ -499,8 +498,8 @@ public class SortCellsTest {
    */
   @Test
   public void testMultipleCells() {
-    KVariable T1 = KVariable("T1", Att.empty().add(Att.SORT(), Sort.class, Sort("ThreadCell")));
-    KVariable T2 = KVariable("T2", Att.empty().add(Att.SORT(), Sort.class, Sort("ThreadCell")));
+    KVariable T1 = KVariable("T1", Att().add(Att.SORT(), Sort.class, Sort("ThreadCell")));
+    KVariable T2 = KVariable("T2", Att().add(Att.SORT(), Sort.class, Sort("ThreadCell")));
     K term =
         cell("<top>", KVariable("F"), cell("<t>", KVariable("T")), app("_ThreadCellBag_", T1, T2));
     K expected =

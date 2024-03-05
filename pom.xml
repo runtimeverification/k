@@ -124,11 +124,6 @@
       <artifactId>scalafmt-core_${scala.majorVersion}</artifactId>
       <version>${scalafmt.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.scala-sbt</groupId>
-      <artifactId>compiler-bridge_2.12</artifactId>
-      <version>1.8.0</version>
-    </dependency>
   </dependencies>
 
   <reporting>
@@ -157,7 +152,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.1.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -171,9 +166,10 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.12.1</version>
+          <version>3.7.0</version>
           <configuration>
-            <release>${java.version}</release>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
           </configuration>
         </plugin>
         <!-- Antrun plugin for running arbitrary shell commands (building subprojects) -->
