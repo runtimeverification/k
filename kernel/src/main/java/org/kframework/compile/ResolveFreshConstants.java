@@ -94,10 +94,7 @@ public class ResolveFreshConstants {
       }
       if (left instanceof KApply) {
         kapp = (KApply) left;
-        if (m.attributesFor()
-            .get(kapp.klabel())
-            .getOrElse(() -> Att.empty())
-            .contains(Att.FUNCTION())) {
+        if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Att.FUNCTION())) {
           return rule;
         }
       }

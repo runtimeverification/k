@@ -12,7 +12,7 @@ import scala.annotation.tailrec
 class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   // convert the input set of relations to Map form for performance
   private val directRelationsMap: Map[T, Set[T]] =
-    directRelations.groupBy(_._1).mapValues(_.map(_._2).toSet).map(identity)
+    directRelations.groupBy(_._1).mapValues(_.map(_._2) toSet).map(identity)
 
   lazy val elements: Set[T] = directRelations.flatMap(a => Set(a._1, a._2))
 
