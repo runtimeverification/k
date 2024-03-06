@@ -87,7 +87,17 @@ SENTENCE_TEST_DATA: Final = (
     ),
     (
         'syntax Foo ::= r"foo" [token]',
-        SyntaxDefn(SortDecl('Foo'), (PriorityBlock((Lexical('foo', att=Att((('token', ''),))),)),)),
+        SyntaxDefn(
+            SortDecl('Foo'),
+            (PriorityBlock((Production((Lexical('foo'),), att=Att((('token', ''),))),)),),
+        ),
+    ),
+    (
+        'syntax FooBar ::= r"foo" "bar" [token]',
+        SyntaxDefn(
+            SortDecl('FooBar'),
+            (PriorityBlock((Production((Lexical('foo'), Terminal('bar')), att=Att((('token', ''),))),)),),
+        ),
     ),
     (
         'syntax Foos ::= List{Foo, ","}',
@@ -216,7 +226,7 @@ SENTENCE_TEST_DATA: Final = (
                     (Production((Terminal('bar'),)), Production((NonTerminal(Sort('Bar')),))),
                     assoc=Assoc.LEFT,
                 ),
-                PriorityBlock((Lexical('baz', att=Att((('token', ''),))),), assoc=Assoc.RIGHT),
+                PriorityBlock((Production((Lexical('baz'),), att=Att((('token', ''),))),), assoc=Assoc.RIGHT),
                 PriorityBlock((UserList('Foo', ','),), assoc=Assoc.NON_ASSOC),
             ),
         ),
