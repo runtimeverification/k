@@ -263,11 +263,6 @@ class OuterParser:
         return PriorityBlock(productions, assoc)
 
     def _production_like(self) -> ProductionLike:
-        if self._la.type is TokenType.REGEX:
-            regex = _dequote_regex(self._consume())
-            att = self._maybe_att()
-            return Lexical(regex, att)
-
         if (
             self._la2.type is TokenType.LBRACE
             and self._la.type is TokenType.ID_UPPER
@@ -307,6 +302,9 @@ class OuterParser:
     def _production_item(self) -> ProductionItem:
         if self._la.type is TokenType.STRING:
             return Terminal(_dequote_string(self._consume()))
+
+        if self._la.type is TokenType.REGEX:
+            return Lexical(_dequote_regex(self._consume()))
 
         return self._non_terminal()
 
