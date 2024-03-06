@@ -142,7 +142,6 @@ public class KPrint {
     switch (outputMode) {
       case KAST:
       case NONE:
-      case BINARY:
       case JSON:
         return serialize(result, outputMode);
       case PRETTY:
@@ -184,7 +183,6 @@ public class KPrint {
     return switch (outputMode) {
       case KAST -> (ToKast.apply(term) + "\n").getBytes();
       case NONE -> "".getBytes();
-      case BINARY -> ToBinary.apply(term);
       case JSON -> ToJson.apply(term);
       default -> throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
     };

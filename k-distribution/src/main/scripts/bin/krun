@@ -142,7 +142,7 @@ $KRUN options:
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
-                           values are pretty, program, kast, binary, json,
+                           values are pretty, program, kast, json,
                            kore, and none.
       --output-file FILE   Print final configuration to FILE
       --parser VALUE       Use VALUE as parser to parse \$PGM. For example,
@@ -295,13 +295,12 @@ do
         pretty) ;;
         program) ;;
         kast) ;;
-        binary) ;;
         json) ;;
         kore) ;;
         none) ;;
 
         *)
-        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "kore", or "none".'
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "json", "kore", or "none".'
         ;;
       esac
       outputMode="$2"
