@@ -10,7 +10,6 @@ import org.kframework.utils.errorsystem.KEMException
 import scala.annotation.meta.param
 import scala.collection.immutable
 import scala.collection.mutable
-import scala.collection.Set
 
 case class Configuration(body: K, ensures: K, att: Att = Att.empty)
     extends Sentence
@@ -35,7 +34,7 @@ case class FlatModule(
     name: String,
     imports: Set[FlatImport],
     localSentences: Set[Sentence],
-    @(Nonnull @param) val att: Att = Att.empty
+    @(Nonnull @param) att: Att = Att.empty
 ) extends OuterKORE
     with Sorting
     with Serializable {}

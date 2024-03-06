@@ -3,7 +3,7 @@
 package org.kframework.kore
 
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
@@ -69,9 +69,9 @@ trait FoldKSetTransformer[E] extends FoldK[Set[E]] {}
 
 class KVisitor extends java.util.function.Consumer[K] {
 
-  def accept(k: K) = apply(k)
+  def accept(k: K): Unit = apply(k)
 
-  def apply(k: K) {
+  def apply(k: K): Unit =
     k match {
       case k: KApply         => apply(k: KApply)
       case k: KRewrite       => apply(k)
@@ -81,7 +81,6 @@ class KVisitor extends java.util.function.Consumer[K] {
       case k: InjectedKLabel => apply(k)
       case k: KAs            => apply(k)
     }
-  }
 
   def apply(k: KApply): Unit = {
     k.klabel match {

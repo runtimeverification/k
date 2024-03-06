@@ -13,7 +13,7 @@ import org.kframework.kore._
 import org.kframework.kore.Unapply._
 import org.kframework.utils.errorsystem.KEMException
 import scala.collection.immutable
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
 

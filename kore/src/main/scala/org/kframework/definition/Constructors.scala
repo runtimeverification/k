@@ -14,13 +14,18 @@ import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 
 object Constructors {
 
-  def Definition(mainModule: Module, modules: Set[Module], att: Att) =
+  def Definition(mainModule: Module, modules: immutable.Set[Module], att: Att) =
     definition.Definition(mainModule, modules, att)
 
   def Import(module: Module, isPublic: Boolean) =
     definition.Import(module, isPublic)
 
-  def Module(name: String, imports: Set[Import], sentences: Set[Sentence], att: attributes.Att) =
+  def Module(
+      name: String,
+      imports: immutable.Set[Import],
+      sentences: immutable.Set[Sentence],
+      att: attributes.Att
+  ) =
     definition.Module(name, imports, sentences, att)
 
   def SyntaxSort(params: immutable.Seq[Sort], sort: Sort) = definition.SyntaxSort(params, sort)
@@ -76,13 +81,18 @@ object Constructors {
 
   def Tag(s: String) = definition.Tag(s)
 
-  def SyntaxPriority(priorities: immutable.Seq[Set[Tag]]) = definition.SyntaxPriority(priorities)
-  def SyntaxPriority(priorities: immutable.Seq[Set[Tag]], att: attributes.Att) =
+  def SyntaxPriority(priorities: immutable.Seq[immutable.Set[Tag]]) =
+    definition.SyntaxPriority(priorities)
+  def SyntaxPriority(priorities: immutable.Seq[immutable.Set[Tag]], att: attributes.Att) =
     definition.SyntaxPriority(priorities, att)
 
-  def SyntaxAssociativity(assoc: definition.Associativity, tags: Set[Tag]) =
+  def SyntaxAssociativity(assoc: definition.Associativity, tags: immutable.Set[Tag]) =
     definition.SyntaxAssociativity(assoc, tags)
-  def SyntaxAssociativity(assoc: definition.Associativity, tags: Set[Tag], att: attributes.Att) =
+  def SyntaxAssociativity(
+      assoc: definition.Associativity,
+      tags: immutable.Set[Tag],
+      att: attributes.Att
+  ) =
     definition.SyntaxAssociativity(assoc, tags, att)
 
   def Context(content: K, requires: K) = definition.Context(content, requires)

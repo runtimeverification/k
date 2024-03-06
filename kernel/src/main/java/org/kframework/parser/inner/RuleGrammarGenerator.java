@@ -106,13 +106,13 @@ public record RuleGrammarGenerator(Definition baseK) {
     Module newM =
         new Module(
             mod.name() + "-" + name,
-            (scala.collection.Set<Import>)
-                mod.imports()
-                    .$bar(
-                        Set(
-                            Import(baseK.getModule(K).get(), true),
-                            Import(baseK.getModule(name).get(), true),
-                            Import(baseK.getModule(DEFAULT_LAYOUT).get(), true))),
+            mod.imports()
+                .$bar(
+                    Set(
+                        Import(baseK.getModule(K).get(), true),
+                        Import(baseK.getModule(name).get(), true),
+                        Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
+                .toSet(),
             mod.localSentences(),
             mod.att());
     return newM;
@@ -559,7 +559,7 @@ public record RuleGrammarGenerator(Definition baseK) {
                           || p.items().last() instanceof RegexTerminal;
                       final ProductionItem body;
                       if (cfgInfo.isLeafCell(p.sort())) {
-                        body = p.items().tail().head();
+                        body = p.items().apply(1);
                       } else {
                         body = NonTerminal(Sorts.Bag());
                       }

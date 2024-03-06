@@ -74,7 +74,6 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.Function1;
 import scala.Option;
 import scala.collection.JavaConverters;
-import scala.collection.Set$;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we
@@ -467,8 +466,9 @@ public class Kompile {
       return Module(
           module.name(),
           module.imports(),
-          Stream.concat(stream(module.localSentences()), prods.stream())
-              .collect(org.kframework.Collections.toSet()),
+          immutable(
+              Stream.concat(stream(module.localSentences()), prods.stream())
+                  .collect(Collectors.toSet())),
           module.att());
     }
   }
@@ -761,10 +761,7 @@ public class Kompile {
 
     stream(modules)
         .flatMap(
-            m ->
-                stream(
-                    m.productionsForSort()
-                        .getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
+            m -> stream(optional(m.productionsForSort().get(Sorts.Bool().head())).orElse(Set())))
         .collect(Collectors.toSet())
         .forEach(
             prod -> {
@@ -773,7 +770,7 @@ public class Kompile {
                 return;
               }
               ProductionItem first = items.head();
-              ProductionItem second = items.tail().head();
+              ProductionItem second = items.apply(1);
               ProductionItem last = items.last();
               // Check if the production is of the form isSort ( ... )
               if ((first instanceof Terminal)

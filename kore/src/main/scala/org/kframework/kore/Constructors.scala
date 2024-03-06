@@ -3,7 +3,7 @@ package org.kframework.kore
 
 import org.kframework.attributes._
 import scala.collection.immutable
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait Constructors {
   def KLabel(name: String, params: immutable.Seq[Sort]): KLabel
@@ -20,7 +20,7 @@ trait Constructors {
   // Unfortunately, IntelliJ struggles to resolve variadic functions,
   // so we instead manually provide overloads for 0-5 elements below
   final def KLabel(name: String, params: Array[Sort]): KLabel =
-    KLabel(name, params.to[immutable.Seq])
+    KLabel(name, params.to(immutable.Seq))
   final def KLabel(name: String): KLabel              = KLabel(name, immutable.Seq())
   final def KLabel(name: String, param: Sort): KLabel = KLabel(name, immutable.Seq(param))
   final def KLabel(name: String, param1: Sort, param2: Sort): KLabel =
@@ -39,7 +39,7 @@ trait Constructors {
   ): KLabel =
     KLabel(name, immutable.Seq(param1, param2, param3, param4, param5))
 
-  final def Sort(name: String, params: Array[Sort]): Sort = Sort(name, params.to[immutable.Seq])
+  final def Sort(name: String, params: Array[Sort]): Sort = Sort(name, params.to(immutable.Seq))
   final def Sort(name: String): Sort                      = Sort(name, immutable.Seq())
   final def Sort(name: String, param: Sort): Sort         = Sort(name, immutable.Seq(param))
   final def Sort(name: String, param1: Sort, param2: Sort): Sort =

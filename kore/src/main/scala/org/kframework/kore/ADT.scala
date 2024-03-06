@@ -5,8 +5,7 @@ import org.kframework.attributes._
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
 import org.kframework.kore
-import scala.collection.immutable
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Abstract Data Types: basic implementations for the inner KORE interfaces.
@@ -17,17 +16,13 @@ import scala.collection.JavaConverters._
 
 object ADT {
 
-  case class KLabel(name: String, params: immutable.Seq[kore.Sort]) extends kore.KLabel {
+  case class KLabel(name: String, params: kore.Sort*) extends kore.KLabel {
     override def toString =
       if (params.isEmpty) {
         name
       } else {
         name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
       }
-  }
-
-  object KLabel {
-    def apply(name: String, params: kore.Sort*): KLabel = KLabel(name, params.to[immutable.Seq])
   }
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty)
@@ -75,17 +70,13 @@ object ADT {
 
   case class KVariable(name: String, att: Att = Att.empty) extends kore.KVariable {}
 
-  case class Sort(name: String, params: immutable.Seq[kore.Sort]) extends kore.Sort {
+  case class Sort(name: String, params: kore.Sort*) extends kore.Sort {
     override def toString =
       if (params.isEmpty) {
         name
       } else {
         name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
       }
-  }
-
-  object Sort {
-    def apply(name: String, params: kore.Sort*): Sort = Sort(name, params.to[immutable.Seq])
   }
 
   case class SortHead(name: String, params: Int) extends kore.SortHead {

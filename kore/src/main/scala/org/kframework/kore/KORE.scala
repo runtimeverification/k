@@ -6,7 +6,7 @@ import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.collection.immutable
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Basic implementation of a Constructor of inner KORE classes. It can be used by either creating a
@@ -60,7 +60,8 @@ object KORE extends Constructors {
     ADT.Sort(name.name)
   }
 
-  def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala: _*)
+  def Sort(name: String, params: java.util.List[Sort]): Sort =
+    ADT.Sort(name, params.asScala.toSeq: _*)
 
   def SortHead(name: String, params: Int): SortHead = ADT.SortHead(name, params)
 

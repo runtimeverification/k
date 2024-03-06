@@ -548,7 +548,7 @@ object Att {
   implicit val ord: Ordering[Att] = {
     import scala.math.Ordering.Implicits._
     Ordering.by[Att, immutable.Seq[(String, String, String)]](att =>
-      att.att.iterator.map(k => (k._1._1.key, k._1._2, k._2.toString)).to[immutable.Seq].sorted
+      att.att.iterator.map(k => (k._1._1.key, k._1._2, k._2.toString)).to(immutable.Seq).sorted
     )
   }
 }

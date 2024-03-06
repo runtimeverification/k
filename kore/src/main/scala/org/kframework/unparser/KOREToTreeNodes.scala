@@ -8,32 +8,13 @@ import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore._
 import org.kframework.parser._
-import org.kframework.POSet
 import org.pcollections.ConsPStack
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object KOREToTreeNodes {
 
   import org.kframework.kore.KORE._
-
-  def wellTyped(
-      args: immutable.Seq[Sort],
-      p: Production,
-      children: Iterable[Term],
-      subsorts: POSet[Sort]
-  ): Boolean = {
-    val origP = p.att.getOptional(Att.ORIGINAL_PRD, classOf[Production]).orElse(p)
-    val subst = origP.substitute(args)
-    val rightPoly =
-      (args.isEmpty && origP.params.nonEmpty) || (p.sort == subst.sort && p.items == subst.items)
-    return rightPoly && p.nonterminals
-      .zip(children)
-      .forall(p =>
-        !p._2.isInstanceOf[ProductionReference] || subsorts
-          .lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort)
-      )
-  }
 
   def apply(t: K, mod: Module): Term = t match {
     case t: KToken =>
@@ -72,12 +53,12 @@ object KOREToTreeNodes {
       val sort = Sort(t.sort.name, t.sort.params)
       KToken(t.s, sort, t.att)
     case s: KSequence =>
-      upList(mod)(s.items.asScala.to[immutable.Seq])
+      upList(mod)(s.items.asScala.to(immutable.Seq))
         .foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) =>
           KApply(KLabel("#KSequence"), KList(k1, k2), s.att)
         )
     case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(mod)(r.left), up(mod)(r.right)), r.att)
-    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala.to[immutable.Seq]), t.att)
+    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala.to(immutable.Seq)), t.att)
   }
 
   def upList(mod: Module)(items: immutable.Seq[K]): immutable.Seq[K] =

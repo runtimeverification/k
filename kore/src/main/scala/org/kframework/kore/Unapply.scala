@@ -1,9 +1,9 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.kore
 
-import collection.JavaConverters._
 import org.kframework.kore
 import scala.collection.immutable
+import scala.jdk.CollectionConverters._
 
 /**
  * Scala deconstructors for inner KORE objects.
@@ -35,7 +35,7 @@ object Unapply {
 
   object KSequence {
     def unapply(kseq: KSequence): Option[immutable.Seq[K]] = Some(
-      kseq.items.asScala.to[immutable.Seq]
+      kseq.items.asScala.to(immutable.Seq)
     )
   }
 
@@ -52,11 +52,8 @@ object Unapply {
   }
 
   object KList {
-
-    import scala.collection.JavaConverters._
-
     def unapplySeq(klist: KList): Option[immutable.Seq[kore.K]] = Some(
-      klist.items.asScala.to[immutable.Seq]
+      klist.items.asScala.to(immutable.Seq)
     )
   }
 
