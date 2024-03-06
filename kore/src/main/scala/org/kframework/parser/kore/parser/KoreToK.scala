@@ -1,6 +1,7 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
+import com.runtimeverification.k.kore
 import org.kframework.{ kore => k }
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
@@ -8,7 +9,6 @@ import org.kframework.builtin.Sorts
 import org.kframework.kore.ADT.KVariable
 import org.kframework.kore.Assoc
 import org.kframework.kore.KORE
-import org.kframework.parser.kore
 import org.kframework.utils.StringUtil
 import scala.collection.JavaConverters._
 import scala.collection.Map

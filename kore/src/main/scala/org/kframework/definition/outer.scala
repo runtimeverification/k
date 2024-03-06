@@ -363,6 +363,9 @@ case class Module(
     mergeAttributes(_)
   }
 
+  lazy val hookAttributes: Map[String, String] =
+    sortAttributesFor.flatMap(s => s._2.getOption(Att.HOOK).map(att => s._1.name -> att))
+
   private def mergeAttributes[T <: Sentence](p: Set[T]) =
     Att.mergeAttributes(p.map(_.att))
 

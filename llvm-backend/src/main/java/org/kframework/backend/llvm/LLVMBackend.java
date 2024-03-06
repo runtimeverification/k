@@ -22,12 +22,14 @@ import org.kframework.compile.Backend;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.parser.kore.parser.KoreToK;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import scala.collection.Map;
 
 public class LLVMBackend extends KoreBackend {
 
@@ -55,6 +57,7 @@ public class LLVMBackend extends KoreBackend {
   public void accept(Backend.Holder h) {
     Stopwatch sw = new Stopwatch(globalOptions);
     String kore = getKompiledString(h.def, true);
+    var hookAtts = h.def.kompiledDefinition.mainModule().hookAttributes();
     h.def = null;
     files.saveToKompiled("definition.kore", kore);
     sw.printIntermediate("  Print definition.kore");
@@ -71,7 +74,7 @@ public class LLVMBackend extends KoreBackend {
         globalOptions.includesExceptionType(ExceptionType.USELESS_RULE),
         options.enableSearch,
         ex -> {
-          var translated = translateError(ex);
+          var translated = translateError(ex, hookAtts);
           kem.addKException(translated);
           if (globalOptions.includesExceptionType(translated.getType())) {
             warnings.increment();
@@ -194,7 +197,17 @@ public class LLVMBackend extends KoreBackend {
                     l.getStartLine(), l.getEndLine(), l.getStartColumn(), l.getEndColumn()));
   }
 
-  private KException translateError(MatchingException ex) {
+  private String getCounterExampleMessage(MatchingException ex, Map<String, String> hookAtts) {
+    return ex.getPattern()
+        .map(
+            p -> {
+              var kast = new KoreToK(hookAtts).apply(p).toString();
+              return ex.getMessage() + ": " + kast;
+            })
+        .orElse(ex.getMessage());
+  }
+
+  private KException translateError(MatchingException ex, Map<String, String> hookAtts) {
     switch (ex.getType()) {
       case USELESS_RULE -> {
         return new KException(
@@ -209,7 +222,7 @@ public class LLVMBackend extends KoreBackend {
         return new KException(
             ExceptionType.NON_EXHAUSTIVE_MATCH,
             KException.KExceptionGroup.COMPILER,
-            ex.getMessage(),
+            getCounterExampleMessage(ex, hookAtts),
             getSource(ex).orElse(null),
             getLocation(ex).orElse(null));
       }
