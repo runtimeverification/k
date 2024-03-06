@@ -27,13 +27,13 @@ trait DefinitionToString {
 trait RuleToString {
   self: Rule =>
   override def toString =
-    Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
+    immutable.Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
 trait ClaimToString {
   self: Claim =>
   override def toString =
-    Seq("claim", body, "requires", requires, "ensures", ensures, att).mkString(" ")
+    immutable.Seq("claim", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
 trait ProductionToString {
@@ -97,12 +97,13 @@ trait SyntaxAssociativityToString {
 
 trait ContextToString {
   self: Context =>
-  override def toString = Seq("context", body, "requires", requires, att).mkString(" ")
+  override def toString = immutable.Seq("context", body, "requires", requires, att).mkString(" ")
 }
 
 trait ContextAliasToString {
   self: ContextAlias =>
-  override def toString = Seq("context", "alias", body, "requires", requires, att).mkString(" ")
+  override def toString =
+    immutable.Seq("context", "alias", body, "requires", requires, att).mkString(" ")
 }
 
 trait SyntaxPriorityToString {

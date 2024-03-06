@@ -177,7 +177,7 @@ public class KILtoKORE extends KILTransformation<Object> {
   }
 
   public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {
-    Seq<scala.collection.Set<Tag>> seqOfSetOfTags =
+    scala.collection.immutable.Seq<scala.collection.Set<Tag>> seqOfSetOfTags =
         immutable(
             pe.getPriorityBlocks().stream()
                 .map(block -> toTags(block.getProductions(), pe))

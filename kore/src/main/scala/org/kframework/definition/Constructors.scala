@@ -23,8 +23,8 @@ object Constructors {
   def Module(name: String, imports: Set[Import], sentences: Set[Sentence], att: attributes.Att) =
     definition.Module(name, imports, sentences, att)
 
-  def SyntaxSort(params: Seq[Sort], sort: Sort) = definition.SyntaxSort(params, sort)
-  def SyntaxSort(params: Seq[Sort], sort: Sort, att: attributes.Att) =
+  def SyntaxSort(params: immutable.Seq[Sort], sort: Sort) = definition.SyntaxSort(params, sort)
+  def SyntaxSort(params: immutable.Seq[Sort], sort: Sort, att: attributes.Att) =
     definition.SyntaxSort(params, sort, att)
 
   def SortSynonym(newSort: Sort, oldSort: Sort) = definition.SortSynonym(newSort, oldSort)
@@ -35,25 +35,35 @@ object Constructors {
   def SyntaxLexical(name: String, regex: String, att: attributes.Att) =
     definition.SyntaxLexical(name, regex, att)
 
-  def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) =
+  def Production(params: immutable.Seq[Sort], sort: Sort, items: immutable.Seq[ProductionItem]) =
     definition.Production(params, sort, items, Att.empty)
-  def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) =
+  def Production(
+      params: immutable.Seq[Sort],
+      sort: Sort,
+      items: immutable.Seq[ProductionItem],
+      att: attributes.Att
+  ) =
     definition.Production(params, sort, items, att)
-  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) =
+  def Production(klabel: KLabel, sort: Sort, items: immutable.Seq[ProductionItem]) =
     definition.Production(klabel, klabel.params, sort, items)
-  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) =
+  def Production(
+      klabel: KLabel,
+      sort: Sort,
+      items: immutable.Seq[ProductionItem],
+      att: attributes.Att
+  ) =
     definition.Production(klabel, klabel.params, sort, items, att)
   def Production(
       klabel: Option[KLabel],
-      params: Seq[Sort],
+      params: immutable.Seq[Sort],
       sort: Sort,
-      items: Seq[ProductionItem]
+      items: immutable.Seq[ProductionItem]
   ) = definition.Production(klabel, params, sort, items, Att.empty)
   def Production(
       klabel: Option[KLabel],
-      params: Seq[Sort],
+      params: immutable.Seq[Sort],
       sort: Sort,
-      items: Seq[ProductionItem],
+      items: immutable.Seq[ProductionItem],
       att: attributes.Att
   ) = definition.Production(klabel, params, sort, items, att)
 
@@ -66,8 +76,8 @@ object Constructors {
 
   def Tag(s: String) = definition.Tag(s)
 
-  def SyntaxPriority(priorities: Seq[Set[Tag]]) = definition.SyntaxPriority(priorities)
-  def SyntaxPriority(priorities: Seq[Set[Tag]], att: attributes.Att) =
+  def SyntaxPriority(priorities: immutable.Seq[Set[Tag]]) = definition.SyntaxPriority(priorities)
+  def SyntaxPriority(priorities: immutable.Seq[Set[Tag]], att: attributes.Att) =
     definition.SyntaxPriority(priorities, att)
 
   def SyntaxAssociativity(assoc: definition.Associativity, tags: Set[Tag]) =

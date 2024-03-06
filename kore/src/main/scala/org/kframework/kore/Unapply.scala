@@ -3,6 +3,7 @@ package org.kframework.kore
 
 import collection.JavaConverters._
 import org.kframework.kore
+import scala.collection.immutable
 
 /**
  * Scala deconstructors for inner KORE objects.
@@ -33,7 +34,9 @@ object Unapply {
   }
 
   object KSequence {
-    def unapply(kseq: KSequence): Option[Seq[K]] = Some(kseq.items.asScala.toSeq)
+    def unapply(kseq: KSequence): Option[immutable.Seq[K]] = Some(
+      kseq.items.asScala.to[immutable.Seq]
+    )
   }
 
   object KRewrite {
@@ -52,7 +55,9 @@ object Unapply {
 
     import scala.collection.JavaConverters._
 
-    def unapplySeq(klist: KList): Option[Seq[kore.K]] = Some(klist.items.asScala.toSeq)
+    def unapplySeq(klist: KList): Option[immutable.Seq[kore.K]] = Some(
+      klist.items.asScala.to[immutable.Seq]
+    )
   }
 
 }

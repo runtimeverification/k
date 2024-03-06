@@ -17,12 +17,13 @@ import scala.collection.JavaConverters._
 object Collections {
   def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala
   def immutable[T](s: java.util.Set[T]): Set[T]           = s.asScala.toSet
-  def immutable[T](s: java.util.List[T]): Seq[T]          = s.asScala
-  def immutable[K, V](s: java.util.Map[K, V]): Map[K, V]  = s.asScala
+  def immutable[T](s: java.util.List[T]): collection.immutable.Seq[T] =
+    s.asScala.to[collection.immutable.Seq]
+  def immutable[K, V](s: java.util.Map[K, V]): Map[K, V] = s.asScala
 
-  def mutable[T](s: scala.List[T]): java.util.List[T]  = s.asJava
-  def mutable[T](s: Seq[T]): java.util.List[T]         = s.asJava
-  def mutable[K, V](s: Map[K, V]): java.util.Map[K, V] = s.asJava
+  def mutable[T](s: scala.List[T]): java.util.List[T]               = s.asJava
+  def mutable[T](s: collection.immutable.Seq[T]): java.util.List[T] = s.asJava
+  def mutable[K, V](s: Map[K, V]): java.util.Map[K, V]              = s.asJava
   def mutable[T](s: Set[T]): java.util.Set[T] = {
     val x = new util.HashSet[T]()
     x.addAll(s.asJava)
@@ -37,18 +38,21 @@ object Collections {
   def map[T](f: java.util.function.Function[T, T])(s: Set[T]): Set[T] = s.map(x => f(x))
   def map[T](f: java.util.function.Function[T, T])(s: scala.List[T]): scala.List[T] =
     s.map(x => f(x))
-  def map[T](f: java.util.function.Function[T, T])(s: Seq[T]): Seq[T] = s.map(x => f(x))
+  def map[T](f: java.util.function.Function[T, T])(
+      s: collection.immutable.Seq[T]
+  ): collection.immutable.Seq[T] =
+    s.map(x => f(x))
 
   def add[T](e: T)(s: Set[T]): Set[T]     = s + e
   def minus[T](e: T)(s: Set[T]): Set[T]   = s - e
   def or[T](a: Set[T], b: Set[T]): Set[T] = a | b
 
-  def cons[T](e: T)(s: Seq[T]): Seq[T] = e +: s
+  def cons[T](e: T)(s: collection.immutable.Seq[T]): collection.immutable.Seq[T] = e +: s
 
   @annotation.varargs
   def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
   @annotation.varargs
-  def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)
+  def Seq[T](es: T*): scala.collection.immutable.Seq[T] = scala.collection.immutable.Seq[T](es: _*)
   @annotation.varargs
   def Set[T](es: T*) = scala.collection.immutable.Set[T](es: _*)
 

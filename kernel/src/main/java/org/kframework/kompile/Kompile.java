@@ -672,7 +672,7 @@ public class Kompile {
     // See `RuleGrammarGenerator::getCombinedGrammarImpl`.
     var disambMod = RuleGrammarGenerator.getCombinedGrammarImpl(module, false, false, true)._2();
     var withOverload =
-        disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
+        disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toList();
 
     stream(withOverload)
         .forEach(
@@ -768,7 +768,7 @@ public class Kompile {
         .collect(Collectors.toSet())
         .forEach(
             prod -> {
-              Seq<ProductionItem> items = prod.items();
+              scala.collection.immutable.Seq<ProductionItem> items = prod.items();
               if (items.size() < 3) {
                 return;
               }

@@ -73,7 +73,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
       .filter(p => (cellSorts(p.sort) || cellBagSorts(p.sort)) && p.att.contains(Att.INITIALIZER))
       .map(p => (p.sort, KApply(p.klabel.get)))
       .flatMap { case (s, app) =>
-        if (cellBagSorts(s)) getCellSortsOfCellBag(s).map((_, app)) else Seq((s, app))
+        if (cellBagSorts(s)) getCellSortsOfCellBag(s).map((_, app)) else immutable.Seq((s, app))
       }
       .toMap
 
@@ -96,8 +96,8 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
-  private val sortedSorts: Seq[Sort] = Collections.immutable(edgesPoset.sortedElements())
-  private val sortedEdges: Seq[(Sort, Sort)] =
+  private val sortedSorts: immutable.Seq[Sort] = Collections.immutable(edgesPoset.sortedElements())
+  private val sortedEdges: immutable.Seq[(Sort, Sort)] =
     edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
   val levels: Map[Sort, Int] = sortedEdges.foldLeft(topCells.map((_, 0)).toMap) {
     case (m: Map[Sort, Int], (from: Sort, to: Sort)) =>
@@ -134,9 +134,9 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     .map(_.asInstanceOf[NonTerminal].sort)
     .flatMap { s =>
       if (cellBagSorts(s))
-        getCellSortsOfCellBag(s).toSeq
+        getCellSortsOfCellBag(s).to[immutable.Seq]
       else
-        Seq(s)
+        immutable.Seq(s)
     }
     .asJava
 

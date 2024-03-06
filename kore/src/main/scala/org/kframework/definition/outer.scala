@@ -48,7 +48,7 @@ case class Definition(mainModule: Module, entryModules: Set[Module], att: Att)
 trait Sorting {
   def computeSubsortPOSet(sentences: Set[Sentence], syntactic: Boolean) = {
     val subsortRelations: Set[(Sort, Sort)] = sentences.collect {
-      case Production(klabel, Seq(), endSort, Seq(NonTerminal(startSort, _)), _)
+      case Production(klabel, immutable.Seq(), endSort, immutable.Seq(NonTerminal(startSort, _)), _)
           if klabel.isEmpty || syntactic =>
         (startSort, endSort)
     }
@@ -89,7 +89,7 @@ trait Sorting {
       prods: Set[Production]
   ): Set[(Production, Production)] = {
     val prodsToConsider =
-      prods.toSeq.filter(_.att.contains(Att.OVERLOAD)).groupBy(_.att.get(Att.OVERLOAD))
+      prods.to[immutable.Seq].filter(_.att.contains(Att.OVERLOAD)).groupBy(_.att.get(Att.OVERLOAD))
     val pairs: Iterable[(Production, Production)] = for {
       x  <- prodsToConsider.values
       p1 <- x
@@ -109,7 +109,8 @@ trait Sorting {
     def areKLabelOverloadable(p1: Production, p2: Production): Boolean =
       p1.klabel.isDefined && p1.klabelAtt == p2.klabelAtt && isLessThan(p1, p2, subsorts)
 
-    val prodsForOverloads = prods.toSeq.filter(_.klabelAtt.isDefined).groupBy(_.klabelAtt)
+    val prodsForOverloads =
+      prods.to[immutable.Seq].filter(_.klabelAtt.isDefined).groupBy(_.klabelAtt)
     val pairs: Iterable[(Production, Production)] = for {
       x  <- prodsForOverloads.values
       p1 <- x
@@ -205,7 +206,7 @@ case class Module(
       case _                                                             => false
     }
 
-  lazy val sortedProductions: Seq[Production] = productions.toSeq.sorted
+  lazy val sortedProductions: immutable.Seq[Production] = productions.to[immutable.Seq].sorted
 
   lazy val localProductions: Set[Production] = localSentences.collect { case p: Production => p }
 
@@ -238,7 +239,8 @@ case class Module(
       .get(Sorts.Layout.head)
       .getOrElse(Set[Production]())
       .collect {
-        case Production(_, _, _, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
+        case Production(_, _, _, immutable.Seq(RegexTerminal(_, terminalRegex, _)), _) =>
+          terminalRegex
         case p =>
           throw KEMException.compilerError(
             "Productions of sort `#Layout` must be exactly one `RegexTerminal`.",
@@ -272,7 +274,7 @@ case class Module(
     if (tokenProductionsFor.contains(s))
       tokenProductionsFor.apply(s).head
     else
-      Production(None, Seq(), s, Seq(), Att.empty.add(Att.TOKEN))
+      Production(None, immutable.Seq(), s, immutable.Seq(), Att.empty.add(Att.TOKEN))
 
   lazy val allModuleNames: Set[String] = importedModuleNames + name
 
@@ -331,7 +333,7 @@ case class Module(
 
   lazy val contexts: Set[Context] = sentences.collect { case r: Context => r }
 
-  lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
+  lazy val sortedRules: immutable.Seq[Rule] = rules.to[immutable.Seq].sorted
 
   lazy val localRules: Set[Rule]   = localSentences.collect { case r: Rule => r }
   lazy val localClaims: Set[Claim] = localSentences.collect { case r: Claim => r }
@@ -347,11 +349,11 @@ case class Module(
     mergeAttributes(_)
   }
 
-  @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
+  @transient lazy val signatureFor: Map[KLabel, Set[(immutable.Seq[Sort], Sort)]] =
     productionsFor.mapValues { ps: Set[Production] =>
       ps.filter { p: Production => p.params.isEmpty }
         .map { p: Production =>
-          val params: Seq[Sort] = p.items.collect { case NonTerminal(sort, _) => sort }
+          val params: immutable.Seq[Sort] = p.items.collect { case NonTerminal(sort, _) => sort }
           (params, p.sort)
         }
     }
@@ -363,7 +365,7 @@ case class Module(
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
 
   lazy val sortDeclarationsFor: Map[SortHead, Set[SyntaxSort]] =
-    (sortDeclarations ++ allSorts.map(s => SyntaxSort(Seq(), s, Att.empty)))
+    (sortDeclarations ++ allSorts.map(s => SyntaxSort(immutable.Seq(), s, Att.empty)))
       .groupBy(_.sort.head)
 
   @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor.mapValues {
@@ -397,9 +399,9 @@ case class Module(
   lazy val allSorts: Set[Sort] = (definedSorts -- definedInstantiations.keys).map(
     Sort(_)
   ) ++ definedInstantiations.values.flatten
-  lazy val localSorts: Set[Sort]             = allSorts -- fullImports.flatMap(_.allSorts)
-  lazy val sortedDefinedSorts: Seq[SortHead] = definedSorts.toSeq.sorted
-  lazy val sortedAllSorts: Seq[Sort]         = allSorts.toSeq.sorted
+  lazy val localSorts: Set[Sort]                       = allSorts -- fullImports.flatMap(_.allSorts)
+  lazy val sortedDefinedSorts: immutable.Seq[SortHead] = definedSorts.to[immutable.Seq].sorted
+  lazy val sortedAllSorts: immutable.Seq[Sort]         = allSorts.to[immutable.Seq].sorted
 
   lazy val listSorts: Set[Sort] = sentences.collect {
     case Production(_, _, srt, _, att1) if att1.contains(Att.USER_LIST) =>
@@ -413,7 +415,7 @@ case class Module(
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
       .collect { case SyntaxPriority(ps, _) => ps }
-      .map { ps: Seq[Set[Tag]] =>
+      .map { ps: immutable.Seq[Set[Tag]] =>
         val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
           case ((all, prev), current) =>
             val newPairs = for {
@@ -658,7 +660,7 @@ object Rule {
 
 // syntax declarations
 
-case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
+case class SyntaxPriority(priorities: immutable.Seq[Set[Tag]], att: Att = Att.empty)
     extends Sentence
     with SyntaxPriorityToString
     with OuterKORE {
@@ -669,8 +671,8 @@ case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
 object SyntaxPriority {
   implicit val ord: Ordering[SyntaxPriority] = {
     import scala.math.Ordering.Implicits._
-    Ordering.by[SyntaxPriority, (Seq[Seq[Tag]], Att)](s =>
-      (s.priorities.map(_.toSeq.sorted), s.att)
+    Ordering.by[SyntaxPriority, (immutable.Seq[immutable.Seq[Tag]], Att)](s =>
+      (s.priorities.map(_.to[immutable.Seq].sorted), s.att)
     )
   }
 }
@@ -686,8 +688,8 @@ case class SyntaxAssociativity(assoc: Associativity, tags: Set[Tag], att: Att = 
 object SyntaxAssociativity {
   implicit val ord: Ordering[SyntaxAssociativity] = {
     import scala.math.Ordering.Implicits._
-    Ordering.by[SyntaxAssociativity, (Associativity, Seq[Tag], Att)](s =>
-      (s.assoc, s.tags.toSeq.sorted, s.att)
+    Ordering.by[SyntaxAssociativity, (Associativity, immutable.Seq[Tag], Att)](s =>
+      (s.assoc, s.tags.to[immutable.Seq].sorted, s.att)
     )
   }
 }
@@ -701,16 +703,16 @@ object Tag {
 //trait Production {
 //  def sort: Sort
 //  def att: Att
-//  def items: Seq[ProductionItem]
+//  def items: immutable.Seq[ProductionItem]
 //  def klabel: Option[KLabel] =
 //    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(s, _, _)) => s } map { KLabel(_) }
 //}
 
-case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty)
+case class SyntaxSort(params: immutable.Seq[Sort], sort: Sort, att: Att = Att.empty)
     extends Sentence
     with SyntaxSortToString
     with OuterKORE {
-  def items = Seq()
+  def items = immutable.Seq()
 
   override val isSyntax          = true
   override val isNonSyntax       = false
@@ -719,7 +721,7 @@ case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty)
 object SyntaxSort {
   implicit val ord: Ordering[SyntaxSort] = {
     import scala.math.Ordering.Implicits._
-    Ordering.by[SyntaxSort, (Seq[String], String, Att)](s =>
+    Ordering.by[SyntaxSort, (immutable.Seq[String], String, Att)](s =>
       (s.params.map(_.name), s.sort.name, s.att)
     )
   }
@@ -755,9 +757,9 @@ object SyntaxLexical {
 
 case class Production(
     klabel: Option[KLabel],
-    params: Seq[Sort],
+    params: immutable.Seq[Sort],
     sort: Sort,
-    items: Seq[ProductionItem],
+    items: immutable.Seq[ProductionItem],
     att: Att
 ) extends Sentence
     with ProductionToString {
@@ -792,11 +794,11 @@ case class Production(
 
   def nonterminal(i: Int): NonTerminal = nonterminals(i)
 
-  def substitute(args: Seq[Sort]): Production = {
+  def substitute(args: immutable.Seq[Sort]): Production = {
     val subst = params.zip(args).toMap
     Production(
       klabel.map(l => ADT.KLabel(l.name, args: _*)),
-      Seq(),
+      immutable.Seq(),
       subst.getOrElse(sort, sort.substitute(subst)),
       items.map {
         case NonTerminal(sort, name) =>
@@ -886,23 +888,23 @@ case class Production(
       )
       val empty = Production(
         klabel,
-        Seq(),
+        immutable.Seq(),
         Sort(baseName),
-        Seq(Terminal("")),
+        immutable.Seq(Terminal("")),
         newAtt.add(Att.RECORD_PRD_EMPTY)
       )
       val subsort = Production(
         None,
-        Seq(),
+        immutable.Seq(),
         Sort(baseName),
-        Seq(NonTerminal(Sort(baseName + "Ne"), None)),
+        immutable.Seq(NonTerminal(Sort(baseName + "Ne"), None)),
         newAtt.add(Att.RECORD_PRD_SUBSORT)
       )
       val repeat = Production(
         klabel,
-        Seq(),
+        immutable.Seq(),
         Sort(baseName + "Ne"),
-        Seq(
+        immutable.Seq(
           NonTerminal(Sort(baseName + "Ne"), None),
           Terminal(","),
           NonTerminal(Sort(baseName + "Item"), None)
@@ -911,18 +913,18 @@ case class Production(
       )
       val subsort2 = Production(
         None,
-        Seq(),
+        immutable.Seq(),
         Sort(baseName + "Ne"),
-        Seq(NonTerminal(Sort(baseName + "Item"), None)),
+        immutable.Seq(NonTerminal(Sort(baseName + "Item"), None)),
         newAtt.add(Att.RECORD_PRD_SUBSORT)
       )
       val namedItems: Set[Production] = namedNts
         .map(nt =>
           Production(
             klabel,
-            Seq(),
+            immutable.Seq(),
             Sort(baseName + "Item"),
-            Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)),
+            immutable.Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)),
             newAtt.add(Att.RECORD_PRD_ITEM, nt.name.get)
           )
         )
@@ -959,13 +961,18 @@ object Production {
 
   def apply(
       klabel: KLabel,
-      params: Seq[Sort],
+      params: immutable.Seq[Sort],
       sort: Sort,
-      items: Seq[ProductionItem],
+      items: immutable.Seq[ProductionItem],
       att: Att = Att.empty
   ): Production =
     Production(Some(klabel), params, sort, items, att)
-  def apply(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att): Production =
+  def apply(
+      params: immutable.Seq[Sort],
+      sort: Sort,
+      items: immutable.Seq[ProductionItem],
+      att: Att
+  ): Production =
     if (att.contains(Att.KLABEL)) {
       Production(Some(KORE.KLabel(att.get(Att.KLABEL))), params, sort, items, att)
     } else {

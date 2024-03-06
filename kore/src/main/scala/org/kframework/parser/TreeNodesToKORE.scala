@@ -12,6 +12,7 @@ import org.kframework.definition.Production
 import org.kframework.kore._
 import org.kframework.kore.Unapply._
 import org.kframework.utils.errorsystem.KEMException
+import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
@@ -114,7 +115,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
   def unquote(t: K): String =
     t.asInstanceOf[KToken].s.stripPrefix("`").stripSuffix("`")
 
-  def downList(items: Seq[K]): Seq[K] =
+  def downList(items: immutable.Seq[K]): immutable.Seq[K] =
     items.map(down _)
 
   def downKLabel(t: K): KLabel = t match {

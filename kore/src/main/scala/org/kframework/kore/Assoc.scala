@@ -3,6 +3,7 @@ package org.kframework.kore
 
 import org.kframework.attributes.Att
 import org.kframework.definition.Module
+import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 /**
@@ -11,7 +12,11 @@ import scala.collection.JavaConverters._
 object Assoc extends {
 
   def flatten(label: KLabel, list: java.util.List[K], m: Module): java.util.List[K] =
-    flatten(label, list.asScala, ADT.KLabel(m.attributesFor(label).get(Att.UNIT))).asJava
+    flatten(
+      label,
+      list.asScala.to[immutable.Seq],
+      ADT.KLabel(m.attributesFor(label).get(Att.UNIT))
+    ).asJava
 
   def flatten(label: KLabel, list: java.util.List[K], unit: KToken): java.util.List[K] =
     list.asScala.flatMap {
@@ -29,13 +34,13 @@ object Assoc extends {
     }.asJava
 
   def flatten(label: KLabel, list: java.util.List[K], unit: KLabel): java.util.List[K] =
-    flatten(label, list.asScala, unit).asJava
+    flatten(label, list.asScala.to[immutable.Seq], unit).asJava
 
-  def flatten(label: KLabel, list: Seq[K], unit: KLabel): Seq[K] =
+  def flatten(label: KLabel, list: immutable.Seq[K], unit: KLabel): immutable.Seq[K] =
     list.flatMap {
       case k: KApply =>
         if (k.klabel == label)
-          flatten(label, k.klist.items.asScala, unit)
+          flatten(label, k.klist.items.asScala.to[immutable.Seq], unit)
         else if (k.klabel == unit)
           List()
         else

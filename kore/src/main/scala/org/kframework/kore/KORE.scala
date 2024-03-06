@@ -5,6 +5,7 @@ import org.kframework.attributes
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
+import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 /**
@@ -22,7 +23,7 @@ object KORE extends Constructors {
 
   def KApply(klabel: KLabel, klist: KList): KApply = KApply(klabel, klist, Att.empty)
 
-  def KApply(klabel: KLabel, ks: Seq[K], att: Att = Att.empty): KApply =
+  def KApply(klabel: KLabel, ks: immutable.Seq[K], att: Att = Att.empty): KApply =
     KApply(klabel, KList(ks.asJava), att)
 
   def KToken(string: String, sort: Sort): KToken = KToken(string, sort, Att.empty)
@@ -41,7 +42,8 @@ object KORE extends Constructors {
   //  def toKSequence: Collector[K, KSequence] =
   //    Collector(() => new CombinerFromBuilder(KSequence.newBuilder()))
 
-  override def KLabel(name: String, params: Seq[Sort]): KLabel = ADT.KLabel(name, params: _*)
+  override def KLabel(name: String, params: immutable.Seq[Sort]): KLabel =
+    ADT.KLabel(name, params: _*)
 
   override def KApply(klabel: KLabel, klist: KList, att: Att): KApply =
     ADT.KApply(klabel, klist, att)
@@ -51,7 +53,7 @@ object KORE extends Constructors {
 
   override def KVariable(name: String, att: Att): KVariable = ADT.KVariable(name, att)
 
-  override def Sort(name: String, params: Seq[Sort]): Sort = ADT.Sort(name, params: _*)
+  override def Sort(name: String, params: immutable.Seq[Sort]): Sort = ADT.Sort(name, params: _*)
 
   def Sort(name: SortHead): Sort = {
     assert(name.params == 0)

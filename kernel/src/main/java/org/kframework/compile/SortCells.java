@@ -936,13 +936,13 @@ public class SortCells {
   // find nth argument sort for a given klabel
   // if multiple signiture exist, then return arbitrary one of them that is not K
   private Sort nthArgSort(KLabel klabel, int n) {
-    java.util.Set<Tuple2<Seq<Sort>, Sort>> sigs =
+    java.util.Set<Tuple2<scala.collection.immutable.Seq<Sort>, Sort>> sigs =
         mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
     if (sigs == null) {
       throw new IllegalArgumentException("Not found signature for label: " + klabel);
     }
     Sort sort = null;
-    for (Tuple2<Seq<Sort>, Sort> sig : sigs) {
+    for (Tuple2<scala.collection.immutable.Seq<Sort>, Sort> sig : sigs) {
       List<Sort> sorts = JavaConversions.seqAsJavaList(sig._1());
       if (n >= sorts.size()) continue;
       sort = sorts.get(n);

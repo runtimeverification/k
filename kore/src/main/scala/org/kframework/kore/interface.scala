@@ -36,8 +36,11 @@ object K {
           Ordering.Tuple2(Ordering[String], Ordering[Sort]).compare((c.s, c.sort), (d.s, d.sort))
         case (c: KApply, d: KApply) =>
           Ordering
-            .Tuple2(KLabelOrdering, seqDerivedOrdering[Seq, K](this))
-            .compare((c.klabel, c.klist.items.asScala), (d.klabel, d.klist.items.asScala))
+            .Tuple2(KLabelOrdering, seqDerivedOrdering[immutable.Seq, K](this))
+            .compare(
+              (c.klabel, c.klist.items.asScala.to[immutable.Seq]),
+              (d.klabel, d.klist.items.asScala.to[immutable.Seq])
+            )
         case (c: KSequence, d: KSequence) =>
           seqDerivedOrdering(this).compare(c.items.asScala, d.items.asScala)
         case (c: KVariable, d: KVariable) => Ordering[String].compare(c.name, d.name)
@@ -89,7 +92,7 @@ object KLabelOrdering extends Ordering[KLabel] {
   def compare(a: KLabel, b: KLabel): Int = {
     import scala.math.Ordering.Implicits._
     Ordering
-      .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering[Sort]))
+      .Tuple2(Ordering[String], seqDerivedOrdering[immutable.Seq, Sort](Ordering[Sort]))
       .compare((a.name, a.params), (b.name, b.params))
   }
 }
@@ -116,7 +119,7 @@ trait Sort extends Ordered[Sort] with AttValue {
   def compare(that: Sort): Int = {
     import scala.math.Ordering.Implicits._
     Ordering
-      .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity)))
+      .Tuple2(Ordering[String], seqDerivedOrdering[immutable.Seq, Sort](Ordering.ordered(identity)))
       .compare((this.name, this.params), (that.name, that.params))
   }
 

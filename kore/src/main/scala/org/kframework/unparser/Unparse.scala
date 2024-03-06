@@ -6,6 +6,7 @@ import org.kframework.kore.K
 import org.kframework.kore.KLabel
 import org.kframework.kore.Unapply._
 import org.kframework.utils.StringUtil
+import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 /**
@@ -89,7 +90,7 @@ object ToKast {
         unparse(accumulator, false, 0, a)
       }
       accumulator(")")
-    case KSequence(Seq()) => accumulator(".K")
+    case KSequence(immutable.Seq()) => accumulator(".K")
     case KSequence(a +: items) =>
       unparse(accumulator, inParen, 2, a)
       for (i <- items) {

@@ -647,7 +647,7 @@ public class ModuleToKORE {
     scala.collection.Set<Production> mapProds = module.productionsForSort().apply(mapSort.head());
     Production concatProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.concat")).get();
     Production elementProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.element")).get();
-    Seq<NonTerminal> nonterminals = elementProd.nonterminals();
+    scala.collection.immutable.Seq<NonTerminal> nonterminals = elementProd.nonterminals();
     Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
 
     // rule
@@ -674,7 +674,7 @@ public class ModuleToKORE {
         setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceil, setVar));
       }
     }
-    Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
+    scala.collection.immutable.Seq<K> setArgsSeq = immutable(setArgs);
 
     KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
     Rule ceilMapRule =
@@ -744,13 +744,11 @@ public class ModuleToKORE {
       }
       sb.append(")) [constructor{}()] // no confusion same constructor\n");
     }
+
     for (Production prod2 :
-        iterable(
-            module
-                .productionsForSort()
-                .apply(prod.sort().head())
-                .toSeq()
-                .sorted(Production.ord()))) {
+        Collections.mutable(module.productionsForSort().apply(prod.sort().head())).stream()
+            .sorted(Production.ord())
+            .toList()) {
       // !(cx(x1,x2,...) /\ cy(y1,y2,...))
       if (prod2.klabel().isEmpty()
           || noConfusion.contains(Tuple2.apply(prod, prod2))
@@ -802,11 +800,9 @@ public class ModuleToKORE {
     convert(sort, sbTemp);
     sbTemp.append("} (");
     for (Production prod :
-        iterable(
-            mutable(module.productionsForSort())
-                .getOrDefault(sort.head(), Set())
-                .toSeq()
-                .sorted(Production.ord()))) {
+        mutable(mutable(module.productionsForSort()).getOrDefault(sort.head(), Set())).stream()
+            .sorted(Production.ord())
+            .toList()) {
       if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod) || prod.isMacro()) {
         continue;
       }
@@ -1942,7 +1938,8 @@ public class ModuleToKORE {
     convert(klabel, java.util.Collections.emptySet(), sb);
   }
 
-  private void convert(KLabel klabel, Seq<Sort> params, StringBuilder sb) {
+  private void convert(
+      KLabel klabel, scala.collection.immutable.Seq<Sort> params, StringBuilder sb) {
     convert(klabel, mutable(params), sb);
   }
 
@@ -1998,7 +1995,7 @@ public class ModuleToKORE {
     convert(Sort(sort.name(), immutable(params)), params, sb);
   }
 
-  private void convert(Sort sort, Seq<Sort> params, StringBuilder sb) {
+  private void convert(Sort sort, scala.collection.immutable.Seq<Sort> params, StringBuilder sb) {
     convert(sort, mutable(params), sb);
   }
 

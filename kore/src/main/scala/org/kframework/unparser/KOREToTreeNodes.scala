@@ -18,7 +18,7 @@ object KOREToTreeNodes {
   import org.kframework.kore.KORE._
 
   def wellTyped(
-      args: Seq[Sort],
+      args: immutable.Seq[Sort],
       p: Production,
       children: Iterable[Term],
       subsorts: POSet[Sort]
@@ -72,13 +72,14 @@ object KOREToTreeNodes {
       val sort = Sort(t.sort.name, t.sort.params)
       KToken(t.s, sort, t.att)
     case s: KSequence =>
-      upList(mod)(s.items.asScala).foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) =>
-        KApply(KLabel("#KSequence"), KList(k1, k2), s.att)
-      )
+      upList(mod)(s.items.asScala.to[immutable.Seq])
+        .foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) =>
+          KApply(KLabel("#KSequence"), KList(k1, k2), s.att)
+        )
     case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(mod)(r.left), up(mod)(r.right)), r.att)
-    case t: KApply   => KApply(t.klabel, upList(mod)(t.klist.items.asScala), t.att)
+    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala.to[immutable.Seq]), t.att)
   }
 
-  def upList(mod: Module)(items: Seq[K]): Seq[K] =
+  def upList(mod: Module)(items: immutable.Seq[K]): immutable.Seq[K] =
     items.map(up(mod) _)
 }

@@ -8,6 +8,7 @@ import org.kframework.attributes._
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
 import scala.annotation.meta.param
+import scala.collection.immutable
 import scala.collection.mutable
 import scala.collection.Set
 
@@ -52,10 +53,13 @@ object FlatModule {
    * @return
    *   The set of Modules, directly connected and maximally shared.
    */
-  def toModules(allModules: Seq[FlatModule], previousModules: Set[Module]): Set[Module] = {
+  def toModules(
+      allModules: immutable.Seq[FlatModule],
+      previousModules: Set[Module]
+  ): Set[Module] = {
     val memoization: mutable.HashMap[String, Module] = collection.mutable.HashMap[String, Module]()
     previousModules.map(m => memoization.put(m.name, m))
-    def toModuleRec(m: FlatModule, visitedModules: Seq[FlatModule]): Module = {
+    def toModuleRec(m: FlatModule, visitedModules: immutable.Seq[FlatModule]): Module = {
       if (visitedModules.contains(m)) {
         var msg = "Found circularity in module imports: "
         visitedModules.reverse.foreach(m => msg += m.name + " < ")
@@ -90,7 +94,7 @@ object FlatModule {
         }
       )
     }
-    allModules.map(m => toModuleRec(m, Seq()))
+    allModules.map(m => toModuleRec(m, immutable.Seq()))
     memoization.values.toSet
   }
 }

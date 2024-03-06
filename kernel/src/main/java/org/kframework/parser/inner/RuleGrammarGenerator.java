@@ -564,7 +564,7 @@ public record RuleGrammarGenerator(Definition baseK) {
                         body = NonTerminal(Sorts.Bag());
                       }
                       final ProductionItem optDots = NonTerminal(Sort("#OptionalDots"));
-                      Seq<ProductionItem> pi =
+                      scala.collection.immutable.Seq<ProductionItem> pi =
                           Seq(p.items().head(), optDots, body, optDots, p.items().last());
                       Production p1 = Production(p.klabel().get(), p.sort(), pi, p.att());
                       Production p2 = Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())));
