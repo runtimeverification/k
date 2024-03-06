@@ -3,7 +3,6 @@ package org.kframework.parser;
 
 public enum InputModes {
   PROGRAM,
-  BINARY,
   JSON,
   KAST,
   KORE,
