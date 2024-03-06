@@ -61,7 +61,7 @@ public class GenerateSortPredicateRules {
               KRewrite(
                   KApply(
                       KLabel("is" + sort),
-                      KVariable(sort.name(), Att.empty().add(Att.SORT(), Sort.class, sort))),
+                      KVariable(sort.name(), Att().add(Att.SORT(), Sort.class, sort))),
                   BooleanUtils.TRUE),
               BooleanUtils.TRUE,
               BooleanUtils.TRUE));
@@ -70,7 +70,7 @@ public class GenerateSortPredicateRules {
               KRewrite(KApply(KLabel("is" + sort), KVariable("K")), BooleanUtils.FALSE),
               BooleanUtils.TRUE,
               BooleanUtils.TRUE,
-              Att.empty().add(Att.OWISE())));
+              Att().add(Att.OWISE())));
       return res.stream();
     }
   }
