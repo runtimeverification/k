@@ -94,9 +94,10 @@ jobs:
           docker run --rm runtimeverificationinc/kframework-pyk:${PYK_VERSION} kompile --version
       - name: 'Push docker image'
         env:
-          USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          USERNAME: "rvdockerhub" # ${{ secrets.DOCKERHUB_USERNAME }}
           PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: |
           PYK_VERSION=$(cat package/version)
+          set -eux
           docker login --username ${USERNAME} --password ${PASSWORD}
           docker image push runtimeverificationinc/kframework-pyk:${PYK_VERSION}
