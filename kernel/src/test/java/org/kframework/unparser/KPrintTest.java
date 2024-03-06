@@ -10,7 +10,6 @@ import java.util.List;
 import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.kore.K;
-import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
 
@@ -20,8 +19,7 @@ public class KPrintTest {
     return KApply(KLabel(cellName), cellContent);
   }
 
-  OutputModes[] outputModes =
-      new OutputModes[] {OutputModes.JSON, OutputModes.BINARY, OutputModes.KAST};
+  OutputModes[] outputModes = new OutputModes[] {OutputModes.JSON, OutputModes.KAST};
 
   private String bytes2String(byte[] input) {
     return new String(input, StandardCharsets.UTF_8);
@@ -35,7 +33,6 @@ public class KPrintTest {
     byte[] unparsed = KPrint.serialize(origTerm, outputMode);
     return switch (outputMode) {
       case JSON -> JsonParser.parse(unparsed);
-      case BINARY -> BinaryParser.parse(unparsed);
       case KAST -> KastParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
       default -> KToken("###", Sort("UnsupportedOutputMode"));
     };
