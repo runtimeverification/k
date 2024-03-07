@@ -42,8 +42,6 @@ $KORE_PRINT arguments:
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
                            which is determined based on whether stdout is a
                            terminal
-  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR
       --definition DIR     Exact path to the kompiled directory.
   -h, --help               Display this help and exit
       --no-substitution-filtering  Don't filter conjuncts with anonymous
@@ -84,12 +82,6 @@ do
         error 1 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
-      shift
-      ;;
-
-      -d|--directory)
-      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
-      dir="$2"
       shift
       ;;
 

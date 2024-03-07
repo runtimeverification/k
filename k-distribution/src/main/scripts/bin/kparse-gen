@@ -42,8 +42,6 @@ $KPARSE_GEN options:
       --bison-file FILE    C file that should be linked into the generated
                            parser
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
-  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR
       --definition DIR     Exact path to the kompiled directory.
   -g, --glr                Generate a GLR parser instead of an LR(1) parser
   -h, --help               Display this help and exit
@@ -75,12 +73,6 @@ do
 
       --bison-stack-max-depth)
       stackDepth="$2"
-      shift
-      ;;
-
-      -d|--directory)
-      echo "[Warning]: -d/--directory is deprecated. Use --definition instead."
-      dir="$2"
       shift
       ;;
 

@@ -120,8 +120,6 @@ $KRUN options:
                            mode. Currently only supported on LLVM backend.
       --debugger-command FILE  Execute GDB commands from FILE to debug program.
                                Currently only supported on LLVM backend.
-  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR.
       --dry-run            Do not execute backend, but instead print the
                            command that would be executed to stdout.
       --haskell-backend-command CMD  use CMD instead of kore-exec to invoke
@@ -237,12 +235,6 @@ do
       tempFiles+=("$tempFile")
       printf %s "$val" > "$tempFile"
       printf -v "$var_name" %s "$tempFile"
-      ;;
-
-      -d|--directory)
-      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
-      dir="$2"
-      shift
       ;;
 
       --dry-run)

@@ -40,8 +40,6 @@ $(k_util_usage)
 
 $KPARSE options:
 
-  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR
   -h, --help               Display this help and exit
       --definition DIR     Exact path to the kompiled directory.
   -i, --input MODE         Select input mode to use when parsing. Valid values
@@ -67,12 +65,6 @@ do
     ARGV+=("$1")
   else
     case "$arg" in
-      -d|--directory)
-      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
-      dir="$2"
-      shift
-      ;;
-
       -h|--help)
       print_usage
       exit 0

@@ -137,7 +137,6 @@ public class KException implements Serializable, HasLocation {
     NON_LR_GRAMMAR,
     IGNORED_ATTRIBUTE,
     REMOVED_ANYWHERE,
-    DEPRECATED_DIRECTORY_FLAG,
     DEPRECATED_SYMBOL,
     MISSING_HOOK,
     SINGLETON_OVERLOAD,
