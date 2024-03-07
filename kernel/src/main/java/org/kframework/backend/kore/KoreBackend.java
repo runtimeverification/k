@@ -310,43 +310,12 @@ public class KoreBackend implements Backend {
             "generateSortPredicateRules",
             "numberSentences2");
 
-    return def ->
-        resolveComm
-            .andThen(resolveIO)
-            .andThen(resolveFun)
-            .andThen(resolveFunctionWithConfig)
-            .andThen(resolveStrict)
-            .andThen(resolveAnonVars)
-            .andThen(d -> new ResolveContexts().resolve(d))
-            .andThen(numberSentences)
-            .andThen(resolveHeatCoolAttribute)
-            .andThen(resolveSemanticCasts)
-            .andThen(subsortKItem)
-            .andThen(constantFolding)
-            .andThen(propagateMacroToRules)
-            .andThen(guardOrs)
-            .andThen(resolveFreshConfigConstants)
-            .andThen(generateSortPredicateSyntax)
-            .andThen(generateSortProjections)
-            .andThen(expandMacros)
-            .andThen(AddImplicitComputationCell::transformDefinition)
-            .andThen(resolveFreshConstants)
-            .andThen(generateSortPredicateSyntax)
-            .andThen(generateSortProjections)
-            .andThen(checkSimplificationRules)
-            .andThen(subsortKItem)
-            .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-            .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
-            .andThen(d -> ConcretizeCells.transformDefinition(d))
-            .andThen(genCoverage)
-            .andThen(Kompile::addSemanticsModule)
-            .andThen(resolveConfigVar)
-            .andThen(addCoolLikeAtt)
-            .andThen(markExtraConcreteRules)
-            .andThen(removeAnywhereRules)
-            .andThen(generateSortPredicateRules)
-            .andThen(numberSentences)
-            .apply(def);
+    Function1<Definition, Definition> applyPipeline =
+        stepOrdering.stream()
+            .map(name -> namedStages.get(name))
+            .reduce(d -> d, (f, g) -> f.andThen(g));
+
+    return d -> applyPipeline.apply(d);
   }
 
   @Override
