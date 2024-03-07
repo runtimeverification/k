@@ -40,8 +40,8 @@ $(k_util_usage)
 
 $KPARSE options:
 
-  -h, --help               Display this help and exit
   -d, --definition DIR     Exact path to the kompiled directory.
+  -h, --help               Display this help and exit
   -i, --input MODE         Select input mode to use when parsing. Valid values
                            are program, kast, binary, json, and kore.
   -m, --module MODULE      Module to use to generate grammar
