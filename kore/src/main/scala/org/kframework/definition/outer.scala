@@ -481,10 +481,12 @@ case class Module(
   def checkUserLists(): Unit = localSentences.foreach {
     case p @ Production(_, _, srt, _, atts) =>
       if (atts.contains(Att.USER_LIST)) {
-        val prev = importedSentences.find(s =>
+        val prev = sentences.find(s =>
           s.isInstanceOf[Production]
             && s.asInstanceOf[Production].sort.equals(srt)
             && s.att.contains(Att.USER_LIST)
+            && !(s.source.equals(p.source)
+              && s.location.equals(p.location))
         )
         if (prev.isDefined)
           throw KEMException.compilerError(
