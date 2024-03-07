@@ -272,43 +272,48 @@ public class KoreBackend implements Backend {
             entry("generateSortPredicateRules", generateSortPredicateRules),
             entry("numberSentences2", numberSentences));
 
-    List<String> stepOrdering =
-        List.of(
-            "resolveComm",
-            "resolveIO",
-            "resolveFun",
-            "resolveFunctionWithConfig",
-            "resolveStrict",
-            "resolveAnonVars",
-            "resolveContexts",
-            "numberSentences1",
-            "resolveHeatCoolAttribute",
-            "resolveSemanticCasts",
-            "subsortKItem1",
-            "constantFolding",
-            "propagateMacroToRules",
-            "guardOrs",
-            "resolveFreshConfigConstants",
-            "generateSortPredicateSyntax1",
-            "generateSortProjections1",
-            "expandMacros",
-            "addImplicitComputationCell",
-            "resolveFreshConstants",
-            "generateSortPredicateSyntax2",
-            "generateSortProjections2",
-            "checkSimplificationRules",
-            "subsortKItem2",
-            "addStrategyCellToRules",
-            "addStrategyRuleToMainModule",
-            "concretizeCells",
-            "genCoverage",
-            "addSemanticsModule",
-            "resolveConfigVar",
-            "addCoolLikeAtt",
-            "markExtraConcreteRules",
-            "removeAnywhereRules",
-            "generateSortPredicateRules",
-            "numberSentences2");
+    List<String> stepOrdering;
+    if (kompileOptions.koreBackendSteps != null) {
+      stepOrdering = List.of(kompileOptions.koreBackendSteps.split(","));
+    } else {
+      stepOrdering =
+          List.of(
+              "resolveComm",
+              "resolveIO",
+              "resolveFun",
+              "resolveFunctionWithConfig",
+              "resolveStrict",
+              "resolveAnonVars",
+              "resolveContexts",
+              "numberSentences1",
+              "resolveHeatCoolAttribute",
+              "resolveSemanticCasts",
+              "subsortKItem1",
+              "constantFolding",
+              "propagateMacroToRules",
+              "guardOrs",
+              "resolveFreshConfigConstants",
+              "generateSortPredicateSyntax1",
+              "generateSortProjections1",
+              "expandMacros",
+              "addImplicitComputationCell",
+              "resolveFreshConstants",
+              "generateSortPredicateSyntax2",
+              "generateSortProjections2",
+              "checkSimplificationRules",
+              "subsortKItem2",
+              "addStrategyCellToRules",
+              "addStrategyRuleToMainModule",
+              "concretizeCells",
+              "genCoverage",
+              "addSemanticsModule",
+              "resolveConfigVar",
+              "addCoolLikeAtt",
+              "markExtraConcreteRules",
+              "removeAnywhereRules",
+              "generateSortPredicateRules",
+              "numberSentences2");
+    }
 
     Function1<Definition, Definition> applyPipeline =
         stepOrdering.stream()
