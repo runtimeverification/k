@@ -86,7 +86,7 @@ class KDistBuildCommand(Command, LoggingOptions):
             action='append',
             help='build with argument',
         )
-        parser.add_argument('-f', '--force', action='store_true', help='force build')
+        parser.add_argument('-f', '--force', default=None, action='store_true', help='force build')
         parser.add_argument('-j', '--jobs', metavar='N', type=int, help='maximal number of build jobs')
 
     def exec(self) -> None:
