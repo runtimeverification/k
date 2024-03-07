@@ -261,7 +261,7 @@ public class KoreBackend implements Backend {
                 d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d)),
             entry(
                 "addStrategyRuleToMainModule",
-                d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d)),
+                d -> Strategy.addStrategyRuleToMainModule(d.mainModule().name()).apply(d)),
             entry("concretizeCells", d -> ConcretizeCells.transformDefinition(d)),
             entry("genCoverage", genCoverage),
             entry("addSemanticsModule", Kompile::addSemanticsModule),
