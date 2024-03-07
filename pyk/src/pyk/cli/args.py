@@ -32,8 +32,8 @@ class LoggingOptions(Options):
 
     @staticmethod
     def update_args(parser: ArgumentParser) -> None:
-        parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output.')
-        parser.add_argument('--debug', action='store_true', help='Debug output.')
+        parser.add_argument('--verbose', '-v', default=None, action='store_true', help='Verbose output.')
+        parser.add_argument('--debug', default=None, action='store_true', help='Debug output.')
 
 
 class OutputFileOptions(Options):
@@ -69,8 +69,10 @@ class DisplayOptions(Options):
 
     @staticmethod
     def update_args(parser: ArgumentParser) -> None:
-        parser.add_argument('--minimize', dest='minimize', action='store_true', help='Minimize output.')
-        parser.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize output.')
+        parser.add_argument('--minimize', dest='minimize', default=None, action='store_true', help='Minimize output.')
+        parser.add_argument(
+            '--no-minimize', dest='minimize', default=None, action='store_false', help='Do not minimize output.'
+        )
 
 
 class KDefinitionOptions(Options):
@@ -185,11 +187,16 @@ class KompileOptions(Options):
         parser.add_argument(
             '--emit-json',
             dest='emit_json',
+            default=None,
             action='store_true',
             help='Emit JSON definition after compilation.',
         )
         parser.add_argument(
-            '--no-emit-json', dest='emit_json', action='store_false', help='Do not JSON definition after compilation.'
+            '--no-emit-json',
+            dest='emit_json',
+            default=None,
+            action='store_false',
+            help='Do not JSON definition after compilation.',
         )
         parser.add_argument(
             '-ccopt',
@@ -200,31 +207,35 @@ class KompileOptions(Options):
         parser.add_argument(
             '--no-llvm-kompile',
             dest='llvm_kompile',
+            default=None,
             action='store_false',
             help='Do not run llvm-kompile process.',
         )
         parser.add_argument(
             '--with-llvm-library',
             dest='llvm_library',
+            default=None,
             action='store_true',
             help='Make kompile generate a dynamic llvm library.',
         )
         parser.add_argument(
             '--enable-llvm-debug',
             dest='enable_llvm_debug',
+            default=None,
             action='store_true',
             help='Make kompile generate debug symbols for llvm.',
         )
         parser.add_argument(
             '--read-only-kompiled-directory',
             dest='read_only',
+            default=None,
             action='store_true',
             help='Generated a kompiled directory that K will not attempt to write to afterwards.',
         )
-        parser.add_argument('-O0', dest='o0', action='store_true', help='Optimization level 0.')
-        parser.add_argument('-O1', dest='o1', action='store_true', help='Optimization level 1.')
-        parser.add_argument('-O2', dest='o2', action='store_true', help='Optimization level 2.')
-        parser.add_argument('-O3', dest='o3', action='store_true', help='Optimization level 3.')
+        parser.add_argument('-O0', dest='o0', default=None, action='store_true', help='Optimization level 0.')
+        parser.add_argument('-O1', dest='o1', default=None, action='store_true', help='Optimization level 1.')
+        parser.add_argument('-O2', dest='o2', default=None, action='store_true', help='Optimization level 2.')
+        parser.add_argument('-O3', dest='o3', default=None, action='store_true', help='Optimization level 3.')
 
 
 class ParallelOptions(Options):
