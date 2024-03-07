@@ -1049,6 +1049,53 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         assert actual_path_conds == expected_path_conds
 
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,expected_pending,expected_failing,path_conditions',
+        FAILURE_INFO_TEST_DATA,
+        ids=[test_id for test_id, *_ in FAILURE_INFO_TEST_DATA],
+    )
+    def test_failure_info_recomputed_on_proof_reinit(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        expected_pending: int,
+        expected_failing: int,
+        path_conditions: tuple[KInner],
+        proof_dir: Path,
+    ) -> None:
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
+        )
+
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
+        proof_id = proof.id
+        kcfg_explore.simplify(proof.kcfg, {})
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
+        prover.advance_proof()
+
+        # reload proof from disk
+        proof = APRProof.read_proof_data(proof_dir, proof_id)
+        prover = APRProver(proof, kcfg_explore=kcfg_explore)
+        prover.advance_proof()
+
+        failure_info = proof.failure_info
+        assert isinstance(failure_info, APRFailureInfo)
+
+        actual_pending = len(failure_info.pending_nodes)
+        actual_failing = len(failure_info.failing_nodes)
+
+        assert expected_pending == actual_pending
+        assert expected_failing == actual_failing
+
+        actual_path_conds = set({path_condition for _, path_condition in failure_info.path_conditions.items()})
+        expected_path_conds = set({kprove.pretty_print(condition) for condition in path_conditions})
+
+        assert actual_path_conds == expected_path_conds
+
     def test_apr_prove_read_write_node_data(
         self,
         kprove: KProve,
