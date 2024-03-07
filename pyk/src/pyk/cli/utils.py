@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from typing import Final, TypeVar
 
     from ..kcfg.kcfg import NodeIdLike
+    from .args import LoggingOptions
 
     T1 = TypeVar('T1')
     T2 = TypeVar('T2')
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
 LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
 
-def loglevel(args: Namespace) -> int:
+def loglevel(args: LoggingOptions | Namespace) -> int:
     if args.debug:
         return logging.DEBUG
 
