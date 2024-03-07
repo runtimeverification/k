@@ -10,7 +10,6 @@ public enum OutputModes {
   PRETTY,
   PROGRAM,
   KAST,
-  BINARY,
   JSON,
   KORE,
   NONE;

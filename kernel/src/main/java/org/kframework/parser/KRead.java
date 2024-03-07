@@ -12,7 +12,6 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.KSyntax2Bison;
@@ -55,7 +54,7 @@ public record KRead(
       InputModes inputMode,
       boolean partialParseDebug) {
     return switch (inputMode) {
-      case BINARY, JSON, KAST -> deserialize(stringToParse, inputMode, source);
+      case JSON, KAST -> deserialize(stringToParse, inputMode, source);
       case KORE -> new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
       case PROGRAM -> def.parseSingleTerm(
           mod, sort, startSymbolLocation, kem, files, stringToParse, source, partialParseDebug);
@@ -169,7 +168,6 @@ public record KRead(
 
   public static K deserialize(String stringToParse, InputModes inputMode, Source source) {
     return switch (inputMode) {
-      case BINARY -> BinaryParser.parse(stringToParse.getBytes());
       case JSON -> JsonParser.parse(stringToParse);
       case KAST -> KastParser.parse(stringToParse, source);
       default -> throw KEMException.criticalError(
