@@ -8,7 +8,7 @@ public class DefinitionLoadingOptions {
   public DefinitionLoadingOptions() {}
 
   @Parameter(
-      names = {"--definition"},
+      names = {"--definition", "-d"},
       description = "Exact path to the kompiled directory.",
       descriptionKey = "path")
   public String inputDirectory;

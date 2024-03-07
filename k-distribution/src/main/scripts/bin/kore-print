@@ -42,7 +42,7 @@ $KORE_PRINT arguments:
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
                            which is determined based on whether stdout is a
                            terminal
-      --definition DIR     Exact path to the kompiled directory.
+  -d, --definition DIR     Exact path to the kompiled directory.
   -h, --help               Display this help and exit
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
@@ -85,7 +85,7 @@ do
       shift
       ;;
 
-      --definition)
+      -d|--definition)
       kompiledDir="$2"
       shift
       ;;

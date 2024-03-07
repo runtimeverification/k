@@ -125,7 +125,7 @@ $KRUN options:
       --haskell-backend-command CMD  use CMD instead of kore-exec to invoke
                                      Haskell backend
   -h, --help               Display this help and exit
-      --definition DIR     Exact path to the kompiled directory.
+  -d, --definition DIR     Exact path to the kompiled directory.
       --execute-to-branch  Execute until a non-deterministic state is reached, then exit.
                            Requires the --enable-search option to have been passed to kompile
                            on the LLVM backend.
@@ -252,7 +252,7 @@ do
       exit 0
       ;;
 
-      --definition)
+      -d|--definition)
       kompiledDir="$2"
       shift
       ;;
