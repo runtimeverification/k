@@ -326,6 +326,6 @@ class Prover:
             results = self.step_proof()
             for result in results:
                 self.proof.commit(result)
-            if self.proof.failed:
-                self.proof.failure_info = self.failure_info()
             self.proof.write_proof_data()
+        if self.proof.failed:
+            self.proof.failure_info = self.failure_info()
