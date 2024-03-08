@@ -82,7 +82,7 @@ class TestMinimizeTerm(KompiledTest):
         assume_argv(
             [
                 'pyk',
-                'prove',
+                'prove-legacy',
                 str(definition_dir),
                 str(K_FILES / 'imp-verification.k'),
                 str(K_FILES / 'imp-unproveable-spec.k'),

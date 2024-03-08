@@ -210,7 +210,7 @@ def exec_rpc_kast(args: Namespace) -> None:
     args.output_file.write(json.dumps(request))
 
 
-def exec_prove(args: Namespace) -> None:
+def exec_prove_legacy(args: Namespace) -> None:
     kompiled_dir: Path = args.definition_dir
     kprover = KProve(kompiled_dir, args.main_file)
     final_state = kprover.prove(Path(args.spec_file), spec_module_name=args.spec_module, args=args.kArgs)
@@ -310,16 +310,16 @@ def create_argument_parser() -> ArgumentParser:
     )
     rpc_kast_args.add_argument('--output-file', type=FileType('w'), default='-')
 
-    prove_args = pyk_args_command.add_parser(
-        'prove',
+    prove_legacy_args = pyk_args_command.add_parser(
+        'prove-legacy',
         help='Prove an input specification (using kprovex).',
         parents=[k_cli_args.logging_args, definition_args],
     )
-    prove_args.add_argument('main_file', type=str, help='Main file used for kompilation.')
-    prove_args.add_argument('spec_file', type=str, help='File with the specification module.')
-    prove_args.add_argument('spec_module', type=str, help='Module with claims to be proven.')
-    prove_args.add_argument('--output-file', type=FileType('w'), default='-')
-    prove_args.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
+    prove_legacy_args.add_argument('main_file', type=str, help='Main file used for kompilation.')
+    prove_legacy_args.add_argument('spec_file', type=str, help='File with the specification module.')
+    prove_legacy_args.add_argument('spec_module', type=str, help='Module with claims to be proven.')
+    prove_legacy_args.add_argument('--output-file', type=FileType('w'), default='-')
+    prove_legacy_args.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
 
     pyk_args_command.add_parser(
         'graph-imports',

@@ -12,14 +12,16 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
-from ..cterm import CTerm, cterm_build_claim
+from ..cterm import CTerm, cterm_symbolic
 from ..kast import Atts, kast_term
 from ..kast.inner import KInner
-from ..kast.manip import extract_subst, flatten_label, free_vars
-from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
+from ..kast.manip import extract_lhs, flatten_label
+from ..kast.outer import KApply, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
+from ..kcfg.explore import KCFGExplore
 from ..kore.rpc import KoreExecLogFormat
-from ..prelude.ml import is_top, mlAnd
-from ..utils import gen_file_timestamp, run_process, unique
+from ..prelude.ml import is_top
+from ..proof import APRProof, APRProver, EqualityProof, ImpliesProver
+from ..utils import gen_file_timestamp, run_process
 from . import TypeInferenceMode
 from .kprint import KPrint
 
@@ -30,6 +32,9 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
+    from ..kcfg.semantics import KCFGSemantics
+    from ..kore.rpc import FallbackReason
+    from ..proof import Proof, Prover
     from ..utils import BugReport
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -163,6 +168,7 @@ class KProve(KPrint):
     main_file: Path | None
     prover: list[str]
     prover_args: list[str]
+    _kcfg_explore: KCFGExplore | None
 
     def __init__(
         self,
@@ -185,6 +191,7 @@ class KProve(KPrint):
         self.main_file = main_file
         self.prover = [command]
         self.prover_args = []
+        self._kcfg_explore = None
 
     def prove(
         self,
@@ -194,28 +201,18 @@ class KProve(KPrint):
         include_dirs: Iterable[Path] = (),
         md_selector: str | None = None,
         haskell_args: Iterable[str] = (),
-        haskell_rts_args: Iterable[str] = (),
-        haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Path | None = None,
-        allow_zero_step: bool = False,
-        dry_run: bool = False,
         depth: int | None = None,
-        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
-        haskell_log_debug_transition: bool = True,
     ) -> list[CTerm]:
-        log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
+        log_file = spec_file.with_suffix('.debug-log')
         if log_file.exists():
             log_file.unlink()
-        haskell_log_entries = unique(
-            list(haskell_log_entries) + (['DebugTransition'] if haskell_log_debug_transition else [])
-        )
         haskell_log_args = [
             '--log',
             str(log_file),
             '--log-format',
-            haskell_log_format.value,
+            KoreExecLogFormat.ONELINE.value,
             '--log-entries',
-            ','.join(haskell_log_entries),
+            'DebugTransition',
         ]
 
         env = os.environ.copy()
@@ -223,12 +220,6 @@ class KProve(KPrint):
         kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args + ([existing_opts] if existing_opts else []))
         _LOGGER.debug(f'export KORE_EXEC_OPTS={kore_exec_opts!r}')
         env['KORE_EXEC_OPTS'] = kore_exec_opts
-
-        if haskell_rts_args:
-            existing = os.getenv('GHCRTS')
-            ghc_rts = ' '.join(list(haskell_rts_args) + ([existing] if existing else []))
-            _LOGGER.debug(f'export GHCRTS={ghc_rts!r}')
-            env['GHCRTS'] = ghc_rts
 
         proc_result = _kprove(
             spec_file=spec_file,
@@ -239,7 +230,6 @@ class KProve(KPrint):
             md_selector=md_selector,
             output=KProveOutput.JSON,
             temp_dir=self.use_directory,
-            dry_run=dry_run,
             args=self.prover_args + list(args),
             env=env,
             check=False,
@@ -249,12 +239,9 @@ class KProve(KPrint):
         if proc_result.returncode not in (0, 1):
             raise RuntimeError('kprove failed!')
 
-        if dry_run:
-            return [CTerm.bottom()]
-
         debug_log = _get_rule_log(log_file)
         final_state = KInner.from_dict(kast_term(json.loads(proc_result.stdout)))
-        if is_top(final_state) and len(debug_log) == 0 and not allow_zero_step:
+        if is_top(final_state) and len(debug_log) == 0:
             raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
         return [CTerm.from_kast(disjunct) for disjunct in flatten_label('#Or', final_state)]
 
@@ -265,10 +252,6 @@ class KProve(KPrint):
         lemmas: Iterable[KRule] = (),
         args: Iterable[str] = (),
         haskell_args: Iterable[str] = (),
-        haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Path | None = None,
-        allow_zero_step: bool = False,
-        dry_run: bool = False,
         depth: int | None = None,
     ) -> list[CTerm]:
         with self._tmp_claim_definition(claim, claim_id, lemmas=lemmas) as (claim_path, claim_module_name):
@@ -277,45 +260,132 @@ class KProve(KPrint):
                 spec_module_name=claim_module_name,
                 args=args,
                 haskell_args=haskell_args,
-                haskell_log_entries=haskell_log_entries,
-                log_axioms_file=log_axioms_file,
-                allow_zero_step=allow_zero_step,
-                dry_run=dry_run,
                 depth=depth,
             )
 
-    # TODO: This should return the empty disjunction `[]` instead of `#Top`.
-    # The prover should never return #Bottom, so we can ignore that case.
-    # Once those are taken care of, we can change the return type to a CTerm
-    def prove_cterm(
+    def prove_claim_rpc(
         self,
-        claim_id: str,
-        init_cterm: CTerm,
-        target_cterm: CTerm,
-        lemmas: Iterable[KRule] = (),
-        args: Iterable[str] = (),
-        haskell_args: Iterable[str] = (),
+        claim: KClaim,
+        kcfg_semantics: KCFGSemantics | None = None,
+        id: str | None = None,
+        port: int | None = None,
+        kore_rpc_command: str | Iterable[str] | None = None,
+        llvm_definition_dir: Path | None = None,
+        smt_timeout: int | None = None,
+        smt_retry_limit: int | None = None,
+        smt_tactic: str | None = None,
+        bug_report: BugReport | None = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_entries: Iterable[str] = (),
         log_axioms_file: Path | None = None,
-        allow_zero_step: bool = False,
-        depth: int | None = None,
-    ) -> list[CTerm]:
-        claim, var_map = cterm_build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
-        next_state = self.prove_claim(
-            claim,
-            claim_id,
-            lemmas=lemmas,
-            args=args,
-            haskell_args=haskell_args,
+        trace_rewrites: bool = False,
+        start_server: bool = True,
+        maude_port: int | None = None,
+        fallback_on: Iterable[FallbackReason] | None = None,
+        interim_simplification: int | None = None,
+        no_post_exec_simplify: bool = False,
+    ) -> Proof:
+        with cterm_symbolic(
+            self.definition,
+            self.kompiled_kore,
+            self.definition_dir,
+            id=id,
+            port=port,
+            kore_rpc_command=kore_rpc_command,
+            llvm_definition_dir=llvm_definition_dir,
+            smt_timeout=smt_timeout,
+            smt_retry_limit=smt_retry_limit,
+            smt_tactic=smt_tactic,
+            bug_report=bug_report,
+            haskell_log_format=haskell_log_format,
+            haskell_log_entries=haskell_log_entries,
             log_axioms_file=log_axioms_file,
-            allow_zero_step=allow_zero_step,
-            depth=depth,
+            trace_rewrites=trace_rewrites,
+            start_server=start_server,
+            maude_port=maude_port,
+            fallback_on=fallback_on,
+            interim_simplification=interim_simplification,
+            no_post_exec_simplify=no_post_exec_simplify,
+        ) as cts:
+            kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
+            proof: Proof
+            prover: Prover
+            lhs_top = extract_lhs(claim.body)
+            if (
+                type(lhs_top) is KApply
+                and self.definition.production_for_klabel(lhs_top.label) in self.definition.functions
+            ):
+                proof = EqualityProof.from_claim(claim, self.definition)
+                prover = ImpliesProver(proof, kcfg_explore)
+            else:
+                proof = APRProof.from_claim(self.definition, claim, {})
+                prover = APRProver(proof, kcfg_explore)
+            prover.advance_proof()
+            if proof.passed:
+                _LOGGER.info(f'Proof passed: {proof.id}')
+            elif proof.failed:
+                _LOGGER.info(f'Proof failed: {proof.id}')
+            else:
+                _LOGGER.info(f'Proof pending: {proof.id}')
+            return proof
+
+    def prove_rpc(
+        self,
+        spec_file: Path,
+        spec_module_name: str,
+        claim_labels: Iterable[str] | None = None,
+        exclude_claim_labels: Iterable[str] | None = None,
+        kcfg_semantics: KCFGSemantics | None = None,
+        id: str | None = None,
+        port: int | None = None,
+        kore_rpc_command: str | Iterable[str] | None = None,
+        llvm_definition_dir: Path | None = None,
+        smt_timeout: int | None = None,
+        smt_retry_limit: int | None = None,
+        smt_tactic: str | None = None,
+        bug_report: BugReport | None = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Path | None = None,
+        trace_rewrites: bool = False,
+        start_server: bool = True,
+        maude_port: int | None = None,
+        fallback_on: Iterable[FallbackReason] | None = None,
+        interim_simplification: int | None = None,
+        no_post_exec_simplify: bool = False,
+    ) -> list[Proof]:
+        def _prove_claim_rpc(claim: KClaim) -> Proof:
+            return self.prove_claim_rpc(
+                claim,
+                kcfg_semantics=kcfg_semantics,
+                id=id,
+                port=port,
+                kore_rpc_command=kore_rpc_command,
+                llvm_definition_dir=llvm_definition_dir,
+                smt_timeout=smt_timeout,
+                smt_retry_limit=smt_retry_limit,
+                smt_tactic=smt_tactic,
+                bug_report=bug_report,
+                haskell_log_format=haskell_log_format,
+                haskell_log_entries=haskell_log_entries,
+                log_axioms_file=log_axioms_file,
+                trace_rewrites=trace_rewrites,
+                start_server=start_server,
+                maude_port=maude_port,
+                fallback_on=fallback_on,
+                interim_simplification=interim_simplification,
+                no_post_exec_simplify=no_post_exec_simplify,
+            )
+
+        all_claims = self.get_claims(
+            spec_file,
+            spec_module_name=spec_module_name,
+            claim_labels=claim_labels,
+            exclude_claim_labels=exclude_claim_labels,
         )
-        next_states = list(unique(CTerm.from_kast(var_map(ns.kast)) for ns in next_state if not CTerm._is_top(ns.kast)))
-        constraint_subst, _ = extract_subst(init_cterm.kast)
-        next_states = [
-            CTerm.from_kast(mlAnd([constraint_subst.unapply(ns.kast), constraint_subst.ml_pred])) for ns in next_states
-        ]
-        return next_states if len(next_states) > 0 else [CTerm.top()]
+        if all_claims is None:
+            raise ValueError(f'No claims found in file: {spec_file}')
+        return [_prove_claim_rpc(claim) for claim in all_claims]
 
     def get_claim_modules(
         self,
@@ -325,11 +395,14 @@ class KProve(KPrint):
         md_selector: str | None = None,
     ) -> KFlatModuleList:
         with self._temp_file() as ntf:
-            self.prove(
-                spec_file,
+            _kprove(
+                spec_file=spec_file,
+                kompiled_dir=self.definition_dir,
                 spec_module_name=spec_module_name,
                 include_dirs=include_dirs,
                 md_selector=md_selector,
+                output=KProveOutput.JSON,
+                temp_dir=self.use_directory,
                 dry_run=True,
                 args=['--emit-json-spec', ntf.name],
             )
