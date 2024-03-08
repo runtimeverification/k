@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import fnmatch
 import logging
-from typing import TYPE_CHECKING, Any
+from argparse import ArgumentParser
+from typing import TYPE_CHECKING
 
-from pyk.cli.args import LoggingOptions
-from pyk.cli.cli import CLI, Command
+from pyk.cli.args import KCLIArgs
 from pyk.cli.utils import loglevel
 
 from ..kdist import kdist, target_ids
 
 if TYPE_CHECKING:
-    from argparse import ArgumentParser
+    from argparse import Namespace
     from typing import Final
 
 
@@ -20,14 +20,42 @@ _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
 
 def main() -> None:
-    kdist_cli = CLI(
-        {KDistBuildCommand, KDistCleanCommand, KDistWhichCommand, KDistListCommand}, top_level_args=[LoggingOptions]
+    args = _parse_arguments()
+
+    logging.basicConfig(level=loglevel(args), format=_LOG_FORMAT)
+
+    if args.command == 'build':
+        _exec_build(**vars(args))
+
+    elif args.command == 'clean':
+        _exec_clean(args.target)
+
+    elif args.command == 'which':
+        _exec_which(args.target)
+
+    elif args.command == 'list':
+        _exec_list()
+
+    else:
+        raise AssertionError()
+
+
+def _exec_build(
+    command: str,
+    targets: list[str],
+    args: list[str],
+    jobs: int,
+    force: bool,
+    verbose: bool,
+    debug: bool,
+) -> None:
+    kdist.build(
+        target_ids=_process_targets(targets),
+        args=_process_args(args),
+        jobs=jobs,
+        force=force,
+        verbose=verbose or debug,
     )
-    cmd = kdist_cli.get_command()
-    assert isinstance(cmd, LoggingOptions)
-    print(vars(cmd))
-    logging.basicConfig(level=loglevel(cmd), format=_LOG_FORMAT)
-    cmd.exec()
 
 
 def _process_targets(targets: list[str]) -> list[str]:
@@ -52,137 +80,66 @@ def _process_args(args: list[str]) -> dict[str, str]:
     return res
 
 
-class KDistBuildCommand(Command, LoggingOptions):
-    targets: list[str]
-    force: bool
-    jobs: int
-    args: list[str]
-
-    @staticmethod
-    def name() -> str:
-        return 'build'
-
-    @staticmethod
-    def help_str() -> str:
-        return 'build targets'
-
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'force': False,
-            'jobs': 1,
-            'targets': ['*'],
-            'args': [],
-        }
-
-    @staticmethod
-    def update_args(parser: ArgumentParser) -> None:
-        parser.add_argument('targets', metavar='TARGET', nargs='*', help='target to build')
-        parser.add_argument(
-            '-a',
-            '--arg',
-            dest='args',
-            metavar='ARG',
-            action='append',
-            help='build with argument',
-        )
-        parser.add_argument('-f', '--force', default=None, action='store_true', help='force build')
-        parser.add_argument('-j', '--jobs', metavar='N', type=int, help='maximal number of build jobs')
-
-    def exec(self) -> None:
-        print(self.verbose)
-        print(self.debug)
-        kdist.build(
-            target_ids=_process_targets(self.targets),
-            args=_process_args(self.args),
-            jobs=self.jobs,
-            force=self.force,
-            verbose=self.verbose or self.debug,
-        )
+def _exec_clean(target: str | None) -> None:
+    res = kdist.clean(target)
+    print(res)
 
 
-class KDistCleanCommand(Command, LoggingOptions):
-    target: str
+def _exec_which(target: str | None) -> None:
+    res = kdist.which(target)
+    print(res)
 
-    @staticmethod
-    def name() -> str:
-        return 'clean'
 
-    @staticmethod
-    def help_str() -> str:
-        return 'clean targets'
+def _exec_list() -> None:
+    targets_by_plugin: dict[str, list[str]] = {}
+    for plugin_name, target_name in target_ids():
+        targets = targets_by_plugin.get(plugin_name, [])
+        targets.append(target_name)
+        targets_by_plugin[plugin_name] = targets
 
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'target': None,
-        }
+    for plugin_name in targets_by_plugin:
+        print(plugin_name)
+        for target_name in targets_by_plugin[plugin_name]:
+            print(f'* {target_name}')
 
-    @staticmethod
-    def update_args(parser: ArgumentParser) -> None:
+
+def _parse_arguments() -> Namespace:
+    def add_target_arg(parser: ArgumentParser, help_text: str) -> None:
         parser.add_argument(
             'target',
             metavar='TARGET',
             nargs='?',
-            help='target to clean',
+            help=help_text,
         )
 
-    def exec(self) -> None:
-        res = kdist.clean(self.target)
-        print(res)
+    k_cli_args = KCLIArgs()
 
+    parser = ArgumentParser(prog='kdist', parents=[k_cli_args.logging_args])
+    command_parser = parser.add_subparsers(dest='command', required=True)
 
-class KDistWhichCommand(Command, LoggingOptions):
-    target: str
+    build_parser = command_parser.add_parser('build', help='build targets')
+    build_parser.add_argument('targets', metavar='TARGET', nargs='*', default='*', help='target to build')
+    build_parser.add_argument(
+        '-a',
+        '--arg',
+        dest='args',
+        metavar='ARG',
+        action='append',
+        default=[],
+        help='build with argument',
+    )
+    build_parser.add_argument('-f', '--force', action='store_true', default=False, help='force build')
+    build_parser.add_argument('-j', '--jobs', metavar='N', type=int, default=1, help='maximal number of build jobs')
 
-    @staticmethod
-    def name() -> str:
-        return 'which'
+    clean_parser = command_parser.add_parser('clean', help='clean targets')
+    add_target_arg(clean_parser, 'target to clean')
 
-    @staticmethod
-    def help_str() -> str:
-        return 'print target location'
+    which_parser = command_parser.add_parser('which', help='print target location')
+    add_target_arg(which_parser, 'target to print directory for')
 
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'target': None,
-        }
+    command_parser.add_parser('list', help='print list of available targets')
 
-    @staticmethod
-    def update_args(parser: ArgumentParser) -> None:
-        parser.add_argument(
-            'target',
-            metavar='TARGET',
-            nargs='?',
-            help='target to print directory for',
-        )
-
-    def exec(self) -> None:
-        res = kdist.which(self.target)
-        print(res)
-
-
-class KDistListCommand(Command, LoggingOptions):
-    @staticmethod
-    def name() -> str:
-        return 'list'
-
-    @staticmethod
-    def help_str() -> str:
-        return 'print list of available targets'
-
-    def exec(self) -> None:
-        targets_by_plugin: dict[str, list[str]] = {}
-        for plugin_name, target_name in target_ids():
-            targets = targets_by_plugin.get(plugin_name, [])
-            targets.append(target_name)
-            targets_by_plugin[plugin_name] = targets
-
-        for plugin_name in targets_by_plugin:
-            print(plugin_name)
-            for target_name in targets_by_plugin[plugin_name]:
-                print(f'* {target_name}')
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
