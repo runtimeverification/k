@@ -1,25 +1,38 @@
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, NamedTuple
 
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
 from ..kast.manip import flatten_label, free_vars
 from ..konvert import kast_to_kore, kore_to_kast
-from ..kore.rpc import AbortedResult, SatResult, StopReason, UnknownResult, UnsatResult
+from ..kore.rpc import (
+    AbortedResult,
+    KoreClient,
+    KoreExecLogFormat,
+    SatResult,
+    StopReason,
+    TransportType,
+    UnknownResult,
+    UnsatResult,
+    kore_server,
+)
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.ml import is_top, mlEquals, mlTop
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Iterator
+    from pathlib import Path
     from typing import Final
 
     from ..kast import KInner
     from ..kast.outer import KDefinition
     from ..kore.kompiled import KompiledKore
-    from ..kore.rpc import KoreClient, LogEntry
+    from ..kore.rpc import FallbackReason, LogEntry
     from ..kore.syntax import Pattern
+    from ..utils import BugReport
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -228,3 +241,66 @@ class CTermSymbolic:
         kast_simplified, logs = self.kast_simplify(kast, module_name=module_name)
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)
+
+
+@contextmanager
+def cterm_symbolic(
+    definition: KDefinition,
+    kompiled_kore: KompiledKore,
+    definition_dir: Path,
+    *,
+    id: str | None = None,
+    port: int | None = None,
+    kore_rpc_command: str | Iterable[str] | None = None,
+    llvm_definition_dir: Path | None = None,
+    smt_timeout: int | None = None,
+    smt_retry_limit: int | None = None,
+    smt_tactic: str | None = None,
+    bug_report: BugReport | None = None,
+    haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+    haskell_log_entries: Iterable[str] = (),
+    log_axioms_file: Path | None = None,
+    trace_rewrites: bool = False,
+    start_server: bool = True,
+    maude_port: int | None = None,
+    fallback_on: Iterable[FallbackReason] | None = None,
+    interim_simplification: int | None = None,
+    no_post_exec_simplify: bool = False,
+) -> Iterator[CTermSymbolic]:
+    if start_server:
+        # Old way of handling KoreServer, to be removed
+        with kore_server(
+            definition_dir=definition_dir,
+            llvm_definition_dir=llvm_definition_dir,
+            module_name=definition.main_module_name,
+            port=port,
+            command=kore_rpc_command,
+            bug_report=bug_report,
+            smt_timeout=smt_timeout,
+            smt_retry_limit=smt_retry_limit,
+            smt_tactic=smt_tactic,
+            haskell_log_format=haskell_log_format,
+            haskell_log_entries=haskell_log_entries,
+            log_axioms_file=log_axioms_file,
+            fallback_on=fallback_on,
+            interim_simplification=interim_simplification,
+            no_post_exec_simplify=no_post_exec_simplify,
+        ) as server:
+            with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
+                yield CTermSymbolic(client, definition, kompiled_kore, trace_rewrites=trace_rewrites)
+    else:
+        if port is None:
+            raise ValueError('Missing port with start_server=False')
+        if maude_port is None:
+            dispatch = None
+        else:
+            dispatch = {
+                'execute': [('localhost', maude_port, TransportType.HTTP)],
+                'simplify': [('localhost', maude_port, TransportType.HTTP)],
+                'add-module': [
+                    ('localhost', maude_port, TransportType.HTTP),
+                    ('localhost', port, TransportType.SINGLE_SOCKET),
+                ],
+            }
+        with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id, dispatch=dispatch) as client:
+            yield CTermSymbolic(client, definition, kompiled_kore, trace_rewrites=trace_rewrites)
