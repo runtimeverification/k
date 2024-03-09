@@ -200,6 +200,7 @@ public class KoreBackend implements Backend {
             DefinitionTransformer.from(
                     m ->
                         new ResolveFreshConstants(
+                                kem,
                                 d,
                                 kompileOptions.topCell,
                                 files,
@@ -315,7 +316,7 @@ public class KoreBackend implements Backend {
     Function1<Module, Module> resolveFreshConstants =
         d ->
             ModuleTransformer.from(
-                    new ResolveFreshConstants(def, kompileOptions.topCell, files)::resolve,
+                    new ResolveFreshConstants(kem, def, kompileOptions.topCell, files)::resolve,
                     "resolving !Var variables")
                 .apply(d);
     Function1<Module, Module> addImplicitCounterCell =
