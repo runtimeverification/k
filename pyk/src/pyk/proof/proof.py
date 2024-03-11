@@ -319,6 +319,7 @@ class Prover:
         while self.proof.can_progress:
             if fail_fast and self.proof.failed:
                 _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
+                self.proof.failure_info = self.failure_info()
                 return
             if max_iterations is not None and max_iterations <= iterations:
                 return
