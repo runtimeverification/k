@@ -159,7 +159,7 @@ class KCFGShow:
             csubst = split.splits[target_id]
             ret_split_lines: list[str] = []
             substs = csubst.subst.items()
-            constraints = csubst.constraints
+            constraints = [ml_pred_to_bool(c, unsafe=True) for c in csubst.constraints]
             if len(constraints) == 1:
                 first_line, *rest_lines = self.kprint.pretty_print(constraints[0]).split('\n')
                 ret_split_lines.append(f'constraint: {first_line}')
