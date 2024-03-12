@@ -4,6 +4,7 @@ on:
     branches:
       - '_update-deps/runtimeverification/llvm-backend'
       - '_update-deps/runtimeverification/hs-backend-booster'
+      - 'submodule-demo'
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
