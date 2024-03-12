@@ -1,0 +1,28 @@
+APRProof: a732d61c1e6ccbc27dc9b43c91f01234bd7c045a422f7f505482395ced24333e
+    status: ProofStatus.FAILED
+    admitted: False
+    nodes: 2
+    pending: 0
+    failing: 1
+    vacuous: 0
+    stuck: 1
+    terminal: 0
+    refuted: 0
+    bounded: 0
+    execution time: 0s
+Subproofs: 0
+1 Failure nodes. (0 pending and 1 failing)
+
+Failing nodes:
+
+  Node id: 1
+  Failure reason:
+    Matching failed.
+    The following cells failed matching individually (antecedent #Implies consequent):
+    K_CELL: doIt ( -3 #Implies 0 )
+    ~> K_CELL_fc656f08:K
+  Path condition:
+    #Top
+  Failed to generate a model.
+
+Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN

@@ -199,3 +199,45 @@ jobs:
 
           docker run --rm runtimeverificationinc/kframework-pyk:${COMMIT}
           docker run --rm runtimeverificationinc/kframework-pyk:${COMMIT} kompile --version
+
+  regression-new-tests:
+    needs: code-quality-checks
+    name: 'K Regression Tests'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11']
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Build Docker image'
+        run: |
+          COMMIT=$(git rev-parse --short=7 HEAD)
+          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
+
+          docker build .                                            \
+            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
+            --build-arg K_VERSION=${K_VERSION}                      \
+            --tag runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker run             \
+            --name pyk-ci        \
+            --rm                 \
+            --interactive        \
+            --tty                \
+            --detach             \
+            --workdir /home/user \
+            runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker cp . pyk-ci:/home/user
+          docker exec pyk-ci chown -R user:user /home/user
+      - name: 'Set Python version'
+        run: docker exec --user user pyk-ci poetry env use ${{ matrix.python-version }}
+      - name: 'Build and run integration tests'
+        run: docker exec --user user pyk-ci make test-regression-new -j8
+      - name: 'Tear down Docker container'
+        if: always()
+        run: |
+          docker stop --time=0 pyk-ci

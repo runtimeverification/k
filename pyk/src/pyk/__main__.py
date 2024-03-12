@@ -10,13 +10,11 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
-from pyk.kast.inner import KInner
-from pyk.kore.rpc import ExecuteResult
-
 from .cli.args import KCLIArgs
 from .cli.utils import LOG_FORMAT, dir_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
+from .kast.inner import KInner
 from .kast.manip import (
     flatten_label,
     minimize_rule,
@@ -28,12 +26,16 @@ from .kast.manip import (
 from .kast.outer import read_kast_definition
 from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
-from .kore.rpc import StopReason
+from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
+from .ktool import TypeInferenceMode
+from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
+from .proof.reachability import APRFailureInfo
+from .utils import check_file_path, ensure_dir_path
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -218,6 +220,43 @@ def exec_prove_legacy(args: Namespace) -> None:
     _LOGGER.info(f'Wrote file: {args.output_file.name}')
 
 
+def exec_prove(args: Namespace) -> None:
+    kompiled_directory: Path
+    if args.definition_dir is None:
+        kompiled_directory = Kompile.default_directory()
+        _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
+    else:
+        kompiled_directory = args.definition_dir
+    kprove = KProve(kompiled_directory)
+    proofs = kprove.prove_rpc(Path(args.spec_file), args.spec_module, type_inference_mode=args.type_inference_mode)
+    for proof in proofs:
+        print('\n'.join(proof.summary.lines))
+        if proof.failed and args.failure_info:
+            failure_info = proof.failure_info
+            if type(failure_info) is APRFailureInfo:
+                print('\n'.join(failure_info.print()))
+    sys.exit(len([p.id for p in proofs if not p.passed]))
+
+
+def exec_kompile(args: Namespace) -> None:
+    main_file = Path(args.main_file)
+    check_file_path(main_file)
+    kompiled_directory: Path
+    if 'definition_dir' not in args:
+        kompiled_directory = Path(f'{main_file.stem}-kompiled')
+        ensure_dir_path(kompiled_directory)
+    else:
+        kompiled_directory = args.definition_dir
+    kompile_dict = {
+        'main_file': main_file,
+        'backend': args.backend.value,
+    }
+    Kompile.from_dict(kompile_dict)(
+        output_dir=kompiled_directory,
+        type_inference_mode=args.type_inference_mode,
+    )
+
+
 def exec_graph_imports(args: Namespace) -> None:
     kompiled_dir: Path = args.definition_dir
     kprinter = KPrint(kompiled_dir)
@@ -262,17 +301,15 @@ def exec_json_to_kore(args: dict[str, Any]) -> None:
 def create_argument_parser() -> ArgumentParser:
     k_cli_args = KCLIArgs()
 
-    definition_args = ArgumentParser(add_help=False)
-    definition_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
-
     pyk_args = ArgumentParser()
     pyk_args_command = pyk_args.add_subparsers(dest='command', required=True)
 
     print_args = pyk_args_command.add_parser(
         'print',
         help='Pretty print a term.',
-        parents=[k_cli_args.logging_args, definition_args, k_cli_args.display_args],
+        parents=[k_cli_args.logging_args, k_cli_args.display_args],
     )
+    print_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     print_args.add_argument('term', type=FileType('r'), help='Input term (in format specified with --input).')
     print_args.add_argument('--input', default=PrintInput.KAST_JSON, type=PrintInput, choices=list(PrintInput))
     print_args.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
@@ -284,8 +321,9 @@ def create_argument_parser() -> ArgumentParser:
     rpc_print_args = pyk_args_command.add_parser(
         'rpc-print',
         help='Pretty-print an RPC request/response',
-        parents=[k_cli_args.logging_args, definition_args],
+        parents=[k_cli_args.logging_args],
     )
+    rpc_print_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     rpc_print_args.add_argument(
         'input_file',
         type=FileType('r'),
@@ -313,25 +351,70 @@ def create_argument_parser() -> ArgumentParser:
     prove_legacy_args = pyk_args_command.add_parser(
         'prove-legacy',
         help='Prove an input specification (using kprovex).',
-        parents=[k_cli_args.logging_args, definition_args],
+        parents=[k_cli_args.logging_args],
     )
+    prove_legacy_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     prove_legacy_args.add_argument('main_file', type=str, help='Main file used for kompilation.')
     prove_legacy_args.add_argument('spec_file', type=str, help='File with the specification module.')
     prove_legacy_args.add_argument('spec_module', type=str, help='Module with claims to be proven.')
     prove_legacy_args.add_argument('--output-file', type=FileType('w'), default='-')
     prove_legacy_args.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
 
-    pyk_args_command.add_parser(
+    kompile_args = pyk_args_command.add_parser(
+        'kompile',
+        help='Kompile the K specification.',
+        parents=[k_cli_args.logging_args],
+    )
+    kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
+    kompile_args.add_argument(
+        '--output-definition',
+        '--definition',
+        type=ensure_dir_path,
+        dest='definition_dir',
+        help='Path to kompile definition to.',
+    )
+    kompile_args.add_argument(
+        '--backend',
+        type=KompileBackend,
+        dest='backend',
+        default=KompileBackend.LLVM,
+        help='K backend to target with compilation.',
+    )
+    kompile_args.add_argument(
+        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+    )
+
+    prove_args = pyk_args_command.add_parser(
+        'prove',
+        help='Prove an input specification (using RPC based prover).',
+        parents=[k_cli_args.logging_args],
+    )
+    prove_args.add_argument('spec_file', type=str, help='File with the specification module.')
+    prove_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
+    prove_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
+    prove_args.add_argument(
+        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+    )
+    prove_args.add_argument(
+        '--failure-info',
+        default=False,
+        action='store_true',
+        help='Print out more information about proof failures.',
+    )
+
+    graph_imports_args = pyk_args_command.add_parser(
         'graph-imports',
         help='Graph the imports of a given definition.',
-        parents=[k_cli_args.logging_args, definition_args],
+        parents=[k_cli_args.logging_args],
     )
+    graph_imports_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
 
     coverage_args = pyk_args_command.add_parser(
         'coverage',
         help='Convert coverage file to human readable log.',
-        parents=[k_cli_args.logging_args, definition_args],
+        parents=[k_cli_args.logging_args],
     )
+    coverage_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     coverage_args.add_argument('coverage_file', type=FileType('r'), help='Coverage file to build log for.')
     coverage_args.add_argument('-o', '--output', type=FileType('w'), default='-')
 

@@ -124,7 +124,6 @@ class KCLIArgs:
         )
         args.add_argument('--main-module', default=None, type=str, help='Name of the main module.')
         args.add_argument('--syntax-module', default=None, type=str, help='Name of the syntax module.')
-        args.add_argument('--spec-module', default=None, type=str, help='Name of the spec module.')
         args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
         args.add_argument(
             '--md-selector',

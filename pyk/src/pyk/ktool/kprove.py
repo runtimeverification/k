@@ -353,6 +353,7 @@ class KProve(KPrint):
         fallback_on: Iterable[FallbackReason] | None = None,
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
+        type_inference_mode: TypeInferenceMode | None = None,
     ) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
             return self.prove_claim_rpc(
@@ -382,6 +383,7 @@ class KProve(KPrint):
             spec_module_name=spec_module_name,
             claim_labels=claim_labels,
             exclude_claim_labels=exclude_claim_labels,
+            type_inference_mode=type_inference_mode,
         )
         if all_claims is None:
             raise ValueError(f'No claims found in file: {spec_file}')
@@ -393,6 +395,7 @@ class KProve(KPrint):
         spec_module_name: str | None = None,
         include_dirs: Iterable[Path] = (),
         md_selector: str | None = None,
+        type_inference_mode: TypeInferenceMode | None = None,
     ) -> KFlatModuleList:
         with self._temp_file() as ntf:
             _kprove(
@@ -404,6 +407,7 @@ class KProve(KPrint):
                 output=KProveOutput.JSON,
                 temp_dir=self.use_directory,
                 dry_run=True,
+                type_inference_mode=type_inference_mode,
                 args=['--emit-json-spec', ntf.name],
             )
             return KFlatModuleList.from_dict(kast_term(json.loads(Path(ntf.name).read_text())))
@@ -417,12 +421,14 @@ class KProve(KPrint):
         claim_labels: Iterable[str] | None = None,
         exclude_claim_labels: Iterable[str] | None = None,
         include_dependencies: bool = True,
+        type_inference_mode: TypeInferenceMode | None = None,
     ) -> list[KClaim]:
         flat_module_list = self.get_claim_modules(
             spec_file=spec_file,
             spec_module_name=spec_module_name,
             include_dirs=include_dirs,
             md_selector=md_selector,
+            type_inference_mode=type_inference_mode,
         )
 
         _module_names = [module.name for module in flat_module_list.modules]
