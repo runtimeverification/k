@@ -28,6 +28,8 @@ import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.*;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
 import scala.Tuple4;
@@ -66,8 +68,8 @@ public class GenerateSentencesFromConfigDecl {
    * @param m The module the configuration declaration exists in.
    * @return A set of sentences representing the configuration declaration.
    */
-  public static Set<Sentence> gen(K body, K ensures, Att att, Module m) {
-    return genInternal(body, ensures, att, m)._1();
+  public static Set<Sentence> gen(KExceptionManager kem, K body, K ensures, Att att, Module m) {
+    return genInternal(kem, body, ensures, att, m)._1();
   }
 
   /**
@@ -87,7 +89,7 @@ public class GenerateSentencesFromConfigDecl {
    *     and the body of the initializer.
    */
   private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(
-      K term, K ensures, Att cfgAtt, Module m) {
+      KExceptionManager kem, K term, K ensures, Att cfgAtt, Module m) {
     if (term instanceof KApply kapp) {
       if (kapp.klabel().name().equals("#configCell")) {
         // is a single cell
@@ -112,11 +114,12 @@ public class GenerateSentencesFromConfigDecl {
                           Location.class,
                           kapp.att().get(Att.LOCATION(), Location.class));
                 Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult =
-                    genInternal(cellContents, null, att, m);
+                    genInternal(kem, cellContents, null, att, m);
 
                 boolean isLeafCell = childResult._4();
                 Tuple4<Set<Sentence>, Sort, K, Boolean> myResult =
                     computeSentencesOfWellFormedCell(
+                        kem,
                         isLeafCell,
                         isStream,
                         multiplicity,
@@ -184,7 +187,7 @@ public class GenerateSentencesFromConfigDecl {
                   KApply(KLabel("#cellPropertyListTerminator")),
                   term,
                   cellLabel);
-          return genInternal(generatedTop, ensures, cfgAtt, m);
+          return genInternal(kem, generatedTop, ensures, cfgAtt, m);
         }
         List<K> cells = Assoc.flatten(kapp.klabel(), kapp.klist().items(), m);
         Set<Sentence> accumSentences = Set();
@@ -193,7 +196,7 @@ public class GenerateSentencesFromConfigDecl {
         for (K cell : cells) {
           // for each cell, generate the child and inform the parent of the children it contains
           Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult =
-              genInternal(cell, null, cfgAtt, m);
+              genInternal(kem, cell, null, cfgAtt, m);
           accumSentences = (Set<Sentence>) accumSentences.$bar(childResult._1());
           sorts.addAll(childResult._2());
           initializers.add(childResult._3());
@@ -369,6 +372,7 @@ public class GenerateSentencesFromConfigDecl {
    *     the term to be used to initialize this cell in the initializer of its parent cell.
    */
   private static Tuple4<Set<Sentence>, Sort, K, Boolean> computeSentencesOfWellFormedCell(
+      KExceptionManager kem,
       boolean isLeaf,
       boolean isStream,
       Multiplicity multiplicity,
@@ -682,7 +686,9 @@ public class GenerateSentencesFromConfigDecl {
       // -or-
       // rule initCell(Init) => <cell> Context[$var] </cell>
       cellsSort = bagSort;
-      rhs = optionalCellInitializer(hasConfigurationOrRegularVariable, cellProperties, initLabel);
+      rhs =
+          optionalCellInitializer(
+              kem, cellName, hasConfigurationOrRegularVariable, cellProperties, initLabel);
     } else if (multiplicity == Multiplicity.OPTIONAL) {
       // syntax Cell ::= ".Cell"
       Production cellUnit = Production(KLabel("." + sortName), sort, Seq(Terminal("." + sortName)));
@@ -701,7 +707,9 @@ public class GenerateSentencesFromConfigDecl {
       // -or-
       // rule initCell(Init) => <cell> Context[$var] </cell>
       cellsSort = sort;
-      rhs = optionalCellInitializer(hasConfigurationOrRegularVariable, cellProperties, initLabel);
+      rhs =
+          optionalCellInitializer(
+              kem, cellName, hasConfigurationOrRegularVariable, cellProperties, initLabel);
     } else {
       // rule initCell => <cell> initChildren... </cell>
       // -or-
@@ -753,8 +761,21 @@ public class GenerateSentencesFromConfigDecl {
    * configuration variables.
    */
   private static KApply optionalCellInitializer(
-      boolean initializeOptionalCell, Att cellProperties, String initLabel) {
+      KExceptionManager kem,
+      String cellName,
+      boolean initializeOptionalCell,
+      Att cellProperties,
+      String initLabel) {
     if (initializeOptionalCell) {
+      if (!cellProperties.contains(Att.INITIAL())) {
+        kem.registerCompilerWarning(
+            KException.ExceptionType.CELL_COLLECTION_VAR_WITHOUT_INITIAL,
+            "Configuration variable found in declaration of collection cell <"
+                + cellName
+                + ">. Implicitly, this causes the initial configuration to start with one <"
+                + cellName
+                + "> element instead of zero. Add the `initial=\"\"` attribute to make that behavior explicit.");
+      }
       return KApply(KLabel(initLabel), INIT);
     } else if (cellProperties.contains(Att.INITIAL())) {
       return KApply(KLabel(initLabel));
