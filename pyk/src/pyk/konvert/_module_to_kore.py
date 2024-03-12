@@ -92,11 +92,16 @@ def module_to_kore(definition: KDefinition) -> Module:
     ]
     subsort_axioms = _subsort_axioms(module)
 
+    defn = KDefinition(module.name, (module,))  # for getting the sort lattice
+
+    assoc_axioms = _assoc_axioms(defn)
+
     sentences: list[Sentence] = []
     sentences += imports
     sentences += sort_decls
     sentences += symbol_decls
     sentences += subsort_axioms
+    sentences += assoc_axioms
 
     return Module(name=name, sentences=sentences, attrs=attrs)
 
@@ -254,6 +259,65 @@ def _subsort_axioms(module: KFlatModule) -> list[Axiom]:
 
         res.append(subsort_axiom(subsort=sort_to_kore(subsort), supersort=sort_to_kore(supersort)))
 
+    return res
+
+
+def _assoc_axioms(defn: KDefinition) -> list[Axiom]:
+    def assoc_axiom(production: KProduction) -> Axiom:
+        assert production.klabel
+
+        try:
+            left, right = production.non_terminals
+        except ValueError as err:
+            raise ValueError(f'Illegal use of the assoc attribute on non-binary production: {production}') from err
+
+        def check_prod_sort_is_subsort_of(sort: KSort) -> None:
+            if production.sort == sort:
+                return
+            if production.sort in defn.subsorts(sort):
+                return
+            raise ValueError(
+                f'Sort {production.sort.name} is not a subsort of sort {sort.name}, associative production is not well-sorted: {production}'
+            )
+
+        check_prod_sort_is_subsort_of(left.sort)
+        check_prod_sort_is_subsort_of(right.sort)
+
+        symbol = _label_name(production.klabel.name)
+        sort_params = tuple(SortVar(param.name) for param in production.klabel.params)
+        sort = sort_to_kore(production.sort)
+        R = SortVar('R')  # noqa: N806
+        K1, K2, K3 = (EVar(name, sort) for name in ['K1', 'K2', 'K3'])  # noqa: N806
+
+        def app(left: Pattern, right: Pattern) -> App:
+            return App(symbol, sort_params, (left, right))
+
+        return Axiom(
+            (R,) + sort_params,
+            Equals(
+                sort,
+                R,
+                app(app(K1, K2), K3),
+                app(K1, app(K2, K3)),
+            ),
+            attrs=(App('assoc'),),
+        )
+
+    assert len(defn.modules) == 1
+    module = defn.modules[0]
+
+    res: list[Axiom] = []
+    for sentence in module.sentences:
+        if not isinstance(sentence, KProduction):
+            continue
+        if not sentence.klabel:
+            continue
+        if sentence.klabel.name in BUILTIN_LABELS:
+            continue
+        if not Atts.ASSOC in sentence.att:
+            continue
+
+        res.append(assoc_axiom(sentence))
     return res
 
 
