@@ -250,15 +250,14 @@ class APRProof(Proof, KCFGExploration):
         raise ValueError(f'Could not load APRProof from file {id}: {proof_path}')
 
     @property
-    def status(self) -> ProofStatus:
+    def own_status(self) -> ProofStatus:
         if self.admitted:
             return ProofStatus.PASSED
-        if len(self.failing) > 0 or self.subproofs_status == ProofStatus.FAILED:
+        if len(self.failing) > 0:
             return ProofStatus.FAILED
-        elif len(self.pending) > 0 or self.subproofs_status == ProofStatus.PENDING:
+        if len(self.pending) > 0:
             return ProofStatus.PENDING
-        else:
-            return ProofStatus.PASSED
+        return ProofStatus.PASSED
 
     @property
     def can_progress(self) -> bool:
