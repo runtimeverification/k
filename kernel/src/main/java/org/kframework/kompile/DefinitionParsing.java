@@ -513,6 +513,7 @@ public class DefinitionParsing {
                           configDecl ->
                               stream(
                                   GenerateSentencesFromConfigDecl.gen(
+                                      kem,
                                       configDecl.body(),
                                       configDecl.ensures(),
                                       configDecl.att(),
