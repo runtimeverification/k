@@ -176,8 +176,18 @@ class Proof(ABC):
 
     @property
     @abstractmethod
-    def status(self) -> ProofStatus:
+    def own_status(self) -> ProofStatus:
         ...
+
+    @property
+    def status(self) -> ProofStatus:
+        if self.admitted:
+            return ProofStatus.PASSED
+        if self.own_status == ProofStatus.FAILED or self.subproofs_status == ProofStatus.FAILED:
+            return ProofStatus.FAILED
+        if self.own_status == ProofStatus.PENDING or self.subproofs_status == ProofStatus.PENDING:
+            return ProofStatus.PENDING
+        return ProofStatus.PASSED
 
     @property
     @abstractmethod
