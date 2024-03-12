@@ -71,6 +71,16 @@ class APRProofViewer(KCFGViewer):
                 APRProofBehaviorView(self._proof, self._kprint, node_printer=self._node_printer, id='behavior'),
                 id='navigation',
             ),
-            Vertical(NodeView(self._kprint, custom_view=self._custom_view, id='node-view'), id='display'),
+            Vertical(
+                NodeView(
+                    self._kprint,
+                    custom_view=self._custom_view,
+                    proof_id=self._proof.id,
+                    proof_status=self._proof.status.value,
+                    exec_time=self._proof.exec_time,
+                    id='node-view',
+                ),
+                id='display',
+            ),
         )
         yield Footer()
