@@ -14,7 +14,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, final
 
-from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process
+from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process, single
 from . import TypeInferenceMode
 
 if TYPE_CHECKING:
@@ -79,6 +79,19 @@ class KompileBackend(Enum):
 
 class Kompile(ABC):
     base_args: KompileArgs
+
+    @staticmethod
+    def default_directory() -> Path:
+        try:
+            return single(Path().glob('*-kompiled'))
+        except ValueError as err:
+            if len(err.args) == 1:
+                raise ValueError('Could not find `*-kompiled` directory, use --definition to specify one.') from err
+            else:
+                _, fst, snd = err.args
+                raise ValueError(
+                    f'More than one `*-kompiled` directory found ({fst}, {snd}, ...), use `--definition` to specify one.'
+                ) from err
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> Kompile:

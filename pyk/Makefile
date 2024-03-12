@@ -35,6 +35,8 @@ test-unit: poetry-install
 test-integration: poetry-install
 	$(POETRY_RUN) pytest src/tests/integration --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
 
+test-regression-new: poetry-install
+	$(MAKE) -C regression-new
 
 # Coverage
 
