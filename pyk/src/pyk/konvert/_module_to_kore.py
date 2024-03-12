@@ -7,8 +7,23 @@ from typing import TYPE_CHECKING
 from ..kast import EMPTY_ATT, Atts, KInner
 from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
-from ..kast.outer import KDefinition, KProduction, KRule, KSyntaxSort
-from ..kore.syntax import App, Import, Module, SortApp, SortDecl, SortVar, String, Symbol, SymbolDecl
+from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRule, KSyntaxSort
+from ..kore.prelude import inj
+from ..kore.syntax import (
+    App,
+    Axiom,
+    Equals,
+    EVar,
+    Exists,
+    Import,
+    Module,
+    SortApp,
+    SortDecl,
+    SortVar,
+    String,
+    Symbol,
+    SymbolDecl,
+)
 from ..prelude.k import K_ITEM, K
 from ..utils import FrozenDict
 from ._kast_to_kore import _kast_to_kore
@@ -75,11 +90,13 @@ def module_to_kore(definition: KDefinition) -> Module:
         for sentence in module.sentences
         if isinstance(sentence, KProduction) and sentence.klabel and sentence.klabel.name not in BUILTIN_LABELS
     ]
+    subsort_axioms = _subsort_axioms(module)
 
     sentences: list[Sentence] = []
     sentences += imports
     sentences += sort_decls
     sentences += symbol_decls
+    sentences += subsort_axioms
 
     return Module(name=name, sentences=sentences, attrs=attrs)
 
@@ -190,6 +207,54 @@ def symbol_prod_to_kore(production: KProduction) -> SymbolDecl:
         attrs=attrs,
         hooked=hooked,
     )
+
+
+def _subsort_axioms(module: KFlatModule) -> list[Axiom]:
+    def extract_subsort(production: KProduction) -> tuple[KSort, KSort] | None:
+        if len(production.items) != 1:
+            return None
+
+        item = production.items[0]
+        if not isinstance(item, KNonTerminal):
+            return None
+
+        assert not production.klabel
+        return item.sort, production.sort
+
+    def subsort_axiom(subsort: Sort, supersort: Sort) -> Axiom:
+        R = SortVar('R')  # noqa: N806
+        Val = EVar('Val', supersort)  # noqa: N806
+        return Axiom(
+            (R,),
+            Exists(
+                R,
+                Val,
+                Equals(
+                    supersort,
+                    R,
+                    Val,
+                    inj(subsort, supersort, EVar('From', subsort)),
+                ),
+            ),
+            attrs=(App('subsort', (subsort, supersort), ()),),
+        )
+
+    res: list[Axiom] = []
+    for sentence in module.sentences:
+        if not isinstance(sentence, KProduction):
+            continue
+
+        subsort_res = extract_subsort(sentence)
+        if not subsort_res:
+            continue
+
+        subsort, supersort = subsort_res
+        if supersort == K:
+            continue
+
+        res.append(subsort_axiom(subsort=sort_to_kore(subsort), supersort=sort_to_kore(supersort)))
+
+    return res
 
 
 # ----------------------------------
