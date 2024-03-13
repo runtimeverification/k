@@ -230,7 +230,7 @@ class Atts:
     TOKEN: Final = AttKey('token', type=_NONE)
     TOTAL: Final = AttKey('total', type=_NONE)
     TRUSTED: Final = AttKey('trusted', type=_NONE)
-    UNIT: Final = AttKey('unit', type=_ANY)
+    UNIT: Final = AttKey('unit', type=_STR)
     UNIQUE_ID: Final = AttKey('UNIQUE_ID', type=_ANY)
     UNPARSE_AVOID: Final = AttKey('unparseAvoid', type=_NONE)
     USER_LIST: Final = AttKey('userList', type=_ANY)
