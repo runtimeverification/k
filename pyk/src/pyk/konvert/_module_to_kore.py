@@ -75,6 +75,7 @@ def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
 
     module = simplified_module(definition)
+    defn = KDefinition(module.name, (module,))  # for getting the sort lattice
 
     name = name_to_kore(module.name)
     attrs = atts_to_kore({key: value for key, value in module.att.items() if key != Atts.DIGEST})  # filter digest
@@ -90,18 +91,16 @@ def module_to_kore(definition: KDefinition) -> Module:
         for sentence in module.sentences
         if isinstance(sentence, KProduction) and sentence.klabel and sentence.klabel.name not in BUILTIN_LABELS
     ]
-    subsort_axioms = _subsort_axioms(module)
-
-    defn = KDefinition(module.name, (module,))  # for getting the sort lattice
-
-    assoc_axioms = _assoc_axioms(defn)
 
     sentences: list[Sentence] = []
     sentences += imports
     sentences += sort_decls
     sentences += symbol_decls
-    sentences += subsort_axioms
-    sentences += assoc_axioms
+    sentences += _subsort_axioms(module)
+    sentences += _assoc_axioms(defn)
+    sentences += _idem_axioms(module)
+    sentences += _unit_axioms(module)
+    sentences += _functional_axioms(module)
 
     return Module(name=name, sentences=sentences, attrs=attrs)
 
@@ -175,8 +174,18 @@ def sort_decl_to_kore(syntax_sort: KSyntaxSort) -> SortDecl:
     return SortDecl(name, (), attrs=attrs, hooked=hooked)
 
 
-def sort_to_kore(sort: KSort) -> SortApp:
+def sort_to_kore(sort: KSort, production: KProduction | None = None) -> Sort:
+    if production and sort in production.params:
+        return _sort_var(sort)
+    return _sort_app(sort)
+
+
+def _sort_app(sort: KSort) -> SortApp:
     return SortApp(_sort_name(sort.name))
+
+
+def _sort_var(sort: KSort) -> SortVar:
+    return SortVar(_sort_name(sort.name))
 
 
 def _sort_name(name: str) -> str:
@@ -192,17 +201,11 @@ def symbol_prod_to_kore(production: KProduction) -> SymbolDecl:
         raise ValueError(f'Expected symbol production, got: {production}')
 
     symbol_name = _label_name(production.klabel.name)
-    symbol_vars = tuple(SortVar(_sort_name(sort.name)) for sort in production.params)
+    symbol_vars = tuple(_sort_var(sort) for sort in production.params)
     symbol = Symbol(symbol_name, symbol_vars)
 
-    def to_sort(sort: KSort) -> Sort:
-        name = _sort_name(sort.name)
-        if sort in production.params:
-            return SortVar(name)
-        return SortApp(name)
-
-    param_sorts = tuple(to_sort(sort) for sort in production.argument_sorts)
-    sort = to_sort(production.sort)
+    param_sorts = tuple(sort_to_kore(item.sort, production) for item in production.non_terminals)
+    sort = sort_to_kore(production.sort, production)
     attrs = atts_to_kore(production.att)
     hooked = Atts.HOOK in production.att
     return SymbolDecl(
@@ -284,8 +287,8 @@ def _assoc_axioms(defn: KDefinition) -> list[Axiom]:
         check_prod_sort_is_subsort_of(right.sort)
 
         symbol = _label_name(production.klabel.name)
-        sort_params = tuple(SortVar(param.name) for param in production.klabel.params)
-        sort = sort_to_kore(production.sort)
+        sort_params = tuple(_sort_var(param) for param in production.klabel.params)
+        sort = sort_to_kore(production.sort, production)
         R = SortVar('R')  # noqa: N806
         K1, K2, K3 = (EVar(name, sort) for name in ['K1', 'K2', 'K3'])  # noqa: N806
 
@@ -318,6 +321,141 @@ def _assoc_axioms(defn: KDefinition) -> list[Axiom]:
             continue
 
         res.append(assoc_axiom(sentence))
+    return res
+
+
+def _idem_axioms(module: KFlatModule) -> list[Axiom]:
+    def idem_axiom(production: KProduction) -> Axiom:
+        assert production.klabel
+
+        try:
+            left, right = production.non_terminals
+        except ValueError as err:
+            raise ValueError(f'Illegal use of the idem attribute on non-binary production: {production}') from err
+
+        def check_is_prod_sort(sort: KSort) -> None:
+            if sort == production.sort:
+                return
+            raise ValueError(
+                f'Sort {sort.name} is not {production.sort.name}, idempotent production is not well-sorted: {production}'
+            )
+
+        check_is_prod_sort(left.sort)
+        check_is_prod_sort(right.sort)
+
+        symbol = _label_name(production.klabel.name)
+        sort_params = tuple(_sort_var(param) for param in production.klabel.params)
+        sort = sort_to_kore(production.sort, production)
+        R = SortVar('R')  # noqa: N806
+        K = EVar('K', sort)  # noqa: N806
+
+        return Axiom(
+            (R,) + sort_params,
+            Equals(sort, R, App(symbol, sort_params, (K, K)), K),
+            attrs=(App('idem'),),
+        )
+
+    res: list[Axiom] = []
+    for sentence in module.sentences:
+        if not isinstance(sentence, KProduction):
+            continue
+        if not sentence.klabel:
+            continue
+        if sentence.klabel.name in BUILTIN_LABELS:
+            continue
+        if not Atts.IDEM in sentence.att:
+            continue
+        res.append(idem_axiom(sentence))
+    return res
+
+
+def _unit_axioms(module: KFlatModule) -> list[Axiom]:
+    def unit_axioms(production: KProduction) -> tuple[Axiom, Axiom]:
+        assert production.klabel
+
+        try:
+            left, right = production.non_terminals
+        except ValueError as err:
+            raise ValueError(f'Illegal use of the unit attribute on non-binary production: {production}') from err
+
+        def check_is_prod_sort(sort: KSort) -> None:
+            if sort == production.sort:
+                return
+            raise ValueError(
+                f'Sort {sort.name} is not {production.sort.name}, unit production is not well-sorted: {production}'
+            )
+
+        check_is_prod_sort(left.sort)
+        check_is_prod_sort(right.sort)
+
+        symbol = _label_name(production.klabel.name)
+        sort_params = tuple(_sort_var(param) for param in production.klabel.params)
+        sort = sort_to_kore(production.sort, production)
+        unit = App(_label_name(production.att[Atts.UNIT]))
+        R = SortVar('R')  # noqa: N806
+        K = EVar('K', sort)  # noqa: N806
+
+        left_unit = Axiom(
+            (R,) + sort_params,
+            Equals(sort, R, App(symbol, sort_params, (K, unit)), K),
+            attrs=(App('unit'),),
+        )
+        right_unit = Axiom(
+            (R,) + sort_params,
+            Equals(sort, R, App(symbol, sort_params, (unit, K)), K),
+            attrs=(App('unit'),),
+        )
+        return left_unit, right_unit
+
+    res: list[Axiom] = []
+    for sentence in module.sentences:
+        if not isinstance(sentence, KProduction):
+            continue
+        if not sentence.klabel:
+            continue
+        if sentence.klabel.name in BUILTIN_LABELS:
+            continue
+        if not Atts.FUNCTION in sentence.att:
+            continue
+        if not Atts.UNIT in sentence.att:
+            continue
+        res.extend(unit_axioms(sentence))
+    return res
+
+
+def _functional_axioms(module: KFlatModule) -> list[Axiom]:
+    def functional_axiom(production: KProduction) -> Axiom:
+        assert production.klabel
+
+        symbol = _label_name(production.klabel.name)
+        sort_params = tuple(_sort_var(param) for param in production.klabel.params)
+        sort = sort_to_kore(production.sort, production)
+        R = SortVar('R')  # noqa: N806
+        Val = EVar('Val', sort)  # noqa: N806
+        param_sorts = tuple(sort_to_kore(item.sort, production) for item in production.non_terminals)
+        params = tuple(EVar(f'K{i}', sort) for i, sort in enumerate(param_sorts))
+
+        return Axiom(
+            (R,) + sort_params,
+            Exists(
+                R,
+                Val,
+                Equals(sort, R, Val, App(symbol, sort_params, params)),
+            ),
+            attrs=(App('functional'),),
+        )
+
+    res: list[Axiom] = []
+    for sentence in module.sentences:
+        if not isinstance(sentence, KProduction):
+            continue
+        if not sentence.klabel:
+            continue
+        if sentence.klabel.name in BUILTIN_LABELS:
+            continue
+        if not Atts.FUNCTIONAL in sentence.att:
+            continue
+        res.append(functional_axiom(sentence))
     return res
 
 
