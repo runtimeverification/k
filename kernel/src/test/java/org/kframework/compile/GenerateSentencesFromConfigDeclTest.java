@@ -37,12 +37,14 @@ public class GenerateSentencesFromConfigDeclTest {
 
   Definition def;
   FileUtil files;
+  KExceptionManager kem;
 
   @Before
   public void setUp() {
     String definitionText;
     files = FileUtil.testFileUtil();
-    ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
+    kem = new KExceptionManager(new GlobalOptions());
+    ParserUtils parser = new ParserUtils(files, kem);
     File definitionFile = new File(Kompile.BUILTIN_DIRECTORY + "/prelude.md");
     definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
@@ -92,7 +94,7 @@ public class GenerateSentencesFromConfigDeclTest {
         RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), files)
             .getExtensionModule();
     Set<Sentence> gen =
-        GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
+        GenerateSentencesFromConfigDecl.gen(kem, configuration, BooleanUtils.FALSE, Att(), m);
     Att initializerAtts = Att().add(Att.INITIALIZER());
     Att productionAtts = initializerAtts.add(Att.FUNCTION());
     Set<Sentence> reference =
