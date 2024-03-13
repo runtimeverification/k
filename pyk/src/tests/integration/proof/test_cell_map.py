@@ -40,7 +40,7 @@ EXECUTE_TEST_DATA: Final[Iterable[tuple[str, int, State, int, State, Iterable[St
         1,
         State('#accountNonexistent(1)', 'SetItem(1)', [('1', '2')]),
         1,
-        State('false', 'SetItem(1)', [('1', '2')]),
+        State('false ~> .K', 'SetItem(1)', [('1', '2')]),
         [],
     ),
 )

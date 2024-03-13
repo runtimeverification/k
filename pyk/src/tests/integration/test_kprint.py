@@ -184,6 +184,33 @@ PRETTY_PRINT_IMP_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
         ),
         ('<T>\n  <k>\n    int x , y ;\n  </k>\n  <state>\n    .Map\n  </state>\n</T>'),
     ),
+    (
+        'imp-config-with-ksequence',
+        KApply(
+            '<T>',
+            KApply(
+                '<k>',
+                KSequence(
+                    [
+                        KApply(
+                            'int_;_',
+                            KApply(
+                                '_,_',
+                                KToken('x', 'Id'),
+                                KApply(
+                                    '_,_',
+                                    KToken('y', 'Id'),
+                                    KApply('.List{"_,_"}'),
+                                ),
+                            ),
+                        )
+                    ]
+                ),
+            ),
+            KApply('<state>', KApply('.Map')),
+        ),
+        ('<T>\n  <k>\n    int x , y ; ~> .K\n  </k>\n  <state>\n    .Map\n  </state>\n</T>'),
+    ),
 )
 
 

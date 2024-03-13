@@ -195,7 +195,7 @@ class PrettyPrinter:
             # TODO: Would be nice to say `return self._print_kinner(EMPTY_K)`
             return '.K'
         if ksequence.arity == 1:
-            return self._print_kinner(ksequence.items[0])
+            return self._print_kinner(ksequence.items[0]) + ' ~> .K'
         unparsed_k_seq = '\n~> '.join([self._print_kinner(item) for item in ksequence.items[0:-1]])
         if ksequence.items[-1] == KToken('...', KSort('K')):
             unparsed_k_seq = unparsed_k_seq + '\n' + self._print_kinner(KToken('...', KSort('K')))

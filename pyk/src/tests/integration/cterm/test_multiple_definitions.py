@@ -53,16 +53,16 @@ class TestMultipleDefinitionsProof(CTermSymbolicTest, KPrintTest):
 
         assert exec_res.depth == 0
         assert len(split_next_terms) == 2
-        assert 'a ( X:KItem )' == split_k
+        assert 'a ( X:KItem ) ~> .K' == split_k
         assert [
-            'a ( X:KItem )',
-            'a ( X:KItem )',
+            'a ( X:KItem ) ~> .K',
+            'a ( X:KItem ) ~> .K',
         ] == split_next_k
 
         step_1_res = cterm_symbolic.execute(split_next_terms[0], depth=1)
         step_1_k = kprint.pretty_print(step_1_res.state.cell('K_CELL'))
-        assert 'c' == step_1_k
+        assert 'c ~> .K' == step_1_k
 
         step_2_res = cterm_symbolic.execute(split_next_terms[1], depth=1)
         step_2_k = kprint.pretty_print(step_2_res.state.cell('K_CELL'))
-        assert 'c' == step_2_k
+        assert 'c ~> .K' == step_2_k

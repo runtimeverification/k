@@ -9,7 +9,7 @@ State:
 <generatedTop>
   <T>
     <k>
-      int k , sum , .Ids ; k = 1 ; sum = 0 ; while ( k <= 10000 ) { sum = sum + k ; k = k + 1 ; }
+      int k , sum , .Ids ; k = 1 ; sum = 0 ; while ( k <= 10000 ) { sum = sum + k ; k = k + 1 ; } ~> .K
     </k>
     <state>
       .Map

@@ -8,6 +8,8 @@ POETRY_RUN?=poetry run -C $(ROOT)
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
 KOMPILE=$(POETRY_RUN) pyk kompile
+# ditto for krun
+KRUN=$(POETRY_RUN) pyk run
 # and kprove
 KPROVE=$(POETRY_RUN) pyk prove
 # path relative to current definition of test programs
@@ -16,9 +18,8 @@ TESTDIR?=tests
 DEFDIR?=.
 # path to kompile output directory
 KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
-# path relative to current definition of output/input files
-RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
+RUN_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=haskell
@@ -33,6 +34,7 @@ ifeq ($(UNAME), Darwin)
 endif
 
 KOMPILE_FLAGS+=--type-inference-mode checked $(VERBOSITY)
+KRUN_FLAGS+=
 KPROVE_FLAGS+=--type-inference-mode checked --failure-info $(VERBOSITY)
 
 CHECK?=| diff -
@@ -46,13 +48,15 @@ PIPEFAIL?=set -o pipefail;
 .PHONY: kompile all clean update-results proofs
 
 # run all tests
-all: kompile proofs
+all: kompile krun proofs
 
 # run only kompile
 kompile: $(KOMPILED_DIR)/timestamp
 
 $(KOMPILED_DIR)/timestamp: $(DEF).$(SOURCE_EXT)
 	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< --output-definition $(KOMPILED_DIR)
+
+krun: $(RUN_TESTS)
 
 proofs: $(PROOF_TESTS)
 
@@ -64,18 +68,10 @@ update-results: CHECK=>
 # if some programs should be run with different options their rule should be
 # specified in the makefile prior to including ktest.mak.
 %.$(EXT): kompile
-ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) (cat $@.in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
-else
-	$(PIPEFAIL) (cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null || true) | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
-endif
+	$(PIPEFAIL) (cat $@.in 2>/dev/null || true) | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 
 %-spec.k %-spec.md: kompile
-ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
-else
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
-endif
 
 clean:
 	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz
