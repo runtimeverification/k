@@ -951,7 +951,7 @@ An element can be added to the front of a `List` using the `pushList` operator.
 
 ```k
   syntax List ::= pushList(KItem, List)       [function, total, hook(LIST.push), klabel(pushList), symbol]
-  rule pushList(K, L) => ListItem(K) L
+  rule pushList(K::KItem, L1::List) => ListItem(K) L1
 ```
 
 ### List indexing
