@@ -7,9 +7,8 @@ public class JavaVersion {
   /**
    * Prints a version string that can be parsed by checkJava.
    *
-   * For more context on what format is expected here, see the checkJava script.
-   * If the output of `java --version` ever changes, this class should do so as
-   * well.
+   * <p>For more context on what format is expected here, see the checkJava script. If the output of
+   * `java --version` ever changes, this class should do so as well.
    */
   public static void main(String[] args) {
     System.err.println("java " + System.getProperty("java.version"));
