@@ -32,6 +32,7 @@ from .ktool import TypeInferenceMode
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
+from .ktool.krun import KRun
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo
@@ -250,11 +251,30 @@ def exec_kompile(args: Namespace) -> None:
     kompile_dict = {
         'main_file': main_file,
         'backend': args.backend.value,
+        'syntax_module': args.syntax_module,
+        'main_module': args.main_module,
+        'md_selector': args.md_selector,
+        'include_dirs': (Path(include) for include in args.includes),
     }
     Kompile.from_dict(kompile_dict)(
         output_dir=kompiled_directory,
         type_inference_mode=args.type_inference_mode,
     )
+
+
+def exec_run(args: Namespace) -> None:
+    pgm_file = Path(args.pgm_file)
+    check_file_path(pgm_file)
+    kompiled_directory: Path
+    if 'definition_dir' not in args:
+        kompiled_directory = Kompile.default_directory()
+        _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
+    else:
+        kompiled_directory = args.definition_dir
+    krun = KRun(kompiled_directory)
+    rc, res = krun.krun(pgm_file)
+    print(krun.pretty_print(res))
+    sys.exit(rc)
 
 
 def exec_graph_imports(args: Namespace) -> None:
@@ -363,7 +383,7 @@ def create_argument_parser() -> ArgumentParser:
     kompile_args = pyk_args_command.add_parser(
         'kompile',
         help='Kompile the K specification.',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, k_cli_args.definition_args],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
     kompile_args.add_argument(
@@ -383,6 +403,14 @@ def create_argument_parser() -> ArgumentParser:
     kompile_args.add_argument(
         '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
     )
+
+    run_args = pyk_args_command.add_parser(
+        'run',
+        help='Run a given program using the K definition.',
+        parents=[k_cli_args.logging_args],
+    )
+    run_args.add_argument('pgm_file', type=str, help='File program to run in it.')
+    run_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
 
     prove_args = pyk_args_command.add_parser(
         'prove',
