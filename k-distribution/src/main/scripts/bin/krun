@@ -101,36 +101,28 @@ $(k_util_usage)
 $KRUN options:
 
       --bound N            Return at most N solutions  with --search
-      --depth N            Execute at most N rewrite steps
-      --color [on|off]     Enable/disable ANSI color codes. Overrides default,
-                           which is determined based on whether stdout is a
-                           terminal.
-  -pNAME=VALUE             Use VALUE as a command to parse \$NAME. For example,
-                           if NAME=PGM and VALUE=cat, and the user also passes
-                           \`-cPGM=foo\`, a temporary file containing the word
-                           "foo" is created and cat is called on it to provide
-                           the value of \$PGM as a KORE term.
-
   -cNAME=VALUE             Use VALUE as the value for \$NAME. By default,
                            \`kparse -m MAINMODULE\` is used as the
                            parser. This can be overridden with -p.
+      --color [on|off]     Enable/disable ANSI color codes. Overrides default,
+                           which is determined based on whether stdout is a
+                           terminal.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
       --debugger-batch     Launch the backend in a debugging console in batch
                            mode. Currently only supported on LLVM backend.
       --debugger-command FILE  Execute GDB commands from FILE to debug program.
                                Currently only supported on LLVM backend.
-  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR.
+  -d, --definition DIR     Exact path to the kompiled directory.
+      --depth N            Execute at most N rewrite steps
       --dry-run            Do not execute backend, but instead print the
                            command that would be executed to stdout.
-      --haskell-backend-command CMD  use CMD instead of kore-exec to invoke
-                                     Haskell backend
-  -h, --help               Display this help and exit
-      --definition DIR     Exact path to the kompiled directory.
       --execute-to-branch  Execute until a non-deterministic state is reached, then exit.
                            Requires the --enable-search option to have been passed to kompile
                            on the LLVM backend.
+      --haskell-backend-command CMD  use CMD instead of kore-exec to invoke
+                                     Haskell backend
+  -h, --help               Display this help and exit
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -139,18 +131,23 @@ $KRUN options:
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
                            true.
+      --no-pattern         Skip pattern matching the result of searches on the
+                           llvm backend against the default search pattern.
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, json,
                            kore, and none.
       --output-file FILE   Print final configuration to FILE
+  -pNAME=VALUE             Use VALUE as a command to parse \$NAME. For example,
+                           if NAME=PGM and VALUE=cat, and the user also passes
+                           \`-cPGM=foo\`, a temporary file containing the word
+                           "foo" is created and cat is called on it to provide
+                           the value of \$PGM as a KORE term.
       --parser VALUE       Use VALUE as parser to parse \$PGM. For example,
                            if the user says "$KRUN --parser cat foo.kore", then
                            \`cat foo.kore\` is invoked and the result on stdout
                            is used as the value of \$PGM as a KORE term.
-      --no-pattern         Skip pattern matching the result of searches on the
-                           llvm backend against the default search pattern.
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
@@ -239,12 +236,6 @@ do
       printf -v "$var_name" %s "$tempFile"
       ;;
 
-      -d|--directory)
-      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
-      dir="$2"
-      shift
-      ;;
-
       --dry-run)
       cmdprefix="echo "
       dryRun=true
@@ -260,7 +251,7 @@ do
       exit 0
       ;;
 
-      --definition)
+      -d|--definition)
       kompiledDir="$2"
       shift
       ;;

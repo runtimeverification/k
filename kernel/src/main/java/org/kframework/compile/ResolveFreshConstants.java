@@ -36,6 +36,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.collection.JavaConverters;
@@ -43,6 +44,7 @@ import scala.collection.Set;
 
 public class ResolveFreshConstants {
 
+  private final KExceptionManager kem;
   private final Definition def;
   private final FileUtil files;
   private Module m;
@@ -200,12 +202,18 @@ public class ResolveFreshConstants {
     return s;
   }
 
-  public ResolveFreshConstants(Definition def, String manualTopCell, FileUtil files) {
-    this(def, manualTopCell, files, 0);
+  public ResolveFreshConstants(
+      KExceptionManager kem, Definition def, String manualTopCell, FileUtil files) {
+    this(kem, def, manualTopCell, files, 0);
   }
 
   public ResolveFreshConstants(
-      Definition def, String manualTopCell, FileUtil files, int initialFresh) {
+      KExceptionManager kem,
+      Definition def,
+      String manualTopCell,
+      FileUtil files,
+      int initialFresh) {
+    this.kem = kem;
     this.def = def;
     this.manualTopCell = manualTopCell;
     this.files = files;
@@ -281,7 +289,7 @@ public class ResolveFreshConstants {
                 topCellToken);
         Set<Sentence> newSentences =
             GenerateSentencesFromConfigDecl.gen(
-                generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
+                kem, generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
         sentences = (Set<Sentence>) sentences.$bar(newSentences);
         sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
       }
@@ -291,7 +299,7 @@ public class ResolveFreshConstants {
       ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), files);
       Set<Sentence> newSentences =
           GenerateSentencesFromConfigDecl.gen(
-              freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
+              kem, freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
       sentences = (Set<Sentence>) sentences.$bar(newSentences);
       sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
     }

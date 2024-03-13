@@ -17,19 +17,6 @@ import org.kframework.utils.options.OutputDirectoryOptions;
 public class DefinitionLoadingModuleTest {
 
   @Test
-  public void testReadDefinition() throws IOException {
-    DefinitionLoadingOptions options = new DefinitionLoadingOptions();
-    new JCommander(options, "--directory", "src/test/resources");
-    DefinitionLoadingModule module = new DefinitionLoadingModule();
-    File kompiledDir = module.directory(options, new File("."), System.getenv());
-    assertEquals(
-        new File("src/test/resources/test-kompiled").getCanonicalFile(),
-        kompiledDir.getCanonicalFile());
-    assertTrue(kompiledDir.exists());
-    assertTrue(kompiledDir.isDirectory());
-  }
-
-  @Test
   public void testReadDefinition2() throws IOException {
     DefinitionLoadingOptions options = new DefinitionLoadingOptions();
     new JCommander(options, "--definition", "src/test/resources/test-kompiled");
