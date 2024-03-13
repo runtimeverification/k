@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from ..utils import ensure_dir_path
-from .utils import bug_report_arg, dir_path, file_path
+from .utils import bug_report_arg, file_path
 
 if TYPE_CHECKING:
     from typing import TypeVar
@@ -124,7 +124,6 @@ class KCLIArgs:
         )
         args.add_argument('--main-module', default=None, type=str, help='Name of the main module.')
         args.add_argument('--syntax-module', default=None, type=str, help='Name of the syntax module.')
-        args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
         args.add_argument(
             '--md-selector',
             type=str,
