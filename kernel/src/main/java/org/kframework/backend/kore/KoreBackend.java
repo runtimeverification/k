@@ -317,6 +317,12 @@ public class KoreBackend implements Backend {
 
     Function1<Definition, Definition> applyPipeline =
         stepOrdering.stream()
+            .peek(
+                name -> {
+                  if (!namedStages.containsKey(name))
+                    throw KEMException.compilerError(
+                        "Step doesn't exist for --kore-backend-steps: " + name);
+                })
             .map(name -> namedStages.get(name))
             .reduce(d -> d, (f, g) -> f.andThen(g));
 
