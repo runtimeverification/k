@@ -10,10 +10,8 @@ import java.io.File;
 import java.util.Map;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KompiledDir;
@@ -49,9 +47,6 @@ public class DefinitionLoadingModule extends AbstractModule {
       @Environment Map<String, String> env) {
     File directory = null;
     if (options.inputDirectory != null) {
-      if (options.directory != null)
-        throw KEMException.criticalError(
-            "Cannot use both --directory and --definition at the same time.");
       File f = new File(options.inputDirectory);
       if (f.isAbsolute()) {
         directory = f;
@@ -67,29 +62,15 @@ public class DefinitionLoadingModule extends AbstractModule {
       }
     } else {
       File whereDir;
-      if (options.directory == null) {
-        if (env.get("KRUN_COMPILED_DEF") != null) {
-          File f = new File(env.get("KRUN_COMPILED_DEF"));
-          if (f.isAbsolute()) {
-            whereDir = f;
-          } else {
-            whereDir = new File(workingDir, env.get("KRUN_COMPILED_DEF"));
-          }
-        } else {
-          whereDir = workingDir;
-        }
-      } else {
-        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
-        kem.registerCriticalWarning(
-            DEPRECATED_DIRECTORY_FLAG,
-            "Using --directory is deprecated. Use --output-definition instead.");
-        kem.print();
-        File f = new File(options.directory);
+      if (env.get("KRUN_COMPILED_DEF") != null) {
+        File f = new File(env.get("KRUN_COMPILED_DEF"));
         if (f.isAbsolute()) {
           whereDir = f;
         } else {
-          whereDir = new File(workingDir, options.directory);
+          whereDir = new File(workingDir, env.get("KRUN_COMPILED_DEF"));
         }
+      } else {
+        whereDir = workingDir;
       }
       File[] dirs = whereDir.listFiles((current, name) -> new File(current, name).isDirectory());
 
