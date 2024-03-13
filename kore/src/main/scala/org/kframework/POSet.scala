@@ -167,14 +167,6 @@ object POSet {
   def apply[T](s: Set[(T, T)])     = new POSet(s)
 
   /**
-   * Import this for Scala syntactic sugar.
-   */
-  implicit class PO[T](x: T)(implicit val po: POSet[T]) {
-    def <(y: T): Boolean = po.<(x, y)
-    def >(y: T): Boolean = po.>(x, y)
-  }
-
-  /**
    * Return the set of all elements which are greater than or equal to each element of the input,
    * using the provided relations map. Input must be non-empty.
    */
