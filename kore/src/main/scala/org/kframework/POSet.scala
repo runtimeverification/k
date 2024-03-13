@@ -76,29 +76,25 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
       .groupBy(_._1)
       .mapValues(_.map(_._2))
 
-  def <(x: T, y: T): Boolean = relations.get(x).exists(_.contains(y))
-  def >(x: T, y: T): Boolean = relations.get(y).exists(_.contains(x))
-  def ~(x: T, y: T): Boolean = <(x, y) || <(y, x)
-
   /**
    * Returns true if x < y
    */
-  def lessThan(x: T, y: T): Boolean         = <(x, y)
-  def lessThanEq(x: T, y: T): Boolean       = x == y || <(x, y)
+  def lessThan(x: T, y: T): Boolean         = relations.get(x).exists(_.contains(y))
+  def lessThanEq(x: T, y: T): Boolean       = x == y || lessThan(x, y)
   def directlyLessThan(x: T, y: T): Boolean = directRelationsMap.get(x).exists(_.contains(y))
 
   /**
    * Returns true if y < x
    */
-  def greaterThan(x: T, y: T): Boolean         = >(x, y)
-  def greaterThanEq(x: T, y: T): Boolean       = x == y || >(x, y)
+  def greaterThan(x: T, y: T): Boolean         = relations.get(y).exists(_.contains(x))
+  def greaterThanEq(x: T, y: T): Boolean       = x == y || greaterThan(x, y)
   def directlyGreaterThan(x: T, y: T): Boolean = directRelationsMap.get(y).exists(_.contains(x))
 
   /**
    * Returns true if y < x or y < x
    */
-  def inSomeRelation(x: T, y: T): Boolean   = this.~(x, y)
-  def inSomeRelationEq(x: T, y: T): Boolean = x == y || this.~(x, y)
+  def inSomeRelation(x: T, y: T): Boolean   = lessThan(x, y) || lessThan(y, x)
+  def inSomeRelationEq(x: T, y: T): Boolean = x == y || inSomeRelation(x, y)
 
   /**
    * Return the set of all upper bounds of the input.
@@ -144,7 +140,7 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    * Return the subset of items from the argument which are not greater than any other item.
    */
   def minimal(sorts: Iterable[T]): Set[T] =
-    sorts.filter(s1 => !sorts.exists(s2 => >(s1, s2))).toSet
+    sorts.filter(s1 => !sorts.exists(s2 => greaterThan(s1, s2))).toSet
 
   def minimal(sorts: util.Collection[T]): util.Set[T] =
     Collections.mutable(minimal(Collections.immutable(sorts)))

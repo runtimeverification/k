@@ -15,11 +15,11 @@ class POSetTest {
   @Test def transitiveness() {
     val p = POSet(b1 -> b2, b2 -> b3, b4 -> b5)
 
-    assertTrue(p.<(b1, b3))
-    assertTrue(p.<(b1, b2))
-    assertFalse(p.>(b1, b1))
-    assertFalse(p.<(b1, b1))
-    assertFalse(p.<(b1, b4))
+    assertTrue(p.lessThan(b1, b3))
+    assertTrue(p.lessThan(b1, b2))
+    assertFalse(p.greaterThan(b1, b1))
+    assertFalse(p.lessThan(b1, b1))
+    assertFalse(p.lessThan(b1, b4))
   }
 
   @Test(expected = classOf[KEMException])
