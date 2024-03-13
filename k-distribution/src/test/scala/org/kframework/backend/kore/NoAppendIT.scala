@@ -1,9 +1,9 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.kore
 
+import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
 import org.junit.Assert._
 import org.junit.Test
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 
 class NoAppendIT extends KoreTest {
 

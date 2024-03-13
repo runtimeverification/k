@@ -1,11 +1,11 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.kore
 
+import com.runtimeverification.k.kore._
 import org.junit.Assert._
 import org.junit.Test
 import org.kframework.attributes.Att
 import org.kframework.builtin.KLabels
-import org.kframework.parser.kore._
 
 class ClaimAttributes extends KoreTest {
 
