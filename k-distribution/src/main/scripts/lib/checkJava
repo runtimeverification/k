@@ -36,7 +36,7 @@ else
     setarch
     JAVA=$NG
   else
-    version=$("$_java" -version 2>&1)
+    version=$("$_java" --version)
     setarch
     if [ $ARCH -eq 64 ]; then
       TIERED=-XX:+TieredCompilation
@@ -46,15 +46,20 @@ else
   fi
 fi
 
-
+# The Java version information we're parsing here looks something like this:
+#
+#   openjdk 21.0.2 2024-01-16
+#   OpenJDK Runtime Environment Homebrew (build 21.0.2)
+#   OpenJDK 64-Bit Server VM Homebrew (build 21.0.2, mixed mode, sharing)
+#
+# To get the major version, we need to look at the first line's second field,
+# then use a regex to extract the major version component. If the JVM changes
+# the format of the version that gets printed, this script needs to be updated
+# as well.
 if [[ "$_java" ]]; then
-    version=$(echo $version | awk -F '"' '/version/ {print $2}')
-#    echo version "$version"
-    if [[ $version = "1."* ]]; then
-      version=$(echo $version | sed -e 's/1\.\([0-9]*\)\(.*\)/\1/; 1q')
-    else
-      version=$(echo $version | sed -e 's/\([0-9]*\)\(.*\)/\1/; 1q')
-    fi
+    version=$(echo "$version" | head -1 | cut -d ' ' -f2)
+    version=$(echo "$version" | sed -e 's/\([0-9]*\)\(.*\)/\1/; 1q')
+
     if [[ "$version" -lt "$MIN_VERSION" ]]; then
         echoerr -e "\033[1;31mError:\033[0m K requires Java $MIN_VERSION to run but the detected version is $version."
         echoerr "Please either add Java $MIN_VERSION bin directory to the PATH or set the JAVA_HOME
