@@ -1,0 +1,9 @@
+[Error] Outer Parser: Module DUPLICATEMODULE differs from previous declaration at Source(duplicateModule.k) and Location(2,1,4,10)
+	Source(duplicateModule.k)
+	Location(6,1,8,10)
+	  .	v~~~~~~~~~~~~~~~~~~~~~
+	6 |	module DUPLICATEMODULE
+	7 |	
+	8 |	endmodule
+	  .	~~~~~~~~^
+[Error] Outer Parser: Had 1 outer parsing errors.

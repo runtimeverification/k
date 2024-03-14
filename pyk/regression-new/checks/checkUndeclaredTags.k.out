@@ -1,0 +1,5 @@
+[Error] Outer Parser: Could not find any productions for tag: a
+	Source(checkUndeclaredTags.k)
+	Location(3,3,3,24)
+	3 |	  syntax priority a > b
+	  .	  ^~~~~~~~~~~~~~~~~~~~~

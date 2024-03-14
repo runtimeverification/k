@@ -1,0 +1,21 @@
+[Error] Compiler: Rewrites are not allowed to be nested.
+	Source(nestedRewriteInFun.k)
+	Location(6,22,6,28)
+	6 |	rule 0 => #fun(0 => (1 => 2))(0)
+	  .	                     ^~~~~~
+[Error] Compiler: Rewrites are not allowed to be nested.
+	Source(nestedRewriteInFun.k)
+	Location(7,17,7,23)
+	7 |	rule 0 => #fun((0 => 1) => 2)(0)
+	  .	                ^~~~~~
+[Error] Compiler: Rewrites are not allowed to be nested.
+	Source(nestedRewriteInFun.k)
+	Location(12,26,12,32)
+	12 |	rule 1 => #fun(foo(0 => (1 => 2)))(0)
+	   .	                         ^~~~~~
+[Error] Compiler: Rewrites are not allowed to be nested.
+	Source(nestedRewriteInFun.k)
+	Location(13,21,13,27)
+	13 |	rule 1 => #fun(foo((0 => 1) => 2))(0)
+	   .	                    ^~~~~~
+[Error] Compiler: Had 4 structural errors.

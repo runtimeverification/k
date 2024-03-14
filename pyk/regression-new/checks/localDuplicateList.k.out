@@ -1,0 +1,5 @@
+[Error] Compiler: Sort Foo previously declared as a user list at Source(localDuplicateList.k) and Location(9,18,9,32)
+	Source(localDuplicateList.k)
+	Location(8,18,8,33)
+	8 |	  syntax Foo ::= List{Bool, ","}
+	  .	                 ^~~~~~~~~~~~~~~

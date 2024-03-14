@@ -1,0 +1,16 @@
+[Error] Compiler: Variable 'X' defined but not used. Prefix variable name with underscore if this is intentional.
+	Source(existsLHSBoundFail.k)
+	Location(11,12,11,13)
+	11 |	  rule foo(X) => #Exists Y . { I #Equals Y }
+	   .	           ^
+[Error] Compiler: Found variable I on right hand side of rule, not bound on left hand side. Did you mean "?I"?
+	Source(existsLHSBoundFail.k)
+	Location(11,32,11,33)
+	11 |	  rule foo(X) => #Exists Y . { I #Equals Y }
+	   .	                               ^
+[Error] Compiler: Variable 'I' defined but not used. Prefix variable name with underscore if this is intentional.
+	Source(existsLHSBoundFail.k)
+	Location(11,32,11,33)
+	11 |	  rule foo(X) => #Exists Y . { I #Equals Y }
+	   .	                               ^
+[Error] Compiler: Had 3 structural errors.

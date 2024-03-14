@@ -1,0 +1,5 @@
+[Error] Compiler: Parameters for the attribute 'owise' are forbidden.
+	Source(attParamForbidden.k)
+	Location(5,19,5,27)
+	5 |	  rule a() => .K [owise(1)]
+	  .	                  ^~~~~~~~

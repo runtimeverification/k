@@ -22,7 +22,7 @@ KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
 RUN_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
 # default KOMPILE_BACKEND
-KOMPILE_BACKEND?=haskell
+KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))

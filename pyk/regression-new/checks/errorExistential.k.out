@@ -1,0 +1,6 @@
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(errorExistential.k)
+	Location(5,11,5,13)
+	5 |	rule 0 => ?I:Int
+	  .	          ^~
+[Error] Compiler: Had 1 structural errors.

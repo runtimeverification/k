@@ -1,0 +1,6 @@
+[Error] Compiler: The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.
+	Source(checkSymbolKlabel.k)
+	Location(3,18,3,50)
+	3 |	               | bar() [symbol(bar), klabel(baz)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.

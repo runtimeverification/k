@@ -1,0 +1,5 @@
+[Error] Compiler: Could not find module: FOO
+	Source(missingModule.k)
+	Location(3,3,3,14)
+	3 |	  imports FOO
+	  .	  ^~~~~~~~~~~

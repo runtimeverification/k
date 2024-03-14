@@ -1,0 +1,89 @@
+int x, a[10];
+
+void incx() {
+  ++x;
+}
+
+int zero() {
+  return 0;
+}
+
+int id(int x) {
+  return x;
+}
+
+void->void id0(void->void f) {
+  return f;
+}
+
+void->int id1(void->int f) {
+  return f;
+}
+
+int->int id2(int->int f) {
+  return f;
+}
+
+int double(int x) {
+  return 2*x;
+}
+
+void->void hoincx() {
+  return incx;
+}
+
+void->int hozero() {
+  return zero;
+}
+
+int->int hoid() {
+  return id;
+}
+
+int->int hodouble() {
+  return double;
+}
+
+void app0(void->void f) {
+  f();
+}
+
+int app1(void->int f) {
+  return f();
+}
+
+int app2(int->int f, int x) {
+  return f(x);
+}
+
+void map(int->int f, int[] x) {
+  for (int i = 0; i <= sizeOf(x) - 1; ++i) {
+    x[i] = app2(f,x[i]);
+  }
+}
+
+void printall() {
+  print("x = ",x, ";  a[] = ");
+  for (int i = 0; i <= sizeOf(a) - 1; ++i) {
+    print(a[i], " ");
+  }
+  print("\n");
+}
+
+void main() {
+  x = 0;
+  for (int i=0; i <= sizeOf(a) - 1; ++i) {
+    a[i]=i;
+  }
+  printall();
+  hoincx()();
+  print(x," ", hozero()()," ", hoid()(7)," ", hodouble()(7),"\n");
+  id0(hoincx())();
+  print(x," ", id1(hozero())()," ", 
+        id2(hoid())(7)," ", id2(hodouble())(7),"\n");
+  app0(id0(hoincx()));
+  print(x," ", app1(id1(hozero()))," ", 
+        app2(id2(hoid()),7)," ", app2(id2(hodouble()),7),"\n");
+  map(double,a);
+  printall();
+}
