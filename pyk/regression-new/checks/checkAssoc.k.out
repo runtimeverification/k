@@ -1,0 +1,25 @@
+[Error] Compiler: left attribute not permitted on non-associative production.
+Hint: The sub-sorting relation Bool <= Int does not hold, so the left attribute has no effect.
+	Source(checkAssoc.k)
+	Location(10,21,10,55)
+	10 |	    syntax Bool ::= Bool "bad1"  Int  [left, function]
+	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: right attribute not permitted on non-associative production.
+Hint: The sub-sorting relation Bool <= Int does not hold, so the right attribute has no effect.
+	Source(checkAssoc.k)
+	Location(11,21,11,56)
+	11 |	                  | Int  "bad2"  Bool [right, function]
+	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: non-assoc attribute not permitted on non-associative production.
+Hint: One of the sub-sorting relations Bool <= Bool or Bool <= Int does not hold, so the non-assoc attribute has no effect.
+	Source(checkAssoc.k)
+	Location(12,21,12,60)
+	12 |	                  | Bool "bad3"  Int  [non-assoc, function]
+	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: non-assoc attribute not permitted on non-associative production.
+Hint: One of the sub-sorting relations Bool <= Int or Bool <= Bool does not hold, so the non-assoc attribute has no effect.
+	Source(checkAssoc.k)
+	Location(13,21,13,60)
+	13 |	                  | Int  "bad4"  Bool [non-assoc, function]
+	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 4 structural errors.

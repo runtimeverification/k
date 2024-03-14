@@ -1,0 +1,5 @@
+[Error] Compiler: Parameters for the attribute 'prec' are required.
+	Source(attParamRequired.k)
+	Location(5,19,5,23)
+	5 |	  rule a() => .K [prec]
+	  .	                  ^~~~

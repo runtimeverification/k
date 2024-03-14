@@ -1,0 +1,6 @@
+[Error] Inner Parser: Scanner error: unexpected character sequence '"'.
+	Source(unicode.k)
+	Location(6,15,6,16)
+	6 |	    rule <k> b"\x😃" => b"" </k>
+	  .	              ^
+[Error] Compiler: Had 1 parsing errors.

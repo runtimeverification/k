@@ -1,0 +1,5 @@
+[Error] Compiler: group(_) attribute expects a comma separated list of groups, each of which consists of a lower case letter followed by any number of alphanumeric or '-' characters.
+	Source(checkGroup.k)
+	Location(4,18,4,43)
+	4 |	               | Int "+" Int [group(fun,)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~
