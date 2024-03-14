@@ -16,7 +16,7 @@ from _kllvm.ast import (  # type: ignore  # noqa: F401
     Symbol,
     SymbolAliasDeclaration,
     SymbolDeclaration,
-    ValueType,
     Variable,
     VariablePattern,
+    value_type,
 )

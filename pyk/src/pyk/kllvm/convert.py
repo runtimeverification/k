@@ -121,7 +121,7 @@ def sort_to_llvm(sort: Sort) -> kllvm.Sort:
         case SortVar(name):
             return kllvm.SortVariable(name)
         case SortApp(name, sorts):
-            res = kllvm.CompositeSort(sort.name, kllvm.ValueType(kllvm.SortCategory(0)))
+            res = kllvm.CompositeSort(sort.name, kllvm.value_type(kllvm.SortCategory(0)))
             for subsort in sorts:
                 res.add_argument(sort_to_llvm(subsort))
             return res
