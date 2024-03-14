@@ -1,5 +1,5 @@
 <k>
-  ListItem ( 1 )
+  ListItem ( 4 )
   ListItem ( 3 )
-  ListItem ( 4 ) ~> .K
+  ListItem ( 1 ) ~> .K
 </k>
