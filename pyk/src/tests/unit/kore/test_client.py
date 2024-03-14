@@ -360,7 +360,7 @@ ERROR_TEST_DATA: Final = (
             data=kore(int_dv(0)),
         ),
         SmtSolverError(int_dv(0)),
-        r'Smt solver error: \dv{SortInt{}}("0")',
+        r'SMT solver error: \dv{SortInt{}}("0")',
     ),
     (
         'default-error',
