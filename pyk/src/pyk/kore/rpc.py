@@ -426,7 +426,7 @@ class SmtSolverError(KoreClientError):
 
     def __init__(self, pattern: Pattern):
         self.pattern = pattern
-        super().__init__(f'Smt solver error: {self.pattern.text}')
+        super().__init__(f'SMT solver error: {self.pattern.text}')
 
 
 @final
