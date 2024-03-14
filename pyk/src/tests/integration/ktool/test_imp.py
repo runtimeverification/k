@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.prelude.kbool import BOOL, notBool
@@ -195,7 +196,14 @@ class TestImpProve(KProveTest):
     ) -> None:
         proof = single(
             kprove.prove_rpc(
-                Path(spec_file), spec_module, claim_labels=[claim_id], kcfg_semantics=ImpSemantics(kprove.definition)
+                ProveOptions(
+                    {
+                        'spec_file': Path(spec_file),
+                        'spec_module': spec_module,
+                    }
+                ),
+                claim_labels=[claim_id],
+                kcfg_semantics=ImpSemantics(kprove.definition),
             )
         )
         assert proof.status == proof_status
