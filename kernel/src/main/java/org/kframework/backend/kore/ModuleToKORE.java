@@ -237,12 +237,8 @@ public class ModuleToKORE {
 
     semantics.append("\n// symbols\n");
     Set<Production> overloads = new HashSet<>();
-    for (Production lesser : iterable(module.overloads().elements())) {
-      for (Production greater :
-          iterable(
-              module.overloads().relations().get(lesser).getOrElse(Collections::<Production>Set))) {
-        overloads.add(greater);
-      }
+    for (Production lesser : module.overloads().elements()) {
+      overloads.addAll(module.overloads().relations().getOrDefault(lesser, Set.of()));
     }
     translateSymbols(attributes, functionRules, overloads, semantics);
 
@@ -270,14 +266,8 @@ public class ModuleToKORE {
       }
     }
 
-    for (Production lesser : iterable(module.overloads().elements())) {
-      for (Production greater :
-          iterable(
-              module
-                  .overloads()
-                  .relations()
-                  .get(lesser)
-                  .getOrElse(() -> Collections.<Production>Set()))) {
+    for (Production lesser : module.overloads().elements()) {
+      for (Production greater : module.overloads().relations().getOrDefault(lesser, Set.of())) {
         genOverloadedAxiom(lesser, greater, syntax);
       }
     }
@@ -321,14 +311,8 @@ public class ModuleToKORE {
       genNoJunkAxiom(sort, semantics);
     }
 
-    for (Production lesser : iterable(module.overloads().elements())) {
-      for (Production greater :
-          iterable(
-              module
-                  .overloads()
-                  .relations()
-                  .get(lesser)
-                  .getOrElse(() -> Collections.<Production>Set()))) {
+    for (Production lesser : module.overloads().elements()) {
+      for (Production greater : module.overloads().relations().getOrDefault(lesser, Set.of())) {
         genOverloadedAxiom(lesser, greater, semantics);
       }
     }
@@ -1741,10 +1725,11 @@ public class ModuleToKORE {
       att = att.add(Att.TERMINALS(), sb.toString());
       if (prod.klabel().isDefined()) {
         List<K> lessThanK = new ArrayList<>();
-        Option<scala.collection.Set<Tag>> lessThan =
-            module.priorities().relations().get(Tag(prod.klabel().get().name()));
-        if (lessThan.isDefined()) {
-          for (Tag t : iterable(lessThan.get())) {
+        Optional<Set<Tag>> lessThan =
+            Optional.ofNullable(
+                module.priorities().relations().get(Tag(prod.klabel().get().name())));
+        if (lessThan.isPresent()) {
+          for (Tag t : lessThan.get()) {
             if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
               continue;
             }

@@ -92,7 +92,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getCellBagSortsOfCell(n: Sort): Set[Sort] =
     m.allSorts.filter(m.subsorts.directlyLessThan(n, _)).intersect(cellBagSorts)
 
-  private val edgesPoset: POSet[Sort] = POSet(edges)
+  private val edgesPoset: POSet[Sort] = new POSet(edges)
 
   private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
