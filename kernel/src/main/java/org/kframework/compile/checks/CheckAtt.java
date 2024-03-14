@@ -342,9 +342,14 @@ public class CheckAtt {
   }
 
   private void checkSymbolKLabel(Production prod) {
-    if (prod.att().contains(Att.SYMBOL()) && prod.att().contains(Att.KLABEL())) {
+    if (!prod.att().contains(Att.KLABEL())) {
+      return;
+    }
+
+    var kLabelValue = prod.att().get(Att.KLABEL());
+
+    if (prod.att().contains(Att.SYMBOL())) {
       if (prod.att().get(Att.SYMBOL()).isEmpty()) {
-        var kLabelValue = prod.att().get(Att.KLABEL());
         var message =
             "The zero-argument form of `symbol` is deprecated. Replace `klabel("
                 + kLabelValue
@@ -358,6 +363,28 @@ public class CheckAtt {
             KEMException.compilerError(
                 "The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.",
                 prod));
+      }
+    } else {
+      var overloadProds = m.overloads().elements();
+
+      if (overloadProds.contains(prod)) {
+        var message =
+            "Attribute `klabel("
+                + kLabelValue
+                + ") is deprecated, but marks an overload. Add `overload("
+                + kLabelValue
+                + ")`.";
+
+        kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors, message, prod);
+      } else {
+        var message =
+            "Attribute `klabel(_)` is deprecated. Either remove `klabel("
+                + kLabelValue
+                + ")`, or replace it by `symbol("
+                + kLabelValue
+                + ")`.";
+
+        kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors, message, prod);
       }
     }
   }
