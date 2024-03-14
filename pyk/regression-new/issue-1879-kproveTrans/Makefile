@@ -1,2 +1,2 @@
 SUBDIRS=haskell
-include ../../../include/kframework/ktest-group.mak
+include ../include/ktest-group.mak

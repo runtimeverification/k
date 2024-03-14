@@ -1,3 +1,3 @@
 DEF=test
 
-include ../../../../include/kframework/ktest-fail.mak
+include ../../include/ktest-fail.mak

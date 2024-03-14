@@ -1,3 +1,3 @@
 SUBDIRS=lesson_6
 
-include ../../../../../include/kframework/ktest-group.mak
+include ../../../include/ktest-group.mak

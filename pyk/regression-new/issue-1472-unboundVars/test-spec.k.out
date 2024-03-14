@@ -1,1 +1,13 @@
-#Top
+APRProof: ee62a8e3d964afa449cbd203374e5c6a386931f5f4df08983d90d1473e48a756
+    status: ProofStatus.PASSED
+    admitted: False
+    nodes: 2
+    pending: 0
+    failing: 0
+    vacuous: 0
+    stuck: 0
+    terminal: 0
+    refuted: 0
+    bounded: 0
+    execution time: 0s
+Subproofs: 0

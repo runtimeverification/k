@@ -1,3 +1,8 @@
-<k>
-  test ( 2 , 1 , 1 ) ~> .K
-</k>
+<generatedTop>
+  <k>
+    test ( 2 , 1 , 1 ) ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

@@ -1,3 +1,8 @@
-<k>
-  u'f' ~> .K
-</k>
+<generatedTop>
+  <k>
+    u'f' ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
