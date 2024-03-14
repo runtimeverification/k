@@ -1,0 +1,6 @@
+[Error] Inner Parser: Parse error: unexpected token '"\u0012"' following token 'b'.
+	Source(unicode-escape.k)
+	Location(6,15,6,23)
+	6 |	    rule <k> b"\u0012" => b"" </k>
+	  .	              ^~~~~~~~
+[Error] Compiler: Had 1 parsing errors.

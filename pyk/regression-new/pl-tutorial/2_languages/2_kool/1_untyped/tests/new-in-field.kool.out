@@ -1,0 +1,3 @@
+Method C2 local c is: 2
+Class C2 field c is: 1
+(new C2()).c is: 1

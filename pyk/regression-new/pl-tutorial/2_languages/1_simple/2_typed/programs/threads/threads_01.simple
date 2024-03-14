@@ -1,0 +1,10 @@
+// Simple multithreaded program with two behaviors.
+
+void main() {
+  int x = 5;
+  spawn { x = 7; };
+  print(x,"\n");
+}
+
+// 5
+// 7

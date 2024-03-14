@@ -1,0 +1,21 @@
+// gcd
+
+gcdInt( 5, 3);
+gcdInt( 5,-3);
+gcdInt(-5, 3);
+gcdInt(-5,-3);
+
+gcdInt( 3, 5);
+gcdInt(-3, 5);
+gcdInt( 3,-5);
+gcdInt(-3,-5);
+
+gcdInt( 1071, 462);
+gcdInt( 1071,-462);
+gcdInt(-1071, 462);
+gcdInt(-1071,-462);
+
+gcdInt( 462, 1071);
+gcdInt(-462, 1071);
+gcdInt( 462,-1071);
+gcdInt(-462,-1071);

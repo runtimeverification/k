@@ -1,0 +1,20 @@
+function main() {
+  try {
+    foo();
+  }
+  catch(e) {
+    print(e,"\n");  // should print 7
+  }
+}
+
+function foo() {
+  try {
+    throw 5;
+    print(17);      // should not be printed
+  } catch(e) {
+    throw e + 2;    // throws 7
+  }
+  throw 1;          // should not be reached
+}
+
+// 7

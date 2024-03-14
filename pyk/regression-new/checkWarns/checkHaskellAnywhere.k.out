@@ -1,0 +1,6 @@
+[Error] Compiler: anywhere is not supported by the haskell backend.
+	Source(checkHaskellAnywhere.k)
+	Location(8,8,8,14)
+	8 |	  rule 1 => 2 [anywhere]
+	  .	       ^~~~~~
+[Error] Compiler: Had 1 structural errors.

@@ -1,0 +1,13 @@
+function main() {
+  var e;
+  try {
+    var x = 2;
+    print(x," ");
+    throw ++x + x;
+  }
+  catch(e) {
+    print(e,"\n");
+  }
+}
+
+// 2 6 or 2 5

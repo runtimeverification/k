@@ -1,0 +1,75 @@
+// Testing super in combination with dynamic method dispatch
+
+class A {
+  var i;
+  var j;
+  method A() {
+    i = 1;
+    j = i + 1;
+    return j;
+  }
+  method f() {
+    return A();
+  }
+  method g() {
+    return f();
+  }
+  method h() {
+    return (i + j);
+  }
+}
+
+class B extends A {
+  var j;
+  var k;
+  method A() {
+    return this.B();
+  }
+  method B() {
+    super.A();
+    j = 10;
+    k = j + 1;
+    return k;
+  }
+  method g() {
+    return super.h();
+  }
+  method h() {
+    return g();	   
+  }
+}
+
+class C extends B {
+  method A() {
+    return super.A();
+  }
+  method B() {
+    return super.B();
+  }
+  method C() {
+    i = 100;
+    j = i + 1;
+    k = j + 1;
+    return k;
+  }
+  method g() {
+    return (i + k * j);
+  }
+}
+
+class Main {
+  method p(o) {
+    print(o.f(), " ");
+    print(o.g(), " ");
+    print(o.h(), "\n");
+  }
+  method Main() {
+    this.p(new A());
+    this.p(new B());
+    this.p(new C());
+  }
+}
+
+// 2 2 3
+// 11 3 3
+// 11 111 111

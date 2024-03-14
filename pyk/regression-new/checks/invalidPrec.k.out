@@ -1,0 +1,5 @@
+[Error] Compiler: Inconsistent token precedence detected.
+	Source(invalidPrec.k)
+	Location(4,17,4,34)
+	4 |	 syntax Foo ::= r"[0-9]+" [token]
+	  .	                ^~~~~~~~~~~~~~~~~
