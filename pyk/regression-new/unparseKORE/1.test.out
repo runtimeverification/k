@@ -1,3 +1,8 @@
-<k>
-  "Lbla1'UndsUnds'TEST'Unds'A'Unds'A{}(Lbla2'UndsUnds'TEST'Unds'A'Unds'A{}(Lbla2'UndsUnds'TEST'Unds'A'Unds'A{}(Lbla2'UndsUnds'TEST'Unds'A'Unds'A{}(Lblb1{}()))))" ~> .K
-</k>
+<generatedTop>
+  <k>
+    "Lbla1'UndsUnds'TEST'Unds'A'Unds'A{}(Lbla2'UndsUnds'TEST'Unds'A'Unds'A{}(Lbla2'UndsUnds'TEST'Unds'A'Unds'A{}(Lbla2'UndsUnds'TEST'Unds'A'Unds'A{}(Lblb1{}()))))" ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

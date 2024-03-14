@@ -1,3 +1,8 @@
-<k>
-  15 ~> .K
-</k>
+<generatedTop>
+  <k>
+    15 ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

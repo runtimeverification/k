@@ -1,3 +1,8 @@
-<k>
-  #systemResult ( 0 , "sout\n" , "serr\n" ) ~> .K
-</k>
+<generatedTop>
+  <k>
+    #systemResult ( 0 , "sout\n" , "serr\n" ) ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

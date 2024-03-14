@@ -1,2 +1,2 @@
 SUBDIRS=remake-depend simple
-include ../../../include/kframework/ktest-group.mak
+include ../include/ktest-group.mak

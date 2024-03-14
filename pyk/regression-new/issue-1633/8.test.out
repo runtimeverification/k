@@ -1,3 +1,8 @@
-<k>
-  0xff.ffp-2 ~> .K
-</k>
+<generatedTop>
+  <k>
+    0xff.ffp-2 ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
