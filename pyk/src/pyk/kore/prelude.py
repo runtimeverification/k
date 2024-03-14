@@ -148,9 +148,7 @@ LBL_INIT_GENERATED_TOP_CELL: Final = SymbolId('LblinitGeneratedTopCell')
 LBL_GENERATED_TOP: Final = SymbolId("Lbl'-LT-'generatedTop'-GT-'")
 LBL_GENERATED_COUNTER: Final = SymbolId("Lbl'-LT-'generatedCounter'-GT-'")
 LBL_K: Final = SymbolId("Lbl'-LT-'k'-GT-'")
-LBL_ITE: Final = SymbolId(
-    "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
-)
+LBL_ITE: Final = SymbolId('Lblite')
 INJ: Final = SymbolId('inj')
 KSEQ: Final = SymbolId('kseq')
 
