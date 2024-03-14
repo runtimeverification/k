@@ -60,7 +60,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.kore.VisitK;
-import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
@@ -1693,8 +1692,7 @@ public class ModuleToKORE {
       att = att.add(Att.MACRO());
     }
     // update format attribute with structure expected by backend
-    String format =
-        att.getOptional(Att.FORMAT()).orElse(Formatter.defaultFormat(prod.items().size()));
+    String format = att.getOptional(Att.FORMAT()).orElse(prod.defaultFormat());
     int nt = 1;
     boolean hasFormat = true;
     boolean printName =

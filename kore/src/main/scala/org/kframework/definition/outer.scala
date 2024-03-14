@@ -926,6 +926,8 @@ case class Production(
   override val isSyntax          = true
   override val isNonSyntax       = false
   override def withAtt(att: Att) = Production(klabel, params, sort, items, att)
+
+  lazy val defaultFormat = items.zipWithIndex.map { case (_, i) => s"%${i + 1}" }.mkString(" ")
 }
 
 object Production {
