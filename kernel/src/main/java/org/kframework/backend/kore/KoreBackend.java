@@ -1,12 +1,15 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.kore;
 
+import static java.util.Map.entry;
 import static org.kframework.Collections.*;
 
 import com.google.inject.Inject;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import org.apache.commons.io.FilenameUtils;
@@ -228,43 +231,103 @@ public class KoreBackend implements Backend {
                     this::removeAnywhereRules, "removing anywhere rules for the Haskell backend")
                 .apply(d);
 
-    return def ->
-        resolveComm
-            .andThen(resolveIO)
-            .andThen(resolveFun)
-            .andThen(resolveFunctionWithConfig)
-            .andThen(resolveStrict)
-            .andThen(resolveAnonVars)
-            .andThen(d -> new ResolveContexts().resolve(d))
-            .andThen(numberSentences)
-            .andThen(resolveHeatCoolAttribute)
-            .andThen(resolveSemanticCasts)
-            .andThen(subsortKItem)
-            .andThen(constantFolding)
-            .andThen(propagateMacroToRules)
-            .andThen(guardOrs)
-            .andThen(resolveFreshConfigConstants)
-            .andThen(generateSortPredicateSyntax)
-            .andThen(generateSortProjections)
-            .andThen(expandMacros)
-            .andThen(AddImplicitComputationCell::transformDefinition)
-            .andThen(resolveFreshConstants)
-            .andThen(generateSortPredicateSyntax)
-            .andThen(generateSortProjections)
-            .andThen(checkSimplificationRules)
-            .andThen(subsortKItem)
-            .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-            .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
-            .andThen(d -> ConcretizeCells.transformDefinition(d))
-            .andThen(genCoverage)
-            .andThen(Kompile::addSemanticsModule)
-            .andThen(resolveConfigVar)
-            .andThen(addCoolLikeAtt)
-            .andThen(markExtraConcreteRules)
-            .andThen(removeAnywhereRules)
-            .andThen(generateSortPredicateRules)
-            .andThen(numberSentences)
-            .apply(def);
+    Map<String, Function1<Definition, Definition>> namedStages =
+        Map.ofEntries(
+            entry("resolveComm", resolveComm),
+            entry("resolveIO", resolveIO),
+            entry("resolveFun", resolveFun),
+            entry("resolveFunctionWithConfig", resolveFunctionWithConfig),
+            entry("resolveStrict", resolveStrict),
+            entry("resolveAnonVars", resolveAnonVars),
+            entry("resolveContexts", d -> new ResolveContexts().resolve(d)),
+            entry("numberSentences1", numberSentences),
+            entry("resolveHeatCoolAttribute", resolveHeatCoolAttribute),
+            entry("resolveSemanticCasts", resolveSemanticCasts),
+            entry("subsortKItem1", subsortKItem),
+            entry("constantFolding", constantFolding),
+            entry("propagateMacroToRules", propagateMacroToRules),
+            entry("guardOrs", guardOrs),
+            entry("resolveFreshConfigConstants", resolveFreshConfigConstants),
+            entry("generateSortPredicateSyntax1", generateSortPredicateSyntax),
+            entry("generateSortProjections1", generateSortProjections),
+            entry("expandMacros", expandMacros),
+            entry("addImplicitComputationCell", AddImplicitComputationCell::transformDefinition),
+            entry("resolveFreshConstants", resolveFreshConstants),
+            entry("generateSortPredicateSyntax2", generateSortPredicateSyntax),
+            entry("generateSortProjections2", generateSortProjections),
+            entry("checkSimplificationRules", checkSimplificationRules),
+            entry("subsortKItem2", subsortKItem),
+            entry(
+                "addStrategyCellToRules",
+                d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d)),
+            entry(
+                "addStrategyRuleToMainModule",
+                d -> Strategy.addStrategyRuleToMainModule(d.mainModule().name()).apply(d)),
+            entry("concretizeCells", d -> ConcretizeCells.transformDefinition(d)),
+            entry("genCoverage", genCoverage),
+            entry("addSemanticsModule", Kompile::addSemanticsModule),
+            entry("resolveConfigVar", resolveConfigVar),
+            entry("addCoolLikeAtt", addCoolLikeAtt),
+            entry("markExtraConcreteRules", markExtraConcreteRules),
+            entry("removeAnywhereRules", removeAnywhereRules),
+            entry("generateSortPredicateRules", generateSortPredicateRules),
+            entry("numberSentences2", numberSentences));
+
+    List<String> stepOrdering;
+    if (kompileOptions.koreBackendSteps != null) {
+      stepOrdering = List.of(kompileOptions.koreBackendSteps.split(","));
+    } else {
+      stepOrdering =
+          List.of(
+              "resolveComm",
+              "resolveIO",
+              "resolveFun",
+              "resolveFunctionWithConfig",
+              "resolveStrict",
+              "resolveAnonVars",
+              "resolveContexts",
+              "numberSentences1",
+              "resolveHeatCoolAttribute",
+              "resolveSemanticCasts",
+              "subsortKItem1",
+              "constantFolding",
+              "propagateMacroToRules",
+              "guardOrs",
+              "resolveFreshConfigConstants",
+              "generateSortPredicateSyntax1",
+              "generateSortProjections1",
+              "expandMacros",
+              "addImplicitComputationCell",
+              "resolveFreshConstants",
+              "generateSortPredicateSyntax2",
+              "generateSortProjections2",
+              "checkSimplificationRules",
+              "subsortKItem2",
+              "addStrategyCellToRules",
+              "addStrategyRuleToMainModule",
+              "concretizeCells",
+              "genCoverage",
+              "addSemanticsModule",
+              "resolveConfigVar",
+              "addCoolLikeAtt",
+              "markExtraConcreteRules",
+              "removeAnywhereRules",
+              "generateSortPredicateRules",
+              "numberSentences2");
+    }
+
+    Function1<Definition, Definition> applyPipeline =
+        stepOrdering.stream()
+            .peek(
+                name -> {
+                  if (!namedStages.containsKey(name))
+                    throw KEMException.compilerError(
+                        "Step doesn't exist for --kore-backend-steps: " + name);
+                })
+            .map(name -> namedStages.get(name))
+            .reduce(d -> d, (f, g) -> f.andThen(g));
+
+    return d -> applyPipeline.apply(d);
   }
 
   @Override
