@@ -10,7 +10,7 @@ import java.util.List;
  * This class is designed to support the specification of a list of strings using a single string in
  * cases where using a list of strings would be infeasible. For example, in krun, simulation options
  * are passed by passing a set of krun options as parameter to a special krun option. We can't use
- * variable arity because then --simulation --directory foo would be interpreted as two options
+ * variable arity because then --simulation --definition foo would be interpreted as two options
  * instead of one with two words.
  *
  * @author dwightguth

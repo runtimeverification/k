@@ -1,6 +1,9 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.kore
 
+import com.runtimeverification.k.kore._
+import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
+import com.runtimeverification.k.kore.parser.TextToKore
 import java.io.File
 import java.nio.file.Files
 import org.kframework.compile.Backend
@@ -8,9 +11,6 @@ import org.kframework.kompile.Kompile
 import org.kframework.kompile.KompileOptions
 import org.kframework.main.GlobalOptions
 import org.kframework.main.Tool
-import org.kframework.parser.kore._
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
-import org.kframework.parser.kore.parser.TextToKore
 import org.kframework.utils.errorsystem.KExceptionManager
 import org.kframework.utils.file.FileUtil
 import org.kframework.utils.options.InnerParsingOptions

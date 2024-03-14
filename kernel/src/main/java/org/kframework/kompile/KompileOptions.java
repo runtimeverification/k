@@ -235,4 +235,11 @@ public class KompileOptions implements Serializable {
       description = "Enable generation of legacy antileft priority predicates.",
       hidden = true)
   public boolean enableKoreAntileft;
+
+  @Parameter(
+      names = "--kore-backend-steps",
+      description =
+          "Specify a comma separated list of pipeline stages to apply to the definition after parsing",
+      hidden = true)
+  public String koreBackendSteps;
 }
