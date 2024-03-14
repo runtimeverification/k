@@ -1,16 +1,156 @@
 from __future__ import annotations
 
+import sys
 from argparse import ArgumentParser
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, Any
 
-from ..utils import ensure_dir_path
+from pyk.utils import ensure_dir_path
+
+from .cli import Options
 from .utils import bug_report_arg, file_path
 
 if TYPE_CHECKING:
-    from typing import TypeVar
+    from pathlib import Path
 
-    T = TypeVar('T')
+    from ..utils import BugReport
+
+
+class LoggingOptions(Options):
+    debug: bool
+    verbose: bool
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'verbose': False,
+            'debug': False,
+        }
+
+
+class OutputFileOptions(Options):
+    output_file: IO[Any]
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'output_file': sys.stdout,
+        }
+
+
+class DefinitionOptions(Options):
+    definition_dir: Path
+
+
+class DisplayOptions(Options):
+    minimize: bool
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'minimize': True,
+        }
+
+
+class KDefinitionOptions(Options):
+    includes: list[str]
+    main_module: str | None
+    syntax_module: str | None
+    spec_module: str | None
+    md_selector: str
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'spec_module': None,
+            'main_module': None,
+            'syntax_module': None,
+            'md_selector': 'k',
+            'includes': [],
+        }
+
+
+class SaveDirOptions(Options):
+    save_directory: Path | None
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'save_directory': None,
+        }
+
+
+class SpecOptions(SaveDirOptions):
+    spec_file: Path
+    claim_labels: list[str] | None
+    exclude_claim_labels: list[str]
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'claim_labels': None,
+            'exclude_claim_labels': [],
+        }
+
+
+class KompileOptions(Options):
+    emit_json: bool
+    ccopts: list[str]
+    llvm_kompile: bool
+    llvm_library: bool
+    enable_llvm_debug: bool
+    read_only: bool
+    o0: bool
+    o1: bool
+    o2: bool
+    o3: bool
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'emit_json': True,
+            'llvm_kompile': False,
+            'llvm_library': False,
+            'enable_llvm_debug': False,
+            'read_only': False,
+            'o0': False,
+            'o1': False,
+            'o2': False,
+            'o3': False,
+            'ccopts': [],
+        }
+
+
+class ParallelOptions(Options):
+    workers: int
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'workers': 1,
+        }
+
+
+class BugReportOptions(Options):
+    bug_report: BugReport | None
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {'bug_report': None}
+
+
+class SMTOptions(Options):
+    smt_timeout: int
+    smt_retry_limit: int
+    smt_tactic: str | None
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'smt_timeout': 300,
+            'smt_retry_limit': 10,
+            'smt_tactic': None,
+        }
 
 
 class KCLIArgs:
@@ -122,8 +262,8 @@ class KCLIArgs:
         args.add_argument(
             '-I', type=str, dest='includes', default=[], action='append', help='Directories to lookup K definitions in.'
         )
-        args.add_argument('--main-module', default=None, type=str, help='Name of the main module.')
-        args.add_argument('--syntax-module', default=None, type=str, help='Name of the syntax module.')
+        args.add_argument('--main-module', type=str, help='Name of the main module.')
+        args.add_argument('--syntax-module', type=str, help='Name of the syntax module.')
         args.add_argument(
             '--md-selector',
             type=str,
