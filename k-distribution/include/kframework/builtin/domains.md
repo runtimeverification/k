@@ -1017,7 +1017,7 @@ comparisons, it is much better to first convert to a set using `List2Set`.
 You can get the number of elements of a list in O(1) time.
 
 ```k
-  syntax Int ::= size(List)               [function, total, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
+  syntax Int ::= size(List)               [function, total, hook(LIST.size), symbol(sizeList), smtlib(smt_seq_len)]
 ```
 
 ```k
