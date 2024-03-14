@@ -216,13 +216,9 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'if-then-else',
         KSort('K'),
-        r"""
-        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortK{}}(
-            VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {}
-        )
-        """,
+        r'Lblite{SortK{}}(VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {})',
         KApply(
-            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('K')]),
+            KLabel('ite', [KSort('K')]),
             [
                 KVariable('C', sort=KSort('Bool')),
                 KVariable('B1', sort=KSort('K')),
@@ -436,13 +432,9 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
     (
         'if-then-else-no-sort-param-k',
         KSort('K'),
-        r"""
-        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortK{}}(
-            VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {}
-        )
-        """,
+        r'Lblite{SortK{}}(VarC : SortBool{}, VarB1 : SortK{}, VarB2 : SortK {})',
         KApply(
-            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+            KLabel('ite', []),
             [
                 KVariable('C', sort=KSort('Bool')),
                 KVariable('B1', sort=KSort('K')),
@@ -456,9 +448,7 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
         r"""
         Lbl'UndsPlus'Int'Unds'{}(
             VarA : SortInt{},
-            Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortInt{}}(
-                VarC : SortBool{}, VarI1 : SortInt{}, VarI2 : SortInt {}
-            )
+            Lblite{SortInt{}}(VarC : SortBool{}, VarI1 : SortInt{}, VarI2 : SortInt {})
         )
         """,
         KApply(
@@ -466,7 +456,7 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
             [
                 KVariable('A', sort=KSort('Int')),
                 KApply(
-                    KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+                    KLabel('ite', []),
                     [
                         KVariable('C', sort=KSort('Bool')),
                         KVariable('I1', sort=KSort('Int')),
@@ -480,20 +470,20 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
         'if-then-else-no-sort-param-nested',
         KSort('Int'),
         r"""
-        Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortInt{}}(
+        Lblite{SortInt{}}(
             VarC1 : SortBool{},
-            Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort{SortInt{}}(
+            Lblite{SortInt{}}(
                 VarC2 : SortBool{}, VarI1 : SortInt{} , VarI2 : SortInt{}
             ),
             VarI3 : SortInt{}
         )
         """,
         KApply(
-            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+            KLabel('ite', []),
             [
                 KVariable('C1', sort=KSort('Bool')),
                 KApply(
-                    KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', []),
+                    KLabel('ite', []),
                     [
                         KVariable('C2', sort=KSort('Bool')),
                         KVariable('I1', sort=KSort('Int')),
@@ -636,7 +626,7 @@ SORT_TERM_DATA: Final = (
     (
         'sort-parametric-int',
         KApply(
-            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('Int')]),
+            KLabel('ite', [KSort('Int')]),
             [KToken('true', 'Bool'), intToken(1), intToken(2)],
         ),
         KSort('Int'),
@@ -644,7 +634,7 @@ SORT_TERM_DATA: Final = (
     (
         'sort-parametric-bool',
         KApply(
-            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('Bool')]),
+            KLabel('ite', [KSort('Bool')]),
             [KToken('true', 'Bool'), KToken('true', 'Bool'), KToken('false', 'Bool')],
         ),
         KSort('Bool'),
