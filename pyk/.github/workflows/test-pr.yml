@@ -71,7 +71,7 @@ jobs:
   profile:
     needs: code-quality-checks
     name: 'Profiling'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: [ubuntu-latest]
     timeout-minutes: 10
     strategy:
       matrix:
@@ -79,42 +79,32 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Build Docker image'
+      - name: 'Install Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
+      - name: 'Install K'
         run: |
-          COMMIT=$(git rev-parse --short=7 HEAD)
-          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
-
-          docker build .                                            \
-            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
-            --build-arg K_VERSION=${K_VERSION}                      \
-            --tag runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker run             \
-            --name pyk-ci        \
-            --rm                 \
-            --interactive        \
-            --tty                \
-            --detach             \
-            --workdir /home/user \
-            runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker cp . pyk-ci:/home/user
-          docker exec pyk-ci chown -R user:user /home/user
-      - name: 'Set Python version'
-        run: docker exec --user user pyk-ci poetry env use ${{ matrix.python-version }}
-      - name: 'Build and run integration tests'
+          K_VERSION=$(cat deps/k_release)
+          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
+          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
+          sudo apt-get update
+          sudo apt-get -y install ./${DEB_PACKAGE_NAME}
+      - name: 'Set up Java'
         run: |
-          docker exec --user user pyk-ci make profile
-          docker exec --user user pyk-ci bash -c "find /tmp/pytest-of-${USER}/pytest-current/ -type f -name '*.prof' | sort | xargs tail -n +1"
-      - name: 'Tear down Docker container'
-        if: always()
+          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+          java --version
+      - name: 'Run profiling'
         run: |
-          docker stop --time=0 pyk-ci
+          make profile PROF_ARGS=-n4
+          find /tmp/pytest-of-${USER}/pytest-current/ -type f -name '*.prof' | sort | xargs tail -n +1
 
   integration-tests:
     needs: code-quality-checks
     name: 'Integration Tests'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: [ubuntu-latest]
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -123,35 +113,57 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Build Docker image'
+      - name: 'Install Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
+      - name: 'Install K'
         run: |
-          COMMIT=$(git rev-parse --short=7 HEAD)
-          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
-
-          docker build .                                            \
-            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
-            --build-arg K_VERSION=${K_VERSION}                      \
-            --tag runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker run             \
-            --name pyk-ci        \
-            --rm                 \
-            --interactive        \
-            --tty                \
-            --detach             \
-            --workdir /home/user \
-            runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker cp . pyk-ci:/home/user
-          docker exec pyk-ci chown -R user:user /home/user
-      - name: 'Set Python version'
-        run: docker exec --user user pyk-ci poetry env use ${{ matrix.python-version }}
-      - name: 'Build and run integration tests'
-        run: docker exec --user user pyk-ci make cov-integration COV_ARGS='-n8 --timeout 500'
-      - name: 'Tear down Docker container'
-        if: always()
+          K_VERSION=$(cat deps/k_release)
+          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
+          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
+          sudo apt-get update
+          sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
+      - name: 'Set up Java'
         run: |
-          docker stop --time=0 pyk-ci
+          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+          java --version
+      - name: 'Run integration tests'
+        run: make cov-integration COV_ARGS='-n4 --timeout 500'
+
+  regression-tests:
+    needs: code-quality-checks
+    name: 'K Regression Tests'
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11']
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Install Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
+      - name: 'Install K'
+        run: |
+          K_VERSION=$(cat deps/k_release)
+          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
+          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
+          sudo apt-get update
+          sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
+      - name: 'Set up Java'
+        run: |
+          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+          java --version
+      - name: 'Run K regression tests'
+        run: make test-regression-new -j4
 
   build-on-nix:
     needs: code-quality-checks
@@ -179,13 +191,13 @@ jobs:
 
   build-docker:
     needs: integration-tests
-    name: 'Build docker image for release'
+    name: 'Build Docker Image'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
-      - name: 'Build Docker image for release'
+      - name: 'Build Docker image'
         run: |
           COMMIT=$(git rev-parse --short=7 HEAD)
           K_VERSION=$(cut --delim=v --field=2 deps/k_release)
@@ -199,45 +211,3 @@ jobs:
 
           docker run --rm runtimeverificationinc/kframework-pyk:${COMMIT}
           docker run --rm runtimeverificationinc/kframework-pyk:${COMMIT} kompile --version
-
-  regression-new-tests:
-    needs: code-quality-checks
-    name: 'K Regression Tests'
-    runs-on: [self-hosted, linux, normal]
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.11']
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Build Docker image'
-        run: |
-          COMMIT=$(git rev-parse --short=7 HEAD)
-          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
-
-          docker build .                                            \
-            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
-            --build-arg K_VERSION=${K_VERSION}                      \
-            --tag runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker run             \
-            --name pyk-ci        \
-            --rm                 \
-            --interactive        \
-            --tty                \
-            --detach             \
-            --workdir /home/user \
-            runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker cp . pyk-ci:/home/user
-          docker exec pyk-ci chown -R user:user /home/user
-      - name: 'Set Python version'
-        run: docker exec --user user pyk-ci poetry env use ${{ matrix.python-version }}
-      - name: 'Build and run integration tests'
-        run: docker exec --user user pyk-ci make test-regression-new -j8
-      - name: 'Tear down Docker container'
-        if: always()
-        run: |
-          docker stop --time=0 pyk-ci
