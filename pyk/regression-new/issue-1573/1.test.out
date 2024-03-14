@@ -1,8 +1,13 @@
-<top>
-  <k>
-    .K
-  </k>
-  <v>
-    10  .IntList
-  </v>
-</top>
+<generatedTop>
+  <top>
+    <k>
+      .K
+    </k>
+    <v>
+      10  .IntList
+    </v>
+  </top>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

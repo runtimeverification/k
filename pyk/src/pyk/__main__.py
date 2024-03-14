@@ -230,7 +230,7 @@ def exec_prove(args: Namespace) -> None:
         kompiled_directory = args.definition_dir
     kprove = KProve(kompiled_directory)
     proofs = kprove.prove_rpc(Path(args.spec_file), args.spec_module, type_inference_mode=args.type_inference_mode)
-    for proof in proofs:
+    for proof in sorted(proofs, key=lambda p: p.id):
         print('\n'.join(proof.summary.lines))
         if proof.failed and args.failure_info:
             failure_info = proof.failure_info
