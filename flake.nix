@@ -1,9 +1,9 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/fa0d3b2809154e4c01c0ab62660f757a8fc31dfb";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/0dcecfab68794c3b47d32404145dac0f9690f65d";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/6dbd2033cc4368328ea65121613782a23de6792d";
+      url = "github:runtimeverification/hs-backend-booster/fd230760909a00c0d0dc591c7fcd20ef072592bc";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
@@ -61,7 +61,7 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-AMxXqu1bbpnmsmLTizNw1n2llSdvx6AuNZRGUHqPn14=";
+                mvnHash = "sha256-ZbASgB39pSRXxqMuUp9aRxkt0wKhgXV1e1YAQh+ZEIs=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.12.18"
                   "ant-contrib:ant-contrib:1.0b3"
@@ -73,6 +73,8 @@
                 clang = prev."clang_${toString final.llvm-version}";
                 booster =
                   booster-backend.packages.${prev.system}.kore-rpc-booster;
+                rpc-client =
+                  booster-backend.packages.${prev.system}.kore-rpc-client;
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
@@ -145,13 +147,20 @@
           smoke-test = with pkgs;
             stdenv.mkDerivation {
               name = "k-${k-version}-${self.rev or "dirty"}-smoke-test";
-              unpackPhase = "true";
-              buildInputs = [ fmt gmp mpfr k ];
-              buildPhase = ''
-                echo "module TEST imports BOOL endmodule" > test.k
-                kompile test.k --syntax-module TEST --backend llvm
-                rm -rf test-kompiled
-                kompile test.k --syntax-module TEST --backend haskell
+              src = lib.cleanSource
+                (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
+                  ./k-distribution);
+              preferLocalBuild = true;
+              buildInputs = [ lsof fmt gmp mpfr k ];
+              buildFlags = [
+                "K_BIN=${k}/bin"
+                "KLLVMLIB=${k}/lib/kllvm"
+                "PACKAGE_VERSION=${k-version}"
+                "--output-sync"
+              ];
+              enableParallelBuilding = true;
+              preBuild = ''
+                cd tests/smoke
               '';
               installPhase = ''
                 runHook preInstall

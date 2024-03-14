@@ -135,7 +135,7 @@ The lists of types are useful for function arguments.
                 | "(" Type ")"             [bracket]
                 > Types "->" Type
 
-  syntax Types ::= List{Type,","}          [klabel(exps)]
+  syntax Types ::= List{Type,","} [overload(exps)]
 ```
 
 ## Declarations
@@ -203,7 +203,7 @@ We still need lists of expressions, defined below, but note that we do
 not need lists of identifiers anymore.  They have been replaced by the lists
 of parameters.
 ```k
-  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
+  syntax Exps ::= List{Exp,","}          [strict, overload(exps)]
 ```
 
 ## Statements

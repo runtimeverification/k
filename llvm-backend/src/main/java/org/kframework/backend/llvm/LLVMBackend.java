@@ -8,21 +8,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.llvm.matching.Matching;
+import org.kframework.backend.llvm.matching.MatchingException;
 import org.kframework.compile.Backend;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.parser.kore.parser.KoreToK;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import scala.collection.Map;
 
 public class LLVMBackend extends KoreBackend {
 
@@ -50,6 +57,7 @@ public class LLVMBackend extends KoreBackend {
   public void accept(Backend.Holder h) {
     Stopwatch sw = new Stopwatch(globalOptions);
     String kore = getKompiledString(h.def, true);
+    var hookAtts = h.def.kompiledDefinition.mainModule().hookAttributes();
     h.def = null;
     files.saveToKompiled("definition.kore", kore);
     sw.printIntermediate("  Print definition.kore");
@@ -66,8 +74,9 @@ public class LLVMBackend extends KoreBackend {
         globalOptions.includesExceptionType(ExceptionType.USELESS_RULE),
         options.enableSearch,
         ex -> {
-          kem.addKException(ex);
-          if (globalOptions.includesExceptionType(ex.getType())) {
+          var translated = translateError(ex, hookAtts);
+          kem.addKException(translated);
+          if (globalOptions.includesExceptionType(translated.getType())) {
             warnings.increment();
           }
           return null;
@@ -174,6 +183,58 @@ public class LLVMBackend extends KoreBackend {
       throw KEMException.criticalError("Error with I/O while executing llvm-kompile", e);
     }
     sw.printIntermediate("  \u2514" + executable + ": " + type);
+  }
+
+  private Optional<Source> getSource(MatchingException ex) {
+    return ex.getSource().map(s -> new Source(s.getSource()));
+  }
+
+  private Optional<Location> getLocation(MatchingException ex) {
+    return ex.getLocation()
+        .map(
+            l ->
+                new Location(
+                    l.getStartLine(), l.getEndLine(), l.getStartColumn(), l.getEndColumn()));
+  }
+
+  private String getCounterExampleMessage(MatchingException ex, Map<String, String> hookAtts) {
+    return ex.getPattern()
+        .map(
+            p -> {
+              var kast = new KoreToK(hookAtts).apply(p).toString();
+              return ex.getMessage() + ": " + kast;
+            })
+        .orElse(ex.getMessage());
+  }
+
+  private KException translateError(MatchingException ex, Map<String, String> hookAtts) {
+    switch (ex.getType()) {
+      case USELESS_RULE -> {
+        return new KException(
+            ExceptionType.USELESS_RULE,
+            KException.KExceptionGroup.COMPILER,
+            ex.getMessage(),
+            getSource(ex).orElse(null),
+            getLocation(ex).orElse(null));
+      }
+
+      case NON_EXHAUSTIVE_MATCH -> {
+        return new KException(
+            ExceptionType.NON_EXHAUSTIVE_MATCH,
+            KException.KExceptionGroup.COMPILER,
+            getCounterExampleMessage(ex, hookAtts),
+            getSource(ex).orElse(null),
+            getLocation(ex).orElse(null));
+      }
+
+      case INTERNAL_ERROR -> throw KEMException.internalError(
+          ex.getMessage(), ex, getLocation(ex), getSource(ex));
+
+      case COMPILER_ERROR -> throw KEMException.compilerError(
+          ex.getMessage(), ex, getLocation(ex), getSource(ex));
+    }
+
+    throw KEMException.criticalError("Unhandled pattern matching exception", ex);
   }
 
   private String getThreshold() {

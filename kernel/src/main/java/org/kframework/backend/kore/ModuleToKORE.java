@@ -1768,8 +1768,6 @@ public class ModuleToKORE {
           }
         }
         att = att.add(Att.PRIORITIES(), KList.class, KList(lessThanK));
-        att = att.remove(Att.LEFT());
-        att = att.remove(Att.RIGHT());
         att =
             att.add(
                 Att.LEFT_INTERNAL(),
@@ -1784,9 +1782,7 @@ public class ModuleToKORE {
     } else {
       att = att.remove(Att.FORMAT());
     }
-    // This attribute is a frontend attribute only and is removed from the kore
-    // Since it has no meaning outside the frontend
-    return att.remove(Att.ORIGINAL_PRD(), Production.class);
+    return att;
   }
 
   private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
@@ -2013,7 +2009,10 @@ public class ModuleToKORE {
 
     for (Tuple2<Tuple2<Att.Key, String>, ?> attribute :
         // Sort to stabilize error messages
-        stream(att.att()).sorted(Comparator.comparing(Tuple2::toString)).toList()) {
+        stream(att.att())
+            .filter(e -> e._1._1.shouldEmit())
+            .sorted(Comparator.comparing(Tuple2::toString))
+            .toList()) {
       Att.Key key = attribute._1._1;
       String strKey = key.key();
       String clsName = attribute._1._2;

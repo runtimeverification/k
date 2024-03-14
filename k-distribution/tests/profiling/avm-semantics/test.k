@@ -6,7 +6,7 @@ module JSON-SYNTAX
   imports public BOOL-SYNTAX
   imports public FLOAT-SYNTAX
   syntax JSONs  ::=
-    List{JSON,","} [klabel(JSONs), symbol]
+    List{JSON,","} [symbol(JSONs)]
   syntax JSONKey  ::=
     String
   syntax JSON  ::=
@@ -2810,7 +2810,7 @@ module AVM-PANIC
   rule <k> #stopIfError() => .K </k>
        <returncode> RETURN_CODE </returncode>
     requires RETURN_CODE =/=Int 0
-  rule <k> #stopIfError() => . ... </k>
+  rule <k> #stopIfError() => .K ... </k>
        <returncode> RETURN_CODE </returncode>
        <returnstatus> _ => "Success" </returnstatus>
     requires RETURN_CODE ==Int 0
@@ -3053,7 +3053,7 @@ module TEAL-EXECUTION
   imports public TEAL-TYPES
   imports public TEAL-INTERPRETER-STATE
   imports public AVM-PANIC
-  rule <k> #initContext() => . ...</k>
+  rule <k> #initContext() => .K ...</k>
        <currentTxnExecution>
          <teal>
          _ => (
@@ -3073,7 +3073,7 @@ module TEAL-EXECUTION
          </teal>
          ...
        </currentTxnExecution>
-  rule <k> #restoreContext() => . ...</k>
+  rule <k> #restoreContext() => .K ...</k>
        <currentTx> TX_ID </currentTx>
        <transaction>
          <txID> TX_ID </txID>
@@ -3081,7 +3081,7 @@ module TEAL-EXECUTION
          ...
        </transaction>
        <currentTxnExecution> _ => C </currentTxnExecution>
-  rule <k> #initApp(APP_ID) => . ...</k>
+  rule <k> #initApp(APP_ID) => .K ...</k>
        <currentApplicationID> _ => APP_ID </currentApplicationID>
        <currentApplicationAddress> _ => getAppAddressBytes(APP_ID) </currentApplicationAddress>
        <creatorAddress> _ => {AC [ APP_ID ]}:>Bytes </creatorAddress>
@@ -3112,7 +3112,7 @@ module TEAL-EXECUTION
     "#checkDuplicateLabels" "(" ")" [klabel(#checkDuplicateLabels)]
   rule <k> #checkDuplicateLabels() => #panic(DUPLICATE_LABEL) ... </k>
        <labels> duplicate-label </labels>
-  rule <k> #checkDuplicateLabels() => . ... </k>  [owise]
+  rule <k> #checkDuplicateLabels() => .K ... </k>  [owise]
   syntax Int  ::=
     "loadVersionCell" "(" TealPragmas ")" [function, klabel(loadVersionCell), total]
   rule loadVersionCell ( #pragma version V _:TealPragmas ) => V
@@ -3150,7 +3150,7 @@ module TEAL-EXECUTION
        <pc> PC </pc>
        <program> PGM </program>
    requires PC ==Int size(PGM)
-  rule <k> #incrementPC() => . ... </k>
+  rule <k> #incrementPC() => .K ... </k>
        <pc> PC => PC +Int #if JUMPED #then 0 #else 1 #fi </pc>
        <jumped> JUMPED => false </jumped>
   syntax KItem  ::=
@@ -3159,7 +3159,7 @@ module TEAL-EXECUTION
     "#checkStack" "(" ")" [klabel(#checkStack)]
   rule <k> #finalizeExecution() => #saveScratch() ~> #deactivateApp() ~> #checkStack() ... </k>
     requires getTxnField(getCurrentTxn(), TypeEnum) ==K (@ appl)
-  rule <k> #deactivateApp() => . ... </k>
+  rule <k> #deactivateApp() => .K ... </k>
        <currentApplicationID> APP_ID </currentApplicationID>
        <activeApps> (SetItem(APP_ID) => .Set) ... </activeApps>
   rule <k> #checkStack() => .K ... </k>
@@ -3181,7 +3181,7 @@ module TEAL-EXECUTION
        <stacksize> _ </stacksize>
   syntax KItem  ::=
     "#saveScratch" "(" ")" [klabel(#saveScratch)]
-  rule <k> #saveScratch() => . ...</k>
+  rule <k> #saveScratch() => .K ...</k>
        <currentTx> TXN_ID </currentTx>
        <transaction>
          <txID> TXN_ID </txID>
@@ -3288,27 +3288,27 @@ module ALGO-ITXN
   imports public AVM-INITIALIZATION
   syntax KItem  ::=
     "#setItxnField" "(" TxnFieldTop "," TValue ")" [klabel(#setItxnField)]
-  rule <k> #setItxnField(Sender, VAL) => . ... </k>
+  rule <k> #setItxnField(Sender, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <sender> _ => VAL </sender> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Fee, VAL) => . ... </k>
+  rule <k> #setItxnField(Fee, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <fee> _ => VAL </fee> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Note, VAL) => . ... </k>
+  rule <k> #setItxnField(Note, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <note> _ => VAL </note> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(RekeyTo, VAL) => . ... </k>
+  rule <k> #setItxnField(RekeyTo, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <rekeyTo> _ => VAL </rekeyTo> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Type, VAL) => . ... </k>
+  rule <k> #setItxnField(Type, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction>
@@ -3317,7 +3317,7 @@ module ALGO-ITXN
                     ...
                   </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(TypeEnum, VAL) => . ... </k>
+  rule <k> #setItxnField(TypeEnum, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction>
@@ -3340,17 +3340,17 @@ module ALGO-ITXN
            ...
          </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Receiver, VAL) => . ... </k>
+  rule <k> #setItxnField(Receiver, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <receiver> _ => VAL </receiver> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Amount, VAL) => . ... </k>
+  rule <k> #setItxnField(Amount, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <amount> _ => VAL </amount> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(CloseRemainderTo, VAL) => . ... </k>
+  rule <k> #setItxnField(CloseRemainderTo, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <closeRemainderTo> _ => VAL </closeRemainderTo> ... </transaction>)
@@ -3372,32 +3372,32 @@ module ALGO-ITXN
            ...
          </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(VotePK, VAL) => . ... </k>
+  rule <k> #setItxnField(VotePK, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <votePk> _ => VAL </votePk> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(SelectionPK, VAL) => . ... </k>
+  rule <k> #setItxnField(SelectionPK, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <selectionPK> _ => VAL </selectionPK> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(VoteFirst, VAL) => . ... </k>
+  rule <k> #setItxnField(VoteFirst, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <voteFirst> _ => VAL </voteFirst> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(VoteLast, VAL) => . ... </k>
+  rule <k> #setItxnField(VoteLast, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <voteLast> _ => VAL </voteLast> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(VoteKeyDilution, VAL) => . ... </k>
+  rule <k> #setItxnField(VoteKeyDilution, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <voteKeyDilution> _ => VAL </voteKeyDilution> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Nonparticipation, VAL) => . ... </k>
+  rule <k> #setItxnField(Nonparticipation, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <nonparticipation> _ => VAL </nonparticipation> ... </transaction>)
@@ -3427,62 +3427,62 @@ module ALGO-ITXN
            ...
          </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAsset, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAsset, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configAsset> _ => VAL </configAsset> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetTotal, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetTotal, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configTotal> _ => VAL </configTotal> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetDecimals, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetDecimals, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configDecimals> _ => VAL </configDecimals> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetDefaultFrozen, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetDefaultFrozen, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configDefaultFrozen> _ => VAL </configDefaultFrozen> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetUnitName, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetUnitName, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configUnitName> _ => VAL </configUnitName> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetName, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetName, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configAssetName> _ => VAL </configAssetName> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetURL, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetURL, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configAssetURL> _ => VAL </configAssetURL> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetMetaDataHash, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetMetaDataHash, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configMetaDataHash> _ => VAL </configMetaDataHash> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetManager, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetManager, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configManagerAddr> _ => VAL </configManagerAddr> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetReserve, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetReserve, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configReserveAddr> _ => VAL </configReserveAddr> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetFreeze, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetFreeze, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configFreezeAddr> _ => VAL </configFreezeAddr> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ConfigAssetClawback, VAL) => . ... </k>
+  rule <k> #setItxnField(ConfigAssetClawback, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <configClawbackAddr> _ => VAL </configClawbackAddr> ... </transaction>)
@@ -3503,27 +3503,27 @@ module ALGO-ITXN
            ...
          </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(XferAsset, VAL) => . ... </k>
+  rule <k> #setItxnField(XferAsset, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <xferAsset> _ => VAL </xferAsset> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(AssetAmount, VAL) => . ... </k>
+  rule <k> #setItxnField(AssetAmount, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <assetAmount> _ => VAL </assetAmount> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(AssetSender, VAL) => . ... </k>
+  rule <k> #setItxnField(AssetSender, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <assetASender> _ => VAL </assetASender> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(AssetReceiver, VAL) => . ... </k>
+  rule <k> #setItxnField(AssetReceiver, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <assetReceiver> _ => VAL </assetReceiver> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(AssetCloseTo, VAL) => . ... </k>
+  rule <k> #setItxnField(AssetCloseTo, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <assetCloseTo> _ => VAL </assetCloseTo> ... </transaction>)
@@ -3542,17 +3542,17 @@ module ALGO-ITXN
            ...
          </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(FreezeAsset, VAL) => . ... </k>
+  rule <k> #setItxnField(FreezeAsset, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <freezeAsset> _ => VAL </freezeAsset> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(FreezeAssetAccount, VAL) => . ... </k>
+  rule <k> #setItxnField(FreezeAssetAccount, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <freezeAccount> _ => VAL </freezeAccount> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(FreezeAssetFrozen, VAL) => . ... </k>
+  rule <k> #setItxnField(FreezeAssetFrozen, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <assetFrozen> _ => VAL </assetFrozen> ... </transaction>)
@@ -3589,42 +3589,42 @@ module ALGO-ITXN
          </transaction>)
        </innerTransactions>
     requires isTxnApplField(FIELD) orBool isTxnaField(FIELD)
-  rule <k> #setItxnField(ApplicationID, VAL) => . ... </k>
+  rule <k> #setItxnField(ApplicationID, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <applicationID> _ => VAL </applicationID> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(OnCompletion, VAL) => . ... </k>
+  rule <k> #setItxnField(OnCompletion, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <onCompletion> _ => VAL </onCompletion> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ApprovalProgram, VAL) => . ... </k>
+  rule <k> #setItxnField(ApprovalProgram, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <approvalProgram> _ => VAL </approvalProgram> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ClearStateProgram, VAL) => . ... </k>
+  rule <k> #setItxnField(ClearStateProgram, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <clearStateProgram> _ => VAL </clearStateProgram> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(ApplicationArgs, VAL) => . ... </k>
+  rule <k> #setItxnField(ApplicationArgs, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <applicationArgs> APP_ARGS => append(VAL, APP_ARGS) </applicationArgs> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Accounts, VAL) => . ... </k>
+  rule <k> #setItxnField(Accounts, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <accounts> ACCOUNTS => append(VAL, ACCOUNTS) </accounts> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Applications, VAL) => . ... </k>
+  rule <k> #setItxnField(Applications, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <foreignApps> APPS => append(VAL, APPS) </foreignApps> ... </transaction>)
        </innerTransactions>
-  rule <k> #setItxnField(Assets, VAL) => . ... </k>
+  rule <k> #setItxnField(Assets, VAL) => .K ... </k>
        <innerTransactions>
          ...
          ListItem(<transaction> <foreignAssets> ASSETS => append(VAL, ASSETS) </foreignAssets> ... </transaction>)
@@ -3664,7 +3664,7 @@ module ALGO-ITXN
        </k>
        <activeApps> AA </activeApps>
     requires APP_ID in AA
-  rule <k> #checkForReentrance(_) => . ...</k>   [owise]
+  rule <k> #checkForReentrance(_) => .K ...</k>   [owise]
   syntax KItem  ::=
     "#checkItxnFieldsCoherent" "(" TransactionCell ")" [klabel(#checkItxnFieldsCoherent)]
   rule <k> #checkItxnFieldsCoherent(
@@ -3673,7 +3673,7 @@ module ALGO-ITXN
              <payTxFields> _ </payTxFields>
            </txnTypeSpecificFields>
            ...
-         </transaction>) => . ...
+         </transaction>) => .K ...
        </k>
   rule <k> #checkItxnFieldsCoherent(
          <transaction>
@@ -3681,7 +3681,7 @@ module ALGO-ITXN
              <appCallTxFields> _ </appCallTxFields>
            </txnTypeSpecificFields>
            ...
-         </transaction>) => . ...
+         </transaction>) => .K ...
        </k>
   rule <k> #checkItxnFieldsCoherent(
          <transaction>
@@ -3689,7 +3689,7 @@ module ALGO-ITXN
              <keyRegTxFields> _ </keyRegTxFields>
            </txnTypeSpecificFields>
            ...
-         </transaction>) => . ...
+         </transaction>) => .K ...
        </k>
   rule <k> #checkItxnFieldsCoherent(
          <transaction>
@@ -3697,7 +3697,7 @@ module ALGO-ITXN
              <assetConfigTxFields> _ </assetConfigTxFields>
            </txnTypeSpecificFields>
            ...
-         </transaction>) => . ...
+         </transaction>) => .K ...
        </k>
   rule <k> #checkItxnFieldsCoherent(
          <transaction>
@@ -3705,7 +3705,7 @@ module ALGO-ITXN
              <assetTransferTxFields> _ </assetTransferTxFields>
            </txnTypeSpecificFields>
            ...
-         </transaction>) => . ...
+         </transaction>) => .K ...
        </k>
   rule <k> #checkItxnFieldsCoherent(
          <transaction>
@@ -3713,13 +3713,13 @@ module ALGO-ITXN
              <assetFreezeTxFields> _ </assetFreezeTxFields>
            </txnTypeSpecificFields>
            ...
-         </transaction>) => . ...
+         </transaction>) => .K ...
        </k>
   rule <k> #checkItxnFieldsCoherent(<transaction> _T </transaction>) => #panic(TXN_INVALID) ...</k>  [owise]
   syntax KItem  ::=
     "#checkItxns" "(" List ")" [klabel(#checkItxns)]
   rule <k> #checkItxns((ListItem(T:TransactionCell) REST)) => (#checkItxn(T) ~> #checkItxns(REST)) ...</k>
-  rule <k> #checkItxns(.List) => . ...</k>
+  rule <k> #checkItxns(.List) => .K ...</k>
   syntax AlgorandCommand  ::=
     "#evalTxGroup" "(" ")" [klabel(#evalTxGroup)]
   syntax KItem  ::=
@@ -3753,11 +3753,11 @@ module ALGO-ITXN
        </transactions>
        <nextTxnID> TXN_ID => TXN_ID +Int 1 </nextTxnID>
   requires notBool (Int2String(TXN_ID) in_transactions(<transactions> TXNS </transactions>))
-  rule <k> #pushItxns() => . ...</k>
+  rule <k> #pushItxns() => .K ...</k>
        <innerTransactions> .List </innerTransactions>
   syntax KItem  ::=
     "#saveState" "(" ")" [klabel(#saveState)]
-  rule <k> #saveState() => . ...</k>
+  rule <k> #saveState() => .K ...</k>
        <currentTxnExecution> C </currentTxnExecution>
        <currentTx> TXN_ID </currentTx>
        <transaction>
@@ -3771,7 +3771,7 @@ module ALGO-ITXN
     "#loadFromGroupInner" "(" Int "," TxnField ")" [klabel(#loadFromGroupInner)]
   syntax KItem  ::=
     "#loadFromGroupInner" "(" Int "," TxnaField "," Int ")" [klabel(#loadFromGroupInner)]
-  rule <k> #loadFromGroupInner(GROUP_IDX, FIELD) => . ...</k>
+  rule <k> #loadFromGroupInner(GROUP_IDX, FIELD) => .K ...</k>
        <lastTxnGroupID> LAST_GROUP </lastTxnGroupID>
        <stack> XS => ({getTxnField(TX_ID, FIELD)}:>TValue : XS) </stack>
        <stacksize> SS => SS +Int 1 </stacksize>
@@ -3782,7 +3782,7 @@ module ALGO-ITXN
          ...
        </transaction>
     requires isTValue(getTxnField(TX_ID, FIELD))
-  rule <k> #loadFromGroupInner(GROUP_IDX, FIELD, IDX) => . ...</k>
+  rule <k> #loadFromGroupInner(GROUP_IDX, FIELD, IDX) => .K ...</k>
        <lastTxnGroupID> LAST_GROUP </lastTxnGroupID>
        <stack> XS => ({getTxnField(TX_ID, FIELD, IDX)}:>TValue : XS) </stack>
        <stacksize> SS => SS +Int 1 </stacksize>
@@ -4183,7 +4183,7 @@ module TEAL-DRIVER
        <stack> B : ARRAY : _ </stack>
       requires B >Int lengthBytes(ARRAY)
         orBool B +Int 8 >Int lengthBytes(ARRAY)
-  rule <k> replace2 START:Int => . ... </k>
+  rule <k> replace2 START:Int => .K ... </k>
        <stack> B:Bytes : A:Bytes : XS => replaceAtBytes(A, START, B) : XS </stack>
        <stacksize> S => S -Int 1 </stacksize>
     requires START +Int lengthBytes(B) <=Int lengthBytes(A)
@@ -4191,7 +4191,7 @@ module TEAL-DRIVER
        <stack> B:Bytes : A:Bytes : _ </stack>
        <stacksize> _ </stacksize>
     requires START +Int lengthBytes(B) >Int lengthBytes(A)
-  rule <k> replace3 => . ... </k>
+  rule <k> replace3 => .K ... </k>
        <stack> B:Bytes : START:Int : A:Bytes : XS => replaceAtBytes(A, START, B) : XS </stack>
        <stacksize> S => S -Int 2 </stacksize>
     requires START +Int lengthBytes(B) <=Int lengthBytes(A)
@@ -4549,17 +4549,17 @@ module TEAL-DRIVER
   rule <k> returnSubroutine() => #panic(CALLSTACK_UNDERFLOW) ... </k>
        <pc> _ </pc>
        <callStack> .List </callStack>
-  rule <k> proto ARGS RETS => . ... </k>
+  rule <k> proto ARGS RETS => .K ... </k>
        <callStack> ListItem(frame(_, _, _ => ARGS, _ => RETS)) ... </callStack>
     requires (ARGS >=Int 0) andBool (RETS >=Int 0)
-  rule <k> proto ARGS RETS => . ... </k>
+  rule <k> proto ARGS RETS => .K ... </k>
        <callStack> ListItem(frame(RETURN_PC, STACK_PTR) => frame(RETURN_PC, STACK_PTR, ARGS, RETS)) ... </callStack>
     requires (ARGS >=Int 0) andBool (RETS >=Int 0)
-  rule <k> frame_dig N => . ... </k>
+  rule <k> frame_dig N => .K ... </k>
        <stack> XS => XS{getStackPtr() +Int N} : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
     requires S <Int MAX_STACK_DEPTH
-  rule <k> frame_bury N => . ... </k>
+  rule <k> frame_bury N => .K ... </k>
        <stack> X : XS => XS{getStackPtr() +Int N <- X} </stack>
        <stacksize> S => S -Int 1 </stacksize>
   rule <k> pop => .K ... </k>
@@ -4624,14 +4624,14 @@ module TEAL-DRIVER
        </stack>
        <stacksize> S => S -Int 2 </stacksize>
     requires notBool (int2Bool(A))
-  rule <k> bury N:Int => . ... </k>
+  rule <k> bury N:Int => .K ... </k>
        <stack> A:TValue : STACK => (#take(N -Int 1, STACK) A : #drop(N, STACK)) </stack>
        <stacksize> S => S -Int 1 </stacksize>
     requires 0 <Int N andBool N <Int S
   rule <k> bury N:Int => #panic(STACK_UNDERFLOW) ... </k>
        <stacksize> S </stacksize>
     requires notBool(0 <Int N andBool N <Int S)
-  rule <k> popn N:Int => . ... </k>
+  rule <k> popn N:Int => .K ... </k>
        <stack> STACK => #drop(N, STACK) </stack>
        <stacksize> S => S -Int N </stacksize>
     requires N <=Int S
@@ -4643,7 +4643,7 @@ module TEAL-DRIVER
        <stacksize> S => S +Int 1 </stacksize>
     requires N >Int 0
      andBool S <Int MAX_STACK_DEPTH
-  rule <k> dupn 0 => . ... </k>
+  rule <k> dupn 0 => .K ... </k>
   rule <k> dupn N => #panic(STACK_OVERFLOW) ... </k>
        <stacksize> S </stacksize>
     requires S +Int N >Int MAX_STACK_DEPTH
@@ -4674,7 +4674,7 @@ module TEAL-DRIVER
     requires S >=Int MAX_STACK_DEPTH
   syntax KItem  ::=
     "loadFromGroup" "(" Int "," TxnField ")" [klabel(loadFromGroup)]
-  rule <k> loadFromGroup(GROUP_IDX, FIELD) => . ... </k>
+  rule <k> loadFromGroup(GROUP_IDX, FIELD) => .K ... </k>
        <stacksize> S => S +Int 1 </stacksize>
        <stack> XS => fromMaybeTVal(getGroupFieldByIdx(GROUP_ID, GROUP_IDX, FIELD)) : XS </stack>
        <currentTx> CURRENT_TX_ID </currentTx>
@@ -4712,7 +4712,7 @@ module TEAL-DRIVER
   rule fromMaybeTVal(V:TValue) => V
   syntax KItem  ::=
     "loadFromGroup" "(" Int "," TxnaField "," Int ")" [klabel(loadFromGroup)]
-  rule <k> loadFromGroup(GROUP_IDX, FIELD, IDX) => . ...</k>
+  rule <k> loadFromGroup(GROUP_IDX, FIELD, IDX) => .K ...</k>
        <stack> XS => fromMaybeTVal(getGroupFieldByIdx(GROUP_ID, GROUP_IDX, FIELD, IDX)) : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <currentTx> CURRENT_TX_ID </currentTx>
@@ -4800,7 +4800,7 @@ module TEAL-DRIVER
     requires notBool isTValue(accountReference(A))
   syntax KItem  ::=
     "#balance" MaybeTValue
-  rule <k> #balance BAL:TUInt64 => . ...</k>
+  rule <k> #balance BAL:TUInt64 => .K ...</k>
        <stack> _ : XS => BAL : XS </stack>
   rule <k> #balance _ => #panic(TXN_ACCESS_FAILED) </k>   [owise]
   rule <k> min_balance => #min_balance getAccountParamsField(AcctMinBalance, {accountReference(A)}:>TValue) ... </k>
@@ -4811,10 +4811,10 @@ module TEAL-DRIVER
     requires notBool isTValue(accountReference(A))
   syntax KItem  ::=
     "#min_balance" MaybeTValue
-  rule <k> #min_balance MIN_BAL:TUInt64 => . ...</k>
+  rule <k> #min_balance MIN_BAL:TUInt64 => .K ...</k>
        <stack> _ : XS => MIN_BAL : XS </stack>
   rule <k> #min_balance _ => #panic(TXN_ACCESS_FAILED) </k>   [owise]
-  rule <k> log => . ...</k>
+  rule <k> log => .K ...</k>
        <stack> (MSG:TBytes : XS) => XS </stack>
        <stacksize> S => S -Int 1 </stacksize>
        <currentTx> TX_ID </currentTx>
@@ -5248,12 +5248,12 @@ module TEAL-DRIVER
        <stacksize> S => S +Int 1 </stacksize>
     requires S <Int MAX_STACK_DEPTH
      andBool (isInt(RET) andThenBool {RET}:>Int <Int 0)
-  rule <k> app_params_get FIELD => . ...</k>
+  rule <k> app_params_get FIELD => .K ...</k>
        <stack> APP:Int : XS => 1 : {getAppParamsField(FIELD, APP)}:>TValue : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
     requires isTValue(getAppParamsField(FIELD, APP))
      andBool S <Int MAX_STACK_DEPTH
-  rule <k> app_params_get FIELD => . ...</k>
+  rule <k> app_params_get FIELD => .K ...</k>
        <stack> APP:Int : XS => 0 : 0 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
     requires notBool(isTValue(getAppParamsField(FIELD, APP)))
@@ -5265,7 +5265,7 @@ module TEAL-DRIVER
     requires S <Int 1
   rule <k> app_params_get _ => #panic(ILL_TYPED_STACK) ...</k>
        <stack> _:Bytes : _ </stack>
-  rule <k> acct_params_get FIELD => . ...</k>
+  rule <k> acct_params_get FIELD => .K ...</k>
        <stack> ACCT : XS => 1 : {getAccountParamsField(FIELD, {accountReference(ACCT)}:>TValue)}:>TValue : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
     requires (isTValue(accountReference(ACCT))
@@ -5273,7 +5273,7 @@ module TEAL-DRIVER
  andThenBool isInt(getAccountParamsField(AcctBalance, ACCT))
  andThenBool {getAccountParamsField(AcctBalance, ACCT)}:>Int >Int 0)
      andBool S <Int MAX_STACK_DEPTH
-  rule <k> acct_params_get FIELD => . ...</k>
+  rule <k> acct_params_get FIELD => .K ...</k>
        <stack> ACCT : XS => 0 : {getAccountParamsField(FIELD, {accountReference(ACCT)}:>TValue)}:>TValue : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
     requires (isTValue(accountReference(ACCT))
@@ -5296,7 +5296,7 @@ module TEAL-DRIVER
     requires isBytes(boxAcct(NAME))
   syntax KItem  ::=
     "#createBox" "(" Bytes "," Bytes "," Int ")"
-  rule <k> #createBox(NAME, ADDR, SIZE) => . ... </k>
+  rule <k> #createBox(NAME, ADDR, SIZE) => .K ... </k>
        <stack> XS => 1 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <account>
@@ -5315,7 +5315,7 @@ module TEAL-DRIVER
     requires SIZE <=Int PARAM_MAX_BOX_SIZE
      andBool notBool(NAME in_boxes(<boxes> REST </boxes>))
      andBool ADDR ==K getGlobalField(CurrentApplicationAddress)
-  rule <k> #createBox(NAME, ADDR, SIZE) => . ... </k>
+  rule <k> #createBox(NAME, ADDR, SIZE) => .K ... </k>
        <stack> XS => 0 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <account>
@@ -5365,7 +5365,7 @@ module TEAL-DRIVER
        <stack> VAL:Bytes : OFFSET:Int : NAME:Bytes : XS => XS </stack>
        <stacksize> S => S -Int 3 </stacksize>
     requires isBytes(boxAcct(NAME))
-  rule <k> #boxReplace(NAME, ADDR, OFFSET, VAL) => . ...</k>
+  rule <k> #boxReplace(NAME, ADDR, OFFSET, VAL) => .K ...</k>
        <account>
          <address> ADDR </address>
          <box>
@@ -5409,7 +5409,7 @@ module TEAL-DRIVER
        <stack> VAL:Bytes : NAME:Bytes : XS => XS </stack>
        <stacksize> S => S -Int 2 </stacksize>
     requires isBytes(boxAcct(NAME))
-  rule <k> #boxPut(NAME, ADDR, VAL) => . ...</k>
+  rule <k> #boxPut(NAME, ADDR, VAL) => .K ...</k>
        <account>
          <address> ADDR </address>
          <box>
@@ -5453,7 +5453,7 @@ module TEAL-DRIVER
        <stack> LENGTH:Int : OFFSET:Int : NAME:Bytes : XS => XS </stack>
        <stacksize> S => S -Int 3 </stacksize>
     requires isBytes(boxAcct(NAME))
-  rule <k> #boxExtract(NAME, ADDR, OFFSET, LENGTH) => . ... </k>
+  rule <k> #boxExtract(NAME, ADDR, OFFSET, LENGTH) => .K ... </k>
        <stack> XS => substrBytes(BYTES, OFFSET, OFFSET +Int LENGTH) : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <account>
@@ -5499,7 +5499,7 @@ module TEAL-DRIVER
        <stack> NAME:Bytes : XS => XS </stack>
        <stacksize> S => S -Int 1 </stacksize>
     requires isBytes(boxAcct(NAME))
-  rule <k> #boxGet(NAME, ADDR) => . ... </k>
+  rule <k> #boxGet(NAME, ADDR) => .K ... </k>
        <stack> XS => 1 : BYTES : XS </stack>
        <stacksize> S => S +Int 2 </stacksize>
        <account>
@@ -5511,7 +5511,7 @@ module TEAL-DRIVER
          ...
        </account>
     requires lengthBytes(BYTES) <Int MAX_BYTEARRAY_LEN
-  rule <k> #boxGet(NAME, ADDR) => . ... </k>
+  rule <k> #boxGet(NAME, ADDR) => .K ... </k>
        <stack> XS => 0 : .Bytes : XS </stack>
        <stacksize> S => S +Int 2 </stacksize>
        <account>
@@ -5547,7 +5547,7 @@ module TEAL-DRIVER
        <stack> NAME:Bytes : XS => XS </stack>
        <stacksize> S => S -Int 1 </stacksize>
     requires isBytes(boxAcct(NAME))
-  rule <k> #boxLen(NAME, ADDR) => . ... </k>
+  rule <k> #boxLen(NAME, ADDR) => .K ... </k>
        <stack> XS => 1 : lengthBytes(BYTES) : XS </stack>
        <stacksize> S => S +Int 2 </stacksize>
        <account>
@@ -5561,7 +5561,7 @@ module TEAL-DRIVER
          </boxes>
          ...
        </account>
-  rule <k> #boxLen(NAME, ADDR) => . ... </k>
+  rule <k> #boxLen(NAME, ADDR) => .K ... </k>
        <stack> XS => 0 : 0 : XS </stack>
        <stacksize> S => S +Int 2 </stacksize>
        <account>
@@ -5587,7 +5587,7 @@ module TEAL-DRIVER
        <stack> NAME:Bytes : XS => XS </stack>
        <stacksize> S => S -Int 1 </stacksize>
     requires isBytes(boxAcct(NAME))
-  rule <k> #boxDel(NAME, ADDR) => . ... </k>
+  rule <k> #boxDel(NAME, ADDR) => .K ... </k>
        <stack> XS => 1 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <account>
@@ -5603,7 +5603,7 @@ module TEAL-DRIVER
          lengthBytes(BYTES)))) </minBalance>
          ...
        </account>
-  rule <k> #boxDel(NAME, ADDR) => . ... </k>
+  rule <k> #boxDel(NAME, ADDR) => .K ... </k>
        <stack> XS => 0 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <account>
@@ -5649,7 +5649,7 @@ module TEAL-DRIVER
        <stacksize> S => S -Int 2 </stacksize>
   syntax KItem  ::=
     "loadGroupScratch" "(" Int "," Int ")" [klabel(loadGroupScratch)]
-  rule <k> loadGroupScratch(GROUP_IDX, I) => . ...</k>
+  rule <k> loadGroupScratch(GROUP_IDX, I) => .K ...</k>
        <stack> XS => ({M[I]}:>TValue) : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <currentTx> TX_ID </currentTx>
@@ -5668,7 +5668,7 @@ module TEAL-DRIVER
      andBool I in_keys(M)
      andBool S <Int MAX_STACK_DEPTH
      andBool GROUP_IDX <Int ({getTxnField(getCurrentTxn(), GroupIndex)}:>Int)
-  rule <k> loadGroupScratch(GROUP_IDX, I) => . ...</k>
+  rule <k> loadGroupScratch(GROUP_IDX, I) => .K ...</k>
        <stack> XS => ({M[I]}:>TValue) : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <currentTx> TX_ID </currentTx>
@@ -5682,7 +5682,7 @@ module TEAL-DRIVER
      andBool I in_keys(M)
      andBool S <Int MAX_STACK_DEPTH
      andBool GROUP_IDX <Int ({getTxnField(getCurrentTxn(), GroupIndex)}:>Int)
-  rule <k> loadGroupScratch(GROUP_IDX, I) => . ...</k>
+  rule <k> loadGroupScratch(GROUP_IDX, I) => .K ...</k>
        <stack> XS => 0 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <currentTx> TX_ID </currentTx>
@@ -5701,7 +5701,7 @@ module TEAL-DRIVER
      andBool notBool (I in_keys(M))
      andBool S <Int MAX_STACK_DEPTH
      andBool GROUP_IDX <Int ({getTxnField(getCurrentTxn(), GroupIndex)}:>Int)
-  rule <k> loadGroupScratch(GROUP_IDX, I) => . ...</k>
+  rule <k> loadGroupScratch(GROUP_IDX, I) => .K ...</k>
        <stack> XS => 0 : XS </stack>
        <stacksize> S => S +Int 1 </stacksize>
        <currentTx> TX_ID </currentTx>
@@ -5725,7 +5725,7 @@ module TEAL-DRIVER
   rule <k> loadGroupScratch(_, _) => #panic(STACK_OVERFLOW) ... </k>
        <stacksize> S </stacksize>
     requires S >=Int MAX_STACK_DEPTH
-  rule <k> itxn_begin => . ...</k>
+  rule <k> itxn_begin => .K ...</k>
        <innerTransactions>
          .List =>
          ListItem(<transaction>
@@ -5763,7 +5763,7 @@ module TEAL-DRIVER
   rule <k> itxn_field FIELD => #setItxnField(FIELD, VAL) ...</k>
        <stack> VAL : XS => XS </stack>
        <stacksize> S => S -Int 1 </stacksize>
-  rule <k> itxn_next => . ...</k>
+  rule <k> itxn_next => .K ...</k>
        <innerTransactions>
          REST:List
          (.List =>
@@ -5920,7 +5920,7 @@ module ALGOD-MODELS
             </assetsOptedIn>
             ...
           </account>
-  rule <k> #setupOptInAssets(_:Bytes, .JSONs) => . ... </k>
+  rule <k> #setupOptInAssets(_:Bytes, .JSONs) => .K ... </k>
   syntax KItem  ::=
     "#addAccountJSON" "(" JSON ")" [klabel(#addAccountJSON)]
   rule <k> #addAccountJSON({"address": ADDR:String,
@@ -6153,7 +6153,7 @@ module ALGOD-MODELS
            </appsOptedIn>
            ...
          </account>
-  rule <k> #loadLocalState(_:Bytes, [ .JSONs ]) => . ... </k>
+  rule <k> #loadLocalState(_:Bytes, [ .JSONs ]) => .K ... </k>
   rule <k> #loadLocalState(APP_ID:Int, ADDR:Bytes,
                              [{"key": K:String, "value": {"bytes": V:String, "type": 1, "uint": _} }, REST:JSONs])
           => #loadLocalState(APP_ID, ADDR, [REST]) ... </k>
@@ -6184,7 +6184,7 @@ module ALGOD-MODELS
            </appsOptedIn>
            ...
          </account>
-  rule <k> #loadLocalState(_:Int, _:Bytes, [.JSONs]) => . ... </k>
+  rule <k> #loadLocalState(_:Int, _:Bytes, [.JSONs]) => .K ... </k>
   syntax KItem  ::=
     "#loadGlobalState" "(" Int "," JSONs ")" [klabel(#loadGlobalState)]
   rule <k> #loadGlobalState(APP_ID, [{"key": K:String, "value": {"bytes": V:String, "type": 1, "uint": _} }, REST:JSONs] )
@@ -6207,7 +6207,7 @@ module ALGOD-MODELS
            </globalState>
            ...
          </app>
-  rule <k> #loadGlobalState(_, [.JSONs]) => . ... </k>
+  rule <k> #loadGlobalState(_, [.JSONs]) => .K ... </k>
   syntax KItem  ::=
     "#setupApplications" "(" JSON ")" [klabel(#setupApplications)]
   rule <k> #setupApplications([APP_JSON, REST]) => #addApplicationJSON(APP_JSON) ~> #setupApplications([REST]) ... </k>
@@ -6754,7 +6754,7 @@ module AVM-EXECUTION
   rule <k> #checkTxnSignature() => .K ... </k>
   syntax AlgorandCommand  ::=
     "#clearState" "(" TValue "," TValue ")" [klabel(#clearState)]
-  rule <k> #clearState(APP_ID, ADDR) => . ...</k>
+  rule <k> #clearState(APP_ID, ADDR) => .K ...</k>
        <account>
          <address> ADDR </address>
          <appsOptedIn>
@@ -6779,7 +6779,7 @@ module AVM-EXECUTION
          </minBalance>
          ...
        </account>
-  rule <k> #clearState(APP_ID, ADDR) => . ...</k>
+  rule <k> #clearState(APP_ID, ADDR) => .K ...</k>
        <account>
          <address> ADDR </address>
          <appsOptedIn>
@@ -6806,7 +6806,7 @@ module AVM-EXECUTION
        </appsCreated>
   syntax AlgorandCommand  ::=
     "#updatePrograms" "(" TValue "," KItem "," KItem ")" [klabel(#updatePrograms)]
-  rule <k> #updatePrograms(APP_ID, APPROVAL_PGM, CLEAR_STATE_PGM) => . ...</k>
+  rule <k> #updatePrograms(APP_ID, APPROVAL_PGM, CLEAR_STATE_PGM) => .K ...</k>
        <app>
          <appID> APP_ID </appID>
          <approvalPgmSrc> _ => APPROVAL_PGM </approvalPgmSrc>
@@ -6815,7 +6815,7 @@ module AVM-EXECUTION
        </app>
   syntax AlgorandCommand  ::=
     "#deleteApplication" "(" TValue ")" [klabel(#deleteApplication)]
-  rule <k> #deleteApplication(APP_ID) => . ...</k>
+  rule <k> #deleteApplication(APP_ID) => .K ...</k>
        <account>
          <appsCreated>
            ((<app>
@@ -6838,7 +6838,7 @@ module AVM-EXECUTION
        <appCreator> (APP_ID |-> _) => .Map ... </appCreator>
   syntax AlgorandCommand  ::=
     "#closeTo" "(" TValue "," TValue "," TValue ")" [klabel(#closeTo)]
-  rule <k> #closeTo(ASSET_ID, FROM, CLOSE_TO) => . ...</k>
+  rule <k> #closeTo(ASSET_ID, FROM, CLOSE_TO) => .K ...</k>
        <account>
          <address> FROM </address>
          <assetsOptedIn>
@@ -6863,7 +6863,7 @@ module AVM-EXECUTION
        </account>
   syntax AlgorandCommand  ::=
     "#giveAlgos" "(" TValue "," TValue ")" [klabel(#giveAlgos)]
-  rule <k> #giveAlgos(ACCOUNT, AMOUNT) => . ...</k>
+  rule <k> #giveAlgos(ACCOUNT, AMOUNT) => .K ...</k>
        <account>
          <address> ACCOUNT </address>
          <balance> BALANCE => BALANCE +Int AMOUNT </balance>
@@ -6879,7 +6879,7 @@ module AVM-EXECUTION
        requires (BALANCE +Int AMOUNT) <Int 0
   syntax AlgorandCommand  ::=
     "#giveAsset" "(" TValue "," TValue "," TValue ")" [klabel(#giveAsset)]
-  rule <k> #giveAsset(ASSET_ID, ACCOUNT, AMOUNT) => . ...</k>
+  rule <k> #giveAsset(ASSET_ID, ACCOUNT, AMOUNT) => .K ...</k>
        <account>
          <address> ACCOUNT </address>
          <optInAsset>
@@ -6905,11 +6905,11 @@ module AVM-EXECUTION
     "#checkSufficientBalance" "(" ")" [klabel(#checkSufficientBalance)]
   rule <k> #checkSufficientBalance() => (#checkSufficientBalance(ADDR) ~> #checkSufficientBalance()) ...</k>
        <touchedAccounts> (ListItem(ADDR) => .List) ...</touchedAccounts>
-  rule <k> #checkSufficientBalance() => . ...</k>
+  rule <k> #checkSufficientBalance() => .K ...</k>
        <touchedAccounts> .List </touchedAccounts>
   syntax AlgorandCommand  ::=
     "#checkSufficientBalance" "(" Bytes ")" [klabel(#checkSufficientBalance)]
-  rule <k> #checkSufficientBalance(ADDR) => . ...</k>
+  rule <k> #checkSufficientBalance(ADDR) => .K ...</k>
        <account>
          <address> ADDR </address>
          <balance> BALANCE </balance>
@@ -6979,7 +6979,7 @@ module AVM-EXECUTION
     requires notBool ( SENDER in_accounts (<accountsMap> AMAP </accountsMap>) )
       orBool notBool ( RECEIVER in_accounts (<accountsMap> AMAP </accountsMap>) )
   rule <k> #executeTxn(@keyreg) => #panic(UNSUPPORTED_TXN_TYPE) ... </k>
-  rule <k> #executeTxn(@acfg) => . ...</k>
+  rule <k> #executeTxn(@acfg) => .K ...</k>
        <currentTx> TXN_ID </currentTx>
        <transaction>
          <txID>                TXN_ID         </txID>
@@ -7034,7 +7034,7 @@ module AVM-EXECUTION
          ...
        </account>
        <assetCreator> .Map => (ASSET_ID |-> SENDER) ...</assetCreator>
-  rule <k> #executeTxn(@acfg) => . ...</k>
+  rule <k> #executeTxn(@acfg) => .K ...</k>
        <currentTx> TXN_ID </currentTx>
        <transaction>
          <txID>                TXN_ID          </txID>
@@ -7058,7 +7058,7 @@ module AVM-EXECUTION
       orBool RESERVE_ADDR =/=K getGlobalField(ZeroAddress)
       orBool FREEZE_ADDR  =/=K getGlobalField(ZeroAddress)
       orBool CLAWB_ADDR   =/=K getGlobalField(ZeroAddress)
-  rule <k> #executeTxn(@acfg) => . ...</k>
+  rule <k> #executeTxn(@acfg) => .K ...</k>
        <currentTx> TXN_ID </currentTx>
        <transaction>
          <txID>                TXN_ID          </txID>
@@ -7217,7 +7217,7 @@ module AVM-EXECUTION
        </transaction>
     requires assetCreated(ASSET_ID)
      andBool CLOSE_TO =/=K getGlobalField(ZeroAddress)
-  rule <k> #executeTxn(@afrz) => . ... </k>
+  rule <k> #executeTxn(@afrz) => .K ... </k>
        <currentTx> TXN_ID </currentTx>
        <transaction>
          <txID>                 TXN_ID              </txID>

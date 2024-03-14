@@ -146,7 +146,7 @@ to start with lower case letters.  We take the freedom to tacitly introduce
 syntactic lists/sequences for each nonterminal for which we need them:
 ```k
   syntax Name                                      [token]
-  syntax Names ::= List{Name,","}                  [klabel(exps)]
+  syntax Names ::= List{Name,","}                  [overload(exps)]
 ```
 Expression constructs will be defined throughtout the syntax module.
 Below are the very basic ones, namely the builtins, the names, and the
@@ -156,13 +156,13 @@ the list is on a position which can be evaluated:
 ```k
   syntax Exp ::= Int | Bool | String | Name
                | "(" Exp ")"                       [bracket]
-  syntax Exps  ::= List{Exp,","}                   [strict, klabel(exps)]
+  syntax Exps  ::= List{Exp,","}                   [strict, overload(exps)]
   syntax Val
   syntax Exp ::= Val
   syntax Exps ::= Vals
-  syntax Vals ::= List{Val,","}                    [klabel(exps)]
+  syntax Vals ::= List{Val,","}                    [overload(exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom,","}              [klabel(exps)]
+  syntax Bottoms ::= List{Bottom,","}              [overload(exps)]
 ```
 We next define the syntax of arithmetic constructs, together with
 their relative priorities and left-/non-associativities.  We also
@@ -335,7 +335,7 @@ Like in many functional languages, type parameters/variables in
 user-defined types are quoted identifiers.
 ```k
   syntax TypeVar                        [token]
-  syntax TypeVars ::= List{TypeVar,","} [klabel(types)]
+  syntax TypeVars ::= List{TypeVar,","} [overload(types)]
 ```
 Types can be basic types, function types, or user-defined
 parametric types.  In the dynamic semantics we are going to simply ignore
@@ -349,15 +349,15 @@ a constructor for function types:
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]
                 | TypeVar
-                | TypeName             [klabel(TypeName), avoid]
+                | TypeName             [symbol(TypeName), avoid]
                 | Type TypeName   [symbol(Type-TypeName), macro]
                 | "(" Types ")" TypeName                    [prefer]
-  syntax Types ::= List{Type,","} [klabel(types)]
+  syntax Types ::= List{Type,","} [overload(types)]
   syntax Types ::= TypeVars
 
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
-  syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
+  syntax TypeCases ::= List{TypeCase,"|"}     [symbol(_|TypeCase_)]
 ```
 
 ## Additional Priorities
@@ -462,6 +462,7 @@ We only define integers, Booleans and strings as values here, but will
 add more values later.
 ```k
   syntax Val ::= Int | Bool | String
+  syntax Val ::= Bottom
   syntax Vals ::= Bottoms
   syntax KResult ::= Val
 ```

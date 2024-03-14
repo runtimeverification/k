@@ -233,6 +233,12 @@ public class DefinitionParsing {
     modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
     modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDOUT-STREAM").get()));
     modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("MAP").get()));
+    if (options.coverage) {
+      modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-IO").get()));
+      modules =
+          Stream.concat(
+              modules, stream(parsedDefinition.getModule("K-IO").get().importedModules()));
+    }
     modules =
         Stream.concat(
             modules,
@@ -279,33 +285,16 @@ public class DefinitionParsing {
 
   public Definition parseDefinition(
       File definitionFile, String mainModuleName, String mainProgramsModule) {
-    Definition definition =
-        parser.loadDefinition(
-            mainModuleName,
-            mainProgramsModule,
-            FileUtil.load(definitionFile),
-            definitionFile,
-            definitionFile.getParentFile(),
-            ListUtils.union(lookupDirectories, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-            autoImportDomains,
-            options.preprocess,
-            options.bisonLists);
-    Module m = definition.mainModule();
-    return options.coverage
-        ? DefinitionTransformer.from(
-                mod ->
-                    mod.equals(m)
-                        ? Module(
-                            m.name(),
-                            (Set<Import>)
-                                m.imports()
-                                    .$bar(Set(Import(definition.getModule("K-IO").get(), true))),
-                            m.localSentences(),
-                            m.att())
-                        : mod,
-                "add implicit modules")
-            .apply(definition)
-        : definition;
+    return parser.loadDefinition(
+        mainModuleName,
+        mainProgramsModule,
+        FileUtil.load(definitionFile),
+        definitionFile,
+        definitionFile.getParentFile(),
+        ListUtils.union(lookupDirectories, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
+        autoImportDomains,
+        options.preprocess,
+        options.bisonLists);
   }
 
   protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
@@ -524,6 +513,7 @@ public class DefinitionParsing {
                           configDecl ->
                               stream(
                                   GenerateSentencesFromConfigDecl.gen(
+                                      kem,
                                       configDecl.body(),
                                       configDecl.ensures(),
                                       configDecl.att(),

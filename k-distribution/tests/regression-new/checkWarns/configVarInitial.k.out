@@ -1,0 +1,2 @@
+[Error] Compiler: Configuration variable found in declaration of collection cell <bad>. Implicitly, this causes the initial configuration to start with one <bad> element instead of zero. Add the `initial=""` attribute to make that behavior explicit.
+[Error] Compiler: Had 1 parsing errors.

@@ -2279,7 +2279,7 @@ module K-EQUAL-SYNTAX
 
   syntax priority equalEqualK notEqualEqualK > boolOperation mlOp
 
-  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi" [function, total, smt-hook(ite), hook(KEQUAL.ite)]
+  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi" [function, total, symbol(ite), smt-hook(ite), hook(KEQUAL.ite)]
 
 endmodule
 
@@ -2380,7 +2380,8 @@ a library function. If the `errno` returned is not one of the below errnos
 known to K, `#unknownIOError` is returned along with the integer errno value.
 
 ```k
-  syntax IOError ::= "#EOF" [symbol(#EOF)] | #unknownIOError(errno: Int) [symbol]
+  syntax IOError ::= "#EOF" [symbol(#EOF)]
+                   | #unknownIOError(errno: Int) [symbol(#unknownIOError)]
                    | "#E2BIG" [symbol(#E2BIG)]
                    | "#EACCES" [symbol(#EACCES)]
                    | "#EAGAIN" [symbol(#EAGAIN)]

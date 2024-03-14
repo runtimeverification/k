@@ -4,6 +4,7 @@ package org.kframework.backend.haskell;
 import static org.kframework.builtin.BooleanUtils.*;
 
 import com.google.inject.Inject;
+import com.runtimeverification.k.kore.parser.ParseError;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.main.Tool;
 import org.kframework.parser.KoreParser;
-import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;

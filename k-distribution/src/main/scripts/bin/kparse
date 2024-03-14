@@ -40,10 +40,8 @@ $(k_util_usage)
 
 $KPARSE options:
 
-  -d, --directory DIR      [DEPRECATED] Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR
+  -d, --definition DIR     Exact path to the kompiled directory.
   -h, --help               Display this help and exit
-      --definition DIR     Exact path to the kompiled directory.
   -i, --input MODE         Select input mode to use when parsing. Valid values
                            are program, kast, binary, json, and kore.
   -m, --module MODULE      Module to use to generate grammar
@@ -67,18 +65,12 @@ do
     ARGV+=("$1")
   else
     case "$arg" in
-      -d|--directory)
-      echo "[Warning]: -d/--directory is deprecated. Use --definition instead." >&2
-      dir="$2"
-      shift
-      ;;
-
       -h|--help)
       print_usage
       exit 0
       ;;
 
-      --definition)
+      -d|--definition)
       kompiledDir="$2"
       shift
       ;;
