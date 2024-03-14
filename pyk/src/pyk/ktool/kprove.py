@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from subprocess import CompletedProcess
     from typing import Final
 
+    from ..cli.pyk import ProveOptions
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
     from ..kcfg.semantics import KCFGSemantics
@@ -331,8 +332,7 @@ class KProve(KPrint):
 
     def prove_rpc(
         self,
-        spec_file: Path,
-        spec_module_name: str,
+        options: ProveOptions,
         claim_labels: Iterable[str] | None = None,
         exclude_claim_labels: Iterable[str] | None = None,
         kcfg_semantics: KCFGSemantics | None = None,
@@ -353,7 +353,6 @@ class KProve(KPrint):
         fallback_on: Iterable[FallbackReason] | None = None,
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
-        type_inference_mode: TypeInferenceMode | None = None,
     ) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
             return self.prove_claim_rpc(
@@ -379,14 +378,14 @@ class KProve(KPrint):
             )
 
         all_claims = self.get_claims(
-            spec_file,
-            spec_module_name=spec_module_name,
+            options.spec_file,
+            spec_module_name=options.spec_module,
             claim_labels=claim_labels,
             exclude_claim_labels=exclude_claim_labels,
-            type_inference_mode=type_inference_mode,
+            type_inference_mode=options.type_inference_mode,
         )
         if all_claims is None:
-            raise ValueError(f'No claims found in file: {spec_file}')
+            raise ValueError(f'No claims found in file: {options.spec_file}')
         return [_prove_claim_rpc(claim) for claim in all_claims]
 
     def get_claim_modules(
