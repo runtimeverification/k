@@ -25,8 +25,8 @@ public class POSet<T> implements Serializable {
   private final Map<T, Set<T>> relations;
 
   @SafeVarargs
-  public POSet(scala.Tuple2<T, T>... directRelations) {
-    this(Arrays.stream(directRelations).map(t -> Pair.of(t._1, t._2)).collect(Collectors.toSet()));
+  public POSet(Pair<T, T>... directRelations) {
+    this(Arrays.stream(directRelations).collect(Collectors.toSet()));
   }
 
   public POSet(scala.collection.Set<scala.Tuple2<T, T>> directRelations) {
