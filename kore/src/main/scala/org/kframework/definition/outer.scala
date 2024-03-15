@@ -926,6 +926,24 @@ case class Production(
   override val isSyntax          = true
   override val isNonSyntax       = false
   override def withAtt(att: Att) = Production(klabel, params, sort, items, att)
+
+  lazy val defaultFormat: String =
+    if (isPrefixProduction && nonterminals.size > 0 && nonterminals.forall(_.name.isDefined)) {
+      items.zipWithIndex
+        .map {
+          case (Terminal("("), i)              => s"%${i + 1}..."
+          case (Terminal(_), i)                => s"%${i + 1}"
+          case (NonTerminal(_, Some(name)), i) => s"$name: %${i + 1}"
+          case (RegexTerminal(_, _, _), _) =>
+            throw new IllegalArgumentException(
+              "Default format not supported for productions with regex terminals"
+            )
+          case _ => throw new AssertionError()
+        }
+        .mkString(" ")
+    } else {
+      items.zipWithIndex.map { case (_, i) => s"%${i + 1}" }.mkString(" ")
+    }
 }
 
 object Production {
