@@ -10,13 +10,16 @@ from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRule, KSyntaxSort
 from ..kore.prelude import inj
 from ..kore.syntax import (
+    And,
     App,
     Axiom,
     Equals,
     EVar,
     Exists,
+    Implies,
     Import,
     Module,
+    Not,
     SortApp,
     SortDecl,
     SortVar,
@@ -101,6 +104,7 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += _idem_axioms(module)
     sentences += _unit_axioms(module)
     sentences += _functional_axioms(module)
+    sentences += _no_confusion_axioms(module)
 
     return Module(name=name, sentences=sentences, attrs=attrs)
 
@@ -456,6 +460,83 @@ def _functional_axioms(module: KFlatModule) -> list[Axiom]:
         if not Atts.FUNCTIONAL in sentence.att:
             continue
         res.append(functional_axiom(sentence))
+    return res
+
+
+def _no_confusion_axioms(module: KFlatModule) -> list[Axiom]:
+    def axiom_for_same_constr(production: KProduction) -> Axiom:
+        assert production.klabel
+
+        symbol = _label_name(production.klabel.name)
+        sort_params = tuple(_sort_var(param) for param in production.klabel.params)
+        sort = sort_to_kore(production.sort, production)
+
+        def app(args: Iterable[Pattern]) -> App:
+            return App(symbol, sort_params, args)
+
+        param_sorts = tuple(sort_to_kore(item.sort, production) for item in production.non_terminals)
+        xs = tuple(EVar(f'X{i}', sort) for i, sort in enumerate(param_sorts))
+        ys = tuple(EVar(f'Y{i}', sort) for i, sort in enumerate(param_sorts))
+
+        return Axiom(
+            sort_params,
+            Implies(
+                sort,
+                And(sort, (app(xs), app(ys))),
+                app(And(x.sort, (x, y)) for x, y in zip(xs, ys, strict=True)),
+            ),
+            attrs=(App('constructor'),),
+        )
+
+    def axiom_for_diff_constr(prod1: KProduction, prod2: KProduction) -> Axiom:
+        assert prod1.klabel
+        assert prod2.klabel
+        assert prod1.sort == prod2.sort
+
+        sort = sort_to_kore(prod1.sort, prod1)
+
+        symbol1 = _label_name(prod1.klabel.name)
+        sort_params1 = tuple(_sort_var(param) for param in prod1.klabel.params)
+        param_sorts1 = tuple(sort_to_kore(item.sort, prod1) for item in prod1.non_terminals)
+        xs = tuple(EVar(f'X{i}', sort) for i, sort in enumerate(param_sorts1))
+
+        symbol2 = _label_name(prod2.klabel.name)
+        sort_params2 = tuple(_sort_var(param) for param in prod2.klabel.params)
+        param_sorts2 = tuple(sort_to_kore(item.sort, prod2) for item in prod2.non_terminals)
+        ys = tuple(EVar(f'Y{i}', sort) for i, sort in enumerate(param_sorts2))
+
+        return Axiom(
+            sort_params1,  # TODO Why the asymmetry?
+            Not(
+                sort,
+                And(
+                    sort,
+                    (
+                        App(symbol1, sort_params1, xs),
+                        App(symbol2, sort_params2, ys),
+                    ),
+                ),
+            ),
+            attrs=(App('constructor'),),
+        )
+
+    prods = [
+        sent
+        for sent in module.sentences
+        if isinstance(sent, KProduction)
+        and sent.klabel
+        and sent.klabel.name not in BUILTIN_LABELS
+        and Atts.CONSTRUCTOR in sent.att
+    ]
+
+    res: list[Axiom] = []
+    res += (axiom_for_same_constr(p) for p in prods if p.non_terminals)
+    res += (
+        axiom_for_diff_constr(p1, p2)
+        for p1 in prods
+        for p2 in prods
+        if p1.sort == p2.sort and p1.klabel and p2.klabel and p1.klabel.name < p2.klabel.name
+    )
     return res
 
 
