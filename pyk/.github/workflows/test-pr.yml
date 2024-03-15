@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           # fetch-depth 0 means deep clone the repo
@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-env
       - name: 'Run code quality checks'
         run: make check
       - name: 'Run pyupgrade'
@@ -49,9 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-env
       - name: 'Build documentation'
         run: make docs
 
@@ -60,11 +60,17 @@ jobs:
     name: 'Unit Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: 'Run unit tests'
         run: make cov-unit
 
@@ -73,29 +79,13 @@ jobs:
     name: 'Profiling'
     runs-on: [ubuntu-latest]
     timeout-minutes: 10
-    strategy:
-      matrix:
-        python-version: ['3.10']
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Install Python'
-        uses: actions/setup-python@v4
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
-      - name: 'Install K'
-        run: |
-          K_VERSION=$(cat deps/k_release)
-          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
-          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
-          sudo apt-get update
-          sudo apt-get -y install ./${DEB_PACKAGE_NAME}
-      - name: 'Set up Java'
-        run: |
-          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
-          java --version
+          install-k: true
       - name: 'Run profiling'
         run: |
           make profile PROF_ARGS=-n4
@@ -106,30 +96,13 @@ jobs:
     name: 'Integration Tests'
     runs-on: [ubuntu-latest]
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.10', '3.11']
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Install Python'
-        uses: actions/setup-python@v4
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
-      - name: 'Install K'
-        run: |
-          K_VERSION=$(cat deps/k_release)
-          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
-          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
-          sudo apt-get update
-          sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
-      - name: 'Set up Java'
-        run: |
-          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
-          java --version
+          install-k: true
       - name: 'Run integration tests'
         run: make cov-integration COV_ARGS='-n4 --timeout 500'
 
@@ -138,30 +111,13 @@ jobs:
     name: 'K Regression Tests'
     runs-on: [ubuntu-latest]
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.11']
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
-      - name: 'Install Python'
-        uses: actions/setup-python@v4
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v8
-      - name: 'Install K'
-        run: |
-          K_VERSION=$(cat deps/k_release)
-          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
-          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
-          sudo apt-get update
-          sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
-      - name: 'Set up Java'
-        run: |
-          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
-          java --version
+          install-k: true
       - name: 'Run K regression tests'
         run: make test-regression-new -j4
 
@@ -171,26 +127,25 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13]
-        target: [pyk-python310, pyk-python311]
     runs-on: ${{ matrix.os }}
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: 'Install Nix/Cachix'
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v26
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v14
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_KEY }}'
       - name: 'Build pyk'
-        run: GC_DONT_GC=1 nix build --print-build-logs .#${{ matrix.target }}
+        run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
 
   build-docker:
-    needs: integration-tests
+    needs: code-quality-checks
     name: 'Build Docker Image'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
