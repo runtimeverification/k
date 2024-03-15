@@ -2,6 +2,10 @@
 
 package org.kframework.definition
 
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameter
+import org.junit.runners.Parameterized.Parameters
 import org.junit.Assert
 import org.junit.Test
 import org.kframework.attributes.Att
@@ -343,4 +347,95 @@ class OuterTest {
 
     checkOrdering(sentenceListWithAtts)
   }
+}
+
+@RunWith(classOf[Parameterized])
+class DefaultFormatTest(
+    production: Production,
+    expected: String
+) {
+  @Test def test(): Unit =
+    Assert.assertEquals(expected, production.defaultFormat)
+}
+
+object DefaultFormatTest {
+  val S = Sort("S")
+
+  @Parameters
+  def data(): java.util.Collection[Array[Object]] = java.util.Arrays.asList(
+    Array[Object](Production(Seq(), S, Seq(), Att.empty), ""),
+    Array[Object](Production(Seq(), S, Seq(Terminal("foo")), Att.empty), "%1"),
+    Array[Object](Production(Seq(), S, Seq(Terminal("foo"), Terminal("bar")), Att.empty), "%1 %2"),
+    Array[Object](
+      Production(Seq(), S, Seq(Terminal("foo"), Terminal("bar"), Terminal("baz")), Att.empty),
+      "%1 %2 %3"
+    ),
+    Array[Object](
+      Production(Seq(), S, Seq(Terminal("foo"), NonTerminal(S, None), Terminal("bar")), Att.empty),
+      "%1 %2 %3"
+    ),
+    Array[Object](
+      Production(Seq(), S, Seq(Terminal("foo"), Terminal("("), Terminal(")")), Att.empty),
+      "%1 %2 %3"
+    ),
+    Array[Object](
+      Production(
+        Seq(),
+        S,
+        Seq(Terminal("foo"), Terminal("("), NonTerminal(S, None), Terminal(")")),
+        Att.empty
+      ),
+      "%1 %2 %3 %4"
+    ),
+    Array[Object](
+      Production(
+        Seq(),
+        S,
+        Seq(Terminal("foo"), Terminal("("), NonTerminal(S, None), Terminal(")")),
+        Att.empty
+      ),
+      "%1 %2 %3 %4"
+    ),
+    Array[Object](
+      Production(
+        Seq(),
+        S,
+        Seq(Terminal("foo"), Terminal("("), NonTerminal(S, Some("x")), Terminal(")")),
+        Att.empty
+      ),
+      "%1 %2... x: %3 %4"
+    ),
+    Array[Object](
+      Production(
+        Seq(),
+        S,
+        Seq(
+          Terminal("foo"),
+          Terminal("("),
+          NonTerminal(S, Some("x")),
+          Terminal(","),
+          NonTerminal(S, None),
+          Terminal(")")
+        ),
+        Att.empty
+      ),
+      "%1 %2 %3 %4 %5 %6"
+    ),
+    Array[Object](
+      Production(
+        Seq(),
+        S,
+        Seq(
+          Terminal("foo"),
+          Terminal("("),
+          NonTerminal(S, Some("x")),
+          Terminal(","),
+          NonTerminal(S, Some("y")),
+          Terminal(")")
+        ),
+        Att.empty
+      ),
+      "%1 %2... x: %3 %4 y: %5 %6"
+    )
+  )
 }
