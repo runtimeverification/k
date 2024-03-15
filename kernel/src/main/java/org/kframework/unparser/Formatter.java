@@ -38,10 +38,7 @@ public class Formatter {
       resetColor(indenter, c.production(), colorize);
     } else if (term instanceof TermCons tc) {
       String format =
-          tc.production()
-              .att()
-              .getOptional(Att.FORMAT())
-              .orElse(defaultFormat(tc.production().items().size()));
+          tc.production().att().getOptional(Att.FORMAT()).orElse(tc.production().defaultFormat());
       for (int i = 0; i < format.length(); i++) {
         char c = format.charAt(i);
         if (c == '%') {
@@ -131,15 +128,6 @@ public class Formatter {
         }
       }
     }
-  }
-
-  public static String defaultFormat(int size) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 1; i <= size; i++) {
-      sb.append("%").append(i).append(" ");
-    }
-    sb.deleteCharAt(sb.length() - 1);
-    return sb.toString();
   }
 
   private static void color(Indenter indenter, Production p, int offset, ColorSetting colorize) {
