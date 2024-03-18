@@ -116,7 +116,7 @@ trait Sort extends Ordered[Sort] with AttValue {
     import scala.math.Ordering.Implicits._
     Ordering
       .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity)))
-      .compare((this.name, this.params), (this.name, this.params))
+      .compare((this.name, this.params), (that.name, that.params))
   }
 
   def head: SortHead = ADT.SortHead(name, params.size)
