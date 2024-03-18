@@ -5,7 +5,14 @@ from typing import IO, TYPE_CHECKING, Any
 
 from pyk.ktool.kompile import KompileBackend
 
-from .args import DefinitionOptions, DisplayOptions, KDefinitionOptions, LoggingOptions, OutputFileOptions
+from .args import (
+    DefinitionOptions,
+    DisplayOptions,
+    KDefinitionOptions,
+    KompileOptions,
+    LoggingOptions,
+    OutputFileOptions,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -102,7 +109,7 @@ class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
         }
 
 
-class KompileCommandOptions(LoggingOptions, KDefinitionOptions):
+class KompileCommandOptions(LoggingOptions, KDefinitionOptions, KompileOptions):
     definition_dir: Path | None
     main_file: str
     backend: KompileBackend

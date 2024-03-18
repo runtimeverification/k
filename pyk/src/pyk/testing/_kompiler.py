@@ -16,7 +16,7 @@ from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
 from ..ktool import TypeInferenceMode
-from ..ktool.kompile import DefinitionInfo, Kompile
+from ..ktool.kompile import DefinitionInfo, Kompile, LLVMKompileType
 from ..ktool.kprint import KPrint
 from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
@@ -186,7 +186,7 @@ class KoreClientTest(KompiledTest):
         kwargs = dict(self.LLVM_ARGS)
         kwargs['backend'] = 'llvm'
         kwargs['main_file'] = self.KOMPILE_MAIN_FILE
-        kwargs['llvm_kompile_type'] = 'c'
+        kwargs['llvm_kompile_type'] = LLVMKompileType.C
         return kompile(**kwargs)
 
     @pytest.fixture

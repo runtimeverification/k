@@ -1,3 +1,8 @@
-<k>
-  foo ( sym2 ( 222 ) +Num 1 ) ~> .K
-</k>
+<generatedTop>
+  <k>
+    foo ( sym2 ( 222 ) +Num 1 ) ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
