@@ -5,6 +5,7 @@ import collection._
 import org.kframework.attributes.Att
 import org.kframework.definition._
 import org.kframework.kore.KORE.Sort
+import org.kframework.Collections
 import scala.collection.immutable.Iterable
 
 object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module] {
@@ -15,13 +16,14 @@ object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module]
       .apply(m.sentences)
       .groupBy(l => l.klabel)
       .map { case (klabel, userListInfo) =>
-        val minimalSorts = m.subsorts.minimal(userListInfo.map(li => li.sort))
+        val minimalSorts = m.subsorts.minimal(Collections.iterable(userListInfo.map(li => li.sort)))
         if (minimalSorts.size > 1) {
           val newBottomSort = Sort("GeneratedListBottom{" + klabel.name.replace("|", "") + "}")
 
           Set[Sentence]()
             .|(
-              minimalSorts
+              Collections
+                .immutable(minimalSorts)
                 .map(s => Production(Seq(), s, Seq(NonTerminal(newBottomSort, None)), Att.empty))
             )
             .+(SyntaxSort(Seq(), newBottomSort, Att.empty))

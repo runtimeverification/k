@@ -28,7 +28,7 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<KEME
   public Either<Set<KEMException>, Term> apply(TermCons tc) {
     if (overloads.elements().contains(tc.production()) && tc.items().isEmpty()) {
       Set<Production> candidates =
-          stream(overloads.elements())
+          streamIter(overloads.elements())
               .filter(
                   p ->
                       p.klabel().isDefined()
