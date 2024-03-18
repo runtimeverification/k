@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import logging
+from itertools import repeat
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ..kast import EMPTY_ATT, Atts, KInner
+from ..kast.att import Format
 from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
-from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRule, KSyntaxSort
+from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRegexTerminal, KRule, KSyntaxSort, KTerminal
 from ..kore.prelude import inj
 from ..kore.syntax import (
     And,
@@ -28,7 +30,7 @@ from ..kore.syntax import (
     SymbolDecl,
 )
 from ..prelude.k import K_ITEM, K
-from ..utils import FrozenDict
+from ..utils import FrozenDict, intersperse
 from ._kast_to_kore import _kast_to_kore
 from ._utils import munge
 
@@ -160,6 +162,9 @@ def _parse_special_att_value(key: AttKey, value: Any) -> tuple[tuple[Sort, ...],
     if key == Atts.SOURCE:
         assert isinstance(value, Path)
         return (), (String(f'Source({value})'),)
+    if key == Atts.FORMAT:
+        assert isinstance(value, Format)
+        return (), (String(value.unparse()),)
     if key == Atts.ELEMENT:
         # TODO avoid special casing by pre-processing the attribute into a KApply
         # This should be handled by the frontend
@@ -608,7 +613,6 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
             Atts.CELL_FRAGMENT,
             Atts.CELL_NAME,
             Atts.CELL_OPT_ABSENT,
-            Atts.COLOR,
             Atts.GROUP,
             Atts.IMPURE,
             Atts.INDEX,
@@ -625,11 +629,17 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         },
     )
     module = _discard_hook_atts(module)
+    module = _discard_format_atts(module)
     module = _add_anywhere_atts(module)
     module = _add_symbol_atts(module, Atts.MACRO, _is_macro)
     module = _add_symbol_atts(module, Atts.FUNCTIONAL, _is_functional)
     module = _add_symbol_atts(module, Atts.INJECTIVE, _is_injective)
     module = _add_symbol_atts(module, Atts.CONSTRUCTOR, _is_constructor)
+    module = _add_default_format_atts(module)
+    module = _inline_terminals_in_format_atts(module)
+    module = _add_colors_atts(module)
+    module = _discard_symbol_atts(module, [Atts.COLOR])
+    module = _add_terminals_atts(module)
 
     return module
 
@@ -918,6 +928,25 @@ def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = 
     return module.let(sentences=sentences)
 
 
+def _discard_format_atts(module: KFlatModule) -> KFlatModule:
+    """Remove format attributes from symbol productions with items other than terminals and non-terminals."""
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        if all(isinstance(item, (KTerminal, KNonTerminal)) for item in sentence.items):
+            return sentence
+
+        return sentence.let(att=sentence.att.discard([Atts.FORMAT]))
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
 def _discard_symbol_atts(module: KFlatModule, atts: Container[AttKey]) -> KFlatModule:
     """Remove certain attributes from symbol productions."""
 
@@ -965,3 +994,119 @@ def _is_overloaded_by(defn: KDefinition, prod1: KProduction, prod2: KProduction)
     if any(sort1 not in defn.subsorts(sort2) for sort1, sort2 in zip(arg_sorts1, arg_sorts2, strict=True)):
         return False
     return prod1 != prod2
+
+
+def _add_default_format_atts(module: KFlatModule) -> KFlatModule:
+    """Add a default format attribute value to each symbol profuction missing one."""
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        if Atts.FORMAT in sentence.att:
+            return sentence
+
+        return sentence.let(att=sentence.att.update([Atts.FORMAT(sentence.default_format)]))
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _inline_terminals_in_format_atts(module: KFlatModule) -> KFlatModule:
+    """For a terminal `"foo"` change `%i` to `%cfoo%r`. For a non-terminal, decrease the index."""
+
+    def inline_terminals(formatt: Format, production: KProduction) -> Format:
+        nt_indexes: dict[int, int] = {}
+        nt_index = 1
+        for i, item in enumerate(production.items):
+            if isinstance(item, KNonTerminal):
+                nt_indexes[i] = nt_index
+                nt_index += 1
+
+        tokens: list[str] = []
+        for token in formatt.tokens:
+            if len(token) > 1 and token[0] == '%' and token[1].isdigit():
+                index = int(token[1:])
+                if index > len(production.items):  # Note: index is 1-based
+                    raise ValueError(r'Format index out of bounds: {token}')
+                item_index = index - 1
+                item = production.items[item_index]
+
+                match item:
+                    case KTerminal(value):
+                        escaped = value.replace('\\', r'\\').replace('$', r'\$')
+                        interspersed = intersperse(escaped.split('%'), '%%')
+                        new_tokens = [s for s in interspersed if s]
+                        tokens += ['%c']
+                        tokens += new_tokens
+                        tokens += ['%r']
+                    case KNonTerminal():
+                        new_index = nt_indexes[item_index]
+                        tokens.append(f'%{new_index}')
+                    case _:
+                        assert isinstance(item, KRegexTerminal)
+                        raise ValueError(r'Invalid reference to regex terminal: {token}')
+            else:
+                tokens.append(token)
+        return Format(tokens)
+
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        if Atts.FORMAT not in sentence.att:
+            return sentence
+
+        formatt = sentence.att[Atts.FORMAT]
+        formatt = inline_terminals(formatt, sentence)
+
+        return sentence.let(att=sentence.att.update([Atts.FORMAT(formatt)]))
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _add_colors_atts(module: KFlatModule) -> KFlatModule:
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        if Atts.FORMAT not in sentence.att:
+            return sentence
+
+        if Atts.COLOR not in sentence.att:
+            return sentence
+
+        formatt = sentence.att[Atts.FORMAT]
+        ncolors = sum(1 for token in formatt.tokens if token == '%c')
+        color = sentence.att[Atts.COLOR]
+        colors = ','.join(repeat(color, ncolors))
+
+        return sentence.let(att=sentence.att.update([Atts.COLORS(colors)]))
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
+
+
+def _add_terminals_atts(module: KFlatModule) -> KFlatModule:
+    def update(sentence: KSentence) -> KSentence:
+        if not isinstance(sentence, KProduction):
+            return sentence
+
+        if not sentence.klabel:
+            return sentence
+
+        terminals = ''.join('0' if isinstance(item, KNonTerminal) else '1' for item in sentence.items)
+        return sentence.let(att=sentence.att.update([Atts.TERMINALS(terminals)]))
+
+    sentences = tuple(update(sent) for sent in module)
+    return module.let(sentences=sentences)
