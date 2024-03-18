@@ -2,10 +2,8 @@ amb-rew
 append
 bad-bytes-literal
 bad-flags
-bison-glr-bug
 bison-parser-library
 boundary-cells-opt
-bytes-coverage
 cell-bag-sort-llvm
 cell-sort-haskell
 checkClaimError
@@ -18,7 +16,6 @@ configuration-formatting
 context-alias
 context-alias-2
 context-labels
-coverage
 domains-lemmas-no-smt
 doubleinj
 equals-formatting
@@ -33,7 +30,6 @@ glr3
 glr4
 help
 imp-haskell
-imp-json
 imp-kore
 imp++-llvm
 imp-llvm
@@ -46,7 +42,6 @@ issue-1175
 issue-1193
 issue-1263
 issue-1384
-issue-1388
 issue-1436
 issue-1489-claimLoc
 issue-1528
@@ -72,7 +67,6 @@ issue-2812-kprove-filter-claims
 issue-2909-allow-anywhere-haskell
 issue-3035-antileft
 issue-313
-issue-3285-nonexistent-concrete-rule
 issue-3385
 issue-3446
 issue-3520-freshConfig

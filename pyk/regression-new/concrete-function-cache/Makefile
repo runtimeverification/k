@@ -1,8 +1,8 @@
-DEF=../concrete-function/a
+DEF=a
 TESTDIR=.
 EXT=a
 KOMPILE_BACKEND=haskell
-KOMPILE_FLAGS=--concrete-rules "A.f2"
+KOMPILE_FLAGS=
 
 %-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))

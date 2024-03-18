@@ -1,6 +1,6 @@
 DEF=test
 EXT=test
 TESTDIR=.
-KOMPILE_FLAGS+=--syntax-module TEST --concrete-rules "TEST.f-of-a-is-b"
+KOMPILE_FLAGS+=--syntax-module TEST
 
 include ../include/ktest-fail.mak
