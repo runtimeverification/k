@@ -7,7 +7,7 @@ from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, final
 
-from ..utils import check_dir_path, check_file_path
+from ..utils import POSet, check_dir_path, check_file_path
 from .parser import KoreParser
 from .syntax import (
     DV,
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Any
 
+    from ..utils import FrozenDict
     from .syntax import Definition, Kore, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -211,30 +212,11 @@ def _app_from_dict(dct: Any) -> App:
 @final
 @dataclass
 class KoreSortTable:
-    _subsort_table: dict[Sort, set[Sort]]
+    _subsort_table: FrozenDict[Sort, frozenset[Sort]]
 
     def __init__(self, subsorts: Iterable[tuple[Sort, Sort]]):
-        self._subsort_table = self._create_subsort_table(subsorts)
-
-    @staticmethod
-    def _create_subsort_table(subsorts: Iterable[tuple[Sort, Sort]]) -> dict[Sort, set[Sort]]:
-        res: dict[Sort, set[Sort]] = {}
-
-        for subsort, supersort in subsorts:
-            if supersort not in res:
-                res[supersort] = set()
-            res[supersort].add(subsort)
-
-        supersorts = res.keys()
-        for sort_k in supersorts:
-            for sort_j in supersorts:
-                if sort_k not in res[sort_j]:
-                    continue
-
-                for sort_i in res[sort_k]:
-                    res[sort_j].add(sort_i)
-
-        return res
+        poset = POSet((y, x) for x, y in subsorts)
+        self._subsort_table = poset.image
 
     @staticmethod
     def for_definition(definition: Definition) -> KoreSortTable:

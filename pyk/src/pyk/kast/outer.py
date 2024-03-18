@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, final
 
 from ..prelude.kbool import TRUE
 from ..prelude.ml import ML_QUANTIFIERS
-from ..utils import filter_none, single, unique
+from ..utils import POSet, filter_none, single, unique
 from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
     KApply,
@@ -36,6 +36,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
     from os import PathLike
     from typing import Any, Final, TypeVar
+
+    from ..utils import FrozenDict
 
     RL = TypeVar('RL', bound='KRuleLike')
 
@@ -283,6 +285,17 @@ class KProduction(KSentence):
 
     def let_att(self, att: KAtt) -> KProduction:
         return self.let(att=att)
+
+    @cached_property
+    def as_subsort(self) -> tuple[KSort, KSort] | None:
+        """Return a pair `(supersort, subsort)` if `self` is a subsort production, and `None` otherwise."""
+        if len(self.items) != 1:
+            return None
+        item = self.items[0]
+        if not isinstance(item, KNonTerminal):
+            return None
+        assert not self.klabel
+        return self.sort, item.sort
 
     @cached_property
     def non_terminals(self) -> tuple[KNonTerminal, ...]:
@@ -989,7 +1002,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     main_module: InitVar[KFlatModule]
 
     _production_for_klabel: dict[KLabel, KProduction]
-    _subsorts: dict[KSort, list[KSort]]
     _init_config: dict[KSort, KInner]
     _empty_config: dict[KSort, KInner]
 
@@ -1016,7 +1028,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         object.__setattr__(self, 'att', att)
         object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, '_production_for_klabel', {})
-        object.__setattr__(self, '_subsorts', {})
         object.__setattr__(self, '_init_config', {})
         object.__setattr__(self, '_empty_config', {})
 
@@ -1203,19 +1214,15 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         """Returns the argument sorts of a given `KLabel` by looking up the production."""
         return self.production_for_klabel(label).argument_sorts
 
-    def subsorts(self, sort: KSort) -> list[KSort]:
-        """Returns all subsorts of a given `KSort` by inspecting the definition (table computed lazily and memoized)."""
-        if sort not in self._subsorts:
-            self._subsorts[sort] = self._compute_subsorts(sort)
-        return self._subsorts[sort]
+    @cached_property
+    def subsort_table(self) -> FrozenDict[KSort, frozenset[KSort]]:
+        """Return a mapping from sorts to all their proper subsorts."""
+        poset = POSet(subsort for prod in self.productions if (subsort := prod.as_subsort) is not None)
+        return poset.image
 
-    def _compute_subsorts(self, sort: KSort) -> list[KSort]:
-        _subsorts = []
-        for prod in self.productions:
-            if prod.sort == sort and len(prod.items) == 1 and type(prod.items[0]) is KNonTerminal:
-                _subsort = prod.items[0].sort
-                _subsorts.extend([_subsort] + self.subsorts(prod.items[0].sort))
-        return list(set(_subsorts))
+    def subsorts(self, sort: KSort) -> frozenset[KSort]:
+        """Return all subsorts of a given `KSort` by inspecting the definition."""
+        return self.subsort_table.get(sort, frozenset())
 
     def sort(self, kast: KInner) -> KSort | None:
         """Computes the sort of a given term using best-effort simple sorting algorithm, returns `None` on algorithm failure."""

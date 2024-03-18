@@ -232,17 +232,6 @@ def symbol_prod_to_kore(production: KProduction) -> SymbolDecl:
 
 
 def _subsort_axioms(module: KFlatModule) -> list[Axiom]:
-    def extract_subsort(production: KProduction) -> tuple[KSort, KSort] | None:
-        if len(production.items) != 1:
-            return None
-
-        item = production.items[0]
-        if not isinstance(item, KNonTerminal):
-            return None
-
-        assert not production.klabel
-        return item.sort, production.sort
-
     def subsort_axiom(subsort: Sort, supersort: Sort) -> Axiom:
         R = SortVar('R')  # noqa: N806
         Val = EVar('Val', supersort)  # noqa: N806
@@ -266,11 +255,11 @@ def _subsort_axioms(module: KFlatModule) -> list[Axiom]:
         if not isinstance(sentence, KProduction):
             continue
 
-        subsort_res = extract_subsort(sentence)
+        subsort_res = sentence.as_subsort
         if not subsort_res:
             continue
 
-        subsort, supersort = subsort_res
+        supersort, subsort = subsort_res
         if supersort == K:
             continue
 
