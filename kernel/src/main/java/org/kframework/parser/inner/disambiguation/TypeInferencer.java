@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Collections;
 import org.kframework.POSet;
 import org.kframework.attributes.Att;
@@ -39,9 +40,7 @@ import org.kframework.parser.TermCons;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.Tuple2;
 import scala.collection.Seq;
-import scala.collection.Set;
 
 /**
  * Class to manage communication with z3 for the purposes of type inference. This class is driven by
@@ -166,7 +165,7 @@ public class TypeInferencer implements AutoCloseable {
     Map<SortHead, Integer> ordinals = new HashMap<>();
     int i = 0;
 
-    for (Sort s : iterable(relations.sortedElements())) {
+    for (Sort s : relations.sortedElements()) {
       if (!isRealSort(s.head())) {
         continue;
       }
@@ -174,19 +173,20 @@ public class TypeInferencer implements AutoCloseable {
     }
     // provide fixed interpretation of subsort relation
     println("(define-fun " + name + " ((s1 Sort) (s2 Sort)) Bool (or");
-    for (Tuple2<Sort, Set<Sort>> relation :
-        stream(relations.relations())
-            .sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1().head(), 0)))
+    for (Pair<Sort, java.util.Set<Sort>> relation :
+        relations.relations().entrySet().stream()
+            .map(t -> Pair.of(t.getKey(), t.getValue()))
+            .sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t.getLeft().head(), 0)))
             .toList()) {
-      if (!isRealSort(relation._1().head())) {
+      if (!isRealSort(relation.getLeft().head())) {
         continue;
       }
-      for (Sort s2 : iterable(relation._2())) {
+      for (Sort s2 : relation.getRight()) {
         if (!isRealSort(s2.head())) {
           continue;
         }
         print("  (and (= s1 ");
-        printSort(relation._1());
+        printSort(relation.getLeft());
         print(") (= s2 ");
         printSort(s2);
         println("))");
