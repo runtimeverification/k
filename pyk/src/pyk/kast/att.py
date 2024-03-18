@@ -226,6 +226,7 @@ class Atts:
     ALIAS_REC: Final = AttKey('alias-rec', type=_NONE)
     ANYWHERE: Final = AttKey('anywhere', type=_NONE)
     ASSOC: Final = AttKey('assoc', type=_NONE)
+    BRACKET: Final = AttKey('bracket', type=_NONE)
     CIRCULARITY: Final = AttKey('circularity', type=_NONE)
     CELL: Final = AttKey('cell', type=_NONE)
     CELL_COLLECTION: Final = AttKey('cellCollection', type=_NONE)
