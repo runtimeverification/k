@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from abc import abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable
@@ -14,7 +15,7 @@ from typing import TYPE_CHECKING, final
 from ..prelude.kbool import TRUE
 from ..prelude.ml import ML_QUANTIFIERS
 from ..utils import filter_none, single, unique
-from .att import EMPTY_ATT, Atts, KAst, KAtt, WithKAtt
+from .att import EMPTY_ATT, Atts, Format, KAst, KAtt, WithKAtt
 from .inner import (
     KApply,
     KInner,
@@ -292,6 +293,62 @@ class KProduction(KSentence):
     def argument_sorts(self) -> list[KSort]:
         """Return the sorts of the non-terminal positions of the productions."""
         return [knt.sort for knt in self.non_terminals]
+
+    @cached_property
+    def is_prefix(self) -> bool:
+        """
+        The production is of the form `t* "(" (n ("," n)*)? ")"`.
+
+        Here, `t` is a terminal other than `"("`, `","` or `")"`, and `n` a non-terminal.
+        Example: `Int ::= "mul" "(" Int "," Int ")"`
+        """
+
+        def encode(item: KProductionItem) -> str:
+            match item:
+                case KTerminal(value):
+                    if value in ['(', ',', ')']:
+                        return value
+                    return 't'
+                case KNonTerminal():
+                    return 'n'
+                case KRegexTerminal():
+                    return 'r'
+                case _:
+                    raise AssertionError()
+
+        string = ''.join(encode(item) for item in self.items)
+        pattern = r't*\((n(,n)*)?\)'
+        return bool(re.fullmatch(pattern, string))
+
+    @cached_property
+    def is_record(self) -> bool:
+        """The production is prefix with labelled nonterminals"""
+        return bool(self.is_prefix and self.non_terminals and all(item.name is not None for item in self.non_terminals))
+
+    @property
+    def default_format(self) -> Format:
+        format_str: str
+        if self.is_record:
+            tokens = []
+            for i, item in enumerate(self.items):
+                match item:
+                    case KTerminal('('):
+                        tokens.append(f'%{i + 1}...')
+                    case KTerminal(_):
+                        tokens.append(f'%{i + 1}')
+                    case KNonTerminal(_, name):
+                        assert name is not None
+                        tokens.append(f'{name}:')
+                        tokens.append(f'%{i + 1}')
+                    case KRegexTerminal():
+                        raise ValueError('Default format is not supported for productions with regex terminals')
+                    case _:
+                        raise AssertionError()
+            format_str = ' '.join(tokens)
+        else:
+            format_str = ' '.join(f'%{i}' for i in range(1, len(self.items) + 1))
+
+        return Format.parse(format_str)
 
 
 @final
