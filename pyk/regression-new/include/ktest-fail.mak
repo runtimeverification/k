@@ -1,11 +1,12 @@
+SHELL=/bin/bash
+
+ROOT=$(abspath $(MAKEFILE_PATH)/../..)
+POETRY_RUN?=poetry run -C $(ROOT)
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
-K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
-KOMPILE=${K_BIN}/kompile
-KAST=${K_BIN}/kast
-# and kdep
-KDEP=${K_BIN}/kdep
+KOMPILE=$(POETRY_RUN) pyk kompile
+KAST=$(POETRY_RUN) pyk parse
 # path to put -kompiled directory in
 DEFDIR?=.
 # all tests in test directory with matching file extension
@@ -14,9 +15,9 @@ TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 KOMPILE_BACKEND?=llvm
 KAST_TESTS?=$(wildcard ./*.kast)
 
-KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked
-KPROVE_FLAGS+=--no-exc-wrap
-KRUN_FLAGS+=--no-exc-wrap
+KOMPILE_FLAGS+=--type-inference-mode checked
+KPROVE_FLAGS+=
+KRUN_FLAGS+=
 
 CHECK=| diff -
 

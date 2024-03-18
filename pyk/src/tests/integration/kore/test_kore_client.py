@@ -46,6 +46,7 @@ from pyk.kore.rpc import (
     VacuousResult,
 )
 from pyk.kore.syntax import And, App, Axiom, Bottom, Equals, EVar, Implies, Import, Module, Rewrites, Top
+from pyk.ktool.kompile import LLVMKompileType
 from pyk.testing import KoreClientTest
 
 from ..utils import K_FILES
@@ -749,7 +750,7 @@ def imp_dir(kompile: Kompiler) -> Path:
 
 @pytest.fixture(scope='module')
 def imp_llvm_dir(kompile: Kompiler) -> Path:
-    return kompile(K_FILES / 'imp.k', backend='llvm', llvm_kompile_type='c')
+    return kompile(K_FILES / 'imp.k', backend='llvm', llvm_kompile_type=LLVMKompileType.C)
 
 
 @pytest.mark.parametrize('args', START_BOOSTER_SERVER_TEST_DATA, ids=count())

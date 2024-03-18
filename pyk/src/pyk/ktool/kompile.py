@@ -253,27 +253,30 @@ class LLVMKompileType(Enum):
 @dataclass(frozen=True)
 class LLVMKompile(Kompile):
     base_args: KompileArgs
-    llvm_kompile_type: LLVMKompileType
-    llvm_kompile_output: str | None
+    llvm_kompile_type: LLVMKompileType | None
+    llvm_kompile_output: Path | None
     opt_level: int
     ccopts: tuple[str, ...]
     no_llvm_kompile: bool
     enable_search: bool
     enable_llvm_debug: bool
+    llvm_proof_hint_instrumentation: bool
 
     def __init__(
         self,
         base_args: KompileArgs,
         *,
         llvm_kompile_type: str | LLVMKompileType | None = None,
-        llvm_kompile_output: str | None = None,
+        llvm_kompile_output: str | Path | None = None,
         opt_level: int | None = None,
         ccopts: Iterable[str] = (),
         no_llvm_kompile: bool = False,
         enable_search: bool = False,
         enable_llvm_debug: bool = False,
+        llvm_proof_hint_instrumentation: bool = False,
     ):
         llvm_kompile_type = LLVMKompileType(llvm_kompile_type) if llvm_kompile_type is not None else None
+        llvm_kompile_output = Path(llvm_kompile_output) if llvm_kompile_output is not None else None
 
         opt_level = opt_level or 0
         if not (0 <= opt_level <= 3):
@@ -289,6 +292,7 @@ class LLVMKompile(Kompile):
         object.__setattr__(self, 'no_llvm_kompile', no_llvm_kompile)
         object.__setattr__(self, 'enable_search', enable_search)
         object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
+        object.__setattr__(self, 'llvm_proof_hint_instrumentation', llvm_proof_hint_instrumentation)
 
     @property
     def backend(self) -> Literal[KompileBackend.LLVM]:
@@ -302,7 +306,7 @@ class LLVMKompile(Kompile):
             args += ['--llvm-kompile-type', self.llvm_kompile_type.value]
 
         if self.llvm_kompile_output is not None:
-            args += ['--llvm-kompile-output', self.llvm_kompile_output]
+            args += ['--llvm-kompile-output', str(self.llvm_kompile_output)]
 
         if self.opt_level:
             args += [f'-O{self.opt_level}']
@@ -318,6 +322,9 @@ class LLVMKompile(Kompile):
 
         if self.enable_llvm_debug:
             args += ['--enable-llvm-debug']
+
+        if self.llvm_proof_hint_instrumentation:
+            args += ['--llvm-proof-hint-instrumentation']
 
         return args
 
@@ -337,6 +344,8 @@ class KompileArgs:
     bison_parser_library: bool
     post_process: str | None
     read_only: bool
+    coverage: bool
+    bison_lists: bool
 
     def __init__(
         self,
@@ -353,6 +362,8 @@ class KompileArgs:
         bison_parser_library: bool = False,
         post_process: str | None = None,
         read_only: bool = False,
+        coverage: bool = False,
+        bison_lists: bool = False,
     ):
         main_file = Path(main_file)
         include_dirs = tuple(sorted(Path(include_dir) for include_dir in include_dirs))
@@ -370,6 +381,8 @@ class KompileArgs:
         object.__setattr__(self, 'bison_parser_library', bison_parser_library)
         object.__setattr__(self, 'post_process', post_process)
         object.__setattr__(self, 'read_only', read_only)
+        object.__setattr__(self, 'coverage', coverage)
+        object.__setattr__(self, 'bison_lists', bison_lists)
 
     def args(self) -> list[str]:
         args = [str(self.main_file)]
@@ -406,6 +419,12 @@ class KompileArgs:
 
         if self.read_only:
             args += ['--read-only-kompiled-directory']
+
+        if self.coverage:
+            args += ['--coverage']
+
+        if self.bison_lists:
+            args += ['--bison-lists']
 
         return args
 

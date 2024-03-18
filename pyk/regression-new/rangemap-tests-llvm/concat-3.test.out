@@ -1,3 +1,8 @@
-<k>
-  [ 1 , 5 ) r|-> 40 ~> .K
-</k>
+<generatedTop>
+  <k>
+    [ 1 , 5 ) r|-> 40 ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

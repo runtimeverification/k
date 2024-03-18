@@ -3,16 +3,14 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser
 from functools import cached_property
+from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
 
-from pyk.utils import ensure_dir_path
-
+from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode
 from .cli import Options
-from .utils import bug_report_arg, file_path
+from .utils import bug_report_arg, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from ..utils import BugReport
 
 
@@ -95,15 +93,23 @@ class SpecOptions(SaveDirOptions):
 
 class KompileOptions(Options):
     emit_json: bool
-    ccopts: list[str]
     llvm_kompile: bool
     llvm_library: bool
     enable_llvm_debug: bool
+    llvm_kompile_type: LLVMKompileType | None
+    llvm_kompile_output: Path | None
+    llvm_proof_hint_instrumentation: bool
     read_only: bool
     o0: bool
     o1: bool
     o2: bool
     o3: bool
+    ccopts: list[str]
+    enable_search: bool
+    coverage: bool
+    gen_bison_parser: bool
+    gen_glr_bison_parser: bool
+    bison_lists: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -112,12 +118,20 @@ class KompileOptions(Options):
             'llvm_kompile': False,
             'llvm_library': False,
             'enable_llvm_debug': False,
+            'llvm_kompile_type': None,
+            'llvm_kompile_output': None,
+            'llvm_proof_hint_instrumentation': False,
             'read_only': False,
             'o0': False,
             'o1': False,
             'o2': False,
             'o3': False,
             'ccopts': [],
+            'enable_search': False,
+            'coverage': False,
+            'gen_bison_parser': False,
+            'gen_glr_bison_parser': False,
+            'bison_lists': False,
         }
 
 
@@ -181,14 +195,27 @@ class KCLIArgs:
     def kompile_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
         args.add_argument(
+            '--output-definition',
+            '--definition',
+            type=ensure_dir_path,
+            dest='definition_dir',
+            help='Path to kompile definition to.',
+        )
+        args.add_argument(
+            '--backend',
+            type=KompileBackend,
+            dest='backend',
+            help='K backend to target with compilation.',
+        )
+        args.add_argument(
+            '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+        )
+        args.add_argument(
             '--emit-json',
             dest='emit_json',
             default=True,
             action='store_true',
             help='Emit JSON definition after compilation.',
-        )
-        args.add_argument(
-            '--no-emit-json', dest='emit_json', action='store_false', help='Do not JSON definition after compilation.'
         )
         args.add_argument(
             '-ccopt',
@@ -218,6 +245,8 @@ class KCLIArgs:
             action='store_true',
             help='Make kompile generate debug symbols for llvm.',
         )
+        args.add_argument('--llvm-kompile-type', type=LLVMKompileType, help='Mode to kompile LLVM backend in.')
+        args.add_argument('--llvm-kompile-output', type=Path, help='Location to put kompiled LLVM backend at.')
         args.add_argument(
             '--read-only-kompiled-directory',
             dest='read_only',
@@ -229,6 +258,48 @@ class KCLIArgs:
         args.add_argument('-O1', dest='o1', default=False, action='store_true', help='Optimization level 1.')
         args.add_argument('-O2', dest='o2', default=False, action='store_true', help='Optimization level 2.')
         args.add_argument('-O3', dest='o3', default=False, action='store_true', help='Optimization level 3.')
+        args.add_argument(
+            '--enable-search',
+            dest='enable_search',
+            default=False,
+            action='store_true',
+            help='Enable search mode on LLVM backend krun.',
+        )
+        args.add_argument(
+            '--coverage',
+            dest='coverage',
+            default=False,
+            action='store_true',
+            help='Enable logging semantic rule coverage measurement.',
+        )
+        args.add_argument(
+            '--gen-bison-parser',
+            dest='gen_bison_parser',
+            default=False,
+            action='store_true',
+            help='Generate standalone Bison parser for program sort.',
+        )
+        args.add_argument(
+            '--gen-glr-bison-parser',
+            dest='gen_glr_bison_parser',
+            default=False,
+            action='store_true',
+            help='Generate standalone GLR Bison parser for program sort.',
+        )
+        args.add_argument(
+            '--bison-lists',
+            dest='bison_lists',
+            default=False,
+            action='store_true',
+            help='Disable List{Sort} parsing to make grammar LR(1) for Bison parser.',
+        )
+        args.add_argument(
+            '--llvm-proof-hint-instrumentation',
+            dest='llvm_proof_hint_instrumentation',
+            default=False,
+            action='store_true',
+            help='Enable proof hint generation in LLVM backend kompilation.',
+        )
         return args
 
     @cached_property

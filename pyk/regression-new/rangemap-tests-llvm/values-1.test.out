@@ -1,3 +1,8 @@
-<k>
-  ListItem ( 40 ) ~> .K
-</k>
+<generatedTop>
+  <k>
+    ListItem ( 40 ) ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

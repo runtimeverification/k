@@ -1,3 +1,8 @@
-<k>
-  foo ( inc ( sym2 ( ?_X:Int ) ) ) ~> .K
-</k>
+<generatedTop>
+  <k>
+    foo ( inc ( sym2 ( ?_X:Int ) ) ) ~> .K
+  </k>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

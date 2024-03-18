@@ -6,6 +6,6 @@ module TEST
                  | "c" [token]
   syntax Thing ::= f ( Thing ) [ function, total ]
 
-  rule [f-of-a-is-b] : f(A) => b requires A ==K a // [concrete]
+  rule [f-of-a-is-b] : f(A) => b requires A ==K a  [concrete]
   rule [f-otherwise] : f(_) => c                   [owise]
 endmodule
