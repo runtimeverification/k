@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+from functools import reduce
 from itertools import repeat
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from ..kast import EMPTY_ATT, Atts, KInner
 from ..kast.att import Format
@@ -15,6 +16,7 @@ from ..kore.syntax import (
     And,
     App,
     Axiom,
+    Bottom,
     Equals,
     EVar,
     Exists,
@@ -22,12 +24,14 @@ from ..kore.syntax import (
     Import,
     Module,
     Not,
+    Or,
     SortApp,
     SortDecl,
     SortVar,
     String,
     Symbol,
     SymbolDecl,
+    Top,
 )
 from ..prelude.k import K_ITEM, K
 from ..utils import FrozenDict, intersperse
@@ -107,6 +111,7 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += _unit_axioms(module)
     sentences += _functional_axioms(module)
     sentences += _no_confusion_axioms(module)
+    sentences += _no_junk_axioms(defn)
 
     return Module(name=name, sentences=sentences, attrs=attrs)
 
@@ -542,6 +547,86 @@ def _no_confusion_axioms(module: KFlatModule) -> list[Axiom]:
         for p2 in prods
         if p1.sort == p2.sort and p1.klabel and p2.klabel and p1.klabel.name < p2.klabel.name
     )
+    return res
+
+
+def _no_junk_axioms(defn: KDefinition) -> list[Axiom]:
+    class NoJunk(NamedTuple):
+        sort: KSort
+        constructors: tuple[KProduction, ...]
+        subsorts: tuple[KSort, ...]
+        has_tokens: bool
+
+        def axiom(self) -> Axiom | None:
+            sort = sort_to_kore(self.sort)
+
+            disjuncts: list[Pattern] = []
+            disjuncts += (self.ctor_disjunct(prod) for prod in self.constructors)
+            disjuncts += (self.subsort_disjunct(sort) for sort in self.subsorts)
+            disjuncts += [Top(sort)] if self.has_tokens else []
+            disjuncts += [Bottom(sort)]
+
+            if len(disjuncts) == 1:
+                return None
+
+            return Axiom((), Or(sort, disjuncts), attrs=(App('constructor'),))
+
+        def ctor_disjunct(self, production: KProduction) -> Pattern:
+            assert production.klabel
+
+            symbol = _label_name(production.klabel.name)
+            sort_params = tuple(_sort_var(param) for param in production.klabel.params)
+            sort = sort_to_kore(production.sort, production)
+            param_sorts = tuple(sort_to_kore(item.sort, production) for item in production.non_terminals)
+            params = tuple(EVar(f'X{i}', sort) for i, sort in enumerate(param_sorts))
+
+            app: Pattern = App(symbol, sort_params, params)
+            return reduce(lambda x, y: Exists(sort, y, x), reversed(params), app)
+
+        def subsort_disjunct(self, subsort: KSort) -> Pattern:
+            kore_sort = sort_to_kore(self.sort)
+            kore_subsort = sort_to_kore(subsort)
+            Val = EVar('Val', kore_subsort)  # noqa: N806
+            return Exists(kore_sort, Val, inj(kore_subsort, kore_sort, Val))
+
+    def no_junk_for(syntax_sort: KSyntaxSort, productions_for_sort: Iterable[KProduction]) -> NoJunk:
+        sort = syntax_sort.sort
+        subsorts = tuple(sorted(defn.subsorts(sort), key=lambda s: s.name)) if sort != K else ()
+        has_tokens = Atts.HAS_DOMAIN_VALUES in syntax_sort.att
+
+        def key(production: KProduction) -> str:
+            assert production.klabel
+            return production.klabel.name
+
+        constructors = tuple(
+            sorted(
+                (
+                    prod
+                    for prod in productions_for_sort
+                    if prod.klabel and prod.klabel not in BUILTIN_LABELS and Atts.FUNCTION not in prod.att
+                ),
+                key=key,
+            )
+        )
+
+        return NoJunk(sort, constructors, subsorts, has_tokens)
+
+    assert len(defn.modules) == 1
+    module = defn.modules[0]
+
+    def prods_by_sort() -> dict[KSort, list[KProduction]]:
+        res: dict[KSort, list[KProduction]] = {}
+        for prod in module.productions:
+            res.setdefault(prod.sort, []).append(prod)
+        return res
+
+    res: list[Axiom] = []
+    prods = prods_by_sort()
+    for syntax_sort in module.syntax_sorts:
+        no_junk = no_junk_for(syntax_sort, prods.get(syntax_sort.sort, []))
+        axiom = no_junk.axiom()
+        if axiom:
+            res.append(axiom)
     return res
 
 
