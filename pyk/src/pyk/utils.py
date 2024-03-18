@@ -9,14 +9,15 @@ import subprocess
 import sys
 import tarfile
 import time
-from collections.abc import Mapping
+from collections.abc import Hashable, Mapping
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Hashable, Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
     from logging import Logger
     from subprocess import CompletedProcess
     from typing import Any, Final
@@ -32,11 +33,11 @@ if TYPE_CHECKING:
     R4 = TypeVar('R4')
     T = TypeVar('T')
     S = TypeVar('S')
-    H = TypeVar('H', bound=Hashable)
 
 P = TypeVar('P')
 R = TypeVar('R')
-K = TypeVar('K')
+H = TypeVar('H', bound=Hashable)
+K = TypeVar('K', bound=Hashable)
 V = TypeVar('V')
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -81,6 +82,34 @@ class FrozenDict(Mapping[K, V]):
 
 
 EMPTY_FROZEN_DICT: Final[FrozenDict] = FrozenDict()
+
+
+@final
+@dataclass(frozen=True)
+class POSet(Generic[H]):
+    image: FrozenDict[H, frozenset[H]]
+
+    def __init__(self, relation: Iterable[tuple[H, H]]):
+        _image = self._compute_image(relation)
+        image: FrozenDict[H, frozenset[H]] = FrozenDict({x: frozenset(y) for x, y in _image.items()})
+        object.__setattr__(self, 'image', image)
+
+    @staticmethod
+    def _compute_image(relation: Iterable[tuple[H, H]]) -> dict[H, set[H]]:
+        image: dict[H, set[H]] = {}
+
+        for x, y in relation:
+            image.setdefault(x, set()).add(y)
+
+        domain = set(image)
+        for k in domain:
+            for i in domain:
+                if k not in image[i]:
+                    continue
+                for j in image[k]:
+                    image[i].add(j)
+
+        return image
 
 
 def check_type(x: Any, typ: type[T]) -> T:

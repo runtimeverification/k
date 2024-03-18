@@ -1,8 +1,15 @@
-from typing import Final
+from __future__ import annotations
+
+from itertools import count
+from typing import TYPE_CHECKING, Final
 
 import pytest
 
-from pyk.utils import deconstruct_short_hash
+from pyk.utils import POSet, deconstruct_short_hash
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
 
 FULL_HASH: Final = '0001000200030004000500060007000800010002000300040005000600070008'
 TEST_DATA_PASS: Final = (
@@ -30,3 +37,24 @@ def test_deconstruct_short_hash_fail(short_hash: str) -> None:
 
     # Then
     assert str(excinfo.value) == f'Bad short hash: {short_hash}'
+
+
+POSET_TEST_DATA: Final[tuple[tuple[tuple[tuple[int, int], ...], dict[int, set[int]]], ...]] = (
+    ((), {}),
+    (((1, 2),), {1: {2}}),
+    (((1, 2), (1, 3)), {1: {2, 3}}),
+    (((1, 2), (3, 4)), {1: {2}, 3: {4}}),
+    (((1, 2), (2, 3)), {1: {2, 3}, 2: {3}}),
+    (((1, 2), (2, 3), (3, 4)), {1: {2, 3, 4}, 2: {3, 4}, 3: {4}}),
+    (((1, 2), (2, 1)), {1: {1, 2}, 2: {1, 2}}),  # Not antisymmetric
+)
+
+
+@pytest.mark.parametrize('relation,expected', POSET_TEST_DATA, ids=count())
+def test_poset(relation: Iterable[tuple[int, int]], expected: dict[int, set[int]]) -> None:
+    # When
+    image = POSet(relation).image
+    actual = {x: set(ys) for x, ys in image.items()}
+
+    # Then
+    assert actual == expected
