@@ -95,8 +95,8 @@ public class GenerateSentencesFromConfigDeclTest {
         RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), files)
             .getExtensionModule();
     Set<Sentence> gen =
-        GenerateSentencesFromConfigDecl.gen(kem, configuration, BooleanUtils.FALSE, Att(), m);
-    Att initializerAtts = Att().add(Att.INITIALIZER());
+        GenerateSentencesFromConfigDecl.gen(kem, configuration, BooleanUtils.FALSE, Att.empty(), m);
+    Att initializerAtts = Att.empty().add(Att.INITIALIZER());
     Att productionAtts = initializerAtts.add(Att.FUNCTION());
     Set<Sentence> reference =
         Set(
