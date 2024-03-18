@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import logging
+import re
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from functools import cache
 from itertools import chain
 from pathlib import Path
+from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, final, overload
 
 from ..utils import FrozenDict
@@ -151,12 +153,55 @@ class PathType(AttType[Path]):
         return f'"{value}"'
 
 
+@final
+@dataclass(frozen=True)
+class Format:
+    tokens: tuple[str, ...]
+
+    _pattern: ClassVar[re.Pattern] = re.compile(r'%\D|%\d+|[^%]+')
+
+    def __init__(self, tokens: Iterable[str] = ()):
+        object.__setattr__(self, 'tokens', tuple(tokens))
+
+    @classmethod
+    def parse(cls, s: str) -> Format:
+        matches = list(cls._pattern.finditer(s))
+
+        matched_len: int
+        if not matches:
+            matched_len = 0
+        else:
+            _, matched_len = matches[-1].span()
+
+        if matched_len != len(s):
+            assert s and s[-1] == '%'
+            raise ValueError(f'Incomplete escape sequence at the end of format string: {s}')
+
+        return Format(m[0] for m in matches)
+
+    def unparse(self) -> str:
+        return ''.join(self.tokens)
+
+
+class FormatType(AttType[Format]):
+    def from_dict(self, obj: Any) -> Format:
+        assert isinstance(obj, str)
+        return Format.parse(obj)
+
+    def to_dict(self, value: Format) -> Any:
+        return value.unparse()
+
+    def pretty(self, value: Format) -> str:
+        return f'"{value.unparse}"'
+
+
 _NONE: Final = NoneType()
 _ANY: Final = AnyType()
 _INT: Final = IntType()
 _STR: Final = StrType()
 _LOCATION: Final = LocationType()
 _PATH: Final = PathType()
+_FORMAT: Final = FormatType()
 
 
 @final
@@ -195,7 +240,8 @@ class Atts:
     DEPENDS: Final = AttKey('depends', type=_ANY)
     DIGEST: Final = AttKey('digest', type=_ANY)
     ELEMENT: Final = AttKey('element', type=_ANY)
-    FORMAT: Final = AttKey('format', type=_ANY)
+    FORMAT: Final = AttKey('format', type=_FORMAT)
+    FRESH_GENERATOR: Final = AttKey('freshGenerator', type=_NONE)
     FUNCTION: Final = AttKey('function', type=_NONE)
     FUNCTIONAL: Final = AttKey('functional', type=_NONE)
     GROUP: Final = AttKey('group', type=_STR)
@@ -227,6 +273,7 @@ class Atts:
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
     STRICT: Final = AttKey('strict', type=_ANY)
     SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
+    TERMINALS: Final = AttKey('terminals', type=_STR)
     TOKEN: Final = AttKey('token', type=_NONE)
     TOTAL: Final = AttKey('total', type=_NONE)
     TRUSTED: Final = AttKey('trusted', type=_NONE)
