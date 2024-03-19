@@ -26,12 +26,13 @@ let
         mvn dependency:get -Dartifact="$artifactId" -Dmaven.repo.local=$out/.m2
       done
 
-      for artifactId in ${builtins.toString manualMvnSourceArtifacts}
+      for artifact in ${builtins.toString manualMvnSourceArtifacts}
       do
-        group=$(echo $artifactId | cut -d':' -f1)
-        artifact=$(echo $artifactId | cut -d':' -f2)
+        groupId=$(echo $artifact | cut -d':' -f1)
+        artifactId=$(echo $artifact | cut -d':' -f2)
+        version=$(echo $artifact | cut -d':' -f3)
         echo "downloading manual sources $artifactId"
-        mvn dependency:sources -DincludeGroupIds=$group -DincludeArtifactIds=$artifact -Dmaven.repo.local=$out/.m2
+        mvn dependency:get -Dclassifier=sources -DgroupId=$groupId -DartifactId=$artifactId -Dversion=$version -Dmaven.repo.local=$out/.m2
       done
     '' + lib.optionalString (!buildOffline) ''
       mvn package -Dmaven.repo.local=$out/.m2 ${mvnParameters}
