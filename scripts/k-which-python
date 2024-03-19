@@ -9,12 +9,16 @@ version="$1"
 
 case "$version" in
   3.10)
-    echo "${lib.makeBinPath [python310]}/python3"
+    echo python3.10
     ;;
   3.11)
-    echo "${lib.makeBinPath [python311]}/python3"
+    echo python3.11
+    ;;
+  "")
+    echo python3
     ;;
   *)
-    echo "${lib.makeBinPath [python3]}/python3"
+    echo "Unsupported Python version: $version"
+    exit 1
     ;;
 esac
