@@ -312,10 +312,7 @@ class KProve(KPrint):
             proof: Proof
             prover: Prover
             lhs_top = extract_lhs(claim.body)
-            if (
-                type(lhs_top) is KApply
-                and self.definition.production_for_klabel(lhs_top.label) in self.definition.functions
-            ):
+            if type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions:
                 proof = EqualityProof.from_claim(claim, self.definition)
                 prover = ImpliesProver(proof, kcfg_explore)
             else:
