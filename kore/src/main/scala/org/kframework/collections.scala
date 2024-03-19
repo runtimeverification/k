@@ -19,7 +19,6 @@ object Collections {
   def immutable[T](s: java.util.Set[T]): Set[T]           = s.asScala.toSet
   def immutable[T](s: java.util.List[T]): Seq[T]          = s.asScala
   def immutable[K, V](s: java.util.Map[K, V]): Map[K, V]  = s.asScala
-  def immutable[T](s: Array[T]): Seq[T]                   = s
 
   def mutable[T](s: scala.List[T]): java.util.List[T]  = s.asJava
   def mutable[T](s: Seq[T]): java.util.List[T]         = s.asJava
@@ -30,9 +29,10 @@ object Collections {
     x
   }
 
-  def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
-  def stream[T](c: Iterable[T]): java.util.stream.Stream[T] =
-    StreamSupport.stream(c.asJava.spliterator(), false);
+  def iterable[T](c: Iterable[T]): java.lang.Iterable[T]    = c.asJava
+  def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = streamIter(c.asJava)
+  def streamIter[T](c: java.lang.Iterable[T]): java.util.stream.Stream[T] =
+    StreamSupport.stream(c.spliterator(), false)
 
   def map[T](f: java.util.function.Function[T, T])(s: Set[T]): Set[T] = s.map(x => f(x))
   def map[T](f: java.util.function.Function[T, T])(s: scala.List[T]): scala.List[T] =

@@ -53,7 +53,7 @@ trait Sorting {
         (startSort, endSort)
     }
 
-    POSet(subsortRelations)
+    new POSet(subsortRelations)
   }
 
   /**
@@ -131,7 +131,7 @@ trait Sorting {
       subsorts: POSet[Sort],
       prods: Set[Production]
   ): POSet[Production] =
-    POSet(
+    new POSet(
       computeAttributeOverloadPOSet(subsorts, prods) ++ computeKLabelOverloadPOSet(subsorts, prods)
     )
 
@@ -286,7 +286,14 @@ case class Module(
     productions
       .collect { case p if p.att.contains(Att.BRACKET) => p }
       .groupBy(_.sort)
-      .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
+      .map { case (s, ps) =>
+        (
+          s,
+          ps.toList.sortBy(_.sort)(
+            scala.math.Ordering.comparatorToOrdering(subsorts.asComparator())
+          )
+        )
+      }
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor.mapValues(_.head.sort)
 
@@ -419,7 +426,7 @@ case class Module(
         pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
       }
       .flatten
-  lazy val priorities = POSet(expressedPriorities)
+  lazy val priorities = new POSet[Tag](expressedPriorities)
   lazy val leftAssoc  = buildAssoc(Associativity.Left)
   lazy val rightAssoc = buildAssoc(Associativity.Right)
 
@@ -926,6 +933,24 @@ case class Production(
   override val isSyntax          = true
   override val isNonSyntax       = false
   override def withAtt(att: Att) = Production(klabel, params, sort, items, att)
+
+  lazy val defaultFormat: String =
+    if (isPrefixProduction && nonterminals.size > 0 && nonterminals.forall(_.name.isDefined)) {
+      items.zipWithIndex
+        .map {
+          case (Terminal("("), i)              => s"%${i + 1}..."
+          case (Terminal(_), i)                => s"%${i + 1}"
+          case (NonTerminal(_, Some(name)), i) => s"$name: %${i + 1}"
+          case (RegexTerminal(_, _, _), _) =>
+            throw new IllegalArgumentException(
+              "Default format not supported for productions with regex terminals"
+            )
+          case _ => throw new AssertionError()
+        }
+        .mkString(" ")
+    } else {
+      items.zipWithIndex.map { case (_, i) => s"%${i + 1}" }.mkString(" ")
+    }
 }
 
 object Production {

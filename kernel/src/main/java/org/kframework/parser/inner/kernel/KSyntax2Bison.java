@@ -53,12 +53,7 @@ public class KSyntax2Bison {
       MutableInt nextOrdinal) {
     NonTerminal nt = (NonTerminal) items.get(idx);
     Tag parent = new Tag(prod.klabel().get().name());
-    Set<Tag> prods = new HashSet<>();
-    for (Tag child :
-        iterable(
-            module.priorities().relations().get(parent).getOrElse(() -> Collections.<Tag>Set()))) {
-      prods.add(child);
-    }
+    Set<Tag> prods = new HashSet<>(module.priorities().relations().getOrDefault(parent, Set.of()));
     for (Tuple2<Tag, Tag> entry : iterable(assoc)) {
       if (entry._1().equals(parent)) {
         prods.add(entry._2());
@@ -322,7 +317,7 @@ public class KSyntax2Bison {
             .append(nts.get(i))
             .append(".nterm->symbol, \"inj{\", 4) == 0 && (false");
         Sort greaterSort = lesser.nonterminals().apply(i).sort();
-        for (Sort lesserSort : iterable(module.subsorts().elements())) {
+        for (Sort lesserSort : module.subsorts().elements()) {
           if (module.subsorts().lessThanEq(lesserSort, greaterSort)) {
             bison.append(" || strcmp($").append(nts.get(i)).append(".nterm->children[0]->sort, \"");
             encodeKore(lesserSort, bison);
@@ -341,7 +336,7 @@ public class KSyntax2Bison {
       Production greater,
       List<Integer> nts,
       boolean hasLocation) {
-    for (Production lesser : iterable(disambModule.overloads().sortedElements())) {
+    for (Production lesser : disambModule.overloads().sortedElements()) {
       if (disambModule.overloads().lessThan(lesser, greater)) {
         bison.append("  if (");
         appendOverloadCondition(bison, module, greater, lesser, nts);
