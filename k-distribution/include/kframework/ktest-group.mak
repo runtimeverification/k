@@ -6,7 +6,7 @@ SUBPROOFS=$(addsuffix .proofs,$(SUBDIRS))
 SUBSEARCHES=$(addsuffix .searches,$(SUBDIRS))
 SUBKAST=$(addsuffix .kast,$(SUBDIRS))
 
-.PHONY: all update-results clean kompile krun proofs searches strat kast $(SUBDIRS) $(SUBCLEAN) $(SUBUPDATE) $(SUBKOMPILE) $(SUBKRUN) $(SUBPROOFS) $(SUBSEARCHES) $(SUBKAST)
+.PHONY: all update-results clean kompile krun proofs searches kast $(SUBDIRS) $(SUBCLEAN) $(SUBUPDATE) $(SUBKOMPILE) $(SUBKRUN) $(SUBPROOFS) $(SUBSEARCHES) $(SUBKAST)
 
 all: $(SUBDIRS)
 clean: $(SUBCLEAN)

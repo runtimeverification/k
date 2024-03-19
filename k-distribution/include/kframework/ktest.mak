@@ -68,7 +68,7 @@ PIPEFAIL?=set -o pipefail;
 .PHONY: kompile krun all clean update-results proofs
 
 # run all tests
-all: kompile krun proofs searches strat kast kast-bison kparse
+all: kompile krun proofs searches kast kast-bison kparse
 
 # run only kompile
 kompile: $(KOMPILED_DIR)/timestamp
