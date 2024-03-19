@@ -1,7 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile
 
-import collection._
 import java.util
 import org.kframework.attributes.Att
 import org.kframework.builtin.Sorts
@@ -14,8 +13,10 @@ import org.kframework.kore._
 import org.kframework.kore.KORE.KApply
 import org.kframework.kore.KORE.KLabel
 import org.kframework.utils.errorsystem.KEMException
+import org.kframework.Collections
 import org.kframework.POSet
 import org.kframework.TopologicalSort._
+import scala.collection._
 import scala.collection.JavaConverters._
 
 object ConfigurationInfoFromModule
@@ -96,7 +97,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
-  private val sortedSorts: Seq[Sort] = tsort(edges).toSeq
+  private val sortedSorts: Seq[Sort] = Collections.immutable(edgesPoset.sortedElements())
   private val sortedEdges: Seq[(Sort, Sort)] =
     edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
   val levels: Map[Sort, Int] = sortedEdges.foldLeft(topCells.map((_, 0)).toMap) {
