@@ -6,13 +6,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.utils.Lazy;
 import org.kframework.utils.errorsystem.KEMException;
@@ -108,14 +106,17 @@ public class POSet<T> implements Serializable {
     return elementsLazy.get();
   }
 
-  private List<T> computeSortedElements() {
-    return StreamSupport.stream(TopologicalSort.tsort(directRelations).spliterator(), false)
-        .toList();
+  private java.util.List<T> computeSortedElements() {
+    Optional<Stream<T>> topological = TopologicalSort.tsort(directRelations);
+    // We already checked for cycles during construction, so the sort should succeed
+    assert topological.isPresent();
+    return topological.get().toList();
   }
 
-  private final Lazy<List<T>> sortedElementsLazy = new Lazy<>(this::computeSortedElements);
+  private final Lazy<java.util.List<T>> sortedElementsLazy =
+      new Lazy<>(this::computeSortedElements);
 
-  public List<T> sortedElements() {
+  public java.util.List<T> sortedElements() {
     return sortedElementsLazy.get();
   }
 
