@@ -8,8 +8,6 @@ object Sorts {
   val Layout     = Sort("#Layout")
   val LineMarker = Sort("#LineMarker")
 
-  val RuleTag = Sort("#RuleTag")
-
   val KString     = Sort("KString")
   val KBool       = Sort("KBool")
   val RuleContent = Sort("#RuleContent")

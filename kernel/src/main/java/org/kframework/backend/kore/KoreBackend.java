@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.Backends;
 import org.kframework.compile.*;
@@ -257,12 +256,6 @@ public class KoreBackend implements Backend {
             entry("generateSortProjections2", generateSortProjections),
             entry("checkSimplificationRules", checkSimplificationRules),
             entry("subsortKItem2", subsortKItem),
-            entry(
-                "addStrategyCellToRules",
-                d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d)),
-            entry(
-                "addStrategyRuleToMainModule",
-                d -> Strategy.addStrategyRuleToMainModule(d.mainModule().name()).apply(d)),
             entry("concretizeCells", d -> ConcretizeCells.transformDefinition(d)),
             entry("genCoverage", genCoverage),
             entry("addSemanticsModule", Kompile::addSemanticsModule),
@@ -303,8 +296,6 @@ public class KoreBackend implements Backend {
               "generateSortProjections2",
               "checkSimplificationRules",
               "subsortKItem2",
-              "addStrategyCellToRules",
-              "addStrategyRuleToMainModule",
               "concretizeCells",
               "genCoverage",
               "addSemanticsModule",

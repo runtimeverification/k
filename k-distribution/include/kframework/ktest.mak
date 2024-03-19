@@ -38,7 +38,6 @@ RESULTDIR?=$(TESTDIR)
 TESTS?=$(wildcard $(TESTDIR)/krun.nopgm) $(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
-STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 KPARSE_TESTS?=$(wildcard $(TESTDIR)/*.kparse)
 KAST_BISON_TESTS?=$(wildcard $(TESTDIR)/*.kast-bison)
@@ -82,8 +81,6 @@ krun: $(TESTS)
 proofs: $(PROOF_TESTS)
 
 searches: $(SEARCH_TESTS)
-
-strat: $(STRAT_TESTS)
 
 kast: $(KAST_TESTS)
 
@@ -131,13 +128,6 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $@.out
 else
 	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
-endif
-
-%.strat: kompile
-ifeq ($(TESTDIR),$(RESULTDIR))
-	$(PIPEFAIL) $(KRUN_OR_LEGACY) $@.input $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
-else
-	$(PIPEFAIL) $(KRUN_OR_LEGACY) $@.input $(KRUN_FLAGS) $(DEBUG) --definition $(KOMPILED_DIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
 endif
 
 %.kast: kompile
