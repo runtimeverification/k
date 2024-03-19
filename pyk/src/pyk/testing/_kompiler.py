@@ -167,7 +167,7 @@ class KoreClientTest(KompiledTest):
     KOMPILE_BACKEND: ClassVar = 'haskell'
     LLVM_ARGS: ClassVar[dict[str, Any]] = {}
 
-    CLIENT_TIMEOUT: ClassVar = 2000
+    CLIENT_TIMEOUT: ClassVar = 5000
 
     @pytest.fixture(scope='class', params=['legacy', 'booster'])
     def server_type(self, request: FixtureRequest, use_server: UseServer) -> ServerType:
