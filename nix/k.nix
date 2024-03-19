@@ -27,10 +27,6 @@ let
   ] ++ lib.optional (debugger != null) debugger;
   runtimePath = lib.makeBinPath runtimeInputs;
 
-  which-python = ''
-      '';
-
-
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
