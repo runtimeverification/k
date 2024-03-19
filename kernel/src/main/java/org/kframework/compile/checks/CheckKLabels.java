@@ -41,17 +41,11 @@ public class CheckKLabels {
   private final Set<KEMException> errors;
   private final KExceptionManager kem;
   private final FileUtil files;
-  private final List<String> extraConcreteRules;
 
-  public CheckKLabels(
-      Set<KEMException> errors,
-      KExceptionManager kem,
-      FileUtil files,
-      List<String> extraConcreteRules) {
+  public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, FileUtil files) {
     this.errors = errors;
     this.kem = kem;
     this.files = files;
-    this.extraConcreteRules = extraConcreteRules;
   }
 
   private final Map<String, Module> klabels = new HashMap<>();
@@ -128,21 +122,16 @@ public class CheckKLabels {
     }
   }
 
-  private boolean isExtraConcreteRule(Rule r) {
-    return r.label().isPresent() && extraConcreteRules.contains(r.label().get());
-  }
-
   private boolean hasSymbolicAttWithNoArg(Rule r) {
     return r.att().contains(Att.SYMBOLIC()) && r.att().get(Att.SYMBOLIC()).equals("");
   }
 
   private boolean hasConcreteAttWithNoArg(Rule r) {
-    return isExtraConcreteRule(r)
-        || (r.att().contains(Att.CONCRETE()) && r.att().get(Att.CONCRETE()).equals(""));
+    return r.att().contains(Att.CONCRETE()) && r.att().get(Att.CONCRETE()).equals("");
   }
 
   private boolean hasConcreteAtt(Rule r) {
-    return isExtraConcreteRule(r) || r.att().contains(Att.CONCRETE());
+    return r.att().contains(Att.CONCRETE());
   }
 
   public void check(Module mainMod) {

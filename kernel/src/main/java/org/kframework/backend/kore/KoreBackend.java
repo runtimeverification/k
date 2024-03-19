@@ -223,8 +223,6 @@ public class KoreBackend implements Backend {
                     "Adding configuration variable to lhs")
                 .apply(d);
     Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-    Function1<Definition, Definition> markExtraConcreteRules =
-        d -> MarkExtraConcreteRules.mark(d, kompileOptions.extraConcreteRuleLabels);
     Function1<Definition, Definition> removeAnywhereRules =
         d ->
             DefinitionTransformer.from(
@@ -268,7 +266,6 @@ public class KoreBackend implements Backend {
             entry("addSemanticsModule", Kompile::addSemanticsModule),
             entry("resolveConfigVar", resolveConfigVar),
             entry("addCoolLikeAtt", addCoolLikeAtt),
-            entry("markExtraConcreteRules", markExtraConcreteRules),
             entry("removeAnywhereRules", removeAnywhereRules),
             entry("generateSortPredicateRules", generateSortPredicateRules),
             entry("numberSentences2", numberSentences));
@@ -310,7 +307,6 @@ public class KoreBackend implements Backend {
               "addSemanticsModule",
               "resolveConfigVar",
               "addCoolLikeAtt",
-              "markExtraConcreteRules",
               "removeAnywhereRules",
               "generateSortPredicateRules",
               "numberSentences2");
