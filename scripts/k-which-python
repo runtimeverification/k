@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+if [ "$#" -gt 1 ]; then
+    echo "Usage: k-which-python [3.10|3.11]"
+    exit 1
+fi
+
+version="$1"
+
+case "$version" in
+  3.10)
+    echo "${lib.makeBinPath [python310]}/python3"
+    ;;
+  3.11)
+    echo "${lib.makeBinPath [python311]}/python3"
+    ;;
+  *)
+    echo "${lib.makeBinPath [python3]}/python3"
+    ;;
+esac
