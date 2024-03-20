@@ -415,7 +415,6 @@ object Att {
       onlyon3[Module, Production, Rule],
       KeyRange.WholePipeline
     )
-  final val TAG = Key.builtin("tag", KeyParameter.Required, onlyon[Rule], KeyRange.FrontendOnly)
   final val TOKEN = Key.builtin(
     "token",
     KeyParameter.Forbidden,
