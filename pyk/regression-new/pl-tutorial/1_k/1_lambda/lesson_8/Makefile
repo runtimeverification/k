@@ -5,4 +5,4 @@ KOMPILE_FLAGS=--gen-bison-parser
 %/arithmetic-div-zero.lambda:
 	true
 
-include ../../../../../../include/kframework/ktest.mak
+include ../../../../include/ktest.mak

@@ -31,6 +31,11 @@ class KompileNotFoundError(RuntimeError):
         super().__init__(f'Kompile command not found: {str}')
 
 
+class Warnings(Enum):
+    ALL = 'all'
+    NONE = 'none'
+
+
 def kompile(
     main_file: str | Path,
     *,
@@ -346,6 +351,8 @@ class KompileArgs:
     read_only: bool
     coverage: bool
     bison_lists: bool
+    warnings: Warnings | None
+    warning_to_error: bool
 
     def __init__(
         self,
@@ -364,10 +371,13 @@ class KompileArgs:
         read_only: bool = False,
         coverage: bool = False,
         bison_lists: bool = False,
+        warnings: str | Warnings | None = None,
+        warning_to_error: bool = False,
     ):
         main_file = Path(main_file)
         include_dirs = tuple(sorted(Path(include_dir) for include_dir in include_dirs))
         hook_namespaces = tuple(hook_namespaces)
+        warnings = Warnings(warnings) if warnings is not None else warnings
 
         object.__setattr__(self, 'main_file', main_file)
         object.__setattr__(self, 'main_module', main_module)
@@ -383,6 +393,8 @@ class KompileArgs:
         object.__setattr__(self, 'read_only', read_only)
         object.__setattr__(self, 'coverage', coverage)
         object.__setattr__(self, 'bison_lists', bison_lists)
+        object.__setattr__(self, 'warnings', warnings)
+        object.__setattr__(self, 'warning_to_error', warning_to_error)
 
     def args(self) -> list[str]:
         args = [str(self.main_file)]
@@ -425,6 +437,12 @@ class KompileArgs:
 
         if self.bison_lists:
             args += ['--bison-lists']
+
+        if self.warnings is not None:
+            args += ['--warnings', self.warnings.value]
+
+        if self.warning_to_error:
+            args += ['-w2e']
 
         return args
 

@@ -5,4 +5,4 @@ RESULTDIR=tests
 KOMPILE_FLAGS=--enable-search
 KRUN_FLAGS=--pattern "<tasks> .Bag </tasks>" --smt none
 
-include ../../../../../../../include/kframework/ktest.mak
+include ../../../../../include/ktest.mak

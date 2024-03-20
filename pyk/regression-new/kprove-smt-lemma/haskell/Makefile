@@ -5,4 +5,4 @@ KOMPILE_BACKEND=haskell
 KOMPILE_FLAGS=--syntax-module VERIF
 export KORE_EXEC_OPTS=--log-level error
 
-include ../../../../include/kframework/ktest.mak
+include ../../include/ktest.mak

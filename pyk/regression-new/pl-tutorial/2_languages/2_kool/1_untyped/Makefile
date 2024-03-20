@@ -5,4 +5,4 @@ KRUN_FLAGS=--output none
 %/threads.kool: kompile
 	true
 
-include ../../../../../../include/kframework/ktest.mak
+include ../../../../include/ktest.mak

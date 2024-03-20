@@ -6,7 +6,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
 
-from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode
+from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import Options
 from .utils import bug_report_arg, ensure_dir_path, file_path
 
@@ -23,6 +23,18 @@ class LoggingOptions(Options):
         return {
             'verbose': False,
             'debug': False,
+        }
+
+
+class WarningOptions(Options):
+    warnings: Warnings | None
+    warning_to_error: bool
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'warnings': None,
+            'warning_to_error': False,
         }
 
 
@@ -173,6 +185,26 @@ class KCLIArgs:
         args = ArgumentParser(add_help=False)
         args.add_argument('--verbose', '-v', default=False, action='store_true', help='Verbose output.')
         args.add_argument('--debug', default=False, action='store_true', help='Debug output.')
+        return args
+
+    @cached_property
+    def warning_args(self) -> ArgumentParser:
+        args = ArgumentParser(add_help=False)
+        args.add_argument(
+            '--warnings',
+            '-w',
+            dest='warnings',
+            type=Warnings,
+            default=None,
+            help='Warnings to print about (no effect on pyk, only subcommands).',
+        )
+        args.add_argument(
+            '-w2e',
+            dest='warning_to_error',
+            default=False,
+            action='store_true',
+            help='Turn warnings into errors (no effect on pyk, only subcommands).',
+        )
         return args
 
     @cached_property

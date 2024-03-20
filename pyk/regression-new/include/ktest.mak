@@ -35,7 +35,7 @@ DEFDIR?=.
 # path to kompile output directory
 KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
 # all tests in test directory with matching file extension
-RUN_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
+RUN_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT)) $(wildcard $(TESTDIR)/krun.nopgm)
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
@@ -55,7 +55,7 @@ ifeq ($(UNAME), Darwin)
 endif
 
 KOMPILE_FLAGS+=--type-inference-mode checked $(VERBOSITY)
-KRUN_FLAGS+=
+KRUN_FLAGS+=$(VERBOSITY)
 KPROVE_FLAGS+=--type-inference-mode checked --failure-info $(VERBOSITY)
 
 CHECK?=| diff -
