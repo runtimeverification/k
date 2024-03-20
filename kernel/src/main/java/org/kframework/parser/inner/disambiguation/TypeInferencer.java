@@ -126,7 +126,6 @@ public class TypeInferencer implements AutoCloseable {
         || s.equals(Sorts.K())
         || s.equals(Sorts.KItem())
         || s.equals(Sorts.KLabel())
-        || s.equals(Sorts.RuleTag())
         || s.isNat();
   }
 
