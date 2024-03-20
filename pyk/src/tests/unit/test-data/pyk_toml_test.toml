@@ -1,0 +1,6 @@
+[coverage]
+output = "default-file"
+
+[coverage.a_profile]
+verbose = true    
+output = "a-profile-file"

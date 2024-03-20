@@ -185,6 +185,10 @@ class KompileOptions(Options):
             'with-llvm-library': 'llvm_library',
             'read-only-kompiled-directory': 'read_only',
             'ccopt': 'ccopts',
+            'O0': 'o0',
+            'O1': 'o1',
+            'O2': 'o2',
+            'O3': 'o3',
         }
 
 
