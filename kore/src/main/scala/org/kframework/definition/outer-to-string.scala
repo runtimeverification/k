@@ -86,9 +86,10 @@ trait SyntaxAssociativityToString {
   self: SyntaxAssociativity =>
   override def toString = {
     val assocString = assoc match {
-      case Associativity.Left     => "left"
-      case Associativity.Right    => "right"
-      case Associativity.NonAssoc => "non-assoc"
+      case Associativity.Left        => "left"
+      case Associativity.Right       => "right"
+      case Associativity.NonAssoc    => "non-assoc"
+      case Associativity.Unspecified => "unspecified"
     }
     "syntax associativity " + assocString + " " + tags.mkString(" ") + att.postfixString
   }

@@ -42,7 +42,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
       )
     case t @ TermCons(_, _) => termConsToKApply(t)
     case Ambiguity(items) =>
-      KApply(KLabel("amb"), KList(items.asScala.toList.map(apply) asJava), Att.empty)
+      KApply(KLabel("amb"), KList(items.asScala.toList.map(apply).asJava), Att.empty)
   }
 
   def termConsToKApply(t: TermCons): K = {
@@ -60,7 +60,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
       else t.production.klabel.get
     KApply(
       klabel.head,
-      KList(new util.ArrayList(t.items).asScala.reverse.map(apply) asJava),
+      KList(new util.ArrayList(t.items).asScala.reverse.map(apply).asJava),
       locationToAtt(t.location, t.source).add(Att.PRODUCTION, classOf[Production], realProd)
     )
   }
