@@ -81,7 +81,7 @@ class DisplayOptions(Options):
         return {
             'minimize': True,
         }
-
+    
 
 class KDefinitionOptions(Options):
     includes: list[str]
@@ -117,7 +117,6 @@ class SaveDirOptions(Options):
             'save_directory': None,
             'temp_directory': None,
         }
-
 
 class SpecOptions(SaveDirOptions):
     spec_file: Path
