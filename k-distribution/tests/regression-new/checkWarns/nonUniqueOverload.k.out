@@ -1,31 +1,11 @@
-[Error] Compiler: Symbol 'foo__NONUNIQUEOVERLOAD_Foo1_Foo1' defined but not used. Add the 'unused' attribute if this is intentional.
-	Source(nonUniqueOverload.k)
-	Location(7,21,7,47)
-	7 |	    syntax Foo1 ::= "foo" Foo1 [overload(foo)]
-	  .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Overload `foo` is not unique. Consider renaming one of the overload sets with this key.
 	Source(nonUniqueOverload.k)
-	Location(8,21,8,47)
-	8 |	    syntax Foo2 ::= "foo" Foo2 [overload(foo)]
-	  .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Symbol 'foo__NONUNIQUEOVERLOAD_Foo2_Foo2' defined but not used. Add the 'unused' attribute if this is intentional.
-	Source(nonUniqueOverload.k)
-	Location(8,21,8,47)
-	8 |	    syntax Foo2 ::= "foo" Foo2 [overload(foo)]
-	  .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Symbol 'foo___NONUNIQUEOVERLOAD_Foo1_Foo1_Foo1' defined but not used. Add the 'unused' attribute if this is intentional.
-	Source(nonUniqueOverload.k)
-	Location(10,21,10,52)
-	10 |	    syntax Foo1 ::= "foo" Foo1 Foo1 [overload(foo)]
-	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(8,21,8,55)
+	8 |	    syntax Foo2 ::= "foo" Foo2 [overload(foo), unused]
+	  .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Overload `foo` is not unique. Consider renaming one of the overload sets with this key.
 	Source(nonUniqueOverload.k)
-	Location(11,21,11,52)
-	11 |	    syntax Foo2 ::= "foo" Foo2 Foo2 [overload(foo)]
-	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Symbol 'foo___NONUNIQUEOVERLOAD_Foo2_Foo2_Foo2' defined but not used. Add the 'unused' attribute if this is intentional.
-	Source(nonUniqueOverload.k)
-	Location(11,21,11,52)
-	11 |	    syntax Foo2 ::= "foo" Foo2 Foo2 [overload(foo)]
-	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 6 structural errors.
+	Location(11,21,11,60)
+	11 |	    syntax Foo2 ::= "foo" Foo2 Foo2 [overload(foo), unused]
+	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 2 structural errors.
