@@ -31,9 +31,6 @@ public class KLabels {
   public static final KLabel INIT_GENERATED_COUNTER_CELL = KLabel("initGeneratedCounterCell");
   public static final String THIS_CONFIGURATION = "THIS_CONFIGURATION";
 
-  public static final KLabel STRATEGY_CELL = KLabel("<s>");
-  public static final KLabel STUCK = KLabel("#STUCK");
-
   public static final KLabel ML_FALSE = KLabel("#Bottom");
   public static final KLabel ML_TRUE = KLabel("#Top");
   public static final KLabel ML_OR = KLabel("#Or");
