@@ -633,7 +633,7 @@ public class Kompile {
     }
   }
 
-  private void checkOverloads(Module module) {
+  private void checkSingletonOverload(Module module) {
     var withOverload = module.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
 
     stream(withOverload)
@@ -647,6 +647,32 @@ public class Kompile {
                     p);
               }
             });
+  }
+
+  private void checkDuplicateOverloads(Module module) {
+    var partialOrderHeads =
+        module.overloads().relations().keySet().stream()
+            .collect(Collectors.groupingBy(p -> p.att().get(Att.OVERLOAD())));
+
+    partialOrderHeads.forEach(
+        (key, prods) -> {
+          if (prods.size() > 1) {
+            for (Production prod : prods) {
+              kem.registerCompilerWarning(
+                  KException.ExceptionType.DUPLICATE_OVERLOAD,
+                  errors,
+                  "Overload `"
+                      + key
+                      + "` is not unique. Consider renaming one of the overload sets with this key.",
+                  prod);
+            }
+          }
+        });
+  }
+
+  private void checkOverloads(Module module) {
+    checkSingletonOverload(module);
+    checkDuplicateOverloads(module);
   }
 
   private void checkAnywhereRules(scala.collection.Set<Module> modules) {
