@@ -9,7 +9,7 @@ class NoAppendIT extends KoreTest {
 
   @Test def test() {
     val axioms = this.axioms(
-      "module TEST imports K-EQUAL imports DEFAULT-STRATEGY configuration <k> $PGM:K </k> <s/> endmodule"
+      "module TEST imports K-EQUAL configuration <k> $PGM:K </k> endmodule"
     )
     for (axiom <- axioms) {
       val rewrite = getRewrite(axiom)
