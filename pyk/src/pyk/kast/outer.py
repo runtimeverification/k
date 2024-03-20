@@ -1214,6 +1214,50 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             symbols[symbol] = prod
         return FrozenDict(symbols)
 
+    @cached_property
+    def overloads(self) -> FrozenDict[str, frozenset[str]]:
+        """Return a mapping from symbols to the sets of symbols that overload them."""
+
+        def lt(overloader: KProduction, overloaded: KProduction) -> bool:
+            assert overloader.klabel
+            assert overloaded.klabel
+            assert overloader.klabel.name != overloaded.klabel.name
+            assert Atts.OVERLOAD in overloader.att
+            assert Atts.OVERLOAD in overloaded.att
+            assert overloader.att[Atts.OVERLOAD] == overloaded.att[Atts.OVERLOAD]
+            arg_sorts1 = overloader.argument_sorts
+            arg_sorts2 = overloaded.argument_sorts
+            if len(arg_sorts1) != len(arg_sorts2):
+                return False
+            if overloader.sort not in self.subsorts(overloaded.sort):
+                return False
+            less = False
+            for sort1, sort2 in zip(arg_sorts1, arg_sorts2, strict=True):
+                if sort1 == sort2:
+                    continue
+                if sort1 in self.subsorts(sort2):
+                    less = True
+                    continue
+                return False
+            return less
+
+        symbols_by_overload: dict[str, list[str]] = {}
+        for symbol in self.symbols:
+            prod = self.symbols[symbol]
+            if Atts.OVERLOAD in prod.att:
+                symbols_by_overload.setdefault(prod.att[Atts.OVERLOAD], []).append(symbol)
+
+        overloads: dict[str, list[str]] = {}
+        for _, symbols in symbols_by_overload.items():
+            for s1 in symbols:
+                for s2 in symbols:
+                    if s1 == s2:
+                        continue
+                    if lt(overloader=self.symbols[s1], overloaded=self.symbols[s2]):
+                        # Index by overloaded symbol, this way it is easy to look them up
+                        overloads.setdefault(s2, []).append(s1)
+        return FrozenDict({key: frozenset(values) for key, values in overloads.items()})
+
     def sort(self, kast: KInner) -> KSort | None:
         """Computes the sort of a given term using best-effort simple sorting algorithm, returns `None` on algorithm failure."""
         match kast:

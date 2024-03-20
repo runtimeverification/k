@@ -260,6 +260,7 @@ class Atts:
     MACRO: Final = AttKey('macro', type=_NONE)
     MACRO_REC: Final = AttKey('macro-rec', type=_NONE)
     MAINCELL: Final = AttKey('maincell', type=_NONE)
+    OVERLOAD: Final = AttKey('overload', type=_STR)
     OWISE: Final = AttKey('owise', type=_NONE)
     PREDICATE: Final = AttKey('predicate', type=_ANY)
     PREFER: Final = AttKey('prefer', type=_NONE)
