@@ -7,8 +7,8 @@ from typing import IO, TYPE_CHECKING, Any
 
 import tomli
 
-from ..ktool.kompile import KompileBackend
 from ..ktool import TypeInferenceMode
+from ..ktool.kompile import KompileBackend
 from .args import (
     ConfigArgs,
     DefinitionOptions,
