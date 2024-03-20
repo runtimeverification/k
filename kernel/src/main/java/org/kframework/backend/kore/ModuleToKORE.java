@@ -1760,6 +1760,7 @@ public class ModuleToKORE {
     return KList(
         stream(assoc)
             .filter(t -> t._1().name().equals(klabel.name()))
+            .sorted(Comparator.comparing(t -> t._2().name()))
             .map(t -> KApply(KLabel(t._2().name())))
             .collect(Collectors.toList()));
   }
