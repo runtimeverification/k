@@ -603,8 +603,7 @@ public class Kompile {
               moduleNames.add(m.name());
             });
 
-    CheckKLabels checkKLabels =
-        new CheckKLabels(errors, kem, files, kompileOptions.extraConcreteRuleLabels);
+    CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files);
     Set<String> checkedModules = new HashSet<>();
     // only check imported modules because otherwise we might have false positives
     Consumer<Module> checkModuleKLabels =
