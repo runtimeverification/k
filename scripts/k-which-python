@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [ "$#" -gt 1 ]; then
+    echo "Usage: k-which-python [3.10|3.11]"
+    exit 1
+fi
+
+version="$1"
+
+case "$version" in
+  3.10)
+    echo python3.10
+    ;;
+  3.11)
+    echo python3.11
+    ;;
+  "")
+    echo python3
+    ;;
+  *)
+    echo "Unsupported Python version: $version"
+    exit 1
+    ;;
+esac
