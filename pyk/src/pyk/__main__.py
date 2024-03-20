@@ -8,11 +8,11 @@ from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
-import tomli 
 
+import tomli
 from graphviz import Digraph
 
-from .cli.args import KCLIArgs, ConfigArgs
+from .cli.args import ConfigArgs, KCLIArgs
 from .cli.pyk import generate_options, get_option_string_destination
 from .cli.utils import LOG_FORMAT, dir_path, file_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
@@ -42,8 +42,8 @@ from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
-    from typing import Any, Final
     from argparse import Namespace
+    from typing import Any, Final
 
     from .cli.pyk import (
         CoverageOptions,
@@ -80,8 +80,8 @@ def main() -> None:
 
     stripped_args = toml_args | {
         key: val for (key, val) in vars(args).items() if val is not None and not (isinstance(val, Iterable) and not val)
-    } 
-    
+    }
+
     options = generate_options(stripped_args)
 
     logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
@@ -531,9 +531,13 @@ def create_argument_parser() -> ArgumentParser:
     coverage_args.add_argument('coverage_file', type=FileType('r'), help='Coverage file to build log for.')
     coverage_args.add_argument('-o', '--output', type=FileType('w'))
 
-    pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[k_cli_args.logging_args, config_args.config_args])
+    pyk_args_command.add_parser(
+        'kore-to-json', help='Convert textual KORE to JSON', parents=[k_cli_args.logging_args, config_args.config_args]
+    )
 
-    pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args, config_args.config_args])
+    pyk_args_command.add_parser(
+        'json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args, config_args.config_args]
+    )
 
     return pyk_args
 
@@ -541,11 +545,11 @@ def create_argument_parser() -> ArgumentParser:
 def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
     def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
         if len(profile_list) == 0 or profile_list[0] not in toml_profile:
-            return { k:v for k,v in toml_profile.items() if type(v) is not dict}
+            return {k: v for k, v in toml_profile.items() if type(v) is not dict}
         elif len(profile_list) == 1:
-            return { k:v for k,v in toml_profile[profile_list[0]].items() if type(v) is not dict}
+            return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
         return get_profile(toml_profile[profile_list[0]], profile_list[1:])
-    
+
     toml_args = {}
     if args.config_file.is_file():
         with open(args.config_file, 'rb') as config_file:
@@ -556,19 +560,22 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
                     'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
                 )
 
-    toml_args = get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
-    toml_args = { get_option_string_destination(args.command, k):v for k,v in toml_args.items() }
-    for k,v in toml_args.items():
-        if k[:3] == "no-" and (v == "true" or v == "false"):
+    toml_args = (
+        get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
+    )
+    toml_args = {get_option_string_destination(args.command, k): v for k, v in toml_args.items()}
+    for k, v in toml_args.items():
+        if k[:3] == 'no-' and (v == 'true' or v == 'false'):
             del toml_args[k]
-            toml_args[k[3:]] = "false" if v == "true" else "true" 
-        if k == "optimization-level":
+            toml_args[k[3:]] = 'false' if v == 'true' else 'true'
+        if k == 'optimization-level':
             level = toml_args[k] if toml_args[k] >= 0 else 0
             level = level if toml_args[k] <= 3 else 3
             del toml_args[k]
-            toml_args['-O' + str(level)] = "true"
-              
+            toml_args['-O' + str(level)] = 'true'
+
     return toml_args
+
 
 if __name__ == '__main__':
     main()
