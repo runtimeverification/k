@@ -652,6 +652,7 @@ public class Kompile {
   private void checkDuplicateOverloads(Module module) {
     var partialOrderHeads =
         module.overloads().relations().keySet().stream()
+            .filter(p -> p.att().contains(Att.OVERLOAD()))
             .collect(Collectors.groupingBy(p -> p.att().get(Att.OVERLOAD())));
 
     partialOrderHeads.forEach(
