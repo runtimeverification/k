@@ -15,9 +15,11 @@ TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 KOMPILE_BACKEND?=llvm
 KAST_TESTS?=$(wildcard ./*.kast)
 
-KOMPILE_FLAGS+=--type-inference-mode checked
-KPROVE_FLAGS+=
-KRUN_FLAGS+=
+VERBOSITY?=
+
+KOMPILE_FLAGS+=--type-inference-mode checked $(VERBOSITY)
+KPROVE_FLAGS+=$(VERBOSITY)
+KRUN_FLAGS+=$(VERBOSITY)
 
 CHECK=| diff -
 

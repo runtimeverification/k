@@ -22,4 +22,4 @@ KRUN_FLAGS=--output none
 %/threads/threads_08.simple: kompile
 	true
 
-include ../../../../../../../include/kframework/ktest.mak
+include ../../../../../include/ktest.mak

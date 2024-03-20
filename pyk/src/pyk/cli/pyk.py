@@ -3,8 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
 
-from pyk.ktool.kompile import KompileBackend
-
+from ..ktool.kompile import KompileBackend
 from .args import (
     DefinitionOptions,
     DisplayOptions,
@@ -12,6 +11,7 @@ from .args import (
     KompileOptions,
     LoggingOptions,
     OutputFileOptions,
+    WarningOptions,
 )
 
 if TYPE_CHECKING:
@@ -109,7 +109,7 @@ class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
         }
 
 
-class KompileCommandOptions(LoggingOptions, KDefinitionOptions, KompileOptions):
+class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
     definition_dir: Path | None
     main_file: str
     backend: KompileBackend

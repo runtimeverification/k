@@ -5,4 +5,7 @@
   <foo>
     bar ~> .K
   </foo>
+  <generatedCounter>
+    0
+  </generatedCounter>
 </generatedTop>

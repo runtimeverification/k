@@ -282,6 +282,8 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'gen_bison_parser': options.gen_bison_parser,
         'gen_glr_bison_parser': options.gen_glr_bison_parser,
         'bison_lists': options.bison_lists,
+        'warnings': options.warnings,
+        'warning_to_error': options.warning_to_error,
     }
     if options.backend == KompileBackend.LLVM:
         kompile_dict['ccopts'] = options.ccopts
@@ -431,7 +433,7 @@ def create_argument_parser() -> ArgumentParser:
     kompile_args = pyk_args_command.add_parser(
         'kompile',
         help='Kompile the K specification.',
-        parents=[k_cli_args.logging_args, k_cli_args.definition_args, k_cli_args.kompile_args],
+        parents=[k_cli_args.logging_args, k_cli_args.warning_args, k_cli_args.definition_args, k_cli_args.kompile_args],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
 

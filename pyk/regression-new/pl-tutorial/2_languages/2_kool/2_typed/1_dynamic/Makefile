@@ -9,4 +9,4 @@ RESULTDIR=tests
 %/threads.kool: kompile
 	true
 
-include ../../../../../../../include/kframework/ktest.mak
+include ../../../../../include/ktest.mak
