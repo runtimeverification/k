@@ -138,7 +138,11 @@ public class GenerateSortProjections {
     }
     boolean total = false;
     if (mainMod != null) {
-      if (stream(mainMod.productionsForSort().apply(prod.sort().head()))
+      if (stream(
+                  mainMod
+                      .productionsForSort()
+                      .get(prod.sort().head())
+                      .getOrElse(() -> Collections.<Production>Set()))
               .filter(p -> !p.att().contains(Att.FUNCTION()))
               .count()
           == 1) {
