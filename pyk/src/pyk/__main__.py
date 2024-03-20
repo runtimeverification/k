@@ -8,12 +8,13 @@ from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
+import tomli 
 
 from graphviz import Digraph
 
-from .cli.args import KCLIArgs
-from .cli.pyk import generate_options
-from .cli.utils import LOG_FORMAT, dir_path, loglevel
+from .cli.args import KCLIArgs, ConfigArgs
+from .cli.pyk import generate_options, get_option_string_destination
+from .cli.utils import LOG_FORMAT, dir_path, file_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .kast.inner import KInner
@@ -42,6 +43,7 @@ from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from typing import Any, Final
+    from argparse import Namespace
 
     from .cli.pyk import (
         CoverageOptions,
@@ -74,10 +76,12 @@ def main() -> None:
 
     cli_parser = create_argument_parser()
     args = cli_parser.parse_args()
+    toml_args = parse_toml_args(args)
 
-    stripped_args = {
+    stripped_args = toml_args | {
         key: val for (key, val) in vars(args).items() if val is not None and not (isinstance(val, Iterable) and not val)
-    }
+    } 
+    
     options = generate_options(stripped_args)
 
     logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
@@ -391,6 +395,7 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 def create_argument_parser() -> ArgumentParser:
     k_cli_args = KCLIArgs()
+    config_args = ConfigArgs()
 
     pyk_args = ArgumentParser()
     pyk_args_command = pyk_args.add_subparsers(dest='command', required=True)
@@ -398,7 +403,7 @@ def create_argument_parser() -> ArgumentParser:
     print_args = pyk_args_command.add_parser(
         'print',
         help='Pretty print a term.',
-        parents=[k_cli_args.logging_args, k_cli_args.display_args],
+        parents=[k_cli_args.logging_args, k_cli_args.display_args, config_args.config_args],
     )
     print_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     print_args.add_argument('term', type=FileType('r'), help='Input term (in format specified with --input).')
@@ -410,7 +415,7 @@ def create_argument_parser() -> ArgumentParser:
     rpc_print_args = pyk_args_command.add_parser(
         'rpc-print',
         help='Pretty-print an RPC request/response',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     rpc_print_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     rpc_print_args.add_argument(
@@ -423,7 +428,7 @@ def create_argument_parser() -> ArgumentParser:
     rpc_kast_args = pyk_args_command.add_parser(
         'rpc-kast',
         help='Convert an "execute" JSON RPC response to a new "execute" or "simplify" request, copying parameters from a reference request.',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     rpc_kast_args.add_argument(
         'reference_request_file',
@@ -440,7 +445,7 @@ def create_argument_parser() -> ArgumentParser:
     prove_legacy_args = pyk_args_command.add_parser(
         'prove-legacy',
         help='Prove an input specification (using kprovex).',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     prove_legacy_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     prove_legacy_args.add_argument('main_file', type=str, help='Main file used for kompilation.')
@@ -452,14 +457,14 @@ def create_argument_parser() -> ArgumentParser:
     kompile_args = pyk_args_command.add_parser(
         'kompile',
         help='Kompile the K specification.',
-        parents=[k_cli_args.logging_args, k_cli_args.warning_args, k_cli_args.definition_args, k_cli_args.kompile_args],
+        parents=[k_cli_args.logging_args, k_cli_args.warning_args, k_cli_args.definition_args, k_cli_args.kompile_args, config_args.config_args],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
 
     run_args = pyk_args_command.add_parser(
         'run',
         help='Run a given program using the K definition.',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     run_args.add_argument('pgm_file', type=str, help='File program to run in it.')
     run_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
@@ -467,7 +472,13 @@ def create_argument_parser() -> ArgumentParser:
     prove_args = pyk_args_command.add_parser(
         'prove',
         help='Prove an input specification (using RPC based prover).',
-        parents=[k_cli_args.logging_args, k_cli_args.spec_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
+    )
+    prove_args.add_argument('spec_file', type=file_path, help='File with the specification module.')
+    prove_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
+    prove_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
+    prove_args.add_argument(
+        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
     )
     prove_args.add_argument(
         '--failure-info',
@@ -507,25 +518,57 @@ def create_argument_parser() -> ArgumentParser:
     graph_imports_args = pyk_args_command.add_parser(
         'graph-imports',
         help='Graph the imports of a given definition.',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     graph_imports_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
 
     coverage_args = pyk_args_command.add_parser(
         'coverage',
         help='Convert coverage file to human readable log.',
-        parents=[k_cli_args.logging_args],
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     coverage_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     coverage_args.add_argument('coverage_file', type=FileType('r'), help='Coverage file to build log for.')
     coverage_args.add_argument('-o', '--output', type=FileType('w'))
 
-    pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[k_cli_args.logging_args])
+    pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[k_cli_args.logging_args, config_args.config_args])
 
-    pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args])
+    pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args, config_args.config_args])
 
     return pyk_args
 
+
+def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
+    def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
+        if len(profile_list) == 0 or profile_list[0] not in toml_profile:
+            return { k:v for k,v in toml_profile.items() if type(v) is not dict}
+        elif len(profile_list) == 1:
+            return { k:v for k,v in toml_profile[profile_list[0]].items() if type(v) is not dict}
+        return get_profile(toml_profile[profile_list[0]], profile_list[1:])
+    
+    toml_args = {}
+    if args.config_file.is_file():
+        with open(args.config_file, 'rb') as config_file:
+            try:
+                toml_args = tomli.load(config_file)
+            except tomli.TOMLDecodeError:
+                _LOGGER.error(
+                    'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
+                )
+
+    toml_args = get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
+    toml_args = { get_option_string_destination(args.command, k):v for k,v in toml_args.items() }
+    for k,v in toml_args.items():
+        if k[:3] == "no-" and (v == "true" or v == "false"):
+            del toml_args[k]
+            toml_args[k[3:]] = "false" if v == "true" else "true" 
+        if k == "optimization-level":
+            level = toml_args[k] if toml_args[k] >= 0 else 0
+            level = level if toml_args[k] <= 3 else 3
+            del toml_args[k]
+            toml_args['-O' + str(level)] = "true"
+              
+    return toml_args
 
 if __name__ == '__main__':
     main()

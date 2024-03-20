@@ -26,7 +26,12 @@ class LoggingOptions(Options):
             'verbose': False,
             'debug': False,
         }
-
+    
+    @staticmethod
+    def from_option_string() -> dict[str, Any]:
+        return {
+            'v': 'verbose',
+        }
 
 class WarningOptions(Options):
     warnings: Warnings | None
@@ -52,8 +57,14 @@ class OutputFileOptions(Options):
 
 class DefinitionOptions(Options):
     definition_dir: Path
-
-
+    
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'output-definition': 'definition_dir',
+            'definition': 'definition_dir',
+        }
+    
 class DisplayOptions(Options):
     minimize: bool
 
@@ -62,7 +73,7 @@ class DisplayOptions(Options):
         return {
             'minimize': True,
         }
-
+    
 
 class KDefinitionOptions(Options):
     includes: list[str]
@@ -80,7 +91,12 @@ class KDefinitionOptions(Options):
             'md_selector': 'k',
             'includes': [],
         }
-
+    
+    @staticmethod
+    def from_option_string() -> dict[str, str]:
+        return {
+            'includes': 'includes',
+        }
 
 class SaveDirOptions(Options):
     save_directory: Path | None
@@ -92,7 +108,6 @@ class SaveDirOptions(Options):
             'save_directory': None,
             'temp_directory': None,
         }
-
 
 class SpecOptions(SaveDirOptions):
     spec_file: Path
@@ -107,7 +122,13 @@ class SpecOptions(SaveDirOptions):
             'claim_labels': None,
             'exclude_claim_labels': None,
         }
-
+    
+    @staticmethod
+    def from_option_string() -> dict[str, str]:
+        return SaveDirOptions.from_option_string() | {
+            'claim': 'claim_labels',
+            'exclude-claim': 'exclude_claim_labels',
+        }
 
 class KompileOptions(Options):
     emit_json: bool
@@ -153,7 +174,14 @@ class KompileOptions(Options):
             'bison_lists': False,
             'no_exc_wrap': False,
         }
-
+    
+    @staticmethod
+    def from_option_string() -> dict[str, str]:
+        return {
+            'with-llvm-library': 'llvm_library',
+            'read-only-kompiled-directory': 'read_only',
+            'ccopt': 'ccopts',
+        }
 
 class ParallelOptions(Options):
     workers: int
@@ -164,6 +192,11 @@ class ParallelOptions(Options):
             'workers': 1,
         }
 
+    @staticmethod
+    def from_option_string() -> dict[str, str]:
+        return {
+            'j': 'workers',
+        }
 
 class BugReportOptions(Options):
     bug_report: BugReport | None
@@ -186,7 +219,25 @@ class SMTOptions(Options):
             'smt_tactic': None,
         }
 
-
+class ConfigArgs:
+    @cached_property
+    def config_args(self) -> ArgumentParser:
+        args = ArgumentParser(add_help=False)
+        args.add_argument(
+            '--config-file',
+            dest='config_file',
+            type=file_path,
+            default=Path('./pyk.toml'),
+            help='Path to Pyk config file.',
+        )
+        args.add_argument(
+            '--config-profile',
+            dest='config_profile',
+            default='default',
+            help='Config profile to be used.',
+        )
+        return args
+    
 class KCLIArgs:
     @cached_property
     def logging_args(self) -> ArgumentParser:
