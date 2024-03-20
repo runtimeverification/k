@@ -5,7 +5,7 @@ KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS+=--syntax-module TEST
 DEFDIR=some/nested/path
 
-include ../../../../include/kframework/ktest.mak
+include ../../include/ktest.mak
 
 CHECK := $(REMOVE_PATHS) $(CHECK)
 update-results: CHECK := $(REMOVE_PATHS) $(CHECK)

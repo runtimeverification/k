@@ -1,5 +1,10 @@
-<x>
-  <k>
-    0 ~> .K
-  </k>
-</x>
+<generatedTop>
+  <x>
+    <k>
+      0 ~> .K
+    </k>
+  </x>
+  <generatedCounter>
+    1
+  </generatedCounter>
+</generatedTop>

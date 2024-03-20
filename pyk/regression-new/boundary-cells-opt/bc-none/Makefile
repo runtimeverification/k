@@ -8,4 +8,4 @@ KOMPILE_BACKEND?=haskell
 
 KPROVE_FLAGS=
 
-include ../../../../include/kframework/ktest.mak
+include ../../include/ktest.mak

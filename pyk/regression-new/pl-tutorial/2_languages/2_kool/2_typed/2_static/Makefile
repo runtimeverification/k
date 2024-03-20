@@ -11,4 +11,4 @@ RESULTDIR=tests
 %/return-object.kool: kompile
 	true
 
-include ../../../../../../../include/kframework/ktest.mak
+include ../../../../../include/ktest.mak

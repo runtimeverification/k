@@ -4,4 +4,4 @@ TESTDIR=.
 KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS=--syntax-module TEST --llvm-mutable-bytes
 
-include ../../../../include/kframework/ktest.mak
+include ../../include/ktest.mak

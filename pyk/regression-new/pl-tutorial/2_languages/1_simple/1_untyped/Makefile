@@ -5,7 +5,7 @@ KOMPILE_FLAGS=--enable-search
 KOMPILE_BACKEND?=llvm
 KRUN_FLAGS=--output none --smt none
 
-include ../../../../../../include/kframework/ktest.mak
+include ../../../../include/ktest.mak
 
 tests/threads/threads_05.simple: kompile
 	cat $@.in 2>/dev/null | $(KRUN_OR_LEGACY) $@ --definition $(DEF)-kompiled --search --bound 5 $(CHECK) $@.out

@@ -5,4 +5,4 @@ KOMPILE_BACKEND=haskell
 KOMPILE_FLAGS=--syntax-module A
 KPROVE_FLAGS=
 
-include ../../../../../include/kframework/ktest.mak
+include ../../../include/ktest.mak
