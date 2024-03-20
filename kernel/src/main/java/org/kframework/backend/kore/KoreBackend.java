@@ -154,9 +154,12 @@ public class KoreBackend implements Backend {
     DefinitionTransformer generateSortPredicateRules =
         DefinitionTransformer.from(
             new GenerateSortPredicateRules()::gen, "adding sort predicate rules");
-    DefinitionTransformer generateSortProjections =
-        DefinitionTransformer.from(
-            new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
+    Function1<Definition, Definition> generateSortProjections =
+        d ->
+            DefinitionTransformer.from(
+                    new GenerateSortProjections(kompileOptions.coverage, d.mainModule())::gen,
+                    "adding sort projections")
+                .apply(d);
     DefinitionTransformer subsortKItem =
         DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
     Function1<Definition, Definition> addCoolLikeAtt =
@@ -377,8 +380,11 @@ public class KoreBackend implements Backend {
         ModuleTransformer.fromSentenceTransformer(
             new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
             "concretizing configuration");
-    ModuleTransformer generateSortProjections =
-        ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
+    Function1<Module, Module> generateSortProjections =
+        m ->
+            ModuleTransformer.from(
+                    new GenerateSortProjections(false, m)::gen, "adding sort projections")
+                .apply(m);
 
     return m ->
         resolveComm

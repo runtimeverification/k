@@ -28,13 +28,16 @@ import scala.collection.Set;
 public class GenerateSortProjections {
 
   private Module mod;
+  private final Module mainMod;
   private final boolean cover;
 
-  public GenerateSortProjections(boolean cover) {
+  public GenerateSortProjections(boolean cover, Module mainMod) {
+    this.mainMod = mainMod;
     this.cover = cover;
   }
 
   public GenerateSortProjections(Module mod) {
+    this.mainMod = null;
     this.mod = mod;
     this.cover = false;
   }
