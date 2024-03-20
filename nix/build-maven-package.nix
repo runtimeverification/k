@@ -2,7 +2,8 @@
 
 { src, sourceRoot ? null, buildOffline ? false, patches ? [ ], pname, version
 , mvnHash ? "", mvnFetchExtraArgs ? { }, mvnDepsParameters ? ""
-, manualMvnArtifacts ? [ ], mvnParameters ? "", ... }@args:
+, manualMvnArtifacts ? [ ], manualMvnSourceArtifacts ? [ ]
+, mvnParameters ? "", ... }@args:
 
 # originally extracted from dbeaver
 # created to allow using maven packages in the same style as rust
@@ -23,6 +24,15 @@ let
       do
         echo "downloading manual $artifactId"
         mvn dependency:get -Dartifact="$artifactId" -Dmaven.repo.local=$out/.m2
+      done
+
+      for artifact in ${builtins.toString manualMvnSourceArtifacts}
+      do
+        groupId=$(echo $artifact | cut -d':' -f1)
+        artifactId=$(echo $artifact | cut -d':' -f2)
+        version=$(echo $artifact | cut -d':' -f3)
+        echo "downloading manual sources $artifactId"
+        mvn dependency:get -Dclassifier=sources -DgroupId=$groupId -DartifactId=$artifactId -Dversion=$version -Dmaven.repo.local=$out/.m2
       done
     '' + lib.optionalString (!buildOffline) ''
       mvn package -Dmaven.repo.local=$out/.m2 ${mvnParameters}

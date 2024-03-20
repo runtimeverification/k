@@ -1,6 +1,6 @@
-{ src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
+{ src, maven, mvnHash, manualMvnArtifacts, manualMvnSourceArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
-, pkg-config, python3, z3, haskell-backend, booster, rpc-client, prelude-kore, llvm-backend
+, pkg-config, python3, python310, python311, z3, haskell-backend, booster, rpc-client, prelude-kore, llvm-backend
 , debugger, version, llvm-kompile-libs, runtimeShell }:
 
 let
@@ -27,21 +27,15 @@ let
   ] ++ lib.optional (debugger != null) debugger;
   runtimePath = lib.makeBinPath runtimeInputs;
 
-  which-python = ''
-      #!${runtimeShell}
-      echo "${lib.makeBinPath [python3]}/python3"
-      '';
-
-
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
-      inherit version src mvnHash manualMvnArtifacts;
+      inherit version src mvnHash manualMvnArtifacts manualMvnSourceArtifacts;
 
       buildOffline = true;
 
       mvnParameters =
-        "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true";
+        "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true -DsecondaryCacheDir=secondary-cache";
 
       nativeBuildInputs = [ makeWrapper ];
 
@@ -53,8 +47,13 @@ let
       installPhase = ''
         mkdir -p $out/bin-unwrapped
         mkdir -p $out/bin
-        echo -n "${which-python}" > $out/bin/k-which-python
-        chmod +x $out/bin/k-which-python
+
+        cp scripts/k-which-python $out/bin
+        substituteInPlace $out/bin/k-which-python \
+          --replace "#!/usr/bin/env bash" "${runtimeShell}" \
+          --replace "echo python3.10" "echo ${lib.makeBinPath [python310]}/python3" \
+          --replace "echo python3.11" "echo ${lib.makeBinPath [python311]}/python3" \
+          --replace "echo python3"    "echo ${lib.makeBinPath [python3]}/python3"
 
         cp -r k-distribution/target/release/k/bin/* $out/bin-unwrapped/
         cp -r k-distribution/target/release/k/{include,lib} $out/

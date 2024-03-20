@@ -141,7 +141,7 @@ public class AddSortInjections {
       String hookAtt =
           mod.sortAttributesFor()
               .get(expectedSort.head())
-              .getOrElse(() -> Att())
+              .getOrElse(() -> Att.empty())
               .getOptional(Att.HOOK())
               .orElse("");
       if ((hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List"))

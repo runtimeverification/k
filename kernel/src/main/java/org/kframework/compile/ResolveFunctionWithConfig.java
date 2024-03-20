@@ -63,7 +63,8 @@ public class ResolveFunctionWithConfig {
     topCellLabel = KLabels.GENERATED_TOP_CELL;
     CONFIG_VAR =
         KVariable(
-            "#Configuration", Att().add(Att.SORT(), Sort.class, topCell).add(Att.WITH_CONFIG()));
+            "#Configuration",
+            Att.empty().add(Att.SORT(), Sort.class, topCell).add(Att.WITH_CONFIG()));
   }
 
   private boolean ruleNeedsConfig(RuleOrClaim r) {
@@ -165,7 +166,7 @@ public class ResolveFunctionWithConfig {
         List<K> items =
             Stream.concat(
                     funKApp.items().stream(),
-                    Stream.of(KAs(secondChild, CONFIG_VAR, Att().add(Att.WITH_CONFIG()))))
+                    Stream.of(KAs(secondChild, CONFIG_VAR, Att.empty().add(Att.WITH_CONFIG()))))
                 .collect(Collections.toList());
         K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
         if (rhs == null) {
