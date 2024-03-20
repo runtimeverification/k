@@ -650,6 +650,10 @@ public class Kompile {
   }
 
   private void checkDuplicateOverloads(Module module) {
+    // Collect the set of productions that are the greatest element of an overload set, grouped
+    // by their `overload(_)` key. If any key has multiple greatest elements, then two overload sets
+    // are using the same key. This is not ambiguous from the point of view of the compiler, but may
+    // be confusing to users.
     var partialOrderHeads =
         module.overloads().relations().keySet().stream()
             .filter(p -> p.att().contains(Att.OVERLOAD()))
