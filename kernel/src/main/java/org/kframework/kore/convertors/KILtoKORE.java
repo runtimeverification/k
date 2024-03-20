@@ -121,7 +121,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                           + " when loading from front-end classes.");
                 }),
         koreModules,
-        Att());
+        Att.empty());
   }
 
   @SuppressWarnings("unchecked")
@@ -391,14 +391,14 @@ public class KILtoKORE extends KILTransformation<Object> {
 
   private static Att attributesFromSource(Source source) {
     if (source != null) {
-      return Att().add(Att.SOURCE(), Source.class, source);
+      return Att.empty().add(Att.SOURCE(), Source.class, source);
     }
-    return Att();
+    return Att.empty();
   }
 
   private static org.kframework.attributes.Att attributesFromLocation(Location location) {
     if (location != null) {
-      return Att().add(Att.LOCATION(), Location.class, location);
-    } else return Att();
+      return Att.empty().add(Att.LOCATION(), Location.class, location);
+    } else return Att.empty();
   }
 }
