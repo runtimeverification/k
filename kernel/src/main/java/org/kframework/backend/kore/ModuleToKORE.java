@@ -1723,7 +1723,7 @@ public class ModuleToKORE {
       }
       att = att.add(Att.TERMINALS(), sb.toString());
       if (prod.klabel().isDefined()) {
-        List<K> lessThanK = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         Optional<Set<Tag>> lessThan =
             Optional.ofNullable(
                 module.priorities().relations().get(Tag(prod.klabel().get().name())));
@@ -1732,9 +1732,12 @@ public class ModuleToKORE {
             if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
               continue;
             }
-            lessThanK.add(KApply(KLabel(t.name())));
+            tags.add(t.name());
           }
         }
+        tags.sort(Comparator.naturalOrder());
+        List<K> lessThanK =
+            tags.stream().map(tag -> KApply(KLabel(tag))).collect(Collectors.toList());
         att = att.add(Att.PRIORITIES(), KList.class, KList(lessThanK));
         att =
             att.add(
