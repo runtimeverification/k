@@ -20,7 +20,7 @@ KRUN_FLAGS+=--no-exc-wrap
 
 CHECK=| diff -
 
-.PHONY: kompile all clean update-results dummy krun proofs searches strat kast
+.PHONY: kompile all clean update-results dummy krun proofs searches kast
 
 # run all tests
 all: kompile kast

@@ -15,7 +15,6 @@ module TEST
   imports STRING-BUFFER
   imports BYTES
   imports K-IO
-  imports DEFAULT-STRATEGY
   imports MINT
   imports FFI
   imports JSON
@@ -26,5 +25,5 @@ module TEST
   syntax MInt{8}
   rule I:Int => Int2MInt(I)::MInt{8}
 
-  configuration <k> $PGM:K </k> <s/>
+  configuration <k> $PGM:K </k>
 endmodule
