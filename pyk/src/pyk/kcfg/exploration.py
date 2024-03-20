@@ -97,3 +97,12 @@ class KCFGExploration:
         dct['kcfg'] = self.kcfg.to_dict()
         dct['terminal'] = sorted(self._terminal)
         return dct
+
+    #
+    # Minimization
+    #
+
+    # Minimizing the KCFG
+    def minimize_kcfg(self) -> None:
+        self.kcfg.minimize()
+        self._terminal = self._terminal.difference(self.kcfg._deleted_nodes)
