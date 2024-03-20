@@ -136,14 +136,6 @@ public class KompileOptions implements Serializable {
       hidden = true)
   public boolean bisonLists;
 
-  @Parameter(
-      names = "--concrete-rules",
-      description =
-          "List of rule labels to be considered concrete, in addition to rules marked with"
-              + " `[concrete]` attribute",
-      descriptionKey = "labels")
-  public List<String> extraConcreteRuleLabels = Collections.emptyList();
-
   @ParametersDelegate public SMTOptions smt = new SMTOptions();
 
   @Parameter(
