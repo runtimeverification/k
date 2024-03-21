@@ -1723,19 +1723,7 @@ public class ModuleToKORE {
       }
       att = att.add(Att.TERMINALS(), sb.toString());
       if (prod.klabel().isDefined()) {
-        List<K> lessThanK = new ArrayList<>();
-        Optional<Set<Tag>> lessThan =
-            Optional.ofNullable(
-                module.priorities().relations().get(Tag(prod.klabel().get().name())));
-        if (lessThan.isPresent()) {
-          for (Tag t : lessThan.get()) {
-            if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
-              continue;
-            }
-            lessThanK.add(KApply(KLabel(t.name())));
-          }
-        }
-        att = att.add(Att.PRIORITIES(), KList.class, KList(lessThanK));
+        att = att.add(Att.PRIORITIES(), KList.class, getPriorities(prod.klabel().get()));
         att =
             att.add(
                 Att.LEFT_INTERNAL(),
@@ -1753,10 +1741,30 @@ public class ModuleToKORE {
     return att;
   }
 
+  private KList getPriorities(KLabel klabel) {
+    List<String> tags = new ArrayList<>();
+    Optional<Set<Tag>> lessThan =
+        Optional.ofNullable(module.priorities().relations().get(Tag(klabel.name())));
+    if (lessThan.isPresent()) {
+      for (Tag tag : lessThan.get()) {
+        if (ConstructorChecks.isBuiltinLabel(KLabel(tag.name()))) {
+          continue;
+        }
+        tags.add(tag.name());
+      }
+    }
+    return KList(
+        tags.stream()
+            .sorted(Comparator.naturalOrder())
+            .map(tag -> KApply(KLabel(tag)))
+            .collect(Collectors.toList()));
+  }
+
   private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
     return KList(
         stream(assoc)
             .filter(t -> t._1().name().equals(klabel.name()))
+            .sorted(Comparator.comparing(t -> t._2().name()))
             .map(t -> KApply(KLabel(t._2().name())))
             .collect(Collectors.toList()));
   }
