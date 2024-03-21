@@ -950,7 +950,7 @@ An element of a `List` is constucted via the `ListItem` operator.
 An element can be added to the front of a `List` using the `pushList` operator.
 
 ```k
-  syntax List ::= pushList(KItem, List)       [function, total, hook(LIST.push), klabel(pushList), symbol]
+  syntax List ::= pushList(KItem, List)       [function, total, hook(LIST.push), symbol(pushList)]
   rule pushList(K::KItem, L1::List) => ListItem(K) L1
 ```
 
