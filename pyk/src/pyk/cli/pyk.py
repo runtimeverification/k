@@ -280,7 +280,7 @@ def create_argument_parser() -> ArgumentParser:
     rpc_print_args = pyk_args_command.add_parser(
         'rpc-print',
         help='Pretty-print an RPC request/response',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args],
     )
     rpc_print_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     rpc_print_args.add_argument(
@@ -293,7 +293,7 @@ def create_argument_parser() -> ArgumentParser:
     rpc_kast_args = pyk_args_command.add_parser(
         'rpc-kast',
         help='Convert an "execute" JSON RPC response to a new "execute" or "simplify" request, copying parameters from a reference request.',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args],
     )
     rpc_kast_args.add_argument(
         'reference_request_file',
@@ -310,7 +310,7 @@ def create_argument_parser() -> ArgumentParser:
     prove_legacy_args = pyk_args_command.add_parser(
         'prove-legacy',
         help='Prove an input specification (using kprovex).',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args],
     )
     prove_legacy_args.add_argument('definition_dir', type=dir_path, help='Path to definition directory.')
     prove_legacy_args.add_argument('main_file', type=str, help='Main file used for kompilation.')
@@ -327,7 +327,6 @@ def create_argument_parser() -> ArgumentParser:
             k_cli_args.warning_args,
             k_cli_args.definition_args,
             k_cli_args.kompile_args,
-            config_args.config_args,
         ],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
@@ -335,7 +334,7 @@ def create_argument_parser() -> ArgumentParser:
     run_args = pyk_args_command.add_parser(
         'run',
         help='Run a given program using the K definition.',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args],
     )
     run_args.add_argument('pgm_file', type=str, help='File program to run in it.')
     run_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
