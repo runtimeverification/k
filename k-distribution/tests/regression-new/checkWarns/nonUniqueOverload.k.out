@@ -1,11 +1,11 @@
 [Error] Compiler: Overload `foo` is not unique. Consider renaming one of the overload sets with this key.
 	Source(nonUniqueOverload.k)
-	Location(8,21,8,55)
-	8 |	    syntax Foo2 ::= "foo" Foo2 [overload(foo), unused]
-	  .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(8,19,8,53)
+	8 |	  syntax Foo2 ::= "foo" Foo2 [overload(foo), unused]
+	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Overload `foo` is not unique. Consider renaming one of the overload sets with this key.
 	Source(nonUniqueOverload.k)
-	Location(11,21,11,60)
-	11 |	    syntax Foo2 ::= "foo" Foo2 Foo2 [overload(foo), unused]
-	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(11,19,11,58)
+	11 |	  syntax Foo2 ::= "foo" Foo2 Foo2 [overload(foo), unused]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.

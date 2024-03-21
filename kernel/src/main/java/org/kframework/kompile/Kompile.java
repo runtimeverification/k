@@ -661,7 +661,9 @@ public class Kompile {
 
     partialOrderHeads.forEach(
         (key, prods) -> {
-          if (prods.size() > 1) {
+          var userList =
+              prods.size() == 2 && prods.stream().allMatch(p -> p.att().contains(Att.USER_LIST()));
+          if (prods.size() > 1 && !userList) {
             for (Production prod : prods) {
               kem.registerCompilerWarning(
                   KException.ExceptionType.DUPLICATE_OVERLOAD,
