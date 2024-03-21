@@ -322,7 +322,7 @@ def create_argument_parser() -> ArgumentParser:
     kompile_args = pyk_args_command.add_parser(
         'kompile',
         help='Kompile the K specification.',
-        parents=[k_cli_args.logging_args, k_cli_args.definition_args, k_cli_args.kompile_args, config_args.config_args],
+        parents=[k_cli_args.logging_args, k_cli_args.warning_args, k_cli_args.definition_args, k_cli_args.kompile_args, config_args.config_args],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
 
