@@ -391,9 +391,15 @@ public class CheckAtt {
 
   private void checkKLabelOverload(Production prod) {
     if (prod.att().contains(Att.KLABEL()) && prod.att().contains(Att.OVERLOAD())) {
-      errors.add(
-          KEMException.compilerError(
-              "The attributes `klabel(_)` and `overload(_)` may not occur together.", prod));
+      var klabelKey = prod.att().get(Att.KLABEL());
+      var msg =
+          "The attributes `klabel` and `overload` may not occur together. Either remove `klabel("
+              + klabelKey
+              + ")`, or replace it by `symbol("
+              + klabelKey
+              + ")`";
+
+      errors.add(KEMException.compilerError(msg, prod));
     }
   }
 
