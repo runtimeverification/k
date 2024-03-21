@@ -17,6 +17,14 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 
+/**
+ * MinimizeTermConstruction.
+ *
+ * <p>Looks for places where #as patterns can be used to reduce the number of constructors in
+ * rewrites:
+ *
+ * <p>`P1 => P2[P1]` -> `P1 #as X => P2[X]`
+ */
 public class MinimizeTermConstruction {
 
   private final Set<KVariable> vars = new HashSet<>();
