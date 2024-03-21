@@ -393,14 +393,16 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
         return get_profile(toml_profile[profile_list[0]], profile_list[1:])
 
     toml_args = {}
-    if args.config_file.is_file():
-        with open(args.config_file, 'rb') as config_file:
-            try:
-                toml_args = tomli.load(config_file)
-            except tomli.TOMLDecodeError:
-                _LOGGER.error(
-                    'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
-                )
+    if not hasattr(args, 'config_file') or not args.config_file.is_file():
+        return {}
+
+    with open(args.config_file, 'rb') as config_file:
+        try:
+            toml_args = tomli.load(config_file)
+        except tomli.TOMLDecodeError:
+            _LOGGER.error(
+                'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
+            )
 
     toml_args = (
         get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
