@@ -1,7 +1,6 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile
 
-import collection._
 import java.util
 import org.kframework.attributes.Att
 import org.kframework.builtin.Sorts
@@ -14,8 +13,10 @@ import org.kframework.kore._
 import org.kframework.kore.KORE.KApply
 import org.kframework.kore.KORE.KLabel
 import org.kframework.utils.errorsystem.KEMException
+import org.kframework.Collections
 import org.kframework.POSet
 import org.kframework.TopologicalSort._
+import scala.collection._
 import scala.collection.JavaConverters._
 
 object ConfigurationInfoFromModule
@@ -92,11 +93,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getCellBagSortsOfCell(n: Sort): Set[Sort] =
     m.allSorts.filter(m.subsorts.directlyLessThan(n, _)).intersect(cellBagSorts)
 
-  private val edgesPoset: POSet[Sort] = POSet(edges)
+  private val edgesPoset: POSet[Sort] = new POSet(edges)
 
   private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
-  private val sortedSorts: Seq[Sort] = tsort(edges).toSeq
+  private val sortedSorts: Seq[Sort] = Collections.immutable(edgesPoset.sortedElements())
   private val sortedEdges: Seq[(Sort, Sort)] =
     edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
   val levels: Map[Sort, Int] = sortedEdges.foldLeft(topCells.map((_, 0)).toMap) {
@@ -124,7 +125,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     else
       Multiplicity.ONE
 
-  override def getParent(k: Sort): Sort             = edges.collectFirst { case (p, `k`) => p } get
+  override def getParent(k: Sort): Sort             = edges.collectFirst { case (p, `k`) => p }.get
   override def isCell(k: Sort): Boolean             = cellSorts.contains(k)
   override def isCellLabel(kLabel: KLabel): Boolean = cellLabelsToSorts.contains(kLabel)
   override def isLeafCell(k: Sort): Boolean         = !isParentCell(k)
@@ -142,7 +143,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst {
     case NonTerminal(n, _) => n
-  } get
+  }.get
 
   override def getDefaultCell(k: Sort): KApply = cellInitializer(k)
 

@@ -5,7 +5,7 @@ module SERIALIZATION
 
     syntax Int ::= keccak ( Bytes ) [function, total, smtlib(smt_keccak)]
  // --------------------------------------------------------------------------
-    rule [keccak]: keccak(_) => 1
+    rule [keccak]: keccak(_) => 1 [concrete]
 
 endmodule
 

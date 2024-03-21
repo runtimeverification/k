@@ -415,7 +415,6 @@ object Att {
       onlyon3[Module, Production, Rule],
       KeyRange.WholePipeline
     )
-  final val TAG = Key.builtin("tag", KeyParameter.Required, onlyon[Rule], KeyRange.FrontendOnly)
   final val TOKEN = Key.builtin(
     "token",
     KeyParameter.Forbidden,
@@ -571,6 +570,6 @@ trait AttributesToString {
     att.map {
       case ((attKey, `stringClassName`), "") => attKey.key
       case ((attKey, _), value)              => attKey.key + "(" + value + ")"
-    } toList
+    }.toList
   }
 }

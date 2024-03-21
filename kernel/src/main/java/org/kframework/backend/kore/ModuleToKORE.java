@@ -52,7 +52,6 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KList;
-import org.kframework.kore.KORE;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
@@ -60,7 +59,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.kore.VisitK;
-import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
@@ -238,12 +236,8 @@ public class ModuleToKORE {
 
     semantics.append("\n// symbols\n");
     Set<Production> overloads = new HashSet<>();
-    for (Production lesser : iterable(module.overloads().elements())) {
-      for (Production greater :
-          iterable(
-              module.overloads().relations().get(lesser).getOrElse(Collections::<Production>Set))) {
-        overloads.add(greater);
-      }
+    for (Production lesser : module.overloads().elements()) {
+      overloads.addAll(module.overloads().relations().getOrDefault(lesser, Set.of()));
     }
     translateSymbols(attributes, functionRules, overloads, semantics);
 
@@ -271,14 +265,8 @@ public class ModuleToKORE {
       }
     }
 
-    for (Production lesser : iterable(module.overloads().elements())) {
-      for (Production greater :
-          iterable(
-              module
-                  .overloads()
-                  .relations()
-                  .get(lesser)
-                  .getOrElse(() -> Collections.<Production>Set()))) {
+    for (Production lesser : module.overloads().elements()) {
+      for (Production greater : module.overloads().relations().getOrDefault(lesser, Set.of())) {
         genOverloadedAxiom(lesser, greater, syntax);
       }
     }
@@ -322,14 +310,8 @@ public class ModuleToKORE {
       genNoJunkAxiom(sort, semantics);
     }
 
-    for (Production lesser : iterable(module.overloads().elements())) {
-      for (Production greater :
-          iterable(
-              module
-                  .overloads()
-                  .relations()
-                  .get(lesser)
-                  .getOrElse(() -> Collections.<Production>Set()))) {
+    for (Production lesser : module.overloads().elements()) {
+      for (Production greater : module.overloads().relations().getOrDefault(lesser, Set.of())) {
         genOverloadedAxiom(lesser, greater, semantics);
       }
     }
@@ -386,7 +368,7 @@ public class ModuleToKORE {
       boolean heatCoolEq,
       String topCellSortStr) {
     for (SortHead sort : iterable(module.sortedDefinedSorts())) {
-      Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+      Att att = module.sortAttributesFor().get(sort).getOrElse(() -> Att.empty());
       if (att.contains(Att.TOKEN())) {
         tokenSorts.add(sort);
       }
@@ -420,7 +402,7 @@ public class ModuleToKORE {
         continue;
       }
       sb.append("  ");
-      Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+      Att att = module.sortAttributesFor().get(sort).getOrElse(() -> Att.empty());
       if (att.contains(Att.HOOK())) {
         if (collectionSorts.contains(att.get(Att.HOOK()))) {
           Production concatProd =
@@ -871,7 +853,7 @@ public class ModuleToKORE {
         sbTemp.append(", ");
       }
     }
-    Att sortAtt = module.sortAttributesFor().get(sort.head()).getOrElse(() -> KORE.Att());
+    Att sortAtt = module.sortAttributesFor().get(sort.head()).getOrElse(() -> Att.empty());
     if (!hasToken && sortAtt.contains(Att.TOKEN())) {
       numTerms++;
       convertTokenProd(sort, sbTemp);
@@ -1693,24 +1675,13 @@ public class ModuleToKORE {
       att = att.add(Att.MACRO());
     }
     // update format attribute with structure expected by backend
-    String format =
-        att.getOptional(Att.FORMAT()).orElse(Formatter.defaultFormat(prod.items().size()));
+    String format = att.getOptional(Att.FORMAT()).orElse(prod.defaultFormat());
     int nt = 1;
     boolean hasFormat = true;
-    boolean printName =
-        stream(prod.items())
-            .noneMatch(pi -> pi instanceof NonTerminal && ((NonTerminal) pi).name().isEmpty());
-    boolean printEllipses = false;
 
     for (int i = 0; i < prod.items().size(); i++) {
       if (prod.items().apply(i) instanceof NonTerminal) {
-        String replacement;
-        if (printName && prod.isPrefixProduction()) {
-          replacement = ((NonTerminal) prod.items().apply(i)).name().get() + ": %" + (nt++);
-          printEllipses = true;
-        } else {
-          replacement = "%" + (nt++);
-        }
+        String replacement = "%" + (nt++);
         format = format.replaceAll("%" + (i + 1) + "(?![0-9])", replacement);
       } else if (prod.items().apply(i) instanceof Terminal) {
         format =
@@ -1726,10 +1697,6 @@ public class ModuleToKORE {
       } else {
         hasFormat = false;
       }
-    }
-    if (printEllipses && format.contains("(")) {
-      int idxLParam = format.indexOf("(") + 1;
-      format = format.substring(0, idxLParam) + "... " + format.substring(idxLParam);
     }
     if (hasFormat) {
       att = att.add(Att.FORMAT(), format);
@@ -1757,10 +1724,11 @@ public class ModuleToKORE {
       att = att.add(Att.TERMINALS(), sb.toString());
       if (prod.klabel().isDefined()) {
         List<K> lessThanK = new ArrayList<>();
-        Option<scala.collection.Set<Tag>> lessThan =
-            module.priorities().relations().get(Tag(prod.klabel().get().name()));
-        if (lessThan.isDefined()) {
-          for (Tag t : iterable(lessThan.get())) {
+        Optional<Set<Tag>> lessThan =
+            Optional.ofNullable(
+                module.priorities().relations().get(Tag(prod.klabel().get().name())));
+        if (lessThan.isPresent()) {
+          for (Tag t : lessThan.get()) {
             if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
               continue;
             }
@@ -1866,7 +1834,7 @@ public class ModuleToKORE {
           KLabel(KLabels.INJ, Sort("S1"), Sort("S2")),
           Sort("S2"),
           Seq(NonTerminal(Sort("S1"))),
-          Att());
+          Att.empty());
 
   private Production production(KApply term) {
     return production(term, false);

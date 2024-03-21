@@ -442,7 +442,7 @@ public class GenerateSentencesFromConfigDecl {
               KLabel(initLabel),
               initSort,
               Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")),
-              Att().add(Att.INITIALIZER()).add(Att.FUNCTION()));
+              Att.empty().add(Att.INITIALIZER()).add(Att.FUNCTION()));
       initializerRule =
           Rule(
               KRewrite(
@@ -451,14 +451,14 @@ public class GenerateSentencesFromConfigDecl {
                       KLabel("<" + cellName + ">"), false, childInitializer, false)),
               BooleanUtils.TRUE,
               ensures == null ? BooleanUtils.TRUE : ensures,
-              Att().add(Att.INITIALIZER()));
+              Att.empty().add(Att.INITIALIZER()));
     } else {
       initializer =
           Production(
               KLabel(initLabel),
               initSort,
               Seq(Terminal(initLabel)),
-              Att().add(Att.INITIALIZER()).add(Att.FUNCTION()));
+              Att.empty().add(Att.INITIALIZER()).add(Att.FUNCTION()));
       initializerRule =
           Rule(
               KRewrite(
@@ -467,7 +467,7 @@ public class GenerateSentencesFromConfigDecl {
                       KLabel("<" + cellName + ">"), false, childInitializer, false)),
               BooleanUtils.TRUE,
               ensures == null ? BooleanUtils.TRUE : ensures,
-              Att().add(Att.INITIALIZER()));
+              Att.empty().add(Att.INITIALIZER()));
     }
     if (!m.definedKLabels().contains(KLabel(initLabel))) {
       sentences.add(initializer);
@@ -509,7 +509,7 @@ public class GenerateSentencesFromConfigDecl {
                     KLabel("no" + childSort),
                     childOptSort,
                     List(Terminal("no" + childSort)),
-                    Att().add(Att.CELL_OPT_ABSENT(), Sort.class, childSort)));
+                    Att.empty().add(Att.CELL_OPT_ABSENT(), Sort.class, childSort)));
           }
         }
       }
@@ -520,7 +520,7 @@ public class GenerateSentencesFromConfigDecl {
                 KLabel("<" + cellName + ">-fragment"),
                 fragmentSort,
                 immutable(fragmentItems),
-                Att().add(Att.CELL_FRAGMENT(), Sort.class, Sort(sortName))));
+                Att.empty().add(Att.CELL_FRAGMENT(), Sort.class, Sort(sortName))));
       }
     }
 
@@ -557,7 +557,7 @@ public class GenerateSentencesFromConfigDecl {
       String type = cellProperties.getOptional(Att.TYPE()).orElse("Bag");
       Sort bagSort = Sort(sortName + type);
       Att bagAtt =
-          Att()
+          Att.empty()
               .add(Att.ASSOC(), "")
               .add(Att.CELL_COLLECTION())
               .add(Att.ELEMENT(), bagSort.name() + "Item")
@@ -591,7 +591,9 @@ public class GenerateSentencesFromConfigDecl {
           SyntaxSort(
               Seq(),
               bagSort,
-              Att().add(Att.HOOK(), type.toUpperCase() + '.' + type).add(Att.CELL_COLLECTION()));
+              Att.empty()
+                  .add(Att.HOOK(), type.toUpperCase() + '.' + type)
+                  .add(Att.CELL_COLLECTION()));
       Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
       Sentence bagElement;
       if (type.equals("Map")) {
@@ -611,7 +613,10 @@ public class GenerateSentencesFromConfigDecl {
                     Terminal(","),
                     NonTerminal(sort),
                     Terminal(")")),
-                Att().add(Att.HOOK(), elementHook).add(Att.FUNCTION()).add(Att.FORMAT(), "%5"));
+                Att.empty()
+                    .add(Att.HOOK(), elementHook)
+                    .add(Att.FUNCTION())
+                    .add(Att.FORMAT(), "%5"));
       } else {
         bagElement =
             Production(
@@ -622,14 +627,17 @@ public class GenerateSentencesFromConfigDecl {
                     Terminal("("),
                     NonTerminal(sort),
                     Terminal(")")),
-                Att().add(Att.HOOK(), elementHook).add(Att.FUNCTION()).add(Att.FORMAT(), "%3"));
+                Att.empty()
+                    .add(Att.HOOK(), elementHook)
+                    .add(Att.FUNCTION())
+                    .add(Att.FORMAT(), "%3"));
       }
       Sentence bagUnit =
           Production(
               KLabel("." + bagSort.name()),
               bagSort,
               Seq(Terminal("." + bagSort.name())),
-              Att().add(Att.HOOK(), unitHook).add(Att.FUNCTION()));
+              Att.empty().add(Att.HOOK(), unitHook).add(Att.FUNCTION()));
       Sentence bag =
           Production(
               KLabel("_" + bagSort + "_"),
@@ -653,7 +661,7 @@ public class GenerateSentencesFromConfigDecl {
                     Terminal("("),
                     NonTerminal(bagSort),
                     Terminal(")")),
-                Att().add(Att.HOOK(), "MAP.in_keys").add(Att.FUNCTION()).add(Att.TOTAL())));
+                Att.empty().add(Att.HOOK(), "MAP.in_keys").add(Att.FUNCTION()).add(Att.TOTAL())));
 
         // syntax KeyCell ::= CellMapKey(Cell) [function, total]
         // rule CellMapKey(<cell> K ...<\cell>) => K
@@ -667,7 +675,7 @@ public class GenerateSentencesFromConfigDecl {
                     Terminal("("),
                     NonTerminal(sort),
                     Terminal(")")),
-                Att().add(Att.FUNCTION()).add(Att.TOTAL()));
+                Att.empty().add(Att.FUNCTION()).add(Att.TOTAL()));
         KVariable key =
             KVariable("Key", Att.empty().add(Att.SORT(), Sort.class, childSorts.get(0)));
         Rule cellMapKeyRule =
@@ -785,7 +793,7 @@ public class GenerateSentencesFromConfigDecl {
   }
 
   private static Att getCellPropertiesAsAtt(K k, String cellName) {
-    Att att = Att();
+    Att att = Att.empty();
     if (cellName.equals("k")) {
       att = att.add(Att.MAINCELL());
     }
@@ -796,11 +804,11 @@ public class GenerateSentencesFromConfigDecl {
   private static Att getCellPropertiesAsAtt(K k) {
     if (k instanceof KApply kapp) {
       if (kapp.klabel().name().equals("#cellPropertyListTerminator")) {
-        return Att();
+        return Att.empty();
       } else if (kapp.klabel().name().equals("#cellPropertyList")) {
         if (kapp.klist().size() == 2) {
           Tuple2<Att.Key, String> attribute = getCellProperty(kapp.klist().items().get(0));
-          return Att()
+          return Att.empty()
               .add(attribute._1(), attribute._2())
               .addAll(getCellPropertiesAsAtt(kapp.klist().items().get(1)));
         }
