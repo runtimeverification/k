@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
@@ -184,6 +185,29 @@ public class POSet<T> implements Serializable {
 
   public Optional<T> maximum() {
     return maximumLazy.get();
+  }
+
+  private Map<T, Integer> computeConnectedComponents() {
+    Map<T, Integer> data = new HashMap<>();
+    int nextComponent = 0;
+
+    for (var entry : directRelations) {
+      int best = nextComponent++;
+      best = Integer.min(data.getOrDefault(entry.getLeft(), best), best);
+      best = Integer.min(data.getOrDefault(entry.getRight(), best), best);
+
+      data.put(entry.getLeft(), best);
+      data.put(entry.getRight(), best);
+    }
+
+    return data;
+  }
+
+  private final Lazy<Map<T, Integer>> connectedComponentsLazy =
+      new Lazy<>(this::computeConnectedComponents);
+
+  public Map<T, Integer> connectedComponents() {
+    return connectedComponentsLazy.get();
   }
 
   public boolean lessThan(T x, T y) {

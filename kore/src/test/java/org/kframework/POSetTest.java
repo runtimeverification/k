@@ -80,4 +80,17 @@ public class POSetTest {
     assertEquals(
         Optional.empty(), new POSet<>(Pair.of(b2, b1), Pair.of(b3, b2), Pair.of(b4, b2)).minimum());
   }
+
+  @Test
+  public void connectedComponents() {
+    POSet<Bar> p = new POSet<>(Pair.of(b1, b2), Pair.of(b2, b3), Pair.of(b4, b5));
+    var components = p.connectedComponents();
+
+    assertEquals(components.get(b1), components.get(b2));
+    assertEquals(components.get(b2), components.get(b3));
+
+    assertEquals(components.get(b4), components.get(b5));
+
+    assertNotEquals(components.get(b1), components.get(b4));
+  }
 }
