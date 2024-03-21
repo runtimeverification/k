@@ -418,7 +418,7 @@ public record RuleGrammarGenerator(Definition baseK) {
         // syntax MInt{K} ::= MInt{6}
         Production p1 =
             Production(
-                Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att());
+                Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att.empty());
         prods.add(p1);
       }
     }
@@ -627,7 +627,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       for (Sort srt : iterable(mod.allSorts())) {
         if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
           // KItem ::= Sort
-          prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
+          prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att.empty()));
         }
       }
       // Add KItem subsorts to disambiguation for use by sort inference
@@ -701,14 +701,14 @@ public record RuleGrammarGenerator(Definition baseK) {
                   Seq(),
                   ul.sort,
                   Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))),
-                  Att().add(Att.NOT_INJECTION()));
+                  Att.empty().add(Att.NOT_INJECTION()));
           // Es ::= Es#Terminator // if the list is *
           prod5 =
               Production(
                   Seq(),
                   ul.sort,
                   Seq(NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))),
-                  Att().add(Att.NOT_INJECTION()));
+                  Att.empty().add(Att.NOT_INJECTION()));
         }
 
         res.add(prod1);
@@ -769,7 +769,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       for (ProductionItem pi : iterable(((Production) prod).items())) {
         if (pi instanceof Terminal t) {
           if (alphaNum.matcher(t.value()).matches()) {
-            prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add(Att.TOKEN())));
+            prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att.empty().add(Att.TOKEN())));
           }
         }
       }
@@ -778,7 +778,7 @@ public record RuleGrammarGenerator(Definition baseK) {
 
   private static Set<Sentence> makeCasts(Sort innerSort, Sort castSort, Sort labelSort) {
     Set<Sentence> prods = new HashSet<>();
-    Att attrs1 = Att().add(Att.SORT(), Sort.class, castSort);
+    Att attrs1 = Att.empty().add(Att.SORT(), Sort.class, castSort);
     prods.add(
         Production(
             KLabel("#SyntacticCast"),
