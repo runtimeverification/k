@@ -570,6 +570,6 @@ trait AttributesToString {
     att.map {
       case ((attKey, `stringClassName`), "") => attKey.key
       case ((attKey, _), value)              => attKey.key + "(" + value + ")"
-    } toList
+    }.toList
   }
 }

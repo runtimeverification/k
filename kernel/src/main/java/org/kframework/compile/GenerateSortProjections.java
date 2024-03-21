@@ -28,13 +28,16 @@ import scala.collection.Set;
 public class GenerateSortProjections {
 
   private Module mod;
+  private final Module mainMod;
   private final boolean cover;
 
-  public GenerateSortProjections(boolean cover) {
+  public GenerateSortProjections(boolean cover, Module mainMod) {
+    this.mainMod = mainMod;
     this.cover = cover;
   }
 
   public GenerateSortProjections(Module mod) {
+    this.mainMod = null;
     this.mod = mod;
     this.cover = false;
   }
@@ -77,7 +80,7 @@ public class GenerateSortProjections {
             KRewrite(KApply(lbl, var), var),
             BooleanUtils.TRUE,
             BooleanUtils.TRUE,
-            Att().add(Att.PROJECTION()));
+            Att.empty().add(Att.PROJECTION()));
     if (mod.definedKLabels().contains(lbl)) {
       return Stream.empty();
     }
@@ -86,7 +89,7 @@ public class GenerateSortProjections {
             lbl,
             sort,
             Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-            Att().add(Att.FUNCTION()).add(Att.PROJECTION()));
+            Att.empty().add(Att.FUNCTION()).add(Att.PROJECTION()));
     if (cover) {
       KLabel sideEffectLbl = KLabel("sideEffect:" + sort);
       Production sideEffect =
@@ -100,7 +103,7 @@ public class GenerateSortProjections {
                   Terminal(","),
                   NonTerminal(sort),
                   Terminal(")")),
-              Att().add(Att.FUNCTION()));
+              Att.empty().add(Att.FUNCTION()));
       Rule sideEffectR =
           Rule(
               KRewrite(
@@ -133,12 +136,29 @@ public class GenerateSortProjections {
     if (!hasName) {
       return Stream.empty();
     }
+    boolean total = false;
+    if (mainMod != null) {
+      if (stream(
+                  mainMod
+                      .productionsForSort()
+                      .get(prod.sort().head())
+                      .getOrElse(() -> Collections.<Production>Set()))
+              .filter(p -> !p.att().contains(Att.FUNCTION()))
+              .count()
+          == 1) {
+        total = true;
+      }
+    }
     i = 0;
     for (NonTerminal nt : iterable(prod.nonterminals())) {
       if (nt.name().isDefined()) {
         KLabel lbl = getProjectLbl(prod.klabel().get().name(), nt.name().get());
         if (mod.definedKLabels().contains(lbl)) {
           return Stream.empty();
+        }
+        Att att = Att.empty().add(Att.FUNCTION());
+        if (total) {
+          att = att.add(Att.TOTAL());
         }
         sentences.add(
             Production(
@@ -149,7 +169,7 @@ public class GenerateSortProjections {
                     Terminal("("),
                     NonTerminal(prod.sort()),
                     Terminal(")")),
-                Att().add(Att.FUNCTION())));
+                att));
         sentences.add(
             Rule(
                 KRewrite(KApply(lbl, KApply(prod.klabel().get(), KList(vars))), vars.get(i)),

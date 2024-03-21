@@ -457,7 +457,7 @@ public class Kompile {
     for (Sort srt : iterable(module.allSorts())) {
       if (!RuleGrammarGenerator.isParserSort(srt)) {
         // KItem ::= Sort
-        Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att());
+        Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att.empty());
         if (!module.sentences().contains(prod)) {
           prods.add(prod);
         }
@@ -633,7 +633,7 @@ public class Kompile {
     }
   }
 
-  private void checkOverloads(Module module) {
+  private void checkSingletonOverload(Module module) {
     var withOverload = module.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
 
     stream(withOverload)
@@ -647,6 +647,39 @@ public class Kompile {
                     p);
               }
             });
+  }
+
+  private void checkDuplicateOverloads(Module module) {
+    // Collect the set of productions that are the greatest element of an overload set, grouped
+    // by their `overload(_)` key. If any key has multiple greatest elements, then two overload sets
+    // are using the same key. This is not ambiguous from the point of view of the compiler, but may
+    // be confusing to users.
+    var partialOrderHeads =
+        module.overloads().relations().keySet().stream()
+            .filter(p -> p.att().contains(Att.OVERLOAD()))
+            .collect(Collectors.groupingBy(p -> p.att().get(Att.OVERLOAD())));
+
+    partialOrderHeads.forEach(
+        (key, prods) -> {
+          var userList =
+              prods.size() == 2 && prods.stream().allMatch(p -> p.att().contains(Att.USER_LIST()));
+          if (prods.size() > 1 && !userList) {
+            for (Production prod : prods) {
+              kem.registerCompilerWarning(
+                  KException.ExceptionType.DUPLICATE_OVERLOAD,
+                  errors,
+                  "Overload `"
+                      + key
+                      + "` is not unique. Consider renaming one of the overload sets with this key.",
+                  prod);
+            }
+          }
+        });
+  }
+
+  private void checkOverloads(Module module) {
+    checkSingletonOverload(module);
+    checkDuplicateOverloads(module);
   }
 
   private void checkAnywhereRules(scala.collection.Set<Module> modules) {
@@ -725,7 +758,7 @@ public class Kompile {
                 Import(d.getModule("K-TERM").get(), true),
                 Import(d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get(), true)),
             Set(),
-            Att());
+            Att.empty());
     allModules.add(languageParsingModule);
     return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
   }

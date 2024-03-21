@@ -1,9 +1,9 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/4d5d1fe232c41400e09a2db0d8cb4989a5dd5832";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/093af3153a5e07626d9b2e628d7ad4fc77c5a723";
     booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/8c26ad4af5fb38b385abf2f99483483461fbdff3";
+      url = "github:runtimeverification/hs-backend-booster/88ffab54a7266d8c98d5c039ef81143d1d24f3f0";
       inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
       inputs.haskell-backend.follows = "haskell-backend";
       inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
@@ -61,12 +61,15 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-ZbASgB39pSRXxqMuUp9aRxkt0wKhgXV1e1YAQh+ZEIs=";
+                mvnHash = "sha256-8IJqbI5QFXTqR6QzMgsYG+STlXI93SzQkN+Xps10Zik=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.12.18"
                   "ant-contrib:ant-contrib:1.0b3"
                   "org.apache.ant:ant-nodeps:1.8.1"
                   "org.apache.maven.wagon:wagon-provider-api:1.0-alpha-6"
+                ];
+                manualMvnSourceArtifacts = [
+                  "org.scala-sbt:compiler-bridge_2.12:1.8.0"
                 ];
                 inherit (final) maven;
                 inherit (prev) llvm-backend;

@@ -1,4 +1,4 @@
-{ src, maven, mvnHash, manualMvnArtifacts, clang, stdenv, lib, runCommand
+{ src, maven, mvnHash, manualMvnArtifacts, manualMvnSourceArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
 , pkg-config, python3, python310, python311, z3, haskell-backend, booster, rpc-client, prelude-kore, llvm-backend
 , debugger, version, llvm-kompile-libs, runtimeShell }:
@@ -30,12 +30,12 @@ let
   k = current-llvm-kompile-libs:
     maven.buildMavenPackage rec {
       pname = "k";
-      inherit version src mvnHash manualMvnArtifacts;
+      inherit version src mvnHash manualMvnArtifacts manualMvnSourceArtifacts;
 
       buildOffline = true;
 
       mvnParameters =
-        "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true";
+        "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true -DsecondaryCacheDir=secondary-cache";
 
       nativeBuildInputs = [ makeWrapper ];
 
