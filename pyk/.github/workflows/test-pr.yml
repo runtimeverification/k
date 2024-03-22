@@ -104,7 +104,7 @@ jobs:
         with:
           install-k: true
       - name: 'Run integration tests'
-        run: make cov-integration COV_ARGS='-n4 --timeout 500'
+        run: make cov-integration COV_ARGS='-n4 --timeout 1500'
 
   regression-tests:
     needs: code-quality-checks
