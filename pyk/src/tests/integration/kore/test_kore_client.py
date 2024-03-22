@@ -32,6 +32,7 @@ from pyk.kore.rpc import (
     CutPointResult,
     DepthBoundResult,
     DuplicateModuleError,
+    GetModelResult,
     ImplicationError,
     ImpliesResult,
     InvalidModuleError,
@@ -47,7 +48,7 @@ from pyk.kore.rpc import (
 )
 from pyk.kore.syntax import And, App, Axiom, Bottom, Equals, EVar, Implies, Import, Module, Rewrites, Top
 from pyk.ktool.kompile import LLVMKompileType
-from pyk.testing import KoreClientTest
+from pyk.testing import KoreClientTest, ServerType
 
 from ..utils import K_FILES
 
@@ -56,7 +57,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final
 
-    from pyk.kore.rpc import BoosterServerArgs, ExecuteResult, GetModelResult, KoreClient
+    from pyk.kore.rpc import BoosterServerArgs, ExecuteResult, KoreClient
     from pyk.kore.syntax import Pattern
     from pyk.testing import Kompiler
 
@@ -149,7 +150,15 @@ SIMPLIFY_TEST_DATA: Final = (('top-and-top', And(INT, (int_top, int_top)), int_t
 
 GET_MODEL_TEST_DATA: Final = (
     ('unkown-config', term(0), None, UnknownResult()),
-    ('unknown-trivial', int_top, None, UnknownResult()),
+    (
+        'sat-trivial',
+        int_top,
+        None,
+        {
+            ServerType.LEGACY: UnknownResult(),
+            ServerType.BOOSTER: SatResult(None),
+        },
+    ),
     ('unsat-trivial', int_bottom, None, UnsatResult()),
     ('unsat-ineq', Equals(BOOL, INT, TRUE, and_bool(gt_int(x, int_dv(1)), le_int(x, int_dv(0)))), None, UnsatResult()),
     ('unsat-eq', Equals(BOOL, INT, TRUE, and_bool(eq_int(x, int_dv(0)), eq_int(x, int_dv(1)))), None, UnsatResult()),
@@ -345,13 +354,17 @@ class TestKoreClient(KoreClientTest):
         test_id: str,
         pattern: Pattern,
         module_name: str | None,
-        expected: GetModelResult,
+        server_type: ServerType,
+        expected: GetModelResult | Mapping[ServerType, GetModelResult],
     ) -> None:
         # When
         actual = kore_client.get_model(pattern, module_name)
 
         # Then
-        assert actual == expected
+        if isinstance(expected, GetModelResult):
+            assert actual == expected
+        else:
+            assert actual == expected[server_type]
 
     @pytest.mark.parametrize(
         'test_id,module',
