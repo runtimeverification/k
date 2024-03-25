@@ -384,7 +384,7 @@ def create_argument_parser() -> ArgumentParser:
     return pyk_args
 
 
-def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
+def parse_toml_args(args: Namespace) -> dict[str, Any]:
     def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
         if len(profile_list) == 0 or profile_list[0] not in toml_profile:
             return {k: v for k, v in toml_profile.items() if type(v) is not dict}
@@ -392,7 +392,7 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
             return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
         return get_profile(toml_profile[profile_list[0]], profile_list[1:])
 
-    toml_args = {}
+    toml_args: dict[str, Any] = {}
     if not hasattr(args, 'config_file') or not args.config_file.is_file():
         return {}
 
@@ -407,8 +407,8 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
     toml_args = (
         get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
     )
-    
-    toml_adj_args = {}
+
+    toml_adj_args: dict[str, Any] = {}
     for k, v in toml_args.items():
         opt_string = get_option_string_destination(args.command, k)
         if opt_string[:3] == 'no_':
