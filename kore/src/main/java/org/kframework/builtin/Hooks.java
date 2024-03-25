@@ -26,6 +26,7 @@ public class Hooks {
   public static final String SUBSTITUTION = "SUBSTITUTION";
   public static final String UNIFICATION = "UNIFICATION";
   public static final String JSON = "JSON";
+  public static final String TIMER = "TIMER";
 
   public static final Set<String> namespaces =
       Collections.unmodifiableSet(
@@ -48,5 +49,6 @@ public class Hooks {
                   STRING,
                   SUBSTITUTION,
                   UNIFICATION,
-                  JSON)));
+                  JSON,
+                  TIMER)));
 }
