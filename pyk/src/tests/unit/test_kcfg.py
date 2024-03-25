@@ -4,13 +4,14 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KVariable
+from pyk.cterm import CSubst, CTerm
+from pyk.kast.inner import KApply, KVariable, Subst
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.show import NodePrinter
 from pyk.prelude.kint import geInt, intToken, ltInt
 from pyk.prelude.ml import mlEquals, mlEqualsTrue, mlTop
 from pyk.prelude.utils import token
+from pyk.utils import single
 
 from .mock_kprint import MockKPrint
 
@@ -19,7 +20,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any
 
-    from pyk.cterm import CSubst
     from pyk.kast import KInner
 
 
@@ -628,6 +628,17 @@ def test_minimize() -> None:
     assert cfg.contains_edge(KCFG.Edge(node_28, node(20, True), 75, ('r1', 'r2', 'r3', 'r4', 'r5')))
     assert cfg.contains_edge(KCFG.Edge(node_29, node(21, True), 75, ('r1', 'r2', 'r3', 'r4', 'r5')))
     assert cfg.contains_edge(KCFG.Edge(node_25, node(23, True), 155, ('r1', 'r2', 'r3', 'r4', 'r6', 'r7', 'r8')))
+
+
+def test_split_csubsts() -> None:
+    cfg = KCFG()
+    cfg.create_node(term(11))
+    cfg.split_on_constraints(1, [x_equals(10), x_equals(20)])
+    # The target substitutions are identities, with the appropriate constraints
+    split = single(cfg.splits())
+    assert split.source == KCFG.Node(1, term(11))
+    assert split._targets[0][1] == CSubst(Subst({'V11': KVariable('V11')}), [x_equals(10)])
+    assert split._targets[1][1] == CSubst(Subst({'V11': KVariable('V11')}), [x_equals(20)])
 
 
 def test_write_cfg_data(tmp_path: Path) -> None:
