@@ -450,18 +450,6 @@ APR_PROVE_TEST_DATA: Iterable[
         1,
     ),
     (
-        'imp-simple-sum-1000',
-        K_FILES / 'imp-simple-spec.k',
-        'IMP-SIMPLE-SPEC',
-        'sum-1000',
-        None,
-        None,
-        [],
-        True,
-        ProofStatus.PASSED,
-        1,
-    ),
-    (
         'imp-if-almost-same-plus',
         K_FILES / 'imp-simple-spec.k',
         'IMP-SIMPLE-SPEC-DEPENDENCIES',

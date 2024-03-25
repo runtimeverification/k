@@ -21,8 +21,8 @@ runs:
     - name: 'Install Poetry'
       uses: Gr1N/setup-poetry@v9
     - name: 'Install K'
-      shell: bash
       if: fromJSON(inputs.install-k)
+      shell: bash
       run: |
         K_VERSION=$(cat deps/k_release)
         DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
