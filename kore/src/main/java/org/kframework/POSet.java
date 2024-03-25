@@ -2,6 +2,7 @@
 package org.kframework;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -187,16 +188,35 @@ public class POSet<T> implements Serializable {
   }
 
   private Map<T, Integer> computeConnectedComponents() {
-    Map<T, Integer> data = new HashMap<>();
+    var data = new HashMap<T, Integer>();
     int nextComponent = 0;
 
-    for (var entry : directRelations) {
-      int best = nextComponent++;
-      best = Integer.min(data.getOrDefault(entry.getLeft(), best), best);
-      best = Integer.min(data.getOrDefault(entry.getRight(), best), best);
+    for (var node : elements()) {
+      var queue = new ArrayDeque<T>();
+      queue.push(node);
 
-      data.put(entry.getLeft(), best);
-      data.put(entry.getRight(), best);
+      var anyChange = false;
+      while (!queue.isEmpty()) {
+        var cur = queue.pop();
+        if (data.containsKey(cur)) {
+          continue;
+        }
+
+        data.put(cur, nextComponent);
+        anyChange = true;
+
+        for (var next : relations().getOrDefault(cur, Set.of())) {
+          queue.addFirst(next);
+        }
+
+        for (var next : relationsOp().getOrDefault(cur, Set.of())) {
+          queue.addFirst(next);
+        }
+      }
+
+      if (anyChange) {
+        nextComponent++;
+      }
     }
 
     return data;
@@ -205,6 +225,22 @@ public class POSet<T> implements Serializable {
   private final Lazy<Map<T, Integer>> connectedComponentsLazy =
       new Lazy<>(this::computeConnectedComponents);
 
+  /**
+   * Compute a connected component identifier for each element in this POSet.
+   *
+   * <p>Two elements share a connected component identifier if there is some sequence of edges (in
+   * any direction) that connect them. Note that being in the same connected component does not
+   * imply that two elements are related to one another in their POSet; if `A <: B` and `A <: C`
+   * then `B` and `C` are in the same connected component but are not in any ordering relation with
+   * each other.
+   *
+   * <p>Note that this mapping is computed lazily when this method is first called; it uses a DFS
+   * over the POSet graph internally and has time complexity of `O(V + E)`. Subsequent calls will
+   * not recompute the mapping and therefore take constant time.
+   *
+   * @return A lazily initialized map from elements to an integer in the range [0, N) indicating
+   *     which connected component that element belongs to.
+   */
   public Map<T, Integer> connectedComponents() {
     return connectedComponentsLazy.get();
   }

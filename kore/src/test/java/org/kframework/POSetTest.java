@@ -93,4 +93,36 @@ public class POSetTest {
 
     assertNotEquals(components.get(b1), components.get(b4));
   }
+
+  @Test
+  public void connected2() {
+    POSet<Bar> p = new POSet<>(Pair.of(b1, b2), Pair.of(b4, b5), Pair.of(b2, b3), Pair.of(b3, b4));
+    var components = p.connectedComponents();
+
+    assertEquals(components.get(b1), components.get(b2));
+    assertEquals(components.get(b1), components.get(b3));
+    assertEquals(components.get(b1), components.get(b4));
+    assertEquals(components.get(b1), components.get(b5));
+  }
+
+  @Test
+  public void connected3() {
+    POSet<Bar> p = new POSet<>(Pair.of(b1, b2), Pair.of(b3, b4));
+    var components = p.connectedComponents();
+
+    assertEquals(components.get(b1), components.get(b2));
+    assertEquals(components.get(b3), components.get(b4));
+    assertNotEquals(components.get(b1), components.get(b3));
+  }
+
+  @Test
+  public void connected4() {
+    POSet<Bar> p = new POSet<>(Pair.of(b1, b2), Pair.of(b2, b3), Pair.of(b3, b4), Pair.of(b3, b5));
+    var components = p.connectedComponents();
+
+    assertEquals(components.get(b1), components.get(b2));
+    assertEquals(components.get(b1), components.get(b3));
+    assertEquals(components.get(b1), components.get(b4));
+    assertEquals(components.get(b1), components.get(b5));
+  }
 }
