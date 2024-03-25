@@ -409,7 +409,7 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
     )
     toml_args = {get_option_string_destination(args.command, k): v for k, v in toml_args.items()}
     for k, v in toml_args.items():
-        if k[:3] == 'no-' and (v == 'true' or v == 'false'):
+        if k[:3] == 'no_' and (v == 'true' or v == 'false'):
             del toml_args[k]
             toml_args[k[3:]] = 'false' if v == 'true' else 'true'
         if k == 'optimization-level':
