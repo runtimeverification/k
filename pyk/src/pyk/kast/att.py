@@ -28,16 +28,13 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class AttType(Generic[T], ABC):
     @abstractmethod
-    def from_dict(self, obj: Any) -> T:
-        ...
+    def from_dict(self, obj: Any) -> T: ...
 
     @abstractmethod
-    def to_dict(self, value: T) -> Any:
-        ...
+    def to_dict(self, value: T) -> Any: ...
 
     @abstractmethod
-    def pretty(self, value: T) -> str | None:
-        ...
+    def pretty(self, value: T) -> str | None: ...
 
 
 class NoneType(AttType[None]):
@@ -314,12 +311,10 @@ class KAtt(KAst, Mapping[AttKey, Any]):
         return self.atts[key]
 
     @overload
-    def get(self, key: AttKey[T], /) -> T | None:
-        ...
+    def get(self, key: AttKey[T], /) -> T | None: ...
 
     @overload
-    def get(self, key: AttKey[T], /, default: U) -> T | U:
-        ...
+    def get(self, key: AttKey[T], /, default: U) -> T | U: ...
 
     def get(self, *args: Any, **kwargs: Any) -> Any:
         return self.atts.get(*args, **kwargs)
@@ -371,8 +366,7 @@ class WithKAtt(ABC):
     att: KAtt
 
     @abstractmethod
-    def let_att(self: W, att: KAtt) -> W:
-        ...
+    def let_att(self: W, att: KAtt) -> W: ...
 
     def map_att(self: W, f: Callable[[KAtt], KAtt]) -> W:
         return self.let_att(att=f(self.att))

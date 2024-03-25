@@ -54,8 +54,7 @@ class JsonRpcError(Exception):
 
 class Transport(ContextManager['Transport'], ABC):
     @abstractmethod
-    def request(self, req: str) -> str:
-        ...
+    def request(self, req: str) -> str: ...
 
     def __enter__(self) -> Transport:
         return self
@@ -64,16 +63,13 @@ class Transport(ContextManager['Transport'], ABC):
         self.close()
 
     @abstractmethod
-    def close(self) -> None:
-        ...
+    def close(self) -> None: ...
 
     @abstractmethod
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]:
-        ...
+    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]: ...
 
     @abstractmethod
-    def description(self) -> str:
-        ...
+    def description(self) -> str: ...
 
 
 class TransportType(Enum):
@@ -493,8 +489,7 @@ class RewriteResult(ABC):
             raise ValueError(f"Expected {dct['tag']} as 'success'/'failure'")
 
     @abstractmethod
-    def to_dict(self) -> dict[str, Any]:
-        ...
+    def to_dict(self) -> dict[str, Any]: ...
 
 
 @final
@@ -552,8 +547,7 @@ class LogEntry(ABC):  # noqa: B024
             raise ValueError(f"Expected {dct['tag']} as 'rewrite'/'simplification'")
 
     @abstractmethod
-    def to_dict(self) -> dict[str, Any]:
-        ...
+    def to_dict(self) -> dict[str, Any]: ...
 
 
 @final
@@ -846,14 +840,12 @@ class GetModelResult(ABC):  # noqa: B024
 
 @final
 @dataclass(frozen=True)
-class UnknownResult(GetModelResult):
-    ...
+class UnknownResult(GetModelResult): ...
 
 
 @final
 @dataclass(frozen=True)
-class UnsatResult(GetModelResult):
-    ...
+class UnsatResult(GetModelResult): ...
 
 
 @final

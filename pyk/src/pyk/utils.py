@@ -121,7 +121,7 @@ def check_type(x: Any, typ: type[T]) -> T:
 def raised(f: Callable, *args: Any, **kwargs: Any) -> BaseException | None:
     try:
         f(*args, **kwargs)
-    except BaseException as e:
+    except Exception as e:
         return e
 
     return None
@@ -179,16 +179,14 @@ def maybe(f: Callable[[P], R]) -> Callable[[P | None], R | None]:
 
 
 @overload
-def tuple_of() -> Callable[[tuple[()]], tuple[()]]:
-    ...
+def tuple_of() -> Callable[[tuple[()]], tuple[()]]: ...
 
 
 @overload
 def tuple_of(
     f1: Callable[[P1], R1],
     /,
-) -> Callable[[tuple[P1]], tuple[R1]]:
-    ...
+) -> Callable[[tuple[P1]], tuple[R1]]: ...
 
 
 @overload
@@ -196,8 +194,7 @@ def tuple_of(
     f1: Callable[[P1], R1],
     f2: Callable[[P2], R2],
     /,
-) -> Callable[[tuple[P1, P2]], tuple[R1, R2]]:
-    ...
+) -> Callable[[tuple[P1, P2]], tuple[R1, R2]]: ...
 
 
 @overload
@@ -206,8 +203,7 @@ def tuple_of(
     f2: Callable[[P2], R2],
     f3: Callable[[P3], R3],
     /,
-) -> Callable[[tuple[P1, P2, P3]], tuple[R1, R2, R3]]:
-    ...
+) -> Callable[[tuple[P1, P2, P3]], tuple[R1, R2, R3]]: ...
 
 
 @overload
@@ -217,8 +213,7 @@ def tuple_of(
     f3: Callable[[P3], R3],
     f4: Callable[[P4], R4],
     /,
-) -> Callable[[tuple[P1, P2, P3, P4]], tuple[R1, R2, R3, R4]]:
-    ...
+) -> Callable[[tuple[P1, P2, P3, P4]], tuple[R1, R2, R3, R4]]: ...
 
 
 def tuple_of(*args: Callable) -> Callable:

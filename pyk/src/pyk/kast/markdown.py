@@ -70,8 +70,7 @@ def parse_tags(text: str) -> set[str]:
 
 class Selector(ABC):
     @abstractmethod
-    def eval(self, atoms: Container[str]) -> bool:
-        ...
+    def eval(self, atoms: Container[str]) -> bool: ...
 
 
 @final

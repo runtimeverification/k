@@ -28,8 +28,7 @@ class Source(ABC):
         raise ValueError(f'Cannot parse source: {dct}')
 
     @abstractmethod
-    def resolve(self, project_path: Path) -> Path:
-        ...
+    def resolve(self, project_path: Path) -> Path: ...
 
 
 @final

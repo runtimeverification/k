@@ -246,8 +246,7 @@ class CTermSymbolicTest(KoreClientTest):
 
 class KCFGExploreTest(CTermSymbolicTest):
     @abstractmethod
-    def semantics(self, definition: KDefinition) -> KCFGSemantics:
-        ...
+    def semantics(self, definition: KDefinition) -> KCFGSemantics: ...
 
     @pytest.fixture
     def kcfg_explore(

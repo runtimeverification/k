@@ -23,8 +23,7 @@ class KAst(ABC):
         return 3
 
     @abstractmethod
-    def to_dict(self) -> dict[str, Any]:
-        ...
+    def to_dict(self) -> dict[str, Any]: ...
 
     @final
     def to_json(self) -> str:

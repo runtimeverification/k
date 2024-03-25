@@ -106,29 +106,24 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         @property
         @abstractmethod
-        def targets(self) -> tuple[KCFG.Node, ...]:
-            ...
+        def targets(self) -> tuple[KCFG.Node, ...]: ...
 
         @property
         def target_ids(self) -> list[int]:
             return sorted(target.id for target in self.targets)
 
         @abstractmethod
-        def replace_source(self, node: KCFG.Node) -> KCFG.Successor:
-            ...
+        def replace_source(self, node: KCFG.Node) -> KCFG.Successor: ...
 
         @abstractmethod
-        def replace_target(self, node: KCFG.Node) -> KCFG.Successor:
-            ...
+        def replace_target(self, node: KCFG.Node) -> KCFG.Successor: ...
 
         @abstractmethod
-        def to_dict(self) -> dict[str, Any]:
-            ...
+        def to_dict(self) -> dict[str, Any]: ...
 
         @staticmethod
         @abstractmethod
-        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Successor:
-            ...
+        def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Successor: ...
 
     class EdgeLike(Successor):
         source: KCFG.Node
@@ -221,8 +216,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return (self.source, self.target_ids) < (other.source, other.target_ids)
 
         @abstractmethod
-        def with_single_target(self, target: KCFG.Node) -> KCFG.MultiEdge:
-            ...
+        def with_single_target(self, target: KCFG.Node) -> KCFG.MultiEdge: ...
 
     @final
     @dataclass(frozen=True)
@@ -1164,20 +1158,17 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         return cfg
 
 
-class KCFGExtendResult(ABC):
-    ...
+class KCFGExtendResult(ABC): ...
 
 
 @final
 @dataclass(frozen=True)
-class Vacuous(KCFGExtendResult):
-    ...
+class Vacuous(KCFGExtendResult): ...
 
 
 @final
 @dataclass(frozen=True)
-class Stuck(KCFGExtendResult):
-    ...
+class Stuck(KCFGExtendResult): ...
 
 
 @final

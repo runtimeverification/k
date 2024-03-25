@@ -155,7 +155,7 @@ class KDist:
             ):
                 try:
                     target.target.build(output_dir, deps=self._deps(target), args=args, verbose=verbose)
-                except BaseException as err:
+                except Exception as err:
                     shutil.rmtree(output_dir, ignore_errors=True)
                     raise RuntimeError(f'Build failed: {target_id.full_name}') from err
 
