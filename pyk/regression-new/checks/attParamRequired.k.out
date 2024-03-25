@@ -3,3 +3,5 @@
 	Location(5,19,5,23)
 	5 |	  rule a() => .K [prec]
 	  .	                  ^~~~
+[ERROR] Running process failed with returncode 113:
+    kompile attParamRequired.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition attParamRequired-kompiled --type-inference-mode checked

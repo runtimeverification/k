@@ -4,3 +4,5 @@
 	6 |	  syntax left times plus
 	  .	  ^~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile syntaxGroups.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition syntaxGroups-kompiled --type-inference-mode checked

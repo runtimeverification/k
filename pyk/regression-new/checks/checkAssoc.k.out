@@ -23,3 +23,5 @@ Hint: One of the sub-sorting relations Bool <= Int or Bool <= Bool does not hold
 	13 |	                  | Int  "bad4"  Bool [non-assoc, function]
 	   .	                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 4 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkAssoc.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkAssoc-kompiled --type-inference-mode checked

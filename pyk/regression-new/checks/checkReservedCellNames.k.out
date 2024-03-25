@@ -9,3 +9,5 @@
 	14 |	    <generatedTop> 1 </generatedTop>
 	   .	     ^~~~~~~~~~~~
 [Error] Compiler: Had 2 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkReservedCellNames.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkReservedCellNames-kompiled --type-inference-mode checked

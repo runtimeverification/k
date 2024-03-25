@@ -18,3 +18,5 @@
 	23 |	    rule . => l 1 r   // ambiguous - error
 	   .	              ^~~~~
 [Error] Compiler: Had 3 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile priorityError.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition priorityError-kompiled --type-inference-mode checked

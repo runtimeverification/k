@@ -9,3 +9,5 @@
 	7 |	syntax Baz ::= baz() [klabel(foo), symbol]
 	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile invalidSymbol.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidSymbol-kompiled --type-inference-mode checked

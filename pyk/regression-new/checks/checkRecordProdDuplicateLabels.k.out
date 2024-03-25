@@ -9,3 +9,5 @@
 	43 |	 rule invariantStateFull(... p2:X, numUsers:_Gen0, p2:Y) => 1 // duplicate keys here, rest should be fine
 	   .	      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkRecordProdDuplicateLabels.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkRecordProdDuplicateLabels-kompiled --type-inference-mode checked

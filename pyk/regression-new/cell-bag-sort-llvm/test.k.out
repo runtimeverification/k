@@ -15,3 +15,5 @@
 	30 |	                    </contract>
 	   .	                    ~~~~~~~~~~^
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile test.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition test-kompiled --type-inference-mode checked

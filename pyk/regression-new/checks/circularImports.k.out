@@ -1,1 +1,3 @@
 [Error] Compiler: Found circularity in module imports: E < D < C < B < A < E
+[ERROR] Running process failed with returncode 113:
+    kompile circularImports.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition circularImports-kompiled --type-inference-mode checked

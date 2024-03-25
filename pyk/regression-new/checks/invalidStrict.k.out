@@ -39,3 +39,5 @@
 	27 |	syntax Baz ::= thingy(K) [seqstrict(x)]
 	   .	               ^~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 8 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile invalidStrict.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidStrict-kompiled --type-inference-mode checked

@@ -4,3 +4,5 @@
 	12 |	syntax Pgm ::= MisTypedCell
 	   .	               ^~~~~~~~~~~~
 [Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkCellSortDeclFail.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkCellSortDeclFail-kompiled --type-inference-mode checked

@@ -9,3 +9,5 @@
 	5 |	  rule a() => .K [idem, owise]
 	  .	       ^~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile restrictedAtts.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition restrictedAtts-kompiled --type-inference-mode checked

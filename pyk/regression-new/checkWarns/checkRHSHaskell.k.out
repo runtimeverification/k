@@ -19,3 +19,5 @@
 	31 |	    rule <k> 1 => 2 </k> requires #fun ( #let _ = 1 #in true => true ) ( 5 )
 	   .	                                         ^~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 4 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkRHSHaskell.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition checkRHSHaskell-kompiled --type-inference-mode checked

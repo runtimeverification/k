@@ -3,3 +3,5 @@
 	Location(7,18,7,120)
 	7 |	  syntax Foo ::= Foo Foo        [left, function, total, hook(LIST.concat), klabel(_Foo_), unit(.Foo), element(FooItem)]
 	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile removeUnit.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition removeUnit-kompiled --type-inference-mode checked

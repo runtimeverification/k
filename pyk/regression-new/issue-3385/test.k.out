@@ -1,6 +1,8 @@
 [Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
 	Source(test.k)
 	Location(9,24,9,50)
-	9 |	  rule [f-of-a-is-b] : f(A) => b requires A ==K a // [concrete]
+	9 |	  rule [f-of-a-is-b] : f(A) => b requires A ==K a  [concrete]
 	  .	                       ^~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile test.k --syntax-module TEST --md-selector k --emit-json --no-exc-wrap --backend llvm --output-definition test-kompiled --type-inference-mode checked
