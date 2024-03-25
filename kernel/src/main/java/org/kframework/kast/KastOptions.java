@@ -161,8 +161,7 @@ public final class KastOptions {
       names = {"--input", "-i"},
       descriptionKey = "mode",
       converter = InputModeConverter.class,
-      description =
-          "How to read kast input in. <mode> is either [program|kast|json|kore|rule].")
+      description = "How to read kast input in. <mode> is either [program|kast|json|kore|rule].")
   public InputModes input = InputModes.PROGRAM;
 
   @Parameter(
