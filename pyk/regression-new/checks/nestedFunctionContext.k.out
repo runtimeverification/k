@@ -9,3 +9,5 @@
 	20 |	     <baz> [[foo(0)]] <baz> .K </baz> </baz>
 	   .	     ^~~~~
 [Error] Compiler: Had 2 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile nestedFunctionContext.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition nestedFunctionContext-kompiled --type-inference-mode checked

@@ -9,3 +9,5 @@
 	8 |	  syntax PipeInts ::= List{Int, "|"} [symbol(pipe-ints), terminator-symbol(.pipe-ints)]
 	  .	                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkTerminatorSymbol.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkTerminatorSymbol-kompiled --type-inference-mode checked

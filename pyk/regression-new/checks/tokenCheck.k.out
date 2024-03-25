@@ -14,3 +14,5 @@
 	21 |	  syntax Id ::= Foo(Id)
 	   .	                ^~~~~~~
 [Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile tokenCheck.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition tokenCheck-kompiled --type-inference-mode checked

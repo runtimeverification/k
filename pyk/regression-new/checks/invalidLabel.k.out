@@ -14,3 +14,5 @@
 	8 |	  rule 0 => 1 [label(foo`bar)]
 	  .	       ^~~~~~
 [Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile invalidLabel.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidLabel-kompiled --type-inference-mode checked

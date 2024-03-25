@@ -7,3 +7,5 @@
 	4 |	endmodule
 	  .	~~~~~~~~^
 [Error] Outer Parser: Had 1 outer parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile test.k --syntax-module TEST --md-selector k --emit-json --no-exc-wrap --backend llvm --output-definition test-kompiled --type-inference-mode checked

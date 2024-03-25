@@ -3,3 +3,5 @@
 	Location(12,18,12,30)
 	12 |	syntax KItem ::= List{Int,""}
 	   .	                 ^~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkListDecl1.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkListDecl1-kompiled --type-inference-mode checked

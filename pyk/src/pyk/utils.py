@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
     from logging import Logger
-    from subprocess import CompletedProcess
+    from subprocess import CalledProcessError, CompletedProcess
     from typing import Any, Final
 
     P1 = TypeVar('P1')
@@ -451,6 +451,12 @@ def run_process(
         res.check_returncode()
 
     return res
+
+
+def exit_with_process_error(err: CalledProcessError) -> None:
+    sys.stderr.write(f'[ERROR] Running process failed with returncode {err.returncode}:\n    {shlex.join(err.cmd)}\n')
+    sys.stderr.flush()
+    sys.exit(err.returncode)
 
 
 def gen_file_timestamp(comment: str = '//') -> str:

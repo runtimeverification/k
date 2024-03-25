@@ -6,3 +6,5 @@
 	Location(5,13,5,21)
 	5 |	  rule 0 => 1 /Int 0
 	  .	            ^~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile invalidConstantExp.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidConstantExp-kompiled --type-inference-mode checked

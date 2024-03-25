@@ -3,3 +3,5 @@
 	Location(5,18,5,37)
 	5 |	  syntax Exp ::= "(" A ")" [bracket]
 	  .	                 ^~~~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkBracketSubsort.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkBracketSubsort-kompiled --type-inference-mode checked

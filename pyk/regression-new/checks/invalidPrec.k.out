@@ -3,3 +3,5 @@
 	Location(4,17,4,34)
 	4 |	 syntax Foo ::= r"[0-9]+" [token]
 	  .	                ^~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile invalidPrec.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidPrec-kompiled --type-inference-mode checked

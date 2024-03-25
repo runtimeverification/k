@@ -4,3 +4,5 @@
 	7 |	rule foo => bar [anywhere]
 	  .	            ^~~
 [Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile wideningAnywhere.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition wideningAnywhere-kompiled --type-inference-mode checked

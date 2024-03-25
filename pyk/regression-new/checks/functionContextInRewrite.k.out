@@ -4,3 +4,5 @@
 	9 |	rule 0 => ([[ 1 ]] <bar> 0 </bar>)
 	  .	           ^
 [Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile functionContextInRewrite.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition functionContextInRewrite-kompiled --type-inference-mode checked

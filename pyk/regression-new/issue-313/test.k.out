@@ -3,3 +3,5 @@
 	Source(test.k)
 	Location(16,6,20,17)
 [Warning] Compiler: Could not find main syntax module with name TEST-SYNTAX in definition.  Use --syntax-module to specify one. Using TEST as default.
+[ERROR] Running process failed with returncode 113:
+    kompile test.k --md-selector k --emit-json --no-exc-wrap --backend llvm --output-definition test-kompiled --type-inference-mode checked

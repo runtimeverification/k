@@ -3,3 +3,5 @@
 	Location(5,19,5,27)
 	5 |	  rule a() => .K [owise(1)]
 	  .	                  ^~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile attParamForbidden.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition attParamForbidden-kompiled --type-inference-mode checked

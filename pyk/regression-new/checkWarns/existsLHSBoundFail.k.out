@@ -14,3 +14,5 @@
 	11 |	  rule foo(X) => #Exists Y . { I #Equals Y }
 	   .	                               ^
 [Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile existsLHSBoundFail.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition existsLHSBoundFail-kompiled --type-inference-mode checked

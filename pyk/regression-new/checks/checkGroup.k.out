@@ -3,3 +3,5 @@
 	Location(4,18,4,43)
 	4 |	               | Int "+" Int [group(fun,)]
 	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkGroup.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkGroup-kompiled --type-inference-mode checked

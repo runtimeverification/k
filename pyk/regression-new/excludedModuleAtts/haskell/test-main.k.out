@@ -1,1 +1,3 @@
 [Error] Compiler: Main module TEST-MAIN has excluded attribute [concrete].
+[ERROR] Running process failed with returncode 113:
+    kompile test-main.k --md-selector k --emit-json --no-exc-wrap --backend haskell --output-definition test-main-kompiled --type-inference-mode checked

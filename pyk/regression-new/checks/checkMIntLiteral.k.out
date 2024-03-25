@@ -4,3 +4,5 @@
 	14 |	  rule foo(0p32) => 0
 	   .	           ^~~~
 [Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkMIntLiteral.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkMIntLiteral-kompiled --type-inference-mode checked

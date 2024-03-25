@@ -10,3 +10,5 @@
 	12 |	  rule X => label(X, wrap X)
 	   .	       ^~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile paramAmb.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition paramAmb-kompiled --type-inference-mode checked

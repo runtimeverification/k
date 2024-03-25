@@ -54,7 +54,7 @@ ifeq ($(UNAME), Darwin)
 	KOMPILE_FLAGS+=--no-haskell-binary
 endif
 
-KOMPILE_FLAGS+=--type-inference-mode checked $(VERBOSITY)
+KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
 KRUN_FLAGS+=$(VERBOSITY)
 KPROVE_FLAGS+=--type-inference-mode checked --failure-info $(VERBOSITY)
 

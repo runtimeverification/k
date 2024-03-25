@@ -24,3 +24,5 @@
 	11 |	rule foo
 	   .	        ^
 [Error] Compiler: Had 5 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile parseErrorExpected.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition parseErrorExpected-kompiled --type-inference-mode checked

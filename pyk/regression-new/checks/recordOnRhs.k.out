@@ -4,3 +4,5 @@
 	7 |	rule _Gen0 => foo(...)
 	  .	              ^~~~~~~~
 [Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile recordOnRhs.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition recordOnRhs-kompiled --type-inference-mode checked

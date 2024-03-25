@@ -7,3 +7,5 @@
   while executing phase "expand macros" on sentence at
 	Source(expandMacroRequires.k)
 	Location(12,10,12,49)
+[ERROR] Running process failed with returncode 113:
+    kompile expandMacroRequires.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition expandMacroRequires-kompiled --type-inference-mode checked
