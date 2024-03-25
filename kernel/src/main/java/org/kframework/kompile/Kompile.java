@@ -663,16 +663,13 @@ public class Kompile {
     attributeGroups.forEach(
         ps -> {
           var userList = ps.stream().allMatch(p -> p.att().contains(Att.USER_LIST()));
-          if (userList) {
-            return;
-          }
 
           var groups =
               ps.stream()
                   .collect(
                       Collectors.groupingBy(p -> module.overloads().connectedComponents().get(p)));
 
-          if (groups.size() > 1) {
+          if (groups.size() > (userList ? 2 : 1)) {
             for (var g : groups.values()) {
               assert !g.isEmpty();
               var prod = g.get(0);
