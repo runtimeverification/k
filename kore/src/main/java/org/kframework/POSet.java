@@ -239,7 +239,8 @@ public class POSet<T> implements Serializable {
    * not recompute the mapping and therefore take constant time.
    *
    * @return A lazily initialized map from elements to an integer in the range [0, N) indicating
-   *     which connected component that element belongs to.
+   *     which connected component that element belongs to, where N is the number of connected
+   *     components.
    */
   public Map<T, Integer> connectedComponents() {
     return connectedComponentsLazy.get();
