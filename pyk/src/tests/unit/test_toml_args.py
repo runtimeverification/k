@@ -37,16 +37,7 @@ def test_toml_read() -> None:
 
 def test_toml_profiles() -> None:
     parser = create_argument_parser()
-    cmd_args = [
-        'coverage',
-        '--config-file',
-        str(TEST_TOML),
-        '--config-profile',
-        'a_profile',
-        '.',
-        str(TEST_TOML),
-        '--verbose',
-    ]
+    cmd_args = ['coverage', '--config-file', str(TEST_TOML), '--config-profile', 'a_profile', '.', str(TEST_TOML)]
     args = parser.parse_args(cmd_args)
     args_dict = parse_toml_args(args)
     assert 'verbose' in args_dict
