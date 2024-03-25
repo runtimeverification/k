@@ -32,12 +32,10 @@ class Interpreter(Generic[T], ABC):
             state = self.next_state(state)
 
     @abstractmethod
-    def init_state(self) -> T:
-        ...
+    def init_state(self) -> T: ...
 
     @abstractmethod
-    def next_state(self, state: T, steps: int | None = None) -> T:
-        ...
+    def next_state(self, state: T, steps: int | None = None) -> T: ...
 
 
 @final
@@ -99,8 +97,7 @@ def _show_parser() -> ArgumentParser:
     return ArgumentParser(description='Show the current configuration')
 
 
-class ReplError(Exception):
-    ...
+class ReplError(Exception): ...
 
 
 class BaseRepl(Cmd, Generic[T], ABC):

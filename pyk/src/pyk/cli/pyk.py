@@ -55,20 +55,17 @@ class PrintInput(Enum):
     KAST_JSON = 'kast-json'
 
 
-class JsonToKoreOptions(LoggingOptions):
-    ...
+class JsonToKoreOptions(LoggingOptions): ...
 
 
-class KoreToJsonOptions(LoggingOptions):
-    ...
+class KoreToJsonOptions(LoggingOptions): ...
 
 
 class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
     coverage_file: IO[Any]
 
 
-class GraphImportsOptions(DefinitionOptions, LoggingOptions):
-    ...
+class GraphImportsOptions(DefinitionOptions, LoggingOptions): ...
 
 
 class RPCKastOptions(OutputFileOptions, LoggingOptions):

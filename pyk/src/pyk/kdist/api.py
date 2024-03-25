@@ -56,8 +56,7 @@ class TargetId:
 
 class Target(ABC):
     @abstractmethod
-    def build(self, output_dir: Path, deps: dict[str, Path], args: dict[str, Any], verbose: bool) -> None:
-        ...
+    def build(self, output_dir: Path, deps: dict[str, Path], args: dict[str, Any], verbose: bool) -> None: ...
 
     def deps(self) -> Iterable[str]:
         return ()

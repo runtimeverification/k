@@ -87,8 +87,7 @@ class Kore(ABC):
         return str_io.getvalue()
 
     @abstractmethod
-    def write(self, output: IO[str]) -> None:
-        ...
+    def write(self, output: IO[str]) -> None: ...
 
 
 def _write_sep_by_comma(kores: Iterable[Kore], output: IO[str]) -> None:
@@ -111,8 +110,7 @@ class Sort(Kore):
 
     @property
     @abstractmethod
-    def dict(self) -> dict[str, Any]:
-        ...
+    def dict(self) -> dict[str, Any]: ...
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> Sort:
@@ -134,8 +132,7 @@ class WithSort(ABC):
     sort: Sort
 
     @abstractmethod
-    def let_sort(self: WS, sort: Sort) -> WS:
-        ...
+    def let_sort(self: WS, sort: Sort) -> WS: ...
 
     def map_sort(self: WS, f: Callable[[Sort], Sort]) -> WS:
         return self.let_sort(f(self.sort))
@@ -259,16 +256,14 @@ class Pattern(Kore):
 
     @classmethod
     @abstractmethod
-    def _from_dict(cls: type[P], dct: Mapping[str, Any], patterns: list[Pattern]) -> P:
-        ...
+    def _from_dict(cls: type[P], dct: Mapping[str, Any], patterns: list[Pattern]) -> P: ...
 
     @property
     def json(self) -> str:
         return json.dumps(self.dict, sort_keys=True)
 
     @abstractmethod
-    def _dict(self, dicts: list) -> dict[str, Any]:
-        ...
+    def _dict(self, dicts: list) -> dict[str, Any]: ...
 
     @classmethod
     @abstractmethod
@@ -305,12 +300,10 @@ class Pattern(Kore):
 
     @property
     @abstractmethod
-    def patterns(self) -> tuple[Pattern, ...]:
-        ...
+    def patterns(self) -> tuple[Pattern, ...]: ...
 
     @abstractmethod
-    def let_patterns(self: P, patterns: Iterable[Pattern]) -> P:
-        ...
+    def let_patterns(self: P, patterns: Iterable[Pattern]) -> P: ...
 
     def map_patterns(self: P, f: Callable[[Pattern], Pattern]) -> P:
         return self.let_patterns(patterns=(f(pattern) for pattern in self.patterns))
@@ -543,8 +536,7 @@ class App(Pattern):
 class MLPattern(Pattern):
     @classmethod
     @abstractmethod
-    def symbol(cls) -> str:
-        ...
+    def symbol(cls) -> str: ...
 
     @classmethod
     def of(cls: type[ML], symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()) -> ML:
@@ -565,8 +557,7 @@ class MLPattern(Pattern):
 
     @property
     @abstractmethod
-    def sorts(self) -> tuple[Sort, ...]:
-        ...
+    def sorts(self) -> tuple[Sort, ...]: ...
 
     @property
     def ctor_patterns(self) -> tuple[Pattern, ...]:
@@ -1618,8 +1609,7 @@ class DV(MLPattern, WithSort):
         return {'tag': 'DV', 'sort': self.sort.dict, 'value': self.value.value}
 
 
-class MLSyntaxSugar(MLPattern):
-    ...
+class MLSyntaxSugar(MLPattern): ...
 
 
 # TODO AppAssoc, OrAssoc
@@ -1628,8 +1618,7 @@ class Assoc(MLSyntaxSugar):
 
     @property
     @abstractmethod
-    def pattern(self) -> Pattern:
-        ...
+    def pattern(self) -> Pattern: ...
 
     @property
     def sorts(self) -> tuple[()]:
@@ -1792,15 +1781,13 @@ class WithAttrs(ABC):
     attrs: tuple[App, ...]
 
     @abstractmethod
-    def let_attrs(self: WA, attrs: Iterable[App]) -> WA:
-        ...
+    def let_attrs(self: WA, attrs: Iterable[App]) -> WA: ...
 
     def map_attrs(self: WA, f: Callable[[tuple[App, ...]], Iterable[App]]) -> WA:
         return self.let_attrs(f(self.attrs))
 
 
-class Sentence(Kore, WithAttrs):
-    ...
+class Sentence(Kore, WithAttrs): ...
 
 
 @final

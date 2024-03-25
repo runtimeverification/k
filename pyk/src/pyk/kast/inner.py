@@ -57,12 +57,10 @@ class KLabel(KAst):
     params: tuple[KSort, ...]
 
     @overload
-    def __init__(self, name: str, params: Iterable[str | KSort]):
-        ...
+    def __init__(self, name: str, params: Iterable[str | KSort]): ...
 
     @overload
-    def __init__(self, name: str, *params: str | KSort):
-        ...
+    def __init__(self, name: str, *params: str | KSort): ...
 
     # TODO Is it possible to extract a decorator?
     def __init__(self, name: str, *args: Any, **kwargs: Any):
@@ -95,12 +93,10 @@ class KLabel(KAst):
         return chain([self.name], self.params)
 
     @overload
-    def __call__(self, args: Iterable[KInner]) -> KApply:
-        ...
+    def __call__(self, args: Iterable[KInner]) -> KApply: ...
 
     @overload
-    def __call__(self, *args: KInner) -> KApply:
-        ...
+    def __call__(self, *args: KInner) -> KApply: ...
 
     def __call__(self, *args: Any, **kwargs: Any) -> KApply:
         return self.apply(*args, **kwargs)
@@ -119,12 +115,10 @@ class KLabel(KAst):
         return KLabel(name=name, params=params)
 
     @overload
-    def apply(self, args: Iterable[KInner]) -> KApply:
-        ...
+    def apply(self, args: Iterable[KInner]) -> KApply: ...
 
     @overload
-    def apply(self, *args: KInner) -> KApply:
-        ...
+    def apply(self, *args: KInner) -> KApply: ...
 
     def apply(self, *args: Any, **kwargs: Any) -> KApply:
         """Construct a `KApply` with this `KLabel` as the AST head and the supplied parameters as the arguments."""
@@ -184,8 +178,7 @@ class KInner(KAst):
 
     @classmethod
     @abstractmethod
-    def _from_dict(cls: type[KI], d: Mapping[str, Any], terms: list[KInner]) -> KI:
-        ...
+    def _from_dict(cls: type[KI], d: Mapping[str, Any], terms: list[KInner]) -> KI: ...
 
     @property
     @abstractmethod
@@ -243,8 +236,7 @@ class KInner(KAst):
                 stack.append([])
 
     @abstractmethod
-    def _to_dict(self, terms: list[KInner]) -> dict[str, Any]:
-        ...
+    def _to_dict(self, terms: list[KInner]) -> dict[str, Any]: ...
 
 
 @final
@@ -364,12 +356,10 @@ class KApply(KInner):
     args: tuple[KInner, ...]
 
     @overload
-    def __init__(self, label: str | KLabel, args: Iterable[KInner]):
-        ...
+    def __init__(self, label: str | KLabel, args: Iterable[KInner]): ...
 
     @overload
-    def __init__(self, label: str | KLabel, *args: KInner):
-        ...
+    def __init__(self, label: str | KLabel, *args: KInner): ...
 
     def __init__(self, label: str | KLabel, *args: Any, **kwargs: Any):
         """Construct a new `KApply` given the input `KLabel` or str, applied to arguments."""
@@ -579,12 +569,10 @@ class KSequence(KInner, Sequence[KInner]):
     items: tuple[KInner, ...]
 
     @overload
-    def __init__(self, items: Iterable[KInner]):
-        ...
+    def __init__(self, items: Iterable[KInner]): ...
 
     @overload
-    def __init__(self, *items: KInner):
-        ...
+    def __init__(self, *items: KInner): ...
 
     def __init__(self, *args: Any, **kwargs: Any):
         """Construct a new `KSequence` given the arguments."""
@@ -613,12 +601,10 @@ class KSequence(KInner, Sequence[KInner]):
         object.__setattr__(self, 'items', tuple(items))
 
     @overload
-    def __getitem__(self, key: int) -> KInner:
-        ...
+    def __getitem__(self, key: int) -> KInner: ...
 
     @overload
-    def __getitem__(self, key: slice) -> tuple[KInner, ...]:
-        ...
+    def __getitem__(self, key: slice) -> tuple[KInner, ...]: ...
 
     def __getitem__(self, key: int | slice) -> KInner | tuple[KInner, ...]:
         return self.items[key]

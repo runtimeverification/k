@@ -163,7 +163,7 @@ def llvm_to_module(module: kllvm.Module) -> Module:
 
 def llvm_to_sentence(decl: kllvm.Declaration) -> Sentence:
     attrs = _attrs(decl.attributes)
-    vars = (llvm_to_sort(var) for var in decl.object_sort_variables)
+    vars = tuple(llvm_to_sort_var(var) for var in decl.object_sort_variables)
     match decl:
         case kllvm.ModuleImportDeclaration():  # type: ignore
             return Import(decl.module_name, attrs)
@@ -220,6 +220,10 @@ def llvm_to_sort(sort: kllvm.Sort) -> Sort:
             return SortApp(sort.name, (llvm_to_sort(subsort) for subsort in sort.arguments))
         case _:
             raise AssertionError()
+
+
+def llvm_to_sort_var(var: kllvm.SortVariable) -> SortVar:
+    return SortVar(var.name)
 
 
 def _attrs(attributes: dict[str, kllvm.CompositePattern]) -> tuple[App, ...]:

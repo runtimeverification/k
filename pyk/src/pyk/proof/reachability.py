@@ -52,13 +52,11 @@ class APRProofSubsumeResult(APRProofResult):
 
 
 @dataclass
-class APRProofTerminalResult(APRProofResult):
-    ...
+class APRProofTerminalResult(APRProofResult): ...
 
 
 @dataclass
-class APRProofBoundedResult(APRProofResult):
-    ...
+class APRProofBoundedResult(APRProofResult): ...
 
 
 class APRProof(Proof, KCFGExploration):

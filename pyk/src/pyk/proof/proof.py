@@ -65,8 +65,7 @@ class Proof(ABC):
             ensure_dir_path(self.proof_dir)
 
     @abstractmethod
-    def commit(self, result: StepResult) -> None:
-        ...
+    def commit(self, result: StepResult) -> None: ...
 
     def admit(self) -> None:
         self.admitted = True
@@ -176,8 +175,7 @@ class Proof(ABC):
 
     @property
     @abstractmethod
-    def own_status(self) -> ProofStatus:
-        ...
+    def own_status(self) -> ProofStatus: ...
 
     @property
     def status(self) -> ProofStatus:
@@ -191,8 +189,7 @@ class Proof(ABC):
 
     @property
     @abstractmethod
-    def can_progress(self) -> bool:
-        ...
+    def can_progress(self) -> bool: ...
 
     @property
     def failed(self) -> bool:
@@ -212,8 +209,7 @@ class Proof(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> Proof:
-        ...
+    def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> Proof: ...
 
     @classmethod
     def read_proof(cls: type[Proof], id: str, proof_dir: Path) -> Proof:
@@ -279,8 +275,7 @@ class ProofSummary(ABC):
 
     @property
     @abstractmethod
-    def lines(self) -> list[str]:
-        ...
+    def lines(self) -> list[str]: ...
 
     def __str__(self) -> str:
         return '\n'.join(self.lines)
@@ -301,12 +296,10 @@ class CompositeSummary(ProofSummary):
         return [line for lines in (summary.lines for summary in self.summaries) for line in lines]
 
 
-class StepResult:
-    ...
+class StepResult: ...
 
 
-class FailureInfo:
-    ...
+class FailureInfo: ...
 
 
 class Prover:
@@ -317,12 +310,10 @@ class Prover:
         self.kcfg_explore = kcfg_explore
 
     @abstractmethod
-    def failure_info(self) -> FailureInfo:
-        ...
+    def failure_info(self) -> FailureInfo: ...
 
     @abstractmethod
-    def step_proof(self) -> Iterable[StepResult]:
-        ...
+    def step_proof(self) -> Iterable[StepResult]: ...
 
     def advance_proof(self, max_iterations: int | None = None, fail_fast: bool = False) -> None:
         iterations = 0
