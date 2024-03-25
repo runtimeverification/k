@@ -78,7 +78,9 @@ trait Sorting {
       p1.nonterminals
         .zip(p2.nonterminals)
         .forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
-      (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort)) &&
+      p1.sort != p2.sort && (p1.nonterminals.isEmpty || p1.nonterminals.map(
+        _.sort
+      ) != p2.nonterminals.map(_.sort)) &&
       p1 != p2
 
   /**
