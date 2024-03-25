@@ -29,11 +29,7 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<KEME
     if (overloads.elements().contains(tc.production()) && tc.items().isEmpty()) {
       Set<Production> candidates =
           streamIter(overloads.elements())
-              .filter(
-                  p ->
-                      p.klabel().isDefined()
-                          && p.klabelAtt().equals(tc.production().klabelAtt())
-                          && overloads.lessThanEq(p, tc.production()))
+              .filter(p -> overloads.lessThanEq(p, tc.production()))
               .collect(Collectors.toSet());
       candidates = overloads.minimal(candidates);
       if (candidates.size() != 1) {
