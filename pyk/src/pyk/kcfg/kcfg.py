@@ -5,6 +5,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Container
 from dataclasses import dataclass, field
+from functools import reduce
 from threading import RLock
 from typing import TYPE_CHECKING, Final, List, Union, cast, final
 
@@ -24,7 +25,7 @@ from ..kast.manip import (
 from ..kast.outer import KFlatModule
 from ..prelude.kbool import andBool
 from ..prelude.ml import mlAnd
-from ..utils import ensure_dir_path, single
+from ..utils import ensure_dir_path, not_none, single
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, MutableMapping
@@ -851,7 +852,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def split_on_constraints(self, source_id: NodeIdLike, constraints: Iterable[KInner]) -> list[int]:
         source = self.node(source_id)
         branch_node_ids = [self.create_node(source.cterm.add_constraint(c)).id for c in constraints]
-        csubsts = [CSubst(constraints=flatten_label('#And', constraint)) for constraint in constraints]
+        csubsts = [not_none(source.cterm.match_with_constraint(self.node(id).cterm)) for id in branch_node_ids]
+        csubsts = [
+            reduce(CSubst.add_constraint, flatten_label('#And', constraint), csubst)
+            for (csubst, constraint) in zip(csubsts, constraints, strict=True)
+        ]
         self.create_split(source.id, zip(branch_node_ids, csubsts, strict=True))
         return branch_node_ids
 

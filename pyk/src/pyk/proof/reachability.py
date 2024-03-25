@@ -413,7 +413,7 @@ class APRProof(Proof, KCFGExploration):
             if type(edge) is KCFG.Split:
                 assert len(edge.targets) == 1
                 csubst = edge.splits[edge.targets[0].id]
-                curr_constraint = mlAnd([csubst.subst.ml_pred, csubst.constraint, curr_constraint])
+                curr_constraint = mlAnd([csubst.subst.minimize().ml_pred, csubst.constraint, curr_constraint])
             if type(edge) is KCFG.Cover:
                 curr_constraint = mlAnd([edge.csubst.constraint, edge.csubst.subst.apply(curr_constraint)])
         return mlAnd(flatten_label('#And', curr_constraint))
@@ -579,9 +579,9 @@ class APRProof(Proof, KCFGExploration):
         assert type(closest_branch) is KCFG.Split
         refuted_branch_root = closest_branch.targets[0]
         csubst = closest_branch.splits[refuted_branch_root.id]
-        if len(csubst.subst) > 0:
+        if not (csubst.subst.is_identity):
             _LOGGER.error(
-                f'Cannot refute node {node.id}: unexpected non-empty substitution {csubst.subst} in Split from {closest_branch.source.id}'
+                f'Cannot refute node {node.id}: unexpected non-identity substitution {csubst.subst} in Split from {closest_branch.source.id}'
             )
             return None
         if len(csubst.constraints) > 1:
