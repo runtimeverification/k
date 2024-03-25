@@ -633,6 +633,15 @@ public class Kompile {
   }
 
   private void checkSingletonOverload(Module module) {
+    // When disambiguating, an extra production `Es ::= E` is added for every user list
+    // sort `Es`.
+    //
+    // This means that productions that reference a user list sort (or the child sort of
+    // one) can behave as overloads at disambiguation, even if they look like singletons
+    // from the perspective. We therefore need to use the disambiguation module to implement this
+    // check.
+    //
+    // See `RuleGrammarGenerator::getCombinedGrammarImpl`.
     var disambMod = RuleGrammarGenerator.getCombinedGrammarImpl(module, false, false, true)._2();
     var withOverload =
         disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
