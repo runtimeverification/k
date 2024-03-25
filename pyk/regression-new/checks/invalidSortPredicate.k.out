@@ -6,3 +6,5 @@
 	Location(8,8,8,16)
 	8 |	  rule isExp(I) => isInt(I) andBool configFunction()
 	  .	       ^~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile invalidSortPredicate.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidSortPredicate-kompiled --type-inference-mode checked

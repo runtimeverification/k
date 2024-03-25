@@ -23,3 +23,5 @@
 	   .	                      ^~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 4 parsing errors.
 [Error] Compiler: Had 5 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateKCells.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateKCells-kompiled --type-inference-mode checked

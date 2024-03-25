@@ -17,7 +17,7 @@ KAST_TESTS?=$(wildcard ./*.kast)
 
 VERBOSITY?=
 
-KOMPILE_FLAGS+=--type-inference-mode checked $(VERBOSITY)
+KOMPILE_FLAGS+=--no-exc-wrap --type-inference-mode checked $(VERBOSITY)
 KPROVE_FLAGS+=$(VERBOSITY)
 KRUN_FLAGS+=$(VERBOSITY)
 

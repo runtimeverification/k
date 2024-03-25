@@ -3,3 +3,5 @@
 	Location(9,24,9,41)
 	9 |	  context [foo-left]:  foo( HOLE,    _ )
 	  .	                       ^~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateContextLabels.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateContextLabels-kompiled --type-inference-mode checked

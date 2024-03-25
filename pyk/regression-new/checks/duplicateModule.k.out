@@ -7,3 +7,5 @@
 	8 |	endmodule
 	  .	~~~~~~~~^
 [Error] Outer Parser: Had 1 outer parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateModule.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateModule-kompiled --type-inference-mode checked

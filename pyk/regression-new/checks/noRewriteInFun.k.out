@@ -4,3 +4,5 @@
 	5 |	rule 0 => #fun(0)(0)
 	  .	          ^~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile noRewriteInFun.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition noRewriteInFun-kompiled --type-inference-mode checked

@@ -7,3 +7,5 @@
   while executing phase "expand macros" on sentence at
 	Source(smtLemmaCheck.k)
 	Location(13,8,13,42)
+[ERROR] Running process failed with returncode 113:
+    kompile smtLemmaCheck.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition smtLemmaCheck-kompiled --type-inference-mode checked

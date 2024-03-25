@@ -4,3 +4,5 @@
 	10 |	  syntax Foo ::= foo(Int)
 	   .	                 ^~~~~~~~
 [Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkUnusedSymbol.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition checkUnusedSymbol-kompiled --type-inference-mode checked

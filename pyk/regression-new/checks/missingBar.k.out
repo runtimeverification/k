@@ -4,3 +4,5 @@ Was expecting one of: ["rule", "context", "configuration", "claim", "syntax", "e
 	Location(5,18,5,21)
 	5 |	                 bar ()
 	  .	                 ^~~
+[ERROR] Running process failed with returncode 113:
+    kompile missingBar.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition missingBar-kompiled --type-inference-mode checked

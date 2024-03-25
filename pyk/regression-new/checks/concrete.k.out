@@ -39,3 +39,5 @@
 	34 |	  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic, simplification]
 	   .	       ^~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 8 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile concrete.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition concrete-kompiled --type-inference-mode checked

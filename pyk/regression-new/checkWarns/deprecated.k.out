@@ -54,3 +54,5 @@
 	24 |	    <k> qux(foo()) </k>
 	   .	            ^~~~~
 [Error] Compiler: Had 11 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile deprecated.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition deprecated-kompiled --type-inference-mode checked

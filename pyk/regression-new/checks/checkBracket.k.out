@@ -3,3 +3,5 @@
 	Location(3,18,3,43)
 	3 |	  syntax Exp ::= "(" Exp Exp ")" [bracket]
 	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkBracket.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkBracket-kompiled --type-inference-mode checked

@@ -14,3 +14,5 @@
 	9 |	  claim A => 0
 	  .	        ^~~~~~
 [Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateRules.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateRules-kompiled --type-inference-mode checked

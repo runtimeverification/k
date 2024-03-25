@@ -14,3 +14,5 @@
 	25 |	  rule foo(X) => ?X:Int
 	   .	                 ^~
 [Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkUnusedVar.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition checkUnusedVar-kompiled --type-inference-mode checked

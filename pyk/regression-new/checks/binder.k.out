@@ -9,3 +9,5 @@
 	9 |	  syntax Error ::= foo(Error, Error) [binder]
 	  .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile binder.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition binder-kompiled --type-inference-mode checked

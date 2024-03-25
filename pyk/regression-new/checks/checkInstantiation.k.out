@@ -3,3 +3,5 @@
 	Location(10,20,10,32)
 	10 |	  syntax KItem ::= foo(MInt{6})
 	   .	                   ^~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkInstantiation.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkInstantiation-kompiled --type-inference-mode checked

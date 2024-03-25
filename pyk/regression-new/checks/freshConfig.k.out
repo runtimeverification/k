@@ -4,3 +4,5 @@
 	Location(15,14,15,16)
 	15 |	  <freshFoo> !_:Foo </freshFoo>
 	   .	             ^~
+[ERROR] Running process failed with returncode 113:
+    kompile freshConfig.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition freshConfig-kompiled --type-inference-mode checked

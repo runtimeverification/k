@@ -49,3 +49,5 @@
 	55 |	  rule a() => .K
 	   .	       ^
 [Error] Compiler: Had 10 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile signature.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition signature-kompiled --type-inference-mode checked

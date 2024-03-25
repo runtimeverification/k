@@ -9,3 +9,5 @@
 	6 |	rule 1 => (2 => 3)
 	  .	           ^~~~~~
 [Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile nestedRewrite.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition nestedRewrite-kompiled --type-inference-mode checked

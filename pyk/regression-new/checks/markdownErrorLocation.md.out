@@ -4,3 +4,5 @@
 	26 |	  rule 21 // pandoc would think this is line 20, column 7
 	   .	       ^~
 [Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile markdownErrorLocation.md --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition markdownErrorLocation-kompiled --type-inference-mode checked

@@ -39,3 +39,5 @@
 	20 |	    requires isDone(?STATE)
 	   .	                    ^~~~~~
 [Error] Compiler: Had 8 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile existentialCheck.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition existentialCheck-kompiled --type-inference-mode checked

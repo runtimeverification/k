@@ -3,3 +3,5 @@
 	Location(9,21,9,33)
 	9 |	  syntax MyList ::= List{Int,""}
 	  .	                    ^~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkDuplicateList.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkDuplicateList-kompiled --type-inference-mode checked
