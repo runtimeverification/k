@@ -753,13 +753,13 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         },
     )
     module = _discard_hook_atts(module)
-    module = _discard_format_atts(module)
     module = _add_anywhere_atts(module)
     module = _add_symbol_atts(module, Atts.MACRO, _is_macro)
     module = _add_symbol_atts(module, Atts.FUNCTIONAL, _is_functional)
     module = _add_symbol_atts(module, Atts.INJECTIVE, _is_injective)
     module = _add_symbol_atts(module, Atts.CONSTRUCTOR, _is_constructor)
     module = _add_default_format_atts(module)
+    module = _discard_format_atts(module)
     module = _inline_terminals_in_format_atts(module)
     module = _add_colors_atts(module)
     module = _discard_symbol_atts(module, [Atts.COLOR])
@@ -1189,6 +1189,9 @@ def _add_terminals_atts(module: KFlatModule) -> KFlatModule:
             return sentence
 
         if not sentence.klabel:
+            return sentence
+
+        if Atts.FORMAT not in sentence.att:
             return sentence
 
         terminals = ''.join('0' if isinstance(item, KNonTerminal) else '1' for item in sentence.items)
