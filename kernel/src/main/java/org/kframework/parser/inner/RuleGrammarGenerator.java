@@ -334,7 +334,7 @@ public record RuleGrammarGenerator(Definition baseK) {
   }
 
   public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(
-      Module mod, boolean isBison, boolean forGlobalScanner) {
+      Module mod, boolean isBison, boolean forGlobalScanner, boolean subsortUserLists) {
     Set<Sentence> prods = new HashSet<>();
     Set<Sentence> extensionProds = new HashSet<>();
     Set<Sentence> disambProds;
@@ -730,7 +730,7 @@ public record RuleGrammarGenerator(Definition baseK) {
       parseProds = res;
     }
 
-    if (mod.importedModuleNames().contains(RULE_LISTS)) {
+    if (mod.importedModuleNames().contains(RULE_LISTS) || subsortUserLists) {
       Set<Sentence> res = new HashSet<>();
       for (UserList ul : UserList.getLists(parseProds)) {
         Production prod1;

@@ -3,7 +3,6 @@ package org.kframework.kompile;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.kore.KORE.*;
 
 import com.google.inject.Inject;
 import java.io.File;
@@ -634,29 +633,14 @@ public class Kompile {
   }
 
   private void checkSingletonOverload(Module module) {
-    var withOverload = module.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
-
-    var lists = UserList.getLists(mutable(module.sentences()));
-    var listSorts =
-        lists.stream().flatMap(ul -> Stream.of(ul.sort, ul.childSort)).collect(Collectors.toSet());
+    var disambMod = RuleGrammarGenerator.getCombinedGrammarImpl(module, false, false, true)._2();
+    var withOverload =
+        disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
 
     stream(withOverload)
         .forEach(
             p -> {
-              // When disambiguating, an extra production `Es ::= E` is added for every user list
-              // sort `Es`.
-              //
-              // This means that productions that reference a user list sort (or the child sort of
-              // one) can behave as overloads at disambiguation, even if they look like singletons
-              // here. To avoid reconstructing the entire disambiguation module for this check, we
-              // simply silence this warning when a singleton production references any sort
-              // mentioned in a `List{S, ...}` production.
-              //
-              // See `RuleGrammarGenerator::getCombinedGrammarImpl`.
-              var couldBeUserList =
-                  p.nonterminals().toStream().exists(nt -> listSorts.contains(nt.sort()))
-                      || listSorts.contains(p.sort());
-              if (!module.overloads().elements().contains(p) && !couldBeUserList) {
+              if (!disambMod.overloads().elements().contains(p)) {
                 kem.registerCompilerWarning(
                     KException.ExceptionType.SINGLETON_OVERLOAD,
                     errors,
