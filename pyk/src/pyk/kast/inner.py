@@ -693,7 +693,7 @@ class Subst(Mapping[str, KInner]):
 
     def minimize(self) -> Subst:
         """Return a new substitution with any identity items removed."""
-        return Subst({k: v for k, v in self.items() if v != KVariable(k)})
+        return Subst({k: v for k, v in self.items() if type(v) is not KVariable or v.name != k})
 
     def compose(self, other: Subst) -> Subst:
         """Union two substitutions together, preferring the assignments in `self` if present in both."""
@@ -769,6 +769,10 @@ class Subst(Mapping[str, KInner]):
             return KToken('true', 'Bool')
 
         return reduce(KLabel('_andBool_'), conjuncts)
+
+    @property
+    def is_identity(self) -> bool:
+        return len(self.minimize()) == 0
 
 
 def bottom_up_with_summary(f: Callable[[KInner, list[A]], tuple[KInner, A]], kinner: KInner) -> tuple[KInner, A]:
