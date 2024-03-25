@@ -630,8 +630,7 @@ class KRuleLike(KSentence):
         requires: KInner | None = None,
         ensures: KInner | None = None,
         att: KAtt | None = None,
-    ) -> RL:
-        ...
+    ) -> RL: ...
 
 
 @final

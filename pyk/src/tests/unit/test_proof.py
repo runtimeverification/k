@@ -309,12 +309,12 @@ def test_print_failure_info() -> None:
     path_conditions[5] = '#Top'
 
     failure_reasons = {}
-    failure_reasons[
-        3
-    ] = 'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 2 #Implies 1'
-    failure_reasons[
-        5
-    ] = 'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 5 #Implies 6'
+    failure_reasons[3] = (
+        'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 2 #Implies 1'
+    )
+    failure_reasons[5] = (
+        'Structural matching failed, the following cells failed individually (antecedent #Implies consequent):\nSTATE_CELL: $n |-> 5 #Implies 6'
+    )
 
     models: dict[int, list[tuple[str, str]]] = {}
     models[5] = [('X', '101')]

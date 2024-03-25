@@ -102,8 +102,7 @@ class _Cache(Generic[A]):
 
 class _OptInner(ABC):
     @abstractmethod
-    def build(self, klabels: _Cache[KLabel], terms: list[KInner]) -> KInner:
-        ...
+    def build(self, klabels: _Cache[KLabel], terms: list[KInner]) -> KInner: ...
 
 
 @final
