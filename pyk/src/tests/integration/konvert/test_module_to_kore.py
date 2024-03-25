@@ -52,12 +52,7 @@ def kore_module(definition_dir: Path, definition_info: DefinitionInfo) -> Module
     return next(module for module in definition if module.name == definition_info.main_module_name)
 
 
-IGNORED_SYMBOL_ATTRS: Final = {
-    'left',
-    'priorities',
-    'right',
-    "symbol'Kywd'",
-}
+IGNORED_SYMBOL_ATTRS: Final = {"symbol'Kywd'"}
 
 
 def test_module_to_kore(kast_defn: KDefinition, kore_module: Module) -> None:
