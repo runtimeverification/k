@@ -666,8 +666,7 @@ public class Kompile {
 
           var groups =
               ps.stream()
-                  .collect(
-                      Collectors.groupingBy(p -> module.overloads().connectedComponents().get(p)));
+                  .collect(Collectors.groupingBy(module.overloads().connectedComponents()::get));
 
           if (groups.size() > (userList ? 2 : 1)) {
             for (var g : groups.values()) {
