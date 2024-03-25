@@ -1,7 +1,7 @@
 [Error] Compiler: Overload `foo` is not unique. Consider renaming one of the overload sets with this key.
 	Source(nonUniqueOverload.k)
-	Location(8,19,8,53)
-	8 |	  syntax Foo2 ::= "foo" Foo2 [overload(foo), unused]
+	Location(7,19,7,53)
+	7 |	  syntax Foo1 ::= "foo" Foo1 [overload(foo), unused]
 	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Overload `foo` is not unique. Consider renaming one of the overload sets with this key.
 	Source(nonUniqueOverload.k)

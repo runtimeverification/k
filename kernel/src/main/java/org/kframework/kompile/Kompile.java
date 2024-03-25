@@ -650,21 +650,33 @@ public class Kompile {
   }
 
   private void checkDuplicateOverloads(Module module) {
-    // Collect the set of productions that are the greatest element of an overload set, grouped
-    // by their `overload(_)` key. If any key has multiple greatest elements, then two overload sets
-    // are using the same key. This is not ambiguous from the point of view of the compiler, but may
-    // be confusing to users.
-    var partialOrderHeads =
-        module.overloads().relations().keySet().stream()
+    // Group the overloaded productions in this module by their `overload(_)` attribute, then
+    // examine each group to see if the elements in that group are connected. If elements with the
+    // same attribute are not in the same connected component, then we have two disjoint overload
+    // sets with the same name, which is potentially confusing to the user.
+    var attributeGroups =
+        module.overloads().elements().stream()
             .filter(p -> p.att().contains(Att.OVERLOAD()))
-            .collect(Collectors.groupingBy(p -> p.att().get(Att.OVERLOAD())));
+            .collect(Collectors.groupingBy(p -> p.att().get(Att.OVERLOAD())))
+            .values();
 
-    partialOrderHeads.forEach(
-        (key, prods) -> {
-          var userList =
-              prods.size() == 2 && prods.stream().allMatch(p -> p.att().contains(Att.USER_LIST()));
-          if (prods.size() > 1 && !userList) {
-            for (Production prod : prods) {
+    attributeGroups.forEach(
+        ps -> {
+          var userList = ps.stream().allMatch(p -> p.att().contains(Att.USER_LIST()));
+          if (userList) {
+            return;
+          }
+
+          var groups =
+              ps.stream()
+                  .collect(
+                      Collectors.groupingBy(p -> module.overloads().connectedComponents().get(p)));
+
+          if (groups.size() > 1) {
+            for (var g : groups.values()) {
+              assert !g.isEmpty();
+              var prod = g.get(0);
+              var key = prod.att().get(Att.OVERLOAD());
               kem.registerCompilerWarning(
                   KException.ExceptionType.DUPLICATE_OVERLOAD,
                   errors,
