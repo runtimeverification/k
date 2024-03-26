@@ -128,7 +128,7 @@ def check_missing_sentences(actual: Module, expected: Module) -> None:
     for sent in expected.sentences:
         # TODO remove
         # Filter for SortDecl and SymbolDecl for now
-        if not isinstance(sent, SortDecl):
+        if not isinstance(sent, (SortDecl, SymbolDecl)):
             continue
         if sent not in actual_sentences:
             pytest.fail(f'Missing sentence: {sent.text}')
