@@ -24,6 +24,8 @@ from ..kast.outer import (
     KSyntaxSort,
     KTerminal,
 )
+from ..kore.kompiled import KompiledKore
+from ..kore.parser import KoreParser
 from ..kore.prelude import inj
 from ..kore.syntax import (
     And,
@@ -48,7 +50,7 @@ from ..kore.syntax import (
 )
 from ..prelude.k import K_ITEM, K
 from ..utils import FrozenDict, intersperse
-from ._kast_to_kore import _kast_to_kore
+from ._kast_to_kore import _kast_to_kore, krule_to_kore
 from ._utils import munge
 
 if TYPE_CHECKING:
@@ -58,7 +60,7 @@ if TYPE_CHECKING:
     from ..kast import AttEntry, AttKey, KAtt
     from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
-    from ..kore.syntax import Pattern, Sentence, Sort
+    from ..kore.syntax import Definition, Pattern, Sentence, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -127,12 +129,14 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += _no_junk_axioms(definition)
     sentences += _overload_axioms(definition)
 
-    res = Module(name=name, sentences=sentences, attrs=attrs)
     # Filter the overload attribute
-    res = res.let(
-        sentences=(sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'overload') for sent in res.sentences)
-    )
+    sentences = [sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'overload') for sent in sentences]
 
+    kore_module = Module(name=name, sentences=sentences, attrs=attrs)
+    kompiled_kore = _kompiled_kore_from_module(kore_module)
+    sentences += _rule_axioms(definition, kompiled_kore)
+
+    res = Module(name=name, sentences=sentences, attrs=attrs)
     return res
 
 
@@ -688,6 +692,29 @@ def _overload_axioms(defn: KDefinition) -> list[Axiom]:
         for overloaded, overloaders in defn.overloads.items()
         for overloader in overloaders
     ]
+
+
+def _kompiled_kore_from_module(module: Module) -> KompiledKore:
+    prelude = _get_prelude()
+    definition = prelude.let(modules=prelude.modules + (module,))
+    return KompiledKore.for_definition(definition)
+
+
+_PRELUDE: Definition | None = None
+
+
+def _get_prelude() -> Definition:
+    global _PRELUDE
+    if _PRELUDE is None:
+        prelude_file = Path(__file__).parent / 'prelude.kore'
+        assert prelude_file.is_file()
+        definition = KoreParser(prelude_file.read_text()).definition()
+        _PRELUDE = definition
+    return _PRELUDE
+
+
+def _rule_axioms(definition: KDefinition, kompiled_kore: KompiledKore) -> list[Axiom]:
+    return [krule_to_kore(definition, kompiled_kore, rule) for rule in definition.rules]
 
 
 # ----------------------------------
