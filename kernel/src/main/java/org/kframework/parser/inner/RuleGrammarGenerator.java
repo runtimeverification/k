@@ -333,6 +333,23 @@ public record RuleGrammarGenerator(Definition baseK) {
         partialParseDebug);
   }
 
+  /**
+   * Generate the derived extension, disambiguation and parsing modules from a user module.
+   *
+   * <p>When performing different parts of the compilation pipeline, we need to use derived modules
+   * with different properties to the user-supplied source module. This method adds additional
+   * syntax to the user module to do so.
+   *
+   * <p>TODO: analysis of the properties of these modules: K Issue #1278
+   *
+   * @param mod The user module to transform.
+   * @param isBison If true, modules with the `not-lr1` attribute will be dropped.
+   * @param forGlobalScanner If false, only the public signature of the user module is considered
+   *     (i.e. private imports are dropped).
+   * @param subsortUserLists If true, a subsorting production `Es ::= E` is added to the
+   *     disambiguation module for each user list sort `Es`.
+   * @return A tuple `(extension, disambiguation, parsing)` of derived modules.
+   */
   public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(
       Module mod, boolean isBison, boolean forGlobalScanner, boolean subsortUserLists) {
     Set<Sentence> prods = new HashSet<>();
