@@ -1036,12 +1036,13 @@ endmodule
 
 module LIST-SYMBOLIC [symbolic]
   imports LIST
+  imports INT
 
   rule size(ListItem(_)) => 1 [simplification]
   rule size(L1::List L2::List) => size(L1) +Int size(L2) [simplification]
 
-  rule (ListItem(K) L) [ 0 ] => K [simplification]
-  rule (ListItem(K) L) [ N ] => L [ N -Int 1] requires N >Int 0 [simplification]
+  rule (ListItem(K) _) [ 0 ] => K [simplification]
+  rule (ListItem(_) L) [ N ] => L [ N -Int 1 ] requires N >Int 0 [simplification]
 
 endmodule
 ```
