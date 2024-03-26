@@ -167,7 +167,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     Module extM = extensionModule;
     if (extM == null) {
       Tuple3<Module, Module, Module> mods =
-          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
+          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner, false);
       extM = mods._1();
       disambModule = mods._2();
       parsingModule = mods._3();
@@ -180,7 +180,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     Module parseM = parsingModule;
     if (parseM == null) {
       Tuple3<Module, Module, Module> mods =
-          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
+          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner, false);
       extensionModule = mods._1();
       disambModule = mods._2();
       parseM = mods._3();
@@ -193,7 +193,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     Module disambM = disambModule;
     if (disambM == null) {
       Tuple3<Module, Module, Module> mods =
-          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner);
+          RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison, forGlobalScanner, false);
       extensionModule = mods._1();
       disambM = mods._2();
       parsingModule = mods._3();
