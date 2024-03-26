@@ -95,9 +95,9 @@ BUILTIN_LABELS: Final = {
 
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
-    defn = simplified_definition(definition)
-    assert len(defn.modules) == 1
-    module = defn.modules[0]
+    definition = simplified_definition(definition)
+    assert len(definition.modules) == 1
+    module = definition.modules[0]
 
     name = name_to_kore(module.name)
     attrs = atts_to_kore({key: value for key, value in module.att.items() if key != Atts.DIGEST})  # filter digest
@@ -119,13 +119,13 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += sort_decls
     sentences += symbol_decls
     sentences += _subsort_axioms(module)
-    sentences += _assoc_axioms(defn)
+    sentences += _assoc_axioms(definition)
     sentences += _idem_axioms(module)
     sentences += _unit_axioms(module)
     sentences += _functional_axioms(module)
     sentences += _no_confusion_axioms(module)
-    sentences += _no_junk_axioms(defn)
-    sentences += _overload_axioms(defn)
+    sentences += _no_junk_axioms(definition)
+    sentences += _overload_axioms(definition)
 
     res = Module(name=name, sentences=sentences, attrs=attrs)
     # Filter the overload attribute
