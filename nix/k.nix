@@ -85,7 +85,7 @@ let
               lib.optionalString (current-llvm-kompile-libs != [ ]) ''
                 --set NIX_LLVM_KOMPILE_LIBS "${
                   lib.strings.concatStringsSep " "
-                  (lib.lists.unique current-llvm-kompile-libs)
+                  (lib.lists.sort (a: b: a < b) (lib.lists.unique current-llvm-kompile-libs))
                 }"''
             }
         done
@@ -98,7 +98,7 @@ let
             makeWrapper $prog $out/bin/$(basename $prog) \
               --set NIX_LLVM_KOMPILE_LIBS "${
                 lib.strings.concatStringsSep " "
-                (lib.lists.unique current-llvm-kompile-libs)
+                (lib.lists.sort (a: b: a < b) (lib.lists.unique current-llvm-kompile-libs))
               }"
           done''}
       '';
