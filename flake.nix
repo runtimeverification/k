@@ -134,6 +134,7 @@
             llvm-kompile-libs = with pkgs; {
               procps = [ "-I${procps}/include" "-L${procps}/lib" ];
               openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
+              secp256k1 = [ "-I${secp256k1}/include" "-L${secp256k1}/lib" ];
             };
           };
 
