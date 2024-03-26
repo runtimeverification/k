@@ -86,10 +86,7 @@ jobs:
           script: |
             export PATH="$(nix build github:runtimeverification/kup --no-link --json | jq -r '.[].outputs | to_entries[].value')/bin:$PATH"
             kup publish k-framework-binary .#k --keep-days 180
-            kup publish k-framework-binary .#k.openssl --keep-days 180
-            kup publish k-framework-binary .#k.procps --keep-days 180
-            kup publish k-framework-binary .#k.openssl.procps --keep-days 180
-            kup publish k-framework-binary .#k.procps.openssl --keep-days 180
+            kup publish k-framework-binary .#k.openssl.procps.secp256k1 --keep-days 180
 
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
