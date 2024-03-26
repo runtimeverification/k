@@ -95,9 +95,9 @@ BUILTIN_LABELS: Final = {
 
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
-
-    module = simplified_module(definition)
-    defn = KDefinition(module.name, (module,))  # for getting the sort lattice
+    defn = simplified_definition(definition)
+    assert len(defn.modules) == 1
+    module = defn.modules[0]
 
     name = name_to_kore(module.name)
     attrs = atts_to_kore({key: value for key, value in module.att.items() if key != Atts.DIGEST})  # filter digest
@@ -695,7 +695,7 @@ def _overload_axioms(defn: KDefinition) -> list[Axiom]:
 # ----------------------------------
 
 
-def simplified_module(definition: KDefinition, module_name: str | None = None) -> KFlatModule:
+def simplified_definition(definition: KDefinition, module_name: str | None = None) -> KDefinition:
     """
     In ModuleToKORE.java, there are some implicit KAST-to-KAST kompilation
     steps hidden in the conversion. In particular, the kompiled KAST definition
@@ -756,8 +756,7 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         AddSymbolAtts(Atts.CONSTRUCTOR(None), _is_constructor),
     )
     definition = reduce(lambda defn, step: step.execute(defn), pipeline, definition)
-    module = definition.modules[0]
-    return module
+    return definition
 
 
 class KompilerPass(ABC):
