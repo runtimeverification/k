@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import mlAnd, mlEqualsTrue, mlOr
+from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr
 from ..utils import find_common_items, hash_str
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (
@@ -794,3 +794,40 @@ def build_rule(
     rule = rule.update_atts([Atts.LABEL(rule_id)])
 
     return (rule, Subst(vremap_subst))
+
+
+def replace_rewrites_with_implies(kast: KInner) -> KInner:
+    def _replace_rewrites_with_implies(_kast: KInner) -> KInner:
+        if type(_kast) is KRewrite:
+            return mlImplies(_kast.lhs, _kast.rhs)
+        return _kast
+
+    return bottom_up(_replace_rewrites_with_implies, kast)
+
+
+def no_cell_rewrite_to_dots(term: KInner) -> KInner:
+    """
+    Transforms a given term by replacing the contents of each cell with dots if the LHS and RHS are the same.
+
+    This function recursively traverses the cells in a term. When it finds a cell whose left-hand side (LHS) is identical to its right-hand side (RHS),
+    it replaces the cell's contents with a predefined DOTS.
+
+    Parameters:
+    - term (KInner): The term to be transformed.
+
+    Returns:
+    - KInner: The transformed term, where specific cell contents have been replaced with dots.
+    """
+
+    def _no_cell_rewrite_to_dots(_term: KInner) -> KInner:
+        if type(_term) is KApply and _term.is_cell:
+            lhs = extract_lhs(_term)
+            rhs = extract_rhs(_term)
+            if lhs == rhs:
+                return KApply(_term.label, [DOTS])
+        return _term
+
+    config, _subst = split_config_from(term)
+    subst = Subst({cell_name: _no_cell_rewrite_to_dots(cell_contents) for cell_name, cell_contents in _subst.items()})
+
+    return subst(config)
