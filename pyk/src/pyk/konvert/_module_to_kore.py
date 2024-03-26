@@ -914,13 +914,13 @@ class AddDomainValueAtts(SingleModulePass):
 
     def _transform_module(self, module: KFlatModule) -> KFlatModule:
         token_sorts = self._token_sorts(module)
-        sentences = tuple(
-            self._update(sent) if sent.sort in token_sorts else sent for sent in module if isinstance(sent, KSyntaxSort)
-        )
+        sentences = tuple(self._update(sent, token_sorts) if isinstance(sent, KSyntaxSort) else sent for sent in module)
         return module.let(sentences=sentences)
 
     @staticmethod
-    def _update(syntax_sort: KSyntaxSort) -> KSyntaxSort:
+    def _update(syntax_sort: KSyntaxSort, token_sorts: set[KSort]) -> KSyntaxSort:
+        if syntax_sort.sort not in token_sorts:
+            return syntax_sort
         return syntax_sort.let(att=syntax_sort.att.update([Atts.HAS_DOMAIN_VALUES(None)]))
 
     @staticmethod
