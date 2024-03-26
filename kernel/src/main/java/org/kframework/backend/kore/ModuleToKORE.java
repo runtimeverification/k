@@ -897,13 +897,20 @@ public class ModuleToKORE {
       }
       conn = ",";
     }
-    sb.append("), inj{");
-    convert(lesser.sort(), lesser, sb);
-    sb.append(", ");
-    convert(greater.sort(), greater, sb);
-    sb.append("} (");
+
+    if (greater.sort().equals(lesser.sort())) {
+      sb.append("), ");
+    } else {
+      sb.append("), inj{");
+      convert(lesser.sort(), lesser, sb);
+      sb.append(", ");
+      convert(greater.sort(), greater, sb);
+      sb.append("} (");
+    }
+
     convert(lesser.klabel().get(), lesser, sb);
     sb.append("(");
+
     conn = "";
     for (int i = 0; i < lesser.nonterminals().size(); i++) {
       sb.append(conn);
@@ -911,7 +918,12 @@ public class ModuleToKORE {
       convert(lesser.nonterminal(i).sort(), lesser, sb);
       conn = ",";
     }
-    sb.append("))) ");
+
+    if (greater.sort().equals(lesser.sort())) {
+      sb.append(")) ");
+    } else {
+      sb.append("))) ");
+    }
     final var args = KList(KApply(greater.klabel().get()), KApply(lesser.klabel().get()));
     final var att = Att.empty().add(Att.SYMBOL_OVERLOAD(), KList.class, args);
     convert(new HashMap<>(), att, sb, null, null);
