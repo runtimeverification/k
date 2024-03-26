@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import reduce
 from itertools import product, repeat
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import ClassVar  # noqa: TC003
+from typing import TYPE_CHECKING, NamedTuple, final
 
 from ..kast import EMPTY_ATT, Atts, KInner
 from ..kast.att import Format
@@ -49,10 +52,10 @@ from ._kast_to_kore import _kast_to_kore
 from ._utils import munge
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Container, Iterable, Mapping
+    from collections.abc import Callable, Iterable, Mapping
     from typing import Any, Final
 
-    from ..kast import AttKey, KAtt
+    from ..kast import AttEntry, AttKey, KAtt
     from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
     from ..kore.syntax import Pattern, Sentence, Sort
@@ -692,36 +695,6 @@ def _overload_axioms(defn: KDefinition) -> list[Axiom]:
 # ----------------------------------
 
 
-HOOK_NAMESPACES: Final = {
-    'BOOL',
-    'BUFFER',
-    'BYTES',
-    'FFI',
-    'FLOAT',
-    'INT',
-    'IO',
-    'JSON',
-    'KEQUAL',
-    'KREFLECTION',
-    'LIST',
-    'MAP',
-    'MINT',
-    'RANGEMAP',
-    'SET',
-    'STRING',
-    'SUBSTITUTION',
-    'UNIFICATION',
-}
-
-
-COLLECTION_HOOKS: Final = {
-    'SET.Set',
-    'MAP.Map',
-    'LIST.List',
-    'RANGEMAP.RangeMap',
-}
-
-
 def simplified_module(definition: KDefinition, module_name: str | None = None) -> KFlatModule:
     """
     In ModuleToKORE.java, there are some implicit KAST-to-KAST kompilation
@@ -739,269 +712,314 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
     output. These discrepancies should be analyzed and fixed.
     """
     module_name = module_name or definition.main_module_name
-    module = _flatten_module(definition, module_name)  # TODO KORE supports imports, why is definition.kore flat?
-
-    # sorts
-    module = _add_syntax_sorts(module)
-    module = _add_collection_atts(module)
-    module = _add_domain_value_atts(module)
-
-    # symbols
-    module = _pull_up_rewrites(module)
-    module = _discard_symbol_atts(
-        module,
-        {
-            Atts.CELL,
-            Atts.CELL_FRAGMENT,
-            Atts.CELL_NAME,
-            Atts.CELL_OPT_ABSENT,
-            Atts.GROUP,
-            Atts.IMPURE,
-            Atts.INDEX,
-            Atts.INITIALIZER,
-            Atts.MAINCELL,
-            Atts.PREDICATE,
-            Atts.PREFER,
-            Atts.PRIVATE,
-            Atts.PRODUCTION,
-            Atts.PROJECTION,
-            Atts.SEQSTRICT,
-            Atts.STRICT,
-            Atts.USER_LIST,
-        },
+    pipeline = (
+        FlattenDefinition(module_name),
+        # sorts
+        AddSyntaxSorts(),
+        AddCollectionAtts(),
+        AddDomainValueAtts(),
+        # symbols
+        PullUpRewrites(),
+        DiscardSymbolAtts(
+            [
+                Atts.CELL,
+                Atts.CELL_FRAGMENT,
+                Atts.CELL_NAME,
+                Atts.CELL_OPT_ABSENT,
+                Atts.GROUP,
+                Atts.IMPURE,
+                Atts.INDEX,
+                Atts.INITIALIZER,
+                Atts.MAINCELL,
+                Atts.PREDICATE,
+                Atts.PREFER,
+                Atts.PRIVATE,
+                Atts.PRODUCTION,
+                Atts.PROJECTION,
+                Atts.SEQSTRICT,
+                Atts.STRICT,
+                Atts.USER_LIST,
+            ],
+        ),
+        DiscardHookAtts(),
+        AddAnywhereAtts(),
+        AddSymbolAtts(Atts.MACRO(None), _is_macro),
+        AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
+        AddSymbolAtts(Atts.INJECTIVE(None), _is_injective),
+        AddSymbolAtts(Atts.CONSTRUCTOR(None), _is_constructor),
+        AddDefaultFormatAtts(),
+        DiscardFormatAtts(),
+        InlineFormatTerminals(),
+        AddColorAtts(),
+        DiscardSymbolAtts([Atts.COLOR]),
+        AddTerminalAtts(),
+        AddPrioritiesAtts(),
+        AddAssocAtts(),
     )
-    module = _discard_hook_atts(module)
-    module = _add_anywhere_atts(module)
-    module = _add_symbol_atts(module, Atts.MACRO, _is_macro)
-    module = _add_symbol_atts(module, Atts.FUNCTIONAL, _is_functional)
-    module = _add_symbol_atts(module, Atts.INJECTIVE, _is_injective)
-    module = _add_symbol_atts(module, Atts.CONSTRUCTOR, _is_constructor)
-    module = _add_default_format_atts(module)
-    module = _discard_format_atts(module)
-    module = _inline_terminals_in_format_atts(module)
-    module = _add_colors_atts(module)
-    module = _discard_symbol_atts(module, [Atts.COLOR])
-    module = _add_terminals_atts(module)
-    module = _add_priorities_atts(module)
-    module = _add_assoc_atts(module)
-
+    definition = reduce(lambda defn, step: step.execute(defn), pipeline, definition)
+    module = definition.modules[0]
     return module
 
 
-def _flatten_module(definition: KDefinition, module_name: str) -> KFlatModule:
-    """Return a flat module with all sentences included and without imports"""
-    module = definition.module(module_name)
-    sentences = _imported_sentences(definition, module_name)
-    return module.let(sentences=sentences, imports=())
+class KompilerPass(ABC):
+    @abstractmethod
+    def execute(self, definition: KDefinition) -> KDefinition: ...
 
 
-def _imported_sentences(definition: KDefinition, module_name: str) -> list[KSentence]:
-    """Return all sentences from imported modules, including the module itself."""
+class SingleModulePass(KompilerPass, ABC):
+    @final
+    def execute(self, definition: KDefinition) -> KDefinition:
+        if len(definition.modules) > 1:
+            raise ValueError('Expected a single module')
+        module = definition.modules[0]
+        module = self._transform_module(module)
+        return KDefinition(module.name, (module,))
 
-    pending: list[str] = [module_name]
-    imported: set[str] = set()
-
-    res: list[KSentence] = []
-    while pending:
-        module_name = pending.pop()
-        if module_name in imported:
-            continue
-        module = definition.module(module_name)
-        res += module.sentences
-        pending += (importt.name for importt in module.imports)
-        imported.add(module_name)
-
-    return res
+    @abstractmethod
+    def _transform_module(self, module: KFlatModule) -> KFlatModule: ...
 
 
-def _add_syntax_sorts(module: KFlatModule) -> KFlatModule:
-    """Return a module with explicit syntax declarations: each sort is declared with the union of its attributes."""
-    sentences = [sentence for sentence in module if not isinstance(sentence, KSyntaxSort)]
-    sentences += _syntax_sorts(module)
-    return module.let(sentences=sentences)
+class RulePass(SingleModulePass, ABC):
+    @final
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._transform_rule(sent) if isinstance(sent, KRule) else sent for sent in module.sentences)
+        return module.let(sentences=sentences)
+
+    @abstractmethod
+    def _transform_rule(self, rule: KRule) -> KRule: ...
 
 
-def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
-    """Return a declaration for each sort in the module."""
-    declarations: dict[KSort, KAtt] = {}
+@dataclass
+class FlattenDefinition(KompilerPass):
+    """Return a definition with a single flat module without imports."""
 
-    def is_higher_order(production: KProduction) -> bool:
-        # Example: syntax {Sort} Sort ::= Sort "#as" Sort
-        return production.sort in production.params
+    module_name: str
 
-    # Merge attributes from KSyntaxSort instances
-    for syntax_sort in module.syntax_sorts:
-        sort = syntax_sort.sort
-        if sort not in declarations:
-            declarations[sort] = syntax_sort.att
-        else:
-            assert declarations[sort].keys().isdisjoint(syntax_sort.att)
-            declarations[sort] = declarations[sort].update(syntax_sort.att.entries())
+    def execute(self, definition: KDefinition) -> KDefinition:
+        sentences = self._imported_sentences(definition, self.module_name)
+        module = definition.module(self.module_name)
+        module = module.let(sentences=sentences, imports=())
+        return KDefinition(module.name, (module,))
 
-    # Also consider production sorts
-    for production in module.productions:
-        if is_higher_order(production):
-            continue
+    @staticmethod
+    def _imported_sentences(definition: KDefinition, module_name: str) -> list[KSentence]:
+        """Return all sentences from imported modules, including the module itself."""
+        pending: list[str] = [module_name]
+        imported: set[str] = set()
 
-        sort = production.sort
-        if sort not in declarations:
-            declarations[sort] = EMPTY_ATT
+        res: list[KSentence] = []
+        while pending:
+            module_name = pending.pop()
+            if module_name in imported:
+                continue
+            module = definition.module(module_name)
+            res += module.sentences
+            pending += (importt.name for importt in module.imports)
+            imported.add(module_name)
 
-    return [KSyntaxSort(sort, att=att) for sort, att in declarations.items()]
+        return res
 
 
-def _add_collection_atts(module: KFlatModule) -> KFlatModule:
-    """Return a module where concat, element and unit attributes are added to collection sort declarations."""
+@dataclass
+class AddSyntaxSorts(SingleModulePass):
+    """Return a definition with explicit syntax declarations: each sort is declared with the union of its attributes."""
 
-    # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
-    concat_prods = {prod.sort: prod for prod in module.productions if Atts.ELEMENT in prod.att}
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = [sentence for sentence in module if not isinstance(sentence, KSyntaxSort)]
+        sentences += self._syntax_sorts(module)
+        return module.let(sentences=sentences)
 
-    assert all(
-        Atts.UNIT in prod.att for _, prod in concat_prods.items()
-    )  # TODO Could be saved with a different attribute structure: concat(Element, Unit)
+    @staticmethod
+    def _syntax_sorts(module: KFlatModule) -> list[KSyntaxSort]:
+        """Return a declaration for each sort in the module."""
+        declarations: dict[KSort, KAtt] = {}
 
-    def update_att(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KSyntaxSort):
-            return sentence
+        def is_higher_order(production: KProduction) -> bool:
+            # Example: syntax {Sort} Sort ::= Sort "#as" Sort
+            return production.sort in production.params
 
-        syntax_sort: KSyntaxSort = sentence
+        # Merge attributes from KSyntaxSort instances
+        for syntax_sort in module.syntax_sorts:
+            sort = syntax_sort.sort
+            if sort not in declarations:
+                declarations[sort] = syntax_sort.att
+            else:
+                assert declarations[sort].keys().isdisjoint(syntax_sort.att)
+                declarations[sort] = declarations[sort].update(syntax_sort.att.entries())
 
-        if syntax_sort.att.get(Atts.HOOK) not in COLLECTION_HOOKS:
+        # Also consider production sorts
+        for production in module.productions:
+            if is_higher_order(production):
+                continue
+
+            sort = production.sort
+            if sort not in declarations:
+                declarations[sort] = EMPTY_ATT
+
+        return [KSyntaxSort(sort, att=att) for sort, att in declarations.items()]
+
+
+@dataclass
+class AddCollectionAtts(SingleModulePass):
+    """Return a definition where concat, element and unit attributes are added to collection sort declarations."""
+
+    COLLECTION_HOOKS: ClassVar[frozenset[str]] = frozenset(
+        [
+            'SET.Set',
+            'MAP.Map',
+            'LIST.List',
+            'RANGEMAP.RangeMap',
+        ],
+    )
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        # Example: syntax Map ::= Map Map [..., klabel(_Map_), element(_|->_), unit(.Map), ...]
+        concat_atts = {prod.sort: prod.att for prod in module.productions if Atts.ELEMENT in prod.att}
+
+        assert all(
+            Atts.UNIT in att for _, att in concat_atts.items()
+        )  # TODO Could be saved with a different attribute structure: concat(Element, Unit)
+
+        sentences = tuple(self._update(sent, concat_atts) if isinstance(sent, KSyntaxSort) else sent for sent in module)
+        return module.let(sentences=sentences)
+
+    @staticmethod
+    def _update(syntax_sort: KSyntaxSort, concat_atts: Mapping[KSort, KAtt]) -> KSyntaxSort:
+        if syntax_sort.att.get(Atts.HOOK) not in AddCollectionAtts.COLLECTION_HOOKS:
             return syntax_sort
 
-        prod_att = concat_prods[syntax_sort.sort].att
+        assert syntax_sort.sort in concat_atts
+        concat_att = concat_atts[syntax_sort.sort]
 
         return syntax_sort.let(
             att=syntax_sort.att.update(
                 [
                     # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
-                    Atts.CONCAT(KApply(prod_att[Atts.KLABEL]).to_dict()),
+                    Atts.CONCAT(KApply(concat_att[Atts.KLABEL]).to_dict()),
                     # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
-                    Atts.ELEMENT(prod_att[Atts.ELEMENT]),
-                    Atts.UNIT(prod_att[Atts.UNIT]),
+                    Atts.ELEMENT(concat_att[Atts.ELEMENT]),
+                    Atts.UNIT(concat_att[Atts.UNIT]),
                 ]
             )
         )
 
-    sentences = tuple(update_att(sent) for sent in module)
-    return module.let(sentences=sentences)
 
-
-def _add_domain_value_atts(module: KFlatModule) -> KFlatModule:
-    """Return a module where attribute "hasDomainValues" is added to all sort declarations that apply.
+@dataclass
+class AddDomainValueAtts(SingleModulePass):
+    """Return a definition where attribute "hasDomainValues" is added to all sort declarations that apply.
 
     The requirement on a sort declaration is to either have the "token" attribute directly
     or on a corresponding production.
     """
 
-    token_sorts = _token_sorts(module)
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        token_sorts = self._token_sorts(module)
+        sentences = tuple(
+            self._update(sent) if sent.sort in token_sorts else sent for sent in module if isinstance(sent, KSyntaxSort)
+        )
+        return module.let(sentences=sentences)
 
-    def update_att(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KSyntaxSort):
-            return sentence
-
-        syntax_sort: KSyntaxSort = sentence
-
-        if syntax_sort.sort not in token_sorts:
-            return syntax_sort
-
+    @staticmethod
+    def _update(syntax_sort: KSyntaxSort) -> KSyntaxSort:
         return syntax_sort.let(att=syntax_sort.att.update([Atts.HAS_DOMAIN_VALUES(None)]))
 
-    sentences = tuple(update_att(sent) for sent in module)
-    return module.let(sentences=sentences)
+    @staticmethod
+    def _token_sorts(module: KFlatModule) -> set[KSort]:
+        res: set[KSort] = set()
+
+        # TODO "token" should be an attribute of only productions
+        for syntax_sort in module.syntax_sorts:
+            if Atts.TOKEN in syntax_sort.att:
+                res.add(syntax_sort.sort)
+
+        for production in module.productions:
+            if Atts.TOKEN in production.att:
+                res.add(production.sort)
+
+        return res
 
 
-def _token_sorts(module: KFlatModule) -> set[KSort]:
-    res: set[KSort] = set()
-
-    # TODO "token" should be an attribute of only productions
-    for syntax_sort in module.syntax_sorts:
-        if Atts.TOKEN in syntax_sort.att:
-            res.add(syntax_sort.sort)
-
-    for production in module.productions:
-        if Atts.TOKEN in production.att:
-            res.add(production.sort)
-
-    return res
-
-
-def _pull_up_rewrites(module: KFlatModule) -> KFlatModule:
+@dataclass
+class PullUpRewrites(RulePass):
     """Ensure that each rule is of the form X => Y."""
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KRule):
-            return sentence
-        if isinstance(sentence.body, KRewrite):
-            return sentence
-        rewrite = KRewrite(
-            lhs=extract_lhs(sentence.body),
-            rhs=extract_rhs(sentence.body),
-        )
-        return sentence.let(body=rewrite)
+    def _transform_rule(self, rule: KRule) -> KRule:
+        if isinstance(rule.body, KRewrite):
+            return rule
 
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        rewrite = KRewrite(lhs=extract_lhs(rule.body), rhs=extract_rhs(rule.body))
+        return rule.let(body=rewrite)
 
 
-def _add_anywhere_atts(module: KFlatModule) -> KFlatModule:
+@dataclass
+class AddAnywhereAtts(KompilerPass):
     """Add the anywhere attribute to all symbol productions that are overloads or have a corresponding anywhere rule."""
 
-    rules = _rules_by_klabel(module)
-    defn = KDefinition(module.name, (module,))  # for getting the subsort and overload lattices
+    def execute(self, definition: KDefinition) -> KDefinition:
+        if len(definition.modules) > 1:
+            raise ValueError('Expected a single module')
+        module = definition.modules[0]
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+        rules = self._rules_by_klabel(module)
 
-        if not sentence.klabel:
-            return sentence
+        sentences = tuple(
+            self._update(sent, definition, rules) if isinstance(sent, KProduction) else sent for sent in module
+        )
+        module = module.let(sentences=sentences)
+        return KDefinition(module.name, (module,))
 
-        klabel = sentence.klabel
+    @staticmethod
+    def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
+        """Return a dict that maps a label l to the list of all rules l => X.
+
+        If a label does not have a matching rule, it will be not contained in the dict.
+        The function expects that all rules have a rewrite on top.
+        """
+        res: dict[KLabel, list[KRule]] = {}
+        for rule in module.rules:
+            assert isinstance(rule.body, KRewrite)
+            if not isinstance(rule.body.lhs, KApply):
+                continue
+            label = rule.body.lhs.label
+            res.setdefault(label, []).append(rule)
+        return res
+
+    @staticmethod
+    def _update(production: KProduction, definition: KDefinition, rules: Mapping[KLabel, list[KRule]]) -> KProduction:
+        if not production.klabel:
+            return production
+
+        klabel = production.klabel
+
         if any(Atts.ANYWHERE in rule.att for rule in rules.get(klabel, [])):
-            return sentence.let(att=sentence.att.update([Atts.ANYWHERE(None)]))
+            return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
 
-        if klabel.name in defn.overloads:
-            return sentence.let(att=sentence.att.update([Atts.ANYWHERE(None)]))
+        if klabel.name in definition.overloads:
+            return production.let(att=production.att.update([Atts.ANYWHERE(None)]))
 
-        return sentence
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        return production
 
 
-def _rules_by_klabel(module: KFlatModule) -> dict[KLabel, list[KRule]]:
-    """Return a dict that maps a label l to the list of all rules l => X.
+@dataclass
+class AddSymbolAtts(SingleModulePass):
+    """Add attribute to symbol productions based on a predicate."""
 
-    If a label does not have a matching rule, it will be not contained in the dict.
-    The function expects that all rules have a rewrite on top.
-    """
-    res: dict[KLabel, list[KRule]] = {}
-    for rule in module.rules:
-        assert isinstance(rule.body, KRewrite)
-        if not isinstance(rule.body.lhs, KApply):
-            continue
-        label = rule.body.lhs.label
-        res.setdefault(label, []).append(rule)
-    return res
+    entry: AttEntry
+    pred: Callable[[KAtt], bool]
 
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        return module.let(
+            sentences=tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        )
 
-def _add_symbol_atts(module: KFlatModule, att: AttKey[None], pred: Callable[[KAtt], bool]) -> KFlatModule:
-    """Add attribute to symbol productions based on a predicate predicate."""
+    def _update(self, production: KProduction) -> KProduction:
+        if not production.klabel:  # filter for symbol productions
+            return production
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+        if self.pred(production.att):
+            return production.let(att=production.att.update([self.entry]))
 
-        if not sentence.klabel:  # filter for symbol productions
-            return sentence
-
-        if pred(sentence.att):
-            return sentence.let(att=sentence.att.update([att(None)]))
-
-        return sentence
-
-    return module.let(sentences=tuple(update(sent) for sent in module))
+        return production
 
 
 def _is_macro(att: KAtt) -> bool:
@@ -1040,91 +1058,139 @@ def _is_constructor(att: KAtt) -> bool:
     )
 
 
-def _discard_hook_atts(module: KFlatModule, *, hook_namespaces: Iterable[str] = ()) -> KFlatModule:
+@dataclass
+class DiscardHookAtts(SingleModulePass):
     """Remove hook attributes from symbol productions that are not built-in and not activated."""
 
-    def is_active(hook: str) -> bool:
-        namespaces = (*hook_namespaces, *HOOK_NAMESPACES)
-        return hook.startswith(tuple(f'{namespace}.' for namespace in namespaces))
+    active_prefixes: tuple[str, ...]
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+    HOOK_NAMESPACES: ClassVar[tuple[str, ...]] = (
+        'BOOL',
+        'BUFFER',
+        'BYTES',
+        'FFI',
+        'FLOAT',
+        'INT',
+        'IO',
+        'JSON',
+        'KEQUAL',
+        'KREFLECTION',
+        'LIST',
+        'MAP',
+        'MINT',
+        'RANGEMAP',
+        'SET',
+        'STRING',
+        'SUBSTITUTION',
+        'UNIFICATION',
+    )
 
-        if not sentence.klabel:
-            return sentence
+    def __init__(self, hook_namespaces: Iterable[str] = ()):
+        namespaces = (*hook_namespaces, *self.HOOK_NAMESPACES)
+        self.active_prefixes = tuple(f'{namespace}.' for namespace in namespaces)
 
-        if not Atts.HOOK in sentence.att:
-            return sentence
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
 
-        hook = sentence.att[Atts.HOOK]
-        if not is_active(hook):
-            return sentence.let(att=sentence.att.discard([Atts.HOOK]))
+    def _update(self, production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
 
-        return sentence
+        if not Atts.HOOK in production.att:
+            return production
 
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        hook = production.att[Atts.HOOK]
+        if not self._is_active(hook):
+            return production.let(att=production.att.discard([Atts.HOOK]))
 
+        return production
 
-def _discard_format_atts(module: KFlatModule) -> KFlatModule:
-    """Remove format attributes from symbol productions with items other than terminals and non-terminals."""
-
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
-
-        if not sentence.klabel:
-            return sentence
-
-        if all(isinstance(item, (KTerminal, KNonTerminal)) for item in sentence.items):
-            return sentence
-
-        return sentence.let(att=sentence.att.discard([Atts.FORMAT]))
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+    def _is_active(self, hook: str) -> bool:
+        return hook.startswith(self.active_prefixes)
 
 
-def _discard_symbol_atts(module: KFlatModule, atts: Container[AttKey]) -> KFlatModule:
+@dataclass
+class DiscardSymbolAtts(SingleModulePass):
     """Remove certain attributes from symbol productions."""
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+    keys: frozenset[AttKey]
 
-        if not sentence.klabel:
-            return sentence
+    def __init__(self, keys: Iterable[AttKey]):
+        self.keys = frozenset(keys)
 
-        return sentence.let(att=sentence.att.discard(atts))
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
 
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+    def _update(self, production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
+
+        return production.let(att=production.att.discard(self.keys))
 
 
-def _add_default_format_atts(module: KFlatModule) -> KFlatModule:
+@dataclass
+class AddDefaultFormatAtts(SingleModulePass):
     """Add a default format attribute value to each symbol profuction missing one."""
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
 
-        if not sentence.klabel:
-            return sentence
+    @staticmethod
+    def _update(production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
 
-        if Atts.FORMAT in sentence.att:
-            return sentence
+        if Atts.FORMAT in production.att:
+            return production
 
-        return sentence.let(att=sentence.att.update([Atts.FORMAT(sentence.default_format)]))
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        return production.let(att=production.att.update([Atts.FORMAT(production.default_format)]))
 
 
-def _inline_terminals_in_format_atts(module: KFlatModule) -> KFlatModule:
+@dataclass
+class DiscardFormatAtts(SingleModulePass):
+    """Remove format attributes from symbol productions with items other than terminals and non-terminals."""
+
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
+
+    @staticmethod
+    def _update(production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
+
+        if all(isinstance(item, (KTerminal, KNonTerminal)) for item in production.items):
+            return production
+
+        return production.let(att=production.att.discard([Atts.FORMAT]))
+
+
+@dataclass
+class InlineFormatTerminals(SingleModulePass):
     """For a terminal `"foo"` change `%i` to `%cfoo%r`. For a non-terminal, decrease the index."""
 
-    def inline_terminals(formatt: Format, production: KProduction) -> Format:
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
+
+    @staticmethod
+    def _update(production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
+
+        if Atts.FORMAT not in production.att:
+            return production
+
+        formatt = production.att[Atts.FORMAT]
+        formatt = InlineFormatTerminals._inline_terminals(formatt, production)
+
+        return production.let(att=production.att.update([Atts.FORMAT(formatt)]))
+
+    @staticmethod
+    def _inline_terminals(formatt: Format, production: KProduction) -> Format:
         nt_indexes: dict[int, int] = {}
         nt_index = 1
         for i, item in enumerate(production.items):
@@ -1159,93 +1225,88 @@ def _inline_terminals_in_format_atts(module: KFlatModule) -> KFlatModule:
                 tokens.append(token)
         return Format(tokens)
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
 
-        if not sentence.klabel:
-            return sentence
+@dataclass
+class AddColorAtts(SingleModulePass):
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
 
-        if Atts.FORMAT not in sentence.att:
-            return sentence
+    @staticmethod
+    def _update(production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
 
-        formatt = sentence.att[Atts.FORMAT]
-        formatt = inline_terminals(formatt, sentence)
+        if Atts.FORMAT not in production.att:
+            return production
 
-        return sentence.let(att=sentence.att.update([Atts.FORMAT(formatt)]))
+        if Atts.COLOR not in production.att:
+            return production
 
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
-
-
-def _add_colors_atts(module: KFlatModule) -> KFlatModule:
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
-
-        if not sentence.klabel:
-            return sentence
-
-        if Atts.FORMAT not in sentence.att:
-            return sentence
-
-        if Atts.COLOR not in sentence.att:
-            return sentence
-
-        formatt = sentence.att[Atts.FORMAT]
+        formatt = production.att[Atts.FORMAT]
         ncolors = sum(1 for token in formatt.tokens if token == '%c')
-        color = sentence.att[Atts.COLOR]
+        color = production.att[Atts.COLOR]
         colors = ','.join(repeat(color, ncolors))
 
-        return sentence.let(att=sentence.att.update([Atts.COLORS(colors)]))
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        return production.let(att=production.att.update([Atts.COLORS(colors)]))
 
 
-def _add_terminals_atts(module: KFlatModule) -> KFlatModule:
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+@dataclass
+class AddTerminalAtts(SingleModulePass):
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        sentences = tuple(self._update(sent) if isinstance(sent, KProduction) else sent for sent in module)
+        return module.let(sentences=sentences)
 
-        if not sentence.klabel:
-            return sentence
+    @staticmethod
+    def _update(production: KProduction) -> KProduction:
+        if not production.klabel:
+            return production
 
-        if Atts.FORMAT not in sentence.att:
-            return sentence
+        if Atts.FORMAT not in production.att:
+            return production
 
-        terminals = ''.join('0' if isinstance(item, KNonTerminal) else '1' for item in sentence.items)
-        return sentence.let(att=sentence.att.update([Atts.TERMINALS(terminals)]))
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        terminals = ''.join('0' if isinstance(item, KNonTerminal) else '1' for item in production.items)
+        return production.let(att=production.att.update([Atts.TERMINALS(terminals)]))
 
 
-def _add_priorities_atts(module: KFlatModule) -> KFlatModule:
-    defn = KDefinition(module.name, (module,))
+@dataclass
+class AddPrioritiesAtts(KompilerPass):
+    def execute(self, definition: KDefinition) -> KDefinition:
+        if len(definition.modules) > 1:
+            raise ValueError('Expected a single module')
+        module = definition.modules[0]
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+        sentences = tuple(self._update(sent, definition) if isinstance(sent, KProduction) else sent for sent in module)
+        module = module.let(sentences=sentences)
+        return KDefinition(module.name, (module,))
 
-        if not sentence.klabel:
-            return sentence
+    @staticmethod
+    def _update(production: KProduction, definition: KDefinition) -> KSentence:
+        if not production.klabel:
+            return production
 
-        if Atts.FORMAT not in sentence.att:
-            return sentence
+        if Atts.FORMAT not in production.att:
+            return production
 
-        tags = sorted(defn.priorities.get(sentence.klabel.name, []))
+        tags = sorted(definition.priorities.get(production.klabel.name, []))
         priorities = tuple(
             KApply(tag).to_dict() for tag in tags if tag not in BUILTIN_LABELS
         )  # TODO Add KType to pyk.kast.att
-        return sentence.let(att=sentence.att.update([Atts.PRIORITIES(priorities)]))
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        return production.let(att=production.att.update([Atts.PRIORITIES(priorities)]))
 
 
-def _add_assoc_atts(module: KFlatModule) -> KFlatModule:
-    def assocs(assoc: KAssoc) -> dict[str, set[str]]:
+@dataclass
+class AddAssocAtts(SingleModulePass):
+    def _transform_module(self, module: KFlatModule) -> KFlatModule:
+        left_assocs = self._assocs(module, KAssoc.LEFT)
+        right_assocs = self._assocs(module, KAssoc.RIGHT)
+        sentences = tuple(
+            self._update(sent, left_assocs, right_assocs) if isinstance(sent, KProduction) else sent for sent in module
+        )
+        return module.let(sentences=sentences)
+
+    @staticmethod
+    def _assocs(module: KFlatModule, assoc: KAssoc) -> dict[str, set[str]]:
         sents = (
             sent
             for sent in module.sentences
@@ -1259,22 +1320,18 @@ def _add_assoc_atts(module: KFlatModule) -> KFlatModule:
 
         return reduce(lambda res, pair: insert(res, key=pair[0], value=pair[1]), pairs, {})
 
-    left_assocs = assocs(KAssoc.LEFT)
-    right_assocs = assocs(KAssoc.RIGHT)
+    @staticmethod
+    def _update(
+        production: KProduction,
+        left_assocs: Mapping[str, set[str]],
+        right_assocs: Mapping[str, set[str]],
+    ) -> KProduction:
+        if not production.klabel:
+            return production
 
-    def update(sentence: KSentence) -> KSentence:
-        if not isinstance(sentence, KProduction):
-            return sentence
+        if Atts.FORMAT not in production.att:
+            return production
 
-        if not sentence.klabel:
-            return sentence
-
-        if Atts.FORMAT not in sentence.att:
-            return sentence
-
-        left = tuple(KApply(tag).to_dict() for tag in sorted(left_assocs.get(sentence.klabel.name, [])))
-        right = tuple(KApply(tag).to_dict() for tag in sorted(right_assocs.get(sentence.klabel.name, [])))
-        return sentence.let(att=sentence.att.update([Atts.LEFT(left), Atts.RIGHT(right)]))
-
-    sentences = tuple(update(sent) for sent in module)
-    return module.let(sentences=sentences)
+        left = tuple(KApply(tag).to_dict() for tag in sorted(left_assocs.get(production.klabel.name, [])))
+        right = tuple(KApply(tag).to_dict() for tag in sorted(right_assocs.get(production.klabel.name, [])))
+        return production.let(att=production.att.update([Atts.LEFT(left), Atts.RIGHT(right)]))
