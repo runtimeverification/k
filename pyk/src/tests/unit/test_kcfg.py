@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CSubst, CTerm
-from pyk.kast.inner import KApply, KVariable, Subst
+from pyk.kast.inner import KApply, KRewrite, KToken, KVariable, Subst
+from pyk.kast.manip import no_cell_rewrite_to_dots
 from pyk.kcfg import KCFG, KCFGShow
 from pyk.kcfg.show import NodePrinter
 from pyk.prelude.kint import geInt, intToken, ltInt
@@ -932,3 +933,40 @@ def test_pretty_print() -> None:
     # Then
     assert actual == expected
     assert actual_full_printer == expected_full_printer
+
+
+def test_no_cell_rewrite_to_dots() -> None:
+    term = KApply(
+        '<accounts>',
+        [
+            KRewrite(
+                lhs=KApply(
+                    '_AccountCellMap_',
+                    [
+                        KApply(
+                            '<account>',
+                            [
+                                KApply(
+                                    '<acctID>',
+                                    [KToken('645326474426547203313410069153905908525362434349', 'Int')],
+                                ),
+                            ],
+                        ),
+                        KApply(
+                            '<account>',
+                            [
+                                KApply(
+                                    '<acctID>',
+                                    [KToken('728815563385977040452943777879061427756277306518', 'Int')],
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                rhs=KVariable('ACCOUNTS_FINAL', 'AccountCellMap'),
+            )
+        ],
+    )
+
+    result = no_cell_rewrite_to_dots(term)
+    assert result == term

@@ -5,22 +5,20 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from ..cterm import CTerm
-from ..kast.inner import KApply, KRewrite, KVariable
+from ..kast.inner import KApply, KVariable
 from ..kast.manip import (
-    abstract_term_safely,
-    bottom_up,
-    extract_lhs,
-    extract_rhs,
     flatten_label,
     minimize_term,
     ml_pred_to_bool,
+    no_cell_rewrite_to_dots,
     push_down_rewrites,
+    replace_rewrites_with_implies,
 )
 from ..kast.pretty import PrettyPrinter
 from ..kore.rpc import RewriteSuccess
 from ..prelude.kbool import notBool
 from ..prelude.kint import leInt, ltInt
-from ..prelude.ml import is_top, mlAnd, mlEqualsFalse, mlEqualsTrue, mlImplies, mlNot
+from ..prelude.ml import is_top, mlAnd, mlEqualsFalse, mlEqualsTrue, mlNot
 from ..utils import shorten_hashes, single
 from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
 from .semantics import DefaultSemantics
@@ -65,25 +63,6 @@ class KCFGExplore:
         return self._pretty_printer.print(kinner)
 
     def implication_failure_reason(self, antecedent: CTerm, consequent: CTerm) -> tuple[bool, str]:
-        def no_cell_rewrite_to_dots(term: KInner) -> KInner:
-            def _no_cell_rewrite_to_dots(_term: KInner) -> KInner:
-                if type(_term) is KApply and _term.is_cell:
-                    lhs = extract_lhs(_term)
-                    rhs = extract_rhs(_term)
-                    if lhs == rhs:
-                        return KApply(_term.label, [abstract_term_safely(lhs, base_name=_term.label.name)])
-                return _term
-
-            return bottom_up(_no_cell_rewrite_to_dots, term)
-
-        def replace_rewrites_with_implies(kast: KInner) -> KInner:
-            def _replace_rewrites_with_implies(_kast: KInner) -> KInner:
-                if type(_kast) is KRewrite:
-                    return mlImplies(_kast.lhs, _kast.rhs)
-                return _kast
-
-            return bottom_up(_replace_rewrites_with_implies, kast)
-
         def _is_cell_subst(csubst: KInner) -> bool:
             if type(csubst) is KApply and csubst.label.name == '_==K_':
                 csubst_arg = csubst.args[0]
