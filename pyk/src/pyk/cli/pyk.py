@@ -127,6 +127,7 @@ class ProveOptions(LoggingOptions):
     spec_module: str | None
     type_inference_mode: TypeInferenceMode | None
     failure_info: bool
+    max_depth: int | None
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -135,6 +136,7 @@ class ProveOptions(LoggingOptions):
             'spec_module': None,
             'type_inference_mode': None,
             'failure_info': False,
+            'max_depth': None,
         }
 
 

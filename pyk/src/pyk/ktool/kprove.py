@@ -285,6 +285,7 @@ class KProve(KPrint):
         fallback_on: Iterable[FallbackReason] | None = None,
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
+        max_depth: int | None = None,
     ) -> Proof:
         with cterm_symbolic(
             self.definition,
@@ -317,7 +318,7 @@ class KProve(KPrint):
                 prover = ImpliesProver(proof, kcfg_explore)
             else:
                 proof = APRProof.from_claim(self.definition, claim, {})
-                prover = APRProver(proof, kcfg_explore)
+                prover = APRProver(proof, kcfg_explore, execute_depth=max_depth)
             prover.advance_proof()
             if proof.passed:
                 _LOGGER.info(f'Proof passed: {proof.id}')
@@ -350,6 +351,7 @@ class KProve(KPrint):
         fallback_on: Iterable[FallbackReason] | None = None,
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
+        max_depth: int | None = None,
     ) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
             return self.prove_claim_rpc(
@@ -372,6 +374,7 @@ class KProve(KPrint):
                 fallback_on=fallback_on,
                 interim_simplification=interim_simplification,
                 no_post_exec_simplify=no_post_exec_simplify,
+                max_depth=max_depth,
             )
 
         all_claims = self.get_claims(

@@ -467,6 +467,12 @@ def create_argument_parser() -> ArgumentParser:
         action='store_true',
         help='Print out more information about proof failures.',
     )
+    prove_args.add_argument(
+        '--max-depth',
+        default=None,
+        type=int,
+        help='Maximum number of steps to take in symbolic execution per basic block.',
+    )
 
     graph_imports_args = pyk_args_command.add_parser(
         'graph-imports',
