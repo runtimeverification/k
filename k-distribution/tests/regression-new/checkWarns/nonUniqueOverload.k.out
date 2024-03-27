@@ -8,4 +8,4 @@
 	Location(11,19,11,58)
 	11 |	  syntax Foo2 ::= "foo" Foo2 Foo2 [overload(foo), unused]
 	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 2 structural errors.
+[Error] Compiler: Had 2 errors after compilation.

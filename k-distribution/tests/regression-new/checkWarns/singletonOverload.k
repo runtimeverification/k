@@ -11,7 +11,7 @@ module WARNS
 endmodule
 
 module NOWARNS
-  imports BOOL
+  imports DOMAINS
 
   syntax Foo  ::= "foo" | "bar"
   syntax Foos ::= List{Foo, ","}
@@ -24,6 +24,9 @@ module NOWARNS
 
   rule test(F, Rest) => test(F) andBool test(Rest)
   rule test(.Foos) => true
+
+  syntax KItem ::= disambiguate(KItem, KItem) [overload(disambiguate), unused]
+                 | disambiguate(List, Set)    [overload(disambiguate), unused]
 endmodule
 
 module SINGLETONOVERLOAD

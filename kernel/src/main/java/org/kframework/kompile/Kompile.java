@@ -212,15 +212,15 @@ public class Kompile {
         parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
 
     files.saveToKompiled("parsed.txt", parsedDef.toString());
-    checkDefinition(parsedDef, excludedModuleTags);
-    sw.printIntermediate("Validate definition");
+    preCompilationChecks(parsedDef, excludedModuleTags);
+    sw.printIntermediate("Validate parsed definition");
 
     Definition kompiledDefinition = pipeline.apply(parsedDef);
-    files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
-    sw.printIntermediate("Apply compile pipeline");
 
-    // final check for sort correctness
-    for (Module m : mutable(kompiledDefinition.modules())) m.checkSorts();
+    files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
+    postCompilationChecks(kompiledDefinition);
+    sw.printIntermediate("Apply compile pipeline and validate definition");
+
     if (kompileOptions.postProcess != null) {
       kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
       files.saveToKompiled("post-processed.txt", kompiledDefinition.toString());
@@ -484,12 +484,42 @@ public class Kompile {
     return definitionParsing.parseRule(compiledDef, contents, source);
   }
 
-  private void checkDefinition(Definition parsedDef, Set<Att.Key> excludedModuleTags) {
+  private void preCompilationChecks(Definition parsedDef, Set<Att.Key> excludedModuleTags) {
     scala.collection.Set<Module> modules = parsedDef.modules();
     Module mainModule = parsedDef.mainModule();
     Option<Module> kModule = parsedDef.getModule("K");
     definitionChecks(stream(modules).collect(Collectors.toSet()));
     structuralChecks(modules, mainModule, kModule, excludedModuleTags);
+  }
+
+  /**
+   * Run structural checks that rely on the compilation pipeline having already been run.
+   *
+   * <p>The checks run at this stage are:
+   *
+   * <ul>
+   *   <li>Correctness of sorts: that there are no user-supplied parametric sorts remaining, and
+   *       that all non-terminals have a valid sort assigned.
+   *   <li>Validity of the overload lattice; running these checks requires that all
+   *       compiler-generated subsort productions have been created.
+   * </ul>
+   *
+   * @param def The definition to apply checks to.
+   */
+  private void postCompilationChecks(Definition def) {
+    var modules = def.modules();
+    var mainModule = def.mainModule();
+
+    for (Module m : mutable(modules)) {
+      m.checkSorts();
+    }
+
+    checkOverloads(mainModule);
+
+    if (!errors.isEmpty()) {
+      kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+      throw KEMException.compilerError("Had " + errors.size() + " errors after compilation.");
+    }
   }
 
   // checks that are not verified in the prover
@@ -544,7 +574,6 @@ public class Kompile {
       Option<Module> kModule,
       Set<Att.Key> excludedModuleTags) {
     checkAnywhereRules(modules);
-    checkOverloads(mainModule);
 
     boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
     CheckRHSVariables checkRHSVariables =
