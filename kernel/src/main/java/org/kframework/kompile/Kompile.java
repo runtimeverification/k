@@ -3,7 +3,6 @@ package org.kframework.kompile;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.kore.KORE.*;
 
 import com.google.inject.Inject;
 import java.io.File;
@@ -634,12 +633,23 @@ public class Kompile {
   }
 
   private void checkSingletonOverload(Module module) {
-    var withOverload = module.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
+    // When disambiguating, an extra production `Es ::= E` is added for every user list
+    // sort `Es`.
+    //
+    // This means that productions that reference a user list sort (or the child sort of
+    // one) can behave as overloads at disambiguation, even if they look like singletons
+    // from the perspective. We therefore need to use the disambiguation module to implement this
+    // check.
+    //
+    // See `RuleGrammarGenerator::getCombinedGrammarImpl`.
+    var disambMod = RuleGrammarGenerator.getCombinedGrammarImpl(module, false, false, true)._2();
+    var withOverload =
+        disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
 
     stream(withOverload)
         .forEach(
             p -> {
-              if (!module.overloads().elements().contains(p)) {
+              if (!disambMod.overloads().elements().contains(p)) {
                 kem.registerCompilerWarning(
                     KException.ExceptionType.SINGLETON_OVERLOAD,
                     errors,
