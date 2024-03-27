@@ -8,4 +8,4 @@
 	Location(10,19,10,54)
 	10 |	                | Exp  "." Id [unused, overload(_._)]
 	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 2 structural errors.
+[Error] Compiler: Had 2 errors after compilation.
