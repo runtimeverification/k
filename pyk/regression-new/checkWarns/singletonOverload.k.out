@@ -8,6 +8,6 @@
 	Location(10,19,10,54)
 	10 |	                | Exp  "." Id [unused, overload(_._)]
 	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 2 structural errors.
+[Error] Compiler: Had 2 errors after compilation.
 [ERROR] Running process failed with returncode 113:
     kompile singletonOverload.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition singletonOverload-kompiled --type-inference-mode checked
