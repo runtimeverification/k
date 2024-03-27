@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
 from itertools import pairwise, product
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING, final, overload
 
 from ..prelude.kbool import TRUE
 from ..prelude.ml import ML_QUANTIFIERS
@@ -34,10 +34,11 @@ from .inner import (
 from .kast import kast_term
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping
+    from collections.abc import Callable, Iterator, Mapping
     from os import PathLike
     from typing import Any, Final, TypeVar
 
+    S = TypeVar('S', bound='KSentence')
     RL = TypeVar('RL', bound='KRuleLike')
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -899,6 +900,18 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
     @cached_property
     def sentence_by_unique_id(self) -> dict[str, KSentence]:
         return {sent.unique_id: sent for sent in self.sentences if sent.unique_id is not None}
+
+    @overload
+    def map_sentences(self, f: Callable[[S], S], *, of_type: type[S]) -> KFlatModule: ...
+
+    @overload
+    def map_sentences(self, f: Callable[[KSentence], KSentence], *, of_type: None = None) -> KFlatModule: ...
+
+    # Uses overload instead of default argument as a workaround: https://github.com/python/mypy/issues/3737
+    def map_sentences(self, f: Callable, *, of_type: Any = None) -> KFlatModule:
+        if of_type is None:
+            of_type = KSentence
+        return self.let(sentences=tuple(f(sent) if isinstance(sent, of_type) else sent for sent in self.sentences))
 
     @staticmethod
     def from_dict(d: Mapping[str, Any]) -> KFlatModule:
