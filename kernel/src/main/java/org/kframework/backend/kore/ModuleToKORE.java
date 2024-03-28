@@ -298,7 +298,7 @@ public class ModuleToKORE {
       if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
         genUnitAxiom(prod, semantics);
       }
-      if (isFunctional(prod, functionRules)) {
+      if (isFunctional(prod)) {
         genFunctionalAxiom(prod, semantics);
       }
       if (isConstructor(prod, functionRules)) {
@@ -458,7 +458,7 @@ public class ModuleToKORE {
       Production prod,
       StringBuilder sb) {
     sb.append("  ");
-    if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+    if (isFunction(prod) && isHook(prod)) {
       sb.append("hooked-");
     }
     sb.append("symbol ");
@@ -475,7 +475,7 @@ public class ModuleToKORE {
     sb.append(") : ");
     convert(prod.sort(), prod, sb);
     sb.append(" ");
-    Att koreAtt = addKoreAttributes(prod, functionRules, overloads);
+    Att koreAtt = koreAttributes(prod, functionRules, overloads);
     convert(attributes, koreAtt, sb, null, null);
     sb.append("\n");
   }
@@ -928,16 +928,6 @@ public class ModuleToKORE {
     final var att = Att.empty().add(Att.SYMBOL_OVERLOAD(), KList.class, args);
     convert(new HashMap<>(), att, sb, null, null);
     sb.append(" // overloaded production\n");
-  }
-
-  private boolean isRealHook(Att att) {
-    String hook = att.get(Att.HOOK());
-    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
-        .anyMatch(ns -> hook.startsWith(ns + "."));
-  }
-
-  private static boolean isBuiltinProduction(Production prod) {
-    return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
   }
 
   public String convertSpecificationModule(
@@ -1625,13 +1615,30 @@ public class ModuleToKORE {
   }
 
   private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-    Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
+    Att att = semanticAttributes(prod, functionRules, java.util.Collections.emptySet());
     return att.contains(Att.CONSTRUCTOR());
   }
 
-  private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-    Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
-    return att.contains(Att.FUNCTIONAL());
+  private static boolean isFunctional(Production prod) {
+    return !isFunction(prod) || prod.att().contains(Att.TOTAL());
+  }
+
+  private static boolean isFunction(Production prod) {
+    return prod.att().contains(Att.FUNCTION());
+  }
+
+  private boolean isHook(Production prod) {
+    return prod.att().contains(Att.HOOK()) && isRealHook(prod.att());
+  }
+
+  private boolean isRealHook(Att att) {
+    String hook = att.get(Att.HOOK());
+    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
+        .anyMatch(ns -> hook.startsWith(ns + "."));
+  }
+
+  private static boolean isBuiltinProduction(Production prod) {
+    return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
   }
 
   private boolean isGeneratedInKeysOp(Production prod) {
@@ -1641,9 +1648,16 @@ public class ModuleToKORE {
     return (!prod.klabel().isEmpty());
   }
 
-  private Att addKoreAttributes(
+  private Att koreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
-    boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
+    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
+    att = att.addAll(semanticAttributes(prod, functionRules, overloads));
+    att = att.addAll(syntaxAttributes(prod));
+    return att;
+  }
+
+  private Att semanticAttributes(
+      Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
     boolean isConstructor = !isFunction(prod);
     isConstructor &= !prod.att().contains(Att.ASSOC());
     isConstructor &= !prod.att().contains(Att.COMM());
@@ -1667,14 +1681,14 @@ public class ModuleToKORE {
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
-    Att att = prod.att().remove(Att.CONSTRUCTOR());
-    if (att.contains(Att.HOOK()) && !isRealHook(att)) {
-      att = att.remove(Att.HOOK());
+    Att att = Att.empty();
+    if (isHook(prod)) {
+      att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
     }
     if (isConstructor) {
       att = att.add(Att.CONSTRUCTOR());
     }
-    if (isFunctional) {
+    if (isFunctional(prod)) {
       att = att.add(Att.FUNCTIONAL());
     }
     if (isAnywhere) {
@@ -1686,10 +1700,13 @@ public class ModuleToKORE {
     if (isMacro) {
       att = att.add(Att.MACRO());
     }
+    return att;
+  }
+
+  private Att syntaxAttributes(Production prod) {
     // update format attribute with structure expected by backend
-    String format = att.getOptional(Att.FORMAT()).orElse(prod.defaultFormat());
+    String format = prod.att().getOptional(Att.FORMAT()).orElse(prod.defaultFormat());
     int nt = 1;
-    boolean hasFormat = true;
 
     for (int i = 0; i < prod.items().size(); i++) {
       if (prod.items().apply(i) instanceof NonTerminal) {
@@ -1707,48 +1724,45 @@ public class ModuleToKORE {
                         .replace("%", "%%")
                     + "%r");
       } else {
-        hasFormat = false;
+        return Att.empty();
       }
     }
-    if (hasFormat) {
-      att = att.add(Att.FORMAT(), format);
-      if (att.contains(Att.COLOR())) {
-        boolean escape = false;
-        StringBuilder colors = new StringBuilder();
-        String conn = "";
-        for (int i = 0; i < format.length(); i++) {
-          if (escape && format.charAt(i) == 'c') {
-            colors.append(conn).append(att.get(Att.COLOR()));
-            conn = ",";
-          }
-          escape = format.charAt(i) == '%';
+
+    Att att = Att.empty();
+    att = att.add(Att.FORMAT(), format);
+    if (prod.att().contains(Att.COLOR())) {
+      String color = prod.att().get(Att.COLOR());
+      boolean escape = false;
+      StringBuilder colors = new StringBuilder();
+      String conn = "";
+      for (int i = 0; i < format.length(); i++) {
+        if (escape && format.charAt(i) == 'c') {
+          colors.append(conn).append(color);
+          conn = ",";
         }
-        att = att.add(Att.COLORS(), colors.toString());
+        escape = format.charAt(i) == '%';
       }
-      StringBuilder sb = new StringBuilder();
-      for (ProductionItem pi : iterable(prod.items())) {
-        if (pi instanceof NonTerminal) {
-          sb.append('0');
-        } else {
-          sb.append('1');
-        }
+      att = att.add(Att.COLORS(), colors.toString());
+    }
+    StringBuilder sb = new StringBuilder();
+    for (ProductionItem pi : iterable(prod.items())) {
+      if (pi instanceof NonTerminal) {
+        sb.append('0');
+      } else {
+        sb.append('1');
       }
-      att = att.add(Att.TERMINALS(), sb.toString());
-      if (prod.klabel().isDefined()) {
-        att = att.add(Att.PRIORITIES(), KList.class, getPriorities(prod.klabel().get()));
-        att =
-            att.add(
-                Att.LEFT_INTERNAL(),
-                KList.class,
-                getAssoc(module.leftAssoc(), prod.klabel().get()));
-        att =
-            att.add(
-                Att.RIGHT_INTERNAL(),
-                KList.class,
-                getAssoc(module.rightAssoc(), prod.klabel().get()));
-      }
-    } else {
-      att = att.remove(Att.FORMAT());
+    }
+    att = att.add(Att.TERMINALS(), sb.toString());
+    if (prod.klabel().isDefined()) {
+      att = att.add(Att.PRIORITIES(), KList.class, getPriorities(prod.klabel().get()));
+      att =
+          att.add(
+              Att.LEFT_INTERNAL(), KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
+      att =
+          att.add(
+              Att.RIGHT_INTERNAL(),
+              KList.class,
+              getAssoc(module.rightAssoc(), prod.klabel().get()));
     }
     return att;
   }
@@ -1779,10 +1793,6 @@ public class ModuleToKORE {
             .sorted(Comparator.comparing(t -> t._2().name()))
             .map(t -> KApply(KLabel(t._2().name())))
             .collect(Collectors.toList()));
-  }
-
-  private boolean isFunction(Production prod) {
-    return prod.att().contains(Att.FUNCTION());
   }
 
   // Assume that there is no quantifiers
