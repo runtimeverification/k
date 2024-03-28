@@ -475,7 +475,7 @@ public class ModuleToKORE {
     sb.append(") : ");
     convert(prod.sort(), prod, sb);
     sb.append(" ");
-    Att koreAtt = addKoreAttributes(prod, functionRules, overloads);
+    Att koreAtt = koreAttributes(prod, functionRules, overloads);
     convert(attributes, koreAtt, sb, null, null);
     sb.append("\n");
   }
@@ -1648,7 +1648,7 @@ public class ModuleToKORE {
     return (!prod.klabel().isEmpty());
   }
 
-  private Att addKoreAttributes(
+  private Att koreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
     Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
     att = att.addAll(semanticAttributes(prod, functionRules, overloads));
