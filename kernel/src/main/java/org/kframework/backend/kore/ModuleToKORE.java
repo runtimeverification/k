@@ -1651,7 +1651,17 @@ public class ModuleToKORE {
   private Att koreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
     Att att = prod.att();
-    List<Att.Key> attsToRemove = List.of(Att.CONSTRUCTOR(), Att.HOOK(), Att.FORMAT());
+    List<Att.Key> attsToRemove =
+        List.of(
+            // semantics
+            Att.CONSTRUCTOR(),
+            Att.HOOK(),
+            // syntax
+            Att.ASSOC(),
+            Att.BRACKET(),
+            Att.COLORS(),
+            Att.COMM(),
+            Att.FORMAT());
     for (Att.Key key : attsToRemove) {
       att = att.remove(key);
     }
@@ -1734,6 +1744,14 @@ public class ModuleToKORE {
 
     Att att = Att.empty();
     att = att.add(Att.FORMAT(), format);
+
+    List<Att.Key> attsToCopy = List.of(Att.ASSOC(), Att.BRACKET(), Att.COLORS(), Att.COMM());
+    for (Att.Key key : attsToCopy) {
+      if (prod.att().contains(key)) {
+        att = att.add(key, prod.att().get(key));
+      }
+    }
+
     if (prod.att().contains(Att.COLOR())) {
       String color = prod.att().get(Att.COLOR());
       boolean escape = false;
