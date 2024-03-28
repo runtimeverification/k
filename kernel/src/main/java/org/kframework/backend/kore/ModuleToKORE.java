@@ -1673,7 +1673,8 @@ public class ModuleToKORE {
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
-    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK());
+    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
+
     if (isHook(prod)) {
       att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
     }
@@ -1693,7 +1694,6 @@ public class ModuleToKORE {
       att = att.add(Att.MACRO());
     }
 
-    att = att.remove(Att.FORMAT());
     att = att.addAll(syntaxAttributes(prod));
 
     return att;
