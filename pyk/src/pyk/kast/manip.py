@@ -565,12 +565,6 @@ def is_anon_var(kast: KInner) -> bool:
     return type(kast) is KVariable and kast.name.startswith('_')
 
 
-def get_cell(constrained_term: KInner, cell_variable: str) -> KInner:
-    state, _ = split_config_and_constraints(constrained_term)
-    _, subst = split_config_from(state)
-    return subst[cell_variable]
-
-
 def set_cell(constrained_term: KInner, cell_variable: str, cell_value: KInner) -> KInner:
     state, constraint = split_config_and_constraints(constrained_term)
     config, subst = split_config_from(state)

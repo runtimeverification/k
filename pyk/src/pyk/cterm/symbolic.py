@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
-from ..kast.manip import flatten_label, free_vars, sort_ac_collections
+from ..kast.manip import flatten_label, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.rpc import (
@@ -186,8 +186,7 @@ class CTermSymbolic:
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
-        fv_antecedent = free_vars(antecedent.kast)
-        unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
+        unbound_consequent = [v for v in consequent.free_vars if v not in antecedent.free_vars]
         if len(unbound_consequent) > 0:
             bind_text, bind_label = ('existentially', '#Exists')
             if bind_universally:

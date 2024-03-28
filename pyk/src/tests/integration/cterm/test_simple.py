@@ -6,7 +6,6 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
-from pyk.kast.manip import get_cell
 from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
@@ -116,8 +115,8 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
 
         # When
         actual_post, _logs = cterm_symbolic.simplify(self.config(kprint, *pre))
-        actual_k = kprint.pretty_print(get_cell(actual_post.kast, 'K_CELL'))
-        actual_state = kprint.pretty_print(get_cell(actual_post.kast, 'STATE_CELL'))
+        actual_k = kprint.pretty_print(actual_post.cell('K_CELL'))
+        actual_state = kprint.pretty_print(actual_post.cell('STATE_CELL'))
 
         # Then
         assert actual_k == expected_k
