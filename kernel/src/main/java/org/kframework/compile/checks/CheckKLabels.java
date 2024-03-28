@@ -107,7 +107,7 @@ public class CheckKLabels {
     } else if (sentence instanceof Production prod) {
       if (prod.klabel().isDefined()) {
         KLabel klabel = prod.klabel().get();
-        if (klabelProds.containsKey(klabel.name()) && !internalDuplicates.contains(klabel.name())) {
+        if (klabelProds.containsKey(klabel.name())) {
           errors.add(
               KEMException.compilerError(
                   "Symbol "
@@ -245,8 +245,6 @@ public class CheckKLabels {
       }
     }
   }
-
-  private static final ImmutableSet<String> internalDuplicates = ImmutableSet.of("#EmptyK");
 
   private static final ImmutableSet<String> internalNames =
       ImmutableSet.of(
