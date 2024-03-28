@@ -1697,7 +1697,6 @@ public class ModuleToKORE {
     // update format attribute with structure expected by backend
     String format = prod.att().getOptional(Att.FORMAT()).orElse(prod.defaultFormat());
     int nt = 1;
-    boolean hasFormat = true;
 
     for (int i = 0; i < prod.items().size(); i++) {
       if (prod.items().apply(i) instanceof NonTerminal) {
@@ -1715,52 +1714,47 @@ public class ModuleToKORE {
                         .replace("%", "%%")
                     + "%r");
       } else {
-        hasFormat = false;
+        return Att.empty();
       }
     }
 
-    if (hasFormat) {
-      Att att = Att.empty();
-      att = att.add(Att.FORMAT(), format);
-      if (prod.att().contains(Att.COLOR())) {
-        String color = prod.att().get(Att.COLOR());
-        boolean escape = false;
-        StringBuilder colors = new StringBuilder();
-        String conn = "";
-        for (int i = 0; i < format.length(); i++) {
-          if (escape && format.charAt(i) == 'c') {
-            colors.append(conn).append(color);
-            conn = ",";
-          }
-          escape = format.charAt(i) == '%';
+    Att att = Att.empty();
+    att = att.add(Att.FORMAT(), format);
+    if (prod.att().contains(Att.COLOR())) {
+      String color = prod.att().get(Att.COLOR());
+      boolean escape = false;
+      StringBuilder colors = new StringBuilder();
+      String conn = "";
+      for (int i = 0; i < format.length(); i++) {
+        if (escape && format.charAt(i) == 'c') {
+          colors.append(conn).append(color);
+          conn = ",";
         }
-        att = att.add(Att.COLORS(), colors.toString());
+        escape = format.charAt(i) == '%';
       }
-      StringBuilder sb = new StringBuilder();
-      for (ProductionItem pi : iterable(prod.items())) {
-        if (pi instanceof NonTerminal) {
-          sb.append('0');
-        } else {
-          sb.append('1');
-        }
-      }
-      att = att.add(Att.TERMINALS(), sb.toString());
-      if (prod.klabel().isDefined()) {
-        att = att.add(Att.PRIORITIES(), KList.class, getPriorities(prod.klabel().get()));
-        att =
-            att.add(
-                Att.LEFT_INTERNAL(),
-                KList.class,
-                getAssoc(module.leftAssoc(), prod.klabel().get()));
-        att =
-            att.add(
-                Att.RIGHT_INTERNAL(),
-                KList.class,
-                getAssoc(module.rightAssoc(), prod.klabel().get()));
-      }
-      return att;
+      att = att.add(Att.COLORS(), colors.toString());
     }
-    return Att.empty();
+    StringBuilder sb = new StringBuilder();
+    for (ProductionItem pi : iterable(prod.items())) {
+      if (pi instanceof NonTerminal) {
+        sb.append('0');
+      } else {
+        sb.append('1');
+      }
+    }
+    att = att.add(Att.TERMINALS(), sb.toString());
+    if (prod.klabel().isDefined()) {
+      att = att.add(Att.PRIORITIES(), KList.class, getPriorities(prod.klabel().get()));
+      att =
+          att.add(
+              Att.LEFT_INTERNAL(), KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
+      att =
+          att.add(
+              Att.RIGHT_INTERNAL(),
+              KList.class,
+              getAssoc(module.rightAssoc(), prod.klabel().get()));
+    }
+    return att;
   }
 
   private KList getPriorities(KLabel klabel) {
