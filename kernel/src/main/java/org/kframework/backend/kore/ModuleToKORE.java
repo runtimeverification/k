@@ -458,7 +458,7 @@ public class ModuleToKORE {
       Production prod,
       StringBuilder sb) {
     sb.append("  ");
-    if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+    if (isFunction(prod) && isHook(prod)) {
       sb.append("hooked-");
     }
     sb.append("symbol ");
@@ -928,6 +928,10 @@ public class ModuleToKORE {
     final var att = Att.empty().add(Att.SYMBOL_OVERLOAD(), KList.class, args);
     convert(new HashMap<>(), att, sb, null, null);
     sb.append(" // overloaded production\n");
+  }
+
+  private boolean isHook(Production prod) {
+    return prod.att().contains(Att.HOOK()) && isRealHook(prod.att());
   }
 
   private boolean isRealHook(Att att) {
@@ -1670,7 +1674,7 @@ public class ModuleToKORE {
     isConstructor &= !isAnywhere;
 
     Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK());
-    if (prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+    if (isHook(prod)) {
       att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
     }
     if (isConstructor) {
