@@ -76,7 +76,7 @@ module IELE-COMMON
   syntax IeleName  ::=
     IeleNameToken
   syntax IeleName  ::=
-    StringIeleName [avoid, function, klabel(StringIeleName), symbol]
+    StringIeleName [avoid, function, symbol(StringIeleName)]
   syntax GlobalName  ::=
     "@" IeleName
   syntax LocalName  ::=

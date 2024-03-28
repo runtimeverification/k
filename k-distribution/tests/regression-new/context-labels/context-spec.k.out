@@ -12,7 +12,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
                           /* T Fn D Sfa Cl */
-                          Lblfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
+                          Lblfoo{}(
                               /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}(),
                               /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
                           )
@@ -51,7 +51,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa */
                       kseq{}(
                           /* T Fn D Sfa Cl */
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A0'Unds'{}(
+                          Lbl'Hash'freezerfoo0'Unds'{}(
                               /* T Fn D Sfa Cl */
                               kseq{}(
                                   /* T Fn D Sfa Cli */
@@ -97,7 +97,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa */
                       kseq{}(
                           /* T Fn D Sfa Cl */
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A0'Unds'{}(
+                          Lbl'Hash'freezerfoo0'Unds'{}(
                               /* T Fn D Sfa Cl */
                               kseq{}(
                                   /* T Fn D Sfa Cli */
@@ -139,7 +139,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
                           /* T Fn D Sfa Cl */
-                          Lblfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
+                          Lblfoo{}(
                               /* T Fn D Sfa Cli */
                               /* Inj: */ inj{SortInt{}, SortA{}}(
                                   /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
@@ -181,7 +181,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa */
                       kseq{}(
                           /* T Fn D Sfa Cl */
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerfoo1'Unds'{}(
                               /* T Fn D Sfa Cl */
                               kseq{}(
                                   /* T Fn D Sfa Cli */
@@ -226,7 +226,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa */
                       kseq{}(
                           /* T Fn D Sfa Cl */
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerfoo1'Unds'{}(
                               /* T Fn D Sfa Cl */
                               kseq{}(
                                   /* T Fn D Sfa Cli */
@@ -522,7 +522,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
                           /* T Fn D Sfa Cl */
-                          Lblbaz'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
+                          Lblbaz{}(
                               /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}(),
                               /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
                           )
@@ -561,7 +561,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa */
                       kseq{}(
                           /* T Fn D Sfa Cl */
-                          Lbl'Hash'freezerbaz'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerbaz1'Unds'{}(
                               /* T Fn D Sfa Cl */
                               kseq{}(
                                   /* T Fn D Sfa Cli */
@@ -607,7 +607,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                       /* T Fn D Sfa */
                       kseq{}(
                           /* T Fn D Sfa Cl */
-                          Lbl'Hash'freezerbaz'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerbaz1'Unds'{}(
                               /* T Fn D Sfa Cl */
                               kseq{}(
                                   /* T Fn D Sfa Cli */
