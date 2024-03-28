@@ -40,6 +40,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
@@ -346,8 +347,8 @@ public class ExpandMacros {
   private Set<Sort> sort(K k, RuleOrClaim r) {
     if (k instanceof KVariable) {
       return Collections.singleton(k.att().getOptional(Att.SORT(), Sort.class).orElse(null));
-    } else if (k instanceof KToken) {
-      return Collections.singleton(((KToken) k).sort());
+    } else if (k instanceof KToken tok) {
+      return Collections.singleton(tok.sort());
     } else if (k instanceof KApply kapp) {
       if (kapp.klabel() instanceof KVariable) {
         throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
@@ -374,13 +375,21 @@ public class ExpandMacros {
       return candidates;
     } else if (k instanceof KSequence) {
       return Collections.singleton(Sorts.K());
-    } else if (k instanceof KAs) {
-      return sort(((KAs) k).pattern(), r);
+    } else if (k instanceof KAs as) {
+      return sort(as.pattern(), r);
+    } else if (k instanceof KRewrite rew) {
+      Set<Sort> left = sort(rew.left(), r);
+      Set<Sort> right = sort(rew.right(), r);
+      Set<Sort> results = new HashSet<>();
+      for (Sort lSort : left) {
+        for (Sort rSort : right) {
+          results.add(AddSortInjections.lubSort(lSort, rSort, null, r, mod));
+        }
+      }
+      return results;
     } else {
-      throw KEMException.compilerError(
-          "Cannot compute macros with sort check on terms that are not KApply, KToken, or"
-              + " KVariable.",
-          r);
+      throw KEMException.internalError(
+          "Cannot compute macros with sort check on terms that are InjectedKLabel.", r);
     }
   }
 
