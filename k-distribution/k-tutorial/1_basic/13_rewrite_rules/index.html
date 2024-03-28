@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/k-tutorial/1_basic/13_rewrite_rules/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../assets/img/favicon.ico" />
+
+<title>Lesson 1.13: Basics of K Rewriting | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="lesson-1.13%3A-basics-of-k-rewriting">Lesson 1.13: Basics of K Rewriting</h1>
+<p>The purpose of this lesson is to explain how rewrite rules that are not the
+definition of a function behave, and how, using these rules, you can construct
+a semantics of programs in a programming language in K.</p>
+<h2 id="recap%3A-function-rules-in-k">Recap: Function rules in K</h2>
+<p>Recall from <a href="../02_basics/">Lesson 1.2</a> that we have, thus far,
+introduced two types of productions in K: <strong>constructors</strong> and <strong>functions</strong>.
+A function is identified by the <strong>function</strong> attribute placed on the
+production. As you may recall, when we write a rule with a function on the
+left-hand side of the <code>=&gt;</code> operator, we are defining the meaning of that
+function for inputs which match the patterns on the left-hand side of the rule.
+If the argument to the function match the patterns, then the function is
+evaluated to the value constructed by substituting the bindings for the
+variables into the right-hand side of the rule.</p>
+<h2 id="top-level-rules">Top-level rules</h2>
+<p>However, function rules are not the only type of rule permissible in K, nor
+even the most frequently used. K also has a concept of a
+<strong>top-level rewrite rule</strong>. The simplest way to ensure that a rule is treated
+as a top-level rule is for the left-hand side of the rule to mention one or
+more <strong>cells</strong>. We will cover how cells work and are declared in more detail
+in a later lesson, but for now, what you should know is that when we ran <code>krun</code>
+in our very first example in Lesson 1.2 and got the following output:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>&lt;k&gt;
+  Yellow ( ) ~&gt; .
+&lt;/k&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><code>&lt;k&gt;</code> is a cell, known by convention as the <strong>K cell</strong>. This cell is available
+by default in any definition without needing to be explicitly declared.</p>
+<p>The K cell contains a single term of sort <code>K</code>. <code>K</code> is a predefined sort in K
+with two constructors, that can be roughly represented by the following
+grammar:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>  syntax K ::= KItem "~&gt;" K
+             | "."
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>As a syntactic convenience, K allows you to treat <code>~&gt;</code> like it is an
+associative list (i.e., as if it were defined as <code>syntax K ::= K "~&gt;" K</code>).
+When a definition is compiled, it will automatically transform the rules you
+write so that they treat the <code>K</code> sort as a cons-list. Another syntactic
+convenience is that, for disambiguation purposes, you can write <code>.K</code> anywhere
+you would otherwise write <code>.</code> and the meaning is identical.</p>
+<p>Now, you may notice that the above grammar mentions the sort <code>KItem</code>. This is
+another built-in sort in K. For every sort <code>S</code> declared in a definition (with
+the exception of <code>K</code> and <code>KItem</code>), K will implicitly insert the following
+production:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>  syntax KItem ::= S
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>In other words, every sort is a subsort of the sort <code>KItem</code>, and thus a term
+of any sort can be injected as an element of a term of sort <code>K</code>, also called
+a <strong>K sequence</strong>.</p>
+<p>By default, when you <code>krun</code> a program, the AST of the program is inserted as
+the sole element of a K sequence into the <code>&lt;k&gt;</code> cell. This explains why we
+saw the output we did in Lesson 1.2.</p>
+<p>With these preliminaries in mind, we can now explain how top-level rewrite
+rules work in K. Put simply, any rule where there is a cell (such as the K
+cell) at the top on the left-hand side will be a top-level rewrite rule. Once
+the initial program has been inserted into the K cell, the resulting term,
+called the <strong>configuration</strong>, will be matched against all the top-level
+rewrite rules in the definition. If only one rule matches, the substitution
+generated by the matching will be applied to the right-hand side of the rule
+and the resulting term is <strong>rewritten</strong> to be the new configuration. Rewriting
+proceeds by iteratively applying rules, also called <strong>taking steps</strong>, until
+no top-level rewrite rule can be applied. At this point the configuration
+becomes the <strong>final configuration</strong> and is output by <code>krun</code>.</p>
+<p>If more than one top-level rule applies, by default, <code>K</code> will pick just one
+of those rules, apply it, and continue rewriting. However, it is
+<strong>non-deterministic</strong> which rule applies. In theory, it could be any of them.
+By passing the <code>--search</code> flag to <code>krun</code>, you are able to tell <code>krun</code> to
+explore all possible non-deterministic choices, and generate a complete list of
+all possible final configurations reachable by each nondeterminstic choice that
+can be made. Note that the <code>--search</code> flag to krun only works if you pass
+<code>--enable-search</code> to kompile first.</p>
+<p>Unlike top-level rewrite rules, function rules are not associated with any
+particular set of cells in the configuration (although they can contain cells
+in their function arguments and return value). While top-level rewrite rules
+apply to the entire term being rewritten, function rules apply anywhere a
+function application for that function appears, and are immediately rewritten
+to their return value in that position.</p>
+<p>Another key distinction between top-level rules and function rules is that
+function <em>symbols</em>, i.e., productions with the <code>function</code> attribute, are
+mathematical functions rather than constructors. While a constructor is
+logically distinct from any other constructor of the same sort, and can be
+matched against unconditionally, a function does not necessaraily have the
+same restriction unless it happens to be an injective function. Thus, two
+function symbols with different arguments may still ultimately produce the
+same value and thus compare equal to one another. Due to this, concrete
+execution (i.e., all K definitions introduced thus far; see Lesson 1.21)
+introduces the restriction that you cannot match on a function symbol on the
+left-hand side of a rule, except as the top symbol on the left-hand side of
+a function rule. This restriction will be later lifted when we introduce the
+Haskell Backend which performs <strong>symbolic execution</strong>.</p>
+<h3 id="exercise">Exercise</h3>
+<p>Pass a program containing no functions to <code>krun</code>. You can use a term of sort
+<code>Exp</code> from <code>LESSON-11-E</code>. Observe the output and try to understand why you get
+the output you do. Then write two rules that rewrite that program to another.
+Run <code>krun --search</code> on that program and observe both results. Then add a third
+rule that rewrites one of those results again. Test that that rule applies as
+well.</p>
+<h2 id="using-top-level-rules-to-evaluate-expressions">Using top-level rules to evaluate expressions</h2>
+<p>Thus far, we have focused primarily on defining functions over constructors
+in K. However, now that we have a basic understanding of top-level rules,
+it is possible to introduce a <strong>rewrite system</strong> to our definitions. A rewrite
+system is a collection of top-level rewrite rules which performs an organized
+transformation of a particular program into a result which expresses the
+meaning of that program. For example, we might rewrite an expression in a
+programming language into a value representing the result of evaluating that
+expression.</p>
+<p>Recall in Lesson 1.11, we wrote a simple grammar of Boolean and integer
+expressions that looked roughly like this (<code>lesson-13-a.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>A
+  <span class="token keyword">imports</span> INT
+
+  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token keyword">Int</span>
+               <span class="token operator">|</span> <span class="token keyword">Bool</span>
+               <span class="token operator">|</span> Exp <span class="token string">"+"</span> Exp
+               <span class="token operator">|</span> Exp <span class="token string">"&amp;&amp;"</span> Exp
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In that lesson, we defined a function <code>eval</code> which evaluated such expressions
+to either an integer or Boolean.</p>
+<p>However, it is more idiomatic to evaluate such expressions using top-level
+rewrite rules. Here is how one might do so in K (<code>lesson-13-b.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>B<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> UNSIGNED<span class="token operator">-</span>INT<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> BOOL<span class="token operator">-</span>SYNTAX
+
+  <span class="token keyword">syntax</span> Val <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token keyword">Int</span> <span class="token operator">|</span> <span class="token keyword">Bool</span>
+  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Val
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span> Exp <span class="token string">"+"</span> Exp
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span> Exp <span class="token string">"&amp;&amp;"</span> Exp
+<span class="token keyword">endmodule</span>
+
+<span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>B
+  <span class="token keyword">imports</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>B<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> INT
+  <span class="token keyword">imports</span> BOOL
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> I1<span class="token punctuation">:</span><span class="token keyword">Int</span> <span class="token operator">+</span> I2<span class="token punctuation">:</span><span class="token keyword">Int</span> <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> I1 <span class="token operator">+</span><span class="token keyword">Int</span> I2 <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> B1<span class="token punctuation">:</span><span class="token keyword">Bool</span> <span class="token operator">&amp;&amp;</span> B2<span class="token punctuation">:</span><span class="token keyword">Bool</span> <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> B1 andBool B2 <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token keyword">syntax</span> KItem <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> freezer1<span class="token punctuation">(</span>Val<span class="token punctuation">)</span> <span class="token operator">|</span> freezer2<span class="token punctuation">(</span>Exp<span class="token punctuation">)</span>
+                 <span class="token operator">|</span> freezer3<span class="token punctuation">(</span>Val<span class="token punctuation">)</span> <span class="token operator">|</span> freezer4<span class="token punctuation">(</span>Exp<span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">+</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E2 <span class="token operator">~&gt;</span> freezer1<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">51</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Exp <span class="token operator">+</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1 <span class="token operator">~&gt;</span> freezer2<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">52</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">&amp;&amp;</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E2 <span class="token operator">~&gt;</span> freezer3<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">51</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Exp <span class="token operator">&amp;&amp;</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1 <span class="token operator">~&gt;</span> freezer4<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">52</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E2<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer1<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1 <span class="token operator">+</span> E2 <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer2<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1 <span class="token operator">+</span> E2 <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E2<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer3<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1 <span class="token operator">&amp;&amp;</span> E2 <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer4<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> K<span class="token punctuation">:</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1 <span class="token operator">&amp;&amp;</span> E2 <span class="token operator">~&gt;</span> K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This is of course rather cumbersome currently, but we will soon introduce
+syntactic convenience which makes writing definitions of this type considerably
+easier. For now, notice that there are roughly 3 types of rules here: the first
+matches a K cell in which the first element of the K sequence is an <code>Exp</code> whose
+arguments are values, and rewrites the first element of the sequence to the
+result of that expression. The second also matches a K cell with an <code>Exp</code> in
+the first element of its K sequence, but it matches when one or both arguments
+of the <code>Exp</code> are not values, and replaces the first element of the K sequence
+with two new elements: one being an argument to evaluate, and the other being
+a special constructor called a <strong>freezer</strong>. Finally, the third matches a K
+sequence where a <code>Val</code> is first, and a freezer is second, and replaces them
+with a partially evaluated expression.</p>
+<p>This general pattern is what is known as <strong>heating</strong> an expression,
+<strong>evaluating</strong> its arguments, <strong>cooling</strong> the arguments into the expression
+again, and <strong>evaluating</strong> the expression itself. By repeatedly performing
+this sequence of actions, we can evaluate an entire AST containing a complex
+expression down into its resulting value.</p>
+<h3 id="exercise-1">Exercise</h3>
+<p>Write an addition expression with integers. Use <code>krun --depth 1</code> to see the
+result of rewriting after applying a single top-level rule. Gradually increase
+the value of <code>--depth</code> to see successive states. Observe how this combination
+of rules is eventually able to evaluate the entire expression.</p>
+<h2 id="simplifying-the-evaluator%3A-local-rewrites-and-cell-ellipses">Simplifying the evaluator: Local rewrites and cell ellipses</h2>
+<p>As you saw above, the definition we wrote is rather cumbersome. Over the
+remainder of Lessons 1.13 and 1.14, we will greatly simplify it. The first step
+in doing so is to teach a bit more about the rewrite operator, <code>=&gt;</code>. Thus far,
+all the rules we have written look like <code>rule LHS =&gt; RHS</code>. However, this is not
+the only way the rewrite operator can be used. It is actually possible to place
+a constructor or function at the very top of the rule, and place rewrite
+operators inside that term. While a rewrite operator cannot appear nested
+inside another rewrite operator, by doing this, we can express that some parts
+of what we are matching are not <strong>changed</strong> by the rewrite operator. For
+example, consider the following rule from above:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>  rule &lt;k&gt; I1:Int + I2:Int ~&gt; K:K &lt;/k&gt; =&gt; &lt;k&gt; I1 +Int I2 ~&gt; K &lt;/k&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>We can equivalently write it like following:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>  rule &lt;k&gt; (I1:Int + I2:Int =&gt; I1 +Int I2) ~&gt; _:K &lt;/k&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>When you put a rewrite inside a term like this, in essence, you are telling
+the rule to only rewrite <strong>part</strong> of the left-hand side to the right-hand side.
+In practice, this is implemented by lifting the rewrite operator to the top of
+the rule by means of duplicating the surrounding context.</p>
+<p>There is a way that the above rule can be simplified further, however. K
+provides a special syntax for each cell containing a term of sort K, indicating
+that we want to match only on some prefix of the K sequence. For example, the
+above rule can be simplified further like so:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>  rule &lt;k&gt; I1:Int + I2:Int =&gt; I1 +Int I2 ...&lt;/k&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Here we have placed the symbol <code>...</code> immediately prior to the <code>&lt;/k&gt;</code> which ends
+the cell. What this tells the compiler is to take the contents of the cell,
+treat it as the prefix of a K sequence, and insert an anonymous variable of
+sort <code>K</code> at the end. Thus we can think of <code>...</code> as a way of saying we
+<strong>don't care</strong> about the part of the K sequence after the beginning, leaving
+it unchanged.</p>
+<p>Putting all this together, we can rewrite <code>LESSON-13-B</code> like so
+(<code>lesson-13-c.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>C<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> UNSIGNED<span class="token operator">-</span>INT<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> BOOL<span class="token operator">-</span>SYNTAX
+
+  <span class="token keyword">syntax</span> Val <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token keyword">Int</span> <span class="token operator">|</span> <span class="token keyword">Bool</span>
+  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Val
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span> Exp <span class="token string">"+"</span> Exp
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span> Exp <span class="token string">"&amp;&amp;"</span> Exp
+<span class="token keyword">endmodule</span>
+
+<span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>C
+  <span class="token keyword">imports</span> LESSON<span class="token operator">-</span><span class="token number">13</span><span class="token operator">-</span>C<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> INT
+  <span class="token keyword">imports</span> BOOL
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> I1<span class="token punctuation">:</span><span class="token keyword">Int</span> <span class="token operator">+</span> I2<span class="token punctuation">:</span><span class="token keyword">Int</span> <span class="token operator">=&gt;</span> I1 <span class="token operator">+</span><span class="token keyword">Int</span> I2 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> B1<span class="token punctuation">:</span><span class="token keyword">Bool</span> <span class="token operator">&amp;&amp;</span> B2<span class="token punctuation">:</span><span class="token keyword">Bool</span> <span class="token operator">=&gt;</span> B1 andBool B2 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token keyword">syntax</span> KItem <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> freezer1<span class="token punctuation">(</span>Val<span class="token punctuation">)</span> <span class="token operator">|</span> freezer2<span class="token punctuation">(</span>Exp<span class="token punctuation">)</span>
+                 <span class="token operator">|</span> freezer3<span class="token punctuation">(</span>Val<span class="token punctuation">)</span> <span class="token operator">|</span> freezer4<span class="token punctuation">(</span>Exp<span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">+</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">=&gt;</span> E2 <span class="token operator">~&gt;</span> freezer1<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">51</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Exp <span class="token operator">+</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">=&gt;</span> E1 <span class="token operator">~&gt;</span> freezer2<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">52</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">&amp;&amp;</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">=&gt;</span> E2 <span class="token operator">~&gt;</span> freezer3<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">51</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Exp <span class="token operator">&amp;&amp;</span> E2<span class="token punctuation">:</span>Exp <span class="token operator">=&gt;</span> E1 <span class="token operator">~&gt;</span> freezer4<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">[</span>priority<span class="token punctuation">(</span><span class="token number">52</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E2<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer1<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> E1 <span class="token operator">+</span> E2 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer2<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> E1 <span class="token operator">+</span> E2 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E2<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer3<span class="token punctuation">(</span>E1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> E1 <span class="token operator">&amp;&amp;</span> E2 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> E1<span class="token punctuation">:</span>Val <span class="token operator">~&gt;</span> freezer4<span class="token punctuation">(</span>E2<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> E1 <span class="token operator">&amp;&amp;</span> E2 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This is still rather cumbersome, but it is already greatly simplified. In the
+next lesson, we will see how additional features of K can be used to specify
+heating and cooling rules much more compactly.</p>
+<h2 id="exercises">Exercises</h2>
+<ol>
+<li>Modify <code>LESSON-13-C</code> to add rules to evaluate integer subtraction.</li>
+</ol>
+<h2 id="next-lesson">Next lesson</h2>
+<p>Once you have completed the above exercises, you can continue to
+<a href="../14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a>.</p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#lesson-1.13%3A-basics-of-k-rewriting" class="bd-toc-link">Lesson 1.13: Basics of K Rewriting</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#recap%3A-function-rules-in-k"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Recap: Function rules in K
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#top-level-rules" class="bd-toc-link">Top-level rules</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercise"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Exercise
+              </a></div>
+            </div>
+          </details>
+        <details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#using-top-level-rules-to-evaluate-expressions" class="bd-toc-link">Using top-level rules to evaluate expressions</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercise-1"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Exercise
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#simplifying-the-evaluator%3A-local-rewrites-and-cell-ellipses"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Simplifying the evaluator: Local rewrites and cell ellipses
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercises"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Exercises
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#next-lesson"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Next lesson
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

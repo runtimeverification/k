@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/pl-tutorial/1_k/2_imp/lesson_3/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../../assets/img/favicon.ico" />
+
+<title>Computations, Results, Strictness; Rules Involving Cells | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="computations%2C-results%2C-strictness%3B-rules-involving-cells">Computations, Results, Strictness; Rules Involving Cells</h1>
+<p>In this lesson we will learn about the syntactic category <code>K</code> of computations,
+about how strictness attributes are in fact syntactic sugar for rewrite rules
+over computations, and why it is important to tell the tool which
+computations are results. We will also see a K rule that involves cells.</p>
+<h2 id="k-computations">K Computations</h2>
+<p>Computation structures, or more simply <em>computations</em>, extend the abstract
+syntax of your language with a list structure using <code>~&gt;</code> (read <em>followed
+by</em> or <em>and then</em>, and written <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>↷</mo></mrow><annotation encoding="application/x-tex">\curvearrowright</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mrel amsrm">↷</span></span></span></span> in Latex) as a separator.
+K provides a distinguished sort, <code>K</code>, for computations. The extension of the
+abstract syntax of your language into computations is done automatically by
+the K tool when you declare constructs using the <code>syntax</code> keyword, so the K
+semantic rules can uniformly operate only on terms of sort <code>K</code>. The intuition
+for computation structures of the form</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>t1 ~&gt; t2 ~&gt; ... ~&gt; tn
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>is that the listed tasks are to be processed in order. The initial
+computation typically contains the original program as its sole task, but
+rules can then modify it into task sequences, as seen shortly.</p>
+<h2 id="strictness-in-theory">Strictness in Theory</h2>
+<p>The strictness attributes, used as annotations to language constructs,
+actually correspond to rules over computations. For example, the
+<code>strict(2)</code> attribute of the assignment statement corresponds to the
+following two opposite rules (<code>X</code> ranges over <code>Id</code> and <code>A</code> over <code>AExp</code>):</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>X=A; =&gt; A ~&gt; X=[];
+A ~&gt; X=[]; =&gt; X=A;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>The first rule pulls <code>A</code> from the syntactic context <code>X=A;</code> and schedules it
+for processing. The second rule plugs <code>A</code> back into its context.
+Inspired from the chemical abstract machine, we call rules of the first
+type above <em>heating</em> rules and rules of the second type <em>cooling</em> rules.
+Similar rules are generated for other arguments in which operations are
+strict. Iterative applications of heating rules eventually bring to the
+top of the computation atomic tasks, such as a variable lookup, or a
+builtin operation, which then make computational progress by means of other
+rules. Once progress is made, cooling rules can iteratively plug the result
+back into context, so that heating rules can pick another candidate for
+reduction, and so on and so forth.</p>
+<p>When operations are strict only in some of their arguments, the corresponding
+positions of the arguments in which they are strict are explicitly enumerated
+in the argument of the <code>strict</code> attribute, e.g., <code>strict(2)</code> like above, or
+<code>strict(2 3)</code> for an operation strict in its second and third arguments, etc.
+If an operation is simply declared <code>strict</code> then it means that it is strict
+in all its arguments. For example, the strictness of addition yields:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>A1+A2 =&gt; A1 ~&gt; []+A2
+A1 ~&gt; []+A2 =&gt; A1+A2
+A1+A2 =&gt; A2 ~&gt; A1+[]
+A2 ~&gt; A1+[] =&gt; A1+A2
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>It can be seen that such heating/cooling rules can easily lead to
+non-determinism, since the same term may be heated many different ways;
+these different evaluation orders may lead to different behaviors in some
+languages (not in IMP, because its expressions do not have side effects,
+but we will experiment with non-determinism in its successor, IMP++).</p>
+<p>A similar desugaring applies to sequential strictness, declared with the
+keyword <code>seqstrict</code>. While the order of arguments of <code>strict</code> is irrelevant,
+it matters in the case of <code>seqstrict</code>: they are to be evaluated in the
+specified order; if no arguments are given, then they are assumed by default
+to be evaluated from left-to-right. For example, the default heating/cooling
+rules associated to the sequentially strict <code>&lt;=</code> construct above are
+(<code>A1</code>, <code>A2</code> range over <code>AExp</code> and <code>I1</code> over <code>Int</code>):</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>A1&lt;=A2 =&gt; A1 ~&gt; []&lt;=A2
+A1 ~&gt; []&lt;=A2 =&gt; A1&lt;=A2
+I1&lt;=A2 =&gt; A2 ~&gt; I1&lt;=[]
+A2 ~&gt; I1&lt;=[] =&gt; I1&lt;=A2
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In other words, <code>A2</code> is only heated/cooled after <code>A1</code> is already evaluated.</p>
+<p>While the heating/cooling rules give us a nice and uniform means to define
+all the various allowable ways in which a program can evaluate, all based
+on rewriting, the fact that they are reversible comes with a serious practical
+problem: they make the K definitions unexecutable, because they lead to
+non-termination.</p>
+<h2 id="strictness-in-practice%3B-k-results">Strictness in Practice; K Results</h2>
+<p>To break the reversibility of the theoretical heating/cooling rules, and,
+moreover, to efficiently execute K definitions, the current implementation of
+the K tool relies on users giving explicit definitions of their languages'
+results.</p>
+<p>The K tool provides a predicate <code>isKResult</code>, which is automatically defined
+as we add syntactic constructs to <code>KResult</code> (in fact the K tool defines such
+predicates for all syntactic categories, which are used, for example, as
+rule side conditions to check user-declared variable memberships, such as
+<code>V:Val</code> stating that <code>V</code> belongs to <code>Val</code>).</p>
+<p>The <code>kompile</code> tool, depending upon what it is requested to do, changes the
+reversible heating/cooling rules corresponding to evaluation strategy
+definitions (e.g., those corresponding to strictness attributes) to avoid
+non-termination. For example, when one is interested in obtaining an
+executable model of the language (which is the default compilation mode of
+<code>kompile</code>), then heating is performed only when the to-be-pulled syntactic
+fragment is not a result, and the corresponding cooling only when the
+to-be-plugged fragment is a result. In this case, e.g., the heating/cooling
+rules for assignment are modified as follows:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>X=A; =&gt; A ~&gt; X=[];  requires notBool isKResult(A)
+A ~&gt; X=[]; =&gt; X=A;  requires isKResult(A)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>Note that non-termination of heating/cooling is avoided now. The only thing
+lost is the number of possible behaviors that a program can manifest, but
+this is irrelevant when all we want is one behavior.</p>
+<p>As will be discussed in the IMP++ tutorial, the heating/cooling rules are
+modified differently by <code>kompile</code> when we are interested in other aspects
+of the language definition, such us, for example, in a search-able model that
+comprises all program behaviors. This latter model is obviously more general
+from a theoretical perspective, but, in practice, it is also slower to execute.
+The <code>kompile</code> tool strives to give you the best model of the language for the
+task you are interested in.</p>
+<h2 id="can't-results-be-inferred-automatically%3F">Can't Results be Inferred Automatically?</h2>
+<p>This is a long story, but the short answer is: <em>No!</em>. Maybe in some cases
+it is possible, but we prefer to not attempt it in the K tool. For example,
+you most likely do not want any stuck computation to count as a result,
+since some of them can happen simply because you forgot a semantic rule that
+could have further reduce it! Besides, in our experience with defining large
+languages, it is quite useful to take your time and think of what the results
+of your language's computations are. This fact in itself may help you improve
+your overall language design. We typically do it at the same time with
+defining the evaluation strategies of our languages. Although in theory K
+could infer the results of your language as the stuck computations, based on
+the above we have deliberately decided to not provide this feature, in spite
+of requests from some users. So you currently do have to explicitly define
+your K results if you want to effectively use the K tool. Note, however, that
+theoretical definitions, not meant to be executed, need not worry about
+defining results (that's because in theory semantic rules apply <em>modulo</em> the
+reversible heating/cooling rules, so results are not necessary).</p>
+<h2 id="a-k-rule-involving-cells">A K Rule Involving Cells</h2>
+<p>All our K rules so far in the tutorial were of the form</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>rule left =&gt; right requires condition
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>where <code>left</code> and <code>right</code> were syntactic, or more generally computation, terms.</p>
+<p>Here is our first K rule explicitly involving cells:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>rule &lt;k&gt; X:Id =&gt; I ...&lt;/k&gt; &lt;state&gt;... X |-&gt; I ...&lt;/state&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Recall that the <code>k</code> cell holds computations, which are sequences of tasks
+separated by <code>~&gt;</code>. Also, the <code>state</code> cell holds a map, which is a set of
+bindings, each binding being a pair of computations (currently, the
+K builtin data-structures, like maps, are untyped; or, said differently,
+they are all over the type of computations, <code>K</code>).</p>
+<p>Therefore, the two cells mentioned in the rule above hold collections
+of things, ordered or not. The <code>...</code>s, which we also call cell <em>frames</em>,
+stand for <em>more stuff there, which we do not care about</em>.</p>
+<p>The rewrite relation <code>=&gt;</code> is allowed in K to appear anywhere in a term, its
+meaning being that the corresponding subterm is rewritten as indicated in the
+shown context. We say that K's rewriting is <em>local</em>.</p>
+<p>The rule above says that if the identifier <code>X</code> is the first task in the <code>k</code>
+cell, and if <code>X</code> is bound to <code>I</code> somewhere in the <code>state</code>, then <code>X</code> rewrites
+to <code>I</code> <em>locally</em> in the <code>k</code> cell. Therefore, IMP variables need to be already
+declared when looked up.</p>
+<p>Of course, the K rule above can be translated into an ordinary rewrite rule
+of the form</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>rule &lt;k&gt; X ~&gt; Rest &lt;/k&gt; &lt;state&gt; Before (X |-&gt; I) After &lt;/state&gt;
+  =&gt; &lt;k&gt; I ~&gt; Rest &lt;/k&gt; &lt;state&gt; Before (X |-&gt; I) After &lt;/state&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>Besides being more verbose and thus tedious to write, this ordinary rule
+is also more error-prone; for example, we may forget the <code>Rest</code> variable
+in the right-hand-side, etc. Moreover, the concurrent semantics of K
+allows for its rules to be interpreted as <em>concurrent transactions</em>, where
+the context is the read-only component of the transaction, while the
+subterms which are rewritten are read/write component of the transaction;
+thus, K rule instances can apply concurrently if they only overlap
+on read-only parts, while they cannot if regarded as ordinary rewrite logic
+rules. Note: our current implementation of the K tool is not concurrent,
+so K rules are in fact desugared as normal rewrite rules in the K tool.</p>
+<p>Kompile <code>imp.k</code> using a documentation option and check out how the K rule
+looks in the generated document. The <code>...</code> frames are displayed as cell
+tears, metaphorically implying that those parts of the cells that we
+do not care about are <em>torn away</em>. The rewrite relation is replaced by a
+horizontal line: specifically, the subterm which rewrites, <code>X</code>, is
+underlined, and its replacement is written underneath the line.</p>
+<p>In the next lesson we define the complete K semantics of IMP and
+run the programs we parsed in the first lesson.</p>
+<p>Go to <a href="../lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a>.</p>
+<p><a href="https://youtu.be/gYPkhiT2SxA" target="_blank" rel="noreferrer noopener">MOVIE (out of date) [10'30"]</a></p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#computations%2C-results%2C-strictness%3B-rules-involving-cells" class="bd-toc-link">Computations, Results, Strictness; Rules Involving Cells</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#k-computations"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                K Computations
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#strictness-in-theory"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Strictness in Theory
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#strictness-in-practice%3B-k-results"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Strictness in Practice; K Results
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#can't-results-be-inferred-automatically%3F"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Can't Results be Inferred Automatically?
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#a-k-rule-involving-cells"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                A K Rule Involving Cells
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

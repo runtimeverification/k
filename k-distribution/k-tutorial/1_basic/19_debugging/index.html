@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/k-tutorial/1_basic/19_debugging/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../assets/img/favicon.ico" />
+
+<title>Lesson 1.19: Debugging with GDB or LLDB | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="lesson-1.19%3A-debugging-with-gdb-or-lldb">Lesson 1.19: Debugging with GDB or LLDB</h1>
+<p>The purpose of this lesson is to teach how to debug your K interpreter using
+the K-language support provided in <a href="https://www.gnu.org/software/gdb/" target="_blank" rel="noreferrer noopener">GDB</a> or
+<a href="https://lldb.llvm.org/index.html" target="_blank" rel="noreferrer noopener">LLDB</a>.</p>
+<h2 id="caveats">Caveats</h2>
+<p>This lesson has been written with GDB support on Linux in mind. Unfortunately,
+on macOS, GDB has limited support. To address this, we have introduced early
+experimental support for debugging with LLDB on macOS. In some cases, the
+features supported by LLDB are slightly different to those supported by GDB; the
+tutorial text will make this clear where necessary. If you use a macOS with an
+LLVM version older than 15, you may need to upgrade it to use the LLDB
+correctly. If you encounter an issue on either operating system, please open an
+issue against the <a href="https://github.com/runtimeverification/k" target="_blank" rel="noreferrer noopener">K repository</a>.</p>
+<h2 id="getting-started">Getting started</h2>
+<p>On Linux, you will need GDB in order to complete this lesson. If you do not
+already have GDB installed, then do so. Steps to install GDB are outlined in
+this <a href="http://www.gdbtutorial.com/tutorial/how-install-gdb" target="_blank" rel="noreferrer noopener">GDB Tutorial</a>.</p>
+<p>On macOS, LLDB should already have been installed with K's build dependencies
+(whether you have built K from source, or installed it using <code>kup</code> or Homebrew).</p>
+<p>The first thing neccessary in order to debug a K interpreter is to build the
+interpreter with full debugging support enabled. This can be done relatively
+simply. First, run <code>kompile</code> with the command line flag <code>--enable-llvm-debug</code>.
+The resulting compiled K definition will be ready to support debugging.</p>
+<p>Once you have a compiled K definition and a program you wish to debug, you can
+start the debugger by passing the <code>--debugger</code> flag to <code>krun</code>. This will
+automatically load the program you are executing into GDB and drop you into a
+GDB shell ready to start executing the program.</p>
+<p>As an example, consider the following K definition (<code>lesson-19-a.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">19</span><span class="token operator">-</span>A
+  <span class="token keyword">imports</span> INT
+
+  <span class="token keyword">rule</span> I <span class="token operator">=&gt;</span> I <span class="token operator">+</span><span class="token keyword">Int</span> <span class="token number">1</span>
+    <span class="token keyword">requires</span> I &lt;<span class="token keyword">Int</span> <span class="token number">100</span>
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>If we compile this definition with <code>kompile lesson-19-a.k --enable-llvm-debug</code>,
+and run the program <code>0</code> in the debugger with <code>krun -cPGM=0 --debugger</code>, we will
+see the following output (roughly, and depending on which platform you are
+using):</p>
+<h3 id="gdb-%2F-linux">GDB / Linux</h3>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>GNU gdb (Ubuntu 9.2-0ubuntu1~20.04) 9.2
+Copyright (C) 2020 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+    &lt;http://www.gnu.org/software/gdb/documentation/&gt;.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./lesson-19-a-kompiled/interpreter...
+warning: File "/home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+        add-auto-load-safe-path /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter
+line to your configuration file "/home/dwightguth/.gdbinit".
+To completely disable this security protection add
+        set auto-load safe-path /
+line to your configuration file "/home/dwightguth/.gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+        info "(gdb)Auto-loading safe path"
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>To make full advantage of the GDB features of K, you should follow the first
+command listed in this output message and add the corresponding
+<code>add-auto-load-safe-path</code> command to your <code>~/.gdbinit</code> file as prompted.
+Please note that the path will be different on your machine than the one
+listed above. Adding directories to the "load safe path" effectively tells GDB
+to trust those directories. All content under a given directory will be recursively
+trusted, so if you want to avoid having to add paths to the "load safe path" every
+time you kompile a different <code>K</code> definition, then you can just trust a minimal
+directory containing all your kompiled files; however, do not choose a top-level directory containing arbitrary files as this amounts to trusting arbitrary files and is a security risk. More info on the load safe path
+can be found <a href="https://sourceware.org/gdb/onlinedocs/gdb/Auto_002dloading-safe-path.html" target="_blank" rel="noreferrer noopener">here</a>.</p>
+<h3 id="lldb-%2F-macos">LLDB / macOS</h3>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) target create "./lesson-19-a-kompiled/interpreter"
+warning: 'interpreter' contains a debug script. To run this script in this debug session:
+
+    command script import "/Users/brucecollie/code/scratch/lesson-19-a-kompiled/interpreter.dSYM/Contents/Resources/Python/interpreter.py"
+
+To run all discovered debug scripts in this session:
+
+    settings set target.load-script-from-symbol-file true
+
+Current executable set to '/Users/brucecollie/code/scratch/lesson-19-a-kompiled/interpreter' (x86_64).
+(lldb) settings set -- target.run-args  ".krun-2023-03-20-11-22-46-TcYt9ffhb2/tmp.in.RupiLwHNfn" "-1" ".krun-2023-03-20-11-22-46-TcYt9ffhb2/result.kore"
+(lldb) 
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>LLDB applies slightly different security policies to GDB. To load K's debugging
+scripts for this session only, you can run the <code>command script import</code> line at
+the LLDB prompt. The loaded scripts will not persist across debugging sessions
+if you do this. It is also possible to configure LLDB to automatically load the
+K scripts when an interpreter is started in LLDB; doing so requires a slightly
+less broad permission than GDB.</p>
+<p>On macOS, the <code>.dSYM</code> directory that contains debugging symbols for an
+executable can also contain Python scripts in <code>Contents/Resources/Python</code>. If
+there is a Python script with a name matching the name of the current executable
+(here, <code>interpreter</code> and <code>interpreter.py</code>), it will be automatically loaded if
+the <code>target.load-script-from-symbol-file</code> setting is set). You can therefore add
+the <code>settings set</code> command to your <code>~/.lldbinit</code> without enabling full arbitrary
+code execution, but you should be aware of the paths from which code <em>can</em> be
+executed if you do so.</p>
+<h2 id="basic-commands">Basic commands</h2>
+<blockquote>
+<p><strong>LLDB Note:</strong> the <code>k start</code> and <code>k step</code> commands are currently not
+implemented in the K LLDB scripts. To work around this limitation temporarily,
+you can run <code>process launch --stop-at-entry</code> instead of <code>k start</code>. To emulate
+<code>k step</code>, first run <code>rbreak k_step</code> once, then <code>continue</code> instead of each <code>k step</code>. We hope to address these limitations soon.</p>
+</blockquote>
+<p>The most basic commands you can execute in the K GDB session are to run your
+program or to step through it. The first can be accomplished using GDB's
+built-in <code>run</code> command. This will automatically start the program and begin
+executing it. It will continue until the program aborts or finishes, or the
+debugger is interrupted with Ctrl-C.</p>
+<p>Sometimes you want finer-grained control over how you proceed through the
+program you are debugging. To step through the rule applications in your
+program, you can use the <code>k start</code> and <code>k step</code> GDB commands.</p>
+<p><code>k start</code> is similar to the built-in <code>start</code> command in that it starts the
+program and then immediately breaks before doing any work. However, unlike
+the <code>start</code> command which will break immediately after the <code>main</code> method of
+a program is executed, the <code>K start</code> program will initialize the rewriter,
+evaluate the initial configuration, and break immediately prior to applying
+any rewrite steps.</p>
+<p>In the example above, here is what we see when we run the <code>k start</code> command:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>Temporary breakpoint 1 at 0x239210
+Starting program: /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter .krun-2021-08-13-14-10-50-sMwBkbRicw/tmp.in.01aQt85TaA -1 .krun-2021-08-13-14-10-50-sMwBkbRicw/result.kore
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, 0x0000000000239210 in main ()
+0x0000000000231890 in step (subject=&lt;k&gt;
+  0 ~&gt; .
+&lt;/k&gt;)
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As you can see, we are stopped at the <code>step</code> function in the interpreter.
+This function is responsible for taking top-level rewrite steps. The <code>subject</code>
+parameter to this function is the current K configuration.</p>
+<p>We can step through K rewrite steps one at a time by running the <code>k step</code>
+command. By default, this takes a single rewrite step (including any function
+rule applications that are part of that step).</p>
+<p>Here is what we see when we run that command:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>Continuing.
+
+Temporary breakpoint -22, 0x0000000000231890 in step (subject=&lt;k&gt;
+  1 ~&gt; .
+&lt;/k&gt;)
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As we can see, we have taken a single rewrite step. We can also pass a number
+to the <code>k step</code> command which indicates the number of rewrite steps to take.</p>
+<p>Here is what we see if we run <code>k step 10</code>:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>Continuing.
+
+Temporary breakpoint -23, 0x0000000000231890 in step (subject=&lt;k&gt;
+  11 ~&gt; .
+&lt;/k&gt;)
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As we can see, ten rewrite steps were taken.</p>
+<h2 id="breakpoints">Breakpoints</h2>
+<p>The next important step in debugging an application in GDB is to be able to
+set breakpoints. Generally speaking, there are three types of breakpoints we
+are interested in a K semantics: Setting a breakpoint when a particular
+function is called, setting a breakpoint when a particular rule is applied,
+and setting a breakpoint when a side condition of a rule is evaluated.</p>
+<p>The easiest way to do the first two things is to set a breakpoint on the
+line of code containing the function or rule.</p>
+<p>For example, consider the following K definition (<code>lesson-19-b.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">19</span><span class="token operator">-</span>B
+  <span class="token keyword">imports</span> BOOL
+
+  <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> isBlue<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> Banana<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> isBlue<span class="token punctuation">(</span>Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">true</span>
+  <span class="token keyword">rule</span> isBlue<span class="token punctuation">(</span>Banana<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">false</span>
+
+  <span class="token keyword">rule</span> F<span class="token punctuation">:</span>Fruit <span class="token operator">=&gt;</span> isBlue<span class="token punctuation">(</span>F<span class="token punctuation">)</span>
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Once this program has been compiled for debugging, we can run the program
+<code>Blueberry()</code>. We can then set a breakpoint that stops when the <code>isBlue</code>
+function is called with the following command in GDB:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>break lesson-19-b.k:4
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Similarly, in LLDB, run:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>breakpoint set --file lesson-19-b.k --line 4
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Here is what we see if we set this breakpoint and then run the interpreter:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break lesson-19-b.k:4
+Breakpoint 1 at 0x231040: file /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k, line 4.
+(gdb) run
+Starting program: /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b-kompiled/interpreter .krun-2021-08-13-14-20-27-vXOQmV6lwS/tmp.in.fga98yqXlc -1 .krun-2021-08-13-14-20-27-vXOQmV6lwS/result.kore
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LblisBlue'LParUndsRParUnds'LESSON-19-B'Unds'Bool'Unds'Fruit (_1=Blueberry ( )) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k:4
+4         syntax Bool ::= isBlue(Fruit) [function]
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) breakpoint set --file lesson-19-b.k --line 4
+Breakpoint 1: where = interpreter`LblisBlue'LParUndsRParUnds'LESSON-19-B'Unds'Bool'Unds'Fruit + 20 at lesson-19-b.k:4:19, address = 0x0000000100003ff4
+(lldb) run
+Process 50546 launched: '/Users/brucecollie/code/scratch/lesson-19-b-kompiled/interpreter' (x86_64)
+Process 50546 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000100003ff4 interpreter`LblisBlue'LParUndsRParUnds'LESSON-19-B'Unds'Bool'Unds'Fruit(_1=Blueberry ( )) at lesson-19-b.k:4:19
+   1   	module LESSON-19-B
+   2   	  imports BOOL
+   3   	
+-&gt; 4   	  syntax Bool ::= isBlue(Fruit) [function]
+   5   	  syntax Fruit ::= Blueberry() | Banana()
+   6   	  rule isBlue(Blueberry()) =&gt; true
+   7   	  rule isBlue(Banana()) =&gt; false
+(lldb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As we can see, we have stopped at the point where we are evaluating that
+function. The value <code>_1</code> that is a parameter to that function shows the
+value passed to the function by the caller.</p>
+<p>We can also break when the <code>isBlue(Blueberry()) =&gt; true</code> rule applies by simply
+changing the line number to the line number of that rule:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break lesson-19-b.k:6
+Breakpoint 1 at 0x2af710: file /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k, line 6.
+(gdb) run
+Starting program: /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b-kompiled/interpreter .krun-2021-08-13-14-32-36-7kD0ic7XwD/tmp.in.8JNH5Qtmow -1 .krun-2021-08-13-14-32-36-7kD0ic7XwD/result.kore
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, apply_rule_138 () at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k:6
+6         rule isBlue(Blueberry()) =&gt; true
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) breakpoint set --file lesson-19-b.k --line 6
+Breakpoint 1: where = interpreter`apply_rule_140 at lesson-19-b.k:6:8, address = 0x0000000100004620
+(lldb) run
+Process 50681 launched: '/Users/brucecollie/code/scratch/lesson-19-b-kompiled/interpreter' (x86_64)
+Process 50681 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000100004620 interpreter`apply_rule_140 at lesson-19-b.k:6:8
+   3   	
+   4   	  syntax Bool ::= isBlue(Fruit) [function]
+   5   	  syntax Fruit ::= Blueberry() | Banana()
+-&gt; 6   	  rule isBlue(Blueberry()) =&gt; true
+   7   	  rule isBlue(Banana()) =&gt; false
+   8   	
+   9   	  rule F:Fruit =&gt; isBlue(F)
+(lldb) 
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We can also do the same with a top-level rule:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break lesson-19-b.k:9
+Breakpoint 1 at 0x2aefa0: lesson-19-b.k:9. (2 locations)
+(gdb) run
+Starting program: /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b-kompiled/interpreter .krun-2021-08-13-14-33-13-9fC8Sz4aO3/tmp.in.jih1vtxSiQ -1 .krun-2021-08-13-14-33-13-9fC8Sz4aO3/result.kore
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, apply_rule_107 (Var'Unds'DotVar0=&lt;generatedCounter&gt;
+  0
+&lt;/generatedCounter&gt;, Var'Unds'DotVar1=., VarF=Blueberry ( )) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-b.k:9
+9         rule F:Fruit =&gt; isBlue(F)
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) breakpoint set --file lesson-19-b.k --line 9
+Breakpoint 1: 2 locations.
+(lldb) run
+Process 50798 launched: '/Users/brucecollie/code/scratch/lesson-19-b-kompiled/interpreter' (x86_64)
+Process 50798 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x0000000100003f2e interpreter`apply_rule_109(Var'Unds'DotVar0=&lt;generatedCounter&gt;
+  0
+&lt;/generatedCounter&gt;, Var'Unds'DotVar1=., VarF=Blueberry ( )) at lesson-19-b.k:9:8
+   6   	  rule isBlue(Blueberry()) =&gt; true
+   7   	  rule isBlue(Banana()) =&gt; false
+   8   	
+-&gt; 9   	  rule F:Fruit =&gt; isBlue(F)
+   10  	endmodule
+(lldb)  
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Unlike the function rule above, we see several parameters to this function.
+These are the substitution that was matched for the function. Variables only
+appear in this substitution if they are actually used on the right-hand side
+of the rule.</p>
+<h2 id="advanced-breakpoints">Advanced breakpoints</h2>
+<p>Sometimes it is inconvenient to set the breakpoint based on a line number.</p>
+<p>It is also possible to set a breakpoint based on the rule label of a particular
+rule. Consider the following definition (<code>lesson-19-c.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">19</span><span class="token operator">-</span>C
+  <span class="token keyword">imports</span> INT
+  <span class="token keyword">imports</span> BOOL
+
+  <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> isEven<span class="token punctuation">(</span><span class="token keyword">Int</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> <span class="token punctuation">[</span>isEven<span class="token punctuation">]</span><span class="token punctuation">:</span> isEven<span class="token punctuation">(</span>I<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">true</span> <span class="token keyword">requires</span> I <span class="token operator">%</span><span class="token keyword">Int</span> <span class="token number">2</span> <span class="token operator">==</span><span class="token keyword">Int</span> <span class="token number">0</span>
+  <span class="token keyword">rule</span> <span class="token punctuation">[</span>isOdd<span class="token punctuation">]</span><span class="token punctuation">:</span> isEven<span class="token punctuation">(</span>I<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">false</span> <span class="token keyword">requires</span> I <span class="token operator">%</span><span class="token keyword">Int</span> <span class="token number">2</span> <span class="token operator">=</span><span class="token operator">/</span><span class="token operator">=</span><span class="token keyword">Int</span> <span class="token number">0</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We will run the program <code>isEven(4)</code>. We can set a breakpoint for when a rule
+applies by means of the <code>MODULE-NAME.label.rhs</code> syntax:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break LESSON-19-C.isEven.rhs
+Breakpoint 1 at 0x2afda0: file /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c.k, line 6.
+(gdb) run
+Starting program: /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c-kompiled/interpreter .krun-2021-08-13-14-40-29-LNNT8YEZ61/tmp.in.ZG93vWCGGC -1 .krun-2021-08-13-14-40-29-LNNT8YEZ61/result.kore
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LESSON-19-C.isEven.rhs () at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c.k:6
+6         rule [isEven]: isEven(I) =&gt; true requires I %Int 2 ==Int 0
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) breakpoint set --name LESSON-19-C.isEven.rhs
+Breakpoint 1: where = interpreter`LESSON-19-C.isEven.rhs at lesson-19-c.k:6:18, address = 0x00000001000038e0
+(lldb) run
+Process 51205 launched: '/Users/brucecollie/code/scratch/lesson-19-c-kompiled/interpreter' (x86_64)
+Process 51205 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x00000001000038e0 interpreter`LESSON-19-C.isEven.rhs at lesson-19-c.k:6:18
+   3   	  imports BOOL
+   4   	
+   5   	  syntax Bool ::= isEven(Int) [function]
+-&gt; 6   	  rule [isEven]: isEven(I) =&gt; true requires I %Int 2 ==Int 0
+   7   	  rule [isOdd]: isEven(I) =&gt; false requires I %Int 2 =/=Int 0
+   8   	
+   9   	endmodule
+(lldb) 
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We can also set a breakpoint for when a rule's side condition is evaluated
+by means of the <code>MODULE-NAME.label.sc</code> syntax:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break LESSON-19-C.isEven.sc
+Breakpoint 1 at 0x2afd70: file /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c.k, line 6.
+(gdb) run
+Starting program: /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c-kompiled/interpreter .krun-2021-08-13-14-41-48-1BoGfJRbYc/tmp.in.kg4F8cwfCe -1 .krun-2021-08-13-14-41-48-1BoGfJRbYc/result.kore
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LESSON-19-C.isEven.sc (VarI=4) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c.k:6
+6         rule [isEven]: isEven(I) =&gt; true requires I %Int 2 ==Int 0
+(gdb) finish
+Run till exit from #0  LESSON-19-C.isEven.sc (VarI=4) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c.k:6
+0x00000000002b2662 in LblisEven'LParUndsRParUnds'LESSON-19-C'Unds'Bool'Unds'Int (_1=4) at /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-c.k:5
+5         syntax Bool ::= isEven(Int) [function]
+Value returned is $1 = true
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) breakpoint set --name LESSON-19-C.isEven.sc
+Breakpoint 1: where = interpreter`LESSON-19-C.isEven.sc + 1 at lesson-19-c.k:6:18, address = 0x00000001000038c1
+(lldb) run
+Process 52530 launched: '/Users/brucecollie/code/scratch/lesson-19-c-kompiled/interpreter' (x86_64)
+Process 52530 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x00000001000038c1 interpreter`LESSON-19-C.isEven.sc(VarI=0x0000000101800088) at lesson-19-c.k:6:18
+   3   	  imports BOOL
+   4   	
+   5   	  syntax Bool ::= isEven(Int) [function]
+-&gt; 6   	  rule [isEven]: isEven(I) =&gt; true requires I %Int 2 ==Int 0
+   7   	  rule [isOdd]: isEven(I) =&gt; false requires I %Int 2 =/=Int 0
+   8   	
+   9   	endmodule
+(lldb) finish
+Process 52649 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = step out
+Return value: (bool) $0 = true
+
+    frame #0: 0x00000001000069e5 interpreter`LblisEven'LParUndsRParUnds'LESSON-19-C'Unds'Bool'Unds'Int(_1=0x0000000101800088) at lesson-19-c.k:5:19
+   2   	  imports INT
+   3   	  imports BOOL
+   4   	
+-&gt; 5   	  syntax Bool ::= isEven(Int) [function]
+   6   	  rule [isEven]: isEven(I) =&gt; true requires I %Int 2 ==Int 0
+   7   	  rule [isOdd]: isEven(I) =&gt; false requires I %Int 2 =/=Int 0
+   8
+(lldb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here we have used the built-in command <code>finish</code> to tell us whether the side
+condition returned true or not. Note that once again, we see the substitution
+that was matched from the left-hand side. Like before, a variable will only
+appear here if it is used in the side condition.</p>
+<h2 id="debugging-rule-matching">Debugging rule matching</h2>
+<p>Sometimes it is useful to try to determine why a particular rule did or did
+not apply. K provides some basic debugging commands which make it easier
+to determine this.</p>
+<p>Consider the following K definition (<code>lesson-19-d.k</code>):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">19</span><span class="token operator">-</span>D
+
+  <span class="token keyword">syntax</span> Foo <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> foo<span class="token punctuation">(</span>Bar<span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Bar <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> bar<span class="token punctuation">(</span>Baz<span class="token punctuation">)</span> <span class="token operator">|</span> bar2<span class="token punctuation">(</span>Baz<span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Baz <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> baz<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> baz2<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> <span class="token punctuation">[</span>baz<span class="token punctuation">]</span><span class="token punctuation">:</span> foo<span class="token punctuation">(</span>bar<span class="token punctuation">(</span>baz<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Suppose we try to run the program <code>foo(bar(baz2()))</code>. It is obvious from this
+example why the rule in this definition will not apply. However, in practice,
+such cases are not always obvious. You might look at a rule and not immediately
+spot why it didn't apply on a particular term. For this reason, it can be
+useful to get the debugger to provide a log about how it tried to match that
+term. You can do this with the <code>k match</code> command. If you are stopped after
+having run <code>k start</code> or <code>k step</code>, you can obtain this log for any rule after
+any step by running the command <code>k match MODULE.label subject</code> for a particular
+top-level rule label.</p>
+<p>For example, with the <code>baz</code> rule above, we get the following output:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) k match LESSON-19-D.baz subject
+Subject:
+baz2 ( )
+does not match pattern:
+baz ( )
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(lldb) k match LESSON-19-D.baz subject
+Subject:
+baz2 ( )
+does not match pattern:
+baz ( )
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As we can see, it provided the exact subterm which did not match against the
+rule, as well as the particular subpattern it ought to have matched against.</p>
+<p>This command does not actually take any rewrite steps. In the event that
+matching actually succeeds, you will still need to run the <code>k step</code> command
+to advance to the next step.</p>
+<h2 id="final-notes">Final notes</h2>
+<p>In addition to the functionality provided above, you have the full power of
+GDB or LLDB at your disposal when debugging. Some features are not particularly
+well-adapted to K code and may require more advanced knowledge of the
+term representation or implementation to use effectively, but anything that
+can be done in GDB or LLDB can in theory be done using this debugging functionality.
+We suggest you refer to the
+<a href="https://www.gnu.org/software/gdb/documentation/" target="_blank" rel="noreferrer noopener">GDB Documentation</a> or
+<a href="https://lldb.llvm.org/use/tutorial.html" target="_blank" rel="noreferrer noopener">LLDB Tutorial</a> if you
+want to try to do something and are unsure as to how.</p>
+<h2 id="exercises">Exercises</h2>
+<ol>
+<li>Compile your solution to Lesson 1.18, Exercise 2 with debugging support
+enabled and step through several programs you have previously used to test.
+Then set a breakpoint on the <code>isKResult</code> function and observe the state of the
+interpreter when stopped at that breakpoint. Set a breakpoint on the rule for
+addition and run a program that causes it to be stopped at that breakpoint.
+Finally, step through the program until the addition symbol is at the top
+of the K cell, and then use the <code>k match</code> command to report the reason why
+the subtraction rule does not apply. You may need to modify the definition
+to insert some rule labels.</li>
+</ol>
+<h2 id="next-lesson">Next lesson</h2>
+<p>Once you have completed the above exercises, you can continue to
+<a href="../20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a>.</p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#lesson-1.19%3A-debugging-with-gdb-or-lldb" class="bd-toc-link">Lesson 1.19: Debugging with GDB or LLDB</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#caveats"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Caveats
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#getting-started" class="bd-toc-link">Getting started</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#gdb-%2F-linux"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                GDB / Linux
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#lldb-%2F-macos"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                LLDB / macOS
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#basic-commands"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Basic commands
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#breakpoints"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Breakpoints
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#advanced-breakpoints"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Advanced breakpoints
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#debugging-rule-matching"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Debugging rule matching
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#final-notes"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Final notes
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercises"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Exercises
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#next-lesson"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Next lesson
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

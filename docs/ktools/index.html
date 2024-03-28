@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/docs/ktools/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../assets/img/favicon.ico" />
+
+<title>K Tools | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../index.html">
+    <picture>
+      <source
+        srcset="../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="markdown-preview"><html><head></head><body><h1 id="k-tools">K Tools</h1>
+<p>Here we document how to use some of the most commonly used K tools.</p>
+<h2 id="minimizing-output">Minimizing Output</h2>
+<p>When one is working with <code>kore-repl</code> or the prover in general and looking at
+specific configurations using config, sometimes the configurations can be huge.</p>
+<p>One tool to help print configuration compactly is the <code>pyk print</code> utility:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh">pyk print
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>We are going to use <code>--minimize</code> option (which is actually used automatically
+when printing with pyk). This will filter out many uninteresting cells for the
+current config and make the result more compact.</p>
+<p>Then, when invoking the prover, you can minimize your output by piping it into
+the <code>pyk print ...</code> facility with arguments for controlling the output:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh">kprove <span class="token parameter variable">--output</span> json <span class="token parameter variable">--definition</span> DEFN <span class="token punctuation">..</span>. <span class="token punctuation">\</span>
+    <span class="token operator">|</span> jq .term                             <span class="token punctuation">\</span>
+    <span class="token operator">|</span> pyk print DEFN /dev/stdin --omit-labels <span class="token punctuation">..</span>. --keep-labels <span class="token punctuation">..</span>.
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>You can also use this in the <code>kore-repl</code> more easily, by making a help script.
+In your current directory, save a new script <code>pykprint.sh</code>:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh"><span class="token shebang important">#!/bin/bash</span>
+
+kast <span class="token parameter variable">--input</span> kore <span class="token parameter variable">--output</span> json <span class="token parameter variable">--definition</span> <span class="token variable">$1</span> /dev/stdin <span class="token punctuation">\</span>
+    <span class="token operator">|</span> jq .term                                             <span class="token punctuation">\</span>
+    <span class="token operator">|</span> pyk print <span class="token variable">$1</span> /dev/stdin --omit-labels <span class="token variable">$2</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Now call <code>config | bash pykprint.sh DEFN</code> in Kore REPL to make the output
+smaller.</p>
+<p>The options you have to control the output are as follows:</p>
+<ul>
+<li><code>--no-minimize</code>: do not remove uninteresting cells.</li>
+<li><code>--omit-cells</code>: remove the selected cells from the output.</li>
+<li><code>--keep-cells</code>: keep only the selected cells in the output.</li>
+</ul>
+<p>Note: Make sure that there is no whitespace around , in the omit list,
+otherwise you'll get an error (, is a list separator, so this
+requirement is strict).</p>
+<h2 id="debugging">Debugging</h2>
+<p>The LLVM Backend has support for integration with GDB. You can run the debugger
+on a particular program by passing the <code>--debugger</code> flag to krun, or by
+invoking the llvm backend interpreter directly. Below we provide a simple
+tutorial to explain some of the basic commands supported by the LLVM backend.</p>
+<h3 id="lldb-support">LLDB Support</h3>
+<p>GDB is not well-supported on macOS, particularly on newer OS versions and Apple
+Silicon ARM hardware. Consequently, if the <code>--debugger</code> option is passed to krun
+on macOS, LLDB[^1] is launched instead of GDB. However, the K-specific debugger
+scripts that GDB uses have not been ported to LLDB yet, and so the instructions
+in the rest of this section will not work.</p>
+<h3 id="the-k-definition">The K Definition</h3>
+<p>Here is a sample K definition we will use to demonstrate debugging
+capabilities:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> TEST
+  <span class="token keyword">imports</span> INT
+
+  <span class="token keyword">configuration</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> foo<span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token punctuation">[</span>test<span class="token punctuation">]</span><span class="token punctuation">:</span> I<span class="token punctuation">:</span><span class="token keyword">Int</span> <span class="token operator">=&gt;</span> I <span class="token operator">+</span><span class="token keyword">Int</span> <span class="token number">1</span> <span class="token keyword">requires</span> I &lt;<span class="token keyword">Int</span> <span class="token number">10</span>
+
+  <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> foo<span class="token punctuation">(</span><span class="token keyword">Int</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> foo<span class="token punctuation">(</span>I<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token number">0</span> <span class="token operator">-</span><span class="token keyword">Int</span> I
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>You should compile this definition with <code>--backend llvm --enable-llvm-debug</code> to
+use the debugger most effectively.</p>
+<h3 id="stepping">Stepping</h3>
+<p><strong>Important:</strong> When you first run <code>krun</code> with option <code>--debugger</code>, GDB / LLDB
+will instruct you on how to modify <code>~/.gdbinit</code> or <code>~/.lldbinit</code> to enable
+printing abstract syntax of K terms in the debugger. If you do not perform this
+step, you can still use all the other features, but K terms will be printed as
+their raw address in memory.</p>
+<p>GDB will need the kompiled interpreter in its safe path in order to access the
+pretty printing python script within it. A good way to do this would be to pick
+a minimum top-level path that covers all of your kompiled semantics (ie. <code>set auto-load safe-path ~/k-semantics</code>). LLDB has slightly different security
+policies that do not require fully-arbitrary code execution.</p>
+<p>This section uses GDB syntax to demonstrate the debugging features. Please
+refer to the <a href="https://lldb.llvm.org/use/map.html" target="_blank" rel="noreferrer noopener">GDB to LLDB command map</a> on
+macOS.</p>
+<p>You can break before every step of execution is taken by setting a breakpoint
+on the <code>k_step</code> function.</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break definition.kore:k_step
+Breakpoint 1 at 0x25e340
+(gdb) run
+Breakpoint 1, 0x000000000025e340 in step (subject=`&lt;generatedTop&gt;{}`(`&lt;k&gt;{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("0", "Int")),dotk{}(.KList))),`&lt;generatedCounter&gt;{}`(#token("0", "Int"))))
+(gdb) continue
+Continuing.
+
+Breakpoint 1, 0x000000000025e340 in step (subject=`&lt;generatedTop&gt;{}`(`&lt;k&gt;{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("1", "Int")),dotk{}(.KList))),`&lt;generatedCounter&gt;{}`(#token("0", "Int"))))
+(gdb) continue 2
+Will ignore next crossing of breakpoint 1.  Continuing.
+
+Breakpoint 1, 0x000000000025e340 in step (subject=`&lt;generatedTop&gt;{}`(`&lt;k&gt;{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("3", "Int")),dotk{}(.KList))),`&lt;generatedCounter&gt;{}`(#token("0", "Int"))))
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="breaking-on-a-specific-rule">Breaking on a specific rule</h3>
+<p>You can break when a rule is applied by giving the rule a rule label. If the
+module name is TEST and the rule label is test, you can break when the rule
+applies by setting a breakpoint on the <code>TEST.test.rhs</code> function:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break TEST.test.rhs
+Breakpoint 1 at 0x25e250: file /home/dwightguth/test/./test.k, line 4.
+(gdb) run
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`&lt;generatedCounter&gt;{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that the substitution associated with that rule is visible in the
+description of the frame.</p>
+<p>You can also break when a side condition is applied using the <code>TEST.test.sc</code>
+function:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break TEST.test.sc
+Breakpoint 1 at 0x25e230: file /home/dwightguth/test/./test.k, line 4.
+(gdb) run
+Breakpoint 1, TEST.test.sc (VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that every variable used in the side condition can have its value
+inspected when stopped at this breakpoint, but other variables are not visible.</p>
+<p>You can also break on a rule by its location:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break test.k:4
+Breakpoint 1 at 0x25e230: test.k:4. (2 locations)
+(gdb) run
+Breakpoint 1, TEST.test.sc (VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`&lt;generatedCounter&gt;{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.sc (VarI=#token("1", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that this sets a breakpoint at two locations: one on the side condition
+and one on the right hand side. If the rule had no side condition, the first
+would not be set. You can also view the locations of the breakpoints and
+disable them individually:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) info breakpoint
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   &lt;MULTIPLE&gt;
+        breakpoint already hit 3 times
+1.1                         y     0x000000000025e230 in TEST.test.sc at /home/dwightguth/test/./test.k:4
+1.2                         y     0x000000000025e250 in TEST.test.rhs at /home/dwightguth/test/./test.k:4
+(gdb) disable 1.1
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`&lt;generatedCounter&gt;{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("1", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`&lt;generatedCounter&gt;{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("2", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int =&gt; I +Int 1 requires I &lt;Int 10
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Now only the breakpoint when the rule applies is enabled.</p>
+<h3 id="breaking-on-a-function">Breaking on a function</h3>
+<p>You can also break when a particular function in your semantics is invoked:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) info functions foo
+All functions matching regular expression "foo":
+
+File /home/dwightguth/test/./test.k:
+struct __mpz_struct *Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int(struct __mpz_struct *);
+(gdb) break Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int
+Breakpoint 1 at 0x25e640: file /home/dwightguth/test/./test.k, line 6.
+(gdb) run
+Breakpoint 1, Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) at /home/dwightguth/test/./test.k:6
+6         syntax Int ::= foo(Int) [function]
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this case, the variables have numbers instead of names because the names of
+arguments in functions in K come from rules, and we are stopped before any
+specific rule has applied. For example, <code>_1</code> is the first argument to the
+function.</p>
+<p>You can also set a breakpoint in this location by setting it on the line
+associated with its production:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) break test.k:6
+Breakpoint 1 at 0x25e640: file /home/dwightguth/test/./test.k, line 6.
+(gdb) run
+Breakpoint 1, Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) at /home/dwightguth/test/./test.k:6
+6         syntax Int ::= foo(Int) [function]
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>These two syntaxes are equivalent; use whichever is easier for you.</p>
+<p>You can also view the stack of function applications:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(gdb) bt
+#0  Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) at /home/dwightguth/test/./test.k:6
+#1  0x000000000025e5f8 in apply_rule_111 (VarDotVar0=`&lt;generatedCounter&gt;{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList)) at /home/dwightguth/test/./test.k:9
+#2  0x0000000000268a52 in take_steps ()
+#3  0x000000000026b7b4 in main ()
+(gdb)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here we see that <code>foo</code> was invoked while applying the rule on line 9 of test.k,
+and we also can see the substitution of that rule. If foo was evaluated while
+evaluating another function, we would also be able to see the arguments of that
+function as well, unless the function was tail recursive, in which case no
+stack frame would exist once the tail call was performed.</p>
+<h3 id="breaking-on-a-set-of-rules-or-functions">Breaking on a set of rules or functions</h3>
+<p>Using <code>rbreak &lt;regex&gt;</code> you can set breakpoints on multiple functions.</p>
+<ul>
+<li>
+<p><code>rbreak Lbl</code> - sets a breakpoint on all non hooked <code>function</code>s</p>
+</li>
+<li>
+<p><code>rbreak Lbl.*TEST</code> - sets a breakpoint on all <code>function</code>s from module <code>TEST</code></p>
+</li>
+<li>
+<p><code>rbreak hook_INT</code> - sets a breakpoint on all hooks from module <code>INT</code></p>
+</li>
+</ul>
+<h3 id="other-debugger-issues">Other debugger issues</h3>
+<ul>
+<li><code>&lt;optimized out&gt;</code> try kompiling without <code>-O1</code>, <code>-O2</code>, or <code>-O3</code>.</li>
+<li><code>(gdb) break definition.kore:break -&gt; No source file named definition.kore.</code>
+send <code>--enable-llvm-debug</code> to kompile in order to generate debug info symbols.</li>
+</ul>
+<h2 id="profiling-your-k-semantics">Profiling your K semantics</h2>
+<p>The first thing to be aware of is in order to get meaningful data,
+you need to build the semantics and all of its dependencies with
+optimizations enabled but <em>without the frame pointer elimination
+optimization</em>. For example, for EVM, this means rebuilding GMP, MPFR,
+JEMalloc, Crypto++, SECP256K1, etc with the following <code>exports</code>.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh"><span class="token builtin class-name">export</span> <span class="token assign-left variable">CFLAGS</span><span class="token operator">=</span><span class="token string">"-DNDEBUG -O2 -fno-omit-frame-pointer"</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">CXXFLAGS</span><span class="token operator">=</span><span class="token string">"-DNDEBUG -O2 -fno-omit-frame-pointer"</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>You can skip this step, but if you do, any samples within these
+libraries will not have correct stack trace information, which means
+you will likely not get a meaningful set of data that will tell you
+where the majority of time is really being spent. Don't worry about
+rebuilding literally every single dependency though. Just focus on the
+ones that you expect to take a non-negligible amount of runtime. You
+will be able to tell if you haven't done enough later, and you can go
+back and rebuild more.  Once this is done, you then build K with
+optimizations and debug info enabled, like so:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh">mvn package <span class="token parameter variable">-Dproject.build.type</span><span class="token operator">=</span><span class="token string">"FastBuild"</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Next, you build the semantics with optimizations and debug info
+enabled (i.e., <code>kompile -ccopt -O2 --iterated -ccopt -fno-omit-frame-pointer</code>).</p>
+<p>Once all this is done, you should be ready to profile your
+application. Essentially, you should run whatever test suite you
+usually run, but with <code>perf record -g -- </code> prefixed to the front. For
+example, for KEVM it's the following command. (For best data, don't
+run this step in parallel.)</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh">perf record <span class="token parameter variable">-g</span> -- <span class="token function">make</span> test-conformance
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Finally, you want to filter out just the samples that landed within
+the llvm backend and view the report. For this, you need to know the
+name of the binary that was generated by your build system. Normally
+it is <code>interpreter</code>, but e.g. if you are building the web3 client for
+kevm, it would be <code>kevm-client</code>. You will want to run the following
+command.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh">perf report <span class="token parameter variable">-g</span> <span class="token parameter variable">-c</span> <span class="token variable">$binary_name</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>If all goes well, you should see a breakdown of where CPU time has
+been spent executing the application. You will know that sufficient
+time was spent rebuilding dependencies with the correct flags when the
+total time reported by the main method is close to 100%. If it's not
+close to 100%, this is probably because a decent amount of self time
+was reported in stack traces that were not built with frame pointers
+enabled, meaning that perf was unable to walk the stack. You will have
+to go back, rebuild the appropriate libraries, and then record your
+trace again.</p>
+<p>Your ultimate goal is to identify the hotspots that take the most
+time, and make them execute faster. Entries like <code>step</code> and
+<code>step_1234</code> like functions refer to the cost of matching. An entry
+like <code>side_condition_1234</code> is a side condition and <code>apply_rule_1234</code>
+is constructing the rhs of a rule. You can convert from this rule
+ordinal to a location using the <code>llvm-kompile-compute-loc</code> script in
+the bin folder of the llvm backend repo. For example,</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">sh</div><code class="language-sh">llvm-kompile-compute-loc <span class="token number">5868</span> evm-semantics/.build/defn/llvm/driver-kompiled
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>spits out the following text.</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>Line: 18529
+/home/dwightguth/evm-semantics/./.build/defn/llvm/driver.k:493:10
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>This is the line of <code>definition.kore</code> that the axiom appears on as
+well as the original location of the rule in the K semantics. You can
+use this information to figure out which rules and functions are
+causing the most time and optimize them to be more efficient.</p>
+<h2 id="running-tests---kserver">Running tests - kserver</h2>
+<p>The <code>kserver</code> is a front-end tool based on <a href="https://github.com/facebookarchive/nailgun" target="_blank" rel="noreferrer noopener">Nailgun</a>
+which helps to reduce the startup time of the JVM. Calling <code>kserver</code> in a terminal
+window will wait for all kompile/kprove calls and force them to run in the same process
+and share the same threads. This also reduces the thread contention significantly. <code>kompile</code>
+uses all the threads available to do rule parsing. Another benefit is that it saves caches,
+and each time you call kprove/kast, you can access those directly w/o extra disk usage.
+Running the <code>regression-new</code> integration tests on a powerful machine (32 threads) takes 8m,
+with the kserver active it takes 2m. You can start the kserver in two ways.</p>
+<ul>
+<li>blocking: call <code>kserver</code> in the command line. Close it after you are done testing. Useful for quick testing.</li>
+<li>non-blocking: call <code>spawn-kserver &lt;log.flie&gt;</code> and close it with <code>stop-kserver</code> - this is used for automation on CI</li>
+</ul>
+<p>Because we reuse caches, you should stop and restart the server between runs.
+The Nailgun implementation hasn't been updated in the last 3-5 years, and it's not compatible with Java 18 onwards.</p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#k-tools" class="bd-toc-link">K Tools</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#minimizing-output"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Minimizing Output
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#debugging" class="bd-toc-link">Debugging</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#lldb-support"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                LLDB Support
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#the-k-definition"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                The K Definition
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#stepping"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Stepping
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#breaking-on-a-specific-rule"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Breaking on a specific rule
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#breaking-on-a-function"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Breaking on a function
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#breaking-on-a-set-of-rules-or-functions"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Breaking on a set of rules or functions
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#other-debugger-issues"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Other debugger issues
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#profiling-your-k-semantics"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Profiling your K semantics
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#running-tests---kserver"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Running tests - kserver
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../assets/js/index.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

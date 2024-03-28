@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/k-tutorial/1_basic/03_parsing/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../assets/img/favicon.ico" />
+
+<title>Lesson 1.3: BNF Syntax and Parser Generation | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="lesson-1.3%3A-bnf-syntax-and-parser-generation">Lesson 1.3: BNF Syntax and Parser Generation</h1>
+<p>The purpose of this lesson is to explain the full syntax and semantics of
+<strong>productions</strong> in K as well as how productions and other syntactic
+<strong>sentences</strong> can be used to define grammars for use parsing both rules as well
+as programs.</p>
+<h2 id="k's-approach-to-parsing">K's approach to parsing</h2>
+<p>K's grammar is divided into two components: the <strong>outer syntax</strong> of K and the
+<strong>inner syntax</strong> of K.  Outer syntax refers to the parsing of <strong>requires</strong>,
+<strong>modules</strong>, <strong>imports</strong>, and <strong>sentences</strong> in a K definition. Inner syntax
+refers to the parsing of <strong>rules</strong> and <strong>programs</strong>. Unlike the outer syntax of
+K, which is predetermined, much of the inner syntax of K is defined by you, the
+developer. When rules or programs are parsed, they are parsed within the
+context of a module. Rules are parsed in the context of the module in which
+they exist, whereas programs are parsed in the context of the
+<strong>main syntax module</strong> of a K definition. The productions and other syntactic
+sentences in a module are used to construct the grammar of the module, which
+is then used to perform parsing.</p>
+<h2 id="basic-bnf-productions">Basic BNF productions</h2>
+<p>To illustrate how this works, we will consider a simple K definition which
+defines a relatively basic calculator capable of evaluating Boolean expressions
+containing and, or, not, and xor.</p>
+<p>Input the following program into your editor as file <code>lesson-03-a.k</code>:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">03</span><span class="token operator">-</span>A
+
+  <span class="token keyword">syntax</span> Boolean <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"true"</span> <span class="token operator">|</span> <span class="token string">"false"</span>
+                   <span class="token operator">|</span> <span class="token string">"!"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                   <span class="token operator">|</span> Boolean <span class="token string">"&amp;&amp;"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                   <span class="token operator">|</span> Boolean <span class="token string">"^"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                   <span class="token operator">|</span> Boolean <span class="token string">"||"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>You will notice that the productions in this file look a little different than
+the ones from the previous lesson. In point of fact, K has two different
+mechanisms for defining productions. We have previously been focused
+exclusively on the first mechanism, where the <code>::=</code> symbol is followed by an
+alphanumeric identifier followed by a comma-separated list of sorts in
+parentheses. However, this is merely a special case of a more generic mechanism
+for defining the syntax of productions using a variant of
+<a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form" target="_blank" rel="noreferrer noopener">BNF Form</a>.</p>
+<p>For example, in the previous lesson, we had the following set of productions:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">03</span><span class="token operator">-</span>B
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Yellow<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> Blue<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Banana<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> Blueberry<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> colorOf<span class="token punctuation">(</span>Fruit<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>It turns out that this is equivalent to the following definition which defines
+the same grammar, but using BNF notation:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">03</span><span class="token operator">-</span>C
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"Yellow"</span> <span class="token string">"("</span> <span class="token string">")"</span> <span class="token operator">|</span> <span class="token string">"Blue"</span> <span class="token string">"("</span> <span class="token string">")"</span>
+  <span class="token keyword">syntax</span> Fruit <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"Banana"</span> <span class="token string">"("</span> <span class="token string">")"</span> <span class="token operator">|</span> <span class="token string">"Blueberrry"</span> <span class="token string">"("</span> <span class="token string">")"</span>
+  <span class="token keyword">syntax</span> Color <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"colorOf"</span> <span class="token string">"("</span> Fruit <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this example, the sorts of the argument to the function are unchanged, but
+everything else has been wrapped in double quotation marks. This is because
+in BNF notation, we distinguish between two types of <strong>production items</strong>:
+<strong>terminals</strong> and <strong>non-terminals</strong>. A terminal represents simply a literal
+string of characters that is verbatim part of the syntax of that production.
+A non-terminal, conversely, represents a sort name, where the syntax of that
+production accepts any valid term of that sort at that position.</p>
+<p>This is why, when we wrote the program <code>colorOf(Banana())</code>, <code>krun</code> was able to
+execute that program: because it represented a term of sort <code>Color</code> that was
+parsed and interpreted by K's interpreter. In other words, <code>krun</code> parses and
+interprets terms according to the grammar defined by the developer. It is
+automatically converted into an AST of that term, and then the <code>colorOf</code>
+function is evaluated using the function rules provided in the definition.</p>
+<p>You can ask yourself: How does K match the strings between the double quotes?
+The answer is that K uses Flex to generate a scanner for the grammar. Flex looks
+for the longest possible match of a regular expression in the input. If there
+are ambiguities between 2 or more regular expressions, it will pick the one with
+the highest <code>prec</code> attribute. You can learn more about how Flex matching works
+<a href="https://westes.github.io/flex/manual/Matching.html#Matching" target="_blank" rel="noreferrer noopener">here</a>.</p>
+<p>Bringing us back to the file <code>lesson-03-a.k</code>, we can see that this grammar
+has given a simple BNF grammar for expressions over Booleans. We have defined
+constructors corresponding to the Boolean values true and false, and functions
+corresponding to the Boolean operators for and, or, not, and xor. We have also
+given a syntax for each of these functions based on their syntax in the <code>C</code>
+programming language. As such, we can now write programs in the simple language
+we have defined.</p>
+<p>Input the following program into your editor as <code>and.bool</code> in the same
+directory:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>true &amp;&amp; false
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>We cannot interpret this program yet, because we have not given rules defining
+the meaning of the <code>&amp;&amp;</code> function yet, but we can parse it. To do this, you can
+run (from the same directory):</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>kast --output kore and.bool
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>kast</code> is K's just-in-time parser. It will generate a grammar from your K
+definition on the fly and use it to parse the program passed on the command
+line. The <code>--output</code> flag controls how the resulting AST is represented; don't
+worry about the possible values yet, just use <code>kore</code>.</p>
+<p>You ought to get the following AST printed on standard output, minus the
+formatting:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>inj{SortBoolean{}, SortKItem{}}(
+  Lbl'UndsAnd-And-UndsUnds'LESSON-03-A'Unds'Boolean'Unds'Boolean'Unds'Boolean{}(
+    Lbltrue'Unds'LESSON-03-A'Unds'Boolean{}(),
+    Lblfalse'Unds'LESSON-03-A'Unds'Boolean{}()
+  )
+)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Don't worry about what exactly this means yet, just understand that it
+represents the AST of the program that you just parsed. You ought to be able
+to recognize the basic shape of it by seeing the words <code>true</code>, <code>false</code>, and
+<code>And</code> in there. This is <strong>Kore</strong>, the intermediate representation of K, and we
+will cover it in detail later.</p>
+<p>Note that you can also tell <code>kast</code> to print the AST in other formats. For a
+more direct representation of the original K, while still maintaining the
+structure of an AST, you can say <code>kast --output kast and.bool</code>. This will
+yield the following output:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>`_&amp;&amp;__LESSON-03-A_Boolean_Boolean_Boolean`(
+  `true_LESSON-03-A_Boolean`(.KList),
+  `false_LESSON-03-A_Boolean`(.KList)
+)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note how the first output is largely a name-mangled version of the second
+output. The one difference is the presence of the <code>inj</code> symbol in the KORE
+output. We will talk more about this in later lessons.</p>
+<h3 id="exercise">Exercise</h3>
+<p>Parse the expression <code>false || true</code> with <code>--output kast</code>. See if you can
+predict approximately what the corresponding output would be with
+<code>--output kore</code>, then run the command yourself and compare it to your
+prediction.</p>
+<h2 id="ambiguities">Ambiguities</h2>
+<p>Now let's try a slightly more advanced example. Input the following program
+into your editor as <code>and-or.bool</code>:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>true &amp;&amp; false || false
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>When you try and parse this program, you ought to see the following error:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>[Error] Inner Parser: Parsing ambiguity.
+1: syntax Boolean ::= Boolean "||" Boolean [function]
+
+`_||__LESSON-03-A_Boolean_Boolean_Boolean`(`_&amp;&amp;__LESSON-03-A_Boolean_Boolean_Boolean`(`true_LESSON-03-A_Boolean`(.KList),`false_LESSON-03-A_Boolean`(.KList)),`false_LESSON-03-A_Boolean`(.KList))
+2: syntax Boolean ::= Boolean "&amp;&amp;" Boolean [function]
+
+`_&amp;&amp;__LESSON-03-A_Boolean_Boolean_Boolean`(`true_LESSON-03-A_Boolean`(.KList),`_||__LESSON-03-A_Boolean_Boolean_Boolean`(`false_LESSON-03-A_Boolean`(.KList),`false_LESSON-03-A_Boolean`(.KList)))
+        Source(./and-or.bool)
+        Location(1,1,1,23)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This error is saying that <code>kast</code> was unable to parse this program because it is
+ambiguous. K's just-in-time parser is a GLL parser, which means it can handle
+the full generality of context-free grammars, including those grammars which
+are ambiguous. An ambiguous grammar is one where the same string can be parsed
+as multiple distinct ASTs. In this example, it can't decide whether it should
+be parsed as <code>(true &amp;&amp; false) || false</code> or as <code>true &amp;&amp; (false || false)</code>. As a
+result, it reports the error to the user.</p>
+<h2 id="brackets">Brackets</h2>
+<p>Currently there is no way of resolving this ambiguity, making it impossible
+to write complex expressions in this language. This is obviously a problem.
+The standard solution in most programming languages to this problem is to
+use parentheses to indicate the appropriate grouping. K generalizes this notion
+into a type of production called a <strong>bracket</strong>. A bracket production in K
+is any production with the <code>bracket</code> attribute. It is required that such a
+production only have a single non-terminal, and the sort of the production
+must equal the sort of that non-terminal. However, K does not otherwise
+impose restrictions on the grammar the user provides for a bracket. With that
+being said, the most common type of bracket is one in which a non-terminal
+is surrounded by terminals representing some type of bracket such as
+<code>()</code>, <code>[]</code>, <code>{}</code>, <code>&lt;&gt;</code>, etc. For example, we can define the most common
+type of bracket, the type used by the vast majority of programming languages,
+quite simply.</p>
+<p>Consider the following modified definition, which we will save to
+<code>lesson-03-d.k</code>:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> LESSON<span class="token operator">-</span><span class="token number">03</span><span class="token operator">-</span>D
+
+  <span class="token keyword">syntax</span> Boolean <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"true"</span> <span class="token operator">|</span> <span class="token string">"false"</span>
+                   <span class="token operator">|</span> <span class="token string">"("</span> Boolean <span class="token string">")"</span> <span class="token punctuation">[</span><span class="token class-name">bracket</span><span class="token punctuation">]</span>
+                   <span class="token operator">|</span> <span class="token string">"!"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                   <span class="token operator">|</span> Boolean <span class="token string">"&amp;&amp;"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                   <span class="token operator">|</span> Boolean <span class="token string">"^"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                   <span class="token operator">|</span> Boolean <span class="token string">"||"</span> Boolean <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this definition, if the user does not explicitly define parentheses, the
+grammar remains ambiguous and K's just-in-time parser will report an error.
+However, you are now able to parse more complex programs by means of explicitly
+grouping subterms with the bracket we have just defined.</p>
+<p>Consider <code>and-or-left.bool</code>:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(true &amp;&amp; false) || false
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Now consider <code>and-or-right.bool</code>:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>true &amp;&amp; (false || false)
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>If you parse these programs with <code>kast</code>, you will once again get a single
+unique AST with no error. If you look, you might notice that the bracket itself
+does not appear in the AST. In fact, this is a property unique to brackets:
+productions with the bracket attribute are not represented in the parsed AST
+of a term, and the child of the bracket is folded immediately into the parent
+term. This is the reason for the requirement that a bracket production have
+a single non-terminal of the same sort as the production itself.</p>
+<h3 id="exercise-1">Exercise</h3>
+<p>Write out what you expect the AST to be arising from parsing these two programs
+above with <code>--output kast</code>, then parse them yourself and compare them to the
+AST you expected. Confirm for yourself that the bracket production does not
+appear in the AST.</p>
+<h2 id="tokens">Tokens</h2>
+<p>So far we have seen how we can define the grammar of a language. However,
+the grammar is not the only relevant part of parsing a language. Also relevant
+is the lexical syntax of the language. Thus far, we have implicitly been using
+K's automatic lexer generation to generate a token in the scanner for each
+terminal in our grammar. However, sometimes we wish to define more complex
+lexical syntax. For example, consider the case of integers in C: an integer
+consists of a decimal, octal, or hexadecimal number followed by an optional
+suffix indicating the type of the literal.</p>
+<p>In theory it would be possible to define this syntax via a grammar, but not
+only would it be cumbersome and tedious, you would also then have to deal with
+an AST generated for the literal which is not convenient to work with.</p>
+<p>Instead of doing this, K allows you to define <strong>token</strong> productions, where
+a production consists of a <a href="https://en.wikipedia.org/wiki/Regular_expression" target="_blank" rel="noreferrer noopener">regular expression</a> followed by the <code>token</code>
+attribute, and the resulting AST consists of a typed string containing the
+value recognized by the regular expression.</p>
+<p>For example, the builtin integers in K are defined using the following
+production:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">.k .exclude</div><code class="k exclude"><span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> r<span class="token string">"[\\+-]?[0-9]+"</span> <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Here we can see that we have defined that an integer is an optional sign
+followed by a nonzero sequence of digits. The <code>r</code> preceding the terminal
+indicates that what appears inside the double quotes is a regular expression,
+and the <code>token</code> attribute indicates that terms which parse as this production
+should be converted into a token by the parser.</p>
+<p>It is also possible to define tokens that do not use regular expressions. This
+can be useful when you wish to declare particular identifiers for use in your
+semantics later. For example:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">.k .exclude</div><code class="k exclude"><span class="token keyword">syntax</span> <span class="token keyword">Id</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"main"</span> <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Here, we declare that <code>main</code> is a token of sort <code>Id</code>. Instead of being parsed
+as a symbol, it gets parsed as a token, generating a typed string in the AST.
+This is useful in a semantics of C because the parser generally does not treat
+the <code>main</code> function in C specially; only the semantics treats it specially.</p>
+<p>Of course, languages can have more complex lexical syntax. For example, if we
+wish to define the syntax of integers in C, we could use the following
+production:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">.k .exclude</div><code class="k exclude"><span class="token keyword">syntax</span> IntConstant <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> r<span class="token string">"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?"</span> <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>As you may have noted above, long and complex regular expressions
+can be hard to read. They also suffer from the problem that unlike a grammar,
+they are not particularly modular.</p>
+<p>We can get around this restriction by declaring explicit regular expressions,
+giving them a name, and then referring to them in productions.</p>
+<p>Consider the following (equivalent) way to define the lexical syntax of
+integers in C:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">.k .exclude</div><code class="k exclude"><span class="token keyword">syntax</span> IntConstant <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> r<span class="token string">"({DecConstant}|{OctConstant}|{HexConstant})({IntSuffix}?)"</span> <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+<span class="token keyword">syntax lexical</span> DecConstant <span class="token operator">=</span> r<span class="token string">"{NonzeroDigit}({Digit}*)"</span>
+<span class="token keyword">syntax lexical</span> OctConstant <span class="token operator">=</span> r<span class="token string">"0({OctDigit}*)"</span>
+<span class="token keyword">syntax lexical</span> HexConstant <span class="token operator">=</span> r<span class="token string">"{HexPrefix}({HexDigit}+)"</span>
+<span class="token keyword">syntax lexical</span> HexPrefix <span class="token operator">=</span> r<span class="token string">"0x|0X"</span>
+<span class="token keyword">syntax lexical</span> NonzeroDigit <span class="token operator">=</span> r<span class="token string">"[1-9]"</span>
+<span class="token keyword">syntax lexical</span> Digit <span class="token operator">=</span> r<span class="token string">"[0-9]"</span>
+<span class="token keyword">syntax lexical</span> OctDigit <span class="token operator">=</span> r<span class="token string">"[0-7]"</span>
+<span class="token keyword">syntax lexical</span> HexDigit <span class="token operator">=</span> r<span class="token string">"[0-9a-fA-F]"</span>
+<span class="token keyword">syntax lexical</span> IntSuffix <span class="token operator">=</span> r<span class="token string">"{UnsignedSuffix}({LongSuffix}?)|{UnsignedSuffix}{LongLongSuffix}|{LongSuffix}({UnsignedSuffix}?)|{LongLongSuffix}({UnsignedSuffix}?)"</span>
+<span class="token keyword">syntax lexical</span> UnsignedSuffix <span class="token operator">=</span> r<span class="token string">"[uU]"</span>
+<span class="token keyword">syntax lexical</span> LongSuffix <span class="token operator">=</span> r<span class="token string">"[lL]"</span>
+<span class="token keyword">syntax lexical</span> LongLongSuffix <span class="token operator">=</span> r<span class="token string">"ll|LL"</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As you can see, this is rather more verbose, but it has the benefit of both
+being much easier to read and understand, and also increased modularity.
+Note that we refer to a named regular expression by putting the name in curly
+brackets. Note also that only the first sentence actually declares a new piece
+of syntax in the language. When the user writes <code>syntax lexical</code>, they are only
+declaring a regular expression. To declare an actual piece of syntax in the
+grammar, you still must actually declare an explicit token production.</p>
+<p>One final note: K uses <a href="https://github.com/westes/flex" target="_blank" rel="noreferrer noopener">Flex</a> to implement
+its lexical analysis. As a result, you can refer to the
+<a href="http://westes.github.io/flex/manual/Patterns.html#Patterns" target="_blank" rel="noreferrer noopener">Flex Manual</a>
+for a detailed description of the regular expression syntax supported. Note
+that for performance reasons, Flex's regular expressions are actually a regular
+language, and thus lack some of the syntactic convenience of modern
+"regular expression" libraries. If you need features that are not part of the
+syntax of Flex regular expressions, you are encouraged to express them via
+a grammar instead.</p>
+<h2 id="ahead-of-time-parser-generation">Ahead-of-time parser generation</h2>
+<p>So far we have been entirely focused on K's support for just-in-time parsing,
+where the parser is generated on the fly prior to being used. This benefits
+from being faster to generate the parser, but it suffers in performance if you
+have to repeatedly parse strings with the same parser. For this reason, it is
+generally encouraged that when parsing programs, you use K's ahead-of-time
+parser generation. K makes use of
+<a href="https://www.gnu.org/software/bison/" target="_blank" rel="noreferrer noopener">GNU Bison</a> to generate parsers.</p>
+<p>By default, you can enable ahead-of-time parsing via the <code>--gen-bison-parser</code>
+flag to <code>kompile</code>. This will make use of Bison's LR(1) parser generator. As
+such, if your grammar is not LR(1), it may not parse exactly the same as if
+you were to use the just-in-time parser, because Bison will automatically pick
+one of the possible branches whenever it encounters a shift-reduce or
+reduce-reduce conflict. In this case, you can either modify your grammar to be
+LR(1), or you can enable use of Bison's GLR support by instead passing
+<code>--gen-glr-bison-parser</code> to <code>kompile</code>. Note that if your grammar is ambiguous,
+the ahead-of-time parser will not provide you with particularly readable error
+messages at this time.</p>
+<p>If you have a K definition named <code>foo.k</code>, and it generates a directory when
+you run <code>kompile</code> called <code>foo-kompiled</code>, you can invoke the ahead-of-time
+parser you generated by running <code>foo-kompiled/parser_PGM &lt;file&gt;</code> on a file.</p>
+<h2 id="exercises">Exercises</h2>
+<ol>
+<li>
+<p>Compile <code>lesson-03-d.k</code> with ahead-of-time parsing enabled. Then compare
+how long it takes to run <code>kast --output kore and-or-left.bool</code> with how long it
+takes to run <code>lesson-03-d-kompiled/parser_PGM and-or-left.bool</code>. Confirm for
+yourself that both produce the same result, but that the latter is faster.</p>
+</li>
+<li>
+<p>Define a simple grammar consisting of integers, brackets, addition,
+subtraction, multiplication, division, and unary negation. Integers should be
+in decimal form and lexically without a sign, whereas negative numbers can be
+represented via unary negation. Ensure that you are able to parse some basic
+arithmetic expressions using a generated ahead-of-time parser. Do not worry
+about disambiguating the grammar or about writing rules to implement the
+operations in this definition.</p>
+</li>
+<li>
+<p>Write a program where the meaning of the arithmetic expression based on
+the grammar you defined above is ambiguous, and then write programs that
+express each individual intended meaning using brackets.</p>
+</li>
+</ol>
+<h2 id="next-lesson">Next lesson</h2>
+<p>Once you have completed the above exercises, you can continue to
+<a href="../04_disambiguation/">Lesson 1.4: Disambiguating Parses</a>.</p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#lesson-1.3%3A-bnf-syntax-and-parser-generation" class="bd-toc-link">Lesson 1.3: BNF Syntax and Parser Generation</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#k's-approach-to-parsing"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                K's approach to parsing
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#basic-bnf-productions" class="bd-toc-link">Basic BNF productions</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercise"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Exercise
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#ambiguities"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Ambiguities
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#brackets" class="bd-toc-link">Brackets</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercise-1"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Exercise
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#tokens"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Tokens
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#ahead-of-time-parser-generation"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Ahead-of-time parser generation
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercises"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Exercises
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#next-lesson"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Next lesson
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

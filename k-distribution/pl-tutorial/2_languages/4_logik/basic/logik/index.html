@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../../../assets/img/favicon.ico" />
+
+<title>LOGIK | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><p>// NOTE: this definition is not runnable as is.
+// It is intended for documentation and academic purposes only.</p>
+<h1 id="logik">LOGIK</h1>
+<p>Author: Grigore Roșu (grosu@illinois.edu)<br>
+Organization: University of Illinois at Urbana-Champaign</p>
+<p>Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)<br>
+Organization: University of Bucharest</p>
+<h2 id="abstract">Abstract</h2>
+<p>This is the <strong>K</strong> semantic definition of LOGIK, a trivial language
+capturing the essence of the logic programming paradigm.  In this
+definition, we explicitly focus on simplicity and mathematical
+clarity, not on advanced logic programming features or performance.
+Those are covered in the LOGIK++ extension under <code>examples/logik++</code>.</p>
+<p>Specifically, a LOGIK program consists of a sequence of <strong>Horn clauses</strong>
+of the form</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>P :- P1, P2, ..., Pn .
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>followed by a <strong>query</strong> of the form</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>?- Q1, Q2, ..., Qm .
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>where <code>P</code>, <code>P1</code>, <code>P2</code>, ..., <code>Pn</code>, <code>Q1</code>, <code>Q2</code>,
+..., <code>Qm</code> are <strong>literals</strong>.  The
+symbol <code>:-</code> is read "if".  A literal has the form
+<code>p(T1,T2,...,Tk)</code>, where <code>p</code> is a <strong>predicate symbol</strong>
+and where <code>T1,T2,...,Tk</code> are <strong>terms</strong>.  Terms are built as
+usual, with <strong>operation symbols</strong> and <strong>variables</strong>.  A common
+convention in logic programming languages, also adopted here, is that
+variables are capitalized and operation symbols are not.  Operations
+with zero arguments are called <strong>constants</strong> and are written without
+parentheses, that is, <code>c</code> instead of <code>c()</code>.  Horn
+clauses without conditions, called <strong>facts</strong>, are written
+without <code>:-</code>, that is, <code>P.</code> instead of <code>P :- .</code>.</p>
+<p>For example, the LOGIK program below gives a few facts about a
+<code>parent</code> predicate, then several clauses defining some useful
+predicates including an <code>ancestor</code> predicate, and finally a
+query asking for those who both have ancestors and are ancestors
+themselves in the <code>parent</code> relation:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>parent(david,john).
+parent(jim,david).
+parent(steve,jim).
+parent(nathan,steve).
+
+grandparent(A,B):-
+  parent(A,X),
+  parent(X,B).
+
+ancestor(A,B):-
+  parent(A,X),
+  parents(X,B).
+
+parents(X,X).
+parents(A,B):-
+  ancestor(A,B).
+
+both(X) :- ancestor(A,X), ancestor(X,B).
+
+?- both(X).
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Above, we only have constant operation symbols, so these and variables
+are the only terms that can be used in predicates.  As expected, the
+LOGIK program above will give us three solutions for <code>X</code>:
+<code>david</code>, <code>steve</code>, and <code>jim</code>.  If we inline the
+<code>both(X)</code> predicate in the query, that is, if we replace the
+query with <code>?- ancestor(A,X), ancestor(X,B).</code> then we get
+10 solutions, one for for each triple <code>A</code>, <code>X</code>, and
+<code>B</code> satisfying both predicates <code>ancestor(A,X)</code> and
+<code>ancestor(X,B)</code>.</p>
+<p>As another example, the program below defines an <code>append</code>
+predicate followed by a simple goal:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+?- append(cons(a,nil), cons(b,nil), V).
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Besides the predicate symbol <code>append</code>, the program above also
+includes a constant symbol <code>nil</code> and a binary operation symbol
+<code>cons</code>.  Additionally, the query also includes two more
+constants, <code>a</code> and <code>b</code>.  The capitalized identifiers are
+all variables.  As expected, the LOGIK program above yields only one
+solution, namely <code>V = cons(a,cons(b,nil))</code>.  On the other hand,
+if we change the query to:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>?- append(L1, cons(a,L2), cons(a,cons(b,cons(a,nil)))).
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>then LOGIK yields two solutions: one where <code>L1</code> is
+<code>cons(a,cons(b,nil))</code> and <code>L2</code> is <code>nil</code>,
+and another where <code>L1</code> is <code>nil</code> and <code>L2</code> is
+<code>cons(a,cons(b,nil))</code>.</p>
+<p>The programs above all generated <strong>ground solutions</strong>, that is,
+solutions where the query variables are mapped to ground terms (i.e.,
+terms without variables).  Let us now consider the following query:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>?- append(cons(a,nil), Y, Z).
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>There are obviously infinitely many ground solutions for the query
+above, e.g.,<br>
+<code>Y = nil</code> and <code>Z = cons(a,nil)</code>,<br>
+<code>Y = cons(a,nil)</code> and <code>Z = cons(a,cons(a,nil))</code>,<br>
+<code>Y = cons(b,nil)</code> and <code>Z = cons(a,cons(b,nil))</code>,<br>
+<code>Y = cons(c,cons(b,nil))</code> and <code>Z = cons(a,cons(c,cons(b,nil)))</code>,<br>
+etc.  However, all the ground solutions for the query above can be
+elegantly characterized by the property that <code>Z</code> is bound to a list
+starting with <code>a</code> and followed by the list that <code>Y</code> is
+bound to.  This property can in fact be described as a <strong>symbolic solution</strong>
+to the query: <code>Z = cons(a,Y)</code> or, equivalently,
+<code>Y = Symb</code> and <code>Z = cons(a,Symb)</code>.  It is possible to
+define a ``more general than'' relation on such symbolic solutions,
+in the sense that the more particular solution can be obtained as a
+specialization/substitution of the more general one, and then it can
+be shown that the above is the <strong>most general solution</strong> to the
+stated query.  Logic programming languages, including our LOGIK,
+attempt to always compute such most general solutions.</p>
+<p>Logic programming languages are highly non-deterministic, in that
+several Horn clauses may be used at the same time, each possibly
+resulting in a different solution.  Implementations of logic
+programming languages consist of complex, optimized search and
+indexing algorithms, which we are not concerned with here.  Instead,
+we here take advantage of <strong>K</strong>'s builtin support for search.
+Specifically, to find all the solutions of a LOGIK program, we have to
+use <code>krun</code> with the option <code>--search</code>.  However, note
+that some programs have infinitely many solutions which cannot relate
+to each other by the "more general" relation.  For example, the query</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>?- append(L1, cons(a,L2), L3) .
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>To address such cases and terminate, logic programming languages allow
+the user to choose how many solutions to be computed and displayed.
+In LOGIK, we can use the <code>--bound</code> option of <code>krun</code> for
+this purpose.</p>
+<p>Finally, note that some queries have no solution.  In some cases that
+is easy to detect by exhaustive analysis, such as for the following
+query:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>?- append(cons(a,L1), L2, cons(b,L3)).
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Logic programming languages, including LOGIK, terminate in such cases
+and report a no solution answer.  However, there are cases where
+exhaustive analysis is not sufficient, such as for the query:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>?- append(cons(a,L), nil, L).
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>In such cases, logic programming languages do not terminate.  While
+one may devise techniques to detect non-termination in some cases,
+one cannot do it in general (same like for all Turing-complete
+languages).</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">requires</span> <span class="token string">"unification.k"</span>
+
+<span class="token keyword">module</span> LOGIK<span class="token operator">-</span>COMMON
+  <span class="token keyword">imports</span> DOMAINS<span class="token operator">-</span>SYNTAX
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="syntax">Syntax</h2>
+<p>The syntax of LOGIK is straightforward: a program is a sequence of
+Horn clauses followed by a query:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Literal
+  <span class="token keyword">syntax</span> Term <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Literal <span class="token operator">|</span> Literal <span class="token string">"("</span> Terms <span class="token string">")"</span>
+  <span class="token keyword">syntax</span> Terms <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> List<span class="token punctuation">{</span>Term<span class="token punctuation">,</span><span class="token string">","</span><span class="token punctuation">}</span>
+  <span class="token keyword">syntax</span> Clause <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Term <span class="token string">":-"</span> Terms <span class="token string">"."</span> <span class="token operator">|</span> Term <span class="token string">"."</span>
+  <span class="token keyword">syntax</span> Query <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"?-"</span> Terms <span class="token string">"."</span>
+  <span class="token keyword">syntax</span> Pgm <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Query <span class="token operator">|</span> Clause Pgm
+<span class="token keyword">endmodule</span>
+
+<span class="token keyword">module</span> LOGIK<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> LOGIK<span class="token operator">-</span>COMMON
+  <span class="token keyword">imports</span> BUILTIN<span class="token operator">-</span>ID<span class="token operator">-</span>TOKENS
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Variables and literals are defined as tokens following the conventions
+used in Prolog (variables start with _ or capital letter, while literals
+start with lower case letters):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> #KVariable <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> r<span class="token string">"[A-Z_][A-Za-z0-9_]*"</span>   <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">,</span> prec<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+                      <span class="token operator">|</span> #UpperId                 <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+  <span class="token keyword">syntax</span> Term <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> #KVariable <span class="token punctuation">[</span><span class="token class-name">klabel</span><span class="token punctuation">(</span>#SemanticCastToTerm<span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token keyword">syntax</span> Literal <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> r<span class="token string">"[a-z][a-zA-Z0-9_]*"</span>                 <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+                   <span class="token operator">|</span> #LowerId                              <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+<span class="token keyword">endmodule</span>
+
+<span class="token keyword">module</span> LOGIK
+  <span class="token keyword">imports</span> LOGIK<span class="token operator">-</span>COMMON
+  <span class="token keyword">imports</span> DOMAINS
+  <span class="token keyword">imports</span> UNIFICATION
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Unification is at the core of logic programming.  Here we are
+going to use the predefined unification procedure (the same one we
+used in the type inferencers in Tutorial 5).</p>
+<h2 id="configuration">Configuration</h2>
+<p>The configuration stores each clause in its own cell for easy access,
+and the most general unifier in a cell named <code>mgu</code>, same like
+the type inferencers.  The <code>k</code> cell holds the query and the
+<code>fresh</code> cell holds a fresh clause instance to be attempted on
+the next query item.  To more easily read the solutions, we add a
+second top-level cell, <code>solution</code>.  Both top cells are
+optional.  Indeed, we start with the main top cell and, when a
+solution is found, we move it into the <code>solution</code> cell and
+discard the main cell.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">configuration</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>T</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>yellow<span class="token punctuation">"</span></span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>?<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>green<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> $PGM<span class="token punctuation">:</span>Pgm <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>fresh</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>orange<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>fresh</span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>clauses</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>red<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+                    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>clause</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>pink<span class="token punctuation">"</span></span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>*<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>clause</span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>clauses</span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mgu</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mgu</span><span class="token punctuation">&gt;</span></span>
+                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>T</span><span class="token punctuation">&gt;</span></span>
+                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>solution</span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>?<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>K <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>solution</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="pre--and-post-processing">Pre- and post-processing</h2>
+<p>Before we launch the semantics, we first scan the given program and
+place each clause in its own cell, and then place the query in the
+<code>k</code> cell and initialize the mgu with the variables from the query.</p>
+<p>Note that we put a fresh instance of the clause to avoid interference with
+the query variables.  By a "fresh instance" of a clause we mean one whose
+variables are renamed with fresh names; we need that in order to avoid
+undesired unification conflicts due to particular names chosen for
+variables in the original program, as well as conflicts due to
+subsequent uses of the same clause.  It is safe to rename the
+variables in a clause, because clauses are universally quantified in
+their variables.  This process of creating a fresh instance of a
+clause is similar to how we created fresh instances of type schemas in
+the higher-order type inferencer discussed in Tutorial 5.  Indeed, we
+can safely regard clauses as "clause schemas" comprising infinitely
+many instances, one for each context.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> C<span class="token punctuation">:</span>Clause Pgm <span class="token operator">=&gt;</span> Pgm <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+       <span class="token punctuation">(</span><span class="token punctuation">.</span>Bag <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>clause</span><span class="token punctuation">&gt;</span></span> #renameVariables<span class="token punctuation">(</span>C<span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>clause</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token operator">?</span><span class="token operator">-</span> Ls<span class="token punctuation">:</span>Terms<span class="token punctuation">.</span> <span class="token operator">=&gt;</span> Ls <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mgu</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> #variablesMap<span class="token punctuation">(</span>#variables<span class="token punctuation">(</span>Ls<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mgu</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We also sequentialize the goals for easier processing:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> L<span class="token punctuation">:</span>Term<span class="token punctuation">,</span> Ls<span class="token punctuation">:</span>Terms <span class="token operator">=&gt;</span> L <span class="token operator">~&gt;</span> Ls
+  <span class="token keyword">rule</span> <span class="token punctuation">.</span>Terms <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>When all the goals are solved, indicated by the empty <code>k</code>
+cell, the calculated most general unifier (mgu) is in the <code>mgu</code>
+cell.  In that case, to ease reading of the final solution we move the
+mgu in the <code>solution</code> cell and delete the rest of the
+configuration:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>T</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mgu</span><span class="token punctuation">&gt;</span></span> Theta <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mgu</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>T</span><span class="token punctuation">&gt;</span></span>
+  <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>solution</span><span class="token punctuation">&gt;</span></span> Theta <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>solution</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>Since we are not interested in seeing the failed attempts to solve
+the query, we collapse all the error configurations into an empty
+configuration (recall that both top-level cells in the configuration
+were declared optional).  This way, if we see an empty configuration
+when we search for all solutions, we know that some attempts failed
+(but we do not know which ones).</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token comment">// this would be nice, but we need feedback from the external unifier</span>
+<span class="token comment">// for this.</span>
+<span class="token comment">//  rule &lt;T&gt;... &lt;mgu&gt; _:MguError &lt;/mgu&gt; ...&lt;/T&gt; =&gt; .</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="semantics">Semantics</h2>
+<p>Once all the infrastructure is in place, the actual semantics of LOGIK
+is quite simple.  All we have to do is to pick some (fresh instance of
+a) clause, then unify its conclusion with the first query literal, and
+then replace that literal with condition of the clause.  The intuition
+here is the following: to satisfy the first literal in the query, we
+need to find some instance of some clause that matches it, and then to
+similarly show that we can satisfy the conditions of that clause.
+Mathematically, this is an instance of the proof principle called
+<strong>resolution</strong>: if <code>p ∨ q</code> and <code>¬ p ∨ r</code> hold, then so does
+<code>q ∨ r</code>.  We let it as an exercise to the reader to see how the two
+relate (hint: assume the negation of the goal together with all the
+clauses, and then derive <strong>false</strong>).</p>
+<p>The following two rules are tightly connected and they together
+perform the following core task: pick a fresh instance of a clause
+which unifies with the first goal item, then add its conditions as new
+goals.</p>
+<p>Pick a clause and generate a fresh instance of it when the
+<code>fresh</code> cell is empty:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>fresh</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span> <span class="token operator">=&gt;</span> #renameVariables<span class="token punctuation">(</span>C<span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>fresh</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>clause</span><span class="token punctuation">&gt;</span></span> C <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>clause</span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> T<span class="token punctuation">:</span>Term <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">requires</span> #unifiable<span class="token punctuation">(</span>T<span class="token punctuation">,</span>head<span class="token punctuation">(</span>C<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">syntax</span> Term <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> head<span class="token punctuation">(</span>Clause<span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> head<span class="token punctuation">(</span>L<span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> L
+  <span class="token keyword">rule</span> head<span class="token punctuation">(</span>L<span class="token punctuation">:</span><span class="token operator">-</span>_<span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> L
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>If the goal is unifiable with the fresh clause's head, replace the goal
+with the clause body, and empty the <code>fresh</code> cell (so that
+another clause can be chosen using the rule above):</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> L<span class="token punctuation">:</span>Term <span class="token operator">=&gt;</span> <span class="token punctuation">.</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>fresh</span><span class="token punctuation">&gt;</span></span>  L<span class="token punctuation">:</span>Term <span class="token punctuation">.</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>fresh</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> L<span class="token punctuation">:</span>Term <span class="token punctuation">:</span>KItem <span class="token operator">=&gt;</span> Ls <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>fresh</span><span class="token punctuation">&gt;</span></span>  L<span class="token punctuation">:</span>Term <span class="token punctuation">:</span><span class="token operator">-</span> Ls<span class="token punctuation">:</span>Terms<span class="token punctuation">.</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>fresh</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that there is no problem if a clause is chosen whose
+conclusion literal does not unify with the first goal literal.
+The search
+option of <code>krun</code> will systematically try all clauses, so no
+solution is missed.  Of course, the above is not the most efficient
+way to implement a logic programming language, but recall that our
+objective here was to present a simple and mathematically clean
+solution.  We encourage the interested reader to consult the LOGIK++
+language definition for a more efficient definition of a richer logic
+programming language.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#logik" class="bd-toc-link">LOGIK</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#abstract"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Abstract
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#syntax"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Syntax
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#configuration"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Configuration
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#pre--and-post-processing"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Pre- and post-processing
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#semantics"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Semantics
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

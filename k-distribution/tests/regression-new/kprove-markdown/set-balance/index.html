@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/tests/regression-new/kprove-markdown/set-balance/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../../assets/img/favicon.ico" />
+
+<title>set_balance spec | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="set_balance-spec"><code>set_balance</code> spec</h1>
+<h2 id="state-model">State Model</h2>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">
+<span class="token keyword">module</span> SET<span class="token operator">-</span>BALANCE
+    <span class="token keyword">imports</span> INT
+    <span class="token keyword">imports</span> DOMAINS
+    <span class="token keyword">imports</span> COLLECTIONS
+
+    <span class="token keyword">configuration</span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>set-balance</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> $ACTION<span class="token punctuation">:</span>Action <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>now</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>now</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>events</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>List <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>events</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>return-value</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Result <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>return-value</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>call-stack</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>List <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>call-stack</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationFee</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationFee</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transferFee</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>transferFee</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+          <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>*<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Map<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>AccountId<span class="token punctuation">:</span>AccountId <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>vestingBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>vestingBalance</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>startingBlock</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>startingBlock</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>perBlock</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>perBlock</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nonce</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Nonce <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nonce</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>locks</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Set <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>locks</span><span class="token punctuation">&gt;</span></span>
+          <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>set-balance</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="data">Data</h2>
+<ul>
+<li>An <code>AccountId</code> is an <code>Int</code>.</li>
+<li>An <code>Origin</code> is an <code>AccountId</code>, <code>Root</code>, or <code>None</code>.</li>
+<li>A <code>Nonce</code> is an optional <code>Int</code>.</li>
+<li>An <code>Event</code> records some happenning.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> AccountId <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">".AccountId"</span> <span class="token operator">|</span> <span class="token keyword">Int</span>
+ <span class="token comment">// ---------------------------------------</span>
+
+    <span class="token keyword">syntax</span> Origin <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> AccountId <span class="token operator">|</span> <span class="token string">".Root"</span> <span class="token operator">|</span> <span class="token string">".None"</span>
+ <span class="token comment">// -----------------------------------------------</span>
+
+    <span class="token keyword">syntax</span> Nonce <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">".Nonce"</span> <span class="token operator">|</span> <span class="token keyword">Int</span>
+ <span class="token comment">// -------------------------------</span>
+
+    <span class="token keyword">syntax</span> Event <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> DustEvent <span class="token punctuation">(</span> <span class="token keyword">Int</span> <span class="token punctuation">)</span>
+ <span class="token comment">// ----------------------------------</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Some predicates which help specifying behavior:</p>
+<ul>
+<li><code>#inWidth</code>: Specify that a given number is in some bitwidth.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> #inWidth<span class="token punctuation">(</span><span class="token keyword">Int</span><span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// ---------------------------------------------------------</span>
+    <span class="token keyword">rule</span> #inWidth<span class="token punctuation">(</span>N<span class="token punctuation">,</span> M<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token number">0</span> <span class="token operator">&lt;=</span><span class="token keyword">Int</span> M andBool M &lt;<span class="token keyword">Int</span> <span class="token punctuation">(</span><span class="token number">2</span> <span class="token operator">^</span><span class="token keyword">Int</span> N<span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="results">Results</h2>
+<p>A <code>Result</code> is the return value of an execution step.</p>
+<ul>
+<li><code>AccountKilled</code> indicates that the free balance goes below the existential threshold.</li>
+<li><code>Updated</code> indicates that an account was updated successfully.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Result <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">".Result"</span> <span class="token operator">|</span> <span class="token string">"AccountKilled"</span> <span class="token operator">|</span> <span class="token string">"Updated"</span>
+ <span class="token comment">// ---------------------------------------------------------</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="public-getters">Public Getters</h2>
+<h3 id="total_balance"><code>total_balance</code></h3>
+<p>Retrieves the total balance of an account.  This includes both the free and
+reserved balances.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"total_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// -----------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> total_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">+</span><span class="token keyword">Int</span> reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h3 id="free_balance"><code>free_balance</code></h3>
+<p>Gets the free balance of an account.</p>
+<p>Other than when this module is executing, this will never be strictly between
+<code>EXISTENTIAL_DEPOSIT</code> and zero.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"free_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// ----------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span>    free_balance<span class="token punctuation">(</span>_<span class="token punctuation">)</span>   <span class="token operator">=&gt;</span> <span class="token number">0</span> <span class="token punctuation">[</span>owise<span class="token punctuation">]</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> FREE_BALANCE <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="reserved_balance"><code>reserved_balance</code></h3>
+<p>Gets the reserved balance of an account.</p>
+<p>Other than when this module is executing, this will never be strictly between
+<code>EXISTENTIAL_DEPOSIT</code> and zero.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"reserved_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// --------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span>    reserved_balance<span class="token punctuation">(</span>_<span class="token punctuation">)</span>   <span class="token operator">=&gt;</span> <span class="token number">0</span> <span class="token punctuation">[</span>owise<span class="token punctuation">]</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> FREE_BALANCE <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="can_slash"><code>can_slash</code></h3>
+<p>Determines if an account’s free balance is over the value provided.  This is
+often used to determine if an account has enough balance to cover a potential
+slash, hence the name.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"can_slash"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// ----------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span>    can_slash<span class="token punctuation">(</span>_<span class="token punctuation">,</span> _<span class="token punctuation">)</span>        <span class="token operator">=&gt;</span> <span class="token boolean">false</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> can_slash<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> FREE_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> AMOUNT <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="total_issuance"><code>total_issuance</code></h3>
+<p>Retrieves the total outstanding amount of currency outstanding.  This will
+always be equal to the sum of all free and reserved balances in all active
+accounts, except when the balances module is executing.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"total_issuance"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// ------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> total_issuance <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="issue"><code>issue</code></h3>
+<p>Issues currency, creating an imbalance.</p>
+<p>This is not specified, since these semantics do not include the concept of an
+imbalance.  Without the concept of destructors and move semantics, it would be
+almost impossible to use correctly.</p>
+<h3 id="burn"><code>burn</code></h3>
+<p>Burns currency.</p>
+<p>This is not part of the semantics for the same reason <code>burn</code> is not.</p>
+<h2 id="actions-and-results">Actions and Results</h2>
+<p>An <code>Action</code> is an execution step (or the result of an execution step).
+An <code>EntryAction</code> is an <code>Action</code> that can be invoked externally.
+A <code>Result</code> is considered an <code>Action</code>, as is an <code>EntryAction</code>.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Result <span class="token operator">|</span> EntryAction
+ <span class="token comment">// --------------------------------------</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h3 id="account_exists"><code>account_exists</code></h3>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"account_exists"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// -------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span>    account_exists<span class="token punctuation">(</span>_<span class="token punctuation">)</span>   <span class="token operator">=&gt;</span> <span class="token boolean">false</span> <span class="token punctuation">[</span>owise<span class="token punctuation">]</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> account_exists<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">true</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="create_account"><code>create_account</code></h3>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"create_account"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span>
+ <span class="token comment">// ----------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> create_account<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">(</span> <span class="token punctuation">.</span>Bag <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="set_free_balance"><code>set_free_balance</code></h3>
+<ul>
+<li>Updates an accounts balance if the new balance is above the existential threshold.</li>
+<li>Kills the account if the balance goes below the existential threshold and the reserved balance is non-zero.</li>
+<li>Reaps the account if the balance goes below the existential threshold and the reserved balance is zero.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"set_free_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// --------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">(</span><span class="token punctuation">.</span>K <span class="token operator">=&gt;</span> create_account<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">~&gt;</span> set_free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> _<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> notBool account_exists<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>free<span class="token operator">-</span>account<span class="token operator">-</span>updated<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> EXISTENTIAL_DEPOSIT <span class="token operator">&lt;=</span><span class="token keyword">Int</span> BALANCE
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>free<span class="token operator">-</span>account<span class="token operator">-</span>killed<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>events</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">(</span><span class="token punctuation">.</span>List <span class="token operator">=&gt;</span> ListItem<span class="token punctuation">(</span>DustEvent<span class="token punctuation">(</span>FREE_BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>events</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nonce</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>Nonce <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nonce</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token operator">=&gt;</span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> RESERVED_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Int</span> <span class="token attr-name">EXISTENTIAL_DEPOSIT</span>
+       <span class="token attr-name">andBool</span> <span class="token attr-name">0</span> <span class="token attr-name">&lt;Int</span> <span class="token attr-name">RESERVED_BALANCE</span>
+
+    <span class="token attr-name">rule</span> <span class="token attr-name"><span class="token namespace">[free-account-reaped]:</span></span>
+         <span class="token attr-name">&lt;k</span><span class="token punctuation">&gt;</span></span> set_free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>events</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">(</span><span class="token punctuation">.</span>List <span class="token operator">=&gt;</span> ListItem<span class="token punctuation">(</span>DustEvent<span class="token punctuation">(</span>FREE_BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>events</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">(</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+               <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+          <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>Bag
+           <span class="token punctuation">)</span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> BALANCE &lt;<span class="token keyword">Int</span> EXISTENTIAL_DEPOSIT
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="set_reserved_balance"><code>set_reserved_balance</code></h3>
+<ul>
+<li>Updates an accounts balance if the new balance is above the existential threshold.</li>
+<li>Kills the account if the balance goes below the existential threshold and the free balance is non-zero.</li>
+<li>Reaps the account if the balance goes below the existential threshold and the free balance is zero.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"set_reserved_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">(</span><span class="token punctuation">.</span>K <span class="token operator">=&gt;</span> create_account<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">~&gt;</span> set_reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> _<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> notBool account_exists<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>reserved<span class="token operator">-</span>account<span class="token operator">-</span>updated<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> EXISTENTIAL_DEPOSIT <span class="token operator">&lt;=</span><span class="token keyword">Int</span> BALANCE
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>reserved<span class="token operator">-</span>account<span class="token operator">-</span>killed<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>events</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">(</span><span class="token punctuation">.</span>List <span class="token operator">=&gt;</span> ListItem<span class="token punctuation">(</span>DustEvent<span class="token punctuation">(</span>RESERVED_BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>events</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nonce</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>Nonce <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nonce</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> RESERVED_BALANCE <span class="token operator">=&gt;</span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Int</span> <span class="token attr-name">EXISTENTIAL_DEPOSIT</span>
+       <span class="token attr-name">andBool</span> <span class="token attr-name">0</span> <span class="token attr-name">&lt;Int</span> <span class="token attr-name">FREE_BALANCE</span>
+
+    <span class="token attr-name">rule</span> <span class="token attr-name"><span class="token namespace">[reserved-account-reaped]:</span></span>
+         <span class="token attr-name">&lt;k</span><span class="token punctuation">&gt;</span></span> set_reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>events</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">(</span><span class="token punctuation">.</span>List <span class="token operator">=&gt;</span> ListItem<span class="token punctuation">(</span>DustEvent<span class="token punctuation">(</span>RESERVED_BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>events</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">(</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> RESERVED_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+               <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+          <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>Bag
+           <span class="token punctuation">)</span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> BALANCE &lt;<span class="token keyword">Int</span> EXISTENTIAL_DEPOSIT
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="set_balance"><code>set_balance</code></h3>
+<ul>
+<li>Sets the new free balance</li>
+<li>Creates suitible imbalances (both positive and negative).</li>
+<li>Calls <code>set_free_balance</code> with the new free balance.</li>
+<li>Calls <code>set_reserved_balance</code> with the new reserved balance.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> EntryAction <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"set_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ------------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>balance<span class="token operator">-</span>set<span class="token punctuation">]</span><span class="token punctuation">:</span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_balance<span class="token punctuation">(</span>_<span class="token punctuation">,</span> WHO<span class="token punctuation">,</span> FREE_BALANCE<span class="token punctuation">,</span> RESERVED_BALANCE<span class="token punctuation">)</span>
+         <span class="token operator">=&gt;</span> set_balance_free<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> FREE_BALANCE<span class="token punctuation">)</span>
+         <span class="token operator">~&gt;</span> set_balance_reserved<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> RESERVED_BALANCE<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Helpers for calling <code>set_free_balance</code> and <code>set_reserved_balance</code>.</p>
+<ul>
+<li>Sets the new free balance</li>
+<li>Emits an imbalance event</li>
+<li>Helper function for <code>set_balance</code></li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"set_balance_free"</span>     <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"set_balance_reserved"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>balance<span class="token operator">-</span>set<span class="token operator">-</span>free<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_balance_free<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> FREE_BALANCE<span class="token string">') =&gt; set_free_balance(WHO, FREE_BALANCE'</span><span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> ISSUANCE <span class="token operator">=&gt;</span> ISSUANCE <span class="token operator">+</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>FREE_BALANCE' <span class="token operator">-</span><span class="token keyword">Int</span> free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> #inWidth<span class="token punctuation">(</span><span class="token number">96</span><span class="token punctuation">,</span> ISSUANCE <span class="token operator">+</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>FREE_BALANCE' <span class="token operator">-</span><span class="token keyword">Int</span> free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>balance<span class="token operator">-</span>set<span class="token operator">-</span>reserved<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> set_balance_reserved<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> RESERVED_BALANCE<span class="token string">') =&gt; set_reserved_balance(WHO, RESERVED_BALANCE'</span><span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> ISSUANCE <span class="token operator">=&gt;</span> ISSUANCE <span class="token operator">+</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>RESERVED_BALANCE' <span class="token operator">-</span><span class="token keyword">Int</span> reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> #inWidth<span class="token punctuation">(</span><span class="token number">96</span><span class="token punctuation">,</span> ISSUANCE <span class="token operator">+</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>RESERVED_BALANCE' <span class="token operator">-</span><span class="token keyword">Int</span> reserved_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="transfer_raw"><code>transfer_raw</code></h3>
+<p>Transfer some liquid free balance to another account.</p>
+<p><code>transfer</code> will set the <code>FreeBalance</code> of the sender and receiver.
+It will decrease the total issuance of the system by the <code>TransferFee</code>.
+If the sender's account is below the existential deposit as a result
+of the transfer, the account will be reaped.</p>
+<p>The dispatch origin for this call must be <code>Signed</code> by the transactor.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> ExistenceRequirement <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"AllowDeath"</span>
+                                  <span class="token operator">|</span> <span class="token string">"KeepAlive"</span>
+
+    <span class="token keyword">syntax</span> EntryAction <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> transfer<span class="token punctuation">(</span>Origin<span class="token punctuation">,</span> AccountId<span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">)</span>
+                         <span class="token operator">|</span> <span class="token string">"transfer_keep_alive"</span> <span class="token string">"("</span> Origin <span class="token string">","</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ---------------------------------------------------------------------------------</span>
+
+    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> rawTransfer<span class="token punctuation">(</span>AccountId<span class="token punctuation">,</span> AccountId<span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> ExistenceRequirement<span class="token punctuation">)</span>
+ <span class="token comment">// ------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>transfer<span class="token operator">-</span>to<span class="token operator">-</span>raw<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> transfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">:</span>AccountId<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> rawTransfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> AllowDeath<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>transfer<span class="token operator">-</span>keep<span class="token operator">-</span>alive<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> transfer_keep_alive<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">:</span>AccountId<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> rawTransfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> KeepAlive<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">(</span><span class="token punctuation">.</span>K <span class="token operator">=&gt;</span> create_account<span class="token punctuation">(</span>DESTINATION<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">~&gt;</span> rawTransfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> _<span class="token punctuation">,</span> _<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span>         account_exists<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">)</span>
+       andBool notBool account_exists<span class="token punctuation">(</span>DESTINATION<span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>transfer<span class="token operator">-</span>self<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> rawTransfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">:</span>AccountId<span class="token punctuation">,</span> ORIGIN<span class="token punctuation">,</span> _<span class="token punctuation">,</span> _<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> account_exists<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>transfer<span class="token operator">-</span>existing<span class="token operator">-</span>account<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> rawTransfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> EXISTENCE_REQUIREMENT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> SOURCE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> FEE<span class="token punctuation">)</span>
+          <span class="token operator">~&gt;</span> set_free_balance<span class="token punctuation">(</span>DESTINATION<span class="token punctuation">,</span> DESTINATION_BALANCE <span class="token operator">+</span><span class="token keyword">Int</span> AMOUNT<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> ISSUANCE <span class="token operator">=&gt;</span> ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> FEE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>transferFee</span><span class="token punctuation">&gt;</span></span> FEE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>transferFee</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ORIGIN <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> SOURCE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> DESTINATION <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> DESTINATION_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> ORIGIN <span class="token operator">=</span><span class="token operator">/</span><span class="token operator">=</span>K DESTINATION
+       andBool DESTINATION_BALANCE &gt;<span class="token keyword">Int</span> <span class="token number">0</span>
+       andBool SOURCE_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>AMOUNT <span class="token operator">+</span><span class="token keyword">Int</span> FEE<span class="token punctuation">)</span>
+       andBool ensure_can_withdraw<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> Transfer<span class="token punctuation">,</span> SOURCE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> FEE<span class="token punctuation">)</span>
+       andBool <span class="token punctuation">(</span>EXISTENCE_REQUIREMENT <span class="token operator">==</span>K AllowDeath orBool SOURCE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> FEE &gt;<span class="token keyword">Int</span> EXISTENTIAL_DEPOSIT<span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>transfer<span class="token operator">-</span>create<span class="token operator">-</span>account<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> rawTransfer<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">:</span>AccountId<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> EXISTENCE_REQUIREMENT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> SOURCE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> CREATION_FEE<span class="token punctuation">)</span>
+          <span class="token operator">~&gt;</span> set_free_balance<span class="token punctuation">(</span>DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> ISSUANCE <span class="token operator">=&gt;</span> ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> CREATION_FEE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationFee</span><span class="token punctuation">&gt;</span></span> CREATION_FEE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationFee</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ORIGIN <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> SOURCE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> DESTINATION <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> <span class="token number">0</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> ORIGIN <span class="token operator">=</span><span class="token operator">/</span><span class="token operator">=</span>K DESTINATION
+       andBool SOURCE_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>AMOUNT <span class="token operator">+</span><span class="token keyword">Int</span> CREATION_FEE<span class="token punctuation">)</span>
+       andBool EXISTENTIAL_DEPOSIT <span class="token operator">&lt;=</span><span class="token keyword">Int</span> AMOUNT
+       andBool ensure_can_withdraw<span class="token punctuation">(</span>ORIGIN<span class="token punctuation">,</span> Transfer<span class="token punctuation">,</span> SOURCE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> CREATION_FEE<span class="token punctuation">)</span>
+       andBool <span class="token punctuation">(</span>EXISTENCE_REQUIREMENT <span class="token operator">==</span>K AllowDeath orBool SOURCE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> CREATION_FEE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> EXISTENTIAL_DEPOSIT<span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="force_transfer"><code>force_transfer</code></h3>
+<p>Force a transfer from any account to any other account.  This can only be done by root.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> EntryAction <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"force_transfer"</span> <span class="token string">"("</span> Origin <span class="token string">","</span> AccountId <span class="token string">","</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ------------------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>force<span class="token operator">-</span>transfer<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> force_transfer<span class="token punctuation">(</span><span class="token punctuation">.</span>Root<span class="token punctuation">,</span> SOURCE<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> transfer<span class="token punctuation">(</span>SOURCE<span class="token punctuation">,</span> DESTINATION<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="withdraw"><code>withdraw</code></h3>
+<p>Withdraw funds from an account.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> EntryAction <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> withdraw<span class="token punctuation">(</span>AccountId<span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> WithdrawReason<span class="token punctuation">,</span> ExistenceRequirement<span class="token punctuation">)</span>
+ <span class="token comment">// -------------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>withdraw<span class="token punctuation">]</span><span class="token punctuation">:</span> <span class="token comment">// K really needs where clauses</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> withdraw<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> EXISTENCE_REQUIREMENT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> withdrawInner<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> EXISTENCE_REQUIREMENT<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> withdrawInner<span class="token punctuation">(</span>AccountId<span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> WithdrawReason<span class="token punctuation">,</span> ExistenceRequirement<span class="token punctuation">)</span>
+ <span class="token comment">// ------------------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>withdrawInner<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> withdrawInner<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">,</span> NEW_BALANCE<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> EXISTENCE_REQUIREMENT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> NEW_BALANCE<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> ISSUANCE <span class="token operator">=&gt;</span> ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span> EXISTENTIAL_DEPOSIT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>existentialDeposit</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> NEW_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> <span class="token number">0</span>
+       andBool ensure_can_withdraw<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> NEW_BALANCE<span class="token punctuation">)</span>
+       andBool <span class="token punctuation">(</span>EXISTENCE_REQUIREMENT <span class="token operator">==</span>K AllowDeath orBool NEW_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> EXISTENTIAL_DEPOSIT<span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="call-frames">Call Frames</h2>
+<p>Function call and return.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> CallFrame <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> frame<span class="token punctuation">(</span>continuation<span class="token punctuation">:</span> K<span class="token punctuation">)</span>
+    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> call   <span class="token punctuation">(</span> Action <span class="token punctuation">)</span>
+                    <span class="token operator">|</span> return <span class="token punctuation">(</span> Result <span class="token punctuation">)</span>
+ <span class="token comment">// -----------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>call<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> call<span class="token punctuation">(</span>Action<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> CONT <span class="token operator">=&gt;</span> Action <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>call-stack</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>List <span class="token operator">=&gt;</span> ListItem<span class="token punctuation">(</span>frame<span class="token punctuation">(</span>CONT<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>call-stack</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>return<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> return<span class="token punctuation">(</span>R<span class="token punctuation">)</span> <span class="token operator">~&gt;</span> _ <span class="token operator">=&gt;</span> CONT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>return-value</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> R <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>return-value</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>call-stack</span><span class="token punctuation">&gt;</span></span> ListItem<span class="token punctuation">(</span>frame<span class="token punctuation">(</span>CONT<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>List <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>call-stack</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>return<span class="token operator">-</span>unit<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>K <span class="token operator">=&gt;</span> CONT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>return-value</span><span class="token punctuation">&gt;</span></span> _ <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>Result <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>return-value</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>call-stack</span><span class="token punctuation">&gt;</span></span> ListItem<span class="token punctuation">(</span>frame<span class="token punctuation">(</span>CONT<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>List <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>call-stack</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Ensure that a given amount can be withdrawn from an account.</p>
+<p><strong>FIXME</strong>: we do not account for multiple withdrawl reasons, due to K’s
+lacking polymorphism.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> WithdrawReason <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"TransactionPayment"</span>
+                            <span class="token operator">|</span> <span class="token string">"Transfer"</span>
+                            <span class="token operator">|</span> <span class="token string">"Reserve"</span>
+                            <span class="token operator">|</span> <span class="token string">"Fee"</span>
+                            <span class="token operator">|</span> <span class="token string">"Tip"</span>
+ <span class="token comment">// -------------------------------</span>
+
+
+    <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"ensure_can_withdraw"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> WithdrawReason <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// ---------------------------------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> ensure_can_withdraw<span class="token punctuation">(</span>_<span class="token punctuation">,</span> _<span class="token punctuation">,</span> _<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">true</span> <span class="token punctuation">[</span>owise<span class="token punctuation">]</span>
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> ensure_can_withdraw<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> Transfer #Or Reserve<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">false</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>vestingBalance</span><span class="token punctuation">&gt;</span></span> VESTING_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>vestingBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> VESTING_BALANCE &lt;<span class="token keyword">Int</span> BALANCE
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> ensure_can_withdraw<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">false</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>now</span><span class="token punctuation">&gt;</span></span> NOW <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>now</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>locks</span><span class="token punctuation">&gt;</span></span> ACCOUNT_LOCKS <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>locks</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> activeLocks<span class="token punctuation">(</span>ACCOUNT_LOCKS<span class="token punctuation">,</span> NOW<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span>
+
+    <span class="token keyword">syntax</span> LockID <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"Election"</span>
+                    <span class="token operator">|</span> <span class="token string">"Staking"</span>
+                    <span class="token operator">|</span> <span class="token string">"Democracy"</span>
+                    <span class="token operator">|</span> <span class="token string">"Phragmen"</span>
+ <span class="token comment">// ----------------------------</span>
+
+    <span class="token keyword">syntax</span> AccountLock <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> lock <span class="token punctuation">(</span> id<span class="token punctuation">:</span> LockID<span class="token punctuation">,</span> until<span class="token punctuation">:</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> amount<span class="token punctuation">:</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> reasons<span class="token punctuation">:</span> Set <span class="token punctuation">)</span>
+ <span class="token comment">// ---------------------------------------------------------------------------------</span>
+
+    <span class="token keyword">syntax</span> <span class="token keyword">Bool</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> activeLock <span class="token punctuation">(</span>AccountLock<span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> WithdrawReason<span class="token punctuation">,</span> <span class="token keyword">Int</span>      <span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                  <span class="token operator">|</span> activeLocks<span class="token punctuation">(</span>Set<span class="token punctuation">,</span>         <span class="token keyword">Int</span><span class="token punctuation">,</span> WithdrawReason<span class="token punctuation">,</span> <span class="token keyword">Int</span>      <span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+                  <span class="token operator">|</span> activeLocks<span class="token punctuation">(</span>List<span class="token punctuation">,</span>        <span class="token keyword">Int</span><span class="token punctuation">,</span> WithdrawReason<span class="token punctuation">,</span> <span class="token keyword">Int</span><span class="token punctuation">,</span> <span class="token keyword">Bool</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> <span class="token class-name">klabel</span><span class="token punctuation">(</span>activeLocksAux<span class="token punctuation">)</span><span class="token punctuation">]</span>
+ <span class="token comment">// -----------------------------------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> activeLock<span class="token punctuation">(</span>AL<span class="token punctuation">,</span> NOW<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> NOW &lt;<span class="token keyword">Int</span> until<span class="token punctuation">(</span>AL<span class="token punctuation">)</span> andBool BALANCE &lt;<span class="token keyword">Int</span> amount<span class="token punctuation">(</span>AL<span class="token punctuation">)</span> andBool REASON in reasons<span class="token punctuation">(</span>AL<span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> activeLocks<span class="token punctuation">(</span>ALS<span class="token punctuation">,</span> NOW<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> activeLocks<span class="token punctuation">(</span>Set2List<span class="token punctuation">(</span>ALS<span class="token punctuation">)</span><span class="token punctuation">,</span> NOW<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">rule</span> activeLocks<span class="token punctuation">(</span><span class="token punctuation">.</span>List<span class="token punctuation">,</span> _<span class="token punctuation">,</span> _<span class="token punctuation">,</span> _<span class="token punctuation">,</span> RESULT<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> RESULT
+    <span class="token keyword">rule</span> activeLocks<span class="token punctuation">(</span><span class="token punctuation">(</span>ListItem<span class="token punctuation">(</span>AL<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>List<span class="token punctuation">)</span> _<span class="token punctuation">,</span> NOW<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">,</span> RESULT <span class="token operator">=&gt;</span> RESULT orBool activeLock<span class="token punctuation">(</span>AL<span class="token punctuation">,</span> NOW<span class="token punctuation">,</span> REASON<span class="token punctuation">,</span> BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="slashing-and-repatriation-of-reserved-balances">Slashing and repatriation of reserved balances</h2>
+<p>The first of these is also used by <code>slash</code>.</p>
+<ul>
+<li><code>slash_reserved</code></li>
+<li><code>repatriate_reserved</code></li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"slash_reserved"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>slash<span class="token operator">-</span>reserved<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> slash_reserved<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_reserved_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> maxInt<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> RESERVED_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT<span class="token punctuation">)</span><span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ACCOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> RESERVED_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> minInt<span class="token punctuation">(</span>RESERVED_BALANCE<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"repatriate_reserved"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// -------------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>repatriate<span class="token operator">-</span>reserved<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> repatriate_reserved<span class="token punctuation">(</span>SLASHED<span class="token punctuation">,</span> BENEFICIARY<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>BENEFICIARY<span class="token punctuation">,</span> BENEFICIARY_FREE_BALANCE <span class="token operator">+</span><span class="token keyword">Int</span> minInt<span class="token punctuation">(</span>SLASHED_RESERVED_BALANCE<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token operator">~&gt;</span> set_reserved_balance<span class="token punctuation">(</span>SLASHED<span class="token punctuation">,</span> SLASHED_RESERVED_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> minInt<span class="token punctuation">(</span>SLASHED_RESERVED_BALANCE<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span><span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> SLASHED <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> SLASHED_RESERVED_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> BENEFICIARY <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> BENEFICIARY_RESERVED_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> BENEFICIARY_FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> BENEFICIARY_FREE_BALANCE <span class="token operator">+</span><span class="token keyword">Int</span> BENEFICIARY_RESERVED_BALANCE &gt;<span class="token keyword">Int</span> <span class="token number">0</span>
+       andBool SLASHED <span class="token operator">=</span><span class="token operator">/</span><span class="token operator">=</span>K BENEFICIARY
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>repatriate<span class="token operator">-</span>reserved<span class="token operator">-</span>same<span class="token operator">-</span>account<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> repatriate_reserved<span class="token punctuation">(</span>SLASHED<span class="token punctuation">,</span> SLASHED<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> unreserve<span class="token punctuation">(</span>SLASHED<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="slashing">Slashing</h3>
+<p>Used to punish a node for violating the protocol.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> EntryAction <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> slash <span class="token punctuation">(</span> AccountId <span class="token punctuation">,</span> <span class="token keyword">Int</span> <span class="token punctuation">)</span>
+ <span class="token comment">// ------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>slash<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> slash<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> FREE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ACCOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> FREE_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> AMOUNT
+
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>slash<span class="token operator">-</span>empty<span class="token operator">-</span>free<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> slash<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+          <span class="token operator">~&gt;</span> slash_reserved<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> AMOUNT <span class="token operator">-</span><span class="token keyword">Int</span> FREE_BALANCE<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ACCOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">-</span><span class="token keyword">Int</span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> FREE_BALANCE &lt;<span class="token keyword">Int</span> AMOUNT
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="reservation-and-unreservation-of-balances">Reservation and unreservation of balances</h3>
+<p>Used to move balance from free to reserved and visa versa.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> reserve <span class="token punctuation">(</span> AccountId <span class="token punctuation">,</span> <span class="token keyword">Int</span> <span class="token punctuation">)</span>
+ <span class="token comment">// ---------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>reserve<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> reserve<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_reserved_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> FREE_BALANCE <span class="token operator">+</span><span class="token keyword">Int</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">~&gt;</span> set_free_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> FREE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT<span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ACCOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> _ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> FREE_BALANCE <span class="token operator">&gt;=</span><span class="token keyword">Int</span> AMOUNT
+       andBool ensure_can_withdraw<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> Reserve<span class="token punctuation">,</span> FREE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> AMOUNT<span class="token punctuation">)</span>
+
+    <span class="token keyword">syntax</span> Action <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> unreserve <span class="token punctuation">(</span> AccountId <span class="token punctuation">,</span> <span class="token keyword">Int</span> <span class="token punctuation">)</span>
+ <span class="token comment">// -----------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>unreserve<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> unreserve<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span>
+          <span class="token operator">=&gt;</span> set_free_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> FREE_BALANCE <span class="token operator">+</span><span class="token keyword">Int</span> minInt<span class="token punctuation">(</span>AMOUNT<span class="token punctuation">,</span> RESERVED_BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token operator">~&gt;</span> set_reserved_balance<span class="token punctuation">(</span>ACCOUNT<span class="token punctuation">,</span> FREE_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> minInt<span class="token punctuation">(</span>AMOUNT<span class="token punctuation">,</span> RESERVED_BALANCE<span class="token punctuation">)</span><span class="token punctuation">)</span>
+         <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accounts</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> ACCOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reservedBalance</span><span class="token punctuation">&gt;</span></span> RESERVED_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reservedBalance</span><span class="token punctuation">&gt;</span></span>
+             <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accounts</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="vesting">Vesting</h2>
+<ul>
+<li><code>locked_at</code> ― amount currently locked</li>
+<li><code>vesting_balance</code> ― get the balance that cannot currently be withdrawn.</li>
+</ul>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"locked_at"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// -------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> locked_at<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> maxInt<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> VESTING_BALANCE <span class="token operator">-</span><span class="token keyword">Int</span> <span class="token punctuation">(</span>PER_BLOCK <span class="token operator">*</span><span class="token keyword">Int</span> maxInt<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> NOW <span class="token operator">-</span><span class="token keyword">Int</span> STARTING_BLOCK<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>now</span><span class="token punctuation">&gt;</span></span> NOW <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>now</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>vestingBalance</span><span class="token punctuation">&gt;</span></span> VESTING_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>vestingBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>startingBlock</span><span class="token punctuation">&gt;</span></span> STARTING_BLOCK <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>startingBlock</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>perBlock</span><span class="token punctuation">&gt;</span></span> PER_BLOCK <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>perBlock</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+
+    <span class="token keyword">syntax</span> <span class="token keyword">Int</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"vesting_balance"</span> <span class="token string">"("</span> AccountId <span class="token string">")"</span> <span class="token punctuation">[</span>function<span class="token punctuation">,</span> total<span class="token punctuation">]</span>
+ <span class="token comment">// -------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> vesting_balance<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> minInt<span class="token punctuation">(</span>FREE_BALANCE<span class="token punctuation">,</span> locked_at<span class="token punctuation">(</span>WHO<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="deposits">Deposits</h2>
+<p>Deposit into an existing account.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">    <span class="token keyword">syntax</span> EntryAction <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"deposit_into_existing"</span> <span class="token string">"("</span> AccountId <span class="token string">","</span> <span class="token keyword">Int</span> <span class="token string">")"</span>
+ <span class="token comment">// ------------------------------------------------------------------------</span>
+    <span class="token keyword">rule</span> <span class="token punctuation">[</span>deposit<span class="token operator">-</span>into<span class="token operator">-</span>existing<span class="token punctuation">]</span><span class="token punctuation">:</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> deposit_into_existing<span class="token punctuation">(</span>WHO<span class="token punctuation">,</span> AMOUNT<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>K <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>totalIssuance</span><span class="token punctuation">&gt;</span></span> TOTAL_ISSUANCE <span class="token operator">=&gt;</span> TOTAL_ISSUANCE <span class="token operator">+</span><span class="token keyword">Int</span> AMOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>totalIssuance</span><span class="token punctuation">&gt;</span></span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>account</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>accountID</span><span class="token punctuation">&gt;</span></span> WHO <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>accountID</span><span class="token punctuation">&gt;</span></span>
+           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>freeBalance</span><span class="token punctuation">&gt;</span></span> FREE_BALANCE <span class="token operator">=&gt;</span> FREE_BALANCE <span class="token operator">+</span><span class="token keyword">Int</span> AMOUNT <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>freeBalance</span><span class="token punctuation">&gt;</span></span>
+           <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>account</span><span class="token punctuation">&gt;</span></span>
+      <span class="token keyword">requires</span> FREE_BALANCE &gt;<span class="token keyword">Int</span> <span class="token number">0</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>End of module</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#set_balance-spec" class="bd-toc-link"><code>set_balance</code> spec</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#state-model"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                State Model
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#data"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Data
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#results"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Results
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#public-getters" class="bd-toc-link">Public Getters</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#total_balance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>total_balance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#free_balance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>free_balance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#reserved_balance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>reserved_balance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#can_slash"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>can_slash</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#total_issuance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>total_issuance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#issue"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>issue</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#burn"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>burn</code>
+              </a></div>
+            </div>
+          </details>
+        <details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#actions-and-results" class="bd-toc-link">Actions and Results</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#account_exists"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>account_exists</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#create_account"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>create_account</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#set_free_balance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>set_free_balance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#set_reserved_balance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>set_reserved_balance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#set_balance"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>set_balance</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#transfer_raw"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>transfer_raw</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#force_transfer"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>force_transfer</code>
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#withdraw"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                <code>withdraw</code>
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#call-frames"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Call Frames
+              </a></div><details style="padding:0.25rem 0;;padding-left: 8px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#slashing-and-repatriation-of-reserved-balances" class="bd-toc-link">Slashing and repatriation of reserved balances</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#slashing"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Slashing
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#reservation-and-unreservation-of-balances"
+                class="bd-toc-link"
+                style="padding-left: 16px;;"
+              >
+                Reservation and unreservation of balances
+              </a></div>
+            </div>
+          </details>
+        <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#vesting"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Vesting
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#deposits"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Deposits
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

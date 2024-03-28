@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/tests/regression-new/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../../../../../../assets/img/favicon.ico" />
+
+<title>SIMPLE — Typed — Static | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../../../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../../../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../../../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../../../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../../../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../../../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../../../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../../../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../../../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../../../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../../../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../../../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../../../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="simple-%E2%80%94-typed-%E2%80%94-static">SIMPLE — Typed — Static</h1>
+<p>Author: Grigore Roșu (grosu@illinois.edu)<br>
+Organization: University of Illinois at Urbana-Champaign</p>
+<p>Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)<br>
+Organization: University of Bucharest</p>
+<h2 id="abstract">Abstract</h2>
+<p>This is the <strong>K</strong> definition of the static semantics of the typed SIMPLE
+language, or in other words, a type system for the typed SIMPLE
+language in <strong>K</strong>.  We do not re-discuss the various features of the
+SIMPLE language here.  The reader is referred to the untyped version of
+the language for such discussions.  We here only focus on the new and
+interesting problems raised by the addition of type declarations, and
+what it takes to devise a type system/checker for the language.</p>
+<p>When designing a type system for a language, no matter in what
+paradigm, we have to decide upon the intended typing policy.  Note
+that we can have multiple type systems for the same language, one for
+each typing policy.  For example, should we accept programs which
+don't have a main function?  Or should we allow functions that do not
+return explicitly?  Or should we allow functions whose type expects
+them to return a value (say an <code>int</code>) to use a plain
+<code>return;</code> statement, which returns no value, like in C?
+And so on and so forth.  Typically, there are two opposite tensions
+when designing a type system.  On the one hand, you want your type
+system to be as permissive as possible, that is, to accept as many
+programs that do not get stuck when executed with the untyped
+semantics as possible; this will keep the programmers using your
+language happy.  On the other hand, you want your type system to have
+a reasonable performance when implemented; this will keep both the
+programmers and the implementers of your language happy.  For example,
+a type system for rejecting programs that could perform
+division-by-zero is not expected to be feasible in general.  A simple
+guideline when designing typing policies is to imagine how the
+semantics of the untyped language may get stuck and try to prevent
+those situations from happening.</p>
+<p>Before we give the <strong>K</strong> type system of SIMPLE formally, we discuss,
+informally, the intended typing policy:</p>
+<ul>
+<li>
+<p>Each program should contain a <code>main()</code> function.  Indeed,
+the untyped SIMPLE semantics will get stuck on any program which does
+not have a <code>main</code> function.</p>
+</li>
+<li>
+<p>Each primitive value has its own type, which can be <code>int</code>
+<code>bool</code>, or <code>string</code>.  There is also a type <code>void</code>
+for nonexistent values, for example for the result of a function meant
+to return no value (but only be used for its side effects, like a
+procedure).</p>
+</li>
+<li>
+<p>The syntax of untyped SIMPLE is extended to allow type
+declarations for all the variables, including array variables.  This is
+done in a C/Java-style.  For example, <code>int x;</code> or
+<code>int x=7, y=x+3;</code>, or <code>int[][][] a[10,20];</code>
+(the latter defines a <code>10 × 20</code> matrix of arrays of integers).
+Recall from untyped SIMPLE that, unlike in C/Java, our multi-dimensional
+arrays use comma-separated arguments, although they have the array-of-array
+semantics.</p>
+</li>
+<li>
+<p>Functions are also typed in a C/Java style.  However, since in SIMPLE
+we allow functions to be passed to and returned by other functions, we also
+need function types.  We will use the conventional higher-order arrow-notation
+for function types, but will separate the argument types with commas.  For
+example, a function returning an array of <code>bool</code> elements and
+taking as argument an array <code>x</code> of two-integer-argument functions
+returning an integer, is declared using a syntax of the form
+<code>bool[] f(((int,int)-&gt;int)[] x) { ... }</code>
+and has the type <code>((int,int)-&gt;int)[] -&gt; bool[]</code>.</p>
+</li>
+<li>
+<p>We allow any variable declarations at the top level.  Functions
+can only be declared at the top level.  Each function can only access the
+other functions and variables declared at the top level, or its own locally
+declared variables.  SIMPLE has static scoping.</p>
+</li>
+<li>
+<p>The various expression and statement constructs take only elements of
+the expected types.</p>
+</li>
+<li>
+<p>Increment and assignment can operate both on variables and on array
+elements.  For example, if <code>f</code> has type <code>int-&gt;int[][]</code> and
+function <code>g</code> has the type <code>int-&gt;int</code>, then the
+increment expression <code>++f(7)[g(2),g(3)]</code> is valid.</p>
+</li>
+<li>
+<p>Functions should only return values of their declared result
+type.  To give the programmers more flexibility, we allow functions to
+use <code>return;</code> statements to terminate without returning an
+actual value, or to not explicitly use any return statement,
+regardless of their declared return type.  This flexibility can be
+handy when writing programs using certain functions only for their
+side effects.  Nevertheless, as the dynamic semantics shows, a return
+value is automatically generated when an explicit <code>return</code>
+statement is not encountered.</p>
+</li>
+<li>
+<p>For simplicity, we here limit exceptions to only throw and catch
+integer values.  We let it as an exercise to the reader to extend the
+semantics to allow throwing and catching arbitrary-type exceptions.
+Like in programming languages like Java, one can go even further and
+define a semantics where thrown exceptions are propagated through
+try-catch statements until one of the corresponding type is found.
+We will do this when we define the KOOL language, not here.
+To keep the definition if SIMPLE simple, here we do not attempt to
+reject programs which throw uncaught exceptions.</p>
+</li>
+</ul>
+<p>Like in untyped SIMPLE, some constructs can be desugared into a
+smaller set of basic constructs.  In general, it should be clear why a
+program does not type by looking at the top of the <code>k</code> cells in
+its stuck configuration.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token keyword">module</span> SIMPLE<span class="token operator">-</span>TYPED<span class="token operator">-</span>STATIC<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> DOMAINS<span class="token operator">-</span>SYNTAX
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="syntax">Syntax</h2>
+<p>The syntax of typed SIMPLE extends that of untyped SIMPLE with support
+for declaring types to variables and functions.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> <span class="token keyword">Id</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"main"</span> <span class="token punctuation">[</span><span class="token class-name">token</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="types">Types</h2>
+<p>Primitive, array and function types, as well as lists (or tuples) of types.
+The lists of types are useful for function arguments.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Type <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"void"</span> <span class="token operator">|</span> <span class="token string">"int"</span> <span class="token operator">|</span> <span class="token string">"bool"</span> <span class="token operator">|</span> <span class="token string">"string"</span>
+                <span class="token operator">|</span> Type <span class="token string">"["</span> <span class="token string">"]"</span>
+                <span class="token operator">|</span> <span class="token string">"("</span> Type <span class="token string">")"</span>             <span class="token punctuation">[</span><span class="token class-name">bracket</span><span class="token punctuation">]</span>
+                &gt; Types <span class="token string">"-&gt;"</span> Type
+
+  <span class="token keyword">syntax</span> Types <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> List<span class="token punctuation">{</span>Type<span class="token punctuation">,</span><span class="token string">","</span><span class="token punctuation">}</span> <span class="token punctuation">[</span>overload<span class="token punctuation">(</span>exps<span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="declarations">Declarations</h2>
+<p>Variable and function declarations have the expected syntax.  For variables,
+we basically just replaced the <code>var</code> keyword of untyped SIMPLE with a
+type.  For functions, besides replacing the <code>function</code> keyword with a
+type, we also introduce a new syntactic category for typed variables,
+<code>Param</code>, and lists over it.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Param <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Type <span class="token keyword">Id</span>
+  <span class="token keyword">syntax</span> Params <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> List<span class="token punctuation">{</span>Param<span class="token punctuation">,</span><span class="token string">","</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">syntax</span> Stmt <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Type Exps <span class="token string">";"</span>
+                <span class="token operator">|</span> Type <span class="token keyword">Id</span> <span class="token string">"("</span> Params <span class="token string">")"</span> Block
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="expressions">Expressions</h2>
+<p>The syntax of expressions is identical to that in untyped SIMPLE,
+except for the logical conjunction and disjunction which have
+different strictness attributes, because they now have different
+evaluation strategies.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token keyword">Int</span> <span class="token operator">|</span> <span class="token keyword">Bool</span> <span class="token operator">|</span> <span class="token keyword">String</span> <span class="token operator">|</span> <span class="token keyword">Id</span>
+               <span class="token operator">|</span> <span class="token string">"("</span> Exp <span class="token string">")"</span>             <span class="token punctuation">[</span><span class="token class-name">bracket</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> <span class="token string">"++"</span> Exp
+               &gt; Exp <span class="token string">"["</span> Exps <span class="token string">"]"</span>        <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+               &gt; Exp <span class="token string">"("</span> Exps <span class="token string">")"</span>        <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> <span class="token string">"-"</span> Exp                 <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> <span class="token string">"sizeOf"</span> <span class="token string">"("</span> Exp <span class="token string">")"</span>    <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> <span class="token string">"read"</span> <span class="token string">"("</span> <span class="token string">")"</span>
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span>
+                 Exp <span class="token string">"*"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"/"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"%"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span>
+                 Exp <span class="token string">"+"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"-"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               &gt; <span class="token class-name">non-assoc</span><span class="token punctuation">:</span>
+                 Exp <span class="token string">"&lt;"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">non-assoc</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"&lt;="</span> Exp            <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">non-assoc</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"&gt;"</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">non-assoc</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"&gt;="</span> Exp            <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">non-assoc</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"=="</span> Exp            <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">non-assoc</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"!="</span> Exp            <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">non-assoc</span><span class="token punctuation">]</span>
+               &gt; <span class="token string">"!"</span> Exp                 <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+               &gt; <span class="token class-name">left</span><span class="token punctuation">:</span>
+                 Exp <span class="token string">"&amp;&amp;"</span> Exp            <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               <span class="token operator">|</span> Exp <span class="token string">"||"</span> Exp            <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> <span class="token class-name">left</span><span class="token punctuation">]</span>
+               &gt; <span class="token string">"spawn"</span> Block
+               &gt; Exp <span class="token string">"="</span> Exp             <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">right</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that <code>spawn</code> has not been declared strict.  This may
+seem unexpected,  because the child thread shares the same environment
+with the parent thread, so from a typing perspective the spawned
+statement makes the same sense in a child thread as it makes in the
+parent thread.  The reason for not declaring it strict is because we
+want to disallow programs where the spawned thread calls the
+<code>return</code> statement, because those programs would get stuck in
+the dynamic semantics.  The type semantics of spawn below will reject
+such programs.</p>
+<p>We still need lists of expressions, defined below, but note that we do
+not need lists of identifiers anymore.  They have been replaced by the lists
+of parameters.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Exps <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> List<span class="token punctuation">{</span>Exp<span class="token punctuation">,</span><span class="token string">","</span><span class="token punctuation">}</span>          <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">,</span> overload<span class="token punctuation">(</span>exps<span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="statements">Statements</h2>
+<p>The statements have the same syntax as in untyped SIMPLE, except for
+the exceptions, which now type their parameter.  Note that, unlike in untyped
+SIMPLE, all statement constructs which have arguments and are not desugared
+are strict, including the conditional and the <code>while</code>.  Indeed, from a
+typing perspective, they are all strict: first type their arguments and then
+type the actual construct.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Block <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"{"</span> <span class="token string">"}"</span>
+                <span class="token operator">|</span> <span class="token string">"{"</span> Stmt <span class="token string">"}"</span>
+
+  <span class="token keyword">syntax</span> Stmt <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Block
+                <span class="token operator">|</span> Exp <span class="token string">";"</span>                                  <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"if"</span> <span class="token string">"("</span> Exp <span class="token string">")"</span> Block <span class="token string">"else"</span> Block      <span class="token punctuation">[</span><span class="token class-name">avoid</span><span class="token punctuation">,</span> <span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"if"</span> <span class="token string">"("</span> Exp <span class="token string">")"</span> Block                   <span class="token punctuation">[</span><span class="token class-name">macro</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"while"</span> <span class="token string">"("</span> Exp <span class="token string">")"</span> Block                <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"for"</span> <span class="token string">"("</span> Stmt Exp <span class="token string">";"</span> Exp <span class="token string">")"</span> Block     <span class="token punctuation">[</span><span class="token class-name">macro</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"return"</span> Exp <span class="token string">";"</span>                         <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"return"</span> <span class="token string">";"</span>
+                <span class="token operator">|</span> <span class="token string">"print"</span> <span class="token string">"("</span> Exps <span class="token string">")"</span> <span class="token string">";"</span>                 <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"try"</span> Block <span class="token string">"catch"</span> <span class="token string">"("</span> Param <span class="token string">")"</span> Block  <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"throw"</span> Exp <span class="token string">";"</span>                          <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"join"</span> Exp <span class="token string">";"</span>                           <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"acquire"</span> Exp <span class="token string">";"</span>                        <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"release"</span> Exp <span class="token string">";"</span>                        <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+                <span class="token operator">|</span> <span class="token string">"rendezvous"</span> Exp <span class="token string">";"</span>                     <span class="token punctuation">[</span><span class="token class-name">strict</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Note that the sequential composition is now sequentially strict,
+because, unlike in the dynamic semantics where statements dissolved,
+they now reduce to the <code>stmt</code> type, which is a result.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Stmt <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Stmt Stmt                             <span class="token punctuation">[</span><span class="token class-name">seqstrict</span><span class="token punctuation">,</span> <span class="token class-name">right</span><span class="token punctuation">]</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="desugaring-macros">Desugaring macros</h2>
+<p>We use the same desugaring macros like in untyped SIMPLE, but, of
+course, including the types of the involved variables.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> if <span class="token punctuation">(</span>E<span class="token punctuation">)</span> S <span class="token operator">=&gt;</span> if <span class="token punctuation">(</span>E<span class="token punctuation">)</span> S else <span class="token punctuation">{</span><span class="token punctuation">}</span>
+  <span class="token keyword">rule</span> for<span class="token punctuation">(</span>Start Cond<span class="token punctuation">;</span> Step<span class="token punctuation">)</span> <span class="token punctuation">{</span>S<span class="token punctuation">:</span>Stmt<span class="token punctuation">}</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>Start while<span class="token punctuation">(</span>Cond<span class="token punctuation">)</span><span class="token punctuation">{</span>S Step<span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span>
+  <span class="token keyword">rule</span> for<span class="token punctuation">(</span>Start Cond<span class="token punctuation">;</span> Step<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>Start while<span class="token punctuation">(</span>Cond<span class="token punctuation">)</span><span class="token punctuation">{</span>Step<span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span>
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type E1<span class="token punctuation">:</span>Exp<span class="token punctuation">,</span> E2<span class="token punctuation">:</span>Exp<span class="token punctuation">,</span> Es<span class="token punctuation">:</span>Exps<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> T E1<span class="token punctuation">;</span> T E2<span class="token punctuation">,</span> Es<span class="token punctuation">;</span>               <span class="token punctuation">[</span>anywhere<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type X<span class="token punctuation">:</span><span class="token keyword">Id</span> <span class="token operator">=</span> E<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> T X<span class="token punctuation">;</span> X <span class="token operator">=</span> E<span class="token punctuation">;</span>                                  <span class="token punctuation">[</span>anywhere<span class="token punctuation">]</span>
+
+<span class="token keyword">endmodule</span>
+
+
+<span class="token keyword">module</span> SIMPLE<span class="token operator">-</span>TYPED<span class="token operator">-</span>STATIC
+  <span class="token keyword">imports</span> SIMPLE<span class="token operator">-</span>TYPED<span class="token operator">-</span>STATIC<span class="token operator">-</span>SYNTAX
+  <span class="token keyword">imports</span> DOMAINS
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="static-semantics">Static semantics</h2>
+<p>Here we define the type system of SIMPLE.  Like concrete semantics,
+type systems defined in <strong>K</strong> are also executable.  However, <strong>K</strong> type
+systems turn into type checkers instead of interpreters when executed.</p>
+<p>The typing process is done in two (overlapping) phases.  In the first
+phase the global environment is built, which contains type bindings
+for all the globally declared variables and functions.  For functions,
+the declared types will be ``trusted'' during the first phase and
+simply bound to their corresponding function names and placed in the
+global type environment.  At the same time, type-checking tasks that
+the function bodies indeed respect their claimed types are generated.
+All these tasks are (concurrently) verified during the second phase.
+This way, all the global variable and function declarations are
+available in the global type environment and can be used in order to
+type-check each function code.  This is consistent with the semantics
+of untyped SIMPLE, where functions can access all the global variables
+and can call any other function declared in the same program.  The
+two phases may overlap because of the <strong>K</strong> concurrent semantics.  For
+example, a function task can be started while the first phase is still
+running; moreover, it may even complete before the first phase does,
+namely when all the global variables and functions that it needs have
+already been processed and made available in the global environment by
+the first phase task.</p>
+<h2 id="extended-syntax-and-results">Extended syntax and results</h2>
+<p>The idea is to start with a configuration holding the program to type
+in one of its cells, then apply rewrite rules on it mixing types and
+language syntax, and eventually obtain a type instead of the original
+program.  In other words, the program reduces to its type using
+the <strong>K</strong> rules giving the type system of the language.  In doing so,
+additional typing tasks for function bodies are generated and solved
+the same way.  If this rewriting process gets stuck, then we say that
+the program is not well-typed.  Otherwise the program is well-typed
+(by definition).  We did not need types for statements and for blocks
+as part of the typed SIMPLE syntax, because programmers are not allowed
+to use such types explicitly.  However, we are going to need them in the
+type system, because blocks and statements reduce to them.</p>
+<p>We start by allowing types to be used inside expressions and statements in
+our language.  This way, types can be used together with language syntax in
+subsequent <strong>K</strong> rules without any parsing errors.  Like in the type system of
+IMP++ in the <strong>K</strong> tutorial, we prefer to group the block and statement types
+under one syntactic sub-category of types, because this allows us to more
+compactly state that certain terms can be either blocks or statements.  Also,
+since programs and fragments of program will reduce to their types, in order
+for the strictness and context declarations to be executable we state that
+types are results (same like we did in the IMP++ tutorial).</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Type
+  <span class="token keyword">syntax</span> Exps <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Types
+  <span class="token keyword">syntax</span> BlockOrStmtType <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token string">"block"</span> <span class="token operator">|</span> <span class="token string">"stmt"</span>
+  <span class="token keyword">syntax</span> Type <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> BlockOrStmtType
+  <span class="token keyword">syntax</span> Block <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> BlockOrStmtType
+  <span class="token keyword">syntax</span> KResult <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> Type
+                   <span class="token operator">|</span> Types    <span class="token comment">//TODO: remove this, eventually</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The configuration of our type system consists of a <code>tasks</code> cell
+holding various typing <code>task</code> cells, and a global type environment.
+Each task includes a <code>k</code> cell holding the code to type, a <code>tenv</code>
+cell holding the local type environment, and a <code>return</code> cell holding
+the return type of the currently checked function.  The latter is needed in
+order to check whether return statements return values of the expected type.
+Initially, the program is placed in a <code>k</code> cell inside a
+<code>task</code> cell.  Since the cells with multiplicity <code>?</code> are not
+included in the initial configuration, the <code>task</code> cell holding
+the original program in its <code>k</code> cell will contain no other
+subcells.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">configuration</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>T</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>yellow<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tasks</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>orange<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+                    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>*<span class="token punctuation">"</span></span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>yellow<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Set<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+                      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>green<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> $PGM<span class="token punctuation">:</span>Stmt <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span>
+                      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>?<span class="token punctuation">"</span></span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>cyan<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Map <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span>
+                      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>returnType</span> <span class="token attr-name">multiplicity</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>?<span class="token punctuation">"</span></span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>black<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> void <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>returnType</span><span class="token punctuation">&gt;</span></span>
+                    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tasks</span><span class="token punctuation">&gt;</span></span>
+<span class="token comment">//                  &lt;br/&gt;</span>
+                  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>gtenv</span> <span class="token attr-name">color</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>blue<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Map <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>gtenv</span><span class="token punctuation">&gt;</span></span>
+                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>T</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="variable-declarations">Variable declarations</h2>
+<p>Variable declarations type as statements, that is, they reduce to the
+type <code>stmt</code>.  There are only two cases that need to be
+considered: when a simple variable is declared and when an array
+variable is declared.  The macros at the end of the syntax module
+above take care of reducing other variable declarations, including
+ones where the declared variables are initialized, to only these two
+cases.  The first case has two subcases: when the variable declaration
+is global (i.e., the <code>task</code> cell contains only the <code>k</code>
+cell), in which case it is added to the global type environment
+checking at the same time that the variable has not been already
+declared; and when the variable declaration is local (i.e., a
+<code>tenv</code> cell is available), in which case it is simply added to
+the local type environment, possibly shadowing previous homonymous
+variables.  The third case reduces to the second, incrementally moving
+the array dimension into the type until the array becomes a simple
+variable.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> T<span class="token punctuation">:</span>Type X<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>gtenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token punctuation">(</span><span class="token punctuation">.</span>Map <span class="token operator">=&gt;</span> X <span class="token operator">|</span><span class="token operator">-</span>&gt; T<span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>gtenv</span><span class="token punctuation">&gt;</span></span>
+    <span class="token keyword">requires</span> notBool<span class="token punctuation">(</span>X in keys<span class="token punctuation">(</span>Rho<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> T<span class="token punctuation">:</span>Type X<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token operator">=&gt;</span> Rho<span class="token punctuation">[</span>X &lt;<span class="token operator">-</span> T<span class="token punctuation">]</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token keyword">context</span> _<span class="token punctuation">:</span>Type _<span class="token punctuation">:</span><span class="token punctuation">:</span>Exp<span class="token punctuation">[</span>HOLE<span class="token punctuation">:</span><span class="token punctuation">:</span>Exps<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token comment">// The rule below may need to sort E to Exp in the future, if the</span>
+<span class="token comment">// parser gets stricter; without that information, it may not be able</span>
+<span class="token comment">// to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)</span>
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type E<span class="token punctuation">:</span>Exp<span class="token punctuation">[</span>int<span class="token punctuation">,</span>Ts<span class="token punctuation">:</span>Types<span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token operator">=&gt;</span> T<span class="token punctuation">[</span><span class="token punctuation">]</span> E<span class="token punctuation">[</span>Ts<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token comment">// I want to write the rule below as _:Type (E:Exp[.Types] =&gt; E),</span>
+<span class="token comment">// but the list completion seems to not work well with that.</span>
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type E<span class="token punctuation">:</span>Exp<span class="token punctuation">[</span><span class="token punctuation">.</span>Types<span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token operator">=&gt;</span> T E<span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="function-declarations">Function declarations</h2>
+<p>Functions are allowed to be declared only at the top level (the
+<code>task</code> cell holds only its <code>k</code> subcell).  Each function
+declaration reduces to a variable declaration (a binding of its name
+to its declared function type), but also adds a task into the
+<code>tasks</code> cell.  The task consists of a typing of the statement
+declaring all the function parameters followed by the function body,
+together with the expected return type of the function.  The
+<code>getTypes</code> and <code>mkDecls</code> functions, defined at the end of
+the file in the section on auxiliary operations, extracts the list of
+types and makes a sequence of variable declarations from a list of
+function parameters, respectively.  Note that, although in the dynamic
+semantics we include a terminating <code>return</code> statement at the
+end of the function body to eliminate from the analysis the case when
+the function does not provide an explicit return, we do not need to
+include such a similar <code>return</code> statement here.  That's because
+the <code>return</code> statements type to <code>stmt</code> anyway, and the
+entire code of the function body needs to type anyway.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> T<span class="token punctuation">:</span>Type F<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">(</span>Ps<span class="token punctuation">:</span>Params<span class="token punctuation">)</span> S <span class="token operator">=&gt;</span> getTypes<span class="token punctuation">(</span>Ps<span class="token punctuation">)</span><span class="token operator">-</span>&gt;T F<span class="token punctuation">;</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span>
+       <span class="token punctuation">(</span><span class="token punctuation">.</span>Bag <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span>
+               <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> mkDecls<span class="token punctuation">(</span>Ps<span class="token punctuation">)</span> S <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Map <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>returnType</span><span class="token punctuation">&gt;</span></span> T <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>returnType</span><span class="token punctuation">&gt;</span></span>
+             <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="checking-if-main()-exists%7D">Checking if <code>main()</code> exists}</h2>
+<p>Once the entire program is processed (generating appropriate tasks
+to type check its function bodies), we can dissolve the main
+<code>task</code> cell (the one holding only a <code>k</code> subcell).  Since
+we want to enforce that programs include a main function, we also
+generate a function task executing <code>main()</code> to ensure that it
+types (remove this task creation if you do not want your type system
+to reject programs without a <code>main</code> function).</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> stmt <span class="token operator">=&gt;</span> main<span class="token punctuation">(</span><span class="token punctuation">.</span>Exps<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">(</span><span class="token punctuation">.</span>Bag <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span>Map <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">)</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="collecting-the-terminated-tasks">Collecting the terminated tasks</h2>
+<p>Similarly, once a non-main task (i.e., one which contains a
+<code>tenv</code> subcells) is completed using the subsequent rules (i.e.,
+its <code>k</code> cell holds only the <code>block</code> or <code>stmt</code>
+type), we can dissolve its corresponding cell.  Note that it is
+important to ensure that we only dissolve tasks containing a
+<code>tenv</code> cell with the rule below, because the main task should
+<code>not</code> dissolve this way!  It should do what the above rule says.
+In the end, there should be no task cell left in the configuration
+when the program correctly type checks.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> _<span class="token punctuation">:</span>BlockOrStmtType <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> _ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token operator">=&gt;</span> <span class="token punctuation">.</span>Bag
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="basic-values">Basic values</h2>
+<p>The first three rewrite rules below reduce the primitive values to
+their types, as we typically do when we define type systems in <strong>K</strong>.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> _<span class="token punctuation">:</span><span class="token keyword">Int</span> <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> _<span class="token punctuation">:</span><span class="token keyword">Bool</span> <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> _<span class="token punctuation">:</span><span class="token keyword">String</span> <span class="token operator">=&gt;</span> string
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="variable-lookup">Variable lookup</h2>
+<p>There are three cases to distinguish for variable lookup: (1) if the
+variable is bound in the local type environment, then look its type up
+there; (2) if a local environment exists and the variable is not bound
+in it, then look its type up in the global environment; (3) finally,
+if there is no local environment, meaning that we are executing the
+top-level pass, then look the variable's type up in the global
+environment, too.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> X<span class="token punctuation">:</span><span class="token keyword">Id</span> <span class="token operator">=&gt;</span> T <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> X <span class="token operator">|</span><span class="token operator">-</span>&gt; T <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> X<span class="token punctuation">:</span><span class="token keyword">Id</span> <span class="token operator">=&gt;</span> T <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>gtenv</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> X <span class="token operator">|</span><span class="token operator">-</span>&gt; T <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>gtenv</span><span class="token punctuation">&gt;</span></span>
+    <span class="token keyword">requires</span> notBool<span class="token punctuation">(</span>X in keys<span class="token punctuation">(</span>Rho<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> X<span class="token punctuation">:</span><span class="token keyword">Id</span> <span class="token operator">=&gt;</span> T <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>gtenv</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> X <span class="token operator">|</span><span class="token operator">-</span>&gt; T <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>gtenv</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="increment">Increment</h2>
+<p>We want the increment operation to apply to any lvalue, including
+array elements, not only to variables.  For that reason, we define a
+special context extracting the type of the argument of the increment
+operation only if that argument is an lvalue.  Otherwise the rewriting
+process gets stuck.  The operation <code>ltype</code> is defined at the
+end of this file, in the auxiliary operation section.  It essentially
+acts as a filter, getting stuck if its argument is not an lvalue and
+letting it reduce otherwise.  The type of the lvalue is expected to be
+an integer in order to be allowed to be incremented, as seen in the
+rule <code>++ int =&gt; int</code> below.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">context</span> <span class="token operator">++</span><span class="token punctuation">(</span>HOLE <span class="token operator">=&gt;</span> ltype<span class="token punctuation">(</span>HOLE<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> <span class="token operator">++</span> int <span class="token operator">=&gt;</span> int
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="common-expression-constructs">Common expression constructs</h2>
+<p>The rules below are straightforward and self-explanatory:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> int <span class="token operator">+</span> int <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> string <span class="token operator">+</span> string <span class="token operator">=&gt;</span> string
+  <span class="token keyword">rule</span> int <span class="token operator">-</span> int <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> int <span class="token operator">*</span> int <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> int <span class="token operator">/</span> int <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> int <span class="token operator">%</span> int <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> <span class="token operator">-</span> int <span class="token operator">=&gt;</span> int
+  <span class="token keyword">rule</span> int &lt; int <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> int <span class="token operator">&lt;=</span> int <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> int &gt; int <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> int <span class="token operator">&gt;=</span> int <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type <span class="token operator">==</span> T <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type <span class="token operator">!=</span> T <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> bool <span class="token operator">&amp;&amp;</span> bool <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> bool <span class="token operator">||</span> bool <span class="token operator">=&gt;</span> bool
+  <span class="token keyword">rule</span> <span class="token operator">!</span> bool <span class="token operator">=&gt;</span> bool
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="array-access-and-size">Array access and size</h2>
+<p>Array access requires each index to type to an integer, and the
+array type to be at least as deep as the number of indexes:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k"><span class="token comment">// NOTE:</span>
+<span class="token comment">// We used to need parentheses in the RHS, to avoid capturing Ts as an attribute</span>
+<span class="token comment">// Let's hope that is not a problem anymore.</span>
+
+  <span class="token keyword">rule</span> <span class="token punctuation">(</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">[</span>int<span class="token punctuation">,</span> Ts<span class="token punctuation">:</span>Types<span class="token punctuation">]</span> <span class="token operator">=&gt;</span> T<span class="token punctuation">[</span>Ts<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type<span class="token punctuation">[</span><span class="token punctuation">.</span>Types<span class="token punctuation">]</span> <span class="token operator">=&gt;</span> T
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>sizeOf</code> only needs to check that its argument is an array:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> sizeOf<span class="token punctuation">(</span>_T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> int
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="input%2Foutput">Input/Output</h2>
+<p>The read expression construct types to an integer, while print types
+to a statement provided that all its arguments type to integers or
+strings.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> read<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> int
+
+  <span class="token keyword">rule</span> print<span class="token punctuation">(</span>T<span class="token punctuation">:</span>Type<span class="token punctuation">,</span> Ts <span class="token operator">=&gt;</span> Ts<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token keyword">requires</span> T <span class="token operator">==</span>K int orBool T <span class="token operator">==</span>K string
+  <span class="token keyword">rule</span> print<span class="token punctuation">(</span><span class="token punctuation">.</span>Types<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="assignment">Assignment</h2>
+<p>The special context and the rule for assignment below are similar
+to those for increment: the LHS of the assignment must be an lvalue
+and, in that case, it must have the same type as the RHS, which then
+becomes the type of the assignment.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">context</span> <span class="token punctuation">(</span>HOLE <span class="token operator">=&gt;</span> ltype<span class="token punctuation">(</span>HOLE<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> _
+  <span class="token keyword">rule</span> T<span class="token punctuation">:</span>Type <span class="token operator">=</span> T <span class="token operator">=&gt;</span> T
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="function-application-and-return">Function application and return</h2>
+<p>Function application requires the type of the function and the
+types of the passed values to be compatible.  Note that a special case
+is needed to handle the no-argument case:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token punctuation">(</span>Ts<span class="token punctuation">:</span>Types <span class="token operator">-</span>&gt; T<span class="token punctuation">)</span><span class="token punctuation">(</span>Ts<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> T <span class="token keyword">requires</span> Ts <span class="token operator">=</span><span class="token operator">/</span><span class="token operator">=</span>K <span class="token punctuation">.</span>Types
+  <span class="token keyword">rule</span> <span class="token punctuation">(</span>void <span class="token operator">-</span>&gt; T<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">.</span>Types<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> T
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>The returned value must have the same type as the declared
+function return type.  If an empty return is encountered, than
+we should check that we are in a function (and not a thread)
+context, that is, a <code>return</code> cell must be available:</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> return T<span class="token punctuation">:</span>Type<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>returnType</span><span class="token punctuation">&gt;</span></span> T <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>returnType</span><span class="token punctuation">&gt;</span></span>
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> return<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>returnType</span><span class="token punctuation">&gt;</span></span> _ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>returnType</span><span class="token punctuation">&gt;</span></span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="blocks">Blocks</h2>
+<p>To avoid having to recover type environments after blocks, we prefer
+to start a new task for block body, making sure that the new task
+is passed the same type environment and return cells.  The value
+returned by <code>return</code> statements must have the same type as
+stated in the <code>return</code> cell.  The <code>print</code> variadic
+function is allowed to only print integers and strings.  The thrown
+exceptions can only have integer type.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">=&gt;</span> block
+
+  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token punctuation">{</span>S<span class="token punctuation">}</span> <span class="token operator">=&gt;</span> block <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span> R <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span>
+       <span class="token punctuation">(</span><span class="token punctuation">.</span>Bag <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> S <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span> R <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="expression-statement">Expression statement</h2>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> _<span class="token punctuation">:</span>Type<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="conditional-and-while-loop">Conditional and <code>while</code> loop</h2>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> if <span class="token punctuation">(</span>bool<span class="token punctuation">)</span> block else block <span class="token operator">=&gt;</span> stmt
+  <span class="token keyword">rule</span> while <span class="token punctuation">(</span>bool<span class="token punctuation">)</span> block <span class="token operator">=&gt;</span> stmt
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="exceptions">Exceptions</h2>
+<p>We currently force the parameters of exceptions to only be integers.
+Moreover, for simplicity, we assume that integer exceptions can be
+thrown from anywhere, including from functions which do not define
+any try-catch block (with the currently unchecked ‒also for
+simplicity‒ expectation that the caller functions would catch those
+exceptions).</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> try block catch<span class="token punctuation">(</span>int X<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>S<span class="token punctuation">}</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>int X<span class="token punctuation">;</span> S<span class="token punctuation">}</span>
+  <span class="token keyword">rule</span> try block catch<span class="token punctuation">(</span>int X<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>int X<span class="token punctuation">;</span><span class="token punctuation">}</span>
+  <span class="token keyword">rule</span> throw int<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="concurrency">Concurrency</h2>
+<p>Nothing special about typing the concurrency constructs, except that
+we do not want the spawned thread to return, so we do not include any
+<code>return</code> cell in the new task cell for the thread statement.
+Same like with the functions above, we do not check for thrown
+exceptions which are not caught.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">rule</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> spawn S <span class="token operator">=&gt;</span> int <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span>
+       <span class="token punctuation">(</span><span class="token punctuation">.</span>Bag <span class="token operator">=&gt;</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>task</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>k</span><span class="token punctuation">&gt;</span></span> S <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>k</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tenv</span><span class="token punctuation">&gt;</span></span> Rho <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tenv</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>task</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> join int<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+  <span class="token keyword">rule</span> acquire _<span class="token punctuation">:</span>Type<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+  <span class="token keyword">rule</span> release _<span class="token punctuation">:</span>Type<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+  <span class="token keyword">rule</span> rendezvous _<span class="token punctuation">:</span>Type<span class="token punctuation">;</span> <span class="token operator">=&gt;</span> stmt
+
+  <span class="token keyword">rule</span> _<span class="token punctuation">:</span>BlockOrStmtType _<span class="token punctuation">:</span>BlockOrStmtType <span class="token operator">=&gt;</span> stmt
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="auxiliary-constructs">Auxiliary constructs</h2>
+<p>The function <code>mkDecls</code> turns a list of parameters into a
+list of variable declarations.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Stmt <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> mkDecls<span class="token punctuation">(</span>Params<span class="token punctuation">)</span>  <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> mkDecls<span class="token punctuation">(</span>T<span class="token punctuation">:</span>Type X<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">,</span> Ps<span class="token punctuation">:</span>Params<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> T X<span class="token punctuation">;</span> mkDecls<span class="token punctuation">(</span>Ps<span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> mkDecls<span class="token punctuation">(</span><span class="token punctuation">.</span>Params<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>The <code>ltype</code> context allows only expressions which have an
+lvalue to evaluate.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> LValue <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> <span class="token keyword">Id</span>
+  <span class="token keyword">rule</span> isLValue<span class="token punctuation">(</span>_<span class="token punctuation">:</span>Exp<span class="token punctuation">[</span>_<span class="token punctuation">:</span>Exps<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token boolean">true</span>
+  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> LValue  <span class="token comment">// K should be able to infer this</span>
+                         <span class="token comment">// if not added, then it gets stuck with an Id on k cell</span>
+
+<span class="token comment">// Instead of the second LValue production above you can use a rule:</span>
+<span class="token comment">//  rule isLValue(_:Exp[_:Exps]) =&gt; true</span>
+
+  <span class="token keyword">syntax</span> Exp <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> ltype<span class="token punctuation">(</span>Exp<span class="token punctuation">)</span>
+<span class="token comment">//  context ltype(HOLE:LValue)</span>
+<span class="token comment">// The above context does not work due to some error, so we write instead</span>
+  <span class="token keyword">context</span> ltype<span class="token punctuation">(</span>HOLE<span class="token punctuation">)</span> <span class="token keyword">requires</span> isLValue<span class="token punctuation">(</span>HOLE<span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The function <code>getTypes</code> is the same as in SIMPLE typed dynamic.</p>
+<pre style="position: relative; padding-top: 32px; counter-reset: linenumber 0;" class="line-numbers language-line-numbers" data-start="1"><div class="code-block-selectors">k</div><code class="language-k">  <span class="token keyword">syntax</span> Types <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">=</span> getTypes<span class="token punctuation">(</span>Params<span class="token punctuation">)</span>  <span class="token punctuation">[</span>function<span class="token punctuation">]</span>
+  <span class="token keyword">rule</span> getTypes<span class="token punctuation">(</span>T<span class="token punctuation">:</span>Type _<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> T<span class="token punctuation">,</span> <span class="token punctuation">.</span>Types   <span class="token comment">// I would like to not use .Types</span>
+  <span class="token keyword">rule</span> getTypes<span class="token punctuation">(</span>T<span class="token punctuation">:</span>Type _<span class="token punctuation">:</span><span class="token keyword">Id</span><span class="token punctuation">,</span> P<span class="token punctuation">,</span> Ps<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> T<span class="token punctuation">,</span> getTypes<span class="token punctuation">(</span>P<span class="token punctuation">,</span>Ps<span class="token punctuation">)</span>
+  <span class="token keyword">rule</span> getTypes<span class="token punctuation">(</span><span class="token punctuation">.</span>Params<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> void<span class="token punctuation">,</span> <span class="token punctuation">.</span>Types
+
+<span class="token keyword">endmodule</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Go to <a href="../../2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></p>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#simple-%E2%80%94-typed-%E2%80%94-static" class="bd-toc-link">SIMPLE — Typed — Static</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#abstract"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Abstract
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#syntax"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Syntax
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#types"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Types
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#declarations"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Declarations
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#expressions"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Expressions
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#statements"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Statements
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#desugaring-macros"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Desugaring macros
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#static-semantics"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Static semantics
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#extended-syntax-and-results"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Extended syntax and results
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#configuration"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Configuration
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#variable-declarations"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Variable declarations
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#function-declarations"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Function declarations
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#checking-if-main()-exists%7D"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Checking if <code>main()</code> exists}
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#collecting-the-terminated-tasks"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Collecting the terminated tasks
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#basic-values"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Basic values
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#variable-lookup"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Variable lookup
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#increment"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Increment
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#common-expression-constructs"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Common expression constructs
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#array-access-and-size"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Array access and size
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#input%2Foutput"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Input/Output
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#assignment"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Assignment
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#function-application-and-return"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Function application and return
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#blocks"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Blocks
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#expression-statement"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Expression statement
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#conditional-and-while-loop"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Conditional and <code>while</code> loop
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exceptions"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Exceptions
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#concurrency"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Concurrency
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#auxiliary-constructs"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Auxiliary constructs
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../../../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>

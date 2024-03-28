@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+<meta
+  name="description"
+  content="Design and implement your programming language and software analysis tools with mathematical rigor."
+/>
+<meta name="keywords" content="runtime, verification, rv, k" />
+<meta name="author" content="K | Runtime Verification Inc" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://kframework.org/k-distribution/k-tutorial/1_basic/22_proofs/" />
+
+<!--favicon icon-->
+<link rel="icon" type="image/png" href="../../../../assets/img/favicon.ico" />
+
+<title>Lesson 1.22: Basics of Deductive Program Verification using K | Runtime Verification Inc</title>
+
+<!-- <base href="/k/" /> -->
+
+<!--web fonts-->
+<link
+  href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css?family=Lora:400i"
+  rel="stylesheet"
+/>
+
+<link
+  href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<link href="../../../../assets/css/index.css" rel="stylesheet" />
+
+<!--[if (gt IE 9) |!(IE)]><!-->
+<!--<link rel="stylesheet" href="/assets/vendor/custom-nav/css/effects/fade-menu.css"/>-->
+<!-- <link rel="stylesheet" href="../../../../assets/k/vl-nav/css/effects/slide-menu.css" /> -->
+<!--<![endif]-->
+
+  </head>
+
+  <body>
+<header
+  class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
+>
+  <a class="logo-link" href="../../../../index.html">
+    <picture>
+      <source
+        srcset="../../../../assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="../../../../assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
+    Semantic Framework
+  </a>
+  <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="../../../../exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="../../../../exports/K.epub">epub</a>
+        <a class="dropdown-item" href="../../../../exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="../../../../exports/K.html">html</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
+        href="https://github.com/runtimeverification/k"
+        target="_blank"
+        rel="noopener"
+        aria-label="GitHub"
+      >
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  </ul>
+  <a
+    class="btn btn-rv-blue d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3"
+    href="https://github.com/runtimeverification/k/releases/latest"
+    >Download</a
+  >
+</header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>
+
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+<div class="col-12 col-md-3 col-xl-2 bd-sidebar mb-3">
+  <form
+    role="search"
+    class="bd-search d-flex align-items-center justify-content-between"
+  >
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search..."
+      aria-label="Search for..."
+      autocomplete="false"
+      id="search-box"
+    />
+    <button
+      class="btn bd-search-docs-toggle d-md-none p-0 ml-3 collapsed"
+      type="button"
+      aria-label="Toggle docs navigation"
+      style="font-size: 1.4rem"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </form>
+  <nav class="collapse bd-links" aria-label="Main navigation">
+    <div class="sidebar-toc pl-2"><div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../">Homepage</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="https://github.com/runtimeverification/k/releases/latest">Install K</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/k-tutorial/">K Tutorial</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/1_basic/">Section 1: Basic K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/01_installing/">Lesson 1.1: Setting up a K Environment</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/02_basics/">Lesson 1.2: Basics of Functional K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/03_parsing/">Lesson 1.3: BNF Syntax and Parser Generation</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/04_disambiguation/">Lesson 1.4: Disambiguating Parses</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/05_modules/">Lesson 1.5: Modules, Imports, and Requires</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/06_ints_and_bools/">Lesson 1.6: Integers and Booleans</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/07_side_conditions/">Lesson 1.7: Side Conditions and Rule Priority</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/08_literate_programming/">Lesson 1.8: Literate Programming with Markdown</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/09_unparsing/">Lesson 1.9: Unparsing and the format and color attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/10_strings/">Lesson 1.10: Strings</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/11_casts/">Lesson 1.11: Casting Terms</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/12_syntactic_lists/">Lesson 1.12: Syntactic Lists</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/13_rewrite_rules/">Lesson 1.13: Basics of K Rewriting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/14_evaluation_order/">Lesson 1.14: Defining Evaluation Order</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/15_configurations/">Lesson 1.15: Configuration Declarations and Cell Nesting</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/16_collections/">Lesson 1.16: Maps, Semantic Lists, and Sets</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/17_cell_multiplicity/">Lesson 1.17: Cell Multiplicity and Cell Collections</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/">Lesson 1.18: Term Equality and the Ternary Operator</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/19_debugging/">Lesson 1.19: Debugging with GDB or LLDB</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/20_backends/">Lesson 1.20: K Backends and the Haskell Backend</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/21_symbolic_execution/">Lesson 1.21: Unification and Symbolic Execution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/1_basic/22_proofs/">Lesson 1.22: K Deductive Verification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/k-tutorial/2_intermediate/">Section 2: Intermediate K Concepts</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/01_macros/">Lesson 2.1: Macros, Aliases, and Anywhere Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/02_fresh_constants/">Lesson 2.2: Fresh Constants</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/03_klabels/">Lesson 2.3: KLabels and Abstract Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/04_overloading/">Lesson 2.4: Overloaded Symbols</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/05_matching_logic/">Lesson 2.5: Matching Logic Connectives and #Or Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/06_function_context/">Lesson 2.6: Function Context</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/07_record_productions/">Lesson 2.7: Record Productions and Named Nonterminals</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/08_fun_and_let/">Lesson 2.8: #fun and #let</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/09_as/">Lesson 2.9: #as Patterns</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/10_matching_operator/">Lesson 2.10: The Matching Operators, :=K and :/=K</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/11_evaluation_order/">Lesson 2.11: Uncommon Evaluation Order Concepts</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/12_floats_and_machine_ints/">Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/13_substitution/">Lesson 2.13: Alpha-renaming-aware Substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/14_io/">Lesson 2.14: File I/O</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/15_string_buffers_and_bytes/">Lesson 2.15: String Buffers and Byte Sequences</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/16_kore/">Lesson 2.16: The Intermediate Language of K, KORE</a></div>
+<div style="padding:0.25rem 0;;padding-left: 24px;"><a href="../../../../k-distribution/k-tutorial/2_intermediate/17_debugging_proofs/">Lesson 2.17: Debugging Proofs using the Haskell Backend REPL</a></div>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/user_manual/">K User Manual</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/cheat_sheet/">K Cheat Sheet</a></div>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../docs/ktools/">K Tool Reference</a></div>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/include/kframework/">K Builtins</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/domains/">domains</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/kast/">kast</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/prelude/">prelude</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/ffi/">ffi</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/json/">json</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/rat/">rat</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../k-distribution/include/kframework/builtin/substitution/">substitution</a></div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="https://github.com/runtimeverification/k/blob/master/k-distribution/include/kframework/builtin/unification.k">unification</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 8px;"><summary><a href="../../../../k-distribution/pl-tutorial/">K PL Tutorial</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 16px;"><a href="../../../../overview/">K Overview</a></div>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/">Learning K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/">Part 1: Defining LAMBDA</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_1/">Lesson 1, LAMBDA: Syntax Modules and Basic K Commands</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_2/">Lesson 2, LAMBDA: Module Importing, Rules, Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_3/">Lesson 3, LAMBDA: Evaluation Strategies using Strictness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_4/">Lesson 4, LAMBDA: Generating Documentation; Latex Attributes</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_5/">Lesson 5, LAMBDA: Adding Builtins; Side Conditions</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_6/">Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_7/">Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_8/">Lesson 8, LAMBDA: Multiple Binding Constructs</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/1_lambda/lesson_9/">Lesson 9, LAMBDA: A Complete and Commented Definition</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/">Part 2: Defining IMP</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_1/">Lesson 1, IMP: Defining a More Complex Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_2/">Lesson 2, IMP: Defining a Configuration</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_3/">Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_4/">Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/2_imp/lesson_5/">Lesson 5, IMP: Completing and Documenting IMP</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/">Part 3: Defining LAMBDA++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_1/">Lesson 1, LAMBDA++: Abrupt Changes of Control</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_2/">Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_3/">Lesson 3, LAMBDA++: Reusing Existing Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_4/">Lesson 4, LAMBDA++: Do Not Reuse Blindly!</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_5/">Lesson 5, LAMBDA++: More Semantic Computation Items</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/3_lambda++/lesson_6/">Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/">Part 4: Defining IMP++</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_1/">Lesson 1, IMP++: Extending/Changing an Existing Language Syntax</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_2/">Lesson 2, IMP++: Configuration Refinement; Freshness</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_3/">Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_4/">Lesson 4, IMP++: Semantic Lists; Input/Output Streaming</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_5/">Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_6/">Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_7/">Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/4_imp++/lesson_8/">Lesson 8, IMP++: Wrapping up Larger Languages</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/">Part 5: Defining Type Systems</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_1/">Lesson 1, Type Systems: Imperative, Environment-Based Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_2/">Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_3/">Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_4/">Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_5/">Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_6/">Lesson 6, Type Systems: Parallel Type Checkers/Inferencers</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_7/">Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_8/">Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/1_k/5_types/lesson_9/">Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)</a></div>
+</div></details>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 16px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/">Learning Language Design and Semantics using K</a></summary><div>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Part 7: SIMPLE: Designing Imperative Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/1_untyped/simple-untyped/">Lesson 1, SIMPLE untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static/">Lesson 2, SIMPLE typed static</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic/">Lesson 3, SIMPLE typed dynamic</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Part 8: KOOL: Designing Object-Oriented Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/1_untyped/kool-untyped/">Lesson 1, KOOL untyped</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic/">Lesson 2, KOOL typed dynamic</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static/">Lesson 3, KOOL typed static</a></div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Part 9: FUN: Designing Functional Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped/">Lesson 1, FUN untyped, Environment-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped/">Lesson 2, FUN untyped, Substitution-Based</a></div>
+<div style="padding:0.25rem 0;;padding-left: 32px;">Lesson 3, FUN polymorphic type inferencer</div>
+</div></details>
+<details style="padding:0.25rem 0;;padding-left: 24px;"><summary><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Part 10: LOGIK: Designing Logic Programming Languages</a></summary><div>
+<div style="padding:0.25rem 0;;padding-left: 32px;"><a href="../../../../k-distribution/pl-tutorial/2_languages/4_logik/basic/logik/">Lesson 1, LOGIK</a></div>
+</div></details>
+</div></details>
+</div></details>
+<div style="padding:0.25rem 0;;padding-left: 8px;"><a href="../../../../projects/">Projects using K</a></div>
+</div></div>
+  </nav>
+</div>
+
+        <main
+          class="col-12 col-md-6 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <div class="introduction markdown-preview"><html><head></head><body><h1 id="lesson-1.22%3A-basics-of-deductive-program-verification-using-k">Lesson 1.22: Basics of Deductive Program Verification using K</h1>
+<p>In this lesson, you will familiarize yourself with the basics of using K for
+deductive program verification.</p>
+<h2 id="1.-setup%3A-simple-programming-language-with-function-calls">1. Setup: Simple Programming Language with Function Calls</h2>
+<p>We base this lesson on a simple programming language with functions,
+assignment, if conditionals, and while loops. Take your time to study its
+formalization below (<code>lesson-22.k</code>):</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>module LESSON-22-SYNTAX
+    imports INT-SYNTAX
+    imports BOOL-SYNTAX
+    imports ID-SYNTAX
+
+    syntax Exp ::= IExp | BExp
+
+    syntax IExp ::= Id | Int
+
+    syntax KResult ::= Int | Bool | Ints
+
+    // Take this sort structure:
+    //
+    //     IExp
+    //    /    \
+    // Int      Id
+    //
+    // Through the List{_, ","} functor.
+    // Must add a `Bot`, for a common subsort for the empty list.
+
+    syntax Bot
+    syntax Bots ::= List{Bot, ","} [klabel(exps)]
+    syntax Ints ::= List{Int, ","} [klabel(exps)]
+                  | Bots
+    syntax Ids  ::= List{Id, ","}  [klabel(exps)]
+                  | Bots
+    syntax Exps ::= List{Exp, ","} [klabel(exps), seqstrict]
+                  | Ids | Ints
+
+    syntax IExp ::= "(" IExp ")" [bracket]
+                  | IExp "+" IExp [seqstrict]
+                  | IExp "-" IExp [seqstrict]
+                  &gt; IExp "*" IExp [seqstrict]
+                  | IExp "/" IExp [seqstrict]
+                  &gt; IExp "^" IExp [seqstrict]
+                  | Id "(" Exps ")" [strict(2)]
+
+    syntax BExp ::= Bool
+
+    syntax BExp ::= "(" BExp ")" [bracket]
+                  | IExp "&lt;=" IExp [seqstrict]
+                  | IExp "&lt;"  IExp [seqstrict]
+                  | IExp "&gt;=" IExp [seqstrict]
+                  | IExp "&gt;"  IExp [seqstrict]
+                  | IExp "==" IExp [seqstrict]
+                  | IExp "!=" IExp [seqstrict]
+
+    syntax BExp ::= BExp "&amp;&amp;" BExp
+                  | BExp "||" BExp
+
+    syntax Stmt ::=
+         Id "=" IExp ";" [strict(2)]                        // Assignment
+       | Stmt Stmt [left]                                   // Sequence
+       | Block                                              // Block
+       | "if" "(" BExp ")" Block "else" Block [strict(1)]   // If conditional
+       | "while" "(" BExp ")" Block                         // While loop
+       | "return" IExp ";"                    [seqstrict]   // Return statement
+       | "def" Id "(" Ids ")" Block                         // Function definition
+
+    syntax Block ::=
+         "{" Stmt "}"    // Block with statement
+       | "{" "}"         // Empty block
+endmodule
+
+module LESSON-22
+    imports INT
+    imports BOOL
+    imports LIST
+    imports MAP
+    imports LESSON-22-SYNTAX
+
+    configuration
+      &lt;k&gt; $PGM:Stmt &lt;/k&gt;
+      &lt;store&gt; .Map &lt;/store&gt;
+      &lt;funcs&gt; .Map &lt;/funcs&gt;
+      &lt;stack&gt; .List &lt;/stack&gt;
+
+ // -----------------------------------------------
+    rule &lt;k&gt; I1 + I2 =&gt; I1 +Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 - I2 =&gt; I1 -Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 * I2 =&gt; I1 *Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 / I2 =&gt; I1 /Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 ^ I2 =&gt; I1 ^Int I2 ... &lt;/k&gt;
+
+    rule &lt;k&gt; I:Id =&gt; STORE[I] ... &lt;/k&gt;
+         &lt;store&gt; STORE &lt;/store&gt;
+
+ // ------------------------------------------------
+    rule &lt;k&gt; I1 &lt;= I2 =&gt; I1  &lt;=Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1  &lt; I2 =&gt; I1   &lt;Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 &gt;= I2 =&gt; I1  &gt;=Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1  &gt; I2 =&gt; I1   &gt;Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 == I2 =&gt; I1  ==Int I2 ... &lt;/k&gt;
+    rule &lt;k&gt; I1 != I2 =&gt; I1 =/=Int I2 ... &lt;/k&gt;
+
+    rule &lt;k&gt; B1 &amp;&amp; B2 =&gt; B1 andBool B2 ... &lt;/k&gt;
+    rule &lt;k&gt; B1 || B2 =&gt; B1  orBool B2 ... &lt;/k&gt;
+
+    rule &lt;k&gt; S1:Stmt S2:Stmt =&gt; S1 ~&gt; S2 ... &lt;/k&gt;
+
+    rule &lt;k&gt; ID = I:Int ; =&gt; . ... &lt;/k&gt;
+         &lt;store&gt; STORE =&gt; STORE [ ID &lt;- I ] &lt;/store&gt;
+
+    rule &lt;k&gt; { S } =&gt; S ... &lt;/k&gt;
+    rule &lt;k&gt; {   } =&gt; . ... &lt;/k&gt;
+
+    rule &lt;k&gt; if (true)   THEN else _ELSE =&gt; THEN ... &lt;/k&gt;
+    rule &lt;k&gt; if (false) _THEN else  ELSE =&gt; ELSE ... &lt;/k&gt;
+
+    rule &lt;k&gt; while ( BE ) BODY =&gt; if ( BE ) { BODY while ( BE ) BODY } else { } ... &lt;/k&gt;
+
+    rule &lt;k&gt; def FNAME ( ARGS ) BODY =&gt; . ... &lt;/k&gt;
+         &lt;funcs&gt; FS =&gt; FS [ FNAME &lt;- def FNAME ( ARGS ) BODY ] &lt;/funcs&gt;
+
+    rule &lt;k&gt; FNAME ( IS:Ints ) ~&gt; CONT =&gt; #makeBindings(ARGS, IS) ~&gt; BODY &lt;/k&gt;
+         &lt;funcs&gt; ... FNAME |-&gt; def FNAME ( ARGS ) BODY ... &lt;/funcs&gt;
+         &lt;store&gt; STORE =&gt; .Map &lt;/store&gt;
+         &lt;stack&gt; .List =&gt; ListItem(state(CONT, STORE)) ... &lt;/stack&gt;
+
+    rule &lt;k&gt; return I:Int ; ~&gt; _ =&gt; I ~&gt; CONT &lt;/k&gt;
+         &lt;stack&gt; ListItem(state(CONT, STORE)) =&gt; .List ... &lt;/stack&gt;
+         &lt;store&gt; _ =&gt; STORE &lt;/store&gt;
+
+    rule &lt;k&gt; return I:Int ; ~&gt; . =&gt; I &lt;/k&gt;
+         &lt;stack&gt; .List &lt;/stack&gt;
+
+    syntax KItem ::= #makeBindings(Ids, Ints)
+                   | state(continuation: K, store: Map)
+ // ----------------------------------------------------
+    rule &lt;k&gt; #makeBindings(.Ids, .Ints) =&gt; . ... &lt;/k&gt;
+    rule &lt;k&gt; #makeBindings((I:Id, IDS =&gt; IDS), (IN:Int, INTS =&gt; INTS)) ... &lt;/k&gt;
+         &lt;store&gt; STORE =&gt; STORE [ I &lt;- IN ] &lt;/store&gt;
+endmodule
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Next, compile this example using <code>kompile lesson-22.k --backend haskell</code>. If
+your processor is an Apple Silicon processor, add the <code>--no-haskell-binary</code>
+flag if the compilation fails.</p>
+<h2 id="2.-setup%3A-proof-environment">2. Setup: Proof Environment</h2>
+<p>Next, take the following snippet of K code and save it in <code>lesson-22-spec.k</code>.
+This is a skeleton of the proof environment, and we will complete it as the
+lesson progresses.</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>requires "lesson-22.k"
+requires "domains.md"
+
+module LESSON-22-SPEC-SYNTAX
+    imports LESSON-22-SYNTAX
+
+endmodule
+
+module VERIFICATION
+    imports K-EQUAL
+    imports LESSON-22-SPEC-SYNTAX
+    imports LESSON-22
+    imports MAP-SYMBOLIC
+
+endmodule
+
+module LESSON-22-SPEC
+    imports VERIFICATION
+
+endmodule
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="3.-claims">3. Claims</h2>
+<ol>
+<li>The first claim we will ask K to prove is that 3 + 4, in fact, equals 7.
+Claims are stated using the <code>claim</code> keyword, followed by the claim
+statement:</li>
+</ol>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>claim &lt;k&gt; 3 + 4 =&gt; 7 ... &lt;/k&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Add this claim to the <code>LESSON-22-SPEC</code> module and run the K prover using the
+command <code>kprove lesson-22-spec.k</code>. You should get back the output <code>#Top</code>,
+which denotes the Matching Logic equivalent of <code>true</code> and means, in this
+context, that all claims have been proven correctly.</p>
+<ol start="2">
+<li>The second claim reasons about the <code>if</code> statement that has a concrete condition:</li>
+</ol>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>claim &lt;k&gt; if ( 3 + 4 == 7 ) {
+            $a = 1 ;
+            } else {
+            $a = 2 ;
+            }
+        =&gt; . ... &lt;/k&gt;
+        &lt;store&gt; STORE =&gt; STORE [ $a &lt;- 1 ] &lt;/store&gt;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>stating that the given program terminates (<code>=&gt; .</code>), and when it does, the value
+of the variable <code>$a</code> is set to <code>1</code>, meaning that the execution will have taken
+the <code>then</code> branch. Add this claim to the <code>LESSON-22-SPEC</code> module, but also add</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>syntax Id ::= "$a" [token]
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>to the <code>LESSON-22-SPEC-SYNTAX</code> module in order to declare <code>$a</code> as a token so
+that it can be used as a program variable. Re-run the K prover, which should
+again return <code>#Top</code>.</p>
+<ol start="3">
+<li>Our third claim demonstrates how to reason about both branches of an <code>if</code>
+statement at the same time:</li>
+</ol>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>claim &lt;k&gt; $a = A:Int ; $b = B:Int ;
+          if ($a &lt; $b) {
+            $c = $b ;
+          } else {
+            $c = $a ;
+          }
+        =&gt; . ... &lt;/k&gt;
+        &lt;store&gt; STORE =&gt; STORE [ $a &lt;- A ] [ $b &lt;- B ] [ $c &lt;- ?C:Int ] &lt;/store&gt;
+    ensures (?C ==Int A) orBool (?C ==Int B)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The program in question first assigns symbolic integers <code>A</code> and <code>B</code> to program
+variables <code>$a</code> and <code>$b</code>, respectively, and then executes the given <code>if</code>
+statement, which has a symbolic condition (<code>A &lt; B</code>), updating the value of the
+program variable <code>$c</code> in both branches. The specification we give states that
+the <code>if</code> statement terminates, with <code>$a</code> and <code>$b</code> updated, respectively, to <code>A</code>
+and <code>B</code>, and <code>$c</code> updated to <em>some</em> symbolic integer value <code>?C</code>. Via the
+<code>ensures</code> clause, which is used to specify additional constraints that hold
+after execution, we also state that this existentially quantified <code>?C</code> equals
+either <code>A</code> or <code>B</code>.</p>
+<p>Add the productions declaring <code>$b</code> and <code>$c</code> as tokens to the
+<code>LESSON-22-SPEC-SYNTAX</code> module, the claim to the <code>LESSON-22-SPEC</code> module, run
+the K prover again, and observe the output, which should not be <code>#Top</code> this
+time. This means that K was not able to prove the claim, and we now need to
+understand why. We do so by examining the output, which should look as follows:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>    (InfoReachability) while checking the implication:
+    The configuration's term unifies with the destination's term,
+    but the implication check between the conditions has failed.
+
+  #Not (
+    #Exists ?C . {
+        STORE [ $a &lt;- A:Int ] [ $b &lt;- B:Int ] [ $c &lt;- ?C:Int ]
+      #Equals
+        STORE [ $a &lt;- A:Int ] [ $b &lt;- B:Int ] [ $c &lt;- B:Int ]
+    }
+  #And
+    {
+      true
+    #Equals
+      ?C ==Int A orBool ?C ==Int B
+    }
+  )
+#And
+  &lt;generatedTop&gt;
+    &lt;k&gt;
+      _DotVar1
+    &lt;/k&gt;
+    &lt;store&gt;
+      STORE [ $a &lt;- A:Int ] [ $b &lt;- B:Int ] [ $c &lt;- B:Int ]
+    &lt;/store&gt;
+    &lt;funcs&gt;
+      _Gen3
+    &lt;/funcs&gt;
+    &lt;stack&gt;
+      _Gen5
+    &lt;/stack&gt;
+  &lt;/generatedTop&gt;
+#And
+  {
+    true
+  #Equals
+    A &lt;Int B
+  }
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This output starts with a message telling us at which point the proof failed,
+followed by the final state, which consists of three parts: some negative
+Matching Logic (ML) constraints, the final configuration (<code>&lt;generatedTop&gt; ... &lt;/generatedTop&gt;</code>), and some positive ML constraints. Generally speaking,
+these positive and the negative constraints could arise from various sources,
+such as (but not limited to) branches taken by the execution
+(e.g. <code>{ true #Equals A &lt;Int B }</code> or <code>#Not ( { true #Equals A &lt;Int B } ) </code>),
+or <code>ensures</code> constraints.</p>
+<p>First, we examine the message:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>(InfoReachability) while checking the implication:
+The configuration's term unifies with the destination's term,
+but the implication check between the conditions has failed.
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>which tells us that the <em>structure</em> of the final configuration is as expected,
+but that some of the associated constraints cannot be proven. We next look at
+the final configuration, in which the relevant item is the <code>&lt;store&gt; ... &lt;/store&gt;</code> cell, because it is the only one that we are reasoning about. By
+inspecting its contents:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>STORE [ $a &lt;- A:Int ] [ $b &lt;- B:Int ] [ $c &lt;- B:Int ]
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>we see that we should be within the constraints of the <code>ensures</code>, since the
+value of <code>$c</code> in the store equals <code>B</code> in this branch. We next examine the
+negative and positive constraints of the output and, more often than not, the
+goal is to instruct K how to use the information from the final configuration
+and the positive constraints to falsify one of the negative constraints. This
+is done through <em>simplifications</em>.</p>
+<p>So, the positive constraint that we have is</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>{ true #Equals A &lt;Int B }
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>meaning that <code>A &lt;Int B</code> holds. Given the analysed program, this tells us that
+we are in the <code>then</code> branch of the <code>if</code>. The negative constraint is</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>  #Not (
+    #Exists ?C . {
+        STORE [ $a &lt;- A:Int ] [ $b &lt;- B:Int ] [ $c &lt;- ?C:Int ]
+      #Equals
+        STORE [ $a &lt;- A:Int ] [ $b &lt;- B:Int ] [ $c &lt;- B:Int ]
+    }
+  #And
+    { true #Equals ?C ==Int A orBool ?C ==Int B }
+  )
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>and we observe, from the first equality, that the existential <code>?C</code> should be
+instantiated with <code>B</code>. This would make both branches of the <code>#And</code> true,
+falsifying the outside <code>#Not</code>. We just need to show <code>K</code> how to conclude that
+<code>?C ==Int B</code>. We do so by introducing the following simplification into the
+<code>VERIFICATION</code> module:</p>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>rule { M:Map [ K &lt;- V ] #Equals M [ K &lt;- V' ] } =&gt; { V #Equals V' } [simplification]
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>which formalizes our internal understanding of <code>?C ==Int B</code>. The rule states
+that when we update the same key in the same map with two values, and the
+resulting maps are equal, then the two values must be equal as well. The
+<code>[simplification]</code> attribute indicates to K to use this rule to simplify the
+state when trying to prove claims. Like function rules, simplification rules
+do not complete to the top of the configuration, but instead apply anywhere
+their left-hand-side matches. Re-run the K prover, which should now return
+<code>#Top</code>, indicating that K was able to use the simplification and prove the
+required claims.</p>
+<ol start="4">
+<li>Next, we show how to state and prove properties of <code>while</code> loops. In
+particular, we consider the following loop</li>
+</ol>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>claim
+    &lt;k&gt;
+        while ( 0 &lt; $n ) {
+            $s = $s + $n;
+            $n = $n - 1;
+            } =&gt; . ...
+    &lt;/k&gt;
+    &lt;store&gt;
+        $s |-&gt; (S:Int =&gt; S +Int ((N +Int 1) *Int N /Int 2))
+        $n |-&gt; (N:Int =&gt; 0)
+    &lt;/store&gt;
+    requires N &gt;=Int 0
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>which adds the sum of the first <code>$n</code> integers to <code>$s</code>, assuming the value of <code>$n</code>
+is non-negative to begin with. This is reflected in the store by stating that,
+after the execution of the loop, the original value of <code>$s</code> (which is set to
+equal some symbolic integer <code>S</code>) is incremented by <code>((N +Int 1) *Int N /Int 2)</code>, and the value of <code>$n</code> always equals <code>0</code>. Add <code>$n</code> and <code>$s</code> as tokens in
+the <code>LESSON-22-SPEC-SYNTAX</code> module, the above claim to the <code>LESSON-22-SPEC</code>
+module, and run the K prover, which should return <code>#Top</code>.</p>
+<ol start="5">
+<li>Finally, our last claim is about a program that uses function calls:</li>
+</ol>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>claim
+    &lt;k&gt;
+        def $sum($n, .Ids) {
+            $s = 0 ;
+            while (0 &lt; $n) {
+                $s = $s + $n;
+                $n = $n - 1;
+            }
+            return $s;
+        }
+
+        $s = $sum(N:Int, .Ints);
+    =&gt; . ... &lt;/k&gt;
+    &lt;funcs&gt; .Map =&gt; ?_ &lt;/funcs&gt;
+    &lt;store&gt; $s |-&gt; (_ =&gt; ((N +Int 1) *Int N /Int 2)) &lt;/store&gt;
+    &lt;stack&gt; .List &lt;/stack&gt;
+    requires N &gt;=Int 0
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Essentially, we have wrapped the <code>while</code> loop from claim 3.4 into a function
+<code>$sum</code>, and then called that function with a symbolic integer <code>N</code>, storing the
+return value in the variable <code>$s</code>. The specification states that this program
+ends up storing the sum of the first <code>N</code> integers in the variable <code>$n</code>. Add <code>$sum</code>
+to the <code>LESSON-22-SPEC-SYNTAX</code> module, the above claim to the
+<code>LESSON-22-SPEC</code> module, and run the K prover, which should again return
+<code>#Top</code>.</p>
+<h2 id="exercises">Exercises</h2>
+<ol>
+<li>
+<p>Change the condition of the if statement in part 3.2 to take the <code>else</code>
+branch and adjust the claim so that the proof passes.</p>
+</li>
+<li>
+<p>The post-condition of the specification in part 3.3 loses some information.
+In particular, the value of <code>?C</code> is in fact the maximum of <code>A</code> and <code>B</code>.
+Prove the same claim as in 3.2, but with the post-condition <code>ensures (?C ==Int maxInt(A, B))</code>.  For this, you will need to extend the <code>VERIFICATION</code>
+module with two simplifications that capture the meaning of <code>maxInt(A:Int, B:Int)</code>. Keep in mind that any rewriting rule can be used as a
+simplification; in particular, that simplifications can have <code>requires</code>
+clauses.</p>
+</li>
+<li>
+<p>Following the pattern shown in part 3.4, assuming a non-negative initial
+value of <code>$b</code>, specify and verify the following <code>while</code> loop:</p>
+</li>
+</ol>
+<pre class="line-numbers language-line-numbers" data-start="1" style="counter-reset: linenumber 0;"><code>while ( 0 &lt; $b ) {
+    $a = $a + $c;
+    $b = $b - 1;
+    $c = $c - 1;
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>Hint</strong>: You will not need additional simplifications---once you've got the
+specification right, the proof will go through.</p>
+<ol start="4">
+<li>Write an arbitrary yet not-too-complex function (or several functions
+interacting with each other), and try to specify and verify it (them) in K.</li>
+</ol>
+</body></html></div>
+        </main>
+
+        <!-- Page ToC -->
+        <div class="col-12 col-md-3 col-xl-2 py-md-3 bd-sidebar page-toc mb-3">
+          
+<div>
+<details style="padding:0.25rem 0;;padding-left: 0px;">
+            <summary class="bd-toc-link-wrapper">
+              <a href="#lesson-1.22%3A-basics-of-deductive-program-verification-using-k" class="bd-toc-link">Lesson 1.22: Basics of Deductive Program Verification using K</a>
+              </summary>
+            <div>
+              <div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#1.-setup%3A-simple-programming-language-with-function-calls"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                1. Setup: Simple Programming Language with Function Calls
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#2.-setup%3A-proof-environment"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                2. Setup: Proof Environment
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#3.-claims"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                3. Claims
+              </a></div><div class="bd-toc-link-wrapper" style="padding:0.25rem 0;">
+              <a
+                href="#exercises"
+                class="bd-toc-link"
+                style="padding-left: 8px;;"
+              >
+                Exercises
+              </a></div>
+            </div>
+          </details>
+        
+</div>
+
+        </div>
+        <div class="btn btn-rv-blue page-toc-toggle-btn"></div>
+        <!-- End Page ToC -->
+      </div>
+    </div>
+<!-- The footer is now controlled by the k-web-theme git submodule -->
+<footer id="rvsite-footer" class="app-footer text-md-left text-center">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-4 mb-md-0 mb-4">
+        <a href="https://runtimeverification.com/" target="_blank">
+          <picture>
+            <source
+              srcset="
+                https://runtimeverification.com/assets/img/rv-logo-dark.png
+              "
+              media="(prefers-color-scheme: dark)"
+            />
+            <img
+              class="logo-dark"
+              src="https://runtimeverification.com/assets/img/rv-logo.png"
+              alt="Runtime Verification logo"
+              style="height: 32px"
+            /> </picture
+        ></a>
+        <p class="mt-2 text-md-left copyright">
+          <a href="https://goo.gl/maps/5iu2nhbUA48fs7fP6" target="_blank"
+            >333 North Green Street, Chicago, IL</a
+          >
+        </p>
+      </div>
+      <div class="col-md-4 text-md-center mb-md-0 mb-4"></div>
+      <div class="col-md-4 mb-md-0 mb-4 pl-0 text-md-right">
+        <p class="copyright">2024 © all rights reserved</p>
+        <span class="copyright"><a href="https://runtimeverification.com/privacy-policy">privacy policy</a> | <a
+                href="https://runtimeverification.com/terms-of-use">terms of use</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="../../../../assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Render youtube video
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
+            }
+          }
+        }
+      });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
+    </script>
+  </body>
+</html>
