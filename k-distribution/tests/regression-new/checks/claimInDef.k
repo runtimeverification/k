@@ -2,6 +2,6 @@
 
 module CLAIMINDEF
 
-    claim _ => .
+    claim _ => .K
 
 endmodule
