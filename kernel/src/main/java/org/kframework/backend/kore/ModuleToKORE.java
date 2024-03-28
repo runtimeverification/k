@@ -1650,7 +1650,11 @@ public class ModuleToKORE {
 
   private Att koreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
-    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
+    Att att = prod.att();
+    List<Att.Key> attsToRemove = List.of(Att.CONSTRUCTOR(), Att.HOOK(), Att.FORMAT());
+    for (Att.Key key : attsToRemove) {
+      att = att.remove(key);
+    }
     att = att.addAll(semanticAttributes(prod, functionRules, overloads));
     att = att.addAll(syntaxAttributes(prod));
     return att;
