@@ -1133,7 +1133,10 @@ class KoreServer(ContextManager['KoreServer']):
 
     def close(self) -> None:
         _LOGGER.info(f'Stopping KoreServer: {self.host}:{self.port}, pid={self.pid}')
-        self._proc.send_signal(SIGINT)
+        if '--solver-transcript' in self._command:
+            self._proc.send_signal(SIGINT)
+        else:
+            self._proc.terminate()
         self._proc.wait()
         _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
 
