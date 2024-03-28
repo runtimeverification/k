@@ -1633,6 +1633,10 @@ public class ModuleToKORE {
     return !isFunction(prod) || prod.att().contains(Att.TOTAL());
   }
 
+  private boolean isFunction(Production prod) {
+    return prod.att().contains(Att.FUNCTION());
+  }
+
   private boolean isGeneratedInKeysOp(Production prod) {
     Option<String> hook = prod.att().getOption(Att.HOOK());
     if (hook.isEmpty()) return false;
@@ -1781,10 +1785,6 @@ public class ModuleToKORE {
             .sorted(Comparator.comparing(t -> t._2().name()))
             .map(t -> KApply(KLabel(t._2().name())))
             .collect(Collectors.toList()));
-  }
-
-  private boolean isFunction(Production prod) {
-    return prod.att().contains(Att.FUNCTION());
   }
 
   // Assume that there is no quantifiers
