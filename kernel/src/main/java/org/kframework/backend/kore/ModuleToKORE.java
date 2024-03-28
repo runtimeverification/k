@@ -1619,11 +1619,11 @@ public class ModuleToKORE {
     return att.contains(Att.CONSTRUCTOR());
   }
 
-  private boolean isFunctional(Production prod) {
+  private static boolean isFunctional(Production prod) {
     return !isFunction(prod) || prod.att().contains(Att.TOTAL());
   }
 
-  private boolean isFunction(Production prod) {
+  private static boolean isFunction(Production prod) {
     return prod.att().contains(Att.FUNCTION());
   }
 
