@@ -256,7 +256,7 @@ public class RuleGrammarTest {
             + "syntax StateCell ::= \"<state>\" K \"</state>\" [klabel(<state>), cell] "
             + "endmodule";
     parseRule(
-        "<T> <k>...1+2*3...</k> (<state> A => .::K ...</state> => .::Bag) ...</T>", def, 0, false);
+        "<T> <k>...1+2*3...</k> (<state> A => .K ...</state> => .::Bag) ...</T>", def, 0, false);
   }
 
   // test rule cells
@@ -286,7 +286,7 @@ public class RuleGrammarTest {
             + "syntax K "
             + "endmodule";
     parseConfig(
-        "<T multiplicity=\"*\"> <k> 1+2*3 </k> (<state> A => .::K </state> => .::Bag) </T>",
+        "<T multiplicity=\"*\"> <k> 1+2*3 </k> (<state> A => .K </state> => .::Bag) </T>",
         def,
         0,
         false);
@@ -309,7 +309,7 @@ public class RuleGrammarTest {
   @Test
   public void test13() {
     String def = "" + "module TEST " + "syntax Bool ::= \"true\" [token] " + "endmodule";
-    parseRule(".::K => .::K requires true", def, 0, false);
+    parseRule(".K => .K requires true", def, 0, false);
   }
 
   // test automatic follow restriction for terminals
