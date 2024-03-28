@@ -1650,6 +1650,8 @@ public class ModuleToKORE {
 
   private Att addKoreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
+    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
+
     boolean isConstructor = !isFunction(prod);
     isConstructor &= !prod.att().contains(Att.ASSOC());
     isConstructor &= !prod.att().contains(Att.COMM());
@@ -1672,8 +1674,6 @@ public class ModuleToKORE {
 
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
-
-    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
 
     if (isHook(prod)) {
       att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
