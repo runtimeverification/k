@@ -932,7 +932,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         split_from_b = single(self.splits(source_id=id))
         ci, csubsts = list(split_from_b.splits.keys()), list(split_from_b.splits.values())
         # If any of the `cond_I` contains variables not present in `A`, the lift cannot be performed soundly.
-        fv_a = set(free_vars(a.cterm.kast))
+        fv_a = a.cterm.free_vars
         for subst in csubsts:
             assert set(free_vars(mlAnd(subst.constraints))).issubset(
                 fv_a

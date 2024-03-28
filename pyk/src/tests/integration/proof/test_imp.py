@@ -8,7 +8,7 @@ import pytest
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
-from pyk.kast.manip import get_cell, minimize_term
+from pyk.kast.manip import minimize_term
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
@@ -1208,7 +1208,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         anti_unifier, subst1, subst2 = cterm1.anti_unify(cterm2, keep_values=False, kdef=kprove.definition)
 
-        k_cell = get_cell(anti_unifier.kast, 'STATE_CELL')
+        k_cell = anti_unifier.cell('STATE_CELL')
         assert type(k_cell) is KApply
         assert k_cell.label.name == '_|->_'
         assert type(k_cell.args[1]) is KVariable
@@ -1221,7 +1221,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             constraint=mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
         )
 
-        assert anti_unifier.kast == expected_anti_unifier.kast
+        assert anti_unifier == expected_anti_unifier
 
     def test_anti_unify_keep_values(
         self,
@@ -1259,7 +1259,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         anti_unifier, subst1, subst2 = cterm1.anti_unify(cterm2, keep_values=True, kdef=kprove.definition)
 
-        k_cell = get_cell(anti_unifier.kast, 'STATE_CELL')
+        k_cell = anti_unifier.cell('STATE_CELL')
         assert type(k_cell) is KApply
         assert k_cell.label.name == '_|->_'
         assert type(k_cell.args[1]) is KVariable
@@ -1296,7 +1296,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             ),
         )
 
-        assert anti_unifier.kast == expected_anti_unifier.kast
+        assert anti_unifier == expected_anti_unifier
 
     def test_anti_unify_subst_true(
         self,
@@ -1318,7 +1318,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         anti_unifier, _, _ = cterm1.anti_unify(cterm2, keep_values=True, kdef=kprove.definition)
 
-        assert anti_unifier.kast == cterm1.kast
+        assert anti_unifier == cterm1
 
     @pytest.mark.parametrize(
         'test_id,antecedent,consequent,expected',
