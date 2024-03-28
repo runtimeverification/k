@@ -1,5 +1,5 @@
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +41,13 @@ def _argument_parser() -> ArgumentParser:
         type=Path,
         help='output directory',
     )
+    kompile_parser.add_argument(
+        '--debug',
+        action=BooleanOptionalAction,
+        dest='debug',
+        default=False,
+        help='whether to send --debug to kompile',
+    )
 
     which_parser = command_parser.add_parser('which', help='print definition directory for target')
     which_parser.add_argument('target_name', metavar='TARGET', help='target to print definition directory for')
@@ -60,13 +67,13 @@ def _project_file(start_dir: Path) -> Path:
     return find_file_upwards(PROJECT_FILE_NAME, start_dir)
 
 
-def do_kompile(start_dir: Path, target_name: str, output_dir: Path | None, **kwargs: Any) -> None:
+def do_kompile(start_dir: Path, target_name: str, output_dir: Path | None, debug: bool, **kwargs: Any) -> None:
     project_file = _project_file(start_dir)
     project = Project.load(project_file)
     kdist_dir = output_dir or project_file.parent / DIST_DIR_NAME
     kbuild = KBuild(kdist_dir)
 
-    definition_dir = kbuild.kompile(project, target_name)
+    definition_dir = kbuild.kompile(project, target_name, debug=debug)
     print(definition_dir)
 
 
