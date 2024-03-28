@@ -73,6 +73,7 @@ public class CheckAtt {
     checkSymbolKLabel(prod);
     checkKLabelOverload(prod);
     checkNullarySymbol(prod);
+    checkNoSymbolOverload(prod);
   }
 
   private <T extends HasAtt & HasLocation> void checkUnrecognizedAtts(T term) {
@@ -357,6 +358,15 @@ public class CheckAtt {
       errors.add(
           KEMException.compilerError(
               "The attributes `klabel(_)` and `overload(_)` may not occur together.", prod));
+    }
+  }
+
+  private void checkNoSymbolOverload(Production prod) {
+    if (prod.klabel().isEmpty() && prod.att().contains(Att.OVERLOAD())) {
+      errors.add(
+          KEMException.compilerError(
+              "Production would not be a KORE symbol and therefore cannot be overloaded. Add a `symbol(_)` attribute to the production.",
+              prod));
     }
   }
 
