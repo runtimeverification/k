@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.kcfg.kcfg import KCFG
+from pyk.kcfg.kcfg import KCFG, NodeAttr
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -11,13 +11,22 @@ if TYPE_CHECKING:
     from pyk.kcfg.kcfg import NodeIdLike
 
 
+class KCFGExplorationNodeAttr(NodeAttr):
+    TERMINAL = NodeAttr('terminal')
+
+
 class KCFGExploration:
     kcfg: KCFG
-    _terminal: set[int]
 
     def __init__(self, kcfg: KCFG, terminal: Iterable[NodeIdLike] | None = None) -> None:
         self.kcfg = kcfg
-        self._terminal = {kcfg._resolve(node_id) for node_id in terminal} if terminal is not None else set()
+        if terminal:
+            for node_id in terminal:
+                self.add_terminal(node_id)
+
+    @property
+    def terminal_ids(self) -> set[int]:
+        return {node.id for node in self.kcfg.nodes if KCFGExplorationNodeAttr.TERMINAL in node.attrs}
 
     #
     # Recognisers
@@ -25,7 +34,7 @@ class KCFGExploration:
 
     # Terminal node recogniser
     def is_terminal(self, node_id: NodeIdLike) -> bool:
-        return self.kcfg._resolve(node_id) in self._terminal
+        return KCFGExplorationNodeAttr.TERMINAL in self.kcfg.node(node_id).attrs
 
     # Explorable node recogniser
     def is_explorable(self, node_id: NodeIdLike) -> bool:
@@ -56,11 +65,11 @@ class KCFGExploration:
 
     # Marking a given node as terminal
     def add_terminal(self, node_id: NodeIdLike) -> None:
-        self._terminal.add(self.kcfg._resolve(node_id))
+        self.kcfg.add_attr(node_id, KCFGExplorationNodeAttr.TERMINAL)
 
     # Unmarking a given node as terminal
     def remove_terminal(self, node_id: int) -> None:
-        self._terminal.discard(node_id)
+        self.kcfg.remove_attr(node_id, KCFGExplorationNodeAttr.TERMINAL)
 
     #
     # Lifted KCFG functions that may affect terminal nodes
@@ -70,14 +79,10 @@ class KCFGExploration:
     def remove_node(self, node_id: NodeIdLike) -> None:
         node_id = self.kcfg._resolve(node_id)
         self.kcfg.remove_node(node_id)
-        self.remove_terminal(node_id)
 
     # Pruning a KCFG subtree starting from a given node
     def prune(self, node_id: NodeIdLike, keep_nodes: Iterable[NodeIdLike] = ()) -> list[int]:
-        pruned_nodes = self.kcfg.prune(node_id, keep_nodes=keep_nodes)
-        for node_id in pruned_nodes:
-            self.remove_terminal(node_id)
-        return pruned_nodes
+        return self.kcfg.prune(node_id, keep_nodes=keep_nodes)
 
     #
     # Dictionarisation
@@ -95,7 +100,7 @@ class KCFGExploration:
     def to_dict(self) -> dict[str, Any]:
         dct: dict[str, Any] = {}
         dct['kcfg'] = self.kcfg.to_dict()
-        dct['terminal'] = sorted(self._terminal)
+        dct['terminal'] = sorted(node.id for node in self.kcfg.nodes if self.is_terminal(node.id))
         return dct
 
     #
@@ -105,4 +110,3 @@ class KCFGExploration:
     # Minimizing the KCFG
     def minimize_kcfg(self) -> None:
         self.kcfg.minimize()
-        self._terminal = self._terminal.difference(self.kcfg._deleted_nodes)

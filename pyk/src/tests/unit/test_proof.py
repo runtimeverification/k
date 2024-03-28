@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kcfg.kcfg import KCFG
+from pyk.kcfg.exploration import KCFGExplorationNodeAttr
+from pyk.kcfg.kcfg import KCFG, KCFGNodeAttr
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import intToken
 from pyk.proof import EqualityProof
@@ -59,14 +60,41 @@ class TestProof:
 
         # Given
         assert sample_proof.proof_dir
-        sample_proof.write_proof()
+        sample_proof.write_proof_data()
 
         # When
-        proof_from_disk = Proof.read_proof(id=sample_proof.id, proof_dir=proof_dir)
+        proof_from_disk = Proof.read_proof_data(id=sample_proof.id, proof_dir=proof_dir)
 
         # Then
         assert type(proof_from_disk) is type(sample_proof)
         assert proof_from_disk.dict == sample_proof.dict
+
+    def test_read_proof_with_attributes(self, proof_dir: Path) -> None:
+
+        kcfg = KCFG.from_dict({'nodes': node_dicts(3)})
+        kcfg.add_attr(1, KCFGNodeAttr.VACUOUS)
+        kcfg.add_attr(2, KCFGExplorationNodeAttr.TERMINAL)
+        sample_proof = APRProof(
+            id='apr_proof_1',
+            kcfg=kcfg,
+            terminal=[],
+            init=node(1).id,
+            target=node(3).id,
+            logs={},
+            proof_dir=proof_dir,
+        )
+
+        # Given
+        assert sample_proof.proof_dir
+        sample_proof.write_proof_data()
+
+        # When
+        proof_from_disk = Proof.read_proof_data(id=sample_proof.id, proof_dir=proof_dir)
+
+        # Then
+        assert type(proof_from_disk) is type(sample_proof)
+        assert type(proof_from_disk) is APRProof
+        assert set(sample_proof.kcfg.nodes) == set(proof_from_disk.kcfg.nodes)
 
     def test_read_proof_aprbmc(self, proof_dir: Path) -> None:
         sample_proof = APRProof(
@@ -82,10 +110,10 @@ class TestProof:
 
         # Given
         assert sample_proof.proof_dir
-        sample_proof.write_proof()
+        sample_proof.write_proof_data()
 
         # When
-        proof_from_disk = Proof.read_proof(id=sample_proof.id, proof_dir=proof_dir)
+        proof_from_disk = Proof.read_proof_data(id=sample_proof.id, proof_dir=proof_dir)
 
         # Then
         assert type(proof_from_disk) is type(sample_proof)
@@ -102,10 +130,10 @@ class TestProof:
 
         # Given
         assert sample_proof.proof_dir
-        sample_proof.write_proof()
+        sample_proof.write_proof_data()
 
         # When
-        proof_from_disk = Proof.read_proof(id=sample_proof.id, proof_dir=proof_dir)
+        proof_from_disk = Proof.read_proof_data(id=sample_proof.id, proof_dir=proof_dir)
 
         # Then
         assert type(proof_from_disk) is type(sample_proof)
@@ -144,9 +172,9 @@ def test_apr_proof_from_dict_no_subproofs(proof_dir: Path) -> None:
     proof = apr_proof(1, proof_dir)
 
     # When
-    proof.write_proof()
+    proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof(proof.id, proof_dir=proof.proof_dir)
+    proof_from_disk = Proof.read_proof_data(id=proof.id, proof_dir=proof.proof_dir)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -162,7 +190,7 @@ def test_apr_proof_from_dict_one_subproofs(proof_dir: Path) -> None:
     proof.read_subproof_data(eq_proof.id)
     proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof_data(proof_dir, proof.id)
+    proof_from_disk = Proof.read_proof_data(proof_dir=proof_dir, id=proof.id)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -181,7 +209,7 @@ def test_apr_proof_from_dict_nested_subproofs(proof_dir: Path) -> None:
     proof.read_subproof_data(subproof.id)
     proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof_data(proof.proof_dir, proof.id)
+    proof_from_disk = Proof.read_proof_data(proof_dir=proof.proof_dir, id=proof.id)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -203,7 +231,7 @@ def test_apr_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None:
     proof.read_subproof_data(sub_proof_3.id)
     proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof_data(proof.proof_dir, proof.id)
+    proof_from_disk = Proof.read_proof_data(proof_dir=proof.proof_dir, id=proof.id)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -225,9 +253,9 @@ def test_apr_proof_minimization_and_terminals() -> None:
         logs={},
     )
 
-    assert proof._terminal == {13, 19, 21}
+    assert proof.terminal_ids == {13, 19, 21}
     proof.minimize_kcfg()
-    assert proof._terminal == {21}
+    assert proof.terminal_ids == {21}
 
 
 MODULE_NAME_TEST_DATA: Final = (
@@ -257,9 +285,9 @@ def test_aprbmc_proof_from_dict_no_subproofs(proof_dir: Path) -> None:
     proof = apr_proof(1, proof_dir, bmc_depth=1)
 
     # When
-    proof.write_proof()
+    proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof(proof.id, proof_dir=proof.proof_dir)
+    proof_from_disk = Proof.read_proof_data(id=proof.id, proof_dir=proof.proof_dir)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -275,7 +303,7 @@ def test_aprbmc_proof_from_dict_one_subproofs(proof_dir: Path) -> None:
     proof.read_subproof_data(eq_proof.id)
     proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof_data(proof.proof_dir, proof.id)
+    proof_from_disk = Proof.read_proof_data(proof_dir=proof.proof_dir, id=proof.id)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -294,7 +322,7 @@ def test_aprbmc_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None
     proof.read_subproof_data(subproof.id)
     proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof_data(proof.proof_dir, proof.id)
+    proof_from_disk = Proof.read_proof_data(proof_dir=proof.proof_dir, id=proof.id)
 
     # Then
     assert proof.dict == proof_from_disk.dict
@@ -421,7 +449,7 @@ def test_apr_proof_summary_subproofs(proof_dir: Path) -> None:
     proof.read_subproof_data(subproof.id)
     proof.write_proof_data()
     assert proof.proof_dir
-    proof_from_disk = Proof.read_proof_data(proof.proof_dir, proof.id)
+    proof_from_disk = Proof.read_proof_data(proof_dir=proof.proof_dir, id=proof.id)
 
     # Then
     comp_summary = proof_from_disk.summary
