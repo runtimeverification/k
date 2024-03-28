@@ -1669,9 +1669,9 @@ public class ModuleToKORE {
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
-    Att att = prod.att().remove(Att.CONSTRUCTOR());
-    if (att.contains(Att.HOOK()) && !isRealHook(att)) {
-      att = att.remove(Att.HOOK());
+    Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK());
+    if (prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+      att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
     }
     if (isConstructor) {
       att = att.add(Att.CONSTRUCTOR());
