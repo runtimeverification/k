@@ -1615,7 +1615,7 @@ public class ModuleToKORE {
   }
 
   private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-    Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
+    Att att = semanticAttributes(prod, functionRules, java.util.Collections.emptySet());
     return att.contains(Att.CONSTRUCTOR());
   }
 
