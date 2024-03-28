@@ -148,6 +148,11 @@ class CTerm:
         """Return the unstructured bare `KInner` representation of a `CTerm` (see `CTerm.from_kast`)."""
         return mlAnd(self, GENERATED_TOP_CELL)
 
+    @cached_property
+    def free_vars(self) -> frozenset[str]:
+        """Return the set of free variable names contained in this `CTerm`"""
+        return frozenset(free_vars(self.kast))
+
     @property
     def hash(self) -> str:
         """Unique hash representing the contents of this `CTerm`."""
@@ -235,7 +240,7 @@ class CTerm:
                 new_cterm = new_cterm.add_constraint(mlEqualsTrue(orBool([disjunct_lhs, disjunct_rhs])))
 
         new_constraints = []
-        fvs = free_vars(new_cterm.kast)
+        fvs = list(new_cterm.free_vars)
         len_fvs = 0
         while len_fvs < len(fvs):
             len_fvs = len(fvs)
