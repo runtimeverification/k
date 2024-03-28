@@ -239,10 +239,12 @@ public class ModuleToKORE {
     for (Production lesser : module.overloads().elements()) {
       overloads.addAll(module.overloads().relations().getOrDefault(lesser, Set.of()));
     }
-    translateSymbols(attributes, functionRules, overloads, semantics);
+
+    syntax.append(semantics);
+    translateSymbols(attributes, functionRules, overloads, semantics, false);
+    translateSymbols(attributes, functionRules, overloads, syntax, true);
 
     // print syntax definition
-    syntax.append(semantics);
     for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort :
         iterable(module.bracketProductionsFor())) {
       for (Production prod : iterable(sort._2())) {
@@ -252,7 +254,8 @@ public class ModuleToKORE {
             overloads,
             prod.att().get(Att.BRACKET_LABEL(), KLabel.class),
             prod,
-            syntax);
+            syntax,
+            true);
       }
     }
     for (Production prod : iterable(module.sortedProductions())) {
@@ -438,7 +441,8 @@ public class ModuleToKORE {
       Map<Att.Key, Boolean> attributes,
       SetMultimap<KLabel, Rule> functionRules,
       Set<Production> overloads,
-      StringBuilder sb) {
+      StringBuilder sb,
+      boolean withSyntaxAtts) {
     for (Production prod : iterable(module.sortedProductions())) {
       if (isBuiltinProduction(prod)) {
         continue;
@@ -446,7 +450,8 @@ public class ModuleToKORE {
       if (prod.klabel().isEmpty()) {
         continue;
       }
-      translateSymbol(attributes, functionRules, overloads, prod.klabel().get(), prod, sb);
+      translateSymbol(
+          attributes, functionRules, overloads, prod.klabel().get(), prod, sb, withSyntaxAtts);
     }
   }
 
@@ -456,7 +461,8 @@ public class ModuleToKORE {
       Set<Production> overloads,
       KLabel label,
       Production prod,
-      StringBuilder sb) {
+      StringBuilder sb,
+      boolean withSyntaxAtts) {
     sb.append("  ");
     if (isFunction(prod) && isHook(prod)) {
       sb.append("hooked-");
@@ -475,7 +481,7 @@ public class ModuleToKORE {
     sb.append(") : ");
     convert(prod.sort(), prod, sb);
     sb.append(" ");
-    Att koreAtt = koreAttributes(prod, functionRules, overloads);
+    Att koreAtt = koreAttributes(prod, functionRules, overloads, withSyntaxAtts);
     convert(attributes, koreAtt, sb, null, null);
     sb.append("\n");
   }
@@ -1649,7 +1655,10 @@ public class ModuleToKORE {
   }
 
   private Att koreAttributes(
-      Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
+      Production prod,
+      SetMultimap<KLabel, Rule> functionRules,
+      Set<Production> overloads,
+      boolean withSyntaxAtts) {
     Att att = prod.att();
     List<Att.Key> attsToRemove =
         List.of(
@@ -1666,7 +1675,9 @@ public class ModuleToKORE {
       att = att.remove(key);
     }
     att = att.addAll(semanticAttributes(prod, functionRules, overloads));
-    att = att.addAll(syntaxAttributes(prod));
+    if (withSyntaxAtts) {
+      att = att.addAll(syntaxAttributes(prod));
+    }
     return att;
   }
 
