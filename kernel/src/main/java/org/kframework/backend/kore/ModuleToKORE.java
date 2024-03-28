@@ -298,7 +298,7 @@ public class ModuleToKORE {
       if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
         genUnitAxiom(prod, semantics);
       }
-      if (isFunctional(prod, functionRules)) {
+      if (isFunctional(prod)) {
         genFunctionalAxiom(prod, semantics);
       }
       if (isConstructor(prod, functionRules)) {
@@ -1629,9 +1629,8 @@ public class ModuleToKORE {
     return att.contains(Att.CONSTRUCTOR());
   }
 
-  private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules) {
-    Att att = addKoreAttributes(prod, functionRules, java.util.Collections.emptySet());
-    return att.contains(Att.FUNCTIONAL());
+  private boolean isFunctional(Production prod) {
+    return !isFunction(prod) || prod.att().contains(Att.TOTAL());
   }
 
   private boolean isGeneratedInKeysOp(Production prod) {
@@ -1643,7 +1642,6 @@ public class ModuleToKORE {
 
   private Att addKoreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
-    boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
     boolean isConstructor = !isFunction(prod);
     isConstructor &= !prod.att().contains(Att.ASSOC());
     isConstructor &= !prod.att().contains(Att.COMM());
@@ -1674,7 +1672,7 @@ public class ModuleToKORE {
     if (isConstructor) {
       att = att.add(Att.CONSTRUCTOR());
     }
-    if (isFunctional) {
+    if (isFunctional(prod)) {
       att = att.add(Att.FUNCTIONAL());
     }
     if (isAnywhere) {
