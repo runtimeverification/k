@@ -38,7 +38,7 @@ class KBuild:
     def definition_dir(self, project: Project, target_name: str) -> Path:
         return self.kdist_dir / self.k_version / target_name
 
-    def kompile(self, project: Project, target_name: str) -> Path:
+    def kompile(self, project: Project, target_name: str, *, debug: bool = False) -> Path:
         self.kdist_dir.mkdir(parents=True, exist_ok=True)
 
         with FileLock(self.kdist_dir / '.lock'):
@@ -48,7 +48,7 @@ class KBuild:
                 return output_dir
 
             with KBuildEnv.create_temp(project) as env:
-                env.kompile(target_name, output_dir)
+                env.kompile(target_name, output_dir, debug=debug)
 
             return output_dir
 
@@ -88,12 +88,13 @@ class KBuildEnv:
         for sub_project in self.project.sub_projects:
             self._sync_project(sub_project)
 
-    def kompile(self, target_name: str, output_dir: Path) -> None:
+    def kompile(self, target_name: str, output_dir: Path, *, debug: bool = False) -> None:
         target = self.project.get_target(target_name)
         kompile(
             output_dir=output_dir,
             include_dirs=self._include_dirs,
             cwd=self.path,
+            debug=debug,
             **self._kompile_args(target),
         )
 
