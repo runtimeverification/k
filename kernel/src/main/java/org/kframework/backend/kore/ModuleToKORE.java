@@ -1651,7 +1651,13 @@ public class ModuleToKORE {
   private Att addKoreAttributes(
       Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
     Att att = prod.att().remove(Att.CONSTRUCTOR()).remove(Att.HOOK()).remove(Att.FORMAT());
+    att = att.addAll(semanticAttributes(prod, functionRules, overloads));
+    att = att.addAll(syntaxAttributes(prod));
+    return att;
+  }
 
+  private Att semanticAttributes(
+      Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
     boolean isConstructor = !isFunction(prod);
     isConstructor &= !prod.att().contains(Att.ASSOC());
     isConstructor &= !prod.att().contains(Att.COMM());
@@ -1675,6 +1681,7 @@ public class ModuleToKORE {
     isConstructor &= !isMacro;
     isConstructor &= !isAnywhere;
 
+    Att att = Att.empty();
     if (isHook(prod)) {
       att = att.add(Att.HOOK(), prod.att().get(att.HOOK()));
     }
@@ -1693,9 +1700,6 @@ public class ModuleToKORE {
     if (isMacro) {
       att = att.add(Att.MACRO());
     }
-
-    att = att.addAll(syntaxAttributes(prod));
-
     return att;
   }
 
