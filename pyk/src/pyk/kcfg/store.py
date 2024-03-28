@@ -42,7 +42,7 @@ class OptimizedNodeStore(MutableMapping[int, KCFG.Node]):
         old_cterm = node.cterm
         new_config = self._optimize(old_cterm.config)
         new_constraints = tuple(self._optimize(c) for c in old_cterm.constraints)
-        new_node = KCFG.Node(node.id, CTerm(new_config, new_constraints))
+        new_node = KCFG.Node(node.id, CTerm(new_config, new_constraints), attrs=node.attrs)
         self._nodes[key] = new_node
 
     def __delitem__(self, key: int) -> None:

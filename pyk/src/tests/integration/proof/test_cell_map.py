@@ -136,7 +136,7 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         proof = APRProof.from_claim(kprove.definition, claim, logs={})
         init = proof.kcfg.node(proof.init)
         new_init_term = kcfg_explore.cterm_symbolic.assume_defined(init.cterm)
-        proof.kcfg.replace_node(init.id, new_init_term)
+        proof.kcfg.let_node(init.id, cterm=new_init_term)
         prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=max_depth)
         prover.advance_proof(max_iterations=max_iterations)
 
