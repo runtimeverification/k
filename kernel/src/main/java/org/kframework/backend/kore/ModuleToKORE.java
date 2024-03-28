@@ -930,20 +930,6 @@ public class ModuleToKORE {
     sb.append(" // overloaded production\n");
   }
 
-  private boolean isHook(Production prod) {
-    return prod.att().contains(Att.HOOK()) && isRealHook(prod.att());
-  }
-
-  private boolean isRealHook(Att att) {
-    String hook = att.get(Att.HOOK());
-    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
-        .anyMatch(ns -> hook.startsWith(ns + "."));
-  }
-
-  private static boolean isBuiltinProduction(Production prod) {
-    return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
-  }
-
   public String convertSpecificationModule(
       Module definition, Module spec, SentenceType defaultSentenceType, StringBuilder sb) {
     SentenceType sentenceType = getSentenceType(spec.att()).orElse(defaultSentenceType);
@@ -1639,6 +1625,20 @@ public class ModuleToKORE {
 
   private boolean isFunction(Production prod) {
     return prod.att().contains(Att.FUNCTION());
+  }
+
+  private boolean isHook(Production prod) {
+    return prod.att().contains(Att.HOOK()) && isRealHook(prod.att());
+  }
+
+  private boolean isRealHook(Att att) {
+    String hook = att.get(Att.HOOK());
+    return Stream.concat(Hooks.namespaces.stream(), options.hookNamespaces.stream())
+        .anyMatch(ns -> hook.startsWith(ns + "."));
+  }
+
+  private static boolean isBuiltinProduction(Production prod) {
+    return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
   }
 
   private boolean isGeneratedInKeysOp(Production prod) {
