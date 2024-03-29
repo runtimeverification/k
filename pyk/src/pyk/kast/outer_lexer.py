@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from enum import Enum, auto
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Generator, Iterable, Iterator
+    from collections.abc import Collection, Generator, Iterable
     from typing import Final
 
 
@@ -60,6 +61,10 @@ class TokenType(Enum):
 class Token(NamedTuple):
     text: str
     type: TokenType
+    start_line: int = 0
+    start_column: int = 0
+    end_line: int = 0
+    end_column: int = 0
 
 
 _EOF_TOKEN: Final = Token('', TokenType.EOF)
@@ -170,8 +175,45 @@ _NEXT_STATE: Final = {
 _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
+class LocationIterator(Iterator[str]):
+    _start_line: int = 1
+    _start_column: int = 0
+    _line: int = 1
+    _column: int = 0
+    _current_token: list[str] = []
+    _iter: Iterator
+
+    def __init__(self, x: Iterable[str]) -> None:
+        self._iter = iter(x)
+
+    def __next__(self) -> str:
+        la = next(self._iter)
+        self._current_token.append(la)
+        self._column += 1
+        if la == '\n':
+            self._column = 0
+            self._line += 1
+        return la
+
+    def cur_loc(self) -> tuple[int, int]:
+        return self._line, self._column
+
+    def start_token(self) -> None:
+        self._start_line, self._start_column = self.cur_loc()
+        self._current_token = []
+
+    def start_token(self, la) -> None:
+        self._start_line, self._start_column = self.cur_loc()
+        self._current_token = [la]
+
+    def get_token(self, type: TokenType) -> Token:
+        result = Token(''.join(self._current_token), type, self._start_line, self._start_column, self._line, self._column)
+        self.start_token(self)
+        return result
+
+
 def outer_lexer(it: Iterable[str]) -> Iterator[Token]:
-    it = iter(it)
+    it = LocationIterator(it)
     la = next(it, '')
     state = State.DEFAULT
 
