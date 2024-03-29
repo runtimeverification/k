@@ -44,7 +44,6 @@ def _argument_parser() -> ArgumentParser:
     kompile_parser.add_argument(
         '--debug',
         action=BooleanOptionalAction,
-        dest='debug',
         default=False,
         help='whether to send --debug to kompile',
     )
