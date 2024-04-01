@@ -61,10 +61,12 @@ class TokenType(Enum):
 class Token(NamedTuple):
     text: str
     type: TokenType
-    start_line: int = 0
-    start_column: int = 0
-    end_line: int = 0
-    end_column: int = 0
+    line: int = 0
+    column: int = 0
+
+    def with_loc(self, loc: tuple[int, int]) -> Token:
+        line, col = loc
+        return Token(self.text, self.type, line, col)
 
 
 _EOF_TOKEN: Final = Token('', TokenType.EOF)
@@ -176,40 +178,23 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    _start_line: int = 1
-    _start_column: int = 0
     _line: int = 1
     _column: int = 0
-    _current_token: list[str] = []
-    _iter: Iterator
+    _iter: Iterator[str]
 
     def __init__(self, x: Iterable[str]) -> None:
         self._iter = iter(x)
 
     def __next__(self) -> str:
         la = next(self._iter)
-        self._current_token.append(la)
         self._column += 1
         if la == '\n':
             self._column = 0
             self._line += 1
         return la
 
-    def cur_loc(self) -> tuple[int, int]:
+    def loc(self) -> tuple[int, int]:
         return self._line, self._column
-
-    def start_token(self) -> None:
-        self._start_line, self._start_column = self.cur_loc()
-        self._current_token = []
-
-    def start_token(self, la) -> None:
-        self._start_line, self._start_column = self.cur_loc()
-        self._current_token = [la]
-
-    def get_token(self, type: TokenType) -> Token:
-        result = Token(''.join(self._current_token), type, self._start_line, self._start_column, self._line, self._column)
-        self.start_token(self)
-        return result
 
 
 def outer_lexer(it: Iterable[str]) -> Iterator[Token]:
