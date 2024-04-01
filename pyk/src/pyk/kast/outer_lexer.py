@@ -246,40 +246,37 @@ _DEFAULT_KEYWORDS: Final = {
 
 def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
-    it.start_token(la)
 
     if not la:
-        return it.get_token(TokenType.EOF), la
+        return _EOF_TOKEN, la
 
     elif la in _SIMPLE_CHARS:
-        return it.get_token(_SIMPLE_CHARS[la].type), next(it, '')
+        tokenfunc = _simple_char
 
     elif la == '"':
-        la = _consume_string([], la, it)
-        return it.get_token(TokenType.STRING), la
+        tokenfunc = _string
 
     elif la == 'r':
-        tok, la = _regex_or_lower_id_or_keyword(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _regex_or_lower_id_or_keyword
 
     elif la in _DIGIT:
-        tok, la = _nat(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _nat
 
     elif la in _ALNUM:
-        tok, la = _id_or_keyword(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _id_or_keyword
 
     elif la == '#':
-        tok, la = _hash_id(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _hash_id
 
     elif la == ':':
-        tok, la = _colon_or_dcoloneq(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _colon_or_dcoloneq
 
     else:
         raise _unexpected_character(la)
+
+    loc = it.loc()
+    token, la = tokenfunc(la, it)
+    return token.with_loc(loc), la
 
 
 def _skip_ws_and_comments(la: str, it: Iterator[str]) -> str:
@@ -426,29 +423,28 @@ _SYNTAX_KEYWORDS: Final = {
 
 def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
-    it.start_token(la)
 
     if not la:
-        return it.get_token(TokenType.EOF), la
+        return _EOF_TOKEN, la
 
     elif la == '{':
-        tok, la = _simple_char(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _simple_char
 
     elif la in _LOWER:
-        tok, la = _syntax_keyword(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _syntax_keyword
 
     elif la in _UPPER:
-        tok, la = _upper_id(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _upper_id
 
     elif la == '#':
-        tok, la = _hash_upper_id(la, it)
-        return it.get_token(tok.type), la
+        tokenfunc = _hash_upper_id
 
     else:
         raise _unexpected_character(la)
+
+    loc = it.loc()
+    token, la = tokenfunc(la, it)
+    return token.with_loc(loc), la
 
 
 def _syntax_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
@@ -502,9 +498,9 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
     r"""[a-zA-Z]\w*(-\w+)*"""
 
     la = _skip_ws_and_comments(la, it)
-    it.start_token(la)
 
     consumed = []
+    line, col = it.loc()
 
     if la not in _ALPHA:
         raise _unexpected_character(la)
@@ -535,14 +531,15 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     text = ''.join(consumed)
     if text in _MODNAME_KEYWORDS:
-        return _KEYWORDS[text], la
-    return it.get_token(TokenType.MODNAME), la
+        return _KEYWORDS[text].with_loc((line, col)), la
+    return Token(text, TokenType.MODNAME, line, col), la
 
 
 _KLABEL_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuration', 'context'}
 
 
 def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
+    loc: tuple[int, int]
     consumed: list[str]
     while True:
         while la in _WHITESPACE:
@@ -552,6 +549,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
             return _EOF_TOKEN, la
 
         if la == '/':
+            loc = it.loc()
             is_comment, consumed, la = _maybe_comment(la, it)
 
             if not is_comment and len(consumed) > 1:
@@ -563,15 +561,15 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
 
             break
 
+        loc = it.loc()
         consumed = []
-        it.start_token(la)
         break
 
     if la == '>' and not consumed:
         consumed.append(la)
         la = next(it, '')
         if not la or la in _WHITESPACE:
-            return _GT_TOKEN, la
+            return _GT_TOKEN.with_loc(loc), la
 
     while la and la not in _WHITESPACE:
         consumed.append(la)
@@ -582,7 +580,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
         token = _KEYWORDS[text]
     else:
         token = Token(text, TokenType.KLABEL)
-    return it.get_token(token.type), la
+    return token.with_loc(loc), la
 
 
 _SIMPLE_STATES: Final = {
