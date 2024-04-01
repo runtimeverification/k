@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.outer_lexer import (
+    LocationIterator,
     Token,
     TokenType,
     _attr,
@@ -287,7 +288,7 @@ DEFAULT_TEST_DATA: Final = (
 )
 def test_default(text: str, expected_token: Token, expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -320,7 +321,7 @@ MODNAME_TEST_DATA: Final = (
 )
 def test_modname(text: str, expected_token: Token, expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -362,7 +363,7 @@ KLABEL_TEST_DATA: Final = (
 )
 def test_klabel(text: str, expected_token: Token, expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
