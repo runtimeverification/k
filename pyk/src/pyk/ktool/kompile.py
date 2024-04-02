@@ -33,6 +33,7 @@ class KompileNotFoundError(RuntimeError):
 
 class Warnings(Enum):
     ALL = 'all'
+    NORMAL = 'normal'
     NONE = 'none'
 
 
