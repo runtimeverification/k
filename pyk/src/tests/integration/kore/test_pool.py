@@ -21,14 +21,35 @@ from pyk.kore.rpc import BranchingResult, KoreClient, StuckResult
 from pyk.testing import KoreServerPoolTest
 from pyk.utils import chain
 
-from ..utils import K_FILES
-
 if TYPE_CHECKING:
     from pyk.kore.pool import KoreServerPool
 
 
 class TestKoreServerPool(KoreServerPoolTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'tree-ts.k'
+    KOMPILE_DEFINITION = """
+        module TREE-TS
+            imports STRING-SYNTAX
+
+            configuration <k> "" </k>
+
+            rule <k> "" => "a" </k>
+            rule <k> "" => "b" </k>
+            rule <k> "a" => "aa" </k>
+            rule <k> "a" => "ab" </k>
+            rule <k> "b" => "ba" </k>
+            rule <k> "b" => "bb" </k>
+            rule <k> "aa" => "aaa" </k>
+            rule <k> "aa" => "aab" </k>
+            rule <k> "ab" => "aba" </k>
+            rule <k> "ab" => "abb" </k>
+            rule <k> "ba" => "baa" </k>
+            rule <k> "ba" => "bab" </k>
+            rule <k> "bb" => "bba" </k>
+            rule <k> "bb" => "bbb" </k>
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'TREE-TS'
+    KOMPILE_ARGS = {'syntax_module': 'TREE-TS'}
 
     POOL_MODULE_NAME = 'TREE-TS'
     POOL_MAX_WORKERS = 4

@@ -32,7 +32,7 @@ DEFINITION_FILES: Final = tuple((TEST_DATA_DIR / 'module-to-kore').glob('*.k'))
     ids=[file.name for file in DEFINITION_FILES],
 )
 def definition_dir(request: FixtureRequest, kompile: Kompiler) -> Path:
-    return kompile(request.param)
+    return kompile(main_file=request.param)
 
 
 @pytest.fixture

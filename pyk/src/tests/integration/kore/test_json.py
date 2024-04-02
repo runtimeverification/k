@@ -29,8 +29,6 @@ from pyk.kore.prelude import (
 from pyk.testing import KRunTest
 from pyk.utils import chain
 
-from ..utils import K_FILES
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Any, Final
@@ -72,7 +70,18 @@ TEST_DATA: Final[tuple[Any, ...]] = (
 
 
 class TestJsonToKore(KRunTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'json-test.k'
+    KOMPILE_DEFINITION = """
+        requires "json.md"
+
+        module JSON-TEST
+            imports STRING-SYNTAX
+            imports JSON
+            syntax Pgm ::= String | JSON
+            configuration <k> $PGM:Pgm</k>
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'JSON-TEST'
+    KOMPILE_ARGS = {'syntax_module': 'JSON-TEST'}
 
     @pytest.mark.parametrize('json_data', TEST_DATA, ids=count())
     def test_json_to_kore(self, krun: KRun, json_data: Any) -> None:

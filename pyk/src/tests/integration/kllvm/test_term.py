@@ -8,14 +8,17 @@ import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.ast import CompositePattern
 from pyk.testing import RuntimeTest
 
-from ..utils import K_FILES
-
 if TYPE_CHECKING:
     from pyk.kllvm.runtime import Runtime
 
 
 class TestTerm(RuntimeTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'ctor.k'
+    KOMPILE_DEFINITION = """
+        module CTOR
+            syntax Foo ::= one() | two() | three()
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'CTOR'
     KOMPILE_ARGS = {
         'syntax_module': 'CTOR',
     }

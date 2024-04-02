@@ -20,8 +20,6 @@ from pyk.ktool.kprint import _kast
 from pyk.ktool.krun import KRun
 from pyk.prelude.bytes import bytesToken
 
-from .utils import K_FILES
-
 if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
@@ -45,15 +43,26 @@ TEST_DATA: Final = (
 )
 
 
-KOMPILE_MAIN_FILE = K_FILES / 'bytes-rewrite.k'
+KOMPILE_DEFINITION = """
+    module BYTES-REWRITE
+        imports BYTES-SYNTAX
+
+        configuration <k> $PGM:Bytes </k>
+                      <b> b"" </b>
+
+        rule <k> B => .K ... </k>
+             <b> _ => B      </b>
+    endmodule
+"""
 KOMPILE_MAIN_MODULE = 'BYTES-REWRITE'
 
 
 @pytest.fixture(scope='module')
 def llvm_dir(kompile: Kompiler) -> Path:
     return kompile(
-        KOMPILE_MAIN_FILE,
+        definition=KOMPILE_DEFINITION,
         main_module=KOMPILE_MAIN_MODULE,
+        syntax_module=KOMPILE_MAIN_MODULE,
         backend='llvm',
     )
 
@@ -61,8 +70,9 @@ def llvm_dir(kompile: Kompiler) -> Path:
 @pytest.fixture(scope='module')
 def haskell_dir(kompile: Kompiler) -> Path:
     return kompile(
-        KOMPILE_MAIN_FILE,
+        definition=KOMPILE_DEFINITION,
         main_module=KOMPILE_MAIN_MODULE,
+        syntax_module=KOMPILE_MAIN_MODULE,
         backend='haskell',
     )
 
