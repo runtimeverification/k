@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast import Atts
+from pyk.kast.inner import KSort
+from pyk.kore.syntax import SortApp
 from pyk.ktool.kompile import KompileBackend, KompileNotFoundError, kompile
 from pyk.testing import KompiledTest
 
@@ -13,6 +15,7 @@ from .utils import K_FILES
 if TYPE_CHECKING:
     from pyk.kast.inner import KLabel
     from pyk.kast.outer import KDefinition
+    from pyk.kore.kompiled import KompiledKore
     from pyk.ktool.kompile import DefinitionInfo
 
 
@@ -79,3 +82,29 @@ class TestKLabel(KompiledTest):
         assert bar.name == 'bar'
         assert baz.name == 'baz_KLABEL_Foo'
         assert qux.name == 'qux_KLABEL_Foo'
+
+
+class TestSubsortSymbol(KompiledTest):
+    KOMPILE_DEFINITION = """
+        module SUBSORT-SYMBOL
+            syntax Foo ::= Bar [symbol(bar)]
+            syntax Bar
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'SUBSORT-SYMBOL'
+    KOMPILE_ARGS = {'syntax_module': 'SUBSORT-SYMBOL'}
+
+    def test(self, definition: KDefinition, kompiled_kore: KompiledKore) -> None:
+        # Given
+        Foo, Bar = (KSort(name) for name in ['Foo', 'Bar'])  # noqa: N806
+
+        # Then
+        assert 'bar' in definition.symbols
+        assert Bar not in definition.subsorts(Foo)
+
+        # And given
+        SortFoo, SortBar = (SortApp(name) for name in ['SortFoo', 'SortBar'])  # noqa: N806
+
+        # Then
+        assert kompiled_kore.symbol_table.resolve('Lblbar') == (SortFoo, (SortBar,))
+        assert not kompiled_kore.sort_table.is_subsort(SortBar, SortFoo)
