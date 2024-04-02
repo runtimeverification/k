@@ -473,6 +473,12 @@ def create_argument_parser() -> ArgumentParser:
         type=int,
         help='Maximum number of steps to take in symbolic execution per basic block.',
     )
+    prove_args.add_argument(
+        '--save-directory',
+        default=None,
+        type=ensure_dir_path,
+        help='Directory to save proof artifacts to for reuse.',
+    )
 
     graph_imports_args = pyk_args_command.add_parser(
         'graph-imports',

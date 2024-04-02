@@ -11,6 +11,7 @@ from .args import (
     KompileOptions,
     LoggingOptions,
     OutputFileOptions,
+    SaveDirOptions,
     SpecOptions,
     WarningOptions,
 )
@@ -122,7 +123,7 @@ class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, 
         }
 
 
-class ProveOptions(LoggingOptions, SpecOptions):
+class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     definition_dir: Path | None
     type_inference_mode: TypeInferenceMode | None
     failure_info: bool

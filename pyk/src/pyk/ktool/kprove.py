@@ -286,6 +286,7 @@ class KProve(KPrint):
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
         max_depth: int | None = None,
+        save_directory: Path | None = None,
     ) -> Proof:
         with cterm_symbolic(
             self.definition,
@@ -314,10 +315,10 @@ class KProve(KPrint):
             prover: Prover
             lhs_top = extract_lhs(claim.body)
             if type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions:
-                proof = EqualityProof.from_claim(claim, self.definition)
+                proof = EqualityProof.from_claim(claim, self.definition, proof_dir=save_directory)
                 prover = ImpliesProver(proof, kcfg_explore)
             else:
-                proof = APRProof.from_claim(self.definition, claim, {})
+                proof = APRProof.from_claim(self.definition, claim, {}, proof_dir=save_directory)
                 prover = APRProver(proof, kcfg_explore, execute_depth=max_depth)
             prover.advance_proof()
             if proof.passed:
@@ -373,6 +374,7 @@ class KProve(KPrint):
                 interim_simplification=interim_simplification,
                 no_post_exec_simplify=no_post_exec_simplify,
                 max_depth=max_depth,
+                save_directory=options.save_directory,
             )
 
         all_claims = self.get_claims(
