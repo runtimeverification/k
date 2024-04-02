@@ -11,6 +11,7 @@ from .args import (
     KompileOptions,
     LoggingOptions,
     OutputFileOptions,
+    SpecOptions,
     WarningOptions,
 )
 
@@ -121,10 +122,8 @@ class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, 
         }
 
 
-class ProveOptions(LoggingOptions):
-    spec_file: Path
+class ProveOptions(LoggingOptions, SpecOptions):
     definition_dir: Path | None
-    spec_module: str | None
     type_inference_mode: TypeInferenceMode | None
     failure_info: bool
     max_depth: int | None
@@ -133,7 +132,6 @@ class ProveOptions(LoggingOptions):
     def default() -> dict[str, Any]:
         return {
             'definition_dir': None,
-            'spec_module': None,
             'type_inference_mode': None,
             'failure_info': False,
             'max_depth': None,

@@ -11,6 +11,8 @@ from .cli import Options
 from .utils import bug_report_arg, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
+    from typing import Iterable
+
     from ..utils import BugReport
 
 
@@ -92,14 +94,16 @@ class SaveDirOptions(Options):
 
 class SpecOptions(SaveDirOptions):
     spec_file: Path
-    claim_labels: list[str] | None
-    exclude_claim_labels: list[str]
+    spec_module: str | None
+    claim_labels: Iterable[str] | None
+    exclude_claim_labels: Iterable[str] | None
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
+            'spec_module': None,
             'claim_labels': None,
-            'exclude_claim_labels': [],
+            'exclude_claim_labels': None,
         }
 
 

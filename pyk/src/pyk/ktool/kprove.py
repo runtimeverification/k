@@ -331,8 +331,6 @@ class KProve(KPrint):
     def prove_rpc(
         self,
         options: ProveOptions,
-        claim_labels: Iterable[str] | None = None,
-        exclude_claim_labels: Iterable[str] | None = None,
         kcfg_semantics: KCFGSemantics | None = None,
         id: str | None = None,
         port: int | None = None,
@@ -380,8 +378,8 @@ class KProve(KPrint):
         all_claims = self.get_claims(
             options.spec_file,
             spec_module_name=options.spec_module,
-            claim_labels=claim_labels,
-            exclude_claim_labels=exclude_claim_labels,
+            claim_labels=options.claim_labels,
+            exclude_claim_labels=options.exclude_claim_labels,
             type_inference_mode=options.type_inference_mode,
         )
         if all_claims is None:
