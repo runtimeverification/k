@@ -70,7 +70,11 @@ class Kompiler:
         kompile = Kompile.from_dict(kwargs)
         if kompile not in self._cache:
             output_dir = self._path / self._uid(kompile)
-            self._cache[kompile] = kompile(output_dir=output_dir, type_inference_mode=TypeInferenceMode.CHECKED)
+            self._cache[kompile] = kompile(
+                output_dir=output_dir,
+                type_inference_mode=TypeInferenceMode.CHECKED,
+                warnings_to_errors=True,
+            )
 
         return self._cache[kompile]
 
