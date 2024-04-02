@@ -45,7 +45,7 @@ def kompile(
     temp_dir: str | Path | None = None,
     type_inference_mode: str | TypeInferenceMode | None = None,
     warnings: str | Warnings | None = None,
-    warning_to_error: bool = False,
+    warnings_to_errors: bool = False,
     no_exc_wrap: bool = False,
     debug: bool = False,
     verbose: bool = False,
@@ -61,7 +61,7 @@ def kompile(
         temp_dir=temp_dir,
         type_inference_mode=type_inference_mode,
         warnings=warnings,
-        warning_to_error=warning_to_error,
+        warnings_to_errors=warnings_to_errors,
         no_exc_wrap=no_exc_wrap,
         debug=debug,
         verbose=verbose,
@@ -144,7 +144,7 @@ class Kompile(ABC):
         temp_dir: str | Path | None = None,
         type_inference_mode: str | TypeInferenceMode | None = None,
         warnings: str | Warnings | None = None,
-        warning_to_error: bool = False,
+        warnings_to_errors: bool = False,
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
@@ -177,8 +177,8 @@ class Kompile(ABC):
             warnings = Warnings(warnings)
             args += ['--warnings', warnings.value]
 
-        if warning_to_error:
-            args += ['-w2e']
+        if warnings_to_errors:
+            args += ['--warnings-to-errors']
 
         if no_exc_wrap:
             args += ['--no-exc-wrap']

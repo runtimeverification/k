@@ -311,7 +311,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             output_dir=kompiled_directory,
             type_inference_mode=options.type_inference_mode,
             warnings=options.warnings,
-            warning_to_error=options.warning_to_error,
+            warnings_to_errors=options.warnings_to_errors,
             no_exc_wrap=options.no_exc_wrap,
         )
     except RuntimeError as err:
