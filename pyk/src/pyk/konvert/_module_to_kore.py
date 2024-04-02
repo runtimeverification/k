@@ -678,7 +678,7 @@ def _overload_axioms(defn: KDefinition) -> list[Axiom]:
                         for i, (s1, s2) in enumerate(zip(param_sorts1, param_sorts2, strict=True))
                     ),
                 ),
-                inj(sort2, sort1, App(symbol2, sort_params2, Ks)),
+                App(symbol2, sort_params2, Ks) if sort1 == sort2 else inj(sort2, sort1, App(symbol2, sort_params2, Ks)),
             ),
             attrs=(App('symbol-overload', (), (App(symbol1, sort_params1), App(symbol2, sort_params2))),),
         )
