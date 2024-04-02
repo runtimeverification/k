@@ -595,19 +595,29 @@ _BUBBLE_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuratio
 _CONTEXT_KEYWORDS: Final = {'alias'}.union(_BUBBLE_KEYWORDS)
 
 
-def _bubble_or_context(la: str, it: Iterator, *, context: bool = False) -> tuple[list[Token], str]:
+def add_loc(loc: tuple[int, int], s: str) -> tuple[int, int]:
+    line, col = loc
+    for c in s:
+        if c == '\n':
+            line += 1
+            col = 0
+        col += 1
+    return (line, col)
+
+
+def _bubble_or_context(la: str, it: LocationIterator, *, context: bool = False) -> tuple[list[Token], str]:
     keywords = _CONTEXT_KEYWORDS if context else _BUBBLE_KEYWORDS
 
     tokens: list[Token] = []
 
-    bubble, final_token, la = _raw_bubble(la, it, keywords)
+    bubble, final_token, la, bubble_loc = _raw_bubble(la, it, keywords)
     if bubble is not None:
-        label_tokens, bubble = _strip_bubble_label(bubble)
+        label_tokens, bubble, bubble_loc = _strip_bubble_label(bubble, bubble_loc)
         bubble, attr_tokens = _strip_bubble_attr(bubble)
 
         tokens = label_tokens
         if bubble:
-            bubble_token = Token(bubble, TokenType.BUBBLE)
+            bubble_token = Token(bubble, TokenType.BUBBLE).with_loc(bubble_loc)
             tokens += [bubble_token]
         tokens += attr_tokens
 
@@ -615,21 +625,32 @@ def _bubble_or_context(la: str, it: Iterator, *, context: bool = False) -> tuple
     return tokens, la
 
 
-def _raw_bubble(la: str, it: Iterator[str], keywords: Collection[str]) -> tuple[str | None, Token, str]:
+def _raw_bubble(
+    la: str, it: LocationIterator, keywords: Collection[str]
+) -> tuple[str | None, Token, str, tuple[int, int]]:
     bubble: list[str] = []  # text that belongs to the bubble
     special: list[str] = []  # text that belongs to the bubble iff preceded and followed by bubble text
     current: list[str] = []  # text that might belong to the bubble or terminate the bubble if keyword
+    bubble_loc: tuple[int, int] = it.loc()
+    current_loc: tuple[int, int] = it.loc()
     while True:
         if not la or la in _WHITESPACE:
             if current:
                 current_str = ''.join(current)
                 if current_str in keywords:  # <special><keyword><ws>
-                    return ''.join(bubble) if bubble else None, _KEYWORDS[current_str], la
+                    return (
+                        ''.join(bubble) if bubble else None,
+                        _KEYWORDS[current_str].with_loc(current_loc),
+                        la,
+                        bubble_loc,
+                    )
                 else:  # <special><current><ws>
+                    bubble_loc = add_loc(bubble_loc, '' if bubble else ''.join(special))
                     bubble += special if bubble else []
                     bubble += current
                     special = []
                     current = []
+                    current_loc = it.loc()
 
             else:  # <special><ws>
                 pass
@@ -637,9 +658,10 @@ def _raw_bubble(la: str, it: Iterator[str], keywords: Collection[str]) -> tuple[
             while la in _WHITESPACE:
                 special.append(la)
                 la = next(it, '')
+                current_loc = it.loc()
 
             if not la:
-                return ''.join(bubble) if bubble else None, _EOF_TOKEN, la
+                return ''.join(bubble) if bubble else None, _EOF_TOKEN, la, bubble_loc
 
         elif la == '/':
             is_comment, consumed, la = _maybe_comment(la, it)
@@ -648,12 +670,19 @@ def _raw_bubble(la: str, it: Iterator[str], keywords: Collection[str]) -> tuple[
                     current_str = ''.join(current)
                     if current_str in keywords:  # <special><keyword><comment>
                         # Differs from K Frontend behavior, see: https://github.com/runtimeverification/k/issues/3501
-                        return ''.join(bubble) if bubble else None, _KEYWORDS[current_str], la
+                        return (
+                            ''.join(bubble) if bubble else None,
+                            _KEYWORDS[current_str].with_loc(current_loc),
+                            la,
+                            bubble_loc,
+                        )
                     else:  # <special><current><comment>
+                        bubble_loc = add_loc(bubble_loc, '' if bubble else ''.join(special))
                         bubble += special if bubble else []
                         bubble += current
                         special = consumed
                         current = []
+                        current_loc = it.loc()
 
                 else:  # <special><comment>
                     special += consumed
@@ -670,22 +699,25 @@ def _raw_bubble(la: str, it: Iterator[str], keywords: Collection[str]) -> tuple[
                 la = next(it, '')
 
 
-RULE_LABEL_PATTERN: Final = re.compile(r'(?s)\s*\[\s*(?P<label>[^\[\]\_\n\r\t ]+)\s*\]\s*:\s*(?P<rest>.*)')
+RULE_LABEL_PATTERN: Final = re.compile(
+    r'(?s)\s*(?P<lbrack>\[)\s*(?P<label>[^\[\]\_\n\r\t ]+)\s*(?P<rbrack>\])\s*(?P<colon>:)\s*(?P<rest>.*)'
+)
 
 
-def _strip_bubble_label(bubble: str) -> tuple[list[Token], str]:
+def _strip_bubble_label(bubble: str, loc: tuple[int, int]) -> tuple[list[Token], str, tuple[int, int]]:
     match = RULE_LABEL_PATTERN.fullmatch(bubble)
     if not match:
-        return [], bubble
+        return [], bubble, loc
 
     return (
         [
-            _LBRACK_TOKEN,
-            Token(match['label'], TokenType.RULE_LABEL),
-            _RBRACK_TOKEN,
-            _COLON_TOKEN,
+            _LBRACK_TOKEN.with_loc(add_loc(loc, bubble[: match.start('lbrack')])),
+            Token(match['label'], TokenType.RULE_LABEL).with_loc(add_loc(loc, bubble[: match.start('label')])),
+            _RBRACK_TOKEN.with_loc(add_loc(loc, bubble[: match.start('rbrack')])),
+            _COLON_TOKEN.with_loc(add_loc(loc, bubble[: match.start('colon')])),
         ],
         match['rest'],
+        add_loc(loc, bubble[: match.start('rest')]),
     )
 
 

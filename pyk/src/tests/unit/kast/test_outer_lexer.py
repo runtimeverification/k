@@ -208,7 +208,7 @@ def test_bubble(
     expected_remaining: str,
 ) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -237,7 +237,7 @@ def test_context(
     expected_remaining: str,
 ) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
