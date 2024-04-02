@@ -289,6 +289,8 @@ class KProduction(KSentence):
     @cached_property
     def as_subsort(self) -> tuple[KSort, KSort] | None:
         """Return a pair `(supersort, subsort)` if `self` is a subsort production, and `None` otherwise."""
+        if self.klabel:
+            return None
         if len(self.items) != 1:
             return None
         item = self.items[0]
