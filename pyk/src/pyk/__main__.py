@@ -249,7 +249,11 @@ def exec_prove(options: ProveOptions) -> None:
     else:
         kompiled_directory = options.definition_dir
     kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
-    proofs = kprove.prove_rpc(options=options)
+    try:
+        proofs = kprove.prove_rpc(options=options)
+    except RuntimeError as err:
+        _, _, _, cpe = err.args
+        exit_with_process_error(cpe)
     for proof in sorted(proofs, key=lambda p: p.id):
         print('\n'.join(proof.summary.lines))
         if proof.failed and options.failure_info:

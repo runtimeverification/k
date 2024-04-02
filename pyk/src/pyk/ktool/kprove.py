@@ -105,7 +105,7 @@ def _kprove(
         return run_process(run_args, logger=_LOGGER, env=env, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
-            f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr
+            f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr, err
         ) from err
 
 
