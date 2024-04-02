@@ -1238,17 +1238,15 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             assert Atts.OVERLOAD in overloader.att
             assert Atts.OVERLOAD in overloaded.att
             assert overloader.att[Atts.OVERLOAD] == overloaded.att[Atts.OVERLOAD]
-            arg_sorts1 = overloader.argument_sorts
-            arg_sorts2 = overloaded.argument_sorts
-            if len(arg_sorts1) != len(arg_sorts2):
-                return False
-            if overloader.sort not in self.subsorts(overloaded.sort):
+            overloader_sorts = [overloader.sort] + overloader.argument_sorts
+            overloaded_sorts = [overloaded.sort] + overloaded.argument_sorts
+            if len(overloader_sorts) != len(overloaded_sorts):
                 return False
             less = False
-            for sort1, sort2 in zip(arg_sorts1, arg_sorts2, strict=True):
-                if sort1 == sort2:
+            for overloader_sort, overloaded_sort in zip(overloader_sorts, overloaded_sorts, strict=True):
+                if overloader_sort == overloaded_sort:
                     continue
-                if sort1 in self.subsorts(sort2):
+                if overloader_sort in self.subsorts(overloaded_sort):
                     less = True
                     continue
                 return False
@@ -1262,13 +1260,13 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
         overloads: dict[str, list[str]] = {}
         for _, symbols in symbols_by_overload.items():
-            for s1 in symbols:
-                for s2 in symbols:
-                    if s1 == s2:
+            for overloader in symbols:
+                for overloaded in symbols:
+                    if overloader == overloaded:
                         continue
-                    if lt(overloader=self.symbols[s1], overloaded=self.symbols[s2]):
+                    if lt(overloader=self.symbols[overloader], overloaded=self.symbols[overloaded]):
                         # Index by overloaded symbol, this way it is easy to look them up
-                        overloads.setdefault(s2, []).append(s1)
+                        overloads.setdefault(overloaded, []).append(overloader)
         return FrozenDict({key: frozenset(values) for key, values in overloads.items()})
 
     @cached_property
