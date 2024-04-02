@@ -357,10 +357,13 @@ ERROR_TEST_DATA: Final = (
         JsonRpcError(
             message='foo',
             code=5,
-            data=kore(int_dv(0)),
+            data={
+                'error': 'Failed to decide predicate.',
+                'term': kore(int_dv(0)),
+            },
         ),
-        SmtSolverError(int_dv(0)),
-        r'SMT solver error: \dv{SortInt{}}("0")',
+        SmtSolverError('Failed to decide predicate.', int_dv(0)),
+        r'SMT solver error: Failed to decide predicate. Pattern: \dv{SortInt{}}("0")',
     ),
     (
         'default-error',
