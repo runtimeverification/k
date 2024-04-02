@@ -248,7 +248,7 @@ def exec_prove(options: ProveOptions) -> None:
         _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
     else:
         kompiled_directory = options.definition_dir
-    kprove = KProve(kompiled_directory)
+    kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
     proofs = kprove.prove_rpc(options=options)
     for proof in sorted(proofs, key=lambda p: p.id):
         print('\n'.join(proof.summary.lines))
@@ -475,9 +475,19 @@ def create_argument_parser() -> ArgumentParser:
     )
     prove_args.add_argument(
         '--save-directory',
+        dest='save_directory',
         default=None,
         type=ensure_dir_path,
         help='Directory to save proof artifacts to for reuse.',
+    )
+    prove_args.add_argument(
+        '--temp-directory',
+        '--temp-dir',
+        '--tmp-dir',
+        dest='temp_directory',
+        default=None,
+        type=ensure_dir_path,
+        help='Directory to save intermediate temporaries to.',
     )
 
     graph_imports_args = pyk_args_command.add_parser(

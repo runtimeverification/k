@@ -396,7 +396,7 @@ class KProve(KPrint):
         md_selector: str | None = None,
         type_inference_mode: TypeInferenceMode | None = None,
     ) -> KFlatModuleList:
-        with self._temp_file() as ntf:
+        with self._temp_file(prefix=f'{spec_file.name}.parsed.json.') as ntf:
             _kprove(
                 spec_file=spec_file,
                 kompiled_dir=self.definition_dir,

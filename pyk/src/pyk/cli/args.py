@@ -84,11 +84,13 @@ class KDefinitionOptions(Options):
 
 class SaveDirOptions(Options):
     save_directory: Path | None
+    temp_directory: Path | None
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'save_directory': None,
+            'temp_directory': None,
         }
 
 
