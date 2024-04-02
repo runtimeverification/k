@@ -37,14 +37,36 @@ if TYPE_CHECKING:
 
 class Kompiler:
     _path: Path
+    _k_dir: Path
+    _k_file_cache: dict[str, Path]
     _cache: dict[Kompile, Path]
 
     def __init__(self, tmp_path_factory: TempPathFactory):
         self._path = tmp_path_factory.mktemp('kompiled')
+        self._k_dir = self._path / 'k-files'
+        self._k_file_cache = {}
         self._cache = {}
 
-    def __call__(self, main_file: str | Path, **kwargs: Any) -> Path:
+    def __call__(
+        self,
+        *,
+        # kompile file
+        main_file: str | Path | None = None,
+        # kompile text
+        definition: str | None = None,
+        main_module: str | None = None,
+        **kwargs: Any,
+    ) -> Path:
+        if (main_file is None) == (definition is None):
+            raise ValueError('Exactly one of main_file and definition must be set')
+
+        if definition is not None:
+            if main_module is None:
+                raise ValueError('If definition is set, then main_module must be specified')
+            main_file = self._cache_definition(definition)
+
         kwargs['main_file'] = main_file
+        kwargs['main_module'] = main_module
         kompile = Kompile.from_dict(kwargs)
         if kompile not in self._cache:
             output_dir = self._path / self._uid(kompile)
@@ -55,9 +77,21 @@ class Kompiler:
     def _uid(self, kompile: Kompile) -> str:
         return f'{kompile.base_args.main_file.stem}-{kompile.backend.value}-{len(self._cache)}'
 
+    def _cache_definition(self, definition: str) -> Path:
+        definition = definition.strip()  # TODO preserve indentation
+        if definition not in self._k_file_cache:
+            self._k_dir.mkdir(exist_ok=True)
+            main_file = self._k_dir / f'definition-{len(self._k_file_cache)}.k'
+            main_file.write_text(definition)
+            self._k_file_cache[definition] = main_file
+
+        return self._k_file_cache[definition]
+
 
 class KompiledTest:
-    KOMPILE_MAIN_FILE: ClassVar[str | Path]
+    KOMPILE_MAIN_FILE: ClassVar[str | Path | None] = None
+    KOMPILE_DEFINITION: ClassVar[str | None] = None
+    KOMPILE_MAIN_MODULE: ClassVar[str | None] = None
     KOMPILE_BACKEND: ClassVar[str | None] = None
     KOMPILE_ARGS: ClassVar[dict[str, Any]] = {}
 
@@ -65,6 +99,8 @@ class KompiledTest:
     def definition_dir(self, kompile: Kompiler) -> Path:
         kwargs = dict(self.KOMPILE_ARGS)
         kwargs['main_file'] = self.KOMPILE_MAIN_FILE
+        kwargs['definition'] = self.KOMPILE_DEFINITION
+        kwargs['main_module'] = self.KOMPILE_MAIN_MODULE
         kwargs['backend'] = self.KOMPILE_BACKEND
         return kompile(**kwargs)
 
@@ -186,6 +222,8 @@ class KoreClientTest(KompiledTest):
         kwargs = dict(self.LLVM_ARGS)
         kwargs['backend'] = 'llvm'
         kwargs['main_file'] = self.KOMPILE_MAIN_FILE
+        kwargs['definition'] = self.KOMPILE_DEFINITION
+        kwargs['main_module'] = self.KOMPILE_MAIN_MODULE
         kwargs['llvm_kompile_type'] = LLVMKompileType.C
         return kompile(**kwargs)
 

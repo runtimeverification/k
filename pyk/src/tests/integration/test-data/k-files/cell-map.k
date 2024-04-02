@@ -1,6 +1,12 @@
 requires "domains.md"
 
+module CELL-MAP-SYNTAX
+    imports INT-SYNTAX
+    syntax KItem ::= #accountNonexistent ( Int ) [symbol(accountNonexistent)]
+endmodule
+
 module CELL-MAP
+    imports CELL-MAP-SYNTAX
     imports INT
     imports MAP
     imports BOOL
@@ -15,7 +21,6 @@ module CELL-MAP
                     </account>
                   </accounts>
 
-    syntax KItem ::= #accountNonexistent ( Int ) [symbol(accountNonexistent)]
     rule <k> #accountNonexistent(I) => true ... </k>
          <activeAccounts> ACCTS </activeAccounts>
       requires notBool I in ACCTS
@@ -25,5 +30,4 @@ module CELL-MAP
            <id> I </id>
            <balance> B </balance>
          </account>
-
 endmodule

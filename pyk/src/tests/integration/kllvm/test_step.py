@@ -6,15 +6,22 @@ import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.parser import parse_pattern
 from pyk.testing import RuntimeTest
 
-from ..utils import K_FILES
-
 if TYPE_CHECKING:
     from pyk.kllvm.ast import Pattern
     from pyk.kllvm.runtime import Runtime
 
 
 class TestStep(RuntimeTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'steps.k'
+    KOMPILE_DEFINITION = """
+        module STEPS
+            imports INT
+            syntax Foo ::= foo(Int) | bar()
+            rule foo(I) => foo(I -Int 1) requires I >Int 0
+            rule foo(_) => bar() [owise]
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'STEPS'
+    KOMPILE_ARGS = {'syntax_module': 'STEPS'}
 
     def test_steps_1(self, runtime: Runtime) -> None:
         term = runtime.term(start_pattern())

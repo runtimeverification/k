@@ -18,8 +18,6 @@ from pyk.kore.prelude import (
 from pyk.kore.syntax import App
 from pyk.ktool.krun import KRun
 
-from ..utils import K_FILES
-
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
@@ -30,7 +28,18 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope='module')
 def definition_dir(kompile: Kompiler) -> Path:
-    return kompile(K_FILES / 'top-cell-initializer.k')
+    definition = """
+        module TOP-CELL-INITIALIZER
+            imports INT-SYNTAX
+            configuration
+                <k> $PGM:Int </k>
+                <a> $A:Int </a>
+                <b> $B:Int </b>
+                <c> $C:Int </c>
+        endmodule
+    """
+    main_module = 'TOP-CELL-INITIALIZER'
+    return kompile(definition=definition, main_module=main_module, syntax_module=main_module)
 
 
 def test_top_cell_initializer(definition_dir: Path) -> None:

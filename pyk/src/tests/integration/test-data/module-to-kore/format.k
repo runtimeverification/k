@@ -1,4 +1,4 @@
-module FORMAT
+module FORMAT-SYNTAX
     imports INT-SYNTAX
 
     syntax Exp ::= Int
@@ -29,4 +29,8 @@ module FORMAT
 
     // record production with format
     syntax Exp ::= div ( x: Exp , y : Exp ) [format(%3 / %5)]
+endmodule
+
+module FORMAT
+    imports FORMAT-SYNTAX
 endmodule
