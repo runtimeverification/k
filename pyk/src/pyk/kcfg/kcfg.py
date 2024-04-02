@@ -17,18 +17,16 @@ from ..kast.manip import (
     extract_lhs,
     extract_rhs,
     flatten_label,
-    free_vars,
     inline_cell_maps,
     rename_generated_vars,
     sort_ac_collections,
 )
 from ..kast.outer import KFlatModule
 from ..prelude.kbool import andBool
-from ..prelude.ml import mlAnd
 from ..utils import ensure_dir_path, not_none, single
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, MutableMapping
+    from collections.abc import Callable, Iterable, Mapping, MutableMapping
     from pathlib import Path
     from types import TracebackType
     from typing import Any
@@ -155,6 +153,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             new_attrs = attrs if attrs is not None else self.attrs
             return KCFG.Node(self.id, new_cterm, new_attrs)
 
+        @property
+        def free_vars(self) -> frozenset[str]:
+            return frozenset(self.cterm.free_vars)
+
     class Successor(ABC):
         source: KCFG.Node
 
@@ -164,12 +166,20 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return self.source < other.source
 
         @property
+        def source_vars(self) -> frozenset[str]:
+            return frozenset(self.source.free_vars)
+
+        @property
         @abstractmethod
         def targets(self) -> tuple[KCFG.Node, ...]: ...
 
         @property
         def target_ids(self) -> list[int]:
             return sorted(target.id for target in self.targets)
+
+        @property
+        def target_vars(self) -> frozenset[str]:
+            return frozenset(set.union(set(), *(target.free_vars for target in self.targets)))
 
         @abstractmethod
         def replace_source(self, node: KCFG.Node) -> KCFG.Successor: ...
@@ -916,11 +926,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self.create_split(source.id, zip(branch_node_ids, csubsts, strict=True))
         return branch_node_ids
 
-    def lift_edge(self, id: NodeIdLike) -> None:
+    def lift_edge(self, b_id: NodeIdLike) -> None:
         """Lift an edge up another edge directly preceding it.
 
         Input:
-            -   id: the identifier of the central node `B` of a sequence of edges `A --> B --> C`.
+            -   b_id: the identifier of the central node `B` of a sequence of edges `A --> B --> C`.
 
         Effect: `A --M steps--> B --N steps--> C` becomes `A --(M + N) steps--> C`. Node `B` is removed.
 
@@ -930,10 +940,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         """
 
         # Obtain edges `A -> B`, `B -> C`
-        a_to_b = single(self.edges(target_id=id))
-        b_to_c = single(self.edges(source_id=id))
+        a_to_b = single(self.edges(target_id=b_id))
+        b_to_c = single(self.edges(source_id=b_id))
         # Remove the node `B`, effectively removing the entire initial structure
-        self.remove_node(id)
+        self.remove_node(b_id)
         # Create edge `A -> C`
         self.create_edge(a_to_b.source.id, b_to_c.target.id, a_to_b.depth + b_to_c.depth, a_to_b.rules + b_to_c.rules)
 
@@ -952,20 +962,22 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             -   bool: An indicator of whether or not at least one edge lift was performed.
         """
 
-        edges_to_lift = [
-            node.id
-            for node in self.nodes
-            if len(self.edges(source_id=node.id)) > 0 and len(self.edges(target_id=node.id)) > 0
-        ]
+        edges_to_lift = sorted(
+            [
+                node.id
+                for node in self.nodes
+                if len(self.edges(source_id=node.id)) > 0 and len(self.edges(target_id=node.id)) > 0
+            ]
+        )
         for node_id in edges_to_lift:
             self.lift_edge(node_id)
         return len(edges_to_lift) > 0
 
-    def lift_split(self, id: NodeIdLike) -> None:
+    def lift_split_edge(self, b_id: NodeIdLike) -> None:
         """Lift a split up an edge directly preceding it.
 
         Input:
-            -   id: the identifier of the central node `B` of the structure `A --> B --> [C_1, ..., C_N]`.
+            -   b_id: the identifier of the central node `B` of the structure `A --> B --> [C_1, ..., C_N]`.
 
         Effect:
             `A --M steps--> B --[cond_1, ..., cond_N]--> [C_1, ..., C_N]` becomes
@@ -980,27 +992,81 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         """
 
         # Obtain edge `A -> B`, split `[cond_I, C_I | I = 1..N ]`
-        a_to_b = single(self.edges(target_id=id))
+        a_to_b = single(self.edges(target_id=b_id))
         a = a_to_b.source
-        split_from_b = single(self.splits(source_id=id))
+        split_from_b = single(self.splits(source_id=b_id))
         ci, csubsts = list(split_from_b.splits.keys()), list(split_from_b.splits.values())
-        # If any of the `cond_I` contains variables not present in `A`, the lift cannot be performed soundly.
-        fv_a = a.cterm.free_vars
-        for subst in csubsts:
-            assert set(free_vars(mlAnd(subst.constraints))).issubset(
-                fv_a
-            ), f'Cannot lift split at node {id} due to branching on freshly introduced variables'
-        # Remove the node `B`, effectively removing the entire initial structure
-        self.remove_node(id)
-        # Create the nodes `[ A #And cond_I | I = 1..N ]`.
-        ai: list[NodeIdLike] = [
-            self.create_node(CTerm(a.cterm.config, a.cterm.constraints + csubst.constraints)).id for csubst in csubsts
+        # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
+        assert (
+            len(split_from_b.source_vars.difference(a.free_vars)) == 0
+            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+        )
+        # Create CTerms and CSubsts corresponding to the new targets of the split
+        new_cterms_with_constraints = [
+            (CTerm(a.cterm.config, a.cterm.constraints + csubst.constraints), csubst.constraint) for csubst in csubsts
         ]
+        # Generate substitutions for new targets, which all exist by construction
+        new_csubsts = [
+            not_none(a.cterm.match_with_constraint(cterm)).add_constraint(constraint)
+            for (cterm, constraint) in new_cterms_with_constraints
+        ]
+        # Remove the node `B`, effectively removing the entire initial structure
+        self.remove_node(b_id)
+        # Create the nodes `[ A #And cond_I | I = 1..N ]`.
+        ai: list[NodeIdLike] = [self.create_node(cterm).id for (cterm, _) in new_cterms_with_constraints]
         # Create the edges `[A #And cond_1 --M steps--> C_I | I = 1..N ]`
         for i in range(len(ai)):
             self.create_edge(ai[i], ci[i], a_to_b.depth, a_to_b.rules)
         # Create the split `A --[cond_1, ..., cond_N]--> [A #And cond_1, ..., A #And cond_N]
-        self.create_split(a.id, zip(ai, csubsts, strict=True))
+        self.create_split(a.id, zip(ai, new_csubsts, strict=True))
+
+    def lift_split_split(self, b_id: NodeIdLike) -> None:
+        """Lift a split up a split directly preceding it, joining them into a single split.
+
+        Input:
+            -   b_id: the identifier of the node `B` of the structure
+                `A --[..., cond_B, ...]--> [..., B, ...]` with `B --[cond_1, ..., cond_N]--> [C_1, ..., C_N]`
+
+        Effect:
+            `A --[..., cond_B, ...]--> [..., B, ...]` with `B --[cond_1, ..., cond_N]--> [C_1, ..., C_N]` becomes
+            `A --[..., cond_B #And cond_1, ..., cond_B #And cond_N, ...]--> [..., C_1, ..., C_N, ...]`.
+            Node `B` is removed.
+
+        Output: None
+
+        Raises:
+            -   `AssertionError`, if the structure in question is not in place.
+        """
+        # Obtain splits `A --[..., cond_B, ...]--> [..., B, ...]` and
+        # `B --[cond_1, ..., cond_N]--> [C_1, ..., C_N]-> [C_1, ..., C_N]`
+        split_from_a, split_from_b = single(self.splits(target_id=b_id)), single(self.splits(source_id=b_id))
+        splits_from_a, splits_from_b = split_from_a.splits, split_from_b.splits
+        a = split_from_a.source
+        ci = list(splits_from_b.keys())
+        # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
+        assert (
+            len(split_from_b.source_vars.difference(a.free_vars)) == 0
+            and len(split_from_b.target_vars.difference(split_from_b.source_vars)) == 0
+        )
+        # Get the substitution for `B`, at the same time removing 'B' from the targets of `A`.
+        csubst_b = splits_from_a.pop(self._resolve(b_id))
+        # Generate substitutions for additional targets `C_I`, which all exist by construction;
+        # the constraints are cumulative, resulting in `cond_B #And cond_I`
+        additional_csubsts = [
+            not_none(a.cterm.match_with_constraint(self.node(ci).cterm))
+            .add_constraint(csubst.constraint)
+            .add_constraint(csubst_b.constraint)
+            for ci, csubst in splits_from_b.items()
+        ]
+        # Create the targets of the new split
+        ci = list(splits_from_b.keys())
+        new_splits = zip(
+            list(splits_from_a.keys()) + ci, list(splits_from_a.values()) + additional_csubsts, strict=True
+        )
+        # Remove the node `B`, thereby removing the two splits as well
+        self.remove_node(b_id)
+        # Create the new split `A --[..., cond_B #And cond_1, ..., cond_B #And cond_N, ...]--> [..., C_1, ..., C_N, ...]`
+        self.create_split(a.id, new_splits)
 
     def lift_splits(self) -> bool:
         """Perform all possible split liftings.
@@ -1013,22 +1079,32 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             -   bool: An indicator of whether or not at least one split lift was performed.
         """
 
-        result = False
-        while True:
-            splits_to_lift = [
-                node.id
-                for node in self.nodes
-                if self.splits(source_id=node.id) != [] and self.edges(target_id=node.id) != []
-            ]
-            if len(splits_to_lift) == 0:
-                break
-            for node_id in splits_to_lift:
-                try:
-                    self.lift_split(node_id)
+        def _lift_split(finder: Callable, lifter: Callable) -> bool:
+            while True:
+                result = False
+                splits_to_lift = sorted(
+                    [
+                        node.id
+                        for node in self.nodes
+                        if (splits := self.splits(source_id=node.id)) != []
+                        and (sources := finder(target_id=node.id)) != []
+                        and (source := single(sources).source)
+                        and (split := single(splits))
+                        and len(split.source_vars.difference(source.free_vars)) == 0
+                        and len(split.target_vars.difference(split.source_vars)) == 0
+                    ]
+                )
+                for id in splits_to_lift:
+                    lifter(id)
                     result = True
-                except AssertionError as err:
-                    _LOGGER.warning(str(err))
-        return result
+                if not result or len(splits_to_lift) == 0:
+                    break
+            return result
+
+        def _fold_lift(result: bool, finder_lifter: tuple[Callable, Callable]) -> bool:
+            return _lift_split(finder_lifter[0], finder_lifter[1]) or result
+
+        return reduce(_fold_lift, [(self.edges, self.lift_split_edge), (self.splits, self.lift_split_split)], False)
 
     def minimize(self) -> None:
         """Minimize KCFG by repeatedly performing the lifting transformations.

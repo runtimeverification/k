@@ -240,7 +240,7 @@ class CTerm:
                 new_cterm = new_cterm.add_constraint(mlEqualsTrue(orBool([disjunct_lhs, disjunct_rhs])))
 
         new_constraints = []
-        fvs = list(new_cterm.free_vars)
+        fvs = new_cterm.free_vars
         len_fvs = 0
         while len_fvs < len(fvs):
             len_fvs = len(fvs)
@@ -249,7 +249,7 @@ class CTerm:
                     constraint_fvs = free_vars(constraint)
                     if any(fv in fvs for fv in constraint_fvs):
                         new_constraints.append(constraint)
-                        fvs.extend(constraint_fvs)
+                        fvs = fvs | constraint_fvs
 
         for constraint in new_constraints:
             new_cterm = new_cterm.add_constraint(constraint)
@@ -267,7 +267,7 @@ class CTerm:
         :param keep_vars: List of variables to keep constraints for even if unbound in the `CTerm`.
         :return: A `CTerm` with the constraints over unbound variables removed.
         """
-        initial_vars = free_vars(self.config) + list(keep_vars)
+        initial_vars = free_vars(self.config) | set(keep_vars)
         new_constraints = remove_useless_constraints(self.constraints, initial_vars)
         return CTerm(self.config, new_constraints)
 
@@ -332,7 +332,7 @@ class CSubst:
 
     @staticmethod
     def from_dict(dct: dict[str, Any]) -> CSubst:
-        """Desirialize `CSubst` from a dictionary representation."""
+        """Deserialize `CSubst` from a dictionary representation."""
         subst = Subst.from_dict(dct['subst'])
         constraints = (KInner.from_dict(c) for c in dct['constraints'])
         return CSubst(subst=subst, constraints=constraints)
