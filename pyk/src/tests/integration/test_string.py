@@ -20,8 +20,6 @@ from pyk.ktool.kprint import _kast
 from pyk.ktool.krun import KRun
 from pyk.prelude.string import stringToken
 
-from .utils import K_FILES
-
 if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
@@ -42,15 +40,26 @@ TEST_DATA: Final = (
     '🙂',
 )
 
-KOMPILE_MAIN_FILE = K_FILES / 'string-rewrite.k'
+KOMPILE_DEFINITION = """
+    module STRING-REWRITE
+        imports STRING-SYNTAX
+
+        configuration <k> $PGM:String </k>
+                      <s> "" </s>
+
+        rule <k> S => .K ... </k>
+             <s> _ => S      </s>
+    endmodule
+"""
 KOMPILE_MAIN_MODULE = 'STRING-REWRITE'
 
 
 @pytest.fixture(scope='module')
 def llvm_dir(kompile: Kompiler) -> Path:
     return kompile(
-        KOMPILE_MAIN_FILE,
+        definition=KOMPILE_DEFINITION,
         main_module=KOMPILE_MAIN_MODULE,
+        syntax_module=KOMPILE_MAIN_MODULE,
         backend='llvm',
     )
 
@@ -58,8 +67,9 @@ def llvm_dir(kompile: Kompiler) -> Path:
 @pytest.fixture(scope='module')
 def haskell_dir(kompile: Kompiler) -> Path:
     return kompile(
-        KOMPILE_MAIN_FILE,
+        definition=KOMPILE_DEFINITION,
         main_module=KOMPILE_MAIN_MODULE,
+        syntax_module=KOMPILE_MAIN_MODULE,
         backend='haskell',
     )
 

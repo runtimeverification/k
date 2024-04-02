@@ -9,8 +9,6 @@ from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.prelude.ml import mlTop
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
-from ..utils import K_FILES
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -22,7 +20,31 @@ EXECUTE_TEST_DATA: Iterable[tuple[str]] = (('branch',),)
 
 
 class TestMultipleDefinitionsProof(CTermSymbolicTest, KPrintTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'multiple-definitions.k'
+    KOMPILE_DEFINITION = """
+        module MULTIPLE-DEFINITIONS
+          imports A
+          imports B
+          imports BOOL
+
+          syntax KItem  ::= a(KItem) [symbol(a)]
+                          | "b"
+                          | "c"
+          rule a(X) => b requires isInt(X)
+          rule a(X) => b requires notBool isInt(X)
+          rule b => c
+        endmodule
+
+        module A
+          syntax Int
+        endmodule
+
+        module B
+          syntax Int
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'MULTIPLE-DEFINITIONS'
+    KOMPILE_ARGS = {'syntax_module': 'MULTIPLE-DEFINITIONS'}
+    LLVM_ARGS = {'syntax_module': 'MULTIPLE-DEFINITIONS'}
 
     @staticmethod
     def config() -> CTerm:

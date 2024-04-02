@@ -48,7 +48,16 @@ def test_kompile_not_found(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 class TestKLabel(KompiledTest):
-    KOMPILE_MAIN_FILE = K_FILES / 'klabel.k'
+    KOMPILE_DEFINITION = """
+        module KLABEL
+            syntax Foo ::= "foo" [symbol(foo)]
+                         | "bar" [klabel(bar), symbol]
+                         | "baz" [klabel(baz)]
+                         | "qux"
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'KLABEL'
+    KOMPILE_ARGS = {'syntax_module': 'KLABEL'}
 
     def test(self, definition: KDefinition) -> None:
         # Given

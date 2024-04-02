@@ -1,7 +1,11 @@
-module MULTI-CLAIM
-    configuration <k> $PGM:Pgm </k>
-
+module MULTI-CLAIM-SYNTAX
     syntax Pgm ::= "a" | "b" | "c"
+endmodule
+
+module MULTI-CLAIM
+    imports MULTI-CLAIM-SYNTAX
+
+    configuration <k> $PGM:Pgm </k>
 endmodule
 
 module MULTI-CLAIM-SPEC-DEPENDENCY-1

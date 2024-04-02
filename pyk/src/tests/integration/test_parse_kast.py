@@ -2,12 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.kast import Atts
+from pyk.kast import EMPTY_ATT, Atts
 from pyk.kast.inner import KApply, KAs, KRewrite, KSort
 from pyk.kast.outer import KRegexTerminal, KSortSynonym, read_kast_definition
-from pyk.utils import single
-
-from .utils import K_FILES
 
 if TYPE_CHECKING:
     from pyk.testing import Kompiler
@@ -15,26 +12,47 @@ if TYPE_CHECKING:
 
 def test_sort_synonym(kompile: Kompiler) -> None:
     # Given
-    definition_dir = kompile(K_FILES / 'sort-synonym.k')
+    k_text = """
+        module SORT-SYNONYM
+            imports INT-SYNTAX
+            syntax NewInt = Int
+        endmodule
+    """
+    main_module = 'SORT-SYNONYM'
+    definition_dir = kompile(definition=k_text, main_module=main_module, syntax_module=main_module)
     definition = read_kast_definition(definition_dir / 'compiled.json')
-    module = definition.module('SORT-SYNONYM-SYNTAX')
+    module = definition.module(main_module)
+    expected = KSortSynonym(new_sort=KSort('NewInt'), old_sort=KSort('Int'))
 
     # When
-    sort_synonym = single(sentence for sentence in module if type(sentence) is KSortSynonym)
+    (syntax_synonym,) = (sentence for sentence in module if type(sentence) is KSortSynonym)
+    actual = syntax_synonym.let(att=EMPTY_ATT)
 
     # Then
-    assert sort_synonym.new_sort == KSort('NewInt')
-    assert sort_synonym.old_sort == KSort('Int')
+    assert actual == expected
 
 
 def test_kas(kompile: Kompiler) -> None:
     # Given
-    definition_dir = kompile(K_FILES / 'contextual-function.k')
+    k_text = """
+        module CONTEXTUAL-FUNCTION
+            imports INT-SYNTAX
+
+            syntax Int ::= getCtx() [function, total]
+
+            configuration <k> $PGM:KItem </k>
+                          <ctx> 0 </ctx>
+
+            rule [[ getCtx() => N ]] <ctx> N </ctx> [label(def-get-ctx)]
+        endmodule
+    """
+    main_module = 'CONTEXTUAL-FUNCTION'
+    definition_dir = kompile(definition=k_text, main_module=main_module, syntax_module=main_module)
     definition = read_kast_definition(definition_dir / 'compiled.json')
-    module = definition.module('CONTEXTUAL-FUNCTION')
+    module = definition.module(main_module)
 
     # When
-    rule = single(rule for rule in module.rules if rule.att.get(Atts.LABEL) == 'def-get-ctx')
+    (rule,) = (rule for rule in module.rules if rule.att.get(Atts.LABEL) == 'def-get-ctx')
 
     # Then
     rewrite = rule.body
@@ -47,9 +65,18 @@ def test_kas(kompile: Kompiler) -> None:
 
 def test_regex_terminal(kompile: Kompiler) -> None:
     # Given
-    definition_dir = kompile(K_FILES / 'regex-terminal.k')
+    k_text = """
+        module REGEX-TERMINAL
+            syntax T0 ::= r"b"            [token]
+            syntax T1 ::= r"(?<!a)b"      [token]
+            syntax T2 ::= r"b(?!c)"       [token]
+            syntax T3 ::= r"(?<!a)b(?!c)" [token]
+        endmodule
+    """
+    main_module = 'REGEX-TERMINAL'
+    definition_dir = kompile(definition=k_text, main_module=main_module, syntax_module=main_module)
     definition = read_kast_definition(definition_dir / 'compiled.json')
-    module = definition.module('REGEX-TERMINAL-SYNTAX')
+    module = definition.module(main_module)
     expected = [
         KRegexTerminal('b', '#', '#'),
         KRegexTerminal('b', 'a', '#'),

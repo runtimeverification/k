@@ -67,7 +67,7 @@ GET_CLAIMS_SPEC_DATA: Iterable[tuple[str, list[str], dict[str, list[str]] | None
 
 class TestGetClaims(KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'multi-claim-spec.k'
-    KOMPILE_ARGS = {'main_module': 'MULTI-CLAIM'}
+    KOMPILE_MAIN_MODULE = 'MULTI-CLAIM'
     SPEC_MODULE_NAME = 'MULTI-CLAIM-SPEC'
 
     @pytest.mark.parametrize(
