@@ -128,6 +128,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     type_inference_mode: TypeInferenceMode | None
     failure_info: bool
     max_depth: int | None
+    max_iterations: int | None
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -136,6 +137,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             'type_inference_mode': None,
             'failure_info': False,
             'max_depth': None,
+            'max_iterations': None,
         }
 
 

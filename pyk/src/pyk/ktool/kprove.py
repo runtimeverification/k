@@ -287,47 +287,59 @@ class KProve(KPrint):
         no_post_exec_simplify: bool = False,
         max_depth: int | None = None,
         save_directory: Path | None = None,
+        max_iterations: int | None = None,
     ) -> Proof:
-        with cterm_symbolic(
-            self.definition,
-            self.kompiled_kore,
-            self.definition_dir,
-            id=id,
-            port=port,
-            kore_rpc_command=kore_rpc_command,
-            llvm_definition_dir=llvm_definition_dir,
-            smt_timeout=smt_timeout,
-            smt_retry_limit=smt_retry_limit,
-            smt_tactic=smt_tactic,
-            bug_report=bug_report,
-            haskell_log_format=haskell_log_format,
-            haskell_log_entries=haskell_log_entries,
-            log_axioms_file=log_axioms_file,
-            trace_rewrites=trace_rewrites,
-            start_server=start_server,
-            maude_port=maude_port,
-            fallback_on=fallback_on,
-            interim_simplification=interim_simplification,
-            no_post_exec_simplify=no_post_exec_simplify,
-        ) as cts:
-            kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
-            proof: Proof
-            prover: Prover
-            lhs_top = extract_lhs(claim.body)
-            if type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions:
-                proof = EqualityProof.from_claim(claim, self.definition, proof_dir=save_directory)
-                prover = ImpliesProver(proof, kcfg_explore)
-            else:
-                proof = APRProof.from_claim(self.definition, claim, {}, proof_dir=save_directory)
-                prover = APRProver(proof, kcfg_explore, execute_depth=max_depth)
-            prover.advance_proof()
-            if proof.passed:
-                _LOGGER.info(f'Proof passed: {proof.id}')
-            elif proof.failed:
-                _LOGGER.info(f'Proof failed: {proof.id}')
-            else:
-                _LOGGER.info(f'Proof pending: {proof.id}')
-            return proof
+        proof: Proof
+        prover: Prover
+        lhs_top = extract_lhs(claim.body)
+        is_functional_claim = (
+            type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions
+        )
+
+        if is_functional_claim:
+            proof = EqualityProof.from_claim(claim, self.definition, proof_dir=save_directory)
+        else:
+            proof = APRProof.from_claim(self.definition, claim, {}, proof_dir=save_directory)
+
+        if not proof.passed and (max_iterations is None or max_iterations > 0):
+            with cterm_symbolic(
+                self.definition,
+                self.kompiled_kore,
+                self.definition_dir,
+                id=id,
+                port=port,
+                kore_rpc_command=kore_rpc_command,
+                llvm_definition_dir=llvm_definition_dir,
+                smt_timeout=smt_timeout,
+                smt_retry_limit=smt_retry_limit,
+                smt_tactic=smt_tactic,
+                bug_report=bug_report,
+                haskell_log_format=haskell_log_format,
+                haskell_log_entries=haskell_log_entries,
+                log_axioms_file=log_axioms_file,
+                trace_rewrites=trace_rewrites,
+                start_server=start_server,
+                maude_port=maude_port,
+                fallback_on=fallback_on,
+                interim_simplification=interim_simplification,
+                no_post_exec_simplify=no_post_exec_simplify,
+            ) as cts:
+                kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
+                if is_functional_claim:
+                    assert type(proof) is EqualityProof
+                    prover = ImpliesProver(proof, kcfg_explore)
+                else:
+                    assert type(proof) is APRProof
+                    prover = APRProver(proof, kcfg_explore, execute_depth=max_depth)
+                prover.advance_proof(max_iterations=max_iterations)
+
+        if proof.passed:
+            _LOGGER.info(f'Proof passed: {proof.id}')
+        elif proof.failed:
+            _LOGGER.info(f'Proof failed: {proof.id}')
+        else:
+            _LOGGER.info(f'Proof pending: {proof.id}')
+        return proof
 
     def prove_rpc(
         self,
@@ -375,6 +387,7 @@ class KProve(KPrint):
                 no_post_exec_simplify=no_post_exec_simplify,
                 max_depth=max_depth,
                 save_directory=options.save_directory,
+                max_iterations=options.max_iterations,
             )
 
         all_claims = self.get_claims(

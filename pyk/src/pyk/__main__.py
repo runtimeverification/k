@@ -478,6 +478,12 @@ def create_argument_parser() -> ArgumentParser:
         help='Maximum number of steps to take in symbolic execution per basic block.',
     )
     prove_args.add_argument(
+        '--max-iterations',
+        default=None,
+        type=int,
+        help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
+    )
+    prove_args.add_argument(
         '--save-directory',
         dest='save_directory',
         default=None,
