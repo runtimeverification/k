@@ -44,6 +44,9 @@ def kompile(
     output_dir: str | Path | None = None,
     temp_dir: str | Path | None = None,
     type_inference_mode: str | TypeInferenceMode | None = None,
+    warnings: str | Warnings | None = None,
+    warning_to_error: bool = False,
+    no_exc_wrap: bool = False,
     debug: bool = False,
     verbose: bool = False,
     cwd: Path | None = None,
@@ -57,6 +60,9 @@ def kompile(
         output_dir=output_dir,
         temp_dir=temp_dir,
         type_inference_mode=type_inference_mode,
+        warnings=warnings,
+        warning_to_error=warning_to_error,
+        no_exc_wrap=no_exc_wrap,
         debug=debug,
         verbose=verbose,
         cwd=cwd,
@@ -137,6 +143,9 @@ class Kompile(ABC):
         output_dir: str | Path | None = None,
         temp_dir: str | Path | None = None,
         type_inference_mode: str | TypeInferenceMode | None = None,
+        warnings: str | Warnings | None = None,
+        warning_to_error: bool = False,
+        no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
         cwd: Path | None = None,
@@ -163,6 +172,16 @@ class Kompile(ABC):
         if type_inference_mode is not None:
             type_inference_mode = TypeInferenceMode(type_inference_mode)
             args += ['--type-inference-mode', type_inference_mode.value]
+
+        if warnings is not None:
+            warnings = Warnings(warnings)
+            args += ['--warnings', warnings.value]
+
+        if warning_to_error:
+            args += ['-w2e']
+
+        if no_exc_wrap:
+            args += ['--no-exc-wrap']
 
         if debug:
             args += ['--debug']
@@ -351,9 +370,6 @@ class KompileArgs:
     read_only: bool
     coverage: bool
     bison_lists: bool
-    warnings: Warnings | None
-    warning_to_error: bool
-    no_exc_wrap: bool
 
     def __init__(
         self,
@@ -372,14 +388,10 @@ class KompileArgs:
         read_only: bool = False,
         coverage: bool = False,
         bison_lists: bool = False,
-        warnings: str | Warnings | None = None,
-        warning_to_error: bool = False,
-        no_exc_wrap: bool = False,
     ):
         main_file = Path(main_file)
         include_dirs = tuple(sorted(Path(include_dir) for include_dir in include_dirs))
         hook_namespaces = tuple(hook_namespaces)
-        warnings = Warnings(warnings) if warnings is not None else warnings
 
         object.__setattr__(self, 'main_file', main_file)
         object.__setattr__(self, 'main_module', main_module)
@@ -395,9 +407,6 @@ class KompileArgs:
         object.__setattr__(self, 'read_only', read_only)
         object.__setattr__(self, 'coverage', coverage)
         object.__setattr__(self, 'bison_lists', bison_lists)
-        object.__setattr__(self, 'warnings', warnings)
-        object.__setattr__(self, 'warning_to_error', warning_to_error)
-        object.__setattr__(self, 'no_exc_wrap', no_exc_wrap)
 
     def args(self) -> list[str]:
         args = [str(self.main_file)]
@@ -440,15 +449,6 @@ class KompileArgs:
 
         if self.bison_lists:
             args += ['--bison-lists']
-
-        if self.warnings is not None:
-            args += ['--warnings', self.warnings.value]
-
-        if self.warning_to_error:
-            args += ['-w2e']
-
-        if self.no_exc_wrap:
-            args += ['--no-exc-wrap']
 
         return args
 
