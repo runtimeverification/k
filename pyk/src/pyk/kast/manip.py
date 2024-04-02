@@ -255,8 +255,8 @@ def count_vars(term: KInner) -> Counter[str]:
     return counter
 
 
-def free_vars(kast: KInner) -> list[str]:
-    return list(count_vars(kast).keys())
+def free_vars(kast: KInner) -> frozenset[str]:
+    return frozenset(count_vars(kast).keys())
 
 
 def propagate_up_constraints(k: KInner) -> KInner:
@@ -530,9 +530,7 @@ def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
     ensures = andBool(flatten_label('_andBool_', ensures))
     ensures = simplify_bool(ensures)
 
-    constrained_vars = list(keep_vars)
-    constrained_vars = constrained_vars + free_vars(requires)
-    constrained_vars = constrained_vars + free_vars(ensures)
+    constrained_vars = set(keep_vars) | free_vars(requires) | free_vars(ensures)
     body = minimize_term(body, keep_vars=constrained_vars)
 
     return rule.let(body=body, requires=requires, ensures=ensures)

@@ -238,24 +238,24 @@ def test_apr_proof_from_dict_heterogeneous_subproofs(proof_dir: Path) -> None:
 
 
 def test_apr_proof_minimization_and_terminals() -> None:
-    #                                                     25    /-- X >=Int 5 --> 20
-    #      5     10     15     20    /-- X >=Int 0 --> 16 --> 18
-    #  11 --> 12 --> 13 --> 14 --> 15                           \-- X  <Int 5 --> 21
-    #                 T             \                     30     35     40         T
-    #                                \-- X  <Int 0 --> 17 --> 19 --> 22 --> 23
-    #                                                          T
+    #                                               25   /-- X >=Int 5 --> 10
+    #     5    10    15    20   /-- X >=Int 0 --> 6 --> 8
+    #  1 --> 2 --> 3 --> 4 --> 5                         \-- X  <Int 5 --> 11
+    #              T            \                    30    35     40        T
+    #                            \-- X  <Int 0 --> 7 --> 9 --> 12 --> 13
+    #                                              T
     proof = APRProof(
         id='apr_min_proof',
         kcfg=minimization_test_kcfg(),
-        terminal=[13, 19, 21],
-        init=11,
-        target=21,
+        terminal=[3, 9, 11],
+        init=1,
+        target=11,
         logs={},
     )
 
-    assert proof.terminal_ids == {13, 19, 21}
+    assert proof.terminal_ids == {3, 9, 11}
     proof.minimize_kcfg()
-    assert proof.terminal_ids == {21}
+    assert proof.terminal_ids == {11}
 
 
 MODULE_NAME_TEST_DATA: Final = (
