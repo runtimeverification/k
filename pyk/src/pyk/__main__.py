@@ -37,7 +37,8 @@ from .ktool.kprove import KProve
 from .ktool.krun import KRun
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
-from .proof.reachability import APRFailureInfo
+from .proof.reachability import APRFailureInfo, APRProof
+from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
@@ -260,6 +261,10 @@ def exec_prove(options: ProveOptions) -> None:
             failure_info = proof.failure_info
             if type(failure_info) is APRFailureInfo:
                 print('\n'.join(failure_info.print()))
+        if options.show_kcfg and type(proof) is APRProof:
+            node_printer = APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
+            show = APRProofShow(kprove, node_printer=node_printer)
+            print('\n'.join(show.show(proof)))
     sys.exit(len([p.id for p in proofs if not p.passed]))
 
 
@@ -470,6 +475,12 @@ def create_argument_parser() -> ArgumentParser:
         default=None,
         action='store_true',
         help='Print out more information about proof failures.',
+    )
+    prove_args.add_argument(
+        '--show-kcfg',
+        default=None,
+        action='store_true',
+        help='Display the resulting proof KCFG.',
     )
     prove_args.add_argument(
         '--max-depth',

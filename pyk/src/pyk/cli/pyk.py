@@ -129,6 +129,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     failure_info: bool
     max_depth: int | None
     max_iterations: int | None
+    show_kcfg: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -138,6 +139,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             'failure_info': False,
             'max_depth': None,
             'max_iterations': None,
+            'show_kcfg': False,
         }
 
 
