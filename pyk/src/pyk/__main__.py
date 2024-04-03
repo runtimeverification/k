@@ -13,7 +13,7 @@ from graphviz import Digraph
 
 from .cli.args import KCLIArgs
 from .cli.pyk import generate_options
-from .cli.utils import LOG_FORMAT, dir_path, file_path, loglevel
+from .cli.utils import LOG_FORMAT, dir_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .kast.inner import KInner
@@ -30,7 +30,6 @@ from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
-from .ktool import TypeInferenceMode
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
@@ -469,13 +468,7 @@ def create_argument_parser() -> ArgumentParser:
     prove_args = pyk_args_command.add_parser(
         'prove',
         help='Prove an input specification (using RPC based prover).',
-        parents=[k_cli_args.logging_args],
-    )
-    prove_args.add_argument('spec_file', type=file_path, help='File with the specification module.')
-    prove_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
-    prove_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
-    prove_args.add_argument(
-        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args],
     )
     prove_args.add_argument(
         '--failure-info',
@@ -501,55 +494,17 @@ def create_argument_parser() -> ArgumentParser:
         type=int,
         help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
     )
-    prove_args.add_argument(
-        '--save-directory',
-        dest='save_directory',
-        default=None,
-        type=ensure_dir_path,
-        help='Directory to save proof artifacts to for reuse.',
-    )
-    prove_args.add_argument(
-        '--temp-directory',
-        '--temp-dir',
-        '--tmp-dir',
-        dest='temp_directory',
-        default=None,
-        type=ensure_dir_path,
-        help='Directory to save intermediate temporaries to.',
-    )
 
     show_args = pyk_args_command.add_parser(
         'show',
         help='Display the status of a given proof.',
-        parents=[k_cli_args.logging_args],
-    )
-    show_args.add_argument('spec_file', type=file_path, help='File with the specification module.')
-    show_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
-    show_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
-    show_args.add_argument(
-        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args],
     )
     show_args.add_argument(
         '--failure-info',
         default=None,
         action='store_true',
         help='Print out more information about proof failures.',
-    )
-    show_args.add_argument(
-        '--save-directory',
-        dest='save_directory',
-        default=None,
-        type=ensure_dir_path,
-        help='Directory to save proof artifacts to for reuse.',
-    )
-    show_args.add_argument(
-        '--temp-directory',
-        '--temp-dir',
-        '--tmp-dir',
-        dest='temp_directory',
-        default=None,
-        type=ensure_dir_path,
-        help='Directory to save intermediate temporaries to.',
     )
 
     graph_imports_args = pyk_args_command.add_parser(
