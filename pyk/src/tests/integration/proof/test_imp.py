@@ -725,7 +725,6 @@ def leaf_number(proof: APRProof) -> int:
 
 
 class TestImpProof(KCFGExploreTest, KProveTest):
-    DISABLE_BOOSTER = True
     KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
