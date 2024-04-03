@@ -96,7 +96,9 @@ class Token(NamedTuple):
     type: TokenType
     loc: Location = Location()
 
-    def __eq__(self, t: Token) -> bool:
+    def __eq__(self, t: object) -> bool:
+        if not isinstance(t, Token):
+            return NotImplemented
         return self.text == t.text and self.type == t.type
 
     def with_loc(self, loc: Location) -> Token:
