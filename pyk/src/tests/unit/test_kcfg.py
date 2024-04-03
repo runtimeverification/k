@@ -661,7 +661,7 @@ def test_lifting_functions_automatic() -> None:
     assert contains_edge(cfg, 15, 7, 50, ('r1', 'r2', 'r3', 'r4'))
 
 
-def test_minimize() -> None:
+def test_minimize_01() -> None:
     cfg = minimization_test_kcfg()
 
     cfg.minimize()
@@ -699,6 +699,57 @@ def test_minimize() -> None:
     assert contains_edge(cfg, 18, 10, 75, ('r1', 'r2', 'r3', 'r4', 'r5'))
     assert contains_edge(cfg, 19, 11, 75, ('r1', 'r2', 'r3', 'r4', 'r5'))
     assert contains_edge(cfg, 15, 13, 155, ('r1', 'r2', 'r3', 'r4', 'r6', 'r7', 'r8'))
+
+
+def test_minimize_02() -> None:
+    x_ge_0 = mlEqualsTrue(geInt(KVariable('X'), intToken(0)))
+    x_lt_0 = mlEqualsTrue(ltInt(KVariable('X'), intToken(0)))
+
+    d = {
+        'next': 7,
+        'nodes': node_dicts(6, config=x_config()),
+        'edges': edge_dicts(
+            (1, 2, 10, ('r1',)),
+            (3, 5, 20, ('r2',)),
+            (4, 6, 30, ('r3',)),
+        ),
+        'splits': split_dicts(
+            (2, [(3, x_ge_0), (4, x_lt_0)]),
+            csubst=x_subst(),
+        ),
+    }
+    cfg = KCFG.from_dict(d)
+    propagate_split_constraints(cfg)
+    #                             20
+    #    10   /-- X >=Int 0 --> 3 --> 5
+    #  1 --> 2                    30
+    #         \-- X  <Int 0 --> 4 --> 6
+
+    cfg.minimize()
+    #                       30
+    #   /-- X >=Int 0 --> 7 --> 5
+    #  1                    40
+    #   \-- X  <Int 0 --> 8 --> 6
+
+    assert cfg._deleted_nodes == {2, 3, 4}
+
+    node_7 = KCFG.Node(7, x_node(1).cterm.add_constraint(x_ge_0))
+    node_8 = KCFG.Node(8, x_node(1).cterm.add_constraint(x_lt_0))
+    assert cfg.node(7) == node_7
+    assert cfg.node(8) == node_8
+    assert cfg._node_id == 9
+
+    assert cfg.contains_split(
+        KCFG.Split(
+            x_node(1),
+            [
+                (node_7, to_csubst_node(x_node(1), node_7, [x_ge_0])),
+                (node_8, to_csubst_node(x_node(1), node_8, [x_lt_0])),
+            ],
+        )
+    )
+    assert contains_edge(cfg, 7, 5, 30, ('r1', 'r2'))
+    assert contains_edge(cfg, 8, 6, 40, ('r1', 'r3'))
 
 
 def test_split_csubsts() -> None:
