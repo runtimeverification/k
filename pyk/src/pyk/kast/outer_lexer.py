@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import re
 from collections.abc import Iterator
 from enum import Enum, auto
@@ -58,15 +59,45 @@ class TokenType(Enum):
     BUBBLE = auto()
 
 
+class Location:
+    _line: int = 0
+    _col: int = 0
+
+    def __init__(self, line: int = 1, col: int = 0) -> None:
+        self._line = line
+        self._col = col
+
+    def __add__(self, s: str) -> Location:
+        line, col = self._line, self._col
+        for c in s:
+            col += 1
+            if c == '\n':
+                line += 1
+                col = 0
+        return Location(line, col)
+
+    def __iadd__(self, s: str) -> Location:
+        for c in s:
+            self._col += 1
+            if c == '\n':
+                self._line += 1
+                self._col = 0
+        return self
+
+    def __repr__(self) -> str:
+        return f'Location({self._line}, {self._col})'
+
+    def get(self) -> tuple[int, int]:
+        return self._line, self._col
+
+
 class Token(NamedTuple):
     text: str
     type: TokenType
-    line: int = 0
-    column: int = 0
+    loc: Location = Location()
 
-    def with_loc(self, loc: tuple[int, int]) -> Token:
-        line, col = loc
-        return Token(self.text, self.type, line, col)
+    def with_loc(self, loc: Location) -> Token:
+        return Token(self.text, self.type, loc)
 
 
 _EOF_TOKEN: Final = Token('', TokenType.EOF)
@@ -178,8 +209,7 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    _line: int = 1
-    _column: int = 0
+    _loc: Location = Location()
     _iter: Iterator[str]
 
     def __init__(self, x: Iterable[str]) -> None:
@@ -187,14 +217,11 @@ class LocationIterator(Iterator[str]):
 
     def __next__(self) -> str:
         la = next(self._iter)
-        self._column += 1
-        if la == '\n':
-            self._column = 0
-            self._line += 1
+        self._loc += la
         return la
 
-    def loc(self) -> tuple[int, int]:
-        return self._line, self._column
+    def loc(self) -> Location:
+        return copy.copy(self._loc)
 
 
 def outer_lexer(it: Iterable[str]) -> Iterator[Token]:
@@ -500,7 +527,7 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
 
     consumed = []
-    line, col = it.loc()
+    loc = it.loc()
 
     if la not in _ALPHA:
         raise _unexpected_character(la)
@@ -531,15 +558,15 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     text = ''.join(consumed)
     if text in _MODNAME_KEYWORDS:
-        return _KEYWORDS[text].with_loc((line, col)), la
-    return Token(text, TokenType.MODNAME, line, col), la
+        return _KEYWORDS[text].with_loc(loc), la
+    return Token(text, TokenType.MODNAME).with_loc(loc), la
 
 
 _KLABEL_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuration', 'context'}
 
 
 def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
-    loc: tuple[int, int]
+    loc: Location
     consumed: list[str]
     while True:
         while la in _WHITESPACE:
@@ -595,16 +622,6 @@ _BUBBLE_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuratio
 _CONTEXT_KEYWORDS: Final = {'alias'}.union(_BUBBLE_KEYWORDS)
 
 
-def add_loc(loc: tuple[int, int], s: str) -> tuple[int, int]:
-    line, col = loc
-    for c in s:
-        if c == '\n':
-            line += 1
-            col = 0
-        col += 1
-    return (line, col)
-
-
 def _bubble_or_context(la: str, it: LocationIterator, *, context: bool = False) -> tuple[list[Token], str]:
     keywords = _CONTEXT_KEYWORDS if context else _BUBBLE_KEYWORDS
 
@@ -617,7 +634,7 @@ def _bubble_or_context(la: str, it: LocationIterator, *, context: bool = False) 
 
         tokens = label_tokens
         if bubble:
-            bubble_token = Token(bubble, TokenType.BUBBLE).with_loc(bubble_loc)
+            bubble_token = Token(bubble, TokenType.BUBBLE, bubble_loc)
             tokens += [bubble_token]
         tokens += attr_tokens
 
@@ -625,14 +642,12 @@ def _bubble_or_context(la: str, it: LocationIterator, *, context: bool = False) 
     return tokens, la
 
 
-def _raw_bubble(
-    la: str, it: LocationIterator, keywords: Collection[str]
-) -> tuple[str | None, Token, str, tuple[int, int]]:
+def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tuple[str | None, Token, str, Location]:
     bubble: list[str] = []  # text that belongs to the bubble
     special: list[str] = []  # text that belongs to the bubble iff preceded and followed by bubble text
     current: list[str] = []  # text that might belong to the bubble or terminate the bubble if keyword
-    bubble_loc: tuple[int, int] = it.loc()
-    current_loc: tuple[int, int] = it.loc()
+    bubble_loc: Location = it.loc()
+    current_loc: Location = it.loc()
     while True:
         if not la or la in _WHITESPACE:
             if current:
@@ -645,7 +660,7 @@ def _raw_bubble(
                         bubble_loc,
                     )
                 else:  # <special><current><ws>
-                    bubble_loc = add_loc(bubble_loc, '' if bubble else ''.join(special))
+                    bubble_loc += '' if bubble else ''.join(special)
                     bubble += special if bubble else []
                     bubble += current
                     special = []
@@ -677,7 +692,7 @@ def _raw_bubble(
                             bubble_loc,
                         )
                     else:  # <special><current><comment>
-                        bubble_loc = add_loc(bubble_loc, '' if bubble else ''.join(special))
+                        bubble_loc += '' if bubble else ''.join(special)
                         bubble += special if bubble else []
                         bubble += current
                         special = consumed
@@ -704,20 +719,20 @@ RULE_LABEL_PATTERN: Final = re.compile(
 )
 
 
-def _strip_bubble_label(bubble: str, loc: tuple[int, int]) -> tuple[list[Token], str, tuple[int, int]]:
+def _strip_bubble_label(bubble: str, loc: Location) -> tuple[list[Token], str, Location]:
     match = RULE_LABEL_PATTERN.fullmatch(bubble)
     if not match:
         return [], bubble, loc
 
     return (
         [
-            _LBRACK_TOKEN.with_loc(add_loc(loc, bubble[: match.start('lbrack')])),
-            Token(match['label'], TokenType.RULE_LABEL).with_loc(add_loc(loc, bubble[: match.start('label')])),
-            _RBRACK_TOKEN.with_loc(add_loc(loc, bubble[: match.start('rbrack')])),
-            _COLON_TOKEN.with_loc(add_loc(loc, bubble[: match.start('colon')])),
+            _LBRACK_TOKEN.with_loc(loc + bubble[: match.start('lbrack')]),
+            Token(match['label'], TokenType.RULE_LABEL, loc + bubble[: match.start('label')]),
+            _RBRACK_TOKEN.with_loc(loc + bubble[: match.start('rbrack')]),
+            _COLON_TOKEN.with_loc(loc + bubble[: match.start('colon')]),
         ],
         match['rest'],
-        add_loc(loc, bubble[: match.start('rest')]),
+        loc + bubble[: match.start('rest')],
     )
 
 
