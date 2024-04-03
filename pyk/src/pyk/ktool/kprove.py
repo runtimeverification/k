@@ -369,7 +369,6 @@ class KProve(KPrint):
         fallback_on: Iterable[FallbackReason] | None = None,
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
-        max_depth: int | None = None,
     ) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
             return self.prove_claim_rpc(
@@ -392,7 +391,7 @@ class KProve(KPrint):
                 fallback_on=fallback_on,
                 interim_simplification=interim_simplification,
                 no_post_exec_simplify=no_post_exec_simplify,
-                max_depth=max_depth,
+                max_depth=options.max_depth,
                 save_directory=options.save_directory,
                 max_iterations=options.max_iterations,
             )
