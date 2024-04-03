@@ -15,11 +15,13 @@ from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import (
     KAssoc,
+    KClaim,
     KDefinition,
     KNonTerminal,
     KProduction,
     KRegexTerminal,
     KRule,
+    KRuleLike,
     KSyntaxAssociativity,
     KSyntaxSort,
     KTerminal,
@@ -50,7 +52,7 @@ from ..kore.syntax import (
 )
 from ..prelude.k import K_ITEM, K
 from ..utils import FrozenDict, intersperse
-from ._kast_to_kore import _kast_to_kore, krule_to_kore
+from ._kast_to_kore import _kast_to_kore
 from ._utils import munge
 
 if TYPE_CHECKING:
@@ -713,8 +715,60 @@ def _get_prelude() -> Definition:
     return _PRELUDE
 
 
+# ------------
+# Rule to KORE
+# ------------
+
+
 def _rule_axioms(definition: KDefinition, kompiled_kore: KompiledKore) -> list[Axiom]:
-    return [krule_to_kore(definition, kompiled_kore, rule) for rule in definition.rules]
+    assert len(definition.modules) == 1
+    module = definition.modules[0]
+    # TODO None should be dropped once all cases are covered
+    return [
+        res
+        for sent in module
+        if isinstance(sent, KRuleLike) and (res := _rule_axiom(sent, definition, kompiled_kore)) is not None
+    ]
+
+
+def _rule_axiom(rule_like: KRuleLike, definition: KDefinition, kompiled_kore: KompiledKore) -> Axiom | None:
+    def lhs_production(rule_like: KRuleLike) -> KProduction | None:
+        if not isinstance(rule_like.body, KRewrite):
+            return None
+        body = rule_like.body
+        if not isinstance(body.lhs, KApply):
+            return None
+        lhs = body.lhs
+        return definition.symbols.get(lhs.label.name)
+
+    def is_equation(rule_like: KRuleLike) -> bool:
+        heat_cool_eq = True  # Free parameter in the K Frontend, fixed here for simplicity
+        production = lhs_production(rule_like)
+        if production is not None and Atts.FUNCTION in production.att:
+            return True
+        if any(key in rule_like.att for key in [Atts.ANYWHERE, Atts.SIMPLIFICATION]):
+            return True
+        if heat_cool_eq and any(key in rule_like.att for key in [Atts.COOL, Atts.HEAT]):
+            return True
+        return False
+
+    if is_equation(rule_like):
+        return _equation_axiom(rule_like, definition, kompiled_kore)
+
+    return None
+
+
+def _equation_axiom(rule_like: KRuleLike, definition: KDefinition, kompiled_kore: KompiledKore) -> Axiom | None:
+    if Atts.OWISE in rule_like.att:
+        return None
+    if isinstance(rule_like, KClaim) or Atts.SIMPLIFICATION in rule_like.att:
+        return None
+    assert isinstance(rule_like, KRule)
+    return _simple_equation_axiom(rule_like, definition, kompiled_kore)
+
+
+def _simple_equation_axiom(rule: KRule, definition: KDefinition, kompiled_kore: KompiledKore) -> Axiom | None:
+    return None
 
 
 # ----------------------------------
