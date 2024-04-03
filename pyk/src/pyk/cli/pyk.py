@@ -44,6 +44,8 @@ def generate_options(args: dict[str, Any]) -> LoggingOptions:
             return ProveLegacyOptions(args)
         case 'prove':
             return ProveOptions(args)
+        case 'show':
+            return ProveOptions(args)
         case 'kompile':
             return KompileCommandOptions(args)
         case 'run':

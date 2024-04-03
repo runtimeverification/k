@@ -268,6 +268,13 @@ def exec_prove(options: ProveOptions) -> None:
     sys.exit(len([p.id for p in proofs if not p.passed]))
 
 
+def exec_show(options: ProveOptions) -> None:
+    options.max_iterations = 0
+    options.show_kcfg = True
+    options.failure_info = True
+    exec_prove(options)
+
+
 def exec_kompile(options: KompileCommandOptions) -> None:
     main_file = Path(options.main_file)
     check_file_path(main_file)
@@ -502,6 +509,40 @@ def create_argument_parser() -> ArgumentParser:
         help='Directory to save proof artifacts to for reuse.',
     )
     prove_args.add_argument(
+        '--temp-directory',
+        '--temp-dir',
+        '--tmp-dir',
+        dest='temp_directory',
+        default=None,
+        type=ensure_dir_path,
+        help='Directory to save intermediate temporaries to.',
+    )
+
+    show_args = pyk_args_command.add_parser(
+        'show',
+        help='Display the status of a given proof.',
+        parents=[k_cli_args.logging_args],
+    )
+    show_args.add_argument('spec_file', type=file_path, help='File with the specification module.')
+    show_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
+    show_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
+    show_args.add_argument(
+        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+    )
+    show_args.add_argument(
+        '--failure-info',
+        default=None,
+        action='store_true',
+        help='Print out more information about proof failures.',
+    )
+    show_args.add_argument(
+        '--save-directory',
+        dest='save_directory',
+        default=None,
+        type=ensure_dir_path,
+        help='Directory to save proof artifacts to for reuse.',
+    )
+    show_args.add_argument(
         '--temp-directory',
         '--temp-dir',
         '--tmp-dir',
