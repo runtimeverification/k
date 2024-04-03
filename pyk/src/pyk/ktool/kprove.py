@@ -298,8 +298,15 @@ class KProve(KPrint):
 
         if is_functional_claim:
             proof = EqualityProof.from_claim(claim, self.definition, proof_dir=save_directory)
+            if save_directory is not None and EqualityProof.proof_data_exists(proof.id, save_directory):
+                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
+                proof = EqualityProof.read_proof_data(save_directory, proof.id)
+
         else:
             proof = APRProof.from_claim(self.definition, claim, {}, proof_dir=save_directory)
+            if save_directory is not None and APRProof.proof_data_exists(proof.id, save_directory):
+                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
+                proof = APRProof.read_proof_data(save_directory, proof.id)
 
         if not proof.passed and (max_iterations is None or max_iterations > 0):
             with cterm_symbolic(
