@@ -286,6 +286,23 @@ class KProduction(KSentence):
     def let_att(self, att: KAtt) -> KProduction:
         return self.let(att=att)
 
+    def apply(self, klabel: KLabel) -> KProduction:
+        """Instantiate sort parameters with concrete sorts from a `klabel`."""
+        if not self.klabel:
+            raise ValueError(f'Cannot apply label to non-symbol production: {klabel.name}')
+        if self.klabel.name != klabel.name:
+            raise ValueError(f'Expected label {self.klabel.name}, got: {klabel.name}')
+        sorts = dict(zip(self.params, klabel.params, strict=True))
+        return self.let(
+            sort=sorts.get(self.sort, self.sort),
+            items=tuple(
+                item.let(sort=sorts.get(item.sort, item.sort)) if isinstance(item, KNonTerminal) else item
+                for item in self.items
+            ),
+            params=(),
+            klabel=klabel,
+        )
+
     @cached_property
     def as_subsort(self) -> tuple[KSort, KSort] | None:
         """Return a pair `(supersort, subsort)` if `self` is a subsort production, and `None` otherwise."""
