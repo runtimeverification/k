@@ -1080,8 +1080,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         """
 
         def _lift_split(finder: Callable, lifter: Callable) -> bool:
+            result = False
             while True:
-                result = False
                 splits_to_lift = sorted(
                     [
                         node.id
@@ -1097,7 +1097,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 for id in splits_to_lift:
                     lifter(id)
                     result = True
-                if not result or len(splits_to_lift) == 0:
+                if len(splits_to_lift) == 0:
                     break
             return result
 
