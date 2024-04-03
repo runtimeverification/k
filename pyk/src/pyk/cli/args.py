@@ -11,7 +11,7 @@ from .cli import Options
 from .utils import bug_report_arg, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from collections.abc import Iterable
 
     from ..utils import BugReport
 
