@@ -76,14 +76,6 @@ class Location:
                 col = 0
         return Location(line, col)
 
-    def __iadd__(self, s: str) -> Location:
-        for c in s:
-            self._col += 1
-            if c == '\n':
-                self._line += 1
-                self._col = 0
-        return self
-
     def __repr__(self) -> str:
         return f'Location({self._line}, {self._col})'
 
