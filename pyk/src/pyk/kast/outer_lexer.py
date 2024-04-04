@@ -59,7 +59,7 @@ class TokenType(Enum):
     BUBBLE = auto()
 
 
-class Location:
+class Loc:
     _line: int = 0
     _col: int = 0
 
@@ -67,14 +67,14 @@ class Location:
         self._line = line
         self._col = col
 
-    def __add__(self, s: str) -> Location:
+    def __add__(self, s: str) -> Loc:
         line, col = self._line, self._col
         for c in s:
             col += 1
             if c == '\n':
                 line += 1
                 col = 0
-        return Location(line, col)
+        return Loc(line, col)
 
     def __repr__(self) -> str:
         return f'Location({self._line}, {self._col})'
@@ -86,14 +86,14 @@ class Location:
 class Token(NamedTuple):
     text: str
     type: TokenType
-    loc: Location = Location()
+    loc: Loc = Loc()
 
     def __eq__(self, t: object) -> bool:
         if not isinstance(t, Token):
             return NotImplemented
         return self.text == t.text and self.type == t.type
 
-    def with_loc(self, loc: Location) -> Token:
+    def with_loc(self, loc: Loc) -> Token:
         return Token(self.text, self.type, loc)
 
 
@@ -206,7 +206,7 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    _loc: Location = Location()
+    _loc: Loc = Loc()
     _iter: Iterator[str]
 
     def __init__(self, x: Iterable[str]) -> None:
@@ -217,7 +217,7 @@ class LocationIterator(Iterator[str]):
         self._loc += la
         return la
 
-    def loc(self) -> Location:
+    def loc(self) -> Loc:
         return copy.copy(self._loc)
 
 
@@ -563,7 +563,7 @@ _KLABEL_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuratio
 
 
 def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
-    loc: Location
+    loc: Loc
     consumed: list[str]
     while True:
         while la in _WHITESPACE:
@@ -639,12 +639,12 @@ def _bubble_or_context(la: str, it: LocationIterator, *, context: bool = False) 
     return tokens, la
 
 
-def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tuple[str | None, Token, str, Location]:
+def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tuple[str | None, Token, str, Loc]:
     bubble: list[str] = []  # text that belongs to the bubble
     special: list[str] = []  # text that belongs to the bubble iff preceded and followed by bubble text
     current: list[str] = []  # text that might belong to the bubble or terminate the bubble if keyword
-    bubble_loc: Location = it.loc()
-    current_loc: Location = it.loc()
+    bubble_loc: Loc = it.loc()
+    current_loc: Loc = it.loc()
     while True:
         if not la or la in _WHITESPACE:
             if current:
@@ -716,7 +716,7 @@ RULE_LABEL_PATTERN: Final = re.compile(
 )
 
 
-def _strip_bubble_label(bubble: str, loc: Location) -> tuple[list[Token], str, Location]:
+def _strip_bubble_label(bubble: str, loc: Loc) -> tuple[list[Token], str, Loc]:
     match = RULE_LABEL_PATTERN.fullmatch(bubble)
     if not match:
         return [], bubble, loc
