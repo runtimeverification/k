@@ -1,0 +1,10 @@
+  <k>
+    false ~> .K
+  </k>
+#And
+  {
+    true
+  #Equals
+    size ( ListItem ( ?X:Int )
+    ?L:List ) >=Int -1
+  }
