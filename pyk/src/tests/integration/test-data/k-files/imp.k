@@ -42,12 +42,16 @@ module IMP
   syntax KResult ::= Int | Bool
   syntax KItem   ::= Pgm
 
+  syntax KItem ::= Error(Id, Map)
+  syntax KItem ::= #lookup(Id, Map) [function, total]
+
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
                 </T>
 
-  rule <k> X:Id => STATE[X] ... </k> <state> STATE </state> requires X in_keys(STATE)
+  rule #lookup(X, M) => M[X] requires X in_keys(M)
+  rule #lookup(X, M) => Error(X, M) [owise]
 
   rule <k> I1 * I2 => I1 *Int I2   ... </k>
   rule <k> I1 / I2 => I1 /Int I2   ... </k> requires I2 =/=Int 0
@@ -61,20 +65,22 @@ module IMP
   rule <k> true && B  => B           ... </k>
   rule <k> false && _ => false       ... </k>
 
-  rule <k> {}  => .K ... </k>
-  rule <k> {S} => S  ... </k>
+  rule [var]: <k> X:Id => #lookup(X, STATE) ... </k> <state> STATE </state>
 
-  rule <k> X = I:Int; => .K ... </k> <state> STATE => STATE [ X <- I ] </state>
+  rule [block]: <k> {S} => S  ... </k>
+  rule [block-empty]: <k> {}  => .K ... </k>
 
-  rule <k> S1:Stmt S2:Stmt => S1 ~> S2 ... </k>
+  rule [assign]: <k> X = I:Int; => .K ... </k> <state> STATE => STATE [ X <- I ] </state>
 
-  rule <k> if (true)  S else _ => S ... </k>
-  rule <k> if (false) _ else S => S ... </k>
+  rule [sequence]: <k> S1:Stmt S2:Stmt => S1 ~> S2 ... </k>
+
+  rule [if-true]: <k> if (true)  S else _ => S ... </k>
+  rule [if-false]: <k> if (false) _ else S => S ... </k>
 
   rule [while]: <k> while (B) S => if (B) {S while (B) S} else {} ... </k>
 
-  rule <k> int (X , Xs => Xs) ; _ ... </k> <state> STATE => STATE [ X <- 0 ] </state>
+  rule [decl]: <k> int (X , Xs => Xs) ; _ ... </k> <state> STATE => STATE [ X <- 0 ] </state>
     requires notBool (X in keys(STATE))
 
-  rule <k> int .Ids ; S => S ... </k>
+  rule [decl-empty]: <k> int .Ids ; S => S ... </k>
 endmodule
