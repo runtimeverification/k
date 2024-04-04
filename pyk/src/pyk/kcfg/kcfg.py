@@ -148,7 +148,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def discard_attr(self, attr: NodeAttr) -> KCFG.Node:
             return KCFG.Node(self.id, self.cterm, self.attrs.difference([attr]))
 
-        def let(self, cterm: CTerm | None = None, attrs: Iterable[KCFGNodeAttr] | None = None) -> KCFG.Node:
+        def let(self, cterm: CTerm | None = None, attrs: Iterable[NodeAttr] | None = None) -> KCFG.Node:
             new_cterm = cterm if cterm is not None else self.cterm
             new_attrs = attrs if attrs is not None else self.attrs
             return KCFG.Node(self.id, new_cterm, new_attrs)
@@ -401,6 +401,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     _kcfg_store: KCFGStore | None
 
+    _attribute_checkers: dict[str, Callable[[KCFG.Node], bool]]
+
     def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True) -> None:
         self._node_id = 1
         if optimize_memory:
@@ -417,8 +419,17 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._ndbranches = {}
         self._aliases = {}
         self._lock = RLock()
+        self._attribute_checkers = {}
+        self._attribute_checkers[KCFGNodeAttr.STUCK.value] = self.check_stuck
+        self._attribute_checkers[KCFGNodeAttr.VACUOUS.value] = self.check_vacuous
         if cfg_dir is not None:
             self._kcfg_store = KCFGStore(cfg_dir)
+
+    def check_stuck(self, node: kcfg.node):
+        return self.is_stuck(node.id)
+
+    def check_vacuous(self, node: kcfg.node):
+        return self.is_vacuous(node.id)
 
     def __contains__(self, item: object) -> bool:
         if type(item) is KCFG.Node:
@@ -657,15 +668,20 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def add_node(self, node: KCFG.Node) -> None:
         if node.id in self._nodes:
             raise ValueError(f'Node with id already exists: {node.id}')
-        self._nodes[node.id] = node
-        self._created_nodes.add(node.id)
+        self.replace_node(node)
 
     def create_node(self, cterm: CTerm) -> KCFG.Node:
         node = KCFG.Node(self._node_id, cterm)
         self._node_id += 1
-        self._nodes[node.id] = node
-        self._created_nodes.add(node.id)
+        self.replace_node(node)
         return node
+    
+    def get_node_attrs(self, node: KCFG.Node) -> Iterable[NodeAttr]:
+        attrs = []
+        for attr, checker in self._attribute_checkers.items():
+            if checker(node):
+                attrs.append(attr)
+        return attrs
 
     def remove_node(self, node_id: NodeIdLike) -> None:
         node_id = self._resolve(node_id)
@@ -723,13 +739,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self.replace_node(new_node)
 
     def let_node(
-        self, node_id: NodeIdLike, cterm: CTerm | None = None, attrs: Iterable[KCFGNodeAttr] | None = None
+        self, node_id: NodeIdLike, cterm: CTerm | None = None, attrs: Iterable[NodeAttr] | None = None
     ) -> None:
         node = self.node(node_id)
         new_node = node.let(cterm=cterm, attrs=attrs)
         self.replace_node(new_node)
 
     def replace_node(self, node: KCFG.Node) -> None:
+        node = node.let(attrs=self.get_node_attrs(node))
         self._nodes[node.id] = node
         self._created_nodes.add(node.id)
         self._update_refs(node.id)

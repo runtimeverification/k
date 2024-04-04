@@ -1057,8 +1057,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof_dir: Path,
         fail_fast: bool,
     ) -> None:
-        if fail_fast:
-            pytest.skip()
+#          if fail_fast:
+#              pytest.skip()
 
         claim = single(
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
@@ -1069,6 +1069,12 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         kcfg_explore.simplify(proof.kcfg, {})
         prover = APRProver(proof, kcfg_explore=kcfg_explore)
         prover.advance_proof()
+
+        failure_info = proof.failure_info
+        assert isinstance(failure_info, APRFailureInfo)
+
+        actual_pending = len(failure_info.pending_nodes)
+        actual_failing = len(failure_info.failing_nodes)
 
         # reload proof from disk
         proof = APRProof.read_proof_data(proof_dir, proof_id)
@@ -1172,6 +1178,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert len(proof.pending) == 1
         assert len(proof.terminal_ids) == 2
         assert len(proof.failing) == 1
+
 
     def test_anti_unify_forget_values(
         self,

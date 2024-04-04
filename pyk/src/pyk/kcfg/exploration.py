@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from pyk.kcfg.kcfg import KCFG, NodeAttr
 
 if TYPE_CHECKING:
+    from pyk.kcfg.semantics import KCFGSemantics
     from collections.abc import Iterable, Mapping
     from typing import Any
 
@@ -16,10 +17,15 @@ class KCFGExplorationNodeAttr(NodeAttr):
 
 
 class KCFGExploration:
+    kcfg_semantics: KCFGSemantics
     kcfg: KCFG
+
+    def check_terminal(self, node: KCFG.Node) -> bool:
+        return self.kcfg_semantics.is_terminal(node.cterm)
 
     def __init__(self, kcfg: KCFG, terminal: Iterable[NodeIdLike] | None = None) -> None:
         self.kcfg = kcfg
+        self.kcfg._attribute_checkers[KCFGExplorationNodeAttr.TERMINAL.value] = self.check_terminal
         if terminal:
             for node_id in terminal:
                 self.add_terminal(node_id)
