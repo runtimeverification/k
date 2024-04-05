@@ -401,7 +401,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
     _kcfg_store: KCFGStore | None
 
-    _attribute_checkers: dict[str, Callable[[KCFG.Node], bool]]
+    _attribute_checkers: dict[NodeAttr, Callable[[KCFG.Node], bool]]
 
     def __init__(self, cfg_dir: Path | None = None, optimize_memory: bool = True) -> None:
         self._node_id = 1
@@ -420,15 +420,19 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         self._aliases = {}
         self._lock = RLock()
         self._attribute_checkers = {}
-        self._attribute_checkers[KCFGNodeAttr.STUCK.value] = self.check_stuck
-        self._attribute_checkers[KCFGNodeAttr.VACUOUS.value] = self.check_vacuous
+        self._attribute_checkers[KCFGNodeAttr.STUCK] = self.check_stuck
+        self._attribute_checkers[KCFGNodeAttr.VACUOUS] = self.check_vacuous
         if cfg_dir is not None:
             self._kcfg_store = KCFGStore(cfg_dir)
 
-    def check_stuck(self, node: kcfg.node):
+    def check_stuck(self, node: KCFG.Node) -> bool:
+        if self.get_node(node.id) is None:
+            return False
         return self.is_stuck(node.id)
 
-    def check_vacuous(self, node: kcfg.node):
+    def check_vacuous(self, node: KCFG.Node) -> bool:
+        if self.get_node(node.id) is None:
+            return False
         return self.is_vacuous(node.id)
 
     def __contains__(self, item: object) -> bool:
