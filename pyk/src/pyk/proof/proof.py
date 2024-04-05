@@ -268,6 +268,9 @@ class Proof(ABC):
         subproofs_summaries = [subproof.summary for subproof in self.subproofs]
         return CompositeSummary([BaseSummary(self.id, self.status), *subproofs_summaries])
 
+    @abstractmethod
+    def get_steps(self) -> Iterable[ProofStep]: ...
+
 
 class ProofSummary(ABC):
     id: str
@@ -296,6 +299,9 @@ class CompositeSummary(ProofSummary):
         return [line for lines in (summary.lines for summary in self.summaries) for line in lines]
 
 
+class ProofStep: ...
+
+
 class StepResult: ...
 
 
@@ -313,21 +319,23 @@ class Prover:
     def failure_info(self) -> FailureInfo: ...
 
     @abstractmethod
-    def step_proof(self) -> Iterable[StepResult]: ...
+    def step_proof(self, step: ProofStep) -> Iterable[StepResult]: ...
 
     def advance_proof(self, max_iterations: int | None = None, fail_fast: bool = False) -> None:
         iterations = 0
-        while self.proof.can_progress:
-            if fail_fast and self.proof.failed:
-                _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
-                self.proof.failure_info = self.failure_info()
-                return
-            if max_iterations is not None and max_iterations <= iterations:
-                return
-            iterations += 1
-            results = self.step_proof()
-            for result in results:
-                self.proof.commit(result)
-            self.proof.write_proof_data()
+        while True:
+            steps = self.proof.get_steps()
+            for step in steps:
+                if fail_fast and self.proof.failed:
+                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
+                    self.proof.failure_info = self.failure_info()
+                    return
+                if max_iterations is not None and max_iterations <= iterations:
+                    return
+                iterations += 1
+                results = self.step_proof(step)
+                for result in results:
+                    self.proof.commit(result)
+                self.proof.write_proof_data()
         if self.proof.failed:
             self.proof.failure_info = self.failure_info()

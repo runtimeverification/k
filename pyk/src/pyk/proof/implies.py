@@ -12,7 +12,7 @@ from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, FALSE, TRUE
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
 from ..utils import ensure_dir_path
-from .proof import FailureInfo, Proof, ProofStatus, ProofSummary, Prover, StepResult
+from .proof import FailureInfo, Proof, ProofStatus, ProofStep, ProofSummary, Prover, StepResult
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -24,6 +24,11 @@ if TYPE_CHECKING:
     from ..ktool.kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+@dataclass
+class ImpliesProofStep(ProofStep):
+    proof: ImpliesProof
 
 
 class ImpliesProof(Proof):
@@ -54,6 +59,9 @@ class ImpliesProof(Proof):
         self.simplified_antecedent = simplified_antecedent
         self.simplified_consequent = simplified_consequent
         self.csubst = csubst
+
+    def get_steps(self) -> Iterable[ProofStep]:
+        return [ImpliesProofStep(self)]
 
     def commit(self, result: StepResult) -> None:
         proof_type = type(self).__name__
@@ -404,29 +412,31 @@ class ImpliesProver(Prover):
         super().__init__(kcfg_explore)
         self.proof = proof
 
-    def step_proof(self) -> Iterable[StepResult]:
-        proof_type = type(self.proof).__name__
-        _LOGGER.info(f'Attempting {proof_type} {self.proof.id}')
+    def step_proof(self, step: ProofStep) -> Iterable[StepResult]:
+        assert isinstance(step, ImpliesProofStep)
 
-        if self.proof.status is not ProofStatus.PENDING:
-            _LOGGER.info(f'{proof_type} finished {self.proof.id}: {self.proof.status}')
+        proof_type = type(step.proof).__name__
+        _LOGGER.info(f'Attempting {proof_type} {step.proof.id}')
+
+        if step.proof.status is not ProofStatus.PENDING:
+            _LOGGER.info(f'{proof_type} finished {step.proof.id}: {step.proof.status}')
             return []
 
         # to prove the equality, we check the implication of the form `constraints #Implies LHS #Equals RHS`, i.e.
         # "LHS equals RHS under these constraints"
-        simplified_antecedent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.antecedent)
-        simplified_consequent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(self.proof.consequent)
+        simplified_antecedent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(step.proof.antecedent)
+        simplified_consequent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(step.proof.consequent)
         _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.pretty_print(simplified_antecedent)}')
         _LOGGER.info(f'Simplified consequent: {self.kcfg_explore.pretty_print(simplified_consequent)}')
 
         csubst: CSubst | None = None
 
         if is_bottom(simplified_antecedent):
-            _LOGGER.warning(f'Antecedent of implication (proof constraints) simplifies to #Bottom {self.proof.id}')
+            _LOGGER.warning(f'Antecedent of implication (proof constraints) simplifies to #Bottom {step.proof.id}')
             csubst = CSubst(Subst({}), ())
 
         elif is_top(simplified_consequent):
-            _LOGGER.warning(f'Consequent of implication (proof equality) simplifies to #Top {self.proof.id}')
+            _LOGGER.warning(f'Consequent of implication (proof equality) simplifies to #Top {step.proof.id}')
             csubst = CSubst(Subst({}), ())
 
         else:
@@ -435,13 +445,13 @@ class ImpliesProver(Prover):
             _result = self.kcfg_explore.cterm_symbolic.implies(
                 antecedent=CTerm(config=dummy_config, constraints=[simplified_antecedent]),
                 consequent=CTerm(config=dummy_config, constraints=[simplified_consequent]),
-                bind_universally=self.proof.bind_universally,
+                bind_universally=step.proof.bind_universally,
             )
             result = _result.csubst
             if result is not None:
                 csubst = result
 
-        _LOGGER.info(f'{proof_type} finished {self.proof.id}: {self.proof.status}')
+        _LOGGER.info(f'{proof_type} finished {step.proof.id}: {step.proof.status}')
         return [
             ImpliesProofResult(
                 csubst=csubst, simplified_antecedent=simplified_antecedent, simplified_consequent=simplified_consequent

@@ -19,7 +19,7 @@ from ..konvert import kflatmodule_to_kore
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
-from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus, StepResult
+from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus, ProofStep, StepResult
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -57,6 +57,12 @@ class APRProofTerminalResult(APRProofResult): ...
 
 @dataclass
 class APRProofBoundedResult(APRProofResult): ...
+
+
+@dataclass
+class APRProofStep(ProofStep):
+    proof: APRProof
+    node_id: int
 
 
 class APRProof(Proof, KCFGExploration):
@@ -131,6 +137,9 @@ class APRProof(Proof, KCFGExploration):
                 subproof = self._subproofs[proof_id]
                 assert type(subproof) is RefutationProof
                 self.node_refutations[node_id] = subproof
+
+    def get_steps(self) -> Iterable[APRProofStep]:
+        return [APRProofStep(self, node.id) for node in self.pending]
 
     def commit(self, result: StepResult) -> None:
         if isinstance(result, APRProofExtendResult):
@@ -715,37 +724,37 @@ class APRProver(Prover):
             _LOGGER.info(f'Subsumed into target node {self.proof.id}: {shorten_hashes((node.id, self.proof.target))}')
         return csubst
 
-    def step_proof(self) -> Iterable[StepResult]:
-        if not self.proof.pending:
-            return []
-        curr_node = self.proof.pending[0]
+    def step_proof(self, step: ProofStep) -> Iterable[StepResult]:
+        assert isinstance(step, APRProofStep)
 
-        if self.proof.bmc_depth is not None and curr_node.id not in self._checked_for_bounded:
-            _LOGGER.info(f'Checking bmc depth for node {self.proof.id}: {curr_node.id}')
+        curr_node = step.proof.kcfg.node(step.node_id)
+
+        if step.proof.bmc_depth is not None and curr_node.id not in self._checked_for_bounded:
+            _LOGGER.info(f'Checking bmc depth for node {step.proof.id}: {curr_node.id}')
             self._checked_for_bounded.add(curr_node.id)
 
             prior_loops = []
-            for succ in reversed(self.proof.shortest_path_to(curr_node.id)):
+            for succ in reversed(step.proof.shortest_path_to(curr_node.id)):
                 if self.kcfg_explore.kcfg_semantics.same_loop(succ.source.cterm, curr_node.cterm):
-                    if succ.source.id in self.proof.prior_loops_cache:
-                        if self.proof.kcfg.zero_depth_between(succ.source.id, curr_node.id):
-                            prior_loops = self.proof.prior_loops_cache[succ.source.id]
+                    if succ.source.id in step.proof.prior_loops_cache:
+                        if step.proof.kcfg.zero_depth_between(succ.source.id, curr_node.id):
+                            prior_loops = step.proof.prior_loops_cache[succ.source.id]
                         else:
-                            prior_loops = self.proof.prior_loops_cache[succ.source.id] + [succ.source.id]
+                            prior_loops = step.proof.prior_loops_cache[succ.source.id] + [succ.source.id]
                         break
                     else:
-                        self.proof.prior_loops_cache[succ.source.id] = []
+                        step.proof.prior_loops_cache[succ.source.id] = []
 
-            self.proof.prior_loops_cache[curr_node.id] = prior_loops
+            step.proof.prior_loops_cache[curr_node.id] = prior_loops
 
-            _LOGGER.info(f'Prior loop heads for node {self.proof.id}: {(curr_node.id, prior_loops)}')
-            if len(prior_loops) > self.proof.bmc_depth:
-                _LOGGER.warning(f'Bounded node {self.proof.id}: {curr_node.id} at bmc depth {self.proof.bmc_depth}')
+            _LOGGER.info(f'Prior loop heads for node {step.proof.id}: {(curr_node.id, prior_loops)}')
+            if len(prior_loops) > step.proof.bmc_depth:
+                _LOGGER.warning(f'Bounded node {step.proof.id}: {curr_node.id} at bmc depth {step.proof.bmc_depth}')
                 return [APRProofBoundedResult(curr_node.id)]
 
         # Terminal checks for current node and target node
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
-        target_is_terminal = self.proof.is_terminal(self.proof.target)
+        target_is_terminal = step.proof.is_terminal(step.proof.target)
 
         terminal_result = [APRProofTerminalResult(node_id=curr_node.id)] if is_terminal else []
 
@@ -763,7 +772,7 @@ class APRProver(Prover):
 
         module_name = self.circularities_module_name if self.nonzero_depth(curr_node) else self.dependencies_module_name
 
-        self.kcfg_explore.check_extendable(self.proof, curr_node)
+        self.kcfg_explore.check_extendable(step.proof, curr_node)
         extend_result = self.kcfg_explore.extend_cterm(
             curr_node.cterm,
             execute_depth=self.execute_depth,
