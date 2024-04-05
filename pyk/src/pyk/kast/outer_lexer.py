@@ -59,34 +59,29 @@ class TokenType(Enum):
     BUBBLE = auto()
 
 
-class Loc:
-    _line: int = 0
-    _col: int = 0
+class Loc(NamedTuple):
+    line: int
+    col: int
 
-    def __init__(self, line: int = 1, col: int = 0) -> None:
-        self._line = line
-        self._col = col
-
-    def __add__(self, s: str) -> Loc:
-        line, col = self._line, self._col
-        for c in s:
-            col += 1
-            if c == '\n':
-                line += 1
-                col = 0
-        return Loc(line, col)
-
-    def __repr__(self) -> str:
-        return f'Location({self._line}, {self._col})'
+    def __add__(self, other: object) -> Loc:
+        if isinstance(other, str):
+            line, col = self.line, self.col
+            for c in other:
+                col += 1
+                if c == '\n':
+                    line += 1
+                    col = 0
+            return Loc(line, col)
+        return NotImplemented
 
     def get(self) -> tuple[int, int]:
-        return self._line, self._col
+        return self.line, self.col
 
 
 class Token(NamedTuple):
     text: str
     type: TokenType
-    loc: Loc = Loc()
+    loc: Loc = Loc(1, 0)
 
     def __eq__(self, t: object) -> bool:
         if not isinstance(t, Token):
@@ -206,7 +201,7 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    _loc: Loc = Loc()
+    _loc: Loc = Loc(1, 0)
     _iter: Iterator[str]
 
     def __init__(self, x: Iterable[str]) -> None:
