@@ -74,10 +74,13 @@ class Loc(NamedTuple):
         return NotImplemented
 
 
+_INIT_LOC: Final = Loc(1, 0)
+
+
 class Token(NamedTuple):
     text: str
     type: TokenType
-    loc: Loc = Loc(1, 0)
+    loc: Loc
 
     def __eq__(self, t: object) -> bool:
         if not isinstance(t, Token):
@@ -91,51 +94,43 @@ class Token(NamedTuple):
         return Token(text=text, type=type, loc=loc)
 
 
-_EOF_TOKEN: Final = Token('', TokenType.EOF)
-_COLON_TOKEN: Final = Token(':', TokenType.COLON)
-_DCOLONEQ_TOKEN: Final = Token('::=', TokenType.DCOLONEQ)
-_COMMA_TOKEN: Final = Token(',', TokenType.COMMA)
-_LPAREN_TOKEN: Final = Token('(', TokenType.LPAREN)
-_RPAREN_TOKEN: Final = Token(')', TokenType.RPAREN)
-_LBRACK_TOKEN: Final = Token('[', TokenType.LBRACK)
-_RBRACK_TOKEN: Final = Token(']', TokenType.RBRACK)
-_GT_TOKEN: Final = Token('>', TokenType.GT)
+_EOF_TOKEN: Final = Token('', TokenType.EOF, _INIT_LOC)
 
 _SIMPLE_CHARS: Final = {
-    ',': _COMMA_TOKEN,
-    '(': _LPAREN_TOKEN,
-    ')': _RPAREN_TOKEN,
-    '[': _LBRACK_TOKEN,
-    ']': _RBRACK_TOKEN,
-    '>': _GT_TOKEN,
-    '{': Token('{', TokenType.LBRACE),
-    '}': Token('}', TokenType.RBRACE),
-    '|': Token('|', TokenType.VBAR),
-    '=': Token('=', TokenType.EQ),
-    '+': Token('+', TokenType.PLUS),
-    '*': Token('*', TokenType.TIMES),
-    '?': Token('?', TokenType.QUESTION),
-    '~': Token('~', TokenType.TILDE),
+    ',': TokenType.COMMA,
+    '(': TokenType.LPAREN,
+    ')': TokenType.RPAREN,
+    '[': TokenType.LBRACK,
+    ']': TokenType.RBRACK,
+    '>': TokenType.GT,
+    '{': TokenType.LBRACE,
+    '}': TokenType.RBRACE,
+    '|': TokenType.VBAR,
+    '=': TokenType.EQ,
+    '+': TokenType.PLUS,
+    '*': TokenType.TIMES,
+    '?': TokenType.QUESTION,
+    '~': TokenType.TILDE,
 }
 
 _KEYWORDS: Final = {
-    'alias': Token('alias', TokenType.KW_ALIAS),
-    'claim': Token('claim', TokenType.KW_CLAIM),
-    'configuration': Token('configuration', TokenType.KW_CONFIG),
-    'context': Token('context', TokenType.KW_CONTEXT),
-    'endmodule': Token('endmodule', TokenType.KW_ENDMODULE),
-    'imports': Token('imports', TokenType.KW_IMPORTS),
-    'left': Token('left', TokenType.KW_LEFT),
-    'lexical': Token('lexical', TokenType.KW_LEXICAL),
-    'module': Token('module', TokenType.KW_MODULE),
-    'non-assoc': Token('non-assoc', TokenType.KW_NONASSOC),
-    'priority': Token('priority', TokenType.KW_PRIORITY),
-    'private': Token('private', TokenType.KW_PRIVATE),
-    'public': Token('public', TokenType.KW_PUBLIC),
-    'requires': Token('requires', TokenType.KW_REQUIRES),
-    'right': Token('right', TokenType.KW_RIGHT),
-    'rule': Token('rule', TokenType.KW_RULE),
-    'syntax': Token('syntax', TokenType.KW_SYNTAX),
+    'alias': TokenType.KW_ALIAS,
+    'claim': TokenType.KW_CLAIM,
+    'configuration': TokenType.KW_CONFIG,
+    'context': TokenType.KW_CONTEXT,
+    'endmodule': TokenType.KW_ENDMODULE,
+    'imports': TokenType.KW_IMPORTS,
+    'left': TokenType.KW_LEFT,
+    'lexical': TokenType.KW_LEXICAL,
+    'module': TokenType.KW_MODULE,
+    'non-assoc': TokenType.KW_NONASSOC,
+    'priority': TokenType.KW_PRIORITY,
+    'private': TokenType.KW_PRIVATE,
+    'public': TokenType.KW_PUBLIC,
+    'requires': TokenType.KW_REQUIRES,
+    'right': TokenType.KW_RIGHT,
+    'rule': TokenType.KW_RULE,
+    'syntax': TokenType.KW_SYNTAX,
 }
 
 _WHITESPACE: Final = {' ', '\t', '\n', '\r'}
@@ -271,7 +266,7 @@ def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
 
     if not la:
-        return _EOF_TOKEN, la
+        return Token('', TokenType.EOF, it.loc), la
 
     elif la in _SIMPLE_CHARS:
         token_func = _simple_char
@@ -298,8 +293,8 @@ def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
         raise _unexpected_character(la)
 
     loc = it.loc
-    token, la = token_func(la, it)
-    return token.let(loc=loc), la
+    text, token_type, la = token_func(la, it)
+    return Token(text, token_type, loc), la
 
 
 def _skip_ws_and_comments(la: str, it: Iterator[str]) -> str:
@@ -317,15 +312,16 @@ def _skip_ws_and_comments(la: str, it: Iterator[str]) -> str:
     return la
 
 
-def _simple_char(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _simple_char(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     # assert la in _SIMPLE_CHARS
 
-    token = _SIMPLE_CHARS[la]
+    text = la
+    token_type = _SIMPLE_CHARS[la]
     la = next(it, '')
-    return token, la
+    return text, token_type, la
 
 
-def _nat(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _nat(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     # assert la in _DIGIT
 
     consumed = []
@@ -333,10 +329,10 @@ def _nat(la: str, it: Iterator[str]) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
     text = ''.join(consumed)
-    return Token(text, TokenType.NAT), la
+    return text, TokenType.NAT, la
 
 
-def _id_or_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _id_or_keyword(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     # assert la in _ALPHA
 
     if la in _LOWER:
@@ -350,11 +346,11 @@ def _id_or_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
         la = next(it, '')
     text = ''.join(consumed)
     if text in _DEFAULT_KEYWORDS:
-        return _KEYWORDS[text], la
-    return Token(text, token_type), la
+        return text, _KEYWORDS[text], la
+    return text, token_type, la
 
 
-def _hash_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _hash_id(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     # assert la == '#'
 
     consumed = [la]
@@ -371,45 +367,45 @@ def _hash_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
     text = ''.join(consumed)
-    return Token(text, token_type), la
+    return text, token_type, la
 
 
-def _colon_or_dcoloneq(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _colon_or_dcoloneq(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     # assert la == ':'
 
     la = next(it, '')
     if la != ':':
-        return _COLON_TOKEN, la
+        return ':', TokenType.COLON, la
     la = next(it, '')
     if la != '=':
         raise _unexpected_character(la)  # Could return [":", ":"], but that never parses
     la = next(it, '')
-    return _DCOLONEQ_TOKEN, la
+    return '::=', TokenType.DCOLONEQ, la
 
 
-def _string(la: str, it: Iterator) -> tuple[Token, str]:
+def _string(la: str, it: Iterator) -> tuple[str, TokenType, str]:
     # assert la == '"'
     consumed: list[str] = []
     la = _consume_string(consumed, la, it)
-    return Token(''.join(consumed), TokenType.STRING), la
+    return ''.join(consumed), TokenType.STRING, la
 
 
-def _regex_or_lower_id_or_keyword(la: str, it: Iterator) -> tuple[Token, str]:
+def _regex_or_lower_id_or_keyword(la: str, it: Iterator) -> tuple[str, TokenType, str]:
     # assert la == 'r'
     consumed = [la]
     la = next(it, '')
 
     if la == '"':
         la = _consume_string(consumed, la, it)
-        return Token(''.join(consumed), TokenType.REGEX), la
+        return ''.join(consumed), TokenType.REGEX, la
 
     while la in _ALNUM:
         consumed.append(la)
         la = next(it, '')
     text = ''.join(consumed)
     if text in _DEFAULT_KEYWORDS:
-        return _KEYWORDS[text], la
-    return Token(text, TokenType.ID_LOWER), la
+        return text, _KEYWORDS[text], la
+    return text, TokenType.ID_LOWER, la
 
 
 def _consume_string(consumed: list[str], la: str, it: Iterator[str]) -> str:
@@ -448,7 +444,7 @@ def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
 
     if not la:
-        return _EOF_TOKEN, la
+        return Token('', TokenType.EOF, it.loc), la
 
     elif la == '{':
         token_func = _simple_char
@@ -466,11 +462,11 @@ def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
         raise _unexpected_character(la)
 
     loc = it.loc
-    token, la = token_func(la, it)
-    return token.let(loc=loc), la
+    text, token_type, la = token_func(la, it)
+    return Token(text, token_type, loc), la
 
 
-def _syntax_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _syntax_keyword(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     if la not in _LOWER:
         raise _unexpected_character(la)
 
@@ -483,10 +479,10 @@ def _syntax_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
     if text not in _SYNTAX_KEYWORDS:
         raise ValueError(f'Unexpected token: {text}')
 
-    return _KEYWORDS[text], la
+    return text, _KEYWORDS[text], la
 
 
-def _upper_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _upper_id(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     if la not in _UPPER:
         raise _unexpected_character(la)
 
@@ -495,10 +491,10 @@ def _upper_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
     text = ''.join(consumed)
-    return Token(text, TokenType.ID_UPPER), la
+    return text, TokenType.ID_UPPER, la
 
 
-def _hash_upper_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _hash_upper_id(la: str, it: Iterator[str]) -> tuple[str, TokenType, str]:
     # assert la == '#'
 
     consumed = [la]
@@ -511,7 +507,7 @@ def _hash_upper_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
     text = ''.join(consumed)
-    return Token(text, TokenType.ID_UPPER), la
+    return text, TokenType.ID_UPPER, la
 
 
 _MODNAME_KEYWORDS: Final = {'private', 'public'}
@@ -554,7 +550,7 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     text = ''.join(consumed)
     if text in _MODNAME_KEYWORDS:
-        return _KEYWORDS[text].let(loc=loc), la
+        return Token(text, _KEYWORDS[text], loc), la
     return Token(text, TokenType.MODNAME, loc), la
 
 
@@ -569,7 +565,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
             la = next(it, '')
 
         if not la:
-            return _EOF_TOKEN, la
+            return Token('', TokenType.EOF, it.loc), la
 
         if la == '/':
             loc = it.loc
@@ -592,7 +588,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
         if not la or la in _WHITESPACE:
-            return _GT_TOKEN.let(loc=loc), la
+            return Token('>', TokenType.GT, loc), la
 
     while la and la not in _WHITESPACE:
         consumed.append(la)
@@ -600,10 +596,10 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     text = ''.join(consumed)
     if text in _KLABEL_KEYWORDS:
-        token = _KEYWORDS[text]
+        token_type = _KEYWORDS[text]
     else:
-        token = Token(text, TokenType.KLABEL)
-    return token.let(loc=loc), la
+        token_type = TokenType.KLABEL
+    return Token(text, token_type, loc), la
 
 
 _SIMPLE_STATES: Final = {
@@ -651,7 +647,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                 if current_str in keywords:  # <special><keyword><ws>
                     return (
                         ''.join(bubble) if bubble else None,
-                        _KEYWORDS[current_str].let(loc=current_loc),
+                        Token(current_str, _KEYWORDS[current_str], current_loc),
                         la,
                         bubble_loc,
                     )
@@ -672,7 +668,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                 current_loc = it.loc
 
             if not la:
-                return ''.join(bubble) if bubble else None, _EOF_TOKEN, la, bubble_loc
+                return ''.join(bubble) if bubble else None, Token('', TokenType.EOF, it.loc), la, bubble_loc
 
         elif la == '/':
             is_comment, consumed, la = _maybe_comment(la, it)
@@ -683,7 +679,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                         # Differs from K Frontend behavior, see: https://github.com/runtimeverification/k/issues/3501
                         return (
                             ''.join(bubble) if bubble else None,
-                            _KEYWORDS[current_str].let(loc=current_loc),
+                            Token(current_str, _KEYWORDS[current_str], current_loc),
                             la,
                             bubble_loc,
                         )
@@ -722,10 +718,10 @@ def _strip_bubble_label(bubble: str, loc: Loc) -> tuple[list[Token], str, Loc]:
 
     return (
         [
-            _LBRACK_TOKEN.let(loc=loc + bubble[: match.start('lbrack')]),
+            Token('[', TokenType.LBRACK, loc + bubble[: match.start('lbrack')]),
             Token(match['label'], TokenType.RULE_LABEL, loc + bubble[: match.start('label')]),
-            _RBRACK_TOKEN.let(loc=loc + bubble[: match.start('rbrack')]),
-            _COLON_TOKEN.let(loc=loc + bubble[: match.start('colon')]),
+            Token(']', TokenType.RBRACK, loc + bubble[: match.start('rbrack')]),
+            Token(':', TokenType.COLON, loc + bubble[: match.start('colon')]),
         ],
         match['rest'],
         loc + bubble[: match.start('rest')],
@@ -744,7 +740,7 @@ def _strip_bubble_attr(bubble: str) -> tuple[str, list[Token]]:
         next(it)  # skip "["
         la = next(it, '')
 
-        tokens = [_LBRACK_TOKEN]
+        tokens = [Token('[', TokenType.LBRACK, _INIT_LOC)]
         attr_tokens = _attr(la, it)
         try:
             while True:
@@ -774,22 +770,22 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
         la = _skip_ws_and_comments(la, it)
 
         if la == '(':  # TAG_STATE
-            yield _LPAREN_TOKEN
+            yield Token('(', TokenType.LPAREN, _INIT_LOC)
             la = next(it, '')
 
             if la == '"':
-                token, la = _string(la, it)
-                yield token
+                text, token_type, la = _string(la, it)
+                yield Token(text, token_type, _INIT_LOC)
             else:
                 content, la = _attr_content(la, it)
                 if content:
                     # allows 'key()'
-                    yield Token(content, TokenType.ATTR_CONTENT)
+                    yield Token(content, TokenType.ATTR_CONTENT, _INIT_LOC)
 
             if la != ')':
                 raise _unexpected_character(la)
 
-            yield _RPAREN_TOKEN
+            yield Token(')', TokenType.RPAREN, _INIT_LOC)
 
             la = next(it, '')
             la = _skip_ws_and_comments(la, it)
@@ -797,14 +793,14 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
         if la != ',':
             break
 
-        yield _COMMA_TOKEN
+        yield Token(',', TokenType.COMMA, _INIT_LOC)
         la = next(it, '')
         la = _skip_ws_and_comments(la, it)
 
     if la != ']':
         raise _unexpected_character(la)
 
-    yield _RBRACK_TOKEN
+    yield Token(']', TokenType.RBRACK, _INIT_LOC)
     la = next(it, '')
 
     return la  # noqa: B901
@@ -845,7 +841,7 @@ def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
         la = next(it, '')
 
     attr_key = ''.join(consumed)
-    return Token(attr_key, TokenType.ATTR_KEY), la
+    return Token(attr_key, TokenType.ATTR_KEY, _INIT_LOC), la
 
 
 _ATTR_CONTENT_FORBIDDEN: Final = {'', '\n', '\r', '"'}
