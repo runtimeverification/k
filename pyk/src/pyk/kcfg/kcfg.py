@@ -1054,8 +1054,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         # the constraints are cumulative, resulting in `cond_B #And cond_I`
         additional_csubsts = [
             not_none(a.cterm.match_with_constraint(self.node(ci).cterm))
-            .add_constraint(csubst.constraint)
             .add_constraint(csubst_b.constraint)
+            .add_constraint(csubst.constraint)
             for ci, csubst in splits_from_b.items()
         ]
         # Create the targets of the new split
