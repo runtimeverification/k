@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import re
 from collections.abc import Iterator
 from enum import Enum, auto
@@ -212,8 +211,9 @@ class LocationIterator(Iterator[str]):
         self._loc += la
         return la
 
+    @property
     def loc(self) -> Loc:
-        return copy.copy(self._loc)
+        return self._loc
 
 
 def outer_lexer(it: Iterable[str]) -> Iterator[Token]:
@@ -293,7 +293,7 @@ def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
     else:
         raise _unexpected_character(la)
 
-    loc = it.loc()
+    loc = it.loc
     token, la = tokenfunc(la, it)
     return token.let(loc=loc), la
 
@@ -461,7 +461,7 @@ def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
     else:
         raise _unexpected_character(la)
 
-    loc = it.loc()
+    loc = it.loc
     token, la = tokenfunc(la, it)
     return token.let(loc=loc), la
 
@@ -519,7 +519,7 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
 
     consumed = []
-    loc = it.loc()
+    loc = it.loc
 
     if la not in _ALPHA:
         raise _unexpected_character(la)
@@ -568,7 +568,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
             return _EOF_TOKEN, la
 
         if la == '/':
-            loc = it.loc()
+            loc = it.loc
             is_comment, consumed, la = _maybe_comment(la, it)
 
             if not is_comment and len(consumed) > 1:
@@ -580,7 +580,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
 
             break
 
-        loc = it.loc()
+        loc = it.loc
         consumed = []
         break
 
@@ -638,8 +638,8 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
     bubble: list[str] = []  # text that belongs to the bubble
     special: list[str] = []  # text that belongs to the bubble iff preceded and followed by bubble text
     current: list[str] = []  # text that might belong to the bubble or terminate the bubble if keyword
-    bubble_loc: Loc = it.loc()
-    current_loc: Loc = it.loc()
+    bubble_loc: Loc = it.loc
+    current_loc: Loc = it.loc
     while True:
         if not la or la in _WHITESPACE:
             if current:
@@ -657,7 +657,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                     bubble += current
                     special = []
                     current = []
-                    current_loc = it.loc()
+                    current_loc = it.loc
 
             else:  # <special><ws>
                 pass
@@ -665,7 +665,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
             while la in _WHITESPACE:
                 special.append(la)
                 la = next(it, '')
-                current_loc = it.loc()
+                current_loc = it.loc
 
             if not la:
                 return ''.join(bubble) if bubble else None, _EOF_TOKEN, la, bubble_loc
@@ -689,7 +689,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                         bubble += current
                         special = consumed
                         current = []
-                        current_loc = it.loc()
+                        current_loc = it.loc
 
                 else:  # <special><comment>
                     special += consumed
