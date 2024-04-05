@@ -113,8 +113,9 @@ _WHITESPACE: Final = {' ', '\t', '\n', '\r'}
 _DIGIT: Final = set('0123456789')
 _LOWER: Final = set('abcdefghijklmnopqrstuvwxyz')
 _UPPER: Final = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-_ALPHA: Final = set().union(_LOWER).union(_UPPER)
-_ALNUM: Final = set(_ALPHA).union(_DIGIT)
+_ALPHA: Final = _LOWER.union(_UPPER)
+_ALNUM: Final = _ALPHA.union(_DIGIT)
+_WORD: Final = {'_'}.union(_ALNUM)
 
 
 class State(Enum):
@@ -456,28 +457,41 @@ def _hash_upper_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
 
 
 _MODNAME_KEYWORDS: Final = {'private', 'public'}
-_MODNAME_CHARS: Final = {'-', '_'}.union(_ALNUM)
 
 
 def _modname(la: str, it: Iterator) -> tuple[Token, str]:
+    r"""[a-zA-Z]\w*(-\w+)*"""
+
     la = _skip_ws_and_comments(la, it)
 
     consumed = []
 
-    if la == '#':
-        consumed.append(la)
-        la = next(it, '')
-
-    if not la:
+    if la not in _ALPHA:
         raise _unexpected_character(la)
 
-    allow_dash = False
-    while la in _MODNAME_CHARS:
-        if la == '-' and not allow_dash:
-            raise _unexpected_character(la)
-        allow_dash = la != '-'
+    consumed.append(la)
+    la = next(it, '')
+
+    while la in _WORD:
         consumed.append(la)
         la = next(it, '')
+
+    while True:
+        if la != '-':
+            break
+
+        consumed.append(la)
+        la = next(it, '')
+
+        if la not in _WORD:
+            raise _unexpected_character(la)
+
+        consumed.append(la)
+        la = next(it, '')
+
+        while la in _WORD:
+            consumed.append(la)
+            la = next(it, '')
 
     text = ''.join(consumed)
     if text in _MODNAME_KEYWORDS:
