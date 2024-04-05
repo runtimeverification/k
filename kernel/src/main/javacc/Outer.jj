@@ -108,7 +108,7 @@ UPPER_ID | LOWER_ID (used in FUN(...))
 SortID ::= UPPER_ID ("{" UPPERID "}")?
   -- but no '#' allowed at front?
 
-MOD_NAME ::= "#"?{[a-z0-9A-Z_]+ "-"}+
+MODNAME ::= [a-zA-Z][a-zA-Z0-9_]*("-" [a-zA-Z0-9_]+)*
 
 KLABEL ::= anything (other than "<")
 
@@ -547,8 +547,8 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 {
   <IMPORTSPRIVATE: "private"> : MODNAME_STATE
 | <IMPORTSPUBLIC: "public"> : MODNAME_STATE
-| <MODNAME: ("#")?(["a"-"z", "0"-"9", "A"-"Z", "_"])+
-             ("-" (["a"-"z", "0"-"9", "A"-"Z", "_"])+)*> : DEFAULT
+| <MODNAME: ["a"-"z", "A"-"Z"](["a"-"z", "A"-"Z", "0"-"9", "_"])*
+            ("-" (["a"-"z", "A"-"Z", "0"-"9", "_"])+)*> : DEFAULT
 }
 
 /**** String Sentence Bubbles ****/
