@@ -74,9 +74,6 @@ class Loc(NamedTuple):
             return Loc(line, col)
         return NotImplemented
 
-    def get(self) -> tuple[int, int]:
-        return self.line, self.col
-
 
 class Token(NamedTuple):
     text: str
@@ -88,8 +85,11 @@ class Token(NamedTuple):
             return NotImplemented
         return self.text == t.text and self.type == t.type
 
-    def with_loc(self, loc: Loc) -> Token:
-        return Token(self.text, self.type, loc)
+    def let(self, *, text: str | None = None, type: TokenType | None = None, loc: Loc | None = None) -> Token:
+        text = text if text else self.text
+        type = type if type else self.type
+        loc = loc if loc else self.loc
+        return Token(text=text, type=type, loc=loc)
 
 
 _EOF_TOKEN: Final = Token('', TokenType.EOF)
@@ -295,7 +295,7 @@ def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     loc = it.loc()
     token, la = tokenfunc(la, it)
-    return token.with_loc(loc), la
+    return token.let(loc=loc), la
 
 
 def _skip_ws_and_comments(la: str, it: Iterator[str]) -> str:
@@ -463,7 +463,7 @@ def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     loc = it.loc()
     token, la = tokenfunc(la, it)
-    return token.with_loc(loc), la
+    return token.let(loc=loc), la
 
 
 def _syntax_keyword(la: str, it: Iterator[str]) -> tuple[Token, str]:
@@ -550,8 +550,8 @@ def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
 
     text = ''.join(consumed)
     if text in _MODNAME_KEYWORDS:
-        return _KEYWORDS[text].with_loc(loc), la
-    return Token(text, TokenType.MODNAME).with_loc(loc), la
+        return _KEYWORDS[text].let(loc=loc), la
+    return Token(text, TokenType.MODNAME, loc), la
 
 
 _KLABEL_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuration', 'context'}
@@ -588,7 +588,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
         consumed.append(la)
         la = next(it, '')
         if not la or la in _WHITESPACE:
-            return _GT_TOKEN.with_loc(loc), la
+            return _GT_TOKEN.let(loc=loc), la
 
     while la and la not in _WHITESPACE:
         consumed.append(la)
@@ -599,7 +599,7 @@ def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
         token = _KEYWORDS[text]
     else:
         token = Token(text, TokenType.KLABEL)
-    return token.with_loc(loc), la
+    return token.let(loc=loc), la
 
 
 _SIMPLE_STATES: Final = {
@@ -647,7 +647,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                 if current_str in keywords:  # <special><keyword><ws>
                     return (
                         ''.join(bubble) if bubble else None,
-                        _KEYWORDS[current_str].with_loc(current_loc),
+                        _KEYWORDS[current_str].let(loc=current_loc),
                         la,
                         bubble_loc,
                     )
@@ -679,7 +679,7 @@ def _raw_bubble(la: str, it: LocationIterator, keywords: Collection[str]) -> tup
                         # Differs from K Frontend behavior, see: https://github.com/runtimeverification/k/issues/3501
                         return (
                             ''.join(bubble) if bubble else None,
-                            _KEYWORDS[current_str].with_loc(current_loc),
+                            _KEYWORDS[current_str].let(loc=current_loc),
                             la,
                             bubble_loc,
                         )
@@ -718,10 +718,10 @@ def _strip_bubble_label(bubble: str, loc: Loc) -> tuple[list[Token], str, Loc]:
 
     return (
         [
-            _LBRACK_TOKEN.with_loc(loc + bubble[: match.start('lbrack')]),
+            _LBRACK_TOKEN.let(loc=loc + bubble[: match.start('lbrack')]),
             Token(match['label'], TokenType.RULE_LABEL, loc + bubble[: match.start('label')]),
-            _RBRACK_TOKEN.with_loc(loc + bubble[: match.start('rbrack')]),
-            _COLON_TOKEN.with_loc(loc + bubble[: match.start('colon')]),
+            _RBRACK_TOKEN.let(loc=loc + bubble[: match.start('rbrack')]),
+            _COLON_TOKEN.let(loc=loc + bubble[: match.start('colon')]),
         ],
         match['rest'],
         loc + bubble[: match.start('rest')],
