@@ -270,31 +270,31 @@ def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
         return _EOF_TOKEN, la
 
     elif la in _SIMPLE_CHARS:
-        tokenfunc = _simple_char
+        token_func = _simple_char
 
     elif la == '"':
-        tokenfunc = _string
+        token_func = _string
 
     elif la == 'r':
-        tokenfunc = _regex_or_lower_id_or_keyword
+        token_func = _regex_or_lower_id_or_keyword
 
     elif la in _DIGIT:
-        tokenfunc = _nat
+        token_func = _nat
 
     elif la in _ALNUM:
-        tokenfunc = _id_or_keyword
+        token_func = _id_or_keyword
 
     elif la == '#':
-        tokenfunc = _hash_id
+        token_func = _hash_id
 
     elif la == ':':
-        tokenfunc = _colon_or_dcoloneq
+        token_func = _colon_or_dcoloneq
 
     else:
         raise _unexpected_character(la)
 
     loc = it.loc
-    token, la = tokenfunc(la, it)
+    token, la = token_func(la, it)
     return token.let(loc=loc), la
 
 
@@ -447,22 +447,22 @@ def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
         return _EOF_TOKEN, la
 
     elif la == '{':
-        tokenfunc = _simple_char
+        token_func = _simple_char
 
     elif la in _LOWER:
-        tokenfunc = _syntax_keyword
+        token_func = _syntax_keyword
 
     elif la in _UPPER:
-        tokenfunc = _upper_id
+        token_func = _upper_id
 
     elif la == '#':
-        tokenfunc = _hash_upper_id
+        token_func = _hash_upper_id
 
     else:
         raise _unexpected_character(la)
 
     loc = it.loc
-    token, la = tokenfunc(la, it)
+    token, la = token_func(la, it)
     return token.let(loc=loc), la
 
 
