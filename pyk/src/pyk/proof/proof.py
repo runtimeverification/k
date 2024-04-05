@@ -325,6 +325,8 @@ class Prover:
         iterations = 0
         while True:
             steps = self.proof.get_steps()
+            if len(list(steps)) == 0:
+                break
             for step in steps:
                 if fail_fast and self.proof.failed:
                     _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
