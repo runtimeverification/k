@@ -61,6 +61,8 @@ class ImpliesProof(Proof):
         self.csubst = csubst
 
     def get_steps(self) -> Iterable[ProofStep]:
+        if not self.can_progress:
+            return []
         return [ImpliesProofStep(self)]
 
     def commit(self, result: StepResult) -> None:
