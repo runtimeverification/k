@@ -200,7 +200,8 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    _loc: Loc = Loc(1, 0)
+    _line: int = 1
+    _col: int = 0
     _iter: Iterator[str]
 
     def __init__(self, x: Iterable[str]) -> None:
@@ -208,12 +209,15 @@ class LocationIterator(Iterator[str]):
 
     def __next__(self) -> str:
         la = next(self._iter)
-        self._loc += la
+        self._col += 1
+        if la == '\n':
+            self._line += 1
+            self._col = 0
         return la
 
     @property
     def loc(self) -> Loc:
-        return self._loc
+        return Loc(self._line, self._col)
 
 
 def outer_lexer(it: Iterable[str]) -> Iterator[Token]:
