@@ -584,13 +584,8 @@ class APRProof(Proof, KCFGExploration):
                 f'Cannot refute node {node.id}: unexpected non-identity substitution {csubst.subst} in Split from {closest_branch.source.id}'
             )
             return None
-        if len(csubst.constraints) > 1:
-            _LOGGER.error(
-                f'Cannot refute node {node.id}: unexpected non-singleton constraints {csubst.constraints} in Split from {closest_branch.source.id}'
-            )
-            return None
 
-        last_constraint = ml_pred_to_bool(csubst.constraints[0])
+        last_constraint = ml_pred_to_bool(csubst.constraint)
         relevant_vars = free_vars(last_constraint)
         pre_split_constraints = [
             ml_pred_to_bool(c)
