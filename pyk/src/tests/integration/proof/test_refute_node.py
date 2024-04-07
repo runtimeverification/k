@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.cterm import CTerm
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
@@ -15,7 +16,7 @@ from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
 from pyk.testing import KCFGExploreTest, KProveTest
-from pyk.utils import single
+from pyk.utils import not_none, single
 
 from ..utils import K_FILES
 
@@ -25,7 +26,6 @@ if TYPE_CHECKING:
 
     from pytest import TempPathFactory
 
-    from pyk.cterm import CTerm
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
@@ -317,3 +317,68 @@ class TestAPRProof(KCFGExploreTest, KProveTest):
         )
 
         assert claim == expected
+
+    def test_apr_proof_refute_node_multiple_constraints(
+        self,
+        kprove: KProve,
+        proof_dir: Path,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        spec_file = K_FILES / 'refute-node-spec.k'
+        spec_module = 'REFUTE-NODE-SPEC'
+        claim_id = 'multi-constraint-split'
+
+        prover = self.build_prover(kprove, proof_dir, kcfg_explore, spec_file, spec_module, claim_id)
+        cfg = prover.proof.kcfg
+
+        config = cfg.node(1).cterm.config
+        l_gt_0 = mlEqualsTrue(gtInt(KVariable('L'), intToken(0)))
+        l_le_0 = mlEqualsTrue(leInt(KVariable('L'), intToken(0)))
+        m_gt_0 = mlEqualsTrue(gtInt(KVariable('M'), intToken(0)))
+        m_le_0 = mlEqualsTrue(leInt(KVariable('M'), intToken(0)))
+
+        cfg.create_node(CTerm(config, [l_gt_0, m_gt_0]))
+        cfg.create_node(CTerm(config, [l_gt_0, m_le_0]))
+        cfg.create_node(CTerm(config, [l_le_0, m_gt_0]))
+        cfg.create_node(CTerm(config, [l_le_0, m_le_0]))
+
+        prover.proof.kcfg.create_split(
+            1,
+            [
+                (
+                    3,
+                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(3).cterm))
+                    .add_constraint(l_gt_0)
+                    .add_constraint(m_gt_0),
+                ),
+                (
+                    4,
+                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(4).cterm))
+                    .add_constraint(l_gt_0)
+                    .add_constraint(m_le_0),
+                ),
+                (
+                    5,
+                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(5).cterm))
+                    .add_constraint(l_le_0)
+                    .add_constraint(m_gt_0),
+                ),
+                (
+                    6,
+                    not_none(cfg.node(1).cterm.match_with_constraint(cfg.node(6).cterm))
+                    .add_constraint(l_le_0)
+                    .add_constraint(m_gt_0),
+                ),
+            ],
+        )
+
+        # When
+        prover.advance_proof(max_iterations=4)
+        # After the minimization, nodes 7-10 created by the advancement of the proof
+        # will have multiple constraints in their immediately preceding splits
+        prover.proof.kcfg.minimize()
+
+        # Then
+        for i in [7, 8, 9, 10]:
+            assert prover.proof.refute_node(cfg.node(i)) is not None
