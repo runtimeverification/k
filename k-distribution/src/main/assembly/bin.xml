@@ -106,11 +106,5 @@
       <fileMode>775</fileMode>
       <directoryMode>775</directoryMode>
     </fileSet>
-    <fileSet>
-      <directory>${project.basedir}/../hs-backend-booster/target/stack-install</directory>
-      <outputDirectory>/bin</outputDirectory>
-      <fileMode>775</fileMode>
-      <directoryMode>775</directoryMode>
-    </fileSet>
   </fileSets>
 </assembly>

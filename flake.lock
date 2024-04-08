@@ -1,34 +1,5 @@
 {
   "nodes": {
-    "booster-backend": {
-      "inputs": {
-        "haskell-backend": [
-          "haskell-backend"
-        ],
-        "nixpkgs": [
-          "haskell-backend",
-          "nixpkgs"
-        ],
-        "stacklock2nix": [
-          "haskell-backend",
-          "stacklock2nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1712228520,
-        "narHash": "sha256-OYQTmMtjy/BJNRt/VqAOwF5QWNK/3Gx5Q7DHWtMnf+4=",
-        "owner": "runtimeverification",
-        "repo": "hs-backend-booster",
-        "rev": "34305b11a3d31e663f4070c684b709c25437a491",
-        "type": "github"
-      },
-      "original": {
-        "owner": "runtimeverification",
-        "repo": "hs-backend-booster",
-        "rev": "34305b11a3d31e663f4070c684b709c25437a491",
-        "type": "github"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -254,7 +225,6 @@
     },
     "root": {
       "inputs": {
-        "booster-backend": "booster-backend",
         "flake-utils": "flake-utils",
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",

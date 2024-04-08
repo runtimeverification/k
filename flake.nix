@@ -2,12 +2,6 @@
   description = "K Framework";
   inputs = {
     haskell-backend.url = "github:runtimeverification/haskell-backend/531f7c1db1a9fad6d18cbcedb3cfd3e35d6b82a5";
-    booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/34305b11a3d31e663f4070c684b709c25437a491";
-      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-      inputs.haskell-backend.follows = "haskell-backend";
-      inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
-    };
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
@@ -18,7 +12,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , booster-backend, llvm-backend }:
+    , llvm-backend }:
     let
       allOverlays = [
         (_: _: {
@@ -42,7 +36,6 @@
                   "nix/"
                   "*.nix"
                   "haskell-backend/src/main/native/haskell-backend/*"
-                  "hs-backend-booster/src/main/native/hs-backend-booster/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
                 ] ./.);
@@ -74,10 +67,6 @@
                 inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
-                booster =
-                  booster-backend.packages.${prev.system}.kore-rpc-booster;
-                rpc-client =
-                  booster-backend.packages.${prev.system}.kore-rpc-client;
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
@@ -121,6 +110,8 @@
             p.kore-parser
             p.kore-repl
             p.kore-rpc
+            p.kore-rpc-booster
+            p.kore-rpc-client
           ];
         };
 
@@ -139,7 +130,7 @@
           };
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
-            inherit llvm-backend haskell-backend booster-backend;
+            inherit llvm-backend haskell-backend;
           };
 
           update-from-submodules =
