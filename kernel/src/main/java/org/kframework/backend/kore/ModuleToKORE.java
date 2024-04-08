@@ -808,7 +808,7 @@ public class ModuleToKORE {
                 .getOrDefault(sort.head(), Set())
                 .toSeq()
                 .sorted(Production.ord()))) {
-      if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
+      if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod) || prod.isMacro()) {
         continue;
       }
       if (prod.klabel().isEmpty()
