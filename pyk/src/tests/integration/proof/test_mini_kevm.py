@@ -50,6 +50,8 @@ def leaf_number(proof: APRProof) -> int:
 
 class TestMiniKEVM(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'mini-kevm.k'
+    # Disabled until resolved: https://github.com/runtimeverification/haskell-backend/issues/3761
+    DISABLE_LEGACY = True
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status,expected_leaf_number',
