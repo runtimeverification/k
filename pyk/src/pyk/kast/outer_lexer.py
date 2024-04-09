@@ -711,12 +711,16 @@ def _strip_bubble_label(bubble: str, loc: Loc) -> tuple[list[Token], str, Loc]:
     if not match:
         return [], bubble, loc
 
+    lbrack_loc = loc + bubble[: match.start('lbrack')]
+    label_loc = lbrack_loc + bubble[match.start('lbrack') : match.start('label')]
+    rbrack_loc = label_loc + bubble[match.start('label') : match.start('rbrack')]
+    colon_loc = rbrack_loc + bubble[match.start('rbrack') : match.start('colon')]
     return (
         [
-            Token('[', TokenType.LBRACK, loc + bubble[: match.start('lbrack')]),
-            Token(match['label'], TokenType.RULE_LABEL, loc + bubble[: match.start('label')]),
-            Token(']', TokenType.RBRACK, loc + bubble[: match.start('rbrack')]),
-            Token(':', TokenType.COLON, loc + bubble[: match.start('colon')]),
+            Token('[', TokenType.LBRACK, lbrack_loc),
+            Token(match['label'], TokenType.RULE_LABEL, label_loc),
+            Token(']', TokenType.RBRACK, rbrack_loc),
+            Token(':', TokenType.COLON, colon_loc),
         ],
         match['rest'],
         loc + bubble[: match.start('rest')],
