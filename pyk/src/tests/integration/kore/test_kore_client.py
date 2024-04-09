@@ -12,7 +12,9 @@ from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import (
     BOOL,
     INT,
+    SORT_GENERATED_COUNTER_CELL,
     SORT_GENERATED_TOP_CELL,
+    SORT_K,
     SORT_K_ITEM,
     TRUE,
     and_bool,
@@ -89,11 +91,38 @@ def term(n: int) -> Pattern:
 
 
 def state(n: int) -> State:
-    return State(term=term(n), substitution=None, predicate=None)
+    return State(term=term(n))
 
 
 EXECUTE_TEST_DATA: Final[tuple[tuple[str, int, Mapping[str, Any], ExecuteResult], ...]] = (
-    ('branching', 0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)), logs=())),
+    (
+        'branching',
+        0,
+        {},
+        BranchingResult(
+            state=state(2),
+            depth=2,
+            next_states=(
+                State(
+                    term=term(3),
+                    rule_id='ae0c978867ef4cc5cbfbadf7be2ff55e30e59465697ceaffa1d9fd5343a21fc6',
+                    rule_substitution={
+                        EVar('GCC', SORT_GENERATED_COUNTER_CELL): EVar("Var'Unds'DotVar0", SORT_GENERATED_COUNTER_CELL),
+                        EVar('K', SORT_K): EVar("Var'Unds'DotVar1", SORT_K),
+                    },
+                ),
+                State(
+                    term=term(4),
+                    rule_id='37a544ff4b6da9b4fb839f86d2ad51b770bcaf3dd578b716c38cf0da33458374',
+                    rule_substitution={
+                        EVar('GCC', SORT_GENERATED_COUNTER_CELL): EVar("Var'Unds'DotVar0", SORT_GENERATED_COUNTER_CELL),
+                        EVar('K', SORT_K): EVar("Var'Unds'DotVar1", SORT_K),
+                    },
+                ),
+            ),
+            logs=(),
+        ),
+    ),
     ('depth-bound', 0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2, logs=())),
     ('stuck', 4, {}, StuckResult(state=state(6), depth=2, logs=())),
     (
@@ -473,7 +502,7 @@ class TestAddModule(KoreClientTest):
     def test_base_module(self, kore_client: KoreClient) -> None:
         # Given
         config = self.config(0)
-        expected = StuckResult(State(term=config, substitution=None, predicate=None), depth=0, logs=())
+        expected = StuckResult(State(term=config), depth=0, logs=())
 
         # When
         actual = kore_client.execute(config)
@@ -484,7 +513,7 @@ class TestAddModule(KoreClientTest):
     def test_base_module_explicitly(self, kore_client: KoreClient) -> None:
         # Given
         config = self.config(0)
-        expected = StuckResult(State(term=config, substitution=None, predicate=None), depth=0, logs=())
+        expected = StuckResult(State(term=config), depth=0, logs=())
 
         # When
         actual = kore_client.execute(config, module_name=self.KOMPILE_MAIN_MODULE)
@@ -496,7 +525,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected = StuckResult(State(term=self.config(1)), depth=1, logs=())
 
         # When
         module_id = kore_client.add_module(module)
@@ -509,7 +538,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(0), substitution=None, predicate=None), depth=0, logs=())
+        expected = StuckResult(State(term=self.config(0)), depth=0, logs=())
 
         # When
         kore_client.add_module(module)
@@ -522,7 +551,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected = StuckResult(State(term=self.config(1)), depth=1, logs=())
 
         # When
         kore_client.add_module(module, name_as_id=True)
@@ -545,7 +574,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected = StuckResult(State(term=self.config(1)), depth=1, logs=())
 
         # When
         module_id = kore_client.add_module(module)
@@ -564,7 +593,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected = StuckResult(State(term=self.config(1)), depth=1, logs=())
 
         # When
         module_id = kore_client.add_module(module, name_as_id=True)
@@ -583,7 +612,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected = StuckResult(State(term=self.config(1)), depth=1, logs=())
 
         # When
         module_id = kore_client.add_module(module)
@@ -608,7 +637,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
+        expected = StuckResult(State(term=self.config(1)), depth=1, logs=())
 
         # When
         module_id = kore_client.add_module(module, name_as_id=True)
@@ -650,8 +679,8 @@ class TestAddModule(KoreClientTest):
         config = self.config(0)
         module_1 = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
         module_2 = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 2)))
-        expected_1 = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
-        expected_2 = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=1, logs=())
+        expected_1 = StuckResult(State(term=self.config(1)), depth=1, logs=())
+        expected_2 = StuckResult(State(term=self.config(2)), depth=1, logs=())
 
         # When
         module_id = kore_client.add_module(module_1)
@@ -672,8 +701,8 @@ class TestAddModule(KoreClientTest):
         config = self.config(0)
         module_1 = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
         module_2 = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 2)))
-        expected_1 = StuckResult(State(term=self.config(1), substitution=None, predicate=None), depth=1, logs=())
-        expected_2 = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=1, logs=())
+        expected_1 = StuckResult(State(term=self.config(1)), depth=1, logs=())
+        expected_2 = StuckResult(State(term=self.config(2)), depth=1, logs=())
 
         # When
         kore_client.add_module(module_1, name_as_id=True)
@@ -693,7 +722,7 @@ class TestAddModule(KoreClientTest):
         # Given
         config = self.config(0)
         module_1 = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
-        expected = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=2, logs=())
+        expected = StuckResult(State(term=self.config(2)), depth=2, logs=())
 
         # When
         module_1_id = kore_client.add_module(module_1)
@@ -709,7 +738,7 @@ class TestAddModule(KoreClientTest):
         config = self.config(0)
         module_1 = Module('A', sentences=(Import(self.KOMPILE_MAIN_MODULE), self.rule(0, 1)))
         module_2 = Module('B', sentences=(Import('A'), self.rule(1, 2)))
-        expected = StuckResult(State(term=self.config(2), substitution=None, predicate=None), depth=2, logs=())
+        expected = StuckResult(State(term=self.config(2)), depth=2, logs=())
 
         # When
         kore_client.add_module(module_1, name_as_id=True)

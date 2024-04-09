@@ -2,12 +2,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .syntax import Assoc, EVar, MLQuant
+from .syntax import And, Assoc, EVar, MLQuant, Top
 
 if TYPE_CHECKING:
     from collections.abc import Collection
 
     from .syntax import Pattern
+
+
+def conjuncts(pattern: Pattern) -> tuple[Pattern, ...]:
+    if isinstance(pattern, Top):
+        return ()
+    if isinstance(pattern, And):
+        return tuple(conjunct for op in pattern.ops for conjunct in conjuncts(op))
+    return (pattern,)
 
 
 def free_occs(pattern: Pattern, *, bound_vars: Collection[str] = ()) -> dict[str, list[EVar]]:
