@@ -55,7 +55,7 @@ public class KompileOptionsTest {
   @Test
   public void testDefaultModuleName() {
     parse("foo.k");
-    assertEquals("FOO", options.mainModule(files));
+    assertEquals("FOO", options.mainModule(files).name());
   }
 
   @Test

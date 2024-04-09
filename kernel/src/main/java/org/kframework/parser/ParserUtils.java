@@ -310,7 +310,7 @@ public class ParserUtils {
   }
 
   public org.kframework.definition.Definition loadDefinition(
-      String mainModuleName,
+      KompileOptions.MainModule mainModuleName,
       Set<Module> previousModules,
       String definitionText,
       Source source,
@@ -337,7 +337,7 @@ public class ParserUtils {
   }
 
   public org.kframework.definition.Definition loadDefinition(
-      String mainModuleName,
+      KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule syntaxModuleName,
       String definitionText,
       File source,
@@ -365,7 +365,7 @@ public class ParserUtils {
   }
 
   public org.kframework.definition.Definition loadDefinition(
-      String mainModuleName,
+      KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule syntaxModuleName,
       String definitionText,
       Source source,
@@ -429,14 +429,15 @@ public class ParserUtils {
         mainModule, immutable(modules), Att.empty().add(Att.SYNTAX_MODULE(), syntaxModule.name()));
   }
 
-  private Module getMainModule(String mainModuleName, Set<Module> modules) {
+  private Module getMainModule(KompileOptions.MainModule mainModuleName, Set<Module> modules) {
     Optional<Module> opt =
-        modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
+        modules.stream().filter(m -> m.name().equals(mainModuleName.name())).findFirst();
     if (opt.isEmpty()) {
-      throw KEMException.compilerError(
-          "Could not find main module with name "
-              + mainModuleName
-              + " in definition. Use --main-module to specify one.");
+      String msg = "Could not find main module with name " + mainModuleName + " in definition.";
+      if (mainModuleName.type().equals(KompileOptions.OptionType.DEFAULT)) {
+        msg += " Use --main-module to specify one.";
+      }
+      throw KEMException.compilerError(msg);
     }
     return opt.get();
   }

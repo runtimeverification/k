@@ -133,7 +133,7 @@ public class DefinitionParsing {
 
   public java.util.Set<Module> parseModules(
       CompiledDefinition definition,
-      String mainModule,
+      KompileOptions.MainModule mainModule,
       String entryPointModule,
       File definitionFile,
       java.util.Set<Att.Key> excludeModules,
@@ -150,7 +150,7 @@ public class DefinitionParsing {
             options.preprocess,
             options.bisonLists);
 
-    if (!def.getModule(mainModule).isDefined()) {
+    if (!def.getModule(mainModule.name()).isDefined()) {
       throw KEMException.criticalError("Module " + mainModule + " does not exist.");
     }
     if (!def.getModule(entryPointModule).isDefined()) {
@@ -158,8 +158,9 @@ public class DefinitionParsing {
     }
     if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
     files.resolveTemp(".");
-    Stream<Module> modules = Stream.of(def.getModule(mainModule).get());
-    modules = Stream.concat(modules, stream(def.getModule(mainModule).get().importedModules()));
+    Stream<Module> modules = Stream.of(def.getModule(mainModule.name()).get());
+    modules =
+        Stream.concat(modules, stream(def.getModule(mainModule.name()).get().importedModules()));
     modules = Stream.concat(modules, Stream.of(def.getModule(entryPointModule).get()));
     modules =
         Stream.concat(modules, stream(def.getModule(entryPointModule).get().importedModules()));
@@ -216,7 +217,7 @@ public class DefinitionParsing {
 
   public Definition parseDefinitionAndResolveBubbles(
       File definitionFile,
-      String mainModuleName,
+      KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule mainProgramsModule,
       java.util.Set<Att.Key> excludedModuleTags) {
     Definition parsedDefinition =
@@ -284,7 +285,9 @@ public class DefinitionParsing {
   }
 
   public Definition parseDefinition(
-      File definitionFile, String mainModuleName, KompileOptions.SyntaxModule mainProgramsModule) {
+      File definitionFile,
+      KompileOptions.MainModule mainModuleName,
+      KompileOptions.SyntaxModule mainProgramsModule) {
     return parser.loadDefinition(
         mainModuleName,
         mainProgramsModule,

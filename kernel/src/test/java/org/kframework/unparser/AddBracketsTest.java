@@ -46,7 +46,7 @@ public class AddBracketsTest {
 
     Definition baseK =
         parser.loadDefinition(
-            "K",
+            new KompileOptions.MainModule("K", KompileOptions.OptionType.USER_PROVIDED),
             new KompileOptions.SyntaxModule("K", KompileOptions.OptionType.USER_PROVIDED),
             definitionText,
             definitionFile,
