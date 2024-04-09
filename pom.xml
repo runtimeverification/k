@@ -13,7 +13,6 @@
     <module>kernel</module>
     <module>k-distribution</module>
     <module>haskell-backend</module>
-    <module>hs-backend-booster</module>
     <module>llvm-backend</module>
     <module>llvm-backend/src/main/native/llvm-backend/matching</module>
   </modules>
