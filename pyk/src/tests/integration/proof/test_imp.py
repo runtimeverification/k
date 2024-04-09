@@ -786,7 +786,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                 kcfg_explore.pretty_print(s.cell('K_CELL')),
                 kcfg_explore.pretty_print(s.cell('STATE_CELL')),
             )
-            for s in exec_res.next_states
+            for s, _ in exec_res.next_states
         ]
 
         # Then

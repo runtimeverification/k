@@ -4,7 +4,6 @@ import logging
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from ..cterm import CTerm
 from ..kast.inner import KApply, KVariable
 from ..kast.manip import (
     flatten_label,
@@ -16,10 +15,8 @@ from ..kast.manip import (
 )
 from ..kast.pretty import PrettyPrinter
 from ..kore.rpc import RewriteSuccess
-from ..prelude.kbool import notBool
-from ..prelude.kint import leInt, ltInt
-from ..prelude.ml import is_top, mlAnd, mlEqualsFalse, mlEqualsTrue, mlNot
-from ..utils import shorten_hashes, single
+from ..prelude.ml import is_top
+from ..utils import not_none, shorten_hashes, single
 from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
 from .semantics import DefaultSemantics
 
@@ -27,7 +24,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from ..cterm import CTermSymbolic
+    from ..cterm import CTerm, CTermSymbolic
     from ..kast import KInner
     from ..kcfg.exploration import KCFGExploration
     from ..kore.rpc import LogEntry
@@ -225,19 +222,19 @@ class KCFGExplore:
             log(f'abstraction node: {node_id}')
             return Abstract(abstract_cterm)
 
-        _branches = self.kcfg_semantics.extract_branches(_cterm)
-        branches = []
-        for constraint in _branches:
-            kast = mlAnd(list(_cterm.constraints) + [constraint])
-            kast, _ = self.cterm_symbolic.kast_simplify(kast)
-            if not CTerm._is_bottom(kast):
-                branches.append(constraint)
-        if len(branches) > 1:
-            constraint_strs = [self.pretty_print(bc) for bc in branches]
-            log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
-            return Branch(branches, heuristic=True)
+        # _branches = self.kcfg_semantics.extract_branches(_cterm)
+        # branches = []
+        # for constraint in _branches:
+        #     kast = mlAnd(list(_cterm.constraints) + [constraint])
+        #     kast, _ = self.cterm_symbolic.kast_simplify(kast)
+        #     if not CTerm._is_bottom(kast):
+        #         branches.append(constraint)
+        # if len(branches) > 1:
+        #     constraint_strs = [self.pretty_print(bc) for bc in branches]
+        #     log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
+        #     return Branch(branches, heuristic=True)
 
-        cterm, next_cterms, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
+        cterm, next_cterms_with_branch_constraints, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
             _cterm,
             depth=execute_depth,
             cut_point_rules=cut_point_rules,
@@ -251,7 +248,7 @@ class KCFGExplore:
             return Step(cterm, depth, next_node_logs, extract_rule_labels(next_node_logs))
 
         # Stuck or vacuous
-        if not next_cterms:
+        if not next_cterms_with_branch_constraints:
             if vacuous:
                 log(f'vacuous node: {node_id}', warning=True)
                 return Vacuous()
@@ -259,41 +256,25 @@ class KCFGExplore:
             return Stuck()
 
         # Cut rule
-        if len(next_cterms) == 1:
+        if len(next_cterms_with_branch_constraints) == 1:
             log(f'cut-rule basic block at depth {depth}: {node_id}')
-            return Step(next_cterms[0], 1, next_node_logs, extract_rule_labels(next_node_logs), cut=True)
+            return Step(
+                next_cterms_with_branch_constraints[0][0],
+                1,
+                next_node_logs,
+                extract_rule_labels(next_node_logs),
+                cut=True,
+            )
 
         # Branch
-        assert len(next_cterms) > 1
-        branches = [mlAnd(c for c in s.constraints if c not in cterm.constraints) for s in next_cterms]
-        branch_and = mlAnd(branches)
-        branch_patterns = [
-            mlAnd([mlEqualsTrue(KVariable('B')), mlEqualsTrue(notBool(KVariable('B')))]),
-            mlAnd([mlEqualsTrue(notBool(KVariable('B'))), mlEqualsTrue(KVariable('B'))]),
-            mlAnd([mlEqualsTrue(KVariable('B')), mlEqualsFalse(KVariable('B'))]),
-            mlAnd([mlEqualsFalse(KVariable('B')), mlEqualsTrue(KVariable('B'))]),
-            mlAnd([mlNot(KVariable('B')), KVariable('B')]),
-            mlAnd([KVariable('B'), mlNot(KVariable('B'))]),
-            mlAnd(
-                [
-                    mlEqualsTrue(ltInt(KVariable('I1'), KVariable('I2'))),
-                    mlEqualsTrue(leInt(KVariable('I2'), KVariable('I1'))),
-                ]
-            ),
-            mlAnd(
-                [
-                    mlEqualsTrue(leInt(KVariable('I1'), KVariable('I2'))),
-                    mlEqualsTrue(ltInt(KVariable('I2'), KVariable('I1'))),
-                ]
-            ),
-        ]
-
-        # Split on branch patterns
-        if any(branch_pattern.match(branch_and) for branch_pattern in branch_patterns):
-            constraint_strs = [self.pretty_print(bc) for bc in branches]
-            log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
+        assert len(next_cterms_with_branch_constraints) > 1
+        if all(branch_constraint for _, branch_constraint in next_cterms_with_branch_constraints):
+            branches = [not_none(rule_predicate) for _, rule_predicate in next_cterms_with_branch_constraints]
+            constraint_strs = [self.pretty_print(ml_pred_to_bool(bc)) for bc in branches]
+            log(f'{len(branches)} branches: {node_id} -> {constraint_strs}')
             return Branch(branches)
-
-        # NDBranch on successor nodes
-        log(f'{len(next_cterms)} non-deterministic branches: {node_id}')
-        return NDBranch(next_cterms, next_node_logs, extract_rule_labels(next_node_logs))
+        else:
+            # NDBranch
+            log(f'{len(next_cterms_with_branch_constraints)} non-deterministic branches: {node_id}')
+            next_cterms = [cterm for cterm, _ in next_cterms_with_branch_constraints]
+            return NDBranch(next_cterms, next_node_logs, extract_rule_labels(next_node_logs))

@@ -81,10 +81,10 @@ class TestMultipleDefinitionsProof(CTermSymbolicTest, KPrintTest):
             'a ( X:KItem ) ~> .K',
         ] == split_next_k
 
-        step_1_res = cterm_symbolic.execute(split_next_terms[0], depth=1)
+        step_1_res = cterm_symbolic.execute(split_next_terms[0][0], depth=1)
         step_1_k = kprint.pretty_print(step_1_res.state.cell('K_CELL'))
         assert 'c ~> .K' == step_1_k
 
-        step_2_res = cterm_symbolic.execute(split_next_terms[1], depth=1)
+        step_2_res = cterm_symbolic.execute(split_next_terms[1][0], depth=1)
         step_2_k = kprint.pretty_print(step_2_res.state.cell('K_CELL'))
         assert 'c ~> .K' == step_2_k
