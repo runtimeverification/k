@@ -131,12 +131,6 @@ class CTermSymbolic:
         assert all(not cterm.is_bottom for cterm, _ in next_states)
         assert len(next_states) != 1 or response.reason is StopReason.CUT_POINT_RULE
 
-        for resp_next_state in resp_next_states:
-            if resp_next_state.rule_predicate is not None:
-                print(f'Rule predicate: {self.kore_to_kast(resp_next_state.rule_predicate) }')
-            else:
-                print('Rule predicate: None')
-
         return CTermExecute(
             state=state,
             next_states=next_states,
