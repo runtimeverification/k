@@ -411,14 +411,16 @@ public class ParserUtils {
     if (opt.isEmpty()) {
       if (syntaxModuleName.type().equals(KompileOptions.OptionType.USER_PROVIDED)) {
         throw KEMException.compilerError(
-            "Could not find main syntax module with name " + syntaxModuleName + " in definition.");
+            "Could not find main syntax module with name "
+                + syntaxModuleName.name()
+                + " in definition.");
       }
       kem.registerCompilerWarning(
           ExceptionType.MISSING_SYNTAX_MODULE,
           "Could not find main syntax module with name "
-              + syntaxModuleName
+              + syntaxModuleName.name()
               + " in definition.  Use --syntax-module to specify one. Using "
-              + mainModuleName
+              + mainModuleName.name()
               + " as default.");
       syntaxModule = mainModule;
     } else {
@@ -433,7 +435,8 @@ public class ParserUtils {
     Optional<Module> opt =
         modules.stream().filter(m -> m.name().equals(mainModuleName.name())).findFirst();
     if (opt.isEmpty()) {
-      String msg = "Could not find main module with name " + mainModuleName + " in definition.";
+      String msg =
+          "Could not find main module with name " + mainModuleName.name() + " in definition.";
       if (mainModuleName.type().equals(KompileOptions.OptionType.DEFAULT)) {
         msg += " Use --main-module to specify one.";
       }
