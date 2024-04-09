@@ -1,0 +1,28 @@
+[Error] Inner Parser: Parse error: unexpected token '=>'.
+	Source(parseErrorExpected.k)
+	Location(7,6,7,8)
+	7 |	rule => false
+	  .	     ^~
+[Error] Inner Parser: Parse error: unexpected end of file following token 'true'.
+	Source(parseErrorExpected.k)
+	Location(8,15,8,15)
+	8 |	rule 0 => true
+	  .	              ^
+[Error] Inner Parser: Parse error: unexpected token '</k>' following token 'true'.
+	Source(parseErrorExpected.k)
+	Location(9,20,9,24)
+	9 |	rule <k> 0 => true </k>
+	  .	                   ^~~~
+[Error] Inner Parser: Parse error: unexpected end of file.
+	Source(parseErrorExpected.k)
+	Location(10,5,10,5)
+	10 |	rule
+	   .	    ^
+[Error] Inner Parser: Parse error: unexpected end of file following token 'foo'.
+	Source(parseErrorExpected.k)
+	Location(11,9,11,9)
+	11 |	rule foo
+	   .	        ^
+[Error] Compiler: Had 5 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile parseErrorExpected.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition parseErrorExpected-kompiled --type-inference-mode checked

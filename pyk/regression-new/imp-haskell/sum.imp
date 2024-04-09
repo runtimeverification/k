@@ -1,0 +1,12 @@
+// This program calculates in sum
+// the sum of numbers from 1 to n.
+
+int n, sum;
+n = 100;
+sum = 0;
+while (!(n <= 0)) {
+  sum = sum + n;
+  n = n + -1;
+}
+
+// sum should be 5050 when n is 100

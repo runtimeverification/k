@@ -1,0 +1,36 @@
+name: 'Set Up Environment'
+description: 'Set up test environment'
+inputs:
+  python-version:
+    description: 'Python version'
+    required: true
+    type: string
+    default: '3.10'
+  install-k:
+    description: 'Install K'
+    required: true
+    type: boolean
+    default: false
+runs:
+  using: "composite"
+  steps:
+    - name: 'Install Python'
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: 'Install Poetry'
+      uses: Gr1N/setup-poetry@v9
+    - name: 'Install K'
+      if: fromJSON(inputs.install-k)
+      shell: bash
+      run: |
+        K_VERSION=$(cat deps/k_release)
+        DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
+        wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
+        sudo apt-get update
+        sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
+        sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+        kompile --version
+    - name: 'Install package'
+      shell: bash
+      run: poetry install

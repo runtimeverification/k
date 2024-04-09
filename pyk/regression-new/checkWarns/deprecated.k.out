@@ -1,0 +1,58 @@
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(12,8,12,11)
+	12 |	  rule f() => true
+	   .	       ^~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(14,16,14,21)
+	14 |	  rule baz(baz(foo())) => baz(bar())
+	   .	               ^~~~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(14,31,14,36)
+	14 |	  rule baz(baz(foo())) => baz(bar())
+	   .	                              ^~~~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(15,14,15,17)
+	15 |	    requires f()
+	   .	             ^~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(16,13,16,16)
+	16 |	    ensures f()
+	   .	            ^~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(18,18,18,27)
+	18 |	  context [qux]: qux(HOLE) requires f()
+	   .	                 ^~~~~~~~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(18,37,18,40)
+	18 |	  context [qux]: qux(HOLE) requires f()
+	   .	                                    ^~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(19,29,19,38)
+	19 |	  context alias [qux2]: baz(qux(HERE)) requires f()
+	   .	                            ^~~~~~~~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(19,49,19,52)
+	19 |	  context alias [qux2]: baz(qux(HERE)) requires f()
+	   .	                                                ^~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(24,9,24,19)
+	24 |	    <k> qux(foo()) </k>
+	   .	        ^~~~~~~~~~
+[Error] Compiler: Use of deprecated production found; this syntax may be removed in the future.
+	Source(deprecated.k)
+	Location(24,13,24,18)
+	24 |	    <k> qux(foo()) </k>
+	   .	            ^~~~~
+[Error] Compiler: Had 11 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile deprecated.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition deprecated-kompiled --type-inference-mode checked

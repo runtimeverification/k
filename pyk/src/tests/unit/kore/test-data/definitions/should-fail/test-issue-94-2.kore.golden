@@ -1,0 +1,10 @@
+Error:
+  module 'TEST':
+  axiom declaration:
+  symbol or alias 'info' (test-issue-94-2.kore 13:2):
+  symbol or alias 'inj' (test-issue-94-2.kore 14:9):
+  symbol or alias 'info' (test-issue-94-2.kore 15:13):
+  \and (test-issue-94-2.kore 15:30):
+  \equals (test-issue-94-2.kore 16:46):
+  (test-issue-94-2.kore 16:37, <implicitly defined entity>):
+    Expecting sort String{} but got #String{}.
