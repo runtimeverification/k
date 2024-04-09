@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pyk.kore.prelude import INT, int_dv
+from pyk.kore.prelude import INT, SORT_GENERATED_TOP_CELL, int_dv
 from pyk.kore.rpc import (
     AbortedResult,
     DefaultError,
@@ -28,7 +28,7 @@ from pyk.kore.rpc import (
     UnsatResult,
     VacuousResult,
 )
-from pyk.kore.syntax import And, App, Bottom, Module, Top
+from pyk.kore.syntax import And, App, Bottom, Equals, EVar, Module, Top
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from pyk.kore.rpc import ExecuteResult
     from pyk.kore.syntax import Pattern
 
+x, y = (EVar(name, INT) for name in ['x', 'y'])
 int_top = Top(INT)
 int_bottom = Bottom(INT)
 
@@ -102,35 +103,50 @@ EXECUTE_TEST_DATA: Final = (
         App('IntAdd', (), (int_dv(1), int_dv(1))),
         {'state': kore(App('IntAdd', [], [int_dv(1), int_dv(1)]))},
         {
-            'state': {'term': kore(int_dv(2)), 'substitution': kore(int_top), 'predicate': kore(int_top)},
+            'state': {
+                'term': kore(int_dv(2)),
+                'substitution': kore(
+                    And(
+                        SORT_GENERATED_TOP_CELL,
+                        (
+                            Equals(INT, SORT_GENERATED_TOP_CELL, x, int_dv(3)),
+                            Equals(INT, SORT_GENERATED_TOP_CELL, y, int_dv(4)),
+                        ),
+                    )
+                ),
+                'predicate': kore(int_top),
+            },
             'depth': 1,
             'reason': 'stuck',
         },
-        StuckResult(State(int_dv(2), int_top, int_top), 1, logs=()),
+        StuckResult(State(int_dv(2), substitution={x: int_dv(3), y: int_dv(4)}, predicate=int_top), 1, logs=()),
     ),
     (
         App('IntAdd', (), (int_dv(1), int_dv(1))),
         {'state': kore(App('IntAdd', [], [int_dv(1), int_dv(1)]))},
         {
-            'state': {'term': kore(int_dv(2)), 'substitution': kore(int_top), 'predicate': kore(int_top)},
+            'state': {
+                'term': kore(int_dv(2)),
+                'substitution': kore(Equals(INT, SORT_GENERATED_TOP_CELL, x, int_dv(3))),
+            },
             'depth': 1,
             'reason': 'vacuous',
         },
-        VacuousResult(State(int_dv(2), int_top, int_top), 1, logs=()),
+        VacuousResult(State(int_dv(2), substitution={x: int_dv(3)}), 1, logs=()),
     ),
     (
         int_dv(0),
         {'state': kore(int_dv(0))},
         {
-            'state': {'term': kore(int_dv(1)), 'substitution': kore(int_dv(2)), 'predicate': kore(int_dv(3))},
-            'depth': 4,
-            'unknown-predicate': kore(int_dv(5)),
+            'state': {'term': kore(int_dv(1))},
+            'depth': 2,
+            'unknown-predicate': kore(int_dv(3)),
             'reason': 'aborted',
         },
         AbortedResult(
-            state=State(term=int_dv(1), substitution=int_dv(2), predicate=int_dv(3)),
-            depth=4,
-            unknown_predicate=int_dv(5),
+            state=State(term=int_dv(1)),
+            depth=2,
+            unknown_predicate=int_dv(3),
             logs=(),
         ),
     ),
