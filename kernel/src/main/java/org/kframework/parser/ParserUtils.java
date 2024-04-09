@@ -409,6 +409,10 @@ public class ParserUtils {
     opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName.name())).findFirst();
     Module syntaxModule;
     if (opt.isEmpty()) {
+      if (syntaxModuleName.type().equals(KompileOptions.OptionType.USER_PROVIDED)) {
+        throw KEMException.compilerError(
+            "Could not find main syntax module with name " + syntaxModuleName + " in definition.");
+      }
       kem.registerCompilerWarning(
           ExceptionType.MISSING_SYNTAX_MODULE,
           "Could not find main syntax module with name "
