@@ -18,8 +18,10 @@ from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
-from ..utils import check_dir_path, check_file_path, filter_none, run_process
-from .syntax import And, SortApp, kore_term
+from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process
+from . import manip
+from .prelude import SORT_GENERATED_TOP_CELL
+from .syntax import And, Equals, EVar, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -457,24 +459,83 @@ class StopReason(str, Enum):
 @dataclass(frozen=True)
 class State:
     term: Pattern
-    substitution: Pattern | None
+    substitution: FrozenDict[EVar, Pattern] | None
     predicate: Pattern | None
+    rule_id: str | None
+    rule_substitution: FrozenDict[EVar, Pattern] | None
+    rule_predicate: Pattern | None
+
+    def __init__(
+        self,
+        term: Pattern,
+        *,
+        substitution: Mapping[EVar, Pattern] | None = None,
+        predicate: Pattern | None = None,
+        rule_id: str | None = None,
+        rule_substitution: Mapping[EVar, Pattern] | None = None,
+        rule_predicate: Pattern | None = None,
+    ):
+        substitution = FrozenDict(substitution) if substitution is not None else None
+        rule_substitution = FrozenDict(rule_substitution) if rule_substitution is not None else None
+        object.__setattr__(self, 'term', term)
+        object.__setattr__(self, 'substitution', substitution)
+        object.__setattr__(self, 'predicate', predicate)
+        object.__setattr__(self, 'rule_id', rule_id)
+        object.__setattr__(self, 'rule_substitution', rule_substitution)
+        object.__setattr__(self, 'rule_predicate', rule_predicate)
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> State:
         return State(
             term=kore_term(dct['term']),
-            substitution=kore_term(dct['substitution']) if 'substitution' in dct else None,
+            substitution=State._subst_to_dict(kore_term(dct['substitution'])) if 'substitution' in dct else None,
             predicate=kore_term(dct['predicate']) if 'predicate' in dct else None,
+            rule_id=dct.get('rule-id'),
+            rule_substitution=(
+                State._subst_to_dict(kore_term(dct['rule-substitution'])) if 'rule-substitution' in dct else None
+            ),
+            rule_predicate=kore_term(dct['rule-predicate']) if 'rule-predicate' in dct else None,
+        )
+
+    @staticmethod
+    def _subst_to_dict(pattern: Pattern) -> dict[EVar, Pattern]:
+        def extract_entry(pattern: Pattern) -> tuple[EVar, Pattern]:
+            if not isinstance(pattern, Equals):
+                raise ValueError(fr'Expected \equals as substituion entry, got: {pattern.text}')
+            if pattern.sort != SORT_GENERATED_TOP_CELL:
+                raise ValueError(
+                    f'Expected {SORT_GENERATED_TOP_CELL.text} as substitution entry sort, got: {pattern.sort.text}'
+                )
+            if not isinstance(pattern.left, EVar):
+                raise ValueError(f'Expected EVar as substitution entry key, got: {pattern.left.text}')
+            if pattern.left.sort != pattern.op_sort:
+                raise ValueError(
+                    f'Mismatch between substitution entry and key sort: {pattern.op_sort.text} and {pattern.left.sort.text}'
+                )
+            return pattern.left, pattern.right
+
+        res: dict[EVar, Pattern] = {}
+        for conjunct in manip.conjuncts(pattern):
+            key, value = extract_entry(conjunct)
+            if key in res:
+                raise ValueError(f'Duplicate substitution entry key: {key.text}')
+            res[key] = value
+        return res
+
+    @staticmethod
+    def _dict_to_subst(dct: Mapping[EVar, Pattern]) -> And:
+        return And(
+            SORT_GENERATED_TOP_CELL,
+            tuple(Equals(var.sort, SORT_GENERATED_TOP_CELL, var, val) for var, val in dct.items()),
         )
 
     @property
     def kore(self) -> Pattern:
         _kore = self.term
         if self.substitution is not None:
-            _kore = And(SortApp('SortGeneratedTopCell'), (_kore, self.substitution))
+            _kore = And(SORT_GENERATED_TOP_CELL, (_kore,) + self._dict_to_subst(self.substitution).ops)
         if self.predicate is not None:
-            _kore = And(SortApp('SortGeneratedTopCell'), (_kore, self.predicate))
+            _kore = And(SORT_GENERATED_TOP_CELL, (_kore, self.predicate))
         return _kore
 
 
