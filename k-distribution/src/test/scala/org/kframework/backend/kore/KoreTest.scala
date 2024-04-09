@@ -54,8 +54,8 @@ class KoreTest {
     files.saveToDefinitionDirectory("test.k", k)
     val defn = compiler.run(
       files.resolveDefinitionDirectory("test.k"),
-      "TEST",
-      "TEST",
+      new KompileOptions.MainModule("TEST", KompileOptions.OptionType.USER_PROVIDED),
+      new KompileOptions.SyntaxModule("TEST", KompileOptions.OptionType.USER_PROVIDED),
       backend.steps,
       backend.excludedModuleTags
     )
