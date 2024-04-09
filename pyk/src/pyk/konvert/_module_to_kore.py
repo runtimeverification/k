@@ -722,20 +722,27 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         PullUpRewrites(),
         DiscardSymbolAtts(
             [
+                Atts.ASSOC,
                 Atts.CELL,
                 Atts.CELL_FRAGMENT,
                 Atts.CELL_NAME,
                 Atts.CELL_OPT_ABSENT,
+                Atts.COLOR,
+                Atts.COLORS,
+                Atts.COMM,
+                Atts.FORMAT,
                 Atts.GROUP,
                 Atts.IMPURE,
                 Atts.INDEX,
                 Atts.INITIALIZER,
+                Atts.LEFT,
                 Atts.MAINCELL,
                 Atts.PREDICATE,
                 Atts.PREFER,
                 Atts.PRIVATE,
                 Atts.PRODUCTION,
                 Atts.PROJECTION,
+                Atts.RIGHT,
                 Atts.SEQSTRICT,
                 Atts.STRICT,
                 Atts.USER_LIST,
@@ -747,14 +754,6 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         AddSymbolAtts(Atts.FUNCTIONAL(None), _is_functional),
         AddSymbolAtts(Atts.INJECTIVE(None), _is_injective),
         AddSymbolAtts(Atts.CONSTRUCTOR(None), _is_constructor),
-        AddDefaultFormatAtts(),
-        DiscardFormatAtts(),
-        InlineFormatTerminals(),
-        AddColorAtts(),
-        DiscardSymbolAtts([Atts.COLOR]),
-        AddTerminalAtts(),
-        AddPrioritiesAtts(),
-        AddAssocAtts(),
     )
     definition = reduce(lambda defn, step: step.execute(defn), pipeline, definition)
     module = definition.modules[0]
@@ -1116,6 +1115,11 @@ class DiscardSymbolAtts(SingleModulePass):
             return production
 
         return production.let(att=production.att.discard(self.keys))
+
+
+# -----------------
+# Syntax attributes
+# -----------------
 
 
 @dataclass
