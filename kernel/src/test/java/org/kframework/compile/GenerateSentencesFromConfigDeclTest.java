@@ -22,6 +22,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
@@ -51,7 +52,7 @@ public class GenerateSentencesFromConfigDeclTest {
     def =
         parser.loadDefinition(
             "K",
-            "K",
+            new KompileOptions.SyntaxModule("K", KompileOptions.OptionType.USER_PROVIDED),
             definitionText,
             definitionFile,
             definitionFile.getParentFile(),

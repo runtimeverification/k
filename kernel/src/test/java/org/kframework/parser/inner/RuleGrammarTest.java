@@ -18,6 +18,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.kompile.DefinitionParsing;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
@@ -50,7 +51,7 @@ public class RuleGrammarTest {
     Definition baseK =
         parser.loadDefinition(
             "K",
-            "K",
+            new KompileOptions.SyntaxModule("K", KompileOptions.OptionType.USER_PROVIDED),
             definitionText,
             definitionFile,
             definitionFile.getParentFile(),

@@ -203,7 +203,7 @@ public class Kompile {
   public CompiledDefinition run(
       File definitionFile,
       String mainModuleName,
-      String mainProgramsModuleName,
+      KompileOptions.SyntaxModule mainProgramsModuleName,
       Function<Definition, Definition> pipeline,
       Set<Att.Key> excludedModuleTags) {
     files.resolveKompiled(".").mkdirs();
@@ -384,7 +384,7 @@ public class Kompile {
   public Definition parseDefinition(
       File definitionFile,
       String mainModuleName,
-      String mainProgramsModule,
+      KompileOptions.SyntaxModule mainProgramsModule,
       Set<Att.Key> excludedModuleTags) {
     return definitionParsing.parseDefinitionAndResolveBubbles(
         definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);

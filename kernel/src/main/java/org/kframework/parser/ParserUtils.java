@@ -2,7 +2,6 @@
 package org.kframework.parser;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
 
 import com.google.common.collect.Streams;
 import java.io.File;
@@ -30,6 +29,7 @@ import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
@@ -338,7 +338,7 @@ public class ParserUtils {
 
   public org.kframework.definition.Definition loadDefinition(
       String mainModuleName,
-      String syntaxModuleName,
+      KompileOptions.SyntaxModule syntaxModuleName,
       String definitionText,
       File source,
       File currentDirectory,
@@ -366,7 +366,7 @@ public class ParserUtils {
 
   public org.kframework.definition.Definition loadDefinition(
       String mainModuleName,
-      String syntaxModuleName,
+      KompileOptions.SyntaxModule syntaxModuleName,
       String definitionText,
       Source source,
       File currentDirectory,
@@ -406,7 +406,7 @@ public class ParserUtils {
     modules.addAll(previousModules); // add the previous modules, since load modules is not additive
     Module mainModule = getMainModule(mainModuleName, modules);
     Optional<Module> opt;
-    opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
+    opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName.name())).findFirst();
     Module syntaxModule;
     if (opt.isEmpty()) {
       kem.registerCompilerWarning(

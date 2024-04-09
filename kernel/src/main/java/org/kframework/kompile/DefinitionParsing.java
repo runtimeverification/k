@@ -39,7 +39,6 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -218,13 +217,13 @@ public class DefinitionParsing {
   public Definition parseDefinitionAndResolveBubbles(
       File definitionFile,
       String mainModuleName,
-      String mainProgramsModule,
+      KompileOptions.SyntaxModule mainProgramsModule,
       java.util.Set<Att.Key> excludedModuleTags) {
     Definition parsedDefinition =
         parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
     Stream<Module> modules = Stream.of(parsedDefinition.mainModule());
     modules = Stream.concat(modules, stream(parsedDefinition.mainModule().importedModules()));
-    Option<Module> syntaxModule = parsedDefinition.getModule(mainProgramsModule);
+    Option<Module> syntaxModule = parsedDefinition.getModule(mainProgramsModule.name());
     if (syntaxModule.isDefined()) {
       modules = Stream.concat(modules, Stream.of(syntaxModule.get()));
       modules = Stream.concat(modules, stream(syntaxModule.get().importedModules()));
@@ -249,7 +248,8 @@ public class DefinitionParsing {
             parsedDefinition.mainModule(),
             modules.collect(Collections.toSet()),
             parsedDefinition.att());
-    trimmed = Kompile.excludeModulesByTag(excludedModuleTags, mainProgramsModule).apply(trimmed);
+    trimmed =
+        Kompile.excludeModulesByTag(excludedModuleTags, mainProgramsModule.name()).apply(trimmed);
     sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
     if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
     files.resolveTemp(".");
@@ -284,7 +284,7 @@ public class DefinitionParsing {
   }
 
   public Definition parseDefinition(
-      File definitionFile, String mainModuleName, String mainProgramsModule) {
+      File definitionFile, String mainModuleName, KompileOptions.SyntaxModule mainProgramsModule) {
     return parser.loadDefinition(
         mainModuleName,
         mainProgramsModule,

@@ -78,11 +78,18 @@ public class KompileOptions implements Serializable {
               + " <main-module>-SYNTAX).")
   private String syntaxModule;
 
-  public String syntaxModule(FileUtil files) {
+  public enum OptionType {
+    DEFAULT,
+    USER_PROVIDED
+  }
+
+  public record SyntaxModule(String name, OptionType type) {}
+
+  public SyntaxModule syntaxModule(FileUtil files) {
     if (syntaxModule == null) {
-      return mainModule(files) + "-SYNTAX";
+      return new SyntaxModule(mainModule(files) + "-SYNTAX", OptionType.DEFAULT);
     }
-    return syntaxModule;
+    return new SyntaxModule(syntaxModule, OptionType.USER_PROVIDED);
   }
 
   @Parameter(names = "--coverage", description = "Generate coverage data when executing semantics.")
