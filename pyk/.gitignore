@@ -1,8 +1,4 @@
-/dist/
-/docs/api/
-/docs/build/
-__pycache__/
-.coverage
-
-.kprove*
-*.debug-log
+# Pyk includes tests written manually as Kore; we therefore want them to be
+# checked in under the pyk/ directory, but not in the rest of the frontend,
+# where they have historically been treated as build artifacts.
+!*.kore
