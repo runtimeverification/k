@@ -1,0 +1,8 @@
+/dist/
+/docs/api/
+/docs/build/
+__pycache__/
+.coverage
+
+.kprove*
+*.debug-log

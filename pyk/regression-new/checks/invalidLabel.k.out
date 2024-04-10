@@ -1,0 +1,18 @@
+[Error] Compiler: Label 'INVALIDLABEL.foo`bar' cannot contain whitespace or backticks.
+	Source(invalidLabel.k)
+	Location(6,19,6,32)
+	6 |	  rule [foo`bar]: true => false
+	  .	                  ^~~~~~~~~~~~~
+[Error] Compiler: Label 'foo bar' cannot contain whitespace or backticks.
+	Source(invalidLabel.k)
+	Location(7,8,7,21)
+	7 |	  rule false => true [label(foo bar)]
+	  .	       ^~~~~~~~~~~~~
+[Error] Compiler: Label 'foo`bar' cannot contain whitespace or backticks.
+	Source(invalidLabel.k)
+	Location(8,8,8,14)
+	8 |	  rule 0 => 1 [label(foo`bar)]
+	  .	       ^~~~~~
+[Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile invalidLabel.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidLabel-kompiled --type-inference-mode checked

@@ -1,0 +1,11 @@
+[Error] Compiler: Rule contains macro symbol that was not expanded
+	Source(expandMacroRequires.k)
+	Location(12,10,12,49)
+	12 |	    rule #foo( X ) => X       requires #bar( X )
+	   .	         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors after macro expansion.
+  while executing phase "expand macros" on sentence at
+	Source(expandMacroRequires.k)
+	Location(12,10,12,49)
+[ERROR] Running process failed with returncode 113:
+    kompile expandMacroRequires.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition expandMacroRequires-kompiled --type-inference-mode checked

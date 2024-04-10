@@ -1,0 +1,8 @@
+[Error] Compiler: anywhere is not supported by the haskell backend.
+	Source(checkHaskellAnywhere.k)
+	Location(8,8,8,14)
+	8 |	  rule 1 => 2 [anywhere]
+	  .	       ^~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkHaskellAnywhere.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition checkHaskellAnywhere-kompiled --type-inference-mode checked

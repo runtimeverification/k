@@ -1,0 +1,21 @@
+// arithmetic
+
+(5 /Rat 6) +Rat (7 /Rat 9) ;
+(5 /Rat 6) -Rat (7 /Rat 9) ;
+(5 /Rat 6) *Rat (7 /Rat 9) ;
+(5 /Rat 6) /Rat (7 /Rat 9) ;
+
+5 +Rat (7 /Rat 9) ;
+5 -Rat (7 /Rat 9) ;
+5 *Rat (7 /Rat 9) ;
+5 /Rat (7 /Rat 9) ;
+
+(5 /Rat 6) +Rat 7 ;
+(5 /Rat 6) -Rat 7 ;
+(5 /Rat 6) *Rat 7 ;
+(5 /Rat 6) /Rat 7 ;
+
+5 +Rat 7 ;
+5 -Rat 7 ;
+5 *Rat 7 ;
+5 /Rat 7 ;
