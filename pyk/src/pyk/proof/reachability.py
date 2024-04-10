@@ -138,7 +138,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                 assert type(subproof) is RefutationProof
                 self.node_refutations[node_id] = subproof
 
-    def get_steps(self) -> Iterable[APRProofStep]:
+    def get_steps(self) -> list[APRProofStep]:
         return [APRProofStep(self, node.id) for node in self.pending]
 
     def commit(self, result: APRProofResult) -> None:
@@ -724,7 +724,7 @@ class APRProver(Prover[APRProofStep, APRProofResult]):
             _LOGGER.info(f'Subsumed into target node {self.proof.id}: {shorten_hashes((node.id, self.proof.target))}')
         return csubst
 
-    def step_proof(self, step: APRProofStep) -> Iterable[APRProofResult]:
+    def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
         curr_node = step.proof.kcfg.node(step.node_id)
 
         if step.proof.bmc_depth is not None and curr_node.id not in self._checked_for_bounded:
@@ -754,7 +754,7 @@ class APRProver(Prover[APRProofStep, APRProofResult]):
         is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
         target_is_terminal = step.proof.is_terminal(step.proof.target)
 
-        terminal_result = [APRProofTerminalResult(node_id=curr_node.id)] if is_terminal else []
+        terminal_result: list[APRProofResult] = [APRProofTerminalResult(node_id=curr_node.id)] if is_terminal else []
 
         # Subsumption should be checked if and only if the target node
         # and the current node are either both terminal or both not terminal

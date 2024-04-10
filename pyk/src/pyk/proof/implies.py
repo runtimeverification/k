@@ -414,7 +414,7 @@ class ImpliesProver(Prover[ImpliesProofStep, ImpliesProofResult]):
         super().__init__(kcfg_explore)
         self.proof = proof
 
-    def step_proof(self, step: ImpliesProofStep) -> Iterable[ImpliesProofResult]:
+    def step_proof(self, step: ImpliesProofStep) -> list[ImpliesProofResult]:
         proof_type = type(step.proof).__name__
         _LOGGER.info(f'Attempting {proof_type} {step.proof.id}')
 
