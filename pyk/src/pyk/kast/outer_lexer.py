@@ -74,7 +74,7 @@ class Loc(NamedTuple):
         return NotImplemented
 
 
-_INIT_LOC: Final = Loc(1, 0)
+INIT_LOC: Final = Loc(1, 0)
 
 
 class Token(NamedTuple):
@@ -89,7 +89,7 @@ class Token(NamedTuple):
         return Token(text=text, type=type, loc=loc)
 
 
-_EOF_TOKEN: Final = Token('', TokenType.EOF, _INIT_LOC)
+_EOF_TOKEN: Final = Token('', TokenType.EOF, INIT_LOC)
 
 _SIMPLE_CHARS: Final = {
     ',': TokenType.COMMA,
@@ -739,7 +739,7 @@ def _strip_bubble_attr(bubble: str) -> tuple[str, list[Token]]:
         next(it)  # skip "["
         la = next(it, '')
 
-        tokens = [Token('[', TokenType.LBRACK, _INIT_LOC)]
+        tokens = [Token('[', TokenType.LBRACK, INIT_LOC)]
         attr_tokens = _attr(la, it)
         try:
             while True:
@@ -769,22 +769,22 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
         la = _skip_ws_and_comments(la, it)
 
         if la == '(':  # TAG_STATE
-            yield Token('(', TokenType.LPAREN, _INIT_LOC)
+            yield Token('(', TokenType.LPAREN, INIT_LOC)
             la = next(it, '')
 
             if la == '"':
                 text, token_type, la = _string(la, it)
-                yield Token(text, token_type, _INIT_LOC)
+                yield Token(text, token_type, INIT_LOC)
             else:
                 content, la = _attr_content(la, it)
                 if content:
                     # allows 'key()'
-                    yield Token(content, TokenType.ATTR_CONTENT, _INIT_LOC)
+                    yield Token(content, TokenType.ATTR_CONTENT, INIT_LOC)
 
             if la != ')':
                 raise _unexpected_character(la)
 
-            yield Token(')', TokenType.RPAREN, _INIT_LOC)
+            yield Token(')', TokenType.RPAREN, INIT_LOC)
 
             la = next(it, '')
             la = _skip_ws_and_comments(la, it)
@@ -792,14 +792,14 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
         if la != ',':
             break
 
-        yield Token(',', TokenType.COMMA, _INIT_LOC)
+        yield Token(',', TokenType.COMMA, INIT_LOC)
         la = next(it, '')
         la = _skip_ws_and_comments(la, it)
 
     if la != ']':
         raise _unexpected_character(la)
 
-    yield Token(']', TokenType.RBRACK, _INIT_LOC)
+    yield Token(']', TokenType.RBRACK, INIT_LOC)
     la = next(it, '')
 
     return la  # noqa: B901
@@ -840,7 +840,7 @@ def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
         la = next(it, '')
 
     attr_key = ''.join(consumed)
-    return Token(attr_key, TokenType.ATTR_KEY, _INIT_LOC), la
+    return Token(attr_key, TokenType.ATTR_KEY, INIT_LOC), la
 
 
 _ATTR_CONTENT_FORBIDDEN: Final = {'', '\n', '\r', '"'}
