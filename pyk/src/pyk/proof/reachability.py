@@ -65,7 +65,7 @@ class APRProofStep(ProofStep):
     node_id: int
 
 
-class APRProof(Proof, KCFGExploration):
+class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     """APRProof and APRProver implement all-path reachability logic,
     as introduced by A. Stefanescu and others in their paper 'All-Path Reachability Logic':
     https://doi.org/10.23638/LMCS-15(2:5)2019
@@ -141,7 +141,7 @@ class APRProof(Proof, KCFGExploration):
     def get_steps(self) -> Iterable[APRProofStep]:
         return [APRProofStep(self, node.id) for node in self.pending]
 
-    def commit(self, result: StepResult) -> None:
+    def commit(self, result: APRProofResult) -> None:
         if isinstance(result, APRProofExtendResult):
             self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
         elif isinstance(result, APRProofSubsumeResult):
@@ -614,7 +614,7 @@ class APRProof(Proof, KCFGExploration):
         return refutation
 
 
-class APRProver(Prover):
+class APRProver(Prover[APRProofStep, APRProofResult]):
     proof: APRProof
 
     main_module_name: str
@@ -724,9 +724,7 @@ class APRProver(Prover):
             _LOGGER.info(f'Subsumed into target node {self.proof.id}: {shorten_hashes((node.id, self.proof.target))}')
         return csubst
 
-    def step_proof(self, step: ProofStep) -> Iterable[StepResult]:
-        assert isinstance(step, APRProofStep)
-
+    def step_proof(self, step: APRProofStep) -> Iterable[APRProofResult]:
         curr_node = step.proof.kcfg.node(step.node_id)
 
         if step.proof.bmc_depth is not None and curr_node.id not in self._checked_for_bounded:

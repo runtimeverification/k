@@ -31,7 +31,14 @@ class ImpliesProofStep(ProofStep):
     proof: ImpliesProof
 
 
-class ImpliesProof(Proof):
+@dataclass
+class ImpliesProofResult(StepResult):
+    csubst: CSubst | None
+    simplified_antecedent: KInner | None
+    simplified_consequent: KInner | None
+
+
+class ImpliesProof(Proof[ImpliesProofStep, ImpliesProofResult]):
     antecedent: KInner
     consequent: KInner
     bind_universally: bool
@@ -60,12 +67,12 @@ class ImpliesProof(Proof):
         self.simplified_consequent = simplified_consequent
         self.csubst = csubst
 
-    def get_steps(self) -> Iterable[ProofStep]:
+    def get_steps(self) -> list[ImpliesProofStep]:
         if not self.can_progress:
             return []
         return [ImpliesProofStep(self)]
 
-    def commit(self, result: StepResult) -> None:
+    def commit(self, result: ImpliesProofResult) -> None:
         proof_type = type(self).__name__
         if isinstance(result, ImpliesProofResult):
             self.csubst = result.csubst
@@ -400,23 +407,14 @@ class RefutationSummary(ProofSummary):
         ]
 
 
-@dataclass
-class ImpliesProofResult(StepResult):
-    csubst: CSubst | None
-    simplified_antecedent: KInner | None
-    simplified_consequent: KInner | None
-
-
-class ImpliesProver(Prover):
+class ImpliesProver(Prover[ImpliesProofStep, ImpliesProofResult]):
     proof: ImpliesProof
 
     def __init__(self, proof: ImpliesProof, kcfg_explore: KCFGExplore):
         super().__init__(kcfg_explore)
         self.proof = proof
 
-    def step_proof(self, step: ProofStep) -> Iterable[StepResult]:
-        assert isinstance(step, ImpliesProofStep)
-
+    def step_proof(self, step: ImpliesProofStep) -> Iterable[ImpliesProofResult]:
         proof_type = type(step.proof).__name__
         _LOGGER.info(f'Attempting {proof_type} {step.proof.id}')
 
