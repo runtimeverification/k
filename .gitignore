@@ -26,8 +26,13 @@ kore/doc
 __pycache__
 result*
 .envrc
-flake.lock
 .DS_Store
 git-describe.out
 timestamp.out
 .profiling-results.json
+
+*.debug-log
+.coverage
+/pyk/dist/
+/pyk/docs/api/
+/pyk/docs/build/
