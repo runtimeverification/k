@@ -25,6 +25,8 @@ version_sub() {
     sed --in-place 's/^K_VERSION=.*$/K_VERSION='${version}'/'                                                         install-k
     sed --in-place 's/^kframework (.*) unstable; urgency=medium$/kframework ('${version}') unstable; urgency=medium/' package/debian/changelog
     sed --in-place 's/^version = ".*"$/version = "'${version}'"/'                                                     pyk/pyproject.toml
+    sed --in-place "s/^version = '.*'$/version = '${version}'/"                                                       pyk/docs/conf.py
+    sed --in-place "s/^release = '.*'$/release = '${version}'/"                                                       pyk/docs/conf.py
 }
 
 version_command="$1" ; shift
