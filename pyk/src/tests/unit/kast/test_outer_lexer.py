@@ -662,7 +662,8 @@ def _parse(path: Path) -> tuple[str, list[Token]]:
             token_type = TokenType[line]
 
             line = next(lines)
-            loc = Loc(*map(int, line.split(',')))
+            line_num, col = map(int, line.split(','))
+            loc = Loc(line_num, col)
 
             line = next(lines)
             token_lines.append(line)
