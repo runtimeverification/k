@@ -22,6 +22,11 @@ import org.kframework.utils.options.StringListConverter;
 
 @RequestScoped
 public class KompileOptions implements Serializable {
+  public enum OptionType {
+    DEFAULT,
+    USER_PROVIDED
+  }
+
   @Inject
   public KompileOptions() {}
 
@@ -62,12 +67,15 @@ public class KompileOptions implements Serializable {
               + " extension (.k).")
   private String mainModule;
 
-  public String mainModule(FileUtil files) {
+  public record MainModule(String name, OptionType type) {}
+
+  public MainModule mainModule(FileUtil files) {
     if (mainModule == null) {
-      return FilenameUtils.getBaseName(outerParsing.mainDefinitionFile(files).getName())
-          .toUpperCase();
+      return new MainModule(
+          FilenameUtils.getBaseName(outerParsing.mainDefinitionFile(files).getName()).toUpperCase(),
+          OptionType.DEFAULT);
     }
-    return mainModule;
+    return new MainModule(mainModule, OptionType.USER_PROVIDED);
   }
 
   @Parameter(
@@ -78,11 +86,13 @@ public class KompileOptions implements Serializable {
               + " <main-module>-SYNTAX).")
   private String syntaxModule;
 
-  public String syntaxModule(FileUtil files) {
+  public record SyntaxModule(String name, OptionType type) {}
+
+  public SyntaxModule syntaxModule(FileUtil files) {
     if (syntaxModule == null) {
-      return mainModule(files) + "-SYNTAX";
+      return new SyntaxModule(mainModule(files).name() + "-SYNTAX", OptionType.DEFAULT);
     }
-    return syntaxModule;
+    return new SyntaxModule(syntaxModule, OptionType.USER_PROVIDED);
   }
 
   @Parameter(names = "--coverage", description = "Generate coverage data when executing semantics.")

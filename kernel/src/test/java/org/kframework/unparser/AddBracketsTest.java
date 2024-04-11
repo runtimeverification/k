@@ -13,6 +13,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
@@ -45,8 +46,8 @@ public class AddBracketsTest {
 
     Definition baseK =
         parser.loadDefinition(
-            "K",
-            "K",
+            new KompileOptions.MainModule("K", KompileOptions.OptionType.USER_PROVIDED),
+            new KompileOptions.SyntaxModule("K", KompileOptions.OptionType.USER_PROVIDED),
             definitionText,
             definitionFile,
             definitionFile.getParentFile(),
