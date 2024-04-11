@@ -6,14 +6,15 @@ import org.kframework.kore.K
 import org.kframework.kore.KLabel
 import org.kframework.kore.Unapply._
 import org.kframework.utils.StringUtil
-import scala.collection.JavaConverters._
+import scala.collection.immutable
+import scala.jdk.CollectionConverters._
 
 /**
  * Print terms according to the official KAST syntax.
  */
 object ToKast {
   def apply(k: K): String = {
-    val b = StringBuilder.newBuilder
+    val b = new StringBuilder()
     unparse(s => b ++= s, false, 0, k)
     b.toString()
   }
@@ -34,7 +35,7 @@ object ToKast {
     } else if (inParen) {
       name = " `" + escapeBackTicksAndSlashes(l.name) + '`'
     } else {
-      name = '`' + escapeBackTicksAndSlashes(l.name) + '`'
+      name = "`" + escapeBackTicksAndSlashes(l.name) + '`'
     }
     if (l.params.isEmpty) {
       name
@@ -89,7 +90,7 @@ object ToKast {
         unparse(accumulator, false, 0, a)
       }
       accumulator(")")
-    case KSequence(Seq()) => accumulator(".K")
+    case KSequence(immutable.Seq()) => accumulator(".K")
     case KSequence(a +: items) =>
       unparse(accumulator, inParen, 2, a)
       for (i <- items) {

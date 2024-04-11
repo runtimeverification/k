@@ -5,7 +5,7 @@ import org.kframework.attributes._
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
 import org.kframework.kore
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Abstract Data Types: basic implementations for the inner KORE interfaces.

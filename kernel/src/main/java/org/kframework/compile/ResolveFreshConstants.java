@@ -225,7 +225,7 @@ public class ResolveFreshConstants {
 
   public Module resolve(Module m) {
     this.m = m;
-    Set<Sentence> sentences = map(this::resolve, m.localSentences());
+    scala.collection.immutable.Set<Sentence> sentences = map(this::resolve, m.localSentences());
     KToken counterCellLabel = KToken("generatedCounter", Sort("#CellName"));
     KApply freshCell =
         KApply(
@@ -293,8 +293,8 @@ public class ResolveFreshConstants {
         Set<Sentence> newSentences =
             GenerateSentencesFromConfigDecl.gen(
                 kem, generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
-        sentences = (Set<Sentence>) sentences.$bar(newSentences);
-        sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
+        sentences = sentences.$bar(newSentences).toSet();
+        sentences = sentences.$bar(immutable(counterSentences)).toSet();
       }
     }
     if (m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
@@ -303,8 +303,8 @@ public class ResolveFreshConstants {
       Set<Sentence> newSentences =
           GenerateSentencesFromConfigDecl.gen(
               kem, freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
-      sentences = (Set<Sentence>) sentences.$bar(newSentences);
-      sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
+      sentences = sentences.$bar(newSentences).toSet();
+      sentences = sentences.$bar(immutable(counterSentences)).toSet();
     }
     if (sentences.equals(m.localSentences())) {
       return m;
