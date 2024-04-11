@@ -28,10 +28,6 @@ ENV LC_ALL=C.UTF-8
 ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/stack.yaml                          /home/$USER/.tmp-haskell/
 ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/kore/kore.cabal                     /home/$USER/.tmp-haskell/kore/
 ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/kore-rpc-types/kore-rpc-types.cabal /home/$USER/.tmp-haskell/kore-rpc-types/
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/booster/package.yaml                /home/$USER/.tmp-haskell/booster/
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/dev-tools/package.yaml              /home/$USER/.tmp-haskell/dev-tools/
 RUN cd /home/$USER/.tmp-haskell && stack build --only-snapshot
-
-ENV LC_ALL=C.UTF-8
-ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/stack.yaml                    /home/$USER/.tmp-booster/
-ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/package.yaml                  /home/$USER/.tmp-booster/
-ADD --chown=$USER:$GROUP hs-backend-booster/src/main/native/hs-backend-booster/dev-tools/package.yaml        /home/$USER/.tmp-booster/dev-tools/
-RUN cd /home/$USER/.tmp-booster && stack build --only-snapshot
