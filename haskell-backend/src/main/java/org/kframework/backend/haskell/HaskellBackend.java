@@ -58,7 +58,7 @@ public class HaskellBackend extends KoreBackend {
       args.add(haskellKompileOptions.haskellBackendCommand);
       args.add("definition.kore");
       args.add("--module");
-      args.add(kompileOptions.mainModule(files));
+      args.add(kompileOptions.mainModule(files).name());
       args.add("--output");
       args.add("haskellDefinition.bin");
       args.add("--serialize");
