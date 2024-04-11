@@ -140,2451 +140,3265 @@ module STRING-BUFFER
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 STRING-SYNTAX
 
 KW_SYNTAX
+2,3
 syntax
 
 ID_UPPER
+2,10
 String
 
 LBRACK
+2,17
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.String
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+3,3
 syntax
 
 ID_UPPER
+3,10
 String
 
 DCOLONEQ
+3,17
 ::=
 
 REGEX
+3,21
 r"[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"
 
 LBRACK
+3,165
 [
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+4,1
 endmodule
 
 KW_MODULE
+7,1
 module
 
 MODNAME
+7,8
 STRING-COMMON
 
 KW_IMPORTS
+8,3
 imports
 
 MODNAME
+8,11
 STRING-SYNTAX
 
 KW_IMPORTS
+9,3
 imports
 
 KW_PRIVATE
+9,11
 private
 
 MODNAME
+9,19
 INT
 
 KW_IMPORTS
+10,3
 imports
 
 KW_PRIVATE
+10,11
 private
 
 MODNAME
+10,19
 FLOAT-SYNTAX
 
 KW_IMPORTS
+11,3
 imports
 
 KW_PRIVATE
+11,11
 private
 
 MODNAME
+11,19
 K-EQUAL
 
 KW_IMPORTS
+12,3
 imports
 
 KW_PRIVATE
+12,11
 private
 
 MODNAME
+12,19
 BOOL
 
 KW_SYNTAX
+14,3
 syntax
 
 ID_UPPER
+14,10
 String
 
 DCOLONEQ
+14,17
 ::=
 
 ID_UPPER
+14,21
 String
 
 STRING
+14,28
 "+String"
 
 ID_UPPER
+14,38
 String
 
 LBRACK
+14,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}+_{\scriptstyle\it String}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.concat
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+16,3
 syntax
 
 ID_UPPER
+16,10
 Int
 
 DCOLONEQ
+16,14
 ::=
 
 ID_LOWER
+16,18
 lengthString
 
 LPAREN
+16,31
 (
 
 ID_UPPER
+16,33
 String
 
 RPAREN
+16,40
 )
 
 LBRACK
+16,42
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.length
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+18,3
 syntax
 
 ID_UPPER
+18,10
 String
 
 DCOLONEQ
+18,17
 ::=
 
 ID_LOWER
+18,21
 chrChar
 
 LPAREN
+18,29
 (
 
 ID_UPPER
+18,31
 Int
 
 RPAREN
+18,35
 )
 
 LBRACK
+18,42
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.chr
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+19,3
 syntax
 
 ID_UPPER
+19,10
 Int
 
 DCOLONEQ
+19,14
 ::=
 
 ID_LOWER
+19,18
 ordChar
 
 LPAREN
+19,26
 (
 
 ID_UPPER
+19,28
 String
 
 RPAREN
+19,35
 )
 
 LBRACK
+19,42
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.ord
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+21,3
 syntax
 
 ID_UPPER
+21,10
 String
 
 DCOLONEQ
+21,17
 ::=
 
 ID_LOWER
+21,21
 substrString
 
 LPAREN
+21,34
 (
 
 ID_UPPER
+21,36
 String
 
 COMMA
+21,43
 ,
 
 ID_LOWER
+21,45
 startIndex
 
 COLON
+21,55
 :
 
 ID_UPPER
+21,57
 Int
 
 COMMA
+21,61
 ,
 
 ID_LOWER
+21,63
 endIndex
 
 COLON
+21,71
 :
 
 ID_UPPER
+21,73
 Int
 
 RPAREN
+21,77
 )
 
 LBRACK
+21,79
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.substr
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+23,3
 syntax
 
 ID_UPPER
+23,10
 Int
 
 DCOLONEQ
+23,14
 ::=
 
 ID_LOWER
+23,18
 findString
 
 LPAREN
+23,29
 (
 
 ID_LOWER
+23,31
 haystack
 
 COLON
+23,39
 :
 
 ID_UPPER
+23,41
 String
 
 COMMA
+23,48
 ,
 
 ID_LOWER
+23,50
 needle
 
 COLON
+23,56
 :
 
 ID_UPPER
+23,58
 String
 
 COMMA
+23,65
 ,
 
 ID_LOWER
+23,67
 index
 
 COLON
+23,72
 :
 
 ID_UPPER
+23,74
 Int
 
 RPAREN
+23,78
 )
 
 LBRACK
+23,82
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.find
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+24,3
 syntax
 
 ID_UPPER
+24,10
 Int
 
 DCOLONEQ
+24,14
 ::=
 
 ID_LOWER
+24,18
 rfindString
 
 LPAREN
+24,30
 (
 
 ID_LOWER
+24,32
 haystack
 
 COLON
+24,40
 :
 
 ID_UPPER
+24,42
 String
 
 COMMA
+24,49
 ,
 
 ID_LOWER
+24,51
 needle
 
 COLON
+24,57
 :
 
 ID_UPPER
+24,59
 String
 
 COMMA
+24,66
 ,
 
 ID_LOWER
+24,68
 index
 
 COLON
+24,73
 :
 
 ID_UPPER
+24,75
 Int
 
 RPAREN
+24,79
 )
 
 LBRACK
+24,82
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.rfind
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+26,3
 syntax
 
 ID_UPPER
+26,10
 Int
 
 DCOLONEQ
+26,14
 ::=
 
 ID_LOWER
+26,18
 findChar
 
 LPAREN
+26,27
 (
 
 ID_LOWER
+26,29
 haystack
 
 COLON
+26,37
 :
 
 ID_UPPER
+26,39
 String
 
 COMMA
+26,46
 ,
 
 ID_LOWER
+26,48
 needles
 
 COLON
+26,55
 :
 
 ID_UPPER
+26,57
 String
 
 COMMA
+26,64
 ,
 
 ID_LOWER
+26,66
 index
 
 COLON
+26,71
 :
 
 ID_UPPER
+26,73
 Int
 
 RPAREN
+26,77
 )
 
 LBRACK
+26,83
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.findChar
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+27,3
 syntax
 
 ID_UPPER
+27,10
 Int
 
 DCOLONEQ
+27,14
 ::=
 
 ID_LOWER
+27,18
 rfindChar
 
 LPAREN
+27,28
 (
 
 ID_LOWER
+27,30
 haystack
 
 COLON
+27,38
 :
 
 ID_UPPER
+27,40
 String
 
 COMMA
+27,47
 ,
 
 ID_LOWER
+27,49
 needles
 
 COLON
+27,56
 :
 
 ID_UPPER
+27,58
 String
 
 COMMA
+27,65
 ,
 
 ID_LOWER
+27,67
 index
 
 COLON
+27,72
 :
 
 ID_UPPER
+27,74
 Int
 
 RPAREN
+27,78
 )
 
 LBRACK
+27,83
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.rfindChar
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+29,3
 syntax
 
 ID_UPPER
+29,10
 String
 
 DCOLONEQ
+29,17
 ::=
 
 ID_UPPER
+29,21
 Bool2String
 
 LPAREN
+29,32
 (
 
 ID_UPPER
+29,33
 Bool
 
 RPAREN
+29,37
 )
 
 LBRACK
+29,39
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+30,3
 rule
 
 BUBBLE
+30,8
 Bool2String(true)  => "true"
 
 KW_RULE
+31,3
 rule
 
 BUBBLE
+31,8
 Bool2String(false) => "false"
 
 KW_SYNTAX
+33,3
 syntax
 
 ID_UPPER
+33,10
 Bool
 
 DCOLONEQ
+33,15
 ::=
 
 ID_UPPER
+33,19
 String2Bool
 
 LPAREN
+33,30
 (
 
 ID_UPPER
+33,31
 String
 
 RPAREN
+33,37
 )
 
 LBRACK
+33,39
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+34,3
 rule
 
 BUBBLE
+34,8
 String2Bool("true")  => true
 
 KW_RULE
+35,3
 rule
 
 BUBBLE
+35,8
 String2Bool("false") => false
 
 KW_SYNTAX
+37,3
 syntax
 
 ID_UPPER
+37,10
 String
 
 DCOLONEQ
+37,17
 ::=
 
 ID_UPPER
+37,21
 Float2String
 
 LPAREN
+37,34
 (
 
 ID_UPPER
+37,36
 Float
 
 RPAREN
+37,42
 )
 
 LBRACK
+37,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.float2string
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+38,3
 syntax
 
 ID_UPPER
+38,10
 String
 
 DCOLONEQ
+38,17
 ::=
 
 ID_UPPER
+38,21
 Float2String
 
 LPAREN
+38,34
 (
 
 ID_UPPER
+38,36
 Float
 
 COMMA
+38,42
 ,
 
 ID_LOWER
+38,44
 format
 
 COLON
+38,50
 :
 
 ID_UPPER
+38,52
 String
 
 RPAREN
+38,59
 )
 
 LBRACK
+38,65
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FloatFormat
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.floatFormat
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+39,3
 syntax
 
 ID_UPPER
+39,10
 Float
 
 DCOLONEQ
+39,17
 ::=
 
 ID_UPPER
+39,21
 String2Float
 
 LPAREN
+39,34
 (
 
 ID_UPPER
+39,36
 String
 
 RPAREN
+39,43
 )
 
 LBRACK
+39,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.string2float
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+41,3
 syntax
 
 ID_UPPER
+41,10
 Int
 
 DCOLONEQ
+41,17
 ::=
 
 ID_UPPER
+41,21
 String2Int
 
 LPAREN
+41,34
 (
 
 ID_UPPER
+41,36
 String
 
 RPAREN
+41,43
 )
 
 LBRACK
+41,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.string2int
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+42,3
 syntax
 
 ID_UPPER
+42,10
 String
 
 DCOLONEQ
+42,17
 ::=
 
 ID_UPPER
+42,21
 Int2String
 
 LPAREN
+42,34
 (
 
 ID_UPPER
+42,36
 Int
 
 RPAREN
+42,40
 )
 
 LBRACK
+42,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.int2string
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+43,3
 syntax
 
 ID_UPPER
+43,10
 String
 
 DCOLONEQ
+43,17
 ::=
 
 ID_UPPER
+43,21
 Base2String
 
 LPAREN
+43,34
 (
 
 ID_UPPER
+43,36
 Int
 
 COMMA
+43,40
 ,
 
 ID_LOWER
+43,42
 base
 
 COLON
+43,46
 :
 
 ID_UPPER
+43,48
 Int
 
 RPAREN
+43,52
 )
 
 LBRACK
+43,63
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.base2string
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+44,3
 syntax
 
 ID_UPPER
+44,10
 Int
 
 DCOLONEQ
+44,17
 ::=
 
 ID_UPPER
+44,21
 String2Base
 
 LPAREN
+44,34
 (
 
 ID_UPPER
+44,36
 String
 
 COMMA
+44,43
 ,
 
 ID_LOWER
+44,45
 base
 
 COLON
+44,49
 :
 
 ID_UPPER
+44,51
 Int
 
 RPAREN
+44,55
 )
 
 LBRACK
+44,63
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.string2base
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+46,3
 syntax
 
 ID_UPPER
+46,10
 String
 
 DCOLONEQ
+46,17
 ::=
 
 STRING
+46,21
 "replaceAll"
 
 STRING
+46,34
 "("
 
 ID_LOWER
+46,38
 haystack
 
 COLON
+46,46
 :
 
 ID_UPPER
+46,48
 String
 
 STRING
+46,55
 ","
 
 ID_LOWER
+46,59
 needle
 
 COLON
+46,65
 :
 
 ID_UPPER
+46,67
 String
 
 STRING
+46,74
 ","
 
 ID_LOWER
+46,78
 replacement
 
 COLON
+46,89
 :
 
 ID_UPPER
+46,91
 String
 
 STRING
+46,98
 ")"
 
 LBRACK
+46,107
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.replaceAll
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+47,3
 syntax
 
 ID_UPPER
+47,10
 String
 
 DCOLONEQ
+47,17
 ::=
 
 STRING
+47,21
 "replace"
 
 STRING
+47,31
 "("
 
 ID_LOWER
+47,35
 haystack
 
 COLON
+47,43
 :
 
 ID_UPPER
+47,45
 String
 
 STRING
+47,52
 ","
 
 ID_LOWER
+47,56
 needle
 
 COLON
+47,62
 :
 
 ID_UPPER
+47,64
 String
 
 STRING
+47,71
 ","
 
 ID_LOWER
+47,75
 replacement
 
 COLON
+47,86
 :
 
 ID_UPPER
+47,88
 String
 
 STRING
+47,95
 ","
 
 ID_LOWER
+47,99
 times
 
 COLON
+47,104
 :
 
 ID_UPPER
+47,106
 Int
 
 STRING
+47,110
 ")"
 
 LBRACK
+47,114
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.replace
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+48,3
 syntax
 
 ID_UPPER
+48,10
 String
 
 DCOLONEQ
+48,17
 ::=
 
 STRING
+48,21
 "replaceFirst"
 
 STRING
+48,36
 "("
 
 ID_LOWER
+48,40
 haystack
 
 COLON
+48,48
 :
 
 ID_UPPER
+48,50
 String
 
 STRING
+48,57
 ","
 
 ID_LOWER
+48,61
 needle
 
 COLON
+48,67
 :
 
 ID_UPPER
+48,69
 String
 
 STRING
+48,76
 ","
 
 ID_LOWER
+48,80
 replacement
 
 COLON
+48,91
 :
 
 ID_UPPER
+48,93
 String
 
 STRING
+48,100
 ")"
 
 LBRACK
+48,107
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.replaceFirst
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+49,3
 syntax
 
 ID_UPPER
+49,10
 Int
 
 DCOLONEQ
+49,14
 ::=
 
 STRING
+49,18
 "countAllOccurrences"
 
 STRING
+49,40
 "("
 
 ID_LOWER
+49,44
 haystack
 
 COLON
+49,52
 :
 
 ID_UPPER
+49,54
 String
 
 STRING
+49,61
 ","
 
 ID_LOWER
+49,65
 needle
 
 COLON
+49,71
 :
 
 ID_UPPER
+49,73
 String
 
 STRING
+49,80
 ")"
 
 LBRACK
+49,95
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.countAllOccurrences
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+51,3
 syntax
 
 ID_UPPER
+51,10
 Bool
 
 DCOLONEQ
+51,15
 ::=
 
 ID_UPPER
+51,19
 String
 
 STRING
+51,26
 "==String"
 
 ID_UPPER
+51,37
 String
 
 LBRACK
+51,45
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.eq
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+52,17
 |
 
 ID_UPPER
+52,19
 String
 
 STRING
+52,26
 "=/=String"
 
 ID_UPPER
+52,38
 String
 
 LBRACK
+52,45
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.ne
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+53,3
 rule
 
 BUBBLE
+53,8
 S1:String =/=String S2:String => notBool (S1 ==String S2)
 
 KW_SYNTAX
+55,3
 syntax
 
 ID_UPPER
+55,10
 Bool
 
 DCOLONEQ
+55,15
 ::=
 
 ID_UPPER
+55,19
 String
 
 STRING
+55,27
 "<String"
 
 ID_UPPER
+55,37
 String
 
 LBRACK
+55,44
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.lt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+56,17
 |
 
 ID_UPPER
+56,19
 String
 
 STRING
+56,26
 "<=String"
 
 ID_UPPER
+56,37
 String
 
 LBRACK
+56,44
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.le
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+57,17
 |
 
 ID_UPPER
+57,19
 String
 
 STRING
+57,27
 ">String"
 
 ID_UPPER
+57,37
 String
 
 LBRACK
+57,44
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.gt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+58,17
 |
 
 ID_UPPER
+58,19
 String
 
 STRING
+58,26
 ">=String"
 
 ID_UPPER
+58,37
 String
 
 LBRACK
+58,44
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.ge
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+60,3
 syntax
 
 ID_UPPER
+60,10
 String
 
 DCOLONEQ
+60,17
 ::=
 
 ID_LOWER
+60,21
 categoryChar
 
 LPAREN
+60,33
 (
 
 ID_UPPER
+60,34
 String
 
 RPAREN
+60,40
 )
 
 LBRACK
+60,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.category
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+61,19
 |
 
 ID_LOWER
+61,21
 directionalityChar
 
 LPAREN
+61,39
 (
 
 ID_UPPER
+61,40
 String
 
 RPAREN
+61,46
 )
 
 LBRACK
+61,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.directionality
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+63,3
 syntax
 
 ID_UPPER
+63,10
 String
 
 DCOLONEQ
+63,17
 ::=
 
 STRING
+63,21
 "newUUID"
 
 LBRACK
+63,31
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.uuid
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+65,3
 rule
 
 BUBBLE
+65,8
 S1:String <=String S2:String => notBool (S2 <String S1)
 
 KW_RULE
+66,3
 rule
 
 BUBBLE
+66,8
 S1:String >String S2:String => S2 <String S1
 
 KW_RULE
+67,3
 rule
 
 BUBBLE
+67,8
 S1:String >=String S2:String => notBool (S1 <String S2)
 
 KW_RULE
+69,3
 rule
 
 BUBBLE
+69,8
 findChar(S1:String, S2:String, I:Int) => #if findString(S1, substrString(S2, 0, 1), I) ==Int -1 #then findChar(S1, substrString(S2, 1, lengthString(S2)), I) #else #if findChar(S1, substrString(S2, 1, lengthString(S2)), I) ==Int -1 #then findString(S1, substrString(S2, 0, 1), I) #else minInt(findString(S1, substrString(S2, 0, 1), I), findChar(S1, substrString(S2, 1, lengthString(S2)), I)) #fi #fi requires S2 =/=String ""
 
 KW_RULE
+70,3
 rule
 
 BUBBLE
+70,8
 findChar(_, "", _) => -1
 
 KW_RULE
+71,3
 rule
 
 BUBBLE
+71,8
 rfindChar(S1:String, S2:String, I:Int) => maxInt(rfindString(S1, substrString(S2, 0, 1), I), rfindChar(S1, substrString(S2, 1, lengthString(S2)), I)) requires S2 =/=String ""
 
 KW_RULE
+72,3
 rule
 
 BUBBLE
+72,8
 rfindChar(_, "", _) => -1
 
 KW_RULE
+74,3
 rule
 
 BUBBLE
+74,8
 countAllOccurrences(Source:String, ToCount:String) => 0
             requires findString(Source, ToCount, 0) <Int 0
 
 KW_RULE
+76,3
 rule
 
 BUBBLE
+76,8
 countAllOccurrences(Source:String, ToCount:String) => 1 +Int countAllOccurrences(substrString(Source, findString(Source, ToCount, 0) +Int lengthString(ToCount), lengthString(Source)), ToCount)
             requires findString(Source, ToCount, 0) >=Int 0
 
 KW_RULE
+79,3
 rule
 
 BUBBLE
+79,8
 replaceFirst(Source:String, ToReplace:String, Replacement:String) => substrString(Source, 0, findString(Source, ToReplace, 0))
                 +String Replacement +String substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source))
                 requires findString(Source, ToReplace, 0) >=Int 0
 
 KW_RULE
+82,3
 rule
 
 BUBBLE
+82,8
 replaceFirst(Source:String, ToReplace:String, _:String) => Source
         requires findString(Source, ToReplace, 0) <Int 0
 
 KW_RULE
+86,3
 rule
 
 BUBBLE
+86,8
 replace(Source:String, ToReplace:String, Replacement:String, Count:Int) =>
        substrString(Source, 0, findString(Source, ToReplace, 0)) +String Replacement +String
        replace(substrString(Source, findString(Source, ToReplace, 0) +Int lengthString(ToReplace), lengthString(Source)), ToReplace, Replacement, Count -Int 1)
         requires Count >Int 0
 
 KW_RULE
+90,3
 rule
 
 BUBBLE
+90,8
 replace(Source:String, _, _, 0) => Source
 
 KW_RULE
+91,3
 rule
 
 BUBBLE
+91,8
 replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
 KW_ENDMODULE
+93,1
 endmodule
 
 KW_MODULE
+96,1
 module
 
 MODNAME
+96,8
 STRING-KORE
 
 LBRACK
+96,20
 [
 
 ATTR_KEY
+1,0
 kore
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbolic
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+97,3
 imports
 
 KW_PRIVATE
+97,11
 private
 
 MODNAME
+97,19
 K-EQUAL
 
 KW_IMPORTS
+98,3
 imports
 
 MODNAME
+98,11
 STRING-COMMON
 
 KW_RULE
+100,3
 rule
 
 BUBBLE
+100,8
 S1:String ==K S2:String => S1 ==String S2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+102,1
 endmodule
 
 KW_MODULE
+105,1
 module
 
 MODNAME
+105,8
 STRING
 
 KW_IMPORTS
+106,3
 imports
 
 MODNAME
+106,11
 STRING-COMMON
 
 KW_IMPORTS
+107,3
 imports
 
 MODNAME
+107,11
 STRING-KORE
 
 KW_ENDMODULE
+108,1
 endmodule
 
 KW_MODULE
+111,1
 module
 
 MODNAME
+111,8
 STRING-BUFFER-IN-K
 
 LBRACK
+111,27
 [
 
 ATTR_KEY
+1,0
 symbolic
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+112,3
 imports
 
 KW_PRIVATE
+112,11
 private
 
 MODNAME
+112,19
 BASIC-K
 
 KW_IMPORTS
+113,3
 imports
 
 MODNAME
+113,11
 STRING
 
 KW_SYNTAX
+115,3
 syntax
 
 ID_UPPER
+115,10
 StringBuffer
 
 DCOLONEQ
+115,23
 ::=
 
 STRING
+115,27
 ".StringBuffer"
 
 LBRACK
+115,43
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+116,3
 syntax
 
 ID_UPPER
+116,10
 StringBuffer
 
 DCOLONEQ
+116,23
 ::=
 
 ID_UPPER
+116,27
 StringBuffer
 
 STRING
+116,40
 "+String"
 
 ID_UPPER
+116,50
 String
 
 LBRACK
+116,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 avoid
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+117,3
 syntax
 
 ID_UPPER
+117,10
 StringBuffer
 
 DCOLONEQ
+117,23
 ::=
 
 ID_UPPER
+117,27
 String
 
 KW_SYNTAX
+118,3
 syntax
 
 ID_UPPER
+118,10
 String
 
 DCOLONEQ
+118,17
 ::=
 
 ID_UPPER
+118,21
 StringBuffer2String
 
 LPAREN
+118,41
 (
 
 ID_UPPER
+118,43
 StringBuffer
 
 RPAREN
+118,56
 )
 
 LBRACK
+118,58
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+120,3
 rule
 
 BUBBLE
+120,8
 {SB:String +String S:String}<:StringBuffer => (SB +String S)::String
 
 KW_RULE
+121,3
 rule
 
 BUBBLE
+121,8
 .StringBuffer => ""
 
 KW_RULE
+122,3
 rule
 
 BUBBLE
+122,8
 StringBuffer2String(S:String) => S
 
 KW_ENDMODULE
+123,1
 endmodule
 
 KW_MODULE
+126,1
 module
 
 MODNAME
+126,8
 STRING-BUFFER-HOOKED
 
 LBRACK
+126,29
 [
 
 ATTR_KEY
+1,0
 concrete
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+127,3
 imports
 
 KW_PRIVATE
+127,11
 private
 
 MODNAME
+127,19
 BASIC-K
 
 KW_IMPORTS
+128,3
 imports
 
 MODNAME
+128,11
 STRING
 
 KW_SYNTAX
+130,3
 syntax
 
 ID_UPPER
+130,10
 StringBuffer
 
 LBRACK
+130,23
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BUFFER.StringBuffer
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+131,3
 syntax
 
 ID_UPPER
+131,10
 StringBuffer
 
 DCOLONEQ
+131,23
 ::=
 
 STRING
+131,27
 ".StringBuffer"
 
 LBRACK
+131,43
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BUFFER.empty
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+132,3
 syntax
 
 ID_UPPER
+132,10
 StringBuffer
 
 DCOLONEQ
+132,23
 ::=
 
 ID_UPPER
+132,27
 StringBuffer
 
 STRING
+132,40
 "+String"
 
 ID_UPPER
+132,50
 String
 
 LBRACK
+132,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BUFFER.concat
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 avoid
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+133,3
 syntax
 
 ID_UPPER
+133,10
 String
 
 DCOLONEQ
+133,17
 ::=
 
 ID_UPPER
+133,21
 StringBuffer2String
 
 LPAREN
+133,41
 (
 
 ID_UPPER
+133,43
 StringBuffer
 
 RPAREN
+133,56
 )
 
 LBRACK
+133,58
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BUFFER.toString
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+134,1
 endmodule
 
 KW_MODULE
+137,1
 module
 
 MODNAME
+137,8
 STRING-BUFFER
 
 KW_IMPORTS
+138,3
 imports
 
 MODNAME
+138,11
 STRING-BUFFER-HOOKED
 
 KW_IMPORTS
+139,3
 imports
 
 MODNAME
+139,11
 STRING-BUFFER-IN-K
 
 KW_ENDMODULE
+140,1
 endmodule
 
 EOF
+140,9
 

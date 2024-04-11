@@ -13,18 +13,23 @@ rule/*2*/
   // end of rule 2
 ===
 KW_RULE
+1,1
 rule
 
 BUBBLE
+1,11
 <a> A        </a>
           <b> b1 => b2 </b>
 
 KW_RULE
+10,1
 rule
 
 BUBBLE
+12,2
 <a> a1 => a2 </a>
   <b> B        </b>
 
 EOF
+13,18
 

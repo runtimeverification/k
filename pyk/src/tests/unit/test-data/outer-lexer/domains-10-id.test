@@ -28,304 +28,405 @@ module ID
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 ID-SYNTAX-PROGRAM-PARSING
 
 KW_IMPORTS
+2,3
 imports
 
 MODNAME
+2,11
 BUILTIN-ID-TOKENS
 
 KW_SYNTAX
+3,3
 syntax
 
 ID_UPPER
+3,10
 Id
 
 DCOLONEQ
+3,13
 ::=
 
 REGEX
+3,17
 r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"
 
 LBRACK
+3,70
 [
 
 ATTR_KEY
+1,0
 prec
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 1
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 VBAR
+4,15
 |
 
 ID_UPPER
+4,17
 #LowerId
 
 LBRACK
+4,70
 [
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 VBAR
+5,15
 |
 
 ID_UPPER
+5,17
 #UpperId
 
 LBRACK
+5,70
 [
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+6,1
 endmodule
 
 KW_MODULE
+9,1
 module
 
 MODNAME
+9,8
 ID-SYNTAX
 
 KW_SYNTAX
+10,3
 syntax
 
 ID_UPPER
+10,10
 Id
 
 LBRACK
+10,13
 [
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+11,1
 endmodule
 
 KW_MODULE
+14,1
 module
 
 MODNAME
+14,8
 ID-COMMON
 
 KW_IMPORTS
+15,3
 imports
 
 MODNAME
+15,11
 ID-SYNTAX
 
 KW_IMPORTS
+16,3
 imports
 
 KW_PRIVATE
+16,11
 private
 
 MODNAME
+16,19
 STRING
 
 KW_SYNTAX
+18,3
 syntax
 
 ID_UPPER
+18,10
 String
 
 DCOLONEQ
+18,17
 ::=
 
 ID_UPPER
+18,21
 Id2String
 
 LPAREN
+18,31
 (
 
 ID_UPPER
+18,33
 Id
 
 RPAREN
+18,36
 )
 
 LBRACK
+18,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.token2string
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+19,3
 syntax
 
 ID_UPPER
+19,10
 Id
 
 DCOLONEQ
+19,13
 ::=
 
 ID_UPPER
+19,17
 String2Id
 
 LPAREN
+19,27
 (
 
 ID_UPPER
+19,28
 String
 
 RPAREN
+19,34
 )
 
 LBRACK
+19,36
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 STRING.string2token
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+20,3
 syntax
 
 ID_UPPER
+20,10
 Id
 
 DCOLONEQ
+20,13
 ::=
 
 ID_LOWER
+20,17
 freshId
 
 LPAREN
+20,24
 (
 
 ID_UPPER
+20,25
 Int
 
 RPAREN
+20,28
 )
 
 LBRACK
+20,33
 [
 
 ATTR_KEY
+1,0
 freshGenerator
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 private
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+22,3
 rule
 
 BUBBLE
+22,8
 freshId(I:Int) => String2Id("_" +String Int2String(I))
 
 KW_ENDMODULE
+23,1
 endmodule
 
 KW_MODULE
+26,1
 module
 
 MODNAME
+26,8
 ID
 
 KW_IMPORTS
+27,3
 imports
 
 MODNAME
+27,11
 ID-COMMON
 
 KW_ENDMODULE
+28,1
 endmodule
 
 EOF
+28,9
 
