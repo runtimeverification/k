@@ -1,0 +1,10 @@
+[]
+
+module TEST-COMMENT-3
+
+  /* This is a block comment. */
+
+  sort Nat{} []
+
+endmodule []
+

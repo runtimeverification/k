@@ -1,0 +1,11 @@
+  {
+    S:String
+  #Equals
+    "5\n"
+  }
+#Or
+  {
+    S:String
+  #Equals
+    "7\n"
+  }
