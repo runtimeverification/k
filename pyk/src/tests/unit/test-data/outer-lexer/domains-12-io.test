@@ -292,3900 +292,5199 @@ module STDOUT-STREAM
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 K-IO
 
 KW_IMPORTS
+2,3
 imports
 
 KW_PRIVATE
+2,11
 private
 
 MODNAME
+2,19
 LIST
 
 KW_IMPORTS
+3,3
 imports
 
 KW_PRIVATE
+3,11
 private
 
 MODNAME
+3,19
 STRING
 
 KW_IMPORTS
+4,3
 imports
 
 KW_PRIVATE
+4,11
 private
 
 MODNAME
+4,19
 INT
 
 KW_SYNTAX
+6,3
 syntax
 
 ID_UPPER
+6,10
 IOError
 
 DCOLONEQ
+6,18
 ::=
 
 STRING
+6,22
 "#EOF"
 
 LBRACK
+6,29
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EOF
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+6,52
 |
 
 ID_LOWER
+6,54
 #unknownIOError
 
 LPAREN
+6,69
 (
 
 ID_LOWER
+6,70
 errno
 
 COLON
+6,75
 :
 
 ID_UPPER
+6,77
 Int
 
 RPAREN
+6,80
 )
 
 LBRACK
+6,82
 [
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+7,20
 |
 
 STRING
+7,22
 "#E2BIG"
 
 LBRACK
+7,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #E2BIG
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+8,20
 |
 
 STRING
+8,22
 "#EACCES"
 
 LBRACK
+8,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EACCES
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+9,20
 |
 
 STRING
+9,22
 "#EAGAIN"
 
 LBRACK
+9,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EAGAIN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+10,20
 |
 
 STRING
+10,22
 "#EBADF"
 
 LBRACK
+10,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EBADF
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+11,20
 |
 
 STRING
+11,22
 "#EBUSY"
 
 LBRACK
+11,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EBUSY
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+12,20
 |
 
 STRING
+12,22
 "#ECHILD"
 
 LBRACK
+12,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ECHILD
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+13,20
 |
 
 STRING
+13,22
 "#EDEADLK"
 
 LBRACK
+13,33
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EDEADLK
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+14,20
 |
 
 STRING
+14,22
 "#EDOM"
 
 LBRACK
+14,30
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EDOM
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+15,20
 |
 
 STRING
+15,22
 "#EEXIST"
 
 LBRACK
+15,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EEXIST
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+16,20
 |
 
 STRING
+16,22
 "#EFAULT"
 
 LBRACK
+16,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EFAULT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+17,20
 |
 
 STRING
+17,22
 "#EFBIG"
 
 LBRACK
+17,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EFBIG
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+18,20
 |
 
 STRING
+18,22
 "#EINTR"
 
 LBRACK
+18,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EINTR
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+19,20
 |
 
 STRING
+19,22
 "#EINVAL"
 
 LBRACK
+19,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EINVAL
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+20,20
 |
 
 STRING
+20,22
 "#EIO"
 
 LBRACK
+20,29
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EIO
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+21,20
 |
 
 STRING
+21,22
 "#EISDIR"
 
 LBRACK
+21,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EISDIR
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+22,20
 |
 
 STRING
+22,22
 "#EMFILE"
 
 LBRACK
+22,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EMFILE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+23,20
 |
 
 STRING
+23,22
 "#EMLINK"
 
 LBRACK
+23,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EMLINK
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+24,20
 |
 
 STRING
+24,22
 "#ENAMETOOLONG"
 
 LBRACK
+24,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENAMETOOLONG
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+25,20
 |
 
 STRING
+25,22
 "#ENFILE"
 
 LBRACK
+25,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENFILE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+26,20
 |
 
 STRING
+26,22
 "#ENODEV"
 
 LBRACK
+26,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENODEV
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+27,20
 |
 
 STRING
+27,22
 "#ENOENT"
 
 LBRACK
+27,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOENT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+28,20
 |
 
 STRING
+28,22
 "#ENOEXEC"
 
 LBRACK
+28,33
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOEXEC
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+29,20
 |
 
 STRING
+29,22
 "#ENOLCK"
 
 LBRACK
+29,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOLCK
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+30,20
 |
 
 STRING
+30,22
 "#ENOMEM"
 
 LBRACK
+30,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOMEM
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+31,20
 |
 
 STRING
+31,22
 "#ENOSPC"
 
 LBRACK
+31,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOSPC
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+32,20
 |
 
 STRING
+32,22
 "#ENOSYS"
 
 LBRACK
+32,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOSYS
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+33,20
 |
 
 STRING
+33,22
 "#ENOTDIR"
 
 LBRACK
+33,33
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOTDIR
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+34,20
 |
 
 STRING
+34,22
 "#ENOTEMPTY"
 
 LBRACK
+34,35
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOTEMPTY
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+35,20
 |
 
 STRING
+35,22
 "#ENOTTY"
 
 LBRACK
+35,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOTTY
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+36,20
 |
 
 STRING
+36,22
 "#ENXIO"
 
 LBRACK
+36,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENXIO
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+37,20
 |
 
 STRING
+37,22
 "#EPERM"
 
 LBRACK
+37,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EPERM
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+38,20
 |
 
 STRING
+38,22
 "#EPIPE"
 
 LBRACK
+38,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EPIPE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+39,20
 |
 
 STRING
+39,22
 "#ERANGE"
 
 LBRACK
+39,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ERANGE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+40,20
 |
 
 STRING
+40,22
 "#EROFS"
 
 LBRACK
+40,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EROFS
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+41,20
 |
 
 STRING
+41,22
 "#ESPIPE"
 
 LBRACK
+41,32
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ESPIPE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+42,20
 |
 
 STRING
+42,22
 "#ESRCH"
 
 LBRACK
+42,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ESRCH
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+43,20
 |
 
 STRING
+43,22
 "#EXDEV"
 
 LBRACK
+43,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EXDEV
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+44,20
 |
 
 STRING
+44,22
 "#EWOULDBLOCK"
 
 LBRACK
+44,37
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EWOULDBLOCK
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+45,20
 |
 
 STRING
+45,22
 "#EINPROGRESS"
 
 LBRACK
+45,37
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EINPROGRESS
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+46,20
 |
 
 STRING
+46,22
 "#EALREADY"
 
 LBRACK
+46,34
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EALREADY
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+47,20
 |
 
 STRING
+47,22
 "#ENOTSOCK"
 
 LBRACK
+47,34
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOTSOCK
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+48,20
 |
 
 STRING
+48,22
 "#EDESTADDRREQ"
 
 LBRACK
+48,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EDESTADDRREQ
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+49,20
 |
 
 STRING
+49,22
 "#EMSGSIZE"
 
 LBRACK
+49,34
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EMSGSIZE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+50,20
 |
 
 STRING
+50,22
 "#EPROTOTYPE"
 
 LBRACK
+50,36
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EPROTOTYPE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+51,20
 |
 
 STRING
+51,22
 "#ENOPROTOOPT"
 
 LBRACK
+51,37
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOPROTOOPT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+52,20
 |
 
 STRING
+52,22
 "#EPROTONOSUPPORT"
 
 LBRACK
+52,41
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EPROTONOSUPPORT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+53,20
 |
 
 STRING
+53,22
 "#ESOCKTNOSUPPORT"
 
 LBRACK
+53,41
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ESOCKTNOSUPPORT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+54,20
 |
 
 STRING
+54,22
 "#EOPNOTSUPP"
 
 LBRACK
+54,36
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EOPNOTSUPP
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+55,20
 |
 
 STRING
+55,22
 "#EPFNOSUPPORT"
 
 LBRACK
+55,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EPFNOSUPPORT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+56,20
 |
 
 STRING
+56,22
 "#EAFNOSUPPORT"
 
 LBRACK
+56,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EAFNOSUPPORT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+57,20
 |
 
 STRING
+57,22
 "#EADDRINUSE"
 
 LBRACK
+57,36
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EADDRINUSE
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+58,20
 |
 
 STRING
+58,22
 "#EADDRNOTAVAIL"
 
 LBRACK
+58,39
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EADDRNOTAVAIL
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+59,20
 |
 
 STRING
+59,22
 "#ENETDOWN"
 
 LBRACK
+59,34
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENETDOWN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+60,20
 |
 
 STRING
+60,22
 "#ENETUNREACH"
 
 LBRACK
+60,37
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENETUNREACH
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+61,20
 |
 
 STRING
+61,22
 "#ENETRESET"
 
 LBRACK
+61,35
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENETRESET
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+62,20
 |
 
 STRING
+62,22
 "#ECONNABORTED"
 
 LBRACK
+62,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ECONNABORTED
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+63,20
 |
 
 STRING
+63,22
 "#ECONNRESET"
 
 LBRACK
+63,36
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ECONNRESET
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+64,20
 |
 
 STRING
+64,22
 "#ENOBUFS"
 
 LBRACK
+64,33
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOBUFS
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+65,20
 |
 
 STRING
+65,22
 "#EISCONN"
 
 LBRACK
+65,33
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EISCONN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+66,20
 |
 
 STRING
+66,22
 "#ENOTCONN"
 
 LBRACK
+66,34
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ENOTCONN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+67,20
 |
 
 STRING
+67,22
 "#ESHUTDOWN"
 
 LBRACK
+67,35
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ESHUTDOWN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+68,20
 |
 
 STRING
+68,22
 "#ETOOMANYREFS"
 
 LBRACK
+68,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ETOOMANYREFS
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+69,20
 |
 
 STRING
+69,22
 "#ETIMEDOUT"
 
 LBRACK
+69,35
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ETIMEDOUT
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+70,20
 |
 
 STRING
+70,22
 "#ECONNREFUSED"
 
 LBRACK
+70,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ECONNREFUSED
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+71,20
 |
 
 STRING
+71,22
 "#EHOSTDOWN"
 
 LBRACK
+71,35
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EHOSTDOWN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+72,20
 |
 
 STRING
+72,22
 "#EHOSTUNREACH"
 
 LBRACK
+72,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EHOSTUNREACH
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+73,20
 |
 
 STRING
+73,22
 "#ELOOP"
 
 LBRACK
+73,31
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #ELOOP
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+74,20
 |
 
 STRING
+74,22
 "#EOVERFLOW"
 
 LBRACK
+74,35
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #EOVERFLOW
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+76,3
 syntax
 
 ID_UPPER
+76,10
 IOInt
 
 DCOLONEQ
+76,16
 ::=
 
 ID_UPPER
+76,20
 Int
 
 VBAR
+76,24
 |
 
 ID_UPPER
+76,26
 IOError
 
 KW_SYNTAX
+77,3
 syntax
 
 ID_UPPER
+77,10
 IOString
 
 DCOLONEQ
+77,19
 ::=
 
 ID_UPPER
+77,23
 String
 
 VBAR
+77,30
 |
 
 ID_UPPER
+77,32
 IOError
 
 KW_SYNTAX
+79,3
 syntax
 
 ID_UPPER
+79,10
 IOInt
 
 DCOLONEQ
+79,16
 ::=
 
 STRING
+79,20
 "#open"
 
 STRING
+79,28
 "("
 
 ID_LOWER
+79,32
 path
 
 COLON
+79,36
 :
 
 ID_UPPER
+79,38
 String
 
 STRING
+79,45
 ")"
 
 LBRACK
+79,49
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 VBAR
+80,16
 |
 
 STRING
+80,18
 "#open"
 
 STRING
+80,26
 "("
 
 ID_LOWER
+80,30
 path
 
 COLON
+80,34
 :
 
 ID_UPPER
+80,36
 String
 
 STRING
+80,43
 ","
 
 ID_LOWER
+80,47
 mode
 
 COLON
+80,51
 :
 
 ID_UPPER
+80,53
 String
 
 STRING
+80,60
 ")"
 
 LBRACK
+80,64
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.open
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+82,3
 rule
 
 BUBBLE
+82,8
 #open(S:String) => #open(S:String, "r+")
 
 KW_SYNTAX
+84,3
 syntax
 
 ID_UPPER
+84,10
 IOInt
 
 DCOLONEQ
+84,16
 ::=
 
 STRING
+84,20
 "#tell"
 
 STRING
+84,28
 "("
 
 ID_LOWER
+84,32
 fd
 
 COLON
+84,34
 :
 
 ID_UPPER
+84,36
 Int
 
 STRING
+84,40
 ")"
 
 LBRACK
+84,44
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.tell
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+85,3
 syntax
 
 ID_UPPER
+85,10
 K
 
 DCOLONEQ
+85,12
 ::=
 
 STRING
+85,16
 "#seek"
 
 STRING
+85,24
 "("
 
 ID_LOWER
+85,28
 fd
 
 COLON
+85,30
 :
 
 ID_UPPER
+85,32
 Int
 
 STRING
+85,36
 ","
 
 ID_LOWER
+85,40
 index
 
 COLON
+85,45
 :
 
 ID_UPPER
+85,47
 Int
 
 STRING
+85,51
 ")"
 
 LBRACK
+85,55
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.seek
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 VBAR
+86,14
 |
 
 STRING
+86,16
 "#seekEnd"
 
 STRING
+86,27
 "("
 
 ID_LOWER
+86,31
 fd
 
 COLON
+86,33
 :
 
 ID_UPPER
+86,35
 Int
 
 STRING
+86,39
 ","
 
 ID_LOWER
+86,43
 fromEnd
 
 COLON
+86,50
 :
 
 ID_UPPER
+86,52
 Int
 
 STRING
+86,56
 ")"
 
 LBRACK
+86,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.seekEnd
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+88,3
 syntax
 
 ID_UPPER
+88,10
 IOInt
 
 DCOLONEQ
+88,16
 ::=
 
 STRING
+88,20
 "#getc"
 
 STRING
+88,28
 "("
 
 ID_LOWER
+88,32
 fd
 
 COLON
+88,34
 :
 
 ID_UPPER
+88,36
 Int
 
 STRING
+88,40
 ")"
 
 LBRACK
+88,56
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.getc
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+89,3
 syntax
 
 ID_UPPER
+89,10
 IOString
 
 DCOLONEQ
+89,19
 ::=
 
 STRING
+89,23
 "#read"
 
 STRING
+89,31
 "("
 
 ID_LOWER
+89,35
 fd
 
 COLON
+89,37
 :
 
 ID_UPPER
+89,39
 Int
 
 STRING
+89,43
 ","
 
 ID_LOWER
+89,47
 length
 
 COLON
+89,53
 :
 
 ID_UPPER
+89,55
 Int
 
 STRING
+89,59
 ")"
 
 LBRACK
+89,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.read
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+91,3
 syntax
 
 ID_UPPER
+91,10
 K
 
 DCOLONEQ
+91,12
 ::=
 
 STRING
+91,16
 "#putc"
 
 STRING
+91,24
 "("
 
 ID_LOWER
+91,28
 fd
 
 COLON
+91,30
 :
 
 ID_UPPER
+91,32
 Int
 
 STRING
+91,36
 ","
 
 ID_LOWER
+91,40
 value
 
 COLON
+91,45
 :
 
 ID_UPPER
+91,47
 Int
 
 STRING
+91,51
 ")"
 
 LBRACK
+91,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.putc
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 VBAR
+92,14
 |
 
 STRING
+92,16
 "#write"
 
 STRING
+92,25
 "("
 
 ID_LOWER
+92,29
 fd
 
 COLON
+92,31
 :
 
 ID_UPPER
+92,33
 Int
 
 STRING
+92,37
 ","
 
 ID_LOWER
+92,41
 value
 
 COLON
+92,46
 :
 
 ID_UPPER
+92,48
 String
 
 STRING
+92,55
 ")"
 
 LBRACK
+92,59
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.write
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+94,3
 syntax
 
 ID_UPPER
+94,10
 K
 
 DCOLONEQ
+94,12
 ::=
 
 STRING
+94,16
 "#close"
 
 STRING
+94,25
 "("
 
 ID_LOWER
+94,29
 fd
 
 COLON
+94,31
 :
 
 ID_UPPER
+94,33
 Int
 
 STRING
+94,37
 ")"
 
 LBRACK
+94,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.close
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+96,3
 syntax
 
 ID_UPPER
+96,10
 K
 
 DCOLONEQ
+96,12
 ::=
 
 STRING
+96,16
 "#lock"
 
 STRING
+96,24
 "("
 
 ID_LOWER
+96,28
 fd
 
 COLON
+96,30
 :
 
 ID_UPPER
+96,32
 Int
 
 STRING
+96,36
 ","
 
 ID_LOWER
+96,40
 endIndex
 
 COLON
+96,48
 :
 
 ID_UPPER
+96,50
 Int
 
 STRING
+96,54
 ")"
 
 LBRACK
+96,58
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.lock
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 VBAR
+97,14
 |
 
 STRING
+97,16
 "#unlock"
 
 STRING
+97,26
 "("
 
 ID_LOWER
+97,30
 fd
 
 COLON
+97,32
 :
 
 ID_UPPER
+97,34
 Int
 
 STRING
+97,38
 ","
 
 ID_LOWER
+97,42
 endIndex
 
 COLON
+97,50
 :
 
 ID_UPPER
+97,52
 Int
 
 STRING
+97,56
 ")"
 
 LBRACK
+97,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.unlock
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+99,3
 syntax
 
 ID_UPPER
+99,10
 IOInt
 
 DCOLONEQ
+99,16
 ::=
 
 STRING
+99,20
 "#accept"
 
 STRING
+99,30
 "("
 
 ID_LOWER
+99,34
 fd
 
 COLON
+99,36
 :
 
 ID_UPPER
+99,38
 Int
 
 STRING
+99,42
 ")"
 
 LBRACK
+99,46
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.accept
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+100,3
 syntax
 
 ID_UPPER
+100,10
 K
 
 DCOLONEQ
+100,12
 ::=
 
 STRING
+100,16
 "#shutdownWrite"
 
 STRING
+100,33
 "("
 
 ID_LOWER
+100,37
 fd
 
 COLON
+100,39
 :
 
 ID_UPPER
+100,41
 Int
 
 STRING
+100,45
 ")"
 
 LBRACK
+100,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.shutdownWrite
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+102,3
 syntax
 
 ID_UPPER
+102,10
 Int
 
 DCOLONEQ
+102,14
 ::=
 
 STRING
+102,18
 "#time"
 
 STRING
+102,26
 "("
 
 STRING
+102,30
 ")"
 
 LBRACK
+102,34
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.time
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+103,3
 syntax
 
 ID_UPPER
+103,10
 Int
 
 DCOLONEQ
+103,14
 ::=
 
 STRING
+103,18
 "#stdin"
 
 LBRACK
+103,29
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 VBAR
+104,17
 |
 
 STRING
+104,19
 "#stdout"
 
 LBRACK
+104,29
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 VBAR
+105,17
 |
 
 STRING
+105,19
 "#stderr"
 
 LBRACK
+105,29
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+107,3
 rule
 
 BUBBLE
+107,8
 #stdin => 0
 
 KW_RULE
+108,3
 rule
 
 BUBBLE
+108,8
 #stdout => 1
 
 KW_RULE
+109,3
 rule
 
 BUBBLE
+109,8
 #stderr => 2
 
 KW_SYNTAX
+111,3
 syntax
 
 ID_UPPER
+111,10
 KItem
 
 DCOLONEQ
+111,16
 ::=
 
 ID_LOWER
+111,20
 #system
 
 LPAREN
+111,28
 (
 
 ID_UPPER
+111,30
 String
 
 RPAREN
+111,37
 )
 
 LBRACK
+111,39
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.system
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 VBAR
+112,18
 |
 
 STRING
+112,20
 "#systemResult"
 
 STRING
+112,36
 "("
 
 ID_UPPER
+112,40
 Int
 
 STRING
+112,60
 ","
 
 ID_UPPER
+112,64
 String
 
 STRING
+112,84
 ","
 
 ID_UPPER
+112,88
 String
 
 STRING
+112,108
 ")"
 
 LBRACK
+112,112
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #systemResult
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+114,3
 syntax
 
 ID_UPPER
+114,10
 IOFile
 
 DCOLONEQ
+114,17
 ::=
 
 ID_LOWER
+114,21
 #mkstemp
 
 LPAREN
+114,29
 (
 
 ID_LOWER
+114,30
 template
 
 COLON
+114,38
 :
 
 ID_UPPER
+114,40
 String
 
 RPAREN
+114,46
 )
 
 LBRACK
+114,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.mkstemp
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+115,3
 syntax
 
 ID_UPPER
+115,10
 IOFile
 
 DCOLONEQ
+115,17
 ::=
 
 ID_UPPER
+115,21
 IOError
 
 VBAR
+116,19
 |
 
 STRING
+116,21
 "#tempFile"
 
 STRING
+116,33
 "("
 
 ID_LOWER
+116,37
 path
 
 COLON
+116,41
 :
 
 ID_UPPER
+116,43
 String
 
 STRING
+116,50
 ","
 
 ID_LOWER
+116,54
 fd
 
 COLON
+116,56
 :
 
 ID_UPPER
+116,58
 Int
 
 STRING
+116,62
 ")"
 
 LBRACK
+116,66
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #tempFile
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+118,3
 syntax
 
 ID_UPPER
+118,10
 K
 
 DCOLONEQ
+118,12
 ::=
 
 ID_LOWER
+118,16
 #remove
 
 LPAREN
+118,23
 (
 
 ID_LOWER
+118,24
 path
 
 COLON
+118,28
 :
 
 ID_UPPER
+118,30
 String
 
 RPAREN
+118,36
 )
 
 LBRACK
+118,38
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.remove
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+120,3
 syntax
 
 ID_UPPER
+120,10
 K
 
 DCOLONEQ
+120,12
 ::=
 
 ID_LOWER
+120,16
 #logToFile
 
 LPAREN
+120,26
 (
 
 ID_LOWER
+120,27
 name
 
 COLON
+120,31
 :
 
 ID_UPPER
+120,33
 String
 
 COMMA
+120,39
 ,
 
 ID_LOWER
+120,41
 value
 
 COLON
+120,46
 :
 
 ID_UPPER
+120,48
 String
 
 RPAREN
+120,54
 )
 
 LBRACK
+120,56
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.log
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 returnsUnit
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+121,3
 syntax
 
 ID_UPPER
+121,10
 K
 
 DCOLONEQ
+121,12
 ::=
 
 ID_LOWER
+121,16
 #log
 
 LPAREN
+121,20
 (
 
 ID_LOWER
+121,21
 value
 
 COLON
+121,26
 :
 
 ID_UPPER
+121,28
 String
 
 RPAREN
+121,34
 )
 
 LBRACK
+121,36
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.logString
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 returnsUnit
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+123,3
 syntax
 
 ID_UPPER
+123,10
 K
 
 DCOLONEQ
+123,12
 ::=
 
 ID_LOWER
+123,16
 #trace
 
 LPAREN
+123,22
 (
 
 ID_LOWER
+123,23
 value
 
 COLON
+123,28
 :
 
 ID_UPPER
+123,30
 KItem
 
 RPAREN
+123,35
 )
 
 LBRACK
+123,37
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.traceTerm
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 returnsUnit
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+124,14
 |
 
 ID_LOWER
+124,16
 #traceK
 
 LPAREN
+124,23
 (
 
 ID_LOWER
+124,24
 value
 
 COLON
+124,29
 :
 
 ID_UPPER
+124,31
 K
 
 RPAREN
+124,32
 )
 
 LBRACK
+124,37
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 IO.traceTerm
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 returnsUnit
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+126,3
 syntax
 
 ID_UPPER
+126,10
 Stream
 
 DCOLONEQ
+126,17
 ::=
 
 ID_LOWER
+126,21
 #buffer
 
 LPAREN
+126,28
 (
 
 ID_UPPER
+126,29
 K
 
 RPAREN
+126,30
 )
 
 VBAR
+127,19
 |
 
 ID_LOWER
+127,21
 #istream
 
 LPAREN
+127,29
 (
 
 ID_UPPER
+127,30
 Int
 
 RPAREN
+127,33
 )
 
 VBAR
+128,19
 |
 
 ID_LOWER
+128,21
 #parseInput
 
 LPAREN
+128,32
 (
 
 ID_UPPER
+128,33
 String
 
 COMMA
+128,39
 ,
 
 ID_UPPER
+128,41
 String
 
 RPAREN
+128,47
 )
 
 VBAR
+129,19
 |
 
 ID_LOWER
+129,21
 #ostream
 
 LPAREN
+129,29
 (
 
 ID_UPPER
+129,30
 Int
 
 RPAREN
+129,33
 )
 
 KW_ENDMODULE
+131,1
 endmodule
 
 KW_MODULE
+139,1
 module
 
 MODNAME
+139,8
 STDIN-STREAM
 
 KW_IMPORTS
+140,3
 imports
 
 MODNAME
+140,11
 K-IO
 
 KW_IMPORTS
+141,3
 imports
 
 MODNAME
+141,11
 K-REFLECTION
 
 KW_IMPORTS
+142,3
 imports
 
 MODNAME
+142,11
 LIST
 
 KW_IMPORTS
+143,3
 imports
 
 MODNAME
+143,11
 INT
 
 KW_IMPORTS
+144,3
 imports
 
 MODNAME
+144,11
 BOOL
 
 KW_CONFIG
+146,3
 configuration
 
 BUBBLE
+146,17
 <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
 
 KW_RULE
+149,3
 rule
 
 LBRACK
+149,8
 [
 
 RULE_LABEL
+149,9
 stdinGetc
 
 RBRACK
+149,18
 ]
 
 COLON
+149,19
 :
 
 BUBBLE
+150,7
 <stdin>
        ListItem(#parseInput(_:String, Delimiters:String))
        ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
@@ -4195,45 +5494,59 @@ BUBBLE
     requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 200
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+160,3
 rule
 
 LBRACK
+160,8
 [
 
 RULE_LABEL
+160,9
 stdinParseString
 
 RBRACK
+160,25
 ]
 
 COLON
+160,26
 :
 
 BUBBLE
+161,7
 <stdin>
        (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S))
        ListItem(#buffer(S:String => ""))
@@ -4242,30 +5555,39 @@ BUBBLE
     requires findChar(S, Delimiters, 0) =/=Int -1 // [stdin]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+170,3
 rule
 
 LBRACK
+170,8
 [
 
 RULE_LABEL
+170,9
 stdinParseInt
 
 RBRACK
+170,22
 ]
 
 COLON
+170,23
 :
 
 BUBBLE
+171,7
 <stdin>
        (ListItem(#parseInput("Int", Delimiters:String))
        => ListItem(String2Int(substrString(S, 0, findChar(S, Delimiters, 0)))))
@@ -4276,30 +5598,39 @@ BUBBLE
        andBool lengthString(S) >Int 1 // [stdin]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+181,3
 rule
 
 LBRACK
+181,8
 [
 
 RULE_LABEL
+181,9
 stdinTrim
 
 RBRACK
+181,18
 ]
 
 COLON
+181,19
 :
 
 BUBBLE
+182,7
 <stdin>
        ListItem(#parseInput(Sort:String, Delimiters:String))
        ListItem(#buffer(S:String => substrString(S, 1, lengthString(S))))
@@ -4310,30 +5641,39 @@ BUBBLE
        andBool lengthString(S) <=Int 1 // [stdin]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+206,3
 rule
 
 LBRACK
+206,8
 [
 
 RULE_LABEL
+206,9
 stdinUnblock
 
 RBRACK
+206,21
 ]
 
 COLON
+206,22
 :
 
 BUBBLE
+207,7
 <stdin>
          (.List => ListItem(#parseInput(?Sort:String, ?Delimiters:String)))
          ListItem(#buffer(_:String))
@@ -4341,63 +5681,83 @@ BUBBLE
        </stdin>
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 unblock
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+221,1
 endmodule
 
 KW_MODULE
+224,1
 module
 
 MODNAME
+224,8
 STDOUT-STREAM
 
 KW_IMPORTS
+225,3
 imports
 
 MODNAME
+225,11
 K-IO
 
 KW_IMPORTS
+226,3
 imports
 
 MODNAME
+226,11
 LIST
 
 KW_IMPORTS
+227,3
 imports
 
 MODNAME
+227,11
 STRING
 
 KW_CONFIG
+229,3
 configuration
 
 BUBBLE
+229,17
 <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
 
 KW_RULE
+232,3
 rule
 
 LBRACK
+232,8
 [
 
 RULE_LABEL
+232,9
 stdoutBufferFloat
 
 RBRACK
+232,26
 ]
 
 COLON
+232,27
 :
 
 BUBBLE
+233,7
 <stdout>
        ListItem(#ostream(_))
        ListItem(_)
@@ -4408,45 +5768,59 @@ BUBBLE
        // [stdout, stderr]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 25
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+242,3
 rule
 
 LBRACK
+242,8
 [
 
 RULE_LABEL
+242,9
 stdoutBufferInt
 
 RBRACK
+242,24
 ]
 
 COLON
+242,25
 :
 
 BUBBLE
+243,7
 <stdout>
        ListItem(#ostream(_))
        ListItem(_)
@@ -4457,45 +5831,59 @@ BUBBLE
        // [stdout, stderr]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 25
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+252,3
 rule
 
 LBRACK
+252,8
 [
 
 RULE_LABEL
+252,9
 stdoutBufferString
 
 RBRACK
+252,27
 ]
 
 COLON
+252,28
 :
 
 BUBBLE
+253,7
 <stdout>
        ListItem(#ostream(_))
        ListItem(_)
@@ -4506,45 +5894,59 @@ BUBBLE
        // [stdout, stderr]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 25
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+264,3
 rule
 
 LBRACK
+264,8
 [
 
 RULE_LABEL
+264,9
 stdoutWrite
 
 RBRACK
+264,20
 ]
 
 COLON
+264,21
 :
 
 BUBBLE
+265,7
 <stdout>
        ListItem(#ostream(N:Int => {#write(N, S) ~> N:Int}:>Int))
        ListItem("on")
@@ -4554,31 +5956,41 @@ BUBBLE
     requires S =/=String "" // [stdout, stderr]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 30
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+292,1
 endmodule
 
 EOF
+292,9
 
