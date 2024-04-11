@@ -1,0 +1,19 @@
+// This program tests the Collatz conjecture for all numbers up to m
+// and accumulates the total number of steps in s.
+
+int m, n, q, r, s;
+m = 10;
+while (!(m<=2)) {
+  n = m;
+  m = m + -1;
+  while (!(n<=1)) {
+    s = s+1;
+    q = n/2;
+    r = q+q+1;
+    if (r<=n) {
+      n = n+n+n+1;         // n becomes 3*n+1 if odd
+    } else {n=q;}          //        or   n/2 if even
+  }
+}
+
+// s should be 66 when m is 10

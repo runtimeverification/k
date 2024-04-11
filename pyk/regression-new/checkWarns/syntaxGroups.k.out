@@ -1,0 +1,8 @@
+[Error] Compiler: Symbols _+__SYNTAXGROUPS-SYNTAX_Exp_Exp_Exp and _*__SYNTAXGROUPS-SYNTAX_Exp_Exp_Exp are in the same associativity group, but have different priorities.
+	Source(syntaxGroups.k)
+	Location(6,3,6,25)
+	6 |	  syntax left times plus
+	  .	  ^~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile syntaxGroups.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition syntaxGroups-kompiled --type-inference-mode checked

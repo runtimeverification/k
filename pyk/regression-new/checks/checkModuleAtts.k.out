@@ -1,0 +1,17 @@
+[Error] Compiler: Module cannot have the following attributes: [group]
+	Source(checkModuleAtts.k)
+	Location(2,1,3,10)
+	  .	v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	2 |	module CHECKMODULEATTS [foo, group(bar), baz]
+	3 |	endmodule
+	  .	~~~~~~~~^
+[Error] Compiler: Unrecognized attributes: [baz, foo]
+	Source(checkModuleAtts.k)
+	Location(2,1,3,10)
+	  .	v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	2 |	module CHECKMODULEATTS [foo, group(bar), baz]
+	3 |	endmodule
+	  .	~~~~~~~~^
+[Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkModuleAtts.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkModuleAtts-kompiled --type-inference-mode checked

@@ -1,0 +1,6 @@
+[Error] Compiler: Definition is missing function isKResult required for strictness. Please either declare sort KResult or declare 'syntax Bool ::= isKResult(K) [symbol(isKResult), function]'
+  while executing phase "resolving heat and cool attributes" on sentence at
+	Source(missingKResult.k)
+	Location(14,18,14,47)
+[ERROR] Running process failed with returncode 113:
+    kompile missingKResult.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition missingKResult-kompiled --type-inference-mode checked

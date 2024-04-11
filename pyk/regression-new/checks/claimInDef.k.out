@@ -1,0 +1,8 @@
+[Error] Compiler: Claims are not allowed in the definition.
+	Source(claimInDef.k)
+	Location(5,11,5,17)
+	5 |	    claim _ => .
+	  .	          ^~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile claimInDef.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition claimInDef-kompiled --type-inference-mode checked

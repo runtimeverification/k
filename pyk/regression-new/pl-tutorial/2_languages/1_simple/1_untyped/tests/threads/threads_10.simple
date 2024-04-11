@@ -1,0 +1,18 @@
+// Well-synchronized program which has only one behavior.
+
+function main() {
+  var x = 1;
+  spawn {
+    acquire 1;
+    x=x+1;
+    release 1;
+    rendezvous 1;
+  };
+  acquire 1;
+  x=x+1;
+  release 1;
+  rendezvous 1;
+  print(x,"\n");
+}
+
+// 3

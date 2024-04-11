@@ -1,0 +1,23 @@
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(25,14,25,33)
+	25 |	    rule <k> #let _ = 1 #in true => 2 </k>
+	   .	             ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(27,40,27,59)
+	27 |	    rule <k> a => b </k> requires #let #let _ = 2 #in true = 1 #in true
+	   .	                                       ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(29,26,29,47)
+	29 |	    rule <k> (1 => 2) ~> #fun ( _ => 2 ) ( 2 ) </k>
+	   .	                         ^~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(31,42,31,61)
+	31 |	    rule <k> 1 => 2 </k> requires #fun ( #let _ = 1 #in true => true ) ( 5 )
+	   .	                                         ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 4 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkRHSHaskell.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition checkRHSHaskell-kompiled --type-inference-mode checked

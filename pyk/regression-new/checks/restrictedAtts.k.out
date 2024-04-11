@@ -1,0 +1,13 @@
+[Error] Compiler: Production cannot have the following attributes: [cool]
+	Source(restrictedAtts.k)
+	Location(4,19,4,35)
+	4 |	  syntax Foo  ::= a() [cool, left]
+	  .	                  ^~~~~~~~~~~~~~~~
+[Error] Compiler: Rule cannot have the following attributes: [idem]
+	Source(restrictedAtts.k)
+	Location(5,8,5,17)
+	5 |	  rule a() => .K [idem, owise]
+	  .	       ^~~~~~~~~
+[Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile restrictedAtts.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition restrictedAtts-kompiled --type-inference-mode checked

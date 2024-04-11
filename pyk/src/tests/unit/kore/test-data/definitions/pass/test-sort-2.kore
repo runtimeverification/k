@@ -1,0 +1,7 @@
+[]
+
+module TEST-SORT-2
+
+  sort List{S} []
+
+endmodule []

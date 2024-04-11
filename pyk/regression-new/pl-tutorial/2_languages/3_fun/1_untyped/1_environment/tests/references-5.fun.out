@@ -1,0 +1,23 @@
+  {
+    V:K
+  #Equals
+    [ 7 , 8 , 9 , .Bottoms ] ~> .K
+  }
+#Or
+  {
+    V:K
+  #Equals
+    [ 7 , 9 , 8 , .Bottoms ] ~> .K
+  }
+#Or
+  {
+    V:K
+  #Equals
+    [ 9 , 8 , 9 , .Bottoms ] ~> .K
+  }
+#Or
+  {
+    V:K
+  #Equals
+    [ 9 , 9 , 8 , .Bottoms ] ~> .K
+  }

@@ -1,0 +1,2 @@
+let id = lambda x . x
+in if (id true) then (id 1) else (id 2)
