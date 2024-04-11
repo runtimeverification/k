@@ -381,6 +381,7 @@ class KCLIArgs:
             type=str,
             help='Code selector expression to use when reading markdown.',
         )
+        args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
         return args
 
     @cached_property
