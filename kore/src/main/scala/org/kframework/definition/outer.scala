@@ -436,7 +436,6 @@ case class Module(
         }
         pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
       }
-      .flatten
   lazy val priorities = new POSet[Tag](expressedPriorities)
   lazy val leftAssoc  = buildAssoc(Associativity.Left)
   lazy val rightAssoc = buildAssoc(Associativity.Right)

@@ -671,8 +671,8 @@ public class Kompile {
     //
     // See `RuleGrammarGenerator::getCombinedGrammarImpl`.
     var disambMod = RuleGrammarGenerator.getCombinedGrammarImpl(module, false, false, true)._2();
-    var withOverload =
-        disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toList();
+    scala.collection.immutable.Seq<Production> withOverload =
+        disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
 
     stream(withOverload)
         .forEach(
