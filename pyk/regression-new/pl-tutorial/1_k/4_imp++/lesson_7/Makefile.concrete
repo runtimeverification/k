@@ -1,0 +1,15 @@
+DEF=imp
+DEFDIR=concrete
+KOMPILED=$(DEFDIR)/$(DEF)-kompiled
+EXT=imp
+KOMPILE_FLAGS+=--gen-glr-bison-parser --enable-search
+KRUN_FLAGS=--output none
+
+include ../../../../../../include/kframework/ktest.mak
+
+
+tests/div.imp: kompile
+	cat $@.in 2>/dev/null | $(KRUN) $@ --definition $(KOMPILED) --search $(CHECK) $@.out
+
+tests/spawn.imp: kompile
+	cat $@.in 2>/dev/null | $(KRUN) $@ --definition $(KOMPILED) --search --pattern "<output> ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) </output>" $(CHECK) $@.out

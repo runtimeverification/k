@@ -1,0 +1,13 @@
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existsLHSBoundFail.k)
+	Location(11,44,11,47)
+	11 |	  rule { C #Equals { C }:>Int } => #Exists ?I1. { C #Equals ?I1:Int } [simplification]
+	   .	                                           ^~~
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existsLHSBoundFail.k)
+	Location(11,61,11,64)
+	11 |	  rule { C #Equals { C }:>Int } => #Exists ?I1. { C #Equals ?I1:Int } [simplification]
+	   .	                                                            ^~~
+[Error] Compiler: Had 2 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile existsLHSBoundFail.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition existsLHSBoundFail-kompiled --type-inference-mode checked

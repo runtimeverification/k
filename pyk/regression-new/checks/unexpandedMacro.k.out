@@ -1,0 +1,11 @@
+[Error] Compiler: Rule contains macro symbol that was not expanded
+	Source(unexpandedMacro.k)
+	Location(6,8,6,27)
+	6 |	  rule A ( N ) +Int 4 => N
+	  .	       ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors after macro expansion.
+  while executing phase "expand macros" on sentence at
+	Source(unexpandedMacro.k)
+	Location(6,8,6,27)
+[ERROR] Running process failed with returncode 113:
+    kompile unexpandedMacro.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition unexpandedMacro-kompiled --type-inference-mode checked

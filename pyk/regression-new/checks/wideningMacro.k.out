@@ -1,0 +1,8 @@
+[Error] Inner Parser: Sort of variable X inferred as greatest lower bound of [Bool, Int], but no such bound exists.
+	Source(wideningMacro.k)
+	Location(8,10,8,25)
+	8 |	    rule #bar ( X ) => X
+	  .	         ^~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile wideningMacro.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition wideningMacro-kompiled --type-inference-mode checked

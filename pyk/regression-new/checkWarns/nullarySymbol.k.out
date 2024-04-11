@@ -1,0 +1,8 @@
+[Error] Compiler: Zero-argument `symbol` attribute used without a corresponding `klabel(_)`. Either remove `symbol`, or supply an argument.
+	Source(nullarySymbol.k)
+	Location(5,18,5,40)
+	5 |	  syntax Foo ::= foo() [symbol, unused]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile nullarySymbol.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition nullarySymbol-kompiled --type-inference-mode checked

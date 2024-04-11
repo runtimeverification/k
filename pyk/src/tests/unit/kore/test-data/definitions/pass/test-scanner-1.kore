@@ -1,0 +1,9 @@
+[]
+
+/* Scanner should skip the \t character in the module body at line 7. */
+
+module TEST-SCANNER-1
+
+  	
+
+endmodule []

@@ -1,0 +1,19 @@
+syntax non-assoc foo bar baz
+===
+KW_SYNTAX
+syntax
+
+KW_NONASSOC
+non-assoc
+
+KLABEL
+foo
+
+KLABEL
+bar
+
+KLABEL
+baz
+
+EOF
+

@@ -1,0 +1,31 @@
+// Testing new, constructor, method invocation.
+
+class C {
+  var i,j;
+  method C(x) {
+    i = x;
+    j = ++x;
+  }
+  method add(d) {
+    i = i+d;
+    j = j-d;
+  }
+  method print2() {
+    print(i, " ", j, "\n");
+  }
+}
+
+class Main {
+  var a,b,o;
+  method Main(){
+    a = b = 5;
+    o = new C(a);
+    o.print2();
+    o.add(++b);
+    o.print2();
+  }
+}
+
+
+// 5 6
+// 11 0

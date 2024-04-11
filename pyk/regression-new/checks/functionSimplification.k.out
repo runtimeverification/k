@@ -1,0 +1,7 @@
+[Error] Compiler: Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.
+	Source(functionSimplification.k)
+	Location(10,8,10,18)
+	10 |	  rule a() => b() [simplification]
+	   .	       ^~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile functionSimplification.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition functionSimplification-kompiled --type-inference-mode checked

@@ -1,0 +1,8 @@
+[Error] Compiler: Found variable _Gen1 on right hand side of rule, not bound on left hand side. Did you mean "?_Gen1"?
+	Source(recordOnRhs.k)
+	Location(7,15,7,23)
+	7 |	rule _Gen0 => foo(...)
+	  .	              ^~~~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile recordOnRhs.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition recordOnRhs-kompiled --type-inference-mode checked

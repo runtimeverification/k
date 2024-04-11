@@ -1,0 +1,7 @@
+[Error] Compiler: Could not find module: FOO
+	Source(missingModule.k)
+	Location(3,3,3,14)
+	3 |	  imports FOO
+	  .	  ^~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile missingModule.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition missingModule-kompiled --type-inference-mode checked

@@ -1,0 +1,8 @@
+[Error] Inner Parser: Scanner error: unexpected character sequence '"'.
+	Source(quote.k)
+	Location(6,24,6,25)
+	6 |	    rule <k> b""" => b"" </k>
+	  .	                       ^
+[Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile quote.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition quote-kompiled --type-inference-mode checked

@@ -1,0 +1,37 @@
+/* Fl Fn D Sfa Cl */
+Lbl'-LT-'generatedTop'-GT-'{}(
+    /* Fl Fn D Sfa Cl */
+    Lbl'-LT-'k'-GT-'{}(
+        /* Fl Fn D Sfa Cl */
+        kseq{}(
+            /* Fl Fn D Sfa Cli */
+            /* Inj: */ inj{SortExps{}, SortKItem{}}(
+                /* Fl Fn D Sfa Cl */
+                Lbl'UndsCommUndsUnds'TEST-SYNTAX'Unds'Exps'Unds'Exp'Unds'Exps{}(
+                    /* Fl Fn D Sfa Cl */
+                    Lbl'Hash'fail'Unds'TEST-SYNTAX'Unds'Exp{}(),
+                    /* Fl Fn D Sfa Cl */
+                    Lbl'UndsCommUndsUnds'TEST-SYNTAX'Unds'Exps'Unds'Exp'Unds'Exps{}(
+                        /* Fl Fn D Sfa Cl */
+                        Lbl'QuesUnds'0'Unds'TEST-SYNTAX'Unds'Exp{}(),
+                        /* Fl Fn D Sfa Cl */
+                        Lbl'UndsCommUndsUnds'TEST-SYNTAX'Unds'Exps'Unds'Exp'Unds'Exps{}(
+                            /* Fl Fn D Sfa Cl */
+                            Lbl'Unds'V'Unds'9'Unds'TEST-SYNTAX'Unds'Exp{}(),
+                            /* Fl Fn D Sfa Cl */
+                            Lbl'UndsCommUndsUnds'TEST-SYNTAX'Unds'Exps'Unds'Exp'Unds'Exps{}(
+                                /* Fl Fn D Sfa Cl */
+                                Lbl'Xor-'-'Unds-LT--GT-And-Unds'TEST-SYNTAX'Unds'Exp{}(),
+                                /* Fl Fn D Sfa Cl */
+                                Lbl'Stop'List'LBraQuotUndsCommUndsUnds'TEST-SYNTAX'Unds'Exps'Unds'Exp'Unds'Exps'QuotRBraUnds'Exps{}()
+                            )
+                        )
+                    )
+                )
+            ),
+            /* Fl Fn D Sfa Cl */ dotk{}()
+        )
+    ),
+    /* Fl Fn D Sfa Cl */
+    Lbl'-LT-'generatedCounter'-GT-'{}(/* Fl Fn D Sfa Cl */ \dv{SortInt{}}("0"))
+)

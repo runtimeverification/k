@@ -1,0 +1,10 @@
+[]
+
+module TEST-ALIAS-6
+
+  symbol g{S}(S,S) : S []
+
+  alias f{S}(S,S) : S
+  where f{S}(X:S, Y:S) := g{S}(X:S, Y:S) []
+
+endmodule []

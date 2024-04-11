@@ -1,0 +1,12 @@
+[]
+
+module TEST-HOOKSORT-1
+
+  hooked-sort S{} [hook{}("S.S")]
+
+  symbol g{}() : S{} []
+
+  alias f{}() : S{}
+  where f{}() :=  g{}() []
+
+endmodule []

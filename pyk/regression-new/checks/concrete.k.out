@@ -1,0 +1,43 @@
+[Error] Compiler: Found symbolic attribute without simplification attribute on function with one or more non-symbolic rules.
+	Source(concrete.k)
+	Location(7,8,7,21)
+	7 |	  rule 0 *Int X => 0 [symbolic]
+	  .	       ^~~~~~~~~~~~~
+[Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(8,8,8,21)
+	8 |	  rule 1 *Int X => X [concrete]
+	  .	       ^~~~~~~~~~~~~
+[Error] Compiler: Rule cannot be both concrete and symbolic in the same variable.
+	Source(concrete.k)
+	Location(11,8,11,19)
+	11 |	  rule foo(0) => 0 [symbolic, concrete]
+	   .	       ^~~~~~~~~~~
+[Error] Compiler: Found symbolic attribute without simplification attribute on function with one or more non-symbolic rules.
+	Source(concrete.k)
+	Location(17,8,17,20)
+	17 |	  rule bar2(0) => 0 [symbolic]
+	   .	       ^~~~~~~~~~~~
+[Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(26,8,26,20)
+	26 |	  rule baz2(0) => 0 [concrete]
+	   .	       ^~~~~~~~~~~~
+[Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(30,8,30,20)
+	30 |	  rule baz3(X) => 0 [concrete(X)]
+	   .	       ^~~~~~~~~~~~
+[Error] Compiler: Rule cannot be both concrete and symbolic in the same variable: [A]
+	Source(concrete.k)
+	Location(33,8,33,32)
+	33 |	  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic(A, B), simplification]
+	   .	       ^~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Rule cannot be both concrete and symbolic in the same variable.
+	Source(concrete.k)
+	Location(34,8,34,32)
+	34 |	  rule baz4(A, B) => baz4(B, A) [concrete(A), symbolic, simplification]
+	   .	       ^~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 8 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile concrete.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition concrete-kompiled --type-inference-mode checked

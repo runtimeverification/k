@@ -1,0 +1,8 @@
+[Error] Compiler: The attribute 'total' cannot be applied to a production which does not have the 'function' attribute.
+	Source(totalWithoutFunction.k)
+	Location(4,16,4,28)
+	4 |	  syntax A ::= c(A) [total]
+	  .	               ^~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile totalWithoutFunction.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition totalWithoutFunction-kompiled --type-inference-mode checked
