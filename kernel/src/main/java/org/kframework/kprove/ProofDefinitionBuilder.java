@@ -18,6 +18,7 @@ import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -50,7 +51,8 @@ public record ProofDefinitionBuilder(
     Set<Module> modules =
         kompile.parseModules(
             compiledDefinition,
-            defModuleNameUpdated,
+            new KompileOptions.MainModule(
+                defModuleNameUpdated, KompileOptions.OptionType.USER_PROVIDED),
             specModuleNameUpdated,
             absSpecFile,
             backend.excludedModuleTags(),
