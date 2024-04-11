@@ -1,0 +1,38 @@
+claim <k> intersect ( intersectSet(.Set,               SetItem(x) ) )         => . </k>
+claim <k> intersect ( intersectSet(.Set,               S ) )                  => . </k>
+claim <k> intersect ( intersectSet(S,                 .Set ) )                => . </k>
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), SetItem(X) ) )         => . </k>
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), SetItem(Y:MyId) ) )    => . </k>
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), SetItem(Y:MyId) ) )    => . </k> requires Y =/=K X
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), SetItem(Y:MyId) ) )    => . </k> requires Y in S
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), SetItem(Y:MyId) ) )    => . </k> requires notBool (Y in S)
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), SetItem(Y:MyId) ) )    => . </k> requires notBool (Y in S) andBool Y =/=K X
+claim <k> intersect ( intersectSet(SetItem(X) ,        S  SetItem(X:MyId) ) ) => . </k>
+claim <k> intersect ( intersectSet(SetItem(Y:MyId),    S  SetItem(X:MyId) ) ) => . </k>
+claim <k> intersect ( intersectSet(SetItem(Y:MyId),    S  SetItem(X:MyId) ) ) => . </k> requires Y =/=K X
+claim <k> intersect ( intersectSet(SetItem(Y:MyId),    S  SetItem(X:MyId) ) ) => . </k> requires Y in S
+claim <k> intersect ( intersectSet(SetItem(Y:MyId),    S  SetItem(X:MyId) ) ) => . </k> requires notBool (Y in S)
+claim <k> intersect ( intersectSet(SetItem(Y:MyId),    S  SetItem(X:MyId) ) ) => . </k> requires notBool (Y in S) andBool Y =/=K X
+claim <k> intersect ( intersectSet(S  SetItem(X:MyId), S ) )                  => . </k>
+claim <k> intersect ( intersectSet(S1 SetItem(X:MyId), S2 ) )                 => . </k>
+claim <k> intersect ( intersectSet(S,                  S  SetItem(X:MyId) ) ) => . </k>
+claim <k> intersect ( intersectSet(S1,                 S2 SetItem(X:MyId) ) ) => . </k>
+
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y  ==K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y  ==K X andBool Z  ==K Y andBool Z  ==K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y  ==K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X andBool                  Z =/=K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X andBool                  Z  ==K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X andBool Z =/=K Y
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z  ==K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Y =/=K X andBool Z  ==K Y andBool Z =/=K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k>
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Z  ==K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Z =/=K X
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Z  ==K Y
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Z =/=K Y
+claim <k> intersect ( Z:MyId in intersectSet( S SetItem(X:MyId), SetItem(Y:MyId) ) )     => . </k> requires Z =/=K Y andBool Z =/=K X
+claim <k> intersect ( X      in intersectSet( SetItem(X:MyId) SetItem(y), SetItem(x) ) ) => . </k>
+claim <k> intersect ( X      in intersectSet( SetItem(X:MyId) SetItem(y), SetItem(x) ) ) => . </k> requires X =/=K x

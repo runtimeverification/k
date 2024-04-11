@@ -126,6 +126,8 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: 'Clean up Docker Container'
         if: always()

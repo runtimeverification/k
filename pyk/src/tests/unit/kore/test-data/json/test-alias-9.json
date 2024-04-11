@@ -1,0 +1,31 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "App",
+    "name": "plus",
+    "sorts": [],
+    "args": [
+      {
+        "tag": "EVar",
+        "name": "X",
+        "sort": {
+          "tag": "SortApp",
+          "name": "Nat",
+          "args": []
+        }
+      },
+      {
+        "tag": "EVar",
+        "name": "X",
+        "sort": {
+          "tag": "SortApp",
+          "name": "Nat",
+          "args": []
+        }
+      }
+    ]
+  }
+} 
+]

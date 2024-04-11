@@ -1,0 +1,80 @@
+[]
+module BOOL
+    sort Bool{} []
+    symbol true{}() : Bool{} [constructor{}(), functional{}()]
+    symbol false{}() : Bool{} [constructor{}(), functional{}()]
+    symbol andBool{}(Bool{}, Bool{}) : Bool{} [functional{}()]
+    symbol orBool{}(Bool{}, Bool{}) : Bool{} [functional{}()]
+    symbol notBool{}(Bool{}) : Bool{} [functional{}()]
+    axiom {} \or{Bool{}}(true{}(), false{}()) []
+    axiom {} \not{Bool{}}(\and{Bool{}}(true{}(), false{}())) []
+    axiom {S} \exists{S}(T:Bool{}, \equals{Bool{}, S}(T:Bool{}, true{}())) []
+    axiom {S} \exists{S}(T:Bool{}, \equals{Bool{}, S}(T:Bool{}, false{}())) []
+    axiom {S} \exists{S}(
+        T:Bool{},
+        \equals{Bool{}, S}(T:Bool{}, andBool{}(X:Bool{}, Y:Bool{}))
+    ) []
+    axiom {S} \exists{S}(
+        T:Bool{},
+        \equals{Bool{}, S}(T:Bool{}, orBool{}(X:Bool{}, Y:Bool{}))
+    ) []
+    axiom {S} \exists{S}(
+        T:Bool{},
+        \equals{Bool{}, S}(T:Bool{}, notBool{}(X:Bool{}))
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Bool{}, S}(T:Bool{}, true{}()), \top{S}())
+        ),
+        \and{S}(
+            \equals{Bool{}, S}(andBool{}(T:Bool{}, X:Bool{}), X:Bool{}),
+            \top{S}()
+        )
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Bool{}, S}(F:Bool{}, false{}()), \top{S}())
+        ),
+        \and{S}(
+            \equals{Bool{}, S}(andBool{}(F:Bool{}, X:Bool{}), false{}()),
+            \top{S}()
+        )
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Bool{}, S}(T:Bool{}, true{}()), \top{S}())
+        ),
+        \and{S}(
+            \equals{Bool{}, S}(orBool{}(T:Bool{}, X:Bool{}), true{}()),
+            \top{S}()
+        )
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Bool{}, S}(F:Bool{}, false{}()), \top{S}())
+        ),
+        \and{S}(
+            \equals{Bool{}, S}(orBool{}(F:Bool{}, X:Bool{}), X:Bool{}),
+            \top{S}()
+        )
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Bool{}, S}(T:Bool{}, true{}()), \top{S}())
+        ),
+        \and{S}(\equals{Bool{}, S}(notBool{}(T:Bool{}), false{}()), \top{S}())
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Bool{}, S}(F:Bool{}, false{}()), \top{S}())
+        ),
+        \and{S}(\equals{Bool{}, S}(notBool{}(F:Bool{}), true{}()), \top{S}())
+    ) []
+endmodule
+[]

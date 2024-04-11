@@ -1,0 +1,12 @@
+[]
+
+module TEST-HOOKS-6
+
+  sort S{} []
+
+  // Verification failure: multiple hooks in same module
+  hooked-symbol f{}() : S{} [hook{}("F.f")]
+
+  hooked-symbol ff{}() : S{} [hook{}("F.f")]
+
+endmodule []

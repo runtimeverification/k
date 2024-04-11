@@ -1,0 +1,29 @@
+// Testing local variable shadowing a field
+
+class C {
+  var f;
+  method C(v) {
+    f = v;
+  }
+  method get() { return f; }
+}
+
+class G {
+  var o;
+  method G(o) {
+    this.o = o;
+  }
+  method d() {
+    var f = 9;
+    return (o.get());
+  }
+}
+
+class Main {
+  method Main() {
+    var t = new C(1), y = new G(t);
+    print(y.d(), "\n");
+  }
+}
+
+// 1

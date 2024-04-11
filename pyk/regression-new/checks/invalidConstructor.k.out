@@ -1,0 +1,18 @@
+[Error] Compiler: Cannot add new constructors to hooked sort K
+	Source(invalidConstructor.k)
+	Location(4,16,4,21)
+	4 |	  syntax K ::= foo()
+	  .	               ^~~~~
+[Error] Compiler: Cannot add new constructors to hooked sort Int
+	Source(invalidConstructor.k)
+	Location(5,18,5,23)
+	5 |	  syntax Int ::= bar()
+	  .	                 ^~~~~
+[Error] Compiler: Sort Int was declared as a token. Productions of this sort can only contain [function] or [token] labels.
+	Source(invalidConstructor.k)
+	Location(5,18,5,23)
+	5 |	  syntax Int ::= bar()
+	  .	                 ^~~~~
+[Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile invalidConstructor.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidConstructor-kompiled --type-inference-mode checked

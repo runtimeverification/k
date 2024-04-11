@@ -1,0 +1,13 @@
+[Error] Compiler: Cell name <generatedCounter> is reserved by K.
+	Source(checkReservedCellNames.k)
+	Location(13,6,13,22)
+	13 |	    <generatedCounter> 0 </generatedCounter>
+	   .	     ^~~~~~~~~~~~~~~~
+[Error] Compiler: Cell name <generatedTop> is reserved by K.
+	Source(checkReservedCellNames.k)
+	Location(14,6,14,18)
+	14 |	    <generatedTop> 1 </generatedTop>
+	   .	     ^~~~~~~~~~~~
+[Error] Compiler: Had 2 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkReservedCellNames.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkReservedCellNames-kompiled --type-inference-mode checked
