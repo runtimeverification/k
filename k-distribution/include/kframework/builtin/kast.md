@@ -97,7 +97,6 @@ module KSEQ
   imports KAST
   imports K-TOP-SORT
   syntax K ::= ".K"      [klabel(#EmptyK), symbol]
-             | "."       [klabel(#EmptyK), symbol, deprecated, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
   syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, group(defaultBracket), applyPriority(1)]
