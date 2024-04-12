@@ -32,23 +32,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+2,21
 group
 
 LPAREN
-1,0
+2,26
 (
 
 ATTR_CONTENT
-1,0
+2,27
 foo
 
 RPAREN
-1,0
+2,30
 )
 
 RBRACK
-1,0
+2,31
 ]
 
 KW_SYNTAX
