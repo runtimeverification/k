@@ -19,7 +19,7 @@ object Collections {
   def immutable[K, V](s: java.util.Map[K, V]): Map[K, V] = s.asScala
 
   def mutable[T](s: scala.List[T]): java.util.List[T]               = s.asJava
-  def mutable[T](s: collection.immutable.Seq[T]): java.util.List[T] = s.asJava
+  def mutable[T](s: collection.immutable.Seq[T]): java.util.List[T] = new util.ArrayList(s.asJava)
   def mutable[K, V](s: Map[K, V]): java.util.Map[K, V]              = s.asJava
 
   def mutable[T](s: Set[T]): java.util.Set[T] = {
