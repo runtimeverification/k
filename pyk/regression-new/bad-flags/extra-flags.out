@@ -1,0 +1,4 @@
+usage: pyk [-h]
+           {print,rpc-print,rpc-kast,prove-legacy,kompile,run,prove,graph-imports,coverage,kore-to-json,json-to-kore}
+           ...
+pyk: error: unrecognized arguments: --badflag --extra ---output-definition test-kompiled

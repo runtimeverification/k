@@ -1,0 +1,6 @@
+Error:
+  module 'DV-1':
+  axiom declaration:
+  \dv (test-dv-3.kore 4:18):
+  (test-dv-3.kore 4:18):
+    Sorts used with domain value must have the hasDomainValues attribute.

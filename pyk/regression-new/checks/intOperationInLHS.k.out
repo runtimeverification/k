@@ -1,0 +1,18 @@
+[Error] Compiler: Illegal function symbol _+Int_ on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
+	Source(intOperationInLHS.k)
+	Location(8,10,8,18)
+	8 |	rule foo(_ +Int 1) => 0
+	  .	         ^~~~~~~~
+[Error] Compiler: Illegal function symbol foo(_)_INTOPERATIONINLHS_Int_Int on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
+	Source(intOperationInLHS.k)
+	Location(18,10,18,16)
+	18 |	     <k> foo(0) </k>
+	   .	         ^~~~~~
+[Error] Compiler: Illegal function symbol foo(_)_INTOPERATIONINLHS_Int_Int on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
+	Source(intOperationInLHS.k)
+	Location(20,19,20,25)
+	20 |	rule [[ bar(0 |-> foo(0)) => foo(0) ]]
+	   .	                  ^~~~~~
+[Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile intOperationInLHS.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition intOperationInLHS-kompiled --type-inference-mode checked

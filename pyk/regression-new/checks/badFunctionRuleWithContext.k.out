@@ -1,0 +1,8 @@
+[Error] Inner Parser: Unexpected sort Bool for term parsed as production syntax Bool ::= "false" [token]. Expected: Int
+	Source(badFunctionRuleWithContext.k)
+	Location(11,23,11,28)
+	11 |	rule [[ foo(I:Int) => false ]]
+	   .	                      ^~~~~
+[Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile badFunctionRuleWithContext.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition badFunctionRuleWithContext-kompiled --type-inference-mode checked

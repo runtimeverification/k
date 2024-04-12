@@ -16,6 +16,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -58,8 +59,8 @@ public class AddEmptyListsTest {
 
     Definition baseK =
         parser.loadDefinition(
-            "K",
-            "K",
+            new KompileOptions.MainModule("K", KompileOptions.OptionType.USER_PROVIDED),
+            new KompileOptions.SyntaxModule("K", KompileOptions.OptionType.USER_PROVIDED),
             definitionText,
             definitionFile,
             definitionFile.getParentFile(),

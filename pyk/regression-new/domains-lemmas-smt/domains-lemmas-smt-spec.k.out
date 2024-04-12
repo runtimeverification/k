@@ -1,0 +1,26 @@
+APRProof: 17d8d2d5bb8956ab1226407bc0fa217aaf3994299439d35fa72df502b512069b
+    status: ProofStatus.PASSED
+    admitted: False
+    nodes: 2
+    pending: 0
+    failing: 0
+    vacuous: 0
+    stuck: 0
+    terminal: 0
+    refuted: 0
+    bounded: 0
+    execution time: 0s
+Subproofs: 0
+APRProof: df14c63506e2d0171ab02ddffc4c0a12f091315d1a05e944975ea03e35241235
+    status: ProofStatus.PASSED
+    admitted: False
+    nodes: 2
+    pending: 0
+    failing: 0
+    vacuous: 0
+    stuck: 0
+    terminal: 0
+    refuted: 0
+    bounded: 0
+    execution time: 0s
+Subproofs: 0

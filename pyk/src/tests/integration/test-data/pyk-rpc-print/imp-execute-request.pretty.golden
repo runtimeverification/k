@@ -1,0 +1,21 @@
+JSON RPC request
+id: 1
+Method: execute
+terminal-rules: ['IMP.stop']
+cut-point-rules: ['IMP.while']
+max-depth: 4
+module: IMP
+State:
+<generatedTop>
+  <T>
+    <k>
+      int k , sum , .Ids ; k = 1 ; sum = 0 ; while ( k <= 10000 ) { sum = sum + k ; k = k + 1 ; } ~> .K
+    </k>
+    <state>
+      .Map
+    </state>
+  </T>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

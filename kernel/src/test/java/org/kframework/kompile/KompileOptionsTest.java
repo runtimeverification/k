@@ -55,12 +55,12 @@ public class KompileOptionsTest {
   @Test
   public void testDefaultModuleName() {
     parse("foo.k");
-    assertEquals("FOO", options.mainModule(files));
+    assertEquals("FOO", options.mainModule(files).name());
   }
 
   @Test
   public void testDefaultSyntaxModuleName() {
     parse("--main-module", "BAR", "foo.k");
-    assertEquals("BAR-SYNTAX", options.syntaxModule(files));
+    assertEquals("BAR-SYNTAX", options.syntaxModule(files).name());
   }
 }

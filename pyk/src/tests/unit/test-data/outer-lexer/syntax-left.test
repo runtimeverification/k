@@ -1,0 +1,19 @@
+syntax left foo bar baz
+===
+KW_SYNTAX
+syntax
+
+KW_LEFT
+left
+
+KLABEL
+foo
+
+KLABEL
+bar
+
+KLABEL
+baz
+
+EOF
+

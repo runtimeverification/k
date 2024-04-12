@@ -1,0 +1,7 @@
+[Error] Compiler: Requiring a K file in the K builtin directory via a deprecated filename. Please replace "ffi.k" with "ffi.md".
+	Source(requireBuiltinK.k)
+	Location(2,1,2,17)
+	2 |	requires "ffi.k"
+	  .	^~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile requireBuiltinK.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition requireBuiltinK-kompiled --type-inference-mode checked

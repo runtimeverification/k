@@ -2,7 +2,6 @@
 package org.kframework.parser;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
 
 import com.google.common.collect.Streams;
 import java.io.File;
@@ -30,6 +29,7 @@ import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
@@ -310,7 +310,7 @@ public class ParserUtils {
   }
 
   public org.kframework.definition.Definition loadDefinition(
-      String mainModuleName,
+      KompileOptions.MainModule mainModuleName,
       Set<Module> previousModules,
       String definitionText,
       Source source,
@@ -337,8 +337,8 @@ public class ParserUtils {
   }
 
   public org.kframework.definition.Definition loadDefinition(
-      String mainModuleName,
-      String syntaxModuleName,
+      KompileOptions.MainModule mainModuleName,
+      KompileOptions.SyntaxModule syntaxModuleName,
       String definitionText,
       File source,
       File currentDirectory,
@@ -365,8 +365,8 @@ public class ParserUtils {
   }
 
   public org.kframework.definition.Definition loadDefinition(
-      String mainModuleName,
-      String syntaxModuleName,
+      KompileOptions.MainModule mainModuleName,
+      KompileOptions.SyntaxModule syntaxModuleName,
       String definitionText,
       Source source,
       File currentDirectory,
@@ -406,15 +406,21 @@ public class ParserUtils {
     modules.addAll(previousModules); // add the previous modules, since load modules is not additive
     Module mainModule = getMainModule(mainModuleName, modules);
     Optional<Module> opt;
-    opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
+    opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName.name())).findFirst();
     Module syntaxModule;
     if (opt.isEmpty()) {
+      if (syntaxModuleName.type().equals(KompileOptions.OptionType.USER_PROVIDED)) {
+        throw KEMException.compilerError(
+            "Could not find main syntax module with name "
+                + syntaxModuleName.name()
+                + " in definition.");
+      }
       kem.registerCompilerWarning(
           ExceptionType.MISSING_SYNTAX_MODULE,
           "Could not find main syntax module with name "
-              + syntaxModuleName
+              + syntaxModuleName.name()
               + " in definition.  Use --syntax-module to specify one. Using "
-              + mainModuleName
+              + mainModuleName.name()
               + " as default.");
       syntaxModule = mainModule;
     } else {
@@ -425,14 +431,16 @@ public class ParserUtils {
         mainModule, immutable(modules), Att.empty().add(Att.SYNTAX_MODULE(), syntaxModule.name()));
   }
 
-  private Module getMainModule(String mainModuleName, Set<Module> modules) {
+  private Module getMainModule(KompileOptions.MainModule mainModuleName, Set<Module> modules) {
     Optional<Module> opt =
-        modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
+        modules.stream().filter(m -> m.name().equals(mainModuleName.name())).findFirst();
     if (opt.isEmpty()) {
-      throw KEMException.compilerError(
-          "Could not find main module with name "
-              + mainModuleName
-              + " in definition. Use --main-module to specify one.");
+      String msg =
+          "Could not find main module with name " + mainModuleName.name() + " in definition.";
+      if (mainModuleName.type().equals(KompileOptions.OptionType.DEFAULT)) {
+        msg += " Use --main-module to specify one.";
+      }
+      throw KEMException.compilerError(msg);
     }
     return opt.get();
   }

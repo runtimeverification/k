@@ -202,8 +202,8 @@ public class Kompile {
    */
   public CompiledDefinition run(
       File definitionFile,
-      String mainModuleName,
-      String mainProgramsModuleName,
+      KompileOptions.MainModule mainModuleName,
+      KompileOptions.SyntaxModule mainProgramsModuleName,
       Function<Definition, Definition> pipeline,
       Set<Att.Key> excludedModuleTags) {
     files.resolveKompiled(".").mkdirs();
@@ -383,8 +383,8 @@ public class Kompile {
 
   public Definition parseDefinition(
       File definitionFile,
-      String mainModuleName,
-      String mainProgramsModule,
+      KompileOptions.MainModule mainModuleName,
+      KompileOptions.SyntaxModule mainProgramsModule,
       Set<Att.Key> excludedModuleTags) {
     return definitionParsing.parseDefinitionAndResolveBubbles(
         definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
@@ -821,7 +821,7 @@ public class Kompile {
 
   public Set<Module> parseModules(
       CompiledDefinition definition,
-      String mainModule,
+      KompileOptions.MainModule mainModule,
       String entryPointModule,
       File definitionFile,
       Set<Att.Key> excludedModuleTags,

@@ -1,0 +1,8 @@
+[Error] Compiler: The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.
+	Source(checkSymbolKlabel.k)
+	Location(3,18,3,50)
+	3 |	               | bar() [symbol(bar), klabel(baz)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkSymbolKlabel.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkSymbolKlabel-kompiled --type-inference-mode checked

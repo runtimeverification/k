@@ -1,0 +1,21 @@
+module TEST
+    rule /* comment */ X => Y /* comment */
+endmodule
+===
+KW_MODULE
+module
+
+MODNAME
+TEST
+
+KW_RULE
+rule
+
+BUBBLE
+X => Y
+
+KW_ENDMODULE
+endmodule
+
+EOF
+
