@@ -647,6 +647,7 @@ SKIPPED_FRONTEND_COMP_TESTS: Final = set((TEST_DATA_DIR / 'frontend-comp-skip').
 
 class TestKonvertSimpleProofs(KPrintTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
+    KOMPILE_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
 
     @pytest.fixture(scope='class')
     def kompiled_kore(self, definition_dir: Path) -> KompiledKore:

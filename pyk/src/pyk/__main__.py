@@ -282,9 +282,6 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'gen_bison_parser': options.gen_bison_parser,
         'gen_glr_bison_parser': options.gen_glr_bison_parser,
         'bison_lists': options.bison_lists,
-        'warnings': options.warnings,
-        'warning_to_error': options.warning_to_error,
-        'no_exc_wrap': options.no_exc_wrap,
     }
     if options.backend == KompileBackend.LLVM:
         kompile_dict['ccopts'] = options.ccopts
@@ -313,6 +310,9 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         Kompile.from_dict(kompile_dict)(
             output_dir=kompiled_directory,
             type_inference_mode=options.type_inference_mode,
+            warnings=options.warnings,
+            warnings_to_errors=options.warnings_to_errors,
+            no_exc_wrap=options.no_exc_wrap,
         )
     except RuntimeError as err:
         _, _, _, _, cpe = err.args
