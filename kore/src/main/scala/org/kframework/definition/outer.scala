@@ -171,6 +171,8 @@ case class Module(
 
   lazy val sentences: immutable.Set[Sentence] = localSentences | importedSentences
 
+  lazy val sortedLocalSentences: immutable.Seq[Sentence] = localSentences.toSeq.sorted
+
   lazy val labeled: Map[String, Set[Sentence]] =
     sentences.filter(_.label.isPresent).groupBy(_.label.get)
 
