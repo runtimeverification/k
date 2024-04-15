@@ -38,6 +38,8 @@ SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90
 
 class TestSimpleProof(CTermSymbolicTest, KPrintTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
+    KOMPILE_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
+    LLVM_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
 
     @staticmethod
     def config(kprint: KPrint, k: str, state: str, constraint: str | None = None) -> CTerm:
