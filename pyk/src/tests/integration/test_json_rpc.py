@@ -69,16 +69,20 @@ class StatefulKJsonRpcServer(JsonRpcServer):
 
 class TestJsonRPCServer(KRunTest):
     KOMPILE_DEFINITION = """
+        module JSON-RPC-EXAMPLE-SYNTAX
+          imports INT-SYNTAX
+        endmodule
+
         module JSON-RPC-EXAMPLE
-        imports INT
+          imports JSON-RPC-EXAMPLE-SYNTAX
+          imports INT
 
-          configuration 
-          <example>
-            <k> $PGM </k>
-            <x> 0:Int </x>
-            <y> 0:Int </y>
-          </example>
-
+          configuration
+            <example>
+              <k> $PGM </k>
+              <x> 0:Int </x>
+              <y> 0:Int </y>
+            </example>
         endmodule
     """
     KOMPILE_MAIN_MODULE = 'JSON-RPC-EXAMPLE'
