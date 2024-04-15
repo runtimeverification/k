@@ -6,18 +6,21 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from itertools import chain
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from ..utils import ensure_dir_path, hash_file, hash_str
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from pathlib import Path
-    from typing import Any, Final, TypeVar
+    from typing import Any, Final
 
     from pyk.kcfg.explore import KCFGExplore
 
     T = TypeVar('T', bound='Proof')
+
+PS = TypeVar('PS', bound='ProofStep')
+SR = TypeVar('SR', bound='StepResult')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -28,7 +31,7 @@ class ProofStatus(Enum):
     PENDING = 'pending'
 
 
-class Proof(ABC):
+class Proof(Generic[PS, SR]):
     _PROOF_TYPES: Final = {'APRProof', 'EqualityProof', 'RefutationProof'}
 
     id: str
@@ -65,7 +68,7 @@ class Proof(ABC):
             ensure_dir_path(self.proof_dir)
 
     @abstractmethod
-    def commit(self, result: StepResult) -> None: ...
+    def commit(self, result: SR) -> None: ...
 
     def admit(self) -> None:
         self.admitted = True
@@ -268,6 +271,9 @@ class Proof(ABC):
         subproofs_summaries = [subproof.summary for subproof in self.subproofs]
         return CompositeSummary([BaseSummary(self.id, self.status), *subproofs_summaries])
 
+    @abstractmethod
+    def get_steps(self) -> Iterable[PS]: ...
+
 
 class ProofSummary(ABC):
     id: str
@@ -296,13 +302,16 @@ class CompositeSummary(ProofSummary):
         return [line for lines in (summary.lines for summary in self.summaries) for line in lines]
 
 
+class ProofStep: ...
+
+
 class StepResult: ...
 
 
 class FailureInfo: ...
 
 
-class Prover:
+class Prover(Generic[PS, SR]):
     kcfg_explore: KCFGExplore
     proof: Proof
 
@@ -313,21 +322,25 @@ class Prover:
     def failure_info(self) -> FailureInfo: ...
 
     @abstractmethod
-    def step_proof(self) -> Iterable[StepResult]: ...
+    def step_proof(self, step: PS) -> Iterable[SR]: ...
 
     def advance_proof(self, max_iterations: int | None = None, fail_fast: bool = False) -> None:
         iterations = 0
-        while self.proof.can_progress:
-            if fail_fast and self.proof.failed:
-                _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
-                self.proof.failure_info = self.failure_info()
-                return
-            if max_iterations is not None and max_iterations <= iterations:
-                return
-            iterations += 1
-            results = self.step_proof()
-            for result in results:
-                self.proof.commit(result)
-            self.proof.write_proof_data()
+        while True:
+            steps = self.proof.get_steps()
+            if len(list(steps)) == 0:
+                break
+            for step in steps:
+                if fail_fast and self.proof.failed:
+                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
+                    self.proof.failure_info = self.failure_info()
+                    return
+                if max_iterations is not None and max_iterations <= iterations:
+                    return
+                iterations += 1
+                results = self.step_proof(step)
+                for result in results:
+                    self.proof.commit(result)
+                self.proof.write_proof_data()
         if self.proof.failed:
             self.proof.failure_info = self.failure_info()
