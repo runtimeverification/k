@@ -40,11 +40,12 @@ module IMP
 
   syntax KResult ::= Int | Bool
 
-  syntax KItem ::= "timerstart"
+  syntax KItem ::= "timerstart" "(" Int ")"
   syntax KItem ::= "timerstop"
 
+
   configuration <T color="yellow">
-                  <k color="green"> timerstart ~> $PGM:Pgm ~> timerstop </k>
+                  <k color="green"> timerstart(42) ~> $PGM:Pgm ~> timerstop </k>
                   <state color="red"> .Map </state>
                 </T>
 
@@ -75,6 +76,6 @@ module IMP
     requires notBool (X in keys(Rho))
   rule int .Ids; S => S
 
-  rule timerstart => timerStart()
+  rule timerstart(I:Int) => timerStart(I)
   rule timerstop => timerStop()
 endmodule
