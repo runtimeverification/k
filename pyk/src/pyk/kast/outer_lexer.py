@@ -82,11 +82,6 @@ class Token(NamedTuple):
     type: TokenType
     loc: Loc
 
-    def __eq__(self, t: object) -> bool:
-        if not isinstance(t, Token):
-            return NotImplemented
-        return self.text == t.text and self.type == t.type
-
     def let(self, *, text: str | None = None, type: TokenType | None = None, loc: Loc | None = None) -> Token:
         text = text if text else self.text
         type = type if type else self.type

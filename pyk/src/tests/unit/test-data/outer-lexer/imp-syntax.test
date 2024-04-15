@@ -8,310 +8,413 @@ syntax Pgm  ::= "int" Ids ";" Stmt         [klabel(int_;_), symbol]
 syntax Ids  ::= List{Id,","}               [klabel(_,_), symbol]
 ===
 KW_SYNTAX
+1,1
 syntax
 
 ID_UPPER
+1,8
 Stmt
 
 DCOLONEQ
+1,13
 ::=
 
 ID_UPPER
+1,17
 Block
 
 VBAR
+2,15
 |
 
 ID_UPPER
+2,17
 Id
 
 STRING
+2,20
 "="
 
 ID_UPPER
+2,24
 AExp
 
 STRING
+2,29
 ";"
 
 LBRACK
+2,44
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _=_;
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 strict
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 2
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+3,15
 |
 
 STRING
+3,17
 "if"
 
 STRING
+3,22
 "("
 
 ID_UPPER
+3,26
 BExp
 
 STRING
+3,31
 ")"
 
 ID_UPPER
+4,17
 Block
 
 STRING
+4,23
 "else"
 
 ID_UPPER
+4,30
 Block
 
 LBRACK
+4,44
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 if(_)_else_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 strict
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 1
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+5,15
 |
 
 STRING
+5,17
 "while"
 
 STRING
+5,25
 "("
 
 ID_UPPER
+5,29
 BExp
 
 STRING
+5,34
 ")"
 
 ID_UPPER
+5,38
 Block
 
 LBRACK
+5,44
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 while(_)_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 GT
+6,15
 >
 
 ID_UPPER
+6,17
 Stmt
 
 ID_UPPER
+6,22
 Stmt
 
 LBRACK
+6,44
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 __
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+7,1
 syntax
 
 ID_UPPER
+7,8
 Pgm
 
 DCOLONEQ
+7,13
 ::=
 
 STRING
+7,17
 "int"
 
 ID_UPPER
+7,23
 Ids
 
 STRING
+7,27
 ";"
 
 ID_UPPER
+7,31
 Stmt
 
 LBRACK
+7,44
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 int_;_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+8,1
 syntax
 
 ID_UPPER
+8,8
 Ids
 
 DCOLONEQ
+8,13
 ::=
 
 ID_UPPER
+8,17
 List
 
 LBRACE
+8,21
 {
 
 ID_UPPER
+8,22
 Id
 
 COMMA
+8,24
 ,
 
 STRING
+8,25
 ","
 
 RBRACE
+8,28
 }
 
 LBRACK
+8,44
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _,_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 EOF
+8,64
 
