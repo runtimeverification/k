@@ -66,10 +66,10 @@ class Loc(NamedTuple):
         if isinstance(other, str):
             line, col = self.line, self.col
             for c in other:
-                col += 1
                 if c == '\n':
                     line += 1
                     col = 0
+                col += 1
             return Loc(line, col)
         return NotImplemented
 
@@ -193,18 +193,21 @@ class LocationIterator(Iterator[str]):
     _line: int
     _col: int
     _iter: Iterator[str]
+    _nextline: bool
 
     def __init__(self, x: Iterable[str], line: int = 1, col: int = 0) -> None:
         self._iter = iter(x)
         self._line = line
         self._col = col
+        self._nextline = False
 
     def __next__(self) -> str:
         la = next(self._iter)
         self._col += 1
-        if la == '\n':
+        if self._nextline:
             self._line += 1
-            self._col = 0
+            self._col = 1
+        self._nextline = la == '\n'
         return la
 
     @property
@@ -725,7 +728,7 @@ def _strip_bubble_label(bubble: str, loc: Loc) -> tuple[list[Token], str, Loc]:
             Token(':', TokenType.COLON, colon_loc),
         ],
         match['rest'],
-        loc + bubble[: match.start('rest')],
+        colon_loc + bubble[match.start('colon') : match.start('rest')],
     )
 
 
