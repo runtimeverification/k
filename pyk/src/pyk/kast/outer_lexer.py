@@ -259,32 +259,39 @@ _DEFAULT_KEYWORDS: Final = {
 }
 
 
-def _default(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _default(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
+    it.start_token(la)
 
     if not la:
-        return _EOF_TOKEN, la
+        return it.get_token(TokenType.EOF), la
 
     elif la in _SIMPLE_CHARS:
-        return _simple_char(la, it)
+        return it.get_token(_SIMPLE_CHARS[la].type), next(it, '')
 
     elif la == '"':
-        return _string(la, it)
+        la = _consume_string([], la, it)
+        return it.get_token(TokenType.STRING), la
 
     elif la == 'r':
-        return _regex_or_lower_id_or_keyword(la, it)
+        tok, la = _regex_or_lower_id_or_keyword(la, it)
+        return it.get_token(tok.type), la
 
     elif la in _DIGIT:
-        return _nat(la, it)
+        tok, la = _nat(la, it)
+        return it.get_token(tok.type), la
 
     elif la in _ALNUM:
-        return _id_or_keyword(la, it)
+        tok, la = _id_or_keyword(la, it)
+        return it.get_token(tok.type), la
 
     elif la == '#':
-        return _hash_id(la, it)
+        tok, la = _hash_id(la, it)
+        return it.get_token(tok.type), la
 
     elif la == ':':
-        return _colon_or_dcoloneq(la, it)
+        tok, la = _colon_or_dcoloneq(la, it)
+        return it.get_token(tok.type), la
 
     else:
         raise _unexpected_character(la)
@@ -432,23 +439,28 @@ _SYNTAX_KEYWORDS: Final = {
 }
 
 
-def _syntax(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _syntax(la: str, it: LocationIterator) -> tuple[Token, str]:
     la = _skip_ws_and_comments(la, it)
+    it.start_token(la)
 
     if not la:
-        return _EOF_TOKEN, la
+        return it.get_token(TokenType.EOF), la
 
     elif la == '{':
-        return _simple_char(la, it)
+        tok, la = _simple_char(la, it)
+        return it.get_token(tok.type), la
 
     elif la in _LOWER:
-        return _syntax_keyword(la, it)
+        tok, la = _syntax_keyword(la, it)
+        return it.get_token(tok.type), la
 
     elif la in _UPPER:
-        return _upper_id(la, it)
+        tok, la = _upper_id(la, it)
+        return it.get_token(tok.type), la
 
     elif la == '#':
-        return _hash_upper_id(la, it)
+        tok, la = _hash_upper_id(la, it)
+        return it.get_token(tok.type), la
 
     else:
         raise _unexpected_character(la)
@@ -501,10 +513,11 @@ def _hash_upper_id(la: str, it: Iterator[str]) -> tuple[Token, str]:
 _MODNAME_KEYWORDS: Final = {'private', 'public'}
 
 
-def _modname(la: str, it: Iterator) -> tuple[Token, str]:
+def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
     r"""[a-zA-Z]\w*(-\w+)*"""
 
     la = _skip_ws_and_comments(la, it)
+    it.start_token(la)
 
     consumed = []
 
@@ -538,13 +551,13 @@ def _modname(la: str, it: Iterator) -> tuple[Token, str]:
     text = ''.join(consumed)
     if text in _MODNAME_KEYWORDS:
         return _KEYWORDS[text], la
-    return Token(text, TokenType.MODNAME), la
+    return it.get_token(TokenType.MODNAME), la
 
 
 _KLABEL_KEYWORDS: Final = {'syntax', 'endmodule', 'rule', 'claim', 'configuration', 'context'}
 
 
-def _klabel(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _klabel(la: str, it: LocationIterator) -> tuple[Token, str]:
     consumed: list[str]
     while True:
         while la in _WHITESPACE:
@@ -566,6 +579,7 @@ def _klabel(la: str, it: Iterator[str]) -> tuple[Token, str]:
             break
 
         consumed = []
+        it.start_token(la)
         break
 
     if la == '>' and not consumed:
@@ -583,7 +597,7 @@ def _klabel(la: str, it: Iterator[str]) -> tuple[Token, str]:
         token = _KEYWORDS[text]
     else:
         token = Token(text, TokenType.KLABEL)
-    return token, la
+    return it.get_token(token.type), la
 
 
 _SIMPLE_STATES: Final = {
