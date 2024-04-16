@@ -2,24 +2,17 @@ from __future__ import annotations
 
 import logging
 from argparse import ArgumentParser, FileType
-import logging
-from argparse import ArgumentParser, FileType
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
 
 import tomli
 
-import tomli
-
 from ..ktool import TypeInferenceMode
 from ..ktool.kompile import KompileBackend
-from ..ktool import TypeInferenceMode
 from .args import (
-    ConfigArgs,
     ConfigArgs,
     DefinitionOptions,
     DisplayOptions,
-    KCLIArgs,
     KCLIArgs,
     KDefinitionOptions,
     KompileOptions,
@@ -30,19 +23,14 @@ from .args import (
     WarningOptions,
 )
 from .utils import dir_path, file_path
-from .utils import dir_path, file_path
 
 if TYPE_CHECKING:
-    from argparse import Namespace
     from argparse import Namespace
     from collections.abc import Iterable
     from pathlib import Path
     from typing import Final
 
-    from typing import Final
 
-
-_LOGGER: Final = logging.getLogger(__name__)
 _LOGGER: Final = logging.getLogger(__name__)
 
 
@@ -412,8 +400,9 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
     toml_args = (
         get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
     )
-    toml_args = {get_option_string_destination(args.command, k): v for k, v in toml_args.items()}
+    toml_adj_args: dict[str, Any] = {}
     for k, v in toml_args.items():
+        opt_string = get_option_string_destination(args.command, k)
         if k[:3] == 'no-' and (v == 'true' or v == 'false'):
             del toml_args[k]
             toml_args[k[3:]] = 'false' if v == 'true' else 'true'
