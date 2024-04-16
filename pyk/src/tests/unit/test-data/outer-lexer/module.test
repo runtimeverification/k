@@ -2,13 +2,17 @@ module TEST
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 TEST
 
 KW_ENDMODULE
+2,1
 endmodule
 
 EOF
+2,9
 

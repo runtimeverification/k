@@ -1,10 +1,13 @@
 rule /* 1 */ program /* 2 */ text // 3
 ===
 KW_RULE
+1,1
 rule
 
 BUBBLE
+1,14
 program /* 2 */ text
 
 EOF
+1,38
 

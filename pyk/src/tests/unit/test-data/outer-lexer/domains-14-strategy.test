@@ -74,553 +74,737 @@ module STRATEGY-ABSTRACT
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 STRATEGY
 
 KW_IMPORTS
+2,5
 imports
 
 MODNAME
+2,13
 ML-SYNTAX
 
 KW_IMPORTS
+3,5
 imports
 
 MODNAME
+3,13
 KVARIABLE-SYNTAX
 
 KW_IMPORTS
+4,5
 imports
 
 KW_PRIVATE
+4,13
 private
 
 MODNAME
+4,21
 K-EQUAL
 
 KW_SYNTAX
+6,5
 syntax
 
 ID_UPPER
+6,12
 #RuleTag
 
 DCOLONEQ
+6,21
 ::=
 
 ID_UPPER
+6,25
 #KVariable
 
 KW_SYNTAX
+8,5
 syntax
 
 ID_UPPER
+8,12
 Strategy
 
 DCOLONEQ
+8,21
 ::=
 
 ID_UPPER
+8,25
 #STUCK
 
 LPAREN
+8,31
 (
 
 RPAREN
+8,32
 )
 
 LBRACK
+8,37
 [
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+9,23
 |
 
 STRING
+9,25
 "^"
 
 ID_UPPER
+9,29
 #RuleTag
 
 LBRACK
+9,38
 [
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #applyRule
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+10,23
 |
 
 STRING
+10,25
 "~"
 
 ID_UPPER
+10,29
 #RuleTag
 
 LBRACK
+10,38
 [
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #appliedRule
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_CONFIG
+12,5
 configuration
 
 BUBBLE
+12,19
 <s> $STRATEGY:K </s>
 
 KW_ENDMODULE
+13,1
 endmodule
 
 KW_MODULE
+16,1
 module
 
 MODNAME
+16,8
 RULE-TAG-SYNTAX
 
 KW_IMPORTS
+17,5
 imports
 
 MODNAME
+17,13
 BUILTIN-ID-TOKENS
 
 KW_SYNTAX
+19,5
 syntax
 
 ID_UPPER
+19,12
 #RuleTag
 
 DCOLONEQ
+19,21
 ::=
 
 ID_UPPER
+19,25
 #LowerId
 
 LBRACK
+19,34
 [
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+20,1
 endmodule
 
 KW_MODULE
+23,1
 module
 
 MODNAME
+23,8
 DEFAULT-STRATEGY-CONCRETE
 
 LBRACK
+23,34
 [
 
 ATTR_KEY
+1,0
 concrete
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+24,5
 imports
 
 MODNAME
+24,13
 STRATEGY
 
 KW_IMPORTS
+25,5
 imports
 
 MODNAME
+25,13
 RULE-TAG-SYNTAX
 
 KW_RULE
+26,5
 rule
 
 BUBBLE
+26,10
 ~ regular => ^ regular
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 anywhere
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+27,1
 endmodule
 
 KW_MODULE
+30,1
 module
 
 MODNAME
+30,8
 DEFAULT-STRATEGY-SYMBOLIC
 
 LBRACK
+30,34
 [
 
 ATTR_KEY
+1,0
 symbolic
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+31,5
 imports
 
 MODNAME
+31,13
 STRATEGY
 
 KW_IMPORTS
+32,5
 imports
 
 MODNAME
+32,13
 RULE-TAG-SYNTAX
 
 KW_RULE
+33,5
 rule
 
 BUBBLE
+33,10
 <s> ~ regular => ^ regular ... </s>
 
 KW_ENDMODULE
+34,1
 endmodule
 
 KW_MODULE
+37,1
 module
 
 MODNAME
+37,8
 DEFAULT-STRATEGY
 
 KW_IMPORTS
+38,5
 imports
 
 MODNAME
+38,13
 STRATEGY
 
 KW_IMPORTS
+39,5
 imports
 
 MODNAME
+39,13
 DEFAULT-STRATEGY-CONCRETE
 
 KW_IMPORTS
+40,5
 imports
 
 MODNAME
+40,13
 DEFAULT-STRATEGY-SYMBOLIC
 
 KW_RULE
+42,5
 rule
 
 BUBBLE
+42,10
 initSCell(_) => <s> ^ regular </s>
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 25
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+43,1
 endmodule
 
 KW_MODULE
+46,1
 module
 
 MODNAME
+46,8
 STRATEGY-ABSTRACT
 
 KW_IMPORTS
+47,5
 imports
 
 MODNAME
+47,13
 STRATEGY
 
 KW_SYNTAX
+49,5
 syntax
 
 ID_UPPER
+49,12
 #RuleTag
 
 DCOLONEQ
+49,21
 ::=
 
 STRING
+49,25
 "("
 
 ID_UPPER
+49,29
 #RuleTag
 
 STRING
+49,38
 ")"
 
 LBRACK
+49,42
 [
 
 ATTR_KEY
+1,0
 bracket
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+52,5
 syntax
 
 ID_UPPER
+52,12
 Strategy
 
 DCOLONEQ
+52,21
 ::=
 
 STRING
+52,25
 ".Strategy"
 
 VBAR
+53,23
 |
 
 STRING
+53,25
 "("
 
 ID_UPPER
+53,29
 Strategy
 
 STRING
+53,38
 ")"
 
 LBRACK
+53,42
 [
 
 ATTR_KEY
+1,0
 bracket
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+55,5
 rule
 
 BUBBLE
+55,10
 <s> .Strategy => . ... </s>
 
 KW_SYNTAX
+57,5
 syntax
 
 ID_UPPER
+57,12
 KItem
 
 DCOLONEQ
+57,18
 ::=
 
 ID_LOWER
+57,22
 #catchSTUCK
 
 LPAREN
+57,34
 (
 
 ID_UPPER
+57,36
 Strategy
 
 RPAREN
+57,45
 )
 
 KW_RULE
+59,5
 rule
 
 BUBBLE
+59,10
 <s> #catchSTUCK(_) => . ... </s>
 
 KW_RULE
+60,5
 rule
 
 BUBBLE
+60,10
 <s> #STUCK() ~> (_S:Strategy => .) ... </s>
 
 KW_RULE
+61,5
 rule
 
 BUBBLE
+61,10
 <s> #STUCK() ~> #catchSTUCK(S) => S ... </s>
 
 KW_SYNTAX
+63,5
 syntax
 
 ID_UPPER
+63,12
 Strategy
 
 DCOLONEQ
+63,21
 ::=
 
 ID_UPPER
+63,25
 Strategy
 
 STRING
+63,34
 ";"
 
 ID_UPPER
+63,38
 Strategy
 
 LBRACK
+63,47
 [
 
 ATTR_KEY
+1,0
 left
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+65,5
 rule
 
 BUBBLE
+65,10
 <s> S:Strategy ; S':Strategy => S ~> S' ... </s>
 
 KW_SYNTAX
+67,5
 syntax
 
 ID_UPPER
+67,12
 #RuleTag
 
 DCOLONEQ
+67,21
 ::=
 
 ID_UPPER
+67,25
 #RuleTag
 
 STRING
+67,34
 "|"
 
 ID_UPPER
+67,38
 #RuleTag
 
 LBRACK
+67,47
 [
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #alternateRule
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+69,5
 rule
 
 BUBBLE
+69,10
 <s> ^ RT:#RuleTag | RT':#RuleTag => ^ RT ~> #catchSTUCK(^ RT') ... </s>
 
 KW_SYNTAX
+71,5
 syntax
 
 ID_UPPER
+71,12
 #RuleTag
 
 DCOLONEQ
+71,21
 ::=
 
 ID_UPPER
+71,25
 #RuleTag
 
 STRING
+71,34
 "*"
 
 LBRACK
+71,38
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #repeatRule
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+73,5
 rule
 
 BUBBLE
+73,10
 <s> ^ RT:#RuleTag * => ^ RT ~> ^ RT * ~> #catchSTUCK(.Strategy) ... </s>
 
 KW_ENDMODULE
+74,1
 endmodule
 
 EOF
+74,9
 

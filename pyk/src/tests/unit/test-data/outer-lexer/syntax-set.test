@@ -13,133 +13,177 @@ syntax Set ::= Set Set
   ]
 ===
 KW_SYNTAX
+1,1
 syntax
 
 ID_UPPER
+1,8
 Set
 
 DCOLONEQ
+1,12
 ::=
 
 ID_UPPER
+1,16
 Set
 
 ID_UPPER
+1,20
 Set
 
 LBRACK
+2,3
 [
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 SET.concat
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _Set_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 assoc
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 unit
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 .Set
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 idem
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 element
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 SetItem
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 format
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 %1%n%2
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 EOF
+13,3
 

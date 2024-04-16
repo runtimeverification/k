@@ -3,19 +3,25 @@ module TEST
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 TEST
 
 KW_RULE
+2,5
 rule
 
 BUBBLE
+2,24
 X => Y
 
 KW_ENDMODULE
+3,1
 endmodule
 
 EOF
+3,9
 
