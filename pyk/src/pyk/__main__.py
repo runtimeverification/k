@@ -270,7 +270,6 @@ def exec_prove(options: ProveOptions) -> None:
 def exec_show(options: ProveOptions) -> None:
     options.max_iterations = 0
     options.show_kcfg = True
-    options.failure_info = True
     exec_prove(options)
 
 
@@ -484,13 +483,11 @@ def create_argument_parser() -> ArgumentParser:
     )
     prove_args.add_argument(
         '--max-depth',
-        default=None,
         type=int,
         help='Maximum number of steps to take in symbolic execution per basic block.',
     )
     prove_args.add_argument(
         '--max-iterations',
-        default=None,
         type=int,
         help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
     )
