@@ -41,7 +41,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.InnerParsingOptions;
 import scala.Option;
 import scala.Tuple3;
-import scala.collection.Seq;
 
 /**
  * Generator for rule and ground parsers. Takes as input a reference to a definition containing all
@@ -107,13 +106,13 @@ public record RuleGrammarGenerator(Definition baseK) {
     Module newM =
         new Module(
             mod.name() + "-" + name,
-            (scala.collection.Set<Import>)
-                mod.imports()
-                    .$bar(
-                        Set(
-                            Import(baseK.getModule(K).get(), true),
-                            Import(baseK.getModule(name).get(), true),
-                            Import(baseK.getModule(DEFAULT_LAYOUT).get(), true))),
+            mod.imports()
+                .$bar(
+                    Set(
+                        Import(baseK.getModule(K).get(), true),
+                        Import(baseK.getModule(name).get(), true),
+                        Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
+                .toSet(),
             mod.localSentences(),
             mod.att());
     return newM;
@@ -560,12 +559,12 @@ public record RuleGrammarGenerator(Definition baseK) {
                           || p.items().last() instanceof RegexTerminal;
                       final ProductionItem body;
                       if (cfgInfo.isLeafCell(p.sort())) {
-                        body = p.items().tail().head();
+                        body = p.items().apply(1);
                       } else {
                         body = NonTerminal(Sorts.Bag());
                       }
                       final ProductionItem optDots = NonTerminal(Sort("#OptionalDots"));
-                      Seq<ProductionItem> pi =
+                      scala.collection.immutable.Seq<ProductionItem> pi =
                           Seq(p.items().head(), optDots, body, optDots, p.items().last());
                       Production p1 = Production(p.klabel().get(), p.sort(), pi, p.att());
                       Production p2 = Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())));

@@ -3,6 +3,7 @@ package org.kframework.kore;
 
 import java.util.Arrays;
 import java.util.List;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import scala.Tuple2;
 import scala.collection.Map;
@@ -60,7 +61,10 @@ public class AttCompare {
   }
 
   private Map<Tuple2<Att.Key, String>, Object> filterAtt(Att att) {
-    return att.att().filterKeys(tuple -> attNames.contains(tuple._1()));
+    return Collections.mutable(att.att()).entrySet().stream()
+        .filter(e -> attNames.contains(e.getKey()._1))
+        .map(e -> Tuple2.apply(e.getKey(), e.getValue()))
+        .collect(Collections.toMap());
   }
 
   @Override

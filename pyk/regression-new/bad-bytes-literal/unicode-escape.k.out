@@ -5,4 +5,4 @@
 	  .	              ^~~~~~~~
 [Error] Compiler: Had 1 parsing errors.
 [ERROR] Running process failed with returncode 113:
-    kompile unicode-escape.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition unicode-escape-kompiled --type-inference-mode checked
+    kompile unicode-escape.k --md-selector k --emit-json --backend llvm --output-definition unicode-escape-kompiled --type-inference-mode checked --warnings none --no-exc-wrap

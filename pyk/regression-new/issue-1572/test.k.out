@@ -1,3 +1,3 @@
 [Error] Inner Parser: Skipping modules [ML-SYNTAX] tagged as not-lr1 which are not supported by Bison.
 [ERROR] Running process failed with returncode 113:
-    kompile test.k --md-selector k --emit-json --gen-bison-parser --warnings all -w2e --no-exc-wrap --backend llvm --output-definition test-kompiled --type-inference-mode checked
+    kompile test.k --md-selector k --emit-json --gen-bison-parser --backend llvm --output-definition test-kompiled --type-inference-mode checked --warnings all --warnings-to-errors --no-exc-wrap

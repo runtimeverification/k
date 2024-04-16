@@ -20,7 +20,6 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import scala.collection.Set;
 
 /**
  * Generates sort predicates from the subsort hierarchy of the module. This module assumes that the
@@ -33,7 +32,7 @@ import scala.collection.Set;
  *  isKItem(#token(_, _)) => true
  * </pre>
  *
- * plus one sort membership function for each builtin-hooked sort.
+ * <p>plus one sort membership function for each builtin-hooked sort.
  */
 public class GenerateSortPredicateRules {
 
@@ -41,9 +40,9 @@ public class GenerateSortPredicateRules {
     return Module(
         mod.name(),
         mod.imports(),
-        (Set<Sentence>)
-            mod.localSentences()
-                .$bar(stream(mod.localSorts()).flatMap(this::gen).collect(Collections.toSet())),
+        mod.localSentences()
+            .$bar(stream(mod.localSorts()).flatMap(this::gen).collect(Collections.toSet()))
+            .toSet(),
         mod.att());
   }
 

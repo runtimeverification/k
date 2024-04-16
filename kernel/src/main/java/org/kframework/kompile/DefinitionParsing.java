@@ -169,7 +169,7 @@ public class DefinitionParsing {
             modules,
             stream(def.entryModules())
                 .filter(m -> stream(m.sentences()).noneMatch(s -> s instanceof Bubble)));
-    def = Definition(def.mainModule(), modules.collect(Collections.toSet()), def.att());
+    def = Definition(def.mainModule(), immutable(modules.collect(Collectors.toSet())), def.att());
 
     def = Kompile.excludeModulesByTag(excludeModules, entryPointModule).apply(def);
     sw.printIntermediate("Outer parsing [" + def.modules().size() + " modules]");
@@ -247,7 +247,7 @@ public class DefinitionParsing {
     Definition trimmed =
         Definition(
             parsedDefinition.mainModule(),
-            modules.collect(Collections.toSet()),
+            immutable(modules.collect(Collectors.toSet())),
             parsedDefinition.att());
     trimmed =
         Kompile.excludeModulesByTag(excludedModuleTags, mainProgramsModule.name()).apply(trimmed);
@@ -314,7 +314,7 @@ public class DefinitionParsing {
                     if (!hasConfigDecl) {
                       return Module(
                           mod.name(),
-                          mod.imports().$bar(Set(Import(defaultConfiguration, true))).seq(),
+                          mod.imports().$bar(Set(Import(defaultConfiguration, true))).toSet(),
                           mod.localSentences(),
                           mod.att());
                     }
@@ -344,7 +344,7 @@ public class DefinitionParsing {
                   if (hasConfigDecl) {
                     return Module(
                         mod.name(),
-                        mod.imports().$bar(Set(Import(mapModule, true))).seq(),
+                        mod.imports().$bar(Set(Import(mapModule, true))).toSet(),
                         mod.localSentences(),
                         mod.att());
                   }
@@ -456,14 +456,14 @@ public class DefinitionParsing {
                                 parseBubble(parser, cache.cache(), b)
                                     .map(p -> upSentence(p, b.sentenceType())))
                         .collect(Collectors.toSet());
-                Set<Sentence> allSent =
+                scala.collection.immutable.Set<Sentence> allSent =
                     m.localSentences()
                         .$bar(immutable(parsedSet))
                         .filter(
                             s ->
                                 !(s instanceof Bubble
                                     && ((Bubble) s).sentenceType().equals(configuration)))
-                        .seq();
+                        .toSet();
                 return Module(m.name(), m.imports(), allSent, m.att());
               }
             });
@@ -496,8 +496,7 @@ public class DefinitionParsing {
                   Module(
                       m.name(),
                       m.imports(),
-                      (Set<Sentence>)
-                          m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
+                      m.localSentences().$bar(importedConfigurationSortsSubsortedToCell).toSet(),
                       m.att());
 
               Module extMod =
@@ -523,15 +522,15 @@ public class DefinitionParsing {
                                       extMod)))
                       .collect(toSet());
 
-              Set<Sentence> stc =
-                  m.localSentences()
-                      .$bar(configDeclProductions)
-                      .filter(s -> !(s instanceof Configuration))
-                      .filter(
-                          s ->
-                              !(s instanceof SyntaxSort
-                                  && s.att().contains(Att.TEMPORARY_CELL_SORT_DECL())))
-                      .seq();
+              scala.collection.immutable.Set<Sentence> stc =
+                  immutable(
+                      stream(m.localSentences().union(configDeclProductions))
+                          .filter(s -> !(s instanceof Configuration))
+                          .filter(
+                              s ->
+                                  !(s instanceof SyntaxSort ss
+                                      && ss.att().contains(Att.TEMPORARY_CELL_SORT_DECL())))
+                          .collect(Collectors.toSet()));
               Module newM = Module(m.name(), m.imports(), stc, m.att());
               newM.checkSorts(); // ensure all the Cell sorts are defined
               return newM;
@@ -622,9 +621,10 @@ public class DefinitionParsing {
       return Module(
           module.name(),
           module.imports(),
-          stream((Set<Sentence>) module.localSentences().$bar(parsedSet))
-              .filter(b -> !(b instanceof Bubble))
-              .collect(Collections.toSet()),
+          Collections.immutable(
+              stream(module.localSentences().$bar(parsedSet))
+                  .filter(b -> !(b instanceof Bubble))
+                  .collect(Collectors.toSet())),
           module.att());
     }
   }
@@ -691,11 +691,11 @@ public class DefinitionParsing {
                       .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
               if (!fromCache.isEmpty()) {
-                Set<Sentence> stc =
+                scala.collection.immutable.Set<Sentence> stc =
                     m.localSentences()
                         .$bar(immutable(Sets.newHashSet(fromCache.values())))
                         .filter(s -> !(s instanceof Bubble && fromCache.containsKey(s)))
-                        .seq();
+                        .toSet();
                 return Module(m.name(), m.imports(), stc, m.att());
               }
               return m;

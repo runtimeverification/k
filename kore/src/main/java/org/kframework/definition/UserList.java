@@ -56,11 +56,11 @@ public class UserList {
           ul.attrs = p.att().remove(Att.KLABEL());
           // should work without the Att.userList() att, i.e. for any list -- see #1892
           ul.nonEmpty = ul.attrs.get(Att.USER_LIST()).equals("+");
-          if (!((NonTerminal) p.items().tail().tail().head()).sort().equals(p.sort())) {
+          if (!((NonTerminal) p.items().apply(2)).sort().equals(p.sort())) {
             ul.leftAssoc = true;
           }
           if (ul.leftAssoc) {
-            ul.childSort = ((NonTerminal) p.items().tail().tail().head()).sort();
+            ul.childSort = ((NonTerminal) p.items().apply(2)).sort();
           } else {
             ul.childSort = ((NonTerminal) p.items().head()).sort();
           }
