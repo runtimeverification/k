@@ -61,11 +61,11 @@ public class ResolveContexts {
     return Module(
         input.name(),
         input.imports(),
-        (scala.collection.Set<Sentence>)
-            stream(input.localSentences())
-                .filter(s -> !(s instanceof Context))
-                .collect(Collections.toSet())
-                .$bar(immutable(rulesToAdd)),
+        stream(input.localSentences())
+            .filter(s -> !(s instanceof Context))
+            .collect(Collections.toSet())
+            .$bar(immutable(rulesToAdd))
+            .toSet(),
         input.att());
   }
 
@@ -310,7 +310,7 @@ public class ResolveContexts {
           @Override
           public scala.collection.Set<K> apply(KVariable k) {
             if (k.name().equals("HOLE")) {
-              return org.kframework.Collections.Set(k);
+              return org.kframework.Collections.<K>Set(k);
             } else {
               return super.apply(k);
             }
@@ -324,7 +324,7 @@ public class ResolveContexts {
         new FindK() {
           @Override
           public scala.collection.Set<K> apply(KRewrite k) {
-            return this.merge(org.kframework.Collections.Set(k), super.apply(k));
+            return this.merge(org.kframework.Collections.<K>Set(k), super.apply(k));
           }
         }.apply(body).size();
     if (cntRewrites > 1) {

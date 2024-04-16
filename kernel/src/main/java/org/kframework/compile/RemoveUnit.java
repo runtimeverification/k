@@ -25,7 +25,7 @@ public class RemoveUnit {
     return Module(
         module.name(),
         module.imports(),
-        stream(module.localSentences()).flatMap(this::gen).collect(Collections.toSet()),
+        stream(module.localSentences()).flatMap(this::gen).collect(Collections.toSet()).toSet(),
         module.att());
   }
 

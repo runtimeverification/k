@@ -6,7 +6,8 @@ import java.util.Optional
 import org.kframework.definition._
 import org.kframework.kore.Sort
 import org.kframework.utils.errorsystem.KEMException
-import org.kframework.Collections._
+import org.kframework.Collections
+import scala.collection.immutable
 import scala.collection.Set
 import scala.reflect.classTag
 import scala.reflect.ClassTag
@@ -533,7 +534,7 @@ object Att {
     )
 
   def from(thatAtt: java.util.Map[Key, String]): Att =
-    Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
+    Att(Collections.immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
 
   private def apply(thatAtt: Map[(Key, String), Any]) =
     new Att(thatAtt)
@@ -546,8 +547,8 @@ object Att {
 
   implicit val ord: Ordering[Att] = {
     import scala.math.Ordering.Implicits._
-    Ordering.by[Att, Seq[(String, String, String)]](att =>
-      att.att.iterator.map(k => (k._1._1.key, k._1._2, k._2.toString)).toSeq.sorted
+    Ordering.by[Att, immutable.Seq[(String, String, String)]](att =>
+      att.att.iterator.map(k => (k._1._1.key, k._1._2, k._2.toString)).to(immutable.Seq).sorted
     )
   }
 }

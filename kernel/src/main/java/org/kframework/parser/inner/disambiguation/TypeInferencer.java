@@ -40,7 +40,6 @@ import org.kframework.parser.TermCons;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.Seq;
 
 /**
  * Class to manage communication with z3 for the purposes of type inference. This class is driven by
@@ -801,7 +800,7 @@ public class TypeInferencer implements AutoCloseable {
       if (t.get().production().params().nonEmpty()) {
         int id = prIds.get(t.get());
         List<String> names = variablesById.get(id);
-        Seq<Sort> formalParams = t.get().production().params();
+        scala.collection.immutable.Seq<Sort> formalParams = t.get().production().params();
         assert (names.size() == formalParams.size());
         for (int i = 0; i < names.size(); i++) {
           params.put(formalParams.apply(i), names.get(i));
@@ -944,7 +943,7 @@ public class TypeInferencer implements AutoCloseable {
     status = null;
   }
 
-  public Seq<Sort> getArgs(ProductionReference pr) {
+  public scala.collection.immutable.Seq<Sort> getArgs(ProductionReference pr) {
     if (prIds.containsKey(pr)) {
       int id = prIds.get(pr);
       List<String> names = variablesById.get(id);
