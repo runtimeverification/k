@@ -337,8 +337,8 @@ class KProve(KPrint):
                     prover = ImpliesProver(proof, kcfg_explore)
                 else:
                     assert type(proof) is APRProof
-                    prover = APRProver(proof, kcfg_explore, execute_depth=max_depth)
-                prover.advance_proof(max_iterations=max_iterations)
+                    prover = APRProver(kcfg_explore, execute_depth=max_depth)
+                prover.advance_proof(proof, max_iterations=max_iterations)
 
         if proof.passed:
             _LOGGER.info(f'Proof passed: {proof.id}')
