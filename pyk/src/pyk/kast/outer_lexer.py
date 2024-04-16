@@ -64,7 +64,7 @@ class Loc(NamedTuple):
 
     def __add__(self, other: object) -> Loc:
         if isinstance(other, str):
-            """ Return the line,column after the additional text """
+            """Return the line,column after the additional text"""
             line, col = self.line, self.col
             for c in other:
                 if c == '\n':
@@ -213,7 +213,7 @@ class LocationIterator(Iterator[str]):
 
     @property
     def loc(self) -> Loc:
-        """ Returns the line,column of the last character returned by the iterator """
+        """Returns the line,column of the last character returned by the iterator"""
         return Loc(self._line, self._col)
 
 
