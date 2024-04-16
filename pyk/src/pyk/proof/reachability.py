@@ -86,6 +86,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     error_info: Exception | None
     prior_loops_cache: dict[int, list[int]]
 
+    _checked_for_terminal: set[int]
+    _checked_for_bounded: set[int]
+
     def __init__(
         self,
         id: str,
@@ -120,6 +123,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.kcfg._kcfg_store = KCFGStore(self.proof_subdir / 'kcfg') if self.proof_subdir else None
         self._exec_time = _exec_time
         self.error_info = error_info
+
+        self._checked_for_terminal = set()
+        self._checked_for_bounded = set()
 
         if self.proof_dir is not None and self.proof_subdir is not None:
             ensure_dir_path(self.proof_dir)
@@ -631,10 +637,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     always_check_subsumption: bool
     fast_check_subsumption: bool
 
-    _checked_for_terminal: set[int]
-    _checked_for_subsumption: set[int]
-    _checked_for_bounded: set[int]
-
     def __init__(
         self,
         kcfg_explore: KCFGExplore,
@@ -685,9 +687,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         return not proof.kcfg.zero_depth_between(proof.init, node.id)
 
     def _check_terminal(self, proof: APRProof, node: KCFG.Node) -> None:
-        if node.id not in self._checked_for_terminal:
+        if node.id not in proof._checked_for_terminal:
             _LOGGER.info(f'Checking terminal: {node.id}')
-            self._checked_for_terminal.add(node.id)
+            proof._checked_for_terminal.add(node.id)
             if self.kcfg_explore.kcfg_semantics.is_terminal(node.cterm):
                 _LOGGER.info(f'Terminal node: {node.id}.')
                 proof.add_terminal(node.id)
@@ -721,9 +723,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
         curr_node = step.proof.kcfg.node(step.node_id)
 
-        if step.proof.bmc_depth is not None and curr_node.id not in self._checked_for_bounded:
+        if step.proof.bmc_depth is not None and curr_node.id not in step.proof._checked_for_bounded:
             _LOGGER.info(f'Checking bmc depth for node {step.proof.id}: {curr_node.id}')
-            self._checked_for_bounded.add(curr_node.id)
+            step.proof._checked_for_bounded.add(curr_node.id)
 
             prior_loops = []
             for succ in reversed(step.proof.shortest_path_to(curr_node.id)):
