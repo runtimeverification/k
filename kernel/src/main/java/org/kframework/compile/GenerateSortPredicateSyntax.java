@@ -27,10 +27,7 @@ public class GenerateSortPredicateSyntax {
       res.add(SyntaxSort(Seq(), Sorts.K()));
     }
     return Module(
-        mod.name(),
-        mod.imports(),
-        (scala.collection.Set<Sentence>) mod.localSentences().$bar(immutable(res)),
-        mod.att());
+        mod.name(), mod.imports(), mod.localSentences().$bar(immutable(res)).toSet(), mod.att());
   }
 
   public Set<Sentence> gen(Module mod, Sort sort) {

@@ -1,19 +1,25 @@
 syntax left foo bar baz
 ===
 KW_SYNTAX
+1,1
 syntax
 
 KW_LEFT
+1,8
 left
 
 KLABEL
+1,13
 foo
 
 KLABEL
+1,17
 bar
 
 KLABEL
+1,21
 baz
 
 EOF
+1,23
 

@@ -72,2497 +72,3329 @@ module FLOAT
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 FLOAT-SYNTAX
 
 KW_SYNTAX
+2,3
 syntax
 
 ID_UPPER
+2,10
 Float
 
 LBRACK
+2,16
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.Float
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+3,3
 syntax
 
 ID_UPPER
+3,10
 Float
 
 DCOLONEQ
+3,16
 ::=
 
 REGEX
+3,20
 r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?"
 
 LBRACK
+3,113
 [
 
 ATTR_KEY
+1,0
 token
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 prec
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 1
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+4,3
 syntax
 
 ID_UPPER
+4,10
 Float
 
 DCOLONEQ
+4,16
 ::=
 
 REGEX
+4,20
 r"[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?"
 
 LBRACK
+4,71
 [
 
 ATTR_KEY
+1,0
 token
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 prec
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 3
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+5,3
 syntax
 
 ID_UPPER
+5,10
 Float
 
 DCOLONEQ
+5,16
 ::=
 
 REGEX
+5,20
 r"NaN([fFdD]|([pP][0-9]+[xX][0-9]+))?"
 
 LBRACK
+5,59
 [
 
 ATTR_KEY
+1,0
 token
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 prec
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 3
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+6,1
 endmodule
 
 KW_MODULE
+9,1
 module
 
 MODNAME
+9,8
 FLOAT
 
 KW_IMPORTS
+10,3
 imports
 
 MODNAME
+10,11
 FLOAT-SYNTAX
 
 KW_IMPORTS
+11,3
 imports
 
 KW_PRIVATE
+11,11
 private
 
 MODNAME
+11,19
 BOOL
 
 KW_IMPORTS
+12,3
 imports
 
 KW_PRIVATE
+12,11
 private
 
 MODNAME
+12,19
 INT-SYNTAX
 
 KW_SYNTAX
+14,3
 syntax
 
 ID_UPPER
+14,10
 Int
 
 DCOLONEQ
+14,14
 ::=
 
 ID_LOWER
+14,18
 precisionFloat
 
 LPAREN
+14,32
 (
 
 ID_UPPER
+14,33
 Float
 
 RPAREN
+14,38
 )
 
 LBRACK
+14,40
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.precision
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+16,3
 syntax
 
 ID_UPPER
+16,10
 Int
 
 DCOLONEQ
+16,14
 ::=
 
 ID_LOWER
+16,18
 exponentBitsFloat
 
 LPAREN
+16,35
 (
 
 ID_UPPER
+16,36
 Float
 
 RPAREN
+16,41
 )
 
 LBRACK
+16,43
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.exponentBits
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+18,3
 syntax
 
 ID_UPPER
+18,10
 Int
 
 DCOLONEQ
+18,14
 ::=
 
 ID_LOWER
+18,18
 exponentFloat
 
 LPAREN
+18,31
 (
 
 ID_UPPER
+18,32
 Float
 
 RPAREN
+18,37
 )
 
 LBRACK
+18,39
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.exponent
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+20,3
 syntax
 
 ID_UPPER
+20,10
 Bool
 
 DCOLONEQ
+20,15
 ::=
 
 ID_LOWER
+20,19
 signFloat
 
 LPAREN
+20,28
 (
 
 ID_UPPER
+20,29
 Float
 
 RPAREN
+20,34
 )
 
 LBRACK
+20,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.sign
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+22,3
 syntax
 
 ID_UPPER
+22,10
 Bool
 
 DCOLONEQ
+22,15
 ::=
 
 ID_LOWER
+22,19
 isNaN
 
 LPAREN
+22,24
 (
 
 ID_UPPER
+22,25
 Float
 
 RPAREN
+22,30
 )
 
 LBRACK
+22,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.isNaN
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.isNaN
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+23,17
 |
 
 ID_LOWER
+23,19
 isInfinite
 
 LPAREN
+23,29
 (
 
 ID_UPPER
+23,30
 Float
 
 RPAREN
+23,35
 )
 
 LBRACK
+23,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+25,3
 syntax
 
 ID_UPPER
+25,10
 Float
 
 DCOLONEQ
+25,16
 ::=
 
 STRING
+25,20
 "--Float"
 
 ID_UPPER
+25,30
 Float
 
 LBRACK
+25,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.neg
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.neg
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+26,18
 >
 
 ID_UPPER
+26,20
 Float
 
 STRING
+26,26
 "^Float"
 
 ID_UPPER
+26,35
 Float
 
 LBRACK
+26,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}^{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.pow
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+27,18
 >
 
 KW_LEFT
+27,20
 left
 
 COLON
+27,24
 :
 
 ID_UPPER
+28,20
 Float
 
 STRING
+28,26
 "*Float"
 
 ID_UPPER
+28,35
 Float
 
 LBRACK
+28,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (fp.mul roundNearestTiesToEven #1 #2)
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.mul
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+29,18
 |
 
 ID_UPPER
+29,20
 Float
 
 STRING
+29,26
 "/Float"
 
 ID_UPPER
+29,35
 Float
 
 LBRACK
+29,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (fp.div roundNearestTiesToEven #1 #2)
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.div
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+30,18
 |
 
 ID_UPPER
+30,20
 Float
 
 STRING
+30,26
 "%Float"
 
 ID_UPPER
+30,35
 Float
 
 LBRACK
+30,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (fp.rem roundNearestTiesToEven #1 #2)
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.rem
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+31,18
 >
 
 KW_LEFT
+31,20
 left
 
 COLON
+31,24
 :
 
 ID_UPPER
+32,20
 Float
 
 STRING
+32,26
 "+Float"
 
 ID_UPPER
+32,35
 Float
 
 LBRACK
+32,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (fp.add roundNearestTiesToEven #1 #2)
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{+_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.add
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+33,18
 |
 
 ID_UPPER
+33,20
 Float
 
 STRING
+33,26
 "-Float"
 
 ID_UPPER
+33,35
 Float
 
 LBRACK
+33,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (fp.sub roundNearestTiesToEven #1 #2)
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{-_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.sub
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+35,3
 syntax
 
 ID_UPPER
+35,10
 Float
 
 DCOLONEQ
+35,16
 ::=
 
 ID_LOWER
+35,20
 rootFloat
 
 LPAREN
+35,29
 (
 
 ID_UPPER
+35,30
 Float
 
 COMMA
+35,35
 ,
 
 ID_UPPER
+35,37
 Int
 
 RPAREN
+35,40
 )
 
 LBRACK
+35,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.root
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+36,18
 |
 
 ID_LOWER
+36,20
 absFloat
 
 LPAREN
+36,28
 (
 
 ID_UPPER
+36,29
 Float
 
 RPAREN
+36,34
 )
 
 LBRACK
+36,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.abs
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.abs
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+37,18
 |
 
 ID_LOWER
+37,20
 roundFloat
 
 LPAREN
+37,30
 (
 
 ID_UPPER
+37,31
 Float
 
 COMMA
+37,36
 ,
 
 ID_LOWER
+37,38
 precision
 
 COLON
+37,47
 :
 
 ID_UPPER
+37,49
 Int
 
 COMMA
+37,52
 ,
 
 ID_LOWER
+37,54
 exponentBits
 
 COLON
+37,66
 :
 
 ID_UPPER
+37,68
 Int
 
 RPAREN
+37,71
 )
 
 LBRACK
+37,74
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.round
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+38,18
 |
 
 ID_LOWER
+38,20
 floorFloat
 
 LPAREN
+38,30
 (
 
 ID_UPPER
+38,31
 Float
 
 RPAREN
+38,36
 )
 
 LBRACK
+38,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.floor
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+39,18
 |
 
 ID_LOWER
+39,20
 ceilFloat
 
 LPAREN
+39,29
 (
 
 ID_UPPER
+39,30
 Float
 
 RPAREN
+39,35
 )
 
 LBRACK
+39,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.ceil
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+40,18
 |
 
 ID_LOWER
+40,20
 truncFloat
 
 LPAREN
+40,30
 (
 
 ID_UPPER
+40,31
 Float
 
 RPAREN
+40,36
 )
 
 LBRACK
+40,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.trunc
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+41,18
 |
 
 ID_LOWER
+41,20
 expFloat
 
 LPAREN
+41,28
 (
 
 ID_UPPER
+41,29
 Float
 
 RPAREN
+41,34
 )
 
 LBRACK
+41,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.exp
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+42,18
 |
 
 ID_LOWER
+42,20
 logFloat
 
 LPAREN
+42,28
 (
 
 ID_UPPER
+42,29
 Float
 
 RPAREN
+42,34
 )
 
 LBRACK
+42,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.log
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+43,18
 |
 
 ID_LOWER
+43,20
 sinFloat
 
 LPAREN
+43,28
 (
 
 ID_UPPER
+43,29
 Float
 
 RPAREN
+43,34
 )
 
 LBRACK
+43,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.sin
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+44,18
 |
 
 ID_LOWER
+44,20
 cosFloat
 
 LPAREN
+44,28
 (
 
 ID_UPPER
+44,29
 Float
 
 RPAREN
+44,34
 )
 
 LBRACK
+44,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.cos
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+45,18
 |
 
 ID_LOWER
+45,20
 tanFloat
 
 LPAREN
+45,28
 (
 
 ID_UPPER
+45,29
 Float
 
 RPAREN
+45,34
 )
 
 LBRACK
+45,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.tan
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+46,18
 |
 
 ID_LOWER
+46,20
 asinFloat
 
 LPAREN
+46,29
 (
 
 ID_UPPER
+46,30
 Float
 
 RPAREN
+46,35
 )
 
 LBRACK
+46,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.asin
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+47,18
 |
 
 ID_LOWER
+47,20
 acosFloat
 
 LPAREN
+47,29
 (
 
 ID_UPPER
+47,30
 Float
 
 RPAREN
+47,35
 )
 
 LBRACK
+47,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.acos
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+48,18
 |
 
 ID_LOWER
+48,20
 atanFloat
 
 LPAREN
+48,29
 (
 
 ID_UPPER
+48,30
 Float
 
 RPAREN
+48,35
 )
 
 LBRACK
+48,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.atan
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+49,18
 |
 
 ID_LOWER
+49,20
 atan2Float
 
 LPAREN
+49,30
 (
 
 ID_UPPER
+49,31
 Float
 
 COMMA
+49,36
 ,
 
 ID_UPPER
+49,38
 Float
 
 RPAREN
+49,43
 )
 
 LBRACK
+49,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.atan2
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+50,18
 |
 
 ID_LOWER
+50,20
 maxFloat
 
 LPAREN
+50,28
 (
 
 ID_UPPER
+50,29
 Float
 
 COMMA
+50,34
 ,
 
 ID_UPPER
+50,36
 Float
 
 RPAREN
+50,41
 )
 
 LBRACK
+50,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.max
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.max
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+51,18
 |
 
 ID_LOWER
+51,20
 minFloat
 
 LPAREN
+51,28
 (
 
 ID_UPPER
+51,29
 Float
 
 COMMA
+51,34
 ,
 
 ID_UPPER
+51,36
 Float
 
 RPAREN
+51,41
 )
 
 LBRACK
+51,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.min
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.min
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+52,18
 |
 
 ID_LOWER
+52,20
 sqrtFloat
 
 LPAREN
+52,29
 (
 
 ID_UPPER
+52,30
 Float
 
 RPAREN
+52,35
 )
 
 LBRACK
+52,49
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 VBAR
+53,18
 |
 
 ID_LOWER
+53,20
 maxValueFloat
 
 LPAREN
+53,33
 (
 
 ID_LOWER
+53,34
 precision
 
 COLON
+53,43
 :
 
 ID_UPPER
+53,45
 Int
 
 COMMA
+53,48
 ,
 
 ID_LOWER
+53,50
 exponentBits
 
 COLON
+53,62
 :
 
 ID_UPPER
+53,64
 Int
 
 RPAREN
+53,67
 )
 
 LBRACK
+53,74
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.maxValue
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+54,18
 |
 
 ID_LOWER
+54,20
 minValueFloat
 
 LPAREN
+54,33
 (
 
 ID_LOWER
+54,34
 precision
 
 COLON
+54,43
 :
 
 ID_UPPER
+54,45
 Int
 
 COMMA
+54,48
 ,
 
 ID_LOWER
+54,50
 exponentBits
 
 COLON
+54,62
 :
 
 ID_UPPER
+54,64
 Int
 
 RPAREN
+54,67
 )
 
 LBRACK
+54,74
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.minValue
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+56,3
 syntax
 
 ID_UPPER
+56,10
 Bool
 
 DCOLONEQ
+56,15
 ::=
 
 ID_UPPER
+56,19
 Float
 
 STRING
+56,25
 "<=Float"
 
 ID_UPPER
+56,35
 Float
 
 LBRACK
+56,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.leq
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.le
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+57,17
 |
 
 ID_UPPER
+57,19
 Float
 
 STRING
+57,25
 "<Float"
 
 ID_UPPER
+57,34
 Float
 
 LBRACK
+57,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.lt
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{<_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.lt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+58,17
 |
 
 ID_UPPER
+58,19
 Float
 
 STRING
+58,25
 ">=Float"
 
 ID_UPPER
+58,35
 Float
 
 LBRACK
+58,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.geq
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.ge
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+59,17
 |
 
 ID_UPPER
+59,19
 Float
 
 STRING
+59,25
 ">Float"
 
 ID_UPPER
+59,34
 Float
 
 LBRACK
+59,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fg.gt
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{>_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.gt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+60,17
 |
 
 ID_UPPER
+60,19
 Float
 
 STRING
+60,25
 "==Float"
 
 ID_UPPER
+60,35
 Float
 
 LBRACK
+60,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 fp.eq
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{==_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.eq
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _==Float_
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+61,17
 |
 
 ID_UPPER
+61,19
 Float
 
 STRING
+61,25
 "=/=Float"
 
 ID_UPPER
+61,36
 Float
 
 LBRACK
+61,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (not (fp.eq #1 #2))
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2}
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+63,3
 rule
 
 BUBBLE
+63,8
 F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
 
 KW_SYNTAX
+65,3
 syntax
 
 ID_UPPER
+65,10
 Float
 
 DCOLONEQ
+65,16
 ::=
 
 ID_UPPER
+65,20
 Int2Float
 
 LPAREN
+65,29
 (
 
 ID_UPPER
+65,30
 Int
 
 COMMA
+65,33
 ,
 
 ID_LOWER
+65,35
 precision
 
 COLON
+65,44
 :
 
 ID_UPPER
+65,46
 Int
 
 COMMA
+65,49
 ,
 
 ID_LOWER
+65,51
 exponentBits
 
 COLON
+65,63
 :
 
 ID_UPPER
+65,65
 Int
 
 RPAREN
+65,68
 )
 
 LBRACK
+65,73
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {\\it{}Int2Float}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.int2float
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+66,3
 syntax
 
 ID_UPPER
+66,10
 Int
 
 DCOLONEQ
+66,14
 ::=
 
 ID_UPPER
+66,18
 Float2Int
 
 LPAREN
+66,27
 (
 
 ID_UPPER
+66,28
 Float
 
 RPAREN
+66,33
 )
 
 LBRACK
+66,38
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {\\it{}Float2Int}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 FLOAT.float2int
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+68,3
 rule
 
 BUBBLE
+68,8
 sqrtFloat(F:Float) => rootFloat(F, 2)
 
 KW_RULE
+70,3
 rule
 
 BUBBLE
+70,8
 isInfinite(F:Float) => F >Float maxValueFloat(precisionFloat(F), exponentBitsFloat(F)) orBool F <Float --Float maxValueFloat(precisionFloat(F), exponentBitsFloat(F))
 
 KW_ENDMODULE
+72,1
 endmodule
 
 EOF
+72,9
 

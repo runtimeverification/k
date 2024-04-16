@@ -28,13 +28,13 @@ class LoggingOptions(Options):
 
 class WarningOptions(Options):
     warnings: Warnings | None
-    warning_to_error: bool
+    warnings_to_errors: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'warnings': None,
-            'warning_to_error': False,
+            'warnings_to_errors': False,
         }
 
 
@@ -201,8 +201,9 @@ class KCLIArgs:
             help='Warnings to print about (no effect on pyk, only subcommands).',
         )
         args.add_argument(
+            '--warnings_to_errors',
             '-w2e',
-            dest='warning_to_error',
+            dest='warnings_to_errors',
             default=False,
             action='store_true',
             help='Turn warnings into errors (no effect on pyk, only subcommands).',
@@ -381,6 +382,7 @@ class KCLIArgs:
             type=str,
             help='Code selector expression to use when reading markdown.',
         )
+        args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
         return args
 
     @cached_property

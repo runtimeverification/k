@@ -132,8 +132,7 @@ public class ToJson {
     jatt.add("node", JsonParser.KATT);
 
     JsonObjectBuilder jattKeys = factory.createObjectBuilder();
-    for (Tuple2<Att.Key, String> attKeyPair :
-        JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+    for (Tuple2<Att.Key, String> attKeyPair : iterable(att.att().keys())) {
       if (attKeyPair._1().key().equals(Location.class.getName())) {
         JsonArrayBuilder locarr = factory.createArrayBuilder();
         Location loc = att.get(Att.LOCATION(), Location.class);

@@ -8,7 +8,7 @@ import pytest
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
-from pyk.kast.manip import minimize_term
+from pyk.kast.manip import minimize_term, sort_ac_collections
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
@@ -778,7 +778,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         # When
         exec_res = kcfg_explore.cterm_symbolic.execute(self.config(kprove, k, state), depth=depth)
         actual_k = kcfg_explore.pretty_print(exec_res.state.cell('K_CELL'))
-        actual_state = kcfg_explore.pretty_print(exec_res.state.cell('STATE_CELL'))
+        actual_state = kcfg_explore.pretty_print(sort_ac_collections(exec_res.state.cell('STATE_CELL')))
         actual_depth = exec_res.depth
 
         actual_next_states = [

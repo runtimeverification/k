@@ -1,22 +1,29 @@
 syntax priority foo bar > baz
 ===
 KW_SYNTAX
+1,1
 syntax
 
 KW_PRIORITY
+1,8
 priority
 
 KLABEL
+1,17
 foo
 
 KLABEL
+1,21
 bar
 
 GT
+1,25
 >
 
 KLABEL
+1,27
 baz
 
 EOF
+1,29
 
