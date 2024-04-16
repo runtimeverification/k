@@ -317,8 +317,8 @@ class KProve(KPrint):
                 prover = ImpliesProver(proof, kcfg_explore)
             else:
                 proof = APRProof.from_claim(self.definition, claim, {})
-                prover = APRProver(proof, kcfg_explore)
-            prover.advance_proof()
+                prover = APRProver(kcfg_explore)
+            prover.advance_proof(proof)
             if proof.passed:
                 _LOGGER.info(f'Proof passed: {proof.id}')
             elif proof.failed:

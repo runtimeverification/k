@@ -92,12 +92,11 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
             kcfg_explore.simplify(proof.kcfg, {})
 
             prover = APRProver(
-                proof,
                 kcfg_explore=kcfg_explore,
                 execute_depth=max_depth,
                 cut_point_rules=cut_rules,
             )
-            prover.advance_proof(max_iterations=max_iterations)
+            prover.advance_proof(proof, max_iterations=max_iterations)
 
             kcfg_show = KCFGShow(
                 kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)

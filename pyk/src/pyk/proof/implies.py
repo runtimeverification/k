@@ -407,7 +407,7 @@ class RefutationSummary(ProofSummary):
         ]
 
 
-class ImpliesProver(Prover[ImpliesProofStep, ImpliesProofResult]):
+class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
     proof: ImpliesProof
 
     def __init__(self, proof: ImpliesProof, kcfg_explore: KCFGExplore):
@@ -458,6 +458,9 @@ class ImpliesProver(Prover[ImpliesProofStep, ImpliesProofResult]):
             )
         ]
 
-    def failure_info(self) -> FailureInfo:
+    def init_proof(self, proof: ImpliesProof) -> None:
+        pass
+
+    def failure_info(self, proof: ImpliesProof) -> FailureInfo:
         # TODO add implementation
         return FailureInfo()
