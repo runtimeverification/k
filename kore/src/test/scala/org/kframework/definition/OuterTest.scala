@@ -12,40 +12,73 @@ import org.kframework.attributes.Att
 import org.kframework.kore.ADT.KToken
 import org.kframework.kore.KORE.KLabel
 import org.kframework.kore.KORE.Sort
+import scala.collection.immutable
 
 class OuterTest {
   @Test def isPrefixTest(): Unit = {
     val sort = Sort("foo")
     val nt   = NonTerminal(sort, None)
     val prod1 =
-      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(")")), Att.empty)
+      Production(
+        immutable.Seq(),
+        sort,
+        immutable.Seq(Terminal("foo"), Terminal("("), nt, Terminal(")")),
+        Att.empty
+      )
     Assert.assertTrue(prod1.isPrefixProduction)
-    val prod2 = Production(Seq(), sort, Seq(Terminal("foo")), Att.empty)
+    val prod2 = Production(immutable.Seq(), sort, immutable.Seq(Terminal("foo")), Att.empty)
     Assert.assertFalse(prod2.isPrefixProduction)
-    val prod3 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("(")), Att.empty)
+    val prod3 =
+      Production(immutable.Seq(), sort, immutable.Seq(Terminal("foo"), Terminal("(")), Att.empty)
     Assert.assertFalse(prod3.isPrefixProduction)
-    val prod4 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt), Att.empty)
+    val prod4 = Production(
+      immutable.Seq(),
+      sort,
+      immutable.Seq(Terminal("foo"), Terminal("("), nt),
+      Att.empty
+    )
     Assert.assertFalse(prod4.isPrefixProduction)
     val prod5 =
-      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(",")), Att.empty)
+      Production(
+        immutable.Seq(),
+        sort,
+        immutable.Seq(Terminal("foo"), Terminal("("), nt, Terminal(",")),
+        Att.empty
+      )
     Assert.assertFalse(prod5.isPrefixProduction)
     val prod6 =
-      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), nt), Att.empty)
+      Production(
+        immutable.Seq(),
+        sort,
+        immutable.Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), nt),
+        Att.empty
+      )
     Assert.assertFalse(prod6.isPrefixProduction)
     val prod7 = Production(
-      Seq(),
+      immutable.Seq(),
       sort,
-      Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), Terminal(")")),
+      immutable.Seq(Terminal("foo"), Terminal("("), nt, Terminal(","), Terminal(")")),
       Att.empty
     )
     Assert.assertFalse(prod7.isPrefixProduction)
     val prod8 =
-      Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), Terminal(")")), Att.empty)
+      Production(
+        immutable.Seq(),
+        sort,
+        immutable.Seq(Terminal("foo"), Terminal("("), Terminal(")")),
+        Att.empty
+      )
     Assert.assertTrue(prod8.isPrefixProduction)
-    val prod9 = Production(Seq(), sort, Seq(Terminal("("), Terminal(")")), Att.empty)
+    val prod9 =
+      Production(immutable.Seq(), sort, immutable.Seq(Terminal("("), Terminal(")")), Att.empty)
     Assert.assertTrue(prod9.isPrefixProduction)
     val prod10 =
-      Production(Seq(), sort, Seq(Terminal("("), nt, Terminal(","), nt, Terminal(")")), Att.empty)
+      Production(
+        immutable.Seq(),
+        sort,
+        immutable.Seq(Terminal("("), nt, Terminal(","), nt, Terminal(")")),
+        Att.empty
+      )
     Assert.assertTrue(prod10.isPrefixProduction)
   }
 
@@ -56,9 +89,9 @@ class OuterTest {
     val nt1   = NonTerminal(sort1, Some("bar"))
     val nt2   = NonTerminal(sort2, Some("baz"))
     val prod = Production(
-      Seq(),
+      immutable.Seq(),
       sort1,
-      Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
+      immutable.Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
       Att.empty
     )
     val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
@@ -67,9 +100,9 @@ class OuterTest {
     Assert.assertEquals(
       Set(
         Production(
-          Seq(),
+          immutable.Seq(),
           sort1,
-          Seq(
+          immutable.Seq(
             Terminal("foo"),
             Terminal("("),
             Terminal("..."),
@@ -77,18 +110,18 @@ class OuterTest {
             Terminal(")")
           ),
           newAtt
-        ),                                                            // main
-        Production(Seq(), Sort("foo-+1"), Seq(Terminal("")), newAtt), // empty
+        ),                                                                                // main
+        Production(immutable.Seq(), Sort("foo-+1"), immutable.Seq(Terminal("")), newAtt), // empty
         Production(
-          Seq(),
+          immutable.Seq(),
           Sort("foo-+1"),
-          Seq(NonTerminal(Sort("foo-+1Ne"), None)),
+          immutable.Seq(NonTerminal(Sort("foo-+1Ne"), None)),
           newAtt
         ), // subsort
         Production(
-          Seq(),
+          immutable.Seq(),
           Sort("foo-+1Ne"),
-          Seq(
+          immutable.Seq(
             NonTerminal(Sort("foo-+1Ne"), None),
             Terminal(","),
             NonTerminal(Sort("foo-+1Item"), None)
@@ -96,21 +129,21 @@ class OuterTest {
           newAtt
         ), // repeat
         Production(
-          Seq(),
+          immutable.Seq(),
           Sort("foo-+1Ne"),
-          Seq(NonTerminal(Sort("foo-+1Item"), None)),
+          immutable.Seq(NonTerminal(Sort("foo-+1Item"), None)),
           newAtt
         ), // subsort2
         Production(
-          Seq(),
+          immutable.Seq(),
           Sort("foo-+1Item"),
-          Seq(Terminal("bar"), Terminal(":"), NonTerminal(sort1, None)),
+          immutable.Seq(Terminal("bar"), Terminal(":"), NonTerminal(sort1, None)),
           newAtt
         ), // item
         Production(
-          Seq(),
+          immutable.Seq(),
           Sort("foo-+1Item"),
-          Seq(Terminal("baz"), Terminal(":"), NonTerminal(sort2, None)),
+          immutable.Seq(Terminal("baz"), Terminal(":"), NonTerminal(sort2, None)),
           newAtt
         ) // item
       ),
@@ -125,9 +158,9 @@ class OuterTest {
     val nt1   = NonTerminal(sort1, None)
     val nt2   = NonTerminal(sort2, Some("baz"))
     val prod = Production(
-      Seq(),
+      immutable.Seq(),
       sort1,
-      Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
+      immutable.Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
       Att.empty
     )
     val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
@@ -136,15 +169,15 @@ class OuterTest {
     Assert.assertEquals(
       Set(
         Production(
-          Seq(),
+          immutable.Seq(),
           sort1,
-          Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")),
+          immutable.Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")),
           newAtt
         ),
         Production(
-          Seq(),
+          immutable.Seq(),
           sort1,
-          Seq(
+          immutable.Seq(
             Terminal("foo"),
             Terminal("("),
             Terminal("..."),
@@ -167,9 +200,9 @@ class OuterTest {
     val nt1   = NonTerminal(sort1, None)
     val nt2   = NonTerminal(sort2, None)
     val prod = Production(
-      Seq(),
+      immutable.Seq(),
       sort1,
-      Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
+      immutable.Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")),
       Att.empty
     )
     val newAtt  = Att.empty.add(Att.RECORD_PRD, classOf[Production], prod)
@@ -178,9 +211,9 @@ class OuterTest {
     Assert.assertEquals(
       Set(
         Production(
-          Seq(),
+          immutable.Seq(),
           sort1,
-          Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")),
+          immutable.Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")),
           newAtt
         )
       ),
@@ -190,9 +223,21 @@ class OuterTest {
 
   @Test def klabelAttEquality(): Unit = {
     val prod1 =
-      Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "foo"))
+      Production(
+        Some(KLabel("foo")),
+        immutable.Seq(),
+        Sort("Foo"),
+        immutable.Seq(),
+        Att.empty.add(Att.KLABEL, "foo")
+      )
     val prod2 =
-      Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.empty.add(Att.KLABEL, "bar"))
+      Production(
+        Some(KLabel("foo")),
+        immutable.Seq(),
+        Sort("Foo"),
+        immutable.Seq(),
+        Att.empty.add(Att.KLABEL, "bar")
+      )
     Assert.assertNotEquals(prod1, prod2)
   }
 
@@ -258,9 +303,9 @@ class OuterTest {
     val tagB = Tag("B")
     val tagC = Tag("C")
 
-    val syntaxSort1 = SyntaxSort(Seq(sortA, sortC), sortA)
-    val syntaxSort2 = SyntaxSort(Seq(sortA, sortC), sortB)
-    val syntaxSort3 = SyntaxSort(Seq(sortB, sortC), sortA)
+    val syntaxSort1 = SyntaxSort(immutable.Seq(sortA, sortC), sortA)
+    val syntaxSort2 = SyntaxSort(immutable.Seq(sortA, sortC), sortB)
+    val syntaxSort3 = SyntaxSort(immutable.Seq(sortB, sortC), sortA)
 
     val synonym1 = SortSynonym(sortA, sortA)
     val synonym2 = SortSynonym(sortA, sortB)
@@ -270,19 +315,19 @@ class OuterTest {
     val lexical2 = SyntaxLexical("A", "B")
     val lexical3 = SyntaxLexical("B", "A")
 
-    val production1 = Production(Seq(), sortA, Seq(), Att.empty)
-    val production2 = Production(KLabel("A"), Seq(), sortA, Seq(), Att.empty)
-    val production3 = Production(KLabel("B"), Seq(), sortA, Seq(), Att.empty)
+    val production1 = Production(immutable.Seq(), sortA, immutable.Seq(), Att.empty)
+    val production2 = Production(KLabel("A"), immutable.Seq(), sortA, immutable.Seq(), Att.empty)
+    val production3 = Production(KLabel("B"), immutable.Seq(), sortA, immutable.Seq(), Att.empty)
 
     val syntaxAssoc1 = SyntaxAssociativity(Associativity.Left, Set(tagA))
     val syntaxAssoc2 = SyntaxAssociativity(Associativity.Left, Set(tagB))
     val syntaxAssoc3 = SyntaxAssociativity(Associativity.Right, Set(tagA))
 
-    val syntaxPriority1 = SyntaxPriority(Seq(Set(tagB, tagA)))
-    val syntaxPriority2 = SyntaxPriority(Seq(Set(tagA, tagB, tagC), Set(tagB)))
-    val syntaxPriority3 = SyntaxPriority(Seq(Set(tagA, tagB, tagC), Set(tagC)))
-    val syntaxPriority4 = SyntaxPriority(Seq(Set(tagA, tagC, tagC), Set(tagB)))
-    val syntaxPriority5 = SyntaxPriority(Seq(Set(tagB)))
+    val syntaxPriority1 = SyntaxPriority(immutable.Seq(Set(tagB, tagA)))
+    val syntaxPriority2 = SyntaxPriority(immutable.Seq(Set(tagA, tagB, tagC), Set(tagB)))
+    val syntaxPriority3 = SyntaxPriority(immutable.Seq(Set(tagA, tagB, tagC), Set(tagC)))
+    val syntaxPriority4 = SyntaxPriority(immutable.Seq(Set(tagA, tagC, tagC), Set(tagB)))
+    val syntaxPriority5 = SyntaxPriority(immutable.Seq(Set(tagB)))
 
     val contextAlias1 = ContextAlias(ktokenA, ktokenA)
     val contextAlias2 = ContextAlias(ktokenA, ktokenB)

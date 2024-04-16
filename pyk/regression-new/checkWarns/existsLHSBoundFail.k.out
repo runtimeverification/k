@@ -15,4 +15,4 @@
 	   .	                               ^
 [Error] Compiler: Had 3 structural errors.
 [ERROR] Running process failed with returncode 113:
-    kompile existsLHSBoundFail.k --md-selector k --emit-json --warnings all -w2e --no-exc-wrap --backend haskell --output-definition existsLHSBoundFail-kompiled --type-inference-mode checked
+    kompile existsLHSBoundFail.k --md-selector k --emit-json --backend haskell --output-definition existsLHSBoundFail-kompiled --type-inference-mode checked --warnings all --warnings-to-errors --no-exc-wrap

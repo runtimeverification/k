@@ -46,7 +46,6 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 /** Parses a Json term into the KORE data structures. */
 public class JsonParser {
@@ -129,7 +128,8 @@ public class JsonParser {
       flatModules.add(toFlatModule(m));
     }
 
-    scala.collection.Set<Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
+    scala.collection.immutable.Set<Module> koreModules =
+        FlatModule.toModules(immutable(flatModules), Set());
     return Constructors.Definition(
         koreModules
             .find(x -> x.name().equals(mainModuleName))
@@ -203,7 +203,7 @@ public class JsonParser {
       case KSYNTAXPRIORITY -> {
         JsonArray priorities = data.getJsonArray("priorities");
         Att att = toAtt(data.getJsonObject("att"));
-        List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
+        List<scala.collection.immutable.Set<Tag>> syntaxPriorities = new ArrayList<>();
         priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
         return new SyntaxPriority(immutable(syntaxPriorities), att);
       }
@@ -217,7 +217,7 @@ public class JsonParser {
                     : "NonAssoc".equals(assocString)
                         ? Associativity.NonAssoc
                         : Associativity.Unspecified;
-        scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
+        scala.collection.immutable.Set<Tag> tags = toTags(data.getJsonArray("tags"));
         Att att = toAtt(data.getJsonObject("att"));
         return new SyntaxAssociativity(assoc, tags, att);
       }
@@ -276,10 +276,10 @@ public class JsonParser {
     }
   }
 
-  private static scala.collection.Set<Tag> toTags(JsonArray data) {
+  private static scala.collection.immutable.Set<Tag> toTags(JsonArray data) {
     Set<Tag> tags = new HashSet<>();
     data.getValuesAs(JsonString.class).forEach(s -> tags.add(new Tag(s.getString())));
-    return JavaConverters.asScalaSet(tags);
+    return immutable(tags);
   }
 
   private static Sort toSort(JsonObject data) {

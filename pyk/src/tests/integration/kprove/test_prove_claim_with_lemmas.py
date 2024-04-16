@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 class TestSimpleProof(KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
+    KOMPILE_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
 
     def test_prove_claim_with_lemmas(self, kprove: KProve) -> None:
         # Given

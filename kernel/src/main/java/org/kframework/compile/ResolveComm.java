@@ -57,7 +57,7 @@ public record ResolveComm(KExceptionManager kem) {
         m.localSentences()
             .$minus$minus(immutable(commSimpRules))
             .$bar(immutable(commRulesToAdd))
-            .seq(),
+            .toSet(),
         m.att());
   }
 
