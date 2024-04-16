@@ -1,10 +1,13 @@
 context foo
 ===
 KW_CONTEXT
+1,1
 context
 
 BUBBLE
+1,9
 foo
 
 EOF
+1,11
 
