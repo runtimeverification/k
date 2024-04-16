@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
     T = TypeVar('T', bound='Proof')
 
+P = TypeVar('P', bound='Proof')
 PS = TypeVar('PS', bound='ProofStep')
 SR = TypeVar('SR', bound='StepResult')
 
@@ -311,36 +312,39 @@ class StepResult: ...
 class FailureInfo: ...
 
 
-class Prover(Generic[PS, SR]):
+class Prover(Generic[P, PS, SR]):
     kcfg_explore: KCFGExplore
-    proof: Proof
 
     def __init__(self, kcfg_explore: KCFGExplore):
         self.kcfg_explore = kcfg_explore
 
     @abstractmethod
-    def failure_info(self) -> FailureInfo: ...
+    def failure_info(self, proof: P) -> FailureInfo: ...
 
     @abstractmethod
     def step_proof(self, step: PS) -> Iterable[SR]: ...
 
-    def advance_proof(self, max_iterations: int | None = None, fail_fast: bool = False) -> None:
+    @abstractmethod
+    def init_proof(self, proof: P) -> None: ...
+
+    def advance_proof(self, proof: P, max_iterations: int | None = None, fail_fast: bool = False) -> None:
         iterations = 0
+        self.init_proof(proof)
         while True:
-            steps = self.proof.get_steps()
+            steps = proof.get_steps()
             if len(list(steps)) == 0:
                 break
             for step in steps:
-                if fail_fast and self.proof.failed:
-                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {self.proof.id}')
-                    self.proof.failure_info = self.failure_info()
+                if fail_fast and proof.failed:
+                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
+                    proof.failure_info = self.failure_info(proof)
                     return
                 if max_iterations is not None and max_iterations <= iterations:
                     return
                 iterations += 1
                 results = self.step_proof(step)
                 for result in results:
-                    self.proof.commit(result)
-                self.proof.write_proof_data()
-        if self.proof.failed:
-            self.proof.failure_info = self.failure_info()
+                    proof.commit(result)
+                proof.write_proof_data()
+        if proof.failed:
+            proof.failure_info = self.failure_info(proof)
