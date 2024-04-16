@@ -11,3 +11,126 @@ APRProof: 3b7070ca4603e18d26d032c0fe64dd71ffadc2c63dae9d57315e8e471a371bd3
     bounded: 0
     execution time: 0s
 Subproofs: 0
+
+┌─ 1 (root, init)
+│     <generatedTop>
+│       <k>
+│         addCounter ( N:Int )
+│         ~> K_CELL_fc656f08:K
+│       </k>
+│       <counter>
+│         C:Int
+│       </counter>
+│       <sum>
+│         S:Int
+│       </sum>
+│       <generatedCounter>
+│         GENERATEDCOUNTER_CELL_949ec677:Int
+│       </generatedCounter>
+│     </generatedTop>
+│     #And { true #Equals N:Int >=Int 0 }
+┃
+┃ (1 step)
+┣━━┓
+┃  │
+┃  ├─ 3
+┃  │     <generatedTop>
+┃  │       <k>
+┃  │         addCounter ( N:Int +Int -1 )
+┃  │         ~> K_CELL_fc656f08:K
+┃  │       </k>
+┃  │       <counter>
+┃  │         C:Int +Int 1
+┃  │       </counter>
+┃  │       <sum>
+┃  │         S:Int +Int C:Int
+┃  │       </sum>
+┃  │       <generatedCounter>
+┃  │         GENERATEDCOUNTER_CELL_949ec677:Int
+┃  │       </generatedCounter>
+┃  │     </generatedTop>
+┃  │     #And { true #Equals N:Int >Int 0 }
+┃  │     #And { true #Equals N:Int >=Int 0 }
+┃  │
+┃  │  (1 step)
+┃  ├─ 5
+┃  │     <generatedTop>
+┃  │       <k>
+┃  │         K_CELL_fc656f08:K
+┃  │       </k>
+┃  │       <counter>
+┃  │         ?_COUNTER_CELL_af8c44a5:Int
+┃  │       </counter>
+┃  │       <sum>
+┃  │         S:Int +Int C:Int +Int N:Int +Int -1 *Int C:Int +Int 1 +Int N:Int +Int -2 *Int N:Int +Int -1 /Int 2
+┃  │       </sum>
+┃  │       <generatedCounter>
+┃  │         ?_GENERATEDCOUNTER_CELL_5e3e01ba:Int
+┃  │       </generatedCounter>
+┃  │     </generatedTop>
+┃  │     #And { true #Equals N:Int >Int 0 }
+┃  │     #And { true #Equals N:Int >=Int 0 }
+┃  │     #And { true #Equals N:Int +Int -1 >=Int 0 }
+┃  │
+┃  ┊  constraint: OMITTED CONSTRAINT
+┃  ┊  subst: OMITTED SUBST
+┃  └─ 2 (leaf, target)
+┃        <generatedTop>
+┃          <k>
+┃            K_CELL_fc656f08:K ~> .K
+┃          </k>
+┃          <counter>
+┃            COUNTER_CELL_af8c44a5:Int
+┃          </counter>
+┃          <sum>
+┃            ?S:Int
+┃          </sum>
+┃          <generatedCounter>
+┃            GENERATEDCOUNTER_CELL_5e3e01ba:Int
+┃          </generatedCounter>
+┃        </generatedTop>
+┃        #And { true #Equals N:Int >=Int 0 }
+┃        #And { true #Equals ?S:Int ==Int S:Int +Int N:Int *Int C:Int +Int N:Int -Int 1 *Int N:Int /Int 2 }
+┃
+┗━━┓
+   │
+   ├─ 4
+   │     <generatedTop>
+   │       <k>
+   │         K_CELL_fc656f08:K
+   │       </k>
+   │       <counter>
+   │         C:Int
+   │       </counter>
+   │       <sum>
+   │         S:Int
+   │       </sum>
+   │       <generatedCounter>
+   │         GENERATEDCOUNTER_CELL_949ec677:Int
+   │       </generatedCounter>
+   │     </generatedTop>
+   │     #And { N:Int #Equals 0 }
+   │
+   ┊  constraint: OMITTED CONSTRAINT
+   ┊  subst: OMITTED SUBST
+   └─ 2 (leaf, target)
+         <generatedTop>
+           <k>
+             K_CELL_fc656f08:K ~> .K
+           </k>
+           <counter>
+             COUNTER_CELL_af8c44a5:Int
+           </counter>
+           <sum>
+             ?S:Int
+           </sum>
+           <generatedCounter>
+             GENERATEDCOUNTER_CELL_5e3e01ba:Int
+           </generatedCounter>
+         </generatedTop>
+         #And { true #Equals N:Int >=Int 0 }
+         #And { true #Equals ?S:Int ==Int S:Int +Int N:Int *Int C:Int +Int N:Int -Int 1 *Int N:Int /Int 2 }
+
+
+
+
