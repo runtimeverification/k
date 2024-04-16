@@ -4,43 +4,57 @@ syntax Foo ::= "bar"
 syntax
 ===
 KW_SYNTAX
+1,1
 syntax
 
 ID_UPPER
+1,8
 Foo
 
 DCOLONEQ
+1,12
 ::=
 
 STRING
+1,16
 "bar"
 
 VBAR
+2,14
 |
 
 ID_UPPER
+2,16
 Baz
 
 LBRACK
+2,20
 [
 
 ATTR_KEY
+1,0
 group
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 foo
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+4,1
 syntax
 
 EOF
+4,6
 

@@ -78,1465 +78,1952 @@ module BYTES
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 BYTES-SYNTAX
 
 KW_IMPORTS
+2,3
 imports
 
 KW_PRIVATE
+2,11
 private
 
 MODNAME
+2,19
 STRING-SYNTAX
 
 KW_SYNTAX
+4,3
 syntax
 
 ID_UPPER
+4,10
 Bytes
 
 LBRACK
+4,16
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.Bytes
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+5,3
 syntax
 
 ID_UPPER
+5,10
 Bytes
 
 DCOLONEQ
+5,16
 ::=
 
 REGEX
+5,20
 r"b[\\\"](([\\x20\\x21\\x23-\\x5B\\x5D-\\x7E])|([\\\\][tnfr\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2}))*[\\\"]"
 
 LBRACK
+5,130
 [
 
 ATTR_KEY
+1,0
 token
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+6,1
 endmodule
 
 KW_MODULE
+9,1
 module
 
 MODNAME
+9,8
 BYTES-STRING-ENCODE
 
 LBRACK
+9,28
 [
 
 ATTR_KEY
+1,0
 kore
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbolic
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+10,3
 imports
 
 MODNAME
+10,11
 BYTES-SYNTAX
 
 KW_SYNTAX
+11,5
 syntax
 
 ID_UPPER
+11,12
 String
 
 DCOLONEQ
+11,19
 ::=
 
 ID_LOWER
+11,23
 decodeBytes
 
 LPAREN
+11,35
 (
 
 ID_LOWER
+11,37
 encoding
 
 COLON
+11,45
 :
 
 ID_UPPER
+11,47
 String
 
 COMMA
+11,54
 ,
 
 ID_LOWER
+11,56
 contents
 
 COLON
+11,64
 :
 
 ID_UPPER
+11,66
 Bytes
 
 RPAREN
+11,72
 )
 
 LBRACK
+11,74
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.decodeBytes
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+12,5
 syntax
 
 ID_UPPER
+12,12
 Bytes
 
 DCOLONEQ
+12,18
 ::=
 
 ID_LOWER
+12,22
 encodeBytes
 
 LPAREN
+12,34
 (
 
 ID_LOWER
+12,36
 encoding
 
 COLON
+12,44
 :
 
 ID_UPPER
+12,46
 String
 
 COMMA
+12,53
 ,
 
 ID_LOWER
+12,55
 contents
 
 COLON
+12,63
 :
 
 ID_UPPER
+12,65
 String
 
 RPAREN
+12,72
 )
 
 LBRACK
+12,74
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.encodeBytes
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+13,1
 endmodule
 
 KW_MODULE
+16,1
 module
 
 MODNAME
+16,8
 BYTES-HOOKED
 
 KW_IMPORTS
+17,3
 imports
 
 MODNAME
+17,11
 STRING-SYNTAX
 
 KW_IMPORTS
+18,3
 imports
 
 MODNAME
+18,11
 BYTES-SYNTAX
 
 KW_IMPORTS
+19,3
 imports
 
 MODNAME
+19,11
 BYTES-STRING-ENCODE
 
 KW_SYNTAX
+21,3
 syntax
 
 ID_UPPER
+21,10
 Bytes
 
 DCOLONEQ
+21,16
 ::=
 
 STRING
+21,20
 ".Bytes"
 
 LBRACK
+21,29
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.empty
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+22,3
 syntax
 
 ID_UPPER
+22,10
 Endianness
 
 DCOLONEQ
+22,21
 ::=
 
 STRING
+22,25
 "LE"
 
 LBRACK
+22,30
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 littleEndianBytes
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+23,23
 |
 
 STRING
+23,25
 "BE"
 
 LBRACK
+23,30
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bigEndianBytes
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+24,3
 syntax
 
 ID_UPPER
+24,10
 Signedness
 
 DCOLONEQ
+24,21
 ::=
 
 STRING
+24,25
 "Signed"
 
 LBRACK
+24,34
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 signedBytes
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 VBAR
+25,23
 |
 
 STRING
+25,25
 "Unsigned"
 
 LBRACK
+25,36
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 unsignedBytes
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+26,3
 syntax
 
 ID_UPPER
+26,10
 Int
 
 DCOLONEQ
+26,14
 ::=
 
 ID_UPPER
+26,18
 Bytes2Int
 
 LPAREN
+26,27
 (
 
 ID_UPPER
+26,28
 Bytes
 
 COMMA
+26,33
 ,
 
 ID_UPPER
+26,35
 Endianness
 
 COMMA
+26,45
 ,
 
 ID_UPPER
+26,47
 Signedness
 
 RPAREN
+26,57
 )
 
 LBRACK
+26,59
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.bytes2int
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+27,3
 syntax
 
 ID_UPPER
+27,10
 Bytes
 
 DCOLONEQ
+27,16
 ::=
 
 ID_UPPER
+27,20
 Int2Bytes
 
 LPAREN
+27,29
 (
 
 ID_LOWER
+27,30
 length
 
 COLON
+27,36
 :
 
 ID_UPPER
+27,38
 Int
 
 COMMA
+27,41
 ,
 
 ID_UPPER
+27,43
 Int
 
 COMMA
+27,46
 ,
 
 ID_UPPER
+27,48
 Endianness
 
 RPAREN
+27,58
 )
 
 LBRACK
+27,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.int2bytes
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+28,18
 |
 
 ID_UPPER
+28,20
 Int2Bytes
 
 LPAREN
+28,29
 (
 
 ID_UPPER
+28,30
 Int
 
 COMMA
+28,33
 ,
 
 ID_UPPER
+28,35
 Endianness
 
 COMMA
+28,45
 ,
 
 ID_UPPER
+28,47
 Signedness
 
 RPAREN
+28,57
 )
 
 LBRACK
+28,59
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Int2BytesNoLen
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+29,3
 syntax
 
 ID_UPPER
+29,10
 String
 
 DCOLONEQ
+29,17
 ::=
 
 ID_UPPER
+29,21
 Bytes2String
 
 LPAREN
+29,33
 (
 
 ID_UPPER
+29,34
 Bytes
 
 RPAREN
+29,39
 )
 
 LBRACK
+29,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.bytes2string
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+30,3
 syntax
 
 ID_UPPER
+30,10
 Bytes
 
 DCOLONEQ
+30,16
 ::=
 
 ID_UPPER
+30,20
 String2Bytes
 
 LPAREN
+30,32
 (
 
 ID_UPPER
+30,33
 String
 
 RPAREN
+30,39
 )
 
 LBRACK
+30,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.string2bytes
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+31,3
 syntax
 
 ID_UPPER
+31,10
 Bytes
 
 DCOLONEQ
+31,16
 ::=
 
 ID_UPPER
+31,20
 Bytes
 
 STRING
+31,26
 "["
 
 ID_LOWER
+31,30
 index
 
 COLON
+31,35
 :
 
 ID_UPPER
+31,37
 Int
 
 STRING
+31,41
 "<-"
 
 ID_LOWER
+31,46
 value
 
 COLON
+31,51
 :
 
 ID_UPPER
+31,53
 Int
 
 STRING
+31,57
 "]"
 
 LBRACK
+31,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.update
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+32,3
 syntax
 
 ID_UPPER
+32,10
 Int
 
 DCOLONEQ
+32,14
 ::=
 
 ID_UPPER
+32,18
 Bytes
 
 STRING
+32,24
 "["
 
 ID_UPPER
+32,28
 Int
 
 STRING
+32,32
 "]"
 
 LBRACK
+32,36
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.get
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+33,3
 syntax
 
 ID_UPPER
+33,10
 Bytes
 
 DCOLONEQ
+33,16
 ::=
 
 ID_LOWER
+33,20
 substrBytes
 
 LPAREN
+33,31
 (
 
 ID_UPPER
+33,32
 Bytes
 
 COMMA
+33,37
 ,
 
 ID_LOWER
+33,39
 startIndex
 
 COLON
+33,49
 :
 
 ID_UPPER
+33,51
 Int
 
 COMMA
+33,54
 ,
 
 ID_LOWER
+33,56
 endIndex
 
 COLON
+33,64
 :
 
 ID_UPPER
+33,66
 Int
 
 RPAREN
+33,69
 )
 
 LBRACK
+33,71
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.substr
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+34,3
 syntax
 
 ID_UPPER
+34,10
 Bytes
 
 DCOLONEQ
+34,16
 ::=
 
 ID_LOWER
+34,20
 replaceAtBytes
 
 LPAREN
+34,34
 (
 
 ID_LOWER
+34,35
 dest
 
 COLON
+34,39
 :
 
 ID_UPPER
+34,41
 Bytes
 
 COMMA
+34,46
 ,
 
 ID_LOWER
+34,48
 index
 
 COLON
+34,53
 :
 
 ID_UPPER
+34,55
 Int
 
 COMMA
+34,58
 ,
 
 ID_LOWER
+34,60
 src
 
 COLON
+34,63
 :
 
 ID_UPPER
+34,65
 Bytes
 
 RPAREN
+34,70
 )
 
 LBRACK
+34,72
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.replaceAt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+35,3
 syntax
 
 ID_UPPER
+35,10
 Bytes
 
 DCOLONEQ
+35,16
 ::=
 
 ID_LOWER
+35,20
 padRightBytes
 
 LPAREN
+35,33
 (
 
 ID_UPPER
+35,34
 Bytes
 
 COMMA
+35,39
 ,
 
 ID_LOWER
+35,41
 length
 
 COLON
+35,47
 :
 
 ID_UPPER
+35,49
 Int
 
 COMMA
+35,52
 ,
 
 ID_LOWER
+35,54
 value
 
 COLON
+35,59
 :
 
 ID_UPPER
+35,61
 Int
 
 RPAREN
+35,64
 )
 
 LBRACK
+35,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.padRight
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+36,18
 |
 
 ID_LOWER
+36,20
 padLeftBytes
 
 LPAREN
+36,32
 (
 
 ID_UPPER
+36,33
 Bytes
 
 COMMA
+36,38
 ,
 
 ID_LOWER
+36,40
 length
 
 COLON
+36,46
 :
 
 ID_UPPER
+36,48
 Int
 
 COMMA
+36,51
 ,
 
 ID_LOWER
+36,53
 value
 
 COLON
+36,58
 :
 
 ID_UPPER
+36,60
 Int
 
 RPAREN
+36,63
 )
 
 LBRACK
+36,65
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.padLeft
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+37,3
 syntax
 
 ID_UPPER
+37,10
 Bytes
 
 DCOLONEQ
+37,16
 ::=
 
 ID_LOWER
+37,20
 reverseBytes
 
 LPAREN
+37,32
 (
 
 ID_UPPER
+37,33
 Bytes
 
 RPAREN
+37,38
 )
 
 LBRACK
+37,40
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.reverse
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+38,3
 syntax
 
 ID_UPPER
+38,10
 Int
 
 DCOLONEQ
+38,14
 ::=
 
 ID_LOWER
+38,18
 lengthBytes
 
 LPAREN
+38,29
 (
 
 ID_UPPER
+38,30
 Bytes
 
 RPAREN
+38,35
 )
 
 LBRACK
+38,37
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.length
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smtlib
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 lengthBytes
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+39,3
 syntax
 
 ID_UPPER
+39,10
 Bytes
 
 DCOLONEQ
+39,16
 ::=
 
 ID_UPPER
+39,20
 Bytes
 
 STRING
+39,26
 "+Bytes"
 
 ID_UPPER
+39,35
 Bytes
 
 LBRACK
+39,41
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 BYTES.concat
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 right
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+41,1
 endmodule
 
 KW_MODULE
+44,1
 module
 
 MODNAME
+44,8
 BYTES-CONCRETE
 
 LBRACK
+44,23
 [
 
 ATTR_KEY
+1,0
 concrete
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+45,3
 imports
 
 MODNAME
+45,11
 BYTES-HOOKED
 
 KW_ENDMODULE
+46,1
 endmodule
 
 KW_MODULE
+49,1
 module
 
 MODNAME
+49,8
 BYTES-KORE
 
 LBRACK
+49,19
 [
 
 ATTR_KEY
+1,0
 kore
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+50,3
 imports
 
 MODNAME
+50,11
 BYTES-HOOKED
 
 KW_IMPORTS
+51,3
 imports
 
 MODNAME
+51,11
 BYTES-SYMBOLIC-CEIL
 
 KW_ENDMODULE
+52,1
 endmodule
 
 KW_MODULE
+55,1
 module
 
 MODNAME
+55,8
 BYTES-SYMBOLIC-CEIL
 
 LBRACK
+55,28
 [
 
 ATTR_KEY
+1,0
 symbolic
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 kore
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+56,3
 imports
 
 MODNAME
+56,11
 BYTES-HOOKED
 
 KW_IMPORTS
+57,3
 imports
 
 KW_PRIVATE
+57,11
 private
 
 MODNAME
+57,19
 INT
 
 KW_IMPORTS
+58,3
 imports
 
 KW_PRIVATE
+58,11
 private
 
 MODNAME
+58,19
 BOOL
 
 KW_RULE
+60,3
 rule
 
 BUBBLE
+60,8
 #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+61,3
 rule
 
 BUBBLE
+61,8
 #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+62,1
 endmodule
 
 KW_MODULE
+65,1
 module
 
 MODNAME
+65,8
 BYTES
 
 KW_IMPORTS
+66,3
 imports
 
 MODNAME
+66,11
 BYTES-CONCRETE
 
 KW_IMPORTS
+67,3
 imports
 
 MODNAME
+67,11
 BYTES-KORE
 
 KW_IMPORTS
+68,3
 imports
 
 KW_PRIVATE
+68,11
 private
 
 MODNAME
+68,19
 INT
 
 KW_RULE
+70,3
 rule
 
 BUBBLE
+70,8
 Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0
 
 KW_RULE
+72,3
 rule
 
 BUBBLE
+72,8
 Int2Bytes(0, _::Endianness, _) => .Bytes
 
 KW_RULE
+73,3
 rule
 
 BUBBLE
+73,8
 Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
     requires I >Int 0
 
 KW_RULE
+75,3
 rule
 
 BUBBLE
+75,8
 Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
     requires I <Int -1
 
 KW_RULE
+77,3
 rule
 
 BUBBLE
+77,8
 Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 
 KW_ENDMODULE
+78,1
 endmodule
 
 EOF
+78,9
 

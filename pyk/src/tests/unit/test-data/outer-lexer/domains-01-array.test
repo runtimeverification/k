@@ -61,799 +61,1065 @@ module ARRAY
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 ARRAY-SYNTAX
 
 KW_IMPORTS
+2,3
 imports
 
 KW_PRIVATE
+2,11
 private
 
 MODNAME
+2,19
 LIST
 
 KW_SYNTAX
+4,3
 syntax
 
 ID_UPPER
+4,10
 Array
 
 LBRACK
+4,16
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.Array
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 unit
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 arrayCtor
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 element
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _[_<-_]
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+6,3
 syntax
 
 ID_UPPER
+6,10
 KItem
 
 DCOLONEQ
+6,16
 ::=
 
 ID_UPPER
+6,20
 Array
 
 STRING
+6,26
 "["
 
 ID_UPPER
+6,30
 Int
 
 STRING
+6,34
 "]"
 
 LBRACK
+6,38
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.lookup
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+8,3
 syntax
 
 ID_UPPER
+8,10
 Array
 
 DCOLONEQ
+8,16
 ::=
 
 ID_UPPER
+8,20
 Array
 
 STRING
+8,26
 "["
 
 ID_LOWER
+8,30
 key
 
 COLON
+8,33
 :
 
 ID_UPPER
+8,35
 Int
 
 STRING
+8,39
 "<-"
 
 ID_LOWER
+8,44
 value
 
 COLON
+8,49
 :
 
 ID_UPPER
+8,51
 KItem
 
 STRING
+8,57
 "]"
 
 LBRACK
+8,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.update
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _[_<-_]
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+9,3
 syntax
 
 ID_UPPER
+9,10
 Array
 
 DCOLONEQ
+9,16
 ::=
 
 ID_UPPER
+9,20
 Array
 
 STRING
+9,26
 "["
 
 ID_UPPER
+9,30
 Int
 
 STRING
+9,34
 "<-"
 
 STRING
+9,39
 "undef"
 
 STRING
+9,47
 "]"
 
 LBRACK
+9,51
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.remove
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+10,3
 syntax
 
 ID_UPPER
+10,10
 Array
 
 DCOLONEQ
+10,16
 ::=
 
 ID_LOWER
+10,20
 updateArray
 
 LPAREN
+10,31
 (
 
 ID_UPPER
+10,32
 Array
 
 COMMA
+10,37
 ,
 
 ID_LOWER
+10,39
 index
 
 COLON
+10,44
 :
 
 ID_UPPER
+10,46
 Int
 
 COMMA
+10,49
 ,
 
 ID_UPPER
+10,51
 List
 
 RPAREN
+10,55
 )
 
 LBRACK
+10,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.updateAll
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+11,3
 syntax
 
 ID_UPPER
+11,10
 Array
 
 DCOLONEQ
+11,16
 ::=
 
 ID_LOWER
+11,20
 fillArray
 
 LPAREN
+11,29
 (
 
 ID_UPPER
+11,30
 Array
 
 COMMA
+11,35
 ,
 
 ID_LOWER
+11,37
 index
 
 COLON
+11,42
 :
 
 ID_UPPER
+11,44
 Int
 
 COMMA
+11,47
 ,
 
 ID_LOWER
+11,49
 length
 
 COLON
+11,55
 :
 
 ID_UPPER
+11,57
 Int
 
 COMMA
+11,60
 ,
 
 ID_LOWER
+11,62
 value
 
 COLON
+11,67
 :
 
 ID_UPPER
+11,69
 KItem
 
 RPAREN
+11,74
 )
 
 LBRACK
+11,76
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.fill
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+13,3
 syntax
 
 ID_UPPER
+13,10
 Bool
 
 DCOLONEQ
+13,15
 ::=
 
 ID_UPPER
+13,19
 Int
 
 STRING
+13,23
 "in_keys"
 
 STRING
+13,33
 "("
 
 ID_UPPER
+13,37
 Array
 
 STRING
+13,43
 ")"
 
 LBRACK
+13,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.in_keys
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+14,1
 endmodule
 
 KW_MODULE
+17,1
 module
 
 MODNAME
+17,8
 ARRAY-IN-K
 
 LBRACK
+17,19
 [
 
 ATTR_KEY
+1,0
 private
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+18,3
 imports
 
 KW_PUBLIC
+18,11
 public
 
 MODNAME
+18,18
 ARRAY-SYNTAX
 
 KW_IMPORTS
+19,3
 imports
 
 KW_PRIVATE
+19,11
 private
 
 MODNAME
+19,19
 LIST
 
 KW_IMPORTS
+20,3
 imports
 
 KW_PRIVATE
+20,11
 private
 
 MODNAME
+20,19
 K-EQUAL
 
 KW_IMPORTS
+21,3
 imports
 
 KW_PRIVATE
+21,11
 private
 
 MODNAME
+21,19
 INT
 
 KW_IMPORTS
+22,3
 imports
 
 KW_PRIVATE
+22,11
 private
 
 MODNAME
+22,19
 BOOL
 
 KW_SYNTAX
+24,3
 syntax
 
 ID_UPPER
+24,10
 Array
 
 DCOLONEQ
+24,16
 ::=
 
 ID_LOWER
+24,20
 makeArray
 
 LPAREN
+24,29
 (
 
 ID_LOWER
+24,30
 length
 
 COLON
+24,36
 :
 
 ID_UPPER
+24,38
 Int
 
 COMMA
+24,41
 ,
 
 ID_LOWER
+24,43
 value
 
 COLON
+24,48
 :
 
 ID_UPPER
+24,50
 KItem
 
 RPAREN
+24,55
 )
 
 LBRACK
+24,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ARRAY.make
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 public
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+25,3
 syntax
 
 ID_UPPER
+25,10
 Array
 
 DCOLONEQ
+25,16
 ::=
 
 ID_LOWER
+25,20
 arr
 
 LPAREN
+25,23
 (
 
 ID_UPPER
+25,24
 List
 
 COMMA
+25,28
 ,
 
 ID_UPPER
+25,30
 Int
 
 COMMA
+25,33
 ,
 
 ID_UPPER
+25,35
 KItem
 
 RPAREN
+25,40
 )
 
 KW_RULE
+27,3
 rule
 
 BUBBLE
+27,8
 makeArray(I::Int, D::KItem) => arr(.List, I, D)
 
 KW_RULE
+29,3
 rule
 
 BUBBLE
+29,8
 arr(L::List, _, _       ) [ IDX::Int ] => L[IDX] requires 0 <=Int IDX andBool IDX  <Int size(L)
 
 KW_RULE
+30,3
 rule
 
 BUBBLE
+30,8
 arr(_      , _, D::KItem) [ _        ] => D
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 owise
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+32,3
 syntax
 
 ID_UPPER
+32,10
 List
 
 DCOLONEQ
+32,15
 ::=
 
 ID_LOWER
+32,19
 ensureOffsetList
 
 LPAREN
+32,35
 (
 
 ID_UPPER
+32,36
 List
 
 COMMA
+32,40
 ,
 
 ID_UPPER
+32,42
 Int
 
 COMMA
+32,45
 ,
 
 ID_UPPER
+32,47
 KItem
 
 RPAREN
+32,52
 )
 
 LBRACK
+32,54
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+33,3
 rule
 
 BUBBLE
+33,8
 ensureOffsetList(L::List, IDX::Int, D::KItem) => L makeList(IDX +Int 1 -Int size(L), D) requires         IDX >=Int size(L)
 
 KW_RULE
+34,3
 rule
 
 BUBBLE
+34,8
 ensureOffsetList(L::List, IDX::Int, _::KItem) => L                                      requires notBool IDX >=Int size(L)
 
 KW_RULE
+36,3
 rule
 
 BUBBLE
+36,8
 arr(L::List, I::Int, D::KItem) [ IDX::Int <- VAL::KItem ] => arr(ensureOffsetList(L, IDX, D) [ IDX <- VAL ], I, D)
 
 KW_RULE
+38,3
 rule
 
 BUBBLE
+38,8
 arr(L::List, I::Int, D::KItem) [ IDX::Int <- undef ] => arr(L, I, D) [ IDX <- D ]
 
 KW_RULE
+40,3
 rule
 
 BUBBLE
+40,8
 updateArray(arr(L::List, I::Int, D::KItem), IDX::Int, L2::List) => arr(updateList(ensureOffsetList(L, IDX +Int size(L2) -Int 1, D), IDX, L2), I, D)
 
 KW_RULE
+42,3
 rule
 
 BUBBLE
+42,8
 fillArray(arr(L::List, I::Int, D::KItem), IDX::Int, LEN::Int, VAL::KItem) => arr(fillList(ensureOffsetList(L, IDX +Int LEN -Int 1, D), IDX, LEN, VAL), I, D)
 
 KW_RULE
+44,3
 rule
 
 BUBBLE
+44,8
 IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 
 KW_ENDMODULE
+45,1
 endmodule
 
 KW_MODULE
+48,1
 module
 
 MODNAME
+48,8
 ARRAY-SYMBOLIC
 
 LBRACK
+48,23
 [
 
 ATTR_KEY
+1,0
 symbolic
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+49,3
 imports
 
 MODNAME
+49,11
 ARRAY-IN-K
 
 KW_ENDMODULE
+50,1
 endmodule
 
 KW_MODULE
+53,1
 module
 
 MODNAME
+53,8
 ARRAY-KORE
 
 LBRACK
+53,19
 [
 
 ATTR_KEY
+1,0
 kore
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+54,3
 imports
 
 MODNAME
+54,11
 ARRAY-IN-K
 
 KW_ENDMODULE
+55,1
 endmodule
 
 KW_MODULE
+58,1
 module
 
 MODNAME
+58,8
 ARRAY
 
 KW_IMPORTS
+59,3
 imports
 
 MODNAME
+59,11
 ARRAY-SYMBOLIC
 
 KW_IMPORTS
+60,3
 imports
 
 MODNAME
+60,11
 ARRAY-KORE
 
 KW_ENDMODULE
+61,1
 endmodule
 
 EOF
+61,9
 
