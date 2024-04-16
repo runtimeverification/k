@@ -901,8 +901,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                     subproof.admit()
                     subproof.write_proof_data()
 
-            prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
-            prover.advance_proof(max_iterations=max_iterations)
+            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
+            prover.advance_proof(proof, max_iterations=max_iterations)
 
             kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
             cfg_lines = kcfg_show.show(proof.kcfg)
@@ -941,13 +941,12 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
         prover = APRProver(
-            proof,
             kcfg_explore=kcfg_explore,
             execute_depth=max_depth,
             terminal_rules=terminal_rules,
             cut_point_rules=cut_rules,
         )
-        prover.advance_proof(max_iterations=max_iterations)
+        prover.advance_proof(proof, max_iterations=max_iterations)
 
         assert len(proof.failing) == 1
         path_constraint = proof.path_constraints(proof.failing[0].id)
@@ -982,13 +981,12 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, bmc_depth=bmc_depth)
         kcfg_explore.simplify(proof.kcfg, {})
         prover = APRProver(
-            proof,
             kcfg_explore=kcfg_explore,
             execute_depth=max_depth,
             terminal_rules=terminal_rules,
             cut_point_rules=cut_rules,
         )
-        prover.advance_proof(max_iterations=max_iterations)
+        prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
         cfg_lines = kcfg_show.show(proof.kcfg)
@@ -1021,10 +1019,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={})
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(proof, kcfg_explore=kcfg_explore)
-        prover.advance_proof(fail_fast=fail_fast)
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=fail_fast)
 
-        failure_info = prover.failure_info()
+        failure_info = prover.failure_info(proof)
         assert isinstance(failure_info, APRFailureInfo)
 
         actual_pending = len(failure_info.pending_nodes)
@@ -1067,13 +1065,13 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
         proof_id = proof.id
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(proof, kcfg_explore=kcfg_explore)
-        prover.advance_proof()
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof)
 
         # reload proof from disk
         proof = APRProof.read_proof_data(proof_dir, proof_id)
-        prover = APRProver(proof, kcfg_explore=kcfg_explore)
-        prover.advance_proof()
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof)
 
         failure_info = proof.failure_info
         assert isinstance(failure_info, APRFailureInfo)
@@ -1106,8 +1104,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proofs_dir)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=1)
-        prover.advance_proof()
+        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover.advance_proof(proof)
 
         proof_from_disk = APRProof.read_proof_data(proof_dir=proofs_dir, id=proof.id)
 
@@ -1131,8 +1129,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proofs_dir, bmc_depth=3)
         kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=1)
-        prover.advance_proof()
+        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=1)
+        prover.advance_proof(proof)
 
         proof_from_disk = APRProof.read_proof_data(proof_dir=proofs_dir, id=proof.id)
 
@@ -1154,8 +1152,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         )
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
-        prover = APRProver(proof, kcfg_explore=kcfg_explore)
-        prover.advance_proof(fail_fast=False)
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=False)
 
         # Both branches will be checked and fail (fail_fast=False)
         assert len(proof.kcfg.leaves) == 3
@@ -1164,8 +1162,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert len(proof.failing) == 2
 
         proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
-        prover = APRProver(proof, kcfg_explore=kcfg_explore)
-        prover.advance_proof(fail_fast=True)
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=True)
 
         # First branch will be reached first and terminate the proof, leaving the second long branch pending (fail_fast=True)
         assert len(proof.kcfg.leaves) == 3
