@@ -105,7 +105,7 @@ def _kprove(
         return run_process(run_args, logger=_LOGGER, env=env, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
-            f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr
+            f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr, err
         ) from err
 
 
@@ -285,53 +285,72 @@ class KProve(KPrint):
         fallback_on: Iterable[FallbackReason] | None = None,
         interim_simplification: int | None = None,
         no_post_exec_simplify: bool = False,
+        max_depth: int | None = None,
+        save_directory: Path | None = None,
+        max_iterations: int | None = None,
     ) -> Proof:
-        with cterm_symbolic(
-            self.definition,
-            self.kompiled_kore,
-            self.definition_dir,
-            id=id,
-            port=port,
-            kore_rpc_command=kore_rpc_command,
-            llvm_definition_dir=llvm_definition_dir,
-            smt_timeout=smt_timeout,
-            smt_retry_limit=smt_retry_limit,
-            smt_tactic=smt_tactic,
-            bug_report=bug_report,
-            haskell_log_format=haskell_log_format,
-            haskell_log_entries=haskell_log_entries,
-            log_axioms_file=log_axioms_file,
-            trace_rewrites=trace_rewrites,
-            start_server=start_server,
-            maude_port=maude_port,
-            fallback_on=fallback_on,
-            interim_simplification=interim_simplification,
-            no_post_exec_simplify=no_post_exec_simplify,
-        ) as cts:
-            kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
-            proof: Proof
-            prover: Prover
-            lhs_top = extract_lhs(claim.body)
-            if type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions:
-                proof = EqualityProof.from_claim(claim, self.definition)
-                prover = ImpliesProver(proof, kcfg_explore)
-            else:
-                proof = APRProof.from_claim(self.definition, claim, {})
-                prover = APRProver(kcfg_explore)
-            prover.advance_proof(proof)
-            if proof.passed:
-                _LOGGER.info(f'Proof passed: {proof.id}')
-            elif proof.failed:
-                _LOGGER.info(f'Proof failed: {proof.id}')
-            else:
-                _LOGGER.info(f'Proof pending: {proof.id}')
-            return proof
+        proof: Proof
+        prover: Prover
+        lhs_top = extract_lhs(claim.body)
+        is_functional_claim = (
+            type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions
+        )
+
+        if is_functional_claim:
+            proof = EqualityProof.from_claim(claim, self.definition, proof_dir=save_directory)
+            if save_directory is not None and EqualityProof.proof_data_exists(proof.id, save_directory):
+                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
+                proof = EqualityProof.read_proof_data(save_directory, proof.id)
+
+        else:
+            proof = APRProof.from_claim(self.definition, claim, {}, proof_dir=save_directory)
+            if save_directory is not None and APRProof.proof_data_exists(proof.id, save_directory):
+                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
+                proof = APRProof.read_proof_data(save_directory, proof.id)
+
+        if not proof.passed and (max_iterations is None or max_iterations > 0):
+            with cterm_symbolic(
+                self.definition,
+                self.kompiled_kore,
+                self.definition_dir,
+                id=id,
+                port=port,
+                kore_rpc_command=kore_rpc_command,
+                llvm_definition_dir=llvm_definition_dir,
+                smt_timeout=smt_timeout,
+                smt_retry_limit=smt_retry_limit,
+                smt_tactic=smt_tactic,
+                bug_report=bug_report,
+                haskell_log_format=haskell_log_format,
+                haskell_log_entries=haskell_log_entries,
+                log_axioms_file=log_axioms_file,
+                trace_rewrites=trace_rewrites,
+                start_server=start_server,
+                maude_port=maude_port,
+                fallback_on=fallback_on,
+                interim_simplification=interim_simplification,
+                no_post_exec_simplify=no_post_exec_simplify,
+            ) as cts:
+                kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
+                if is_functional_claim:
+                    assert type(proof) is EqualityProof
+                    prover = ImpliesProver(proof, kcfg_explore)
+                else:
+                    assert type(proof) is APRProof
+                    prover = APRProver(kcfg_explore, execute_depth=max_depth)
+                prover.advance_proof(proof, max_iterations=max_iterations)
+
+        if proof.passed:
+            _LOGGER.info(f'Proof passed: {proof.id}')
+        elif proof.failed:
+            _LOGGER.info(f'Proof failed: {proof.id}')
+        else:
+            _LOGGER.info(f'Proof pending: {proof.id}')
+        return proof
 
     def prove_rpc(
         self,
         options: ProveOptions,
-        claim_labels: Iterable[str] | None = None,
-        exclude_claim_labels: Iterable[str] | None = None,
         kcfg_semantics: KCFGSemantics | None = None,
         id: str | None = None,
         port: int | None = None,
@@ -372,13 +391,16 @@ class KProve(KPrint):
                 fallback_on=fallback_on,
                 interim_simplification=interim_simplification,
                 no_post_exec_simplify=no_post_exec_simplify,
+                max_depth=options.max_depth,
+                save_directory=options.save_directory,
+                max_iterations=options.max_iterations,
             )
 
         all_claims = self.get_claims(
             options.spec_file,
             spec_module_name=options.spec_module,
-            claim_labels=claim_labels,
-            exclude_claim_labels=exclude_claim_labels,
+            claim_labels=options.claim_labels,
+            exclude_claim_labels=options.exclude_claim_labels,
             type_inference_mode=options.type_inference_mode,
         )
         if all_claims is None:
@@ -393,7 +415,7 @@ class KProve(KPrint):
         md_selector: str | None = None,
         type_inference_mode: TypeInferenceMode | None = None,
     ) -> KFlatModuleList:
-        with self._temp_file() as ntf:
+        with self._temp_file(prefix=f'{spec_file.name}.parsed.json.') as ntf:
             _kprove(
                 spec_file=spec_file,
                 kompiled_dir=self.definition_dir,
