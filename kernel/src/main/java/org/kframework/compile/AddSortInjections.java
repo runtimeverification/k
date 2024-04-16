@@ -464,7 +464,8 @@ public class AddSortInjections {
   }
 
   private Production production(KApply term) {
-    Option<scala.collection.Set<Production>> prods = mod.productionsFor().get(term.klabel().head());
+    Option<scala.collection.immutable.Set<Production>> prods =
+        mod.productionsFor().get(term.klabel().head());
     if (prods.isEmpty()) {
       throw KEMException.compilerError(
           "Could not find productions for KApply with label "

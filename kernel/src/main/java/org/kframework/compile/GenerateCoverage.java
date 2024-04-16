@@ -29,8 +29,7 @@ public class GenerateCoverage {
               if (mod.equals(m)) {
                 return Module(
                     m.name(),
-                    (Set<Import>)
-                        m.imports().$bar(Set(Import(definition.getModule("K-IO").get(), true))),
+                    m.imports().$bar(Set(Import(definition.getModule("K-IO").get(), true))).toSet(),
                     m.localSentences(),
                     m.att());
               } else {

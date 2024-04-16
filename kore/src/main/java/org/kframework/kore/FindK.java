@@ -13,6 +13,6 @@ public class FindK extends AbstractFoldK<Set<K>> {
 
   @Override
   public Set<K> merge(Set<K> a, Set<K> b) {
-    return Collections.or(a, b);
+    return a.$bar(b);
   }
 }

@@ -5,7 +5,8 @@ import java.util.Optional
 import org.kframework.attributes._
 import org.kframework.unparser.ToKast
 import org.kframework.utils.errorsystem.KEMException
-import scala.collection.JavaConverters._
+import scala.collection.immutable
+import scala.jdk.CollectionConverters._
 
 /**
  * This file contains all inner KORE interfaces. The the wiki for documentation:
@@ -27,7 +28,7 @@ trait K extends Serializable with HasLocation with AttValue {
 }
 
 object K {
-  implicit val ord = new Ordering[K] {
+  implicit val ord: Ordering[K] = new Ordering[K] {
     def compare(a: K, b: K): Int = {
       import scala.math.Ordering.Implicits._
       (a, b) match {
@@ -35,10 +36,13 @@ object K {
           Ordering.Tuple2(Ordering[String], Ordering[Sort]).compare((c.s, c.sort), (d.s, d.sort))
         case (c: KApply, d: KApply) =>
           Ordering
-            .Tuple2(KLabelOrdering, seqDerivedOrdering[Seq, K](this))
-            .compare((c.klabel, c.klist.items.asScala), (d.klabel, d.klist.items.asScala))
+            .Tuple2(KLabelOrdering, seqOrdering[immutable.Seq, K](this))
+            .compare(
+              (c.klabel, c.klist.items.asScala.to(immutable.Seq)),
+              (d.klabel, d.klist.items.asScala.to(immutable.Seq))
+            )
         case (c: KSequence, d: KSequence) =>
-          seqDerivedOrdering(this).compare(c.items.asScala, d.items.asScala)
+          seqOrdering(this).compare(c.items.asScala, d.items.asScala)
         case (c: KVariable, d: KVariable) => Ordering[String].compare(c.name, d.name)
         case (c: KAs, d: KAs) =>
           Ordering.Tuple2(this, this).compare((c.pattern, c.alias), (d.pattern, d.alias))
@@ -72,7 +76,7 @@ trait KItem extends K
 
 trait KLabel extends AttValue {
   def name: String
-  def params: Seq[Sort]
+  def params: immutable.Seq[Sort]
   override def equals(other: Any) = other match {
     case l: KLabel => name == l.name && params == l.params
     case _         => false
@@ -88,7 +92,7 @@ object KLabelOrdering extends Ordering[KLabel] {
   def compare(a: KLabel, b: KLabel): Int = {
     import scala.math.Ordering.Implicits._
     Ordering
-      .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering[Sort]))
+      .Tuple2(Ordering[String], seqOrdering[immutable.Seq, Sort](Ordering[Sort]))
       .compare((a.name, a.params), (b.name, b.params))
   }
 }
@@ -105,7 +109,7 @@ trait KToken extends KItem {
 
 trait Sort extends Ordered[Sort] with AttValue {
   def name: String
-  def params: Seq[Sort]
+  def params: immutable.Seq[Sort]
   override def equals(other: Any) = other match {
     case other: Sort => name == other.name && params == other.params
     case _           => false
@@ -115,7 +119,7 @@ trait Sort extends Ordered[Sort] with AttValue {
   def compare(that: Sort): Int = {
     import scala.math.Ordering.Implicits._
     Ordering
-      .Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity)))
+      .Tuple2(Ordering[String], seqOrdering[immutable.Seq, Sort](Ordering.ordered(identity)))
       .compare((this.name, this.params), (that.name, that.params))
   }
 
