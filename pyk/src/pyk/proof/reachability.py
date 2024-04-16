@@ -8,7 +8,6 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
-from collections.abc import Iterator
 
 from pyk.kore.rpc import LogEntry
 
@@ -26,7 +25,7 @@ from .implies import ProofSummary, Prover, RefutationProof
 from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus, ProofStep, StepResult
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Iterable, Iterator, Mapping
     from typing import Any, Final, TypeVar
 
     from ..kast.outer import KClaim, KDefinition, KFlatModuleList, KRuleLike
