@@ -921,6 +921,8 @@ class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
     _client: JsonRpcClientFacade
+    _port: int
+    _bug_report: BugReport | None
 
     def __init__(
         self,
@@ -935,6 +937,8 @@ class KoreClient(ContextManager['KoreClient']):
     ):
         if dispatch is None:
             dispatch = {}
+        self._port = port
+        self._bug_report = bug_report
         self._client = JsonRpcClientFacade(
             host,
             port,
