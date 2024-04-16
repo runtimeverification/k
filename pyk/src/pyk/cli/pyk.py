@@ -420,7 +420,8 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
         if k == 'optimization-level':
             level = toml_args[k] if toml_args[k] >= 0 else 0
             level = level if toml_args[k] <= 3 else 3
-            del toml_args[k]
-            toml_args['-o' + str(level)] = 'true'
+            toml_adj_args['o' + str(level)] = True
+        else:
+            toml_adj_args[opt_string] = v
 
     return toml_args
