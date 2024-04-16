@@ -65,6 +65,9 @@ class APRProofStep(ProofStep):
     proof: APRProof
     node_id: int
 
+    def id(self) -> int:
+        return self.node_id
+
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     """APRProof and APRProver implement all-path reachability logic,

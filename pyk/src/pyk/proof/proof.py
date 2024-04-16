@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from enum import Enum
+from functools import partial
 from itertools import chain
 from typing import TYPE_CHECKING, Generic, TypeVar
 
@@ -12,6 +15,7 @@ from ..utils import ensure_dir_path, hash_file, hash_str
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
+    from concurrent.futures import Future
     from pathlib import Path
     from typing import Any, Final
 
@@ -303,7 +307,10 @@ class CompositeSummary(ProofSummary):
         return [line for lines in (summary.lines for summary in self.summaries) for line in lines]
 
 
-class ProofStep: ...
+class ProofStep:
+
+    @abstractmethod
+    def id(self) -> int: ...
 
 
 class StepResult: ...
@@ -348,3 +355,41 @@ class Prover(Generic[P, PS, SR]):
                 proof.write_proof_data()
         if proof.failed:
             proof.failure_info = self.failure_info(proof)
+
+    def parallel_advance_proof(
+        self, proof: P, max_iterations: int | None = None, fail_fast: bool = False, max_workers: int = 3
+    ) -> None:
+        pending: dict[Future[Any], str] = {}
+        explored: set[int] = set()
+        iterations = 0
+        self.init_proof(proof)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+
+            def submit_steps(_steps: Iterable[PS]) -> None:
+                for step in _steps:
+                    if step.id() in explored:
+                        continue
+                    explored.add(step.id())
+
+                    job = partial(self.step_proof, step)
+                    future: Future[Any] = pool.submit(job)  # <-- schedule steps for execution
+                    print('submitting job', file=sys.stderr)
+                    pending[future] = 'a'
+
+            submit_steps(proof.get_steps())
+
+            while True:
+                if len(pending) == 0:
+                    break
+                done, _ = wait(pending, return_when='FIRST_COMPLETED')
+                future = done.pop()
+                proof_results = future.result()
+                for result in proof_results:
+                    proof.commit(result)
+                proof.write_proof_data()
+                if max_iterations is not None and max_iterations <= iterations:
+                    return
+                iterations += 1
+                submit_steps(proof.get_steps())
+                pending.pop(future)

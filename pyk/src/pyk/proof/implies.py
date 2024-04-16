@@ -30,6 +30,9 @@ _LOGGER: Final = logging.getLogger(__name__)
 class ImpliesProofStep(ProofStep):
     proof: ImpliesProof
 
+    def id(self) -> int:
+        return 1
+
 
 @dataclass
 class ImpliesProofResult(StepResult):
