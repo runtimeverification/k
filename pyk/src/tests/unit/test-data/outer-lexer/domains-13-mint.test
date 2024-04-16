@@ -82,2996 +82,3993 @@ module MINT
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 MINT-SYNTAX
 
 KW_SYNTAX
+4,3
 syntax
 
 LBRACE
+4,10
 {
 
 ID_UPPER
+4,11
 Width
 
 RBRACE
+4,16
 }
 
 ID_UPPER
+4,18
 MInt
 
 LBRACE
+4,22
 {
 
 ID_UPPER
+4,23
 Width
 
 RBRACE
+4,28
 }
 
 LBRACK
+4,30
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.MInt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+7,3
 syntax
 
 LBRACE
+7,10
 {
 
 ID_UPPER
+7,11
 Width
 
 RBRACE
+7,16
 }
 
 ID_UPPER
+7,18
 MInt
 
 LBRACE
+7,22
 {
 
 ID_UPPER
+7,23
 Width
 
 RBRACE
+7,28
 }
 
 DCOLONEQ
+7,30
 ::=
 
 REGEX
+7,34
 r"[\\+-]?[0-9]+[pP][0-9]+"
 
 LBRACK
+7,61
 [
 
 ATTR_KEY
+1,0
 token
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 prec
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 2
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.literal
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+8,1
 endmodule
 
 KW_MODULE
+11,1
 module
 
 MODNAME
+11,8
 MINT
 
 KW_IMPORTS
+12,3
 imports
 
 MODNAME
+12,11
 MINT-SYNTAX
 
 KW_IMPORTS
+13,3
 imports
 
 KW_PRIVATE
+13,11
 private
 
 MODNAME
+13,19
 INT
 
 KW_IMPORTS
+14,3
 imports
 
 KW_PRIVATE
+14,11
 private
 
 MODNAME
+14,19
 BOOL
 
 KW_SYNTAX
+16,3
 syntax
 
 LBRACE
+16,10
 {
 
 ID_UPPER
+16,11
 Width
 
 RBRACE
+16,16
 }
 
 ID_UPPER
+16,18
 Int
 
 DCOLONEQ
+16,22
 ::=
 
 ID_LOWER
+16,26
 bitwidthMInt
 
 LPAREN
+16,38
 (
 
 ID_UPPER
+16,39
 MInt
 
 LBRACE
+16,43
 {
 
 ID_UPPER
+16,44
 Width
 
 RBRACE
+16,49
 }
 
 RPAREN
+16,50
 )
 
 LBRACK
+16,54
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.bitwidth
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+18,3
 syntax
 
 LBRACE
+18,10
 {
 
 ID_UPPER
+18,11
 Width
 
 RBRACE
+18,16
 }
 
 ID_UPPER
+18,18
 Int
 
 DCOLONEQ
+18,22
 ::=
 
 ID_UPPER
+18,26
 MInt2Signed
 
 LPAREN
+18,37
 (
 
 ID_UPPER
+18,38
 MInt
 
 LBRACE
+18,42
 {
 
 ID_UPPER
+18,43
 Width
 
 RBRACE
+18,48
 }
 
 RPAREN
+18,49
 )
 
 LBRACK
+18,55
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.svalue
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+19,24
 |
 
 ID_UPPER
+19,26
 MInt2Unsigned
 
 LPAREN
+19,39
 (
 
 ID_UPPER
+19,40
 MInt
 
 LBRACE
+19,44
 {
 
 ID_UPPER
+19,45
 Width
 
 RBRACE
+19,50
 }
 
 RPAREN
+19,51
 )
 
 LBRACK
+19,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.uvalue
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bv2int
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+21,3
 syntax
 
 LBRACE
+21,10
 {
 
 ID_UPPER
+21,11
 Width
 
 RBRACE
+21,16
 }
 
 ID_UPPER
+21,18
 MInt
 
 LBRACE
+21,22
 {
 
 ID_UPPER
+21,23
 Width
 
 RBRACE
+21,28
 }
 
 DCOLONEQ
+21,30
 ::=
 
 ID_UPPER
+21,34
 Int2MInt
 
 LPAREN
+21,42
 (
 
 ID_UPPER
+21,43
 Int
 
 RPAREN
+21,46
 )
 
 LBRACK
+21,48
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.integer
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 int2bv
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+23,3
 syntax
 
 ID_UPPER
+23,10
 Int
 
 DCOLONEQ
+23,14
 ::=
 
 ID_LOWER
+23,18
 sminMInt
 
 LPAREN
+23,26
 (
 
 ID_UPPER
+23,27
 Int
 
 RPAREN
+23,30
 )
 
 LBRACK
+23,35
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 VBAR
+24,16
 |
 
 ID_LOWER
+24,18
 smaxMInt
 
 LPAREN
+24,26
 (
 
 ID_UPPER
+24,27
 Int
 
 RPAREN
+24,30
 )
 
 LBRACK
+24,35
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 VBAR
+25,16
 |
 
 ID_LOWER
+25,18
 uminMInt
 
 LPAREN
+25,26
 (
 
 ID_UPPER
+25,27
 Int
 
 RPAREN
+25,30
 )
 
 LBRACK
+25,35
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 VBAR
+26,16
 |
 
 ID_LOWER
+26,18
 umaxMInt
 
 LPAREN
+26,26
 (
 
 ID_UPPER
+26,27
 Int
 
 RPAREN
+26,30
 )
 
 LBRACK
+26,35
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+27,3
 rule
 
 BUBBLE
+27,8
 sminMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
 
 KW_RULE
+28,3
 rule
 
 BUBBLE
+28,8
 smaxMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
 
 KW_RULE
+29,3
 rule
 
 BUBBLE
+29,8
 uminMInt(_:Int) => 0
 
 KW_RULE
+30,3
 rule
 
 BUBBLE
+30,8
 umaxMInt(N:Int) => (1 <<Int N) -Int 1
 
 KW_SYNTAX
+32,3
 syntax
 
 ID_UPPER
+32,10
 Bool
 
 DCOLONEQ
+32,15
 ::=
 
 ID_LOWER
+32,19
 soverflowMInt
 
 LPAREN
+32,32
 (
 
 ID_LOWER
+32,33
 width
 
 COLON
+32,38
 :
 
 ID_UPPER
+32,40
 Int
 
 COMMA
+32,43
 ,
 
 ID_UPPER
+32,45
 Int
 
 RPAREN
+32,48
 )
 
 LBRACK
+32,52
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 VBAR
+33,17
 |
 
 ID_LOWER
+33,19
 uoverflowMInt
 
 LPAREN
+33,32
 (
 
 ID_LOWER
+33,33
 width
 
 COLON
+33,38
 :
 
 ID_UPPER
+33,40
 Int
 
 COMMA
+33,43
 ,
 
 ID_UPPER
+33,45
 Int
 
 RPAREN
+33,48
 )
 
 LBRACK
+33,52
 [
 
 ATTR_KEY
+1,0
 function
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+34,3
 rule
 
 BUBBLE
+36,4
 soverflowMInt(N:Int, I:Int)
   =>
     I <Int sminMInt(N) orBool I >Int smaxMInt(N)
 
 KW_RULE
+38,3
 rule
 
 BUBBLE
+40,4
 uoverflowMInt(N:Int, I:Int)
   =>
     I <Int uminMInt(N) orBool I >Int umaxMInt(N)
 
 KW_SYNTAX
+43,3
 syntax
 
 LBRACE
+43,10
 {
 
 ID_UPPER
+43,11
 Width
 
 RBRACE
+43,16
 }
 
 ID_UPPER
+43,18
 MInt
 
 LBRACE
+43,22
 {
 
 ID_UPPER
+43,23
 Width
 
 RBRACE
+43,28
 }
 
 DCOLONEQ
+43,30
 ::=
 
 STRING
+43,34
 "~MInt"
 
 ID_UPPER
+43,42
 MInt
 
 LBRACE
+43,46
 {
 
 ID_UPPER
+43,47
 Width
 
 RBRACE
+43,52
 }
 
 LBRACK
+43,54
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.not
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvnot
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+44,32
 |
 
 STRING
+44,34
 "--MInt"
 
 ID_UPPER
+44,43
 MInt
 
 LBRACE
+44,47
 {
 
 ID_UPPER
+44,48
 Width
 
 RBRACE
+44,53
 }
 
 LBRACK
+44,55
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.neg
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvuminus
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+45,32
 >
 
 KW_LEFT
+45,34
 left
 
 COLON
+45,38
 :
 
 ID_UPPER
+46,34
 MInt
 
 LBRACE
+46,38
 {
 
 ID_UPPER
+46,39
 Width
 
 RBRACE
+46,44
 }
 
 STRING
+46,46
 "*MInt"
 
 ID_UPPER
+46,54
 MInt
 
 LBRACE
+46,58
 {
 
 ID_UPPER
+46,59
 Width
 
 RBRACE
+46,64
 }
 
 LBRACK
+46,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.mul
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvmul
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+47,32
 |
 
 ID_UPPER
+47,34
 MInt
 
 LBRACE
+47,38
 {
 
 ID_UPPER
+47,39
 Width
 
 RBRACE
+47,44
 }
 
 STRING
+47,46
 "/sMInt"
 
 ID_UPPER
+47,55
 MInt
 
 LBRACE
+47,59
 {
 
 ID_UPPER
+47,60
 Width
 
 RBRACE
+47,65
 }
 
 LBRACK
+47,67
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.sdiv
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvsdiv
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+48,32
 |
 
 ID_UPPER
+48,34
 MInt
 
 LBRACE
+48,38
 {
 
 ID_UPPER
+48,39
 Width
 
 RBRACE
+48,44
 }
 
 STRING
+48,46
 "%sMInt"
 
 ID_UPPER
+48,55
 MInt
 
 LBRACE
+48,59
 {
 
 ID_UPPER
+48,60
 Width
 
 RBRACE
+48,65
 }
 
 LBRACK
+48,67
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.srem
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvsrem
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+49,32
 |
 
 ID_UPPER
+49,34
 MInt
 
 LBRACE
+49,38
 {
 
 ID_UPPER
+49,39
 Width
 
 RBRACE
+49,44
 }
 
 STRING
+49,46
 "/uMInt"
 
 ID_UPPER
+49,55
 MInt
 
 LBRACE
+49,59
 {
 
 ID_UPPER
+49,60
 Width
 
 RBRACE
+49,65
 }
 
 LBRACK
+49,67
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.udiv
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvudiv
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+50,32
 |
 
 ID_UPPER
+50,34
 MInt
 
 LBRACE
+50,38
 {
 
 ID_UPPER
+50,39
 Width
 
 RBRACE
+50,44
 }
 
 STRING
+50,46
 "%uMInt"
 
 ID_UPPER
+50,55
 MInt
 
 LBRACE
+50,59
 {
 
 ID_UPPER
+50,60
 Width
 
 RBRACE
+50,65
 }
 
 LBRACK
+50,67
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.urem
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvurem
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+51,32
 >
 
 KW_LEFT
+51,34
 left
 
 COLON
+51,38
 :
 
 ID_UPPER
+52,34
 MInt
 
 LBRACE
+52,38
 {
 
 ID_UPPER
+52,39
 Width
 
 RBRACE
+52,44
 }
 
 STRING
+52,46
 "+MInt"
 
 ID_UPPER
+52,54
 MInt
 
 LBRACE
+52,58
 {
 
 ID_UPPER
+52,59
 Width
 
 RBRACE
+52,64
 }
 
 LBRACK
+52,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.add
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvadd
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+53,32
 |
 
 ID_UPPER
+53,34
 MInt
 
 LBRACE
+53,38
 {
 
 ID_UPPER
+53,39
 Width
 
 RBRACE
+53,44
 }
 
 STRING
+53,46
 "-MInt"
 
 ID_UPPER
+53,54
 MInt
 
 LBRACE
+53,58
 {
 
 ID_UPPER
+53,59
 Width
 
 RBRACE
+53,64
 }
 
 LBRACK
+53,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.sub
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvsub
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+54,32
 >
 
 KW_LEFT
+54,34
 left
 
 COLON
+54,38
 :
 
 ID_UPPER
+55,34
 MInt
 
 LBRACE
+55,38
 {
 
 ID_UPPER
+55,39
 Width
 
 RBRACE
+55,44
 }
 
 STRING
+55,46
 "<<MInt"
 
 ID_UPPER
+55,55
 MInt
 
 LBRACE
+55,59
 {
 
 ID_UPPER
+55,60
 Width
 
 RBRACE
+55,65
 }
 
 LBRACK
+55,67
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.shl
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvshl
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+56,32
 |
 
 ID_UPPER
+56,34
 MInt
 
 LBRACE
+56,38
 {
 
 ID_UPPER
+56,39
 Width
 
 RBRACE
+56,44
 }
 
 STRING
+56,46
 ">>aMInt"
 
 ID_UPPER
+56,56
 MInt
 
 LBRACE
+56,60
 {
 
 ID_UPPER
+56,61
 Width
 
 RBRACE
+56,66
 }
 
 LBRACK
+56,68
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.ashr
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvashr
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+57,32
 |
 
 ID_UPPER
+57,34
 MInt
 
 LBRACE
+57,38
 {
 
 ID_UPPER
+57,39
 Width
 
 RBRACE
+57,44
 }
 
 STRING
+57,46
 ">>lMInt"
 
 ID_UPPER
+57,56
 MInt
 
 LBRACE
+57,60
 {
 
 ID_UPPER
+57,61
 Width
 
 RBRACE
+57,66
 }
 
 LBRACK
+57,68
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.lshr
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvlshr
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+58,32
 >
 
 KW_LEFT
+58,34
 left
 
 COLON
+58,38
 :
 
 ID_UPPER
+59,34
 MInt
 
 LBRACE
+59,38
 {
 
 ID_UPPER
+59,39
 Width
 
 RBRACE
+59,44
 }
 
 STRING
+59,46
 "&MInt"
 
 ID_UPPER
+59,54
 MInt
 
 LBRACE
+59,58
 {
 
 ID_UPPER
+59,59
 Width
 
 RBRACE
+59,64
 }
 
 LBRACK
+59,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.and
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvand
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+60,32
 >
 
 KW_LEFT
+60,34
 left
 
 COLON
+60,38
 :
 
 ID_UPPER
+61,34
 MInt
 
 LBRACE
+61,38
 {
 
 ID_UPPER
+61,39
 Width
 
 RBRACE
+61,44
 }
 
 STRING
+61,46
 "xorMInt"
 
 ID_UPPER
+61,56
 MInt
 
 LBRACE
+61,60
 {
 
 ID_UPPER
+61,61
 Width
 
 RBRACE
+61,66
 }
 
 LBRACK
+61,68
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.xor
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvxor
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 GT
+62,32
 >
 
 KW_LEFT
+62,34
 left
 
 COLON
+62,38
 :
 
 ID_UPPER
+63,34
 MInt
 
 LBRACE
+63,38
 {
 
 ID_UPPER
+63,39
 Width
 
 RBRACE
+63,44
 }
 
 STRING
+63,46
 "|MInt"
 
 ID_UPPER
+63,54
 MInt
 
 LBRACE
+63,58
 {
 
 ID_UPPER
+63,59
 Width
 
 RBRACE
+63,64
 }
 
 LBRACK
+63,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.or
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvor
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+65,3
 syntax
 
 LBRACE
+65,10
 {
 
 ID_UPPER
+65,11
 Width
 
 RBRACE
+65,16
 }
 
 ID_UPPER
+65,18
 Bool
 
 DCOLONEQ
+65,23
 ::=
 
 ID_UPPER
+65,27
 MInt
 
 LBRACE
+65,31
 {
 
 ID_UPPER
+65,32
 Width
 
 RBRACE
+65,37
 }
 
 STRING
+65,39
 "<sMInt"
 
 ID_UPPER
+65,48
 MInt
 
 LBRACE
+65,52
 {
 
 ID_UPPER
+65,53
 Width
 
 RBRACE
+65,58
 }
 
 LBRACK
+65,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.slt
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvslt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+66,25
 |
 
 ID_UPPER
+66,27
 MInt
 
 LBRACE
+66,31
 {
 
 ID_UPPER
+66,32
 Width
 
 RBRACE
+66,37
 }
 
 STRING
+66,39
 "<uMInt"
 
 ID_UPPER
+66,48
 MInt
 
 LBRACE
+66,52
 {
 
 ID_UPPER
+66,53
 Width
 
 RBRACE
+66,58
 }
 
 LBRACK
+66,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.ult
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvult
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+67,25
 |
 
 ID_UPPER
+67,27
 MInt
 
 LBRACE
+67,31
 {
 
 ID_UPPER
+67,32
 Width
 
 RBRACE
+67,37
 }
 
 STRING
+67,39
 "<=sMInt"
 
 ID_UPPER
+67,49
 MInt
 
 LBRACE
+67,53
 {
 
 ID_UPPER
+67,54
 Width
 
 RBRACE
+67,59
 }
 
 LBRACK
+67,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.sle
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvsle
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+68,25
 |
 
 ID_UPPER
+68,27
 MInt
 
 LBRACE
+68,31
 {
 
 ID_UPPER
+68,32
 Width
 
 RBRACE
+68,37
 }
 
 STRING
+68,39
 "<=uMInt"
 
 ID_UPPER
+68,49
 MInt
 
 LBRACE
+68,53
 {
 
 ID_UPPER
+68,54
 Width
 
 RBRACE
+68,59
 }
 
 LBRACK
+68,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.ule
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvule
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+69,25
 |
 
 ID_UPPER
+69,27
 MInt
 
 LBRACE
+69,31
 {
 
 ID_UPPER
+69,32
 Width
 
 RBRACE
+69,37
 }
 
 STRING
+69,39
 ">sMInt"
 
 ID_UPPER
+69,48
 MInt
 
 LBRACE
+69,52
 {
 
 ID_UPPER
+69,53
 Width
 
 RBRACE
+69,58
 }
 
 LBRACK
+69,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.sgt
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvsgt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+70,25
 |
 
 ID_UPPER
+70,27
 MInt
 
 LBRACE
+70,31
 {
 
 ID_UPPER
+70,32
 Width
 
 RBRACE
+70,37
 }
 
 STRING
+70,39
 ">uMInt"
 
 ID_UPPER
+70,48
 MInt
 
 LBRACE
+70,52
 {
 
 ID_UPPER
+70,53
 Width
 
 RBRACE
+70,58
 }
 
 LBRACK
+70,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.ugt
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvugt
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+71,25
 |
 
 ID_UPPER
+71,27
 MInt
 
 LBRACE
+71,31
 {
 
 ID_UPPER
+71,32
 Width
 
 RBRACE
+71,37
 }
 
 STRING
+71,39
 ">=sMInt"
 
 ID_UPPER
+71,49
 MInt
 
 LBRACE
+71,53
 {
 
 ID_UPPER
+71,54
 Width
 
 RBRACE
+71,59
 }
 
 LBRACK
+71,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.sge
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvsge
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+72,25
 |
 
 ID_UPPER
+72,27
 MInt
 
 LBRACE
+72,31
 {
 
 ID_UPPER
+72,32
 Width
 
 RBRACE
+72,37
 }
 
 STRING
+72,39
 ">=uMInt"
 
 ID_UPPER
+72,49
 MInt
 
 LBRACE
+72,53
 {
 
 ID_UPPER
+72,54
 Width
 
 RBRACE
+72,59
 }
 
 LBRACK
+72,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.uge
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 bvuge
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+73,25
 |
 
 ID_UPPER
+73,27
 MInt
 
 LBRACE
+73,31
 {
 
 ID_UPPER
+73,32
 Width
 
 RBRACE
+73,37
 }
 
 STRING
+73,39
 "==MInt"
 
 ID_UPPER
+73,48
 MInt
 
 LBRACE
+73,52
 {
 
 ID_UPPER
+73,53
 Width
 
 RBRACE
+73,58
 }
 
 LBRACK
+73,60
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.eq
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 =
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+74,25
 |
 
 ID_UPPER
+74,27
 MInt
 
 LBRACE
+74,31
 {
 
 ID_UPPER
+74,32
 Width
 
 RBRACE
+74,37
 }
 
 STRING
+74,39
 "=/=MInt"
 
 ID_UPPER
+74,49
 MInt
 
 LBRACE
+74,53
 {
 
 ID_UPPER
+74,54
 Width
 
 RBRACE
+74,59
 }
 
 LBRACK
+74,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.ne
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 distinct
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+76,3
 syntax
 
 LBRACE
+76,10
 {
 
 ID_UPPER
+76,11
 Width
 
 RBRACE
+76,16
 }
 
 ID_UPPER
+76,18
 MInt
 
 LBRACE
+76,22
 {
 
 ID_UPPER
+76,23
 Width
 
 RBRACE
+76,28
 }
 
 DCOLONEQ
+76,30
 ::=
 
 ID_LOWER
+76,34
 sMaxMInt
 
 LPAREN
+76,42
 (
 
 ID_UPPER
+76,43
 MInt
 
 LBRACE
+76,47
 {
 
 ID_UPPER
+76,48
 Width
 
 RBRACE
+76,53
 }
 
 COMMA
+76,54
 ,
 
 ID_UPPER
+76,56
 MInt
 
 LBRACE
+76,60
 {
 
 ID_UPPER
+76,61
 Width
 
 RBRACE
+76,66
 }
 
 RPAREN
+76,67
 )
 
 LBRACK
+76,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.smax
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (ite (bvslt #1 #2) #2 #1)
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+77,32
 |
 
 ID_LOWER
+77,34
 sMinMInt
 
 LPAREN
+77,42
 (
 
 ID_UPPER
+77,43
 MInt
 
 LBRACE
+77,47
 {
 
 ID_UPPER
+77,48
 Width
 
 RBRACE
+77,53
 }
 
 COMMA
+77,54
 ,
 
 ID_UPPER
+77,56
 MInt
 
 LBRACE
+77,60
 {
 
 ID_UPPER
+77,61
 Width
 
 RBRACE
+77,66
 }
 
 RPAREN
+77,67
 )
 
 LBRACK
+77,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.smin
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (ite (bvslt #1 #2) #1 #2)
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+78,32
 |
 
 ID_LOWER
+78,34
 uMaxMInt
 
 LPAREN
+78,42
 (
 
 ID_UPPER
+78,43
 MInt
 
 LBRACE
+78,47
 {
 
 ID_UPPER
+78,48
 Width
 
 RBRACE
+78,53
 }
 
 COMMA
+78,54
 ,
 
 ID_UPPER
+78,56
 MInt
 
 LBRACE
+78,60
 {
 
 ID_UPPER
+78,61
 Width
 
 RBRACE
+78,66
 }
 
 RPAREN
+78,67
 )
 
 LBRACK
+78,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.umax
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (ite (bvult #1 #2) #2 #1)
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+79,32
 |
 
 ID_LOWER
+79,34
 uMinMInt
 
 LPAREN
+79,42
 (
 
 ID_UPPER
+79,43
 MInt
 
 LBRACE
+79,47
 {
 
 ID_UPPER
+79,48
 Width
 
 RBRACE
+79,53
 }
 
 COMMA
+79,54
 ,
 
 ID_UPPER
+79,56
 MInt
 
 LBRACE
+79,60
 {
 
 ID_UPPER
+79,61
 Width
 
 RBRACE
+79,66
 }
 
 RPAREN
+79,67
 )
 
 LBRACK
+79,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.umin
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 (ite (bvult #1 #2) #1 #2)
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+81,3
 syntax
 
 LBRACE
+81,10
 {
 
 ID_UPPER
+81,11
 Width1
 
 COMMA
+81,17
 ,
 
 ID_UPPER
+81,19
 Width2
 
 RBRACE
+81,25
 }
 
 ID_UPPER
+81,27
 MInt
 
 LBRACE
+81,31
 {
 
 ID_UPPER
+81,32
 Width1
 
 RBRACE
+81,38
 }
 
 DCOLONEQ
+81,40
 ::=
 
 ID_LOWER
+81,44
 roundMInt
 
 LPAREN
+81,53
 (
 
 ID_UPPER
+81,54
 MInt
 
 LBRACE
+81,58
 {
 
 ID_UPPER
+81,59
 Width2
 
 RBRACE
+81,65
 }
 
 RPAREN
+81,66
 )
 
 LBRACK
+81,68
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MINT.round
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+82,1
 endmodule
 
 EOF
+82,9
 

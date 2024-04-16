@@ -1,22 +1,29 @@
 [org.kframework.attributes.Location(Location(50,10,50,120))]
 ===
 LBRACK
+1,1
 [
 
 ATTR_KEY
+1,0
 org.kframework.attributes.Location
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Location(50,10,50,120)
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 EOF
+1,60
 

@@ -4,7 +4,7 @@ package org.kframework.parser
 
 import java.util
 import org.kframework.Collections._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class Ignore
 
@@ -30,7 +30,7 @@ abstract class ChildrenMapping[E, W] {
       val mergedErrors = eithers.collect { case Left(err) => err }.foldLeft(errorUnit)(mergeErrors)
       (Left(mergedErrors), mergedWarnings)
     } else {
-      val newChildren: Iterable[Term] = eithers.map(_.right.get)
+      val newChildren: Iterable[Term] = eithers.map(_.toOption.get)
       (Right(t.replaceChildren(newChildren.asJavaCollection)), mergedWarnings)
     }
   }
@@ -229,8 +229,8 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
     case c: Constant  => apply(c)
   }
 
-  def apply(a: Ambiguity): Term = mapChildren(a)._1.right.get
-  def apply(tc: TermCons): Term = mapChildrenStrict(tc)._1.right.get
+  def apply(a: Ambiguity): Term = mapChildren(a)._1.toOption.get
+  def apply(tc: TermCons): Term = mapChildrenStrict(tc)._1.toOption.get
   def apply(c: Constant): Term  = c
 
   def mergeWarnings(a: Ignore, b: Ignore): Ignore = Ignore

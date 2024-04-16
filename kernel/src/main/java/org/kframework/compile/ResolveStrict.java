@@ -91,7 +91,7 @@ public class ResolveStrict {
     String[] strictAttrs = attribute.split(",");
     for (String strictAttr : strictAttrs) {
       String label = strictAttr.trim();
-      Option<scala.collection.Set<Sentence>> ss = d.mainModule().labeled().get(label);
+      Option<scala.collection.immutable.Set<Sentence>> ss = d.mainModule().labeled().get(label);
       if (ss.isDefined()) {
         for (Sentence s : iterable(ss.get())) {
           if (s instanceof ContextAlias) {
@@ -280,20 +280,18 @@ public class ResolveStrict {
                 .map(s -> (Production) s)
                 .filter(p -> p.att().contains(Att.STRICT()) || p.att().contains(Att.SEQSTRICT()))
                 .collect(Collectors.toSet()));
-    scala.collection.Set<Import> imports = input.imports();
+    scala.collection.immutable.Set<Import> imports = input.imports();
     // strictness makes use _andBool_ found in the BOOL module. Make sure it's imported
     if (!contextsToAdd.isEmpty() && !input.importedModuleNames().contains(Hooks.BOOL))
-      imports =
-          (scala.collection.Set<Import>)
-              Set(Import.apply(d.getModule(Hooks.BOOL).get(), false)).$bar(imports);
+      imports = Set(Import.apply(d.getModule(Hooks.BOOL).get(), false)).$bar(imports).toSet();
     return Module(
         input.name(),
         imports,
-        (scala.collection.Set<Sentence>)
-            stream(input.localSentences())
-                .filter(s -> !(s instanceof ContextAlias))
-                .collect(Collections.toSet())
-                .$bar(immutable(contextsToAdd)),
+        stream(input.localSentences())
+            .filter(s -> !(s instanceof ContextAlias))
+            .collect(Collections.toSet())
+            .$bar(immutable(contextsToAdd))
+            .toSet(),
         input.att());
   }
 }

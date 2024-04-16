@@ -1,10 +1,13 @@
 rule program text
 ===
 KW_RULE
+1,1
 rule
 
 BUBBLE
+1,6
 program text
 
 EOF
+1,17
 

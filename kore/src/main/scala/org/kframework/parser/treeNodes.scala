@@ -11,8 +11,7 @@ import org.kframework.kore.KORE.Sort
 import org.kframework.utils.StringUtil
 import org.pcollections.ConsPStack
 import org.pcollections.PStack
-import scala.collection.mutable
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
@@ -104,7 +103,7 @@ object TermCons {
 
 object Ambiguity {
   @annotation.varargs
-  def apply(items: Term*): Ambiguity = Ambiguity(items.to[mutable.Set].asJava)
+  def apply(items: Term*): Ambiguity = Ambiguity(items.to(collection.mutable.Set).asJava)
 
   def apply(
       items: java.util.Set[Term],

@@ -68,1090 +68,1453 @@ module K-REFLECTION
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 K-EQUAL-SYNTAX
 
 KW_IMPORTS
+2,3
 imports
 
 KW_PRIVATE
+2,11
 private
 
 MODNAME
+2,19
 BOOL
 
 KW_IMPORTS
+3,3
 imports
 
 KW_PRIVATE
+3,11
 private
 
 MODNAME
+3,19
 BASIC-K
 
 KW_SYNTAX
+5,3
 syntax
 
 ID_UPPER
+5,10
 Bool
 
 DCOLONEQ
+5,15
 ::=
 
 KW_LEFT
+5,19
 left
 
 COLON
+5,23
 :
 
 ID_UPPER
+6,19
 K
 
 STRING
+6,21
 "==K"
 
 ID_UPPER
+6,27
 K
 
 LBRACK
+6,39
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 =
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KEQUAL.eq
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _==K_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{=_K}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 group
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 equalEqualK
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 VBAR
+7,17
 |
 
 ID_UPPER
+7,19
 K
 
 STRING
+7,21
 "=/=K"
 
 ID_UPPER
+7,28
 K
 
 LBRACK
+7,39
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 distinct
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KEQUAL.ne
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _=/=K_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mathrel{\neq_K}{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 group
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 notEqualEqualK
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+9,3
 syntax
 
 KW_PRIORITY
+9,10
 priority
 
 KLABEL
+9,19
 equalEqualK
 
 KLABEL
+9,31
 notEqualEqualK
 
 GT
+9,46
 >
 
 KLABEL
+9,48
 boolOperation
 
 KLABEL
+9,62
 mlOp
 
 KW_SYNTAX
+11,3
 syntax
 
 LBRACE
+11,10
 {
 
 ID_UPPER
+11,11
 Sort
 
 RBRACE
+11,15
 }
 
 ID_UPPER
+11,17
 Sort
 
 DCOLONEQ
+11,22
 ::=
 
 STRING
+11,26
 "#if"
 
 ID_UPPER
+11,32
 Bool
 
 STRING
+11,37
 "#then"
 
 ID_UPPER
+11,45
 Sort
 
 STRING
+11,50
 "#else"
 
 ID_UPPER
+11,58
 Sort
 
 STRING
+11,63
 "#fi"
 
 LBRACK
+11,71
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 smt-hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 ite
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KEQUAL.ite
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+13,1
 endmodule
 
 KW_MODULE
+16,1
 module
 
 MODNAME
+16,8
 K-EQUAL-KORE
 
 LBRACK
+16,21
 [
 
 ATTR_KEY
+1,0
 kore
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbolic
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+17,3
 imports
 
 KW_PRIVATE
+17,11
 private
 
 MODNAME
+17,19
 BOOL
 
 KW_IMPORTS
+18,3
 imports
 
 MODNAME
+18,11
 K-EQUAL-SYNTAX
 
 KW_RULE
+20,3
 rule
 
 BUBBLE
+20,8
 K1:Bool ==K K2:Bool => K1 ==Bool K2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+21,3
 rule
 
 BUBBLE
+21,8
 {K1 ==K K2 #Equals true} => {K1 #Equals K2}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+22,3
 rule
 
 BUBBLE
+22,8
 {true #Equals K1 ==K K2} => {K1 #Equals K2}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+23,3
 rule
 
 BUBBLE
+23,8
 {K1 ==K K2 #Equals false} => #Not({K1 #Equals K2})
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+24,3
 rule
 
 BUBBLE
+24,8
 {false #Equals K1 ==K K2} => #Not({K1 #Equals K2})
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+25,3
 rule
 
 BUBBLE
+25,8
 {K1 =/=K K2 #Equals true} => #Not({K1 #Equals K2})
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+26,3
 rule
 
 BUBBLE
+26,8
 {true #Equals K1 =/=K K2} => #Not({K1 #Equals K2})
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+27,3
 rule
 
 BUBBLE
+27,8
 {K1 =/=K K2 #Equals false} => {K1 #Equals K2}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+28,3
 rule
 
 BUBBLE
+28,8
 {false #Equals K1 =/=K K2} => {K1 #Equals K2}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+30,1
 endmodule
 
 KW_MODULE
+33,1
 module
 
 MODNAME
+33,8
 K-EQUAL
 
 KW_IMPORTS
+34,3
 imports
 
 KW_PRIVATE
+34,11
 private
 
 MODNAME
+34,19
 BOOL
 
 KW_IMPORTS
+35,3
 imports
 
 MODNAME
+35,11
 K-EQUAL-SYNTAX
 
 KW_IMPORTS
+36,3
 imports
 
 MODNAME
+36,11
 K-EQUAL-KORE
 
 KW_RULE
+38,3
 rule
 
 BUBBLE
+38,8
 K1:K =/=K K2:K => notBool (K1 ==K K2)
 
 KW_RULE
+40,3
 rule
 
 BUBBLE
+40,8
 #if C:Bool #then B1::K #else _ #fi => B1 requires C
 
 KW_RULE
+41,3
 rule
 
 BUBBLE
+41,8
 #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 
 KW_ENDMODULE
+43,1
 endmodule
 
 KW_MODULE
+46,1
 module
 
 MODNAME
+46,8
 K-REFLECTION
 
 KW_IMPORTS
+47,3
 imports
 
 MODNAME
+47,11
 BASIC-K
 
 KW_IMPORTS
+48,3
 imports
 
 MODNAME
+48,11
 STRING
 
 KW_SYNTAX
+50,3
 syntax
 
 ID_UPPER
+50,10
 K
 
 DCOLONEQ
+50,12
 ::=
 
 STRING
+50,16
 "#configuration"
 
 LBRACK
+50,33
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.configuration
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+51,3
 syntax
 
 ID_UPPER
+51,10
 String
 
 DCOLONEQ
+51,17
 ::=
 
 ID_LOWER
+51,21
 #sort
 
 LPAREN
+51,26
 (
 
 ID_UPPER
+51,27
 K
 
 RPAREN
+51,28
 )
 
 LBRACK
+51,30
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.sort
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+52,3
 syntax
 
 ID_UPPER
+52,10
 KItem
 
 DCOLONEQ
+52,16
 ::=
 
 ID_LOWER
+52,20
 #fresh
 
 LPAREN
+52,26
 (
 
 ID_UPPER
+52,27
 String
 
 RPAREN
+52,33
 )
 
 LBRACK
+52,37
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.fresh
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+53,3
 syntax
 
 ID_UPPER
+53,10
 KItem
 
 DCOLONEQ
+53,16
 ::=
 
 ID_LOWER
+53,20
 getKLabel
 
 LPAREN
+53,29
 (
 
 ID_UPPER
+53,30
 K
 
 RPAREN
+53,31
 )
 
 LBRACK
+53,34
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.getKLabel
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+55,3
 syntax
 
 ID_UPPER
+55,10
 K
 
 DCOLONEQ
+55,12
 ::=
 
 ID_LOWER
+55,16
 #getenv
 
 LPAREN
+55,23
 (
 
 ID_UPPER
+55,24
 String
 
 RPAREN
+55,30
 )
 
 LBRACK
+55,32
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 impure
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.getenv
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+57,3
 syntax
 
 ID_UPPER
+57,10
 String
 
 DCOLONEQ
+57,17
 ::=
 
 ID_LOWER
+57,21
 #kompiledDirectory
 
 LPAREN
+57,39
 (
 
 RPAREN
+57,40
 )
 
 LBRACK
+57,42
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.kompiledDir
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+61,3
 syntax
 
 ID_UPPER
+61,10
 List
 
 DCOLONEQ
+61,15
 ::=
 
 ID_LOWER
+61,19
 #argv
 
 LPAREN
+61,24
 (
 
 RPAREN
+61,25
 )
 
 LBRACK
+61,27
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.argv
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+64,3
 syntax
 
 LBRACE
+64,10
 {
 
 ID_UPPER
+64,11
 Sort
 
 RBRACE
+64,15
 }
 
 ID_UPPER
+64,17
 Sort
 
 DCOLONEQ
+64,22
 ::=
 
 ID_LOWER
+64,26
 #parseKORE
 
 LPAREN
+64,36
 (
 
 ID_UPPER
+64,37
 String
 
 RPAREN
+64,43
 )
 
 LBRACK
+64,45
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.parseKORE
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+65,3
 syntax
 
 LBRACE
+65,10
 {
 
 ID_UPPER
+65,11
 Sort
 
 RBRACE
+65,15
 }
 
 ID_UPPER
+65,17
 String
 
 DCOLONEQ
+65,24
 ::=
 
 ID_LOWER
+65,28
 #unparseKORE
 
 LPAREN
+65,40
 (
 
 ID_UPPER
+65,41
 Sort
 
 RPAREN
+65,45
 )
 
 LBRACK
+65,47
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 KREFLECTION.printKORE
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+66,3
 syntax
 
 ID_UPPER
+66,10
 IOError
 
 DCOLONEQ
+66,18
 ::=
 
 STRING
+66,22
 "#noParse"
 
 STRING
+66,33
 "("
 
 ID_UPPER
+66,37
 String
 
 STRING
+66,44
 ")"
 
 LBRACK
+66,48
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 #noParse
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+68,1
 endmodule
 
 EOF
+68,9
 

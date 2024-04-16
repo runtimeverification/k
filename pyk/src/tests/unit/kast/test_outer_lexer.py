@@ -5,6 +5,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.outer_lexer import (
+    INIT_LOC,
+    Loc,
+    LocationIterator,
     Token,
     TokenType,
     _attr,
@@ -64,132 +67,212 @@ def test_maybe_comment(
 
 
 BUBBLE_TEST_DATA: Final = (
-    ('', [Token('', TokenType.EOF)], ''),
-    (' ', [Token('', TokenType.EOF)], ''),
-    ('//a', [Token('', TokenType.EOF)], ''),
-    ('/*1*/', [Token('', TokenType.EOF)], ''),
-    ('/*1*//*2*//*3*/', [Token('', TokenType.EOF)], ''),
-    ('/*1*/ /*2*/ /*3*/rule', [Token('rule', TokenType.KW_RULE)], ''),
-    ('/*1*/hello/*2*/rule', [Token('hello', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
+    ('', [Token('', TokenType.EOF, Loc(1, 0))], ''),
+    (' ', [Token('', TokenType.EOF, Loc(1, 1))], ''),
+    ('//a', [Token('', TokenType.EOF, Loc(1, 3))], ''),
+    ('/*1*/', [Token('', TokenType.EOF, Loc(1, 5))], ''),
+    ('/*1*//*2*//*3*/', [Token('', TokenType.EOF, Loc(1, 15))], ''),
+    ('/*1*/ /*2*/ /*3*/rule', [Token('rule', TokenType.KW_RULE, Loc(1, 13))], ''),
+    (
+        '/*1*/hello/*2*/rule',
+        [Token('hello', TokenType.BUBBLE, Loc(1, 6)), Token('rule', TokenType.KW_RULE, Loc(1, 16))],
+        '',
+    ),
     (
         '/*1*/hello/*2*/world/*3*/rule',
-        [Token('hello/*2*/world', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)],
+        [Token('hello/*2*/world', TokenType.BUBBLE, Loc(1, 6)), Token('rule', TokenType.KW_RULE, Loc(1, 26))],
         '',
     ),
     (
         '/*1*/hello/*2*/world/*3*/rule/*4*/',
-        [Token('hello/*2*/world', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)],
+        [Token('hello/*2*/world', TokenType.BUBBLE, Loc(1, 6)), Token('rule', TokenType.KW_RULE, Loc(1, 26))],
         '',
     ),
     (
         ' /*1*/ hello /*2*/ world /*3*/ rule ',
-        [Token('hello /*2*/ world', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)],
+        [Token('hello /*2*/ world', TokenType.BUBBLE, Loc(1, 8)), Token('rule', TokenType.KW_RULE, Loc(1, 32))],
         ' ',
     ),
     (
         ' /*1*/ hello /*2*/ world /*3*/ rule /*4*/ ',
-        [Token('hello /*2*/ world', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)],
+        [Token('hello /*2*/ world', TokenType.BUBBLE, Loc(1, 8)), Token('rule', TokenType.KW_RULE, Loc(1, 32))],
         ' /*4*/ ',
     ),
     (
         'hello world // comment\nendmodule',
-        [Token('hello world', TokenType.BUBBLE), Token('endmodule', TokenType.KW_ENDMODULE)],
+        [Token('hello world', TokenType.BUBBLE, Loc(1, 1)), Token('endmodule', TokenType.KW_ENDMODULE, Loc(2, 1))],
         '',
     ),
-    ('a //1\n/*2*/ rule', [Token('a', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
-    ('a //1\n/* rule */ rule', [Token('a', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
-    ('a', [Token('a', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('a/', [Token('a/', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('a/rule', [Token('a/rule', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('abc', [Token('abc', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('abc //', [Token('abc', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('abc /* 1 */ //', [Token('abc', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('rule', [Token('rule', TokenType.KW_RULE)], ''),
-    ('rule/', [Token('rule/', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('rule//comment', [Token('rule', TokenType.KW_RULE)], ''),
-    ('rule/*1*/', [Token('rule', TokenType.KW_RULE)], ''),
-    ('a rule', [Token('a', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
-    ('arule', [Token('arule', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('a/**/rule', [Token('a', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
-    ('a/* comment */rule', [Token('a', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
-    ('an other rule', [Token('an other', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)], ''),
+    (
+        'a //1\n/*2*/ rule',
+        [Token('a', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(2, 7))],
+        '',
+    ),
+    (
+        'a //1\n/* rule */ rule',
+        [Token('a', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(2, 12))],
+        '',
+    ),
+    (
+        'a',
+        [Token('a', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 1))],
+        '',
+    ),
+    (
+        'a/',
+        [Token('a/', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 2))],
+        '',
+    ),
+    (
+        'a/rule',
+        [Token('a/rule', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 6))],
+        '',
+    ),
+    (
+        'abc',
+        [Token('abc', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 3))],
+        '',
+    ),
+    (
+        'abc //',
+        [Token('abc', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 6))],
+        '',
+    ),
+    (
+        'abc /* 1 */ //',
+        [Token('abc', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 14))],
+        '',
+    ),
+    ('rule', [Token('rule', TokenType.KW_RULE, Loc(1, 1))], ''),
+    (
+        'rule/',
+        [Token('rule/', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 5))],
+        '',
+    ),
+    ('rule//comment', [Token('rule', TokenType.KW_RULE, Loc(1, 1))], ''),
+    ('rule/*1*/', [Token('rule', TokenType.KW_RULE, Loc(1, 1))], ''),
+    (
+        'a rule',
+        [Token('a', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(1, 3))],
+        '',
+    ),
+    (
+        'arule',
+        [Token('arule', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 5))],
+        '',
+    ),
+    (
+        'a/**/rule',
+        [Token('a', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(1, 6))],
+        '',
+    ),
+    (
+        'a/* comment */rule',
+        [Token('a', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(1, 15))],
+        '',
+    ),
+    (
+        'an other rule',
+        [Token('an other', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(1, 10))],
+        '',
+    ),
     (
         'cash rules everything around me',
-        [Token('cash rules everything around me', TokenType.BUBBLE), Token('', TokenType.EOF)],
+        [Token('cash rules everything around me', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 31))],
         '',
     ),
     (
         'cash rule/**/s everything around me',
-        [Token('cash', TokenType.BUBBLE), Token('rule', TokenType.KW_RULE)],
+        [Token('cash', TokenType.BUBBLE, Loc(1, 1)), Token('rule', TokenType.KW_RULE, Loc(1, 6))],
         's everything around me',
     ),
-    ('alias', [Token('alias', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('bubble alias', [Token('bubble alias', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('[', [Token('[', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('/**/[', [Token('[', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
-    ('[]', [Token('[]', TokenType.BUBBLE), Token('', TokenType.EOF)], ''),
+    (
+        'alias',
+        [Token('alias', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 5))],
+        '',
+    ),
+    (
+        'bubble alias',
+        [Token('bubble alias', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 12))],
+        '',
+    ),
+    (
+        '[',
+        [Token('[', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 1))],
+        '',
+    ),
+    (
+        '/**/[',
+        [Token('[', TokenType.BUBBLE, Loc(1, 5)), Token('', TokenType.EOF, Loc(1, 5))],
+        '',
+    ),
+    (
+        '[]',
+        [Token('[]', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 2))],
+        '',
+    ),
     (
         '[a]:',
         [
-            Token('[', TokenType.LBRACK),
-            Token('a', TokenType.RULE_LABEL),
-            Token(']', TokenType.RBRACK),
-            Token(':', TokenType.COLON),
-            Token('', TokenType.EOF),
+            Token('[', TokenType.LBRACK, Loc(1, 1)),
+            Token('a', TokenType.RULE_LABEL, Loc(1, 2)),
+            Token(']', TokenType.RBRACK, Loc(1, 3)),
+            Token(':', TokenType.COLON, Loc(1, 4)),
+            Token('', TokenType.EOF, Loc(1, 4)),
         ],
         '',
     ),
     (
         '[a]:b',
         [
-            Token('[', TokenType.LBRACK),
-            Token('a', TokenType.RULE_LABEL),
-            Token(']', TokenType.RBRACK),
-            Token(':', TokenType.COLON),
-            Token('b', TokenType.BUBBLE),
-            Token('', TokenType.EOF),
+            Token('[', TokenType.LBRACK, Loc(1, 1)),
+            Token('a', TokenType.RULE_LABEL, Loc(1, 2)),
+            Token(']', TokenType.RBRACK, Loc(1, 3)),
+            Token(':', TokenType.COLON, Loc(1, 4)),
+            Token('b', TokenType.BUBBLE, Loc(1, 5)),
+            Token('', TokenType.EOF, Loc(1, 5)),
         ],
         '',
     ),
     (
         '[klabel',
-        [Token('[klabel', TokenType.BUBBLE), Token('', TokenType.EOF)],
+        [Token('[klabel', TokenType.BUBBLE, Loc(1, 1)), Token('', TokenType.EOF, Loc(1, 7))],
         '',
     ),
     (
         '[klabel]',
         [
-            Token('[', TokenType.LBRACK),
-            Token('klabel', TokenType.ATTR_KEY),
-            Token(']', TokenType.RBRACK),
-            Token('', TokenType.EOF),
+            Token('[', TokenType.LBRACK, Loc(1, 0)),
+            Token('klabel', TokenType.ATTR_KEY, Loc(1, 0)),
+            Token(']', TokenType.RBRACK, Loc(1, 0)),
+            Token('', TokenType.EOF, Loc(1, 8)),
         ],
         '',
     ),
     (
         '[klabel(hello)]',
         [
-            Token('[', TokenType.LBRACK),
-            Token('klabel', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('hello', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
-            Token('', TokenType.EOF),
+            Token('[', TokenType.LBRACK, Loc(1, 0)),
+            Token('klabel', TokenType.ATTR_KEY, Loc(1, 0)),
+            Token('(', TokenType.LPAREN, Loc(1, 0)),
+            Token('hello', TokenType.ATTR_CONTENT, Loc(1, 0)),
+            Token(')', TokenType.RPAREN, Loc(1, 0)),
+            Token(']', TokenType.RBRACK, Loc(1, 0)),
+            Token('', TokenType.EOF, Loc(1, 15)),
         ],
         '',
     ),
     (
         'bubble [klabel(hello)]',
         [
-            Token('bubble', TokenType.BUBBLE),
-            Token('[', TokenType.LBRACK),
-            Token('klabel', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('hello', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
-            Token('', TokenType.EOF),
+            Token('bubble', TokenType.BUBBLE, Loc(1, 1)),
+            Token('[', TokenType.LBRACK, Loc(1, 0)),
+            Token('klabel', TokenType.ATTR_KEY, Loc(1, 0)),
+            Token('(', TokenType.LPAREN, Loc(1, 0)),
+            Token('hello', TokenType.ATTR_CONTENT, Loc(1, 0)),
+            Token(')', TokenType.RPAREN, Loc(1, 0)),
+            Token(']', TokenType.RBRACK, Loc(1, 0)),
+            Token('', TokenType.EOF, Loc(1, 22)),
         ],
         '',
     ),
@@ -207,7 +290,7 @@ def test_bubble(
     expected_remaining: str,
 ) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -220,8 +303,8 @@ def test_bubble(
 
 
 CONTEXT_TEST_DATA: Final = (
-    ('alias', [Token('alias', TokenType.KW_ALIAS)], ''),
-    ('bubble alias', [Token('bubble', TokenType.BUBBLE), Token('alias', TokenType.KW_ALIAS)], ''),
+    ('alias', [Token('alias', TokenType.KW_ALIAS, Loc(1, 1))], ''),
+    ('bubble alias', [Token('bubble', TokenType.BUBBLE, Loc(1, 1)), Token('alias', TokenType.KW_ALIAS, Loc(1, 8))], ''),
 )
 
 
@@ -236,7 +319,7 @@ def test_context(
     expected_remaining: str,
 ) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -249,34 +332,34 @@ def test_context(
 
 
 DEFAULT_TEST_DATA: Final = (
-    ('', Token('', TokenType.EOF), ''),
-    (' ', Token('', TokenType.EOF), ''),
-    ('// comment', Token('', TokenType.EOF), ''),
-    ('/* comment */', Token('', TokenType.EOF), ''),
-    (' //', Token('', TokenType.EOF), ''),
-    ('0', Token('0', TokenType.NAT), ''),
-    ('01', Token('01', TokenType.NAT), ''),
-    ('012abc', Token('012', TokenType.NAT), 'abc'),
-    ('abc012', Token('abc012', TokenType.ID_LOWER), ''),
-    ('#abc012', Token('#abc012', TokenType.ID_LOWER), ''),
-    ('Abc012', Token('Abc012', TokenType.ID_UPPER), ''),
-    ('#Abc012', Token('#Abc012', TokenType.ID_UPPER), ''),
-    (':', Token(':', TokenType.COLON), ''),
-    ('::=', Token('::=', TokenType.DCOLONEQ), ''),
-    ('""', Token('""', TokenType.STRING), ''),
-    ('"a"', Token('"a"', TokenType.STRING), ''),
-    (r'"\n"', Token(r'"\n"', TokenType.STRING), ''),
-    (r'"\""', Token(r'"\""', TokenType.STRING), ''),
-    (r'"\\"', Token(r'"\\"', TokenType.STRING), ''),
-    ('r', Token('r', TokenType.ID_LOWER), ''),
-    ('r1', Token('r1', TokenType.ID_LOWER), ''),
-    ('r""', Token('r""', TokenType.REGEX), ''),
-    (r'r"\n"', Token(r'r"\n"', TokenType.REGEX), ''),
-    (r'r"\""', Token(r'r"\""', TokenType.REGEX), ''),
-    (r'r"\\"', Token(r'r"\\"', TokenType.REGEX), ''),
-    ('rule', Token('rule', TokenType.KW_RULE), ''),
-    ('rule0', Token('rule0', TokenType.ID_LOWER), ''),
-    ('rulerule', Token('rulerule', TokenType.ID_LOWER), ''),
+    ('', Token('', TokenType.EOF, Loc(1, 0)), ''),
+    (' ', Token('', TokenType.EOF, Loc(1, 1)), ''),
+    ('// comment', Token('', TokenType.EOF, Loc(1, 10)), ''),
+    ('/* comment */', Token('', TokenType.EOF, Loc(1, 13)), ''),
+    (' //', Token('', TokenType.EOF, Loc(1, 3)), ''),
+    ('0', Token('0', TokenType.NAT, Loc(1, 1)), ''),
+    ('01', Token('01', TokenType.NAT, Loc(1, 1)), ''),
+    ('012abc', Token('012', TokenType.NAT, Loc(1, 1)), 'abc'),
+    ('abc012', Token('abc012', TokenType.ID_LOWER, Loc(1, 1)), ''),
+    ('#abc012', Token('#abc012', TokenType.ID_LOWER, Loc(1, 1)), ''),
+    ('Abc012', Token('Abc012', TokenType.ID_UPPER, Loc(1, 1)), ''),
+    ('#Abc012', Token('#Abc012', TokenType.ID_UPPER, Loc(1, 1)), ''),
+    (':', Token(':', TokenType.COLON, Loc(1, 1)), ''),
+    ('::=', Token('::=', TokenType.DCOLONEQ, Loc(1, 1)), ''),
+    ('""', Token('""', TokenType.STRING, Loc(1, 1)), ''),
+    ('"a"', Token('"a"', TokenType.STRING, Loc(1, 1)), ''),
+    (r'"\n"', Token(r'"\n"', TokenType.STRING, Loc(1, 1)), ''),
+    (r'"\""', Token(r'"\""', TokenType.STRING, Loc(1, 1)), ''),
+    (r'"\\"', Token(r'"\\"', TokenType.STRING, Loc(1, 1)), ''),
+    ('r', Token('r', TokenType.ID_LOWER, Loc(1, 1)), ''),
+    ('r1', Token('r1', TokenType.ID_LOWER, Loc(1, 1)), ''),
+    ('r""', Token('r""', TokenType.REGEX, Loc(1, 1)), ''),
+    (r'r"\n"', Token(r'r"\n"', TokenType.REGEX, Loc(1, 1)), ''),
+    (r'r"\""', Token(r'r"\""', TokenType.REGEX, Loc(1, 1)), ''),
+    (r'r"\\"', Token(r'r"\\"', TokenType.REGEX, Loc(1, 1)), ''),
+    ('rule', Token('rule', TokenType.KW_RULE, Loc(1, 1)), ''),
+    ('rule0', Token('rule0', TokenType.ID_LOWER, Loc(1, 1)), ''),
+    ('rulerule', Token('rulerule', TokenType.ID_LOWER, Loc(1, 1)), ''),
 )
 
 
@@ -287,7 +370,7 @@ DEFAULT_TEST_DATA: Final = (
 )
 def test_default(text: str, expected_token: Token, expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -300,16 +383,16 @@ def test_default(text: str, expected_token: Token, expected_remaining: str) -> N
 
 
 MODNAME_TEST_DATA: Final = (
-    ('private', Token('private', TokenType.KW_PRIVATE), ''),
-    ('private MODULE', Token('private', TokenType.KW_PRIVATE), ' MODULE'),
-    ('public', Token('public', TokenType.KW_PUBLIC), ''),
-    ('module', Token('module', TokenType.MODNAME), ''),
-    ('MODULE', Token('MODULE', TokenType.MODNAME), ''),
-    ('module#module', Token('module', TokenType.MODNAME), '#module'),
-    ('mo-du-le', Token('mo-du-le', TokenType.MODNAME), ''),
-    ('m0-DU_l3', Token('m0-DU_l3', TokenType.MODNAME), ''),
-    ('TEST-MODULE', Token('TEST-MODULE', TokenType.MODNAME), ''),
-    ('TEST_MODULE', Token('TEST_MODULE', TokenType.MODNAME), ''),
+    ('private', Token('private', TokenType.KW_PRIVATE, Loc(1, 1)), ''),
+    ('private MODULE', Token('private', TokenType.KW_PRIVATE, Loc(1, 1)), ' MODULE'),
+    ('public', Token('public', TokenType.KW_PUBLIC, Loc(1, 1)), ''),
+    ('module', Token('module', TokenType.MODNAME, Loc(1, 1)), ''),
+    ('MODULE', Token('MODULE', TokenType.MODNAME, Loc(1, 1)), ''),
+    ('module#module', Token('module', TokenType.MODNAME, Loc(1, 1)), '#module'),
+    ('mo-du-le', Token('mo-du-le', TokenType.MODNAME, Loc(1, 1)), ''),
+    ('m0-DU_l3', Token('m0-DU_l3', TokenType.MODNAME, Loc(1, 1)), ''),
+    ('TEST-MODULE', Token('TEST-MODULE', TokenType.MODNAME, Loc(1, 1)), ''),
+    ('TEST_MODULE', Token('TEST_MODULE', TokenType.MODNAME, Loc(1, 1)), ''),
 )
 
 
@@ -320,7 +403,7 @@ MODNAME_TEST_DATA: Final = (
 )
 def test_modname(text: str, expected_token: Token, expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -333,25 +416,25 @@ def test_modname(text: str, expected_token: Token, expected_remaining: str) -> N
 
 
 KLABEL_TEST_DATA: Final = (
-    ('syntax', Token('syntax', TokenType.KW_SYNTAX), ''),
-    ('syntaxx', Token('syntaxx', TokenType.KLABEL), ''),
-    ('<foo()>', Token('<foo()>', TokenType.KLABEL), ''),
-    ('>', Token('>', TokenType.GT), ''),
-    ('>a', Token('>a', TokenType.KLABEL), ''),
-    ('> a', Token('>', TokenType.GT), ' a'),
-    ('/**/', Token('', TokenType.EOF), ''),
-    ('a //', Token('a', TokenType.KLABEL), ' //'),
-    ('// a', Token('', TokenType.EOF), ''),
-    ('//a', Token('', TokenType.EOF), ''),
-    ('/ a', Token('/', TokenType.KLABEL), ' a'),
-    ('/a', Token('/a', TokenType.KLABEL), ''),
-    ('/**/ a', Token('a', TokenType.KLABEL), ''),
-    ('a /**/', Token('a', TokenType.KLABEL), ' /**/'),
-    ('a/**/', Token('a/**/', TokenType.KLABEL), ''),
-    ('/**/a', Token('/**/a', TokenType.KLABEL), ''),
-    ('a/*1*//*2*/', Token('a/*1*//*2*/', TokenType.KLABEL), ''),
-    ('/*1*//*2*/a', Token('/*1*//*2*/a', TokenType.KLABEL), ''),
-    ('/*1*/a/*2*/', Token('/*1*/a/*2*/', TokenType.KLABEL), ''),
+    ('syntax', Token('syntax', TokenType.KW_SYNTAX, Loc(1, 1)), ''),
+    ('syntaxx', Token('syntaxx', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('<foo()>', Token('<foo()>', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('>', Token('>', TokenType.GT, Loc(1, 1)), ''),
+    ('>a', Token('>a', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('> a', Token('>', TokenType.GT, Loc(1, 1)), ' a'),
+    ('/**/', Token('', TokenType.EOF, Loc(1, 4)), ''),
+    ('a //', Token('a', TokenType.KLABEL, Loc(1, 1)), ' //'),
+    ('// a', Token('', TokenType.EOF, Loc(1, 4)), ''),
+    ('//a', Token('', TokenType.EOF, Loc(1, 3)), ''),
+    ('/ a', Token('/', TokenType.KLABEL, Loc(1, 1)), ' a'),
+    ('/a', Token('/a', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('/**/ a', Token('a', TokenType.KLABEL, Loc(1, 6)), ''),
+    ('a /**/', Token('a', TokenType.KLABEL, Loc(1, 1)), ' /**/'),
+    ('a/**/', Token('a/**/', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('/**/a', Token('/**/a', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('a/*1*//*2*/', Token('a/*1*//*2*/', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('/*1*//*2*/a', Token('/*1*//*2*/a', TokenType.KLABEL, Loc(1, 1)), ''),
+    ('/*1*/a/*2*/', Token('/*1*/a/*2*/', TokenType.KLABEL, Loc(1, 1)), ''),
 )
 
 
@@ -362,7 +445,7 @@ KLABEL_TEST_DATA: Final = (
 )
 def test_klabel(text: str, expected_token: Token, expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
 
     # When
@@ -375,132 +458,132 @@ def test_klabel(text: str, expected_token: Token, expected_remaining: str) -> No
 
 
 ATTR_TEST_DATA: Final = (
-    ('a]', [Token('a', TokenType.ATTR_KEY), Token(']', TokenType.RBRACK)], ''),
-    (' a ] ', [Token('a', TokenType.ATTR_KEY), Token(']', TokenType.RBRACK)], ' '),
-    ('a<b>]', [Token('a<b>', TokenType.ATTR_KEY), Token(']', TokenType.RBRACK)], ''),
-    ('1a-B<-->]', [Token('1a-B<-->', TokenType.ATTR_KEY), Token(']', TokenType.RBRACK)], ''),
+    ('a]', [Token('a', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ''),
+    (' a ] ', [Token('a', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ' '),
+    ('a<b>]', [Token('a<b>', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ''),
+    ('1a-B<-->]', [Token('1a-B<-->', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ''),
     (
         'a()] ',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         ' ',
     ),
     (
         'a("")]',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('""', TokenType.STRING),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('""', TokenType.STRING, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         '',
     ),
     (
         'a("hello")]',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('"hello"', TokenType.STRING),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('"hello"', TokenType.STRING, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         '',
     ),
     (
         'a( )] ',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token(' ', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token(' ', TokenType.ATTR_CONTENT, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         ' ',
     ),
     (
         'a(())] ',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('()', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('()', TokenType.ATTR_CONTENT, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         ' ',
     ),
     (
         'a(/*)] ',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('/*', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('/*', TokenType.ATTR_CONTENT, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         ' ',
     ),
     (
         'a(()())] ',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('()()', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('()()', TokenType.ATTR_CONTENT, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         ' ',
     ),
     (
         'a( tag content (()) () )]',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token(' tag content (()) () ', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token(' tag content (()) () ', TokenType.ATTR_CONTENT, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         '',
     ),
     (
         'a,b,c]',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token(',', TokenType.COMMA),
-            Token('b', TokenType.ATTR_KEY),
-            Token(',', TokenType.COMMA),
-            Token('c', TokenType.ATTR_KEY),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token(',', TokenType.COMMA, INIT_LOC),
+            Token('b', TokenType.ATTR_KEY, INIT_LOC),
+            Token(',', TokenType.COMMA, INIT_LOC),
+            Token('c', TokenType.ATTR_KEY, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         '',
     ),
     (
         ' /* 1 */ a /* 2 */ , b /* 3 */ ]',
         [
-            Token('a', TokenType.ATTR_KEY),
-            Token(',', TokenType.COMMA),
-            Token('b', TokenType.ATTR_KEY),
-            Token(']', TokenType.RBRACK),
+            Token('a', TokenType.ATTR_KEY, INIT_LOC),
+            Token(',', TokenType.COMMA, INIT_LOC),
+            Token('b', TokenType.ATTR_KEY, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         '',
     ),
     (
         'a<A>("hello"), b(foo(bar(%), baz))]',
         [
-            Token('a<A>', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('"hello"', TokenType.STRING),
-            Token(')', TokenType.RPAREN),
-            Token(',', TokenType.COMMA),
-            Token('b', TokenType.ATTR_KEY),
-            Token('(', TokenType.LPAREN),
-            Token('foo(bar(%), baz)', TokenType.ATTR_CONTENT),
-            Token(')', TokenType.RPAREN),
-            Token(']', TokenType.RBRACK),
+            Token('a<A>', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('"hello"', TokenType.STRING, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(',', TokenType.COMMA, INIT_LOC),
+            Token('b', TokenType.ATTR_KEY, INIT_LOC),
+            Token('(', TokenType.LPAREN, INIT_LOC),
+            Token('foo(bar(%), baz)', TokenType.ATTR_CONTENT, INIT_LOC),
+            Token(')', TokenType.RPAREN, INIT_LOC),
+            Token(']', TokenType.RBRACK, INIT_LOC),
         ],
         '',
     ),
@@ -579,6 +662,10 @@ def _parse(path: Path) -> tuple[str, list[Token]]:
             token_type = TokenType[line]
 
             line = next(lines)
+            line_num, col = map(int, line.split(','))
+            loc = Loc(line_num, col)
+
+            line = next(lines)
             token_lines.append(line)
 
             maybe_type = False
@@ -605,7 +692,7 @@ def _parse(path: Path) -> tuple[str, list[Token]]:
 
                 token_lines.append(line)
 
-            tokens.append(Token('\n'.join(token_lines), token_type))
+            tokens.append(Token('\n'.join(token_lines), token_type, loc))
 
         return tokens
 

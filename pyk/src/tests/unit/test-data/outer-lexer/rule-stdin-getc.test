@@ -9,21 +9,27 @@ rule [stdinGetc]:
      [stream, priority(200)]
 ===
 KW_RULE
+1,1
 rule
 
 LBRACK
+1,6
 [
 
 RULE_LABEL
+1,7
 stdinGetc
 
 RBRACK
+1,16
 ]
 
 COLON
+1,17
 :
 
 BUBBLE
+2,5
 <stdin>
      ListItem(#parseInput(_:String, Delimiters:String))
      ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
@@ -33,28 +39,37 @@ BUBBLE
   requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 stream
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 200
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 EOF
+9,28
 

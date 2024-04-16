@@ -42,6 +42,8 @@ class SimpleSemantics(KCFGSemantics):
 
 class TestSimpleProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
+    KOMPILE_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
+    LLVM_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
         return SimpleSemantics()

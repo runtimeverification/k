@@ -18,27 +18,35 @@ module IMP
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 IMP
 
 KW_RULE
+3,3
 rule
 
 LBRACK
+3,8
 [
 
 RULE_LABEL
+3,9
 while
 
 RBRACK
+3,14
 ]
 
 COLON
+3,15
 :
 
 BUBBLE
+4,4
 <k>
       while (B)
          S
@@ -53,25 +61,33 @@ BUBBLE
     </k>
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 priority
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 50
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+18,1
 endmodule
 
 EOF
+18,9
 
