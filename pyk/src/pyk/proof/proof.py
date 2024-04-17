@@ -9,12 +9,12 @@ from dataclasses import dataclass
 from enum import Enum
 from itertools import chain
 from threading import current_thread
-from typing import TYPE_CHECKING, Callable, ContextManager, Generic, TypeVar
+from typing import TYPE_CHECKING, ContextManager, Generic, TypeVar
 
 from ..utils import ensure_dir_path, hash_file, hash_str
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Callable, Iterable, Mapping
     from concurrent.futures import Executor, Future
     from pathlib import Path
     from typing import Any, Final
