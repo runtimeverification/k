@@ -407,10 +407,17 @@ class ParallelProver(Generic[P, PS, SR]):
                     proof.commit(result)
                 proof.write_proof_data()
                 if max_iterations is not None and max_iterations <= iterations:
-                    return
+                    break
                 iterations += 1
+                if fail_fast and proof.failed:
+                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
+                    break
                 submit_steps(proof.get_steps(main_prover.kcfg_explore.kcfg_semantics))
                 pending.pop(future)
+
+            if proof.failed:
+                proof.failure_info = main_prover.failure_info(proof)
+            proof.write_proof_data()
 
 
 class Prover(Generic[P, PS, SR]):
