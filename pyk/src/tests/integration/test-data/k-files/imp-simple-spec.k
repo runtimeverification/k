@@ -116,13 +116,13 @@ module IMP-SIMPLE-SPEC
                                else { 
                                   $n = 1;
                                } 
-                               while($n <= 1000) {
+                               while($n <= 100) {
                                   $n = $n + 1;
                                }
                                => .K 
                            ...
                            </k>
-                         <state> $n |-> (0 => 1001) $s |-> _S:Int </state>
+                         <state> $n |-> (0 => 101) $s |-> _S:Int </state>
 
     claim [use-if-almost-same]:
         <k> $n = $n + 1; if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } $s = $s + 1; => .K ...</k>

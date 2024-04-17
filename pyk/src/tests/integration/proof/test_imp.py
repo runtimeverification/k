@@ -7,15 +7,19 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CSubst, CTerm
+from pyk.cterm.symbolic import CTermSymbolic
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
+from pyk.kcfg import KCFGExplore
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
+from pyk.kore.rpc import KoreClient
 from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
-from pyk.proof import APRProof, APRProver, ProofStatus
-from pyk.proof.reachability import APRFailureInfo
+from pyk.proof import APRProver, ProofStatus
+from pyk.proof.proof import ParallelProver
+from pyk.proof.reachability import APRFailureInfo, APRProof, APRProofResult, APRProofStep
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
@@ -30,9 +34,11 @@ if TYPE_CHECKING:
 
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
-    from pyk.kcfg import KCFGExplore
+    from pyk.kore.kompiled import KompiledKore
+    from pyk.kore.rpc import KoreServer
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
+    from pyk.utils import BugReport
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -440,7 +446,7 @@ APR_PROVE_TEST_DATA: Iterable[
         'IMP-SIMPLE-SPEC',
         'long-branches',
         None,
-        30,
+        None,
         [],
         True,
         ProofStatus.PASSED,
@@ -958,6 +964,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof_status: ProofStatus,
         expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
+        definition: KDefinition,
+        bug_report: BugReport,
+        kompiled_kore: KompiledKore,
+        _kore_server: KoreServer,
     ) -> None:
         with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
             spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
@@ -975,8 +985,18 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                     subproof.admit()
                     subproof.write_proof_data()
 
-            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
-            prover.parallel_advance_proof(proof, max_iterations=max_iterations)
+            def create_prover() -> APRProver:
+                kore_client = KoreClient(
+                    'localhost', _kore_server.port, timeout=self.CLIENT_TIMEOUT, bug_report=bug_report
+                )
+                ct_symb = CTermSymbolic(kore_client, definition, kompiled_kore)
+                _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
+                return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
+
+            parallel_prover = ParallelProver[APRProof, APRProofStep, APRProofResult]()
+            parallel_prover.parallel_advance_proof(
+                proof=proof, max_iterations=max_iterations, create_prover=create_prover
+            )
 
             kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
             cfg_lines = kcfg_show.show(proof.kcfg)

@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from pathlib import Path
 
+    from pyk.kcfg.semantics import KCFGSemantics
+
     from ..kast.inner import KSort
     from ..kast.outer import KClaim, KDefinition
     from ..kcfg import KCFGExplore
@@ -70,7 +72,7 @@ class ImpliesProof(Proof[ImpliesProofStep, ImpliesProofResult]):
         self.simplified_consequent = simplified_consequent
         self.csubst = csubst
 
-    def get_steps(self) -> list[ImpliesProofStep]:
+    def get_steps(self, kcfg_semantics: KCFGSemantics) -> list[ImpliesProofStep]:
         if not self.can_progress:
             return []
         return [ImpliesProofStep(self)]
