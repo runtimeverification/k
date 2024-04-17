@@ -188,7 +188,7 @@ class TestImpImpliesProof(KCFGExploreTest, KProveTest):
         proof = ImpliesProof(test_id, antecedent, consequent, bind_universally=bind_universally)
         prover = ImpliesProver(proof, kcfg_explore)
 
-        prover.advance_proof()
+        prover.advance_proof(proof)
 
         assert proof.status == expected_proof_status
 
@@ -216,6 +216,6 @@ class TestImpImpliesProof(KCFGExploreTest, KProveTest):
 
         equality_proof = EqualityProof.from_claim(claim, kprove.definition)
         equality_prover = ImpliesProver(equality_proof, kcfg_explore)
-        equality_prover.advance_proof()
+        equality_prover.advance_proof(equality_proof)
 
         assert equality_proof.status == proof_status

@@ -137,8 +137,8 @@ class TestCellMapProof(KCFGExploreTest, KProveTest):
         init = proof.kcfg.node(proof.init)
         new_init_term = kcfg_explore.cterm_symbolic.assume_defined(init.cterm)
         proof.kcfg.let_node(init.id, cterm=new_init_term)
-        prover = APRProver(proof, kcfg_explore=kcfg_explore, execute_depth=max_depth)
-        prover.advance_proof(max_iterations=max_iterations)
+        prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=max_depth)
+        prover.advance_proof(proof, max_iterations=max_iterations)
 
         kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
         cfg_lines = kcfg_show.show(proof.kcfg)
