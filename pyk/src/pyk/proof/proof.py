@@ -375,7 +375,7 @@ class ParallelProver(Generic[P, PS, SR]):
         fail_fast: bool = False,
         max_workers: int = 3,
     ) -> None:
-        pending: dict[Future[Any], str] = {}
+        pending: set[Future[Any]] = set()
         explored: set[int] = set()
         iterations = 0
 
@@ -393,7 +393,7 @@ class ParallelProver(Generic[P, PS, SR]):
                     print('submitting job', file=sys.stderr)
 
                     future: Future[Any] = pool.submit(step)  # <-- schedule steps for execution
-                    pending[future] = 'a'
+                    pending.add(future)
 
             submit_steps(proof.get_steps(main_prover.kcfg_explore.kcfg_semantics))
 
@@ -413,7 +413,7 @@ class ParallelProver(Generic[P, PS, SR]):
                     _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
                     break
                 submit_steps(proof.get_steps(main_prover.kcfg_explore.kcfg_semantics))
-                pending.pop(future)
+                pending.remove(future)
 
             if proof.failed:
                 proof.failure_info = main_prover.failure_info(proof)
