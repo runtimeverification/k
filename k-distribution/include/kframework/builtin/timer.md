@@ -11,8 +11,8 @@ module TIMER
     imports TIMER-SYNTAX
 
     syntax K ::= "timerStart" "(" ")" [function, hook(TIMER.timerStart)]
-    syntax K ::= "timerStart" "(" Int ")" [function, hook(TIMER.timerStartArg)]
-
     syntax K ::= "timerStop" "(" ")" [function, hook(TIMER.timerStop)]
+    syntax K ::= "timerCount" "(" Int ")" [function, hook(TIMER.timer)]
+    
 endmodule
 ```
