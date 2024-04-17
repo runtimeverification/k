@@ -43,7 +43,7 @@ module IMP
   syntax KItem ::= "timer" "(" Int ")" | "timerstop"
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Pgm ~> timerstop </k>
+                  <k color="green"> timerstart ~> $PGM:Pgm ~> timerstop </k>
                   <state color="red"> .Map </state>
                 </T>
 
@@ -76,4 +76,5 @@ module IMP
 
   rule timer(I:Int) => timerCount(I)
   rule timerstop => timerStop()
+  rule timerstart => timerStart()
 endmodule
