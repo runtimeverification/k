@@ -995,7 +995,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
             parallel_prover = ParallelProver[APRProof, APRProofStep, APRProofResult]()
             parallel_prover.parallel_advance_proof(
-                proof=proof, max_iterations=max_iterations, create_prover=create_prover
+                proof=proof, max_iterations=max_iterations, create_prover=create_prover, max_workers=2
             )
 
             kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))

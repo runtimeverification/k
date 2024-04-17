@@ -373,7 +373,7 @@ class ParallelProver(Generic[P, PS, SR]):
         create_prover: Callable[[], Prover[P, PS, SR]],
         max_iterations: int | None = None,
         fail_fast: bool = False,
-        max_workers: int = 3,
+        max_workers: int = 1,
     ) -> None:
         pending: set[Future[Any]] = set()
         explored: set[int] = set()
