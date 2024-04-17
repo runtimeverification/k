@@ -133,6 +133,46 @@ bool equalsNode(node *x0, node *x1) {
   }
 }
 
+// Define an ordering on nodes as follows:
+//   - Any string node is < any constructor node
+//   - String nodes are compared via strcmp
+//   - Constructor nodes are:
+//     - First compared by symbol via strcmp
+//     - If their symbols are identical, they are compared recursively:
+//       - First by their number of children
+//       - Then lexicographically over their children
+//
+// Returns true if x0 < x1
+bool ltNode(node *x0, node *x1) {
+    if (x0->str && x1->str) {
+        return strcmp(x0->symbol, x1->symbol) < 1;
+    }
+
+    if (x0->str && !x1->str) {
+        return true;
+    }
+
+    if (!x0->str && x1->str) {
+        return false;
+    }
+
+    if (!equalsSymbol(x0, x1)) {
+        return strcmp(x0->symbol, x1->symbol) < 1;
+    }
+
+    if (x0->nchildren != x1->nchildren) {
+        return x0->nchildren < x1->nchildren;
+    }
+
+    for (size_t i = 0; i < x0->nchildren; i++) {
+        if (!equalsNode(x0->children[i], x1->children[i])) {
+            return ltNode(x0->children[i], x1->children[i]);
+        }
+    }
+
+    return false;
+}
+
 char *injSymbol(char *lesser, char *greater) {
   char *prefix = "inj{";
   char *infix = ", ";
@@ -152,6 +192,13 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   if (equalsNode(x0.nterm, x1.nterm)) {
     return x0;
   }
+
+  if(ltNode(x1.nterm, x0.nterm)) {
+    YYSTYPE tmp = x0;
+    x0 = x1;
+    x1 = tmp;
+  }
+
   node *n = malloc(sizeof(node) + sizeof(node *) * 2);
   node *x0n = x0.nterm;
   node *x1n = x1.nterm;
