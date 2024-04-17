@@ -752,26 +752,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         return csubst
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
-        #
-        #          prior_loops = []
-        #          for succ in reversed(step.proof.shortest_path_to(step.node.id)):
-        #              if self.kcfg_explore.kcfg_semantics.same_loop(succ.source.cterm, step.node.cterm):
-        #                  if succ.source.id in step.proof.prior_loops_cache:
-        #                      if step.proof.kcfg.zero_depth_between(succ.source.id, step.node.id):
-        #                          prior_loops = step.proof.prior_loops_cache[succ.source.id]
-        #                      else:
-        #                          prior_loops = step.proof.prior_loops_cache[succ.source.id] + [succ.source.id]
-        #                      break
-        #                  else:
-        #                      step.proof.prior_loops_cache[succ.source.id] = []
-        #
-        #              step.proof.prior_loops_cache[step.node.id] = prior_loops
-        #
-        #              _LOGGER.info(f'Prior loop heads for node {step.proof.id}: {(step.node.id, prior_loops)}')
-        #              if len(prior_loops) > step.proof.bmc_depth:
-        #                  _LOGGER.warning(f'Bounded node {step.proof.id}: {step.node.id} at bmc depth {step.proof.bmc_depth}')
-        #                  return [APRProofBoundedResult(step.node.id)]
-
         if step.bounded:
             _LOGGER.warning(f'Bounded node {step.proof_id}: {step.node.id} at bmc depth {step.bmc_depth}')
             return [APRProofBoundedResult(step.node.id)]
@@ -793,14 +773,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         if is_terminal:
             return terminal_result
-
-        #          module_name = (
-        #              step.proof.circularities_module_name
-        #              if self.nonzero_depth(step.proof, step.node)
-        #              else step.proof.dependencies_module_name
-        #          )
-
-        #          self.kcfg_explore.check_extendable(step.proof, step.node)
 
         extend_result = self.kcfg_explore.extend_cterm(
             step.node.cterm,
