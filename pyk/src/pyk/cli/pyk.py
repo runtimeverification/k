@@ -11,6 +11,8 @@ from .args import (
     KompileOptions,
     LoggingOptions,
     OutputFileOptions,
+    SaveDirOptions,
+    SpecOptions,
     WarningOptions,
 )
 
@@ -41,6 +43,8 @@ def generate_options(args: dict[str, Any]) -> LoggingOptions:
         case 'prove-legacy':
             return ProveLegacyOptions(args)
         case 'prove':
+            return ProveOptions(args)
+        case 'show':
             return ProveOptions(args)
         case 'kompile':
             return KompileCommandOptions(args)
@@ -121,20 +125,23 @@ class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, 
         }
 
 
-class ProveOptions(LoggingOptions):
-    spec_file: Path
+class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     definition_dir: Path | None
-    spec_module: str | None
     type_inference_mode: TypeInferenceMode | None
     failure_info: bool
+    max_depth: int | None
+    max_iterations: int | None
+    show_kcfg: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'definition_dir': None,
-            'spec_module': None,
             'type_inference_mode': None,
             'failure_info': False,
+            'max_depth': None,
+            'max_iterations': None,
+            'show_kcfg': False,
         }
 
 

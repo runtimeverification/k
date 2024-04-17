@@ -211,11 +211,12 @@ class KPrint:
         self._bug_report = bug_report
 
     @contextmanager
-    def _temp_file(self, suffix: str | None = None) -> Iterator[_TemporaryFileWrapper]:
+    def _temp_file(self, prefix: str | None = None, suffix: str | None = None) -> Iterator[_TemporaryFileWrapper]:
         with NamedTemporaryFile(
             'w',
             dir=self.use_directory,
             delete=not self.use_directory,
+            prefix=prefix,
             suffix=suffix,
         ) as ntf:
             _LOGGER.info(f'Created temporary file: {ntf.name}')
