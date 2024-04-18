@@ -169,12 +169,12 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         else:
                             self.prior_loops_cache[succ.source.id] = []
 
-                    self.prior_loops_cache[node.id] = prior_loops
+                self.prior_loops_cache[node.id] = prior_loops
 
-                    _LOGGER.info(f'Prior loop heads for node {self.id}: {(node.id, prior_loops)}')
-                    bounded = len(prior_loops) > self.bmc_depth
-                    if bounded:
-                        _LOGGER.warning(f'Bounded node {self.id}: {node.id} at bmc depth {self.bmc_depth}')
+                _LOGGER.info(f'Prior loop heads for node {self.id}: {(node.id, prior_loops)}')
+                bounded = len(prior_loops) > self.bmc_depth
+                if bounded:
+                    _LOGGER.warning(f'Bounded node {self.id}: {node.id} at bmc depth {self.bmc_depth}')
 
             def nonzero_depth(proof: APRProof, node: KCFG.Node) -> bool:
                 return not proof.kcfg.zero_depth_between(proof.init, node.id)
