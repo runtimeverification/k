@@ -48,51 +48,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+2,45
 klabel
 
 LPAREN
-1,0
+2,51
 (
 
 ATTR_CONTENT
-1,0
+2,52
 _=_;
 
 RPAREN
-1,0
+2,56
 )
 
 COMMA
-1,0
+2,57
 ,
 
 ATTR_KEY
-1,0
+2,59
 symbol
 
 COMMA
-1,0
+2,65
 ,
 
 ATTR_KEY
-1,0
+2,67
 strict
 
 LPAREN
-1,0
+2,73
 (
 
 ATTR_CONTENT
-1,0
+2,74
 2
 
 RPAREN
-1,0
+2,75
 )
 
 RBRACK
-1,0
+2,76
 ]
 
 VBAR
@@ -132,51 +132,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+4,45
 klabel
 
 LPAREN
-1,0
+4,51
 (
 
 ATTR_CONTENT
-1,0
+4,52
 if(_)_else_
 
 RPAREN
-1,0
+4,63
 )
 
 COMMA
-1,0
+4,64
 ,
 
 ATTR_KEY
-1,0
+4,66
 symbol
 
 COMMA
-1,0
+4,72
 ,
 
 ATTR_KEY
-1,0
+4,74
 strict
 
 LPAREN
-1,0
+4,80
 (
 
 ATTR_CONTENT
-1,0
+4,81
 1
 
 RPAREN
-1,0
+4,82
 )
 
 RBRACK
-1,0
+4,83
 ]
 
 VBAR
@@ -208,31 +208,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+5,45
 klabel
 
 LPAREN
-1,0
+5,51
 (
 
 ATTR_CONTENT
-1,0
+5,52
 while(_)_
 
 RPAREN
-1,0
+5,61
 )
 
 COMMA
-1,0
+5,62
 ,
 
 ATTR_KEY
-1,0
+5,64
 symbol
 
 RBRACK
-1,0
+5,70
 ]
 
 GT
@@ -252,39 +252,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+6,45
 klabel
 
 LPAREN
-1,0
+6,51
 (
 
 ATTR_CONTENT
-1,0
+6,52
 __
 
 RPAREN
-1,0
+6,54
 )
 
 COMMA
-1,0
+6,55
 ,
 
 ATTR_KEY
-1,0
+6,57
 symbol
 
 COMMA
-1,0
+6,63
 ,
 
 ATTR_KEY
-1,0
+6,65
 left
 
 RBRACK
-1,0
+6,69
 ]
 
 KW_SYNTAX
@@ -320,31 +320,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+7,45
 klabel
 
 LPAREN
-1,0
+7,51
 (
 
 ATTR_CONTENT
-1,0
+7,52
 int_;_
 
 RPAREN
-1,0
+7,58
 )
 
 COMMA
-1,0
+7,59
 ,
 
 ATTR_KEY
-1,0
+7,61
 symbol
 
 RBRACK
-1,0
+7,67
 ]
 
 KW_SYNTAX
@@ -388,31 +388,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+8,45
 klabel
 
 LPAREN
-1,0
+8,51
 (
 
 ATTR_CONTENT
-1,0
+8,52
 _,_
 
 RPAREN
-1,0
+8,55
 )
 
 COMMA
-1,0
+8,56
 ,
 
 ATTR_KEY
-1,0
+8,58
 symbol
 
 RBRACK
-1,0
+8,64
 ]
 
 EOF

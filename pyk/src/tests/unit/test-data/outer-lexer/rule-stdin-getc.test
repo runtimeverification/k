@@ -29,7 +29,7 @@ COLON
 :
 
 BUBBLE
-2,5
+2,6
 <stdin>
      ListItem(#parseInput(_:String, Delimiters:String))
      ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
@@ -39,35 +39,35 @@ BUBBLE
   requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
 
 LBRACK
-1,0
+9,6
 [
 
 ATTR_KEY
-1,0
+9,7
 stream
 
 COMMA
-1,0
+9,13
 ,
 
 ATTR_KEY
-1,0
+9,15
 priority
 
 LPAREN
-1,0
+9,23
 (
 
 ATTR_CONTENT
-1,0
+9,24
 200
 
 RPAREN
-1,0
+9,27
 )
 
 RBRACK
-1,0
+9,28
 ]
 
 EOF

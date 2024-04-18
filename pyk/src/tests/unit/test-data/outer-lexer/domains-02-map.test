@@ -161,23 +161,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+7,15
 hook
 
 LPAREN
-1,0
+7,19
 (
 
 ATTR_CONTENT
-1,0
+7,20
 MAP.Map
 
 RPAREN
-1,0
+7,27
 )
 
 RBRACK
-1,0
+7,28
 ]
 
 KW_SYNTAX
@@ -205,163 +205,163 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+9,50
 left
 
 COMMA
-1,0
+9,54
 ,
 
 ATTR_KEY
-1,0
+9,56
 function
 
 COMMA
-1,0
+9,64
 ,
 
 ATTR_KEY
-1,0
+9,66
 hook
 
 LPAREN
-1,0
+9,70
 (
 
 ATTR_CONTENT
-1,0
+9,71
 MAP.concat
 
 RPAREN
-1,0
+9,81
 )
 
 COMMA
-1,0
+9,82
 ,
 
 ATTR_KEY
-1,0
+9,84
 klabel
 
 LPAREN
-1,0
+9,90
 (
 
 ATTR_CONTENT
-1,0
+9,91
 _Map_
 
 RPAREN
-1,0
+9,96
 )
 
 COMMA
-1,0
+9,97
 ,
 
 ATTR_KEY
-1,0
+9,99
 symbol
 
 COMMA
-1,0
+9,105
 ,
 
 ATTR_KEY
-1,0
+9,107
 assoc
 
 COMMA
-1,0
+9,112
 ,
 
 ATTR_KEY
-1,0
+9,114
 comm
 
 COMMA
-1,0
+9,118
 ,
 
 ATTR_KEY
-1,0
+9,120
 unit
 
 LPAREN
-1,0
+9,124
 (
 
 ATTR_CONTENT
-1,0
+9,125
 .Map
 
 RPAREN
-1,0
+9,129
 )
 
 COMMA
-1,0
+9,130
 ,
 
 ATTR_KEY
-1,0
+9,132
 element
 
 LPAREN
-1,0
+9,139
 (
 
 ATTR_CONTENT
-1,0
+9,140
 _|->_
 
 RPAREN
-1,0
+9,145
 )
 
 COMMA
-1,0
+9,146
 ,
 
 ATTR_KEY
-1,0
+9,148
 index
 
 LPAREN
-1,0
+9,153
 (
 
 ATTR_CONTENT
-1,0
+9,154
 0
 
 RPAREN
-1,0
+9,155
 )
 
 COMMA
-1,0
+9,156
 ,
 
 ATTR_KEY
-1,0
+9,158
 format
 
 LPAREN
-1,0
+9,164
 (
 
 ATTR_CONTENT
-1,0
+9,165
 %1%n%2
 
 RPAREN
-1,0
+9,171
 )
 
 RBRACK
-1,0
+9,172
 ]
 
 KW_SYNTAX
@@ -385,87 +385,87 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+10,50
 function
 
 COMMA
-1,0
+10,58
 ,
 
 ATTR_KEY
-1,0
+10,60
 total
 
 COMMA
-1,0
+10,65
 ,
 
 ATTR_KEY
-1,0
+10,67
 hook
 
 LPAREN
-1,0
+10,71
 (
 
 ATTR_CONTENT
-1,0
+10,72
 MAP.unit
 
 RPAREN
-1,0
+10,80
 )
 
 COMMA
-1,0
+10,81
 ,
 
 ATTR_KEY
-1,0
+10,83
 klabel
 
 LPAREN
-1,0
+10,89
 (
 
 ATTR_CONTENT
-1,0
+10,90
 .Map
 
 RPAREN
-1,0
+10,94
 )
 
 COMMA
-1,0
+10,95
 ,
 
 ATTR_KEY
-1,0
+10,97
 symbol
 
 COMMA
-1,0
+10,103
 ,
 
 ATTR_KEY
-1,0
+10,105
 latex
 
 LPAREN
-1,0
+10,110
 (
 
 ATTR_CONTENT
-1,0
+10,111
 \dotCt{Map}
 
 RPAREN
-1,0
+10,122
 )
 
 RBRACK
-1,0
+10,123
 ]
 
 KW_SYNTAX
@@ -497,95 +497,95 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+11,58
 function
 
 COMMA
-1,0
+11,66
 ,
 
 ATTR_KEY
-1,0
+11,68
 total
 
 COMMA
-1,0
+11,73
 ,
 
 ATTR_KEY
-1,0
+11,75
 hook
 
 LPAREN
-1,0
+11,79
 (
 
 ATTR_CONTENT
-1,0
+11,80
 MAP.element
 
 RPAREN
-1,0
+11,91
 )
 
 COMMA
-1,0
+11,92
 ,
 
 ATTR_KEY
-1,0
+11,94
 klabel
 
 LPAREN
-1,0
+11,100
 (
 
 ATTR_CONTENT
-1,0
+11,101
 _|->_
 
 RPAREN
-1,0
+11,106
 )
 
 COMMA
-1,0
+11,107
 ,
 
 ATTR_KEY
-1,0
+11,109
 symbol
 
 COMMA
-1,0
+11,115
 ,
 
 ATTR_KEY
-1,0
+11,117
 latex
 
 LPAREN
-1,0
+11,122
 (
 
 ATTR_CONTENT
-1,0
+11,123
 {#1}\mapsto{#2}
 
 RPAREN
-1,0
+11,138
 )
 
 COMMA
-1,0
+11,139
 ,
 
 ATTR_KEY
-1,0
+11,141
 injective
 
 RBRACK
-1,0
+11,150
 ]
 
 KW_SYNTAX
@@ -657,59 +657,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+16,58
 function
 
 COMMA
-1,0
+16,66
 ,
 
 ATTR_KEY
-1,0
+16,68
 hook
 
 LPAREN
-1,0
+16,72
 (
 
 ATTR_CONTENT
-1,0
+16,73
 MAP.lookup
 
 RPAREN
-1,0
+16,83
 )
 
 COMMA
-1,0
+16,84
 ,
 
 ATTR_KEY
-1,0
+16,86
 klabel
 
 LPAREN
-1,0
+16,92
 (
 
 ATTR_CONTENT
-1,0
+16,93
 Map:lookup
 
 RPAREN
-1,0
+16,103
 )
 
 COMMA
-1,0
+16,104
 ,
 
 ATTR_KEY
-1,0
+16,106
 symbol
 
 RBRACK
-1,0
+16,112
 ]
 
 KW_SYNTAX
@@ -753,59 +753,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+17,62
 function
 
 COMMA
-1,0
+17,70
 ,
 
 ATTR_KEY
-1,0
+17,72
 total
 
 COMMA
-1,0
+17,77
 ,
 
 ATTR_KEY
-1,0
+17,79
 hook
 
 LPAREN
-1,0
+17,83
 (
 
 ATTR_CONTENT
-1,0
+17,84
 MAP.lookupOrDefault
 
 RPAREN
-1,0
+17,103
 )
 
 COMMA
-1,0
+17,104
 ,
 
 ATTR_KEY
-1,0
+17,106
 klabel
 
 LPAREN
-1,0
+17,112
 (
 
 ATTR_CONTENT
-1,0
+17,113
 Map:lookupOrDefault
 
 RPAREN
-1,0
+17,132
 )
 
 RBRACK
-1,0
+17,133
 ]
 
 KW_SYNTAX
@@ -865,75 +865,75 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+18,70
 function
 
 COMMA
-1,0
+18,78
 ,
 
 ATTR_KEY
-1,0
+18,80
 total
 
 COMMA
-1,0
+18,85
 ,
 
 ATTR_KEY
-1,0
+18,87
 klabel
 
 LPAREN
-1,0
+18,93
 (
 
 ATTR_CONTENT
-1,0
+18,94
 Map:update
 
 RPAREN
-1,0
+18,104
 )
 
 COMMA
-1,0
+18,105
 ,
 
 ATTR_KEY
-1,0
+18,107
 symbol
 
 COMMA
-1,0
+18,113
 ,
 
 ATTR_KEY
-1,0
+18,115
 hook
 
 LPAREN
-1,0
+18,119
 (
 
 ATTR_CONTENT
-1,0
+18,120
 MAP.update
 
 RPAREN
-1,0
+18,130
 )
 
 COMMA
-1,0
+18,131
 ,
 
 ATTR_KEY
-1,0
+18,133
 prefer
 
 RBRACK
-1,0
+18,139
 ]
 
 KW_SYNTAX
@@ -977,67 +977,67 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+19,54
 function
 
 COMMA
-1,0
+19,62
 ,
 
 ATTR_KEY
-1,0
+19,64
 total
 
 COMMA
-1,0
+19,69
 ,
 
 ATTR_KEY
-1,0
+19,71
 hook
 
 LPAREN
-1,0
+19,75
 (
 
 ATTR_CONTENT
-1,0
+19,76
 MAP.remove
 
 RPAREN
-1,0
+19,86
 )
 
 COMMA
-1,0
+19,87
 ,
 
 ATTR_KEY
-1,0
+19,89
 klabel
 
 LPAREN
-1,0
+19,95
 (
 
 ATTR_CONTENT
-1,0
+19,96
 _[_<-undef]
 
 RPAREN
-1,0
+19,107
 )
 
 COMMA
-1,0
+19,108
 ,
 
 ATTR_KEY
-1,0
+19,110
 symbol
 
 RBRACK
-1,0
+19,116
 ]
 
 KW_SYNTAX
@@ -1069,59 +1069,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+20,50
 function
 
 COMMA
-1,0
+20,58
 ,
 
 ATTR_KEY
-1,0
+20,60
 total
 
 COMMA
-1,0
+20,65
 ,
 
 ATTR_KEY
-1,0
+20,67
 hook
 
 LPAREN
-1,0
+20,71
 (
 
 ATTR_CONTENT
-1,0
+20,72
 MAP.difference
 
 RPAREN
-1,0
+20,86
 )
 
 COMMA
-1,0
+20,87
 ,
 
 ATTR_KEY
-1,0
+20,89
 latex
 
 LPAREN
-1,0
+20,94
 (
 
 ATTR_CONTENT
-1,0
+20,95
 {#1}-_{\it Map}{#2}
 
 RPAREN
-1,0
+20,114
 )
 
 RBRACK
-1,0
+20,115
 ]
 
 KW_SYNTAX
@@ -1165,39 +1165,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+21,50
 function
 
 COMMA
-1,0
+21,58
 ,
 
 ATTR_KEY
-1,0
+21,60
 total
 
 COMMA
-1,0
+21,65
 ,
 
 ATTR_KEY
-1,0
+21,67
 hook
 
 LPAREN
-1,0
+21,71
 (
 
 ATTR_CONTENT
-1,0
+21,72
 MAP.updateAll
 
 RPAREN
-1,0
+21,85
 )
 
 RBRACK
-1,0
+21,86
 ]
 
 KW_SYNTAX
@@ -1241,39 +1241,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+22,50
 function
 
 COMMA
-1,0
+22,58
 ,
 
 ATTR_KEY
-1,0
+22,60
 total
 
 COMMA
-1,0
+22,65
 ,
 
 ATTR_KEY
-1,0
+22,67
 hook
 
 LPAREN
-1,0
+22,71
 (
 
 ATTR_CONTENT
-1,0
+22,72
 MAP.removeAll
 
 RPAREN
-1,0
+22,85
 )
 
 RBRACK
-1,0
+22,86
 ]
 
 KW_SYNTAX
@@ -1309,39 +1309,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+23,50
 function
 
 COMMA
-1,0
+23,58
 ,
 
 ATTR_KEY
-1,0
+23,60
 total
 
 COMMA
-1,0
+23,65
 ,
 
 ATTR_KEY
-1,0
+23,67
 hook
 
 LPAREN
-1,0
+23,71
 (
 
 ATTR_CONTENT
-1,0
+23,72
 MAP.keys
 
 RPAREN
-1,0
+23,80
 )
 
 RBRACK
-1,0
+23,81
 ]
 
 KW_SYNTAX
@@ -1377,31 +1377,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+24,50
 function
 
 COMMA
-1,0
+24,58
 ,
 
 ATTR_KEY
-1,0
+24,60
 hook
 
 LPAREN
-1,0
+24,64
 (
 
 ATTR_CONTENT
-1,0
+24,65
 MAP.keys_list
 
 RPAREN
-1,0
+24,78
 )
 
 RBRACK
-1,0
+24,79
 ]
 
 KW_SYNTAX
@@ -1441,39 +1441,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+25,54
 function
 
 COMMA
-1,0
+25,62
 ,
 
 ATTR_KEY
-1,0
+25,64
 total
 
 COMMA
-1,0
+25,69
 ,
 
 ATTR_KEY
-1,0
+25,71
 hook
 
 LPAREN
-1,0
+25,75
 (
 
 ATTR_CONTENT
-1,0
+25,76
 MAP.in_keys
 
 RPAREN
-1,0
+25,87
 )
 
 RBRACK
-1,0
+25,88
 ]
 
 KW_SYNTAX
@@ -1509,31 +1509,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+26,50
 function
 
 COMMA
-1,0
+26,58
 ,
 
 ATTR_KEY
-1,0
+26,60
 hook
 
 LPAREN
-1,0
+26,64
 (
 
 ATTR_CONTENT
-1,0
+26,65
 MAP.values
 
 RPAREN
-1,0
+26,75
 )
 
 RBRACK
-1,0
+26,76
 ]
 
 KW_SYNTAX
@@ -1569,59 +1569,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+27,50
 function
 
 COMMA
-1,0
+27,58
 ,
 
 ATTR_KEY
-1,0
+27,60
 total
 
 COMMA
-1,0
+27,65
 ,
 
 ATTR_KEY
-1,0
+27,67
 hook
 
 LPAREN
-1,0
+27,71
 (
 
 ATTR_CONTENT
-1,0
+27,72
 MAP.size
 
 RPAREN
-1,0
+27,80
 )
 
 COMMA
-1,0
+27,81
 ,
 
 ATTR_KEY
-1,0
+27,83
 klabel
 
 LPAREN
-1,0
+27,89
 (
 
 ATTR_CONTENT
-1,0
+27,90
 sizeMap
 
 RPAREN
-1,0
+27,97
 )
 
 RBRACK
-1,0
+27,98
 ]
 
 KW_SYNTAX
@@ -1653,39 +1653,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+28,50
 function
 
 COMMA
-1,0
+28,58
 ,
 
 ATTR_KEY
-1,0
+28,60
 total
 
 COMMA
-1,0
+28,65
 ,
 
 ATTR_KEY
-1,0
+28,67
 hook
 
 LPAREN
-1,0
+28,71
 (
 
 ATTR_CONTENT
-1,0
+28,72
 MAP.inclusion
 
 RPAREN
-1,0
+28,85
 )
 
 RBRACK
-1,0
+28,86
 ]
 
 KW_SYNTAX
@@ -1721,51 +1721,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+29,54
 function
 
 COMMA
-1,0
+29,62
 ,
 
 ATTR_KEY
-1,0
+29,64
 hook
 
 LPAREN
-1,0
+29,68
 (
 
 ATTR_CONTENT
-1,0
+29,69
 MAP.choice
 
 RPAREN
-1,0
+29,79
 )
 
 COMMA
-1,0
+29,80
 ,
 
 ATTR_KEY
-1,0
+29,82
 klabel
 
 LPAREN
-1,0
+29,88
 (
 
 ATTR_CONTENT
-1,0
+29,89
 Map:choice
 
 RPAREN
-1,0
+29,99
 )
 
 RBRACK
-1,0
+29,100
 ]
 
 KW_ENDMODULE
@@ -1785,27 +1785,27 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+33,27
 kore
 
 COMMA
-1,0
+33,31
 ,
 
 ATTR_KEY
-1,0
+33,32
 symbolic
 
 COMMA
-1,0
+33,40
 ,
 
 ATTR_KEY
-1,0
+33,41
 haskell
 
 RBRACK
-1,0
+33,48
 ]
 
 KW_IMPORTS
@@ -1849,15 +1849,15 @@ BUBBLE
 #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K)
 
 LBRACK
-1,0
+38,98
 [
 
 ATTR_KEY
-1,0
+38,99
 simplification
 
 RBRACK
-1,0
+38,113
 ]
 
 KW_RULE
@@ -1869,15 +1869,15 @@ BUBBLE
 (K |-> _ M:Map) [ K <- V ] => (K |-> V M)
 
 LBRACK
-1,0
+44,50
 [
 
 ATTR_KEY
-1,0
+44,51
 simplification
 
 RBRACK
-1,0
+44,65
 ]
 
 KW_RULE
@@ -1889,15 +1889,15 @@ BUBBLE
 M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M))
 
 LBRACK
-1,0
+45,72
 [
 
 ATTR_KEY
-1,0
+45,73
 simplification
 
 RBRACK
-1,0
+45,87
 ]
 
 KW_RULE
@@ -1909,15 +1909,15 @@ BUBBLE
 M:Map [ K <- _ ] [ K <- V ] => M [ K <- V ]
 
 LBRACK
-1,0
+46,52
 [
 
 ATTR_KEY
-1,0
+46,53
 simplification
 
 RBRACK
-1,0
+46,67
 ]
 
 KW_RULE
@@ -1929,15 +1929,15 @@ BUBBLE
 (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2
 
 LBRACK
-1,0
+49,91
 [
 
 ATTR_KEY
-1,0
+49,92
 simplification
 
 RBRACK
-1,0
+49,106
 ]
 
 KW_RULE
@@ -1949,15 +1949,15 @@ BUBBLE
 (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M))
 
 LBRACK
-1,0
+52,75
 [
 
 ATTR_KEY
-1,0
+52,76
 simplification
 
 RBRACK
-1,0
+52,90
 ]
 
 KW_RULE
@@ -1969,15 +1969,15 @@ BUBBLE
 M:Map [ K <- undef ] => M requires notBool (K in_keys(M))
 
 LBRACK
-1,0
+53,66
 [
 
 ATTR_KEY
-1,0
+53,67
 simplification
 
 RBRACK
-1,0
+53,81
 ]
 
 KW_RULE
@@ -1989,15 +1989,15 @@ BUBBLE
 (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2
 
 LBRACK
-1,0
+56,97
 [
 
 ATTR_KEY
-1,0
+56,98
 simplification
 
 RBRACK
-1,0
+56,112
 ]
 
 KW_RULE
@@ -2009,15 +2009,15 @@ BUBBLE
 (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M))
 
 LBRACK
-1,0
+59,69
 [
 
 ATTR_KEY
-1,0
+59,70
 simplification
 
 RBRACK
-1,0
+59,84
 ]
 
 KW_RULE
@@ -2029,15 +2029,15 @@ BUBBLE
 (K1 |-> _V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 ensures notBool (K1 in_keys(M))
 
 LBRACK
-1,0
+60,95
 [
 
 ATTR_KEY
-1,0
+60,96
 simplification
 
 RBRACK
-1,0
+60,110
 ]
 
 KW_RULE
@@ -2049,15 +2049,15 @@ BUBBLE
 (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1
 
 LBRACK
-1,0
+61,46
 [
 
 ATTR_KEY
-1,0
+61,47
 simplification
 
 RBRACK
-1,0
+61,61
 ]
 
 KW_RULE
@@ -2069,15 +2069,15 @@ BUBBLE
 ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
 
 LBRACK
-1,0
+62,74
 [
 
 ATTR_KEY
-1,0
+62,75
 simplification
 
 RBRACK
-1,0
+62,89
 ]
 
 KW_RULE
@@ -2089,15 +2089,15 @@ BUBBLE
 (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M))
 
 LBRACK
-1,0
+64,81
 [
 
 ATTR_KEY
-1,0
+64,82
 simplification
 
 RBRACK
-1,0
+64,96
 ]
 
 KW_RULE
@@ -2109,15 +2109,15 @@ BUBBLE
 (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M))
 
 LBRACK
-1,0
+65,119
 [
 
 ATTR_KEY
-1,0
+65,120
 simplification
 
 RBRACK
-1,0
+65,134
 ]
 
 KW_RULE
@@ -2129,15 +2129,15 @@ BUBBLE
 (_MAP:Map [ K  <-  V1 ]) [ K ] orDefault _ => V1
 
 LBRACK
-1,0
+66,57
 [
 
 ATTR_KEY
-1,0
+66,58
 simplification
 
 RBRACK
-1,0
+66,72
 ]
 
 KW_RULE
@@ -2149,15 +2149,15 @@ BUBBLE
 ( MAP:Map [ K1 <- _V1 ]) [ K2 ] orDefault D => MAP [ K2 ] orDefault D requires K1 =/=K K2
 
 LBRACK
-1,0
+67,98
 [
 
 ATTR_KEY
-1,0
+67,99
 simplification
 
 RBRACK
-1,0
+67,113
 ]
 
 KW_RULE
@@ -2169,15 +2169,15 @@ BUBBLE
 .Map [ _ ] orDefault D => D
 
 LBRACK
-1,0
+68,36
 [
 
 ATTR_KEY
-1,0
+68,37
 simplification
 
 RBRACK
-1,0
+68,51
 ]
 
 KW_RULE
@@ -2189,15 +2189,15 @@ BUBBLE
 K in_keys(_M [ K <- undef ]) => false
 
 LBRACK
-1,0
+71,46
 [
 
 ATTR_KEY
-1,0
+71,47
 simplification
 
 RBRACK
-1,0
+71,61
 ]
 
 KW_RULE
@@ -2209,15 +2209,15 @@ BUBBLE
 K in_keys(_M [ K <- _ ]) => true
 
 LBRACK
-1,0
+72,41
 [
 
 ATTR_KEY
-1,0
+72,42
 simplification
 
 RBRACK
-1,0
+72,56
 ]
 
 KW_RULE
@@ -2229,15 +2229,15 @@ BUBBLE
 K1 in_keys(M [ K2 <- _ ]) => true requires K1 ==K K2 orBool K1 in_keys(M)
 
 LBRACK
-1,0
+73,82
 [
 
 ATTR_KEY
-1,0
+73,83
 simplification
 
 RBRACK
-1,0
+73,97
 ]
 
 KW_RULE
@@ -2249,15 +2249,15 @@ BUBBLE
 K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
 
 LBRACK
-1,0
+74,71
 [
 
 ATTR_KEY
-1,0
+74,72
 simplification
 
 RBRACK
-1,0
+74,86
 ]
 
 KW_RULE
@@ -2269,15 +2269,15 @@ BUBBLE
 {false #Equals @Key in_keys(.Map)} => #Ceil(@Key)
 
 LBRACK
-1,0
+76,58
 [
 
 ATTR_KEY
-1,0
+76,59
 simplification
 
 RBRACK
-1,0
+76,73
 ]
 
 KW_RULE
@@ -2289,15 +2289,15 @@ BUBBLE
 {@Key in_keys(.Map) #Equals false} => #Ceil(@Key)
 
 LBRACK
-1,0
+77,58
 [
 
 ATTR_KEY
-1,0
+77,59
 simplification
 
 RBRACK
-1,0
+77,73
 ]
 
 KW_RULE
@@ -2309,15 +2309,15 @@ BUBBLE
 {false #Equals @Key in_keys(Key' |-> Val @M)} => #Ceil(@Key) #And #Ceil(Key' |-> Val @M) #And #Not({@Key #Equals Key'}) #And {false #Equals @Key in_keys(@M)}
 
 LBRACK
-1,0
+78,166
 [
 
 ATTR_KEY
-1,0
+78,167
 simplification
 
 RBRACK
-1,0
+78,181
 ]
 
 KW_RULE
@@ -2329,15 +2329,15 @@ BUBBLE
 {@Key in_keys(Key' |-> Val @M) #Equals false} => #Ceil(@Key) #And #Ceil(Key' |-> Val @M) #And #Not({@Key #Equals Key'}) #And {@Key in_keys(@M) #Equals false}
 
 LBRACK
-1,0
+79,166
 [
 
 ATTR_KEY
-1,0
+79,167
 simplification
 
 RBRACK
-1,0
+79,181
 ]
 
 KW_ENDMODULE

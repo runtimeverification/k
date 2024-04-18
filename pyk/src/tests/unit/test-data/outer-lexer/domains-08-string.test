@@ -160,23 +160,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+2,18
 hook
 
 LPAREN
-1,0
+2,22
 (
 
 ATTR_CONTENT
-1,0
+2,23
 STRING.String
 
 RPAREN
-1,0
+2,36
 )
 
 RBRACK
-1,0
+2,37
 ]
 
 KW_SYNTAX
@@ -200,11 +200,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+3,166
 token
 
 RBRACK
-1,0
+3,171
 ]
 
 KW_ENDMODULE
@@ -304,67 +304,67 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+14,49
 function
 
 COMMA
-1,0
+14,57
 ,
 
 ATTR_KEY
-1,0
+14,59
 total
 
 COMMA
-1,0
+14,64
 ,
 
 ATTR_KEY
-1,0
+14,66
 left
 
 COMMA
-1,0
+14,70
 ,
 
 ATTR_KEY
-1,0
+14,72
 latex
 
 LPAREN
-1,0
+14,77
 (
 
 ATTR_CONTENT
-1,0
+14,78
 {#1}+_{\scriptstyle\it String}{#2}
 
 RPAREN
-1,0
+14,112
 )
 
 COMMA
-1,0
+14,113
 ,
 
 ATTR_KEY
-1,0
+14,115
 hook
 
 LPAREN
-1,0
+14,119
 (
 
 ATTR_CONTENT
-1,0
+14,120
 STRING.concat
 
 RPAREN
-1,0
+14,133
 )
 
 RBRACK
-1,0
+14,134
 ]
 
 KW_SYNTAX
@@ -400,39 +400,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+16,43
 function
 
 COMMA
-1,0
+16,51
 ,
 
 ATTR_KEY
-1,0
+16,53
 total
 
 COMMA
-1,0
+16,58
 ,
 
 ATTR_KEY
-1,0
+16,60
 hook
 
 LPAREN
-1,0
+16,64
 (
 
 ATTR_CONTENT
-1,0
+16,65
 STRING.length
 
 RPAREN
-1,0
+16,78
 )
 
 RBRACK
-1,0
+16,79
 ]
 
 KW_SYNTAX
@@ -468,31 +468,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+18,43
 function
 
 COMMA
-1,0
+18,51
 ,
 
 ATTR_KEY
-1,0
+18,53
 hook
 
 LPAREN
-1,0
+18,57
 (
 
 ATTR_CONTENT
-1,0
+18,58
 STRING.chr
 
 RPAREN
-1,0
+18,68
 )
 
 RBRACK
-1,0
+18,69
 ]
 
 KW_SYNTAX
@@ -528,31 +528,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+19,43
 function
 
 COMMA
-1,0
+19,51
 ,
 
 ATTR_KEY
-1,0
+19,53
 hook
 
 LPAREN
-1,0
+19,57
 (
 
 ATTR_CONTENT
-1,0
+19,58
 STRING.ord
 
 RPAREN
-1,0
+19,68
 )
 
 RBRACK
-1,0
+19,69
 ]
 
 KW_SYNTAX
@@ -620,39 +620,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+21,80
 function
 
 COMMA
-1,0
+21,88
 ,
 
 ATTR_KEY
-1,0
+21,90
 total
 
 COMMA
-1,0
+21,95
 ,
 
 ATTR_KEY
-1,0
+21,97
 hook
 
 LPAREN
-1,0
+21,101
 (
 
 ATTR_CONTENT
-1,0
+21,102
 STRING.substr
 
 RPAREN
-1,0
+21,115
 )
 
 RBRACK
-1,0
+21,116
 ]
 
 KW_SYNTAX
@@ -728,31 +728,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+23,83
 function
 
 COMMA
-1,0
+23,91
 ,
 
 ATTR_KEY
-1,0
+23,93
 hook
 
 LPAREN
-1,0
+23,97
 (
 
 ATTR_CONTENT
-1,0
+23,98
 STRING.find
 
 RPAREN
-1,0
+23,109
 )
 
 RBRACK
-1,0
+23,110
 ]
 
 KW_SYNTAX
@@ -828,31 +828,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+24,83
 function
 
 COMMA
-1,0
+24,91
 ,
 
 ATTR_KEY
-1,0
+24,93
 hook
 
 LPAREN
-1,0
+24,97
 (
 
 ATTR_CONTENT
-1,0
+24,98
 STRING.rfind
 
 RPAREN
-1,0
+24,110
 )
 
 RBRACK
-1,0
+24,111
 ]
 
 KW_SYNTAX
@@ -928,31 +928,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+26,84
 function
 
 COMMA
-1,0
+26,92
 ,
 
 ATTR_KEY
-1,0
+26,94
 hook
 
 LPAREN
-1,0
+26,98
 (
 
 ATTR_CONTENT
-1,0
+26,99
 STRING.findChar
 
 RPAREN
-1,0
+26,114
 )
 
 RBRACK
-1,0
+26,115
 ]
 
 KW_SYNTAX
@@ -1028,31 +1028,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+27,84
 function
 
 COMMA
-1,0
+27,92
 ,
 
 ATTR_KEY
-1,0
+27,94
 hook
 
 LPAREN
-1,0
+27,98
 (
 
 ATTR_CONTENT
-1,0
+27,99
 STRING.rfindChar
 
 RPAREN
-1,0
+27,115
 )
 
 RBRACK
-1,0
+27,116
 ]
 
 KW_SYNTAX
@@ -1088,19 +1088,19 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+29,40
 function
 
 COMMA
-1,0
+29,48
 ,
 
 ATTR_KEY
-1,0
+29,50
 total
 
 RBRACK
-1,0
+29,55
 ]
 
 KW_RULE
@@ -1152,11 +1152,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+33,40
 function
 
 RBRACK
-1,0
+33,48
 ]
 
 KW_RULE
@@ -1208,39 +1208,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+37,58
 function
 
 COMMA
-1,0
+37,66
 ,
 
 ATTR_KEY
-1,0
+37,68
 total
 
 COMMA
-1,0
+37,73
 ,
 
 ATTR_KEY
-1,0
+37,75
 hook
 
 LPAREN
-1,0
+37,79
 (
 
 ATTR_CONTENT
-1,0
+37,80
 STRING.float2string
 
 RPAREN
-1,0
+37,99
 )
 
 RBRACK
-1,0
+37,100
 ]
 
 KW_SYNTAX
@@ -1292,51 +1292,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+38,66
 function
 
 COMMA
-1,0
+38,74
 ,
 
 ATTR_KEY
-1,0
+38,76
 klabel
 
 LPAREN
-1,0
+38,82
 (
 
 ATTR_CONTENT
-1,0
+38,83
 FloatFormat
 
 RPAREN
-1,0
+38,94
 )
 
 COMMA
-1,0
+38,95
 ,
 
 ATTR_KEY
-1,0
+38,97
 hook
 
 LPAREN
-1,0
+38,101
 (
 
 ATTR_CONTENT
-1,0
+38,102
 STRING.floatFormat
 
 RPAREN
-1,0
+38,120
 )
 
 RBRACK
-1,0
+38,121
 ]
 
 KW_SYNTAX
@@ -1372,31 +1372,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+39,58
 function
 
 COMMA
-1,0
+39,66
 ,
 
 ATTR_KEY
-1,0
+39,68
 hook
 
 LPAREN
-1,0
+39,72
 (
 
 ATTR_CONTENT
-1,0
+39,73
 STRING.string2float
 
 RPAREN
-1,0
+39,92
 )
 
 RBRACK
-1,0
+39,93
 ]
 
 KW_SYNTAX
@@ -1432,31 +1432,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+41,58
 function
 
 COMMA
-1,0
+41,66
 ,
 
 ATTR_KEY
-1,0
+41,68
 hook
 
 LPAREN
-1,0
+41,72
 (
 
 ATTR_CONTENT
-1,0
+41,73
 STRING.string2int
 
 RPAREN
-1,0
+41,90
 )
 
 RBRACK
-1,0
+41,91
 ]
 
 KW_SYNTAX
@@ -1492,39 +1492,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+42,58
 function
 
 COMMA
-1,0
+42,66
 ,
 
 ATTR_KEY
-1,0
+42,68
 total
 
 COMMA
-1,0
+42,73
 ,
 
 ATTR_KEY
-1,0
+42,75
 hook
 
 LPAREN
-1,0
+42,79
 (
 
 ATTR_CONTENT
-1,0
+42,80
 STRING.int2string
 
 RPAREN
-1,0
+42,97
 )
 
 RBRACK
-1,0
+42,98
 ]
 
 KW_SYNTAX
@@ -1576,31 +1576,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+43,64
 function
 
 COMMA
-1,0
+43,72
 ,
 
 ATTR_KEY
-1,0
+43,74
 hook
 
 LPAREN
-1,0
+43,78
 (
 
 ATTR_CONTENT
-1,0
+43,79
 STRING.base2string
 
 RPAREN
-1,0
+43,97
 )
 
 RBRACK
-1,0
+43,98
 ]
 
 KW_SYNTAX
@@ -1652,31 +1652,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+44,64
 function
 
 COMMA
-1,0
+44,72
 ,
 
 ATTR_KEY
-1,0
+44,74
 hook
 
 LPAREN
-1,0
+44,78
 (
 
 ATTR_CONTENT
-1,0
+44,79
 STRING.string2base
 
 RPAREN
-1,0
+44,97
 )
 
 RBRACK
-1,0
+44,98
 ]
 
 KW_SYNTAX
@@ -1752,39 +1752,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+46,108
 function
 
 COMMA
-1,0
+46,116
 ,
 
 ATTR_KEY
-1,0
+46,118
 total
 
 COMMA
-1,0
+46,123
 ,
 
 ATTR_KEY
-1,0
+46,125
 hook
 
 LPAREN
-1,0
+46,129
 (
 
 ATTR_CONTENT
-1,0
+46,130
 STRING.replaceAll
 
 RPAREN
-1,0
+46,147
 )
 
 RBRACK
-1,0
+46,148
 ]
 
 KW_SYNTAX
@@ -1876,31 +1876,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+47,115
 function
 
 COMMA
-1,0
+47,123
 ,
 
 ATTR_KEY
-1,0
+47,125
 hook
 
 LPAREN
-1,0
+47,129
 (
 
 ATTR_CONTENT
-1,0
+47,130
 STRING.replace
 
 RPAREN
-1,0
+47,144
 )
 
 RBRACK
-1,0
+47,145
 ]
 
 KW_SYNTAX
@@ -1976,39 +1976,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+48,108
 function
 
 COMMA
-1,0
+48,116
 ,
 
 ATTR_KEY
-1,0
+48,118
 total
 
 COMMA
-1,0
+48,123
 ,
 
 ATTR_KEY
-1,0
+48,125
 hook
 
 LPAREN
-1,0
+48,129
 (
 
 ATTR_CONTENT
-1,0
+48,130
 STRING.replaceFirst
 
 RPAREN
-1,0
+48,149
 )
 
 RBRACK
-1,0
+48,150
 ]
 
 KW_SYNTAX
@@ -2068,39 +2068,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+49,96
 function
 
 COMMA
-1,0
+49,104
 ,
 
 ATTR_KEY
-1,0
+49,106
 total
 
 COMMA
-1,0
+49,111
 ,
 
 ATTR_KEY
-1,0
+49,113
 hook
 
 LPAREN
-1,0
+49,117
 (
 
 ATTR_CONTENT
-1,0
+49,118
 STRING.countAllOccurrences
 
 RPAREN
-1,0
+49,144
 )
 
 RBRACK
-1,0
+49,145
 ]
 
 KW_SYNTAX
@@ -2132,47 +2132,47 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+51,46
 function
 
 COMMA
-1,0
+51,54
 ,
 
 ATTR_KEY
-1,0
+51,56
 total
 
 COMMA
-1,0
+51,61
 ,
 
 ATTR_KEY
-1,0
+51,63
 comm
 
 COMMA
-1,0
+51,67
 ,
 
 ATTR_KEY
-1,0
+51,69
 hook
 
 LPAREN
-1,0
+51,73
 (
 
 ATTR_CONTENT
-1,0
+51,74
 STRING.eq
 
 RPAREN
-1,0
+51,83
 )
 
 RBRACK
-1,0
+51,84
 ]
 
 VBAR
@@ -2196,47 +2196,47 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+52,46
 function
 
 COMMA
-1,0
+52,54
 ,
 
 ATTR_KEY
-1,0
+52,56
 total
 
 COMMA
-1,0
+52,61
 ,
 
 ATTR_KEY
-1,0
+52,63
 comm
 
 COMMA
-1,0
+52,67
 ,
 
 ATTR_KEY
-1,0
+52,69
 hook
 
 LPAREN
-1,0
+52,73
 (
 
 ATTR_CONTENT
-1,0
+52,74
 STRING.ne
 
 RPAREN
-1,0
+52,83
 )
 
 RBRACK
-1,0
+52,84
 ]
 
 KW_RULE
@@ -2276,39 +2276,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+55,45
 function
 
 COMMA
-1,0
+55,53
 ,
 
 ATTR_KEY
-1,0
+55,55
 total
 
 COMMA
-1,0
+55,60
 ,
 
 ATTR_KEY
-1,0
+55,62
 hook
 
 LPAREN
-1,0
+55,66
 (
 
 ATTR_CONTENT
-1,0
+55,67
 STRING.lt
 
 RPAREN
-1,0
+55,76
 )
 
 RBRACK
-1,0
+55,77
 ]
 
 VBAR
@@ -2332,39 +2332,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+56,45
 function
 
 COMMA
-1,0
+56,53
 ,
 
 ATTR_KEY
-1,0
+56,55
 total
 
 COMMA
-1,0
+56,60
 ,
 
 ATTR_KEY
-1,0
+56,62
 hook
 
 LPAREN
-1,0
+56,66
 (
 
 ATTR_CONTENT
-1,0
+56,67
 STRING.le
 
 RPAREN
-1,0
+56,76
 )
 
 RBRACK
-1,0
+56,77
 ]
 
 VBAR
@@ -2388,39 +2388,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+57,45
 function
 
 COMMA
-1,0
+57,53
 ,
 
 ATTR_KEY
-1,0
+57,55
 total
 
 COMMA
-1,0
+57,60
 ,
 
 ATTR_KEY
-1,0
+57,62
 hook
 
 LPAREN
-1,0
+57,66
 (
 
 ATTR_CONTENT
-1,0
+57,67
 STRING.gt
 
 RPAREN
-1,0
+57,76
 )
 
 RBRACK
-1,0
+57,77
 ]
 
 VBAR
@@ -2444,39 +2444,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+58,45
 function
 
 COMMA
-1,0
+58,53
 ,
 
 ATTR_KEY
-1,0
+58,55
 total
 
 COMMA
-1,0
+58,60
 ,
 
 ATTR_KEY
-1,0
+58,62
 hook
 
 LPAREN
-1,0
+58,66
 (
 
 ATTR_CONTENT
-1,0
+58,67
 STRING.ge
 
 RPAREN
-1,0
+58,76
 )
 
 RBRACK
-1,0
+58,77
 ]
 
 KW_SYNTAX
@@ -2512,31 +2512,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+60,49
 function
 
 COMMA
-1,0
+60,57
 ,
 
 ATTR_KEY
-1,0
+60,59
 hook
 
 LPAREN
-1,0
+60,63
 (
 
 ATTR_CONTENT
-1,0
+60,64
 STRING.category
 
 RPAREN
-1,0
+60,79
 )
 
 RBRACK
-1,0
+60,80
 ]
 
 VBAR
@@ -2564,31 +2564,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+61,49
 function
 
 COMMA
-1,0
+61,57
 ,
 
 ATTR_KEY
-1,0
+61,59
 hook
 
 LPAREN
-1,0
+61,63
 (
 
 ATTR_CONTENT
-1,0
+61,64
 STRING.directionality
 
 RPAREN
-1,0
+61,85
 )
 
 RBRACK
-1,0
+61,86
 ]
 
 KW_SYNTAX
@@ -2612,39 +2612,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+63,32
 function
 
 COMMA
-1,0
+63,40
 ,
 
 ATTR_KEY
-1,0
+63,42
 hook
 
 LPAREN
-1,0
+63,46
 (
 
 ATTR_CONTENT
-1,0
+63,47
 STRING.uuid
 
 RPAREN
-1,0
+63,58
 )
 
 COMMA
-1,0
+63,59
 ,
 
 ATTR_KEY
-1,0
+63,61
 impure
 
 RBRACK
-1,0
+63,67
 ]
 
 KW_RULE
@@ -2784,19 +2784,19 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+96,21
 kore
 
 COMMA
-1,0
+96,25
 ,
 
 ATTR_KEY
-1,0
+96,27
 symbolic
 
 RBRACK
-1,0
+96,35
 ]
 
 KW_IMPORTS
@@ -2828,15 +2828,15 @@ BUBBLE
 S1:String ==K S2:String => S1 ==String S2
 
 LBRACK
-1,0
+100,50
 [
 
 ATTR_KEY
-1,0
+100,51
 simplification
 
 RBRACK
-1,0
+100,65
 ]
 
 KW_ENDMODULE
@@ -2884,11 +2884,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+111,28
 symbolic
 
 RBRACK
-1,0
+111,36
 ]
 
 KW_IMPORTS
@@ -2932,19 +2932,19 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+115,44
 function
 
 COMMA
-1,0
+115,52
 ,
 
 ATTR_KEY
-1,0
+115,54
 total
 
 RBRACK
-1,0
+115,59
 ]
 
 KW_SYNTAX
@@ -2976,27 +2976,27 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+116,58
 function
 
 COMMA
-1,0
+116,66
 ,
 
 ATTR_KEY
-1,0
+116,68
 total
 
 COMMA
-1,0
+116,73
 ,
 
 ATTR_KEY
-1,0
+116,75
 avoid
 
 RBRACK
-1,0
+116,80
 ]
 
 KW_SYNTAX
@@ -3048,19 +3048,19 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+118,59
 function
 
 COMMA
-1,0
+118,67
 ,
 
 ATTR_KEY
-1,0
+118,69
 total
 
 RBRACK
-1,0
+118,74
 ]
 
 KW_RULE
@@ -3104,11 +3104,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+126,30
 concrete
 
 RBRACK
-1,0
+126,38
 ]
 
 KW_IMPORTS
@@ -3144,23 +3144,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+130,24
 hook
 
 LPAREN
-1,0
+130,28
 (
 
 ATTR_CONTENT
-1,0
+130,29
 BUFFER.StringBuffer
 
 RPAREN
-1,0
+130,48
 )
 
 RBRACK
-1,0
+130,49
 ]
 
 KW_SYNTAX
@@ -3184,47 +3184,47 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+131,44
 function
 
 COMMA
-1,0
+131,52
 ,
 
 ATTR_KEY
-1,0
+131,54
 total
 
 COMMA
-1,0
+131,59
 ,
 
 ATTR_KEY
-1,0
+131,61
 hook
 
 LPAREN
-1,0
+131,65
 (
 
 ATTR_CONTENT
-1,0
+131,66
 BUFFER.empty
 
 RPAREN
-1,0
+131,78
 )
 
 COMMA
-1,0
+131,79
 ,
 
 ATTR_KEY
-1,0
+131,81
 impure
 
 RBRACK
-1,0
+131,87
 ]
 
 KW_SYNTAX
@@ -3256,47 +3256,47 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+132,58
 function
 
 COMMA
-1,0
+132,66
 ,
 
 ATTR_KEY
-1,0
+132,68
 total
 
 COMMA
-1,0
+132,73
 ,
 
 ATTR_KEY
-1,0
+132,75
 hook
 
 LPAREN
-1,0
+132,79
 (
 
 ATTR_CONTENT
-1,0
+132,80
 BUFFER.concat
 
 RPAREN
-1,0
+132,93
 )
 
 COMMA
-1,0
+132,94
 ,
 
 ATTR_KEY
-1,0
+132,96
 avoid
 
 RBRACK
-1,0
+132,101
 ]
 
 KW_SYNTAX
@@ -3332,39 +3332,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+133,59
 function
 
 COMMA
-1,0
+133,67
 ,
 
 ATTR_KEY
-1,0
+133,69
 total
 
 COMMA
-1,0
+133,74
 ,
 
 ATTR_KEY
-1,0
+133,76
 hook
 
 LPAREN
-1,0
+133,80
 (
 
 ATTR_CONTENT
-1,0
+133,81
 BUFFER.toString
 
 RPAREN
-1,0
+133,96
 )
 
 RBRACK
-1,0
+133,97
 ]
 
 KW_ENDMODULE
