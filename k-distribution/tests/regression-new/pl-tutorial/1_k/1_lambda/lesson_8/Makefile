@@ -1,6 +1,6 @@
 DEF=lambda
 EXT=lambda
-KOMPILE_FLAGS=--gen-bison-parser
+KOMPILE_FLAGS=--gen-glr-bison-parser
 
 %/arithmetic-div-zero.lambda:
 	true

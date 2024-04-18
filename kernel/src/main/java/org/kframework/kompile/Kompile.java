@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 
+import com.google.common.collect.Comparators;
 import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,8 +76,6 @@ import org.kframework.utils.options.OuterParsingOptions;
 import scala.Function1;
 import scala.Option;
 import scala.collection.JavaConverters;
-import scala.collection.Seq;
-import scala.collection.Set$;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we
@@ -468,8 +468,9 @@ public class Kompile {
       return Module(
           module.name(),
           module.imports(),
-          Stream.concat(stream(module.localSentences()), prods.stream())
-              .collect(org.kframework.Collections.toSet()),
+          immutable(
+              Stream.concat(stream(module.sortedLocalSentences()), prods.stream())
+                  .collect(Collectors.toSet())),
           module.att());
     }
   }
@@ -526,7 +527,7 @@ public class Kompile {
   public void definitionChecks(Set<Module> modules) {
     modules.forEach(
         m ->
-            stream(m.localSentences())
+            stream(m.sortedLocalSentences())
                 .forEach(
                     s -> {
                       // Check that the `claim` keyword is not used in the definition.
@@ -578,47 +579,58 @@ public class Kompile {
     boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
     CheckRHSVariables checkRHSVariables =
         new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
-    stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
+    stream(modules)
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(checkRHSVariables::check));
 
     stream(modules).forEach(m -> new CheckAtt(errors, kem, m).check());
 
     stream(modules)
         .forEach(
-            m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
+            m ->
+                stream(m.sortedLocalSentences())
+                    .forEach(new CheckConfigurationCells(errors, m)::check));
 
     stream(modules)
         .forEach(
-            m -> stream(m.localSentences()).forEach(new CheckSortTopUniqueness(errors, m)::check));
+            m ->
+                stream(m.sortedLocalSentences())
+                    .forEach(new CheckSortTopUniqueness(errors, m)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckStreams(errors, m)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckRewrite(errors, m)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckHOLE(errors, m)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
-
-    stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckTokens(errors, m)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckFunctions(errors, m)::check));
-
-    stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, kem)::check));
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckK(errors)::check));
 
     stream(modules)
         .forEach(
-            m -> stream(m.localSentences()).forEach(new CheckSyntaxGroups(errors, m, kem)::check));
+            m -> stream(m.sortedLocalSentences()).forEach(new CheckFunctions(errors, m)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckAssoc(errors, m)::check));
+        .forEach(
+            m -> stream(m.sortedLocalSentences()).forEach(new CheckAnonymous(errors, kem)::check));
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckDeprecated(errors, kem)::check));
+        .forEach(
+            m ->
+                stream(m.sortedLocalSentences())
+                    .forEach(new CheckSyntaxGroups(errors, m, kem)::check));
+
+    stream(modules)
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckAssoc(errors, m)::check));
+
+    stream(modules)
+        .forEach(
+            m -> stream(m.sortedLocalSentences()).forEach(new CheckDeprecated(errors, kem)::check));
 
     Set<String> moduleNames = new HashSet<>();
     stream(modules)
@@ -637,7 +649,7 @@ public class Kompile {
     Consumer<Module> checkModuleKLabels =
         m -> {
           if (!checkedModules.contains(m.name())) {
-            stream(m.localSentences()).forEach(s -> checkKLabels.check(s, m));
+            stream(m.sortedLocalSentences()).forEach(s -> checkKLabels.check(s, m));
           }
           checkedModules.add(m.name());
         };
@@ -651,7 +663,7 @@ public class Kompile {
     checkKLabels.check(mainModule);
 
     stream(modules)
-        .forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
+        .forEach(m -> stream(m.sortedLocalSentences()).forEach(new CheckLabels(errors)::check));
 
     checkIsSortPredicates(modules);
 
@@ -672,7 +684,7 @@ public class Kompile {
     //
     // See `RuleGrammarGenerator::getCombinedGrammarImpl`.
     var disambMod = RuleGrammarGenerator.getCombinedGrammarImpl(module, false, false, true)._2();
-    var withOverload =
+    scala.collection.immutable.Seq<Production> withOverload =
         disambMod.productions().filter(p -> p.att().contains(Att.OVERLOAD())).toSeq();
 
     stream(withOverload)
@@ -698,6 +710,12 @@ public class Kompile {
             .filter(p -> p.att().contains(Att.OVERLOAD()))
             .collect(Collectors.groupingBy(p -> p.att().get(Att.OVERLOAD())))
             .values();
+    attributeGroups.forEach(
+        l ->
+            l.sort(
+                (p1, p2) ->
+                    Comparators.<Location>emptiesLast(Comparator.naturalOrder())
+                        .compare(p1.location(), p2.location())));
 
     attributeGroups.forEach(
         ps -> {
@@ -736,7 +754,7 @@ public class Kompile {
           stream(modules)
               .flatMap(
                   m ->
-                      stream(m.localSentences())
+                      stream(m.sortedLocalSentences())
                           .flatMap(
                               s -> {
                                 if (s instanceof Rule && s.att().contains(Att.ANYWHERE()))
@@ -762,19 +780,16 @@ public class Kompile {
 
     stream(modules)
         .flatMap(
-            m ->
-                stream(
-                    m.productionsForSort()
-                        .getOrElse(Sorts.Bool().head(), Set$.MODULE$::<Production>empty)))
+            m -> stream(optional(m.productionsForSort().get(Sorts.Bool().head())).orElse(Set())))
         .collect(Collectors.toSet())
         .forEach(
             prod -> {
-              Seq<ProductionItem> items = prod.items();
+              scala.collection.immutable.Seq<ProductionItem> items = prod.items();
               if (items.size() < 3) {
                 return;
               }
               ProductionItem first = items.head();
-              ProductionItem second = items.tail().head();
+              ProductionItem second = items.apply(1);
               ProductionItem last = items.last();
               // Check if the production is of the form isSort ( ... )
               if ((first instanceof Terminal)

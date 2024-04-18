@@ -32,1354 +32,1805 @@ module RANGEMAP
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 RANGEMAP
 
 KW_IMPORTS
+2,3
 imports
 
 KW_PRIVATE
+2,11
 private
 
 MODNAME
+2,19
 BOOL-SYNTAX
 
 KW_IMPORTS
+3,3
 imports
 
 KW_PRIVATE
+3,11
 private
 
 MODNAME
+3,19
 INT-SYNTAX
 
 KW_IMPORTS
+4,3
 imports
 
 KW_PRIVATE
+4,11
 private
 
 MODNAME
+4,19
 LIST
 
 KW_IMPORTS
+5,3
 imports
 
 KW_PRIVATE
+5,11
 private
 
 MODNAME
+5,19
 SET
 
 KW_SYNTAX
+7,3
 syntax
 
 ID_UPPER
+7,10
 Range
 
 DCOLONEQ
+7,16
 ::=
 
 STRING
+7,20
 "["
 
 ID_UPPER
+7,24
 KItem
 
 STRING
+7,30
 ","
 
 ID_UPPER
+7,34
 KItem
 
 STRING
+7,40
 ")"
 
 LBRACK
+7,47
 [
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Rangemap:Range
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+9,3
 syntax
 
 ID_UPPER
+9,10
 RangeMap
 
 LBRACK
+9,19
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.RangeMap
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+10,3
 syntax
 
 ID_UPPER
+10,10
 RangeMap
 
 DCOLONEQ
+10,19
 ::=
 
 ID_UPPER
+10,23
 RangeMap
 
 ID_UPPER
+10,32
 RangeMap
 
 LBRACK
+10,64
 [
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.concat
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _RangeMap_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 assoc
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 unit
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 .RangeMap
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 element
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _r|->_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 index
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 0
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 format
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 %1%n%2
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+11,3
 syntax
 
 ID_UPPER
+11,10
 RangeMap
 
 DCOLONEQ
+11,19
 ::=
 
 STRING
+11,23
 ".RangeMap"
 
 LBRACK
+11,59
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.unit
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 .RangeMap
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 \dotCt{RangeMap}
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+12,3
 syntax
 
 ID_UPPER
+12,10
 RangeMap
 
 DCOLONEQ
+12,19
 ::=
 
 ID_UPPER
+12,23
 Range
 
 STRING
+12,29
 "r|->"
 
 ID_UPPER
+12,36
 KItem
 
 LBRACK
+12,63
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.elementRng
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _r|->_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mapsto{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 injective
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+14,3
 syntax
 
 KW_PRIORITY
+14,10
 priority
 
 KLABEL
+14,19
 _r|->_
 
 GT
+14,26
 >
 
 KLABEL
+14,28
 _RangeMap_
 
 KLABEL
+14,39
 .RangeMap
 
 KW_SYNTAX
+15,3
 syntax
 
 KW_NONASSOC
+15,10
 non-assoc
 
 KLABEL
+15,20
 _r|->_
 
 KW_SYNTAX
+17,3
 syntax
 
 ID_UPPER
+17,10
 KItem
 
 DCOLONEQ
+17,16
 ::=
 
 ID_UPPER
+17,20
 RangeMap
 
 STRING
+17,29
 "["
 
 ID_UPPER
+17,33
 KItem
 
 STRING
+17,39
 "]"
 
 LBRACK
+17,62
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.lookup
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RangeMap:lookup
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+18,3
 syntax
 
 ID_UPPER
+18,10
 KItem
 
 DCOLONEQ
+18,16
 ::=
 
 ID_UPPER
+18,20
 RangeMap
 
 STRING
+18,29
 "["
 
 ID_UPPER
+18,33
 KItem
 
 STRING
+18,39
 "]"
 
 STRING
+18,43
 "orDefault"
 
 ID_UPPER
+18,55
 KItem
 
 LBRACK
+18,66
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.lookupOrDefault
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RangeMap:lookupOrDefault
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+19,3
 syntax
 
 ID_UPPER
+19,10
 Range
 
 DCOLONEQ
+19,16
 ::=
 
 STRING
+19,20
 "find_range"
 
 STRING
+19,33
 "("
 
 ID_UPPER
+19,37
 RangeMap
 
 STRING
+19,46
 ","
 
 ID_UPPER
+19,50
 KItem
 
 STRING
+19,56
 ")"
 
 LBRACK
+19,79
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.find_range
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RangeMap:find_range
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+20,3
 syntax
 
 ID_UPPER
+20,10
 RangeMap
 
 DCOLONEQ
+20,19
 ::=
 
 ID_UPPER
+20,23
 RangeMap
 
 STRING
+20,32
 "["
 
 ID_LOWER
+20,36
 keyRange
 
 COLON
+20,44
 :
 
 ID_UPPER
+20,46
 Range
 
 STRING
+20,52
 "<-"
 
 ID_LOWER
+20,57
 value
 
 COLON
+20,62
 :
 
 ID_UPPER
+20,64
 KItem
 
 STRING
+20,70
 "]"
 
 LBRACK
+20,84
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RangeMap:update
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.updateRng
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 prefer
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+21,3
 syntax
 
 ID_UPPER
+21,10
 RangeMap
 
 DCOLONEQ
+21,19
 ::=
 
 ID_UPPER
+21,23
 RangeMap
 
 STRING
+21,32
 "["
 
 ID_UPPER
+21,36
 Range
 
 STRING
+21,42
 "<-"
 
 STRING
+21,47
 "undef"
 
 STRING
+21,55
 "]"
 
 LBRACK
+21,63
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.removeRng
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _r[_<-undef]
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+22,3
 syntax
 
 ID_UPPER
+22,10
 RangeMap
 
 DCOLONEQ
+22,19
 ::=
 
 ID_UPPER
+22,23
 RangeMap
 
 STRING
+22,32
 "-RangeMap"
 
 ID_UPPER
+22,44
 RangeMap
 
 LBRACK
+22,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.difference
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}-_{\it RangeMap}{#2}
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+23,3
 syntax
 
 ID_UPPER
+23,10
 RangeMap
 
 DCOLONEQ
+23,19
 ::=
 
 ID_LOWER
+23,23
 updateRangeMap
 
 LPAREN
+23,37
 (
 
 ID_UPPER
+23,38
 RangeMap
 
 COMMA
+23,46
 ,
 
 ID_UPPER
+23,48
 RangeMap
 
 RPAREN
+23,56
 )
 
 LBRACK
+23,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.updateAll
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+24,3
 syntax
 
 ID_UPPER
+24,10
 RangeMap
 
 DCOLONEQ
+24,19
 ::=
 
 ID_LOWER
+24,23
 removeAll
 
 LPAREN
+24,32
 (
 
 ID_UPPER
+24,33
 RangeMap
 
 COMMA
+24,41
 ,
 
 ID_UPPER
+24,43
 Set
 
 RPAREN
+24,46
 )
 
 LBRACK
+24,59
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.removeAll
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+25,3
 syntax
 
 ID_UPPER
+25,10
 Set
 
 DCOLONEQ
+25,14
 ::=
 
 ID_LOWER
+25,18
 keys
 
 LPAREN
+25,22
 (
 
 ID_UPPER
+25,23
 RangeMap
 
 RPAREN
+25,31
 )
 
 LBRACK
+25,54
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.keys
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+26,3
 syntax
 
 ID_UPPER
+26,10
 List
 
 DCOLONEQ
+26,15
 ::=
 
 STRING
+26,19
 "keys_list"
 
 STRING
+26,31
 "("
 
 ID_UPPER
+26,35
 RangeMap
 
 STRING
+26,44
 ")"
 
 LBRACK
+26,54
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.keys_list
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+27,3
 syntax
 
 ID_UPPER
+27,10
 Bool
 
 DCOLONEQ
+27,15
 ::=
 
 ID_UPPER
+27,19
 KItem
 
 STRING
+27,25
 "in_keys"
 
 STRING
+27,35
 "("
 
 ID_UPPER
+27,39
 RangeMap
 
 STRING
+27,48
 ")"
 
 LBRACK
+27,58
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.in_keys
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+28,3
 syntax
 
 ID_UPPER
+28,10
 List
 
 DCOLONEQ
+28,15
 ::=
 
 ID_LOWER
+28,19
 values
 
 LPAREN
+28,25
 (
 
 ID_UPPER
+28,26
 RangeMap
 
 RPAREN
+28,34
 )
 
 LBRACK
+28,54
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.values
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+29,3
 syntax
 
 ID_UPPER
+29,10
 Int
 
 DCOLONEQ
+29,14
 ::=
 
 ID_LOWER
+29,18
 size
 
 LPAREN
+29,22
 (
 
 ID_UPPER
+29,23
 RangeMap
 
 RPAREN
+29,31
 )
 
 LBRACK
+29,54
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.size
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 sizeRangeMap
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+30,3
 syntax
 
 ID_UPPER
+30,10
 Bool
 
 DCOLONEQ
+30,15
 ::=
 
 ID_UPPER
+30,19
 RangeMap
 
 STRING
+30,28
 "<=RangeMap"
 
 ID_UPPER
+30,41
 RangeMap
 
 LBRACK
+30,64
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.inclusion
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+31,3
 syntax
 
 ID_UPPER
+31,10
 KItem
 
 DCOLONEQ
+31,16
 ::=
 
 ID_LOWER
+31,20
 choice
 
 LPAREN
+31,26
 (
 
 ID_UPPER
+31,27
 RangeMap
 
 RPAREN
+31,35
 )
 
 LBRACK
+31,58
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RANGEMAP.choice
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 RangeMap:choice
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+32,1
 endmodule
 
 EOF
+32,9
 

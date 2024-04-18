@@ -93,1708 +93,2277 @@ module MAP-SYMBOLIC
 endmodule
 ===
 KW_MODULE
+1,1
 module
 
 MODNAME
+1,8
 MAP
 
 KW_IMPORTS
+2,3
 imports
 
 KW_PRIVATE
+2,11
 private
 
 MODNAME
+2,19
 BOOL-SYNTAX
 
 KW_IMPORTS
+3,3
 imports
 
 KW_PRIVATE
+3,11
 private
 
 MODNAME
+3,19
 INT-SYNTAX
 
 KW_IMPORTS
+4,3
 imports
 
 KW_PRIVATE
+4,11
 private
 
 MODNAME
+4,19
 LIST
 
 KW_IMPORTS
+5,3
 imports
 
 KW_PRIVATE
+5,11
 private
 
 MODNAME
+5,19
 SET
 
 KW_SYNTAX
+7,3
 syntax
 
 ID_UPPER
+7,10
 Map
 
 LBRACK
+7,14
 [
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.Map
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+9,3
 syntax
 
 ID_UPPER
+9,10
 Map
 
 DCOLONEQ
+9,14
 ::=
 
 ID_UPPER
+9,18
 Map
 
 ID_UPPER
+9,22
 Map
 
 LBRACK
+9,49
 [
 
 ATTR_KEY
+1,0
 left
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.concat
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _Map_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 assoc
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 comm
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 unit
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 .Map
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 element
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _|->_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 index
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 0
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 format
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 %1%n%2
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+10,3
 syntax
 
 ID_UPPER
+10,10
 Map
 
 DCOLONEQ
+10,14
 ::=
 
 STRING
+10,18
 ".Map"
 
 LBRACK
+10,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.unit
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 .Map
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 \dotCt{Map}
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+11,3
 syntax
 
 ID_UPPER
+11,10
 Map
 
 DCOLONEQ
+11,14
 ::=
 
 ID_UPPER
+11,18
 KItem
 
 STRING
+11,24
 "|->"
 
 ID_UPPER
+11,30
 KItem
 
 LBRACK
+11,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.element
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _|->_
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}\mapsto{#2}
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 injective
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+13,3
 syntax
 
 KW_PRIORITY
+13,10
 priority
 
 KLABEL
+13,19
 _|->_
 
 GT
+13,25
 >
 
 KLABEL
+13,27
 _Map_
 
 KLABEL
+13,33
 .Map
 
 KW_SYNTAX
+14,3
 syntax
 
 KW_NONASSOC
+14,10
 non-assoc
 
 KLABEL
+14,20
 _|->_
 
 KW_SYNTAX
+16,3
 syntax
 
 ID_UPPER
+16,10
 KItem
 
 DCOLONEQ
+16,16
 ::=
 
 ID_UPPER
+16,20
 Map
 
 STRING
+16,24
 "["
 
 ID_UPPER
+16,28
 KItem
 
 STRING
+16,34
 "]"
 
 LBRACK
+16,57
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.lookup
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Map:lookup
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+17,3
 syntax
 
 ID_UPPER
+17,10
 KItem
 
 DCOLONEQ
+17,16
 ::=
 
 ID_UPPER
+17,20
 Map
 
 STRING
+17,24
 "["
 
 ID_UPPER
+17,28
 KItem
 
 STRING
+17,34
 "]"
 
 STRING
+17,38
 "orDefault"
 
 ID_UPPER
+17,50
 KItem
 
 LBRACK
+17,61
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.lookupOrDefault
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Map:lookupOrDefault
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+18,3
 syntax
 
 ID_UPPER
+18,10
 Map
 
 DCOLONEQ
+18,14
 ::=
 
 ID_UPPER
+18,18
 Map
 
 STRING
+18,22
 "["
 
 ID_LOWER
+18,26
 key
 
 COLON
+18,29
 :
 
 ID_UPPER
+18,31
 KItem
 
 STRING
+18,37
 "<-"
 
 ID_LOWER
+18,42
 value
 
 COLON
+18,47
 :
 
 ID_UPPER
+18,49
 KItem
 
 STRING
+18,55
 "]"
 
 LBRACK
+18,69
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Map:update
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.update
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 prefer
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+19,3
 syntax
 
 ID_UPPER
+19,10
 Map
 
 DCOLONEQ
+19,14
 ::=
 
 ID_UPPER
+19,18
 Map
 
 STRING
+19,22
 "["
 
 ID_UPPER
+19,26
 KItem
 
 STRING
+19,32
 "<-"
 
 STRING
+19,37
 "undef"
 
 STRING
+19,45
 "]"
 
 LBRACK
+19,53
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.remove
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 _[_<-undef]
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbol
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+20,3
 syntax
 
 ID_UPPER
+20,10
 Map
 
 DCOLONEQ
+20,14
 ::=
 
 ID_UPPER
+20,18
 Map
 
 STRING
+20,22
 "-Map"
 
 ID_UPPER
+20,29
 Map
 
 LBRACK
+20,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.difference
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 latex
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 {#1}-_{\it Map}{#2}
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+21,3
 syntax
 
 ID_UPPER
+21,10
 Map
 
 DCOLONEQ
+21,14
 ::=
 
 ID_LOWER
+21,18
 updateMap
 
 LPAREN
+21,27
 (
 
 ID_UPPER
+21,28
 Map
 
 COMMA
+21,31
 ,
 
 ID_UPPER
+21,33
 Map
 
 RPAREN
+21,36
 )
 
 LBRACK
+21,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.updateAll
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+22,3
 syntax
 
 ID_UPPER
+22,10
 Map
 
 DCOLONEQ
+22,14
 ::=
 
 ID_LOWER
+22,18
 removeAll
 
 LPAREN
+22,27
 (
 
 ID_UPPER
+22,28
 Map
 
 COMMA
+22,31
 ,
 
 ID_UPPER
+22,33
 Set
 
 RPAREN
+22,36
 )
 
 LBRACK
+22,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.removeAll
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+23,3
 syntax
 
 ID_UPPER
+23,10
 Set
 
 DCOLONEQ
+23,14
 ::=
 
 ID_LOWER
+23,18
 keys
 
 LPAREN
+23,22
 (
 
 ID_UPPER
+23,23
 Map
 
 RPAREN
+23,26
 )
 
 LBRACK
+23,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.keys
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+24,3
 syntax
 
 ID_UPPER
+24,10
 List
 
 DCOLONEQ
+24,15
 ::=
 
 STRING
+24,19
 "keys_list"
 
 STRING
+24,31
 "("
 
 ID_UPPER
+24,35
 Map
 
 STRING
+24,39
 ")"
 
 LBRACK
+24,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.keys_list
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+25,3
 syntax
 
 ID_UPPER
+25,10
 Bool
 
 DCOLONEQ
+25,15
 ::=
 
 ID_UPPER
+25,19
 KItem
 
 STRING
+25,25
 "in_keys"
 
 STRING
+25,35
 "("
 
 ID_UPPER
+25,39
 Map
 
 STRING
+25,43
 ")"
 
 LBRACK
+25,53
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.in_keys
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+26,3
 syntax
 
 ID_UPPER
+26,10
 List
 
 DCOLONEQ
+26,15
 ::=
 
 ID_LOWER
+26,19
 values
 
 LPAREN
+26,25
 (
 
 ID_UPPER
+26,26
 Map
 
 RPAREN
+26,29
 )
 
 LBRACK
+26,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.values
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+27,3
 syntax
 
 ID_UPPER
+27,10
 Int
 
 DCOLONEQ
+27,14
 ::=
 
 ID_LOWER
+27,18
 size
 
 LPAREN
+27,22
 (
 
 ID_UPPER
+27,23
 Map
 
 RPAREN
+27,26
 )
 
 LBRACK
+27,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.size
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 sizeMap
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+28,3
 syntax
 
 ID_UPPER
+28,10
 Bool
 
 DCOLONEQ
+28,15
 ::=
 
 ID_UPPER
+28,19
 Map
 
 STRING
+28,23
 "<=Map"
 
 ID_UPPER
+28,31
 Map
 
 LBRACK
+28,49
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 total
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.inclusion
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_SYNTAX
+29,3
 syntax
 
 ID_UPPER
+29,10
 KItem
 
 DCOLONEQ
+29,16
 ::=
 
 ID_LOWER
+29,20
 choice
 
 LPAREN
+29,26
 (
 
 ID_UPPER
+29,27
 Map
 
 RPAREN
+29,30
 )
 
 LBRACK
+29,53
 [
 
 ATTR_KEY
+1,0
 function
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 hook
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 MAP.choice
 
 RPAREN
+1,0
 )
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 klabel
 
 LPAREN
+1,0
 (
 
 ATTR_CONTENT
+1,0
 Map:choice
 
 RPAREN
+1,0
 )
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+30,1
 endmodule
 
 KW_MODULE
+33,1
 module
 
 MODNAME
+33,8
 MAP-KORE-SYMBOLIC
 
 LBRACK
+33,26
 [
 
 ATTR_KEY
+1,0
 kore
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 symbolic
 
 COMMA
+1,0
 ,
 
 ATTR_KEY
+1,0
 haskell
 
 RBRACK
+1,0
 ]
 
 KW_IMPORTS
+34,3
 imports
 
 MODNAME
+34,11
 MAP
 
 KW_IMPORTS
+35,3
 imports
 
 KW_PRIVATE
+35,11
 private
 
 MODNAME
+35,19
 K-EQUAL
 
 KW_IMPORTS
+36,3
 imports
 
 KW_PRIVATE
+36,11
 private
 
 MODNAME
+36,19
 BOOL
 
 KW_RULE
+38,3
 rule
 
 BUBBLE
+38,8
 #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K)
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+44,3
 rule
 
 BUBBLE
+44,8
 (K |-> _ M:Map) [ K <- V ] => (K |-> V M)
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+45,3
 rule
 
 BUBBLE
+45,8
 M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+46,3
 rule
 
 BUBBLE
+46,8
 M:Map [ K <- _ ] [ K <- V ] => M [ K <- V ]
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+49,3
 rule
 
 BUBBLE
+49,8
 (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+52,3
 rule
 
 BUBBLE
+52,8
 (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+53,3
 rule
 
 BUBBLE
+53,8
 M:Map [ K <- undef ] => M requires notBool (K in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+56,3
 rule
 
 BUBBLE
+56,8
 (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+59,3
 rule
 
 BUBBLE
+59,8
 (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+60,3
 rule
 
 BUBBLE
+60,8
 (K1 |-> _V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 ensures notBool (K1 in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+61,3
 rule
 
 BUBBLE
+61,8
 (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+62,3
 rule
 
 BUBBLE
+62,8
 ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+64,3
 rule
 
 BUBBLE
+64,8
 (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+65,3
 rule
 
 BUBBLE
+65,8
 (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M))
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+66,3
 rule
 
 BUBBLE
+66,8
 (_MAP:Map [ K  <-  V1 ]) [ K ] orDefault _ => V1
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+67,3
 rule
 
 BUBBLE
+67,8
 ( MAP:Map [ K1 <- _V1 ]) [ K2 ] orDefault D => MAP [ K2 ] orDefault D requires K1 =/=K K2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+68,3
 rule
 
 BUBBLE
+68,8
 .Map [ _ ] orDefault D => D
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+71,3
 rule
 
 BUBBLE
+71,8
 K in_keys(_M [ K <- undef ]) => false
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+72,3
 rule
 
 BUBBLE
+72,8
 K in_keys(_M [ K <- _ ]) => true
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+73,3
 rule
 
 BUBBLE
+73,8
 K1 in_keys(M [ K2 <- _ ]) => true requires K1 ==K K2 orBool K1 in_keys(M)
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+74,3
 rule
 
 BUBBLE
+74,8
 K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+76,3
 rule
 
 BUBBLE
+76,8
 {false #Equals @Key in_keys(.Map)} => #Ceil(@Key)
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+77,3
 rule
 
 BUBBLE
+77,8
 {@Key in_keys(.Map) #Equals false} => #Ceil(@Key)
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+78,3
 rule
 
 BUBBLE
+78,8
 {false #Equals @Key in_keys(Key' |-> Val @M)} => #Ceil(@Key) #And #Ceil(Key' |-> Val @M) #And #Not({@Key #Equals Key'}) #And {false #Equals @Key in_keys(@M)}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_RULE
+79,3
 rule
 
 BUBBLE
+79,8
 {@Key in_keys(Key' |-> Val @M) #Equals false} => #Ceil(@Key) #And #Ceil(Key' |-> Val @M) #And #Not({@Key #Equals Key'}) #And {@Key in_keys(@M) #Equals false}
 
 LBRACK
+1,0
 [
 
 ATTR_KEY
+1,0
 simplification
 
 RBRACK
+1,0
 ]
 
 KW_ENDMODULE
+88,1
 endmodule
 
 KW_MODULE
+91,1
 module
 
 MODNAME
+91,8
 MAP-SYMBOLIC
 
 KW_IMPORTS
+92,3
 imports
 
 MODNAME
+92,11
 MAP-KORE-SYMBOLIC
 
 KW_ENDMODULE
+93,1
 endmodule
 
 EOF
+93,9
 

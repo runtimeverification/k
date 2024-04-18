@@ -26,3 +26,40 @@ Failing nodes:
   Failed to generate a model.
 
 Join the Runtime Verification Discord server for support: https://discord.gg/CurfmXNtbN
+
+┌─ 1 (root, stuck, leaf, init)
+│     <generatedTop>
+│       <k>
+│         doIt ( -3 )
+│         ~> K_CELL_fc656f08:K
+│       </k>
+│       <counter>
+│         COUNTER_CELL
+│       </counter>
+│       <sum>
+│         SUM_CELL
+│       </sum>
+│       <generatedCounter>
+│         GENERATEDCOUNTER_CELL_c84b0b5f:Int
+│       </generatedCounter>
+│     </generatedTop>
+
+┌─ 2 (root, leaf, target)
+│     <generatedTop>
+│       <k>
+│         doIt ( 0 )
+│         ~> K_CELL_fc656f08:K
+│       </k>
+│       <counter>
+│         COUNTER_CELL
+│       </counter>
+│       <sum>
+│         SUM_CELL
+│       </sum>
+│       <generatedCounter>
+│         GENERATEDCOUNTER_CELL_6de8d71b:Int
+│       </generatedCounter>
+│     </generatedTop>
+
+
+

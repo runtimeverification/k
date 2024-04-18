@@ -75,10 +75,10 @@ public record ResolveIOStreams(Definition definition, KExceptionManager kem) {
       }
       return Module(
           m.name(),
-          (Set<Import>)
-              m.imports()
-                  .$bar(Set(Import(definition.getModule("K-IO").get(), true)))
-                  .$bar(Set(Import(definition.getModule("K-REFLECTION").get(), true))),
+          m.imports()
+              .$bar(Set(Import(definition.getModule("K-IO").get(), true)))
+              .$bar(Set(Import(definition.getModule("K-REFLECTION").get(), true)))
+              .toSet(),
           immutable(sentences),
           m.att());
     }

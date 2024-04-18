@@ -11,3 +11,61 @@ APRProof: 8b72c409e7e4e821e957233b93c93d850e4c2f79fa4be4a12f32ab064030dce7
     bounded: 0
     execution time: 0s
 Subproofs: 0
+
+┌─ 1 (root, init)
+│     <generatedTop>
+│       <k>
+│         doIt ( 3 )
+│         ~> K_CELL_fc656f08:K
+│       </k>
+│       <counter>
+│         COUNTER_CELL
+│       </counter>
+│       <sum>
+│         SUM_CELL
+│       </sum>
+│       <generatedCounter>
+│         GENERATEDCOUNTER_CELL_c84b0b5f:Int
+│       </generatedCounter>
+│     </generatedTop>
+│
+│  (3 steps)
+├─ 3
+│     <generatedTop>
+│       <k>
+│         doIt ( 0 )
+│         ~> K_CELL_fc656f08:K
+│       </k>
+│       <counter>
+│         COUNTER_CELL:Int
+│       </counter>
+│       <sum>
+│         SUM_CELL:Int
+│       </sum>
+│       <generatedCounter>
+│         GENERATEDCOUNTER_CELL_c84b0b5f:Int
+│       </generatedCounter>
+│     </generatedTop>
+│
+┊  constraint: true
+┊  subst: GENERATEDCOUNTER_CELL_6de8d71b <- GENERATEDCOUNTER_CELL_c84b0b5f:Int
+└─ 2 (leaf, target)
+      <generatedTop>
+        <k>
+          doIt ( 0 )
+          ~> K_CELL_fc656f08:K
+        </k>
+        <counter>
+          COUNTER_CELL
+        </counter>
+        <sum>
+          SUM_CELL
+        </sum>
+        <generatedCounter>
+          GENERATEDCOUNTER_CELL_6de8d71b:Int
+        </generatedCounter>
+      </generatedTop>
+
+
+
+

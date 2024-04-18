@@ -16,6 +16,7 @@ import org.kframework.utils.file.FileUtil
 import org.kframework.utils.options.InnerParsingOptions
 import org.kframework.utils.options.OuterParsingOptions
 import org.kframework.utils.Stopwatch
+import scala.collection.immutable
 
 class KoreTest {
 
@@ -63,19 +64,19 @@ class KoreTest {
     new TextToKore().parse(files.resolveDefinitionDirectory("test.kore"))
   }
 
-  def axioms(defn: Definition): Seq[AxiomDeclaration] =
+  def axioms(defn: Definition): immutable.Seq[AxiomDeclaration] =
     defn.modules.flatMap(
       _.decls.filter(_.isInstanceOf[AxiomDeclaration]).map(_.asInstanceOf[AxiomDeclaration])
     )
 
-  def axioms(k: String): Seq[AxiomDeclaration] = axioms(kompile(k))
+  def axioms(k: String): immutable.Seq[AxiomDeclaration] = axioms(kompile(k))
 
-  def claims(defn: Definition): Seq[ClaimDeclaration] =
+  def claims(defn: Definition): immutable.Seq[ClaimDeclaration] =
     defn.modules.flatMap(
       _.decls.filter(_.isInstanceOf[ClaimDeclaration]).map(_.asInstanceOf[ClaimDeclaration])
     )
 
-  def claims(k: String): Seq[ClaimDeclaration] = claims(kompile(k))
+  def claims(k: String): immutable.Seq[ClaimDeclaration] = claims(kompile(k))
 
   def hasAttribute(attributes: Attributes, name: String): Boolean =
     attributes.patterns.exists { case p: Application => p.head.ctr == name }
@@ -96,32 +97,51 @@ class KoreTest {
       pattern match {
         case And(
               _,
-              Equals(_, _, _, _) +: And(_, _ +: (rw @ Rewrites(_, _, _)) +: Seq()) +: Seq()
+              Equals(_, _, _, _) +: And(
+                _,
+                _ +: (rw @ Rewrites(_, _, _)) +: immutable.Seq()
+              ) +: immutable.Seq()
             ) =>
           Some(rw)
-        case And(_, Top(_) +: And(_, _ +: (rw @ Rewrites(_, _, _)) +: Seq()) +: Seq()) => Some(rw)
-        case Rewrites(s, And(_, Equals(_, _, _, _) +: l +: Seq()), And(_, _ +: r +: Seq())) =>
+        case And(
+              _,
+              Top(_) +: And(_, _ +: (rw @ Rewrites(_, _, _)) +: immutable.Seq()) +: immutable.Seq()
+            ) =>
+          Some(rw)
+        case Rewrites(
+              s,
+              And(_, Equals(_, _, _, _) +: l +: immutable.Seq()),
+              And(_, _ +: r +: immutable.Seq())
+            ) =>
           Some(B.Rewrites(s, l, r))
-        case Rewrites(s, And(_, Top(_) +: l +: Seq()), And(_, _ +: r +: Seq())) =>
+        case Rewrites(
+              s,
+              And(_, Top(_) +: l +: immutable.Seq()),
+              And(_, _ +: r +: immutable.Seq())
+            ) =>
           Some(B.Rewrites(s, l, r))
         case Implies(
               _,
               Equals(_, _, _, _),
-              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())
-            ) =>
-          Some(eq)
-        case Implies(_, Top(_), And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())) =>
-          Some(eq)
-        case Implies(
-              _,
-              And(_, _ +: Equals(_, _, _, _) +: Seq()),
-              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())
+              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: immutable.Seq())
             ) =>
           Some(eq)
         case Implies(
               _,
-              And(_, _ +: Top(_) +: Seq()),
-              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: Seq())
+              Top(_),
+              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: immutable.Seq())
+            ) =>
+          Some(eq)
+        case Implies(
+              _,
+              And(_, _ +: Equals(_, _, _, _) +: immutable.Seq()),
+              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: immutable.Seq())
+            ) =>
+          Some(eq)
+        case Implies(
+              _,
+              And(_, _ +: Top(_) +: immutable.Seq()),
+              And(_, (eq @ Equals(_, _, Application(_, _), _)) +: _ +: immutable.Seq())
             ) =>
           Some(eq)
         case eq @ Equals(_, _, Application(_, _), _) => Some(eq)
@@ -134,10 +154,10 @@ class KoreTest {
   private def isConcrete(symbol: SymbolOrAlias): Boolean =
     symbol.params.forall(_.isInstanceOf[CompoundSort])
 
-  def symbols(pat: Pattern): Seq[SymbolOrAlias] =
+  def symbols(pat: Pattern): immutable.Seq[SymbolOrAlias] =
     pat match {
       case And(_, ps)           => ps.flatMap(symbols)
-      case Application(s, ps)   => Seq(s).filter(isConcrete) ++ ps.flatMap(symbols)
+      case Application(s, ps)   => immutable.Seq(s).filter(isConcrete) ++ ps.flatMap(symbols)
       case Ceil(_, _, p)        => symbols(p)
       case Equals(_, _, p1, p2) => symbols(p1) ++ symbols(p2)
       case Exists(_, _, p)      => symbols(p)
@@ -150,7 +170,7 @@ class KoreTest {
       case Not(_, p)           => symbols(p)
       case Or(_, ps)           => ps.flatMap(symbols)
       case Rewrites(_, p1, p2) => symbols(p1) ++ symbols(p2)
-      case _                   => Seq()
+      case _                   => immutable.Seq()
     }
 
 }

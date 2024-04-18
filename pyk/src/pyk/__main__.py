@@ -13,7 +13,7 @@ from graphviz import Digraph
 
 from .cli.args import KCLIArgs
 from .cli.pyk import generate_options
-from .cli.utils import LOG_FORMAT, dir_path, file_path, loglevel
+from .cli.utils import LOG_FORMAT, dir_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .kast.inner import KInner
@@ -30,14 +30,14 @@ from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
-from .ktool import TypeInferenceMode
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
 from .ktool.krun import KRun
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
-from .proof.reachability import APRFailureInfo
+from .proof.reachability import APRFailureInfo, APRProof
+from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
@@ -248,15 +248,29 @@ def exec_prove(options: ProveOptions) -> None:
         _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
     else:
         kompiled_directory = options.definition_dir
-    kprove = KProve(kompiled_directory)
-    proofs = kprove.prove_rpc(options=options)
+    kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
+    try:
+        proofs = kprove.prove_rpc(options=options)
+    except RuntimeError as err:
+        _, _, _, cpe = err.args
+        exit_with_process_error(cpe)
     for proof in sorted(proofs, key=lambda p: p.id):
         print('\n'.join(proof.summary.lines))
         if proof.failed and options.failure_info:
             failure_info = proof.failure_info
             if type(failure_info) is APRFailureInfo:
                 print('\n'.join(failure_info.print()))
+        if options.show_kcfg and type(proof) is APRProof:
+            node_printer = APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
+            show = APRProofShow(kprove, node_printer=node_printer)
+            print('\n'.join(show.show(proof)))
     sys.exit(len([p.id for p in proofs if not p.passed]))
+
+
+def exec_show(options: ProveOptions) -> None:
+    options.max_iterations = 0
+    options.show_kcfg = True
+    exec_prove(options)
 
 
 def exec_kompile(options: KompileCommandOptions) -> None:
@@ -282,9 +296,6 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'gen_bison_parser': options.gen_bison_parser,
         'gen_glr_bison_parser': options.gen_glr_bison_parser,
         'bison_lists': options.bison_lists,
-        'warnings': options.warnings,
-        'warning_to_error': options.warning_to_error,
-        'no_exc_wrap': options.no_exc_wrap,
     }
     if options.backend == KompileBackend.LLVM:
         kompile_dict['ccopts'] = options.ccopts
@@ -313,6 +324,9 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         Kompile.from_dict(kompile_dict)(
             output_dir=kompiled_directory,
             type_inference_mode=options.type_inference_mode,
+            warnings=options.warnings,
+            warnings_to_errors=options.warnings_to_errors,
+            no_exc_wrap=options.no_exc_wrap,
         )
     except RuntimeError as err:
         _, _, _, _, cpe = err.args
@@ -453,15 +467,37 @@ def create_argument_parser() -> ArgumentParser:
     prove_args = pyk_args_command.add_parser(
         'prove',
         help='Prove an input specification (using RPC based prover).',
-        parents=[k_cli_args.logging_args],
-    )
-    prove_args.add_argument('spec_file', type=file_path, help='File with the specification module.')
-    prove_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
-    prove_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
-    prove_args.add_argument(
-        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args],
     )
     prove_args.add_argument(
+        '--failure-info',
+        default=None,
+        action='store_true',
+        help='Print out more information about proof failures.',
+    )
+    prove_args.add_argument(
+        '--show-kcfg',
+        default=None,
+        action='store_true',
+        help='Display the resulting proof KCFG.',
+    )
+    prove_args.add_argument(
+        '--max-depth',
+        type=int,
+        help='Maximum number of steps to take in symbolic execution per basic block.',
+    )
+    prove_args.add_argument(
+        '--max-iterations',
+        type=int,
+        help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
+    )
+
+    show_args = pyk_args_command.add_parser(
+        'show',
+        help='Display the status of a given proof.',
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args],
+    )
+    show_args.add_argument(
         '--failure-info',
         default=None,
         action='store_true',

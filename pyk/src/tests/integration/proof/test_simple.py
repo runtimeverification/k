@@ -42,6 +42,8 @@ class SimpleSemantics(KCFGSemantics):
 
 class TestSimpleProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
+    KOMPILE_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
+    LLVM_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
         return SimpleSemantics()
@@ -60,11 +62,10 @@ class TestSimpleProof(KCFGExploreTest, KProveTest):
         proof = APRProof.from_claim(kprove.definition, claim, logs={})
         kcfg_explore.simplify(proof.kcfg, {})
         prover = APRProver(
-            proof,
             kcfg_explore=kcfg_explore,
             execute_depth=1,
         )
-        prover.advance_proof()
+        prover.advance_proof(proof)
 
         assert not proof.is_terminal(proof.target)
         for pred in proof.kcfg.predecessors(proof.target):
@@ -76,11 +77,10 @@ class TestSimpleProof(KCFGExploreTest, KProveTest):
         proof = APRProof.from_claim(kprove.definition, claim, logs={})
         kcfg_explore.simplify(proof.kcfg, {})
         prover = APRProver(
-            proof,
             kcfg_explore=kcfg_explore,
             execute_depth=1,
         )
-        prover.advance_proof()
+        prover.advance_proof(proof)
 
         assert proof.is_terminal(proof.target)
         for pred in proof.kcfg.predecessors(proof.target):

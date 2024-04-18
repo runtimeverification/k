@@ -8,9 +8,11 @@ from typing import IO, TYPE_CHECKING, Any
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import Options
-from .utils import bug_report_arg, ensure_dir_path, file_path
+from .utils import bug_report_arg, dir_path, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from ..utils import BugReport
 
 
@@ -28,13 +30,13 @@ class LoggingOptions(Options):
 
 class WarningOptions(Options):
     warnings: Warnings | None
-    warning_to_error: bool
+    warnings_to_errors: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'warnings': None,
-            'warning_to_error': False,
+            'warnings_to_errors': False,
         }
 
 
@@ -82,24 +84,28 @@ class KDefinitionOptions(Options):
 
 class SaveDirOptions(Options):
     save_directory: Path | None
+    temp_directory: Path | None
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
             'save_directory': None,
+            'temp_directory': None,
         }
 
 
 class SpecOptions(SaveDirOptions):
     spec_file: Path
-    claim_labels: list[str] | None
-    exclude_claim_labels: list[str]
+    spec_module: str | None
+    claim_labels: Iterable[str] | None
+    exclude_claim_labels: Iterable[str] | None
 
     @staticmethod
     def default() -> dict[str, Any]:
         return {
+            'spec_module': None,
             'claim_labels': None,
-            'exclude_claim_labels': [],
+            'exclude_claim_labels': None,
         }
 
 
@@ -201,8 +207,9 @@ class KCLIArgs:
             help='Warnings to print about (no effect on pyk, only subcommands).',
         )
         args.add_argument(
+            '--warnings_to_errors',
             '-w2e',
-            dest='warning_to_error',
+            dest='warnings_to_errors',
             default=False,
             action='store_true',
             help='Turn warnings into errors (no effect on pyk, only subcommands).',
@@ -387,7 +394,8 @@ class KCLIArgs:
     def spec_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
         args.add_argument('spec_file', type=file_path, help='Path to spec file.')
-        args.add_argument('--save-directory', type=ensure_dir_path, help='Path to where CFGs are stored.')
+        args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
+        args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
         args.add_argument(
             '--claim',
             type=str,
@@ -401,5 +409,24 @@ class KCLIArgs:
             dest='exclude_claim_labels',
             action='append',
             help='Skip listed claims, MODULE_NAME.claim-id',
+        )
+        args.add_argument(
+            '--type-inference-mode',
+            dest='type_inference_mode',
+            type=TypeInferenceMode,
+            help='Mode for doing K rule type inference in.',
+        )
+        args.add_argument(
+            '--save-directory',
+            default=None,
+            type=ensure_dir_path,
+            help='Directory to save proof artifacts at for reuse.',
+        )
+        args.add_argument(
+            '--temp-directory',
+            dest='temp_directory',
+            default=None,
+            type=ensure_dir_path,
+            help='Directory to save intermediate temporaries to.',
         )
         return args

@@ -8,6 +8,7 @@ import static org.kframework.kore.KORE.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
@@ -23,7 +24,6 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.inner.RuleGrammarGenerator;
-import scala.collection.Set;
 
 public class GenerateSortProjections {
 
@@ -47,13 +47,14 @@ public class GenerateSortProjections {
     return Module(
         mod.name(),
         mod.imports(),
-        (Set<Sentence>)
-            mod.localSentences()
-                .$bar(
+        mod.localSentences()
+            .$bar(
+                immutable(
                     Stream.concat(
                             stream(mod.allSorts()).flatMap(this::gen),
                             stream(mod.localProductions()).flatMap(this::gen))
-                        .collect(Collections.toSet())),
+                        .collect(Collectors.toSet())))
+            .toSet(),
         mod.att());
   }
 
@@ -114,9 +115,9 @@ public class GenerateSortProjections {
                   var),
               BooleanUtils.TRUE,
               BooleanUtils.TRUE);
-      return stream(Set(prod, r, sideEffect, sideEffectR));
+      return stream(Collections.<Sentence>Set(prod, r, sideEffect, sideEffectR));
     } else {
-      return stream(Set(prod, r));
+      return stream(Collections.<Sentence>Set(prod, r));
     }
   }
 
