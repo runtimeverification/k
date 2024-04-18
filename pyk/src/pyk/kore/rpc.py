@@ -920,6 +920,7 @@ class SatResult(GetModelResult):
 class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
+    port: int
     _client: JsonRpcClientFacade
 
     def __init__(
@@ -935,6 +936,7 @@ class KoreClient(ContextManager['KoreClient']):
     ):
         if dispatch is None:
             dispatch = {}
+        self.port = port
         self._client = JsonRpcClientFacade(
             host,
             port,
