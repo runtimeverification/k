@@ -129,6 +129,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     definition_dir: Path | None
     type_inference_mode: TypeInferenceMode | None
     failure_info: bool
+    kore_rpc_command: str | Iterable[str] | None
     max_depth: int | None
     max_iterations: int | None
     show_kcfg: bool
@@ -139,6 +140,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             'definition_dir': None,
             'type_inference_mode': None,
             'failure_info': False,
+            'kore_rpc_command': None,
             'max_depth': None,
             'max_iterations': None,
             'show_kcfg': False,
