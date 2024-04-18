@@ -1140,7 +1140,7 @@ class KoreServer(ContextManager['KoreServer']):
         if not (command := args.get('command')):
             self._command = ['kore-rpc']
         elif type(command) is str:
-            self._command = [command]
+            self._command = command.split()
         else:
             self._command = list(command)
 
