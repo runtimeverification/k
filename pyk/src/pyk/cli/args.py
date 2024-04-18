@@ -33,6 +33,7 @@ class LoggingOptions(Options):
             'v': 'verbose',
         }
 
+
 class WarningOptions(Options):
     warnings: Warnings | None
     warnings_to_errors: bool

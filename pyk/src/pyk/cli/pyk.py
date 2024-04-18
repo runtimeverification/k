@@ -2,21 +2,16 @@ from __future__ import annotations
 
 import logging
 from argparse import ArgumentParser, FileType
-import logging
-from argparse import ArgumentParser, FileType
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
 
 import tomli
 
 from ..ktool.kompile import KompileBackend
-from ..ktool import TypeInferenceMode
 from .args import (
-    ConfigArgs,
     ConfigArgs,
     DefinitionOptions,
     DisplayOptions,
-    KCLIArgs,
     KCLIArgs,
     KDefinitionOptions,
     KompileOptions,
@@ -37,7 +32,6 @@ if TYPE_CHECKING:
     from pyk.ktool import TypeInferenceMode
 
 _LOGGER: Final = logging.getLogger(__name__)
-
 
 
 def generate_options(args: dict[str, Any]) -> LoggingOptions:
@@ -198,7 +192,6 @@ class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
             | LoggingOptions.from_option_string()
             | {'kArgs': 'k_args'}
         )
-
 
 
 class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
