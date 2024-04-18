@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.outer_lexer import (
-    INIT_LOC,
     Loc,
     LocationIterator,
     Token,
@@ -242,9 +241,9 @@ BUBBLE_TEST_DATA: Final = (
     (
         '[klabel]',
         [
-            Token('[', TokenType.LBRACK, Loc(1, 0)),
-            Token('klabel', TokenType.ATTR_KEY, Loc(1, 0)),
-            Token(']', TokenType.RBRACK, Loc(1, 0)),
+            Token('[', TokenType.LBRACK, Loc(1, 1)),
+            Token('klabel', TokenType.ATTR_KEY, Loc(1, 2)),
+            Token(']', TokenType.RBRACK, Loc(1, 8)),
             Token('', TokenType.EOF, Loc(1, 8)),
         ],
         '',
@@ -252,12 +251,12 @@ BUBBLE_TEST_DATA: Final = (
     (
         '[klabel(hello)]',
         [
-            Token('[', TokenType.LBRACK, Loc(1, 0)),
-            Token('klabel', TokenType.ATTR_KEY, Loc(1, 0)),
-            Token('(', TokenType.LPAREN, Loc(1, 0)),
-            Token('hello', TokenType.ATTR_CONTENT, Loc(1, 0)),
-            Token(')', TokenType.RPAREN, Loc(1, 0)),
-            Token(']', TokenType.RBRACK, Loc(1, 0)),
+            Token('[', TokenType.LBRACK, Loc(1, 1)),
+            Token('klabel', TokenType.ATTR_KEY, Loc(1, 2)),
+            Token('(', TokenType.LPAREN, Loc(1, 8)),
+            Token('hello', TokenType.ATTR_CONTENT, Loc(1, 9)),
+            Token(')', TokenType.RPAREN, Loc(1, 14)),
+            Token(']', TokenType.RBRACK, Loc(1, 15)),
             Token('', TokenType.EOF, Loc(1, 15)),
         ],
         '',
@@ -266,12 +265,12 @@ BUBBLE_TEST_DATA: Final = (
         'bubble [klabel(hello)]',
         [
             Token('bubble', TokenType.BUBBLE, Loc(1, 1)),
-            Token('[', TokenType.LBRACK, Loc(1, 0)),
-            Token('klabel', TokenType.ATTR_KEY, Loc(1, 0)),
-            Token('(', TokenType.LPAREN, Loc(1, 0)),
-            Token('hello', TokenType.ATTR_CONTENT, Loc(1, 0)),
-            Token(')', TokenType.RPAREN, Loc(1, 0)),
-            Token(']', TokenType.RBRACK, Loc(1, 0)),
+            Token('[', TokenType.LBRACK, Loc(1, 8)),
+            Token('klabel', TokenType.ATTR_KEY, Loc(1, 9)),
+            Token('(', TokenType.LPAREN, Loc(1, 15)),
+            Token('hello', TokenType.ATTR_CONTENT, Loc(1, 16)),
+            Token(')', TokenType.RPAREN, Loc(1, 21)),
+            Token(']', TokenType.RBRACK, Loc(1, 22)),
             Token('', TokenType.EOF, Loc(1, 22)),
         ],
         '',
@@ -458,132 +457,136 @@ def test_klabel(text: str, expected_token: Token, expected_remaining: str) -> No
 
 
 ATTR_TEST_DATA: Final = (
-    ('a]', [Token('a', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ''),
-    (' a ] ', [Token('a', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ' '),
-    ('a<b>]', [Token('a<b>', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ''),
-    ('1a-B<-->]', [Token('1a-B<-->', TokenType.ATTR_KEY, INIT_LOC), Token(']', TokenType.RBRACK, INIT_LOC)], ''),
+    ('a]', [Token('a', TokenType.ATTR_KEY, Loc(1, 1)), Token(']', TokenType.RBRACK, Loc(1, 2))], ''),
+    (' a ] ', [Token('a', TokenType.ATTR_KEY, Loc(1, 2)), Token(']', TokenType.RBRACK, Loc(1, 4))], ' '),
+    ('a<b>]', [Token('a<b>', TokenType.ATTR_KEY, Loc(1, 1)), Token(']', TokenType.RBRACK, Loc(1, 5))], ''),
+    (
+        '1a-B<-->]',
+        [Token('1a-B<-->', TokenType.ATTR_KEY, Loc(1, 1)), Token(']', TokenType.RBRACK, Loc(1, 9))],
+        '',
+    ),
     (
         'a()] ',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token(')', TokenType.RPAREN, Loc(1, 3)),
+            Token(']', TokenType.RBRACK, Loc(1, 4)),
         ],
         ' ',
     ),
     (
         'a("")]',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('""', TokenType.STRING, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token('""', TokenType.STRING, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 5)),
+            Token(']', TokenType.RBRACK, Loc(1, 6)),
         ],
         '',
     ),
     (
         'a("hello")]',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('"hello"', TokenType.STRING, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token('"hello"', TokenType.STRING, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 10)),
+            Token(']', TokenType.RBRACK, Loc(1, 11)),
         ],
         '',
     ),
     (
         'a( )] ',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token(' ', TokenType.ATTR_CONTENT, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token(' ', TokenType.ATTR_CONTENT, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 4)),
+            Token(']', TokenType.RBRACK, Loc(1, 5)),
         ],
         ' ',
     ),
     (
         'a(())] ',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('()', TokenType.ATTR_CONTENT, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token('()', TokenType.ATTR_CONTENT, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 5)),
+            Token(']', TokenType.RBRACK, Loc(1, 6)),
         ],
         ' ',
     ),
     (
         'a(/*)] ',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('/*', TokenType.ATTR_CONTENT, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token('/*', TokenType.ATTR_CONTENT, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 5)),
+            Token(']', TokenType.RBRACK, Loc(1, 6)),
         ],
         ' ',
     ),
     (
         'a(()())] ',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('()()', TokenType.ATTR_CONTENT, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token('()()', TokenType.ATTR_CONTENT, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 7)),
+            Token(']', TokenType.RBRACK, Loc(1, 8)),
         ],
         ' ',
     ),
     (
         'a( tag content (()) () )]',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token(' tag content (()) () ', TokenType.ATTR_CONTENT, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 2)),
+            Token(' tag content (()) () ', TokenType.ATTR_CONTENT, Loc(1, 3)),
+            Token(')', TokenType.RPAREN, Loc(1, 24)),
+            Token(']', TokenType.RBRACK, Loc(1, 25)),
         ],
         '',
     ),
     (
         'a,b,c]',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token(',', TokenType.COMMA, INIT_LOC),
-            Token('b', TokenType.ATTR_KEY, INIT_LOC),
-            Token(',', TokenType.COMMA, INIT_LOC),
-            Token('c', TokenType.ATTR_KEY, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token(',', TokenType.COMMA, Loc(1, 2)),
+            Token('b', TokenType.ATTR_KEY, Loc(1, 3)),
+            Token(',', TokenType.COMMA, Loc(1, 4)),
+            Token('c', TokenType.ATTR_KEY, Loc(1, 5)),
+            Token(']', TokenType.RBRACK, Loc(1, 6)),
         ],
         '',
     ),
     (
         ' /* 1 */ a /* 2 */ , b /* 3 */ ]',
         [
-            Token('a', TokenType.ATTR_KEY, INIT_LOC),
-            Token(',', TokenType.COMMA, INIT_LOC),
-            Token('b', TokenType.ATTR_KEY, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a', TokenType.ATTR_KEY, Loc(1, 10)),
+            Token(',', TokenType.COMMA, Loc(1, 20)),
+            Token('b', TokenType.ATTR_KEY, Loc(1, 22)),
+            Token(']', TokenType.RBRACK, Loc(1, 32)),
         ],
         '',
     ),
     (
         'a<A>("hello"), b(foo(bar(%), baz))]',
         [
-            Token('a<A>', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('"hello"', TokenType.STRING, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(',', TokenType.COMMA, INIT_LOC),
-            Token('b', TokenType.ATTR_KEY, INIT_LOC),
-            Token('(', TokenType.LPAREN, INIT_LOC),
-            Token('foo(bar(%), baz)', TokenType.ATTR_CONTENT, INIT_LOC),
-            Token(')', TokenType.RPAREN, INIT_LOC),
-            Token(']', TokenType.RBRACK, INIT_LOC),
+            Token('a<A>', TokenType.ATTR_KEY, Loc(1, 1)),
+            Token('(', TokenType.LPAREN, Loc(1, 5)),
+            Token('"hello"', TokenType.STRING, Loc(1, 6)),
+            Token(')', TokenType.RPAREN, Loc(1, 13)),
+            Token(',', TokenType.COMMA, Loc(1, 14)),
+            Token('b', TokenType.ATTR_KEY, Loc(1, 16)),
+            Token('(', TokenType.LPAREN, Loc(1, 17)),
+            Token('foo(bar(%), baz)', TokenType.ATTR_CONTENT, Loc(1, 18)),
+            Token(')', TokenType.RPAREN, Loc(1, 34)),
+            Token(']', TokenType.RBRACK, Loc(1, 35)),
         ],
         '',
     ),
@@ -597,7 +600,7 @@ ATTR_TEST_DATA: Final = (
 )
 def test_attr(text: str, expected_tokens: list[Token], expected_remaining: str) -> None:
     # Given
-    it = iter(text)
+    it = LocationIterator(text)
     la = next(it, '')
     attr_tokens = _attr(la, it)
 
@@ -636,8 +639,15 @@ def test_lexer(test_file: Path) -> None:
     remaining = next(it, None)
 
     # Then
+    _assert_token_locations_match(actual_tokens, text)
     assert actual_tokens == expected_tokens
     assert remaining is None
+
+
+def _assert_token_locations_match(tokens: list[Token], text: str) -> None:
+    line_offsets = [0] + (lambda x: [x := text.find('\n', x) + 1 for _ in range(text.count('\n'))])(0)  # noqa: F841
+    for tok_text, loc in ((t.text, t.loc) for t in tokens):
+        assert text[line_offsets[loc.line - 1] + loc.col - 1 :].find(tok_text) == 0
 
 
 def _parse(path: Path) -> tuple[str, list[Token]]:

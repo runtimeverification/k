@@ -64,31 +64,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+3,71
 prec
 
 LPAREN
-1,0
+3,75
 (
 
 ATTR_CONTENT
-1,0
+3,76
 1
 
 RPAREN
-1,0
+3,77
 )
 
 COMMA
-1,0
+3,78
 ,
 
 ATTR_KEY
-1,0
+3,80
 token
 
 RBRACK
-1,0
+3,85
 ]
 
 VBAR
@@ -104,11 +104,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+4,71
 token
 
 RBRACK
-1,0
+4,76
 ]
 
 VBAR
@@ -124,11 +124,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+5,71
 token
 
 RBRACK
-1,0
+5,76
 ]
 
 KW_ENDMODULE
@@ -156,11 +156,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+10,14
 token
 
 RBRACK
-1,0
+10,19
 ]
 
 KW_ENDMODULE
@@ -228,39 +228,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+18,42
 function
 
 COMMA
-1,0
+18,50
 ,
 
 ATTR_KEY
-1,0
+18,52
 total
 
 COMMA
-1,0
+18,57
 ,
 
 ATTR_KEY
-1,0
+18,59
 hook
 
 LPAREN
-1,0
+18,63
 (
 
 ATTR_CONTENT
-1,0
+18,64
 STRING.token2string
 
 RPAREN
-1,0
+18,83
 )
 
 RBRACK
-1,0
+18,84
 ]
 
 KW_SYNTAX
@@ -296,39 +296,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+19,37
 function
 
 COMMA
-1,0
+19,45
 ,
 
 ATTR_KEY
-1,0
+19,47
 total
 
 COMMA
-1,0
+19,52
 ,
 
 ATTR_KEY
-1,0
+19,54
 hook
 
 LPAREN
-1,0
+19,58
 (
 
 ATTR_CONTENT
-1,0
+19,59
 STRING.string2token
 
 RPAREN
-1,0
+19,78
 )
 
 RBRACK
-1,0
+19,79
 ]
 
 KW_SYNTAX
@@ -364,35 +364,35 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+20,34
 freshGenerator
 
 COMMA
-1,0
+20,48
 ,
 
 ATTR_KEY
-1,0
+20,50
 function
 
 COMMA
-1,0
+20,58
 ,
 
 ATTR_KEY
-1,0
+20,60
 total
 
 COMMA
-1,0
+20,65
 ,
 
 ATTR_KEY
-1,0
+20,67
 private
 
 RBRACK
-1,0
+20,74
 ]
 
 KW_RULE
