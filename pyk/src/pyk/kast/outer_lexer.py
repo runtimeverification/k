@@ -191,13 +191,15 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
+    """A string iterator which tracks the line and column information of the characters in the string"""
+
     _line: int
     _col: int
     _iter: Iterator[str]
     _nextline: bool
 
-    def __init__(self, x: Iterable[str], line: int = 1, col: int = 0) -> None:
-        self._iter = iter(x)
+    def __init__(self, text: Iterable[str], line: int = 1, col: int = 0) -> None:
+        self._iter = iter(text)
         self._line = line
         self._col = col
         self._nextline = False
@@ -213,7 +215,12 @@ class LocationIterator(Iterator[str]):
 
     @property
     def loc(self) -> Loc:
-        """Returns the line,column of the last character returned by the iterator"""
+        """Returns the line,column of the last character returned by the iterator
+
+        If no character has been returned yet, it will be the location that this
+        iterator was initialized with. The default is (1,0), which is the only
+        time the column will be 0.
+        """
         return Loc(self._line, self._col)
 
 
