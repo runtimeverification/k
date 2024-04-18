@@ -26,7 +26,7 @@ from .args import (
     SpecOptions,
     WarningOptions,
 )
-from .utils import dir_path, file_path
+from .utils import dir_path
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
+    from pyk.ktool import TypeInferenceMode
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -328,7 +329,13 @@ def create_argument_parser() -> ArgumentParser:
     kompile_args = pyk_args_command.add_parser(
         'kompile',
         help='Kompile the K specification.',
-        parents=[k_cli_args.logging_args, k_cli_args.definition_args, k_cli_args.kompile_args, config_args.config_args],
+        parents=[
+            k_cli_args.logging_args,
+            k_cli_args.warning_args,
+            k_cli_args.definition_args,
+            k_cli_args.kompile_args,
+            config_args.config_args,
+        ],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
 
@@ -343,21 +350,43 @@ def create_argument_parser() -> ArgumentParser:
     prove_args = pyk_args_command.add_parser(
         'prove',
         help='Prove an input specification (using RPC based prover).',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args, config_args.config_args],
     )
-    prove_args.add_argument('spec_file', type=file_path, help='File with the specification module.')
-    prove_args.add_argument('--definition', type=dir_path, dest='definition_dir', help='Path to definition to use.')
-    prove_args.add_argument('--spec-module', dest='spec_module', type=str, help='Module with claims to be proven.')
-    prove_args.add_argument(
-        '--type-inference-mode', type=TypeInferenceMode, help='Mode for doing K rule type inference in.'
-    )
+
     prove_args.add_argument(
         '--failure-info',
         default=None,
         action='store_true',
         help='Print out more information about proof failures.',
     )
+    prove_args.add_argument(
+        '--show-kcfg',
+        default=None,
+        action='store_true',
+        help='Display the resulting proof KCFG.',
+    )
+    prove_args.add_argument(
+        '--max-depth',
+        type=int,
+        help='Maximum number of steps to take in symbolic execution per basic block.',
+    )
+    prove_args.add_argument(
+        '--max-iterations',
+        type=int,
+        help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
+    )
 
+    show_args = pyk_args_command.add_parser(
+        'show',
+        help='Display the status of a given proof.',
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args],
+    )
+    show_args.add_argument(
+        '--failure-info',
+        default=None,
+        action='store_true',
+        help='Print out more information about proof failures.',
+    )
     graph_imports_args = pyk_args_command.add_parser(
         'graph-imports',
         help='Graph the imports of a given definition.',
