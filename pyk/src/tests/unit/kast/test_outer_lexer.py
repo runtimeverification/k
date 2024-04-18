@@ -639,12 +639,15 @@ def test_lexer(test_file: Path) -> None:
     remaining = next(it, None)
 
     # Then
-    line_offsets = [0] + (lambda x: [x := text.find('\n', x) + 1 for _ in range(text.count('\n'))])(0)  # noqa: F841
-    for tok_text, loc in ((t.text, t.loc) for t in actual_tokens):
-        assert text[line_offsets[loc.line - 1] + loc.col - 1 :].find(tok_text) == 0
-
+    _assert_token_locations_match(actual_tokens, text)
     assert actual_tokens == expected_tokens
     assert remaining is None
+
+
+def _assert_token_locations_match(tokens: list[Token], text: str) -> None:
+    line_offsets = [0] + (lambda x: [x := text.find('\n', x) + 1 for _ in range(text.count('\n'))])(0)  # noqa: F841
+    for tok_text, loc in ((t.text, t.loc) for t in tokens):
+        assert text[line_offsets[loc.line - 1] + loc.col - 1 :].find(tok_text) == 0
 
 
 def _parse(path: Path) -> tuple[str, list[Token]]:
