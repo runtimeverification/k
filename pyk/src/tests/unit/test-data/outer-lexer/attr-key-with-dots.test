@@ -5,23 +5,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+1,2
 org.kframework.attributes.Location
 
 LPAREN
-1,0
+1,36
 (
 
 ATTR_CONTENT
-1,0
+1,37
 Location(50,10,50,120)
 
 RPAREN
-1,0
+1,59
 )
 
 RBRACK
-1,0
+1,60
 ]
 
 EOF
