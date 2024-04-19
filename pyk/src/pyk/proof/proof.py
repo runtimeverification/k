@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -390,8 +389,6 @@ class ParallelProver(Generic[P, PS, SR]):
                     if step.id() in explored:
                         continue
                     explored.add(step.id())
-                    print('submitting job', file=sys.stderr)
-
                     future: Future[Any] = pool.submit(step)  # <-- schedule steps for execution
                     pending.add(future)
 
