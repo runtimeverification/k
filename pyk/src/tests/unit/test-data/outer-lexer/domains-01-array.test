@@ -93,63 +93,63 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+4,17
 hook
 
 LPAREN
-1,0
+4,21
 (
 
 ATTR_CONTENT
-1,0
+4,22
 ARRAY.Array
 
 RPAREN
-1,0
+4,33
 )
 
 COMMA
-1,0
+4,34
 ,
 
 ATTR_KEY
-1,0
+4,36
 unit
 
 LPAREN
-1,0
+4,40
 (
 
 ATTR_CONTENT
-1,0
+4,41
 arrayCtor
 
 RPAREN
-1,0
+4,50
 )
 
 COMMA
-1,0
+4,51
 ,
 
 ATTR_KEY
-1,0
+4,53
 element
 
 LPAREN
-1,0
+4,60
 (
 
 ATTR_CONTENT
-1,0
+4,61
 _[_<-_]
 
 RPAREN
-1,0
+4,68
 )
 
 RBRACK
-1,0
+4,69
 ]
 
 KW_SYNTAX
@@ -185,31 +185,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+6,39
 function
 
 COMMA
-1,0
+6,47
 ,
 
 ATTR_KEY
-1,0
+6,49
 hook
 
 LPAREN
-1,0
+6,53
 (
 
 ATTR_CONTENT
-1,0
+6,54
 ARRAY.lookup
 
 RPAREN
-1,0
+6,66
 )
 
 RBRACK
-1,0
+6,67
 ]
 
 KW_SYNTAX
@@ -269,59 +269,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+8,62
 function
 
 COMMA
-1,0
+8,70
 ,
 
 ATTR_KEY
-1,0
+8,72
 hook
 
 LPAREN
-1,0
+8,76
 (
 
 ATTR_CONTENT
-1,0
+8,77
 ARRAY.update
 
 RPAREN
-1,0
+8,89
 )
 
 COMMA
-1,0
+8,90
 ,
 
 ATTR_KEY
-1,0
+8,92
 klabel
 
 LPAREN
-1,0
+8,98
 (
 
 ATTR_CONTENT
-1,0
+8,99
 _[_<-_]
 
 RPAREN
-1,0
+8,106
 )
 
 COMMA
-1,0
+8,107
 ,
 
 ATTR_KEY
-1,0
+8,109
 symbol
 
 RBRACK
-1,0
+8,115
 ]
 
 KW_SYNTAX
@@ -365,31 +365,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+9,52
 function
 
 COMMA
-1,0
+9,60
 ,
 
 ATTR_KEY
-1,0
+9,62
 hook
 
 LPAREN
-1,0
+9,66
 (
 
 ATTR_CONTENT
-1,0
+9,67
 ARRAY.remove
 
 RPAREN
-1,0
+9,79
 )
 
 RBRACK
-1,0
+9,80
 ]
 
 KW_SYNTAX
@@ -449,31 +449,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+10,58
 function
 
 COMMA
-1,0
+10,66
 ,
 
 ATTR_KEY
-1,0
+10,68
 hook
 
 LPAREN
-1,0
+10,72
 (
 
 ATTR_CONTENT
-1,0
+10,73
 ARRAY.updateAll
 
 RPAREN
-1,0
+10,88
 )
 
 RBRACK
-1,0
+10,89
 ]
 
 KW_SYNTAX
@@ -557,31 +557,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+11,77
 function
 
 COMMA
-1,0
+11,85
 ,
 
 ATTR_KEY
-1,0
+11,87
 hook
 
 LPAREN
-1,0
+11,91
 (
 
 ATTR_CONTENT
-1,0
+11,92
 ARRAY.fill
 
 RPAREN
-1,0
+11,102
 )
 
 RBRACK
-1,0
+11,103
 ]
 
 KW_SYNTAX
@@ -621,39 +621,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+13,48
 function
 
 COMMA
-1,0
+13,56
 ,
 
 ATTR_KEY
-1,0
+13,58
 total
 
 COMMA
-1,0
+13,63
 ,
 
 ATTR_KEY
-1,0
+13,65
 hook
 
 LPAREN
-1,0
+13,69
 (
 
 ATTR_CONTENT
-1,0
+13,70
 ARRAY.in_keys
 
 RPAREN
-1,0
+13,83
 )
 
 RBRACK
-1,0
+13,84
 ]
 
 KW_ENDMODULE
@@ -673,11 +673,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+17,20
 private
 
 RBRACK
-1,0
+17,27
 ]
 
 KW_IMPORTS
@@ -797,39 +797,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+24,58
 function
 
 COMMA
-1,0
+24,66
 ,
 
 ATTR_KEY
-1,0
+24,68
 hook
 
 LPAREN
-1,0
+24,72
 (
 
 ATTR_CONTENT
-1,0
+24,73
 ARRAY.make
 
 RPAREN
-1,0
+24,83
 )
 
 COMMA
-1,0
+24,84
 ,
 
 ATTR_KEY
-1,0
+24,86
 public
 
 RBRACK
-1,0
+24,92
 ]
 
 KW_SYNTAX
@@ -901,15 +901,15 @@ BUBBLE
 arr(_      , _, D::KItem) [ _        ] => D
 
 LBRACK
-1,0
+30,57
 [
 
 ATTR_KEY
-1,0
+30,58
 owise
 
 RBRACK
-1,0
+30,63
 ]
 
 KW_SYNTAX
@@ -961,11 +961,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+32,55
 function
 
 RBRACK
-1,0
+32,63
 ]
 
 KW_RULE
@@ -1041,11 +1041,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+48,24
 symbolic
 
 RBRACK
-1,0
+48,32
 ]
 
 KW_IMPORTS
@@ -1073,11 +1073,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+53,20
 kore
 
 RBRACK
-1,0
+53,24
 ]
 
 KW_IMPORTS

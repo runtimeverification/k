@@ -126,23 +126,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+4,31
 hook
 
 LPAREN
-1,0
+4,35
 (
 
 ATTR_CONTENT
-1,0
+4,36
 MINT.MInt
 
 RPAREN
-1,0
+4,45
 )
 
 RBRACK
-1,0
+4,46
 ]
 
 KW_SYNTAX
@@ -190,51 +190,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+7,62
 token
 
 COMMA
-1,0
+7,67
 ,
 
 ATTR_KEY
-1,0
+7,69
 prec
 
 LPAREN
-1,0
+7,73
 (
 
 ATTR_CONTENT
-1,0
+7,74
 2
 
 RPAREN
-1,0
+7,75
 )
 
 COMMA
-1,0
+7,76
 ,
 
 ATTR_KEY
-1,0
+7,78
 hook
 
 LPAREN
-1,0
+7,82
 (
 
 ATTR_CONTENT
-1,0
+7,83
 MINT.literal
 
 RPAREN
-1,0
+7,95
 )
 
 RBRACK
-1,0
+7,96
 ]
 
 KW_ENDMODULE
@@ -338,39 +338,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+16,55
 function
 
 COMMA
-1,0
+16,63
 ,
 
 ATTR_KEY
-1,0
+16,65
 total
 
 COMMA
-1,0
+16,70
 ,
 
 ATTR_KEY
-1,0
+16,72
 hook
 
 LPAREN
-1,0
+16,76
 (
 
 ATTR_CONTENT
-1,0
+16,77
 MINT.bitwidth
 
 RPAREN
-1,0
+16,90
 )
 
 RBRACK
-1,0
+16,91
 ]
 
 KW_SYNTAX
@@ -430,39 +430,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+18,56
 function
 
 COMMA
-1,0
+18,64
 ,
 
 ATTR_KEY
-1,0
+18,66
 total
 
 COMMA
-1,0
+18,71
 ,
 
 ATTR_KEY
-1,0
+18,73
 hook
 
 LPAREN
-1,0
+18,77
 (
 
 ATTR_CONTENT
-1,0
+18,78
 MINT.svalue
 
 RPAREN
-1,0
+18,89
 )
 
 RBRACK
-1,0
+18,90
 ]
 
 VBAR
@@ -502,59 +502,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+19,58
 function
 
 COMMA
-1,0
+19,66
 ,
 
 ATTR_KEY
-1,0
+19,68
 total
 
 COMMA
-1,0
+19,73
 ,
 
 ATTR_KEY
-1,0
+19,75
 hook
 
 LPAREN
-1,0
+19,79
 (
 
 ATTR_CONTENT
-1,0
+19,80
 MINT.uvalue
 
 RPAREN
-1,0
+19,91
 )
 
 COMMA
-1,0
+19,92
 ,
 
 ATTR_KEY
-1,0
+19,94
 smt-hook
 
 LPAREN
-1,0
+19,102
 (
 
 ATTR_CONTENT
-1,0
+19,103
 bv2int
 
 RPAREN
-1,0
+19,109
 )
 
 RBRACK
-1,0
+19,110
 ]
 
 KW_SYNTAX
@@ -614,59 +614,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+21,49
 function
 
 COMMA
-1,0
+21,57
 ,
 
 ATTR_KEY
-1,0
+21,59
 total
 
 COMMA
-1,0
+21,64
 ,
 
 ATTR_KEY
-1,0
+21,66
 hook
 
 LPAREN
-1,0
+21,70
 (
 
 ATTR_CONTENT
-1,0
+21,71
 MINT.integer
 
 RPAREN
-1,0
+21,83
 )
 
 COMMA
-1,0
+21,84
 ,
 
 ATTR_KEY
-1,0
+21,86
 smt-hook
 
 LPAREN
-1,0
+21,94
 (
 
 ATTR_CONTENT
-1,0
+21,95
 int2bv
 
 RPAREN
-1,0
+21,101
 )
 
 RBRACK
-1,0
+21,102
 ]
 
 KW_SYNTAX
@@ -702,11 +702,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+23,36
 function
 
 RBRACK
-1,0
+23,44
 ]
 
 VBAR
@@ -734,11 +734,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+24,36
 function
 
 RBRACK
-1,0
+24,44
 ]
 
 VBAR
@@ -766,11 +766,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+25,36
 function
 
 RBRACK
-1,0
+25,44
 ]
 
 VBAR
@@ -798,11 +798,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+26,36
 function
 
 RBRACK
-1,0
+26,44
 ]
 
 KW_RULE
@@ -886,11 +886,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+32,53
 function
 
 RBRACK
-1,0
+32,61
 ]
 
 VBAR
@@ -934,11 +934,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+33,53
 function
 
 RBRACK
-1,0
+33,61
 ]
 
 KW_RULE
@@ -946,7 +946,7 @@ KW_RULE
 rule
 
 BUBBLE
-36,4
+35,5
 soverflowMInt(N:Int, I:Int)
   =>
     I <Int sminMInt(N) orBool I >Int smaxMInt(N)
@@ -956,7 +956,7 @@ KW_RULE
 rule
 
 BUBBLE
-40,4
+39,5
 uoverflowMInt(N:Int, I:Int)
   =>
     I <Int uminMInt(N) orBool I >Int umaxMInt(N)
@@ -1022,59 +1022,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+43,55
 function
 
 COMMA
-1,0
+43,63
 ,
 
 ATTR_KEY
-1,0
+43,65
 total
 
 COMMA
-1,0
+43,70
 ,
 
 ATTR_KEY
-1,0
+43,72
 hook
 
 LPAREN
-1,0
+43,76
 (
 
 ATTR_CONTENT
-1,0
+43,77
 MINT.not
 
 RPAREN
-1,0
+43,85
 )
 
 COMMA
-1,0
+43,86
 ,
 
 ATTR_KEY
-1,0
+43,88
 smt-hook
 
 LPAREN
-1,0
+43,96
 (
 
 ATTR_CONTENT
-1,0
+43,97
 bvnot
 
 RPAREN
-1,0
+43,102
 )
 
 RBRACK
-1,0
+43,103
 ]
 
 VBAR
@@ -1106,59 +1106,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+44,56
 function
 
 COMMA
-1,0
+44,64
 ,
 
 ATTR_KEY
-1,0
+44,66
 total
 
 COMMA
-1,0
+44,71
 ,
 
 ATTR_KEY
-1,0
+44,73
 hook
 
 LPAREN
-1,0
+44,77
 (
 
 ATTR_CONTENT
-1,0
+44,78
 MINT.neg
 
 RPAREN
-1,0
+44,86
 )
 
 COMMA
-1,0
+44,87
 ,
 
 ATTR_KEY
-1,0
+44,89
 smt-hook
 
 LPAREN
-1,0
+44,97
 (
 
 ATTR_CONTENT
-1,0
+44,98
 bvuminus
 
 RPAREN
-1,0
+44,106
 )
 
 RBRACK
-1,0
+44,107
 ]
 
 GT
@@ -1214,59 +1214,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+46,67
 function
 
 COMMA
-1,0
+46,75
 ,
 
 ATTR_KEY
-1,0
+46,77
 total
 
 COMMA
-1,0
+46,82
 ,
 
 ATTR_KEY
-1,0
+46,84
 hook
 
 LPAREN
-1,0
+46,88
 (
 
 ATTR_CONTENT
-1,0
+46,89
 MINT.mul
 
 RPAREN
-1,0
+46,97
 )
 
 COMMA
-1,0
+46,98
 ,
 
 ATTR_KEY
-1,0
+46,100
 smt-hook
 
 LPAREN
-1,0
+46,108
 (
 
 ATTR_CONTENT
-1,0
+46,109
 bvmul
 
 RPAREN
-1,0
+46,114
 )
 
 RBRACK
-1,0
+46,115
 ]
 
 VBAR
@@ -1314,51 +1314,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+47,68
 function
 
 COMMA
-1,0
+47,76
 ,
 
 ATTR_KEY
-1,0
+47,78
 hook
 
 LPAREN
-1,0
+47,82
 (
 
 ATTR_CONTENT
-1,0
+47,83
 MINT.sdiv
 
 RPAREN
-1,0
+47,92
 )
 
 COMMA
-1,0
+47,93
 ,
 
 ATTR_KEY
-1,0
+47,95
 smt-hook
 
 LPAREN
-1,0
+47,103
 (
 
 ATTR_CONTENT
-1,0
+47,104
 bvsdiv
 
 RPAREN
-1,0
+47,110
 )
 
 RBRACK
-1,0
+47,111
 ]
 
 VBAR
@@ -1406,51 +1406,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+48,68
 function
 
 COMMA
-1,0
+48,76
 ,
 
 ATTR_KEY
-1,0
+48,78
 hook
 
 LPAREN
-1,0
+48,82
 (
 
 ATTR_CONTENT
-1,0
+48,83
 MINT.srem
 
 RPAREN
-1,0
+48,92
 )
 
 COMMA
-1,0
+48,93
 ,
 
 ATTR_KEY
-1,0
+48,95
 smt-hook
 
 LPAREN
-1,0
+48,103
 (
 
 ATTR_CONTENT
-1,0
+48,104
 bvsrem
 
 RPAREN
-1,0
+48,110
 )
 
 RBRACK
-1,0
+48,111
 ]
 
 VBAR
@@ -1498,51 +1498,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+49,68
 function
 
 COMMA
-1,0
+49,76
 ,
 
 ATTR_KEY
-1,0
+49,78
 hook
 
 LPAREN
-1,0
+49,82
 (
 
 ATTR_CONTENT
-1,0
+49,83
 MINT.udiv
 
 RPAREN
-1,0
+49,92
 )
 
 COMMA
-1,0
+49,93
 ,
 
 ATTR_KEY
-1,0
+49,95
 smt-hook
 
 LPAREN
-1,0
+49,103
 (
 
 ATTR_CONTENT
-1,0
+49,104
 bvudiv
 
 RPAREN
-1,0
+49,110
 )
 
 RBRACK
-1,0
+49,111
 ]
 
 VBAR
@@ -1590,51 +1590,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+50,68
 function
 
 COMMA
-1,0
+50,76
 ,
 
 ATTR_KEY
-1,0
+50,78
 hook
 
 LPAREN
-1,0
+50,82
 (
 
 ATTR_CONTENT
-1,0
+50,83
 MINT.urem
 
 RPAREN
-1,0
+50,92
 )
 
 COMMA
-1,0
+50,93
 ,
 
 ATTR_KEY
-1,0
+50,95
 smt-hook
 
 LPAREN
-1,0
+50,103
 (
 
 ATTR_CONTENT
-1,0
+50,104
 bvurem
 
 RPAREN
-1,0
+50,110
 )
 
 RBRACK
-1,0
+50,111
 ]
 
 GT
@@ -1690,59 +1690,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+52,67
 function
 
 COMMA
-1,0
+52,75
 ,
 
 ATTR_KEY
-1,0
+52,77
 total
 
 COMMA
-1,0
+52,82
 ,
 
 ATTR_KEY
-1,0
+52,84
 hook
 
 LPAREN
-1,0
+52,88
 (
 
 ATTR_CONTENT
-1,0
+52,89
 MINT.add
 
 RPAREN
-1,0
+52,97
 )
 
 COMMA
-1,0
+52,98
 ,
 
 ATTR_KEY
-1,0
+52,100
 smt-hook
 
 LPAREN
-1,0
+52,108
 (
 
 ATTR_CONTENT
-1,0
+52,109
 bvadd
 
 RPAREN
-1,0
+52,114
 )
 
 RBRACK
-1,0
+52,115
 ]
 
 VBAR
@@ -1790,59 +1790,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+53,67
 function
 
 COMMA
-1,0
+53,75
 ,
 
 ATTR_KEY
-1,0
+53,77
 total
 
 COMMA
-1,0
+53,82
 ,
 
 ATTR_KEY
-1,0
+53,84
 hook
 
 LPAREN
-1,0
+53,88
 (
 
 ATTR_CONTENT
-1,0
+53,89
 MINT.sub
 
 RPAREN
-1,0
+53,97
 )
 
 COMMA
-1,0
+53,98
 ,
 
 ATTR_KEY
-1,0
+53,100
 smt-hook
 
 LPAREN
-1,0
+53,108
 (
 
 ATTR_CONTENT
-1,0
+53,109
 bvsub
 
 RPAREN
-1,0
+53,114
 )
 
 RBRACK
-1,0
+53,115
 ]
 
 GT
@@ -1898,51 +1898,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+55,68
 function
 
 COMMA
-1,0
+55,76
 ,
 
 ATTR_KEY
-1,0
+55,78
 hook
 
 LPAREN
-1,0
+55,82
 (
 
 ATTR_CONTENT
-1,0
+55,83
 MINT.shl
 
 RPAREN
-1,0
+55,91
 )
 
 COMMA
-1,0
+55,92
 ,
 
 ATTR_KEY
-1,0
+55,94
 smt-hook
 
 LPAREN
-1,0
+55,102
 (
 
 ATTR_CONTENT
-1,0
+55,103
 bvshl
 
 RPAREN
-1,0
+55,108
 )
 
 RBRACK
-1,0
+55,109
 ]
 
 VBAR
@@ -1990,51 +1990,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+56,69
 function
 
 COMMA
-1,0
+56,77
 ,
 
 ATTR_KEY
-1,0
+56,79
 hook
 
 LPAREN
-1,0
+56,83
 (
 
 ATTR_CONTENT
-1,0
+56,84
 MINT.ashr
 
 RPAREN
-1,0
+56,93
 )
 
 COMMA
-1,0
+56,94
 ,
 
 ATTR_KEY
-1,0
+56,96
 smt-hook
 
 LPAREN
-1,0
+56,104
 (
 
 ATTR_CONTENT
-1,0
+56,105
 bvashr
 
 RPAREN
-1,0
+56,111
 )
 
 RBRACK
-1,0
+56,112
 ]
 
 VBAR
@@ -2082,51 +2082,51 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+57,69
 function
 
 COMMA
-1,0
+57,77
 ,
 
 ATTR_KEY
-1,0
+57,79
 hook
 
 LPAREN
-1,0
+57,83
 (
 
 ATTR_CONTENT
-1,0
+57,84
 MINT.lshr
 
 RPAREN
-1,0
+57,93
 )
 
 COMMA
-1,0
+57,94
 ,
 
 ATTR_KEY
-1,0
+57,96
 smt-hook
 
 LPAREN
-1,0
+57,104
 (
 
 ATTR_CONTENT
-1,0
+57,105
 bvlshr
 
 RPAREN
-1,0
+57,111
 )
 
 RBRACK
-1,0
+57,112
 ]
 
 GT
@@ -2182,59 +2182,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+59,67
 function
 
 COMMA
-1,0
+59,75
 ,
 
 ATTR_KEY
-1,0
+59,77
 total
 
 COMMA
-1,0
+59,82
 ,
 
 ATTR_KEY
-1,0
+59,84
 hook
 
 LPAREN
-1,0
+59,88
 (
 
 ATTR_CONTENT
-1,0
+59,89
 MINT.and
 
 RPAREN
-1,0
+59,97
 )
 
 COMMA
-1,0
+59,98
 ,
 
 ATTR_KEY
-1,0
+59,100
 smt-hook
 
 LPAREN
-1,0
+59,108
 (
 
 ATTR_CONTENT
-1,0
+59,109
 bvand
 
 RPAREN
-1,0
+59,114
 )
 
 RBRACK
-1,0
+59,115
 ]
 
 GT
@@ -2290,59 +2290,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+61,69
 function
 
 COMMA
-1,0
+61,77
 ,
 
 ATTR_KEY
-1,0
+61,79
 total
 
 COMMA
-1,0
+61,84
 ,
 
 ATTR_KEY
-1,0
+61,86
 hook
 
 LPAREN
-1,0
+61,90
 (
 
 ATTR_CONTENT
-1,0
+61,91
 MINT.xor
 
 RPAREN
-1,0
+61,99
 )
 
 COMMA
-1,0
+61,100
 ,
 
 ATTR_KEY
-1,0
+61,102
 smt-hook
 
 LPAREN
-1,0
+61,110
 (
 
 ATTR_CONTENT
-1,0
+61,111
 bvxor
 
 RPAREN
-1,0
+61,116
 )
 
 RBRACK
-1,0
+61,117
 ]
 
 GT
@@ -2398,59 +2398,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+63,67
 function
 
 COMMA
-1,0
+63,75
 ,
 
 ATTR_KEY
-1,0
+63,77
 total
 
 COMMA
-1,0
+63,82
 ,
 
 ATTR_KEY
-1,0
+63,84
 hook
 
 LPAREN
-1,0
+63,88
 (
 
 ATTR_CONTENT
-1,0
+63,89
 MINT.or
 
 RPAREN
-1,0
+63,96
 )
 
 COMMA
-1,0
+63,97
 ,
 
 ATTR_KEY
-1,0
+63,99
 smt-hook
 
 LPAREN
-1,0
+63,107
 (
 
 ATTR_CONTENT
-1,0
+63,108
 bvor
 
 RPAREN
-1,0
+63,112
 )
 
 RBRACK
-1,0
+63,113
 ]
 
 KW_SYNTAX
@@ -2518,59 +2518,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+65,61
 function
 
 COMMA
-1,0
+65,69
 ,
 
 ATTR_KEY
-1,0
+65,71
 total
 
 COMMA
-1,0
+65,76
 ,
 
 ATTR_KEY
-1,0
+65,78
 hook
 
 LPAREN
-1,0
+65,82
 (
 
 ATTR_CONTENT
-1,0
+65,83
 MINT.slt
 
 RPAREN
-1,0
+65,91
 )
 
 COMMA
-1,0
+65,92
 ,
 
 ATTR_KEY
-1,0
+65,94
 smt-hook
 
 LPAREN
-1,0
+65,102
 (
 
 ATTR_CONTENT
-1,0
+65,103
 bvslt
 
 RPAREN
-1,0
+65,108
 )
 
 RBRACK
-1,0
+65,109
 ]
 
 VBAR
@@ -2618,59 +2618,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+66,61
 function
 
 COMMA
-1,0
+66,69
 ,
 
 ATTR_KEY
-1,0
+66,71
 total
 
 COMMA
-1,0
+66,76
 ,
 
 ATTR_KEY
-1,0
+66,78
 hook
 
 LPAREN
-1,0
+66,82
 (
 
 ATTR_CONTENT
-1,0
+66,83
 MINT.ult
 
 RPAREN
-1,0
+66,91
 )
 
 COMMA
-1,0
+66,92
 ,
 
 ATTR_KEY
-1,0
+66,94
 smt-hook
 
 LPAREN
-1,0
+66,102
 (
 
 ATTR_CONTENT
-1,0
+66,103
 bvult
 
 RPAREN
-1,0
+66,108
 )
 
 RBRACK
-1,0
+66,109
 ]
 
 VBAR
@@ -2718,59 +2718,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+67,62
 function
 
 COMMA
-1,0
+67,70
 ,
 
 ATTR_KEY
-1,0
+67,72
 total
 
 COMMA
-1,0
+67,77
 ,
 
 ATTR_KEY
-1,0
+67,79
 hook
 
 LPAREN
-1,0
+67,83
 (
 
 ATTR_CONTENT
-1,0
+67,84
 MINT.sle
 
 RPAREN
-1,0
+67,92
 )
 
 COMMA
-1,0
+67,93
 ,
 
 ATTR_KEY
-1,0
+67,95
 smt-hook
 
 LPAREN
-1,0
+67,103
 (
 
 ATTR_CONTENT
-1,0
+67,104
 bvsle
 
 RPAREN
-1,0
+67,109
 )
 
 RBRACK
-1,0
+67,110
 ]
 
 VBAR
@@ -2818,59 +2818,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+68,62
 function
 
 COMMA
-1,0
+68,70
 ,
 
 ATTR_KEY
-1,0
+68,72
 total
 
 COMMA
-1,0
+68,77
 ,
 
 ATTR_KEY
-1,0
+68,79
 hook
 
 LPAREN
-1,0
+68,83
 (
 
 ATTR_CONTENT
-1,0
+68,84
 MINT.ule
 
 RPAREN
-1,0
+68,92
 )
 
 COMMA
-1,0
+68,93
 ,
 
 ATTR_KEY
-1,0
+68,95
 smt-hook
 
 LPAREN
-1,0
+68,103
 (
 
 ATTR_CONTENT
-1,0
+68,104
 bvule
 
 RPAREN
-1,0
+68,109
 )
 
 RBRACK
-1,0
+68,110
 ]
 
 VBAR
@@ -2918,59 +2918,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+69,61
 function
 
 COMMA
-1,0
+69,69
 ,
 
 ATTR_KEY
-1,0
+69,71
 total
 
 COMMA
-1,0
+69,76
 ,
 
 ATTR_KEY
-1,0
+69,78
 hook
 
 LPAREN
-1,0
+69,82
 (
 
 ATTR_CONTENT
-1,0
+69,83
 MINT.sgt
 
 RPAREN
-1,0
+69,91
 )
 
 COMMA
-1,0
+69,92
 ,
 
 ATTR_KEY
-1,0
+69,94
 smt-hook
 
 LPAREN
-1,0
+69,102
 (
 
 ATTR_CONTENT
-1,0
+69,103
 bvsgt
 
 RPAREN
-1,0
+69,108
 )
 
 RBRACK
-1,0
+69,109
 ]
 
 VBAR
@@ -3018,59 +3018,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+70,61
 function
 
 COMMA
-1,0
+70,69
 ,
 
 ATTR_KEY
-1,0
+70,71
 total
 
 COMMA
-1,0
+70,76
 ,
 
 ATTR_KEY
-1,0
+70,78
 hook
 
 LPAREN
-1,0
+70,82
 (
 
 ATTR_CONTENT
-1,0
+70,83
 MINT.ugt
 
 RPAREN
-1,0
+70,91
 )
 
 COMMA
-1,0
+70,92
 ,
 
 ATTR_KEY
-1,0
+70,94
 smt-hook
 
 LPAREN
-1,0
+70,102
 (
 
 ATTR_CONTENT
-1,0
+70,103
 bvugt
 
 RPAREN
-1,0
+70,108
 )
 
 RBRACK
-1,0
+70,109
 ]
 
 VBAR
@@ -3118,59 +3118,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+71,62
 function
 
 COMMA
-1,0
+71,70
 ,
 
 ATTR_KEY
-1,0
+71,72
 total
 
 COMMA
-1,0
+71,77
 ,
 
 ATTR_KEY
-1,0
+71,79
 hook
 
 LPAREN
-1,0
+71,83
 (
 
 ATTR_CONTENT
-1,0
+71,84
 MINT.sge
 
 RPAREN
-1,0
+71,92
 )
 
 COMMA
-1,0
+71,93
 ,
 
 ATTR_KEY
-1,0
+71,95
 smt-hook
 
 LPAREN
-1,0
+71,103
 (
 
 ATTR_CONTENT
-1,0
+71,104
 bvsge
 
 RPAREN
-1,0
+71,109
 )
 
 RBRACK
-1,0
+71,110
 ]
 
 VBAR
@@ -3218,59 +3218,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+72,62
 function
 
 COMMA
-1,0
+72,70
 ,
 
 ATTR_KEY
-1,0
+72,72
 total
 
 COMMA
-1,0
+72,77
 ,
 
 ATTR_KEY
-1,0
+72,79
 hook
 
 LPAREN
-1,0
+72,83
 (
 
 ATTR_CONTENT
-1,0
+72,84
 MINT.uge
 
 RPAREN
-1,0
+72,92
 )
 
 COMMA
-1,0
+72,93
 ,
 
 ATTR_KEY
-1,0
+72,95
 smt-hook
 
 LPAREN
-1,0
+72,103
 (
 
 ATTR_CONTENT
-1,0
+72,104
 bvuge
 
 RPAREN
-1,0
+72,109
 )
 
 RBRACK
-1,0
+72,110
 ]
 
 VBAR
@@ -3318,59 +3318,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+73,61
 function
 
 COMMA
-1,0
+73,69
 ,
 
 ATTR_KEY
-1,0
+73,71
 total
 
 COMMA
-1,0
+73,76
 ,
 
 ATTR_KEY
-1,0
+73,78
 hook
 
 LPAREN
-1,0
+73,82
 (
 
 ATTR_CONTENT
-1,0
+73,83
 MINT.eq
 
 RPAREN
-1,0
+73,90
 )
 
 COMMA
-1,0
+73,91
 ,
 
 ATTR_KEY
-1,0
+73,93
 smt-hook
 
 LPAREN
-1,0
+73,101
 (
 
 ATTR_CONTENT
-1,0
+73,102
 =
 
 RPAREN
-1,0
+73,103
 )
 
 RBRACK
-1,0
+73,104
 ]
 
 VBAR
@@ -3418,59 +3418,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+74,62
 function
 
 COMMA
-1,0
+74,70
 ,
 
 ATTR_KEY
-1,0
+74,72
 total
 
 COMMA
-1,0
+74,77
 ,
 
 ATTR_KEY
-1,0
+74,79
 hook
 
 LPAREN
-1,0
+74,83
 (
 
 ATTR_CONTENT
-1,0
+74,84
 MINT.ne
 
 RPAREN
-1,0
+74,91
 )
 
 COMMA
-1,0
+74,92
 ,
 
 ATTR_KEY
-1,0
+74,94
 smt-hook
 
 LPAREN
-1,0
+74,102
 (
 
 ATTR_CONTENT
-1,0
+74,103
 distinct
 
 RPAREN
-1,0
+74,111
 )
 
 RBRACK
-1,0
+74,112
 ]
 
 KW_SYNTAX
@@ -3562,59 +3562,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+76,70
 function
 
 COMMA
-1,0
+76,78
 ,
 
 ATTR_KEY
-1,0
+76,80
 total
 
 COMMA
-1,0
+76,85
 ,
 
 ATTR_KEY
-1,0
+76,87
 hook
 
 LPAREN
-1,0
+76,91
 (
 
 ATTR_CONTENT
-1,0
+76,92
 MINT.smax
 
 RPAREN
-1,0
+76,101
 )
 
 COMMA
-1,0
+76,102
 ,
 
 ATTR_KEY
-1,0
+76,104
 smt-hook
 
 LPAREN
-1,0
+76,112
 (
 
 ATTR_CONTENT
-1,0
+76,113
 (ite (bvslt #1 #2) #2 #1)
 
 RPAREN
-1,0
+76,138
 )
 
 RBRACK
-1,0
+76,139
 ]
 
 VBAR
@@ -3674,59 +3674,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+77,70
 function
 
 COMMA
-1,0
+77,78
 ,
 
 ATTR_KEY
-1,0
+77,80
 total
 
 COMMA
-1,0
+77,85
 ,
 
 ATTR_KEY
-1,0
+77,87
 hook
 
 LPAREN
-1,0
+77,91
 (
 
 ATTR_CONTENT
-1,0
+77,92
 MINT.smin
 
 RPAREN
-1,0
+77,101
 )
 
 COMMA
-1,0
+77,102
 ,
 
 ATTR_KEY
-1,0
+77,104
 smt-hook
 
 LPAREN
-1,0
+77,112
 (
 
 ATTR_CONTENT
-1,0
+77,113
 (ite (bvslt #1 #2) #1 #2)
 
 RPAREN
-1,0
+77,138
 )
 
 RBRACK
-1,0
+77,139
 ]
 
 VBAR
@@ -3786,59 +3786,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+78,70
 function
 
 COMMA
-1,0
+78,78
 ,
 
 ATTR_KEY
-1,0
+78,80
 total
 
 COMMA
-1,0
+78,85
 ,
 
 ATTR_KEY
-1,0
+78,87
 hook
 
 LPAREN
-1,0
+78,91
 (
 
 ATTR_CONTENT
-1,0
+78,92
 MINT.umax
 
 RPAREN
-1,0
+78,101
 )
 
 COMMA
-1,0
+78,102
 ,
 
 ATTR_KEY
-1,0
+78,104
 smt-hook
 
 LPAREN
-1,0
+78,112
 (
 
 ATTR_CONTENT
-1,0
+78,113
 (ite (bvult #1 #2) #2 #1)
 
 RPAREN
-1,0
+78,138
 )
 
 RBRACK
-1,0
+78,139
 ]
 
 VBAR
@@ -3898,59 +3898,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+79,70
 function
 
 COMMA
-1,0
+79,78
 ,
 
 ATTR_KEY
-1,0
+79,80
 total
 
 COMMA
-1,0
+79,85
 ,
 
 ATTR_KEY
-1,0
+79,87
 hook
 
 LPAREN
-1,0
+79,91
 (
 
 ATTR_CONTENT
-1,0
+79,92
 MINT.umin
 
 RPAREN
-1,0
+79,101
 )
 
 COMMA
-1,0
+79,102
 ,
 
 ATTR_KEY
-1,0
+79,104
 smt-hook
 
 LPAREN
-1,0
+79,112
 (
 
 ATTR_CONTENT
-1,0
+79,113
 (ite (bvult #1 #2) #1 #2)
 
 RPAREN
-1,0
+79,138
 )
 
 RBRACK
-1,0
+79,139
 ]
 
 KW_SYNTAX
@@ -4030,39 +4030,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+81,69
 function
 
 COMMA
-1,0
+81,77
 ,
 
 ATTR_KEY
-1,0
+81,79
 total
 
 COMMA
-1,0
+81,84
 ,
 
 ATTR_KEY
-1,0
+81,86
 hook
 
 LPAREN
-1,0
+81,90
 (
 
 ATTR_CONTENT
-1,0
+81,91
 MINT.round
 
 RPAREN
-1,0
+81,101
 )
 
 RBRACK
-1,0
+81,102
 ]
 
 KW_ENDMODULE

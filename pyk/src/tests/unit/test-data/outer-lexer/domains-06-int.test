@@ -184,23 +184,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+2,15
 hook
 
 LPAREN
-1,0
+2,19
 (
 
 ATTR_CONTENT
-1,0
+2,20
 INT.Int
 
 RPAREN
-1,0
+2,27
 )
 
 RBRACK
-1,0
+2,28
 ]
 
 KW_SYNTAX
@@ -224,39 +224,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+3,29
 prefer
 
 COMMA
-1,0
+3,35
 ,
 
 ATTR_KEY
-1,0
+3,37
 token
 
 COMMA
-1,0
+3,42
 ,
 
 ATTR_KEY
-1,0
+3,44
 prec
 
 LPAREN
-1,0
+3,48
 (
 
 ATTR_CONTENT
-1,0
+3,49
 2
 
 RPAREN
-1,0
+3,50
 )
 
 RBRACK
-1,0
+3,51
 ]
 
 KW_ENDMODULE
@@ -300,39 +300,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+9,36
 prefer
 
 COMMA
-1,0
+9,42
 ,
 
 ATTR_KEY
-1,0
+9,44
 token
 
 COMMA
-1,0
+9,49
 ,
 
 ATTR_KEY
-1,0
+9,51
 prec
 
 LPAREN
-1,0
+9,55
 (
 
 ATTR_CONTENT
-1,0
+9,56
 2
 
 RPAREN
-1,0
+9,57
 )
 
 RBRACK
-1,0
+9,58
 ]
 
 KW_ENDMODULE
@@ -392,107 +392,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+17,50
 function
 
 COMMA
-1,0
+17,58
 ,
 
 ATTR_KEY
-1,0
+17,60
 klabel
 
 LPAREN
-1,0
+17,66
 (
 
 ATTR_CONTENT
-1,0
+17,67
 ~Int_
 
 RPAREN
-1,0
+17,72
 )
 
 COMMA
-1,0
+17,73
 ,
 
 ATTR_KEY
-1,0
+17,75
 symbol
 
 COMMA
-1,0
+17,81
 ,
 
 ATTR_KEY
-1,0
+17,83
 total
 
 COMMA
-1,0
+17,88
 ,
 
 ATTR_KEY
-1,0
+17,90
 latex
 
 LPAREN
-1,0
+17,95
 (
 
 ATTR_CONTENT
-1,0
+17,96
 \mathop{\sim_{\scriptstyle\it Int}}{#1}
 
 RPAREN
-1,0
+17,135
 )
 
 COMMA
-1,0
+17,136
 ,
 
 ATTR_KEY
-1,0
+17,138
 hook
 
 LPAREN
-1,0
+17,142
 (
 
 ATTR_CONTENT
-1,0
+17,143
 INT.not
 
 RPAREN
-1,0
+17,150
 )
 
 COMMA
-1,0
+17,151
 ,
 
 ATTR_KEY
-1,0
+17,153
 smtlib
 
 LPAREN
-1,0
+17,159
 (
 
 ATTR_CONTENT
-1,0
+17,160
 notInt
 
 RPAREN
-1,0
+17,166
 )
 
 RBRACK
-1,0
+17,167
 ]
 
 GT
@@ -524,107 +524,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+19,50
 function
 
 COMMA
-1,0
+19,58
 ,
 
 ATTR_KEY
-1,0
+19,60
 klabel
 
 LPAREN
-1,0
+19,66
 (
 
 ATTR_CONTENT
-1,0
+19,67
 _^Int_
 
 RPAREN
-1,0
+19,73
 )
 
 COMMA
-1,0
+19,74
 ,
 
 ATTR_KEY
-1,0
+19,76
 symbol
 
 COMMA
-1,0
+19,82
 ,
 
 ATTR_KEY
-1,0
+19,84
 left
 
 COMMA
-1,0
+19,88
 ,
 
 ATTR_KEY
-1,0
+19,90
 smt-hook
 
 LPAREN
-1,0
+19,98
 (
 
 ATTR_CONTENT
-1,0
+19,99
 ^
 
 RPAREN
-1,0
+19,100
 )
 
 COMMA
-1,0
+19,101
 ,
 
 ATTR_KEY
-1,0
+19,103
 latex
 
 LPAREN
-1,0
+19,108
 (
 
 ATTR_CONTENT
-1,0
+19,109
 {#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+19,161
 )
 
 COMMA
-1,0
+19,162
 ,
 
 ATTR_KEY
-1,0
+19,164
 hook
 
 LPAREN
-1,0
+19,168
 (
 
 ATTR_CONTENT
-1,0
+19,169
 INT.pow
 
 RPAREN
-1,0
+19,176
 )
 
 RBRACK
-1,0
+19,177
 ]
 
 VBAR
@@ -652,87 +652,87 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+20,50
 function
 
 COMMA
-1,0
+20,58
 ,
 
 ATTR_KEY
-1,0
+20,60
 klabel
 
 LPAREN
-1,0
+20,66
 (
 
 ATTR_CONTENT
-1,0
+20,67
 _^%Int__
 
 RPAREN
-1,0
+20,75
 )
 
 COMMA
-1,0
+20,76
 ,
 
 ATTR_KEY
-1,0
+20,78
 symbol
 
 COMMA
-1,0
+20,84
 ,
 
 ATTR_KEY
-1,0
+20,86
 left
 
 COMMA
-1,0
+20,90
 ,
 
 ATTR_KEY
-1,0
+20,92
 smt-hook
 
 LPAREN
-1,0
+20,100
 (
 
 ATTR_CONTENT
-1,0
+20,101
 (mod (^ #1 #2) #3)
 
 RPAREN
-1,0
+20,119
 )
 
 COMMA
-1,0
+20,120
 ,
 
 ATTR_KEY
-1,0
+20,122
 hook
 
 LPAREN
-1,0
+20,126
 (
 
 ATTR_CONTENT
-1,0
+20,127
 INT.powmod
 
 RPAREN
-1,0
+20,137
 )
 
 RBRACK
-1,0
+20,138
 ]
 
 GT
@@ -764,123 +764,123 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+22,50
 function
 
 COMMA
-1,0
+22,58
 ,
 
 ATTR_KEY
-1,0
+22,60
 total
 
 COMMA
-1,0
+22,65
 ,
 
 ATTR_KEY
-1,0
+22,67
 klabel
 
 LPAREN
-1,0
+22,73
 (
 
 ATTR_CONTENT
-1,0
+22,74
 _*Int_
 
 RPAREN
-1,0
+22,80
 )
 
 COMMA
-1,0
+22,81
 ,
 
 ATTR_KEY
-1,0
+22,83
 symbol
 
 COMMA
-1,0
+22,89
 ,
 
 ATTR_KEY
-1,0
+22,91
 left
 
 COMMA
-1,0
+22,95
 ,
 
 ATTR_KEY
-1,0
+22,97
 comm
 
 COMMA
-1,0
+22,101
 ,
 
 ATTR_KEY
-1,0
+22,103
 smt-hook
 
 LPAREN
-1,0
+22,111
 (
 
 ATTR_CONTENT
-1,0
+22,112
 *
 
 RPAREN
-1,0
+22,113
 )
 
 COMMA
-1,0
+22,114
 ,
 
 ATTR_KEY
-1,0
+22,116
 latex
 
 LPAREN
-1,0
+22,121
 (
 
 ATTR_CONTENT
-1,0
+22,122
 {#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+22,166
 )
 
 COMMA
-1,0
+22,167
 ,
 
 ATTR_KEY
-1,0
+22,169
 hook
 
 LPAREN
-1,0
+22,173
 (
 
 ATTR_CONTENT
-1,0
+22,174
 INT.mul
 
 RPAREN
-1,0
+22,181
 )
 
 RBRACK
-1,0
+22,182
 ]
 
 VBAR
@@ -904,107 +904,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+25,50
 function
 
 COMMA
-1,0
+25,58
 ,
 
 ATTR_KEY
-1,0
+25,60
 klabel
 
 LPAREN
-1,0
+25,66
 (
 
 ATTR_CONTENT
-1,0
+25,67
 _/Int_
 
 RPAREN
-1,0
+25,73
 )
 
 COMMA
-1,0
+25,74
 ,
 
 ATTR_KEY
-1,0
+25,76
 symbol
 
 COMMA
-1,0
+25,82
 ,
 
 ATTR_KEY
-1,0
+25,84
 left
 
 COMMA
-1,0
+25,88
 ,
 
 ATTR_KEY
-1,0
+25,90
 smt-hook
 
 LPAREN
-1,0
+25,98
 (
 
 ATTR_CONTENT
-1,0
+25,99
 div
 
 RPAREN
-1,0
+25,102
 )
 
 COMMA
-1,0
+25,103
 ,
 
 ATTR_KEY
-1,0
+25,105
 latex
 
 LPAREN
-1,0
+25,110
 (
 
 ATTR_CONTENT
-1,0
+25,111
 {#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+25,155
 )
 
 COMMA
-1,0
+25,156
 ,
 
 ATTR_KEY
-1,0
+25,158
 hook
 
 LPAREN
-1,0
+25,162
 (
 
 ATTR_CONTENT
-1,0
+25,163
 INT.tdiv
 
 RPAREN
-1,0
+25,171
 )
 
 RBRACK
-1,0
+25,172
 ]
 
 VBAR
@@ -1028,107 +1028,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+26,50
 function
 
 COMMA
-1,0
+26,58
 ,
 
 ATTR_KEY
-1,0
+26,60
 klabel
 
 LPAREN
-1,0
+26,66
 (
 
 ATTR_CONTENT
-1,0
+26,67
 _%Int_
 
 RPAREN
-1,0
+26,73
 )
 
 COMMA
-1,0
+26,74
 ,
 
 ATTR_KEY
-1,0
+26,76
 symbol
 
 COMMA
-1,0
+26,82
 ,
 
 ATTR_KEY
-1,0
+26,84
 left
 
 COMMA
-1,0
+26,88
 ,
 
 ATTR_KEY
-1,0
+26,90
 smt-hook
 
 LPAREN
-1,0
+26,98
 (
 
 ATTR_CONTENT
-1,0
+26,99
 mod
 
 RPAREN
-1,0
+26,102
 )
 
 COMMA
-1,0
+26,103
 ,
 
 ATTR_KEY
-1,0
+26,105
 latex
 
 LPAREN
-1,0
+26,110
 (
 
 ATTR_CONTENT
-1,0
+26,111
 {#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+26,153
 )
 
 COMMA
-1,0
+26,154
 ,
 
 ATTR_KEY
-1,0
+26,156
 hook
 
 LPAREN
-1,0
+26,160
 (
 
 ATTR_CONTENT
-1,0
+26,161
 INT.tmod
 
 RPAREN
-1,0
+26,169
 )
 
 RBRACK
-1,0
+26,170
 ]
 
 VBAR
@@ -1152,87 +1152,87 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+28,50
 function
 
 COMMA
-1,0
+28,58
 ,
 
 ATTR_KEY
-1,0
+28,60
 klabel
 
 LPAREN
-1,0
+28,66
 (
 
 ATTR_CONTENT
-1,0
+28,67
 _divInt_
 
 RPAREN
-1,0
+28,75
 )
 
 COMMA
-1,0
+28,76
 ,
 
 ATTR_KEY
-1,0
+28,78
 symbol
 
 COMMA
-1,0
+28,84
 ,
 
 ATTR_KEY
-1,0
+28,86
 left
 
 COMMA
-1,0
+28,90
 ,
 
 ATTR_KEY
-1,0
+28,92
 smt-hook
 
 LPAREN
-1,0
+28,100
 (
 
 ATTR_CONTENT
-1,0
+28,101
 div
 
 RPAREN
-1,0
+28,104
 )
 
 COMMA
-1,0
+28,105
 ,
 
 ATTR_KEY
-1,0
+28,107
 hook
 
 LPAREN
-1,0
+28,111
 (
 
 ATTR_CONTENT
-1,0
+28,112
 INT.ediv
 
 RPAREN
-1,0
+28,120
 )
 
 RBRACK
-1,0
+28,121
 ]
 
 VBAR
@@ -1256,87 +1256,87 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+29,50
 function
 
 COMMA
-1,0
+29,58
 ,
 
 ATTR_KEY
-1,0
+29,60
 klabel
 
 LPAREN
-1,0
+29,66
 (
 
 ATTR_CONTENT
-1,0
+29,67
 _modInt_
 
 RPAREN
-1,0
+29,75
 )
 
 COMMA
-1,0
+29,76
 ,
 
 ATTR_KEY
-1,0
+29,78
 symbol
 
 COMMA
-1,0
+29,84
 ,
 
 ATTR_KEY
-1,0
+29,86
 left
 
 COMMA
-1,0
+29,90
 ,
 
 ATTR_KEY
-1,0
+29,92
 smt-hook
 
 LPAREN
-1,0
+29,100
 (
 
 ATTR_CONTENT
-1,0
+29,101
 mod
 
 RPAREN
-1,0
+29,104
 )
 
 COMMA
-1,0
+29,105
 ,
 
 ATTR_KEY
-1,0
+29,107
 hook
 
 LPAREN
-1,0
+29,111
 (
 
 ATTR_CONTENT
-1,0
+29,112
 INT.emod
 
 RPAREN
-1,0
+29,120
 )
 
 RBRACK
-1,0
+29,121
 ]
 
 GT
@@ -1368,123 +1368,123 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+31,50
 function
 
 COMMA
-1,0
+31,58
 ,
 
 ATTR_KEY
-1,0
+31,60
 total
 
 COMMA
-1,0
+31,65
 ,
 
 ATTR_KEY
-1,0
+31,67
 klabel
 
 LPAREN
-1,0
+31,73
 (
 
 ATTR_CONTENT
-1,0
+31,74
 _+Int_
 
 RPAREN
-1,0
+31,80
 )
 
 COMMA
-1,0
+31,81
 ,
 
 ATTR_KEY
-1,0
+31,83
 symbol
 
 COMMA
-1,0
+31,89
 ,
 
 ATTR_KEY
-1,0
+31,91
 left
 
 COMMA
-1,0
+31,95
 ,
 
 ATTR_KEY
-1,0
+31,97
 comm
 
 COMMA
-1,0
+31,101
 ,
 
 ATTR_KEY
-1,0
+31,103
 smt-hook
 
 LPAREN
-1,0
+31,111
 (
 
 ATTR_CONTENT
-1,0
+31,112
 +
 
 RPAREN
-1,0
+31,113
 )
 
 COMMA
-1,0
+31,114
 ,
 
 ATTR_KEY
-1,0
+31,116
 latex
 
 LPAREN
-1,0
+31,121
 (
 
 ATTR_CONTENT
-1,0
+31,122
 {#1}\mathrel{+_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+31,163
 )
 
 COMMA
-1,0
+31,164
 ,
 
 ATTR_KEY
-1,0
+31,166
 hook
 
 LPAREN
-1,0
+31,170
 (
 
 ATTR_CONTENT
-1,0
+31,171
 INT.add
 
 RPAREN
-1,0
+31,178
 )
 
 RBRACK
-1,0
+31,179
 ]
 
 VBAR
@@ -1508,115 +1508,115 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+32,50
 function
 
 COMMA
-1,0
+32,58
 ,
 
 ATTR_KEY
-1,0
+32,60
 total
 
 COMMA
-1,0
+32,65
 ,
 
 ATTR_KEY
-1,0
+32,67
 klabel
 
 LPAREN
-1,0
+32,73
 (
 
 ATTR_CONTENT
-1,0
+32,74
 _-Int_
 
 RPAREN
-1,0
+32,80
 )
 
 COMMA
-1,0
+32,81
 ,
 
 ATTR_KEY
-1,0
+32,83
 symbol
 
 COMMA
-1,0
+32,89
 ,
 
 ATTR_KEY
-1,0
+32,91
 left
 
 COMMA
-1,0
+32,95
 ,
 
 ATTR_KEY
-1,0
+32,97
 smt-hook
 
 LPAREN
-1,0
+32,105
 (
 
 ATTR_CONTENT
-1,0
+32,106
 -
 
 RPAREN
-1,0
+32,107
 )
 
 COMMA
-1,0
+32,108
 ,
 
 ATTR_KEY
-1,0
+32,110
 latex
 
 LPAREN
-1,0
+32,115
 (
 
 ATTR_CONTENT
-1,0
+32,116
 {#1}\mathrel{-_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+32,157
 )
 
 COMMA
-1,0
+32,158
 ,
 
 ATTR_KEY
-1,0
+32,160
 hook
 
 LPAREN
-1,0
+32,164
 (
 
 ATTR_CONTENT
-1,0
+32,165
 INT.sub
 
 RPAREN
-1,0
+32,172
 )
 
 RBRACK
-1,0
+32,173
 ]
 
 GT
@@ -1648,107 +1648,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+34,50
 function
 
 COMMA
-1,0
+34,58
 ,
 
 ATTR_KEY
-1,0
+34,60
 klabel
 
 LPAREN
-1,0
+34,66
 (
 
 ATTR_CONTENT
-1,0
+34,67
 _>>Int_
 
 RPAREN
-1,0
+34,74
 )
 
 COMMA
-1,0
+34,75
 ,
 
 ATTR_KEY
-1,0
+34,77
 symbol
 
 COMMA
-1,0
+34,83
 ,
 
 ATTR_KEY
-1,0
+34,85
 left
 
 COMMA
-1,0
+34,89
 ,
 
 ATTR_KEY
-1,0
+34,91
 latex
 
 LPAREN
-1,0
+34,96
 (
 
 ATTR_CONTENT
-1,0
+34,97
 {#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+34,140
 )
 
 COMMA
-1,0
+34,141
 ,
 
 ATTR_KEY
-1,0
+34,143
 hook
 
 LPAREN
-1,0
+34,147
 (
 
 ATTR_CONTENT
-1,0
+34,148
 INT.shr
 
 RPAREN
-1,0
+34,155
 )
 
 COMMA
-1,0
+34,156
 ,
 
 ATTR_KEY
-1,0
+34,158
 smtlib
 
 LPAREN
-1,0
+34,164
 (
 
 ATTR_CONTENT
-1,0
+34,165
 shrInt
 
 RPAREN
-1,0
+34,171
 )
 
 RBRACK
-1,0
+34,172
 ]
 
 VBAR
@@ -1772,107 +1772,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+35,50
 function
 
 COMMA
-1,0
+35,58
 ,
 
 ATTR_KEY
-1,0
+35,60
 klabel
 
 LPAREN
-1,0
+35,66
 (
 
 ATTR_CONTENT
-1,0
+35,67
 _<<Int_
 
 RPAREN
-1,0
+35,74
 )
 
 COMMA
-1,0
+35,75
 ,
 
 ATTR_KEY
-1,0
+35,77
 symbol
 
 COMMA
-1,0
+35,83
 ,
 
 ATTR_KEY
-1,0
+35,85
 left
 
 COMMA
-1,0
+35,89
 ,
 
 ATTR_KEY
-1,0
+35,91
 latex
 
 LPAREN
-1,0
+35,96
 (
 
 ATTR_CONTENT
-1,0
+35,97
 {#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+35,140
 )
 
 COMMA
-1,0
+35,141
 ,
 
 ATTR_KEY
-1,0
+35,143
 hook
 
 LPAREN
-1,0
+35,147
 (
 
 ATTR_CONTENT
-1,0
+35,148
 INT.shl
 
 RPAREN
-1,0
+35,155
 )
 
 COMMA
-1,0
+35,156
 ,
 
 ATTR_KEY
-1,0
+35,158
 smtlib
 
 LPAREN
-1,0
+35,164
 (
 
 ATTR_CONTENT
-1,0
+35,165
 shlInt
 
 RPAREN
-1,0
+35,171
 )
 
 RBRACK
-1,0
+35,172
 ]
 
 GT
@@ -1904,123 +1904,123 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+37,50
 function
 
 COMMA
-1,0
+37,58
 ,
 
 ATTR_KEY
-1,0
+37,60
 total
 
 COMMA
-1,0
+37,65
 ,
 
 ATTR_KEY
-1,0
+37,67
 klabel
 
 LPAREN
-1,0
+37,73
 (
 
 ATTR_CONTENT
-1,0
+37,74
 _&Int_
 
 RPAREN
-1,0
+37,80
 )
 
 COMMA
-1,0
+37,81
 ,
 
 ATTR_KEY
-1,0
+37,83
 symbol
 
 COMMA
-1,0
+37,89
 ,
 
 ATTR_KEY
-1,0
+37,91
 left
 
 COMMA
-1,0
+37,95
 ,
 
 ATTR_KEY
-1,0
+37,97
 comm
 
 COMMA
-1,0
+37,101
 ,
 
 ATTR_KEY
-1,0
+37,103
 latex
 
 LPAREN
-1,0
+37,108
 (
 
 ATTR_CONTENT
-1,0
+37,109
 {#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+37,151
 )
 
 COMMA
-1,0
+37,152
 ,
 
 ATTR_KEY
-1,0
+37,154
 hook
 
 LPAREN
-1,0
+37,158
 (
 
 ATTR_CONTENT
-1,0
+37,159
 INT.and
 
 RPAREN
-1,0
+37,166
 )
 
 COMMA
-1,0
+37,167
 ,
 
 ATTR_KEY
-1,0
+37,169
 smtlib
 
 LPAREN
-1,0
+37,175
 (
 
 ATTR_CONTENT
-1,0
+37,176
 andInt
 
 RPAREN
-1,0
+37,182
 )
 
 RBRACK
-1,0
+37,183
 ]
 
 GT
@@ -2052,123 +2052,123 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+39,50
 function
 
 COMMA
-1,0
+39,58
 ,
 
 ATTR_KEY
-1,0
+39,60
 total
 
 COMMA
-1,0
+39,65
 ,
 
 ATTR_KEY
-1,0
+39,67
 klabel
 
 LPAREN
-1,0
+39,73
 (
 
 ATTR_CONTENT
-1,0
+39,74
 _xorInt_
 
 RPAREN
-1,0
+39,82
 )
 
 COMMA
-1,0
+39,83
 ,
 
 ATTR_KEY
-1,0
+39,85
 symbol
 
 COMMA
-1,0
+39,91
 ,
 
 ATTR_KEY
-1,0
+39,93
 left
 
 COMMA
-1,0
+39,97
 ,
 
 ATTR_KEY
-1,0
+39,99
 comm
 
 COMMA
-1,0
+39,103
 ,
 
 ATTR_KEY
-1,0
+39,105
 latex
 
 LPAREN
-1,0
+39,110
 (
 
 ATTR_CONTENT
-1,0
+39,111
 {#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+39,157
 )
 
 COMMA
-1,0
+39,158
 ,
 
 ATTR_KEY
-1,0
+39,160
 hook
 
 LPAREN
-1,0
+39,164
 (
 
 ATTR_CONTENT
-1,0
+39,165
 INT.xor
 
 RPAREN
-1,0
+39,172
 )
 
 COMMA
-1,0
+39,173
 ,
 
 ATTR_KEY
-1,0
+39,175
 smtlib
 
 LPAREN
-1,0
+39,181
 (
 
 ATTR_CONTENT
-1,0
+39,182
 xorInt
 
 RPAREN
-1,0
+39,188
 )
 
 RBRACK
-1,0
+39,189
 ]
 
 GT
@@ -2200,123 +2200,123 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+41,50
 function
 
 COMMA
-1,0
+41,58
 ,
 
 ATTR_KEY
-1,0
+41,60
 total
 
 COMMA
-1,0
+41,65
 ,
 
 ATTR_KEY
-1,0
+41,67
 klabel
 
 LPAREN
-1,0
+41,73
 (
 
 ATTR_CONTENT
-1,0
+41,74
 _|Int_
 
 RPAREN
-1,0
+41,80
 )
 
 COMMA
-1,0
+41,81
 ,
 
 ATTR_KEY
-1,0
+41,83
 symbol
 
 COMMA
-1,0
+41,89
 ,
 
 ATTR_KEY
-1,0
+41,91
 left
 
 COMMA
-1,0
+41,95
 ,
 
 ATTR_KEY
-1,0
+41,97
 comm
 
 COMMA
-1,0
+41,101
 ,
 
 ATTR_KEY
-1,0
+41,103
 latex
 
 LPAREN
-1,0
+41,108
 (
 
 ATTR_CONTENT
-1,0
+41,109
 {#1}\mathrel{|_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+41,150
 )
 
 COMMA
-1,0
+41,151
 ,
 
 ATTR_KEY
-1,0
+41,153
 hook
 
 LPAREN
-1,0
+41,157
 (
 
 ATTR_CONTENT
-1,0
+41,158
 INT.or
 
 RPAREN
-1,0
+41,164
 )
 
 COMMA
-1,0
+41,165
 ,
 
 ATTR_KEY
-1,0
+41,167
 smtlib
 
 LPAREN
-1,0
+41,173
 (
 
 ATTR_CONTENT
-1,0
+41,174
 orInt
 
 RPAREN
-1,0
+41,179
 )
 
 RBRACK
-1,0
+41,180
 ]
 
 KW_SYNTAX
@@ -2360,59 +2360,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+43,50
 function
 
 COMMA
-1,0
+43,58
 ,
 
 ATTR_KEY
-1,0
+43,60
 total
 
 COMMA
-1,0
+43,65
 ,
 
 ATTR_KEY
-1,0
+43,67
 smt-hook
 
 LPAREN
-1,0
+43,75
 (
 
 ATTR_CONTENT
-1,0
+43,76
 (ite (< #1 #2) #1 #2)
 
 RPAREN
-1,0
+43,97
 )
 
 COMMA
-1,0
+43,98
 ,
 
 ATTR_KEY
-1,0
+43,100
 hook
 
 LPAREN
-1,0
+43,104
 (
 
 ATTR_CONTENT
-1,0
+43,105
 INT.min
 
 RPAREN
-1,0
+43,112
 )
 
 RBRACK
-1,0
+43,113
 ]
 
 VBAR
@@ -2448,59 +2448,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+44,50
 function
 
 COMMA
-1,0
+44,58
 ,
 
 ATTR_KEY
-1,0
+44,60
 total
 
 COMMA
-1,0
+44,65
 ,
 
 ATTR_KEY
-1,0
+44,67
 smt-hook
 
 LPAREN
-1,0
+44,75
 (
 
 ATTR_CONTENT
-1,0
+44,76
 (ite (< #1 #2) #2 #1)
 
 RPAREN
-1,0
+44,97
 )
 
 COMMA
-1,0
+44,98
 ,
 
 ATTR_KEY
-1,0
+44,100
 hook
 
 LPAREN
-1,0
+44,104
 (
 
 ATTR_CONTENT
-1,0
+44,105
 INT.max
 
 RPAREN
-1,0
+44,112
 )
 
 RBRACK
-1,0
+44,113
 ]
 
 KW_SYNTAX
@@ -2536,59 +2536,59 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+46,50
 function
 
 COMMA
-1,0
+46,58
 ,
 
 ATTR_KEY
-1,0
+46,60
 total
 
 COMMA
-1,0
+46,65
 ,
 
 ATTR_KEY
-1,0
+46,67
 smt-hook
 
 LPAREN
-1,0
+46,75
 (
 
 ATTR_CONTENT
-1,0
+46,76
 (ite (< #1 0) (- 0 #1) #1)
 
 RPAREN
-1,0
+46,102
 )
 
 COMMA
-1,0
+46,103
 ,
 
 ATTR_KEY
-1,0
+46,105
 hook
 
 LPAREN
-1,0
+46,109
 (
 
 ATTR_CONTENT
-1,0
+46,110
 INT.abs
 
 RPAREN
-1,0
+46,117
 )
 
 RBRACK
-1,0
+46,118
 ]
 
 KW_SYNTAX
@@ -2624,31 +2624,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+48,50
 function
 
 COMMA
-1,0
+48,58
 ,
 
 ATTR_KEY
-1,0
+48,60
 hook
 
 LPAREN
-1,0
+48,64
 (
 
 ATTR_CONTENT
-1,0
+48,65
 INT.log2
 
 RPAREN
-1,0
+48,73
 )
 
 RBRACK
-1,0
+48,74
 ]
 
 KW_SYNTAX
@@ -2716,31 +2716,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+50,74
 function
 
 COMMA
-1,0
+50,82
 ,
 
 ATTR_KEY
-1,0
+50,84
 hook
 
 LPAREN
-1,0
+50,88
 (
 
 ATTR_CONTENT
-1,0
+50,89
 INT.bitRange
 
 RPAREN
-1,0
+50,101
 )
 
 RBRACK
-1,0
+50,102
 ]
 
 VBAR
@@ -2800,31 +2800,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+51,74
 function
 
 COMMA
-1,0
+51,82
 ,
 
 ATTR_KEY
-1,0
+51,84
 hook
 
 LPAREN
-1,0
+51,88
 (
 
 ATTR_CONTENT
-1,0
+51,89
 INT.signExtendBitRange
 
 RPAREN
-1,0
+51,111
 )
 
 RBRACK
-1,0
+51,112
 ]
 
 KW_SYNTAX
@@ -2856,107 +2856,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+53,44
 function
 
 COMMA
-1,0
+53,52
 ,
 
 ATTR_KEY
-1,0
+53,54
 total
 
 COMMA
-1,0
+53,59
 ,
 
 ATTR_KEY
-1,0
+53,61
 klabel
 
 LPAREN
-1,0
+53,67
 (
 
 ATTR_CONTENT
-1,0
+53,68
 _<=Int_
 
 RPAREN
-1,0
+53,75
 )
 
 COMMA
-1,0
+53,76
 ,
 
 ATTR_KEY
-1,0
+53,78
 symbol
 
 COMMA
-1,0
+53,84
 ,
 
 ATTR_KEY
-1,0
+53,86
 smt-hook
 
 LPAREN
-1,0
+53,94
 (
 
 ATTR_CONTENT
-1,0
+53,95
 <=
 
 RPAREN
-1,0
+53,97
 )
 
 COMMA
-1,0
+53,98
 ,
 
 ATTR_KEY
-1,0
+53,100
 latex
 
 LPAREN
-1,0
+53,105
 (
 
 ATTR_CONTENT
-1,0
+53,106
 {#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+53,150
 )
 
 COMMA
-1,0
+53,151
 ,
 
 ATTR_KEY
-1,0
+53,153
 hook
 
 LPAREN
-1,0
+53,157
 (
 
 ATTR_CONTENT
-1,0
+53,158
 INT.le
 
 RPAREN
-1,0
+53,164
 )
 
 RBRACK
-1,0
+53,165
 ]
 
 VBAR
@@ -2980,107 +2980,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+54,44
 function
 
 COMMA
-1,0
+54,52
 ,
 
 ATTR_KEY
-1,0
+54,54
 total
 
 COMMA
-1,0
+54,59
 ,
 
 ATTR_KEY
-1,0
+54,61
 klabel
 
 LPAREN
-1,0
+54,67
 (
 
 ATTR_CONTENT
-1,0
+54,68
 _<Int_
 
 RPAREN
-1,0
+54,74
 )
 
 COMMA
-1,0
+54,75
 ,
 
 ATTR_KEY
-1,0
+54,77
 symbol
 
 COMMA
-1,0
+54,83
 ,
 
 ATTR_KEY
-1,0
+54,85
 smt-hook
 
 LPAREN
-1,0
+54,93
 (
 
 ATTR_CONTENT
-1,0
+54,94
 <
 
 RPAREN
-1,0
+54,95
 )
 
 COMMA
-1,0
+54,96
 ,
 
 ATTR_KEY
-1,0
+54,98
 latex
 
 LPAREN
-1,0
+54,103
 (
 
 ATTR_CONTENT
-1,0
+54,104
 {#1}\mathrel{<_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+54,145
 )
 
 COMMA
-1,0
+54,146
 ,
 
 ATTR_KEY
-1,0
+54,148
 hook
 
 LPAREN
-1,0
+54,152
 (
 
 ATTR_CONTENT
-1,0
+54,153
 INT.lt
 
 RPAREN
-1,0
+54,159
 )
 
 RBRACK
-1,0
+54,160
 ]
 
 VBAR
@@ -3104,107 +3104,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+55,44
 function
 
 COMMA
-1,0
+55,52
 ,
 
 ATTR_KEY
-1,0
+55,54
 total
 
 COMMA
-1,0
+55,59
 ,
 
 ATTR_KEY
-1,0
+55,61
 klabel
 
 LPAREN
-1,0
+55,67
 (
 
 ATTR_CONTENT
-1,0
+55,68
 _>=Int_
 
 RPAREN
-1,0
+55,75
 )
 
 COMMA
-1,0
+55,76
 ,
 
 ATTR_KEY
-1,0
+55,78
 symbol
 
 COMMA
-1,0
+55,84
 ,
 
 ATTR_KEY
-1,0
+55,86
 smt-hook
 
 LPAREN
-1,0
+55,94
 (
 
 ATTR_CONTENT
-1,0
+55,95
 >=
 
 RPAREN
-1,0
+55,97
 )
 
 COMMA
-1,0
+55,98
 ,
 
 ATTR_KEY
-1,0
+55,100
 latex
 
 LPAREN
-1,0
+55,105
 (
 
 ATTR_CONTENT
-1,0
+55,106
 {#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+55,150
 )
 
 COMMA
-1,0
+55,151
 ,
 
 ATTR_KEY
-1,0
+55,153
 hook
 
 LPAREN
-1,0
+55,157
 (
 
 ATTR_CONTENT
-1,0
+55,158
 INT.ge
 
 RPAREN
-1,0
+55,164
 )
 
 RBRACK
-1,0
+55,165
 ]
 
 VBAR
@@ -3228,107 +3228,107 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+56,44
 function
 
 COMMA
-1,0
+56,52
 ,
 
 ATTR_KEY
-1,0
+56,54
 total
 
 COMMA
-1,0
+56,59
 ,
 
 ATTR_KEY
-1,0
+56,61
 klabel
 
 LPAREN
-1,0
+56,67
 (
 
 ATTR_CONTENT
-1,0
+56,68
 _>Int_
 
 RPAREN
-1,0
+56,74
 )
 
 COMMA
-1,0
+56,75
 ,
 
 ATTR_KEY
-1,0
+56,77
 symbol
 
 COMMA
-1,0
+56,83
 ,
 
 ATTR_KEY
-1,0
+56,85
 smt-hook
 
 LPAREN
-1,0
+56,93
 (
 
 ATTR_CONTENT
-1,0
+56,94
 >
 
 RPAREN
-1,0
+56,95
 )
 
 COMMA
-1,0
+56,96
 ,
 
 ATTR_KEY
-1,0
+56,98
 latex
 
 LPAREN
-1,0
+56,103
 (
 
 ATTR_CONTENT
-1,0
+56,104
 {#1}\mathrel{>_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+56,145
 )
 
 COMMA
-1,0
+56,146
 ,
 
 ATTR_KEY
-1,0
+56,148
 hook
 
 LPAREN
-1,0
+56,152
 (
 
 ATTR_CONTENT
-1,0
+56,153
 INT.gt
 
 RPAREN
-1,0
+56,159
 )
 
 RBRACK
-1,0
+56,160
 ]
 
 VBAR
@@ -3352,115 +3352,115 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+57,44
 function
 
 COMMA
-1,0
+57,52
 ,
 
 ATTR_KEY
-1,0
+57,54
 total
 
 COMMA
-1,0
+57,59
 ,
 
 ATTR_KEY
-1,0
+57,61
 klabel
 
 LPAREN
-1,0
+57,67
 (
 
 ATTR_CONTENT
-1,0
+57,68
 _==Int_
 
 RPAREN
-1,0
+57,75
 )
 
 COMMA
-1,0
+57,76
 ,
 
 ATTR_KEY
-1,0
+57,78
 symbol
 
 COMMA
-1,0
+57,84
 ,
 
 ATTR_KEY
-1,0
+57,86
 comm
 
 COMMA
-1,0
+57,90
 ,
 
 ATTR_KEY
-1,0
+57,92
 smt-hook
 
 LPAREN
-1,0
+57,100
 (
 
 ATTR_CONTENT
-1,0
+57,101
 =
 
 RPAREN
-1,0
+57,102
 )
 
 COMMA
-1,0
+57,103
 ,
 
 ATTR_KEY
-1,0
+57,105
 latex
 
 LPAREN
-1,0
+57,110
 (
 
 ATTR_CONTENT
-1,0
+57,111
 {#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+57,157
 )
 
 COMMA
-1,0
+57,158
 ,
 
 ATTR_KEY
-1,0
+57,160
 hook
 
 LPAREN
-1,0
+57,164
 (
 
 ATTR_CONTENT
-1,0
+57,165
 INT.eq
 
 RPAREN
-1,0
+57,171
 )
 
 RBRACK
-1,0
+57,172
 ]
 
 VBAR
@@ -3484,115 +3484,115 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+58,44
 function
 
 COMMA
-1,0
+58,52
 ,
 
 ATTR_KEY
-1,0
+58,54
 total
 
 COMMA
-1,0
+58,59
 ,
 
 ATTR_KEY
-1,0
+58,61
 klabel
 
 LPAREN
-1,0
+58,67
 (
 
 ATTR_CONTENT
-1,0
+58,68
 _=/=Int_
 
 RPAREN
-1,0
+58,76
 )
 
 COMMA
-1,0
+58,77
 ,
 
 ATTR_KEY
-1,0
+58,79
 symbol
 
 COMMA
-1,0
+58,85
 ,
 
 ATTR_KEY
-1,0
+58,87
 comm
 
 COMMA
-1,0
+58,91
 ,
 
 ATTR_KEY
-1,0
+58,93
 smt-hook
 
 LPAREN
-1,0
+58,101
 (
 
 ATTR_CONTENT
-1,0
+58,102
 distinct
 
 RPAREN
-1,0
+58,110
 )
 
 COMMA
-1,0
+58,111
 ,
 
 ATTR_KEY
-1,0
+58,113
 latex
 
 LPAREN
-1,0
+58,118
 (
 
 ATTR_CONTENT
-1,0
+58,119
 {#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}
 
 RPAREN
-1,0
+58,168
 )
 
 COMMA
-1,0
+58,169
 ,
 
 ATTR_KEY
-1,0
+58,171
 hook
 
 LPAREN
-1,0
+58,175
 (
 
 ATTR_CONTENT
-1,0
+58,176
 INT.ne
 
 RPAREN
-1,0
+58,182
 )
 
 RBRACK
-1,0
+58,183
 ]
 
 KW_SYNTAX
@@ -3624,11 +3624,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+60,44
 function
 
 RBRACK
-1,0
+60,52
 ]
 
 KW_SYNTAX
@@ -3664,39 +3664,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+62,32
 function
 
 COMMA
-1,0
+62,40
 ,
 
 ATTR_KEY
-1,0
+62,42
 hook
 
 LPAREN
-1,0
+62,46
 (
 
 ATTR_CONTENT
-1,0
+62,47
 INT.rand
 
 RPAREN
-1,0
+62,55
 )
 
 COMMA
-1,0
+62,56
 ,
 
 ATTR_KEY
-1,0
+62,58
 impure
 
 RBRACK
-1,0
+62,64
 ]
 
 KW_SYNTAX
@@ -3732,39 +3732,39 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+63,31
 function
 
 COMMA
-1,0
+63,39
 ,
 
 ATTR_KEY
-1,0
+63,41
 hook
 
 LPAREN
-1,0
+63,45
 (
 
 ATTR_CONTENT
-1,0
+63,46
 INT.srand
 
 RPAREN
-1,0
+63,55
 )
 
 COMMA
-1,0
+63,56
 ,
 
 ATTR_KEY
-1,0
+63,58
 impure
 
 RBRACK
-1,0
+63,64
 ]
 
 KW_ENDMODULE
@@ -3784,11 +3784,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+68,22
 symbolic
 
 RBRACK
-1,0
+68,30
 ]
 
 KW_IMPORTS
@@ -3828,15 +3828,15 @@ BUBBLE
 I +Int 0 => I
 
 LBRACK
-1,0
+74,22
 [
 
 ATTR_KEY
-1,0
+74,23
 simplification
 
 RBRACK
-1,0
+74,37
 ]
 
 KW_RULE
@@ -3848,15 +3848,15 @@ BUBBLE
 I -Int 0 => I
 
 LBRACK
-1,0
+75,22
 [
 
 ATTR_KEY
-1,0
+75,23
 simplification
 
 RBRACK
-1,0
+75,37
 ]
 
 KW_RULE
@@ -3868,15 +3868,15 @@ BUBBLE
 X modInt N => X requires 0 <=Int X andBool X <Int N
 
 LBRACK
-1,0
+77,60
 [
 
 ATTR_KEY
-1,0
+77,61
 simplification
 
 RBRACK
-1,0
+77,75
 ]
 
 KW_RULE
@@ -3888,15 +3888,15 @@ BUBBLE
 X   %Int N => X requires 0 <=Int X andBool X <Int N
 
 LBRACK
-1,0
+78,60
 [
 
 ATTR_KEY
-1,0
+78,61
 simplification
 
 RBRACK
-1,0
+78,75
 ]
 
 KW_RULE
@@ -3908,15 +3908,15 @@ BUBBLE
 X <<Int 0 => X
 
 LBRACK
-1,0
+81,23
 [
 
 ATTR_KEY
-1,0
+81,24
 simplification
 
 RBRACK
-1,0
+81,38
 ]
 
 KW_RULE
@@ -3928,15 +3928,15 @@ BUBBLE
 0 <<Int _ => 0
 
 LBRACK
-1,0
+82,23
 [
 
 ATTR_KEY
-1,0
+82,24
 simplification
 
 RBRACK
-1,0
+82,38
 ]
 
 KW_RULE
@@ -3948,15 +3948,15 @@ BUBBLE
 X >>Int 0 => X
 
 LBRACK
-1,0
+83,23
 [
 
 ATTR_KEY
-1,0
+83,24
 simplification
 
 RBRACK
-1,0
+83,38
 ]
 
 KW_RULE
@@ -3968,15 +3968,15 @@ BUBBLE
 0 >>Int _ => 0
 
 LBRACK
-1,0
+84,23
 [
 
 ATTR_KEY
-1,0
+84,24
 simplification
 
 RBRACK
-1,0
+84,38
 ]
 
 KW_ENDMODULE
@@ -3996,27 +3996,27 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+88,27
 symbolic
 
 COMMA
-1,0
+88,35
 ,
 
 ATTR_KEY
-1,0
+88,37
 kore
 
 COMMA
-1,0
+88,41
 ,
 
 ATTR_KEY
-1,0
+88,43
 haskell
 
 RBRACK
-1,0
+88,50
 ]
 
 KW_IMPORTS
@@ -4056,15 +4056,15 @@ BUBBLE
 #Ceil(@I1:Int /Int   @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
 
 LBRACK
-1,0
+94,103
 [
 
 ATTR_KEY
-1,0
+94,104
 simplification
 
 RBRACK
-1,0
+94,118
 ]
 
 KW_RULE
@@ -4076,15 +4076,15 @@ BUBBLE
 #Ceil(@I1:Int %Int   @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
 
 LBRACK
-1,0
+95,103
 [
 
 ATTR_KEY
-1,0
+95,104
 simplification
 
 RBRACK
-1,0
+95,118
 ]
 
 KW_RULE
@@ -4096,15 +4096,15 @@ BUBBLE
 #Ceil(@I1:Int modInt @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
 
 LBRACK
-1,0
+96,103
 [
 
 ATTR_KEY
-1,0
+96,104
 simplification
 
 RBRACK
-1,0
+96,118
 ]
 
 KW_RULE
@@ -4116,15 +4116,15 @@ BUBBLE
 #Ceil(@I1:Int >>Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
 
 LBRACK
-1,0
+97,103
 [
 
 ATTR_KEY
-1,0
+97,104
 simplification
 
 RBRACK
-1,0
+97,118
 ]
 
 KW_RULE
@@ -4136,15 +4136,15 @@ BUBBLE
 #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
 
 LBRACK
-1,0
+98,103
 [
 
 ATTR_KEY
-1,0
+98,104
 simplification
 
 RBRACK
-1,0
+98,118
 ]
 
 KW_RULE
@@ -4156,67 +4156,67 @@ BUBBLE
 I +Int B => B +Int I
 
 LBRACK
-1,0
+101,38
 [
 
 ATTR_KEY
-1,0
+101,39
 concrete
 
 LPAREN
-1,0
+101,47
 (
 
 ATTR_CONTENT
-1,0
+101,48
 I
 
 RPAREN
-1,0
+101,49
 )
 
 COMMA
-1,0
+101,50
 ,
 
 ATTR_KEY
-1,0
+101,52
 symbolic
 
 LPAREN
-1,0
+101,60
 (
 
 ATTR_CONTENT
-1,0
+101,61
 B
 
 RPAREN
-1,0
+101,62
 )
 
 COMMA
-1,0
+101,63
 ,
 
 ATTR_KEY
-1,0
+101,65
 simplification
 
 LPAREN
-1,0
+101,79
 (
 
 ATTR_CONTENT
-1,0
+101,80
 51
 
 RPAREN
-1,0
+101,82
 )
 
 RBRACK
-1,0
+101,83
 ]
 
 KW_RULE
@@ -4228,67 +4228,67 @@ BUBBLE
 A -Int I => A +Int (0 -Int I)
 
 LBRACK
-1,0
+102,38
 [
 
 ATTR_KEY
-1,0
+102,39
 concrete
 
 LPAREN
-1,0
+102,47
 (
 
 ATTR_CONTENT
-1,0
+102,48
 I
 
 RPAREN
-1,0
+102,49
 )
 
 COMMA
-1,0
+102,50
 ,
 
 ATTR_KEY
-1,0
+102,52
 symbolic
 
 LPAREN
-1,0
+102,60
 (
 
 ATTR_CONTENT
-1,0
+102,61
 A
 
 RPAREN
-1,0
+102,62
 )
 
 COMMA
-1,0
+102,63
 ,
 
 ATTR_KEY
-1,0
+102,65
 simplification
 
 LPAREN
-1,0
+102,79
 (
 
 ATTR_CONTENT
-1,0
+102,80
 51
 
 RPAREN
-1,0
+102,82
 )
 
 RBRACK
-1,0
+102,83
 ]
 
 KW_RULE
@@ -4300,55 +4300,55 @@ BUBBLE
 (A +Int I2) +Int I3 => A +Int (I2 +Int I3)
 
 LBRACK
-1,0
+104,51
 [
 
 ATTR_KEY
-1,0
+104,52
 concrete
 
 LPAREN
-1,0
+104,60
 (
 
 ATTR_CONTENT
-1,0
+104,61
 I2, I3
 
 RPAREN
-1,0
+104,67
 )
 
 COMMA
-1,0
+104,68
 ,
 
 ATTR_KEY
-1,0
+104,70
 symbolic
 
 LPAREN
-1,0
+104,78
 (
 
 ATTR_CONTENT
-1,0
+104,79
 A
 
 RPAREN
-1,0
+104,80
 )
 
 COMMA
-1,0
+104,81
 ,
 
 ATTR_KEY
-1,0
+104,83
 simplification
 
 RBRACK
-1,0
+104,97
 ]
 
 KW_RULE
@@ -4360,55 +4360,55 @@ BUBBLE
 I1 +Int (B +Int I3) => B +Int (I1 +Int I3)
 
 LBRACK
-1,0
+105,51
 [
 
 ATTR_KEY
-1,0
+105,52
 concrete
 
 LPAREN
-1,0
+105,60
 (
 
 ATTR_CONTENT
-1,0
+105,61
 I1, I3
 
 RPAREN
-1,0
+105,67
 )
 
 COMMA
-1,0
+105,68
 ,
 
 ATTR_KEY
-1,0
+105,70
 symbolic
 
 LPAREN
-1,0
+105,78
 (
 
 ATTR_CONTENT
-1,0
+105,79
 B
 
 RPAREN
-1,0
+105,80
 )
 
 COMMA
-1,0
+105,81
 ,
 
 ATTR_KEY
-1,0
+105,83
 simplification
 
 RBRACK
-1,0
+105,97
 ]
 
 KW_RULE
@@ -4420,55 +4420,55 @@ BUBBLE
 I1 -Int (B +Int I3) => (I1 -Int I3) -Int B
 
 LBRACK
-1,0
+106,51
 [
 
 ATTR_KEY
-1,0
+106,52
 concrete
 
 LPAREN
-1,0
+106,60
 (
 
 ATTR_CONTENT
-1,0
+106,61
 I1, I3
 
 RPAREN
-1,0
+106,67
 )
 
 COMMA
-1,0
+106,68
 ,
 
 ATTR_KEY
-1,0
+106,70
 symbolic
 
 LPAREN
-1,0
+106,78
 (
 
 ATTR_CONTENT
-1,0
+106,79
 B
 
 RPAREN
-1,0
+106,80
 )
 
 COMMA
-1,0
+106,81
 ,
 
 ATTR_KEY
-1,0
+106,83
 simplification
 
 RBRACK
-1,0
+106,97
 ]
 
 KW_RULE
@@ -4480,55 +4480,55 @@ BUBBLE
 I1 +Int (I2 +Int C) => (I1 +Int I2) +Int C
 
 LBRACK
-1,0
+107,51
 [
 
 ATTR_KEY
-1,0
+107,52
 concrete
 
 LPAREN
-1,0
+107,60
 (
 
 ATTR_CONTENT
-1,0
+107,61
 I1, I2
 
 RPAREN
-1,0
+107,67
 )
 
 COMMA
-1,0
+107,68
 ,
 
 ATTR_KEY
-1,0
+107,70
 symbolic
 
 LPAREN
-1,0
+107,78
 (
 
 ATTR_CONTENT
-1,0
+107,79
 C
 
 RPAREN
-1,0
+107,80
 )
 
 COMMA
-1,0
+107,81
 ,
 
 ATTR_KEY
-1,0
+107,83
 simplification
 
 RBRACK
-1,0
+107,97
 ]
 
 KW_RULE
@@ -4540,55 +4540,55 @@ BUBBLE
 I1 +Int (I2 -Int C) => (I1 +Int I2) -Int C
 
 LBRACK
-1,0
+108,51
 [
 
 ATTR_KEY
-1,0
+108,52
 concrete
 
 LPAREN
-1,0
+108,60
 (
 
 ATTR_CONTENT
-1,0
+108,61
 I1, I2
 
 RPAREN
-1,0
+108,67
 )
 
 COMMA
-1,0
+108,68
 ,
 
 ATTR_KEY
-1,0
+108,70
 symbolic
 
 LPAREN
-1,0
+108,78
 (
 
 ATTR_CONTENT
-1,0
+108,79
 C
 
 RPAREN
-1,0
+108,80
 )
 
 COMMA
-1,0
+108,81
 ,
 
 ATTR_KEY
-1,0
+108,83
 simplification
 
 RBRACK
-1,0
+108,97
 ]
 
 KW_RULE
@@ -4600,55 +4600,55 @@ BUBBLE
 (I1 -Int B) +Int I3 => (I1 +Int I3) -Int B
 
 LBRACK
-1,0
+109,51
 [
 
 ATTR_KEY
-1,0
+109,52
 concrete
 
 LPAREN
-1,0
+109,60
 (
 
 ATTR_CONTENT
-1,0
+109,61
 I1, I3
 
 RPAREN
-1,0
+109,67
 )
 
 COMMA
-1,0
+109,68
 ,
 
 ATTR_KEY
-1,0
+109,70
 symbolic
 
 LPAREN
-1,0
+109,78
 (
 
 ATTR_CONTENT
-1,0
+109,79
 B
 
 RPAREN
-1,0
+109,80
 )
 
 COMMA
-1,0
+109,81
 ,
 
 ATTR_KEY
-1,0
+109,83
 simplification
 
 RBRACK
-1,0
+109,97
 ]
 
 KW_RULE
@@ -4660,55 +4660,55 @@ BUBBLE
 I1 -Int (I2 +Int C) => (I1 -Int I2) -Int C
 
 LBRACK
-1,0
+110,51
 [
 
 ATTR_KEY
-1,0
+110,52
 concrete
 
 LPAREN
-1,0
+110,60
 (
 
 ATTR_CONTENT
-1,0
+110,61
 I1, I2
 
 RPAREN
-1,0
+110,67
 )
 
 COMMA
-1,0
+110,68
 ,
 
 ATTR_KEY
-1,0
+110,70
 symbolic
 
 LPAREN
-1,0
+110,78
 (
 
 ATTR_CONTENT
-1,0
+110,79
 C
 
 RPAREN
-1,0
+110,80
 )
 
 COMMA
-1,0
+110,81
 ,
 
 ATTR_KEY
-1,0
+110,83
 simplification
 
 RBRACK
-1,0
+110,97
 ]
 
 KW_RULE
@@ -4720,55 +4720,55 @@ BUBBLE
 I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C
 
 LBRACK
-1,0
+111,51
 [
 
 ATTR_KEY
-1,0
+111,52
 concrete
 
 LPAREN
-1,0
+111,60
 (
 
 ATTR_CONTENT
-1,0
+111,61
 I1, I2
 
 RPAREN
-1,0
+111,67
 )
 
 COMMA
-1,0
+111,68
 ,
 
 ATTR_KEY
-1,0
+111,70
 symbolic
 
 LPAREN
-1,0
+111,78
 (
 
 ATTR_CONTENT
-1,0
+111,79
 C
 
 RPAREN
-1,0
+111,80
 )
 
 COMMA
-1,0
+111,81
 ,
 
 ATTR_KEY
-1,0
+111,83
 simplification
 
 RBRACK
-1,0
+111,97
 ]
 
 KW_RULE
@@ -4780,55 +4780,55 @@ BUBBLE
 (C -Int I2) -Int I3 => C -Int (I2 +Int I3)
 
 LBRACK
-1,0
+112,51
 [
 
 ATTR_KEY
-1,0
+112,52
 concrete
 
 LPAREN
-1,0
+112,60
 (
 
 ATTR_CONTENT
-1,0
+112,61
 I2, I3
 
 RPAREN
-1,0
+112,67
 )
 
 COMMA
-1,0
+112,68
 ,
 
 ATTR_KEY
-1,0
+112,70
 symbolic
 
 LPAREN
-1,0
+112,78
 (
 
 ATTR_CONTENT
-1,0
+112,79
 C
 
 RPAREN
-1,0
+112,80
 )
 
 COMMA
-1,0
+112,81
 ,
 
 ATTR_KEY
-1,0
+112,83
 simplification
 
 RBRACK
-1,0
+112,97
 ]
 
 KW_RULE
@@ -4840,55 +4840,55 @@ BUBBLE
 I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C
 
 LBRACK
-1,0
+114,51
 [
 
 ATTR_KEY
-1,0
+114,52
 concrete
 
 LPAREN
-1,0
+114,60
 (
 
 ATTR_CONTENT
-1,0
+114,61
 I1, I2
 
 RPAREN
-1,0
+114,67
 )
 
 COMMA
-1,0
+114,68
 ,
 
 ATTR_KEY
-1,0
+114,70
 symbolic
 
 LPAREN
-1,0
+114,78
 (
 
 ATTR_CONTENT
-1,0
+114,79
 C
 
 RPAREN
-1,0
+114,80
 )
 
 COMMA
-1,0
+114,81
 ,
 
 ATTR_KEY
-1,0
+114,83
 simplification
 
 RBRACK
-1,0
+114,97
 ]
 
 KW_ENDMODULE
@@ -4908,19 +4908,19 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+119,18
 kore
 
 COMMA
-1,0
+119,22
 ,
 
 ATTR_KEY
-1,0
+119,24
 symbolic
 
 RBRACK
-1,0
+119,32
 ]
 
 KW_IMPORTS
@@ -4964,15 +4964,15 @@ BUBBLE
 I1:Int ==K I2:Int => I1 ==Int I2
 
 LBRACK
-1,0
+124,41
 [
 
 ATTR_KEY
-1,0
+124,42
 simplification
 
 RBRACK
-1,0
+124,56
 ]
 
 KW_RULE
@@ -4984,15 +4984,15 @@ BUBBLE
 {K1 ==Int K2 #Equals true} => {K1 #Equals K2}
 
 LBRACK
-1,0
+125,54
 [
 
 ATTR_KEY
-1,0
+125,55
 simplification
 
 RBRACK
-1,0
+125,69
 ]
 
 KW_RULE
@@ -5004,15 +5004,15 @@ BUBBLE
 {true #Equals K1 ==Int K2} => {K1 #Equals K2}
 
 LBRACK
-1,0
+126,54
 [
 
 ATTR_KEY
-1,0
+126,55
 simplification
 
 RBRACK
-1,0
+126,69
 ]
 
 KW_RULE
@@ -5024,15 +5024,15 @@ BUBBLE
 {K1 ==Int K2 #Equals false} => #Not({K1 #Equals K2})
 
 LBRACK
-1,0
+127,61
 [
 
 ATTR_KEY
-1,0
+127,62
 simplification
 
 RBRACK
-1,0
+127,76
 ]
 
 KW_RULE
@@ -5044,15 +5044,15 @@ BUBBLE
 {false #Equals K1 ==Int K2} => #Not({K1 #Equals K2})
 
 LBRACK
-1,0
+128,61
 [
 
 ATTR_KEY
-1,0
+128,62
 simplification
 
 RBRACK
-1,0
+128,76
 ]
 
 KW_RULE
@@ -5064,15 +5064,15 @@ BUBBLE
 {K1 =/=Int K2 #Equals true} => #Not({K1 #Equals K2})
 
 LBRACK
-1,0
+129,61
 [
 
 ATTR_KEY
-1,0
+129,62
 simplification
 
 RBRACK
-1,0
+129,76
 ]
 
 KW_RULE
@@ -5084,15 +5084,15 @@ BUBBLE
 {true #Equals K1 =/=Int K2} => #Not({K1 #Equals K2})
 
 LBRACK
-1,0
+130,61
 [
 
 ATTR_KEY
-1,0
+130,62
 simplification
 
 RBRACK
-1,0
+130,76
 ]
 
 KW_RULE
@@ -5104,15 +5104,15 @@ BUBBLE
 {K1 =/=Int K2 #Equals false} => {K1 #Equals K2}
 
 LBRACK
-1,0
+131,56
 [
 
 ATTR_KEY
-1,0
+131,57
 simplification
 
 RBRACK
-1,0
+131,71
 ]
 
 KW_RULE
@@ -5124,15 +5124,15 @@ BUBBLE
 {false #Equals K1 =/=Int K2} => {K1 #Equals K2}
 
 LBRACK
-1,0
+132,56
 [
 
 ATTR_KEY
-1,0
+132,57
 simplification
 
 RBRACK
-1,0
+132,71
 ]
 
 KW_ENDMODULE
@@ -5225,30 +5225,30 @@ KW_RULE
 rule
 
 BUBBLE
-152,4
+151,5
 I1:Int modInt I2:Int
   =>
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   requires I2 =/=Int 0
 
 LBRACK
-1,0
+154,27
 [
 
 ATTR_KEY
-1,0
+154,28
 concrete
 
 COMMA
-1,0
+154,36
 ,
 
 ATTR_KEY
-1,0
+154,38
 simplification
 
 RBRACK
-1,0
+154,52
 ]
 
 KW_RULE
@@ -5316,35 +5316,35 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+162,36
 freshGenerator
 
 COMMA
-1,0
+162,50
 ,
 
 ATTR_KEY
-1,0
+162,52
 function
 
 COMMA
-1,0
+162,60
 ,
 
 ATTR_KEY
-1,0
+162,62
 total
 
 COMMA
-1,0
+162,67
 ,
 
 ATTR_KEY
-1,0
+162,69
 private
 
 RBRACK
-1,0
+162,76
 ]
 
 KW_RULE

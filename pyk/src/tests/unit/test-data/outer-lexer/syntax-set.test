@@ -37,151 +37,151 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+2,5
 left
 
 COMMA
-1,0
+3,3
 ,
 
 ATTR_KEY
-1,0
+3,5
 function
 
 COMMA
-1,0
+4,3
 ,
 
 ATTR_KEY
-1,0
+4,5
 hook
 
 LPAREN
-1,0
+4,9
 (
 
 ATTR_CONTENT
-1,0
+4,10
 SET.concat
 
 RPAREN
-1,0
+4,20
 )
 
 COMMA
-1,0
+5,3
 ,
 
 ATTR_KEY
-1,0
+5,5
 klabel
 
 LPAREN
-1,0
+5,11
 (
 
 ATTR_CONTENT
-1,0
+5,12
 _Set_
 
 RPAREN
-1,0
+5,17
 )
 
 COMMA
-1,0
+6,3
 ,
 
 ATTR_KEY
-1,0
+6,5
 symbol
 
 COMMA
-1,0
+7,3
 ,
 
 ATTR_KEY
-1,0
+7,5
 assoc
 
 COMMA
-1,0
+8,3
 ,
 
 ATTR_KEY
-1,0
+8,5
 comm
 
 COMMA
-1,0
+9,3
 ,
 
 ATTR_KEY
-1,0
+9,5
 unit
 
 LPAREN
-1,0
+9,9
 (
 
 ATTR_CONTENT
-1,0
+9,10
 .Set
 
 RPAREN
-1,0
+9,14
 )
 
 COMMA
-1,0
+10,3
 ,
 
 ATTR_KEY
-1,0
+10,5
 idem
 
 COMMA
-1,0
+11,3
 ,
 
 ATTR_KEY
-1,0
+11,5
 element
 
 LPAREN
-1,0
+11,12
 (
 
 ATTR_CONTENT
-1,0
+11,13
 SetItem
 
 RPAREN
-1,0
+11,20
 )
 
 COMMA
-1,0
+12,3
 ,
 
 ATTR_KEY
-1,0
+12,5
 format
 
 LPAREN
-1,0
+12,11
 (
 
 ATTR_CONTENT
-1,0
+12,12
 %1%n%2
 
 RPAREN
-1,0
+12,18
 )
 
 RBRACK
-1,0
+13,3
 ]
 
 EOF

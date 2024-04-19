@@ -64,12 +64,13 @@ class Loc(NamedTuple):
 
     def __add__(self, other: object) -> Loc:
         if isinstance(other, str):
+            """Return the line,column after the additional text"""
             line, col = self.line, self.col
             for c in other:
-                col += 1
                 if c == '\n':
                     line += 1
                     col = 0
+                col += 1
             return Loc(line, col)
         return NotImplemented
 
@@ -190,23 +191,36 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    _line: int = 1
-    _col: int = 0
-    _iter: Iterator[str]
+    """A string iterator which tracks the line and column information of the characters in the string"""
 
-    def __init__(self, x: Iterable[str]) -> None:
-        self._iter = iter(x)
+    _line: int
+    _col: int
+    _iter: Iterator[str]
+    _nextline: bool
+
+    def __init__(self, text: Iterable[str], line: int = 1, col: int = 0) -> None:
+        self._iter = iter(text)
+        self._line = line
+        self._col = col
+        self._nextline = False
 
     def __next__(self) -> str:
         la = next(self._iter)
         self._col += 1
-        if la == '\n':
+        if self._nextline:
             self._line += 1
-            self._col = 0
+            self._col = 1
+        self._nextline = la == '\n'
         return la
 
     @property
     def loc(self) -> Loc:
+        """Returns the line,column of the last character returned by the iterator
+
+        If no character has been returned yet, it will be the location that this
+        iterator was initialized with. The default is (1,0), which is the only
+        time the column will be 0.
+        """
         return Loc(self._line, self._col)
 
 
@@ -617,7 +631,7 @@ def _bubble_or_context(la: str, it: LocationIterator, *, context: bool = False) 
     bubble, final_token, la, bubble_loc = _raw_bubble(la, it, keywords)
     if bubble is not None:
         label_tokens, bubble, bubble_loc = _strip_bubble_label(bubble, bubble_loc)
-        bubble, attr_tokens = _strip_bubble_attr(bubble)
+        bubble, attr_tokens = _strip_bubble_attr(bubble, bubble_loc)
 
         tokens = label_tokens
         if bubble:
@@ -723,23 +737,23 @@ def _strip_bubble_label(bubble: str, loc: Loc) -> tuple[list[Token], str, Loc]:
             Token(':', TokenType.COLON, colon_loc),
         ],
         match['rest'],
-        loc + bubble[: match.start('rest')],
+        colon_loc + bubble[match.start('colon') : match.start('rest')],
     )
 
 
-def _strip_bubble_attr(bubble: str) -> tuple[str, list[Token]]:
+def _strip_bubble_attr(bubble: str, loc: Loc) -> tuple[str, list[Token]]:
     for i in range(len(bubble) - 1, -1, -1):
         if bubble[i] != '[':
             continue
 
         prefix = bubble[:i]
-        suffix = bubble[i:]
+        suffix = bubble[i + 1 :]
+        start_loc = loc + prefix
 
-        it = iter(suffix)
-        next(it)  # skip "["
+        it = LocationIterator(suffix, *start_loc)
         la = next(it, '')
 
-        tokens = [Token('[', TokenType.LBRACK, INIT_LOC)]
+        tokens = [Token('[', TokenType.LBRACK, start_loc)]
         attr_tokens = _attr(la, it)
         try:
             while True:
@@ -757,7 +771,7 @@ def _strip_bubble_attr(bubble: str) -> tuple[str, list[Token]]:
     return bubble, []
 
 
-def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
+def _attr(la: str, it: LocationIterator) -> Generator[Token, None, str]:
     la = _skip_ws_and_comments(la, it)
     if not la:
         raise _unexpected_character(la)
@@ -769,22 +783,23 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
         la = _skip_ws_and_comments(la, it)
 
         if la == '(':  # TAG_STATE
-            yield Token('(', TokenType.LPAREN, INIT_LOC)
+            yield Token('(', TokenType.LPAREN, it.loc)
             la = next(it, '')
+            loc = it.loc
 
             if la == '"':
                 text, token_type, la = _string(la, it)
-                yield Token(text, token_type, INIT_LOC)
+                yield Token(text, token_type, loc)
             else:
                 content, la = _attr_content(la, it)
                 if content:
                     # allows 'key()'
-                    yield Token(content, TokenType.ATTR_CONTENT, INIT_LOC)
+                    yield Token(content, TokenType.ATTR_CONTENT, loc)
 
             if la != ')':
                 raise _unexpected_character(la)
 
-            yield Token(')', TokenType.RPAREN, INIT_LOC)
+            yield Token(')', TokenType.RPAREN, it.loc)
 
             la = next(it, '')
             la = _skip_ws_and_comments(la, it)
@@ -792,23 +807,24 @@ def _attr(la: str, it: Iterator[str]) -> Generator[Token, None, str]:
         if la != ',':
             break
 
-        yield Token(',', TokenType.COMMA, INIT_LOC)
+        yield Token(',', TokenType.COMMA, it.loc)
         la = next(it, '')
         la = _skip_ws_and_comments(la, it)
 
     if la != ']':
         raise _unexpected_character(la)
 
-    yield Token(']', TokenType.RBRACK, INIT_LOC)
+    yield Token(']', TokenType.RBRACK, it.loc)
     la = next(it, '')
 
     return la  # noqa: B901
 
 
-def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
+def _attr_key(la: str, it: LocationIterator) -> tuple[Token, str]:
     # ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9", "."])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?
 
     consumed: list[str] = []
+    loc = it.loc
     if la not in _LOWER and la not in _DIGIT:
         raise _unexpected_character(la)
 
@@ -840,7 +856,7 @@ def _attr_key(la: str, it: Iterator[str]) -> tuple[Token, str]:
         la = next(it, '')
 
     attr_key = ''.join(consumed)
-    return Token(attr_key, TokenType.ATTR_KEY, INIT_LOC), la
+    return Token(attr_key, TokenType.ATTR_KEY, loc), la
 
 
 _ATTR_CONTENT_FORBIDDEN: Final = {'', '\n', '\r', '"'}

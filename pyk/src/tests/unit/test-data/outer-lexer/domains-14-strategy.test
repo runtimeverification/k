@@ -154,11 +154,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+8,38
 symbol
 
 RBRACK
-1,0
+8,44
 ]
 
 VBAR
@@ -178,31 +178,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+9,39
 symbol
 
 COMMA
-1,0
+9,45
 ,
 
 ATTR_KEY
-1,0
+9,47
 klabel
 
 LPAREN
-1,0
+9,53
 (
 
 ATTR_CONTENT
-1,0
+9,54
 #applyRule
 
 RPAREN
-1,0
+9,64
 )
 
 RBRACK
-1,0
+9,65
 ]
 
 VBAR
@@ -222,31 +222,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+10,39
 symbol
 
 COMMA
-1,0
+10,45
 ,
 
 ATTR_KEY
-1,0
+10,47
 klabel
 
 LPAREN
-1,0
+10,53
 (
 
 ATTR_CONTENT
-1,0
+10,54
 #appliedRule
 
 RPAREN
-1,0
+10,66
 )
 
 RBRACK
-1,0
+10,67
 ]
 
 KW_CONFIG
@@ -298,11 +298,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+19,35
 token
 
 RBRACK
-1,0
+19,40
 ]
 
 KW_ENDMODULE
@@ -322,11 +322,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+23,35
 concrete
 
 RBRACK
-1,0
+23,43
 ]
 
 KW_IMPORTS
@@ -354,15 +354,15 @@ BUBBLE
 ~ regular => ^ regular
 
 LBRACK
-1,0
+26,33
 [
 
 ATTR_KEY
-1,0
+26,34
 anywhere
 
 RBRACK
-1,0
+26,42
 ]
 
 KW_ENDMODULE
@@ -382,11 +382,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+30,35
 symbolic
 
 RBRACK
-1,0
+30,43
 ]
 
 KW_IMPORTS
@@ -458,27 +458,27 @@ BUBBLE
 initSCell(_) => <s> ^ regular </s>
 
 LBRACK
-1,0
+42,45
 [
 
 ATTR_KEY
-1,0
+42,46
 priority
 
 LPAREN
-1,0
+42,54
 (
 
 ATTR_CONTENT
-1,0
+42,55
 25
 
 RPAREN
-1,0
+42,57
 )
 
 RBRACK
-1,0
+42,58
 ]
 
 KW_ENDMODULE
@@ -530,11 +530,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+49,43
 bracket
 
 RBRACK
-1,0
+49,50
 ]
 
 KW_SYNTAX
@@ -574,11 +574,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+53,43
 bracket
 
 RBRACK
-1,0
+53,50
 ]
 
 KW_RULE
@@ -670,11 +670,11 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+63,48
 left
 
 RBRACK
-1,0
+63,52
 ]
 
 KW_RULE
@@ -714,31 +714,31 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+67,48
 left
 
 COMMA
-1,0
+67,52
 ,
 
 ATTR_KEY
-1,0
+67,54
 klabel
 
 LPAREN
-1,0
+67,60
 (
 
 ATTR_CONTENT
-1,0
+67,61
 #alternateRule
 
 RPAREN
-1,0
+67,75
 )
 
 RBRACK
-1,0
+67,76
 ]
 
 KW_RULE
@@ -774,23 +774,23 @@ LBRACK
 [
 
 ATTR_KEY
-1,0
+71,39
 klabel
 
 LPAREN
-1,0
+71,45
 (
 
 ATTR_CONTENT
-1,0
+71,46
 #repeatRule
 
 RPAREN
-1,0
+71,57
 )
 
 RBRACK
-1,0
+71,58
 ]
 
 KW_RULE
