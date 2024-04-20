@@ -12,7 +12,7 @@ from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, FALSE, TRUE
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
 from ..utils import ensure_dir_path
-from .proof import FailureInfo, Proof, ProofStatus, ProofStep, ProofSummary, Prover, StepResult
+from .proof import FailureInfo, Proof, ProofStatus, ProofSummary, Prover
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -28,16 +28,13 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-@dataclass
-class ImpliesProofStep(ProofStep):
+@dataclass(frozen=True, eq=True)
+class ImpliesProofStep:
     proof: ImpliesProof
 
-    def id(self) -> int:
-        return 1
-
 
 @dataclass
-class ImpliesProofResult(StepResult):
+class ImpliesProofResult:
     csubst: CSubst | None
     simplified_antecedent: KInner | None
     simplified_consequent: KInner | None

@@ -19,7 +19,7 @@ from ..konvert import kflatmodule_to_kore
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
-from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus, ProofStep, StepResult
+from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -39,7 +39,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 @dataclass
-class APRProofResult(StepResult):
+class APRProofResult:
     node_id: int
 
 
@@ -61,17 +61,14 @@ class APRProofTerminalResult(APRProofResult): ...
 class APRProofBoundedResult(APRProofResult): ...
 
 
-@dataclass
-class APRProofStep(ProofStep):
+@dataclass(frozen=True, eq=True)
+class APRProofStep:
     node: KCFG.Node
     target: KCFG.Node
     bounded: bool
     proof_id: str
     bmc_depth: int | None
     module_name: str
-
-    def id(self) -> int:
-        return self.node.id
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):

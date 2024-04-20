@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, ContextManager, Generic, TypeVar
 from ..utils import ensure_dir_path, hash_file, hash_str
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping
+    from collections.abc import Callable, Hashable, Iterable, Mapping
     from concurrent.futures import Executor, Future
     from pathlib import Path
     from typing import Any, Final
@@ -24,8 +24,8 @@ if TYPE_CHECKING:
     T = TypeVar('T', bound='Proof')
 
 P = TypeVar('P', bound='Proof')
-PS = TypeVar('PS', bound='ProofStep')
-SR = TypeVar('SR', bound='StepResult')
+PS = TypeVar('PS', bound='Hashable')
+SR = TypeVar('SR')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -307,15 +307,6 @@ class CompositeSummary(ProofSummary):
         return [line for lines in (summary.lines for summary in self.summaries) for line in lines]
 
 
-class ProofStep:
-
-    @abstractmethod
-    def id(self) -> int: ...
-
-
-class StepResult: ...
-
-
 class FailureInfo: ...
 
 
@@ -375,7 +366,7 @@ class ParallelProver(Generic[P, PS, SR]):
         max_workers: int = 1,
     ) -> None:
         pending: set[Future[Any]] = set()
-        explored: set[int] = set()
+        explored: set[PS] = set()
         iterations = 0
 
         main_prover = create_prover()
@@ -386,9 +377,9 @@ class ParallelProver(Generic[P, PS, SR]):
 
             def submit_steps(_steps: Iterable[PS]) -> None:
                 for step in _steps:
-                    if step.id() in explored:
+                    if step in explored:
                         continue
-                    explored.add(step.id())
+                    explored.add(step)
                     future: Future[Any] = pool.submit(step)  # <-- schedule steps for execution
                     pending.add(future)
 
