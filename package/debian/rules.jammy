@@ -28,7 +28,7 @@ export PREFIX
 	dh $@ 
 
 override_dh_auto_build:
-	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=$(PREFIX) -Dllvm.backend.destdir=$(DESTDIR)
+	mvn --batch-mode -T$(shell nproc) package -DskipTests -Dllvm.backend.prefix=$(PREFIX) -Dllvm.backend.destdir=$(DESTDIR)
 
 override_dh_auto_install:
 	package/package
