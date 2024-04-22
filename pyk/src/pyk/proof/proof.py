@@ -394,9 +394,9 @@ class ParallelProver(Generic[P, PS, SR]):
                 for result in proof_results:
                     proof.commit(result)
                 proof.write_proof_data()
+                iterations += 1
                 if max_iterations is not None and max_iterations <= iterations:
                     break
-                iterations += 1
                 if fail_fast and proof.failed:
                     _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
                     break
