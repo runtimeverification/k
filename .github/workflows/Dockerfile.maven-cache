@@ -27,4 +27,4 @@ ADD kernel/pom.xml                                             /home/$USER/.tmp-
 ADD k-distribution/pom.xml                                     /home/$USER/.tmp-maven/k-distribution/
 ADD kore/pom.xml                                               /home/$USER/.tmp-maven/kore/
 
-RUN cd /home/$USER/.tmp-maven && mvn --batch-mode dependency:go-offline
+RUN cd /home/$USER/.tmp-maven && mvn -T$(nproc) --batch-mode dependency:go-offline
