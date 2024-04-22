@@ -50,6 +50,8 @@ def generate_options(args: dict[str, Any]) -> LoggingOptions:
             return KompileCommandOptions(args)
         case 'run':
             return RunOptions(args)
+        case 'parse-outer':
+            return ParseOuterOptions(args)
         case _:
             raise ValueError(f'Unrecognized command: {command}')
 
@@ -156,3 +158,10 @@ class RunOptions(LoggingOptions):
         return {
             'definition_dir': None,
         }
+
+
+class ParseOuterOptions(LoggingOptions):
+    main_file: IO[Any]
+    md_selector: str
+    includes: Iterable[str]
+    output_file: IO[Any]

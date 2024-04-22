@@ -25,7 +25,9 @@ from .kast.manip import (
     remove_source_map,
     split_config_and_constraints,
 )
+from .kast.markdown import select_code_blocks
 from .kast.outer import read_kast_definition
+from .kast.outer_parser import OuterParser
 from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
@@ -38,7 +40,7 @@ from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -49,6 +51,7 @@ if TYPE_CHECKING:
         JsonToKoreOptions,
         KompileCommandOptions,
         KoreToJsonOptions,
+        ParseOuterOptions,
         PrintOptions,
         ProveLegacyOptions,
         ProveOptions,
@@ -56,6 +59,7 @@ if TYPE_CHECKING:
         RPCPrintOptions,
         RunOptions,
     )
+    from .kast.outer_syntax import Module
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -389,6 +393,60 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
     sys.stdout.write('\n')
 
 
+def exec_parse_outer(options: ParseOuterOptions) -> None:
+    main_file_dir = Path(options.main_file.name).resolve().parent
+    md_selector = options.md_selector
+    required_files = []
+    search_paths = [main_file_dir]
+    for include in options.includes:
+        include_path = Path(include)
+        try:
+            check_dir_path(include_path)
+        except ValueError:
+            _LOGGER.critical(f"Could not find directory '{include}' passed to -I")
+            exit(1)
+        search_paths.append(include_path.resolve())
+
+    text = options.main_file.read()
+    if Path(options.main_file.name).suffix == '.md':
+        text = select_code_blocks(text, md_selector)
+
+    def _slurp(definition_text: str) -> tuple[Module, ...]:
+        parser = OuterParser(definition_text)
+        definition = parser.definition()
+        result = definition.modules
+        for require in definition.requires:
+            try_files = [include_dir / require.path for include_dir in search_paths]
+            try:
+                # Get the first source file we can find by iterating through search_paths
+                index = [file.exists() for file in try_files].index(True)
+            except ValueError:
+                _LOGGER.critical(f'{require.path} not found')  # TODO Print the source location of the requires clause
+                exit(1)
+
+            required_file = try_files[index]
+            if required_file not in required_files:
+                _LOGGER.info(f'Reading {required_file}')
+                required_files.append(required_file)
+                with open(required_file, 'r') as f:
+                    text = f.read()
+                    if required_file.suffix == '.md':
+                        text = select_code_blocks(text, md_selector)
+                    result += _slurp(text)
+        return result
+
+    k = _slurp(text)
+
+    # TODO: Resolve main module and create the definition
+    # Desugar K language syntax to KAST compatible items
+    # Convert the AST to KOuter
+    # Serialize to JSON
+    try:
+        options.output_file.write(f'{k}')
+    except AttributeError:
+        sys.stdout.write(f'{k}\n')
+
+
 def create_argument_parser() -> ArgumentParser:
     k_cli_args = KCLIArgs()
 
@@ -530,6 +588,23 @@ def create_argument_parser() -> ArgumentParser:
     pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[k_cli_args.logging_args])
 
     pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args])
+
+    parse_outer_args = pyk_args_command.add_parser(
+        'parse-outer', help='Parse an outer K definition into JSON', parents=[k_cli_args.logging_args]
+    )
+    parse_outer_args.add_argument('main_file', type=FileType('r'), help='File with the K definition')
+    parse_outer_args.add_argument(
+        '--md-selector', default='k', help='Code selector expression to use when reading markdown.'
+    )
+    parse_outer_args.add_argument('--output-file', type=FileType('w'), help='Write output to file instead of stdout.')
+    parse_outer_args.add_argument(
+        '-I',
+        type=str,
+        dest='includes',
+        default=[Path.cwd()],
+        action='append',
+        help='Directories to lookup K definitions in.',
+    )
 
     return pyk_args
 
