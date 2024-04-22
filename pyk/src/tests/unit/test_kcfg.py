@@ -752,6 +752,102 @@ def test_minimize_02() -> None:
     assert contains_edge(cfg, 8, 6, 40, ('r1', 'r3'))
 
 
+def test_split_constraint_accumulation() -> None:
+    def x_ge(n: int) -> KApply:
+        return mlEqualsTrue(geInt(KVariable('X'), intToken(n)))
+
+    def x_lt(n: int) -> KApply:
+        return mlEqualsTrue(ltInt(KVariable('X'), intToken(n)))
+
+    d = {
+        'next': 16,
+        'nodes': node_dicts(15, config=x_config()),
+        'edges': edge_dicts(),
+        'splits': split_dicts(
+            (1, [(2, x_ge(0)), (3, x_lt(0))]),
+            (2, [(4, x_ge(32)), (5, x_lt(32))]),
+            (3, [(6, x_ge(-32)), (7, x_lt(-32))]),
+            (4, [(8, x_ge(64)), (9, x_lt(64))]),
+            (5, [(10, x_ge(16)), (11, x_lt(16))]),
+            (6, [(12, x_ge(-16)), (13, x_lt(-16))]),
+            (7, [(14, x_ge(-64)), (15, x_lt(-64))]),
+            csubst=x_subst(),
+        ),
+    }
+    cfg = KCFG.from_dict(d)
+    propagate_split_constraints(cfg)
+
+    cfg.minimize()
+
+    kcfg_show = KCFGShow(MockKPrint(), node_printer=NodePrinter(MockKPrint()))
+    actual = '\n'.join(kcfg_show.pretty(cfg)) + '\n'
+
+    expected = (
+        '\n'
+        '┌─ 1 (root, split)\n'
+        '┃\n'
+        '┃ (branch)\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _>=Int_ ( X , 0 )\n'
+        '┃  ┃     _>=Int_ ( X , 32 )\n'
+        '┃  ┃     _>=Int_ ( X , 64 )\n'
+        '┃  │\n'
+        '┃  └─ 8 (leaf)\n'
+        '┃\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _>=Int_ ( X , 0 )\n'
+        '┃  ┃     _>=Int_ ( X , 32 )\n'
+        '┃  ┃     _<Int_ ( X , 64 )\n'
+        '┃  │\n'
+        '┃  └─ 9 (leaf)\n'
+        '┃\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _>=Int_ ( X , 0 )\n'
+        '┃  ┃     _<Int_ ( X , 32 )\n'
+        '┃  ┃     _>=Int_ ( X , 16 )\n'
+        '┃  │\n'
+        '┃  └─ 10 (leaf)\n'
+        '┃\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _>=Int_ ( X , 0 )\n'
+        '┃  ┃     _<Int_ ( X , 32 )\n'
+        '┃  ┃     _<Int_ ( X , 16 )\n'
+        '┃  │\n'
+        '┃  └─ 11 (leaf)\n'
+        '┃\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _<Int_ ( X , 0 )\n'
+        '┃  ┃     _>=Int_ ( X , -32 )\n'
+        '┃  ┃     _>=Int_ ( X , -16 )\n'
+        '┃  │\n'
+        '┃  └─ 12 (leaf)\n'
+        '┃\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _<Int_ ( X , 0 )\n'
+        '┃  ┃     _>=Int_ ( X , -32 )\n'
+        '┃  ┃     _<Int_ ( X , -16 )\n'
+        '┃  │\n'
+        '┃  └─ 13 (leaf)\n'
+        '┃\n'
+        '┣━━┓ constraints:\n'
+        '┃  ┃     _<Int_ ( X , 0 )\n'
+        '┃  ┃     _<Int_ ( X , -32 )\n'
+        '┃  ┃     _>=Int_ ( X , -64 )\n'
+        '┃  │\n'
+        '┃  └─ 14 (leaf)\n'
+        '┃\n'
+        '┗━━┓ constraints:\n'
+        '   ┃     _<Int_ ( X , 0 )\n'
+        '   ┃     _<Int_ ( X , -32 )\n'
+        '   ┃     _<Int_ ( X , -64 )\n'
+        '   │\n'
+        '   └─ 15 (leaf)\n'
+        '\n'
+    )
+
+    assert actual == expected
+
+
 def test_split_csubsts() -> None:
     cfg = KCFG()
     cfg.create_node(term(11))

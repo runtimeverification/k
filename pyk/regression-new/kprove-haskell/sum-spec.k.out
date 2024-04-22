@@ -69,8 +69,8 @@ Subproofs: 0
 ┃  │       </generatedCounter>
 ┃  │     </generatedTop>
 ┃  │     #And { true #Equals N:Int >Int 0 }
-┃  │     #And { true #Equals N:Int >=Int 0 }
 ┃  │     #And { true #Equals N:Int +Int -1 >=Int 0 }
+┃  │     #And { true #Equals N:Int >=Int 0 }
 ┃  │
 ┃  ┊  constraint: OMITTED CONSTRAINT
 ┃  ┊  subst: OMITTED SUBST
