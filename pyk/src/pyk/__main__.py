@@ -382,6 +382,6 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
     kore.write(sys.stdout)
     sys.stdout.write('\n')
 
-
+    
 if __name__ == '__main__':
     main()
