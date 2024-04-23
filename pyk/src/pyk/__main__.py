@@ -28,7 +28,9 @@ from .kast.manip import (
 from .kast.markdown import select_code_blocks
 from .kast.outer import read_kast_definition
 from .kast.outer_parser import OuterParser
+from .kast.outer_syntax import Definition
 from .kast.pretty import PrettyPrinter
+from .konvert import _ast_to_kast
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
@@ -406,10 +408,6 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
             _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
         search_paths.append(include_path.resolve())
 
-    text = options.main_file.read()
-    if Path(options.main_file.name).suffix == '.md':
-        text = select_code_blocks(text, md_selector)
-
     def _slurp(definition_text: str) -> tuple[Module, ...]:
         parser = OuterParser(definition_text)
         definition = parser.definition()
@@ -434,16 +432,21 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
                     result += _slurp(text)
         return result
 
-    k = _slurp(text)
+    text = options.main_file.read()
+    if Path(options.main_file.name).suffix == '.md':
+        text = select_code_blocks(text, md_selector)
 
-    # TODO: Resolve main module and create the definition
-    # Desugar K language syntax to KAST compatible items
-    # Convert the AST to KOuter
-    # Serialize to JSON
+    modules = _slurp(text)
+
+    main_module_name = Path(options.main_file.name).stem.upper()
+    # TODO Desugar K language syntax to KAST compatible items
+    final_definition = _ast_to_kast(Definition(modules), main_module=main_module_name)
+
+    result_text = json.dumps(final_definition.to_dict())
     try:
-        options.output_file.write(f'{k}')
+        options.output_file.write(result_text)
     except AttributeError:
-        sys.stdout.write(f'{k}\n')
+        sys.stdout.write(f'{result_text}\n')
 
 
 def create_argument_parser() -> ArgumentParser:
