@@ -503,6 +503,13 @@ def create_argument_parser() -> ArgumentParser:
         action='store_true',
         help='Print out more information about proof failures.',
     )
+    prove_args.add_argument(
+        '--kore-rpc-command',
+        dest='kore_rpc_command',
+        type=str,
+        default=None,
+        help='Custom command to start RPC server.',
+    )
 
     graph_imports_args = pyk_args_command.add_parser(
         'graph-imports',
