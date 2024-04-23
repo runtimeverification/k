@@ -9,8 +9,7 @@
   <name>K Framework Tool Parent</name>
 
   <modules>
-    <module>kore</module>
-    <module>kernel</module>
+    <module>k-frontend</module>
     <module>k-distribution</module>
     <module>haskell-backend</module>
     <module>llvm-backend</module>

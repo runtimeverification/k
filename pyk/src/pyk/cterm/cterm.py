@@ -97,7 +97,6 @@ class CTerm:
         constraints = (constraint for _constraint in constraints for constraint in flatten_label('#And', _constraint))
         constraints = unique(constraints)
         constraints = (constraint for constraint in constraints if not CTerm._is_spurious_constraint(constraint))
-        constraints = sorted(constraints, key=CTerm._constraint_sort_key)
         return tuple(constraints)
 
     @staticmethod
@@ -207,7 +206,7 @@ class CTerm:
 
     def add_constraint(self, new_constraint: KInner) -> CTerm:
         """Return a new `CTerm` with the additional constraints."""
-        return CTerm(self.config, [new_constraint] + list(self.constraints))
+        return CTerm(self.config, list(self.constraints) + [new_constraint])
 
     def anti_unify(
         self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None

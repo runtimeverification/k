@@ -16,7 +16,7 @@
   <dependencies>
     <dependency>
       <groupId>com.runtimeverification.k</groupId>
-      <artifactId>kernel</artifactId>
+      <artifactId>k-frontend</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
