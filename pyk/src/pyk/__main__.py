@@ -428,7 +428,7 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
             if required_file not in required_files:
                 _LOGGER.info(f'Reading {required_file}')
                 required_files.append(required_file)
-                with open(required_file, 'r') as f:
+                with open(required_file) as f:
                     text = f.read()
                     if required_file.suffix == '.md':
                         text = select_code_blocks(text, md_selector)
