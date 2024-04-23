@@ -43,7 +43,7 @@ public class JarInfo {
    * Returns the absolute path of the includes directory. Paths are computed relative to the
    * location this class is running from. When it is run from a jar file it assumes it is in a k
    * installation at lib/java/*.jar. When it is run from a .class file it assumes it is running
-   * within the K source project, from a class in kernel/target/classes/, and returns a path to
+   * within the K source project, from a class in k-frontend/target/classes/, and returns a path to
    * k-distribution/include
    *
    * @return
