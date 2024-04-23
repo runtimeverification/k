@@ -18,9 +18,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final
 
-    from pyk.kcfg.explore import KCFGExplore
-    from pyk.kcfg.semantics import KCFGSemantics
-
     T = TypeVar('T', bound='Proof')
 
 P = TypeVar('P', bound='Proof')
@@ -277,7 +274,7 @@ class Proof(Generic[PS, SR]):
         return CompositeSummary([BaseSummary(self.id, self.status), *subproofs_summaries])
 
     @abstractmethod
-    def get_steps(self, kcfg_semantics: KCFGSemantics) -> Iterable[PS]: ...
+    def get_steps(self) -> Iterable[PS]: ...
 
 
 class ProofSummary(ABC):
@@ -383,7 +380,7 @@ class ParallelProver(Generic[P, PS, SR]):
                     future: Future[Any] = pool.submit(step)  # <-- schedule steps for execution
                     pending.add(future)
 
-            submit_steps(proof.get_steps(main_prover.kcfg_explore.kcfg_semantics))
+            submit_steps(proof.get_steps())
 
             while True:
                 if len(pending) == 0:
@@ -400,7 +397,7 @@ class ParallelProver(Generic[P, PS, SR]):
                 if fail_fast and proof.failed:
                     _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
                     break
-                submit_steps(proof.get_steps(main_prover.kcfg_explore.kcfg_semantics))
+                submit_steps(proof.get_steps())
                 pending.remove(future)
 
             if proof.failed:
@@ -409,11 +406,6 @@ class ParallelProver(Generic[P, PS, SR]):
 
 
 class Prover(Generic[P, PS, SR]):
-    kcfg_explore: KCFGExplore
-
-    def __init__(self, kcfg_explore: KCFGExplore):
-        self.kcfg_explore = kcfg_explore
-
     @abstractmethod
     def failure_info(self, proof: P) -> FailureInfo: ...
 
@@ -427,7 +419,7 @@ class Prover(Generic[P, PS, SR]):
         iterations = 0
         self.init_proof(proof)
         while True:
-            steps = proof.get_steps(self.kcfg_explore.kcfg_semantics)
+            steps = proof.get_steps()
             if len(list(steps)) == 0:
                 break
             for step in steps:
