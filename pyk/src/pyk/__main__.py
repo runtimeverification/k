@@ -396,6 +396,12 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
+    # TODO Desugar K language syntax to KAST compatible items
+    #      Import the prelude and add --no-prelude option
+    #      Trim away modules unreachable from the main/syntax modules (modulo some builtins)
+    #      Checks:
+    #        - Circular imports
+    #        - Modules with duplicate names
     main_file_dir = Path(options.main_file.name).resolve().parent
     md_selector = options.md_selector
     required_files = []
@@ -439,7 +445,6 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
     modules = _slurp(text)
 
     main_module_name = getattr(options, 'main_module', Path(options.main_file.name).stem.upper())
-    # TODO Desugar K language syntax to KAST compatible items
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module_name)
 
     result_text = json.dumps(final_definition.to_dict())
