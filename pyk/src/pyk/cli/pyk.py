@@ -165,3 +165,4 @@ class ParseOuterOptions(LoggingOptions):
     md_selector: str
     includes: Iterable[str]
     output_file: IO[Any]
+    main_module: str

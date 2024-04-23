@@ -438,7 +438,7 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
 
     modules = _slurp(text)
 
-    main_module_name = Path(options.main_file.name).stem.upper()
+    main_module_name = getattr(options, 'main_module', Path(options.main_file.name).stem.upper())
     # TODO Desugar K language syntax to KAST compatible items
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module_name)
 
@@ -607,6 +607,7 @@ def create_argument_parser() -> ArgumentParser:
         action='append',
         help='Directories to lookup K definitions in.',
     )
+    parse_outer_args.add_argument('--main-module', type=str, help='The name of the main module for the definition')
 
     return pyk_args
 
