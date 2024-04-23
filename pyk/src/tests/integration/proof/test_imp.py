@@ -11,7 +11,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
+from pyk.prelude.kbool import andBool, notBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProof, APRProver, ProofStatus
@@ -59,21 +59,6 @@ class ImpSemantics(KCFGSemantics):
         if type(k_cell) is KVariable:
             return True
         return False
-
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        if self.definition is None:
-            raise ValueError('IMP branch extraction requires a non-None definition')
-
-        k_cell = c.cell('K_CELL')
-        if type(k_cell) is KSequence and len(k_cell) > 0:
-            k_cell = k_cell[0]
-        if type(k_cell) is KApply and k_cell.label.name == 'if(_)_else_':
-            condition = k_cell.args[0]
-            if (type(condition) is KVariable and condition.sort == BOOL) or (
-                type(condition) is KApply and self.definition.return_sort(condition.label) == BOOL
-            ):
-                return [mlEqualsTrue(condition), mlEqualsTrue(notBool(condition))]
-        return []
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c

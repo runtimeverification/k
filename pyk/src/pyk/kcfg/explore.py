@@ -222,19 +222,7 @@ class KCFGExplore:
             log(f'abstraction node: {node_id}')
             return Abstract(abstract_cterm)
 
-        # _branches = self.kcfg_semantics.extract_branches(_cterm)
-        # branches = []
-        # for constraint in _branches:
-        #     kast = mlAnd(list(_cterm.constraints) + [constraint])
-        #     kast, _ = self.cterm_symbolic.kast_simplify(kast)
-        #     if not CTerm._is_bottom(kast):
-        #         branches.append(constraint)
-        # if len(branches) > 1:
-        #     constraint_strs = [self.pretty_print(bc) for bc in branches]
-        #     log(f'{len(branches)} branches using heuristics: {node_id} -> {constraint_strs}')
-        #     return Branch(branches, heuristic=True)
-
-        cterm, next_cterms_with_branch_constraints, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
+        cterm, next_states, depth, vacuous, next_node_logs = self.cterm_symbolic.execute(
             _cterm,
             depth=execute_depth,
             cut_point_rules=cut_point_rules,
@@ -248,7 +236,7 @@ class KCFGExplore:
             return Step(cterm, depth, next_node_logs, extract_rule_labels(next_node_logs))
 
         # Stuck or vacuous
-        if not next_cterms_with_branch_constraints:
+        if not next_states:
             if vacuous:
                 log(f'vacuous node: {node_id}', warning=True)
                 return Vacuous()
@@ -256,10 +244,10 @@ class KCFGExplore:
             return Stuck()
 
         # Cut rule
-        if len(next_cterms_with_branch_constraints) == 1:
+        if len(next_states) == 1:
             log(f'cut-rule basic block at depth {depth}: {node_id}')
             return Step(
-                next_cterms_with_branch_constraints[0][0],
+                next_states[0].state,
                 1,
                 next_node_logs,
                 extract_rule_labels(next_node_logs),
@@ -267,14 +255,14 @@ class KCFGExplore:
             )
 
         # Branch
-        assert len(next_cterms_with_branch_constraints) > 1
-        if all(branch_constraint for _, branch_constraint in next_cterms_with_branch_constraints):
-            branches = [not_none(rule_predicate) for _, rule_predicate in next_cterms_with_branch_constraints]
+        assert len(next_states) > 1
+        if all(branch_constraint for _, branch_constraint in next_states):
+            branches = [not_none(rule_predicate) for _, rule_predicate in next_states]
             constraint_strs = [self.pretty_print(ml_pred_to_bool(bc)) for bc in branches]
             log(f'{len(branches)} branches: {node_id} -> {constraint_strs}')
             return Branch(branches)
         else:
             # NDBranch
-            log(f'{len(next_cterms_with_branch_constraints)} non-deterministic branches: {node_id}')
-            next_cterms = [cterm for cterm, _ in next_cterms_with_branch_constraints]
+            log(f'{len(next_states)} non-deterministic branches: {node_id}')
+            next_cterms = [cterm for cterm, _ in next_states]
             return NDBranch(next_cterms, next_node_logs, extract_rule_labels(next_node_logs))

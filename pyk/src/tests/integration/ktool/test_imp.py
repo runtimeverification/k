@@ -9,8 +9,6 @@ import pytest
 from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import KCFGSemantics
-from pyk.prelude.kbool import BOOL, notBool
-from pyk.prelude.ml import mlEqualsTrue
 from pyk.proof import ProofStatus
 from pyk.testing import KProveTest
 from pyk.utils import single
@@ -22,7 +20,6 @@ if TYPE_CHECKING:
     from typing import Final
 
     from pyk.cterm import CTerm
-    from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.ktool.kprove import KProve
 
@@ -46,21 +43,6 @@ class ImpSemantics(KCFGSemantics):
         if type(k_cell) is KVariable:
             return True
         return False
-
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        if self.definition is None:
-            raise ValueError('IMP branch extraction requires a non-None definition')
-
-        k_cell = c.cell('K_CELL')
-        if type(k_cell) is KSequence and len(k_cell) > 0:
-            k_cell = k_cell[0]
-        if type(k_cell) is KApply and k_cell.label.name == 'if(_)_else_':
-            condition = k_cell.args[0]
-            if (type(condition) is KVariable and condition.sort == BOOL) or (
-                type(condition) is KApply and self.definition.return_sort(condition.label) == BOOL
-            ):
-                return [mlEqualsTrue(condition), mlEqualsTrue(notBool(condition))]
-        return []
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c
