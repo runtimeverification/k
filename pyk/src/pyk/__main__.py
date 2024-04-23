@@ -403,8 +403,7 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
         try:
             check_dir_path(include_path)
         except ValueError:
-            _LOGGER.critical(f"Could not find directory '{include}' passed to -I")
-            exit(1)
+            _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
         search_paths.append(include_path.resolve())
 
     text = options.main_file.read()
