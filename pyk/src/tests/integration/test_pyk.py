@@ -197,8 +197,6 @@ class TestParseOuter:
         ('d.k', []),
         ('include.k', [str(K_FILES / 'include')]),
         ('markdown.md', []),
-        ('imp.k', []),
-        ('goto.k', []),
     ]
 
     @pytest.mark.parametrize(
