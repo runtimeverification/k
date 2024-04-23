@@ -29,7 +29,7 @@ jobs:
 
 
   pyk-code-quality-checks:
-    name: 'Pyk: Code Quality'
+    name: 'Pyk: Code Quality & Unit Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -50,26 +50,6 @@ jobs:
         run: make check
       - name: 'Run pyupgrade'
         run: make pyupgrade
-
-
-  pyk-unit-tests:
-    name: 'Pyk: Unit Tests'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.10', '3.11', '3.12']
-    defaults:
-      run:
-        working-directory: ./pyk
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
-        with:
-          python-version: ${{ matrix.python-version }}
       - name: 'Run unit tests'
         run: make cov-unit
 
@@ -95,7 +75,6 @@ jobs:
     needs:
       - format-check
       - pyk-code-quality-checks
-      - pyk-unit-tests
       - pyk-build-docs
     steps:
       - run: true
