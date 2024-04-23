@@ -301,7 +301,7 @@ IS_PREFIX_TEST_DATA: Final = (
     (KProduction('Int', (KNonTerminal(KSort('Foo')),)), False),
     (KProduction('Int', (KTerminal('foo'), KTerminal('('))), False),
     (KProduction('Int', (KTerminal('foo'), KTerminal('('), KTerminal(')'))), True),
-    (KProduction('Int', (KRegexTerminal('foo', '', ''), KTerminal('('), KTerminal(')'))), False),
+    (KProduction('Int', (KRegexTerminal('foo'), KTerminal('('), KTerminal(')'))), False),
     (KProduction('Int', (KNonTerminal(KSort('foo')), KTerminal('('), KTerminal(')'))), False),
     (KProduction('Int', (KTerminal('foo'), KTerminal('bar'), KTerminal('('), KTerminal(')'))), True),
     (KProduction('Int', (KTerminal('foo'), KTerminal('('), KNonTerminal(KSort('Foo')), KTerminal(')'))), True),
