@@ -11,9 +11,9 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import andBool, notBool, orBool
+from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.reachability import APRFailureInfo
 from pyk.proof.show import APRProofNodePrinter
@@ -556,7 +556,7 @@ PATH_CONSTRAINTS_TEST_DATA: Iterable[
         1,
         [],
         [],
-        '{ true #Equals notBool _S:Int <=Int 123 }',
+        '{ false #Equals _S:Int <=Int 123 }',
     ),
 )
 
@@ -678,7 +678,7 @@ FAILURE_INFO_TEST_DATA: Iterable[tuple[str, Path, str, str, int, int, tuple[KInn
         'failing-if',
         0,
         1,
-        (mlEqualsTrue(notBool(KVariable('_B', 'Bool'))),),
+        (mlEquals(KVariable('_B', 'Bool'), FALSE),),
         False,
     ),
     (
@@ -688,7 +688,7 @@ FAILURE_INFO_TEST_DATA: Iterable[tuple[str, Path, str, str, int, int, tuple[KInn
         'fail-branch',
         0,
         1,
-        (mlEqualsTrue(notBool(KApply('_<=Int_', [KVariable('_S', 'Int'), KToken('123', '')]))),),
+        (mlEqualsFalse(KApply('_<=Int_', [KVariable('_S', 'Int'), KToken('123', '')])),),
         False,
     ),
     (
