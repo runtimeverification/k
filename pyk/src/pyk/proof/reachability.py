@@ -258,13 +258,13 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         pruned_nodes = super().prune(node_id, keep_nodes=list(keep_nodes) + [self.init, self.target])
         for nid in pruned_nodes:
             self._bounded.discard(nid)
+            self.prior_loops_cache = {k: v for (k, v) in self.prior_loops_cache.items() if k != nid}
             for k, v in self.prior_loops_cache.items():
-                if k == nid:
-                    self.prior_loops_cache.pop(k)
-                elif nid in v:
+                if nid in v:
                     self.prior_loops_cache[k] = tuple(_nid for _nid in self.prior_loops_cache[k] if _nid != nid)
 
         return pruned_nodes
+
 
     @property
     def exec_time(self) -> float:
