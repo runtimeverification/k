@@ -265,7 +265,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
         return pruned_nodes
 
-
     @property
     def exec_time(self) -> float:
         return self._exec_time
