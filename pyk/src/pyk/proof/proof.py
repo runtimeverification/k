@@ -325,6 +325,7 @@ class ProverPool(ContextManager['ProverPool'], Generic[P, PS, SR]):
         self._closed = False
 
     def __enter__(self) -> ProverPool[P, PS, SR]:
+        self._executor.__enter__()
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
