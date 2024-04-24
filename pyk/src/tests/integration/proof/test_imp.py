@@ -18,8 +18,8 @@ from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProver, ProofStatus
-from pyk.proof.proof import ParallelProver
-from pyk.proof.reachability import APRFailureInfo, APRProof, APRProofResult, APRProofStep
+from pyk.proof.proof import parallel_advance_proof
+from pyk.proof.reachability import APRFailureInfo, APRProof
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
@@ -993,8 +993,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                 _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
                 return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
 
-            parallel_prover = ParallelProver[APRProof, APRProofStep, APRProofResult]()
-            parallel_prover.parallel_advance_proof(
+            parallel_advance_proof(
                 proof=proof, max_iterations=max_iterations, create_prover=create_prover, max_workers=2
             )
 
