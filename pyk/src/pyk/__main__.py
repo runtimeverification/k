@@ -396,12 +396,6 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
-    # TODO Desugar K language syntax to KAST compatible items
-    #      Import the prelude and add --no-prelude option
-    #      Trim away modules unreachable from the main/syntax modules (modulo some builtins)
-    #      Checks:
-    #        - Circular imports
-    #        - Modules with duplicate names
     main_file_dir = Path(options.main_file.name).resolve().parent
     md_selector = options.md_selector
     required_files = []
