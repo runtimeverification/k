@@ -329,7 +329,12 @@ class ProverPool(ContextManager['ProverPool'], Generic[P, PS, SR]):
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self._executor.__exit__(exc_type, exc_val, exc_tb)
+        self.close()
+
+    def close(self) -> None:
         self._closed = True
+        for prover in self._provers.values():
+            prover.shutdown()
 
     def submit(self, proof_step: PS) -> Future[Iterable[SR]]:
         if self._closed:
@@ -400,6 +405,9 @@ def parallel_advance_proof(
 
 
 class Prover(Generic[P, PS, SR]):
+    @abstractmethod
+    def shutdown(self) -> None: ...
+
     @abstractmethod
     def failure_info(self, proof: P) -> FailureInfo: ...
 

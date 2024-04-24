@@ -691,6 +691,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
 
+    def shutdown(self) -> None:
+        self.kcfg_explore.cterm_symbolic._kore_client.close()
+
     def init_proof(self, proof: APRProof) -> None:
         def _inject_module(module_name: str, import_name: str, sentences: list[KRuleLike]) -> None:
             _module = KFlatModule(module_name, sentences, [KImport(import_name)])
