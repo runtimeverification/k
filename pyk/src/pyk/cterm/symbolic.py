@@ -41,9 +41,14 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
+class NextState(NamedTuple):
+    state: CTerm
+    condition: KInner | None
+
+
 class CTermExecute(NamedTuple):
     state: CTerm
-    next_states: tuple[CTerm, ...]
+    next_states: tuple[NextState, ...]
     depth: int
     vacuous: bool
     logs: tuple[LogEntry, ...]
@@ -120,9 +125,15 @@ class CTermSymbolic:
 
         state = CTerm.from_kast(self.kore_to_kast(response.state.kore))
         resp_next_states = response.next_states or ()
-        next_states = tuple(CTerm.from_kast(self.kore_to_kast(ns.kore)) for ns in resp_next_states)
+        next_states = tuple(
+            NextState(
+                CTerm.from_kast(self.kore_to_kast(ns.kore)),
+                self.kore_to_kast(ns.rule_predicate) if ns.rule_predicate is not None else None,
+            )
+            for ns in resp_next_states
+        )
 
-        assert all(not cterm.is_bottom for cterm in next_states)
+        assert all(not cterm.is_bottom for cterm, _ in next_states)
         assert len(next_states) != 1 or response.reason is StopReason.CUT_POINT_RULE
 
         return CTermExecute(

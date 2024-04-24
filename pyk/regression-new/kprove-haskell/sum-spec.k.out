@@ -1,7 +1,7 @@
 APRProof: 3b7070ca4603e18d26d032c0fe64dd71ffadc2c63dae9d57315e8e471a371bd3
     status: ProofStatus.PASSED
     admitted: False
-    nodes: 5
+    nodes: 7
     pending: 0
     failing: 0
     vacuous: 0
@@ -12,7 +12,7 @@ APRProof: 3b7070ca4603e18d26d032c0fe64dd71ffadc2c63dae9d57315e8e471a371bd3
     execution time: 0s
 Subproofs: 0
 
-┌─ 1 (root, init)
+┌─ 1 (root, split, init)
 │     <generatedTop>
 │       <k>
 │         addCounter ( N:Int )
@@ -30,10 +30,30 @@ Subproofs: 0
 │     </generatedTop>
 │     #And { true #Equals N:Int >=Int 0 }
 ┃
-┃ (1 step)
-┣━━┓
+┃ (branch)
+┣━━┓ constraint: N:Int >Int 0
 ┃  │
 ┃  ├─ 3
+┃  │     <generatedTop>
+┃  │       <k>
+┃  │         addCounter ( N:Int )
+┃  │         ~> K_CELL_fc656f08:K
+┃  │       </k>
+┃  │       <counter>
+┃  │         C:Int
+┃  │       </counter>
+┃  │       <sum>
+┃  │         S:Int
+┃  │       </sum>
+┃  │       <generatedCounter>
+┃  │         GENERATEDCOUNTER_CELL_949ec677:Int
+┃  │       </generatedCounter>
+┃  │     </generatedTop>
+┃  │     #And { true #Equals N:Int >=Int 0 }
+┃  │     #And { true #Equals N:Int >Int 0 }
+┃  │
+┃  │  (1 step)
+┃  ├─ 5
 ┃  │     <generatedTop>
 ┃  │       <k>
 ┃  │         addCounter ( N:Int +Int -1 )
@@ -53,7 +73,7 @@ Subproofs: 0
 ┃  │     #And { true #Equals N:Int >=Int 0 }
 ┃  │
 ┃  │  (1 step)
-┃  ├─ 5
+┃  ├─ 7
 ┃  │     <generatedTop>
 ┃  │       <k>
 ┃  │         K_CELL_fc656f08:K
@@ -92,9 +112,29 @@ Subproofs: 0
 ┃        #And { true #Equals N:Int >=Int 0 }
 ┃        #And { true #Equals ?S:Int ==Int S:Int +Int N:Int *Int C:Int +Int N:Int -Int 1 *Int N:Int /Int 2 }
 ┃
-┗━━┓
+┗━━┓ constraint: N:Int ==K 0
    │
    ├─ 4
+   │     <generatedTop>
+   │       <k>
+   │         addCounter ( N:Int )
+   │         ~> K_CELL_fc656f08:K
+   │       </k>
+   │       <counter>
+   │         C:Int
+   │       </counter>
+   │       <sum>
+   │         S:Int
+   │       </sum>
+   │       <generatedCounter>
+   │         GENERATEDCOUNTER_CELL_949ec677:Int
+   │       </generatedCounter>
+   │     </generatedTop>
+   │     #And { true #Equals N:Int >=Int 0 }
+   │     #And { N:Int #Equals 0 }
+   │
+   │  (1 step)
+   ├─ 6
    │     <generatedTop>
    │       <k>
    │         K_CELL_fc656f08:K
