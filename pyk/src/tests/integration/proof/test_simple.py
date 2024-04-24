@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from typing import Final
 
     from pyk.cterm import CTerm
-    from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprove import KProve
@@ -29,9 +28,6 @@ class SimpleSemantics(KCFGSemantics):
         if type(k_cell) is KSequence and type(k_cell[0]) is KApply and k_cell[0].label.name == 'f_SIMPLE-PROOFS_Step':
             return True
         return False
-
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        return []
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c
