@@ -56,18 +56,6 @@ class RefuteSemantics(KCFGSemantics):
             return True
         return False
 
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        k_cell = c.cell('K_CELL')
-        if type(k_cell) is KSequence and len(k_cell) > 0:
-            k_cell = k_cell[0]
-        if type(k_cell) is KApply and k_cell.label.name in [
-            'd(_)_REFUTE-NODE-SYNTAX_A_Int',
-            'a(_)_REFUTE-NODE-SYNTAX_A_Int',
-        ]:
-            discriminant = k_cell.args[0]
-            return [mlEqualsTrue(gtInt(discriminant, intToken(0))), mlEqualsTrue(leInt(discriminant, intToken(0)))]
-        return []
-
     def abstract_node(self, c: CTerm) -> CTerm:
         return c
 

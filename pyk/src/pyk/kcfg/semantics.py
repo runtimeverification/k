@@ -5,15 +5,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..cterm import CTerm
-    from ..kast.inner import KInner
 
 
 class KCFGSemantics(ABC):
     @abstractmethod
     def is_terminal(self, c: CTerm) -> bool: ...
-
-    @abstractmethod
-    def extract_branches(self, c: CTerm) -> list[KInner]: ...
 
     @abstractmethod
     def abstract_node(self, c: CTerm) -> CTerm: ...
@@ -25,9 +21,6 @@ class KCFGSemantics(ABC):
 class DefaultSemantics(KCFGSemantics):
     def is_terminal(self, c: CTerm) -> bool:
         return False
-
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        return []
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c
