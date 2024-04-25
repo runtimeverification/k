@@ -161,7 +161,7 @@ class RunOptions(LoggingOptions):
 
 
 class ParseOuterOptions(LoggingOptions):
-    main_file: IO[Any]
+    main_file: Path
     md_selector: str
     includes: Iterable[str]
     output_file: IO[Any]

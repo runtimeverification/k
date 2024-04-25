@@ -13,7 +13,7 @@ from graphviz import Digraph
 
 from .cli.args import KCLIArgs
 from .cli.pyk import generate_options
-from .cli.utils import LOG_FORMAT, dir_path, loglevel
+from .cli.utils import LOG_FORMAT, dir_path, file_path, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .kast.inner import KInner
@@ -25,12 +25,9 @@ from .kast.manip import (
     remove_source_map,
     split_config_and_constraints,
 )
-from .kast.markdown import select_code_blocks
 from .kast.outer import read_kast_definition
-from .kast.outer_parser import OuterParser
-from .kast.outer_syntax import Definition
 from .kast.pretty import PrettyPrinter
-from .konvert import _ast_to_kast
+from .kast.utils import parse_outer
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
@@ -61,7 +58,6 @@ if TYPE_CHECKING:
         RPCPrintOptions,
         RunOptions,
     )
-    from .kast.outer_syntax import Module
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -396,10 +392,7 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
-    main_file_dir = Path(options.main_file.name).resolve().parent
-    md_selector = options.md_selector
-    required_files = []
-    search_paths = [main_file_dir]
+    search_paths = [options.main_file.resolve().parent]
     for include in options.includes:
         include_path = Path(include)
         try:
@@ -408,38 +401,8 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
             _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
         search_paths.append(include_path.resolve())
 
-    def _slurp(definition_text: str) -> tuple[Module, ...]:
-        parser = OuterParser(definition_text)
-        definition = parser.definition()
-        result = definition.modules
-        for require in definition.requires:
-            try_files = [include_dir / require.path for include_dir in search_paths]
-            try:
-                # Get the first source file we can find by iterating through search_paths
-                index = [file.exists() for file in try_files].index(True)
-            except ValueError:
-                _LOGGER.critical(f'{require.path} not found')  # TODO Print the source location of the requires clause
-                exit(1)
-
-            required_file = try_files[index]
-            if required_file not in required_files:
-                _LOGGER.info(f'Reading {required_file}')
-                required_files.append(required_file)
-                with open(required_file) as f:
-                    text = f.read()
-                    if required_file.suffix == '.md':
-                        text = select_code_blocks(text, md_selector)
-                    result += _slurp(text)
-        return result
-
-    text = options.main_file.read()
-    if Path(options.main_file.name).suffix == '.md':
-        text = select_code_blocks(text, md_selector)
-
-    modules = _slurp(text)
-
-    main_module_name = getattr(options, 'main_module', Path(options.main_file.name).stem.upper())
-    final_definition = _ast_to_kast(Definition(modules), main_module=main_module_name)
+    main_module_name = getattr(options, 'main_module', options.main_file.stem.upper())
+    final_definition = parse_outer(options.main_file, main_module_name, search_paths, options.md_selector)
 
     result_text = json.dumps(final_definition.to_dict())
     try:
@@ -593,7 +556,7 @@ def create_argument_parser() -> ArgumentParser:
     parse_outer_args = pyk_args_command.add_parser(
         'parse-outer', help='Parse an outer K definition into JSON', parents=[k_cli_args.logging_args]
     )
-    parse_outer_args.add_argument('main_file', type=FileType('r'), help='File with the K definition')
+    parse_outer_args.add_argument('main_file', type=file_path, help='File with the K definition')
     parse_outer_args.add_argument(
         '--md-selector', default='k', help='Code selector expression to use when reading markdown.'
     )
