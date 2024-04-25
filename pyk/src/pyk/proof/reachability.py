@@ -679,8 +679,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
         _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
 
-        if self.kcfg_explore.kcfg_semantics.is_terminal(proof.kcfg.node(proof.target).cterm):
-            proof.add_terminal(proof.target)
+        for node_id in [proof.init, proof.target]:
+            if self.kcfg_explore.kcfg_semantics.is_terminal(proof.kcfg.node(node_id).cterm):
+                proof.add_terminal(node_id)
 
     def nonzero_depth(self, proof: APRProof, node: KCFG.Node) -> bool:
         return not proof.kcfg.zero_depth_between(proof.init, node.id)
