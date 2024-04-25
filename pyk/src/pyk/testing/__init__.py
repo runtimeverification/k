@@ -9,6 +9,7 @@ from ._kompiler import (
     KProveTest,
     KRunTest,
     RuntimeTest,
+    ProofTraceTest,
     ServerType,
 )
 from ._profiler import Profiler
