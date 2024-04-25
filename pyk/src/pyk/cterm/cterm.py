@@ -315,14 +315,10 @@ class CSubst:
     subst: Subst
     constraints: tuple[KInner, ...]
 
-    def __init__(
-        self, subst: Subst | None = None, constraints: Iterable[KInner] = (), maintain_order: bool = False
-    ) -> None:
+    def __init__(self, subst: Subst | None = None, constraints: Iterable[KInner] = ()) -> None:
         """Construct a new `CSubst` given a `Subst` and set of constraints as `KInner`, performing basic sanity checks."""
         object.__setattr__(self, 'subst', subst if subst is not None else Subst({}))
-        object.__setattr__(
-            self, 'constraints', CTerm._normalize_constraints(constraints, maintain_order=maintain_order)
-        )
+        object.__setattr__(self, 'constraints', CTerm._normalize_constraints(constraints, maintain_order=True))
 
     def __iter__(self) -> Iterator[Subst | KInner]:
         """Return an iterator with the head being the `subst` and the tail being the `constraints`."""
@@ -349,7 +345,7 @@ class CSubst:
 
     def add_constraint(self, constraint: KInner) -> CSubst:
         """Return this `CSubst` with an additional constraint added."""
-        return CSubst(self.subst, list(self.constraints) + [constraint], maintain_order=True)
+        return CSubst(self.subst, list(self.constraints) + [constraint])
 
     def apply(self, cterm: CTerm) -> CTerm:
         """Apply this `CSubst` to the given `CTerm` (instantiating the free variables, and adding the constraints)."""
