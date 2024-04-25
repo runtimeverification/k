@@ -922,11 +922,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             prover.advance_proof(proof, max_iterations=1)
             # We have reached a terminal node, but not yet checked subsumption
             assert proof.status != ProofStatus.PASSED
-
-            kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
-            cfg_lines = kcfg_show.show(proof.kcfg)
-            print('\n'.join(cfg_lines))
-
             # The next advance only checks subsumption
             prover.advance_proof(proof, max_iterations=1)
             assert proof.status == ProofStatus.PASSED
