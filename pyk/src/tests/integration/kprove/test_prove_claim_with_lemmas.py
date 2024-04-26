@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyk.cterm import CTerm
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KToken
+from pyk.kast.manip import is_top
 from pyk.kast.outer import KClaim, KRule
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.ml import mlOr
@@ -37,5 +37,5 @@ class TestSimpleProof(KProveTest):
         result2 = kprove.prove_claim(claim, 'claim-with-lemma', lemmas=[lemma])
 
         # Then
-        assert not CTerm._is_top(mlOr([res.kast for res in result1]))
-        assert CTerm._is_top(mlOr([res.kast for res in result2]))
+        assert not is_top(mlOr([res.kast for res in result1]))
+        assert is_top(mlOr([res.kast for res in result2]))

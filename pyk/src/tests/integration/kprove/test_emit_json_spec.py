@@ -5,9 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cterm import CTerm
 from pyk.kast import EMPTY_ATT
-from pyk.kast.manip import remove_generated_cells
+from pyk.kast.manip import is_top, remove_generated_cells
 from pyk.kast.outer import KDefinition, KRequire
 from pyk.kast.pretty import paren
 from pyk.prelude.ml import mlOr
@@ -43,7 +42,7 @@ class TestEmitJsonSpec(KProveTest):
         result = kprove.prove_claim(spec_module.claims[0], 'looping-1')
 
         # Then
-        assert CTerm._is_top(mlOr([res.kast for res in result]))
+        assert is_top(mlOr([res.kast for res in result]))
 
     def test_prove(self, kprove: KProve, spec_module: KFlatModule) -> None:
         # Given
@@ -64,4 +63,4 @@ class TestEmitJsonSpec(KProveTest):
         result = kprove.prove(spec_file, spec_module_name=spec_module_name, args=['-I', str(include_dir)])
 
         # Then
-        assert CTerm._is_top(mlOr([res.kast for res in result]))
+        assert is_top(mlOr([res.kast for res in result]))
