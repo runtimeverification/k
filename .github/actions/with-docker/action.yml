@@ -56,13 +56,13 @@ runs:
       #     --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
       #     --tag stack:${BASE_DISTRO}-${K_VERSION}                     \
       #     --file ${SUBDIR}${DOCKERFILE}.stack-deps
-      # docker build ${SUBDIR}                                          \
-      #     --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
-      #     --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
-      #     --build-arg BASE_OS=${BASE_OS}                              \
-      #     --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
-      #     --tag maven:${BASE_DISTRO}-${K_VERSION}                     \
-      #     --file ${SUBDIR}${DOCKERFILE}.maven-cache
+      docker build ${SUBDIR}                                          \
+          --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
+          --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
+          --build-arg BASE_OS=${BASE_OS}                              \
+          --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
+          --tag maven:${BASE_DISTRO}-${K_VERSION}                     \
+          --file ${SUBDIR}${DOCKERFILE}.maven-cache
 
       docker build ${SUBDIR} --file ${SUBDIR}${DOCKERFILE}            \
           --tag runtimeverification/${TAG_NAME}                       \

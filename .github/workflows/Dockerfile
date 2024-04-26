@@ -10,10 +10,10 @@ FROM runtimeverificationinc/z3:${BASE_OS}-${BASE_DISTRO}-${Z3_VERSION} as Z3
 # ARG K_VERSION
 # FROM stack:${BASE_DISTRO}-${K_VERSION} as STACK
 
-# ARG BASE_OS
-# ARG BASE_DISTRO
-# ARG K_VERSION
-# FROM maven:${BASE_DISTRO}-${K_VERSION} as MAVEN
+ARG BASE_OS
+ARG BASE_DISTRO
+ARG K_VERSION
+FROM maven:${BASE_DISTRO}-${K_VERSION} as MAVEN
 
 ARG BASE_OS
 ARG BASE_DISTRO
@@ -84,4 +84,4 @@ RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP 
 USER $USER:$GROUP
 
 # COPY --from=STACK --chown=$USER:$GROUP /home/$USER/.stack /home/$USER/.stack
-# COPY --from=MAVEN --chown=$USER:$GROUP /home/$USER/.m2 /home/$USER/.m2
+COPY --from=MAVEN --chown=$USER:$GROUP /home/$USER/.m2 /home/$USER/.m2
