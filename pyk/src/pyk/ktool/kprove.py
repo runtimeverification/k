@@ -12,12 +12,11 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
-from ..cterm import CTerm, cterm_symbolic
+from ..cterm import CTerm
 from ..kast import Atts, kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_lhs, flatten_label
 from ..kast.outer import KApply, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
-from ..kcfg.explore import KCFGExplore
 from ..kore.rpc import KoreExecLogFormat
 from ..prelude.ml import is_top
 from ..proof import APRProof, APRProver, EqualityProof, ImpliesProver
@@ -28,12 +27,12 @@ from .kprint import KPrint
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping
     from subprocess import CompletedProcess
-    from typing import Final
+    from typing import ContextManager, Final
 
     from ..cli.pyk import ProveOptions
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
-    from ..kcfg.semantics import KCFGSemantics
+    from ..kcfg import KCFGExplore
     from ..proof import Proof, Prover
     from ..utils import BugReport
 
@@ -418,15 +417,20 @@ def _get_rule_log(debug_log_file: Path) -> list[list[tuple[str, bool, int]]]:
 
 class ProveRpc:
     _kprove: KProve
+    _explore_context: Callable[[], ContextManager[KCFGExplore]]
 
-    def __init__(self, kprove: KProve):
+    def __init__(
+        self,
+        kprove: KProve,
+        explore_context: Callable[[], ContextManager[KCFGExplore]],
+    ):
         self._kprove = kprove
+        self._explore_context = explore_context
 
-    def prove_rpc(self, options: ProveOptions, kcfg_semantics: KCFGSemantics | None = None) -> list[Proof]:
+    def prove_rpc(self, options: ProveOptions) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
             return self._prove_claim_rpc(
                 claim,
-                kcfg_semantics=kcfg_semantics,
                 max_depth=options.max_depth,
                 save_directory=options.save_directory,
                 max_iterations=options.max_iterations,
@@ -446,14 +450,11 @@ class ProveRpc:
     def _prove_claim_rpc(
         self,
         claim: KClaim,
-        kcfg_semantics: KCFGSemantics | None = None,
         max_depth: int | None = None,
         save_directory: Path | None = None,
         max_iterations: int | None = None,
     ) -> Proof:
         definition = self._kprove.definition
-        kompiled_kore = self._kprove.kompiled_kore
-        definition_dir = self._kprove.definition_dir
 
         proof: Proof
         prover: Prover
@@ -473,8 +474,7 @@ class ProveRpc:
                 proof = APRProof.read_proof_data(save_directory, proof.id)
 
         if not proof.passed and (max_iterations is None or max_iterations > 0):
-            with cterm_symbolic(definition, kompiled_kore, definition_dir) as cts:
-                kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
+            with self._explore_context() as kcfg_explore:
                 if is_functional_claim:
                     assert type(proof) is EqualityProof
                     prover = ImpliesProver(proof, kcfg_explore)
