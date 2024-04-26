@@ -35,6 +35,7 @@ def _slurp(
             index = [file.exists() for file in try_files].index(True)
         except ValueError:
             _LOGGER.critical(f'{require.path} not found')  # TODO Print the source location of the requires clause
+            _LOGGER.critical(f'Lookup directories: {[str(path) for path in search_paths]}')
             exit(1)
 
         required_file = try_files[index]

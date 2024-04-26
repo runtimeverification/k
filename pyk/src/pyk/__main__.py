@@ -393,7 +393,7 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
     search_paths = [options.main_file.resolve().parent]
-    for include in options.includes:
+    for include in getattr(options, 'includes', []):
         include_path = Path(include)
         try:
             check_dir_path(include_path)
@@ -565,7 +565,6 @@ def create_argument_parser() -> ArgumentParser:
         '-I',
         type=str,
         dest='includes',
-        default=[Path.cwd()],
         action='append',
         help='Directories to lookup K definitions in.',
     )
