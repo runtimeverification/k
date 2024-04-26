@@ -30,7 +30,7 @@ from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
-from .ktool.kprove import KProve
+from .ktool.kprove import KProve, ProveRpc
 from .ktool.krun import KRun
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
@@ -245,8 +245,9 @@ def exec_prove(options: ProveOptions) -> None:
     else:
         kompiled_directory = options.definition_dir
     kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
+    prove_rpc = ProveRpc(kprove)
     try:
-        proofs = kprove.prove_rpc(options=options)
+        proofs = prove_rpc.prove_rpc(options=options)
     except RuntimeError as err:
         _, _, _, cpe = err.args
         exit_with_process_error(cpe)

@@ -348,64 +348,6 @@ class KProve(KPrint):
             _LOGGER.info(f'Proof pending: {proof.id}')
         return proof
 
-    def prove_rpc(
-        self,
-        options: ProveOptions,
-        kcfg_semantics: KCFGSemantics | None = None,
-        id: str | None = None,
-        port: int | None = None,
-        llvm_definition_dir: Path | None = None,
-        smt_timeout: int | None = None,
-        smt_retry_limit: int | None = None,
-        smt_tactic: str | None = None,
-        bug_report: BugReport | None = None,
-        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
-        haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Path | None = None,
-        trace_rewrites: bool = False,
-        start_server: bool = True,
-        maude_port: int | None = None,
-        fallback_on: Iterable[FallbackReason] | None = None,
-        interim_simplification: int | None = None,
-        no_post_exec_simplify: bool = False,
-    ) -> list[Proof]:
-        def _prove_claim_rpc(claim: KClaim) -> Proof:
-            return self.prove_claim_rpc(
-                claim,
-                kcfg_semantics=kcfg_semantics,
-                id=id,
-                port=port,
-                kore_rpc_command=options.kore_rpc_command,
-                llvm_definition_dir=llvm_definition_dir,
-                smt_timeout=smt_timeout,
-                smt_retry_limit=smt_retry_limit,
-                smt_tactic=smt_tactic,
-                bug_report=bug_report,
-                haskell_log_format=haskell_log_format,
-                haskell_log_entries=haskell_log_entries,
-                log_axioms_file=log_axioms_file,
-                trace_rewrites=trace_rewrites,
-                start_server=start_server,
-                maude_port=maude_port,
-                fallback_on=fallback_on,
-                interim_simplification=interim_simplification,
-                no_post_exec_simplify=no_post_exec_simplify,
-                max_depth=options.max_depth,
-                save_directory=options.save_directory,
-                max_iterations=options.max_iterations,
-            )
-
-        all_claims = self.get_claims(
-            options.spec_file,
-            spec_module_name=options.spec_module,
-            claim_labels=options.claim_labels,
-            exclude_claim_labels=options.exclude_claim_labels,
-            type_inference_mode=options.type_inference_mode,
-        )
-        if all_claims is None:
-            raise ValueError(f'No claims found in file: {options.spec_file}')
-        return [_prove_claim_rpc(claim) for claim in all_claims]
-
     def get_claim_modules(
         self,
         spec_file: Path,
@@ -564,3 +506,61 @@ class ProveRpc:
 
     def __init__(self, kprove: KProve):
         self._kprove = kprove
+
+    def prove_rpc(
+        self,
+        options: ProveOptions,
+        kcfg_semantics: KCFGSemantics | None = None,
+        id: str | None = None,
+        port: int | None = None,
+        llvm_definition_dir: Path | None = None,
+        smt_timeout: int | None = None,
+        smt_retry_limit: int | None = None,
+        smt_tactic: str | None = None,
+        bug_report: BugReport | None = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Path | None = None,
+        trace_rewrites: bool = False,
+        start_server: bool = True,
+        maude_port: int | None = None,
+        fallback_on: Iterable[FallbackReason] | None = None,
+        interim_simplification: int | None = None,
+        no_post_exec_simplify: bool = False,
+    ) -> list[Proof]:
+        def _prove_claim_rpc(claim: KClaim) -> Proof:
+            return self._kprove.prove_claim_rpc(
+                claim,
+                kcfg_semantics=kcfg_semantics,
+                id=id,
+                port=port,
+                kore_rpc_command=options.kore_rpc_command,
+                llvm_definition_dir=llvm_definition_dir,
+                smt_timeout=smt_timeout,
+                smt_retry_limit=smt_retry_limit,
+                smt_tactic=smt_tactic,
+                bug_report=bug_report,
+                haskell_log_format=haskell_log_format,
+                haskell_log_entries=haskell_log_entries,
+                log_axioms_file=log_axioms_file,
+                trace_rewrites=trace_rewrites,
+                start_server=start_server,
+                maude_port=maude_port,
+                fallback_on=fallback_on,
+                interim_simplification=interim_simplification,
+                no_post_exec_simplify=no_post_exec_simplify,
+                max_depth=options.max_depth,
+                save_directory=options.save_directory,
+                max_iterations=options.max_iterations,
+            )
+
+        all_claims = self._kprove.get_claims(
+            options.spec_file,
+            spec_module_name=options.spec_module,
+            claim_labels=options.claim_labels,
+            exclude_claim_labels=options.exclude_claim_labels,
+            type_inference_mode=options.type_inference_mode,
+        )
+        if all_claims is None:
+            raise ValueError(f'No claims found in file: {options.spec_file}')
+        return [_prove_claim_rpc(claim) for claim in all_claims]

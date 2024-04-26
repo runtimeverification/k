@@ -9,6 +9,7 @@ import pytest
 from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import KCFGSemantics
+from pyk.ktool.kprove import ProveRpc
 from pyk.proof import ProofStatus
 from pyk.testing import KProveTest
 from pyk.utils import single
@@ -170,8 +171,12 @@ class TestImpProve(KProveTest):
         claim_id: str,
         proof_status: ProofStatus,
     ) -> None:
+        # Given
+        prove_rpc = ProveRpc(kprove)
+
+        # When
         proof = single(
-            kprove.prove_rpc(
+            prove_rpc.prove_rpc(
                 ProveOptions(
                     {
                         'spec_file': Path(spec_file),
@@ -182,4 +187,6 @@ class TestImpProve(KProveTest):
                 kcfg_semantics=ImpSemantics(kprove.definition),
             )
         )
+
+        # Then
         assert proof.status == proof_status
