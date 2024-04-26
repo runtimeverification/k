@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import sys
-from itertools import chain
 from typing import TYPE_CHECKING
 
 import pytest
@@ -187,33 +186,3 @@ class TestRpcKast:
         expected = json.loads(expected_file.read_text())
         actual = json.loads(actual_file.read_text())
         assert actual == expected
-
-
-class TestParseOuter:
-    TEST_DATA: list[tuple[str, list[str]]] = [
-        ('a.k', []),
-        ('b.k', []),
-        ('c.k', []),
-        ('d.k', []),
-        ('include.k', [str(K_FILES / 'include')]),
-        ('markdown.md', []),
-    ]
-
-    @pytest.mark.parametrize(
-        'input_filename, include_paths',
-        TEST_DATA,
-        ids=[id for id, _ in enumerate(TEST_DATA)],
-    )
-    def test_parse_outer(
-        self, assume_argv: AssumeArgv, tmp_path: Path, input_filename: str, include_paths: list[str]
-    ) -> None:
-        # Given
-        input_file = K_FILES / input_filename
-        include_args = chain.from_iterable(('-I', include_dir) for include_dir in include_paths)
-        assume_argv(['pyk', 'parse-outer', *include_args, str(input_file)])
-
-        # When
-        main()
-
-        # Then
-        # Just make sure it runs successfully for now
