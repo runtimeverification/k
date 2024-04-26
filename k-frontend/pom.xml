@@ -8,21 +8,21 @@
     <artifactId>parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>kernel</artifactId>
+  <artifactId>k-frontend</artifactId>
   <packaging>jar</packaging>
 
-  <name>K Framework Tool Kernel</name>
+  <name>K Framework Frontend</name>
 
   <dependencies>
+    <dependency>
+      <groupId>com.runtimeverification.k</groupId>
+      <artifactId>scala-kore</artifactId>
+      <version>0.3.3</version>
+    </dependency>
     <dependency>
       <groupId>org.eclipse.lsp4j</groupId>
       <artifactId>org.eclipse.lsp4j</artifactId>
       <version>0.19.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.runtimeverification.k</groupId>
-      <artifactId>kore</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -72,6 +72,16 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>32.1.3-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>org.pcollections</groupId>
+      <artifactId>pcollections</artifactId>
+      <version>2.1.2</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
@@ -126,7 +136,11 @@
       <version>1.4</version>
       <classifier>linux64</classifier>
     </dependency>
-
+    <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
+      <version>1.78</version>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -243,6 +257,35 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>4.8.1</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <args>
+            <arg>-Werror</arg>
+            <arg>-feature</arg>
+            <arg>-deprecation</arg>
+          </args>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>

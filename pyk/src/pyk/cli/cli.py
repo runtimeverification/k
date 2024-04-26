@@ -16,3 +16,7 @@ class Options:
 
         for attr, val in _args.items():
             self.__setattr__(attr, val)
+
+    @staticmethod
+    def from_option_string() -> dict[str, str]:
+        return {}

@@ -6,11 +6,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KSequence, KVariable
+from pyk.kast.inner import KApply, KSequence
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.ml import mlEqualsTrue
-from pyk.prelude.utils import token
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
@@ -23,7 +21,6 @@ if TYPE_CHECKING:
     from typing import Final
 
     from pyk.cterm import CTerm
-    from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprove import KProve
@@ -34,18 +31,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 class GotoSemantics(KCFGSemantics):
     def is_terminal(self, c: CTerm) -> bool:
         return False
-
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        k_cell_pattern = KSequence([KApply('jumpi', [KVariable('JD')])])
-        stack_cell_pattern = KApply('ws', [KVariable('S'), KVariable('SS')])
-        k_cell_match = k_cell_pattern.match(c.cell('K_CELL'))
-        stack_cell_match = stack_cell_pattern.match(c.cell('STACK_CELL'))
-        if k_cell_match is not None and stack_cell_match is not None:
-            return [
-                mlEqualsTrue(KApply('_==Int_', [token(0), stack_cell_match['S']])),
-                mlEqualsTrue(KApply('_=/=Int_', [token(0), stack_cell_match['S']])),
-            ]
-        return []
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c

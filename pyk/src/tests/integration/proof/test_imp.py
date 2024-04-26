@@ -11,9 +11,9 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.prelude.kbool import BOOL, andBool, notBool, orBool
+from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.reachability import APRFailureInfo
 from pyk.proof.show import APRProofNodePrinter
@@ -59,21 +59,6 @@ class ImpSemantics(KCFGSemantics):
         if type(k_cell) is KVariable:
             return True
         return False
-
-    def extract_branches(self, c: CTerm) -> list[KInner]:
-        if self.definition is None:
-            raise ValueError('IMP branch extraction requires a non-None definition')
-
-        k_cell = c.cell('K_CELL')
-        if type(k_cell) is KSequence and len(k_cell) > 0:
-            k_cell = k_cell[0]
-        if type(k_cell) is KApply and k_cell.label.name == 'if(_)_else_':
-            condition = k_cell.args[0]
-            if (type(condition) is KVariable and condition.sort == BOOL) or (
-                type(condition) is KApply and self.definition.return_sort(condition.label) == BOOL
-            ):
-                return [mlEqualsTrue(condition), mlEqualsTrue(notBool(condition))]
-        return []
 
     def abstract_node(self, c: CTerm) -> CTerm:
         return c
@@ -571,7 +556,7 @@ PATH_CONSTRAINTS_TEST_DATA: Iterable[
         1,
         [],
         [],
-        '{ true #Equals notBool _S:Int <=Int 123 }',
+        '{ false #Equals _S:Int <=Int 123 }',
     ),
 )
 
@@ -693,7 +678,7 @@ FAILURE_INFO_TEST_DATA: Iterable[tuple[str, Path, str, str, int, int, tuple[KInn
         'failing-if',
         0,
         1,
-        (mlEqualsTrue(notBool(KVariable('_B', 'Bool'))),),
+        (mlEquals(KVariable('_B', 'Bool'), FALSE),),
         False,
     ),
     (
@@ -703,7 +688,7 @@ FAILURE_INFO_TEST_DATA: Iterable[tuple[str, Path, str, str, int, int, tuple[KInn
         'fail-branch',
         0,
         1,
-        (mlEqualsTrue(notBool(KApply('_<=Int_', [KVariable('_S', 'Int'), KToken('123', '')]))),),
+        (mlEqualsFalse(KApply('_<=Int_', [KVariable('_S', 'Int'), KToken('123', '')])),),
         False,
     ),
     (
@@ -786,7 +771,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                 kcfg_explore.pretty_print(s.cell('K_CELL')),
                 kcfg_explore.pretty_print(s.cell('STATE_CELL')),
             )
-            for s in exec_res.next_states
+            for s, _ in exec_res.next_states
         ]
 
         # Then
@@ -910,6 +895,36 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
+
+    def test_terminal_node_subsumption(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        tmp_path_factory: TempPathFactory,
+    ) -> None:
+        test_id: str = 'imp-terminal-node-subsumption'
+        spec_file: Path = K_FILES / 'imp-simple-spec.k'
+        spec_module: str = 'IMP-SIMPLE-SPEC'
+        claim_id: str = 'terminal-node-subsumption'
+        cut_rules: Iterable[str] = []
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=7, cut_point_rules=cut_rules)
+            prover.advance_proof(proof, max_iterations=1)
+            # We have reached a terminal node, but not yet checked subsumption
+            assert proof.status != ProofStatus.PASSED
+            # The next advance only checks subsumption
+            prover.advance_proof(proof, max_iterations=1)
+            assert proof.status == ProofStatus.PASSED
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',

@@ -170,4 +170,9 @@ module IMP-SIMPLE-SPEC
       <state> $s |-> (0 => 2) </state>
       [depends(simple-untrue)]
 
+    claim [terminal-node-subsumption]: 
+      <k> $n = $n + 1; => .K </k>
+      <state> $n |-> ( N => N +Int 1 ) </state>
+      requires 0 <=Int N  
+
 endmodule
