@@ -557,3 +557,10 @@ def _get_rule_log(debug_log_file: Path) -> list[list[tuple[str, bool, int]]]:
         axioms.pop(-1)
 
     return axioms
+
+
+class ProveRpc:
+    _kprove: KProve
+
+    def __init__(self, kprove: KProve):
+        self._kprove = kprove
