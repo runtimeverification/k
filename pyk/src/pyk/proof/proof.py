@@ -76,7 +76,9 @@ class Proof(Generic[PS, SR]):
             ensure_dir_path(self.proof_dir)
 
     @abstractmethod
-    def commit(self, result: SR) -> None: ...
+    def commit(self, result: SR) -> None:
+        """Applies the step result of type `SR` to `self`, modifying `self`."""
+        ...
 
     def admit(self) -> None:
         self.admitted = True
@@ -280,7 +282,9 @@ class Proof(Generic[PS, SR]):
         return CompositeSummary([BaseSummary(self.id, self.status), *subproofs_summaries])
 
     @abstractmethod
-    def get_steps(self) -> Iterable[PS]: ...
+    def get_steps(self) -> Iterable[PS]:
+        """Return all currently available steps associated with this Proof. Should not modify `self`."""
+        ...
 
 
 class ProofSummary(ABC):
@@ -452,7 +456,12 @@ class Prover(Generic[P, PS, SR]):
     def failure_info(self, proof: P) -> FailureInfo: ...
 
     @abstractmethod
-    def step_proof(self, step: PS) -> Iterable[SR]: ...
+    def step_proof(self, step: PS) -> Iterable[SR]:
+        """Does work associated with a `PS`, a proof step. Should not modify a `Proof` or `self`, but may read
+        from `self` as long as those fields are not being modified during `step_proof()`, `get_steps()`, and
+        `commit()`.
+        """
+        ...
 
     @abstractmethod
     def init_proof(self, proof: P) -> None:
