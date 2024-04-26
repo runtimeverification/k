@@ -28,7 +28,10 @@ export PREFIX
 	dh $@ 
 
 override_dh_auto_build:
-	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=$(PREFIX) -Dllvm.backend.destdir=$(DESTDIR)
+	mvn --batch-mode package -DskipTests \
+		-Dllvm.backend.prefix=$(PREFIX) -Dllvm.backend.destdir=$(DESTDIR) \
+		-Dllvm.backend.skip \
+		-Dhaskell.backend.skip
 
 override_dh_auto_install:
 	package/package

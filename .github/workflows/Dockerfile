@@ -5,15 +5,15 @@ ARG K_VERSION
 ARG Z3_VERSION
 FROM runtimeverificationinc/z3:${BASE_OS}-${BASE_DISTRO}-${Z3_VERSION} as Z3
 
-ARG BASE_OS
-ARG BASE_DISTRO
-ARG K_VERSION
-FROM stack:${BASE_DISTRO}-${K_VERSION} as STACK
+# ARG BASE_OS
+# ARG BASE_DISTRO
+# ARG K_VERSION
+# FROM stack:${BASE_DISTRO}-${K_VERSION} as STACK
 
-ARG BASE_OS
-ARG BASE_DISTRO
-ARG K_VERSION
-FROM maven:${BASE_DISTRO}-${K_VERSION} as MAVEN
+# ARG BASE_OS
+# ARG BASE_DISTRO
+# ARG K_VERSION
+# FROM maven:${BASE_DISTRO}-${K_VERSION} as MAVEN
 
 ARG BASE_OS
 ARG BASE_DISTRO
@@ -67,7 +67,7 @@ RUN    apt-get update              \
         zlib1g-dev
 
 COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
-COPY --from=STACK /usr/local/bin/stack /usr/local/bin/stack
+# COPY --from=STACK /usr/local/bin/stack /usr/local/bin/stack
 
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -83,5 +83,5 @@ RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP 
 
 USER $USER:$GROUP
 
-COPY --from=STACK --chown=$USER:$GROUP /home/$USER/.stack /home/$USER/.stack
-COPY --from=MAVEN --chown=$USER:$GROUP /home/$USER/.m2 /home/$USER/.m2
+# COPY --from=STACK --chown=$USER:$GROUP /home/$USER/.stack /home/$USER/.stack
+# COPY --from=MAVEN --chown=$USER:$GROUP /home/$USER/.m2 /home/$USER/.m2
