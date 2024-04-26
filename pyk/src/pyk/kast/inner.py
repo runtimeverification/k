@@ -928,3 +928,15 @@ def build_cons(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KI
         return KApply(label, (fst, build_cons(unit, label, it)))
     except StopIteration:
         return unit
+
+
+def flatten_label(label: str, kast: KInner) -> list[KInner]:
+    """Given a cons list, return a flat Python list of the elements.
+
+    -   Input: Cons operation to flatten.
+    -   Output: Items of cons list.
+    """
+    if type(kast) is KApply and kast.label.name == label:
+        items = (flatten_label(label, arg) for arg in kast.args)
+        return [c for cs in items for c in cs]
+    return [kast]
