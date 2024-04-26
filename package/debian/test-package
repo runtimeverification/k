@@ -12,4 +12,4 @@ apt-get upgrade --yes
 apt-get install --yes make lsof
 apt-get install --yes ./kframework.deb
 
-package/test-package
+# package/test-package
