@@ -264,90 +264,6 @@ class KProve(KPrint):
                 depth=depth,
             )
 
-    def prove_claim_rpc(
-        self,
-        claim: KClaim,
-        kcfg_semantics: KCFGSemantics | None = None,
-        id: str | None = None,
-        port: int | None = None,
-        kore_rpc_command: str | Iterable[str] | None = None,
-        llvm_definition_dir: Path | None = None,
-        smt_timeout: int | None = None,
-        smt_retry_limit: int | None = None,
-        smt_tactic: str | None = None,
-        bug_report: BugReport | None = None,
-        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
-        haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Path | None = None,
-        trace_rewrites: bool = False,
-        start_server: bool = True,
-        maude_port: int | None = None,
-        fallback_on: Iterable[FallbackReason] | None = None,
-        interim_simplification: int | None = None,
-        no_post_exec_simplify: bool = False,
-        max_depth: int | None = None,
-        save_directory: Path | None = None,
-        max_iterations: int | None = None,
-    ) -> Proof:
-        proof: Proof
-        prover: Prover
-        lhs_top = extract_lhs(claim.body)
-        is_functional_claim = (
-            type(lhs_top) is KApply and self.definition.symbols[lhs_top.label.name] in self.definition.functions
-        )
-
-        if is_functional_claim:
-            proof = EqualityProof.from_claim(claim, self.definition, proof_dir=save_directory)
-            if save_directory is not None and EqualityProof.proof_data_exists(proof.id, save_directory):
-                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
-                proof = EqualityProof.read_proof_data(save_directory, proof.id)
-
-        else:
-            proof = APRProof.from_claim(self.definition, claim, {}, proof_dir=save_directory)
-            if save_directory is not None and APRProof.proof_data_exists(proof.id, save_directory):
-                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
-                proof = APRProof.read_proof_data(save_directory, proof.id)
-
-        if not proof.passed and (max_iterations is None or max_iterations > 0):
-            with cterm_symbolic(
-                self.definition,
-                self.kompiled_kore,
-                self.definition_dir,
-                id=id,
-                port=port,
-                kore_rpc_command=kore_rpc_command,
-                llvm_definition_dir=llvm_definition_dir,
-                smt_timeout=smt_timeout,
-                smt_retry_limit=smt_retry_limit,
-                smt_tactic=smt_tactic,
-                bug_report=bug_report,
-                haskell_log_format=haskell_log_format,
-                haskell_log_entries=haskell_log_entries,
-                log_axioms_file=log_axioms_file,
-                trace_rewrites=trace_rewrites,
-                start_server=start_server,
-                maude_port=maude_port,
-                fallback_on=fallback_on,
-                interim_simplification=interim_simplification,
-                no_post_exec_simplify=no_post_exec_simplify,
-            ) as cts:
-                kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
-                if is_functional_claim:
-                    assert type(proof) is EqualityProof
-                    prover = ImpliesProver(proof, kcfg_explore)
-                else:
-                    assert type(proof) is APRProof
-                    prover = APRProver(kcfg_explore, execute_depth=max_depth)
-                prover.advance_proof(proof, max_iterations=max_iterations)
-
-        if proof.passed:
-            _LOGGER.info(f'Proof passed: {proof.id}')
-        elif proof.failed:
-            _LOGGER.info(f'Proof failed: {proof.id}')
-        else:
-            _LOGGER.info(f'Proof pending: {proof.id}')
-        return proof
-
     def get_claim_modules(
         self,
         spec_file: Path,
@@ -529,7 +445,7 @@ class ProveRpc:
         no_post_exec_simplify: bool = False,
     ) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
-            return self._kprove.prove_claim_rpc(
+            return self.prove_claim_rpc(
                 claim,
                 kcfg_semantics=kcfg_semantics,
                 id=id,
@@ -564,3 +480,89 @@ class ProveRpc:
         if all_claims is None:
             raise ValueError(f'No claims found in file: {options.spec_file}')
         return [_prove_claim_rpc(claim) for claim in all_claims]
+
+    def prove_claim_rpc(
+        self,
+        claim: KClaim,
+        kcfg_semantics: KCFGSemantics | None = None,
+        id: str | None = None,
+        port: int | None = None,
+        kore_rpc_command: str | Iterable[str] | None = None,
+        llvm_definition_dir: Path | None = None,
+        smt_timeout: int | None = None,
+        smt_retry_limit: int | None = None,
+        smt_tactic: str | None = None,
+        bug_report: BugReport | None = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Path | None = None,
+        trace_rewrites: bool = False,
+        start_server: bool = True,
+        maude_port: int | None = None,
+        fallback_on: Iterable[FallbackReason] | None = None,
+        interim_simplification: int | None = None,
+        no_post_exec_simplify: bool = False,
+        max_depth: int | None = None,
+        save_directory: Path | None = None,
+        max_iterations: int | None = None,
+    ) -> Proof:
+        definition = self._kprove.definition
+        kompiled_kore = self._kprove.kompiled_kore
+        definition_dir = self._kprove.definition_dir
+
+        proof: Proof
+        prover: Prover
+        lhs_top = extract_lhs(claim.body)
+        is_functional_claim = type(lhs_top) is KApply and definition.symbols[lhs_top.label.name] in definition.functions
+
+        if is_functional_claim:
+            proof = EqualityProof.from_claim(claim, definition, proof_dir=save_directory)
+            if save_directory is not None and EqualityProof.proof_data_exists(proof.id, save_directory):
+                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
+                proof = EqualityProof.read_proof_data(save_directory, proof.id)
+
+        else:
+            proof = APRProof.from_claim(definition, claim, {}, proof_dir=save_directory)
+            if save_directory is not None and APRProof.proof_data_exists(proof.id, save_directory):
+                _LOGGER.info(f'Reloading from disk {proof.id}: {save_directory}')
+                proof = APRProof.read_proof_data(save_directory, proof.id)
+
+        if not proof.passed and (max_iterations is None or max_iterations > 0):
+            with cterm_symbolic(
+                definition,
+                kompiled_kore,
+                definition_dir,
+                id=id,
+                port=port,
+                kore_rpc_command=kore_rpc_command,
+                llvm_definition_dir=llvm_definition_dir,
+                smt_timeout=smt_timeout,
+                smt_retry_limit=smt_retry_limit,
+                smt_tactic=smt_tactic,
+                bug_report=bug_report,
+                haskell_log_format=haskell_log_format,
+                haskell_log_entries=haskell_log_entries,
+                log_axioms_file=log_axioms_file,
+                trace_rewrites=trace_rewrites,
+                start_server=start_server,
+                maude_port=maude_port,
+                fallback_on=fallback_on,
+                interim_simplification=interim_simplification,
+                no_post_exec_simplify=no_post_exec_simplify,
+            ) as cts:
+                kcfg_explore = KCFGExplore(cts, kcfg_semantics=kcfg_semantics)
+                if is_functional_claim:
+                    assert type(proof) is EqualityProof
+                    prover = ImpliesProver(proof, kcfg_explore)
+                else:
+                    assert type(proof) is APRProof
+                    prover = APRProver(kcfg_explore, execute_depth=max_depth)
+                prover.advance_proof(proof, max_iterations=max_iterations)
+
+        if proof.passed:
+            _LOGGER.info(f'Proof passed: {proof.id}')
+        elif proof.failed:
+            _LOGGER.info(f'Proof failed: {proof.id}')
+        else:
+            _LOGGER.info(f'Proof pending: {proof.id}')
+        return proof
