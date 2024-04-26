@@ -227,11 +227,8 @@ jobs:
   pyk-profile:
     needs: test-package-ubuntu-jammy
     name: 'Pyk: Profiling'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: ./pyk
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -239,25 +236,26 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: kframework.deb
-      - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
         with:
-          install-k: true
+          container-name: k-pyk-profile-${{ github.sha }}
           k-deb-path: kframework.deb
       - name: 'Run profiling'
         run: |
-          make profile PROF_ARGS=-n2
-          find /tmp/pytest-of-${USER}/pytest-current/ -type f -name '*.prof' | sort | xargs tail -n +1
+          docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
+          docker exec -u user k-pyk-profile-${{ github.sha }} /bin/bash -c 'find /tmp/pytest-of-user/pytest-current/ -type f -name "*.prof" | sort | xargs tail -n +1'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-pyk-profile-${{ github.sha }}
 
 
   pyk-integration-tests:
     needs: test-package-ubuntu-jammy
     name: 'Pyk: Integration Tests'
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    defaults:
-      run:
-        working-directory: ./pyk
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 30
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -265,13 +263,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: kframework.deb
-      - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
         with:
-          install-k: true
+          container-name: k-pyk-integration-${{ github.sha }}
           k-deb-path: kframework.deb
       - name: 'Run integration tests'
-        run: make test-integration TEST_ARGS='-n2 --timeout 300'
+        run: |
+          docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --timeout 300'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-pyk-integration-${{ github.sha }}
 
 
   pyk-regression-tests:
@@ -279,9 +282,6 @@ jobs:
     name: 'Pyk: Regression Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: ./pyk
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -289,13 +289,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: kframework.deb
-      - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
         with:
-          install-k: true
+          container-name: k-pyk-regression-${{ github.sha }}
           k-deb-path: kframework.deb
       - name: 'Run K regression tests'
-        run: make test-regression-new -j2
+        run: |
+          docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-pyk-regression-${{ github.sha }}
 
 
   performance-tests:

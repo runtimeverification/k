@@ -1,0 +1,41 @@
+name: 'With K Docker'
+description: 'Start a Docker container with the K .deb package installed'
+inputs:
+  container-name:
+    description: 'Docker container name to use'
+    required: true
+    type: string
+  k-deb-path:
+    description: 'Path to K .deb file'
+    required: true
+    type: string
+    default: kframework.deb
+runs:
+  using: 'composite'
+  steps:
+  - name: 'Set up Docker'
+    shell: bash {0}
+    run: |
+      set -euxo pipefail
+
+      CONTAINER_NAME=${{ inputs.container-name }}
+      TAG=runtimeverificationinc/${CONTAINER_NAME}
+      DOCKERFILE=${{ github.action_path }}/Dockerfile
+      K_DEB_PATH=${{ inputs.k-deb-path }}
+
+      docker build . \
+        --file ${DOCKERFILE}             \
+        --tag ${TAG}                     \
+        --build-arg K_DEB_PATH=${K_DEB_PATH}
+
+      docker run                 \
+        --name ${CONTAINER_NAME} \
+        --rm                     \
+        --interactive            \
+        --tty                    \
+        --detach                 \
+        --user root              \
+        ${TAG}
+
+      docker cp ./pyk/. ${CONTAINER_NAME}:/home/user
+      docker exec ${CONTAINER_NAME} chown -R user:user /home/user
