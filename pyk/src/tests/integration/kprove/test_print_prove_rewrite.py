@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KRewrite, KVariable
-from pyk.kast.manip import is_top, push_down_rewrites
+from pyk.kast.manip import push_down_rewrites
 from pyk.kast.outer import KClaim
 from pyk.prelude.ml import mlOr
 from pyk.testing import KProveTest
@@ -46,4 +47,4 @@ class TestPrintProveRewrite(KProveTest):
 
         # Then
         assert actual == expected
-        assert is_top(mlOr([res.kast for res in result]))
+        assert CTerm._is_top(mlOr([res.kast for res in result]))
