@@ -86,7 +86,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     error_info: Exception | None
     prior_loops_cache: dict[int, list[int]]
 
-    _checked_for_terminal: set[int]
     _checked_for_bounded: set[int]
 
     def __init__(
@@ -124,7 +123,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self._exec_time = _exec_time
         self.error_info = error_info
 
-        self._checked_for_terminal = set()
         self._checked_for_bounded = set()
 
         if self.proof_dir is not None and self.proof_subdir is not None:
@@ -681,25 +679,12 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
         _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
 
-        self._check_all_terminals(proof)
+        for node_id in [proof.init, proof.target]:
+            if self.kcfg_explore.kcfg_semantics.is_terminal(proof.kcfg.node(node_id).cterm):
+                proof.add_terminal(node_id)
 
     def nonzero_depth(self, proof: APRProof, node: KCFG.Node) -> bool:
         return not proof.kcfg.zero_depth_between(proof.init, node.id)
-
-    def _check_terminal(self, proof: APRProof, node: KCFG.Node) -> None:
-        if node.id not in proof._checked_for_terminal:
-            _LOGGER.info(f'Checking terminal: {node.id}')
-            proof._checked_for_terminal.add(node.id)
-            if self.kcfg_explore.kcfg_semantics.is_terminal(node.cterm):
-                _LOGGER.info(f'Terminal node: {node.id}.')
-                proof.add_terminal(node.id)
-            elif self.fast_check_subsumption and self._may_subsume(proof, node):
-                _LOGGER.info(f'Marking node as terminal because of fast may subsume check {proof.id}: {node.id}')
-                proof.add_terminal(node.id)
-
-    def _check_all_terminals(self, proof: APRProof) -> None:
-        for node in proof.kcfg.nodes:
-            self._check_terminal(proof, node)
 
     def _may_subsume(self, proof: APRProof, node: KCFG.Node) -> bool:
         node_k_cell = node.cterm.try_cell('K_CELL')
