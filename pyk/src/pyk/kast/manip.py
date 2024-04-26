@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr
-from ..utils import find_common_items, hash_str
+from ..prelude.ml import is_top, mlAnd, mlEqualsTrue, mlImplies, mlOr
+from ..utils import find_common_items, hash_str, unique
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (
     KApply,
@@ -19,6 +19,7 @@ from .inner import (
     Subst,
     bottom_up,
     collect,
+    flatten_label,
     top_down,
     var_occurrences,
 )
@@ -35,18 +36,6 @@ if TYPE_CHECKING:
     RL = TypeVar('RL', bound=KRuleLike)
 
 _LOGGER: Final = logging.getLogger(__name__)
-
-
-def flatten_label(label: str, kast: KInner) -> list[KInner]:
-    """Given a cons list, return a flat Python list of the elements.
-
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
-    """
-    if type(kast) is KApply and kast.label.name == label:
-        items = (flatten_label(label, arg) for arg in kast.args)
-        return [c for cs in items for c in cs]
-    return [kast]
 
 
 def is_term_like(kast: KInner) -> bool:
@@ -672,6 +661,21 @@ def rename_generated_vars(term: KInner) -> KInner:
         return k.map_inner(_rename_vars)
 
     return _rename_vars(term)
+
+
+def is_spurious_constraint(term: KInner) -> bool:
+    if type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]:
+        return True
+    if is_top(term, weak=True):
+        return True
+    return False
+
+
+def normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
+    constraints = (constraint for _constraint in constraints for constraint in flatten_label('#And', _constraint))
+    constraints = unique(constraints)
+    constraints = (constraint for constraint in constraints if not is_spurious_constraint(constraint))
+    return tuple(constraints)
 
 
 def remove_useless_constraints(constraints: Iterable[KInner], initial_vars: Iterable[str]) -> list[KInner]:

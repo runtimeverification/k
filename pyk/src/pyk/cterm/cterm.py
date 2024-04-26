@@ -14,6 +14,7 @@ from ..kast.manip import (
     flatten_label,
     free_vars,
     ml_pred_to_bool,
+    normalize_constraints,
     push_down_rewrites,
     remove_useless_constraints,
     split_config_and_constraints,
@@ -22,7 +23,7 @@ from ..kast.manip import (
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import andBool, orBool
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlTop
-from ..utils import single, unique
+from ..utils import unique
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -46,10 +47,10 @@ class CTerm:
 
     def __init__(self, config: KInner, constraints: Iterable[KInner] = ()) -> None:
         """Instantiate a given `CTerm`, performing basic sanity checks on the `config` and `constraints`."""
-        if CTerm._is_top(config):
+        if is_top(config, weak=True):
             config = mlTop()
             constraints = ()
-        elif CTerm._is_bottom(config):
+        elif is_bottom(config, weak=True):
             config = mlBottom()
             constraints = ()
         else:
@@ -61,9 +62,9 @@ class CTerm:
     @staticmethod
     def from_kast(kast: KInner) -> CTerm:
         """Interpret a given `KInner` as a `CTerm` by splitting the `config` and `constraints` (see `CTerm.kast`)."""
-        if CTerm._is_top(kast):
+        if is_top(kast, weak=True):
             return CTerm.top()
-        elif CTerm._is_bottom(kast):
+        elif is_bottom(kast, weak=True):
             return CTerm.bottom()
         else:
             config, constraint = split_config_and_constraints(kast)
@@ -94,37 +95,13 @@ class CTerm:
 
     @staticmethod
     def _normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
-        constraints = (constraint for _constraint in constraints for constraint in flatten_label('#And', _constraint))
-        constraints = unique(constraints)
-        constraints = (constraint for constraint in constraints if not CTerm._is_spurious_constraint(constraint))
+        constraints = sorted(normalize_constraints(constraints), key=CTerm._constraint_sort_key)
         return tuple(constraints)
-
-    @staticmethod
-    def _is_spurious_constraint(term: KInner) -> bool:
-        if type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]:
-            return True
-        if is_top(term):
-            return True
-        return False
-
-    @staticmethod
-    def _is_top(kast: KInner) -> bool:
-        flat = flatten_label('#And', kast)
-        if len(flat) == 1:
-            return is_top(single(flat))
-        return all(CTerm._is_top(term) for term in flat)
-
-    @staticmethod
-    def _is_bottom(kast: KInner) -> bool:
-        flat = flatten_label('#And', kast)
-        if len(flat) == 1:
-            return is_bottom(single(flat))
-        return any(CTerm._is_bottom(term) for term in flat)
 
     @property
     def is_bottom(self) -> bool:
         """Check if a given `CTerm` is trivially empty."""
-        return CTerm._is_bottom(self.config) or any(CTerm._is_bottom(cterm) for cterm in self.constraints)
+        return is_bottom(self.config, weak=True) or any(is_bottom(cterm, weak=True) for cterm in self.constraints)
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> tuple[int, str]:
@@ -206,7 +183,7 @@ class CTerm:
 
     def add_constraint(self, new_constraint: KInner) -> CTerm:
         """Return a new `CTerm` with the additional constraints."""
-        return CTerm(self.config, list(self.constraints) + [new_constraint])
+        return CTerm(self.config, [new_constraint] + list(self.constraints))
 
     def anti_unify(
         self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
@@ -316,7 +293,7 @@ class CSubst:
     def __init__(self, subst: Subst | None = None, constraints: Iterable[KInner] = ()) -> None:
         """Construct a new `CSubst` given a `Subst` and set of constraints as `KInner`, performing basic sanity checks."""
         object.__setattr__(self, 'subst', subst if subst is not None else Subst({}))
-        object.__setattr__(self, 'constraints', CTerm._normalize_constraints(constraints))
+        object.__setattr__(self, 'constraints', normalize_constraints(constraints))
 
     def __iter__(self) -> Iterator[Subst | KInner]:
         """Return an iterator with the head being the `subst` and the tail being the `constraints`."""
