@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import pytest
-
 import pyk.kllvm.load  # noqa: F401
 import pyk.kllvm.prooftrace as prooftrace
 from pyk.testing import ProofTraceTest

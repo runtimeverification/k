@@ -11,12 +11,12 @@ from _kllvm.prooftrace import (  # type: ignore  # noqa: F401
     llvm_side_condition_end_event,
     llvm_function_event,
     llvm_hook_event,
-    Argument,
     llvm_rewrite_trace,
 )
+from .ast import Pattern
 
 if TYPE_CHECKING:
-    from .ast import Pattern
+    from _kllvm.prooftrace import Argument
 
 
 class LLVMStepEvent(ABC):
@@ -163,7 +163,7 @@ class LLVMArgument:
         elif isinstance(self._argument.step_event, llvm_hook_event):
             return LLVMHookEvent(self._argument.step_event)
         else:
-            assert False
+            raise AssertionError()
 
     @property
     def kore_pattern(self) -> Pattern:
