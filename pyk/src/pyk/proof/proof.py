@@ -34,6 +34,12 @@ class ProofStatus(Enum):
 
 
 class Proof(Generic[PS, SR]):
+    """Abstract representation of a proof that can be executed in one or more discrete steps
+
+    :param PS: Proof step: data required to perform a step of the proof.
+    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+    """
+
     _PROOF_TYPES: Final = {'APRProof', 'EqualityProof', 'RefutationProof'}
 
     id: str
@@ -308,6 +314,18 @@ class FailureInfo: ...
 
 
 class ProverPool(ContextManager['ProverPool'], Generic[P, PS, SR]):
+    """Wrapper for `ThreadPoolExecutor` which spawns one `Prover` for each worker thread.
+
+    :param P: Type of proof to be advanced in parallel
+    :param PS: Proof step: data required to perform a step of the proof.
+    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+
+    :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
+        data to be written during `parallel_advance_proof`, to avoid race conditions.
+    :param max_workers: Maximum number of worker threads the pool can spawn
+
+    """
+
     _create_prover: Callable[[], Prover[P, PS, SR]]
     _provers: dict[str, Prover[P, PS, SR]]
     _executor: Executor
@@ -362,6 +380,21 @@ def parallel_advance_proof(
     fail_fast: bool = False,
     max_workers: int = 1,
 ) -> None:
+    """Advance proof with multithreaded strategy: `Prover.step_proof()` to a worker thread pool for each step
+    as available, and `Proof.commit()` results as they become available, and get new steps with
+    `Proof.get_steps()` and submit to thread pool.
+
+    :param P: Type of proof to be advanced in parallel
+    :param PS: Proof step: data required to perform a step of the proof.
+    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+
+    :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
+        data to be written during `parallel_advance_proof`, to avoid race conditions.
+    :param max_iterations: Maximum number of steps to take
+    :param fail_fast: If the proof is failing after finishing a step, halt execution even if there are
+        still available steps
+    :param max_workers: Maximum number of worker threads the pool can spawn
+    """
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
     iterations = 0
@@ -406,6 +439,12 @@ def parallel_advance_proof(
 
 
 class Prover(Generic[P, PS, SR]):
+    """Abstract class which advances `Proof`s with `init_proof()` and `step_proof()`
+    :param P: Type of proof this `Prover` operates on
+    :param PS: Proof step: data required to perform a step of the proof.
+    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+    """
+
     @abstractmethod
     def shutdown(self) -> None: ...
 
@@ -416,9 +455,19 @@ class Prover(Generic[P, PS, SR]):
     def step_proof(self, step: PS) -> Iterable[SR]: ...
 
     @abstractmethod
-    def init_proof(self, proof: P) -> None: ...
+    def init_proof(self, proof: P) -> None:
+        """Perform any initialization steps needed at the beginning of proof execution. For example,  for
+        `APRProver`, upload circularity and depends module of the proof to the KoreServer via `add_module`.
+        """
+        ...
 
     def advance_proof(self, proof: P, max_iterations: int | None = None, fail_fast: bool = False) -> None:
+        """Advance proof by a simple loop of `Proof.get_steps()` -> `Prover.step_proof()` -> `Proof.commit()`
+
+        :param max_iterations: Maximum number of steps to take
+        :param fail_fast: If the proof is failing after finishing a step, halt execution even if there are
+            still available steps
+        """
         iterations = 0
         self.init_proof(proof)
         while True:
