@@ -445,7 +445,7 @@ class ProveRpc:
         no_post_exec_simplify: bool = False,
     ) -> list[Proof]:
         def _prove_claim_rpc(claim: KClaim) -> Proof:
-            return self.prove_claim_rpc(
+            return self._prove_claim_rpc(
                 claim,
                 kcfg_semantics=kcfg_semantics,
                 id=id,
@@ -481,7 +481,7 @@ class ProveRpc:
             raise ValueError(f'No claims found in file: {options.spec_file}')
         return [_prove_claim_rpc(claim) for claim in all_claims]
 
-    def prove_claim_rpc(
+    def _prove_claim_rpc(
         self,
         claim: KClaim,
         kcfg_semantics: KCFGSemantics | None = None,
