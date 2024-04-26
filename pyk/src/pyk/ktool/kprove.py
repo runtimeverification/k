@@ -428,14 +428,6 @@ class ProveRpc:
         self._explore_context = explore_context
 
     def prove_rpc(self, options: ProveOptions) -> list[Proof]:
-        def _prove_claim_rpc(claim: KClaim) -> Proof:
-            return self._prove_claim_rpc(
-                claim,
-                max_depth=options.max_depth,
-                save_directory=options.save_directory,
-                max_iterations=options.max_iterations,
-            )
-
         all_claims = self._kprove.get_claims(
             options.spec_file,
             spec_module_name=options.spec_module,
@@ -443,9 +435,19 @@ class ProveRpc:
             exclude_claim_labels=options.exclude_claim_labels,
             type_inference_mode=options.type_inference_mode,
         )
+
         if all_claims is None:
             raise ValueError(f'No claims found in file: {options.spec_file}')
-        return [_prove_claim_rpc(claim) for claim in all_claims]
+
+        return [
+            self._prove_claim_rpc(
+                claim,
+                max_depth=options.max_depth,
+                save_directory=options.save_directory,
+                max_iterations=options.max_iterations,
+            )
+            for claim in all_claims
+        ]
 
     def _prove_claim_rpc(
         self,
