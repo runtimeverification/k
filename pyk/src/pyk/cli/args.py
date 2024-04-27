@@ -7,13 +7,35 @@ from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
-from .cli import Options
+from .cli import Option, Options, OptionsGroup
 from .utils import bug_report_arg, dir_path, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from ..utils import BugReport
+
+
+class LoggingOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            Option(
+                name='debug', cmd_line_name='--debug', type=bool, optional=True, default=False, help_str='Debug output.'
+            )
+        )
+        self.add_option(
+            Option(
+                name='verbose',
+                cmd_line_name='--verbose',
+                aliases=['-v'],
+                toml_name='v',
+                type=bool,
+                optional=True,
+                default=False,
+                help_str='Debug output.',
+            )
+        )
 
 
 class LoggingOptions(Options):
@@ -32,6 +54,35 @@ class LoggingOptions(Options):
         return {
             'v': 'verbose',
         }
+
+
+class WarningOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            Option(
+                name='warnings_to_errors',
+                cmd_line_name='--warnings-to-errors',
+                aliases=['-w2e'],
+                default=False,
+                help_str='Turn warnings into errors (no effect on pyk, only subcommands).',
+                optional=True,
+                toml_name='w2e',
+                type=bool,
+            )
+        )
+        self.add_option(
+            Option(
+                name='warnings',
+                cmd_line_name='--warnings',
+                aliases=['-w'],
+                default=False,
+                help_str='Warnings to print about (no effect on pyk, only subcommands).',
+                optional=True,
+                toml_name='w',
+                type=Warnings,
+            )
+        )
 
 
 class WarningOptions(Options):
@@ -53,6 +104,20 @@ class WarningOptions(Options):
         }
 
 
+class OutputFileOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            Option(
+                name='output_file',
+                cmd_line_name='--output-file',
+                default=sys.stdout,
+                optional=True,
+                type=IO[Any],
+            )
+        )
+
+
 class OutputFileOptions(Options):
     output_file: IO[Any]
 
@@ -63,15 +128,29 @@ class OutputFileOptions(Options):
         }
 
 
+class DefinitionOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            Option(name='definition_dir', toml_name='definition', type=Path, help_str='Path to definition directory.')
+        )
+
+
 class DefinitionOptions(Options):
     definition_dir: Path
 
     @staticmethod
-    def default() -> dict[str, Any]:
+    def from_option_string() -> dict[str, Any]:
         return {
             'output-definition': 'definition_dir',
             'definition': 'definition_dir',
         }
+
+
+class DisplayOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(Option(name='minimize', type=bool, optional=True, default=True, help_str='Minimize output.'))
 
 
 class DisplayOptions(Options):
@@ -82,6 +161,20 @@ class DisplayOptions(Options):
         return {
             'minimize': True,
         }
+
+
+
+class KDefinitionOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(Option(name='includes', cmd_line_name='-I', type=list[str], optional=True, default=[],
+            help_str='Directories to lookup K definitions in.'))
+        self.add_option(Option(name='main_module', cmd_line_name='--main-module', type=(str | None), optional=True, default=None,
+            help_str='Name of the main module.'))
+        self.add_option(Option(name='syntax_module', cmd_line_name='--syntax-module', type=str | None, optional=True, default=None,
+            help_str='Name of the syntax module.'))
+        self.add_option(Option(name='md_selector', cmd_line_name='--md-selector', type=str, optional=True,
+            default='k', help_str='Code selector expression to use when reading markdown.'))
 
 
 class KDefinitionOptions(Options):
@@ -101,11 +194,11 @@ class KDefinitionOptions(Options):
             'includes': [],
         }
 
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return {
-            'includes': 'includes',
-        }
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return {
+#              'includes': 'includes',
+#          }
 
 
 class SaveDirOptions(Options):
