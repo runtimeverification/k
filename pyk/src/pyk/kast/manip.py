@@ -794,6 +794,10 @@ def build_rule(
     rule_body = push_down_rewrites(KRewrite(new_init_config, new_final_config))
     rule_requires = simplify_bool(ml_pred_to_bool(mlAnd(new_init_constraints)))
     rule_ensures = simplify_bool(ml_pred_to_bool(mlAnd(new_final_constraints)))
+    rule_ensures = andBool(
+        [c for c in flatten_label('_andBool_', rule_ensures) if c not in flatten_label('_andBool_', rule_requires)]
+    )
+
     att_entries = [] if priority is None else [Atts.PRIORITY(str(priority))]
     rule_att = KAtt(entries=att_entries)
 
