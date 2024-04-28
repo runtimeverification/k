@@ -760,7 +760,8 @@ def build_rule(
       - `rule`: A `KRule` with variable naming conventions applied so that it should be parseable by K frontend.
       - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
     """
-    init_constraints = list(init_constraints)
+    init_constraints = [bool_to_ml_pred(simplify_bool(ml_pred_to_bool(c))) for c in init_constraints]
+    final_constraints = [bool_to_ml_pred(simplify_bool(ml_pred_to_bool(c))) for c in final_constraints]
     final_constraints = [c for c in final_constraints if c not in init_constraints]
     init_term = mlAnd([init_config] + init_constraints)
     final_term = mlAnd([final_config] + final_constraints)
@@ -794,10 +795,6 @@ def build_rule(
     rule_body = push_down_rewrites(KRewrite(new_init_config, new_final_config))
     rule_requires = simplify_bool(ml_pred_to_bool(mlAnd(new_init_constraints)))
     rule_ensures = simplify_bool(ml_pred_to_bool(mlAnd(new_final_constraints)))
-    rule_ensures = andBool(
-        [c for c in flatten_label('_andBool_', rule_ensures) if c not in flatten_label('_andBool_', rule_requires)]
-    )
-
     att_entries = [] if priority is None else [Atts.PRIORITY(str(priority))]
     rule_att = KAtt(entries=att_entries)
 
