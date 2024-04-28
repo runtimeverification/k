@@ -107,7 +107,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
         'equals-token',
         False,
         KApply(KLabel('#Equals', [KSort('Int'), GENERATED_TOP_CELL]), [intToken(3), f(a)]),
-        KApply('_==K_', [intToken(3), f(a)]),
+        KApply('_==Int_', [intToken(3), f(a)]),
     ),
     ('not-top', False, KApply(KLabel('#Not', [GENERATED_TOP_CELL]), [mlTop()]), notBool(TRUE)),
     ('equals-term', True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),

@@ -14,6 +14,7 @@ from .inner import (
     KLabel,
     KRewrite,
     KSequence,
+    KSort,
     KToken,
     KVariable,
     Subst,
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
     from typing import Final, TypeVar
 
-    from .inner import KInner, KSort
+    from .inner import KInner
 
     KI = TypeVar('KI', bound=KInner)
     W = TypeVar('W', bound=WithKAtt)
@@ -128,7 +129,17 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                 if second == FALSE:
                     return notBool(first)
                 if type(first) in [KVariable, KToken]:
-                    return KApply('_==K_', _kast.args)
+                    assert hasattr(first, 'sort')
+                    if first.sort == KSort('Int'):
+                        return KApply('_==Int_', _kast.args)
+                    else:
+                        return KApply('_==K_', _kast.args)
+                if type(second) in [KVariable, KToken]:
+                    assert hasattr(second, 'sort')
+                    if second.sort == KSort('Int'):
+                        return KApply('_==Int_', _kast.args)
+                    else:
+                        return KApply('_==K_', _kast.args)
                 if type(first) is KSequence and type(second) is KSequence:
                     if first.arity == 1 and second.arity == 1:
                         return KApply('_==K_', (first.items[0], second.items[0]))
