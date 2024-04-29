@@ -4,15 +4,15 @@ import logging
 from functools import singledispatch
 from typing import TYPE_CHECKING, cast
 
-from ..kast.att import EMPTY_ATT
-from ..kast.outer import KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence
-from ..kast.outer_syntax import Att, Definition, Import, Module, Require  # noqa: TC002
+from .att import EMPTY_ATT
+from .outer import KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence
+from .outer_syntax import Att, Definition, Import, Module, Require  # noqa: TC002
 
 if TYPE_CHECKING:
     from typing import Any, Final
 
-    from ..kast.outer import KAst
-    from ..kast.outer_syntax import AST
+    from .outer import KAst
+    from .outer_syntax import AST
 
 _LOGGER: Final = logging.getLogger(__name__)
 

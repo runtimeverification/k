@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from ..konvert import _ast_to_kast
+from ._ast_to_kast import _ast_to_kast
 from .markdown import select_code_blocks
 from .outer import KDefinition
 from .outer_parser import OuterParser
