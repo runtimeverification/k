@@ -417,7 +417,9 @@ def create_argument_parser() -> ArgumentParser:
     )
 
     parse_outer_args = pyk_args_command.add_parser(
-        'parse-outer', help='Parse an outer K definition into JSON', parents=[k_cli_args.logging_args]
+        'parse-outer',
+        help='Parse an outer K definition into JSON',
+        parents=[k_cli_args.logging_args, config_args.config_args],
     )
     parse_outer_args.add_argument('main_file', type=file_path, help='File with the K definition')
     parse_outer_args.add_argument(
