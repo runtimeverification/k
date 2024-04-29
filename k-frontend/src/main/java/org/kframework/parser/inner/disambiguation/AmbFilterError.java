@@ -2,6 +2,7 @@
 package org.kframework.parser.inner.disambiguation;
 
 import com.google.common.collect.Sets;
+import java.util.List;
 import java.util.Set;
 import org.kframework.kore.K;
 import org.kframework.parser.Ambiguity;
@@ -45,21 +46,22 @@ public class AmbFilterError extends SetsTransformerWithErrors<KEMException> {
       return candidate;
     }
 
-    String msg = "Parsing ambiguity.";
+    StringBuilder msg = new StringBuilder("Parsing ambiguity.");
 
-    for (int i = 0; i < amb.items().size(); i++) {
-      msg += "\n" + (i + 1) + ": ";
-      Term elem = (Term) amb.items().toArray()[i];
+    List<Term> sortedItems = amb.items().stream().sorted(Term.ord()).toList();
+    for (int i = 0; i < sortedItems.size(); i++) {
+      msg.append("\n").append(i + 1).append(": ");
+      Term elem = sortedItems.get(i);
       if (elem instanceof ProductionReference tc) {
-        msg += tc.production().toString();
+        msg.append(tc.production().toString());
       }
       // TODO: use the unparser
       // Unparser unparser = new Unparser(context);
       // msg += "\n   " + unparser.print(elem).replace("\n", "\n   ");
-      msg += "\n    " + new RemoveBracketVisitor().apply(elem);
+      msg.append("\n    ").append(new RemoveBracketVisitor().apply(elem));
     }
 
-    KEMException e = KEMException.innerParserError(msg, amb.items().iterator().next());
+    KEMException e = KEMException.innerParserError(msg.toString(), amb.items().iterator().next());
 
     return Left.apply(Sets.newHashSet(e));
   }
