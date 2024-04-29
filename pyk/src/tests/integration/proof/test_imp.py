@@ -896,6 +896,36 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
 
+    def test_terminal_node_subsumption(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        tmp_path_factory: TempPathFactory,
+    ) -> None:
+        test_id: str = 'imp-terminal-node-subsumption'
+        spec_file: Path = K_FILES / 'imp-simple-spec.k'
+        spec_module: str = 'IMP-SIMPLE-SPEC'
+        claim_id: str = 'terminal-node-subsumption'
+        cut_rules: Iterable[str] = []
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=7, cut_point_rules=cut_rules)
+            prover.advance_proof(proof, max_iterations=1)
+            # We have reached a terminal node, but not yet checked subsumption
+            assert proof.status != ProofStatus.PASSED
+            # The next advance only checks subsumption
+            prover.advance_proof(proof, max_iterations=1)
+            assert proof.status == ProofStatus.PASSED
+
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',
         PATH_CONSTRAINTS_TEST_DATA,
@@ -1253,6 +1283,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             state=f'N |-> {abstracted_var.name}:Int',
             constraint=mlAnd(
                 [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(
                         orBool(
                             [
@@ -1271,9 +1304,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                             ]
                         )
                     ),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         )

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ..kast.inner import KApply, KLabel, build_assoc
+from pyk.utils import single
+
+from ..kast.inner import KApply, KLabel, build_assoc, flatten_label
 from .k import GENERATED_TOP_CELL
 from .kbool import BOOL, FALSE, TRUE
 
@@ -20,12 +22,34 @@ ML_QUANTIFIERS: Final = {
 }
 
 
-def is_top(term: KInner) -> bool:
+def _is_top(term: KInner) -> bool:
     return isinstance(term, KApply) and term.label.name == '#Top'
 
 
-def is_bottom(term: KInner) -> bool:
+def is_top(term: KInner, *, weak: bool = False) -> bool:
+    if _is_top(term):
+        return True
+    if not weak:
+        return False
+    flat = flatten_label('#And', term)
+    if len(flat) == 1:
+        return is_top(single(flat))
+    return all(is_top(term, weak=True) for term in flat)
+
+
+def _is_bottom(term: KInner) -> bool:
     return isinstance(term, KApply) and term.label.name == '#Bottom'
+
+
+def is_bottom(term: KInner, *, weak: bool = False) -> bool:
+    if _is_bottom(term):
+        return True
+    if not weak:
+        return False
+    flat = flatten_label('#And', term)
+    if len(flat) == 1:
+        return is_bottom(single(flat))
+    return any(is_bottom(term, weak=True) for term in flat)
 
 
 def mlEquals(  # noqa: N802

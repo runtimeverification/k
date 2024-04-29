@@ -11,15 +11,52 @@ import org.kframework.kore.KORE.Sort
 import org.kframework.utils.StringUtil
 import org.pcollections.ConsPStack
 import org.pcollections.PStack
+import scala.collection.immutable
 import scala.jdk.CollectionConverters._
 
-trait Term extends HasLocation {
+sealed trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
   var source: Optional[Source]     = Optional.empty()
 }
 
-trait ProductionReference extends Term {
+object Term {
+
+  /**
+   * Define an ordering on Terms as follows:
+   *   - Any ProductionReference is < any Ambiguity
+   *   - ProductionReferences are
+   *     - First compared by their production
+   *     - If their productions are equal, they are compared:
+   *       - First by their number of children
+   *       - Then lexicographically over their children
+   *   - Ambiguities are compared
+   *     - First by their number of children
+   *     - Then lexicographically over the sorted order of their children
+   */
+  implicit val ord: Ordering[Term] = (a: Term, b: Term) =>
+    (a, b) match {
+      case (c: ProductionReference, d: Ambiguity) => -1
+      case (c: Ambiguity, d: ProductionReference) => 1
+      case (c: Ambiguity, d: Ambiguity)           => Ordering[Ambiguity].compare(c, d)
+      case (c: ProductionReference, d: ProductionReference) =>
+        Ordering[ProductionReference].compare(c, d)
+    }
+
+}
+
+sealed trait ProductionReference extends Term {
   val production: Production
+}
+
+object ProductionReference {
+  implicit val ord: Ordering[ProductionReference] =
+    (a: ProductionReference, b: ProductionReference) =>
+      (a, b) match {
+        case (c: Constant, d: TermCons) => -1
+        case (c: TermCons, d: Constant) => 1
+        case (c: Constant, d: Constant) => Ordering[Constant].compare(c, d)
+        case (c: TermCons, d: TermCons) => Ordering[TermCons].compare(c, d)
+      }
 }
 
 trait HasChildren {
@@ -73,6 +110,9 @@ object Constant {
     res.source = source
     res
   }
+
+  implicit val ord: Ordering[Constant] = (a: Constant, b: Constant) =>
+    Ordering[Production].compare(a.production, b.production)
 }
 
 object TermCons {
@@ -99,6 +139,20 @@ object TermCons {
     Optional.of(location),
     Optional.of(source)
   )
+
+  implicit val ord: Ordering[TermCons] = (a: TermCons, b: TermCons) => {
+    val prodComp = Ordering[Production].compare(a.production, b.production)
+    if (prodComp != 0) {
+      prodComp
+    } else {
+      Ordering.Implicits
+        .seqOrdering[immutable.Seq, Term]
+        .compare(
+          org.kframework.Collections.immutable(a.items).reverse,
+          org.kframework.Collections.immutable(b.items).reverse
+        )
+    }
+  }
 }
 
 object Ambiguity {
@@ -115,4 +169,12 @@ object Ambiguity {
     res.source = source
     res
   }
+
+  implicit val ord: Ordering[Ambiguity] = (a: Ambiguity, b: Ambiguity) =>
+    Ordering.Implicits
+      .seqOrdering[immutable.Seq, Term]
+      .compare(
+        org.kframework.Collections.immutable(a.items).toSeq.sorted(Term.ord),
+        org.kframework.Collections.immutable(b.items).toSeq.sorted(Term.ord)
+      )
 }
