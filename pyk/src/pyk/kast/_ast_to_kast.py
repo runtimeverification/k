@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import logging
 from functools import singledispatch
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from .att import EMPTY_ATT
-from .outer import KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence
-from .outer_syntax import Att, Definition, Import, Module, Require  # noqa: TC002
+from .outer import KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence  # noqa: TC002
+from .outer_syntax import Att, Definition, Import, Module, Require, Sentence  # noqa: TC002
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -32,7 +32,7 @@ def _definition_to_kdefinition(d: Definition, main_module: str) -> KDefinition:
 
 @_ast_to_kast.register
 def _module_to_kflatmodule(m: Module) -> KFlatModule:
-    sentences = (cast('KSentence', _ast_to_kast(s)) for s in m.sentences)
+    sentences = (_sentence_to_ksentence(s) for s in m.sentences)
     imports = (_import_to_kimport(i) for i in m.imports)
     att = _att_to_katt(m.att)
     return KFlatModule(m.name, sentences, imports, att)
@@ -53,3 +53,10 @@ def _att_to_katt(att: Att) -> KAtt:
     if not att.items:
         return EMPTY_ATT
     return KAtt.from_dict({'att': dict(att.items)})
+
+
+@singledispatch
+@_ast_to_kast.register
+def _sentence_to_ksentence(s: Sentence) -> KSentence:
+    _LOGGER.error(f'Unimplemented conversion for {type(s)}')
+    return None  # type: ignore
