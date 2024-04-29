@@ -386,7 +386,8 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
-    search_paths = [options.main_file.resolve().parent]
+    definition_file = options.main_file.resolve()
+    search_paths = [definition_file.parent]
     for include in getattr(options, 'includes', []):
         include_path = Path(include)
         try:
@@ -395,9 +396,9 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
             _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
         search_paths.append(include_path.resolve())
 
-    main_module_name = getattr(options, 'main_module', options.main_file.stem.upper())
+    main_module_name = getattr(options, 'main_module', definition_file.stem.upper())
     try:
-        final_definition = parse_outer(options.main_file, main_module_name, search_paths, options.md_selector)
+        final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
     except Exception as e:
         _LOGGER.critical(e)
         exit(1)

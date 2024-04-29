@@ -55,6 +55,7 @@ def _slurp(
 def parse_outer(
     definition_file: Path, main_module: str, search_paths: Iterable[Path] = (), md_selector: str = 'k'
 ) -> KDefinition:
+    _LOGGER.info(f'Reading {definition_file}')
     text = definition_file.read_text()
     if definition_file.suffix == '.md':
         text = select_code_blocks(text, md_selector)
