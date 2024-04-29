@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from ..konvert import _ast_to_kast
 from .markdown import select_code_blocks
+from .outer import KDefinition
 from .outer_parser import OuterParser
 from .outer_syntax import Definition
 
@@ -13,7 +14,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
-    from .outer import KDefinition
     from .outer_syntax import Module
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -58,4 +58,5 @@ def parse_outer(
 
     modules = _slurp(text, search_paths, (), md_selector)
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
-    return cast('KDefinition', final_definition)
+    assert isinstance(final_definition, KDefinition)
+    return final_definition
