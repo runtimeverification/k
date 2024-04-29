@@ -128,14 +128,12 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return first
                 if second == FALSE:
                     return notBool(first)
-                if type(first) in [KVariable, KToken]:
-                    assert hasattr(first, 'sort')
+                if isinstance(first, (KVariable, KToken)):
                     if first.sort == KSort('Int'):
                         return KApply('_==Int_', _kast.args)
                     else:
                         return KApply('_==K_', _kast.args)
-                if type(second) in [KVariable, KToken]:
-                    assert hasattr(second, 'sort')
+                if isinstance(second, (KVariable, KToken)):
                     if second.sort == KSort('Int'):
                         return KApply('_==Int_', _kast.args)
                     else:
