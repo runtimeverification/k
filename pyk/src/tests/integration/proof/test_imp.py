@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 import logging
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.cterm import CSubst, CTerm
-from pyk.cterm.symbolic import CTermSymbolic
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
-from pyk.kcfg import KCFGExplore
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
-from pyk.kore.rpc import KoreClient
 from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
@@ -21,24 +19,23 @@ from pyk.proof import APRProver, ProofStatus
 from pyk.proof.proof import parallel_advance_proof
 from pyk.proof.reachability import APRFailureInfo, APRProof
 from pyk.proof.show import APRProofNodePrinter
-from pyk.testing import KCFGExploreTest, KProveTest
+from pyk.testing import KCFGExploreTest, KProveTest, ParallelTest
 from pyk.utils import single
 
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from typing import Final
+    from typing import Callable, Final
 
     from pytest import TempPathFactory
 
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
-    from pyk.kore.kompiled import KompiledKore
-    from pyk.kore.rpc import KoreServer
+    from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
-    from pyk.utils import BugReport
+    from pyk.proof import Prover
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -945,66 +942,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             assert proof.status == ProofStatus.PASSED
 
     @pytest.mark.parametrize(
-        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_leaf_number',
-        APR_PROVE_TEST_DATA,
-        ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
-    )
-    def test_all_path_reachability_prove_parallel(
-        self,
-        kprove: KProve,
-        kcfg_explore: KCFGExplore,
-        test_id: str,
-        spec_file: str,
-        spec_module: str,
-        claim_id: str,
-        max_iterations: int | None,
-        max_depth: int | None,
-        cut_rules: Iterable[str],
-        admit_deps: bool,
-        proof_status: ProofStatus,
-        expected_leaf_number: int,
-        tmp_path_factory: TempPathFactory,
-        definition: KDefinition,
-        bug_report: BugReport,
-        kompiled_kore: KompiledKore,
-        _kore_server: KoreServer,
-    ) -> None:
-        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
-            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
-            spec_label = f'{spec_module}.{claim_id}'
-            proofs = APRProof.from_spec_modules(
-                kprove.definition,
-                spec_modules,
-                spec_labels=[spec_label],
-                logs={},
-                proof_dir=proof_dir,
-            )
-            proof = single([p for p in proofs if p.id == spec_label])
-            if admit_deps:
-                for subproof in proof.subproofs:
-                    subproof.admit()
-                    subproof.write_proof_data()
-
-            def create_prover() -> APRProver:
-                kore_client = KoreClient(
-                    'localhost', _kore_server.port, timeout=self.CLIENT_TIMEOUT, bug_report=bug_report
-                )
-                ct_symb = CTermSymbolic(kore_client, definition, kompiled_kore)
-                _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
-                return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_rules)
-
-            parallel_advance_proof(
-                proof=proof, max_iterations=max_iterations, create_prover=create_prover, max_workers=2
-            )
-
-            kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
-            cfg_lines = kcfg_show.show(proof.kcfg)
-            _LOGGER.info('\n'.join(cfg_lines))
-
-            assert proof.status == proof_status
-            assert leaf_number(proof) == expected_leaf_number
-
-    @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',
         PATH_CONSTRAINTS_TEST_DATA,
         ids=[test_id for test_id, *_ in PATH_CONSTRAINTS_TEST_DATA],
@@ -1431,3 +1368,56 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         assert not passed
         assert actual == expected
+
+
+class TestImpParallelProof(ParallelTest, KCFGExploreTest):
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_leaf_number',
+        APR_PROVE_TEST_DATA,
+        ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
+    )
+    def test_all_path_reachability_prove_parallel(
+        self,
+        kprove: KProve,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int | None,
+        max_depth: int | None,
+        cut_rules: Iterable[str],
+        admit_deps: bool,
+        proof_status: ProofStatus,
+        expected_leaf_number: int,
+        tmp_path_factory: TempPathFactory,
+        create_prover: Callable[[int, Iterable[str]], Prover],
+    ) -> None:
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+            if admit_deps:
+                for subproof in proof.subproofs:
+                    subproof.admit()
+                    subproof.write_proof_data()
+
+            _create_prover = partial(create_prover, max_depth, cut_rules)
+
+            parallel_advance_proof(
+                proof=proof, max_iterations=max_iterations, create_prover=_create_prover, max_workers=2
+            )
+
+            kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
+            cfg_lines = kcfg_show.show(proof.kcfg)
+            _LOGGER.info('\n'.join(cfg_lines))
+
+            assert proof.status == proof_status
+            assert leaf_number(proof) == expected_leaf_number

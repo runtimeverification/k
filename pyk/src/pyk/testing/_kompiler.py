@@ -3,9 +3,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import ClassVar  # noqa: TC003
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 import pytest
+
+from pyk.proof.reachability import APRProver
 
 from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
@@ -298,6 +300,24 @@ class KCFGExploreTest(CTermSymbolicTest):
     ) -> Iterator[KCFGExplore]:
         semantics = self.semantics(cterm_symbolic._definition)
         yield KCFGExplore(cterm_symbolic, kcfg_semantics=semantics)
+
+
+class ParallelTest(KCFGExploreTest):
+    @pytest.fixture
+    def create_prover(
+        self,
+        _kore_server: KoreServer,
+        definition: KDefinition,
+        bug_report: BugReport | None,
+        kompiled_kore: KompiledKore,
+    ) -> Callable[[int, Iterable[str]], APRProver]:
+        def _create_prover(max_depth: int, cut_point_rules: Iterable[str]) -> APRProver:
+            kore_client = KoreClient('localhost', _kore_server.port, timeout=self.CLIENT_TIMEOUT, bug_report=bug_report)
+            ct_symb = CTermSymbolic(kore_client, definition, kompiled_kore)
+            _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
+            return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_point_rules)
+
+        return _create_prover
 
 
 class KoreServerPoolTest(KompiledTest, ABC):
