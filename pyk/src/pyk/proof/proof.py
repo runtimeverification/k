@@ -384,7 +384,7 @@ def parallel_advance_proof(
         def close(self) -> None:
             self._closed = True
             for prover in self._provers.values():
-                prover.shutdown()
+                prover.close()
 
         def submit(self, proof_step: _PS) -> Future[Iterable[_SR]]:
             if self._closed:
@@ -446,15 +446,21 @@ def parallel_advance_proof(
         proof.write_proof_data()
 
 
-class Prover(Generic[P, PS, SR]):
+class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
     """Abstract class which advances `Proof`s with `init_proof()` and `step_proof()`
     :param P: Type of proof this `Prover` operates on
     :param PS: Proof step: data required to perform a step of the proof.
     :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
     """
 
+    def __enter__(self) -> Prover[P, PS, SR]:
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self.close()
+
     @abstractmethod
-    def shutdown(self) -> None: ...
+    def close(self) -> None: ...
 
     @abstractmethod
     def failure_info(self, proof: P) -> FailureInfo: ...

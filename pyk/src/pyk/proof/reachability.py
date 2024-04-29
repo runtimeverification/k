@@ -690,7 +690,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
 
-    def shutdown(self) -> None:
+    def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def init_proof(self, proof: APRProof) -> None:

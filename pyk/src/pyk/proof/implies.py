@@ -411,7 +411,7 @@ class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
     proof: ImpliesProof
     kcfg_explore: KCFGExplore
 
-    def shutdown(self) -> None:
+    def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def __init__(self, proof: ImpliesProof, kcfg_explore: KCFGExplore):
