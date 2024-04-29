@@ -34,10 +34,11 @@ def _slurp(
         try:
             # Get the first source file we can find by iterating through search_paths
             index = [file.exists() for file in try_files].index(True)
-        except ValueError:
-            _LOGGER.critical(f'{require.path} not found')  # TODO Print the source location of the requires clause
-            _LOGGER.critical(f'Lookup directories: {[str(path) for path in search_paths]}')
-            exit(1)
+        except ValueError as v:
+            # TODO Include the source location of the requires clause
+            raise FileNotFoundError(
+                f'{require.path} not found\nLookup directories: {[str(path) for path in search_paths]}'
+            ) from v
 
         required_file = try_files[index]
         if required_file not in processed_files:

@@ -396,7 +396,11 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
         search_paths.append(include_path.resolve())
 
     main_module_name = getattr(options, 'main_module', options.main_file.stem.upper())
-    final_definition = parse_outer(options.main_file, main_module_name, search_paths, options.md_selector)
+    try:
+        final_definition = parse_outer(options.main_file, main_module_name, search_paths, options.md_selector)
+    except Exception as e:
+        _LOGGER.critical(e)
+        exit(1)
 
     result_text = json.dumps(final_definition.to_dict())
     try:
