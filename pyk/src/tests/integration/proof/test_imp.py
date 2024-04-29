@@ -25,8 +25,8 @@ from pyk.utils import single
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from typing import Callable, Final
+    from collections.abc import Callable, Iterable
+    from typing import Final
 
     from pytest import TempPathFactory
 

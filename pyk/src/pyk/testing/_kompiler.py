@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from enum import Enum
 from typing import ClassVar  # noqa: TC003
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING
 
 import pytest
 
