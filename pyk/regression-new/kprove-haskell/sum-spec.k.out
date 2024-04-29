@@ -112,7 +112,7 @@ Subproofs: 0
 ┃        #And { true #Equals N:Int >=Int 0 }
 ┃        #And { true #Equals ?S:Int ==Int S:Int +Int N:Int *Int C:Int +Int N:Int -Int 1 *Int N:Int /Int 2 }
 ┃
-┗━━┓ constraint: N:Int ==K 0
+┗━━┓ constraint: N:Int ==Int 0
    │
    ├─ 4
    │     <generatedTop>
