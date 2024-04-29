@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import is_top, mlAnd, mlEqualsTrue, mlImplies, mlOr
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
 from ..utils import find_common_items, hash_str, unique
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (
@@ -100,7 +100,14 @@ def if_ktype(ktype: type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner]
 
 
 def bool_to_ml_pred(kast: KInner) -> KInner:
-    return mlAnd([mlEqualsTrue(cond) for cond in flatten_label('_andBool_', kast)])
+    def _bool_constraint_to_ml(_kast: KInner) -> KInner:
+        if _kast == TRUE:
+            return mlTop()
+        if _kast == FALSE:
+            return mlBottom()
+        return mlEqualsTrue(_kast)
+
+    return mlAnd([_bool_constraint_to_ml(cond) for cond in flatten_label('_andBool_', kast)])
 
 
 def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
@@ -190,6 +197,10 @@ def simplify_bool(k: KInner) -> KInner:
         rewrite = KRewrite(*rule)
         new_k = rewrite(new_k)
     return new_k
+
+
+def normalize_ml_pred(pred: KInner) -> KInner:
+    return bool_to_ml_pred(simplify_bool(ml_pred_to_bool(pred)))
 
 
 def extract_lhs(term: KInner) -> KInner:
@@ -758,8 +769,13 @@ def build_rule(
       - `rule`: A `KRule` with variable naming conventions applied so that it should be parseable by K frontend.
       - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
     """
-    init_constraints = [bool_to_ml_pred(simplify_bool(ml_pred_to_bool(c))) for c in init_constraints]
-    final_constraints = [bool_to_ml_pred(simplify_bool(ml_pred_to_bool(c))) for c in final_constraints]
+    init_constraints = [normalize_ml_pred(c) for c in init_constraints]
+    final_constraints = [normalize_ml_pred(c) for c in final_constraints]
+    print('Initial constraints:')
+    print(*init_constraints, sep='\n')
+    print('Final constraints:')
+    print(*final_constraints, sep='\n')
+    print('----------------------------')
     final_constraints = [c for c in final_constraints if c not in init_constraints]
     init_term = mlAnd([init_config] + init_constraints)
     final_term = mlAnd([final_config] + final_constraints)
