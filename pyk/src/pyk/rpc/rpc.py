@@ -33,14 +33,16 @@ class ServeRpcOptions(Options):
 
 
 class JsonRpcServer:
-    JSONRPC_VERSION: str = '2.0'
+    JSONRPC_VERSION: Final[str] = '2.0'
+
     methods: dict[str, Callable[..., Any]]
     options: ServeRpcOptions
-    http_server: HTTPServer
+    http_server: HTTPServer | None
 
     def __init__(self, options: ServeRpcOptions) -> None:
         self.methods = {}
         self.options = options
+        self.http_server = None
 
     def register_method(self, name: str, function: Callable[..., Any]) -> None:
         _LOGGER.info(f'Registered method {name} using {function}')
@@ -54,7 +56,15 @@ class JsonRpcServer:
         _LOGGER.info(f'JSON-RPC server at {self.options.addr}:{self.options.port} shut down.')
 
     def shutdown(self) -> None:
-        self.http_server.shutdown()
+        self._http_server().shutdown()
+
+    def port(self) -> int:
+        return self._http_server().server_port
+
+    def _http_server(self) -> HTTPServer:
+        if not self.http_server:
+            raise ValueError('Server has not been started')
+        return self.http_server
 
 
 class JsonRpcMethod(Protocol):

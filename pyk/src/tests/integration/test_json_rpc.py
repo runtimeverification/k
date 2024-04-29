@@ -89,22 +89,32 @@ class TestJsonRPCServer(KRunTest):
     KOMPILE_BACKEND = 'llvm'
 
     def test_json_rpc_server(self, krun: KRun) -> None:
-        server = StatefulKJsonRpcServer(ServeRpcOptions({'definition_dir': krun.definition_dir}))
+        server = StatefulKJsonRpcServer(ServeRpcOptions({'definition_dir': krun.definition_dir, 'port': 0}))
 
         def run_server() -> None:
             server.serve()
 
-        process = Thread(target=run_server)
-        process.start()
+        def wait_until_server_is_up() -> None:
+            while True:
+                try:
+                    server.port()
+                    return
+                except ValueError:
+                    sleep(0.1)
 
-        rpc_client = JsonRpcClient('localhost', 56601, transport=TransportType.HTTP)
+        thread = Thread(target=run_server)
+        thread.start()
+
+        wait_until_server_is_up()
+
+        rpc_client = JsonRpcClient('localhost', server.port(), transport=TransportType.HTTP)
 
         def wait_until_ready() -> None:
             while True:
                 try:
                     rpc_client.request('get_x')
                 except ConnectionRefusedError:
-                    sleep(1)
+                    sleep(0.1)
                     continue
                 break
 
@@ -122,4 +132,4 @@ class TestJsonRPCServer(KRunTest):
         assert res == (123 + 456)
 
         server.shutdown()
-        process.join()
+        thread.join()
