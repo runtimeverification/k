@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import cast
+
 import pyk.kllvm.load  # noqa: F401
 import pyk.kllvm.prooftrace as prooftrace
 from pyk.testing import ProofTraceTest
+
 
 class TestProofTrace(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -41,11 +44,13 @@ class TestProofTrace(ProofTraceTest):
 
         # check that the first event is the rewrite a() => b()
         assert pt.trace[0].is_step_event()
-        assert pt.trace[0].step_event.rule_ordinal == 96
+        rewrite_event = cast('prooftrace.LLVMRewriteEvent', pt.trace[0].step_event)
+        assert rewrite_event.rule_ordinal == 96
 
         # check that the second event is the rewrite b() => c()
         assert pt.trace[1].is_step_event()
-        assert pt.trace[1].step_event.rule_ordinal == 97
+        rewrite_event = cast('prooftrace.LLVMRewriteEvent', pt.trace[1].step_event)
+        assert rewrite_event.rule_ordinal == 97
 
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()

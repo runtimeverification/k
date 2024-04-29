@@ -4,15 +4,16 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, final
 
 from _kllvm.prooftrace import (  # type: ignore  # noqa: F401
-    llvm_step_event,
     LLVMREwriteEvent,
-    llvm_rule_event,
-    llvm_side_condition_event,
-    llvm_side_condition_end_event,
     llvm_function_event,
     llvm_hook_event,
     llvm_rewrite_trace,
+    llvm_rule_event,
+    llvm_side_condition_end_event,
+    llvm_side_condition_event,
+    llvm_step_event,
 )
+
 from .ast import Pattern
 
 if TYPE_CHECKING:
@@ -37,7 +38,7 @@ class LLVMRewriteEvent(LLVMStepEvent):
 class LLVMRuleEvent(LLVMRewriteEvent):
     _rule_event: llvm_rule_event
 
-    def __init__(self, rule_event: llvm_rule_event) -> ():
+    def __init__(self, rule_event: llvm_rule_event) -> None:
         self._rule_event = rule_event
 
     def __repr__(self) -> str:
@@ -49,14 +50,14 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 
     @property
     def substitution(self) -> dict[str, Pattern]:
-        return { k: v[0] for k, v in self._rule_event.substitution.items() }
+        return {k: v[0] for k, v in self._rule_event.substitution.items()}
 
 
 @final
 class LLVMSideConditionEventEnter(LLVMRewriteEvent):
     _side_condition_event: llvm_side_condition_event
 
-    def __init__(self, side_condition_event: llvm_side_condition_event) -> ():
+    def __init__(self, side_condition_event: llvm_side_condition_event) -> None:
         self._side_condition_event = side_condition_event
 
     def __repr__(self) -> str:
@@ -68,14 +69,14 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 
     @property
     def substitution(self) -> dict[str, Pattern]:
-        return { k: v[0] for k, v in self._side_condition_event.substitution.items() }
+        return {k: v[0] for k, v in self._side_condition_event.substitution.items()}
 
 
 @final
 class LLVMSideConditionEventExit(LLVMStepEvent):
     _side_condition_end_event: llvm_side_condition_end_event
 
-    def __init__(self, side_condition_end_event: llvm_side_condition_end_event) -> ():
+    def __init__(self, side_condition_end_event: llvm_side_condition_end_event) -> None:
         self._side_condition_end_event = side_condition_end_event
 
     def __repr__(self) -> str:
@@ -94,7 +95,7 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
 class LLVMFunctionEvent(LLVMStepEvent):
     _function_event: llvm_function_event
 
-    def __init__(self, function_event: llvm_function_event) -> ():
+    def __init__(self, function_event: llvm_function_event) -> None:
         self._function_event = function_event
 
     def __repr__(self) -> str:
@@ -110,14 +111,14 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     @property
     def args(self) -> list[LLVMArgument]:
-        return [ LLVMArgument(arg) for arg in self._function_event.args ]
+        return [LLVMArgument(arg) for arg in self._function_event.args]
 
 
 @final
 class LLVMHookEvent(LLVMStepEvent):
     _hook_event: llvm_hook_event
 
-    def __init__(self, hook_event: llvm_hook_event) -> ():
+    def __init__(self, hook_event: llvm_hook_event) -> None:
         self._hook_event = hook_event
 
     def __repr__(self) -> str:
@@ -133,7 +134,7 @@ class LLVMHookEvent(LLVMStepEvent):
 
     @property
     def args(self) -> list[LLVMArgument]:
-        return [ LLVMArgument(arg) for arg in self._hook_event.args ]
+        return [LLVMArgument(arg) for arg in self._hook_event.args]
 
     @property
     def result(self) -> Pattern:
@@ -144,7 +145,7 @@ class LLVMHookEvent(LLVMStepEvent):
 class LLVMArgument:
     _argument: Argument
 
-    def __init__(self, argument: Argument) -> ():
+    def __init__(self, argument: Argument) -> None:
         self._argument = argument
 
     def __repr__(self) -> str:
@@ -181,7 +182,7 @@ class LLVMArgument:
 class LLVMRewriteTrace:
     _rewrite_trace: llvm_rewrite_trace
 
-    def __init__(self, rewrite_trace: llvm_rewrite_trace) -> ():
+    def __init__(self, rewrite_trace: llvm_rewrite_trace) -> None:
         self._rewrite_trace = rewrite_trace
 
     def __repr__(self) -> str:
@@ -193,7 +194,7 @@ class LLVMRewriteTrace:
 
     @property
     def pre_trace(self) -> list[LLVMArgument]:
-        return [ LLVMArgument(event) for event in self._rewrite_trace.pre_trace ]
+        return [LLVMArgument(event) for event in self._rewrite_trace.pre_trace]
 
     @property
     def initial_config(self) -> LLVMArgument:
@@ -201,7 +202,7 @@ class LLVMRewriteTrace:
 
     @property
     def trace(self) -> list[LLVMArgument]:
-        return [ LLVMArgument(event) for event in self._rewrite_trace.trace ]
+        return [LLVMArgument(event) for event in self._rewrite_trace.trace]
 
     @staticmethod
     def parse(trace: bytes) -> LLVMRewriteTrace:

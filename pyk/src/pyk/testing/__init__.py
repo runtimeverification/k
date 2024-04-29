@@ -8,8 +8,8 @@ from ._kompiler import (
     KPrintTest,
     KProveTest,
     KRunTest,
-    RuntimeTest,
     ProofTraceTest,
+    RuntimeTest,
     ServerType,
 )
 from ._profiler import Profiler
