@@ -771,11 +771,6 @@ def build_rule(
     """
     init_constraints = [normalize_ml_pred(c) for c in init_constraints]
     final_constraints = [normalize_ml_pred(c) for c in final_constraints]
-    print('Initial constraints:')
-    print(*init_constraints, sep='\n')
-    print('Final constraints:')
-    print(*final_constraints, sep='\n')
-    print('----------------------------')
     final_constraints = [c for c in final_constraints if c not in init_constraints]
     init_term = mlAnd([init_config] + init_constraints)
     final_term = mlAnd([final_config] + final_constraints)
