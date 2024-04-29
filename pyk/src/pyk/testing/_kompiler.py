@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 from enum import Enum
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING
@@ -25,7 +24,7 @@ from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
     from pathlib import Path
     from typing import Any
 
