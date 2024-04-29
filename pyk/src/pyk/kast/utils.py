@@ -19,6 +19,20 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
+def parse_outer(
+    definition_file: Path, main_module: str, search_paths: Iterable[Path] = (), md_selector: str = 'k'
+) -> KDefinition:
+    _LOGGER.info(f'Reading {definition_file}')
+    text = definition_file.read_text()
+    if definition_file.suffix == '.md':
+        text = select_code_blocks(text, md_selector)
+
+    modules = _slurp(text, search_paths, [definition_file], md_selector)
+    final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
+    assert isinstance(final_definition, KDefinition)
+    return final_definition
+
+
 def _slurp(
     definition_text: str,
     search_paths: Iterable[Path] = (),
@@ -50,17 +64,3 @@ def _slurp(
                     text = select_code_blocks(text, md_selector)
                 result += _slurp(text, search_paths, processed_files, md_selector)
     return result
-
-
-def parse_outer(
-    definition_file: Path, main_module: str, search_paths: Iterable[Path] = (), md_selector: str = 'k'
-) -> KDefinition:
-    _LOGGER.info(f'Reading {definition_file}')
-    text = definition_file.read_text()
-    if definition_file.suffix == '.md':
-        text = select_code_blocks(text, md_selector)
-
-    modules = _slurp(text, search_paths, [definition_file], md_selector)
-    final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
-    assert isinstance(final_definition, KDefinition)
-    return final_definition
