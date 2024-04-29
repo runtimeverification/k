@@ -24,6 +24,10 @@ P = TypeVar('P', bound='Proof')
 PS = TypeVar('PS', bound='Hashable')
 SR = TypeVar('SR')
 
+_P = TypeVar('_P', bound='Proof')
+_PS = TypeVar('_PS', bound='Hashable')
+_SR = TypeVar('_SR')
+
 _LOGGER: Final = logging.getLogger(__name__)
 
 
@@ -77,7 +81,7 @@ class Proof(Generic[PS, SR]):
 
     @abstractmethod
     def commit(self, result: SR) -> None:
-        """Applies the step result of type `SR` to `self`, modifying `self`."""
+        """Apply the step result of type `SR` to `self`, modifying `self`."""
         ...
 
     def admit(self) -> None:
@@ -317,66 +321,6 @@ class CompositeSummary(ProofSummary):
 class FailureInfo: ...
 
 
-class ProverPool(ContextManager['ProverPool'], Generic[P, PS, SR]):
-    """Wrapper for `ThreadPoolExecutor` which spawns one `Prover` for each worker thread.
-
-    :param P: Type of proof to be advanced in parallel
-    :param PS: Proof step: data required to perform a step of the proof.
-    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
-
-    :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
-        data to be written during `parallel_advance_proof`, to avoid race conditions.
-    :param max_workers: Maximum number of worker threads the pool can spawn
-
-    """
-
-    _create_prover: Callable[[], Prover[P, PS, SR]]
-    _provers: dict[str, Prover[P, PS, SR]]
-    _executor: Executor
-    _closed: bool
-
-    def __init__(
-        self,
-        create_prover: Callable[[], Prover[P, PS, SR]],
-        *,
-        max_workers: int | None = None,
-    ) -> None:
-        self._create_prover = create_prover
-        self._provers = {}
-        self._executor = ThreadPoolExecutor(max_workers)
-        self._closed = False
-
-    def __enter__(self) -> ProverPool[P, PS, SR]:
-        self._executor.__enter__()
-        return self
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self._executor.__exit__(exc_type, exc_val, exc_tb)
-        self.close()
-
-    def close(self) -> None:
-        self._closed = True
-        for prover in self._provers.values():
-            prover.shutdown()
-
-    def submit(self, proof_step: PS) -> Future[Iterable[SR]]:
-        if self._closed:
-            raise ValueError('ProverPool has been closed')
-        return self._executor.submit(self._with_prover(proof_step))
-
-    def _with_prover(self, proof_step: PS) -> Callable[[], Iterable[SR]]:
-
-        def step() -> Iterable[SR]:
-            thread_name = current_thread().name
-            prover: Prover[P, PS, SR] | None = self._provers.get(thread_name)
-            if prover is None:
-                prover = self._create_prover()
-                self._provers[thread_name] = prover
-            return prover.step_proof(proof_step)
-
-        return step
-
-
 def parallel_advance_proof(
     proof: P,
     create_prover: Callable[[], Prover[P, PS, SR]],
@@ -399,6 +343,66 @@ def parallel_advance_proof(
         still available steps
     :param max_workers: Maximum number of worker threads the pool can spawn
     """
+
+    class _ProverPool(ContextManager['_ProverPool'], Generic[_P, _PS, _SR]):
+        """Wrapper for `ThreadPoolExecutor` which spawns one `Prover` for each worker thread.
+
+        :param P: Type of proof to be advanced in parallel
+        :param PS: Proof step: data required to perform a step of the proof.
+        :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+
+        :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
+            data to be written during `parallel_advance_proof`, to avoid race conditions.
+        :param max_workers: Maximum number of worker threads the pool can spawn
+
+        """
+
+        _create_prover: Callable[[], Prover[_P, _PS, _SR]]
+        _provers: dict[str, Prover[_P, _PS, _SR]]
+        _executor: Executor
+        _closed: bool
+
+        def __init__(
+            self,
+            create_prover: Callable[[], Prover[_P, _PS, _SR]],
+            *,
+            max_workers: int | None = None,
+        ) -> None:
+            self._create_prover = create_prover
+            self._provers = {}
+            self._executor = ThreadPoolExecutor(max_workers)
+            self._closed = False
+
+        def __enter__(self) -> _ProverPool[_P, _PS, _SR]:
+            self._executor.__enter__()
+            return self
+
+        def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+            self._executor.__exit__(exc_type, exc_val, exc_tb)
+            self.close()
+
+        def close(self) -> None:
+            self._closed = True
+            for prover in self._provers.values():
+                prover.shutdown()
+
+        def submit(self, proof_step: _PS) -> Future[Iterable[_SR]]:
+            if self._closed:
+                raise ValueError('ProverPool has been closed')
+            return self._executor.submit(self._with_prover(proof_step))
+
+        def _with_prover(self, proof_step: _PS) -> Callable[[], Iterable[_SR]]:
+
+            def step() -> Iterable[_SR]:
+                thread_name = current_thread().name
+                prover: Prover[_P, _PS, _SR] | None = self._provers.get(thread_name)
+                if prover is None:
+                    prover = self._create_prover()
+                    self._provers[thread_name] = prover
+                return prover.step_proof(proof_step)
+
+            return step
+
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
     iterations = 0
@@ -407,7 +411,7 @@ def parallel_advance_proof(
 
     main_prover.init_proof(proof)
 
-    with ProverPool[P, PS, SR](create_prover=create_prover, max_workers=max_workers) as pool:
+    with _ProverPool[P, PS, SR](create_prover=create_prover, max_workers=max_workers) as pool:
 
         def submit_steps(_steps: Iterable[PS]) -> None:
             for step in _steps:
@@ -420,7 +424,7 @@ def parallel_advance_proof(
         submit_steps(proof.get_steps())
 
         while True:
-            if len(pending) == 0:
+            if not pending:
                 break
             done, _ = wait(pending, return_when='FIRST_COMPLETED')
             future = done.pop()
@@ -457,7 +461,7 @@ class Prover(Generic[P, PS, SR]):
 
     @abstractmethod
     def step_proof(self, step: PS) -> Iterable[SR]:
-        """Does work associated with a `PS`, a proof step. Should not modify a `Proof` or `self`, but may read
+        """Do the work associated with a `PS`, a proof step. Should not modify a `Proof` or `self`, but may read
         from `self` as long as those fields are not being modified during `step_proof()`, `get_steps()`, and
         `commit()`.
         """

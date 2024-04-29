@@ -60,7 +60,7 @@ class APRProofTerminalResult(APRProofResult): ...
 class APRProofBoundedResult(APRProofResult): ...
 
 
-@dataclass(frozen=True, eq=True)
+@dataclass(frozen=True)
 class APRProofStep:
     node: KCFG.Node
     target: KCFG.Node
