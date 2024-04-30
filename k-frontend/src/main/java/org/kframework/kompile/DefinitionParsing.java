@@ -58,6 +58,7 @@ import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
+import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -220,8 +221,12 @@ public class DefinitionParsing {
       KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule mainProgramsModule,
       java.util.Set<Att.Key> excludedModuleTags) {
-    Definition parsedDefinition =
-        parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
+    Definition parsedDefinition;
+    if (options.outerParsedJson) {
+      parsedDefinition = JsonParser.parseDefinition(FileUtil.load(definitionFile));
+    } else {
+      parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
+    }
     Stream<Module> modules = Stream.of(parsedDefinition.mainModule());
     modules = Stream.concat(modules, stream(parsedDefinition.mainModule().importedModules()));
     Option<Module> syntaxModule = parsedDefinition.getModule(mainProgramsModule.name());
