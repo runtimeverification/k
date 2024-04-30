@@ -5,8 +5,6 @@ from argparse import ArgumentParser, FileType
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
 
-import tomli
-
 from ..ktool.kompile import KompileBackend
 from .args import (
     ConfigArgs,
@@ -23,8 +21,10 @@ from .args import (
 )
 from .utils import dir_path
 
+#  import tomli
+
+
 if TYPE_CHECKING:
-    from argparse import Namespace
     from collections.abc import Iterable
     from pathlib import Path
     from typing import Final
@@ -34,67 +34,67 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def generate_options(args: dict[str, Any]) -> LoggingOptions:
-    command = args['command']
-    match command:
-        case 'json-to-kore':
-            return JsonToKoreOptions(args)
-        case 'kore-to-json':
-            return KoreToJsonOptions(args)
-        case 'coverage':
-            return CoverageOptions(args)
-        case 'graph-imports':
-            return GraphImportsOptions(args)
-        case 'rpc-kast':
-            return RPCKastOptions(args)
-        case 'rpc-print':
-            return RPCPrintOptions(args)
-        case 'print':
-            return PrintOptions(args)
-        case 'prove-legacy':
-            return ProveLegacyOptions(args)
-        case 'prove':
-            return ProveOptions(args)
-        case 'show':
-            return ProveOptions(args)
-        case 'kompile':
-            return KompileCommandOptions(args)
-        case 'run':
-            return RunOptions(args)
-        case _:
-            raise ValueError(f'Unrecognized command: {command}')
+#  def generate_options(args: dict[str, Any]) -> LoggingOptions:
+#      command = args['command']
+#      match command:
+#          case 'json-to-kore':
+#              return JsonToKoreOptions(args)
+#          case 'kore-to-json':
+#              return KoreToJsonOptions(args)
+#          case 'coverage':
+#              return CoverageOptions(args)
+#          case 'graph-imports':
+#              return GraphImportsOptions(args)
+#          case 'rpc-kast':
+#              return RPCKastOptions(args)
+#          case 'rpc-print':
+#              return RPCPrintOptions(args)
+#          case 'print':
+#              return PrintOptions(args)
+#          case 'prove-legacy':
+#              return ProveLegacyOptions(args)
+#          case 'prove':
+#              return ProveOptions(args)
+#          case 'show':
+#              return ProveOptions(args)
+#          case 'kompile':
+#              return KompileCommandOptions(args)
+#          case 'run':
+#              return RunOptions(args)
+#          case _:
+#              raise ValueError(f'Unrecognized command: {command}')
 
 
-def get_option_string_destination(command: str, option_string: str) -> str:
-    option_string_destinations = {}
-    match command:
-        case 'json-to-kore':
-            option_string_destinations = JsonToKoreOptions.from_option_string()
-        case 'kore-to-json':
-            option_string_destinations = KoreToJsonOptions.from_option_string()
-        case 'coverage':
-            option_string_destinations = CoverageOptions.from_option_string()
-        case 'graph-imports':
-            option_string_destinations = GraphImportsOptions.from_option_string()
-        case 'rpc-kast':
-            option_string_destinations = RPCKastOptions.from_option_string()
-        case 'rpc-print':
-            option_string_destinations = RPCPrintOptions.from_option_string()
-        case 'print':
-            option_string_destinations = PrintOptions.from_option_string()
-        case 'prove-legacy':
-            option_string_destinations = ProveLegacyOptions.from_option_string()
-        case 'prove':
-            option_string_destinations = ProveOptions.from_option_string()
-        case 'kompile':
-            option_string_destinations = KompileCommandOptions.from_option_string()
-        case 'run':
-            option_string_destinations = RunOptions.from_option_string()
-
-    if option_string in option_string_destinations:
-        return option_string_destinations[option_string]
-    else:
-        return option_string.replace('-', '_')
+#  def get_option_string_destination(command: str, option_string: str) -> str:
+#      option_string_destinations = {}
+#      match command:
+#          case 'json-to-kore':
+#              option_string_destinations = JsonToKoreOptions.from_option_string()
+#          case 'kore-to-json':
+#              option_string_destinations = KoreToJsonOptions.from_option_string()
+#          case 'coverage':
+#              option_string_destinations = CoverageOptions.from_option_string()
+#          case 'graph-imports':
+#              option_string_destinations = GraphImportsOptions.from_option_string()
+#          case 'rpc-kast':
+#              option_string_destinations = RPCKastOptions.from_option_string()
+#          case 'rpc-print':
+#              option_string_destinations = RPCPrintOptions.from_option_string()
+#          case 'print':
+#              option_string_destinations = PrintOptions.from_option_string()
+#          case 'prove-legacy':
+#              option_string_destinations = ProveLegacyOptions.from_option_string()
+#          case 'prove':
+#              option_string_destinations = ProveOptions.from_option_string()
+#          case 'kompile':
+#              option_string_destinations = KompileCommandOptions.from_option_string()
+#          case 'run':
+#              option_string_destinations = RunOptions.from_option_string()
+#  
+#      if option_string in option_string_destinations:
+#          return option_string_destinations[option_string]
+#      else:
+#          return option_string.replace('-', '_')
 
 
 class PrintInput(Enum):
@@ -102,10 +102,10 @@ class PrintInput(Enum):
     KAST_JSON = 'kast-json'
 
 
-class JsonToKoreOptions(LoggingOptions): ...
+#  class JsonToKoreOptions(LoggingOptions): ...
 
 
-class KoreToJsonOptions(LoggingOptions): ...
+#  class KoreToJsonOptions(LoggingOptions): ...
 
 
 class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
@@ -409,36 +409,36 @@ def create_argument_parser() -> ArgumentParser:
     return pyk_args
 
 
-def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
-    def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
-        if len(profile_list) == 0 or profile_list[0] not in toml_profile:
-            return {k: v for k, v in toml_profile.items() if type(v) is not dict}
-        elif len(profile_list) == 1:
-            return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
-        return get_profile(toml_profile[profile_list[0]], profile_list[1:])
-
-    toml_args = {}
-    if args.config_file.is_file():
-        with open(args.config_file, 'rb') as config_file:
-            try:
-                toml_args = tomli.load(config_file)
-            except tomli.TOMLDecodeError:
-                _LOGGER.error(
-                    'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
-                )
-
-    toml_args = (
-        get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
-    )
-    toml_args = {get_option_string_destination(args.command, k): v for k, v in toml_args.items()}
-    for k, v in toml_args.items():
-        if k[:3] == 'no-' and (v == 'true' or v == 'false'):
-            del toml_args[k]
-            toml_args[k[3:]] = 'false' if v == 'true' else 'true'
-        if k == 'optimization-level':
-            level = toml_args[k] if toml_args[k] >= 0 else 0
-            level = level if toml_args[k] <= 3 else 3
-            del toml_args[k]
-            toml_args['-o' + str(level)] = 'true'
-
-    return toml_args
+#  def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
+#      def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
+#          if len(profile_list) == 0 or profile_list[0] not in toml_profile:
+#              return {k: v for k, v in toml_profile.items() if type(v) is not dict}
+#          elif len(profile_list) == 1:
+#              return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
+#          return get_profile(toml_profile[profile_list[0]], profile_list[1:])
+#  
+#      toml_args = {}
+#      if args.config_file.is_file():
+#          with open(args.config_file, 'rb') as config_file:
+#              try:
+#                  toml_args = tomli.load(config_file)
+#              except tomli.TOMLDecodeError:
+#                  _LOGGER.error(
+#                      'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
+#                  )
+#  
+#      toml_args = (
+#          get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
+#      )
+#      toml_args = {get_option_string_destination(args.command, k): v for k, v in toml_args.items()}
+#      for k, v in toml_args.items():
+#          if k[:3] == 'no-' and (v == 'true' or v == 'false'):
+#              del toml_args[k]
+#              toml_args[k[3:]] = 'false' if v == 'true' else 'true'
+#          if k == 'optimization-level':
+#              level = toml_args[k] if toml_args[k] >= 0 else 0
+#              level = level if toml_args[k] <= 3 else 3
+#              del toml_args[k]
+#              toml_args['-o' + str(level)] = 'true'
+#  
+#      return toml_args

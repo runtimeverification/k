@@ -5,11 +5,13 @@ from argparse import ArgumentParser, FileType
 from pathlib import Path
 
 #  from enum import Enum
-from typing import IO, TYPE_CHECKING, Any, Iterable, TypeVar
+from typing import IO, TYPE_CHECKING, Any, Generic, Iterable, TypeVar
 
 from ..utils import ensure_dir_path
+from .utils import BugReport, bug_report_arg
 
 T = TypeVar('T')
+OG = TypeVar('OG', bound='OptionsGroup')
 
 if TYPE_CHECKING:
     from enum import EnumMeta
@@ -32,56 +34,8 @@ class CLI:
         subparsers = args.add_subparsers(dest='command', required=True)
         for command in self._commands:
             command_args = subparsers.add_parser(name=command.name, help=command.help_str)
-            for option in command.options:
+            for option in command._options_group.options:
                 option.add_arg(command_args)
-
-        #                  if option.type is bool and option.is_optional:
-        #                      command_args.add_argument(
-        #                          option.cmd_line_name,
-        #                          *(option.aliases),
-        #                          default='NoDefault',
-        #                          required=False,
-        #                          type=option.type,
-        #                          help=option.help_str,
-        #                          metavar=option.metavar,
-        #                          action='store_false' if option.default else 'store_true',
-        #                          dest=option.name,
-        #                      )
-        #                  elif issubclass(option.type, Enum) and option.is_optional:
-        #                      command_args.add_argument(
-        #                          option.cmd_line_name,
-        #                          *(option.aliases),
-        #                          default='NoDefault',
-        #                          required=False,
-        #                          type=option.type,
-        #                          help=option.help_str,
-        #                          metavar=option.metavar,
-        #                          dest=option.name,
-        #                          choices=list(option.type),
-        #                      )
-        #                  elif isinstance(option.type, Iterable) and option.is_optional:
-        #                      command_args.add_argument(
-        #                          option.cmd_line_name,
-        #                          *(option.aliases),
-        #                          default='NoDefault',
-        #                          required=False,
-        #                          type=option.type,
-        #                          help=option.help_str,
-        #                          metavar=option.metavar,
-        #                          action='append',
-        #                          dest=option.name,
-        #                      )
-        #                  else:
-        #                      command_args.add_argument(
-        #                          option.cmd_line_name,
-        #                          *(option.aliases),
-        #                          default='NoDefault',
-        #                          required=(not option.is_optional),
-        #                          type=option.type,
-        #                          help=option.help_str,
-        #                          metavar=option.metavar,
-        #                          dest=option.name,
-        #                      )
         return args
 
     def get_command(self, args: dict[str, Any]) -> Command:
@@ -268,6 +222,25 @@ class EnumOption(Option):
         )
 
 
+class ReadFileOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, IO)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=FileType('r'),
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+        )
+
+
 class WriteFileOption(Option):
 
     def set_default(self, default: Any) -> None:
@@ -281,6 +254,25 @@ class WriteFileOption(Option):
             default='NoDefault',
             required=self.is_optional,
             type=FileType('w'),
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+        )
+
+
+class BugReportOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, BugReport)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=bug_report_arg,
             help=self.help_str,
             metavar=self.metavar,
             dest=self.name,
@@ -326,8 +318,8 @@ class StringListOption(Option):
         )
 
 
-class Command:
-    _options_group: OptionsGroup
+class Command(Generic[OG]):
+    _options_group: OG
     _name: str
     _help_str: str
 
@@ -340,6 +332,11 @@ class Command:
             else:
                 self.__setattr__(option.name, option.default)
 
+    def __init__(self, name: str, help_str: str, options_group: OG) -> None:
+        self._name = name
+        self._help_str = help_str
+        self._options_group = options_group
+
     @property
     def name(self) -> str:
         return self._name
@@ -349,8 +346,8 @@ class Command:
         return self._help_str
 
     @property
-    def options(self) -> list[Option]:
-        return self._options_group.options
+    def options(self) -> OG:
+        return self._options_group
 
     @abstractmethod
     def exec(self) -> None: ...

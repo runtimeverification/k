@@ -9,6 +9,7 @@ from typing import IO, TYPE_CHECKING, Any
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import (
     BoolOption,
+    BugReportOption,
     DirPathOption,
     EnumOption,
     IntOption,
@@ -111,6 +112,8 @@ class WarningOptions(Options):
 
 
 class OutputFileOptionsGroup(OptionsGroup):
+    output_file: IO[Any]
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
@@ -134,6 +137,8 @@ class OutputFileOptions(Options):
 
 
 class DefinitionOptionsGroup(OptionsGroup):
+    definition_dir: Path
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
@@ -603,20 +608,18 @@ class ParallelOptions(Options):
         }
 
 
-#  class BugReportOptionsGroup(OptionsGroup):
-#      def __init__(self) -> None:
-#          super().__init__()
-#          self.add_option(
-#              IntOption(
-#                  name='workers',
-#                  aliases=['-j'],
-#                  cmd_line_name='--workers',
-#                  toml_name='j',
-#                  default=1,
-#                  help_str='Number of processes to run in parallel',
-#                  optional=True,
-#              )
-#          )
+class BugReportOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            BugReportOption(
+                name='bug_report',
+                cmd_line_name='--bug-report',
+                default=None,
+                help_str='Generate bug report with given name.',
+                optional=True,
+            )
+        )
 
 
 class BugReportOptions(Options):
@@ -625,6 +628,38 @@ class BugReportOptions(Options):
     @staticmethod
     def default() -> dict[str, Any]:
         return {'bug_report': None}
+
+
+class SMTOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            IntOption(
+                name='smt_timeout',
+                cmd_line_name='--smt-timeout',
+                default=300,
+                help_str='Timeout in ms to use for SMT queries.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            IntOption(
+                name='smt_retry_limit',
+                cmd_line_name='--smt-retry-limit',
+                default=10,
+                help_str='Number of times to retry SMT queries with scaling timeouts.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            StringOption(
+                name='smt_tactic',
+                cmd_line_name='--smt-tactic',
+                default=None,
+                help_str='Z3 tactic to use when checking satisfiability. Example: (check-sat-using-smt)',
+                optional=True,
+            )
+        )
 
 
 class SMTOptions(Options):

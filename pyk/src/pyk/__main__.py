@@ -3,14 +3,14 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
-from .cli.pyk import PrintInput, create_argument_parser, generate_options, parse_toml_args
-from .cli.utils import LOG_FORMAT, loglevel
+from .cli.args import DefinitionOptionsGroup, LoggingOptionsGroup, OutputFileOptionsGroup
+from .cli.cli import CLI, Command, ReadFileOption
+from .cli.pyk import PrintInput
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .kast.inner import KInner
@@ -38,14 +38,11 @@ from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import IO, Any, Final
 
     from .cli.pyk import (
-        CoverageOptions,
         GraphImportsOptions,
-        JsonToKoreOptions,
         KompileCommandOptions,
-        KoreToJsonOptions,
         PrintOptions,
         ProveLegacyOptions,
         ProveOptions,
@@ -64,24 +61,29 @@ def main() -> None:
     # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
     sys.setrecursionlimit(10**7)
 
-    cli_parser = create_argument_parser()
-    args = cli_parser.parse_args()
-    toml_args = parse_toml_args(args)
+    cli = CLI([JsonToKoreCommand(), JsonToKoreCommand(), CoverageCommand()])
+    cli.get_and_exec_command()
 
-    stripped_args = toml_args | {
-        key: val for (key, val) in vars(args).items() if val is not None and not (isinstance(val, Iterable) and not val)
-    }
 
-    options = generate_options(stripped_args)
-
-    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
-
-    executor_name = 'exec_' + args.command.lower().replace('-', '_')
-    if executor_name not in globals():
-        raise AssertionError(f'Unimplemented command: {args.command}')
-
-    execute = globals()[executor_name]
-    execute(options)
+#
+#      cli_parser = create_argument_parser()
+#      args = cli_parser.parse_args()
+#      toml_args = parse_toml_args(args)
+#
+#      stripped_args = toml_args | {
+#          key: val for (key, val) in vars(args).items() if val is not None and not (isinstance(val, Iterable) and not val)
+#      }
+#
+#      options = generate_options(stripped_args)
+#
+#      logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
+#
+#      executor_name = 'exec_' + args.command.lower().replace('-', '_')
+#      if executor_name not in globals():
+#          raise AssertionError(f'Unimplemented command: {args.command}')
+#
+#      execute = globals()[executor_name]
+#      execute(options)
 
 
 def exec_print(options: PrintOptions) -> None:
@@ -357,30 +359,78 @@ def exec_graph_imports(options: GraphImportsOptions) -> None:
     _LOGGER.info(f'Wrote file: {graph_file}')
 
 
-def exec_coverage(options: CoverageOptions) -> None:
-    kompiled_dir: Path = options.definition_dir
-    definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
-    pretty_printer = PrettyPrinter(definition)
-    for rid in options.coverage_file:
-        rule = minimize_rule(strip_coverage_logger(get_rule_by_id(definition, rid.strip())))
-        options.output_file.write('\n\n')
-        options.output_file.write('Rule: ' + rid.strip())
-        options.output_file.write('\nUnparsed:\n')
-        options.output_file.write(pretty_printer.print(rule))
-    _LOGGER.info(f'Wrote file: {options.output_file.name}')
+class CoverageOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, LoggingOptionsGroup):
+    coverage_file: IO[Any]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            ReadFileOption(name='coverage_file', optional=False, help_str='Coverage fild to build log for.')
+        )
 
 
-def exec_kore_to_json(options: KoreToJsonOptions) -> None:
-    text = sys.stdin.read()
-    kore = KoreParser(text).pattern()
-    print(kore.json)
+class CoverageCommand(Command[CoverageOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('coverage-options', 'Convert coverage file to human readable log.', CoverageOptionsGroup())
+
+    def exec(self) -> None:
+        kompiled_dir: Path = self.options.definition_dir
+        definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
+        pretty_printer = PrettyPrinter(definition)
+        for rid in self.options.coverage_file:
+            rule = minimize_rule(strip_coverage_logger(get_rule_by_id(definition, rid.strip())))
+            self.options.output_file.write('\n\n')
+            self.options.output_file.write('Rule: ' + rid.strip())
+            self.options.output_file.write('\nUnparsed:\n')
+            self.options.output_file.write(pretty_printer.print(rule))
+        _LOGGER.info(f'Wrote file: {self.options.output_file.name}')
 
 
-def exec_json_to_kore(options: JsonToKoreOptions) -> None:
-    text = sys.stdin.read()
-    kore = Pattern.from_json(text)
-    kore.write(sys.stdout)
-    sys.stdout.write('\n')
+#  def exec_coverage(options: CoverageOptions) -> None:
+#      kompiled_dir: Path = options.definition_dir
+#      definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
+#      pretty_printer = PrettyPrinter(definition)
+#      for rid in options.coverage_file:
+#          rule = minimize_rule(strip_coverage_logger(get_rule_by_id(definition, rid.strip())))
+#          options.output_file.write('\n\n')
+#          options.output_file.write('Rule: ' + rid.strip())
+#          options.output_file.write('\nUnparsed:\n')
+#          options.output_file.write(pretty_printer.print(rule))
+#      _LOGGER.info(f'Wrote file: {options.output_file.name}')
+
+
+class KoreToJsonCommand(Command[LoggingOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('kore-to-json', 'convert textual KORE to JSON', LoggingOptionsGroup())
+
+    def exec(self) -> None:
+        text = sys.stdin.read()
+        kore = KoreParser(text).pattern()
+        print(kore.json)
+
+
+#  def exec_kore_to_json(options: KoreToJsonOptions) -> None:
+#      text = sys.stdin.read()
+#      kore = KoreParser(text).pattern()
+#      print(kore.json)
+
+
+class JsonToKoreCommand(Command[LoggingOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('json-to-kore', 'convert JSON to textual KORE', LoggingOptionsGroup())
+
+    def exec(self) -> None:
+        text = sys.stdin.read()
+        kore = Pattern.from_json(text)
+        kore.write(sys.stdout)
+        sys.stdout.write('\n')
+
+
+#  def exec_json_to_kore(options: JsonToKoreOptions) -> None:
+#      text = sys.stdin.read()
+#      kore = Pattern.from_json(text)
+#      kore.write(sys.stdout)
+#      sys.stdout.write('\n')
 
 
 if __name__ == '__main__':
