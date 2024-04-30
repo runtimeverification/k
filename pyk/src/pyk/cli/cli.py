@@ -247,8 +247,8 @@ class EnumOption(Option):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        self._enum_type = enum_type
         super.__init__(*args, **kwargs)
+        self._enum_type = enum_type
 
     def set_default(self, default: Any) -> None:
         assert isinstance(default, self._enum_type)

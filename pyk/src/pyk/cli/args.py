@@ -11,6 +11,7 @@ from .cli import (
     BoolOption,
     DirPathOption,
     EnumOption,
+    IntOption,
     Options,
     OptionsGroup,
     StringListOption,
@@ -291,6 +292,7 @@ class SpecOptionsGroup(OptionsGroup):
             StringListOption(
                 name='claim_labels',
                 cmd_line_name='--claim',
+                toml_name='claim',
                 optional=True,
                 default=None,
                 help_str='Only prove listed claims, MODULE_NAME.claim-id',
@@ -300,6 +302,7 @@ class SpecOptionsGroup(OptionsGroup):
             StringListOption(
                 name='exclude_claim_labels',
                 cmd_line_name='--exclude-claim',
+                toml_name='exclude-claim',
                 optional=True,
                 default=None,
                 help_str='Skip listed claims, MODULE_NAME.claim-id',
@@ -327,6 +330,187 @@ class SpecOptions(SaveDirOptions):
             'claim': 'claim_labels',
             'exclude-claim': 'exclude_claim_labels',
         }
+
+
+class KompileOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            BoolOption(
+                name='emit_json',
+                cmd_line_name='--emit-json',
+                default=True,
+                help_str='Emit JSON definition after compilation.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='llvm_kompile',
+                cmd_line_name='--no-llvm-kompile',
+                default=False,
+                help_str='Do not run llvm-kompile process.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='llvm_library',
+                cmd_line_name='--with-llvm-library',
+                toml_name='with-llvm-library',
+                default=False,
+                help_str='Make kompile generate a dynamic llvm library.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='enable_llvm_debug',
+                cmd_line_name='--enable-llvm-debug',
+                default=False,
+                help_str='Make kompile generate debug symbols for llvm.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            EnumOption(
+                enum_type=LLVMKompileType,
+                name='llvm_kompile_type',
+                cmd_line_name='--llvm-kompile-type',
+                default=None,
+                help_str='Mode to kompile LLVM backend in.',
+            )
+        )
+        self.add_option(
+            DirPathOption(
+                name='llvm_kompile_output',
+                cmd_line_name='--llvm-kompile-output',
+                default=None,
+                help_str='Location to put kompiled LLVM backend at.',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='llvm_proof_hint_instrumentation',
+                cmd_line_name='--llvm-proof-hint-instrumentation',
+                default=False,
+                help_str='Enable proof hint generation in LLVM backend kompilation.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='read_only',
+                cmd_line_name='--read-only-kompiled-directory',
+                toml_name='read-only-kompiled-directory',
+                default=False,
+                help_str='Generate a kompiled directory that K will not attempt to write to afterwards.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='o0',
+                cmd_line_name='-O0',
+                toml_name='O0',
+                default=False,
+                help_str='Optimization level 0.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='o1',
+                cmd_line_name='-O1',
+                toml_name='O1',
+                default=False,
+                help_str='Optimization level 1.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='o2',
+                cmd_line_name='-O2',
+                toml_name='O2',
+                default=False,
+                help_str='Optimization level 2.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='o3',
+                cmd_line_name='-O3',
+                toml_name='O3',
+                default=False,
+                help_str='Optimization level 3.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            StringListOption(
+                name='ccopts',
+                cmd_line_name='-ccopt',
+                optional=True,
+                default=[],
+                help_str='Additional arguments to pass to llvm-kompile',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='enable_search',
+                cmd_line_name='--enable-search',
+                optional=True,
+                default=False,
+                help_str='Enable search mode on LLVM backend krun.',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='coverage',
+                cmd_line_name='--coverage',
+                optional=True,
+                default=False,
+                help_str='Enable logging semantic rule coverage measurement.',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='gen_bison_parser',
+                cmd_line_name='--gen-bison-parser',
+                optional=True,
+                default=False,
+                help_str='Generate standalone Bison parser for program sort.',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='gen_glr_bison_parser',
+                cmd_line_name='--gen-glr-bison-parser',
+                optional=True,
+                default=False,
+                help_str='Generate standalone GLR Bison parser for program sort.',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='bison_lists',
+                cmd_line_name='--bison-lists',
+                optional=True,
+                default=False,
+                help_str='Disable List{Sort} parsing to make grammar LR(1) for Bison parser.',
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='no_exc_wrap',
+                cmd_line_name='--no-exc-wrap',
+                optional=True,
+                default=False,
+                help_str='Do not wrap the output on the CLI.',
+            )
+        )
 
 
 class KompileOptions(Options):
@@ -387,6 +571,22 @@ class KompileOptions(Options):
         }
 
 
+class ParallelOptionsGroup(OptionsGroup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            IntOption(
+                name='workers',
+                aliases=['-j'],
+                cmd_line_name='--workers',
+                toml_name='j',
+                default=1,
+                help_str='Number of processes to run in parallel',
+                optional=True,
+            )
+        )
+
+
 class ParallelOptions(Options):
     workers: int
 
@@ -401,6 +601,22 @@ class ParallelOptions(Options):
         return {
             'j': 'workers',
         }
+
+
+#  class BugReportOptionsGroup(OptionsGroup):
+#      def __init__(self) -> None:
+#          super().__init__()
+#          self.add_option(
+#              IntOption(
+#                  name='workers',
+#                  aliases=['-j'],
+#                  cmd_line_name='--workers',
+#                  toml_name='j',
+#                  default=1,
+#                  help_str='Number of processes to run in parallel',
+#                  optional=True,
+#              )
+#          )
 
 
 class BugReportOptions(Options):
