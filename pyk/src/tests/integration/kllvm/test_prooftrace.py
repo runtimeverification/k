@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import cast
-
 import pyk.kllvm.hints.prooftrace as prooftrace
 import pyk.kllvm.load  # noqa: F401
 from pyk.kore.parser import KoreParser
@@ -31,7 +29,7 @@ class TestProofTrace(ProofTraceTest):
     """
     KOMPILE_MAIN_MODULE = 'TEST-PROOF-TRACE'
 
-    # kore_text = _kast(definition_dir=x, input='program', output='kore', expression="a()").stdout
+    #kore_text = _kast(definition_dir=x, input='program', output='kore', expression="a()").stdout
     program_pattern = KoreParser("Lbla\'LParRParUnds\'TEST-PROOF-TRACE-SYNTAX\'Unds\'Foo{}()").pattern()
 
     HINTS_INPUT_KORE = init_generated_top_cell(
@@ -55,13 +53,13 @@ class TestProofTrace(ProofTraceTest):
 
         # check that the first event is the rewrite a() => b()
         assert pt.trace[0].is_step_event()
-        rewrite_event = cast('prooftrace.LLVMRewriteEvent', pt.trace[0].step_event)
-        assert rewrite_event.rule_ordinal == 96
+        assert isinstance(pt.trace[0].step_event, prooftrace.LLVMRewriteEvent)
+        assert pt.trace[0].step_event.rule_ordinal == 96
 
         # check that the second event is the rewrite b() => c()
         assert pt.trace[1].is_step_event()
-        rewrite_event = cast('prooftrace.LLVMRewriteEvent', pt.trace[1].step_event)
-        assert rewrite_event.rule_ordinal == 97
+        assert isinstance(pt.trace[1].step_event, prooftrace.LLVMRewriteEvent)
+        assert pt.trace[1].step_event.rule_ordinal == 97
 
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()
