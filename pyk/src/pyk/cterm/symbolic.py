@@ -5,6 +5,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NamedTuple, final
 
+from pyk.utils import not_none
+
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
@@ -23,7 +25,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_top, mlEquals, mlTop
+from ..prelude.ml import is_top, mlAnd, mlEquals, mlTop
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -33,7 +35,7 @@ if TYPE_CHECKING:
     from ..kast import KInner
     from ..kast.outer import KDefinition
     from ..kore.kompiled import KompiledKore
-    from ..kore.rpc import FallbackReason, LogEntry
+    from ..kore.rpc import FallbackReason, LogEntry, State
     from ..kore.syntax import Pattern
     from ..utils import BugReport
 
@@ -102,6 +104,32 @@ class CTermSymbolic:
         terminal_rules: Iterable[str] | None = None,
         module_name: str | None = None,
     ) -> CTermExecute:
+
+        def _minimize_branching_constraints(states: tuple[State, ...]) -> tuple[KInner | None, ...]:
+            default = tuple(self.kore_to_kast(not_none(s.rule_predicate)) if s is not None else None for s in states)
+            # Minimization makes sense only if there is a proper branching
+            if len(states) < 2 or any(s.rule_predicate is None for s in states):
+                return default
+            # Determine intersection between all returned sets of branching constraints
+            flattened_default = tuple(flatten_label('#And', not_none(s)) for s in default)
+            intersection = flattened_default[0]
+            for i in range(1, len(flattened_default)):
+                intersection = [c for c in intersection if c in flattened_default[i]]
+                # If intersection is empty, there is nothing to be done
+                if not intersection:
+                    return default
+            # Check if non-empty intersection is entailed by the current path condition
+            dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+            pc_cterm = CTerm(dummy_config, constraints=cterm.constraints)
+            intersection_cterm = CTerm(dummy_config, constraints=intersection)
+            implication_check = self.implies(pc_cterm, intersection_cterm)
+            # The intersection is not entailed, there is nothing to be done
+            if implication_check.remaining_implication:
+                return default
+            # The intersection is entailed and can be filtered out of the branching constraints
+            else:
+                return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
+
         _LOGGER.debug(f'Executing: {cterm}')
         kore = self.kast_to_kore(cterm.kast)
         try:
@@ -125,12 +153,10 @@ class CTermSymbolic:
 
         state = CTerm.from_kast(self.kore_to_kast(response.state.kore))
         resp_next_states = response.next_states or ()
+        branching_constraints = _minimize_branching_constraints(resp_next_states)
         next_states = tuple(
-            NextState(
-                CTerm.from_kast(self.kore_to_kast(ns.kore)),
-                self.kore_to_kast(ns.rule_predicate) if ns.rule_predicate is not None else None,
-            )
-            for ns in resp_next_states
+            NextState(CTerm.from_kast(self.kore_to_kast(ns.kore)), c)
+            for ns, c in zip(resp_next_states, branching_constraints, strict=True)
         )
 
         assert all(not cterm.is_bottom for cterm, _ in next_states)
