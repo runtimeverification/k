@@ -302,7 +302,12 @@ class KCFGExploreTest(CTermSymbolicTest):
         yield KCFGExplore(cterm_symbolic, kcfg_semantics=semantics)
 
 
-class ParallelTest(KCFGExploreTest):
+class ParallelTest(KoreClientTest, ABC):
+    CLIENT_TIMEOUT: ClassVar = 1000
+
+    @abstractmethod
+    def semantics(self, definition: KDefinition) -> KCFGSemantics: ...
+
     @pytest.fixture
     def create_prover(
         self,

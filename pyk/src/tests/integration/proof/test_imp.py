@@ -1370,7 +1370,10 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert actual == expected
 
 
-class TestImpParallelProof(ParallelTest, KCFGExploreTest):
+class TestImpParallelProof(ParallelTest):
+
+    def semantics(self, definition: KDefinition) -> KCFGSemantics:
+        return ImpSemantics(definition)
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_leaf_number',

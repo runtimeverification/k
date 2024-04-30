@@ -24,10 +24,6 @@ P = TypeVar('P', bound='Proof')
 PS = TypeVar('PS', bound='Hashable')
 SR = TypeVar('SR')
 
-_P = TypeVar('_P', bound='Proof')
-_PS = TypeVar('_PS', bound='Hashable')
-_SR = TypeVar('_SR')
-
 _LOGGER: Final = logging.getLogger(__name__)
 
 
@@ -344,65 +340,6 @@ def parallel_advance_proof(
     :param max_workers: Maximum number of worker threads the pool can spawn
     """
 
-    class _ProverPool(ContextManager['_ProverPool'], Generic[_P, _PS, _SR]):
-        """Wrapper for `ThreadPoolExecutor` which spawns one `Prover` for each worker thread.
-
-        :param P: Type of proof to be advanced in parallel
-        :param PS: Proof step: data required to perform a step of the proof.
-        :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
-
-        :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
-            data to be written during `parallel_advance_proof`, to avoid race conditions.
-        :param max_workers: Maximum number of worker threads the pool can spawn
-
-        """
-
-        _create_prover: Callable[[], Prover[_P, _PS, _SR]]
-        _provers: dict[str, Prover[_P, _PS, _SR]]
-        _executor: Executor
-        _closed: bool
-
-        def __init__(
-            self,
-            create_prover: Callable[[], Prover[_P, _PS, _SR]],
-            *,
-            max_workers: int | None = None,
-        ) -> None:
-            self._create_prover = create_prover
-            self._provers = {}
-            self._executor = ThreadPoolExecutor(max_workers)
-            self._closed = False
-
-        def __enter__(self) -> _ProverPool[_P, _PS, _SR]:
-            self._executor.__enter__()
-            return self
-
-        def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-            self._executor.__exit__(exc_type, exc_val, exc_tb)
-            self.close()
-
-        def close(self) -> None:
-            self._closed = True
-            for prover in self._provers.values():
-                prover.close()
-
-        def submit(self, proof_step: _PS) -> Future[Iterable[_SR]]:
-            if self._closed:
-                raise ValueError('ProverPool has been closed')
-            return self._executor.submit(self._with_prover(proof_step))
-
-        def _with_prover(self, proof_step: _PS) -> Callable[[], Iterable[_SR]]:
-
-            def step() -> Iterable[_SR]:
-                thread_name = current_thread().name
-                prover: Prover[_P, _PS, _SR] | None = self._provers.get(thread_name)
-                if prover is None:
-                    prover = self._create_prover()
-                    self._provers[thread_name] = prover
-                return prover.step_proof(proof_step)
-
-            return step
-
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
     iterations = 0
@@ -444,6 +381,66 @@ def parallel_advance_proof(
         if proof.failed:
             proof.failure_info = main_prover.failure_info(proof)
         proof.write_proof_data()
+
+
+class _ProverPool(ContextManager['_ProverPool'], Generic[P, PS, SR]):
+    """Wrapper for `ThreadPoolExecutor` which spawns one `Prover` for each worker thread.
+
+    :param P: Type of proof to be advanced in parallel
+    :param PS: Proof step: data required to perform a step of the proof.
+    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+
+    :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
+        data to be written during `parallel_advance_proof`, to avoid race conditions.
+    :param max_workers: Maximum number of worker threads the pool can spawn
+
+    """
+
+    _create_prover: Callable[[], Prover[P, PS, SR]]
+    _provers: dict[str, Prover[P, PS, SR]]
+    _executor: Executor
+    _closed: bool
+
+    def __init__(
+        self,
+        create_prover: Callable[[], Prover[P, PS, SR]],
+        *,
+        max_workers: int | None = None,
+    ) -> None:
+        self._create_prover = create_prover
+        self._provers = {}
+        self._executor = ThreadPoolExecutor(max_workers)
+        self._closed = False
+
+    def __enter__(self) -> _ProverPool[P, PS, SR]:
+        self._executor.__enter__()
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self._executor.__exit__(exc_type, exc_val, exc_tb)
+        self.close()
+
+    def close(self) -> None:
+        self._closed = True
+        for prover in self._provers.values():
+            prover.close()
+
+    def submit(self, proof_step: PS) -> Future[Iterable[SR]]:
+        if self._closed:
+            raise ValueError('ProverPool has been closed')
+        return self._executor.submit(self._with_prover(proof_step))
+
+    def _with_prover(self, proof_step: PS) -> Callable[[], Iterable[SR]]:
+
+        def step() -> Iterable[SR]:
+            thread_name = current_thread().name
+            prover: Prover[P, PS, SR] | None = self._provers.get(thread_name)
+            if prover is None:
+                prover = self._create_prover()
+                self._provers[thread_name] = prover
+            return prover.step_proof(proof_step)
+
+        return step
 
 
 class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
