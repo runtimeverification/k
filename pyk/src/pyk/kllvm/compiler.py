@@ -97,13 +97,12 @@ def compile_runtime(
 # utility for generation of hints
 # -------------------------------
 
-HINTS_FILE_NAME: Final = 'hints.bin'
-
 
 def generate_hints(
     definition_dir: str | Path,
     input_kore_file: str | Path,
     target_dir: str | Path | None = None,
+    hints_file_name: str = 'hints.bin',
 ) -> Path:
     definition_dir = Path(definition_dir).resolve()
     check_dir_path(definition_dir)
@@ -120,7 +119,7 @@ def generate_hints(
     interpreter = definition_dir / 'interpreter'
     check_file_path(interpreter)
 
-    hints_file = target_dir / HINTS_FILE_NAME
+    hints_file = target_dir / hints_file_name
 
     args = [str(interpreter), str(input_kore_file), '-1', str(hints_file), '--proof-output']
     _LOGGER.info(f'Generating hints: {hints_file.name}')

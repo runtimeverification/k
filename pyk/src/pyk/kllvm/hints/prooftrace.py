@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, final
 
+import pyk.kllvm.load  # noqa: F401
 from _kllvm.prooftrace import (  # type: ignore  # noqa: F401
     LLVMREwriteEvent,
     llvm_function_event,
@@ -13,8 +14,7 @@ from _kllvm.prooftrace import (  # type: ignore  # noqa: F401
     llvm_side_condition_event,
     llvm_step_event,
 )
-
-from .ast import Pattern
+from ..ast import Pattern
 
 if TYPE_CHECKING:
     from _kllvm.prooftrace import Argument
