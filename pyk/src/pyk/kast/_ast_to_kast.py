@@ -19,8 +19,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 @singledispatch
 def _ast_to_kast(ast: AST, **kwargs: Any) -> KAst:
-    _LOGGER.error(f'Unimplemented conversion for {type(ast)}')
-    return None  # type: ignore
+    raise AssertionError(f'Unimplemented AST->KAst conversion for: {type(ast)}')
 
 
 @_ast_to_kast.register
@@ -58,5 +57,4 @@ def _att_to_katt(att: Att) -> KAtt:
 @singledispatch
 @_ast_to_kast.register
 def _sentence_to_ksentence(s: Sentence) -> KSentence:
-    _LOGGER.error(f'Unimplemented conversion for {type(s)}')
-    return None  # type: ignore
+    raise AssertionError(f'Unimplemented Sentence->KSentence conversion for: {type(s)}')
