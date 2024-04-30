@@ -1370,7 +1370,8 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         assert actual == expected
 
 
-class TestImpParallelProof(ParallelTest):
+class TestImpParallelProof(ParallelTest, KProveTest):
+    KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
         return ImpSemantics(definition)
