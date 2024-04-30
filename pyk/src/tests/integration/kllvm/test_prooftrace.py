@@ -2,8 +2,18 @@ from __future__ import annotations
 
 from typing import cast
 
+import pyk.kllvm.hints.prooftrace as prooftrace
 import pyk.kllvm.load  # noqa: F401
-import pyk.kllvm.prooftrace as prooftrace
+from pyk.kore.parser import KoreParser
+from pyk.kore.prelude import (
+    SORT_K_CONFIG_VAR,
+    SORT_K_ITEM,
+    SortApp,
+    init_generated_top_cell,
+    inj,
+    k_config_var,
+    map_pattern,
+)
 from pyk.testing import ProofTraceTest
 
 
@@ -20,17 +30,18 @@ class TestProofTrace(ProofTraceTest):
         endmodule
     """
     KOMPILE_MAIN_MODULE = 'TEST-PROOF-TRACE'
-    HINTS_INPUT_KORE = r"""
-        LblinitGeneratedTopCell{}(
-          Lbl'Unds'Map'Unds'{}(
-            Lbl'Stop'Map{}(),
-            Lbl'UndsPipe'-'-GT-Unds'{}(
-               inj{SortKConfigVar{}, SortKItem{}}(\dv{SortKConfigVar{}}("$PGM")),
-               inj{SortFoo{}, SortKItem{}}(Lbla'LParRParUnds'TEST-PROOF-TRACE-SYNTAX'Unds'Foo{}())
+
+    # kore_text = _kast(definition_dir=x, input='program', output='kore', expression="a()").stdout
+    program_pattern = KoreParser("Lbla\'LParRParUnds\'TEST-PROOF-TRACE-SYNTAX\'Unds\'Foo{}()").pattern()
+
+    HINTS_INPUT_KORE = init_generated_top_cell(
+        map_pattern(
+            (
+                inj(SORT_K_CONFIG_VAR, SORT_K_ITEM, k_config_var('$PGM')),
+                inj(SortApp('SortFoo'), SORT_K_ITEM, program_pattern),
             )
-          )
         )
-    """
+    ).text
 
     def test_proof_trace(self, hints: bytes) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints)
