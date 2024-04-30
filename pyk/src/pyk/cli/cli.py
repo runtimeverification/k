@@ -1,11 +1,21 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from argparse import ArgumentParser
-from enum import Enum
-from typing import Any, Generic, Iterable, TypeVar
+from argparse import ArgumentParser, FileType
+from pathlib import Path
+
+#  from enum import Enum
+from typing import IO, TYPE_CHECKING, Any, Iterable, TypeVar
+
+from ..utils import ensure_dir_path
 
 T = TypeVar('T')
+
+if TYPE_CHECKING:
+    from enum import EnumMeta
+
+    #      from argparse import _SubParsersAction
+    from types import UnionType
 
 
 class CLI:
@@ -23,54 +33,55 @@ class CLI:
         for command in self._commands:
             command_args = subparsers.add_parser(name=command.name, help=command.help_str)
             for option in command.options:
+                option.add_arg(command_args)
 
-                if option.type is bool and option.is_optional:
-                    command_args.add_argument(
-                        option.cmd_line_name,
-                        *(option.aliases),
-                        default='NoDefault',
-                        required=False,
-                        type=option.type,
-                        help=option.help_str,
-                        metavar=option.metavar,
-                        action='store_false' if option.default else 'store_true',
-                        dest=option.name,
-                    )
-                elif issubclass(option.type, Enum) and option.is_optional:
-                    command_args.add_argument(
-                        option.cmd_line_name,
-                        *(option.aliases),
-                        default='NoDefault',
-                        required=False,
-                        type=option.type,
-                        help=option.help_str,
-                        metavar=option.metavar,
-                        dest=option.name,
-                        choices=list(option.type),
-                    )
-                elif isinstance(option.type, Iterable) and option.is_optional:
-                    command_args.add_argument(
-                        option.cmd_line_name,
-                        *(option.aliases),
-                        default='NoDefault',
-                        required=False,
-                        type=option.type,
-                        help=option.help_str,
-                        metavar=option.metavar,
-                        action='append',
-                        dest=option.name,
-                    )
-                else:
-                    command_args.add_argument(
-                        option.cmd_line_name,
-                        *(option.aliases),
-                        default='NoDefault',
-                        required=(not option.is_optional),
-                        type=option.type,
-                        help=option.help_str,
-                        metavar=option.metavar,
-                        dest=option.name,
-                    )
+        #                  if option.type is bool and option.is_optional:
+        #                      command_args.add_argument(
+        #                          option.cmd_line_name,
+        #                          *(option.aliases),
+        #                          default='NoDefault',
+        #                          required=False,
+        #                          type=option.type,
+        #                          help=option.help_str,
+        #                          metavar=option.metavar,
+        #                          action='store_false' if option.default else 'store_true',
+        #                          dest=option.name,
+        #                      )
+        #                  elif issubclass(option.type, Enum) and option.is_optional:
+        #                      command_args.add_argument(
+        #                          option.cmd_line_name,
+        #                          *(option.aliases),
+        #                          default='NoDefault',
+        #                          required=False,
+        #                          type=option.type,
+        #                          help=option.help_str,
+        #                          metavar=option.metavar,
+        #                          dest=option.name,
+        #                          choices=list(option.type),
+        #                      )
+        #                  elif isinstance(option.type, Iterable) and option.is_optional:
+        #                      command_args.add_argument(
+        #                          option.cmd_line_name,
+        #                          *(option.aliases),
+        #                          default='NoDefault',
+        #                          required=False,
+        #                          type=option.type,
+        #                          help=option.help_str,
+        #                          metavar=option.metavar,
+        #                          action='append',
+        #                          dest=option.name,
+        #                      )
+        #                  else:
+        #                      command_args.add_argument(
+        #                          option.cmd_line_name,
+        #                          *(option.aliases),
+        #                          default='NoDefault',
+        #                          required=(not option.is_optional),
+        #                          type=option.type,
+        #                          help=option.help_str,
+        #                          metavar=option.metavar,
+        #                          dest=option.name,
+        #                      )
         return args
 
     def get_command(self, args: dict[str, Any]) -> Command:
@@ -89,7 +100,7 @@ class CLI:
         cmd.exec()
 
 
-class Option(Generic[T]):
+class Option:
     _name: str
     _aliases: list[str]
     _cmd_line_name: str
@@ -97,20 +108,18 @@ class Option(Generic[T]):
     _optional: bool
     _help_str: str | None
     _metavar: str | None
-    _default: T | str
-    _type: type[Any]
+    _default: Any
 
     def __init__(
         self,
         name: str,
-        type: type[Any],
         aliases: Iterable[str] = (),
         cmd_line_name: str | None = None,
         toml_name: str | None = None,
         optional: bool = False,
         help_str: str | None = None,
         metavar: str | None = None,
-        default: T | str = 'NoDefault',
+        default: Any = 'NoDefault',
     ) -> None:
         self._name = name
         self._aliases = list(aliases)
@@ -126,7 +135,10 @@ class Option(Generic[T]):
         if default != 'NoDefault' and not optional:
             raise ValueError(f'Required option {name} cannot take a default value.')
 
-        self._default = default
+        self.set_default(default)
+
+    @abstractmethod
+    def add_arg(self, parser: ArgumentParser) -> None: ...
 
     @property
     def is_optional(self) -> bool:
@@ -157,12 +169,161 @@ class Option(Generic[T]):
         return self._metavar
 
     @property
-    def default(self) -> T | str:
+    def default(self) -> Any:
         return self._default
 
+    @abstractmethod
+    def set_default(self, default: Any) -> None: ...
+
     @property
-    def type(self) -> type:
+    def type(self) -> type | UnionType:
         return self._type
+
+
+class IntOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, int)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=int,
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+        )
+
+
+class BoolOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, bool)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=bool,
+            help=self.help_str,
+            metavar=self.metavar,
+            action='store_false' if self.default else 'store_true',
+            dest=self.name,
+        )
+
+
+class StringOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, str)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=not self.is_optional,
+            type=bool,
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+        )
+
+
+class EnumOption(Option):
+    _enum_type: EnumMeta
+
+    def __init__(
+        self,
+        enum_type: EnumMeta,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        self._enum_type = enum_type
+        super.__init__(*args, **kwargs)
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, self._enum_type)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=self._enum_type,
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+            choices=list(self._enum_type),
+        )
+
+
+class WriteFileOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, IO)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=FileType('w'),
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+        )
+
+
+class DirPathOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, Path)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=ensure_dir_path,
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+        )
+
+
+class StringListOption(Option):
+
+    def set_default(self, default: Any) -> None:
+        assert isinstance(default, Iterable)
+        self._default = default
+
+    def add_arg(self, args: ArgumentParser) -> None:
+        args.add_argument(
+            self.cmd_line_name,
+            *(self.aliases),
+            default='NoDefault',
+            required=self.is_optional,
+            type=list[str],
+            help=self.help_str,
+            metavar=self.metavar,
+            dest=self.name,
+            action='append',
+        )
 
 
 class Command:
@@ -204,6 +365,9 @@ class OptionsGroup:
     def override_default(self, option_name: str, value: T) -> None:
         if not self._options[option_name].is_optional:
             raise ValueError(f'Cannot provide a default value for a required parameter: {option_name}')
+        if option_name not in self._options:
+            raise ValueError(f'Cannot find option with name: {option_name}')
+        self._options[option_name].set_default(value)
 
     @property
     def options(self) -> list[Option]:
