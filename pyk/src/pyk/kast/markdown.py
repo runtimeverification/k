@@ -20,6 +20,7 @@ def select_code_blocks(text: str, selector: str | None = None) -> str:
         tags = parse_tags(code_block.info)
         return _selector.eval(tags)
 
+    # TODO: Preserve line numbers from input text
     return '\n'.join(code_block.code for code_block in code_blocks(text) if selected(code_block))
 
 
