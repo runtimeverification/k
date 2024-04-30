@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
-from ..kast.manip import flatten_label, sort_ac_collections
+from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.rpc import (
@@ -243,7 +243,7 @@ class CTermSymbolic:
                 else:
                     consequent_constraints = list(
                         filter(
-                            lambda x: not CTerm._is_spurious_constraint(x),
+                            lambda x: not is_spurious_constraint(x),
                             map(config_match.subst, consequent.constraints),
                         )
                     )

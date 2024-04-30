@@ -1283,6 +1283,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             state=f'N |-> {abstracted_var.name}:Int',
             constraint=mlAnd(
                 [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(
                         orBool(
                             [
@@ -1301,9 +1304,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                             ]
                         )
                     ),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         )
