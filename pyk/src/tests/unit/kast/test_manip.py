@@ -9,6 +9,7 @@ from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, K
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
+    indexed_rewrite,
     is_term_like,
     minimize_term,
     ml_pred_to_bool,
@@ -518,3 +519,27 @@ IS_TERM_LIKE_TEST_DATA = [
 )
 def test_is_term_like(test_id: str, kast: KInner, expected: bool) -> None:
     assert is_term_like(kast) == expected
+
+
+INDEXED_REWRITE_TEST_DATA = [
+    ('empty', KApply('a'), [], KApply('a')),
+    ('apply', KApply('a'), [KRewrite(KApply('a'), KApply('b'))], KApply('b')),
+    ('token', KToken('0', 'Int'), [KRewrite(KToken('0', 'Int'), KToken('1', 'Int'))], KToken('1', 'Int')),
+    ('no_unification', KApply('a'), [KRewrite(KVariable('X', 'Int'), KApply('b'))], KApply('a')),
+    ('mismatch', KApply('a'), [KRewrite(KApply('b'), KApply('c'))], KApply('a')),
+    (
+        'issue_4297',
+        KApply('a', [KApply('c')]),
+        [KRewrite(KApply('a', [KApply('c')]), KApply('c')), KRewrite(KApply('a', [KApply('b')]), KApply('b'))],
+        KApply('c'),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    'test_id,kast,rewrites,expected',
+    INDEXED_REWRITE_TEST_DATA,
+    ids=[test_id for test_id, *_ in INDEXED_REWRITE_TEST_DATA],
+)
+def test_indexed_rewrite(test_id: str, kast: KInner, rewrites: list[KRewrite], expected: KInner) -> None:
+    assert indexed_rewrite(kast, rewrites) == expected
