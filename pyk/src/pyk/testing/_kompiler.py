@@ -202,14 +202,11 @@ class ServerType(Enum):
                 raise AssertionError()
 
 
-class KoreClientTest(KompiledTest):
+class KoreServerTest(KompiledTest):
     DISABLE_LEGACY: ClassVar = False
     DISABLE_BOOSTER: ClassVar = False
 
-    KOMPILE_BACKEND: ClassVar = 'haskell'
     LLVM_ARGS: ClassVar[dict[str, Any]] = {}
-
-    CLIENT_TIMEOUT: ClassVar = 1000
 
     @pytest.fixture(scope='class', params=['legacy', 'booster'])
     def server_type(self, request: FixtureRequest, use_server: UseServer) -> ServerType:
@@ -267,6 +264,11 @@ class KoreClientTest(KompiledTest):
             case _:
                 raise AssertionError
 
+
+class KoreClientTest(KoreServerTest):
+    KOMPILE_BACKEND: ClassVar = 'haskell'
+    CLIENT_TIMEOUT: ClassVar = 1000
+
     # definition_dir should ideally depend on server_type to avoid triggering kompilation,
     # but it can't due to method signature in superclass.
     # In the parameter list, always put `definition_dir` after `kore_client`.
@@ -302,7 +304,22 @@ class KCFGExploreTest(CTermSymbolicTest):
         yield KCFGExplore(cterm_symbolic, kcfg_semantics=semantics)
 
 
-class ParallelTest(KoreClientTest, ABC):
+class KoreClientFactoryTest(KoreServerTest):
+    KOMPILE_BACKEND: ClassVar = 'haskell'
+    CLIENT_TIMEOUT: ClassVar = 1000
+
+    # definition_dir should ideally depend on server_type to avoid triggering kompilation,
+    # but it can't due to method signature in superclass.
+    # In the parameter list, always put `definition_dir` after `kore_client`.
+    @pytest.fixture
+    def create_kore_client(self, _kore_server: KoreServer, bug_report: BugReport) -> Callable[[], KoreClient]:
+        def _create_kore_client() -> KoreClient:
+            return KoreClient('localhost', _kore_server.port, timeout=self.CLIENT_TIMEOUT, bug_report=bug_report)
+
+        return _create_kore_client
+
+
+class ParallelTest(KoreClientFactoryTest, ABC):
     CLIENT_TIMEOUT: ClassVar = 1000
 
     @abstractmethod
@@ -315,9 +332,10 @@ class ParallelTest(KoreClientTest, ABC):
         definition: KDefinition,
         bug_report: BugReport | None,
         kompiled_kore: KompiledKore,
+        create_kore_client: Callable[[], KoreClient],
     ) -> Callable[[int, Iterable[str]], APRProver]:
         def _create_prover(max_depth: int, cut_point_rules: Iterable[str]) -> APRProver:
-            kore_client = KoreClient('localhost', _kore_server.port, timeout=self.CLIENT_TIMEOUT, bug_report=bug_report)
+            kore_client = create_kore_client()
             ct_symb = CTermSymbolic(kore_client, definition, kompiled_kore)
             _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
             return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_point_rules)
