@@ -91,12 +91,8 @@ MINIMIZE_CONSTRAINTS_TEST_DATA: Final = (
         ),
         KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(10), KVariable('X')))]),
         (
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),
-            ),
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Z')))]),
-            ),
+            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),),
+            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Z')))]),),
         ),
     ),
 )
