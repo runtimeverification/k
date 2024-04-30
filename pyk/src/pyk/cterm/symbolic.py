@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from ..kast import KInner
     from ..kast.outer import KDefinition
     from ..kore.kompiled import KompiledKore
-    from ..kore.rpc import FallbackReason, LogEntry, State
+    from ..kore.rpc import FallbackReason, LogEntry
     from ..kore.syntax import Pattern
     from ..utils import BugReport
 
@@ -96,6 +96,28 @@ class CTermSymbolic:
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
 
+    def minimize_constraints(self, constraints: tuple[KInner, ...], pc: KInner) -> tuple[KInner, ...]:
+        """Minimize given branching constraints with respect to a given path condition."""
+        # Determine intersection between all returned sets of branching constraints
+        flattened_default = tuple(flatten_label('#And', c) for c in constraints)
+        intersection = flattened_default[0]
+        for i in range(1, len(flattened_default)):
+            intersection = [c for c in intersection if c in flattened_default[i]]
+            # If intersection is empty, there is nothing to be done
+            if not intersection:
+                return constraints
+        # Check if non-empty intersection is entailed by the path condition
+        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+        pc_cterm = CTerm(dummy_config, constraints=[pc])
+        intersection_cterm = CTerm(dummy_config, constraints=intersection)
+        implication_check = self.implies(pc_cterm, intersection_cterm, bind_universally=True)
+        # The intersection is not entailed, there is nothing to be done
+        if implication_check.csubst is None:
+            return constraints
+        # The intersection is entailed and can be filtered out of the branching constraints
+        else:
+            return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
+
     def execute(
         self,
         cterm: CTerm,
@@ -104,31 +126,6 @@ class CTermSymbolic:
         terminal_rules: Iterable[str] | None = None,
         module_name: str | None = None,
     ) -> CTermExecute:
-
-        def _minimize_branching_constraints(states: tuple[State, ...]) -> tuple[KInner | None, ...]:
-            default = tuple(self.kore_to_kast(not_none(s.rule_predicate)) if s is not None else None for s in states)
-            # Minimization makes sense only if there is a proper branching
-            if len(states) < 2 or any(s.rule_predicate is None for s in states):
-                return default
-            # Determine intersection between all returned sets of branching constraints
-            flattened_default = tuple(flatten_label('#And', not_none(s)) for s in default)
-            intersection = flattened_default[0]
-            for i in range(1, len(flattened_default)):
-                intersection = [c for c in intersection if c in flattened_default[i]]
-                # If intersection is empty, there is nothing to be done
-                if not intersection:
-                    return default
-            # Check if non-empty intersection is entailed by the current path condition
-            dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
-            pc_cterm = CTerm(dummy_config, constraints=cterm.constraints)
-            intersection_cterm = CTerm(dummy_config, constraints=intersection)
-            implication_check = self.implies(pc_cterm, intersection_cterm)
-            # The intersection is not entailed, there is nothing to be done
-            if implication_check.remaining_implication:
-                return default
-            # The intersection is entailed and can be filtered out of the branching constraints
-            else:
-                return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
 
         _LOGGER.debug(f'Executing: {cterm}')
         kore = self.kast_to_kore(cterm.kast)
@@ -153,7 +150,15 @@ class CTermSymbolic:
 
         state = CTerm.from_kast(self.kore_to_kast(response.state.kore))
         resp_next_states = response.next_states or ()
-        branching_constraints = _minimize_branching_constraints(resp_next_states)
+        branching_constraints = tuple(
+            self.kore_to_kast(not_none(s.rule_predicate)) if s.rule_predicate is not None else None
+            for s in resp_next_states
+        )
+        # Branch constraint minimization makes sense only if there is a proper branching
+        if len(branching_constraints) >= 2 and all(bc is not None for bc in branching_constraints):
+            branching_constraints = self.minimize_constraints(
+                tuple(not_none(bc) for bc in branching_constraints), pc=mlAnd(cterm.constraints)
+            )
         next_states = tuple(
             NextState(CTerm.from_kast(self.kore_to_kast(ns.kore)), c)
             for ns, c in zip(resp_next_states, branching_constraints, strict=True)
