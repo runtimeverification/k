@@ -8,8 +8,15 @@ from typing import TYPE_CHECKING
 
 from graphviz import Digraph
 
-from .cli.args import DefinitionOptionsGroup, LoggingOptionsGroup, OutputFileOptionsGroup
-from .cli.cli import CLI, Command, ReadFileOption
+from .cli.args import (
+    DefinitionOptionsGroup,
+    KDefinitionOptionsGroup,
+    KompileOptionsGroup,
+    LoggingOptionsGroup,
+    OutputFileOptionsGroup,
+    WarningOptionsGroup,
+)
+from .cli.cli import CLI, Command, DirPathOption, EnumOption, ReadFileOption, StringOption
 from .cli.pyk import PrintInput
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
@@ -27,6 +34,7 @@ from .kast.pretty import PrettyPrinter
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
+from .ktool._ktool import TypeInferenceMode
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
 from .ktool.kprove import KProve
@@ -40,16 +48,7 @@ from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 if TYPE_CHECKING:
     from typing import IO, Any, Final
 
-    from .cli.pyk import (
-        GraphImportsOptions,
-        KompileCommandOptions,
-        PrintOptions,
-        ProveLegacyOptions,
-        ProveOptions,
-        RPCKastOptions,
-        RPCPrintOptions,
-        RunOptions,
-    )
+    from .cli.pyk import PrintOptions, ProveLegacyOptions, ProveOptions, RPCKastOptions, RPCPrintOptions
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -269,94 +268,303 @@ def exec_show(options: ProveOptions) -> None:
     exec_prove(options)
 
 
-def exec_kompile(options: KompileCommandOptions) -> None:
-    main_file = Path(options.main_file)
-    check_file_path(main_file)
+#  class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
+#      definition_dir: Path | None
+#      main_file: str
+#      backend: KompileBackend
+#      type_inference_mode: TypeInferenceMode | None
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'definition_dir': None,
+#              'backend': KompileBackend.LLVM,
+#              'type_inference_mode': None,
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              KDefinitionOptions.from_option_string()
+#              | KompileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#              | {'definition': 'definition_dir'}
+#          )
 
-    kompiled_directory: Path
-    if options.definition_dir is None:
-        kompiled_directory = Path(f'{main_file.stem}-kompiled')
-        ensure_dir_path(kompiled_directory)
-    else:
-        kompiled_directory = options.definition_dir
 
-    kompile_dict: dict[str, Any] = {
-        'main_file': main_file,
-        'backend': options.backend.value,
-        'syntax_module': options.syntax_module,
-        'main_module': options.main_module,
-        'md_selector': options.md_selector,
-        'include_dirs': (Path(include) for include in options.includes),
-        'emit_json': options.emit_json,
-        'coverage': options.coverage,
-        'gen_bison_parser': options.gen_bison_parser,
-        'gen_glr_bison_parser': options.gen_glr_bison_parser,
-        'bison_lists': options.bison_lists,
-    }
-    if options.backend == KompileBackend.LLVM:
-        kompile_dict['ccopts'] = options.ccopts
-        kompile_dict['enable_search'] = options.enable_search
-        kompile_dict['llvm_kompile_type'] = options.llvm_kompile_type
-        kompile_dict['llvm_kompile_output'] = options.llvm_kompile_output
-        kompile_dict['llvm_proof_hint_instrumentation'] = options.llvm_proof_hint_instrumentation
-    elif len(options.ccopts) > 0:
-        raise ValueError(f'Option `-ccopt` requires `--backend llvm`, not: --backend {options.backend.value}')
-    elif options.enable_search:
-        raise ValueError(f'Option `--enable-search` requires `--backend llvm`, not: --backend {options.backend.value}')
-    elif options.llvm_kompile_type:
-        raise ValueError(
-            f'Option `--llvm-kompile-type` requires `--backend llvm`, not: --backend {options.backend.value}'
+class KompileCommandOptionsGroup(
+    LoggingOptionsGroup, WarningOptionsGroup, KDefinitionOptionsGroup, KompileOptionsGroup
+):
+    definition_dir: Path | None
+    main_file: str
+    backend: KompileBackend
+    type_inference_mode: TypeInferenceMode | None
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(
+            DirPathOption(
+                name='definition_dir',
+                cmd_line_name='--output-definition',
+                aliases=['--definition'],
+                toml_name='definition',
+                default=None,
+                help_str='Path to kompile definition to.',
+                optional=True,
+            )
         )
-    elif options.llvm_kompile_output:
-        raise ValueError(
-            f'Option `--llvm-kompile-output` requires `--backend llvm`, not: --backend {options.backend.value}'
+        self.add_option(
+            StringOption(
+                name='main_file',
+                optional=False,
+                help_str='File with the specification module.',
+            )
         )
-    elif options.llvm_proof_hint_instrumentation:
-        raise ValueError(
-            f'Option `--llvm-proof-hint-intrumentation` requires `--backend llvm`, not: --backend {options.backend.value}'
+        self.add_option(
+            EnumOption(
+                enum_type=KompileBackend,
+                name='backend',
+                cmd_line_name='--backend',
+                default=KompileBackend.LLVM,
+                help_str='K backend to target with compilation.',
+                optional=True,
+            )
+        )
+        self.add_option(
+            EnumOption(
+                enum_type=TypeInferenceMode,
+                name='type_inference_mode',
+                cmd_line_name='--type-inference-mode',
+                default=None,
+                help_str='Mode for doing K rule type inference in.',
+                optional=True,
+            )
         )
 
-    try:
-        Kompile.from_dict(kompile_dict)(
-            output_dir=kompiled_directory,
-            type_inference_mode=options.type_inference_mode,
-            warnings=options.warnings,
-            warnings_to_errors=options.warnings_to_errors,
-            no_exc_wrap=options.no_exc_wrap,
+
+class KompileCommand(Command[KompileCommandOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('kompile', 'Kompile the K specification', KompileCommandOptionsGroup())
+
+    def exec(self) -> None:
+        main_file = Path(self.options.main_file)
+        check_file_path(main_file)
+
+        kompiled_directory: Path
+        if self.options.definition_dir is None:
+            kompiled_directory = Path(f'{main_file.stem}-kompiled')
+            ensure_dir_path(kompiled_directory)
+        else:
+            kompiled_directory = self.options.definition_dir
+
+        kompile_dict: dict[str, Any] = {
+            'main_file': main_file,
+            'backend': self.options.backend.value,
+            'syntax_module': self.options.syntax_module,
+            'main_module': self.options.main_module,
+            'md_selector': self.options.md_selector,
+            'include_dirs': (Path(include) for include in self.options.includes),
+            'emit_json': self.options.emit_json,
+            'coverage': self.options.coverage,
+            'gen_bison_parser': self.options.gen_bison_parser,
+            'gen_glr_bison_parser': self.options.gen_glr_bison_parser,
+            'bison_lists': self.options.bison_lists,
+        }
+        if self.options.backend == KompileBackend.LLVM:
+            kompile_dict['ccopts'] = self.options.ccopts
+            kompile_dict['enable_search'] = self.options.enable_search
+            kompile_dict['llvm_kompile_type'] = self.options.llvm_kompile_type
+            kompile_dict['llvm_kompile_output'] = self.options.llvm_kompile_output
+            kompile_dict['llvm_proof_hint_instrumentation'] = self.options.llvm_proof_hint_instrumentation
+        elif len(self.options.ccopts) > 0:
+            raise ValueError(f'Option `-ccopt` requires `--backend llvm`, not: --backend {self.options.backend.value}')
+        elif self.options.enable_search:
+            raise ValueError(
+                f'Option `--enable-search` requires `--backend llvm`, not: --backend {self.options.backend.value}'
+            )
+        elif self.options.llvm_kompile_type:
+            raise ValueError(
+                f'Option `--llvm-kompile-type` requires `--backend llvm`, not: --backend {self.options.backend.value}'
+            )
+        elif self.options.llvm_kompile_output:
+            raise ValueError(
+                f'Option `--llvm-kompile-output` requires `--backend llvm`, not: --backend {self.options.backend.value}'
+            )
+        elif self.options.llvm_proof_hint_instrumentation:
+            raise ValueError(
+                f'Option `--llvm-proof-hint-intrumentation` requires `--backend llvm`, not: --backend {self.options.backend.value}'
+            )
+
+        try:
+            Kompile.from_dict(kompile_dict)(
+                output_dir=kompiled_directory,
+                type_inference_mode=self.options.type_inference_mode,
+                warnings=self.options.warnings,
+                warnings_to_errors=self.options.warnings_to_errors,
+                no_exc_wrap=self.options.no_exc_wrap,
+            )
+        except RuntimeError as err:
+            _, _, _, _, cpe = err.args
+            exit_with_process_error(cpe)
+
+
+#  def exec_kompile(options: KompileCommandOptions) -> None:
+#      main_file = Path(options.main_file)
+#      check_file_path(main_file)
+#
+#      kompiled_directory: Path
+#      if options.definition_dir is None:
+#          kompiled_directory = Path(f'{main_file.stem}-kompiled')
+#          ensure_dir_path(kompiled_directory)
+#      else:
+#          kompiled_directory = options.definition_dir
+#
+#      kompile_dict: dict[str, Any] = {
+#          'main_file': main_file,
+#          'backend': options.backend.value,
+#          'syntax_module': options.syntax_module,
+#          'main_module': options.main_module,
+#          'md_selector': options.md_selector,
+#          'include_dirs': (Path(include) for include in options.includes),
+#          'emit_json': options.emit_json,
+#          'coverage': options.coverage,
+#          'gen_bison_parser': options.gen_bison_parser,
+#          'gen_glr_bison_parser': options.gen_glr_bison_parser,
+#          'bison_lists': options.bison_lists,
+#      }
+#      if options.backend == KompileBackend.LLVM:
+#          kompile_dict['ccopts'] = options.ccopts
+#          kompile_dict['enable_search'] = options.enable_search
+#          kompile_dict['llvm_kompile_type'] = options.llvm_kompile_type
+#          kompile_dict['llvm_kompile_output'] = options.llvm_kompile_output
+#          kompile_dict['llvm_proof_hint_instrumentation'] = options.llvm_proof_hint_instrumentation
+#      elif len(options.ccopts) > 0:
+#          raise ValueError(f'Option `-ccopt` requires `--backend llvm`, not: --backend {options.backend.value}')
+#      elif options.enable_search:
+#          raise ValueError(f'Option `--enable-search` requires `--backend llvm`, not: --backend {options.backend.value}')
+#      elif options.llvm_kompile_type:
+#          raise ValueError(
+#              f'Option `--llvm-kompile-type` requires `--backend llvm`, not: --backend {options.backend.value}'
+#          )
+#      elif options.llvm_kompile_output:
+#          raise ValueError(
+#              f'Option `--llvm-kompile-output` requires `--backend llvm`, not: --backend {options.backend.value}'
+#          )
+#      elif options.llvm_proof_hint_instrumentation:
+#          raise ValueError(
+#              f'Option `--llvm-proof-hint-intrumentation` requires `--backend llvm`, not: --backend {options.backend.value}'
+#          )
+#
+#      try:
+#          Kompile.from_dict(kompile_dict)(
+#              output_dir=kompiled_directory,
+#              type_inference_mode=options.type_inference_mode,
+#              warnings=options.warnings,
+#              warnings_to_errors=options.warnings_to_errors,
+#              no_exc_wrap=options.no_exc_wrap,
+#          )
+#      except RuntimeError as err:
+#          _, _, _, _, cpe = err.args
+#          exit_with_process_error(cpe)
+
+
+#  class RunOptions(LoggingOptions):
+#      pgm_file: str
+#      definition_dir: Path | None
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'definition_dir': None,
+#          }
+
+
+class RunOptionsGroup(LoggingOptionsGroup):
+    pgm_file: str
+    definition_dir: Path | None
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(StringOption(name='pgm_file', optional=False, help_str='File program to run in it.'))
+        self.add_option(
+            DirPathOption(
+                name='definition_dir',
+                cmd_line_name='--definition',
+                optional=False,
+                help_str='Path to definition to use.',
+            )
         )
-    except RuntimeError as err:
-        _, _, _, _, cpe = err.args
-        exit_with_process_error(cpe)
 
 
-def exec_run(options: RunOptions) -> None:
-    pgm_file = Path(options.pgm_file)
-    check_file_path(pgm_file)
-    kompiled_directory: Path
-    if options.definition_dir is None:
-        kompiled_directory = Kompile.default_directory()
-        _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
-    else:
-        kompiled_directory = options.definition_dir
-    krun = KRun(kompiled_directory)
-    rc, res = krun.krun(pgm_file)
-    print(krun.pretty_print(res))
-    sys.exit(rc)
+class RunCommand(Command[RunOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('run', 'Run a given program using the K definition.', RunOptionsGroup())
+
+    def exec(self) -> None:
+        pgm_file = Path(self.options.pgm_file)
+        check_file_path(pgm_file)
+        kompiled_directory: Path
+        if self.options.definition_dir is None:
+            kompiled_directory = Kompile.default_directory()
+            _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
+        else:
+            kompiled_directory = self.options.definition_dir
+        krun = KRun(kompiled_directory)
+        rc, res = krun.krun(pgm_file)
+        print(krun.pretty_print(res))
+        sys.exit(rc)
 
 
-def exec_graph_imports(options: GraphImportsOptions) -> None:
-    kompiled_dir: Path = options.definition_dir
-    kprinter = KPrint(kompiled_dir)
-    definition = kprinter.definition
-    import_graph = Digraph()
-    graph_file = kompiled_dir / 'import-graph'
-    for module in definition.modules:
-        module_name = module.name
-        import_graph.node(module_name)
-        for module_import in module.imports:
-            import_graph.edge(module_name, module_import.name)
-    import_graph.render(graph_file)
-    _LOGGER.info(f'Wrote file: {graph_file}')
+#  def exec_run(options: RunOptions) -> None:
+#      pgm_file = Path(options.pgm_file)
+#      check_file_path(pgm_file)
+#      kompiled_directory: Path
+#      if options.definition_dir is None:
+#          kompiled_directory = Kompile.default_directory()
+#          _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
+#      else:
+#          kompiled_directory = options.definition_dir
+#      krun = KRun(kompiled_directory)
+#      rc, res = krun.krun(pgm_file)
+#      print(krun.pretty_print(res))
+#      sys.exit(rc)
+
+
+class GraphImportsOptionsGroup(DefinitionOptionsGroup, LoggingOptionsGroup): ...
+
+
+class GraphImportsCommand(Command[GraphImportsOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('graph-imports', 'Graph the imports of a given definition', GraphImportsOptionsGroup())
+
+    def exec(self) -> None:
+        kompiled_dir: Path = self.options.definition_dir
+        kprinter = KPrint(kompiled_dir)
+        definition = kprinter.definition
+        import_graph = Digraph()
+        graph_file = kompiled_dir / 'import-graph'
+        for module in definition.modules:
+            module_name = module.name
+            import_graph.node(module_name)
+            for module_import in module.imports:
+                import_graph.edge(module_name, module_import.name)
+        import_graph.render(graph_file)
+        _LOGGER.info(f'Wrote file: {graph_file}')
+
+
+#  def exec_graph_imports(options: GraphImportsOptions) -> None:
+#      kompiled_dir: Path = options.definition_dir
+#      kprinter = KPrint(kompiled_dir)
+#      definition = kprinter.definition
+#      import_graph = Digraph()
+#      graph_file = kompiled_dir / 'import-graph'
+#      for module in definition.modules:
+#          module_name = module.name
+#          import_graph.node(module_name)
+#          for module_import in module.imports:
+#              import_graph.edge(module_name, module_import.name)
+#      import_graph.render(graph_file)
+#      _LOGGER.info(f'Wrote file: {graph_file}')
 
 
 class CoverageOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, LoggingOptionsGroup):

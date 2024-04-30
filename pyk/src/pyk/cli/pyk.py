@@ -5,7 +5,6 @@ from argparse import ArgumentParser, FileType
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
 
-from ..ktool.kompile import KompileBackend
 from .args import (
     ConfigArgs,
     DefinitionOptions,
@@ -17,7 +16,6 @@ from .args import (
     OutputFileOptions,
     SaveDirOptions,
     SpecOptions,
-    WarningOptions,
 )
 from .utils import dir_path
 
@@ -90,7 +88,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 #              option_string_destinations = KompileCommandOptions.from_option_string()
 #          case 'run':
 #              option_string_destinations = RunOptions.from_option_string()
-#  
+#
 #      if option_string in option_string_destinations:
 #          return option_string_destinations[option_string]
 #      else:
@@ -120,10 +118,10 @@ class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
         )
 
 
-class GraphImportsOptions(DefinitionOptions, LoggingOptions):
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return DefinitionOptions.from_option_string() | LoggingOptions.from_option_string()
+#  class GraphImportsOptions(DefinitionOptions, LoggingOptions):
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return DefinitionOptions.from_option_string() | LoggingOptions.from_option_string()
 
 
 class RPCKastOptions(OutputFileOptions, LoggingOptions):
@@ -194,28 +192,29 @@ class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
         )
 
 
-class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
-    definition_dir: Path | None
-    main_file: str
-    backend: KompileBackend
-    type_inference_mode: TypeInferenceMode | None
-
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'definition_dir': None,
-            'backend': KompileBackend.LLVM,
-            'type_inference_mode': None,
-        }
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return (
-            KDefinitionOptions.from_option_string()
-            | KompileOptions.from_option_string()
-            | LoggingOptions.from_option_string()
-            | {'definition': 'definition_dir'}
-        )
+#  class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
+#      definition_dir: Path | None
+#      main_file: str
+#      backend: KompileBackend
+#      type_inference_mode: TypeInferenceMode | None
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'definition_dir': None,
+#              'backend': KompileBackend.LLVM,
+#              'type_inference_mode': None,
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              KDefinitionOptions.from_option_string()
+#              | KompileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#              | {'definition': 'definition_dir'}
+#          )
+#
 
 
 class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
@@ -249,15 +248,15 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
         )
 
 
-class RunOptions(LoggingOptions):
-    pgm_file: str
-    definition_dir: Path | None
-
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'definition_dir': None,
-        }
+#  class RunOptions(LoggingOptions):
+#      pgm_file: str
+#      definition_dir: Path | None
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'definition_dir': None,
+#          }
 
 
 def create_argument_parser() -> ArgumentParser:
@@ -416,7 +415,7 @@ def create_argument_parser() -> ArgumentParser:
 #          elif len(profile_list) == 1:
 #              return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
 #          return get_profile(toml_profile[profile_list[0]], profile_list[1:])
-#  
+#
 #      toml_args = {}
 #      if args.config_file.is_file():
 #          with open(args.config_file, 'rb') as config_file:
@@ -426,7 +425,7 @@ def create_argument_parser() -> ArgumentParser:
 #                  _LOGGER.error(
 #                      'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
 #                  )
-#  
+#
 #      toml_args = (
 #          get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
 #      )
@@ -440,5 +439,5 @@ def create_argument_parser() -> ArgumentParser:
 #              level = level if toml_args[k] <= 3 else 3
 #              del toml_args[k]
 #              toml_args['-o' + str(level)] = 'true'
-#  
+#
 #      return toml_args

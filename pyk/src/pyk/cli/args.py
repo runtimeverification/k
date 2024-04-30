@@ -65,6 +65,9 @@ class LoggingOptions(Options):
 
 
 class WarningOptionsGroup(OptionsGroup):
+    warnings: Warnings | None
+    warnings_to_errors: bool
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
@@ -174,6 +177,11 @@ class DisplayOptions(Options):
 
 
 class KDefinitionOptionsGroup(OptionsGroup):
+    includes: list[str]
+    main_module: str
+    syntax_module: str
+    md_selector: str
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
@@ -338,6 +346,26 @@ class SpecOptions(SaveDirOptions):
 
 
 class KompileOptionsGroup(OptionsGroup):
+    emit_json: bool
+    llvm_kompile: bool
+    llvm_library: bool
+    enable_llvm_debug: bool
+    llvm_kompile_type: LLVMKompileType
+    llvm_kompile_output: Path
+    llvm_proof_hint_instrumentation: bool
+    read_only: bool
+    o0: bool
+    o1: bool
+    o2: bool
+    o3: bool
+    ccopts: list[str]
+    enable_search: bool
+    coverage: bool
+    gen_bison_parser: bool
+    gen_glr_bison_parser: bool
+    bison_lists: bool
+    no_exc_wrap: bool
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
