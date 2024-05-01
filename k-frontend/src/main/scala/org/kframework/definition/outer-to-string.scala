@@ -75,11 +75,7 @@ trait NonTerminalToString {
 trait RegexTerminalToString {
   self: RegexTerminal =>
   override def toString =
-    "r" + StringUtil.enquoteKString(
-      (if ("#" == precedeRegex) "" else "(?<!" + precedeRegex + ")") +
-        regex +
-        (if ("#" == followRegex) "" else "(?!" + followRegex + ")")
-    )
+    "r" + StringUtil.enquoteKString(regex)
 }
 
 trait SyntaxAssociativityToString {
