@@ -161,9 +161,15 @@ class DefinitionOptions(Options):
 
 
 class DisplayOptionsGroup(OptionsGroup):
+    minimize: bool
+
     def __init__(self) -> None:
         super().__init__()
-        self.add_option(BoolOption(name='minimize', optional=True, default=True, help_str='Minimize output.'))
+        self.add_option(
+            BoolOption(
+                name='minimize', cmd_line_name='--minimize', optional=True, default=True, help_str='Minimize output.'
+            )
+        )
 
 
 class DisplayOptions(Options):

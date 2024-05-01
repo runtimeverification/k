@@ -3,9 +3,9 @@ from __future__ import annotations
 import logging
 from argparse import ArgumentParser, FileType
 from enum import Enum
-from typing import IO, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from .args import ConfigArgs, DefinitionOptions, DisplayOptions, KCLIArgs, LoggingOptions, OutputFileOptions
+from .args import ConfigArgs, KCLIArgs
 from .utils import dir_path
 
 #  import tomli
@@ -91,16 +91,16 @@ class PrintInput(Enum):
 #  class KoreToJsonOptions(LoggingOptions): ...
 
 
-class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
-    coverage_file: IO[Any]
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return (
-            DefinitionOptions.from_option_string()
-            | OutputFileOptions.from_option_string()
-            | LoggingOptions.from_option_string()
-        )
+#  class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
+#      coverage_file: IO[Any]
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              DefinitionOptions.from_option_string()
+#              | OutputFileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#          )
 
 
 #  class GraphImportsOptions(DefinitionOptions, LoggingOptions):
@@ -109,50 +109,50 @@ class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
 #          return DefinitionOptions.from_option_string() | LoggingOptions.from_option_string()
 
 
-class RPCKastOptions(OutputFileOptions, LoggingOptions):
-    reference_request_file: IO[Any]
-    response_file: IO[Any]
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return OutputFileOptions.from_option_string() | LoggingOptions.from_option_string()
-
-
-class RPCPrintOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
-    input_file: IO[Any]
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return (
-            DefinitionOptions.from_option_string()
-            | OutputFileOptions.from_option_string()
-            | LoggingOptions.from_option_string()
-        )
-
-
-class PrintOptions(DefinitionOptions, OutputFileOptions, DisplayOptions, LoggingOptions):
-    term: IO[Any]
-    input: PrintInput
-    minimize: bool
-    omit_labels: str | None
-    keep_cells: str | None
-
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'input': PrintInput.KAST_JSON,
-            'omit_labels': None,
-            'keep_cells': None,
-        }
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return (
-            DefinitionOptions.from_option_string()
-            | OutputFileOptions.from_option_string()
-            | DisplayOptions.from_option_string()
-            | LoggingOptions.from_option_string()
-        )
+#  class RPCKastOptions(OutputFileOptions, LoggingOptions):
+#      reference_request_file: IO[Any]
+#      response_file: IO[Any]
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return OutputFileOptions.from_option_string() | LoggingOptions.from_option_string()
+#
+#
+#  class RPCPrintOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
+#      input_file: IO[Any]
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              DefinitionOptions.from_option_string()
+#              | OutputFileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#          )
+#
+#
+#  class PrintOptions(DefinitionOptions, OutputFileOptions, DisplayOptions, LoggingOptions):
+#      term: IO[Any]
+#      input: PrintInput
+#      minimize: bool
+#      omit_labels: str | None
+#      keep_cells: str | None
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'input': PrintInput.KAST_JSON,
+#              'omit_labels': None,
+#              'keep_cells': None,
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              DefinitionOptions.from_option_string()
+#              | OutputFileOptions.from_option_string()
+#              | DisplayOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#          )
 
 
 #  class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
