@@ -22,7 +22,7 @@ public class HaskellKompileOptions {
       names = "--no-haskell-binary",
       description =
           "Use the textual KORE format in the haskell backend instead of the binary KORE format."
-              + " This flag is enabled by default and cannot be disabled when running on macOS because of a bug in the underlying Haskell libraries.",
+              + " This flag is disabled by default, except when running on macOS, where it is enabled and cannot be disabled because of a bug in the underlying Haskell libraries.",
       hidden = true)
   public boolean noHaskellBinary = false;
 }
