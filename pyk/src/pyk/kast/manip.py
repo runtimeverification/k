@@ -614,7 +614,7 @@ def indexed_rewrite(kast: KInner, rewrites: Iterable[KRewrite]) -> KInner:
         if type(r.lhs) is KToken:
             token_rewrites.append(r)
         elif type(r.lhs) is KApply:
-            if r.lhs.label.name in token_rewrites:
+            if r.lhs.label.name in apply_rewrites:
                 apply_rewrites[r.lhs.label.name].append(r)
             else:
                 apply_rewrites[r.lhs.label.name] = [r]
