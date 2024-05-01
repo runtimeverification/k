@@ -261,9 +261,7 @@ public class KILtoKORE extends KILTransformation<Object> {
               throw new AssertionError("Lists should have applied before.");
             } else if (it instanceof Lexical) {
               String regex = ((Lexical) it).getLexicalRule();
-              RegexTerminal regexTerminal = getRegexTerminal(regex);
-
-              items.add(regexTerminal);
+              items.add(RegexTerminal(regex));
             } else if (it instanceof Terminal) {
               items.add(Terminal(((Terminal) it).getTerminal()));
             } else {
@@ -303,35 +301,6 @@ public class KILtoKORE extends KILTransformation<Object> {
       }
     }
     return res;
-  }
-
-  public static RegexTerminal getRegexTerminal(String regex) {
-    String precede = "#";
-    if (regex.startsWith("(?<!")) { // find the precede pattern in the beginning: (?<!X)
-      int depth = 1;
-      for (int i = 1; i < regex.length(); i++) {
-        if (regex.charAt(i) == '\\') {
-          i++;
-          continue;
-        }
-        if (regex.charAt(i) == '(') depth++;
-        if (regex.charAt(i) == ')') depth--;
-        if (depth == 0) {
-          precede = regex.substring("(?<!".length(), i);
-          regex = regex.substring(i + 1);
-          break;
-        }
-      }
-    }
-    String follow = "#";
-    int followIndex = regex.lastIndexOf("(?!");
-    if (followIndex != -1 && regex.endsWith(")")) { // find the follow pattern at the end: (?!X)
-      if (!(followIndex > 0 && regex.charAt(followIndex - 1) == '\\')) {
-        follow = regex.substring(followIndex + "(?!".length(), regex.length() - 1);
-        regex = regex.substring(0, followIndex);
-      }
-    }
-    return RegexTerminal(precede, regex, follow);
   }
 
   public void applyUserList(

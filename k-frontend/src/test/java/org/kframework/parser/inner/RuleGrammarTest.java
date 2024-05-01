@@ -15,13 +15,11 @@ import org.junit.Test;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.RegexTerminal;
 import org.kframework.kompile.DefinitionParsing;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
-import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.GlobalOptions.Warnings;
 import org.kframework.parser.ParserUtils;
@@ -345,26 +343,6 @@ public class RuleGrammarTest {
             + "syntax K "
             + "endmodule";
     parseRule("Divide(K1:K, K2:K) => K1:K / K2:K", def, 0, false);
-  }
-
-  // test lexical to RegexTerminal extractor
-  @Test
-  public void test16() {
-    assertPatterns("", "#", "", "#");
-    assertPatterns("abc", "#", "abc", "#");
-    assertPatterns("(?<!abc)", "abc", "", "#");
-    assertPatterns("(?<!abc)def", "abc", "def", "#");
-    assertPatterns("(?<!abcdef", "#", "(?<!abcdef", "#");
-    assertPatterns("(?!abc)", "#", "", "abc");
-    assertPatterns("\\(?!abc)", "#", "\\(?!abc)", "#");
-  }
-
-  private static void assertPatterns(
-      String original, String precede, String pattern, String follow) {
-    RegexTerminal re1 = KILtoKORE.getRegexTerminal(original);
-    Assert.assertEquals(precede, re1.precedeRegex());
-    Assert.assertEquals(pattern, re1.regex());
-    Assert.assertEquals(follow, re1.followRegex());
   }
 
   // test the new regex engine
