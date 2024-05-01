@@ -50,7 +50,7 @@ class CLI:
         args = parser.parse_args()
         stripped_args = {key: val for (key, val) in vars(args).items() if val != 'NoDefault'}
         cmd = self.get_command(stripped_args)
-        cmd.extract(stripped_args)
+        cmd._options_group.extract(stripped_args)
         cmd.exec()
 
 
@@ -323,15 +323,6 @@ class Command(Generic[OG]):
     _name: str
     _help_str: str
 
-    def extract(self, args: dict[str, Any]) -> None:
-        for option in self._options_group.options:
-            if option.name in args:
-                assert isinstance(args[option.name], option.type)
-                self.__setattr__(option.name, args[option.name])
-            # TODO elif option exists in TOML file, set it to the value from there
-            else:
-                self.__setattr__(option.name, option.default)
-
     def __init__(self, name: str, help_str: str, options_group: OG) -> None:
         self._name = name
         self._help_str = help_str
@@ -355,6 +346,15 @@ class Command(Generic[OG]):
 
 class OptionsGroup:
     _options: dict[str, Option]
+
+    def extract(self, args: dict[str, Any]) -> None:
+        for option in self.options:
+            if option.name in args:
+                assert isinstance(args[option.name], option.type)
+                self.__setattr__(option.name, args[option.name])
+            # TODO elif option exists in TOML file, set it to the value from there
+            else:
+                self.__setattr__(option.name, option.default)
 
     def add_option(self, option: Option) -> None:
         self._options[option.name] = option

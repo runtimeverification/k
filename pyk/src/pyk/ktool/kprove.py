@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from subprocess import CompletedProcess
     from typing import Final
 
-    from ..cli.pyk import ProveOptions
+    from ..__main__ import ProveOptionsGroup
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
     from ..kcfg.semantics import KCFGSemantics
@@ -350,7 +350,7 @@ class KProve(KPrint):
 
     def prove_rpc(
         self,
-        options: ProveOptions,
+        options: ProveOptionsGroup,
         kcfg_semantics: KCFGSemantics | None = None,
         id: str | None = None,
         port: int | None = None,

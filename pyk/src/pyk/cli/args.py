@@ -248,6 +248,9 @@ class KDefinitionOptions(Options):
 
 
 class SaveDirOptionsGroup(OptionsGroup):
+    save_directory: Path | None
+    temp_directory: Path | None
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
@@ -283,6 +286,11 @@ class SaveDirOptions(Options):
 
 
 class SpecOptionsGroup(OptionsGroup):
+    spec_file: Path
+    spec_module: str | None
+    claim_labels: Iterable[str] | None
+    exclude_claim_labels: Iterable[str] | None
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(

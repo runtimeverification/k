@@ -5,29 +5,14 @@ from argparse import ArgumentParser, FileType
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
 
-from .args import (
-    ConfigArgs,
-    DefinitionOptions,
-    DisplayOptions,
-    KCLIArgs,
-    KDefinitionOptions,
-    KompileOptions,
-    LoggingOptions,
-    OutputFileOptions,
-    SaveDirOptions,
-    SpecOptions,
-)
+from .args import ConfigArgs, DefinitionOptions, DisplayOptions, KCLIArgs, LoggingOptions, OutputFileOptions
 from .utils import dir_path
 
 #  import tomli
 
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from pathlib import Path
     from typing import Final
-
-    from pyk.ktool import TypeInferenceMode
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -170,26 +155,26 @@ class PrintOptions(DefinitionOptions, OutputFileOptions, DisplayOptions, Logging
         )
 
 
-class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
-    main_file: Path
-    spec_file: Path
-    spec_module: str
-    k_args: Iterable[str]
-
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'k_args': [],
-        }
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return (
-            DefinitionOptions.from_option_string()
-            | OutputFileOptions.from_option_string()
-            | LoggingOptions.from_option_string()
-            | {'kArgs': 'k_args'}
-        )
+#  class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
+#      main_file: Path
+#      spec_file: Path
+#      spec_module: str
+#      k_args: Iterable[str]
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'k_args': [],
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              DefinitionOptions.from_option_string()
+#              | OutputFileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#              | {'kArgs': 'k_args'}
+#          )
 
 
 #  class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
@@ -217,35 +202,35 @@ class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
 #
 
 
-class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
-    definition_dir: Path | None
-    type_inference_mode: TypeInferenceMode | None
-    failure_info: bool
-    kore_rpc_command: str | Iterable[str] | None
-    max_depth: int | None
-    max_iterations: int | None
-    show_kcfg: bool
-
-    @staticmethod
-    def default() -> dict[str, Any]:
-        return {
-            'definition_dir': None,
-            'type_inference_mode': None,
-            'failure_info': False,
-            'kore_rpc_command': None,
-            'max_depth': None,
-            'max_iterations': None,
-            'show_kcfg': False,
-        }
-
-    @staticmethod
-    def from_option_string() -> dict[str, str]:
-        return (
-            KDefinitionOptions.from_option_string()
-            | KompileOptions.from_option_string()
-            | LoggingOptions.from_option_string()
-            | {'definition': 'definition_dir'}
-        )
+#  class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
+#      definition_dir: Path | None
+#      type_inference_mode: TypeInferenceMode | None
+#      failure_info: bool
+#      kore_rpc_command: str | Iterable[str] | None
+#      max_depth: int | None
+#      max_iterations: int | None
+#      show_kcfg: bool
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'definition_dir': None,
+#              'type_inference_mode': None,
+#              'failure_info': False,
+#              'kore_rpc_command': None,
+#              'max_depth': None,
+#              'max_iterations': None,
+#              'show_kcfg': False,
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              KDefinitionOptions.from_option_string()
+#              | KompileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#              | {'definition': 'definition_dir'}
+#          )
 
 
 #  class RunOptions(LoggingOptions):

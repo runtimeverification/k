@@ -10,13 +10,17 @@ from graphviz import Digraph
 
 from .cli.args import (
     DefinitionOptionsGroup,
+    IntOption,
     KDefinitionOptionsGroup,
     KompileOptionsGroup,
     LoggingOptionsGroup,
     OutputFileOptionsGroup,
+    SaveDirOptionsGroup,
+    SpecOptionsGroup,
+    StringListOption,
     WarningOptionsGroup,
 )
-from .cli.cli import CLI, Command, DirPathOption, EnumOption, ReadFileOption, StringOption
+from .cli.cli import CLI, BoolOption, Command, DirPathOption, EnumOption, ReadFileOption, StringOption
 from .cli.pyk import PrintInput
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
@@ -46,9 +50,9 @@ from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Final
+    from typing import IO, Any, Final, Iterable
 
-    from .cli.pyk import PrintOptions, ProveLegacyOptions, ProveOptions, RPCKastOptions, RPCPrintOptions
+    from .cli.pyk import PrintOptions, RPCKastOptions, RPCPrintOptions
 
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -228,44 +232,251 @@ def exec_rpc_kast(options: RPCKastOptions) -> None:
     options.output_file.write(json.dumps(request))
 
 
-def exec_prove_legacy(options: ProveLegacyOptions) -> None:
-    kompiled_dir: Path = options.definition_dir
-    kprover = KProve(kompiled_dir, options.main_file)
-    final_state = kprover.prove(Path(options.spec_file), spec_module_name=options.spec_module, args=options.k_args)
-    options.output_file.write(json.dumps(mlOr([state.kast for state in final_state]).to_dict()))
-    _LOGGER.info(f'Wrote file: {options.output_file.name}')
+#  class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
+#      main_file: Path
+#      spec_file: Path
+#      spec_module: str
+#      k_args: Iterable[str]
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'k_args': [],
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              DefinitionOptions.from_option_string()
+#              | OutputFileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#              | {'kArgs': 'k_args'}
+#          )
 
 
-def exec_prove(options: ProveOptions) -> None:
-    kompiled_directory: Path
-    if options.definition_dir is None:
-        kompiled_directory = Kompile.default_directory()
-        _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
-    else:
-        kompiled_directory = options.definition_dir
-    kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
-    try:
-        proofs = kprove.prove_rpc(options=options)
-    except RuntimeError as err:
-        _, _, _, cpe = err.args
-        exit_with_process_error(cpe)
-    for proof in sorted(proofs, key=lambda p: p.id):
-        print('\n'.join(proof.summary.lines))
-        if proof.failed and options.failure_info:
-            failure_info = proof.failure_info
-            if type(failure_info) is APRFailureInfo:
-                print('\n'.join(failure_info.print()))
-        if options.show_kcfg and type(proof) is APRProof:
-            node_printer = APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
-            show = APRProofShow(kprove, node_printer=node_printer)
-            print('\n'.join(show.show(proof)))
-    sys.exit(len([p.id for p in proofs if not p.passed]))
+class ProveLegacyOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, LoggingOptionsGroup):
+    main_file: Path
+    spec_file: Path
+    spec_module: str
+    k_args: Iterable[str]
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.add_option(DirPathOption(name='main_file', help_str='Main file used for kompilation', optional=False))
+        self.add_option(DirPathOption(name='spec_file', help_str='File with the specification module.', optional=False))
+        self.add_option(StringOption(name='spec_module', help_str='Module with claims to be proven', optional=False))
+        self.add_option(
+            StringListOption(
+                name='k_args',
+                cmd_line_name='kArgs',
+                toml_name='kArgs',
+                help_str='Arguments to pass through to K invocation.',
+                optional=True,
+            )
+        )
 
 
-def exec_show(options: ProveOptions) -> None:
-    options.max_iterations = 0
-    options.show_kcfg = True
-    exec_prove(options)
+class ProveLegacyCommand(Command[ProveLegacyOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('prove-legacy', 'Prove an input specification (using kprovex).', ProveLegacyOptionsGroup())
+
+    def exec(self) -> None:
+        kompiled_dir: Path = self.options.definition_dir
+        kprover = KProve(kompiled_dir, self.options.main_file)
+        final_state = kprover.prove(
+            Path(self.options.spec_file), spec_module_name=self.options.spec_module, args=self.options.k_args
+        )
+        self.options.output_file.write(json.dumps(mlOr([state.kast for state in final_state]).to_dict()))
+        _LOGGER.info(f'Wrote file: {self.options.output_file.name}')
+
+
+#  def exec_prove_legacy(options: ProveLegacyOptions) -> None:
+#      kompiled_dir: Path = options.definition_dir
+#      kprover = KProve(kompiled_dir, options.main_file)
+#      final_state = kprover.prove(Path(options.spec_file), spec_module_name=options.spec_module, args=options.k_args)
+#      options.output_file.write(json.dumps(mlOr([state.kast for state in final_state]).to_dict()))
+#      _LOGGER.info(f'Wrote file: {options.output_file.name}')
+
+
+#  class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
+#      definition_dir: Path | None
+#      type_inference_mode: TypeInferenceMode | None
+#      failure_info: bool
+#      kore_rpc_command: str | Iterable[str] | None
+#      max_depth: int | None
+#      max_iterations: int | None
+#      show_kcfg: bool
+#
+#      @staticmethod
+#      def default() -> dict[str, Any]:
+#          return {
+#              'definition_dir': None,
+#              'type_inference_mode': None,
+#              'failure_info': False,
+#              'kore_rpc_command': None,
+#              'max_depth': None,
+#              'max_iterations': None,
+#              'show_kcfg': False,
+#          }
+#
+#      @staticmethod
+#      def from_option_string() -> dict[str, str]:
+#          return (
+#              KDefinitionOptions.from_option_string()
+#              | KompileOptions.from_option_string()
+#              | LoggingOptions.from_option_string()
+#              | {'definition': 'definition_dir'}
+#          )
+
+
+class ProveOptionsGroup(LoggingOptionsGroup, SpecOptionsGroup, SaveDirOptionsGroup):
+    definition_dir: Path | None
+    type_inference_mode: TypeInferenceMode | None
+    failure_info: bool
+    kore_rpc_command: str | Iterable[str] | None
+    max_depth: int | None
+    max_iterations: int | None
+    show_kcfg: bool
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.add_option(
+            DirPathOption(
+                name='definition_dir',
+                cmd_line_name='--definition',
+                toml_name='definition',
+                help_str='Path to definition to use.',
+                optional=True,
+                default=None,
+            )
+        )
+        self.add_option(
+            EnumOption(
+                enum_type=TypeInferenceMode,
+                name='type_inference_mode',
+                cmd_line_name='--type-inference-mode',
+                help_str='Mode for doing K rule type inference in.',
+                optional=True,
+                default=None,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='failure_info',
+                cmd_line_name='--failure-info',
+                help_str='Print out more information about proof failures.',
+                default=None,
+            )
+        )
+        self.add_option(
+            StringOption(
+                name='kore_rpc_command',
+                cmd_line_name='--kore-rpc-command',
+                help_str='Custom command to start RPC server',
+                default=None,
+            )
+        )
+        self.add_option(
+            IntOption(
+                name='max_depth',
+                cmd_line_name='--max-depth',
+                help_str='Maximum number of steps to take in symbolic execution per basic block.',
+                default=None,
+                optional=True,
+            )
+        )
+        self.add_option(
+            IntOption(
+                name='max_iterations',
+                cmd_line_name='--max-iterations',
+                help_str='Maximum number of KCFG explorations to take in attempting to discharge proof.',
+                default=None,
+                optional=True,
+            )
+        )
+        self.add_option(
+            BoolOption(
+                name='show_kcfg',
+                cmd_line_name='--show-kcfg',
+                help_str='Display the resulting proof KCFG.',
+                default=False,
+                optional=True,
+            )
+        )
+
+
+class ProveCommand(Command[ProveOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('prove', 'Prove an input specification (using RPC based prover).', ProveOptionsGroup())
+
+    def exec(self) -> None:
+        kompiled_directory: Path
+        if self.options.definition_dir is None:
+            kompiled_directory = Kompile.default_directory()
+            _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
+        else:
+            kompiled_directory = self.options.definition_dir
+        kprove = KProve(kompiled_directory, use_directory=self.options.temp_directory)
+        try:
+            proofs = kprove.prove_rpc(options=self.options)
+        except RuntimeError as err:
+            _, _, _, cpe = err.args
+            exit_with_process_error(cpe)
+        for proof in sorted(proofs, key=lambda p: p.id):
+            print('\n'.join(proof.summary.lines))
+            if proof.failed and self.options.failure_info:
+                failure_info = proof.failure_info
+                if type(failure_info) is APRFailureInfo:
+                    print('\n'.join(failure_info.print()))
+            if self.options.show_kcfg and type(proof) is APRProof:
+                node_printer = APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
+                show = APRProofShow(kprove, node_printer=node_printer)
+                print('\n'.join(show.show(proof)))
+        sys.exit(len([p.id for p in proofs if not p.passed]))
+
+
+#  def exec_prove(options: ProveOptions) -> None:
+#      kompiled_directory: Path
+#      if options.definition_dir is None:
+#          kompiled_directory = Kompile.default_directory()
+#          _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
+#      else:
+#          kompiled_directory = options.definition_dir
+#      kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
+#      try:
+#          proofs = kprove.prove_rpc(options=options)
+#      except RuntimeError as err:
+#          _, _, _, cpe = err.args
+#          exit_with_process_error(cpe)
+#      for proof in sorted(proofs, key=lambda p: p.id):
+#          print('\n'.join(proof.summary.lines))
+#          if proof.failed and options.failure_info:
+#              failure_info = proof.failure_info
+#              if type(failure_info) is APRFailureInfo:
+#                  print('\n'.join(failure_info.print()))
+#          if options.show_kcfg and type(proof) is APRProof:
+#              node_printer = APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False)
+#              show = APRProofShow(kprove, node_printer=node_printer)
+#              print('\n'.join(show.show(proof)))
+#      sys.exit(len([p.id for p in proofs if not p.passed]))
+
+
+class ShowCommand(ProveCommand):
+    def __init__(self) -> None:
+        Command.__init__(self, 'show', 'Display the status of a given proof', ProveOptionsGroup())
+
+    def exec(self) -> None:
+        self.options.max_iterations = 0
+        self.options.show_kcfg = True
+        super().exec()
+
+
+#  def exec_show(options: ProveOptions) -> None:
+#      options.max_iterations = 0
+#      options.show_kcfg = True
+#      exec_prove(options)
 
 
 #  class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, KompileOptions):
