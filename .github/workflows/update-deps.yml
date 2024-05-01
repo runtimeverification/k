@@ -4,7 +4,6 @@ on:
     branches:
       - '_update-deps/runtimeverification/llvm-backend'
       - '_update-deps/runtimeverification/haskell-backend'
-      - 'booster-532-depend-on-single-hs-backend-repo' # FIXME remove this line
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
