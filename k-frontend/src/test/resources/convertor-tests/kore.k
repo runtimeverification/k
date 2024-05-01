@@ -82,7 +82,7 @@ endmodule
 // To be used to parse semantic rules
 module K
   imports KSEQ
-  syntax KVariable ::= r"(?<![A-Za-z0-9\\_])(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)" [ hook, token ] // same like KSort?
+  syntax KVariable ::= r"(\\$|\\!|\\?)?([A-Z][A-Za-z0-9']*|_)" [ hook, token ] // same like KSort?
   syntax KItem     ::= KVariable        //[ ... ]
   syntax KLabel    ::= KVariable        //[ ... ]
   syntax K         ::= K "=>" K         [ klabel(#KRewrite), hook(Rewrite) ]
