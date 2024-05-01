@@ -356,7 +356,7 @@ class TestUnparsingDefn(KPrintTest):
                          | noneLabeled(Int, Int)             [function, symbol(none-labeled)]
                          | nonNonTerms()                     [function, symbol(no-nonterms)]
 
-            # https://github.com/runtimeverification/k/issues/4297
+            // https://github.com/runtimeverification/k/issues/4297
             syntax Bool ::= "#range" "(" Int "<"  Int "<"  Int ")" [alias]
                           | "#range" "(" Int "<"  Int "<=" Int ")" [alias]
                           | "#range" "(" Int "<=" Int "<"  Int ")" [alias]
