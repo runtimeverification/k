@@ -121,6 +121,7 @@
       },
       "original": {
         "owner": "runtimeverification",
+        "ref": "v0.1.3",
         "repo": "llvm-backend",
         "type": "github"
       }
