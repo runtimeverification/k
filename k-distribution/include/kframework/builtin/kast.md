@@ -83,8 +83,7 @@ module KAST
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\n\\r])+`" [token]
                   | #LowerId                                   [token]
-                  | r"(?<![a-zA-Z0-9])[#a-z][a-zA-Z0-9]*"               [token, prec(1)]
-                       // something that doesn't collide with meta-variables
+                  | r"[#a-z][a-zA-Z0-9]*"               [token, prec(1)]
 
   syntax KList ::= K
                  | ".KList"          [klabel(#EmptyKList), symbol]
@@ -204,9 +203,9 @@ module KSEQ-SYMBOLIC
   imports ML-SYNTAX
   imports KVARIABLE-SYNTAX
 
-  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_|_[A-Z][A-Za-z0-9'_]*)"   [token, prec(1)]
+  syntax #KVariable ::= r"(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_|_[A-Z][A-Za-z0-9'_]*)"   [token, prec(1)]
                       | #UpperId                                                          [token]
-  syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\$)([A-Z][A-Za-z0-9'_]*)"            [token]
+  syntax KConfigVar ::= r"(\\$)([A-Z][A-Za-z0-9'_]*)"            [token]
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
 endmodule

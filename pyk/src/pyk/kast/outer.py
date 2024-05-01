@@ -73,37 +73,23 @@ class KRegexTerminal(KProductionItem):
     """Represents a regular-expression terminal in EBNF production, to be matched against input text."""
 
     regex: str
-    precede_regex: str
-    follow_regex: str
 
-    def __init__(self, regex: str, precede_regex: str, follow_regex: str):
+    def __init__(self, regex: str):
         object.__setattr__(self, 'regex', regex)
-        object.__setattr__(self, 'precede_regex', precede_regex)
-        object.__setattr__(self, 'follow_regex', follow_regex)
 
     @classmethod
     def _from_dict(cls: type[KRegexTerminal], d: Mapping[str, Any]) -> KRegexTerminal:
-        return KRegexTerminal(
-            regex=d['regex'],
-            precede_regex=d['precedeRegex'],
-            follow_regex=d['followRegex'],
-        )
+        return KRegexTerminal(regex=d['regex'])
 
     def to_dict(self) -> dict[str, Any]:
         return {
             'node': 'KRegexTerminal',
             'regex': self.regex,
-            'precedeRegex': self.precede_regex,
-            'followRegex': self.follow_regex,
         }
 
-    def let(
-        self, *, regex: str | None = None, precede_regex: str | None = None, follow_regex: str | None = None
-    ) -> KRegexTerminal:
+    def let(self, *, regex: str | None = None) -> KRegexTerminal:
         regex = regex if regex is not None else self.regex
-        precede_regex = precede_regex if precede_regex is not None else self.precede_regex
-        follow_regex = follow_regex if follow_regex is not None else self.follow_regex
-        return KRegexTerminal(regex=regex, precede_regex=precede_regex, follow_regex=follow_regex)
+        return KRegexTerminal(regex=regex)
 
 
 @final

@@ -75,9 +75,7 @@ object Constructors {
   def Terminal(s: String)                           = definition.Terminal(s)
   def NonTerminal(sort: Sort)                       = definition.NonTerminal(sort, None)
   def NonTerminal(sort: Sort, name: Option[String]) = definition.NonTerminal(sort, name)
-  def RegexTerminal(regexString: String) = definition.RegexTerminal("#", regexString, "#")
-  def RegexTerminal(precedeRegexString: String, regexString: String, followRegexString: String) =
-    definition.RegexTerminal(precedeRegexString, regexString, followRegexString)
+  def RegexTerminal(regexString: String)            = definition.RegexTerminal(regexString)
 
   def Tag(s: String) = definition.Tag(s)
 
