@@ -68,9 +68,6 @@ def test_regex_terminal(kompile: Kompiler) -> None:
     k_text = """
         module REGEX-TERMINAL
             syntax T0 ::= r"b"            [token]
-            syntax T1 ::= r"(?<!a)b"      [token]
-            syntax T2 ::= r"b(?!c)"       [token]
-            syntax T3 ::= r"(?<!a)b(?!c)" [token]
         endmodule
     """
     main_module = 'REGEX-TERMINAL'
@@ -78,19 +75,12 @@ def test_regex_terminal(kompile: Kompiler) -> None:
     definition = read_kast_definition(definition_dir / 'compiled.json')
     module = definition.module(main_module)
     expected = [
-        KRegexTerminal('b', '#', '#'),
-        KRegexTerminal('b', 'a', '#'),
-        KRegexTerminal('b', '#', 'c'),
-        KRegexTerminal('b', 'a', 'c'),
+        KRegexTerminal('b'),
     ]
 
     # When
     productions = sorted(
-        (
-            prod
-            for prod in module.productions
-            if prod.sort.name in {'T0', 'T1', 'T2', 'T3'} and type(prod.items[0]) is KRegexTerminal
-        ),
+        (prod for prod in module.productions if prod.sort.name in {'T0'} and type(prod.items[0]) is KRegexTerminal),
         key=lambda prod: prod.sort.name,
     )
     actual = [prod.items[0] for prod in productions]
