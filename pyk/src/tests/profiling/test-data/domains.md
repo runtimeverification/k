@@ -2213,7 +2213,7 @@ Provided are the following pieces of functionality:
 ```k
 module ID-SYNTAX-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
-  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
+  syntax Id ::= r"[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
               | #LowerId                                             [token]
               | #UpperId                                             [token]
 endmodule

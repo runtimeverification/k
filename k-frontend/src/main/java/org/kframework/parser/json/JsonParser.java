@@ -298,10 +298,8 @@ public class JsonParser {
         return new NonTerminal(sort, name);
       }
       case KREGEXTERMINAL -> {
-        String precedeRegex = data.getString("precedeRegex");
         String regex = data.getString("regex");
-        String followRegex = data.getString("followRegex");
-        return new RegexTerminal(precedeRegex, regex, followRegex);
+        return new RegexTerminal(regex);
       }
       case KTERMINAL -> {
         String value = data.getString("value");
