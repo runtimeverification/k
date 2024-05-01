@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
+import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ..cli.utils import check_dir_path, check_file_path
 from .compiler import KLLVM_MODULE_FILE_NAME, KLLVM_MODULE_NAME, RUNTIME_MODULE_FILE_NAME, RUNTIME_MODULE_NAME
@@ -10,6 +12,17 @@ from .runtime import Runtime
 
 if TYPE_CHECKING:
     from types import ModuleType
+
+
+class RTLDLocal:
+    def __init__(self) -> None:
+        self.old_flags = sys.getdlopenflags()
+
+    def __enter__(self) -> None:
+        sys.setdlopenflags(self.old_flags | os.RTLD_LOCAL)
+
+    def __exit__(self, *args: Any) -> None:
+        sys.setdlopenflags(self.old_flags)
 
 
 def import_from_file(module_name: str, module_file: str | Path) -> ModuleType:
@@ -43,5 +56,8 @@ def import_runtime(target_dir: str | Path) -> Runtime:
     target_dir = Path(target_dir)
     check_dir_path(target_dir)
     module_file = target_dir / RUNTIME_MODULE_FILE_NAME
-    module = import_from_file(RUNTIME_MODULE_NAME, module_file)
+
+    with RTLDLocal():
+        module = import_from_file(RUNTIME_MODULE_NAME, module_file)
+
     return Runtime(module)
