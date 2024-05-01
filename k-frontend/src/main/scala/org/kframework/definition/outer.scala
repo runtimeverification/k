@@ -244,7 +244,7 @@ case class Module(
     productionsForSort
       .getOrElse(Sorts.Layout.head, immutable.Set[Production]())
       .collect {
-        case Production(_, _, _, immutable.Seq(RegexTerminal(_, terminalRegex, _)), _) =>
+        case Production(_, _, _, immutable.Seq(RegexTerminal(terminalRegex)), _) =>
           terminalRegex
         case p =>
           throw KEMException.compilerError(
@@ -967,7 +967,7 @@ case class Production(
           case (Terminal("("), i)              => s"%${i + 1}..."
           case (Terminal(_), i)                => s"%${i + 1}"
           case (NonTerminal(_, Some(name)), i) => s"$name: %${i + 1}"
-          case (RegexTerminal(_, _, _), _) =>
+          case (RegexTerminal(_), _) =>
             throw new IllegalArgumentException(
               "Default format not supported for productions with regex terminals"
             )
@@ -1022,9 +1022,7 @@ case class NonTerminal(sort: Sort, name: Option[String])
     extends ProductionItem
     with NonTerminalToString
 
-case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String)
-    extends TerminalLike
-    with RegexTerminalToString {
+case class RegexTerminal(regex: String) extends TerminalLike with RegexTerminalToString {
   lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)
 
   def compareTo(t: TerminalLike): Int = {

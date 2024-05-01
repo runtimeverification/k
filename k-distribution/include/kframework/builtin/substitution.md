@@ -35,7 +35,7 @@ and can be followed by zero or more letters, numbers, or underscores.
 module KVAR-SYNTAX-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
 
-  syntax KVar ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
+  syntax KVar ::= r"[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
                 | #LowerId                                             [token]
                 | #UpperId                                             [token]
 endmodule
