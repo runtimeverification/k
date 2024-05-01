@@ -3,7 +3,6 @@ package org.kframework.backend.haskell;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
-import org.kframework.utils.OS;
 import org.kframework.utils.inject.RequestScoped;
 
 @RequestScoped
@@ -25,5 +24,5 @@ public class HaskellKompileOptions {
           "Use the textual KORE format in the haskell backend instead of the binary KORE format."
               + " This flag is enabled by default and cannot be disabled when running on macOS because of a bug in the underlying Haskell libraries.",
       hidden = true)
-  public boolean noHaskellBinary = OS.current().equals(OS.OSX);
+  public boolean noHaskellBinary = false;
 }
