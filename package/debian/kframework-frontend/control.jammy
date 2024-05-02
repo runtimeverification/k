@@ -1,0 +1,18 @@
+Source: kframework-frontend
+Section: devel
+Priority: optional
+Maintainer: Bruce Collie <bruce.collie@runtimeverification.com>
+Build-Depends: debhelper (>=10) , flex , maven , openjdk-17-jdk , pkg-config , python3 , python3-dev , python3-distutils , python3-pip , zlib1g-dev
+Standards-Version: 3.9.6
+Homepage: https://github.com/runtimeverification/k
+
+Package: kframework-frontend
+Architecture: any
+Section: devel
+Priority: optional
+Depends: bison , openjdk-17-jre-headless , flex , gcc , g++ , libsecp256k1-0 , libtinfo-dev , libz3-4 , pkg-config
+Recommends: z3
+Suggests: k-llvm-backend
+Description: K framework frontend
+ Includes K Framework compiler frontend for K language definitions.
+Homepage: https://github.com/runtimeverification/k
