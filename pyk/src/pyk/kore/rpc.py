@@ -540,7 +540,7 @@ class State:
         return _kore
 
 
-class LogEntry(ABC):  # noqa: B024
+class LogEntry(ABC):
     origin: LogOrigin
     result: RewriteResult
 
@@ -653,7 +653,7 @@ class RewriteFailure(RewriteResult):
         return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
 
 
-class ExecuteResult(ABC):  # noqa: B024
+class ExecuteResult(ABC):
     _TYPES: Mapping[StopReason, str] = {
         StopReason.STUCK: 'StuckResult',
         StopReason.DEPTH_BOUND: 'DepthBoundResult',
