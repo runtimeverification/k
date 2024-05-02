@@ -6,16 +6,6 @@ inputs:
     required: true
     type: string
     default: '3.10'
-  install-k:
-    description: 'Install K'
-    required: true
-    type: boolean
-    default: false
-  k-deb-path:
-    description: 'Path to K .deb file'
-    required: true
-    type: string
-    default: kframework.deb
 runs:
   using: "composite"
   steps:
@@ -25,16 +15,6 @@ runs:
         python-version: ${{ inputs.python-version }}
     - name: 'Install Poetry'
       uses: Gr1N/setup-poetry@v9
-    - name: 'Install K'
-      if: fromJSON(inputs.install-k)
-      shell: bash
-      env:
-        DEB_PACKAGE_NAME: ${{ inputs.k-deb-path }}
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
-        sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
-        kompile --version
     - name: 'Install package'
       shell: bash
       run: poetry -C pyk install

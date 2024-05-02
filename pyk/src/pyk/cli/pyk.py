@@ -21,7 +21,7 @@ from .args import (
     SpecOptions,
     WarningOptions,
 )
-from .utils import dir_path
+from .utils import dir_path, file_path
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -61,6 +61,8 @@ def generate_options(args: dict[str, Any]) -> LoggingOptions:
             return KompileCommandOptions(args)
         case 'run':
             return RunOptions(args)
+        case 'parse-outer':
+            return ParseOuterOptions(args)
         case _:
             raise ValueError(f'Unrecognized command: {command}')
 
@@ -260,6 +262,14 @@ class RunOptions(LoggingOptions):
         }
 
 
+class ParseOuterOptions(LoggingOptions):
+    main_file: Path
+    md_selector: str
+    includes: Iterable[str]
+    output_file: IO[Any]
+    main_module: str
+
+
 def create_argument_parser() -> ArgumentParser:
     k_cli_args = KCLIArgs()
     config_args = ConfigArgs()
@@ -370,6 +380,13 @@ def create_argument_parser() -> ArgumentParser:
         type=int,
         help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
     )
+    prove_args.add_argument(
+        '--kore-rpc-command',
+        dest='kore_rpc_command',
+        type=str,
+        default=None,
+        help='Custom command to start RPC server.',
+    )
 
     show_args = pyk_args_command.add_parser(
         'show',
@@ -405,6 +422,25 @@ def create_argument_parser() -> ArgumentParser:
     pyk_args_command.add_parser(
         'json-to-kore', help='Convert JSON to textual KORE', parents=[k_cli_args.logging_args, config_args.config_args]
     )
+
+    parse_outer_args = pyk_args_command.add_parser(
+        'parse-outer',
+        help='Parse an outer K definition into JSON',
+        parents=[k_cli_args.logging_args, config_args.config_args],
+    )
+    parse_outer_args.add_argument('main_file', type=file_path, help='File with the K definition')
+    parse_outer_args.add_argument(
+        '--md-selector', default='k', help='Code selector expression to use when reading markdown.'
+    )
+    parse_outer_args.add_argument('--output-file', type=FileType('w'), help='Write output to file instead of stdout.')
+    parse_outer_args.add_argument(
+        '-I',
+        type=str,
+        dest='includes',
+        action='append',
+        help='Directories to lookup K definitions in.',
+    )
+    parse_outer_args.add_argument('--main-module', type=str, help='The name of the main module for the definition')
 
     return pyk_args
 

@@ -277,6 +277,26 @@ PRETTY_PRINT_ALIAS_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
         # TODO: Actually want 'rangeHundred ( X ) andBool 3 <Int 4'
         '0 <=Int X andBool 3 <Int 4 andBool X <Int hundred',
     ),
+    (
+        'multiple-rules-1',
+        andBool([ltInt(intToken(0), KVariable('CONTRACT_ID')), ltInt(KVariable('CONTRACT_ID'), intToken(9))]),
+        '#range ( 0 < CONTRACT_ID < 9 )',
+    ),
+    (
+        'multiple-rules-2',
+        andBool([ltInt(intToken(0), KVariable('CONTRACT_ID')), leInt(KVariable('CONTRACT_ID'), intToken(9))]),
+        '#range ( 0 < CONTRACT_ID <= 9 )',
+    ),
+    (
+        'multiple-rules-3',
+        andBool([leInt(intToken(0), KVariable('CONTRACT_ID')), ltInt(KVariable('CONTRACT_ID'), intToken(9))]),
+        '#range ( 0 <= CONTRACT_ID < 9 )',
+    ),
+    (
+        'multiple-rules-4',
+        andBool([leInt(intToken(0), KVariable('CONTRACT_ID')), leInt(KVariable('CONTRACT_ID'), intToken(9))]),
+        '#range ( 0 <= CONTRACT_ID <= 9 )',
+    ),
 )
 
 PRETTY_PRINT_NONTERM_LABEL_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
@@ -335,6 +355,17 @@ class TestUnparsingDefn(KPrintTest):
                          | someLabeled(label1: Int, Int)     [function, symbol(some-labeled)]
                          | noneLabeled(Int, Int)             [function, symbol(none-labeled)]
                          | nonNonTerms()                     [function, symbol(no-nonterms)]
+
+            // https://github.com/runtimeverification/k/issues/4297
+            syntax Bool ::= "#range" "(" Int "<"  Int "<"  Int ")" [alias]
+                          | "#range" "(" Int "<"  Int "<=" Int ")" [alias]
+                          | "#range" "(" Int "<=" Int "<"  Int ")" [alias]
+                          | "#range" "(" Int "<=" Int "<=" Int ")" [alias]
+
+            rule #range ( LB <  X <  UB ) => LB  <Int X andBool X  <Int UB
+            rule #range ( LB <  X <= UB ) => LB  <Int X andBool X <=Int UB
+            rule #range ( LB <= X <  UB ) => LB <=Int X andBool X  <Int UB
+            rule #range ( LB <= X <= UB ) => LB <=Int X andBool X <=Int UB
         endmodule
     """
     KOMPILE_MAIN_MODULE = 'UNPARSING'
