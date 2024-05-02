@@ -5,7 +5,7 @@
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
-      url = "github:runtimeverification/llvm-backend";
+      url = "github:runtimeverification/llvm-backend/v0.1.3";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
@@ -134,12 +134,6 @@
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
           };
-
-          update-from-submodules =
-            rv-utils.lib.update-from-submodules pkgs ./flake.lock {
-              llvm-backend.submodule =
-                "llvm-backend/src/main/native/llvm-backend";
-            };
 
           smoke-test = with pkgs;
             stdenv.mkDerivation {
