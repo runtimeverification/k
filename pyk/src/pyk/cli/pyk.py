@@ -380,6 +380,13 @@ def create_argument_parser() -> ArgumentParser:
         type=int,
         help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
     )
+    prove_args.add_argument(
+        '--kore-rpc-command',
+        dest='kore_rpc_command',
+        type=str,
+        default=None,
+        help='Custom command to start RPC server.',
+    )
 
     show_args = pyk_args_command.add_parser(
         'show',
