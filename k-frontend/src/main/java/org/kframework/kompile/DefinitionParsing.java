@@ -58,6 +58,7 @@ import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
+import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -288,16 +289,20 @@ public class DefinitionParsing {
       File definitionFile,
       KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule mainProgramsModule) {
-    return parser.loadDefinition(
-        mainModuleName,
-        mainProgramsModule,
-        FileUtil.load(definitionFile),
-        definitionFile,
-        definitionFile.getParentFile(),
-        ListUtils.union(lookupDirectories, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-        autoImportDomains,
-        options.preprocess,
-        options.bisonLists);
+    if (options.outerParsedJson) {
+      return JsonParser.parseDefinition(FileUtil.load(definitionFile));
+    } else {
+      return parser.loadDefinition(
+          mainModuleName,
+          mainProgramsModule,
+          FileUtil.load(definitionFile),
+          definitionFile,
+          definitionFile.getParentFile(),
+          ListUtils.union(lookupDirectories, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
+          autoImportDomains,
+          options.preprocess,
+          options.bisonLists);
+    }
   }
 
   protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
