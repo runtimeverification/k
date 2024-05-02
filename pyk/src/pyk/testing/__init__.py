@@ -8,6 +8,7 @@ from ._kompiler import (
     KPrintTest,
     KProveTest,
     KRunTest,
+    ParallelTest,
     RuntimeTest,
     ServerType,
 )
