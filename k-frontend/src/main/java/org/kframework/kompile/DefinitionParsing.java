@@ -221,12 +221,8 @@ public class DefinitionParsing {
       KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule mainProgramsModule,
       java.util.Set<Att.Key> excludedModuleTags) {
-    Definition parsedDefinition;
-    if (options.outerParsedJson) {
-      parsedDefinition = JsonParser.parseDefinition(FileUtil.load(definitionFile));
-    } else {
-      parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
-    }
+    Definition parsedDefinition =
+        parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
     Stream<Module> modules = Stream.of(parsedDefinition.mainModule());
     modules = Stream.concat(modules, stream(parsedDefinition.mainModule().importedModules()));
     Option<Module> syntaxModule = parsedDefinition.getModule(mainProgramsModule.name());
@@ -293,16 +289,20 @@ public class DefinitionParsing {
       File definitionFile,
       KompileOptions.MainModule mainModuleName,
       KompileOptions.SyntaxModule mainProgramsModule) {
-    return parser.loadDefinition(
-        mainModuleName,
-        mainProgramsModule,
-        FileUtil.load(definitionFile),
-        definitionFile,
-        definitionFile.getParentFile(),
-        ListUtils.union(lookupDirectories, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-        autoImportDomains,
-        options.preprocess,
-        options.bisonLists);
+    if (options.outerParsedJson) {
+      return JsonParser.parseDefinition(FileUtil.load(definitionFile));
+    } else {
+      return parser.loadDefinition(
+          mainModuleName,
+          mainProgramsModule,
+          FileUtil.load(definitionFile),
+          definitionFile,
+          definitionFile.getParentFile(),
+          ListUtils.union(lookupDirectories, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
+          autoImportDomains,
+          options.preprocess,
+          options.bisonLists);
+    }
   }
 
   protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
