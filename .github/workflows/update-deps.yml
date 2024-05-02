@@ -4,7 +4,6 @@ on:
     branches:
       - '_update-deps/runtimeverification/llvm-backend'
       - '_update-deps/runtimeverification/haskell-backend'
-      - 'booster-532-depend-on-single-hs-backend-repo' # FIXME remove this line
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
@@ -56,9 +55,17 @@ jobs:
             changed=true
           fi
 
+          llvm_backend_version="v$(cat deps/llvm-backend_release)"
+          cd llvm-backend/src/main/native/llvm-backend
+          git checkout ${llvm_backend_version}
+          cd -
+          sed -i 's!      url = "github:runtimeverification/llvm-backend/.*";!      url = "github:runtimeverification/llvm-backend/'"${llvm_backend_version}"'";!' flake.nix
+          if git add flake.nix llvm-backend/src/main/native/llvm-backend && git commit -m "flake.nix, llvm-backend/src/main/native/llvm-backend: update to version ${llvm_backend_version}"; then
+            changed=true
+          fi
+
           nix flake update
-          GC_DONT_GC=1 nix run .#update-from-submodules
-          if git add flake.nix flake.lock && git commit -m 'flake.nix, flake.lock: update'; then
+          if git add flake.lock && git commit -m 'flake.lock: update'; then
             changed=true
           fi
 
