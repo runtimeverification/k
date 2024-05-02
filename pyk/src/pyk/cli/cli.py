@@ -1,23 +1,13 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from argparse import ArgumentParser, FileType
-from pathlib import Path
+from argparse import ArgumentParser
 
 #  from enum import Enum
-from typing import IO, TYPE_CHECKING, Any, Generic, Iterable, TypeVar
-
-from ..utils import ensure_dir_path
-from .utils import BugReport, bug_report_arg
+from typing import Any, Callable, Generic, Iterable, TypeVar
 
 T = TypeVar('T')
 OG = TypeVar('OG', bound='OptionsGroup')
-
-if TYPE_CHECKING:
-    from enum import EnumMeta
-
-    #      from argparse import _SubParsersAction
-    from types import UnionType
 
 
 class CLI:
@@ -57,265 +47,66 @@ class CLI:
 class Option:
     _name: str
     _aliases: list[str]
-    _cmd_line_name: str
+    _dest: str
     _toml_name: str
-    _optional: bool
+    _action: str | None
+    _choices: list[str] | None
+    _const: Any | None
+    _default: Any | None
     _help_str: str | None
     _metavar: str | None
-    _default: Any
+    _nargs: int | str | None
+    _required: bool
+    _type: Callable[[str], Any]
 
     def __init__(
         self,
         name: str,
-        aliases: Iterable[str] = (),
-        cmd_line_name: str | None = None,
-        toml_name: str | None = None,
-        optional: bool = False,
+        arg_type: Callable[[str], Any],
+        dest: str | None = None,
         help_str: str | None = None,
+        action: str | None = None,
+        choices: list[str] | None = None,
+        const: Any | None = None,
+        aliases: Iterable[str] = (),
+        default: Any | str = 'NoDefault',
         metavar: str | None = None,
-        default: Any = 'NoDefault',
+        nargs: int | str | None = None,
+        required: bool = False,
+        toml_name: str | None = None,
     ) -> None:
         self._name = name
         self._aliases = list(aliases)
-        self._cmd_line_name = cmd_line_name or name
-        self._toml_name = cmd_line_name or name
-        self._optional = optional
+        self._dest = dest or name
+        self._toml_name = (toml_name or dest) or name
+        self._action = action
+        self._choices = choices
+        self._const = const
+        self._default = default
         self._help_str = help_str
         self._metavar = metavar
-        self._type = type
-
-        if default == 'NoDefault' and optional:
-            raise ValueError(f'Optional option {name} must define a default value.')
-        if default != 'NoDefault' and not optional:
-            raise ValueError(f'Required option {name} cannot take a default value.')
+        self._nargs = nargs
+        self._required = required
+        self._type = arg_type
 
         self.set_default(default)
 
-    @abstractmethod
-    def add_arg(self, parser: ArgumentParser) -> None: ...
+    def add_arg(self, args: ArgumentParser) -> None: ...  # TODO
 
-    @property
-    def is_optional(self) -> bool:
-        return self._optional
+    def set_default(self, default: Any) -> None:
+        self._default = default
 
     @property
     def name(self) -> str:
         return self._name
 
     @property
-    def aliases(self) -> list[str]:
-        return self._aliases
-
-    @property
-    def cmd_line_name(self) -> str:
-        return self._cmd_line_name
-
-    @property
-    def toml_name(self) -> str:
-        return self._toml_name
-
-    @property
-    def help_str(self) -> str | None:
-        return self._help_str
-
-    @property
-    def metavar(self) -> str | None:
-        return self._metavar
-
-    @property
     def default(self) -> Any:
         return self._default
 
-    @abstractmethod
-    def set_default(self, default: Any) -> None: ...
-
     @property
-    def type(self) -> type | UnionType:
-        return self._type
-
-
-class IntOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, int)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=int,
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-        )
-
-
-class BoolOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, bool)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=bool,
-            help=self.help_str,
-            metavar=self.metavar,
-            action='store_false' if self.default else 'store_true',
-            dest=self.name,
-        )
-
-
-class StringOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, str)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=not self.is_optional,
-            type=bool,
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-        )
-
-
-class EnumOption(Option):
-    _enum_type: EnumMeta
-
-    def __init__(
-        self,
-        enum_type: EnumMeta,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        super.__init__(*args, **kwargs)
-        self._enum_type = enum_type
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, self._enum_type)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=self._enum_type,
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-            choices=list(self._enum_type),
-        )
-
-
-class ReadFileOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, IO)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=FileType('r'),
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-        )
-
-
-class WriteFileOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, IO)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=FileType('w'),
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-        )
-
-
-class BugReportOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, BugReport)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=bug_report_arg,
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-        )
-
-
-class DirPathOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, Path)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=ensure_dir_path,
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-        )
-
-
-class StringListOption(Option):
-
-    def set_default(self, default: Any) -> None:
-        assert isinstance(default, Iterable)
-        self._default = default
-
-    def add_arg(self, args: ArgumentParser) -> None:
-        args.add_argument(
-            self.cmd_line_name,
-            *(self.aliases),
-            default='NoDefault',
-            required=self.is_optional,
-            type=list[str],
-            help=self.help_str,
-            metavar=self.metavar,
-            dest=self.name,
-            action='append',
-        )
+    def is_optional(self) -> bool:
+        return not self._required
 
 
 class Command(Generic[OG]):
@@ -350,7 +141,6 @@ class OptionsGroup:
     def extract(self, args: dict[str, Any]) -> None:
         for option in self.options:
             if option.name in args:
-                assert isinstance(args[option.name], option.type)
                 self.__setattr__(option.name, args[option.name])
             # TODO elif option exists in TOML file, set it to the value from there
             else:

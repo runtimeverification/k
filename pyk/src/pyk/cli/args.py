@@ -5,20 +5,10 @@ from argparse import ArgumentParser
 from functools import cached_property
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
+from argparse import FileType
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
-from .cli import (
-    BoolOption,
-    BugReportOption,
-    DirPathOption,
-    EnumOption,
-    IntOption,
-    Options,
-    OptionsGroup,
-    StringListOption,
-    StringOption,
-    WriteFileOption,
-)
+from .cli import Option, Options, OptionsGroup
 from .utils import bug_report_arg, dir_path, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
@@ -30,19 +20,9 @@ if TYPE_CHECKING:
 class LoggingOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
+        self.add_option(Option('--debug', bool, 'debug', 'Debug output.', default=False, action='store_true'))
         self.add_option(
-            BoolOption(name='debug', cmd_line_name='--debug', optional=True, default=False, help_str='Debug output.')
-        )
-        self.add_option(
-            BoolOption(
-                name='verbose',
-                cmd_line_name='--verbose',
-                aliases=['-v'],
-                toml_name='v',
-                optional=True,
-                default=False,
-                help_str='Debug output.',
-            )
+            Option('--verbose', bool, 'verbose', 'Verbose output', default=False, action='store_true', aliases=['-v'])
         )
 
 
@@ -71,26 +51,25 @@ class WarningOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            BoolOption(
-                name='warnings_to_errors',
-                cmd_line_name='--warnings-to-errors',
-                aliases=['-w2e'],
+            Option(
+                '--warnings-to-errors',
+                bool,
+                'warnings_to_errors',
+                'Turn warnings into errors (no effect on pyk, only subcommands).',
                 default=False,
-                help_str='Turn warnings into errors (no effect on pyk, only subcommands).',
-                optional=True,
+                action='store_true',
                 toml_name='w2e',
             )
         )
         self.add_option(
-            EnumOption(
-                name='warnings',
-                cmd_line_name='--warnings',
-                aliases=['-w'],
-                default=False,
-                help_str='Warnings to print about (no effect on pyk, only subcommands).',
-                optional=True,
+            Option(
+                '--warnings',
+                Warnings,
+                'warnings',
+                'Warnings to print about (no effect on pyk, only subcommands).',
+                default=None,
                 toml_name='w',
-                enum_type=Warnings,
+                choices=list(Warnings),
             )
         )
 
@@ -120,11 +99,12 @@ class OutputFileOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            WriteFileOption(
-                name='output_file',
-                cmd_line_name='--output-file',
+            Option(
+                '--output-file',
+                FileType('w'),
+                'output_file',
+                'Output File',
                 default=sys.stdout,
-                optional=True,
             )
         )
 
@@ -145,7 +125,7 @@ class DefinitionOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            DirPathOption(name='definition_dir', toml_name='definition', help_str='Path to definition directory.')
+            Option('--definition', dir_path, 'definition_dir', 'Path to definition to use.', default=None)
         )
 
 
@@ -166,8 +146,8 @@ class DisplayOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            BoolOption(
-                name='minimize', cmd_line_name='--minimize', optional=True, default=True, help_str='Minimize output.'
+            Option(
+                '--minimize', bool, 'minimize', 'Minimize output.', action='store_true', default=True
             )
         )
 
@@ -184,46 +164,35 @@ class DisplayOptions(Options):
 
 class KDefinitionOptionsGroup(OptionsGroup):
     includes: list[str]
-    main_module: str
-    syntax_module: str
+    main_module: str | None
+    syntax_module: str | None
     md_selector: str
+
 
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            StringListOption(
-                name='includes',
-                cmd_line_name='-I',
-                optional=True,
-                default=[],
-                help_str='Directories to lookup K definitions in.',
+            Option(
+                '-I', str, 'includes', 'Directories to lookup K definitions in.', action='append', default=[],
+                
             )
         )
         self.add_option(
-            StringOption(
-                name='main_module',
-                cmd_line_name='--main-module',
-                optional=True,
-                default=None,
-                help_str='Name of the main module.',
+            Option(
+                '--main-module', str, 'main_module', 'Name of the main module.', default=None,
+                
             )
         )
         self.add_option(
-            StringOption(
-                name='syntax_module',
-                cmd_line_name='--syntax-module',
-                optional=True,
-                default=None,
-                help_str='Name of the syntax module.',
+            Option(
+                '--syntax-module', str, 'syntax_module', 'Name of the syntax module.', default=None,
+                
             )
         )
         self.add_option(
-            StringOption(
-                name='md_selector',
-                cmd_line_name='--md-selector',
-                optional=True,
-                default='k',
-                help_str='Code selector expression to use when reading markdown.',
+            Option(
+                '--md-selector', str, 'md_selector', 'Code selector expression to use when reading markdown.', default='k',
+                
             )
         )
 
@@ -246,12 +215,6 @@ class KDefinitionOptions(Options):
         }
 
 
-#      @staticmethod
-#      def from_option_string() -> dict[str, str]:
-#          return {
-#              'includes': 'includes',
-#          }
-
 
 class SaveDirOptionsGroup(OptionsGroup):
     save_directory: Path | None
@@ -260,21 +223,13 @@ class SaveDirOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            DirPathOption(
-                name='save_directory',
-                cmd_line_name='--save-directory',
-                optional=True,
-                default=None,
-                help_str='Directory to save proof artifacts at for reuse.',
+            Option(
+                '--save-directory', ensure_dir_path, 'save_directory', 'Directory to save proof artifacts at for reuse.', default=None,
             )
         )
         self.add_option(
-            DirPathOption(
-                name='temp_directory',
-                cmd_line_name='--temp-directory',
-                optional=True,
-                default=None,
-                help_str='Directory to save proof intermediate temporaries to.',
+            Option(
+                '--temp-directory', ensure_dir_path, 'temp_directory', 'Directory to save proof intermediate temporaries to.', default=None,
             )
         )
 
@@ -300,41 +255,45 @@ class SpecOptionsGroup(OptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            DirPathOption(
-                name='spec_file',
-                optional=False,
-                help_str='Path to spec file.',
+            Option(
+                'spec_file',
+                file_path,
+                help_str='Path to spec_file.',
+                required=True,
             )
         )
         self.add_option(
-            StringOption(
-                name='spec_module',
-                cmd_line_name='--spec-module',
-                optional=True,
+            Option(
+                '--spec-module',
+                str,
+                'spec_module',
+                'Module with claims to be proven.',
                 default=None,
-                help_str='Module with claims to be proven.',
             )
         )
         self.add_option(
-            StringListOption(
-                name='claim_labels',
-                cmd_line_name='--claim',
+            Option(
+                '--claim',
+                str,
+                'claim_labels',
+                'Only prove listed claims, MODULE_NAME.claim-id',
+                action='append',
+                default=None,
                 toml_name='claim',
-                optional=True,
-                default=None,
-                help_str='Only prove listed claims, MODULE_NAME.claim-id',
             )
         )
         self.add_option(
-            StringListOption(
-                name='exclude_claim_labels',
-                cmd_line_name='--exclude-claim',
-                toml_name='exclude-claim',
-                optional=True,
+            Option(
+                '--exclude_claim',
+                str,
+                'exclude_claim_labels',
+                'Skip listed claims, MODULE_NAME.claim-id',
+                action='append',
                 default=None,
-                help_str='Skip listed claims, MODULE_NAME.claim-id',
+                toml_name='exclude-claim',
             )
         )
+
 
 
 class SpecOptions(SaveDirOptions):
@@ -364,8 +323,8 @@ class KompileOptionsGroup(OptionsGroup):
     llvm_kompile: bool
     llvm_library: bool
     enable_llvm_debug: bool
-    llvm_kompile_type: LLVMKompileType
-    llvm_kompile_output: Path
+    llvm_kompile_type: LLVMKompileType | None
+    llvm_kompile_output: Path | None
     llvm_proof_hint_instrumentation: bool
     read_only: bool
     o0: bool
@@ -380,183 +339,65 @@ class KompileOptionsGroup(OptionsGroup):
     bison_lists: bool
     no_exc_wrap: bool
 
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            BoolOption(
-                name='emit_json',
-                cmd_line_name='--emit-json',
-                default=True,
-                help_str='Emit JSON definition after compilation.',
-                optional=True,
-            )
+            Option('--emit-json', bool, 'emit_json', 'Emit JSON definition after compilation.', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='llvm_kompile',
-                cmd_line_name='--no-llvm-kompile',
-                default=False,
-                help_str='Do not run llvm-kompile process.',
-                optional=True,
-            )
+            Option('--no-llvm-kompile', bool, 'llvm_kompile', 'Do not run llvm-kompile process.', action='store_false', default=True)
         )
         self.add_option(
-            BoolOption(
-                name='llvm_library',
-                cmd_line_name='--with-llvm-library',
-                toml_name='with-llvm-library',
-                default=False,
-                help_str='Make kompile generate a dynamic llvm library.',
-                optional=True,
-            )
+            Option('--with-llvm-library', bool, 'llvm_library', 'Make kompile generate a dynamic llvm library.', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='enable_llvm_debug',
-                cmd_line_name='--enable-llvm-debug',
-                default=False,
-                help_str='Make kompile generate debug symbols for llvm.',
-                optional=True,
-            )
+            Option('--enable-llvm-debug', bool, 'enable_llvm_debug', 'Make kompile generate debug symbols for llvm.', action='store_true', default=False)
         )
         self.add_option(
-            EnumOption(
-                enum_type=LLVMKompileType,
-                name='llvm_kompile_type',
-                cmd_line_name='--llvm-kompile-type',
-                default=None,
-                help_str='Mode to kompile LLVM backend in.',
-            )
+            Option('--llvm-kompile-type', LLVMKompileType, 'llvm_kompile_type', 'Mode to kompile LLVM backend in.', default=None, choices=list(LLVMKompileType))
         )
         self.add_option(
-            DirPathOption(
-                name='llvm_kompile_output',
-                cmd_line_name='--llvm-kompile-output',
-                default=None,
-                help_str='Location to put kompiled LLVM backend at.',
-            )
+            Option('--llvm-kompile-output',  ensure_dir_path, 'llvm_kompile_output', 'Location to put kompiled LLVM backend at.', default=None)
         )
         self.add_option(
-            BoolOption(
-                name='llvm_proof_hint_instrumentation',
-                cmd_line_name='--llvm-proof-hint-instrumentation',
-                default=False,
-                help_str='Enable proof hint generation in LLVM backend kompilation.',
-                optional=True,
-            )
+            Option('--llvm-proof-hint-instrumentation',  bool, 'llvm_proof_hint_instrumentation', 'Enable proof hint generation in LLVM backend kompilation', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='read_only',
-                cmd_line_name='--read-only-kompiled-directory',
-                toml_name='read-only-kompiled-directory',
-                default=False,
-                help_str='Generate a kompiled directory that K will not attempt to write to afterwards.',
-                optional=True,
-            )
+            Option('--read-only-kompiled-directory',  bool, 'read_only', 'Generate a kompiled directory that K will not attempt to write to afterwards.', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='o0',
-                cmd_line_name='-O0',
-                toml_name='O0',
-                default=False,
-                help_str='Optimization level 0.',
-                optional=True,
-            )
+            Option('-O0',  bool, 'o0', 'Optimization level 0', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='o1',
-                cmd_line_name='-O1',
-                toml_name='O1',
-                default=False,
-                help_str='Optimization level 1.',
-                optional=True,
-            )
+            Option('-O1',  bool, 'o1', 'Optimization level 1', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='o2',
-                cmd_line_name='-O2',
-                toml_name='O2',
-                default=False,
-                help_str='Optimization level 2.',
-                optional=True,
-            )
+            Option('-O2',  bool, 'o2', 'Optimization level 2', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='o3',
-                cmd_line_name='-O3',
-                toml_name='O3',
-                default=False,
-                help_str='Optimization level 3.',
-                optional=True,
-            )
+            Option('-O3',  bool, 'o3', 'Optimization level 3', action='store_true', default=False)
         )
         self.add_option(
-            StringListOption(
-                name='ccopts',
-                cmd_line_name='-ccopt',
-                optional=True,
-                default=[],
-                help_str='Additional arguments to pass to llvm-kompile',
-            )
+            Option('-ccopt',  str, 'ccopts', 'Additional arguments to pass to llvm-kompile', action='append', default=[])
         )
         self.add_option(
-            BoolOption(
-                name='enable_search',
-                cmd_line_name='--enable-search',
-                optional=True,
-                default=False,
-                help_str='Enable search mode on LLVM backend krun.',
-            )
+            Option('--enable-search',  bool, 'enable_search', 'Enable search mode on LLVM backend krun', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='coverage',
-                cmd_line_name='--coverage',
-                optional=True,
-                default=False,
-                help_str='Enable logging semantic rule coverage measurement.',
-            )
+            Option('--coverage',  bool, 'coverage', 'Enable logging semantics rule coverage measurement', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='gen_bison_parser',
-                cmd_line_name='--gen-bison-parser',
-                optional=True,
-                default=False,
-                help_str='Generate standalone Bison parser for program sort.',
-            )
+            Option('--gen-bison-parser',  bool, 'gen_bison_parser', 'Generate standolone Bison parser for program sort.', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='gen_glr_bison_parser',
-                cmd_line_name='--gen-glr-bison-parser',
-                optional=True,
-                default=False,
-                help_str='Generate standalone GLR Bison parser for program sort.',
-            )
+            Option('--gen-glr-bison-parser',  bool, 'gen_glr_bison_parser', 'Generate standolone GLR Bison parser for program sort.', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='bison_lists',
-                cmd_line_name='--bison-lists',
-                optional=True,
-                default=False,
-                help_str='Disable List{Sort} parsing to make grammar LR(1) for Bison parser.',
-            )
+            Option('--bison-lists',  bool, 'bison_lists', 'Disable List{Sort} parsing to make grammar LR(1) for Bison parser.', action='store_true', default=False)
         )
         self.add_option(
-            BoolOption(
-                name='no_exc_wrap',
-                cmd_line_name='--no-exc-wrap',
-                optional=True,
-                default=False,
-                help_str='Do not wrap the output on the CLI.',
-            )
+            Option('--no-exc-wrap',  bool, 'no_exc_wrap', 'Do not wrap the output on the CLI.', action='store_true', default=False)
         )
 
 
@@ -619,17 +460,13 @@ class KompileOptions(Options):
 
 
 class ParallelOptionsGroup(OptionsGroup):
+    workers: int
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            IntOption(
-                name='workers',
-                aliases=['-j'],
-                cmd_line_name='--workers',
-                toml_name='j',
-                default=1,
-                help_str='Number of processes to run in parallel',
-                optional=True,
+            Option(
+                '--workers', int, 'workers', 'Number of processes to run in parallel', aliases=['-j'], default=1, toml_name='j'
             )
         )
 
@@ -651,17 +488,13 @@ class ParallelOptions(Options):
 
 
 class BugReportOptionsGroup(OptionsGroup):
+    bug_report: BugReport | None
+
     def __init__(self) -> None:
         super().__init__()
-        self.add_option(
-            BugReportOption(
-                name='bug_report',
-                cmd_line_name='--bug-report',
-                default=None,
-                help_str='Generate bug report with given name.',
-                optional=True,
-            )
-        )
+        self.add_option(Option(
+            '--bug-report', bug_report_arg, 'bug_report', 'Generate bug report with given name.', default=None,
+        ))
 
 
 class BugReportOptions(Options):
@@ -673,34 +506,20 @@ class BugReportOptions(Options):
 
 
 class SMTOptionsGroup(OptionsGroup):
+    smt_timeout: int
+    smt_retry_limit: int
+    smt_tactic: str | None
+
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            IntOption(
-                name='smt_timeout',
-                cmd_line_name='--smt-timeout',
-                default=300,
-                help_str='Timeout in ms to use for SMT queries.',
-                optional=True,
-            )
+            Option('--smt-timeout', int, 'smt_timeout', 'Timeout in ms to use for SMT queries.', default=300)
         )
         self.add_option(
-            IntOption(
-                name='smt_retry_limit',
-                cmd_line_name='--smt-retry-limit',
-                default=10,
-                help_str='Number of times to retry SMT queries with scaling timeouts.',
-                optional=True,
-            )
+            Option('--smt-retry-limit', int, 'smt_retry_limit', 'Number of times to retry SMT queries with scaling timeouts.', default=10)
         )
         self.add_option(
-            StringOption(
-                name='smt_tactic',
-                cmd_line_name='--smt-tactic',
-                default=None,
-                help_str='Z3 tactic to use when checking satisfiability. Example: (check-sat-using-smt)',
-                optional=True,
-            )
+                Option('--smt-tactic', str, 'smt_tactic', 'Z3 tactic to use with checking satisfiability. Example: (check-sat-using-smt)', default=None)
         )
 
 

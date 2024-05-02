@@ -5,23 +5,22 @@ import logging
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
+from argparse import FileType
 
 from graphviz import Digraph
 
 from .cli.args import (
     DefinitionOptionsGroup,
     DisplayOptionsGroup,
-    IntOption,
     KDefinitionOptionsGroup,
     KompileOptionsGroup,
     LoggingOptionsGroup,
     OutputFileOptionsGroup,
     SaveDirOptionsGroup,
     SpecOptionsGroup,
-    StringListOption,
     WarningOptionsGroup,
 )
-from .cli.cli import CLI, BoolOption, Command, DirPathOption, EnumOption, ReadFileOption, StringOption
+from .cli.cli import CLI, Command, Option
 from .cli.pyk import PrintInput
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
@@ -70,42 +69,24 @@ def main() -> None:
 class PrintOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, DisplayOptionsGroup, LoggingOptionsGroup):
     term: IO[Any]
     input: PrintInput
-    omit_labels: str | None
-    keep_cells: str | None
+    omit_labels: list[str] | None
+    keep_cells: list[str] | None
 
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            ReadFileOption(name='term', optional=False, help_str='Input term (in format specified with --input)')
+            Option('term', FileType('r'), help_str='Input term (in format specified with --input)', required=True)
         )
         self.add_option(
-            EnumOption(
-                name='input',
-                cmd_line_name='--input',
-                optional=True,
-                default=PrintInput.KAST_JSON,
-                help_str='Input format.',
-                enum_type=PrintInput,
-            )
+            Option('--input', PrintInput, 'input', help_str='Input format', choices=list(PrintInput), default=PrintInput.KAST_JSON)
         )
         self.add_option(
-            StringOption(
-                name='omit_labels',
-                cmd_line_name='--omit-labels',
-                optional=True,
-                default=None,
-                help_str='List of labels to omit from output',
-            )
+            Option('--omit-labels', str, 'omit_labels', help_str='List of labels to omit from output.', nargs='?', default=[])
         )
         self.add_option(
-            StringOption(
-                name='keep_cells',
-                cmd_line_name='--keep-cells',
-                optional=True,
-                default=None,
-                help_str='List of cells with primitive values to keep in output',
-            )
+            Option('--keep-cells', str, 'keep_cells', help_str='List of cells with primitive values to keep in output.', nargs='?', default=[])
         )
+
 
 
 class PrintCommand(Command[PrintOptionsGroup]):
@@ -157,11 +138,7 @@ class RPCPrintOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, Loggi
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            ReadFileOption(
-                'input_file',
-                optional=False,
-                help_str='An input file containing the JSON RPC request or response with KoreJSON payload.',
-            )
+            Option('input_file', FileType('r'), help_str='An input file containing the JSON RPC request or response with KoreJSON payload. ', required=True)
         )
 
 
@@ -258,18 +235,10 @@ class RPCKastOptionsGroup(OutputFileOptionsGroup, LoggingOptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            ReadFileOption(
-                name='reference_request_file',
-                optional=False,
-                help_str='An input file containing a JSON RPC request to server as a reference for the new request.',
-            )
+            Option('reference_request_file', FileType('r'), help_str='An input file containing a JSON RPC request to serve as a reference for the new request.', required=True)
         )
         self.add_option(
-            ReadFileOption(
-                name='response_file',
-                optional=False,
-                help_str='An input file containing a JSON RPC reesponse with KoreJSON payload.',
-            )
+            Option('response_file', FileType('r'), help_str='An input file containing a JSON RPC response with KoreJSON payload.', required=True)
         )
 
 
@@ -312,17 +281,17 @@ class ProveLegacyOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, Lo
     def __init__(self) -> None:
         super().__init__()
 
-        self.add_option(DirPathOption(name='main_file', help_str='Main file used for kompilation', optional=False))
-        self.add_option(DirPathOption(name='spec_file', help_str='File with the specification module.', optional=False))
-        self.add_option(StringOption(name='spec_module', help_str='Module with claims to be proven', optional=False))
         self.add_option(
-            StringListOption(
-                name='k_args',
-                cmd_line_name='kArgs',
-                toml_name='kArgs',
-                help_str='Arguments to pass through to K invocation.',
-                optional=True,
-            )
+            Option('main_file', str, help_str='Main file used for kompilation', required=True)
+        )
+        self.add_option(
+            Option('spec_file', str, help_str='File with the specification module.', required=True)
+        )
+        self.add_option(
+            Option('spec_module', str, help_str='Module with claims to be proven.', required=True)
+        )
+        self.add_option(
+            Option('kArgs', str, 'k_args', 'Module with claims to be proven.', required=True, nargs='*')
         )
 
 
@@ -351,6 +320,39 @@ class ProveOptionsGroup(LoggingOptionsGroup, SpecOptionsGroup, SaveDirOptionsGro
 
     def __init__(self) -> None:
         super().__init__()
+        self.add_option(
+            Option()
+        )
+
+
+    prove_args = pyk_args_command.add_parser(
+        'prove',
+        help='Prove an input specification (using RPC based prover).',
+        parents=[k_cli_args.logging_args, k_cli_args.spec_args, config_args.config_args],
+    )
+
+    prove_args.add_argument(
+        '--failure-info',
+        default=None,
+        action='store_true',
+        help='Print out more information about proof failures.',
+    )
+    prove_args.add_argument(
+        '--show-kcfg',
+        default=None,
+        action='store_true',
+        help='Display the resulting proof KCFG.',
+    )
+    prove_args.add_argument(
+        '--max-depth',
+        type=int,
+        help='Maximum number of steps to take in symbolic execution per basic block.',
+    )
+    prove_args.add_argument(
+        '--max-iterations',
+        type=int,
+        help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
+    )
 
         self.add_option(
             DirPathOption(
