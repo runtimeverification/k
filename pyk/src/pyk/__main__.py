@@ -24,6 +24,7 @@ from .kast.manip import (
 )
 from .kast.outer import read_kast_definition
 from .kast.pretty import PrettyPrinter
+from .kast.utils import parse_outer
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
@@ -35,7 +36,7 @@ from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -46,6 +47,7 @@ if TYPE_CHECKING:
         JsonToKoreOptions,
         KompileCommandOptions,
         KoreToJsonOptions,
+        ParseOuterOptions,
         PrintOptions,
         ProveLegacyOptions,
         ProveOptions,
@@ -381,6 +383,31 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
     kore = Pattern.from_json(text)
     kore.write(sys.stdout)
     sys.stdout.write('\n')
+
+
+def exec_parse_outer(options: ParseOuterOptions) -> None:
+    definition_file = options.main_file.resolve()
+    search_paths = [definition_file.parent]
+    for include in getattr(options, 'includes', []):
+        include_path = Path(include)
+        try:
+            check_dir_path(include_path)
+        except ValueError:
+            _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
+        search_paths.append(include_path.resolve())
+
+    main_module_name = getattr(options, 'main_module', definition_file.stem.upper())
+    try:
+        final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
+    except Exception as e:
+        _LOGGER.critical(e)
+        exit(1)
+
+    result_text = json.dumps(final_definition.to_dict())
+    try:
+        options.output_file.write(result_text)
+    except AttributeError:
+        sys.stdout.write(f'{result_text}\n')
 
 
 if __name__ == '__main__':

@@ -369,9 +369,7 @@ public class ToJson {
       if (!name.isEmpty()) jsonProduction.add("name", name.get());
     } else if (prod instanceof RegexTerminal t) {
       jsonProduction.add("node", JsonParser.KREGEXTERMINAL);
-      jsonProduction.add("precedeRegex", t.precedeRegex());
       jsonProduction.add("regex", t.regex());
-      jsonProduction.add("followRegex", t.followRegex());
     } else if (prod instanceof Terminal t) {
       jsonProduction.add("node", JsonParser.KTERMINAL);
       jsonProduction.add("value", t.value());

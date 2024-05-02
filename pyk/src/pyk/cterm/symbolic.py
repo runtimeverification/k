@@ -23,7 +23,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_top, mlEquals, mlTop
+from ..prelude.ml import is_top, mlEquals
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -212,11 +212,11 @@ class CTermSymbolic:
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
 
-        if not result.satisfiable:
+        if not result.valid:
             if result.substitution is not None:
-                _LOGGER.debug(f'Received a non-empty substitution for unsatisfiable implication: {result.substitution}')
+                _LOGGER.debug(f'Received a non-empty substitution for falsifiable implication: {result.substitution}')
             if result.predicate is not None:
-                _LOGGER.debug(f'Received a non-empty predicate for unsatisfiable implication: {result.predicate}')
+                _LOGGER.debug(f'Received a non-empty predicate for falsifiable implication: {result.predicate}')
             failing_cells: list[tuple[str, KInner]] = []
             remaining_implication: KInner | None = None
             if failure_reason:
@@ -251,11 +251,11 @@ class CTermSymbolic:
             return CTermImplies(None, tuple(failing_cells), remaining_implication, result.logs)
 
         if result.substitution is None:
-            raise ValueError('Received empty substutition for satisfiable implication.')
+            raise ValueError('Received empty substutition for valid implication.')
         if result.predicate is None:
-            raise ValueError('Received empty predicate for satisfiable implication.')
+            raise ValueError('Received empty predicate for valid implication.')
         ml_subst = self.kore_to_kast(result.substitution)
-        ml_pred = self.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
+        ml_pred = self.kore_to_kast(result.predicate)
         ml_preds = flatten_label('#And', ml_pred)
         if is_top(ml_subst):
             csubst = CSubst(subst=Subst({}), constraints=ml_preds)
