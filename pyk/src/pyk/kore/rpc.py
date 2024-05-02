@@ -3,6 +3,7 @@ from __future__ import annotations
 import http.client
 import json
 import logging
+import os
 import socket
 import sys
 from abc import ABC, abstractmethod
@@ -920,6 +921,7 @@ class SatResult(GetModelResult):
 class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
+    port: int
     _client: JsonRpcClientFacade
 
     def __init__(
@@ -935,6 +937,7 @@ class KoreClient(ContextManager['KoreClient']):
     ):
         if dispatch is None:
             dispatch = {}
+        self.port = port
         self._client = JsonRpcClientFacade(
             host,
             port,
@@ -1104,6 +1107,7 @@ class KoreServerArgs(TypedDict, total=False):
     haskell_log_format: KoreExecLogFormat | None
     haskell_log_entries: Iterable[str] | None
     bug_report: BugReport | None
+    haskell_threads: int | None
 
 
 class KoreServerInfo(NamedTuple):
@@ -1128,6 +1132,7 @@ class KoreServer(ContextManager['KoreServer']):
     _log_axioms_file: Path | None
     _haskell_log_format: KoreExecLogFormat
     _haskell_log_entries: list[str]
+    _haskell_threads: int | None
 
     _bug_report: BugReport | None
 
@@ -1157,6 +1162,8 @@ class KoreServer(ContextManager['KoreServer']):
         else:
             self._haskell_log_entries = []
 
+        self._haskell_threads = args.get('haskell_threads') or 1
+
         self._bug_report = args.get('bug_report')
 
         self._validate()
@@ -1185,8 +1192,12 @@ class KoreServer(ContextManager['KoreServer']):
             self._populate_bug_report(self._bug_report)
 
         cli_args = self._cli_args()
+
+        new_env = os.environ.copy()
+        new_env['GHCRTS'] = f'-N{self._haskell_threads}'
+
         _LOGGER.info(f'Starting KoreServer: {" ".join(cli_args)}')
-        self._proc = Popen(cli_args)
+        self._proc = Popen(cli_args, env=new_env)
         pid = self._proc.pid
         host, port = self._get_host_and_port(pid)
         if self._port:
@@ -1366,6 +1377,7 @@ def kore_server(
     log_axioms_file: Path | None = None,
     haskell_log_format: KoreExecLogFormat | None = None,
     haskell_log_entries: Iterable[str] | None = None,
+    haskell_threads: int | None = None,
     # booster
     llvm_definition_dir: Path | None = None,
     fallback_on: Iterable[str | FallbackReason] | None = None,
@@ -1385,6 +1397,7 @@ def kore_server(
         'smt_tactic': smt_tactic,
         'haskell_log_format': haskell_log_format,
         'haskell_log_entries': haskell_log_entries,
+        'haskell_threads': haskell_threads,
         'bug_report': bug_report,
     }
     if llvm_definition_dir:
