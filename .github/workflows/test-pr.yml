@@ -117,7 +117,7 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 15
-          build-package: package/debian/build-package jammy
+          build-package: package/debian/build-package jammy kframework
           test-package: package/debian/test-package
       - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
         if: failure()
