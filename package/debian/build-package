@@ -19,4 +19,4 @@ mv package/debian/${subdir}/rules.${base_distro}    debian/rules
 
 dpkg-buildpackage
 
-mv ../kframework_$(cat package/version)_amd64.deb ${pkg_name}
+mv ../${subdir}_$(cat package/version)_amd64.deb ${pkg_name}

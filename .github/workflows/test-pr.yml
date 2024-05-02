@@ -136,6 +136,37 @@ jobs:
           retention-days: 1
 
 
+  test-frontend-package-ubuntu-jammy:
+    name: 'K: Ubuntu Jammy Frontend Package'
+    runs-on: [self-hosted, linux, normal]
+    needs: code-quality
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
+        with:
+          os: ubuntu
+          distro: jammy
+          llvm: 15
+          build-package: package/debian/build-package jammy kframework-frontend
+          test-package: package/debian/test-frontend-package
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
+      - name: 'On Success, Upload the package built to the Summary Page'
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kframework-frontend.deb
+          path: kframework-frontend.deb
+          if-no-files-found: error
+          retention-days: 1
+
+
   pyk-build-on-nix:
     needs: code-quality
     name: 'Pyk: Nix Build'
