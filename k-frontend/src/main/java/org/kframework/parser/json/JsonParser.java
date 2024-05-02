@@ -348,6 +348,10 @@ public class JsonParser {
         newAtt = newAtt.add(Att.CELL_FRAGMENT(), Sort.class, toSort(attMap.getJsonObject(key)));
       } else if (key.equals(Att.SORT_PARAMS().key())) {
         newAtt = newAtt.add(Att.SORT_PARAMS(), Sort.class, toSort(attMap.getJsonObject(key)));
+      } else if (key.equals(Att.CONTENT_START_COLUMN().key())) {
+        newAtt = newAtt.add(Att.CONTENT_START_COLUMN(), Integer.parseInt(attMap.getString(key)));
+      } else if (key.equals(Att.CONTENT_START_LINE().key())) {
+        newAtt = newAtt.add(Att.CONTENT_START_LINE(), Integer.parseInt(attMap.getString(key)));
       } else {
         Att.Key attKey =
             Att.getBuiltinKeyOptional(key)
