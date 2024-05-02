@@ -5,13 +5,14 @@ import sys
 from contextlib import contextmanager
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
 from .compiler import KLLVM_MODULE_FILE_NAME, KLLVM_MODULE_NAME, RUNTIME_MODULE_FILE_NAME, RUNTIME_MODULE_NAME
 from .runtime import Runtime
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from types import ModuleType
 
 
