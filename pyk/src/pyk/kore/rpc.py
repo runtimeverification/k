@@ -540,63 +540,6 @@ class State:
         return _kore
 
 
-class RewriteResult(ABC):
-    rule_id: str
-
-    @classmethod
-    def from_dict(cls: type[RR], dct: Mapping[str, Any]) -> RR:
-        if dct['tag'] == 'success':
-            return globals()['RewriteSuccess'].from_dict(dct)
-        elif dct['tag'] == 'failure':
-            return globals()['RewriteFailure'].from_dict(dct)
-        else:
-            raise ValueError(f"Expected {dct['tag']} as 'success'/'failure'")
-
-    @abstractmethod
-    def to_dict(self) -> dict[str, Any]: ...
-
-
-@final
-@dataclass(frozen=True)
-class RewriteSuccess(RewriteResult):
-    rule_id: str
-    rewritten_term: Pattern | None
-
-    @classmethod
-    def from_dict(cls: type[RewriteSuccess], dct: Mapping[str, Any]) -> RewriteSuccess:
-        return RewriteSuccess(
-            rule_id=dct['rule-id'],
-            rewritten_term=kore_term(dct['rewritten-term']) if 'rewritten-term' in dct else None,
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        rewritten_term = {'rewritten-term': KoreClient._state(self.rewritten_term)} if self.rewritten_term else {}
-        return {'tag': 'success', 'rule-id': self.rule_id} | rewritten_term
-
-
-@final
-@dataclass(frozen=True)
-class RewriteFailure(RewriteResult):
-    rule_id: str
-    reason: str
-
-    @classmethod
-    def from_dict(cls: type[RewriteFailure], dct: Mapping[str, Any]) -> RewriteFailure:
-        return RewriteFailure(
-            rule_id=dct['rule-id'],
-            reason=dct['reason'],
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
-
-
-class LogOrigin(str, Enum):
-    KORE_RPC = 'kore-rpc'
-    BOOSTER = 'booster'
-    LLVM = 'llvm'
-
-
 class LogEntry(ABC):  # noqa: B024
     origin: LogOrigin
     result: RewriteResult
@@ -651,6 +594,63 @@ class LogSimplification(LogEntry):
     def to_dict(self) -> dict[str, Any]:
         original_term = {'original-term': KoreClient._state(self.original_term)} if self.original_term else {}
         return {'tag': 'simplification', 'origin': self.origin.value, 'result': self.result.to_dict()} | original_term
+
+
+class LogOrigin(str, Enum):
+    KORE_RPC = 'kore-rpc'
+    BOOSTER = 'booster'
+    LLVM = 'llvm'
+
+
+class RewriteResult(ABC):
+    rule_id: str
+
+    @classmethod
+    def from_dict(cls: type[RR], dct: Mapping[str, Any]) -> RR:
+        if dct['tag'] == 'success':
+            return globals()['RewriteSuccess'].from_dict(dct)
+        elif dct['tag'] == 'failure':
+            return globals()['RewriteFailure'].from_dict(dct)
+        else:
+            raise ValueError(f"Expected {dct['tag']} as 'success'/'failure'")
+
+    @abstractmethod
+    def to_dict(self) -> dict[str, Any]: ...
+
+
+@final
+@dataclass(frozen=True)
+class RewriteSuccess(RewriteResult):
+    rule_id: str
+    rewritten_term: Pattern | None
+
+    @classmethod
+    def from_dict(cls: type[RewriteSuccess], dct: Mapping[str, Any]) -> RewriteSuccess:
+        return RewriteSuccess(
+            rule_id=dct['rule-id'],
+            rewritten_term=kore_term(dct['rewritten-term']) if 'rewritten-term' in dct else None,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        rewritten_term = {'rewritten-term': KoreClient._state(self.rewritten_term)} if self.rewritten_term else {}
+        return {'tag': 'success', 'rule-id': self.rule_id} | rewritten_term
+
+
+@final
+@dataclass(frozen=True)
+class RewriteFailure(RewriteResult):
+    rule_id: str
+    reason: str
+
+    @classmethod
+    def from_dict(cls: type[RewriteFailure], dct: Mapping[str, Any]) -> RewriteFailure:
+        return RewriteFailure(
+            rule_id=dct['rule-id'],
+            reason=dct['reason'],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
 
 
 class ExecuteResult(ABC):  # noqa: B024
