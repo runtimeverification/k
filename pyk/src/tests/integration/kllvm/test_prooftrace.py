@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import pyk.kllvm.hints.prooftrace as prooftrace
 import pyk.kllvm.load  # noqa: F401
-from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import App
 from pyk.kore.prelude import (
     SORT_K_CONFIG_VAR,
     SORT_K_ITEM,
@@ -13,6 +11,7 @@ from pyk.kore.prelude import (
     k_config_var,
     map_pattern,
 )
+from pyk.kore.syntax import App
 from pyk.testing import ProofTraceTest
 
 
