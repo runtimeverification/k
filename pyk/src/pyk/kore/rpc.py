@@ -546,12 +546,9 @@ class LogEntry(ABC):
 
     @classmethod
     def from_dict(cls: type[LE], dct: Mapping[str, Any]) -> LE:
-        if dct['tag'] == 'rewrite':
-            return globals()['LogRewrite'].from_dict(dct)
-        elif dct['tag'] == 'simplification':
-            return globals()['LogSimplification'].from_dict(dct)
-        else:
-            raise ValueError(f"Expected {dct['tag']} as 'rewrite'/'simplification'")
+        if dct['tag'] != 'rewrite':
+            raise ValueError(f"Expected {dct['tag']} as 'rewrite'")
+        return globals()['LogRewrite'].from_dict(dct)
 
     @abstractmethod
     def to_dict(self) -> dict[str, Any]: ...
@@ -572,28 +569,6 @@ class LogRewrite(LogEntry):
 
     def to_dict(self) -> dict[str, Any]:
         return {'tag': 'rewrite', 'origin': self.origin.value, 'result': self.result.to_dict()}
-
-
-@final
-@dataclass(frozen=True)
-class LogSimplification(LogEntry):
-    origin: LogOrigin
-    result: RewriteResult
-    original_term: Pattern | None
-    original_term_index: tuple[int, ...] | None
-
-    @classmethod
-    def from_dict(cls: type[LogSimplification], dct: Mapping[str, Any]) -> LogSimplification:
-        return LogSimplification(
-            origin=LogOrigin(dct['origin']),
-            result=RewriteResult.from_dict(dct['result']),
-            original_term=kore_term(dct['original-term']) if 'original-term' in dct else None,
-            original_term_index=None,  # TODO fixme
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        original_term = {'original-term': KoreClient._state(self.original_term)} if self.original_term else {}
-        return {'tag': 'simplification', 'origin': self.origin.value, 'result': self.result.to_dict()} | original_term
 
 
 class LogOrigin(str, Enum):
@@ -1004,8 +979,6 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
-        log_successful_simplifications: bool | None = None,
-        log_failed_simplifications: bool | None = None,
         log_timing: bool | None = None,
     ) -> ExecuteResult:
         params = filter_none(
@@ -1020,8 +993,6 @@ class KoreClient(ContextManager['KoreClient']):
                 'state': self._state(pattern),
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
-                'log-successful-simplifications': log_successful_simplifications,
-                'log-failed-simplifications': log_failed_simplifications,
                 'log-timing': log_timing,
             }
         )
@@ -1035,16 +1006,12 @@ class KoreClient(ContextManager['KoreClient']):
         consequent: Pattern,
         *,
         module_name: str | None = None,
-        log_successful_simplifications: bool | None = None,
-        log_failed_simplifications: bool | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
-                'log-successful-simplifications': log_successful_simplifications,
-                'log-failed-simplifications': log_failed_simplifications,
             }
         )
 
@@ -1056,15 +1023,11 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         module_name: str | None = None,
-        log_successful_simplifications: bool | None = None,
-        log_failed_simplifications: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
-                'log-successful-simplifications': log_successful_simplifications,
-                'log-failed-simplifications': log_failed_simplifications,
             }
         )
 
