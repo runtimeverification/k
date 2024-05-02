@@ -3,6 +3,7 @@ from __future__ import annotations
 import pyk.kllvm.hints.prooftrace as prooftrace
 import pyk.kllvm.load  # noqa: F401
 from pyk.kore.parser import KoreParser
+from pyk.kore.syntax import App
 from pyk.kore.prelude import (
     SORT_K_CONFIG_VAR,
     SORT_K_ITEM,
@@ -29,8 +30,7 @@ class TestProofTrace(ProofTraceTest):
     """
     KOMPILE_MAIN_MODULE = 'TEST-PROOF-TRACE'
 
-    #kore_text = _kast(definition_dir=x, input='program', output='kore', expression="a()").stdout
-    program_pattern = KoreParser("Lbla\'LParRParUnds\'TEST-PROOF-TRACE-SYNTAX\'Unds\'Foo{}()").pattern()
+    program_pattern = App("Lbla\'LParRParUnds\'TEST-PROOF-TRACE-SYNTAX\'Unds\'Foo")
 
     HINTS_INPUT_KORE = init_generated_top_cell(
         map_pattern(
