@@ -1006,12 +1006,14 @@ class KoreClient(ContextManager['KoreClient']):
         consequent: Pattern,
         *,
         module_name: str | None = None,
+        log_timing: bool | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
+                'log-timing': log_timing,
             }
         )
 
@@ -1023,11 +1025,13 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         module_name: str | None = None,
+        log_timing: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
+                'log-timing': log_timing,
             }
         )
 
