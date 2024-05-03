@@ -578,7 +578,7 @@ class LogOrigin(str, Enum):
 
 
 class RewriteResult(ABC):
-    rule_id: str
+    rule_id: str | None
 
     @classmethod
     def from_dict(cls: type[RR], dct: Mapping[str, Any]) -> RR:
@@ -597,7 +597,7 @@ class RewriteResult(ABC):
 @dataclass(frozen=True)
 class RewriteSuccess(RewriteResult):
     rule_id: str
-    rewritten_term: Pattern | None
+    rewritten_term: Pattern | None = None
 
     @classmethod
     def from_dict(cls: type[RewriteSuccess], dct: Mapping[str, Any]) -> RewriteSuccess:
@@ -614,15 +614,12 @@ class RewriteSuccess(RewriteResult):
 @final
 @dataclass(frozen=True)
 class RewriteFailure(RewriteResult):
-    rule_id: str
+    rule_id: str | None
     reason: str
 
     @classmethod
     def from_dict(cls: type[RewriteFailure], dct: Mapping[str, Any]) -> RewriteFailure:
-        return RewriteFailure(
-            rule_id=dct['rule-id'],
-            reason=dct['reason'],
-        )
+        return RewriteFailure(rule_id=dct.get('rule-id'), reason=dct['reason'])
 
     def to_dict(self) -> dict[str, Any]:
         return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
