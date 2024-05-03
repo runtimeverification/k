@@ -3,11 +3,13 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from argparse import FileType
 from pathlib import Path
 from typing import TYPE_CHECKING
-from argparse import FileType
 
 from graphviz import Digraph
+
+from pyk.cli.utils import dir_path
 
 from .cli.args import (
     DefinitionOptionsGroup,
@@ -16,7 +18,6 @@ from .cli.args import (
     KompileOptionsGroup,
     LoggingOptionsGroup,
     OutputFileOptionsGroup,
-    SaveDirOptionsGroup,
     SpecOptionsGroup,
     WarningOptionsGroup,
 )
@@ -69,8 +70,8 @@ def main() -> None:
 class PrintOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, DisplayOptionsGroup, LoggingOptionsGroup):
     term: IO[Any]
     input: PrintInput
-    omit_labels: list[str] | None
-    keep_cells: list[str] | None
+    omit_labels: str | None
+    keep_cells: str | None
 
     def __init__(self) -> None:
         super().__init__()
@@ -78,15 +79,35 @@ class PrintOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, DisplayO
             Option('term', FileType('r'), help_str='Input term (in format specified with --input)', required=True)
         )
         self.add_option(
-            Option('--input', PrintInput, 'input', help_str='Input format', choices=list(PrintInput), default=PrintInput.KAST_JSON)
+            Option(
+                '--input',
+                PrintInput,
+                'input',
+                help_str='Input format',
+                choices=list(PrintInput),
+                default=PrintInput.KAST_JSON,
+            )
         )
         self.add_option(
-            Option('--omit-labels', str, 'omit_labels', help_str='List of labels to omit from output.', nargs='?', default=[])
+            Option(
+                '--omit-labels',
+                str,
+                'omit_labels',
+                help_str='List of labels to omit from output.',
+                nargs='?',
+                default=[],
+            )
         )
         self.add_option(
-            Option('--keep-cells', str, 'keep_cells', help_str='List of cells with primitive values to keep in output.', nargs='?', default=[])
+            Option(
+                '--keep-cells',
+                str,
+                'keep_cells',
+                help_str='List of cells with primitive values to keep in output.',
+                nargs='?',
+                default=[],
+            )
         )
-
 
 
 class PrintCommand(Command[PrintOptionsGroup]):
@@ -138,7 +159,12 @@ class RPCPrintOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, Loggi
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            Option('input_file', FileType('r'), help_str='An input file containing the JSON RPC request or response with KoreJSON payload. ', required=True)
+            Option(
+                'input_file',
+                FileType('r'),
+                help_str='An input file containing the JSON RPC request or response with KoreJSON payload. ',
+                required=True,
+            )
         )
 
 
@@ -235,10 +261,20 @@ class RPCKastOptionsGroup(OutputFileOptionsGroup, LoggingOptionsGroup):
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            Option('reference_request_file', FileType('r'), help_str='An input file containing a JSON RPC request to serve as a reference for the new request.', required=True)
+            Option(
+                'reference_request_file',
+                FileType('r'),
+                help_str='An input file containing a JSON RPC request to serve as a reference for the new request.',
+                required=True,
+            )
         )
         self.add_option(
-            Option('response_file', FileType('r'), help_str='An input file containing a JSON RPC response with KoreJSON payload.', required=True)
+            Option(
+                'response_file',
+                FileType('r'),
+                help_str='An input file containing a JSON RPC response with KoreJSON payload.',
+                required=True,
+            )
         )
 
 
@@ -281,18 +317,10 @@ class ProveLegacyOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, Lo
     def __init__(self) -> None:
         super().__init__()
 
-        self.add_option(
-            Option('main_file', str, help_str='Main file used for kompilation', required=True)
-        )
-        self.add_option(
-            Option('spec_file', str, help_str='File with the specification module.', required=True)
-        )
-        self.add_option(
-            Option('spec_module', str, help_str='Module with claims to be proven.', required=True)
-        )
-        self.add_option(
-            Option('kArgs', str, 'k_args', 'Module with claims to be proven.', required=True, nargs='*')
-        )
+        self.add_option(Option('main_file', str, help_str='Main file used for kompilation', required=True))
+        self.add_option(Option('spec_file', str, help_str='File with the specification module.', required=True))
+        self.add_option(Option('spec_module', str, help_str='Module with claims to be proven.', required=True))
+        self.add_option(Option('kArgs', str, 'k_args', 'Module with claims to be proven.', required=True, nargs='*'))
 
 
 class ProveLegacyCommand(Command[ProveLegacyOptionsGroup]):
@@ -309,9 +337,7 @@ class ProveLegacyCommand(Command[ProveLegacyOptionsGroup]):
         _LOGGER.info(f'Wrote file: {self.options.output_file.name}')
 
 
-class ProveOptionsGroup(LoggingOptionsGroup, SpecOptionsGroup, SaveDirOptionsGroup):
-    definition_dir: Path | None
-    type_inference_mode: TypeInferenceMode | None
+class ProveOptionsGroup(LoggingOptionsGroup, SpecOptionsGroup):
     failure_info: bool
     kore_rpc_command: str | Iterable[str] | None
     max_depth: int | None
@@ -321,101 +347,45 @@ class ProveOptionsGroup(LoggingOptionsGroup, SpecOptionsGroup, SaveDirOptionsGro
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            Option()
-        )
-
-
-    prove_args = pyk_args_command.add_parser(
-        'prove',
-        help='Prove an input specification (using RPC based prover).',
-        parents=[k_cli_args.logging_args, k_cli_args.spec_args, config_args.config_args],
-    )
-
-    prove_args.add_argument(
-        '--failure-info',
-        default=None,
-        action='store_true',
-        help='Print out more information about proof failures.',
-    )
-    prove_args.add_argument(
-        '--show-kcfg',
-        default=None,
-        action='store_true',
-        help='Display the resulting proof KCFG.',
-    )
-    prove_args.add_argument(
-        '--max-depth',
-        type=int,
-        help='Maximum number of steps to take in symbolic execution per basic block.',
-    )
-    prove_args.add_argument(
-        '--max-iterations',
-        type=int,
-        help='Maximum number of KCFG explorations to take in attempting to discharge proof.',
-    )
-
-        self.add_option(
-            DirPathOption(
-                name='definition_dir',
-                cmd_line_name='--definition',
-                toml_name='definition',
-                help_str='Path to definition to use.',
-                optional=True,
-                default=None,
-            )
-        )
-        self.add_option(
-            EnumOption(
-                enum_type=TypeInferenceMode,
-                name='type_inference_mode',
-                cmd_line_name='--type-inference-mode',
-                help_str='Mode for doing K rule type inference in.',
-                optional=True,
-                default=None,
-            )
-        )
-        self.add_option(
-            BoolOption(
-                name='failure_info',
-                cmd_line_name='--failure-info',
-                help_str='Print out more information about proof failures.',
-                default=None,
-            )
-        )
-        self.add_option(
-            StringOption(
-                name='kore_rpc_command',
-                cmd_line_name='--kore-rpc-command',
-                help_str='Custom command to start RPC server',
-                default=None,
-            )
-        )
-        self.add_option(
-            IntOption(
-                name='max_depth',
-                cmd_line_name='--max-depth',
-                help_str='Maximum number of steps to take in symbolic execution per basic block.',
-                default=None,
-                optional=True,
-            )
-        )
-        self.add_option(
-            IntOption(
-                name='max_iterations',
-                cmd_line_name='--max-iterations',
-                help_str='Maximum number of KCFG explorations to take in attempting to discharge proof.',
-                default=None,
-                optional=True,
-            )
-        )
-        self.add_option(
-            BoolOption(
-                name='show_kcfg',
-                cmd_line_name='--show-kcfg',
-                help_str='Display the resulting proof KCFG.',
+            Option(
+                '--failure-info',
+                bool,
+                'failure_info',
+                'Print out more information about proof failures.',
                 default=False,
-                optional=True,
+                action='store_true',
             )
+        )
+        self.add_option(
+            Option(
+                '--show-kcfg',
+                bool,
+                'show_kcfg',
+                'Display the resulting proof KCFG.',
+                default=False,
+                action='store_true',
+            )
+        )
+        self.add_option(
+            Option(
+                '--max-depth',
+                int,
+                'max_depth',
+                'Maximum number of stepss to take in symbolic execution per basic block.',
+                default=None,
+            )
+        )
+        self.add_option(
+            Option(
+                '--max-iterations',
+                int,
+                'max_iterations',
+                'Maximum number of KCFG explorations to take in attempting to discharge proof.',
+                default=None,
+            )
+        )
+        self.add_option(
+            Option('--kore-rpc-command', str, 'kore_rpc_command', 'Custom command to start RPC server.', default=None)
         )
 
 
@@ -470,41 +440,34 @@ class KompileCommandOptionsGroup(
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            DirPathOption(
-                name='definition_dir',
-                cmd_line_name='--output-definition',
-                aliases=['--definition'],
+            Option(
+                '--output-definition',
+                ensure_dir_path,
+                'definition_dir',
+                'Path to definition to use.',
                 toml_name='definition',
-                default=None,
-                help_str='Path to kompile definition to.',
-                optional=True,
+                aliases=['--definition'],
             )
         )
+        self.add_option(Option('main_file', str, required=True, help_str='File with the specification module.'))
         self.add_option(
-            StringOption(
-                name='main_file',
-                optional=False,
-                help_str='File with the specification module.',
-            )
-        )
-        self.add_option(
-            EnumOption(
-                enum_type=KompileBackend,
-                name='backend',
-                cmd_line_name='--backend',
+            Option(
+                '--backend',
+                KompileBackend,
+                'backend',
+                'K backend to target with compilation.',
+                choices=list(KompileBackend),
                 default=KompileBackend.LLVM,
-                help_str='K backend to target with compilation.',
-                optional=True,
             )
         )
         self.add_option(
-            EnumOption(
-                enum_type=TypeInferenceMode,
-                name='type_inference_mode',
-                cmd_line_name='--type-inference-mode',
+            Option(
+                '--type-inference-mode',
+                TypeInferenceMode,
+                'type_inference_mode',
+                'Mode for doing K rule type inference in.',
+                choices=list(TypeInferenceMode),
                 default=None,
-                help_str='Mode for doing K rule type inference in.',
-                optional=True,
             )
         )
 
@@ -581,15 +544,8 @@ class RunOptionsGroup(LoggingOptionsGroup):
 
     def __init__(self) -> None:
         super().__init__()
-        self.add_option(StringOption(name='pgm_file', optional=False, help_str='File program to run in it.'))
-        self.add_option(
-            DirPathOption(
-                name='definition_dir',
-                cmd_line_name='--definition',
-                optional=False,
-                help_str='Path to definition to use.',
-            )
-        )
+        self.add_option(Option('pgm_file', str, required=True, help_str='File program to run in it.'))
+        self.add_option(Option('--definition', dir_path, 'definition_dir', 'Path to definition to use', default=None))
 
 
 class RunCommand(Command[RunOptionsGroup]):
@@ -639,7 +595,7 @@ class CoverageOptionsGroup(DefinitionOptionsGroup, OutputFileOptionsGroup, Loggi
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            ReadFileOption(name='coverage_file', optional=False, help_str='Coverage fild to build log for.')
+            Option('coverage_file', FileType('r'), required=True, help_str='Coverage file to build log for.')
         )
 
 

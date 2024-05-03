@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 from functools import cached_property
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
-from argparse import FileType
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import Option, Options, OptionsGroup
@@ -124,9 +123,7 @@ class DefinitionOptionsGroup(OptionsGroup):
 
     def __init__(self) -> None:
         super().__init__()
-        self.add_option(
-            Option('--definition', dir_path, 'definition_dir', 'Path to definition to use.', default=None)
-        )
+        self.add_option(Option('--definition', dir_path, 'definition_dir', 'Path to definition to use.', default=None))
 
 
 class DefinitionOptions(Options):
@@ -145,11 +142,7 @@ class DisplayOptionsGroup(OptionsGroup):
 
     def __init__(self) -> None:
         super().__init__()
-        self.add_option(
-            Option(
-                '--minimize', bool, 'minimize', 'Minimize output.', action='store_true', default=True
-            )
-        )
+        self.add_option(Option('--minimize', bool, 'minimize', 'Minimize output.', action='store_true', default=True))
 
 
 class DisplayOptions(Options):
@@ -168,31 +161,43 @@ class KDefinitionOptionsGroup(OptionsGroup):
     syntax_module: str | None
     md_selector: str
 
-
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
             Option(
-                '-I', str, 'includes', 'Directories to lookup K definitions in.', action='append', default=[],
-                
+                '-I',
+                str,
+                'includes',
+                'Directories to lookup K definitions in.',
+                action='append',
+                default=[],
             )
         )
         self.add_option(
             Option(
-                '--main-module', str, 'main_module', 'Name of the main module.', default=None,
-                
+                '--main-module',
+                str,
+                'main_module',
+                'Name of the main module.',
+                default=None,
             )
         )
         self.add_option(
             Option(
-                '--syntax-module', str, 'syntax_module', 'Name of the syntax module.', default=None,
-                
+                '--syntax-module',
+                str,
+                'syntax_module',
+                'Name of the syntax module.',
+                default=None,
             )
         )
         self.add_option(
             Option(
-                '--md-selector', str, 'md_selector', 'Code selector expression to use when reading markdown.', default='k',
-                
+                '--md-selector',
+                str,
+                'md_selector',
+                'Code selector expression to use when reading markdown.',
+                default='k',
             )
         )
 
@@ -215,25 +220,6 @@ class KDefinitionOptions(Options):
         }
 
 
-
-class SaveDirOptionsGroup(OptionsGroup):
-    save_directory: Path | None
-    temp_directory: Path | None
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.add_option(
-            Option(
-                '--save-directory', ensure_dir_path, 'save_directory', 'Directory to save proof artifacts at for reuse.', default=None,
-            )
-        )
-        self.add_option(
-            Option(
-                '--temp-directory', ensure_dir_path, 'temp_directory', 'Directory to save proof intermediate temporaries to.', default=None,
-            )
-        )
-
-
 class SaveDirOptions(Options):
     save_directory: Path | None
     temp_directory: Path | None
@@ -251,6 +237,10 @@ class SpecOptionsGroup(OptionsGroup):
     spec_module: str | None
     claim_labels: Iterable[str] | None
     exclude_claim_labels: Iterable[str] | None
+    definition_dir: Path | None
+    type_inference_mode: TypeInferenceMode
+    save_directory: Path | None
+    temp_directory: Path | None
 
     def __init__(self) -> None:
         super().__init__()
@@ -293,7 +283,35 @@ class SpecOptionsGroup(OptionsGroup):
                 toml_name='exclude-claim',
             )
         )
-
+        self.add_option(Option('--definition', dir_path, 'definition_dir', 'Path to definition to use.'))
+        self.add_option(
+            Option(
+                '--type-inference-mode',
+                TypeInferenceMode,
+                'type_inference_mode',
+                'Mode for doing K rule type inference in.',
+                choices=list(TypeInferenceMode),
+                default=TypeInferenceMode.DEFAULT,
+            )
+        )
+        self.add_option(
+            Option(
+                '--save-directory',
+                ensure_dir_path,
+                'save_directory',
+                'Directory to save proof artifacts at for reuse.',
+                default=None,
+            )
+        )
+        self.add_option(
+            Option(
+                '--temp-directory',
+                ensure_dir_path,
+                'temp_directory',
+                'Directory to save proof intermediate temporaries to.',
+                default=None,
+            )
+        )
 
 
 class SpecOptions(SaveDirOptions):
@@ -339,65 +357,153 @@ class KompileOptionsGroup(OptionsGroup):
     bison_lists: bool
     no_exc_wrap: bool
 
-
     def __init__(self) -> None:
         super().__init__()
         self.add_option(
-            Option('--emit-json', bool, 'emit_json', 'Emit JSON definition after compilation.', action='store_true', default=False)
+            Option(
+                '--emit-json',
+                bool,
+                'emit_json',
+                'Emit JSON definition after compilation.',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('--no-llvm-kompile', bool, 'llvm_kompile', 'Do not run llvm-kompile process.', action='store_false', default=True)
+            Option(
+                '--no-llvm-kompile',
+                bool,
+                'llvm_kompile',
+                'Do not run llvm-kompile process.',
+                action='store_false',
+                default=True,
+            )
         )
         self.add_option(
-            Option('--with-llvm-library', bool, 'llvm_library', 'Make kompile generate a dynamic llvm library.', action='store_true', default=False)
+            Option(
+                '--with-llvm-library',
+                bool,
+                'llvm_library',
+                'Make kompile generate a dynamic llvm library.',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('--enable-llvm-debug', bool, 'enable_llvm_debug', 'Make kompile generate debug symbols for llvm.', action='store_true', default=False)
+            Option(
+                '--enable-llvm-debug',
+                bool,
+                'enable_llvm_debug',
+                'Make kompile generate debug symbols for llvm.',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('--llvm-kompile-type', LLVMKompileType, 'llvm_kompile_type', 'Mode to kompile LLVM backend in.', default=None, choices=list(LLVMKompileType))
+            Option(
+                '--llvm-kompile-type',
+                LLVMKompileType,
+                'llvm_kompile_type',
+                'Mode to kompile LLVM backend in.',
+                default=None,
+                choices=list(LLVMKompileType),
+            )
         )
         self.add_option(
-            Option('--llvm-kompile-output',  ensure_dir_path, 'llvm_kompile_output', 'Location to put kompiled LLVM backend at.', default=None)
+            Option(
+                '--llvm-kompile-output',
+                ensure_dir_path,
+                'llvm_kompile_output',
+                'Location to put kompiled LLVM backend at.',
+                default=None,
+            )
         )
         self.add_option(
-            Option('--llvm-proof-hint-instrumentation',  bool, 'llvm_proof_hint_instrumentation', 'Enable proof hint generation in LLVM backend kompilation', action='store_true', default=False)
+            Option(
+                '--llvm-proof-hint-instrumentation',
+                bool,
+                'llvm_proof_hint_instrumentation',
+                'Enable proof hint generation in LLVM backend kompilation',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('--read-only-kompiled-directory',  bool, 'read_only', 'Generate a kompiled directory that K will not attempt to write to afterwards.', action='store_true', default=False)
+            Option(
+                '--read-only-kompiled-directory',
+                bool,
+                'read_only',
+                'Generate a kompiled directory that K will not attempt to write to afterwards.',
+                action='store_true',
+                default=False,
+            )
+        )
+        self.add_option(Option('-O0', bool, 'o0', 'Optimization level 0', action='store_true', default=False))
+        self.add_option(Option('-O1', bool, 'o1', 'Optimization level 1', action='store_true', default=False))
+        self.add_option(Option('-O2', bool, 'o2', 'Optimization level 2', action='store_true', default=False))
+        self.add_option(Option('-O3', bool, 'o3', 'Optimization level 3', action='store_true', default=False))
+        self.add_option(
+            Option('-ccopt', str, 'ccopts', 'Additional arguments to pass to llvm-kompile', action='append', default=[])
         )
         self.add_option(
-            Option('-O0',  bool, 'o0', 'Optimization level 0', action='store_true', default=False)
+            Option(
+                '--enable-search',
+                bool,
+                'enable_search',
+                'Enable search mode on LLVM backend krun',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('-O1',  bool, 'o1', 'Optimization level 1', action='store_true', default=False)
+            Option(
+                '--coverage',
+                bool,
+                'coverage',
+                'Enable logging semantics rule coverage measurement',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('-O2',  bool, 'o2', 'Optimization level 2', action='store_true', default=False)
+            Option(
+                '--gen-bison-parser',
+                bool,
+                'gen_bison_parser',
+                'Generate standolone Bison parser for program sort.',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('-O3',  bool, 'o3', 'Optimization level 3', action='store_true', default=False)
+            Option(
+                '--gen-glr-bison-parser',
+                bool,
+                'gen_glr_bison_parser',
+                'Generate standolone GLR Bison parser for program sort.',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('-ccopt',  str, 'ccopts', 'Additional arguments to pass to llvm-kompile', action='append', default=[])
+            Option(
+                '--bison-lists',
+                bool,
+                'bison_lists',
+                'Disable List{Sort} parsing to make grammar LR(1) for Bison parser.',
+                action='store_true',
+                default=False,
+            )
         )
         self.add_option(
-            Option('--enable-search',  bool, 'enable_search', 'Enable search mode on LLVM backend krun', action='store_true', default=False)
-        )
-        self.add_option(
-            Option('--coverage',  bool, 'coverage', 'Enable logging semantics rule coverage measurement', action='store_true', default=False)
-        )
-        self.add_option(
-            Option('--gen-bison-parser',  bool, 'gen_bison_parser', 'Generate standolone Bison parser for program sort.', action='store_true', default=False)
-        )
-        self.add_option(
-            Option('--gen-glr-bison-parser',  bool, 'gen_glr_bison_parser', 'Generate standolone GLR Bison parser for program sort.', action='store_true', default=False)
-        )
-        self.add_option(
-            Option('--bison-lists',  bool, 'bison_lists', 'Disable List{Sort} parsing to make grammar LR(1) for Bison parser.', action='store_true', default=False)
-        )
-        self.add_option(
-            Option('--no-exc-wrap',  bool, 'no_exc_wrap', 'Do not wrap the output on the CLI.', action='store_true', default=False)
+            Option(
+                '--no-exc-wrap',
+                bool,
+                'no_exc_wrap',
+                'Do not wrap the output on the CLI.',
+                action='store_true',
+                default=False,
+            )
         )
 
 
@@ -466,7 +572,13 @@ class ParallelOptionsGroup(OptionsGroup):
         super().__init__()
         self.add_option(
             Option(
-                '--workers', int, 'workers', 'Number of processes to run in parallel', aliases=['-j'], default=1, toml_name='j'
+                '--workers',
+                int,
+                'workers',
+                'Number of processes to run in parallel',
+                aliases=['-j'],
+                default=1,
+                toml_name='j',
             )
         )
 
@@ -492,9 +604,15 @@ class BugReportOptionsGroup(OptionsGroup):
 
     def __init__(self) -> None:
         super().__init__()
-        self.add_option(Option(
-            '--bug-report', bug_report_arg, 'bug_report', 'Generate bug report with given name.', default=None,
-        ))
+        self.add_option(
+            Option(
+                '--bug-report',
+                bug_report_arg,
+                'bug_report',
+                'Generate bug report with given name.',
+                default=None,
+            )
+        )
 
 
 class BugReportOptions(Options):
@@ -516,10 +634,22 @@ class SMTOptionsGroup(OptionsGroup):
             Option('--smt-timeout', int, 'smt_timeout', 'Timeout in ms to use for SMT queries.', default=300)
         )
         self.add_option(
-            Option('--smt-retry-limit', int, 'smt_retry_limit', 'Number of times to retry SMT queries with scaling timeouts.', default=10)
+            Option(
+                '--smt-retry-limit',
+                int,
+                'smt_retry_limit',
+                'Number of times to retry SMT queries with scaling timeouts.',
+                default=10,
+            )
         )
         self.add_option(
-                Option('--smt-tactic', str, 'smt_tactic', 'Z3 tactic to use with checking satisfiability. Example: (check-sat-using-smt)', default=None)
+            Option(
+                '--smt-tactic',
+                str,
+                'smt_tactic',
+                'Z3 tactic to use with checking satisfiability. Example: (check-sat-using-smt)',
+                default=None,
+            )
         )
 
 
