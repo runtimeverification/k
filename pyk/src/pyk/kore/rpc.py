@@ -541,17 +541,39 @@ class State:
 
 
 class LogEntry(ABC):
-    origin: LogOrigin
-    result: RewriteResult
-
     @classmethod
     def from_dict(cls: type[LE], dct: Mapping[str, Any]) -> LE:
-        if dct['tag'] != 'rewrite':
-            raise ValueError(f"Expected {dct['tag']} as 'rewrite'")
-        return globals()['LogRewrite'].from_dict(dct)
+        match dct['tag']:
+            case 'processing-time':
+                return LogTiming.from_dict(dct)  # type: ignore
+            case 'rewrite':
+                return LogRewrite.from_dict(dct)  # type: ignore
+            case _:
+                raise ValueError(f'Unsupported LogEntry tag: {dct["tag"]!r}')
 
     @abstractmethod
     def to_dict(self) -> dict[str, Any]: ...
+
+
+@final
+@dataclass(frozen=True)
+class LogTiming(LogEntry):
+    class Component(Enum):
+        KORE_RPC = 'kore-rpc'
+        BOOSTER = 'booster'
+        PROXY = 'proxy'
+
+    time: float
+    component: Component | None
+
+    @classmethod
+    def from_dict(cls, dct: Mapping[str, Any]) -> LogTiming:
+        return LogTiming(
+            time=dct['time'], component=LogTiming.Component(dct['component']) if 'component' in dct else None
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'tag': 'processing-time', 'time': self.time, 'component': self.component}
 
 
 @final
