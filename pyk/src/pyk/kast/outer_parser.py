@@ -107,6 +107,8 @@ class OuterParser:
         return Require(path)
 
     def module(self) -> Module:
+        begin_loc = self._la.loc
+
         self._match(TokenType.KW_MODULE)
 
         name = self._match(TokenType.MODNAME)
@@ -120,8 +122,18 @@ class OuterParser:
         while self._la.type is not TokenType.KW_ENDMODULE:
             sentences.append(self.sentence())
 
+        end_loc = self._la.loc + self._la.text
         self._consume()
 
+        att = Att(
+            att.items
+            + (
+                (
+                    'org.kframework.attributes.Location',
+                    f'{begin_loc.line},{begin_loc.col},{end_loc.line},{end_loc.col}',
+                ),
+            )
+        )
         return Module(name, sentences, imports, att)
 
     def importt(self) -> Import:

@@ -123,6 +123,11 @@ class StrType(AttType[str]):
 
 class LocationType(AttType[tuple[int, int, int, int]]):
     def from_dict(self, obj: Any) -> tuple[int, int, int, int]:
+        if isinstance(obj, str):
+            r = re.compile('(\\d+),(\\d+),(\\d+),(\\d+)')
+            m = r.fullmatch(obj)
+            assert m is not None
+            obj = [int(x) for x in m.groups()]
         assert isinstance(obj, list)
         a, b, c, d = obj
         assert isinstance(a, int)
