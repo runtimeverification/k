@@ -20,14 +20,18 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 def parse_outer(
-    definition_file: Path, main_module: str, search_paths: Iterable[Path] = (), md_selector: str = 'k'
+    definition_file: Path,
+    main_module: str,
+    search_paths: Iterable[Path] = (),
+    md_selector: str = 'k',
+    include_source: bool = True,
 ) -> KDefinition:
     _LOGGER.info(f'Reading {definition_file}')
     text = definition_file.read_text()
     if definition_file.suffix == '.md':
         text = select_code_blocks(text, md_selector)
 
-    modules = _slurp(text, search_paths, [definition_file], md_selector, str(definition_file))
+    modules = _slurp(text, search_paths, [definition_file], md_selector, str(definition_file), include_source)
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
     assert isinstance(final_definition, KDefinition)
     return final_definition
@@ -39,9 +43,10 @@ def _slurp(
     processed_files: list[Path] | None = None,
     md_selector: str = 'k',
     source: str = '',
+    include_source: bool = True,
 ) -> tuple[Module, ...]:
     processed_files = processed_files if processed_files is not None else []
-    parser = OuterParser(definition_text, source=source)
+    parser = OuterParser(definition_text, source=source if include_source else '')
     definition = parser.definition()
     result = definition.modules
     for require in definition.requires:
@@ -63,5 +68,5 @@ def _slurp(
                 text = f.read()
                 if required_file.suffix == '.md':
                     text = select_code_blocks(text, md_selector)
-                result += _slurp(text, search_paths, processed_files, md_selector, str(required_file))
+                result += _slurp(text, search_paths, processed_files, md_selector, str(required_file), include_source)
     return result
