@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..dequote import dequote_string
+from .att import Atts
 from .outer_lexer import _EOF_TOKEN, TokenType, outer_lexer
 from .outer_syntax import (
     EMPTY_ATT,
@@ -62,11 +63,13 @@ class OuterParser:
     _lexer: Iterator[Token]
     _la: Token
     _la2: Token
+    _source: str
 
-    def __init__(self, it: Iterable[str]):
+    def __init__(self, it: Iterable[str], source: str = ''):
         self._lexer = outer_lexer(it)
         self._la = next(self._lexer)
         self._la2 = next(self._lexer, _EOF_TOKEN)
+        self._source = source
 
     def _consume(self) -> str:
         res = self._la.text
@@ -125,15 +128,14 @@ class OuterParser:
         end_loc = self._la.loc + self._la.text
         self._consume()
 
-        att = Att(
-            att.items
-            + (
-                (
-                    'org.kframework.attributes.Location',
-                    f'{begin_loc.line},{begin_loc.col},{end_loc.line},{end_loc.col}',
-                ),
-            )
+        location = (
+            (
+                Atts.LOCATION.name,
+                f'{begin_loc.line},{begin_loc.col},{end_loc.line},{end_loc.col}',
+            ),
         )
+        source = ((Atts.SOURCE.name, self._source),) if self._source else ()
+        att = Att(att.items + location + source)
         return Module(name, sentences, imports, att)
 
     def importt(self) -> Import:

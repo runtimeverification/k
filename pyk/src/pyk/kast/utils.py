@@ -27,7 +27,7 @@ def parse_outer(
     if definition_file.suffix == '.md':
         text = select_code_blocks(text, md_selector)
 
-    modules = _slurp(text, search_paths, [definition_file], md_selector)
+    modules = _slurp(text, search_paths, [definition_file], md_selector, str(definition_file))
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
     assert isinstance(final_definition, KDefinition)
     return final_definition
@@ -38,9 +38,10 @@ def _slurp(
     search_paths: Iterable[Path] = (),
     processed_files: list[Path] | None = None,
     md_selector: str = 'k',
+    source: str = '',
 ) -> tuple[Module, ...]:
     processed_files = processed_files if processed_files is not None else []
-    parser = OuterParser(definition_text)
+    parser = OuterParser(definition_text, source=source)
     definition = parser.definition()
     result = definition.modules
     for require in definition.requires:
@@ -62,5 +63,5 @@ def _slurp(
                 text = f.read()
                 if required_file.suffix == '.md':
                     text = select_code_blocks(text, md_selector)
-                result += _slurp(text, search_paths, processed_files, md_selector)
+                result += _slurp(text, search_paths, processed_files, md_selector, str(required_file))
     return result
