@@ -12,7 +12,7 @@ from pyk.proof.reachability import APRProver
 from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
-from ..kllvm.compiler import compile_runtime
+from ..kllvm.compiler import compile_runtime, generate_hints
 from ..kllvm.importer import import_runtime
 from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
@@ -356,3 +356,16 @@ class RuntimeTest(KompiledTest):
     def runtime(self, definition_dir: Path) -> Runtime:
         compile_runtime(definition_dir)
         return import_runtime(definition_dir)
+
+
+class ProofTraceTest(KompiledTest):
+    KOMPILE_BACKEND = 'llvm'
+    KOMPILE_ARGS = {'llvm_proof_hint_instrumentation': True}
+
+    HINTS_INPUT_KORE: ClassVar[str]
+
+    @pytest.fixture(scope='class')
+    def hints(self, definition_dir: Path, kompile: Kompiler) -> bytes:
+        input_kore_file = kompile._cache_definition(self.HINTS_INPUT_KORE)
+        hints_file = generate_hints(definition_dir, input_kore_file)
+        return hints_file.read_bytes()
