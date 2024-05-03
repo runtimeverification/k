@@ -244,4 +244,11 @@ public class KompileOptions implements Serializable {
           "Specify a comma separated list of pipeline stages to apply to the definition after parsing",
       hidden = true)
   public String koreBackendSteps;
+
+  @Parameter(
+      names = "--outer-parsed-json",
+      description =
+          "Treat the definition file as an already outer parsed KAST definition in JSON format",
+      hidden = true)
+  public boolean outerParsedJson;
 }
