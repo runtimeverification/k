@@ -91,7 +91,29 @@ class Option:
 
         self.set_default(default)
 
-    def add_arg(self, args: ArgumentParser) -> None: ...  # TODO
+    def add_arg(self, args: ArgumentParser) -> None:
+
+        params: dict[str, Any] = {}
+        params['dest'] = self._dest
+        params['type'] = self._type
+        if self._action is not None:
+            params['action'] = self._action
+        if self._choices is not None:
+            params['choices'] = self._choices
+        if self._const is not None:
+            params['const'] = self._const
+        if self._default is not None:
+            params['default'] = self._default
+        if self._help_str is not None:
+            params['help'] = self._help_str
+        if self._metavar is not None:
+            params['metavar'] = self._metavar
+        if self._nargs is not None:
+            params['nargs'] = self._nargs
+        if self._required is not None:
+            params['required'] = self._required
+
+        args.add_argument(self._name, *(self._aliases), **params)
 
     def set_default(self, default: Any) -> None:
         self._default = default
