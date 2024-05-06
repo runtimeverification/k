@@ -1293,6 +1293,8 @@ class BoosterServerArgs(KoreServerArgs, total=False):
     fallback_on: Iterable[str | FallbackReason] | None
     interim_simplification: int | None
     no_post_exec_simplify: bool | None
+    log_context: Iterable[str] | None
+    not_log_context: Iterable[str] | None
 
 
 class BoosterServer(KoreServer):
@@ -1304,6 +1306,8 @@ class BoosterServer(KoreServer):
     _fallback_on: list[FallbackReason] | None
     _interim_simplification: int | None
     _no_post_exec_simplify: bool
+    _log_context: list[str]
+    _not_log_context: list[str]
 
     def __init__(self, args: BoosterServerArgs):
         self._llvm_kompiled_dir = Path(args['llvm_kompiled_dir'])
@@ -1328,6 +1332,8 @@ class BoosterServer(KoreServer):
 
         self._interim_simplification = args.get('interim_simplification')
         self._no_post_exec_simplify = bool(args.get('no_post_exec_simplify'))
+        self._log_context = list(args.get('log_context') or [])
+        self._not_log_context = list(args.get('not_log_context') or [])
 
         if not args.get('command'):
             args['command'] = 'kore-rpc-booster'
@@ -1355,6 +1361,8 @@ class BoosterServer(KoreServer):
             res += ['--interim-simplification', str(self._interim_simplification)]
         if self._no_post_exec_simplify:
             res += ['--no-post-exec-simplify']
+        res += [arg for glob in self._log_context for arg in ['--log-context', glob]]
+        res += [arg for glob in self._not_log_context for arg in ['--not-log-context', glob]]
         return res
 
     def _populate_bug_report(self, bug_report: BugReport) -> None:
