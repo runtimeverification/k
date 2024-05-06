@@ -34,7 +34,7 @@ class AttType(Generic[T], ABC):
     def to_dict(self, value: T) -> Any: ...
 
     @abstractmethod
-    def pretty(self, value: T) -> str | None: ...
+    def unparse(self, value: T) -> str | None: ...
 
     def parse(self, text: str) -> T:
         return self.from_dict(text)
@@ -49,7 +49,7 @@ class NoneType(AttType[None]):
         assert value is None
         return ''
 
-    def pretty(self, value: None) -> None:
+    def unparse(self, value: None) -> None:
         return None
 
 
@@ -69,10 +69,10 @@ class OptionalType(Generic[T], AttType[T | None]):
             return ''
         return self._value_type.to_dict(value)
 
-    def pretty(self, value: T | None) -> str | None:
+    def unparse(self, value: T | None) -> str | None:
         if value is None:
             return None
-        return self._value_type.pretty(value)
+        return self._value_type.unparse(value)
 
     def parse(self, text: str) -> T | None:
         if text == '':
@@ -87,7 +87,7 @@ class AnyType(AttType[Any]):
     def to_dict(self, value: Any) -> Any:
         return self._unfreeze(value)
 
-    def pretty(self, value: Any) -> str:
+    def unparse(self, value: Any) -> str:
         return str(value)
 
     def parse(self, text: str) -> Any:
@@ -116,7 +116,7 @@ class IntType(AttType[int]):
     def to_dict(self, value: int) -> str:
         return str(value)
 
-    def pretty(self, value: int) -> str:
+    def unparse(self, value: int) -> str:
         return str(value)
 
 
@@ -128,7 +128,7 @@ class StrType(AttType[str]):
     def to_dict(self, value: str) -> Any:
         return value
 
-    def pretty(self, value: str) -> str:
+    def unparse(self, value: str) -> str:
         return f'"{value}"'
 
 
@@ -145,7 +145,7 @@ class LocationType(AttType[tuple[int, int, int, int]]):
     def to_dict(self, value: tuple[int, int, int, int]) -> Any:
         return list(value)
 
-    def pretty(self, value: tuple[int, int, int, int]) -> str:
+    def unparse(self, value: tuple[int, int, int, int]) -> str:
         return ','.join(str(e) for e in value)
 
     def parse(self, text: str) -> tuple[int, int, int, int]:
@@ -164,7 +164,7 @@ class PathType(AttType[Path]):
     def to_dict(self, value: Path) -> Any:
         return str(value)
 
-    def pretty(self, value: Path) -> str:
+    def unparse(self, value: Path) -> str:
         return f'"{value}"'
 
 
@@ -206,7 +206,7 @@ class FormatType(AttType[Format]):
     def to_dict(self, value: Format) -> Any:
         return value.unparse()
 
-    def pretty(self, value: Format) -> str:
+    def unparse(self, value: Format) -> str:
         return f'"{value.unparse}"'
 
 
@@ -361,7 +361,7 @@ class KAtt(KAst, Mapping[AttKey, Any]):
             return ''
         att_strs: list[str] = []
         for key, value in self.items():
-            value_str = key.type.pretty(value)
+            value_str = key.type.unparse(value)
             if value_str is None:
                 att_strs.append(key.name)
             else:
