@@ -9,6 +9,7 @@ from ._kompiler import (
     KProveTest,
     KRunTest,
     ParallelTest,
+    ProofTraceTest,
     RuntimeTest,
     ServerType,
 )
