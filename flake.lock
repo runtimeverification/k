@@ -261,11 +261,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1712915401,
-        "narHash": "sha256-mJsmecp+dZjYrQZ5l671ydRU/jfBJJRYtmTy/A1uH8M=",
+        "lastModified": 1715010438,
+        "narHash": "sha256-Do1CWSXjmmun4HvsIymchDhe6EvVS46BTpM466bwNcc=",
         "owner": "runtimeverification",
         "repo": "rv-nix-tools",
-        "rev": "1a233c3c238a411f6d6a84d4e4b5a18ddd1f002b",
+        "rev": "dbffdf9266aa237da45c0b08f6750ced7c1cd686",
         "type": "github"
       },
       "original": {
