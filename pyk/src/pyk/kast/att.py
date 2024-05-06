@@ -36,6 +36,9 @@ class AttType(Generic[T], ABC):
     @abstractmethod
     def pretty(self, value: T) -> str | None: ...
 
+    def parse(self, text: str) -> T:
+        return self.from_dict(text)
+
 
 class NoneType(AttType[None]):
     def from_dict(self, obj: Any) -> None:
@@ -71,6 +74,11 @@ class OptionalType(Generic[T], AttType[T | None]):
             return None
         return self._value_type.pretty(value)
 
+    def parse(self, text: str) -> T | None:
+        if text == '':
+            return None
+        return self._value_type.parse(text)
+
 
 class AnyType(AttType[Any]):
     def from_dict(self, obj: Any) -> Any:
@@ -81,6 +89,9 @@ class AnyType(AttType[Any]):
 
     def pretty(self, value: Any) -> str:
         return str(value)
+
+    def parse(self, text: str) -> Any:
+        raise ValueError(f"Parsing a string into an Any attribute type is not allowed. Attempted to parse '{text}'")
 
     @staticmethod
     def _freeze(obj: Any) -> Any:
@@ -123,11 +134,6 @@ class StrType(AttType[str]):
 
 class LocationType(AttType[tuple[int, int, int, int]]):
     def from_dict(self, obj: Any) -> tuple[int, int, int, int]:
-        if isinstance(obj, str):
-            r = re.compile('(\\d+),(\\d+),(\\d+),(\\d+)')
-            m = r.fullmatch(obj)
-            assert m is not None
-            obj = [int(x) for x in m.groups()]
         assert isinstance(obj, list)
         a, b, c, d = obj
         assert isinstance(a, int)
@@ -141,6 +147,13 @@ class LocationType(AttType[tuple[int, int, int, int]]):
 
     def pretty(self, value: tuple[int, int, int, int]) -> str:
         return ','.join(str(e) for e in value)
+
+    def parse(self, text: str) -> tuple[int, int, int, int]:
+        r = re.compile('(\\d+),(\\d+),(\\d+),(\\d+)')
+        m = r.fullmatch(text)
+        assert m is not None
+        a, b, c, d = (int(x) for x in m.groups())
+        return a, b, c, d
 
 
 class PathType(AttType[Path]):
@@ -332,7 +345,10 @@ class KAtt(KAst, Mapping[AttKey, Any]):
         entries: list[AttEntry] = []
         for k, v in d['att'].items():
             key = Atts.keys().get(k, AttKey(k, type=_ANY))
-            value = key.type.from_dict(v)
+            if isinstance(v, str) and not isinstance(key.type, AnyType):
+                value = key.type.parse(v)
+            else:
+                value = key.type.from_dict(v)
             entries.append(key(value))
         return KAtt(entries=entries)
 
