@@ -9,9 +9,11 @@ from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, K
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
+    indexed_rewrite,
     is_term_like,
     minimize_term,
     ml_pred_to_bool,
+    normalize_ml_pred,
     push_down_rewrites,
     remove_generated_cells,
     rename_generated_vars,
@@ -21,7 +23,7 @@ from pyk.kast.manip import (
 from pyk.prelude.k import DOTS, GENERATED_TOP_CELL
 from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
 from pyk.prelude.kint import INT, intToken
-from pyk.prelude.ml import mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
 
 from ..utils import a, b, c, f, k, x
 
@@ -107,7 +109,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
         'equals-token',
         False,
         KApply(KLabel('#Equals', [KSort('Int'), GENERATED_TOP_CELL]), [intToken(3), f(a)]),
-        KApply('_==K_', [intToken(3), f(a)]),
+        KApply('_==Int_', [intToken(3), f(a)]),
     ),
     ('not-top', False, KApply(KLabel('#Not', [GENERATED_TOP_CELL]), [mlTop()]), notBool(TRUE)),
     ('equals-term', True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
@@ -366,6 +368,112 @@ def test_simplify_bool(test_id: str, term: KInner, expected: KInner) -> None:
     assert actual == expected
 
 
+NORMALIZE_ML_PRED_TEST_DATA = (
+    ('not-top', mlNot(mlTop()), mlBottom()),
+    ('not-bottom', mlNot(mlTop()), mlBottom()),
+    (
+        'mlAnd-bottom',
+        mlAnd(
+            [
+                mlEqualsTrue(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+                mlBottom(),
+                mlEqualsTrue(KApply('_==Int_', [KVariable('Z'), KVariable('T')])),
+            ]
+        ),
+        mlBottom(),
+    ),
+    (
+        'mlAnd-top',
+        mlAnd(
+            [
+                mlEqualsTrue(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+                mlTop(),
+                mlEqualsTrue(KApply('_==Int_', [KVariable('Z'), KVariable('T')])),
+            ]
+        ),
+        mlAnd(
+            [
+                mlEqualsTrue(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+                mlEqualsTrue(KApply('_==Int_', [KVariable('Z'), KVariable('T')])),
+            ]
+        ),
+    ),
+    (
+        'mlEqualsTrue-eqK-idempotent',
+        mlEqualsTrue(KApply('_==K_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_==K_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsTrue-neqK-idempotent',
+        mlEqualsTrue(KApply('_=/=K_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_=/=K_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsFalse-eqK',
+        mlEqualsFalse(KApply('_==K_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_=/=K_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsFalse-neqK',
+        mlEqualsFalse(KApply('_=/=K_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_==K_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsTrue-eqInt-idempotent',
+        mlEqualsTrue(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsTrue-neqInt-idempotent',
+        mlEqualsTrue(KApply('_=/=Int_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_=/=Int_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsFalse-eqInt',
+        mlEqualsFalse(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_=/=Int_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEqualsFalse-neqInt',
+        mlEqualsFalse(KApply('_=/=Int_', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_==Int_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEquals-eqK',
+        KApply('#Equals', [KVariable('X'), KVariable('Y')]),
+        mlEqualsTrue(KApply('_==K_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlEquals-eqInt',
+        KApply('#Equals', [KVariable('X', sort=KSort('Int')), KVariable('Y', sort=KSort('Int'))]),
+        mlEqualsTrue(KApply('_==Int_', [KVariable('X', sort=KSort('Int')), KVariable('Y', sort=KSort('Int'))])),
+    ),
+    (
+        'mlNEquals-eqK',
+        mlNot(KApply('#Equals', [KVariable('X'), KVariable('Y')])),
+        mlEqualsTrue(KApply('_=/=K_', [KVariable('X'), KVariable('Y')])),
+    ),
+    (
+        'mlNEquals-eqInt',
+        mlNot(KApply('#Equals', [KVariable('X', sort=KSort('Int')), KVariable('Y', sort=KSort('Int'))])),
+        mlEqualsTrue(KApply('_=/=Int_', [KVariable('X', sort=KSort('Int')), KVariable('Y', sort=KSort('Int'))])),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,term,expected',
+    NORMALIZE_ML_PRED_TEST_DATA,
+    ids=[test_id for test_id, *_ in NORMALIZE_ML_PRED_TEST_DATA],
+)
+def test_normalize_ml_pred(test_id: str, term: KInner, expected: KInner) -> None:
+    # When
+    actual = normalize_ml_pred(term)
+
+    # Then
+    assert actual == expected
+
+
 MAP_ITEM_CELL = KApply('<mapItem>', KApply('foo'))
 SPLIT_CONFIG_TEST_DATA = (
     (
@@ -411,3 +519,27 @@ IS_TERM_LIKE_TEST_DATA = [
 )
 def test_is_term_like(test_id: str, kast: KInner, expected: bool) -> None:
     assert is_term_like(kast) == expected
+
+
+INDEXED_REWRITE_TEST_DATA = [
+    ('empty', KApply('a'), [], KApply('a')),
+    ('apply', KApply('a'), [KRewrite(KApply('a'), KApply('b'))], KApply('b')),
+    ('token', KToken('0', 'Int'), [KRewrite(KToken('0', 'Int'), KToken('1', 'Int'))], KToken('1', 'Int')),
+    ('no_unification', KApply('a'), [KRewrite(KVariable('X', 'Int'), KApply('b'))], KApply('a')),
+    ('mismatch', KApply('a'), [KRewrite(KApply('b'), KApply('c'))], KApply('a')),
+    (
+        'issue_4297',
+        KApply('a', [KApply('c')]),
+        [KRewrite(KApply('a', [KApply('c')]), KApply('c')), KRewrite(KApply('a', [KApply('b')]), KApply('b'))],
+        KApply('c'),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    'test_id,kast,rewrites,expected',
+    INDEXED_REWRITE_TEST_DATA,
+    ids=[test_id for test_id, *_ in INDEXED_REWRITE_TEST_DATA],
+)
+def test_indexed_rewrite(test_id: str, kast: KInner, rewrites: list[KRewrite], expected: KInner) -> None:
+    assert indexed_rewrite(kast, rewrites) == expected

@@ -4,6 +4,7 @@ import json
 import logging
 import sys
 from argparse import FileType
+from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -23,8 +24,10 @@ from .cli.args import (
 )
 from .cli.cli import CLI, Command, Option
 from .cli.pyk import PrintInput
+from .cli.utils import file_path
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
+from .cterm.symbolic import cterm_symbolic
 from .kast.inner import KInner
 from .kast.manip import (
     flatten_label,
@@ -36,21 +39,24 @@ from .kast.manip import (
 )
 from .kast.outer import read_kast_definition
 from .kast.pretty import PrettyPrinter
+from .kast.utils import parse_outer
+from .kcfg import KCFGExplore
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
 from .ktool._ktool import TypeInferenceMode
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
-from .ktool.kprove import KProve
+from .ktool.kprove import KProve, ProveRpc
 from .ktool.krun import KRun
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import IO, Any, Final, Iterable
 
 
@@ -400,9 +406,22 @@ class ProveCommand(Command[ProveOptionsGroup]):
             _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
         else:
             kompiled_directory = self.options.definition_dir
+
         kprove = KProve(kompiled_directory, use_directory=self.options.temp_directory)
+
+        @contextmanager
+        def explore_context() -> Iterator[KCFGExplore]:
+            with cterm_symbolic(
+                definition=kprove.definition,
+                kompiled_kore=kprove.kompiled_kore,
+                definition_dir=kprove.definition_dir,
+            ) as cts:
+                yield KCFGExplore(cts)
+
+        prove_rpc = ProveRpc(kprove, explore_context)
+
         try:
-            proofs = kprove.prove_rpc(options=self.options)
+            proofs = prove_rpc.prove_rpc(options=self.options)
         except RuntimeError as err:
             _, _, _, cpe = err.args
             exit_with_process_error(cpe)
@@ -635,6 +654,71 @@ class JsonToKoreCommand(Command[LoggingOptionsGroup]):
         kore = Pattern.from_json(text)
         kore.write(sys.stdout)
         sys.stdout.write('\n')
+
+
+class ParseOuterOptionsGroup(LoggingOptionsGroup):
+    main_file: Path
+    md_selector: str
+    includes: Iterable[str]
+    output_file: IO[Any]
+    main_module: str | None
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.add_option(Option('main_file', file_path, required=True, help_str='File with the K definition.'))
+        self.add_option(
+            Option(
+                '--md-selector',
+                str,
+                'md_selector',
+                'Code selector expression to use when reading markdown.',
+                default='k',
+            )
+        )
+        self.add_option(
+            Option('-I', str, 'includes', 'Directories to lookup K definitions in.', action='append', default=[])
+        )
+        self.add_option(
+            Option(
+                '--output-file',
+                FileType('w'),
+                'output_file',
+                'Write output to file instead of stdout.',
+                default=sys.stdout,
+            )
+        )
+        self.add_option(
+            Option('--main-module', str, 'main_module', 'The name of the main module for the definition.', default=None)
+        )
+
+
+class ParseOuterCommand(Command[ParseOuterOptionsGroup]):
+    def __init__(self) -> None:
+        super().__init__('parse-outer', 'Parse an outer K definition into JSON', ParseOuterOptionsGroup())
+
+    def exec(self) -> None:
+        definition_file = self.options.main_file.resolve()
+        search_paths = [definition_file.parent]
+        for include in getattr(self.options, 'includes', []):
+            include_path = Path(include)
+            try:
+                check_dir_path(include_path)
+            except ValueError:
+                _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
+            search_paths.append(include_path.resolve())
+
+        main_module_name = getattr(self.options, 'main_module', definition_file.stem.upper())
+        try:
+            final_definition = parse_outer(definition_file, main_module_name, search_paths, self.options.md_selector)
+        except Exception as e:
+            _LOGGER.critical(e)
+            exit(1)
+
+        result_text = json.dumps(final_definition.to_dict())
+        try:
+            self.options.output_file.write(result_text)
+        except AttributeError:
+            sys.stdout.write(f'{result_text}\n')
 
 
 if __name__ == '__main__':

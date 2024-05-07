@@ -91,3 +91,40 @@ def compile_runtime(
 
     assert module_file.is_file()
     return module_file
+
+
+# -------------------------------
+# utility for generation of hints
+# -------------------------------
+
+
+def generate_hints(
+    definition_dir: str | Path,
+    input_kore_file: str | Path,
+    target_dir: str | Path | None = None,
+    hints_file_name: str = 'hints.bin',
+) -> Path:
+    definition_dir = Path(definition_dir).resolve()
+    check_dir_path(definition_dir)
+
+    input_kore_file = Path(input_kore_file).resolve()
+    check_file_path(input_kore_file)
+
+    if target_dir is None:
+        target_dir = definition_dir
+    else:
+        target_dir = Path(target_dir).resolve()
+        check_dir_path(target_dir)
+
+    interpreter = definition_dir / 'interpreter'
+    check_file_path(interpreter)
+
+    hints_file = target_dir / hints_file_name
+
+    args = [str(interpreter), str(input_kore_file), '-1', str(hints_file), '--proof-output']
+    _LOGGER.info(f'Generating hints: {hints_file.name}')
+    run_process(args, logger=_LOGGER)
+
+    assert hints_file.is_file()
+
+    return hints_file

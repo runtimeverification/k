@@ -12,7 +12,7 @@ from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import BOOL, FALSE, TRUE
 from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue
 from ..utils import ensure_dir_path
-from .proof import FailureInfo, Proof, ProofStatus, ProofStep, ProofSummary, Prover, StepResult
+from .proof import FailureInfo, Proof, ProofStatus, ProofSummary, Prover
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -26,13 +26,13 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-@dataclass
-class ImpliesProofStep(ProofStep):
+@dataclass(frozen=True)
+class ImpliesProofStep:
     proof: ImpliesProof
 
 
 @dataclass
-class ImpliesProofResult(StepResult):
+class ImpliesProofResult:
     csubst: CSubst | None
     simplified_antecedent: KInner | None
     simplified_consequent: KInner | None
@@ -409,9 +409,13 @@ class RefutationSummary(ProofSummary):
 
 class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
     proof: ImpliesProof
+    kcfg_explore: KCFGExplore
+
+    def close(self) -> None:
+        self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def __init__(self, proof: ImpliesProof, kcfg_explore: KCFGExplore):
-        super().__init__(kcfg_explore)
+        self.kcfg_explore = kcfg_explore
         self.proof = proof
 
     def step_proof(self, step: ImpliesProofStep) -> list[ImpliesProofResult]:

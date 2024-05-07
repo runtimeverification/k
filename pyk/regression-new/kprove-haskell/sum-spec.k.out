@@ -49,8 +49,8 @@ Subproofs: 0
 ┃  │         GENERATEDCOUNTER_CELL_949ec677:Int
 ┃  │       </generatedCounter>
 ┃  │     </generatedTop>
-┃  │     #And { true #Equals N:Int >=Int 0 }
 ┃  │     #And { true #Equals N:Int >Int 0 }
+┃  │     #And { true #Equals N:Int >=Int 0 }
 ┃  │
 ┃  │  (1 step)
 ┃  ├─ 5
@@ -89,8 +89,8 @@ Subproofs: 0
 ┃  │       </generatedCounter>
 ┃  │     </generatedTop>
 ┃  │     #And { true #Equals N:Int >Int 0 }
-┃  │     #And { true #Equals N:Int +Int -1 >=Int 0 }
 ┃  │     #And { true #Equals N:Int >=Int 0 }
+┃  │     #And { true #Equals N:Int +Int -1 >=Int 0 }
 ┃  │
 ┃  ┊  constraint: OMITTED CONSTRAINT
 ┃  ┊  subst: OMITTED SUBST
@@ -112,7 +112,7 @@ Subproofs: 0
 ┃        #And { true #Equals N:Int >=Int 0 }
 ┃        #And { true #Equals ?S:Int ==Int S:Int +Int N:Int *Int C:Int +Int N:Int -Int 1 *Int N:Int /Int 2 }
 ┃
-┗━━┓ constraint: N:Int ==K 0
+┗━━┓ constraint: N:Int ==Int 0
    │
    ├─ 4
    │     <generatedTop>
@@ -130,8 +130,8 @@ Subproofs: 0
    │         GENERATEDCOUNTER_CELL_949ec677:Int
    │       </generatedCounter>
    │     </generatedTop>
-   │     #And { true #Equals N:Int >=Int 0 }
    │     #And { N:Int #Equals 0 }
+   │     #And { true #Equals N:Int >=Int 0 }
    │
    │  (1 step)
    ├─ 6

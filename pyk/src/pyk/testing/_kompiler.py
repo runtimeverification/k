@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.proof.reachability import APRProver
+
 from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
-from ..kllvm.compiler import compile_runtime
+from ..kllvm.compiler import compile_runtime, generate_hints
 from ..kllvm.importer import import_runtime
 from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
@@ -22,7 +24,7 @@ from ..ktool.kprove import KProve
 from ..ktool.krun import KRun
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
     from pathlib import Path
     from typing import Any
 
@@ -200,14 +202,12 @@ class ServerType(Enum):
                 raise AssertionError()
 
 
-class KoreClientTest(KompiledTest):
+class KoreServerTest(KompiledTest):
     DISABLE_LEGACY: ClassVar = False
     DISABLE_BOOSTER: ClassVar = False
-
     KOMPILE_BACKEND: ClassVar = 'haskell'
-    LLVM_ARGS: ClassVar[dict[str, Any]] = {}
 
-    CLIENT_TIMEOUT: ClassVar = 1000
+    LLVM_ARGS: ClassVar[dict[str, Any]] = {}
 
     @pytest.fixture(scope='class', params=['legacy', 'booster'])
     def server_type(self, request: FixtureRequest, use_server: UseServer) -> ServerType:
@@ -265,6 +265,10 @@ class KoreClientTest(KompiledTest):
             case _:
                 raise AssertionError
 
+
+class KoreClientTest(KoreServerTest):
+    CLIENT_TIMEOUT: ClassVar = 1000
+
     # definition_dir should ideally depend on server_type to avoid triggering kompilation,
     # but it can't due to method signature in superclass.
     # In the parameter list, always put `definition_dir` after `kore_client`.
@@ -300,6 +304,32 @@ class KCFGExploreTest(CTermSymbolicTest):
         yield KCFGExplore(cterm_symbolic, kcfg_semantics=semantics)
 
 
+class ParallelTest(KoreServerTest, ABC):
+    CLIENT_TIMEOUT: ClassVar = 1000
+
+    @abstractmethod
+    def semantics(self, definition: KDefinition) -> KCFGSemantics: ...
+
+    def create_kore_client(self, _kore_server: KoreServer, bug_report: BugReport | None) -> KoreClient:
+        return KoreClient('localhost', _kore_server.port, timeout=self.CLIENT_TIMEOUT, bug_report=bug_report)
+
+    @pytest.fixture
+    def create_prover(
+        self,
+        _kore_server: KoreServer,
+        definition: KDefinition,
+        bug_report: BugReport | None,
+        kompiled_kore: KompiledKore,
+    ) -> Callable[[int, Iterable[str]], APRProver]:
+        def _create_prover(max_depth: int, cut_point_rules: Iterable[str]) -> APRProver:
+            kore_client = self.create_kore_client(_kore_server, bug_report)
+            ct_symb = CTermSymbolic(kore_client, definition, kompiled_kore)
+            _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
+            return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_point_rules)
+
+        return _create_prover
+
+
 class KoreServerPoolTest(KompiledTest, ABC):
     KOMPILE_BACKEND = 'haskell'
 
@@ -326,3 +356,16 @@ class RuntimeTest(KompiledTest):
     def runtime(self, definition_dir: Path) -> Runtime:
         compile_runtime(definition_dir)
         return import_runtime(definition_dir)
+
+
+class ProofTraceTest(KompiledTest):
+    KOMPILE_BACKEND = 'llvm'
+    KOMPILE_ARGS = {'llvm_proof_hint_instrumentation': True}
+
+    HINTS_INPUT_KORE: ClassVar[str]
+
+    @pytest.fixture(scope='class')
+    def hints(self, definition_dir: Path, kompile: Kompiler) -> bytes:
+        input_kore_file = kompile._cache_definition(self.HINTS_INPUT_KORE)
+        hints_file = generate_hints(definition_dir, input_kore_file)
+        return hints_file.read_bytes()

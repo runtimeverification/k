@@ -4,7 +4,7 @@ import graphlib
 import json
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from pyk.kore.rpc import LogEntry
@@ -19,7 +19,7 @@ from ..konvert import kflatmodule_to_kore
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
-from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus, ProofStep, StepResult
+from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -37,8 +37,9 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 @dataclass
-class APRProofResult(StepResult):
+class APRProofResult:
     node_id: int
+    prior_loops_cache_update: tuple[int, ...]
 
 
 @dataclass
@@ -59,10 +60,15 @@ class APRProofTerminalResult(APRProofResult): ...
 class APRProofBoundedResult(APRProofResult): ...
 
 
-@dataclass
-class APRProofStep(ProofStep):
-    proof: APRProof
-    node_id: int
+@dataclass(frozen=True)
+class APRProofStep:
+    node: KCFG.Node
+    target: KCFG.Node
+    proof_id: str
+    bmc_depth: int | None
+    module_name: str
+    shortest_path_to_node: tuple[KCFG.Node, ...]
+    prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
@@ -84,9 +90,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     circularity: bool
     _exec_time: float
     error_info: Exception | None
-    prior_loops_cache: dict[int, list[int]]
+    prior_loops_cache: dict[int, tuple[int, ...]]
 
-    _checked_for_terminal: set[int]
     _checked_for_bounded: set[int]
 
     def __init__(
@@ -106,7 +111,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         admitted: bool = False,
         _exec_time: float = 0,
         error_info: Exception | None = None,
-        prior_loops_cache: dict[int, list[int]] | None = None,
+        prior_loops_cache: dict[int, tuple[int, ...]] | None = None,
     ):
         Proof.__init__(self, id, proof_dir=proof_dir, subproof_ids=subproof_ids, admitted=admitted)
         KCFGExploration.__init__(self, kcfg, terminal)
@@ -124,7 +129,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self._exec_time = _exec_time
         self.error_info = error_info
 
-        self._checked_for_terminal = set()
         self._checked_for_bounded = set()
 
         if self.proof_dir is not None and self.proof_subdir is not None:
@@ -145,9 +149,38 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                 self.node_refutations[node_id] = subproof
 
     def get_steps(self) -> list[APRProofStep]:
-        return [APRProofStep(self, node.id) for node in self.pending]
+        steps: list[APRProofStep] = []
+        for node in self.pending:
+
+            shortest_path: list[KCFG.Node] = []
+            if self.bmc_depth is not None:
+                shortest_path = []
+                for succ in reversed(self.shortest_path_to(node.id)):
+                    if self.kcfg.zero_depth_between(succ.source.id, node.id):
+                        ...
+                    else:
+                        shortest_path.append(succ.source)
+
+            def nonzero_depth(proof: APRProof, node: KCFG.Node) -> bool:
+                return not proof.kcfg.zero_depth_between(proof.init, node.id)
+
+            module_name = self.circularities_module_name if nonzero_depth(self, node) else self.dependencies_module_name
+
+            steps.append(
+                APRProofStep(
+                    bmc_depth=self.bmc_depth,
+                    module_name=module_name,
+                    node=node,
+                    proof_id=self.id,
+                    target=self.kcfg.node(self.target),
+                    shortest_path_to_node=tuple(shortest_path),
+                    prior_loops_cache=FrozenDict(self.prior_loops_cache),
+                )
+            )
+        return steps
 
     def commit(self, result: APRProofResult) -> None:
+        self.prior_loops_cache[result.node_id] = result.prior_loops_cache_update
         if isinstance(result, APRProofExtendResult):
             self.kcfg.extend(result.extend_result, self.kcfg.node(result.node_id), logs=self.logs)
         elif isinstance(result, APRProofSubsumeResult):
@@ -225,11 +258,10 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         pruned_nodes = super().prune(node_id, keep_nodes=list(keep_nodes) + [self.init, self.target])
         for nid in pruned_nodes:
             self._bounded.discard(nid)
+            self.prior_loops_cache = {k: v for (k, v) in self.prior_loops_cache.items() if k != nid}
             for k, v in self.prior_loops_cache.items():
-                if k == nid:
-                    self.prior_loops_cache.pop(k)
-                elif nid in v:
-                    self.prior_loops_cache[k].remove(nid)
+                if nid in v:
+                    self.prior_loops_cache[k] = tuple(_nid for _nid in self.prior_loops_cache[k] if _nid != nid)
 
         return pruned_nodes
 
@@ -636,6 +668,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     counterexample_info: bool
     always_check_subsumption: bool
     fast_check_subsumption: bool
+    kcfg_explore: KCFGExplore
 
     def __init__(
         self,
@@ -648,7 +681,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         fast_check_subsumption: bool = False,
     ) -> None:
 
-        super().__init__(kcfg_explore)
+        self.kcfg_explore = kcfg_explore
         self.main_module_name = self.kcfg_explore.cterm_symbolic._definition.main_module_name
         self.execute_depth = execute_depth
         self.cut_point_rules = cut_point_rules
@@ -656,6 +689,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.counterexample_info = counterexample_info
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
+
+    def close(self) -> None:
+        self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def init_proof(self, proof: APRProof) -> None:
         def _inject_module(module_name: str, import_name: str, sentences: list[KRuleLike]) -> None:
@@ -681,105 +717,78 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
         _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
 
-        self._check_all_terminals(proof)
+        for node_id in [proof.init, proof.target]:
+            if self.kcfg_explore.kcfg_semantics.is_terminal(proof.kcfg.node(node_id).cterm):
+                proof.add_terminal(node_id)
 
-    def nonzero_depth(self, proof: APRProof, node: KCFG.Node) -> bool:
-        return not proof.kcfg.zero_depth_between(proof.init, node.id)
-
-    def _check_terminal(self, proof: APRProof, node: KCFG.Node) -> None:
-        if node.id not in proof._checked_for_terminal:
-            _LOGGER.info(f'Checking terminal: {node.id}')
-            proof._checked_for_terminal.add(node.id)
-            if self.kcfg_explore.kcfg_semantics.is_terminal(node.cterm):
-                _LOGGER.info(f'Terminal node: {node.id}.')
-                proof.add_terminal(node.id)
-            elif self.fast_check_subsumption and self._may_subsume(proof, node):
-                _LOGGER.info(f'Marking node as terminal because of fast may subsume check {proof.id}: {node.id}')
-                proof.add_terminal(node.id)
-
-    def _check_all_terminals(self, proof: APRProof) -> None:
-        for node in proof.kcfg.nodes:
-            self._check_terminal(proof, node)
-
-    def _may_subsume(self, proof: APRProof, node: KCFG.Node) -> bool:
+    def _may_subsume(self, node: KCFG.Node, target_node: KCFG.Node) -> bool:
         node_k_cell = node.cterm.try_cell('K_CELL')
-        target_k_cell = proof.kcfg.node(proof.target).cterm.try_cell('K_CELL')
+        target_k_cell = target_node.cterm.try_cell('K_CELL')
         if node_k_cell and target_k_cell and not target_k_cell.match(node_k_cell):
             return False
         return True
 
-    def _check_subsume(self, proof: APRProof, node: KCFG.Node) -> CSubst | None:
-        target_cterm = proof.kcfg.node(proof.target).cterm
-        _LOGGER.info(f'Checking subsumption into target state {proof.id}: {shorten_hashes((node.id, target_cterm))}')
-        if self.fast_check_subsumption and not self._may_subsume(proof, node):
-            _LOGGER.info(f'Skipping full subsumption check because of fast may subsume check {proof.id}: {node.id}')
+    def _check_subsume(self, node: KCFG.Node, target_node: KCFG.Node, proof_id: str) -> CSubst | None:
+        target_cterm = target_node.cterm
+        _LOGGER.info(f'Checking subsumption into target state {proof_id}: {shorten_hashes((node.id, target_cterm))}')
+        if self.fast_check_subsumption and not self._may_subsume(node, target_node):
+            _LOGGER.info(f'Skipping full subsumption check because of fast may subsume check {proof_id}: {node.id}')
             return None
         _csubst = self.kcfg_explore.cterm_symbolic.implies(node.cterm, target_cterm)
         csubst = _csubst.csubst
         if csubst is not None:
-            _LOGGER.info(f'Subsumed into target node {proof.id}: {shorten_hashes((node.id, proof.target))}')
+            _LOGGER.info(f'Subsumed into target node {proof_id}: {shorten_hashes((node.id, target_node.id))}')
         return csubst
 
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
-        curr_node = step.proof.kcfg.node(step.node_id)
-
-        if step.proof.bmc_depth is not None and curr_node.id not in step.proof._checked_for_bounded:
-            _LOGGER.info(f'Checking bmc depth for node {step.proof.id}: {curr_node.id}')
-            step.proof._checked_for_bounded.add(curr_node.id)
-
-            prior_loops = []
-            for succ in reversed(step.proof.shortest_path_to(curr_node.id)):
-                if self.kcfg_explore.kcfg_semantics.same_loop(succ.source.cterm, curr_node.cterm):
-                    if succ.source.id in step.proof.prior_loops_cache:
-                        if step.proof.kcfg.zero_depth_between(succ.source.id, curr_node.id):
-                            prior_loops = step.proof.prior_loops_cache[succ.source.id]
-                        else:
-                            prior_loops = step.proof.prior_loops_cache[succ.source.id] + [succ.source.id]
+        prior_loops: tuple[int, ...] = ()
+        if step.bmc_depth is not None:
+            for node in step.shortest_path_to_node:
+                if self.kcfg_explore.kcfg_semantics.same_loop(node.cterm, step.node.cterm):
+                    if node.id in step.prior_loops_cache:
+                        prior_loops = step.prior_loops_cache[node.id] + (node.id,)
                         break
-                    else:
-                        step.proof.prior_loops_cache[succ.source.id] = []
 
-            step.proof.prior_loops_cache[curr_node.id] = prior_loops
-
-            _LOGGER.info(f'Prior loop heads for node {step.proof.id}: {(curr_node.id, prior_loops)}')
-            if len(prior_loops) > step.proof.bmc_depth:
-                _LOGGER.warning(f'Bounded node {step.proof.id}: {curr_node.id} at bmc depth {step.proof.bmc_depth}')
-                return [APRProofBoundedResult(curr_node.id)]
+            _LOGGER.info(f'Prior loop heads for node {step.node.id}: {(step.node.id, prior_loops)}')
+            if len(prior_loops) > step.bmc_depth:
+                _LOGGER.warning(f'Bounded node {step.proof_id}: {step.node.id} at bmc depth {step.bmc_depth}')
+                return [APRProofBoundedResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)]
 
         # Terminal checks for current node and target node
-        is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(curr_node.cterm)
-        target_is_terminal = step.proof.is_terminal(step.proof.target)
+        is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.node.cterm)
+        target_is_terminal = self.kcfg_explore.kcfg_semantics.is_terminal(step.target.cterm)
 
-        terminal_result: list[APRProofResult] = [APRProofTerminalResult(node_id=curr_node.id)] if is_terminal else []
+        terminal_result: list[APRProofResult] = (
+            [APRProofTerminalResult(node_id=step.node.id, prior_loops_cache_update=prior_loops)] if is_terminal else []
+        )
 
         # Subsumption should be checked if and only if the target node
         # and the current node are either both terminal or both not terminal
         if is_terminal == target_is_terminal:
-            csubst = self._check_subsume(step.proof, curr_node)
+            csubst = self._check_subsume(step.node, step.target, proof_id=step.proof_id)
             if csubst is not None:
                 # Information about the subsumed node being terminal must be returned
                 # so that the set of terminal nodes is correctly updated
-                return terminal_result + [APRProofSubsumeResult(csubst=csubst, node_id=curr_node.id)]
+                return terminal_result + [
+                    APRProofSubsumeResult(csubst=csubst, node_id=step.node.id, prior_loops_cache_update=prior_loops)
+                ]
 
         if is_terminal:
             return terminal_result
 
-        module_name = (
-            step.proof.circularities_module_name
-            if self.nonzero_depth(step.proof, curr_node)
-            else step.proof.dependencies_module_name
-        )
-
-        self.kcfg_explore.check_extendable(step.proof, curr_node)
         extend_result = self.kcfg_explore.extend_cterm(
-            curr_node.cterm,
+            step.node.cterm,
             execute_depth=self.execute_depth,
             cut_point_rules=self.cut_point_rules,
             terminal_rules=self.terminal_rules,
-            module_name=module_name,
-            node_id=curr_node.id,
+            module_name=step.module_name,
+            node_id=step.node.id,
         )
-        return [APRProofExtendResult(node_id=curr_node.id, extend_result=extend_result)]
+        return [
+            APRProofExtendResult(
+                node_id=step.node.id, extend_result=extend_result, prior_loops_cache_update=prior_loops
+            )
+        ]
 
     def failure_info(self, proof: APRProof) -> FailureInfo:
         return APRFailureInfo.from_proof(proof, self.kcfg_explore, counterexample_info=self.counterexample_info)

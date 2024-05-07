@@ -6,19 +6,21 @@ from typing import TYPE_CHECKING
 
 from ..prelude.k import DOTS, GENERATED_TOP_CELL
 from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from ..prelude.ml import mlAnd, mlEqualsTrue, mlImplies, mlOr
-from ..utils import find_common_items, hash_str
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
+from ..utils import find_common_items, hash_str, unique
 from .att import EMPTY_ATT, Atts, KAtt, WithKAtt
 from .inner import (
     KApply,
     KLabel,
     KRewrite,
     KSequence,
+    KSort,
     KToken,
     KVariable,
     Subst,
     bottom_up,
     collect,
+    flatten_label,
     top_down,
     var_occurrences,
 )
@@ -28,25 +30,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
     from typing import Final, TypeVar
 
-    from .inner import KInner, KSort
+    from .inner import KInner
 
     KI = TypeVar('KI', bound=KInner)
     W = TypeVar('W', bound=WithKAtt)
     RL = TypeVar('RL', bound=KRuleLike)
 
 _LOGGER: Final = logging.getLogger(__name__)
-
-
-def flatten_label(label: str, kast: KInner) -> list[KInner]:
-    """Given a cons list, return a flat Python list of the elements.
-
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
-    """
-    if type(kast) is KApply and kast.label.name == label:
-        items = (flatten_label(label, arg) for arg in kast.args)
-        return [c for cs in items for c in cs]
-    return [kast]
 
 
 def is_term_like(kast: KInner) -> bool:
@@ -110,7 +100,14 @@ def if_ktype(ktype: type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner]
 
 
 def bool_to_ml_pred(kast: KInner) -> KInner:
-    return mlAnd([mlEqualsTrue(cond) for cond in flatten_label('_andBool_', kast)])
+    def _bool_constraint_to_ml(_kast: KInner) -> KInner:
+        if _kast == TRUE:
+            return mlTop()
+        if _kast == FALSE:
+            return mlBottom()
+        return mlEqualsTrue(_kast)
+
+    return mlAnd([_bool_constraint_to_ml(cond) for cond in flatten_label('_andBool_', kast)])
 
 
 def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
@@ -138,8 +135,16 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return first
                 if second == FALSE:
                     return notBool(first)
-                if type(first) in [KVariable, KToken]:
-                    return KApply('_==K_', _kast.args)
+                if isinstance(first, (KVariable, KToken)):
+                    if first.sort == KSort('Int'):
+                        return KApply('_==Int_', _kast.args)
+                    else:
+                        return KApply('_==K_', _kast.args)
+                if isinstance(second, (KVariable, KToken)):
+                    if second.sort == KSort('Int'):
+                        return KApply('_==Int_', _kast.args)
+                    else:
+                        return KApply('_==K_', _kast.args)
                 if type(first) is KSequence and type(second) is KSequence:
                     if first.arity == 1 and second.arity == 1:
                         return KApply('_==K_', (first.items[0], second.items[0]))
@@ -192,6 +197,10 @@ def simplify_bool(k: KInner) -> KInner:
         rewrite = KRewrite(*rule)
         new_k = rewrite(new_k)
     return new_k
+
+
+def normalize_ml_pred(pred: KInner) -> KInner:
+    return bool_to_ml_pred(simplify_bool(ml_pred_to_bool(pred)))
 
 
 def extract_lhs(term: KInner) -> KInner:
@@ -605,7 +614,7 @@ def indexed_rewrite(kast: KInner, rewrites: Iterable[KRewrite]) -> KInner:
         if type(r.lhs) is KToken:
             token_rewrites.append(r)
         elif type(r.lhs) is KApply:
-            if r.lhs.label.name in token_rewrites:
+            if r.lhs.label.name in apply_rewrites:
                 apply_rewrites[r.lhs.label.name].append(r)
             else:
                 apply_rewrites[r.lhs.label.name] = [r]
@@ -672,6 +681,21 @@ def rename_generated_vars(term: KInner) -> KInner:
         return k.map_inner(_rename_vars)
 
     return _rename_vars(term)
+
+
+def is_spurious_constraint(term: KInner) -> bool:
+    if type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]:
+        return True
+    if is_top(term, weak=True):
+        return True
+    return False
+
+
+def normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
+    constraints = (constraint for _constraint in constraints for constraint in flatten_label('#And', _constraint))
+    constraints = unique(constraints)
+    constraints = (constraint for constraint in constraints if not is_spurious_constraint(constraint))
+    return tuple(constraints)
 
 
 def remove_useless_constraints(constraints: Iterable[KInner], initial_vars: Iterable[str]) -> list[KInner]:
@@ -745,7 +769,8 @@ def build_rule(
       - `rule`: A `KRule` with variable naming conventions applied so that it should be parseable by K frontend.
       - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
     """
-    init_constraints = list(init_constraints)
+    init_constraints = [normalize_ml_pred(c) for c in init_constraints]
+    final_constraints = [normalize_ml_pred(c) for c in final_constraints]
     final_constraints = [c for c in final_constraints if c not in init_constraints]
     init_term = mlAnd([init_config] + init_constraints)
     final_term = mlAnd([final_config] + final_constraints)

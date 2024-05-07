@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import nullcontext
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -9,8 +10,9 @@ import pytest
 from pyk.__main__ import ProveOptionsGroup
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import KCFGSemantics
+from pyk.ktool.kprove import ProveRpc
 from pyk.proof import ProofStatus
-from pyk.testing import KProveTest
+from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
 
 from ..utils import K_FILES
@@ -21,6 +23,7 @@ if TYPE_CHECKING:
 
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
+    from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprove import KProve
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -150,7 +153,7 @@ PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
 )
 
 
-class TestImpProve(KProveTest):
+class TestImpProve(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
 
     def semantics(self, definition: KDefinition) -> KCFGSemantics:
@@ -163,6 +166,7 @@ class TestImpProve(KProveTest):
     )
     def test_prove_rpc(
         self,
+        kcfg_explore: KCFGExplore,
         kprove: KProve,
         test_id: str,
         spec_file: str,
@@ -181,10 +185,11 @@ class TestImpProve(KProveTest):
             'prove',
         )
 
-        proof = single(
-            kprove.prove_rpc(
-                options=options,
-                kcfg_semantics=ImpSemantics(kprove.definition),
-            )
-        )
+        # Given
+        prove_rpc = ProveRpc(kprove, lambda: nullcontext(kcfg_explore))
+
+        # When
+        proof = single(prove_rpc.prove_rpc(options))
+
+        # Then
         assert proof.status == proof_status

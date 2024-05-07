@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -14,16 +15,17 @@ from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEquals, mlEqualsFalse, mlEqualsTrue, mlTop
-from pyk.proof import APRProof, APRProver, ProofStatus
-from pyk.proof.reachability import APRFailureInfo
+from pyk.proof import APRProver, ProofStatus
+from pyk.proof.proof import parallel_advance_proof
+from pyk.proof.reachability import APRFailureInfo, APRProof
 from pyk.proof.show import APRProofNodePrinter
-from pyk.testing import KCFGExploreTest, KProveTest
+from pyk.testing import KCFGExploreTest, KProveTest, ParallelTest
 from pyk.utils import single
 
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
     from typing import Final
 
     from pytest import TempPathFactory
@@ -33,6 +35,7 @@ if TYPE_CHECKING:
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
+    from pyk.proof import Prover
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -433,6 +436,18 @@ APR_PROVE_TEST_DATA: Iterable[
         True,
         ProofStatus.PASSED,
         1,
+    ),
+    (
+        'imp-simple-long-branches',
+        K_FILES / 'imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'long-branches',
+        None,
+        None,
+        [],
+        True,
+        ProofStatus.PASSED,
+        2,
     ),
     (
         'imp-if-almost-same-plus',
@@ -896,6 +911,36 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
 
+    def test_terminal_node_subsumption(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        tmp_path_factory: TempPathFactory,
+    ) -> None:
+        test_id: str = 'imp-terminal-node-subsumption'
+        spec_file: Path = K_FILES / 'imp-simple-spec.k'
+        spec_module: str = 'IMP-SIMPLE-SPEC'
+        claim_id: str = 'terminal-node-subsumption'
+        cut_rules: Iterable[str] = []
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+            prover = APRProver(kcfg_explore=kcfg_explore, execute_depth=7, cut_point_rules=cut_rules)
+            prover.advance_proof(proof, max_iterations=1)
+            # We have reached a terminal node, but not yet checked subsumption
+            assert proof.status != ProofStatus.PASSED
+            # The next advance only checks subsumption
+            prover.advance_proof(proof, max_iterations=1)
+            assert proof.status == ProofStatus.PASSED
+
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,expected_constraint',
         PATH_CONSTRAINTS_TEST_DATA,
@@ -1253,6 +1298,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             state=f'N |-> {abstracted_var.name}:Int',
             constraint=mlAnd(
                 [
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
+                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
                     mlEqualsTrue(
                         orBool(
                             [
@@ -1271,9 +1319,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                             ]
                         )
                     ),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('N', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('X', 'Int'), KToken('1', 'Int')])),
-                    mlEqualsTrue(KApply('_>Int_', [KVariable('Y', 'Int'), KToken('1', 'Int')])),
                 ]
             ),
         )
@@ -1323,3 +1368,60 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         assert not passed
         assert actual == expected
+
+
+class TestImpParallelProof(ParallelTest, KProveTest):
+    KOMPILE_MAIN_FILE = K_FILES / 'imp-verification.k'
+
+    def semantics(self, definition: KDefinition) -> KCFGSemantics:
+        return ImpSemantics(definition)
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,admit_deps,proof_status,expected_leaf_number',
+        APR_PROVE_TEST_DATA,
+        ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
+    )
+    def test_all_path_reachability_prove_parallel(
+        self,
+        kprove: KProve,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int | None,
+        max_depth: int | None,
+        cut_rules: Iterable[str],
+        admit_deps: bool,
+        proof_status: ProofStatus,
+        expected_leaf_number: int,
+        tmp_path_factory: TempPathFactory,
+        create_prover: Callable[[int, Iterable[str]], Prover],
+    ) -> None:
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+            if admit_deps:
+                for subproof in proof.subproofs:
+                    subproof.admit()
+                    subproof.write_proof_data()
+
+            _create_prover = partial(create_prover, max_depth, cut_rules)
+
+            parallel_advance_proof(
+                proof=proof, max_iterations=max_iterations, create_prover=_create_prover, max_workers=2
+            )
+
+            kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True))
+            cfg_lines = kcfg_show.show(proof.kcfg)
+            _LOGGER.info('\n'.join(cfg_lines))
+
+            assert proof.status == proof_status
+            assert leaf_number(proof) == expected_leaf_number
