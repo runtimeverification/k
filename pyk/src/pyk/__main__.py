@@ -56,8 +56,8 @@ from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from typing import IO, Any, Final, Iterable
+    from collections.abc import Iterable, Iterator
+    from typing import IO, Any, Final
 
 
 _LOGGER: Final = logging.getLogger(__name__)

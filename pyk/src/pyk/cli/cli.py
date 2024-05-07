@@ -6,11 +6,14 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 #  from enum import Enum
-from typing import Any, Callable, Final, Generic, Iterable, TypeVar
+from typing import TYPE_CHECKING, Any, Final, Generic, TypeVar
 
 import tomli
 
 from ..cli.utils import file_path
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 T = TypeVar('T')
 OG = TypeVar('OG', bound='OptionsGroup')
