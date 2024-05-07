@@ -4,6 +4,7 @@ import json
 import logging
 import sys
 from collections.abc import Iterable
+from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -13,6 +14,7 @@ from .cli.pyk import PrintInput, create_argument_parser, generate_options, parse
 from .cli.utils import LOG_FORMAT, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
+from .cterm.symbolic import cterm_symbolic
 from .kast.inner import KInner
 from .kast.manip import (
     flatten_label,
@@ -25,12 +27,13 @@ from .kast.manip import (
 from .kast.outer import read_kast_definition
 from .kast.pretty import PrettyPrinter
 from .kast.utils import parse_outer
+from .kcfg import KCFGExplore
 from .kore.parser import KoreParser
 from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
-from .ktool.kprove import KProve
+from .ktool.kprove import KProve, ProveRpc
 from .ktool.krun import KRun
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
@@ -39,6 +42,7 @@ from .proof.show import APRProofNodePrinter, APRProofShow
 from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import Any, Final
 
     from .cli.pyk import (
@@ -244,9 +248,22 @@ def exec_prove(options: ProveOptions) -> None:
         _LOGGER.info(f'Using kompiled directory: {kompiled_directory}.')
     else:
         kompiled_directory = options.definition_dir
+
     kprove = KProve(kompiled_directory, use_directory=options.temp_directory)
+
+    @contextmanager
+    def explore_context() -> Iterator[KCFGExplore]:
+        with cterm_symbolic(
+            definition=kprove.definition,
+            kompiled_kore=kprove.kompiled_kore,
+            definition_dir=kprove.definition_dir,
+        ) as cts:
+            yield KCFGExplore(cts)
+
+    prove_rpc = ProveRpc(kprove, explore_context)
+
     try:
-        proofs = kprove.prove_rpc(options=options)
+        proofs = prove_rpc.prove_rpc(options=options)
     except RuntimeError as err:
         _, _, _, cpe = err.args
         exit_with_process_error(cpe)
