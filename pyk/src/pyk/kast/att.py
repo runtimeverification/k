@@ -36,8 +36,8 @@ class AttType(Generic[T], ABC):
     @abstractmethod
     def unparse(self, value: T) -> str | None: ...
 
-    def parse(self, text: str) -> T:
-        return self.from_dict(text)
+    @abstractmethod
+    def parse(self, text: str) -> T: ...
 
 
 class NoneType(AttType[None]):
@@ -50,6 +50,10 @@ class NoneType(AttType[None]):
         return ''
 
     def unparse(self, value: None) -> None:
+        return None
+
+    def parse(self, text: str) -> None:
+        assert text == ''
         return None
 
 
@@ -91,7 +95,7 @@ class AnyType(AttType[Any]):
         return str(value)
 
     def parse(self, text: str) -> Any:
-        raise ValueError(f"Parsing a string into an Any attribute type is not allowed. Attempted to parse '{text}'")
+        raise ValueError(f'Parsing a string into an Any attribute type is not supported. Attempted to parse: {text!r}')
 
     @staticmethod
     def _freeze(obj: Any) -> Any:
@@ -119,6 +123,9 @@ class IntType(AttType[int]):
     def unparse(self, value: int) -> str:
         return str(value)
 
+    def parse(self, text: str) -> int:
+        return int(text)
+
 
 class StrType(AttType[str]):
     def from_dict(self, obj: Any) -> str:
@@ -131,8 +138,13 @@ class StrType(AttType[str]):
     def unparse(self, value: str) -> str:
         return f'"{value}"'
 
+    def parse(self, text: str) -> str:
+        return text
+
 
 class LocationType(AttType[tuple[int, int, int, int]]):
+    _PARSE_REGEX: Final = re.compile('(\\d+),(\\d+),(\\d+),(\\d+)')
+
     def from_dict(self, obj: Any) -> tuple[int, int, int, int]:
         assert isinstance(obj, list)
         a, b, c, d = obj
@@ -149,8 +161,7 @@ class LocationType(AttType[tuple[int, int, int, int]]):
         return ','.join(str(e) for e in value)
 
     def parse(self, text: str) -> tuple[int, int, int, int]:
-        r = re.compile('(\\d+),(\\d+),(\\d+),(\\d+)')
-        m = r.fullmatch(text)
+        m = self._PARSE_REGEX.fullmatch(text)
         assert m is not None
         a, b, c, d = (int(x) for x in m.groups())
         return a, b, c, d
@@ -166,6 +177,9 @@ class PathType(AttType[Path]):
 
     def unparse(self, value: Path) -> str:
         return f'"{value}"'
+
+    def parse(self, text: str) -> Path:
+        return Path(text)
 
 
 @final
@@ -208,6 +222,9 @@ class FormatType(AttType[Format]):
 
     def unparse(self, value: Format) -> str:
         return f'"{value.unparse}"'
+
+    def parse(self, text: str) -> Format:
+        return Format.parse(text)
 
 
 _NONE: Final = NoneType()
