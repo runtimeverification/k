@@ -1,13 +1,21 @@
 from __future__ import annotations
 
+import logging
 from abc import abstractmethod
 from argparse import ArgumentParser
+from pathlib import Path
 
 #  from enum import Enum
-from typing import Any, Callable, Generic, Iterable, TypeVar
+from typing import Any, Callable, Final, Generic, Iterable, TypeVar
+
+import tomli
+
+from ..cli.utils import file_path
 
 T = TypeVar('T')
 OG = TypeVar('OG', bound='OptionsGroup')
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class CLI:
@@ -40,7 +48,7 @@ class CLI:
         args = parser.parse_args()
         stripped_args = {key: val for (key, val) in vars(args).items() if val != 'NoDefault'}
         cmd = self.get_command(stripped_args)
-        cmd._options_group.extract(stripped_args)
+        cmd._options_group.extract(stripped_args, cmd.name)
         cmd.exec()
 
 
@@ -123,6 +131,10 @@ class Option:
         return self._name
 
     @property
+    def toml_name(self) -> str:
+        return self._toml_name
+
+    @property
     def default(self) -> Any:
         return self._default
 
@@ -157,14 +169,62 @@ class Command(Generic[OG]):
     def exec(self) -> None: ...
 
 
+def parse_toml_args(args: OptionsGroup, command: str) -> dict[str, Any]:
+    def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
+        if len(profile_list) == 0 or profile_list[0] not in toml_profile:
+            return {k: v for k, v in toml_profile.items() if type(v) is not dict}
+        elif len(profile_list) == 1:
+            return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
+        return get_profile(toml_profile[profile_list[0]], profile_list[1:])
+
+    toml_args = {}
+    if args.config_file.is_file():
+        with open(args.config_file, 'rb') as config_file:
+            try:
+                toml_args = tomli.load(config_file)
+            except tomli.TOMLDecodeError:
+                _LOGGER.error(
+                    'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
+                )
+
+    toml_args = get_profile(toml_args[command], args.config_profile.split('.')) if command in toml_args else {}
+    toml_args = {args.get_toml_name_destination(k): v for k, v in toml_args.items()}
+    for k, v in toml_args.items():
+        if k[:3] == 'no-' and (v == 'true' or v == 'false'):
+            del toml_args[k]
+            toml_args[k[3:]] = 'false' if v == 'true' else 'true'
+        if k == 'optimization-level':
+            level = toml_args[k] if toml_args[k] >= 0 else 0
+            level = level if toml_args[k] <= 3 else 3
+            del toml_args[k]
+            toml_args['-o' + str(level)] = 'true'
+
+    return toml_args
+
+
 class OptionsGroup:
     _options: dict[str, Option]
+    config_file: Path
+    config_profile: str
 
-    def extract(self, args: dict[str, Any]) -> None:
+    def __init__(self) -> None:
+        self.add_option(
+            Option('--config-file', file_path, 'config_file', 'Path to Pyk config file.', default=Path('./pyk.toml'))
+        )
+        self.add_option(
+            Option('--config-profile', str, 'config_profile', 'Config profile to be used.', default='default')
+        )
+
+    def extract(self, args: dict[str, Any], command: str) -> None:
+
+        toml_args = parse_toml_args(self, command)
+
         for option in self.options:
             if option.name in args:
                 self.__setattr__(option.name, args[option.name])
             # TODO elif option exists in TOML file, set it to the value from there
+            elif option.name in toml_args:
+                self.__setattr__(option.name, toml_args[option.name])
             else:
                 self.__setattr__(option.name, option.default)
 
@@ -181,6 +241,12 @@ class OptionsGroup:
     @property
     def options(self) -> list[Option]:
         return list(self._options.values())
+
+    def get_toml_name_destination(self, option_string: str) -> str:
+        for option in self.options:
+            if option.toml_name == option_string:
+                return option.name
+        raise ValueError(f'Cannot find option with toml_name {option_string}.')
 
 
 # TODO remove once all implementing semantics use `CLI` system
