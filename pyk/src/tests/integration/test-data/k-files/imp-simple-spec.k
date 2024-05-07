@@ -110,6 +110,20 @@ module IMP-SIMPLE-SPEC
     claim [fail-branch]: <k> if ( $s <= 123) { $n = 1; } else { } => .K ... </k>
                          <state> $n |-> (0 => 1) $s |-> _S:Int </state>
 
+    claim [long-branches]: <k> if ( $s <= 123) { 
+                                  $n = 0; 
+                               } 
+                               else { 
+                                  $n = 1;
+                               } 
+                               while($n <= 100) {
+                                  $n = $n + 1;
+                               }
+                               => .K 
+                           ...
+                           </k>
+                         <state> $n |-> (0 => 101) $s |-> _S:Int </state>
+
     claim [use-if-almost-same]:
         <k> $n = $n + 1; if (_B:Bool) {$s = $n + $s; } else {$s = $s + $n; } $s = $s + 1; => .K ...</k>
         <state> ($s |-> S:Int $n |-> N:Int) => ($s |-> (S +Int N +Int 2) $n |-> N:Int +Int 1) </state>
