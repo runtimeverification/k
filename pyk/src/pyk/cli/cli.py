@@ -17,6 +17,8 @@ OG = TypeVar('OG', bound='OptionsGroup')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
+NO_DEFAULT: Final = object()
+
 
 class CLI:
     _commands: list[Command]
@@ -46,7 +48,7 @@ class CLI:
     def get_and_exec_command(self) -> None:
         parser = self.create_argument_parser()
         args = parser.parse_args()
-        stripped_args = {key: val for (key, val) in vars(args).items() if val != 'NoDefault'}
+        stripped_args = {key: val for (key, val) in vars(args).items() if val != NO_DEFAULT}
         cmd = self.get_command(stripped_args)
         cmd._options_group.extract(stripped_args, cmd.name)
         cmd.exec()
@@ -77,7 +79,7 @@ class Option:
         choices: list[str] | None = None,
         const: Any | None = None,
         aliases: Iterable[str] = (),
-        default: Any | str = 'NoDefault',
+        default: Any | str = NO_DEFAULT,
         metavar: str | None = None,
         nargs: int | str | None = None,
         required: bool = False,
