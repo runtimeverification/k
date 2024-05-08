@@ -21,7 +21,7 @@ AXIOM_TEST_DATA: Final = (
         'axiom2',
         r'',
         r'axiom {} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(V{}(X{}(kseq{}(inj{SortFoo{}, SortKItem{}}(W{}(Y{}(VarX : SortInt{}))), A : SortK{})), B : SortGeneratedCounterCell{}), \top{SortGeneratedTopCell{}}()), \and{SortGeneratedTopCell{}}(V{}(X{}(kseq{}(inj{SortFoo{}, SortKItem{}}(Y{}(Z{}(VarX : SortInt{}))), A : SortK{})), B : SortGeneratedCounterCell{}), \top{SortGeneratedTopCell{}}())) []',
-    )
+    ),
 )
 
 
@@ -31,7 +31,7 @@ AXIOM_TEST_DATA: Final = (
 def test_get_requires(test_id: str, kore_requires: str, kore_axiom: str) -> None:
     # Given
     axiom = KoreParser(kore_axiom).axiom()
-    
+
     if kore_requires == '':
         expected_requires = None
     else:
@@ -42,4 +42,3 @@ def test_get_requires(test_id: str, kore_requires: str, kore_axiom: str) -> None
 
     # Then
     assert actual_requires == expected_requires
-
