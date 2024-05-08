@@ -51,7 +51,7 @@ def _require_to_krequire(r: Require) -> KRequire:
 def _att_to_katt(att: Att) -> KAtt:
     if not att.items:
         return EMPTY_ATT
-    return KAtt.from_dict({'att': dict(att.items)})
+    return KAtt.parse(dict(att.items))
 
 
 @singledispatch

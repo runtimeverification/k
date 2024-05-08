@@ -269,6 +269,7 @@ class Atts:
     COLORS: Final = AttKey('colors', type=_ANY)
     COMM: Final = AttKey('comm', type=_NONE)
     CONCAT: Final = AttKey('concat', type=_ANY)
+    CONCRETE: Final = AttKey('concrete', type=OptionalType(_STR))
     CONSTRUCTOR: Final = AttKey('constructor', type=_NONE)
     DEPENDS: Final = AttKey('depends', type=_ANY)
     DIGEST: Final = AttKey('digest', type=_ANY)
@@ -362,15 +363,21 @@ class KAtt(KAst, Mapping[AttKey, Any]):
         entries: list[AttEntry] = []
         for k, v in d['att'].items():
             key = Atts.keys().get(k, AttKey(k, type=_ANY))
-            if isinstance(v, str) and not isinstance(key.type, AnyType):
-                value = key.type.parse(v)
-            else:
-                value = key.type.from_dict(v)
+            value = key.type.from_dict(v)
             entries.append(key(value))
         return KAtt(entries=entries)
 
     def to_dict(self) -> dict[str, Any]:
         return {'node': 'KAtt', 'att': {key.name: key.type.to_dict(value) for key, value in self.atts.items()}}
+
+    @classmethod
+    def parse(cls: type[KAtt], d: Mapping[str, str]) -> KAtt:
+        entries: list[AttEntry] = []
+        for k, v in d.items():
+            key = Atts.keys().get(k, AttKey(k, type=_ANY))
+            value = key.type.parse(v)
+            entries.append(key(value))
+        return KAtt(entries=entries)
 
     @property
     def pretty(self) -> str:
