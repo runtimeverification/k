@@ -62,6 +62,9 @@ class RefuteSemantics(KCFGSemantics):
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         return False
 
+    def is_loop(self, c1: CTerm) -> bool:
+        return False
+
 
 REFUTE_NODE_TEST_DATA: Iterable[tuple[str, Iterable[KInner], ProofStatus]] = (
     ('refute-node-fail', (leInt(KVariable('N'), intToken(0)),), ProofStatus.FAILED),

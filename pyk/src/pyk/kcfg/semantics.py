@@ -17,6 +17,9 @@ class KCFGSemantics(ABC):
     @abstractmethod
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool: ...
 
+    @abstractmethod
+    def is_loop(self, c1: CTerm) -> bool: ...
+
 
 class DefaultSemantics(KCFGSemantics):
     def is_terminal(self, c: CTerm) -> bool:
@@ -26,4 +29,7 @@ class DefaultSemantics(KCFGSemantics):
         return c
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
+        return False
+
+    def is_loop(self, c1: CTerm) -> bool:
         return False
