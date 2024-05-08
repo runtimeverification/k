@@ -17,6 +17,11 @@ AXIOM_TEST_DATA: Final = (
         r'W{}(VarA : SortInt{},\dv{SortInt{}}("1"))',
         r'axiom {} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(X{}(Y{}(kseq{}(inj{SortInt{}, SortKItem{}}(VarA : SortInt{}),dotk{}())), Z : SortGeneratedCounterCell{}),\equals{SortBool{}, SortGeneratedTopCell{}}(W{}(VarA : SortInt{},\dv{SortInt{}}("1")),\dv{SortBool{}}("true"))),\and{SortGeneratedTopCell{}}(X{}(Y{}(kseq{}(inj{SortInt{}, SortKItem{}}(\dv{SortInt{}}("1")),dotk{}())),),\top{SortGeneratedTopCell{}}())) []',
     ),
+    (
+        'axiom2',
+        r'',
+        r'axiom {} \rewrites{SortGeneratedTopCell{}}(\and{SortGeneratedTopCell{}}(V{}(X{}(kseq{}(inj{SortFoo{}, SortKItem{}}(W{}(Y{}(VarX : SortInt{}))), A : SortK{})), B : SortGeneratedCounterCell{}), \top{SortGeneratedTopCell{}}()), \and{SortGeneratedTopCell{}}(V{}(X{}(kseq{}(inj{SortFoo{}, SortKItem{}}(Y{}(Z{}(VarX : SortInt{}))), A : SortK{})), B : SortGeneratedCounterCell{}), \top{SortGeneratedTopCell{}}())) []',
+    )
 )
 
 
@@ -26,10 +31,15 @@ AXIOM_TEST_DATA: Final = (
 def test_get_requires(test_id: str, kore_requires: str, kore_axiom: str) -> None:
     # Given
     axiom = KoreParser(kore_axiom).axiom()
-    expected_requires = KoreParser(kore_requires).pattern()
+    
+    if kore_requires == '':
+        expected_requires = None
+    else:
+        expected_requires = KoreParser(kore_requires).pattern()
 
     # When
     actual_requires = get_requires(axiom)
 
     # Then
     assert actual_requires == expected_requires
+
