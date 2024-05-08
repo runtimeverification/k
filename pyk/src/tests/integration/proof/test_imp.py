@@ -1066,6 +1066,52 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         assert actual_path_conds == expected_path_conds
 
+    def test_proof_no_progress_on_reload(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        proof_dir: Path,
+    ) -> None:
+
+        spec_file = K_FILES / 'imp-simple-spec.k'
+        spec_module = 'IMP-SIMPLE-SPEC'
+        claim_id = 'fail-early'
+        expected_pending = 1
+        expected_failing = 1
+
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
+        )
+
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
+        proof_id = proof.id
+        kcfg_explore.simplify(proof.kcfg, {})
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=True)
+
+        failure_info = proof.failure_info
+        assert isinstance(failure_info, APRFailureInfo)
+
+        actual_pending = len(failure_info.pending_nodes)
+        actual_failing = len(failure_info.failing_nodes)
+
+        assert expected_pending == actual_pending
+        assert expected_failing == actual_failing
+
+        # reload proof from disk
+        proof = APRProof.read_proof_data(proof_dir, proof_id)
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=True)
+
+        failure_info = proof.failure_info
+        assert isinstance(failure_info, APRFailureInfo)
+
+        actual_pending = len(failure_info.pending_nodes)
+        actual_failing = len(failure_info.failing_nodes)
+
+        assert expected_pending == actual_pending
+        assert expected_failing == actual_failing
+
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,expected_pending,expected_failing,path_conditions,fail_fast',
         FAILURE_INFO_TEST_DATA,
@@ -1085,9 +1131,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof_dir: Path,
         fail_fast: bool,
     ) -> None:
-        if fail_fast:
-            pytest.skip()
-
         claim = single(
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
@@ -1096,12 +1139,12 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof_id = proof.id
         kcfg_explore.simplify(proof.kcfg, {})
         prover = APRProver(kcfg_explore=kcfg_explore)
-        prover.advance_proof(proof)
+        prover.advance_proof(proof, fail_fast=fail_fast)
 
         # reload proof from disk
         proof = APRProof.read_proof_data(proof_dir, proof_id)
         prover = APRProver(kcfg_explore=kcfg_explore)
-        prover.advance_proof(proof)
+        prover.advance_proof(proof, fail_fast=fail_fast)
 
         failure_info = proof.failure_info
         assert isinstance(failure_info, APRFailureInfo)
