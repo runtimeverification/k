@@ -29,8 +29,11 @@ class Formatter:
 
     def _format(self, term: KInner) -> list[str]:
         match term:
-            case KVariable(s, _) | KToken(s, _):
-                return [s]
+            case KToken(token, _):
+                return [token]
+            case KVariable(name, sort):
+                sort_str = f':{sort.name}' if sort else ''
+                return [f'{name}{sort_str}']
             case KSequence():
                 return self._format_ksequence(term)
             case KApply():
