@@ -136,6 +136,10 @@ class Option:
         return self._name
 
     @property
+    def dest(self) -> str:
+        return self._dest
+
+    @property
     def toml_name(self) -> str:
         return self._toml_name
 
@@ -213,6 +217,7 @@ class OptionsGroup:
     config_profile: str
 
     def __init__(self) -> None:
+        self._options = {}
         self.add_option(
             Option('--config-file', file_path, 'config_file', 'Path to Pyk config file.', default=Path('./pyk.toml'))
         )
@@ -222,19 +227,27 @@ class OptionsGroup:
 
     def extract(self, args: dict[str, Any], command: str) -> None:
 
+        config_file = args['config_file'] if 'config_file' in args else self.option_by_name('config_file').default
+        self.__setattr__('config_file', config_file)
+
+        config_profile = (
+            args['config_profile'] if 'config_profile' in args else self.option_by_name('config_profile').default
+        )
+        self.__setattr__('config_profile', config_profile)
+
         toml_args = parse_toml_args(self, command)
 
         for option in self.options:
             if option.name in args:
-                self.__setattr__(option.name, args[option.name])
+                self.__setattr__(option.dest, args[option.name])
             # TODO elif option exists in TOML file, set it to the value from there
             elif option.name in toml_args:
-                self.__setattr__(option.name, toml_args[option.name])
+                self.__setattr__(option.dest, toml_args[option.name])
             else:
-                self.__setattr__(option.name, option.default)
+                self.__setattr__(option.dest, option.default)
 
     def add_option(self, option: Option) -> None:
-        self._options[option.name] = option
+        self._options[option.dest] = option
 
     def override_default(self, option_name: str, value: T) -> None:
         if not self._options[option_name].is_optional:
@@ -246,6 +259,9 @@ class OptionsGroup:
     @property
     def options(self) -> list[Option]:
         return list(self._options.values())
+
+    def option_by_name(self, name: str) -> Option:
+        return self._options[name]
 
     def get_toml_name_destination(self, option_string: str) -> str:
         for option in self.options:
