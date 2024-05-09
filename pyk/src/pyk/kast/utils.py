@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ._ast_to_kast import _ast_to_kast
@@ -12,6 +11,7 @@ from .outer_syntax import Definition
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
     from typing import Final
 
     from .outer_syntax import Module
