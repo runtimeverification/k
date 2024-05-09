@@ -115,6 +115,7 @@ class KDist:
                 submit(target_id)
 
             while pending:
+                print(f'{pending=}')
                 done, _ = concurrent.futures.wait(pending, return_when=concurrent.futures.FIRST_COMPLETED)
                 for future in done:
                     result = future.result()
