@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ._ast_to_kast import _ast_to_kast
@@ -11,7 +12,6 @@ from .outer_syntax import Definition
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from pathlib import Path
     from typing import Final
 
     from .outer_syntax import Module
@@ -46,7 +46,7 @@ def _slurp(
     include_source: bool = True,
 ) -> tuple[Module, ...]:
     processed_files = processed_files if processed_files is not None else []
-    parser = OuterParser(definition_text, source=source if include_source else '')
+    parser = OuterParser(definition_text, source=Path(source) if include_source else None)
     definition = parser.definition()
     result = definition.modules
     for require in definition.requires:

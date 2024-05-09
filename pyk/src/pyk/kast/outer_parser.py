@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..dequote import dequote_string
-from .att import Atts
 from .outer_lexer import _EOF_TOKEN, TokenType, outer_lexer
 from .outer_syntax import (
     EMPTY_ATT,
@@ -36,6 +35,7 @@ from .outer_syntax import (
 
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterable, Iterator
+    from pathlib import Path
     from typing import Final
 
     from .outer_lexer import Token
@@ -63,9 +63,9 @@ class OuterParser:
     _lexer: Iterator[Token]
     _la: Token
     _la2: Token
-    _source: str
+    _source: Path | None
 
-    def __init__(self, it: Iterable[str], source: str = ''):
+    def __init__(self, it: Iterable[str], source: Path | None = None):
         self._lexer = outer_lexer(it)
         self._la = next(self._lexer)
         self._la2 = next(self._lexer, _EOF_TOKEN)
@@ -128,15 +128,7 @@ class OuterParser:
         end_loc = self._la.loc + self._la.text
         self._consume()
 
-        location = (
-            (
-                Atts.LOCATION.name,
-                f'{begin_loc.line},{begin_loc.col},{end_loc.line},{end_loc.col}',
-            ),
-        )
-        source = ((Atts.SOURCE.name, self._source),) if self._source else ()
-        att = Att(att.items + location + source)
-        return Module(name, sentences, imports, att)
+        return Module(name, sentences, imports, att, source=self._source, location=(*begin_loc, *end_loc))
 
     def importt(self) -> Import:
         self._match(TokenType.KW_IMPORTS)

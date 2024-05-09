@@ -384,28 +384,24 @@ def test_import(k_text: str, expected: AST) -> None:
 
 
 MODULE_TEST_DATA: Final = (
-    ('module FOO endmodule', Module('FOO', att=Att(((LOCATION, '1,1,1,21'),)))),
+    ('module FOO endmodule', Module('FOO', location=(1, 1, 1, 21))),
     (
         'module FOO [foo] endmodule',
         Module(
             'FOO',
-            att=Att(
-                (
-                    ('foo', ''),
-                    (LOCATION, '1,1,1,27'),
-                )
-            ),
+            att=Att((('foo', ''),)),
+            location=(1, 1, 1, 27),
         ),
     ),
-    ('module FOO imports BAR endmodule', Module('FOO', imports=(Import('BAR'),), att=Att(((LOCATION, '1,1,1,33'),)))),
+    ('module FOO imports BAR endmodule', Module('FOO', imports=(Import('BAR'),), location=(1, 1, 1, 33))),
     (
         'module FOO imports BAR imports BAZ endmodule',
-        Module('FOO', imports=(Import('BAR'), Import('BAZ')), att=Att(((LOCATION, '1,1,1,45'),))),
+        Module('FOO', imports=(Import('BAR'), Import('BAZ')), location=(1, 1, 1, 45)),
     ),
-    ('module FOO rule x endmodule', Module('FOO', sentences=(Rule('x'),), att=Att(((LOCATION, '1,1,1,28'),)))),
+    ('module FOO rule x endmodule', Module('FOO', sentences=(Rule('x'),), location=(1, 1, 1, 28))),
     (
         'module FOO rule x rule y endmodule',
-        Module('FOO', sentences=(Rule('x'), Rule('y')), att=Att(((LOCATION, '1,1,1,35'),))),
+        Module('FOO', sentences=(Rule('x'), Rule('y')), location=(1, 1, 1, 35)),
     ),
     (
         'module FOO [foo] imports BAR rule x endmodule',
@@ -413,12 +409,8 @@ MODULE_TEST_DATA: Final = (
             'FOO',
             sentences=(Rule('x'),),
             imports=(Import('BAR'),),
-            att=Att(
-                (
-                    ('foo', ''),
-                    (LOCATION, '1,1,1,46'),
-                )
-            ),
+            att=Att((('foo', ''),)),
+            location=(1, 1, 1, 46),
         ),
     ),
 )
@@ -453,19 +445,19 @@ DEFINITION_TEST_DATA: Final = (
     ('', Definition()),
     ('requires "foo.k"', Definition(requires=(Require('foo.k'),))),
     ('requires "foo.k" requires "bar.k"', Definition(requires=(Require('foo.k'), Require('bar.k')))),
-    ('module FOO endmodule', Definition(modules=(Module('FOO', att=Att(((LOCATION, '1,1,1,21'),))),))),
+    ('module FOO endmodule', Definition(modules=(Module('FOO', location=(1, 1, 1, 21)),))),
     (
         'module FOO endmodule module BAR endmodule',
         Definition(
             modules=(
-                Module('FOO', att=Att(((LOCATION, '1,1,1,21'),))),
-                Module('BAR', att=Att(((LOCATION, '1,22,1,42'),))),
+                Module('FOO', location=(1, 1, 1, 21)),
+                Module('BAR', location=(1, 22, 1, 42)),
             )
         ),
     ),
     (
         'requires "foo.k" module FOO endmodule',
-        Definition(modules=(Module('FOO', att=Att(((LOCATION, '1,18,1,38'),))),), requires=(Require('foo.k'),)),
+        Definition(modules=(Module('FOO', location=(1, 18, 1, 38)),), requires=(Require('foo.k'),)),
     ),
 )
 

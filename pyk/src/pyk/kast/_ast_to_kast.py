@@ -4,7 +4,7 @@ import logging
 from functools import singledispatch
 from typing import TYPE_CHECKING
 
-from .att import EMPTY_ATT
+from .att import EMPTY_ATT, Atts
 from .outer import KAtt, KDefinition, KFlatModule, KImport, KRequire, KSentence  # noqa: TC002
 from .outer_syntax import Att, Definition, Import, Module, Require, Sentence  # noqa: TC002
 
@@ -34,6 +34,8 @@ def _module_to_kflatmodule(m: Module) -> KFlatModule:
     sentences = (_sentence_to_ksentence(s) for s in m.sentences)
     imports = (_import_to_kimport(i) for i in m.imports)
     att = _att_to_katt(m.att)
+    att = att.update([Atts.LOCATION(m.location)]) if m.location and not att.get(Atts.LOCATION) else att
+    att = att.update([Atts.SOURCE(m.source)]) if m.source and not att.get(Atts.SOURCE) else att
     return KFlatModule(m.name, sentences, imports, att)
 
 
