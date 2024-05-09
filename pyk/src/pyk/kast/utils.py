@@ -26,27 +26,25 @@ def parse_outer(
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> KDefinition:
-    _LOGGER.info(f'Reading {definition_file}')
-    text = definition_file.read_text()
-    if definition_file.suffix == '.md':
-        text = select_code_blocks(text, md_selector)
-
-    modules = _slurp(text, search_paths, [definition_file], md_selector, str(definition_file), include_source)
+    modules = _slurp(definition_file, search_paths, [definition_file], md_selector, include_source)
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
     assert isinstance(final_definition, KDefinition)
     return final_definition
 
 
 def _slurp(
-    definition_text: str,
+    definition_file: Path,
     search_paths: Iterable[Path] = (),
     processed_files: list[Path] | None = None,
     md_selector: str = 'k',
-    source: str = '',
     include_source: bool = True,
 ) -> tuple[Module, ...]:
     processed_files = processed_files if processed_files is not None else []
-    parser = OuterParser(definition_text, source=Path(source) if include_source else None)
+    _LOGGER.info(f'Reading {definition_file}')
+    text = definition_file.read_text()
+    if definition_file.suffix == '.md':
+        text = select_code_blocks(text, md_selector)
+    parser = OuterParser(text, source=definition_file if include_source else None)
     definition = parser.definition()
     result = definition.modules
     for require in definition.requires:
@@ -63,10 +61,5 @@ def _slurp(
         required_file = try_files[index]
         if required_file not in processed_files:
             processed_files.append(required_file)
-            _LOGGER.info(f'Reading {required_file}')
-            with open(required_file) as f:
-                text = f.read()
-                if required_file.suffix == '.md':
-                    text = select_code_blocks(text, md_selector)
-                result += _slurp(text, search_paths, processed_files, md_selector, str(required_file), include_source)
+            result += _slurp(required_file, search_paths, processed_files, md_selector, include_source)
     return result
