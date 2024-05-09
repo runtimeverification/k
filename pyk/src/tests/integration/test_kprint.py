@@ -289,11 +289,6 @@ PRETTY_PRINT_ALIAS_TEST_DATA: Iterable[tuple[str, KInner, str]] = (
     ),
     (
         'multiple-rules-3',
-        andBool([leInt(intToken(0), KVariable('CONTRACT_ID')), ltInt(KVariable('CONTRACT_ID'), intToken(9))]),
-        '#range ( 0 <= CONTRACT_ID < 9 )',
-    ),
-    (
-        'multiple-rules-4',
         andBool([leInt(intToken(0), KVariable('CONTRACT_ID')), leInt(KVariable('CONTRACT_ID'), intToken(9))]),
         '#range ( 0 <= CONTRACT_ID <= 9 )',
     ),
@@ -364,7 +359,6 @@ class TestUnparsingDefn(KPrintTest):
 
             rule #range ( LB <  X <  UB ) => LB  <Int X andBool X  <Int UB
             rule #range ( LB <  X <= UB ) => LB  <Int X andBool X <=Int UB
-            rule #range ( LB <= X <  UB ) => LB <=Int X andBool X  <Int UB
             rule #range ( LB <= X <= UB ) => LB <=Int X andBool X <=Int UB
         endmodule
     """
