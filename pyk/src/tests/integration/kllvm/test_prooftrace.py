@@ -53,12 +53,12 @@ class TestProofTrace(ProofTraceTest):
         # check that the first event is the rewrite a() => b()
         assert pt.trace[0].is_step_event()
         assert isinstance(pt.trace[0].step_event, prooftrace.LLVMRewriteEvent)
-        assert pt.trace[0].step_event.rule_ordinal == 96
+        assert pt.trace[0].step_event.rule_ordinal == 97
 
         # check that the second event is the rewrite b() => c()
         assert pt.trace[1].is_step_event()
         assert isinstance(pt.trace[1].step_event, prooftrace.LLVMRewriteEvent)
-        assert pt.trace[1].step_event.rule_ordinal == 97
+        assert pt.trace[1].step_event.rule_ordinal == 98
 
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()

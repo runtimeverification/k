@@ -458,7 +458,7 @@ public class GenerateSentencesFromConfigDecl {
               KLabel(initLabel),
               initSort,
               Seq(Terminal(initLabel)),
-              Att.empty().add(Att.INITIALIZER()).add(Att.FUNCTION()));
+              Att.empty().add(Att.INITIALIZER()).add(Att.FUNCTION()).add(Att.TOTAL()));
       initializerRule =
           Rule(
               KRewrite(
