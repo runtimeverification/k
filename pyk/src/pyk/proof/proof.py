@@ -344,43 +344,42 @@ def parallel_advance_proof(
     explored: set[PS] = set()
     iterations = 0
 
-    main_prover = create_prover()
+    with create_prover() as main_prover:
+        main_prover.init_proof(proof)
 
-    main_prover.init_proof(proof)
+        with _ProverPool[P, PS, SR](create_prover=create_prover, max_workers=max_workers) as pool:
 
-    with _ProverPool[P, PS, SR](create_prover=create_prover, max_workers=max_workers) as pool:
+            def submit_steps(_steps: Iterable[PS]) -> None:
+                for step in _steps:
+                    if step in explored:
+                        continue
+                    explored.add(step)
+                    future: Future[Any] = pool.submit(step)  # <-- schedule steps for execution
+                    pending.add(future)
 
-        def submit_steps(_steps: Iterable[PS]) -> None:
-            for step in _steps:
-                if step in explored:
-                    continue
-                explored.add(step)
-                future: Future[Any] = pool.submit(step)  # <-- schedule steps for execution
-                pending.add(future)
-
-        submit_steps(proof.get_steps())
-
-        while True:
-            if not pending:
-                break
-            done, _ = wait(pending, return_when='FIRST_COMPLETED')
-            future = done.pop()
-            proof_results = future.result()
-            for result in proof_results:
-                proof.commit(result)
-            proof.write_proof_data()
-            iterations += 1
-            if max_iterations is not None and max_iterations <= iterations:
-                break
-            if fail_fast and proof.failed:
-                _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
-                break
             submit_steps(proof.get_steps())
-            pending.remove(future)
 
-        if proof.failed:
-            proof.failure_info = main_prover.failure_info(proof)
-        proof.write_proof_data()
+            while True:
+                if not pending:
+                    break
+                done, _ = wait(pending, return_when='FIRST_COMPLETED')
+                future = done.pop()
+                proof_results = future.result()
+                for result in proof_results:
+                    proof.commit(result)
+                proof.write_proof_data()
+                iterations += 1
+                if max_iterations is not None and max_iterations <= iterations:
+                    break
+                if fail_fast and proof.failed:
+                    _LOGGER.warning(f'Terminating proof early because fail_fast is set: {proof.id}')
+                    break
+                submit_steps(proof.get_steps())
+                pending.remove(future)
+
+            if proof.failed:
+                proof.failure_info = main_prover.failure_info(proof)
+            proof.write_proof_data()
 
 
 class _ProverPool(ContextManager['_ProverPool'], Generic[P, PS, SR]):
