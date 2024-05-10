@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, final
 # isort: off
 import pyk.kllvm.load  # noqa: F401
 from _kllvm.prooftrace import (  # type: ignore  # noqa: F401
-    LLVMREwriteEvent,
+    llvm_rewrite_event,
     llvm_function_event,
     llvm_hook_event,
     llvm_rewrite_trace,
