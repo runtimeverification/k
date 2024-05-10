@@ -1,7 +1,7 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/a0ca443f999f9a71ea8bdaab78e91340e318830a";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/aa1bc71a8c2c6937306ca1f411c4d0ff75e7b5b8";
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
