@@ -1089,28 +1089,21 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         prover = APRProver(kcfg_explore=kcfg_explore)
         prover.advance_proof(proof, fail_fast=True)
 
-        failure_info = proof.failure_info
-        assert isinstance(failure_info, APRFailureInfo)
-
-        actual_pending = len(failure_info.pending_nodes)
-        actual_failing = len(failure_info.failing_nodes)
-
-        assert expected_pending == actual_pending
-        assert expected_failing == actual_failing
+        initial_failure_info = proof.failure_info
+        assert isinstance(initial_failure_info, APRFailureInfo)
 
         # reload proof from disk
         proof = APRProof.read_proof_data(proof_dir, proof_id)
         prover = APRProver(kcfg_explore=kcfg_explore)
         prover.advance_proof(proof, fail_fast=True)
 
-        failure_info = proof.failure_info
-        assert isinstance(failure_info, APRFailureInfo)
+        final_failure_info = proof.failure_info
+        assert isinstance(final_failure_info, APRFailureInfo)
 
-        actual_pending = len(failure_info.pending_nodes)
-        actual_failing = len(failure_info.failing_nodes)
+        assert expected_pending == len(final_failure_info.pending_nodes)
+        assert expected_failing == len(final_failure_info.failing_nodes)
 
-        assert expected_pending == actual_pending
-        assert expected_failing == actual_failing
+        assert initial_failure_info == final_failure_info
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,expected_pending,expected_failing,path_conditions,fail_fast',
