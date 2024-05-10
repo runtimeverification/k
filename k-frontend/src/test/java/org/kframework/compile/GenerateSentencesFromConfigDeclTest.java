@@ -99,6 +99,7 @@ public class GenerateSentencesFromConfigDeclTest {
         GenerateSentencesFromConfigDecl.gen(kem, configuration, BooleanUtils.FALSE, Att.empty(), m);
     Att initializerAtts = Att.empty().add(Att.INITIALIZER());
     Att productionAtts = initializerAtts.add(Att.FUNCTION());
+    Att totalProductionAtts = productionAtts.add(Att.TOTAL());
     Set<Sentence> reference =
         Set(
             Production(
@@ -209,7 +210,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 KLabel("initOptCell"),
                 Sort("OptCell"),
                 Seq(Terminal("initOptCell")),
-                productionAtts),
+                totalProductionAtts),
             Rule(
                 KRewrite(
                     KApply(KLabel("initThreadsCell"), KVariable("Init")),

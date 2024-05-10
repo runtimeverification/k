@@ -1461,3 +1461,52 @@ class TestImpParallelProof(ParallelTest, KProveTest):
 
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
+
+    def test_all_path_reachability_prove_parallel_resources(
+        self,
+        kprove: KProve,
+        tmp_path_factory: TempPathFactory,
+        create_prover: Callable[[int, Iterable[str]], Prover],
+    ) -> None:
+
+        test_id = 'imp-simple-addition-1'
+        spec_file = K_FILES / 'imp-simple-spec.k'
+        spec_module = 'IMP-SIMPLE-SPEC'
+        claim_id = 'addition-1'
+
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+
+            _create_prover = partial(create_prover, 1, [])
+
+            provers_created = 0
+
+            class MyAPRProver(APRProver):
+                provers_closed: int = 0
+
+                def close(self) -> None:
+                    MyAPRProver.provers_closed += 1
+                    super().close()
+
+            def create_prover_res_counter() -> APRProver:
+                nonlocal provers_created
+                provers_created += 1
+                prover = _create_prover()
+                prover.__class__ = MyAPRProver
+                assert type(prover) is MyAPRProver
+                return prover
+
+            parallel_advance_proof(
+                proof=proof, max_iterations=2, create_prover=create_prover_res_counter, max_workers=2
+            )
+
+            assert provers_created == MyAPRProver.provers_closed
