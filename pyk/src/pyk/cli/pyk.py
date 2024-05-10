@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 from argparse import ArgumentParser, FileType
 from enum import Enum
-from typing import IO, TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any, Callable
 
 import tomli
 
+from ..ktool import TypeInferenceMode
 from ..ktool.kompile import KompileBackend
 from .args import (
     ConfigArgs,
@@ -29,7 +30,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
-    from pyk.ktool import TypeInferenceMode
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -93,10 +93,39 @@ def get_option_string_destination(command: str, option_string: str) -> str:
         case 'run':
             option_string_destinations = RunOptions.from_option_string()
 
-    if option_string in option_string_destinations:
-        return option_string_destinations[option_string]
-    else:
-        return option_string.replace('-', '_')
+    return option_string_destinations.get(option_string, option_string.replace('-', '_'))
+
+
+def get_argument_type_setter(command: str, option_string: str) -> Callable[[str], Any]:
+    def func(par: str) -> str:
+        return par
+
+    option_types = {}
+    match command:
+        case 'json-to-kore':
+            option_types = JsonToKoreOptions.get_argument_type()
+        case 'kore-to-json':
+            option_types = KoreToJsonOptions.get_argument_type()
+        case 'coverage':
+            option_types = CoverageOptions.get_argument_type()
+        case 'graph-imports':
+            option_types = GraphImportsOptions.get_argument_type()
+        case 'rpc-kast':
+            option_types = RPCKastOptions.get_argument_type()
+        case 'rpc-print':
+            option_types = RPCPrintOptions.get_argument_type()
+        case 'print':
+            option_types = PrintOptions.get_argument_type()
+        case 'prove-legacy':
+            option_types = ProveLegacyOptions.get_argument_type()
+        case 'prove':
+            option_types = ProveOptions.get_argument_type()
+        case 'kompile':
+            option_types = KompileCommandOptions.get_argument_type()
+        case 'run':
+            option_types = RunOptions.get_argument_type()
+
+    return option_types.get(option_string, func)
 
 
 class PrintInput(Enum):
@@ -121,11 +150,24 @@ class CoverageOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
             | LoggingOptions.from_option_string()
         )
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            DefinitionOptions.get_argument_type()
+            | OutputFileOptions.get_argument_type()
+            | LoggingOptions.get_argument_type()
+            | {'coverage_file': FileType('r')}
+        )
+
 
 class GraphImportsOptions(DefinitionOptions, LoggingOptions):
     @staticmethod
     def from_option_string() -> dict[str, str]:
         return DefinitionOptions.from_option_string() | LoggingOptions.from_option_string()
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return DefinitionOptions.get_argument_type() | LoggingOptions.get_argument_type()
 
 
 class RPCKastOptions(OutputFileOptions, LoggingOptions):
@@ -135,6 +177,14 @@ class RPCKastOptions(OutputFileOptions, LoggingOptions):
     @staticmethod
     def from_option_string() -> dict[str, str]:
         return OutputFileOptions.from_option_string() | LoggingOptions.from_option_string()
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            OutputFileOptions.get_argument_type()
+            | LoggingOptions.get_argument_type()
+            | {'reference_request_file': FileType('r'), 'response_file': FileType('r')}
+        )
 
 
 class RPCPrintOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
@@ -146,6 +196,12 @@ class RPCPrintOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
             DefinitionOptions.from_option_string()
             | OutputFileOptions.from_option_string()
             | LoggingOptions.from_option_string()
+        )
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            OutputFileOptions.get_argument_type() | LoggingOptions.get_argument_type() | {'input_file': FileType('r')}
         )
 
 
@@ -173,6 +229,16 @@ class PrintOptions(DefinitionOptions, OutputFileOptions, DisplayOptions, Logging
             | LoggingOptions.from_option_string()
         )
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            DefinitionOptions.get_argument_type()
+            | OutputFileOptions.get_argument_type()
+            | DisplayOptions.get_argument_type()
+            | LoggingOptions.get_argument_type()
+            | {'term': FileType('r'), 'input': PrintInput}
+        )
+
 
 class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
     main_file: Path
@@ -193,6 +259,14 @@ class ProveLegacyOptions(DefinitionOptions, OutputFileOptions, LoggingOptions):
             | OutputFileOptions.from_option_string()
             | LoggingOptions.from_option_string()
             | {'kArgs': 'k_args'}
+        )
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            DefinitionOptions.get_argument_type()
+            | OutputFileOptions.get_argument_type()
+            | LoggingOptions.get_argument_type()
         )
 
 
@@ -217,6 +291,15 @@ class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, 
             | KompileOptions.from_option_string()
             | LoggingOptions.from_option_string()
             | {'definition': 'definition_dir'}
+        )
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            KDefinitionOptions.get_argument_type()
+            | KompileOptions.get_argument_type()
+            | LoggingOptions.get_argument_type()
+            | {'definition': dir_path, 'backend': KompileBackend, 'type-inference-mode': TypeInferenceMode}
         )
 
 
@@ -250,6 +333,15 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             | {'definition': 'definition_dir'}
         )
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return (
+            KDefinitionOptions.get_argument_type()
+            | KompileOptions.get_argument_type()
+            | LoggingOptions.get_argument_type()
+            | {'definition': dir_path, 'type-inference-mode': TypeInferenceMode}
+        )
+
 
 class RunOptions(LoggingOptions):
     pgm_file: str
@@ -261,6 +353,14 @@ class RunOptions(LoggingOptions):
             'definition_dir': None,
         }
 
+    @staticmethod
+    def from_option_string() -> dict[str, str]:
+        return LoggingOptions.from_option_string() | {'definition': 'definition_dir'}
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return LoggingOptions.get_argument_type() | {'definition': dir_path}
+
 
 class ParseOuterOptions(LoggingOptions):
     main_file: Path
@@ -268,6 +368,10 @@ class ParseOuterOptions(LoggingOptions):
     includes: Iterable[str]
     output_file: IO[Any]
     main_module: str
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return LoggingOptions.get_argument_type() | {'main_file': dir_path, 'output-file': FileType('w')}
 
 
 def create_argument_parser() -> ArgumentParser:
@@ -445,7 +549,11 @@ def create_argument_parser() -> ArgumentParser:
     return pyk_args
 
 
-def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
+def parse_toml_args(
+    args: Namespace,
+    option_destinations: Callable[[str, str], str] = get_option_string_destination,
+    arg_type_getter: Callable[[str, str], Callable[[str], Any]] = get_argument_type_setter,
+) -> dict[str, Any]:
     def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
         if len(profile_list) == 0 or profile_list[0] not in toml_profile:
             return {k: v for k, v in toml_profile.items() if type(v) is not dict}
@@ -453,28 +561,33 @@ def parse_toml_args(args: Namespace) -> dict[str, Any | Iterable]:
             return {k: v for k, v in toml_profile[profile_list[0]].items() if type(v) is not dict}
         return get_profile(toml_profile[profile_list[0]], profile_list[1:])
 
-    toml_args = {}
-    if args.config_file.is_file():
-        with open(args.config_file, 'rb') as config_file:
-            try:
-                toml_args = tomli.load(config_file)
-            except tomli.TOMLDecodeError:
-                _LOGGER.error(
-                    'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
-                )
+    toml_args: dict[str, Any] = {}
+    if not hasattr(args, 'config_file') or not args.config_file.is_file():
+        return {}
+
+    with open(args.config_file, 'rb') as config_file:
+        try:
+            toml_args = tomli.load(config_file)
+        except tomli.TOMLDecodeError:
+            _LOGGER.error(
+                'Input config file is not in TOML format, ignoring the file and carrying on with the provided command line agruments'
+            )
 
     toml_args = (
         get_profile(toml_args[args.command], args.config_profile.split('.')) if args.command in toml_args else {}
     )
-    toml_args = {get_option_string_destination(args.command, k): v for k, v in toml_args.items()}
+
+    toml_adj_args: dict[str, Any] = {}
     for k, v in toml_args.items():
-        if k[:3] == 'no-' and (v == 'true' or v == 'false'):
-            del toml_args[k]
-            toml_args[k[3:]] = 'false' if v == 'true' else 'true'
-        if k == 'optimization-level':
+        opt_string = option_destinations(args.command, k)
+        val = arg_type_getter(args.command, k)(v)
+        if opt_string[:3] == 'no-' or opt_string[:3] == 'no_':
+            toml_adj_args[opt_string[3:]] = not val
+        elif k == 'optimization-level':
             level = toml_args[k] if toml_args[k] >= 0 else 0
             level = level if toml_args[k] <= 3 else 3
-            del toml_args[k]
-            toml_args['-o' + str(level)] = 'true'
+            toml_adj_args['o' + str(level)] = True
+        else:
+            toml_adj_args[opt_string] = val
 
-    return toml_args
+    return toml_adj_args
