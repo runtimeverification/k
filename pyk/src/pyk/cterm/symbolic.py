@@ -113,8 +113,6 @@ class CTermSymbolic:
                 module_name=module_name,
                 log_successful_rewrites=True,
                 log_failed_rewrites=self._trace_rewrites,
-                log_successful_simplifications=self._trace_rewrites,
-                log_failed_simplifications=self._trace_rewrites,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
