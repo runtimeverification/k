@@ -114,6 +114,7 @@
             p.kore-rpc
             p.kore-rpc-booster
             p.kore-rpc-client
+            p.booster-dev
           ];
         };
 
