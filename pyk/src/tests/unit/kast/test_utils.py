@@ -27,7 +27,7 @@ def test_parse_outer(test_file: Path) -> None:
     main_module = test_file.stem.upper()
 
     # When
-    actual = parse_outer(test_file, main_module, (test_file.parent, test_file.parent / 'include'))
+    actual = parse_outer(test_file, main_module, (test_file.parent, test_file.parent / 'include'), include_source=False)
 
     # Then
     assert actual == expected

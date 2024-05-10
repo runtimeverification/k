@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.kast.att import Atts
 from pyk.kast.outer_parser import OuterParser
 from pyk.kast.outer_syntax import (
     Alias,
@@ -38,6 +39,7 @@ if TYPE_CHECKING:
 
     from pyk.kast.outer_syntax import AST
 
+LOCATION: Final = Atts.LOCATION.name
 
 SENTENCE_TEST_DATA: Final = (
     ('rule x', Rule('x')),
@@ -382,15 +384,34 @@ def test_import(k_text: str, expected: AST) -> None:
 
 
 MODULE_TEST_DATA: Final = (
-    ('module FOO endmodule', Module('FOO')),
-    ('module FOO [foo] endmodule', Module('FOO', att=Att((('foo', ''),)))),
-    ('module FOO imports BAR endmodule', Module('FOO', imports=(Import('BAR'),))),
-    ('module FOO imports BAR imports BAZ endmodule', Module('FOO', imports=(Import('BAR'), Import('BAZ')))),
-    ('module FOO rule x endmodule', Module('FOO', sentences=(Rule('x'),))),
-    ('module FOO rule x rule y endmodule', Module('FOO', sentences=(Rule('x'), Rule('y')))),
+    ('module FOO endmodule', Module('FOO', location=(1, 1, 1, 21))),
+    (
+        'module FOO [foo] endmodule',
+        Module(
+            'FOO',
+            att=Att((('foo', ''),)),
+            location=(1, 1, 1, 27),
+        ),
+    ),
+    ('module FOO imports BAR endmodule', Module('FOO', imports=(Import('BAR'),), location=(1, 1, 1, 33))),
+    (
+        'module FOO imports BAR imports BAZ endmodule',
+        Module('FOO', imports=(Import('BAR'), Import('BAZ')), location=(1, 1, 1, 45)),
+    ),
+    ('module FOO rule x endmodule', Module('FOO', sentences=(Rule('x'),), location=(1, 1, 1, 28))),
+    (
+        'module FOO rule x rule y endmodule',
+        Module('FOO', sentences=(Rule('x'), Rule('y')), location=(1, 1, 1, 35)),
+    ),
     (
         'module FOO [foo] imports BAR rule x endmodule',
-        Module('FOO', sentences=(Rule('x'),), imports=(Import('BAR'),), att=Att((('foo', ''),))),
+        Module(
+            'FOO',
+            sentences=(Rule('x'),),
+            imports=(Import('BAR'),),
+            att=Att((('foo', ''),)),
+            location=(1, 1, 1, 46),
+        ),
     ),
 )
 
@@ -424,9 +445,20 @@ DEFINITION_TEST_DATA: Final = (
     ('', Definition()),
     ('requires "foo.k"', Definition(requires=(Require('foo.k'),))),
     ('requires "foo.k" requires "bar.k"', Definition(requires=(Require('foo.k'), Require('bar.k')))),
-    ('module FOO endmodule', Definition(modules=(Module('FOO'),))),
-    ('module FOO endmodule module BAR endmodule', Definition(modules=(Module('FOO'), Module('BAR')))),
-    ('requires "foo.k" module FOO endmodule', Definition(modules=(Module('FOO'),), requires=(Require('foo.k'),))),
+    ('module FOO endmodule', Definition(modules=(Module('FOO', location=(1, 1, 1, 21)),))),
+    (
+        'module FOO endmodule module BAR endmodule',
+        Definition(
+            modules=(
+                Module('FOO', location=(1, 1, 1, 21)),
+                Module('BAR', location=(1, 22, 1, 42)),
+            )
+        ),
+    ),
+    (
+        'requires "foo.k" module FOO endmodule',
+        Definition(modules=(Module('FOO', location=(1, 18, 1, 38)),), requires=(Require('foo.k'),)),
+    ),
 )
 
 
