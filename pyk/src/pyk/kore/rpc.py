@@ -878,7 +878,7 @@ class ImpliesResult:
         predicate = dct.get('condition', {}).get('predicate')
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
         return ImpliesResult(
-            valid=dct['satisfiable'],
+            valid=dct['valid'],
             implication=kore_term(dct['implication']),
             substitution=kore_term(substitution) if substitution is not None else None,
             predicate=kore_term(predicate) if predicate is not None else None,
