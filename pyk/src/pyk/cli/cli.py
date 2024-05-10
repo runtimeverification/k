@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 
 class Options:
@@ -19,4 +19,8 @@ class Options:
 
     @staticmethod
     def from_option_string() -> dict[str, str]:
+        return {}
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
         return {}

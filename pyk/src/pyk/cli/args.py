@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 from functools import cached_property
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any, Callable
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import Options
@@ -52,6 +52,10 @@ class WarningOptions(Options):
             'w2e': 'warning_to_error',
         }
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {'warnings': Warnings}
+
 
 class OutputFileOptions(Options):
     output_file: IO[Any]
@@ -62,15 +66,25 @@ class OutputFileOptions(Options):
             'output_file': sys.stdout,
         }
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {'output-file': FileType('w')}
+
 
 class DefinitionOptions(Options):
     definition_dir: Path
 
     @staticmethod
-    def default() -> dict[str, Any]:
+    def from_option_string() -> dict[str, Any]:
         return {
             'output-definition': 'definition_dir',
             'definition': 'definition_dir',
+        }
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {
+            'definition': dir_path,
         }
 
 
@@ -119,6 +133,13 @@ class SaveDirOptions(Options):
             'temp_directory': None,
         }
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {
+            'save-directory': ensure_dir_path,
+            'temp-directory': ensure_dir_path,
+        }
+
 
 class SpecOptions(SaveDirOptions):
     spec_file: Path
@@ -139,6 +160,12 @@ class SpecOptions(SaveDirOptions):
         return SaveDirOptions.from_option_string() | {
             'claim': 'claim_labels',
             'exclude-claim': 'exclude_claim_labels',
+        }
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {
+            'spec_file': file_path,
         }
 
 
@@ -199,6 +226,13 @@ class KompileOptions(Options):
             'O3': 'o3',
         }
 
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {
+            'llvm-kompile-type': LLVMKompileType,
+            'llvm-kompile-output': Path,
+        }
+
 
 class ParallelOptions(Options):
     workers: int
@@ -222,6 +256,12 @@ class BugReportOptions(Options):
     @staticmethod
     def default() -> dict[str, Any]:
         return {'bug_report': None}
+
+    @staticmethod
+    def get_argument_type() -> dict[str, Callable]:
+        return {
+            'bug-report': bug_report_arg,
+        }
 
 
 class SMTOptions(Options):
