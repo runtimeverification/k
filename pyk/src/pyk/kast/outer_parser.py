@@ -81,10 +81,19 @@ class OuterParser:
             return ''
         return f'{self._source}:{t.loc.line}:{t.loc.col}: '
 
+    def _unexpected_token(self, token: Token, expected_types: Iterable[TokenType] = ()) -> ValueError:
+        location = ''
+        message = f'Unexpected token: {token.type.name}'
+        if self._source:
+            location = f'{self._source}:{token.loc.line}:{token.loc.col}: '
+        if expected_types:
+            expected = ', '.join(sorted(token_type.name for token_type in expected_types))
+            message = f'Expected {expected}, got: {token.type.name}'
+        return ValueError(f'{location}{message}')
+
     def _match(self, token_type: TokenType) -> str:
         if self._la.type != token_type:
-            location_string = self._error_location_string(self._la)
-            raise ValueError(location_string + f'Expected {token_type.name}, got: {self._la.type.name}')
+            raise self._unexpected_token(self._la, (token_type,))
         # _consume() inlined for efficiency
         res = self._la.text
         self._la, self._la2 = self._la2, next(self._lexer, _EOF_TOKEN)
@@ -92,9 +101,7 @@ class OuterParser:
 
     def _match_any(self, token_types: Collection[TokenType]) -> str:
         if self._la.type not in token_types:
-            expected_types = ', '.join(sorted(token_type.name for token_type in token_types))
-            location_string = self._error_location_string(self._la)
-            raise ValueError(location_string + f'Expected {expected_types}, got: {self._la.type.name}')
+            raise self._unexpected_token(self._la, token_types)
         # _consume() inlined for efficiency
         res = self._la.text
         self._la, self._la2 = self._la2, next(self._lexer, _EOF_TOKEN)
@@ -213,8 +220,7 @@ class OuterParser:
             regex = _dequote_regex(self._match(TokenType.REGEX))
             return SyntaxLexical(name, regex)
 
-        location_string = self._error_location_string(self._la)
-        raise ValueError(location_string + f'Unexpected token: {self._la.text}')
+        raise self._unexpected_token(self._la)
 
     def _sort_decl(self) -> SortDecl:
         params: list[str] = []
