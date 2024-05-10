@@ -8,10 +8,14 @@ from typing import TYPE_CHECKING, final, overload
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
     from typing import Any, Final
 
 
-class AST(ABC): ...
+@dataclass(frozen=True)
+class AST(ABC):
+    source: Path | None = field(default=None, kw_only=True)
+    location: tuple[int, int, int, int] | None = field(default=None, kw_only=True)
 
 
 @final
@@ -135,7 +139,7 @@ class NonTerminal(ProductionItem):
 
 
 @final
-@dataclass
+@dataclass(frozen=True)
 class Lexical(ProductionItem):
     regex: str
 
@@ -263,11 +267,15 @@ class Module(AST):
         sentences: Iterable[Sentence] = (),
         imports: Iterable[Import] = (),
         att: Att = EMPTY_ATT,
+        source: Path | None = None,
+        location: tuple[int, int, int, int] | None = None,
     ):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sentences', tuple(sentences))
         object.__setattr__(self, 'imports', tuple(imports))
         object.__setattr__(self, 'att', att)
+        object.__setattr__(self, 'source', source)
+        object.__setattr__(self, 'location', location)
 
 
 @final
