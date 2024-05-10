@@ -549,7 +549,11 @@ def create_argument_parser() -> ArgumentParser:
     return pyk_args
 
 
-def parse_toml_args(args: Namespace) -> dict[str, Any]:
+def parse_toml_args(
+    args: Namespace,
+    option_destinations: Callable[[str, str], str] = get_option_string_destination,
+    arg_type_getter: Callable[[str, str], Callable[[str], Any]] = get_argument_type_setter,
+) -> dict[str, Any]:
     def get_profile(toml_profile: dict[str, Any], profile_list: list[str]) -> dict[str, Any]:
         if len(profile_list) == 0 or profile_list[0] not in toml_profile:
             return {k: v for k, v in toml_profile.items() if type(v) is not dict}
@@ -575,9 +579,9 @@ def parse_toml_args(args: Namespace) -> dict[str, Any]:
 
     toml_adj_args: dict[str, Any] = {}
     for k, v in toml_args.items():
-        opt_string = get_option_string_destination(args.command, k)
-        val = get_argument_type_setter(args.command, k)(v)
-        if opt_string[:3] == 'no_':
+        opt_string = option_destinations(args.command, k)
+        val = arg_type_getter(args.command, k)(v)
+        if opt_string[:3] == 'no-' or opt_string[:3] == 'no_':
             toml_adj_args[opt_string[3:]] = not val
         elif k == 'optimization-level':
             level = toml_args[k] if toml_args[k] >= 0 else 0
