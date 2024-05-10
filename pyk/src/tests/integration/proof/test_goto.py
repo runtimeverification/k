@@ -43,6 +43,12 @@ class GotoSemantics(KCFGSemantics):
             return k_cell[0].label.name == 'jumpi'
         return False
 
+    def is_loop(self, c1: CTerm) -> bool:
+        k_cell = c1.cell('K_CELL')
+        if type(k_cell) is KSequence and len(k_cell) > 0 and type(k_cell[0]) is KApply:
+            return k_cell[0].label.name == 'jumpi'
+        return False
+
 
 APRBMC_PROVE_TEST_DATA: Iterable[
     tuple[str, Path, str, str, int | None, int | None, int, Iterable[str], Iterable[str], ProofStatus, int]

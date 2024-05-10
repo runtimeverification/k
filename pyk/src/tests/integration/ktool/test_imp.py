@@ -57,6 +57,12 @@ class ImpSemantics(KCFGSemantics):
             return k_cell_1[0].label.name == 'while(_)_'
         return False
 
+    def is_loop(self, c1: CTerm) -> bool:
+        k_cell_1 = c1.cell('K_CELL')
+        if type(k_cell_1) is KSequence and type(k_cell_1[0]) is KApply:
+            return k_cell_1[0].label.name == 'while(_)_'
+        return False
+
 
 PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
     (

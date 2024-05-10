@@ -35,6 +35,9 @@ class SimpleSemantics(KCFGSemantics):
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         return False
 
+    def is_loop(self, c1: CTerm) -> bool:
+        return False
+
 
 class TestSimpleProof(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'

@@ -743,11 +743,12 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     def step_proof(self, step: APRProofStep) -> list[APRProofResult]:
         prior_loops: tuple[int, ...] = ()
         if step.bmc_depth is not None:
-            for node in step.shortest_path_to_node:
-                if self.kcfg_explore.kcfg_semantics.same_loop(node.cterm, step.node.cterm):
-                    if node.id in step.prior_loops_cache:
-                        prior_loops = step.prior_loops_cache[node.id] + (node.id,)
-                        break
+            if self.kcfg_explore.kcfg_semantics.is_loop(step.node.cterm):
+                for node in step.shortest_path_to_node:
+                    if self.kcfg_explore.kcfg_semantics.same_loop(node.cterm, step.node.cterm):
+                        if node.id in step.prior_loops_cache:
+                            prior_loops = step.prior_loops_cache[node.id] + (node.id,)
+                            break
 
             _LOGGER.info(f'Prior loop heads for node {step.node.id}: {(step.node.id, prior_loops)}')
             if len(prior_loops) > step.bmc_depth:
