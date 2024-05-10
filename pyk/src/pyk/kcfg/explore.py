@@ -14,7 +14,7 @@ from ..kast.manip import (
     replace_rewrites_with_implies,
 )
 from ..kast.pretty import PrettyPrinter
-from ..kore.rpc import RewriteSuccess
+from ..kore.rpc import LogRewrite, RewriteSuccess
 from ..prelude.ml import is_top
 from ..utils import not_none, shorten_hashes, single
 from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
@@ -208,7 +208,7 @@ class KCFGExplore:
         def extract_rule_labels(_logs: tuple[LogEntry, ...]) -> list[str]:
             _rule_lines = []
             for node_log in _logs:
-                if type(node_log.result) is RewriteSuccess:
+                if isinstance(node_log, LogRewrite) and isinstance(node_log.result, RewriteSuccess):
                     if node_log.result.rule_id in self.cterm_symbolic._definition.sentence_by_unique_id:
                         sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
                         _rule_lines.append(f'{sent.label}:{sent.source}')
