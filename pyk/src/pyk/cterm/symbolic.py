@@ -111,7 +111,7 @@ class CTermSymbolic:
                 cut_point_rules=cut_point_rules,
                 terminal_rules=terminal_rules,
                 module_name=module_name,
-                log_successful_rewrites=True,
+                log_successful_rewrites=self._trace_rewrites,
                 log_failed_rewrites=self._trace_rewrites,
             )
         except SmtSolverError as err:
