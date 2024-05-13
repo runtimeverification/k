@@ -96,9 +96,6 @@ def get_option_string_destination(command: str, option_string: str) -> str:
 
 
 def get_argument_type_setter(command: str, option_string: str) -> Callable[[str], Any]:
-    def func(par: str) -> str:
-        return par
-
     option_types = {}
     match command:
         case 'json-to-kore':
