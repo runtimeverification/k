@@ -38,6 +38,11 @@ from pyk.kore.rpc import (
     ImplicationError,
     ImpliesResult,
     InvalidModuleError,
+    LogOrigin,
+    LogRewrite,
+    LogTiming,
+    RewriteFailure,
+    RewriteSuccess,
     SatResult,
     State,
     StuckResult,
@@ -59,7 +64,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final
 
-    from pyk.kore.rpc import BoosterServerArgs, ExecuteResult, KoreClient
+    from pyk.kore.rpc import BoosterServerArgs, ExecuteResult, KoreClient, LogEntry
     from pyk.kore.syntax import Pattern
     from pyk.testing import Kompiler
 
@@ -473,6 +478,191 @@ class TestKoreClientWithSMTLemmas(KoreClientTest):
         assert actual == expected
 
 
+EXECUTE_LOGGING_TEST_DATA = (
+    # value, log_successful_rewrites, log_failed_rewrites, expected
+    (
+        0,
+        False,
+        False,
+        {
+            ServerType.LEGACY: (),
+            ServerType.BOOSTER: (),
+        },
+    ),
+    (
+        0,
+        True,
+        False,
+        {
+            ServerType.LEGACY: (
+                LogRewrite(
+                    origin=LogOrigin.KORE_RPC,
+                    result=RewriteSuccess(
+                        rule_id='911c8f0f2589faf6074f703e8d93e4215bf26a376abe919d2c8cd41ff17fc532',
+                    ),
+                ),
+            ),
+            ServerType.BOOSTER: (
+                LogRewrite(
+                    origin=LogOrigin.BOOSTER,
+                    result=RewriteSuccess(
+                        rule_id='911c8f0f2589faf6074f703e8d93e4215bf26a376abe919d2c8cd41ff17fc532',
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        0,
+        False,
+        True,
+        {
+            ServerType.LEGACY: (),
+            ServerType.BOOSTER: 2
+            * (
+                LogRewrite(
+                    origin=LogOrigin.BOOSTER,
+                    result=RewriteFailure(
+                        rule_id=None,
+                        reason='No applicable rules found',
+                    ),
+                ),
+            ),
+        },
+    ),
+    (
+        0,
+        True,
+        True,
+        {
+            ServerType.LEGACY: (
+                LogRewrite(
+                    origin=LogOrigin.KORE_RPC,
+                    result=RewriteSuccess(
+                        rule_id='911c8f0f2589faf6074f703e8d93e4215bf26a376abe919d2c8cd41ff17fc532',
+                    ),
+                ),
+            ),
+            ServerType.BOOSTER: (
+                LogRewrite(
+                    origin=LogOrigin.BOOSTER,
+                    result=RewriteSuccess(
+                        rule_id='911c8f0f2589faf6074f703e8d93e4215bf26a376abe919d2c8cd41ff17fc532',
+                    ),
+                ),
+                LogRewrite(
+                    origin=LogOrigin.BOOSTER,
+                    result=RewriteFailure(
+                        rule_id=None,
+                        reason='No applicable rules found',
+                    ),
+                ),
+                LogRewrite(
+                    origin=LogOrigin.BOOSTER,
+                    result=RewriteFailure(
+                        rule_id=None,
+                        reason='No applicable rules found',
+                    ),
+                ),
+            ),
+        },
+    ),
+)
+
+
+class TestExecuteLogging(KoreClientTest):
+    KOMPILE_DEFINITION = """
+        module LOGGING-TEST
+            imports INT
+
+            syntax Res ::= "#even" [symbol(even)]
+                         | "#odd"  [symbol(odd) ]
+            syntax Pgm ::= Int | Res
+
+            configuration <k> $PGM:Pgm </k>
+            rule <k> X:Int => #even ... </k> requires X %Int 2  ==Int 0
+            rule <k> X:Int => #odd  ... </k> requires X %Int 2 =/=Int 0
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'LOGGING-TEST'
+    KOMPILE_ARGS = {'syntax_module': 'LOGGING-TEST'}
+    LLVM_ARGS = KOMPILE_ARGS
+
+    @staticmethod
+    def config(i: int) -> Pattern:
+        return generated_top((k(kseq((inj(INT, SORT_K_ITEM, int_dv(i)),))), generated_counter(int_dv(0))))
+
+    @pytest.mark.parametrize(
+        'value,log_successful_rewrites,log_failed_rewrites,expected',
+        EXECUTE_LOGGING_TEST_DATA,
+        ids=count(),
+    )
+    def test(
+        self,
+        server_type: ServerType,
+        kore_client: KoreClient,
+        value: int,
+        log_successful_rewrites: bool,
+        log_failed_rewrites: bool,
+        expected: Mapping[ServerType, tuple[LogEntry, ...]],
+    ) -> None:
+        # Given
+        config = self.config(value)
+
+        # When
+        response = kore_client.execute(
+            config,
+            log_successful_rewrites=log_successful_rewrites,
+            log_failed_rewrites=log_failed_rewrites,
+        )
+        actual = response.logs
+
+        # Then
+        assert actual == expected[server_type]
+
+
+class TestTimeLogging(KoreClientTest):
+    KOMPILE_DEFINITION = """
+        module TIMING-TEST
+            imports INT
+            configuration <k> $PGM:Int </k>
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'TIMING-TEST'
+    KOMPILE_ARGS = {'syntax_module': 'TIMING-TEST'}
+    LLVM_ARGS = KOMPILE_ARGS
+
+    @staticmethod
+    def config(i: int) -> Pattern:
+        return generated_top((k(kseq((inj(INT, SORT_K_ITEM, int_dv(i)),))), generated_counter(int_dv(0))))
+
+    def test_execute(self, kore_client: KoreClient) -> None:
+        # When
+        response = kore_client.execute(self.config(0), log_timing=True)
+        logs = response.logs
+
+        # Then
+        assert logs
+        assert all(isinstance(log, LogTiming) for log in logs)
+
+    def test_implies(self, kore_client: KoreClient) -> None:
+        # When
+        response = kore_client.implies(EVar('X', INT), int_top, log_timing=True)
+        logs = response.logs
+
+        # Then
+        assert logs
+        assert all(isinstance(log, LogTiming) for log in logs)
+
+    def test_simplify(self, kore_client: KoreClient) -> None:
+        # When
+        _, logs = kore_client.simplify(int_top, log_timing=True)
+
+        # Then
+        assert logs
+        assert all(isinstance(log, LogTiming) for log in logs)
+
+
 class TestAddModule(KoreClientTest):
     KOMPILE_DEFINITION = """
         module INT-CONFIG
@@ -821,6 +1011,9 @@ START_BOOSTER_SERVER_TEST_DATA: Final[tuple[dict[str, Any], ...]] = (
     {'fallback_on': ['Aborted', 'Stuck']},
     {'interim_simplification': 3},
     {'no_post_exec_simpify': True},
+    {'log_context': ['booster*']},
+    {'not_log_context': ['*detail']},
+    {'log_context': ['kore*', '*success*'], 'not_log_context': ['*constraint*', '*simplify*']},
 )
 
 
