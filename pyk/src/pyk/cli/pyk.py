@@ -124,7 +124,7 @@ def get_argument_type_setter(command: str, option_string: str) -> Callable[[str]
         case 'run':
             option_types = RunOptions.get_argument_type()
 
-    return option_types.get(option_string, func)
+    return option_types.get(option_string, (lambda x: x))
 
 
 class PrintInput(Enum):
