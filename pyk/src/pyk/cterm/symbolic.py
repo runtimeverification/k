@@ -96,21 +96,21 @@ class CTermSymbolic:
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
 
-    def minimize_constraints(self, constraints: tuple[KInner, ...], pc: KInner) -> tuple[KInner, ...]:
+    def minimize_constraints(self, constraints: tuple[KInner, ...], path_condition: KInner) -> tuple[KInner, ...]:
         """Minimize given branching constraints with respect to a given path condition."""
+        # By construction, this function is to be called with at least two sets of constraints
+        assert len(constraints) >= 2
         # Determine intersection between all returned sets of branching constraints
         flattened_default = tuple(flatten_label('#And', c) for c in constraints)
-        intersection = flattened_default[0]
-        for i in range(1, len(flattened_default)):
-            intersection = [c for c in intersection if c in flattened_default[i]]
-            # If intersection is empty, there is nothing to be done
-            if not intersection:
-                return constraints
+        intersection = set.intersection(*(set(cs) for cs in flattened_default))
+        # If intersection is empty, there is nothing to be done
+        if not intersection:
+            return constraints
         # Check if non-empty intersection is entailed by the path condition
         dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
-        pc_cterm = CTerm(dummy_config, constraints=[pc])
+        path_condition_cterm = CTerm(dummy_config, constraints=[path_condition])
         intersection_cterm = CTerm(dummy_config, constraints=intersection)
-        implication_check = self.implies(pc_cterm, intersection_cterm, bind_universally=True)
+        implication_check = self.implies(path_condition_cterm, intersection_cterm, bind_universally=True)
         # The intersection is not entailed, there is nothing to be done
         if implication_check.csubst is None:
             return constraints
@@ -155,7 +155,7 @@ class CTermSymbolic:
         # Branch constraint minimization makes sense only if there is a proper branching
         if len(branching_constraints) >= 2 and all(bc is not None for bc in branching_constraints):
             branching_constraints = self.minimize_constraints(
-                tuple(not_none(bc) for bc in branching_constraints), pc=mlAnd(cterm.constraints)
+                tuple(not_none(bc) for bc in branching_constraints), path_condition=mlAnd(cterm.constraints)
             )
         next_states = tuple(
             NextState(CTerm.from_kast(self.kore_to_kast(ns.kore)), c)
