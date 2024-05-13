@@ -12,6 +12,7 @@ from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, final, overload
 
 from ..utils import FrozenDict
+from .color import Color
 from .kast import KAst
 
 if TYPE_CHECKING:
@@ -227,13 +228,27 @@ class FormatType(AttType[Format]):
         return Format.parse(text)
 
 
+class ColorType(AttType[Color]):
+    def from_dict(self, obj: Any) -> Color:
+        assert isinstance(obj, str)
+        return Color(obj)
+
+    def to_dict(self, value: Color) -> str:
+        return value.value
+
+    def unparse(self, value: Color) -> str:
+        return value.value
+
+    def parse(self, text: str) -> Color:
+        return Color(text)
+
+
 _NONE: Final = NoneType()
 _ANY: Final = AnyType()
 _INT: Final = IntType()
 _STR: Final = StrType()
 _LOCATION: Final = LocationType()
 _PATH: Final = PathType()
-_FORMAT: Final = FormatType()
 
 
 @final
@@ -265,7 +280,7 @@ class Atts:
     CELL_FRAGMENT: Final = AttKey('cellFragment', type=_ANY)
     CELL_NAME: Final = AttKey('cellName', type=_STR)
     CELL_OPT_ABSENT: Final = AttKey('cellOptAbsent', type=_ANY)
-    COLOR: Final = AttKey('color', type=_STR)
+    COLOR: Final = AttKey('color', type=ColorType())
     COLORS: Final = AttKey('colors', type=_ANY)
     COMM: Final = AttKey('comm', type=_NONE)
     CONCAT: Final = AttKey('concat', type=_ANY)
@@ -274,7 +289,7 @@ class Atts:
     DEPENDS: Final = AttKey('depends', type=_ANY)
     DIGEST: Final = AttKey('digest', type=_ANY)
     ELEMENT: Final = AttKey('element', type=_ANY)
-    FORMAT: Final = AttKey('format', type=_FORMAT)
+    FORMAT: Final = AttKey('format', type=FormatType())
     FRESH_GENERATOR: Final = AttKey('freshGenerator', type=_NONE)
     FUNCTION: Final = AttKey('function', type=_NONE)
     FUNCTIONAL: Final = AttKey('functional', type=_NONE)
