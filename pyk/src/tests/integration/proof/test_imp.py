@@ -1066,6 +1066,45 @@ class TestImpProof(KCFGExploreTest, KProveTest):
 
         assert actual_path_conds == expected_path_conds
 
+    def test_proof_no_progress_on_reload(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        proof_dir: Path,
+    ) -> None:
+
+        spec_file = K_FILES / 'imp-simple-spec.k'
+        spec_module = 'IMP-SIMPLE-SPEC'
+        claim_id = 'fail-early'
+        expected_pending = 1
+        expected_failing = 1
+
+        claim = single(
+            kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
+        )
+
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
+        proof_id = proof.id
+        kcfg_explore.simplify(proof.kcfg, {})
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=True)
+
+        initial_failure_info = proof.failure_info
+        assert isinstance(initial_failure_info, APRFailureInfo)
+
+        # reload proof from disk
+        proof = APRProof.read_proof_data(proof_dir, proof_id)
+        prover = APRProver(kcfg_explore=kcfg_explore)
+        prover.advance_proof(proof, fail_fast=True)
+
+        final_failure_info = proof.failure_info
+        assert isinstance(final_failure_info, APRFailureInfo)
+
+        assert expected_pending == len(final_failure_info.pending_nodes)
+        assert expected_failing == len(final_failure_info.failing_nodes)
+
+        assert initial_failure_info == final_failure_info
+
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,expected_pending,expected_failing,path_conditions,fail_fast',
         FAILURE_INFO_TEST_DATA,
@@ -1085,9 +1124,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof_dir: Path,
         fail_fast: bool,
     ) -> None:
-        if fail_fast:
-            pytest.skip()
-
         claim = single(
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
@@ -1096,12 +1132,12 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         proof_id = proof.id
         kcfg_explore.simplify(proof.kcfg, {})
         prover = APRProver(kcfg_explore=kcfg_explore)
-        prover.advance_proof(proof)
+        prover.advance_proof(proof, fail_fast=fail_fast)
 
         # reload proof from disk
         proof = APRProof.read_proof_data(proof_dir, proof_id)
         prover = APRProver(kcfg_explore=kcfg_explore)
-        prover.advance_proof(proof)
+        prover.advance_proof(proof, fail_fast=fail_fast)
 
         failure_info = proof.failure_info
         assert isinstance(failure_info, APRFailureInfo)
@@ -1425,3 +1461,52 @@ class TestImpParallelProof(ParallelTest, KProveTest):
 
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
+
+    def test_all_path_reachability_prove_parallel_resources(
+        self,
+        kprove: KProve,
+        tmp_path_factory: TempPathFactory,
+        create_prover: Callable[[int, Iterable[str]], Prover],
+    ) -> None:
+
+        test_id = 'imp-simple-addition-1'
+        spec_file = K_FILES / 'imp-simple-spec.k'
+        spec_module = 'IMP-SIMPLE-SPEC'
+        claim_id = 'addition-1'
+
+        with tmp_path_factory.mktemp(f'apr_tmp_proofs-{test_id}') as proof_dir:
+            spec_modules = kprove.get_claim_modules(Path(spec_file), spec_module_name=spec_module)
+            spec_label = f'{spec_module}.{claim_id}'
+            proofs = APRProof.from_spec_modules(
+                kprove.definition,
+                spec_modules,
+                spec_labels=[spec_label],
+                logs={},
+                proof_dir=proof_dir,
+            )
+            proof = single([p for p in proofs if p.id == spec_label])
+
+            _create_prover = partial(create_prover, 1, [])
+
+            provers_created = 0
+
+            class MyAPRProver(APRProver):
+                provers_closed: int = 0
+
+                def close(self) -> None:
+                    MyAPRProver.provers_closed += 1
+                    super().close()
+
+            def create_prover_res_counter() -> APRProver:
+                nonlocal provers_created
+                provers_created += 1
+                prover = _create_prover()
+                prover.__class__ = MyAPRProver
+                assert type(prover) is MyAPRProver
+                return prover
+
+            parallel_advance_proof(
+                proof=proof, max_iterations=2, create_prover=create_prover_res_counter, max_workers=2
+            )
+
+            assert provers_created == MyAPRProver.provers_closed
