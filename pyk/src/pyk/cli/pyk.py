@@ -4,7 +4,6 @@ import logging
 from argparse import ArgumentParser, FileType
 from enum import Enum
 from typing import IO, TYPE_CHECKING, Any
-from collections.abc import Callable
 
 import tomli
 
@@ -27,10 +26,9 @@ from .utils import dir_path, file_path
 
 if TYPE_CHECKING:
     from argparse import Namespace
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
     from pathlib import Path
     from typing import Final
-
 
 _LOGGER: Final = logging.getLogger(__name__)
 

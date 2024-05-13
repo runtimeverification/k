@@ -5,14 +5,13 @@ from argparse import ArgumentParser, FileType
 from functools import cached_property
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
-from collections.abc import Callable
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import Options
 from .utils import bug_report_arg, dir_path, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
 
     from ..utils import BugReport
 
