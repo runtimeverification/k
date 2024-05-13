@@ -5,7 +5,7 @@
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
-      url = "github:runtimeverification/llvm-backend/v0.1.12";
+      url = "github:runtimeverification/llvm-backend/v0.1.13";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
