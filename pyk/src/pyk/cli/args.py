@@ -189,6 +189,7 @@ class KompileOptions(Options):
     gen_glr_bison_parser: bool
     bison_lists: bool
     no_exc_wrap: bool
+    outer_parsed_json: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -212,6 +213,7 @@ class KompileOptions(Options):
             'gen_glr_bison_parser': False,
             'bison_lists': False,
             'no_exc_wrap': False,
+            'outer_parsed_json': False,
         }
 
     @staticmethod

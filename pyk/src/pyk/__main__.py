@@ -309,6 +309,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'gen_bison_parser': options.gen_bison_parser,
         'gen_glr_bison_parser': options.gen_glr_bison_parser,
         'bison_lists': options.bison_lists,
+        'outer_parsed_json': options.outer_parsed_json,
     }
     if options.backend == KompileBackend.LLVM:
         kompile_dict['ccopts'] = options.ccopts
