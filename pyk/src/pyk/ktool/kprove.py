@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from subprocess import CompletedProcess
     from typing import ContextManager, Final
 
-    from ..cli.pyk import ProveOptions
+    from ..__main__ import ProveOptionsGroup
     from ..kast.outer import KClaim, KRule, KRuleLike
     from ..kast.pretty import SymbolTable
     from ..kcfg import KCFGExplore
@@ -427,7 +427,7 @@ class ProveRpc:
         self._kprove = kprove
         self._explore_context = explore_context
 
-    def prove_rpc(self, options: ProveOptions) -> list[Proof]:
+    def prove_rpc(self, options: ProveOptionsGroup) -> list[Proof]:
         all_claims = self._kprove.get_claims(
             options.spec_file,
             spec_module_name=options.spec_module,

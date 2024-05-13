@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.cli.pyk import ProveOptions
+from pyk.__main__ import ProveOptionsGroup
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.ktool.kprove import ProveRpc
@@ -174,21 +174,22 @@ class TestImpProve(KCFGExploreTest, KProveTest):
         claim_id: str,
         proof_status: ProofStatus,
     ) -> None:
+
+        options = ProveOptionsGroup()
+        options.extract(
+            {
+                'spec_file': Path(spec_file),
+                'spec_module': spec_module,
+                'claim_labels': [claim_id],
+            },
+            'prove',
+        )
+
         # Given
         prove_rpc = ProveRpc(kprove, lambda: nullcontext(kcfg_explore))
 
         # When
-        proof = single(
-            prove_rpc.prove_rpc(
-                ProveOptions(
-                    {
-                        'spec_file': Path(spec_file),
-                        'spec_module': spec_module,
-                        'claim_labels': [claim_id],
-                    }
-                ),
-            )
-        )
+        proof = single(prove_rpc.prove_rpc(options))
 
         # Then
         assert proof.status == proof_status
