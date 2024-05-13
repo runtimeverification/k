@@ -6,6 +6,7 @@ import sys
 from collections.abc import Iterable
 from contextlib import contextmanager
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 from graphviz import Digraph
@@ -15,6 +16,8 @@ from .cli.utils import LOG_FORMAT, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .cterm.symbolic import cterm_symbolic
+from .kast import KAst
+from .kast.att import KAtt
 from .kast.inner import KInner
 from .kast.manip import (
     flatten_label,
@@ -24,7 +27,7 @@ from .kast.manip import (
     remove_source_map,
     split_config_and_constraints,
 )
-from .kast.outer import read_kast_definition
+from .kast.outer import KFlatModule, read_kast_definition
 from .kast.pretty import PrettyPrinter
 from .kast.utils import parse_outer
 from .kcfg import KCFGExplore
@@ -39,7 +42,7 @@ from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import FrozenDictEncoder, check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -50,6 +53,7 @@ if TYPE_CHECKING:
         GraphImportsOptions,
         JsonToKoreOptions,
         KompileCommandOptions,
+        KompileXCommandOptions,
         KoreToJsonOptions,
         ParseOuterOptions,
         PrintOptions,
@@ -426,6 +430,51 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
         options.output_file.write(result_text)
     except AttributeError:
         sys.stdout.write(f'{result_text}\n')
+
+
+def exec_kompilex(options: KompileXCommandOptions) -> None:
+    definition_file = Path(options.main_file).resolve()
+    search_paths = [definition_file.parent]
+    for include in getattr(options, 'includes', []):
+        include_path = Path(include)
+        try:
+            check_dir_path(include_path)
+        except ValueError:
+            _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
+        search_paths.append(include_path.resolve())
+
+    main_module_name = options.main_module or definition_file.stem.upper()
+    try:
+        final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
+    except Exception as e:
+        _LOGGER.critical(e)
+        exit(1)
+
+    if options.pre_parsed_prelude:
+        prelude_json = json.loads(options.pre_parsed_prelude.read())
+        prelude_modules = tuple(KFlatModule.from_dict(mod) for mod in prelude_json)
+        final_definition = final_definition.let(all_modules=final_definition.all_modules + prelude_modules)
+
+    syntax_module_name = options.syntax_module or main_module_name + '-SYNTAX'
+    if syntax_module_name not in [m.name for m in final_definition.all_modules]:
+        _LOGGER.warn(
+            f'Could not find main syntax module with name {syntax_module_name} in definition. Use --syntax-module to specify one. Using {main_module_name} as default.'
+        )
+        syntax_module_name = main_module_name
+    syntax_att = KAtt.parse({'syntaxModule': main_module_name})
+    final_definition = final_definition.let_att(syntax_att)
+
+    kast_json = {'format': 'KAST', 'version': KAst.version(), 'term': final_definition.to_dict()}
+    ntf = NamedTemporaryFile('w', prefix='pyk_kompilex_', delete=not options.debug)
+    ntf.write(json.dumps(kast_json, cls=FrozenDictEncoder))
+    ntf.flush()
+
+    options.main_file = ntf.name
+    options.outer_parsed_json = True
+    if options.definition_dir is None:
+        options.definition_dir = Path(f'{definition_file.stem}-kompiled')
+
+    exec_kompile(options)
 
 
 if __name__ == '__main__':
