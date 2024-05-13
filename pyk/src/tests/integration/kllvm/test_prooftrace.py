@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pyk.kllvm.hints.prooftrace as prooftrace
-import pyk.kllvm.load  # noqa: F401
 from pyk.kore.prelude import (
     SORT_K_CONFIG_VAR,
     SORT_K_ITEM,

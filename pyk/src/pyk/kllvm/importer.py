@@ -45,6 +45,8 @@ def import_from_file(module_name: str, module_file: str | Path) -> ModuleType:
 
 
 def import_kllvm(target_dir: str | Path) -> ModuleType:
+    if '_kllvm' in sys.modules:
+        return sys.modules['_kllvm']
     target_dir = Path(target_dir)
     check_dir_path(target_dir)
     module_file = target_dir / KLLVM_MODULE_FILE_NAME
