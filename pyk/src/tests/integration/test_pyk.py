@@ -186,3 +186,26 @@ class TestRpcKast:
         expected = json.loads(expected_file.read_text())
         actual = json.loads(actual_file.read_text())
         assert actual == expected
+
+
+class TestKompileX:
+    TEST_FILES = ('a.k', 'b.k', 'c.k', 'd.k')
+    TEST_DATA = [TEST_DATA_DIR / 'k-files' / file for file in TEST_FILES]
+
+    @pytest.mark.parametrize('definition_file', TEST_DATA, ids=[id for id, _ in enumerate(TEST_FILES)])
+    def test_kompilex(self, assume_argv: AssumeArgv, tmp_path: Path, definition_file: Path) -> None:
+        # Given
+        assume_argv(
+            [
+                'pyk',
+                'kompilex',
+                '--pre-parsed-prelude',
+                str(TEST_DATA_DIR / 'prelude-modules.json'),
+                '--definition',
+                str(tmp_path / f'{definition_file.stem}-kompiled'),
+                str(definition_file),
+            ]
+        )
+
+        # When
+        main()
