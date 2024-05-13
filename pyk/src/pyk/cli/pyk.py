@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 from argparse import ArgumentParser, FileType
 from enum import Enum
-from typing import IO, TYPE_CHECKING, Any, Callable
+from typing import IO, TYPE_CHECKING, Any
+from collections.abc import Callable
 
 import tomli
 

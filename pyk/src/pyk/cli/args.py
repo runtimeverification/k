@@ -4,7 +4,8 @@ import sys
 from argparse import ArgumentParser, FileType
 from functools import cached_property
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, Callable
+from typing import IO, TYPE_CHECKING, Any
+from collections.abc import Callable
 
 from ..ktool.kompile import KompileBackend, LLVMKompileType, TypeInferenceMode, Warnings
 from .cli import Options
