@@ -1234,7 +1234,7 @@ class AddColorAtts(SingleModulePass):
         formatt = production.att[Atts.FORMAT]
         ncolors = sum(1 for token in formatt.tokens if token == '%c')
         color = production.att[Atts.COLOR]
-        colors = ','.join(repeat(color.value, ncolors))
+        colors = tuple(repeat(color, ncolors))
 
         return production.let(att=production.att.update([Atts.COLORS(colors)]))
 

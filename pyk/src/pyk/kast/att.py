@@ -243,6 +243,21 @@ class ColorType(AttType[Color]):
         return Color(text)
 
 
+class ColorsType(AttType[tuple[Color, ...]]):
+    def from_dict(self, obj: Any) -> tuple[Color, ...]:
+        assert isinstance(obj, str)
+        return self.parse(obj)
+
+    def to_dict(self, value: tuple[Color, ...]) -> str:
+        return self.unparse(value)
+
+    def unparse(self, value: tuple[Color, ...]) -> str:
+        return ','.join(v.value for v in value)
+
+    def parse(self, text: str) -> tuple[Color, ...]:
+        return tuple(Color(color) for color in text.replace(' ', '').split(','))
+
+
 _NONE: Final = NoneType()
 _ANY: Final = AnyType()
 _INT: Final = IntType()
@@ -281,7 +296,7 @@ class Atts:
     CELL_NAME: Final = AttKey('cellName', type=_STR)
     CELL_OPT_ABSENT: Final = AttKey('cellOptAbsent', type=_ANY)
     COLOR: Final = AttKey('color', type=ColorType())
-    COLORS: Final = AttKey('colors', type=_ANY)
+    COLORS: Final = AttKey('colors', type=ColorsType())
     COMM: Final = AttKey('comm', type=_NONE)
     CONCAT: Final = AttKey('concat', type=_ANY)
     CONCRETE: Final = AttKey('concrete', type=OptionalType(_STR))
