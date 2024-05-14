@@ -234,13 +234,17 @@ class Kompile(ABC):
             if bug_report:
                 bug_report.add_file_contents(out, Path('kompile.log'))
 
-        definition_dir = output_dir if output_dir else Path(self.base_args.main_file.stem + '-kompiled')
+        definition_dir = output_dir if output_dir else _default_output_dir(self.base_args.main_file)
         assert definition_dir.is_dir()
 
         return definition_dir
 
     @abstractmethod
     def args(self) -> list[str]: ...
+
+
+def _default_output_dir(main_file: Path) -> Path:
+    return Path(main_file.stem + '-kompiled')
 
 
 @final
