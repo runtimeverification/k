@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__all__ = ['KompileBackend', 'kompile']
+__all__ = ['PykBackend', 'kompile']
 
 import dataclasses
 import logging
@@ -31,6 +31,14 @@ class KompileNotFoundError(RuntimeError):
         super().__init__(f'Kompile command not found: {str}')
 
 
+class PykBackend(Enum):
+    LLVM = 'llvm'
+    HASKELL = 'haskell'
+    KORE = 'kore'
+    MAUDE = 'maude'
+    BOOSTER = 'booster'
+
+
 class Warnings(Enum):
     ALL = 'all'
     NORMAL = 'normal'
@@ -40,6 +48,8 @@ class Warnings(Enum):
 def kompile(
     main_file: str | Path,
     *,
+    backend: str | PykBackend | None = None,
+    # ---
     command: Iterable[str] = ('kompile',),
     output_dir: str | Path | None = None,
     temp_dir: str | Path | None = None,
@@ -47,13 +57,22 @@ def kompile(
     warnings: str | Warnings | None = None,
     warnings_to_errors: bool = False,
     no_exc_wrap: bool = False,
+    # ---
     debug: bool = False,
     verbose: bool = False,
     cwd: Path | None = None,
     check: bool = True,
+    # ---
     **kwargs: Any,
 ) -> Path:
     kwargs['main_file'] = main_file
+
+    pyk_backend = PykBackend(backend) if backend else None
+    if pyk_backend is PykBackend.BOOSTER:
+        raise ValueError('Backend not supported')
+
+    kwargs['backend'] = KompileBackend(pyk_backend.value) if pyk_backend else None
+
     kompiler = Kompile.from_dict(kwargs)
     return kompiler(
         command=command,
@@ -68,6 +87,11 @@ def kompile(
         cwd=cwd,
         check=check,
     )
+
+
+# -----------
+# kompile CLI
+# -----------
 
 
 class KompileBackend(Enum):
