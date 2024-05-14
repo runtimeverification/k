@@ -19,7 +19,6 @@ import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.ProductionItem;
-import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
 import org.kframework.kil.*;
@@ -29,6 +28,7 @@ import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
 import org.kframework.kore.KLabel;
+import org.kframework.parser.outer.ParseRegex;
 import org.kframework.utils.errorsystem.KEMException;
 
 public class KILtoKORE extends KILTransformation<Object> {
@@ -139,7 +139,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
   public org.kframework.definition.Sentence apply(SyntaxLexical lexical) {
     return new org.kframework.definition.SyntaxLexical(
-        lexical.name, lexical.regex, convertAttributes(lexical));
+        lexical.name, ParseRegex.parse(lexical.regex, lexical), convertAttributes(lexical));
   }
 
   public org.kframework.definition.Bubble apply(StringSentence sentence) {
@@ -261,7 +261,7 @@ public class KILtoKORE extends KILTransformation<Object> {
               throw new AssertionError("Lists should have applied before.");
             } else if (it instanceof Lexical) {
               String regex = ((Lexical) it).getLexicalRule();
-              items.add(RegexTerminal(regex));
+              items.add(RegexTerminal(ParseRegex.parse(regex, it)));
             } else if (it instanceof Terminal) {
               items.add(Terminal(((Terminal) it).getTerminal()));
             } else {
