@@ -2,6 +2,7 @@ from __future__ import annotations
 
 __all__ = ['PykBackend', 'kompile']
 
+import concurrent.futures
 import dataclasses
 import logging
 import shlex
@@ -69,7 +70,20 @@ def kompile(
 
     pyk_backend = PykBackend(backend) if backend else None
     if pyk_backend is PykBackend.BOOSTER:
-        raise ValueError('Backend not supported')
+        return _booster_kompile(
+            command=command,
+            output_dir=output_dir,
+            temp_dir=temp_dir,
+            type_inference_mode=type_inference_mode,
+            warnings=warnings,
+            warnings_to_errors=warnings_to_errors,
+            no_exc_wrap=no_exc_wrap,
+            debug=debug,
+            verbose=verbose,
+            cwd=cwd,
+            check=check,
+            kwargs=kwargs,
+        )
 
     kwargs['backend'] = KompileBackend(pyk_backend.value) if pyk_backend else None
 
@@ -87,6 +101,95 @@ def kompile(
         cwd=cwd,
         check=check,
     )
+
+
+def _booster_kompile(
+    command: Iterable[str],
+    output_dir: str | Path | None,
+    temp_dir: str | Path | None,
+    type_inference_mode: str | TypeInferenceMode | None,
+    warnings: str | Warnings | None,
+    warnings_to_errors: bool,
+    no_exc_wrap: bool,
+    # ---
+    debug: bool,
+    verbose: bool,
+    cwd: Path | None,
+    check: bool,
+    # ---
+    kwargs: Mapping[str, Any],
+) -> Path:
+    llvm_kt = kwargs.get('llvm_kompile_type')
+    llvm_kt = LLVMKompileType(llvm_kt) if llvm_kt else None
+    if llvm_kt and llvm_kt is not LLVMKompileType.C:
+        raise ValueError(f'Unsupported argument value for Booster kompilation: llvm_kompile_type: {llvm_kt.value}')
+
+    llvm_args, haskell_args = _group_args(kwargs)
+
+    llvm_args['backend'] = KompileBackend.LLVM
+    llvm_args['llvm_kompile_type'] = LLVMKompileType.C
+    llvm_kompile = LLVMKompile.from_dict(llvm_args)
+
+    haskell_args['backend'] = KompileBackend.HASKELL
+    haskell_kompile = HaskellKompile.from_dict(haskell_args)
+
+    main_file = Path(kwargs['main_file'])
+    output_dir = Path(output_dir) if output_dir else _default_output_dir(main_file)
+    temp_dir = Path(temp_dir) if temp_dir else None
+
+    def kompile_llvm() -> None:
+        llvm_kompile(
+            command=command,
+            output_dir=output_dir / 'llvm-library',
+            temp_dir=temp_dir / 'llvm-library' if temp_dir else None,
+            type_inference_mode=type_inference_mode,
+            warnings=warnings,
+            warnings_to_errors=warnings_to_errors,
+            no_exc_wrap=no_exc_wrap,
+            debug=debug,
+            verbose=verbose,
+            cwd=cwd,
+            check=check,
+        )
+
+    def kompile_haskell() -> None:
+        haskell_kompile(
+            command=command,
+            output_dir=output_dir,
+            temp_dir=temp_dir,
+            type_inference_mode=type_inference_mode,
+            warnings=warnings,
+            warnings_to_errors=warnings_to_errors,
+            no_exc_wrap=no_exc_wrap,
+            debug=debug,
+            verbose=verbose,
+            cwd=cwd,
+            check=check,
+        )
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [executor.submit(f) for f in [kompile_llvm, kompile_haskell]]
+        for future in concurrent.futures.as_completed(futures):
+            future.result()
+
+    assert output_dir.is_dir()
+    return output_dir
+
+
+def _group_args(args: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    llvm_args = {}
+    haskell_args = {}
+
+    for arg, value in args.items():
+        if arg in COMMON_ARGS:
+            llvm_args[arg] = value
+            haskell_args[arg] = value
+        elif arg in KompileBackend.LLVM.args:
+            llvm_args[arg] = value
+        elif arg in KompileBackend.HASKELL.args:
+            haskell_args[arg] = value
+
+    return llvm_args, haskell_args
 
 
 # -----------
