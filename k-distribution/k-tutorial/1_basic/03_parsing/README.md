@@ -284,7 +284,7 @@ For example, the builtin integers in K are defined using the following
 production:
 
 ```{.k .exclude}
-syntax Int ::= r"[\\+-]?[0-9]+" [token]
+syntax Int ::= r"[\\+\\-]?[0-9]+" [token]
 ```
 
 Here we can see that we have defined that an integer is an optional sign
