@@ -730,7 +730,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
     def _check_subsume(self, node: KCFG.Node, target_node: KCFG.Node, proof_id: str) -> CSubst | None:
         target_cterm = target_node.cterm
-        _LOGGER.info(f'Checking subsumption into target state {proof_id}: {shorten_hashes((node.id))}')
+        _LOGGER.info(f'Checking subsumption into target state {proof_id}: {shorten_hashes(node.id)}')
         if self.fast_check_subsumption and not self._may_subsume(node, target_node):
             _LOGGER.info(f'Skipping full subsumption check because of fast may subsume check {proof_id}: {node.id}')
             return None
