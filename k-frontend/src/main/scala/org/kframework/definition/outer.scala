@@ -9,6 +9,7 @@ import javax.annotation.Nonnull
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.definition.regex.Regex
+import org.kframework.definition.regex.RegexBody
 import org.kframework.definition.regex.RegexSyntax
 import org.kframework.definition.Constructors._
 import org.kframework.kore._
@@ -766,7 +767,7 @@ object SortSynonym {
     Ordering.by[SortSynonym, (String, String, Att)](s => (s.newSort.name, s.oldSort.name, s.att))
 }
 
-case class SyntaxLexical(name: String, regex: Regex, att: Att = Att.empty)
+case class SyntaxLexical(name: String, regex: RegexBody, att: Att = Att.empty)
     extends Sentence
     with SyntaxLexicalToString
     with OuterKORE {

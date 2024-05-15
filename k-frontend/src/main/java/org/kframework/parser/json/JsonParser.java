@@ -247,7 +247,7 @@ public class JsonParser {
         String name = data.getString("name");
         String regex = data.getString("regex");
         Att att = toAtt(data.getJsonObject("att"));
-        return new SyntaxLexical(name, ParseRegex.parse(regex), att);
+        return new SyntaxLexical(name, ParseRegex.parseNamed(regex), att);
       }
       case KBUBBLE -> {
         String sentenceType = data.getString("sentenceType");

@@ -124,6 +124,26 @@ public class ParseRegex {
     return parse(new Scanner(regex));
   }
 
+  public static RegexBody parseNamed(String regex, HasLocation loc) {
+    return parseNamed(new Scanner(regex, loc));
+  }
+
+  public static RegexBody parseNamed(String regex) {
+    return parseNamed(new Scanner(regex));
+  }
+
+  private static RegexBody parseNamed(Scanner input) {
+    Regex reg = parse(input);
+    if (reg.startLine() || reg.endLine()) {
+      String msg = "Named lexical syntax cannot contain line anchors.";
+      if (input.location().isPresent()) {
+        throw KEMException.outerParserError(msg, input.location().get());
+      }
+      throw KEMException.outerParserError(msg);
+    }
+    return reg.reg();
+  }
+
   private static Regex parse(Scanner input) {
     // A few special cases for better error messages
     String contents = input.contents();

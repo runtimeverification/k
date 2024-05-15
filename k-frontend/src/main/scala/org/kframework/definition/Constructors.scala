@@ -6,6 +6,7 @@ import org.kframework.attributes
 import org.kframework.attributes.Att
 import org.kframework.definition
 import org.kframework.definition.regex.Regex
+import org.kframework.definition.regex.RegexBody
 import org.kframework.kore._
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 
@@ -37,9 +38,9 @@ object Constructors {
   def SortSynonym(newSort: Sort, oldSort: Sort, att: attributes.Att) =
     definition.SortSynonym(newSort, oldSort, att)
 
-  def SyntaxLexical(name: String, regex: Regex) =
+  def SyntaxLexical(name: String, regex: RegexBody) =
     definition.SyntaxLexical(name, regex)
-  def SyntaxLexical(name: String, regex: Regex, att: attributes.Att) =
+  def SyntaxLexical(name: String, regex: RegexBody, att: attributes.Att) =
     definition.SyntaxLexical(name, regex, att)
 
   def Production(params: immutable.Seq[Sort], sort: Sort, items: immutable.Seq[ProductionItem]) =
