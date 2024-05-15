@@ -309,7 +309,7 @@ class Atts:
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
     STRICT: Final = AttKey('strict', type=_ANY)
     SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
-    SYNTAXMODULE: Final = AttKey('syntaxModule', type=_STR)
+    SYNTAX_MODULE: Final = AttKey('syntaxModule', type=_STR)
     TERMINALS: Final = AttKey('terminals', type=_STR)
     TOKEN: Final = AttKey('token', type=_NONE)
     TOTAL: Final = AttKey('total', type=_NONE)
