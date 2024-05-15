@@ -1,6 +1,6 @@
 [coverage]
 output = "default-file"
-definition = "/var/folders/ks/1p8zyp5j7xz_v1krhl4l17tm0000gn/T"
+definition = "/tmp"
 
 [print]
 input = "kast-json"
@@ -10,5 +10,5 @@ no-minimize = true
 kArgs = ["arg 1","args 2"]
 
 [coverage.a_profile]
-verbose = true    
+verbose = true
 output = "a-profile-file"
