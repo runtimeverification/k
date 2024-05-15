@@ -43,6 +43,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
+import org.kframework.parser.outer.ParseRegex;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
@@ -246,7 +247,7 @@ public class JsonParser {
         String name = data.getString("name");
         String regex = data.getString("regex");
         Att att = toAtt(data.getJsonObject("att"));
-        return new SyntaxLexical(name, regex, att);
+        return new SyntaxLexical(name, ParseRegex.parse(regex), att);
       }
       case KBUBBLE -> {
         String sentenceType = data.getString("sentenceType");
@@ -299,7 +300,7 @@ public class JsonParser {
       }
       case KREGEXTERMINAL -> {
         String regex = data.getString("regex");
-        return new RegexTerminal(regex);
+        return new RegexTerminal(ParseRegex.parse(regex));
       }
       case KTERMINAL -> {
         String value = data.getString("value");
