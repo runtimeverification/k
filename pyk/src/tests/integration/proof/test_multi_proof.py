@@ -48,7 +48,7 @@ class TestImpMultiProof(KCFGExploreTest, KProveTest):
         MULTIPROOF_TEST_DATA,
         ids=[test_id for test_id, *_ in MULTIPROOF_TEST_DATA],
     )
-    def test_multiproof_pass(
+    def test_multiproof_status(
         self,
         kprove: KProve,
         kcfg_explore: KCFGExplore,
@@ -58,7 +58,6 @@ class TestImpMultiProof(KCFGExploreTest, KProveTest):
         claim_id_2: str,
         proof_status: ProofStatus,
     ) -> None:
-
         spec_file = K_FILES / 'imp-simple-spec.k'
         spec_module = 'IMP-FUNCTIONAL-SPEC'
 
@@ -92,3 +91,41 @@ class TestImpMultiProof(KCFGExploreTest, KProveTest):
         equality_prover.advance_proof(equality_proof_2)
 
         assert mproof.status == proof_status
+
+    def test_multiproof_write(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        proof_dir: Path,
+    ) -> None:
+        spec_file = K_FILES / 'imp-simple-spec.k'
+        spec_module = 'IMP-FUNCTIONAL-SPEC'
+
+        claim_id_1 = 'concrete-addition'
+        claim_id_2 = 'concrete-identity'
+
+        claim_1 = single(
+            kprove.get_claims(
+                Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id_1}']
+            )
+        )
+        claim_2 = single(
+            kprove.get_claims(
+                Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id_2}']
+            )
+        )
+
+        equality_proof_1 = EqualityProof.from_claim(claim_1, kprove.definition, proof_dir=proof_dir)
+        equality_proof_2 = EqualityProof.from_claim(claim_2, kprove.definition, proof_dir=proof_dir)
+
+        equality_proof_1.write_proof_data()
+        equality_proof_2.write_proof_data()
+
+        mproof = MultiProof(
+            id='multiproof1', subproof_ids=[equality_proof_1.id, equality_proof_2.id], proof_dir=proof_dir
+        )
+
+        mproof.write_proof_data()
+
+        disk_mproof = MultiProof.read_proof_data(proof_dir=proof_dir, id='multiproof1')
+        assert disk_mproof.dict == mproof.dict

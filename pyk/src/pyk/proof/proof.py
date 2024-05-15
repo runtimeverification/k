@@ -40,7 +40,7 @@ class Proof(Generic[PS, SR]):
     :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
     """
 
-    _PROOF_TYPES: Final = {'APRProof', 'EqualityProof', 'RefutationProof'}
+    _PROOF_TYPES: Final = {'APRProof', 'EqualityProof', 'RefutationProof', 'MultiProof'}
 
     id: str
     proof_dir: Path | None
@@ -247,6 +247,7 @@ class Proof(Generic[PS, SR]):
     def read_proof_data(proof_dir: Path, id: str) -> Proof:
         # these local imports allow us to call .to_dict() based on the proof type we read from JSON
         from .implies import EqualityProof, RefutationProof  # noqa
+        from .proof import MultiProof  # noqa
         from .reachability import APRProof  # noqa
 
         proof_path = proof_dir / id / 'proof.json'
@@ -303,11 +304,17 @@ class MultiProof(Proof[None, None]):
     def commit(self, result: None) -> None: ...
 
     @classmethod
-    def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> Proof:
+    def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> MultiProof:
         _id = dct['id']
         _subproof_ids = dct['subproof_ids']
         _admitted = dct['admitted']
         return MultiProof(id=_id, subproof_ids=_subproof_ids, proof_dir=proof_dir, admitted=_admitted)
+
+    @property
+    def dict(self) -> dict[str, Any]:
+        dct = super().dict
+        dct['type'] = 'MultiProof'
+        return dct
 
     def get_steps(self) -> Iterable[None]:
         """Return all currently available steps associated with this Proof. Should not modify `self`."""
@@ -316,6 +323,15 @@ class MultiProof(Proof[None, None]):
     @property
     def own_status(self) -> ProofStatus:
         return ProofStatus.PASSED
+
+    @staticmethod
+    def read_proof_data(proof_dir: Path, id: str) -> MultiProof:
+        proof_path = proof_dir / id / 'proof.json'
+        if Proof.proof_data_exists(id, proof_dir):
+            proof_dict = json.loads(proof_path.read_text())
+            return MultiProof.from_dict(proof_dict, proof_dir)
+
+        raise ValueError(f'Could not load Proof from file {id}: {proof_path}')
 
     def write_proof_data(self) -> None:
         super().write_proof_data()
