@@ -36,7 +36,7 @@ module LEXICAL-SYNTAX
   syntax lexical HexFloatConstant = r"{HexPrefix}({HexFractionalConstant}|{HexDigitSeq}){BinaryExponentPart}({FloatSuffix}?)"
   syntax lexical FractionalConstant = r"({DigitSeq}?)[.]{DigitSeq}|{DigitSeq}[.]"
   syntax lexical ExponentPart = r"[eE]({Sign}?){DigitSeq}"
-  syntax lexical Sign = r"[+-]"
+  syntax lexical Sign = r"[+\\-]"
   syntax lexical DigitSeq = r"{Digit}+"
   syntax lexical HexFractionalConstant = r"({HexDigitSeq}?)[.]{HexDigitSeq}|{HexDigitSeq}[.]"
   syntax lexical BinaryExponentPart = r"[pP]({Sign}?){DigitSeq}"

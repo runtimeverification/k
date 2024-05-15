@@ -1,11 +1,6 @@
-# path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-# path to the kompile binary of this distribuition
-K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
-KOMPILE=${K_BIN}/kompile
-KAST=${K_BIN}/kast
-# and kdep
-KDEP=${K_BIN}/kdep
+include $(MAKEFILE_PATH)/ktest-common.mak
+
 # path to put -kompiled directory in
 DEFDIR?=.
 # all tests in test directory with matching file extension
@@ -33,10 +28,10 @@ kast: $(KAST_TESTS)
 dummy:
 
 %.k %.md: dummy
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG_FAIL) $@ --output-definition $(DEFDIR)/$(basename $@)-kompiled 2>&1 | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out $(CHECK2)
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG_FAIL) $@ --output-definition $(DEFDIR)/$(basename $@)-kompiled 2>&1 $(REMOVE_PATHS) $(CHECK) $@.out $(CHECK2)
 
 %.kast: kompile
-	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) 2>&1 | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out
+	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) 2>&1 $(REMOVE_PATHS) $(CHECK) $@.out
 
 # run all tests and regenerate output files
 update-results: kompile kast
