@@ -10,5 +10,5 @@ no-minimize = true
 kArgs = ["arg 1","args 2"]
 
 [coverage.a_profile]
-verbose = true    
+verbose = true
 output = "a-profile-file"
