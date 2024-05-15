@@ -113,8 +113,6 @@ class CTermSymbolic:
                 module_name=module_name,
                 log_successful_rewrites=True,
                 log_failed_rewrites=self._trace_rewrites,
-                log_successful_simplifications=self._trace_rewrites,
-                log_failed_simplifications=self._trace_rewrites,
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -161,7 +159,7 @@ class CTermSymbolic:
         return kast_simplified, logs
 
     def get_model(self, cterm: CTerm, module_name: str | None = None) -> Subst | None:
-        _LOGGER.info(f'Getting model: {cterm}')
+        _LOGGER.debug(f'Getting model: {cterm}')
         kore = self.kast_to_kore(cterm.kast)
         try:
             result = self._kore_client.get_model(kore, module_name=module_name)
@@ -273,7 +271,8 @@ class CTermSymbolic:
 
     def assume_defined(self, cterm: CTerm, module_name: str | None = None) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
-        kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.config])
+        cterm_simplified, logs = self.simplify(cterm, module_name=module_name)
+        kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm_simplified.config])
         kast_simplified, logs = self.kast_simplify(kast, module_name=module_name)
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)

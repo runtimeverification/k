@@ -12,6 +12,7 @@ from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, final, overload
 
 from ..utils import FrozenDict
+from .color import Color
 from .kast import KAst
 
 if TYPE_CHECKING:
@@ -34,7 +35,10 @@ class AttType(Generic[T], ABC):
     def to_dict(self, value: T) -> Any: ...
 
     @abstractmethod
-    def pretty(self, value: T) -> str | None: ...
+    def unparse(self, value: T) -> str | None: ...
+
+    @abstractmethod
+    def parse(self, text: str) -> T: ...
 
 
 class NoneType(AttType[None]):
@@ -46,7 +50,11 @@ class NoneType(AttType[None]):
         assert value is None
         return ''
 
-    def pretty(self, value: None) -> None:
+    def unparse(self, value: None) -> None:
+        return None
+
+    def parse(self, text: str) -> None:
+        assert text == ''
         return None
 
 
@@ -66,10 +74,15 @@ class OptionalType(Generic[T], AttType[T | None]):
             return ''
         return self._value_type.to_dict(value)
 
-    def pretty(self, value: T | None) -> str | None:
+    def unparse(self, value: T | None) -> str | None:
         if value is None:
             return None
-        return self._value_type.pretty(value)
+        return self._value_type.unparse(value)
+
+    def parse(self, text: str) -> T | None:
+        if text == '':
+            return None
+        return self._value_type.parse(text)
 
 
 class AnyType(AttType[Any]):
@@ -79,8 +92,11 @@ class AnyType(AttType[Any]):
     def to_dict(self, value: Any) -> Any:
         return self._unfreeze(value)
 
-    def pretty(self, value: Any) -> str:
+    def unparse(self, value: Any) -> str:
         return str(value)
+
+    def parse(self, text: str) -> Any:
+        raise ValueError(f'Parsing a string into an Any attribute type is not supported. Attempted to parse: {text!r}')
 
     @staticmethod
     def _freeze(obj: Any) -> Any:
@@ -105,8 +121,11 @@ class IntType(AttType[int]):
     def to_dict(self, value: int) -> str:
         return str(value)
 
-    def pretty(self, value: int) -> str:
+    def unparse(self, value: int) -> str:
         return str(value)
+
+    def parse(self, text: str) -> int:
+        return int(text)
 
 
 class StrType(AttType[str]):
@@ -117,11 +136,16 @@ class StrType(AttType[str]):
     def to_dict(self, value: str) -> Any:
         return value
 
-    def pretty(self, value: str) -> str:
+    def unparse(self, value: str) -> str:
         return f'"{value}"'
+
+    def parse(self, text: str) -> str:
+        return text
 
 
 class LocationType(AttType[tuple[int, int, int, int]]):
+    _PARSE_REGEX: Final = re.compile('(\\d+),(\\d+),(\\d+),(\\d+)')
+
     def from_dict(self, obj: Any) -> tuple[int, int, int, int]:
         assert isinstance(obj, list)
         a, b, c, d = obj
@@ -134,8 +158,14 @@ class LocationType(AttType[tuple[int, int, int, int]]):
     def to_dict(self, value: tuple[int, int, int, int]) -> Any:
         return list(value)
 
-    def pretty(self, value: tuple[int, int, int, int]) -> str:
+    def unparse(self, value: tuple[int, int, int, int]) -> str:
         return ','.join(str(e) for e in value)
+
+    def parse(self, text: str) -> tuple[int, int, int, int]:
+        m = self._PARSE_REGEX.fullmatch(text)
+        assert m is not None
+        a, b, c, d = (int(x) for x in m.groups())
+        return a, b, c, d
 
 
 class PathType(AttType[Path]):
@@ -146,8 +176,11 @@ class PathType(AttType[Path]):
     def to_dict(self, value: Path) -> Any:
         return str(value)
 
-    def pretty(self, value: Path) -> str:
+    def unparse(self, value: Path) -> str:
         return f'"{value}"'
+
+    def parse(self, text: str) -> Path:
+        return Path(text)
 
 
 @final
@@ -188,8 +221,41 @@ class FormatType(AttType[Format]):
     def to_dict(self, value: Format) -> Any:
         return value.unparse()
 
-    def pretty(self, value: Format) -> str:
+    def unparse(self, value: Format) -> str:
         return f'"{value.unparse}"'
+
+    def parse(self, text: str) -> Format:
+        return Format.parse(text)
+
+
+class ColorType(AttType[Color]):
+    def from_dict(self, obj: Any) -> Color:
+        assert isinstance(obj, str)
+        return Color(obj)
+
+    def to_dict(self, value: Color) -> str:
+        return value.value
+
+    def unparse(self, value: Color) -> str:
+        return value.value
+
+    def parse(self, text: str) -> Color:
+        return Color(text)
+
+
+class ColorsType(AttType[tuple[Color, ...]]):
+    def from_dict(self, obj: Any) -> tuple[Color, ...]:
+        assert isinstance(obj, str)
+        return self.parse(obj)
+
+    def to_dict(self, value: tuple[Color, ...]) -> str:
+        return self.unparse(value)
+
+    def unparse(self, value: tuple[Color, ...]) -> str:
+        return ','.join(v.value for v in value)
+
+    def parse(self, text: str) -> tuple[Color, ...]:
+        return tuple(Color(color) for color in text.replace(' ', '').split(','))
 
 
 _NONE: Final = NoneType()
@@ -198,7 +264,6 @@ _INT: Final = IntType()
 _STR: Final = StrType()
 _LOCATION: Final = LocationType()
 _PATH: Final = PathType()
-_FORMAT: Final = FormatType()
 
 
 @final
@@ -230,15 +295,16 @@ class Atts:
     CELL_FRAGMENT: Final = AttKey('cellFragment', type=_ANY)
     CELL_NAME: Final = AttKey('cellName', type=_STR)
     CELL_OPT_ABSENT: Final = AttKey('cellOptAbsent', type=_ANY)
-    COLOR: Final = AttKey('color', type=_STR)
-    COLORS: Final = AttKey('colors', type=_ANY)
+    COLOR: Final = AttKey('color', type=ColorType())
+    COLORS: Final = AttKey('colors', type=ColorsType())
     COMM: Final = AttKey('comm', type=_NONE)
     CONCAT: Final = AttKey('concat', type=_ANY)
+    CONCRETE: Final = AttKey('concrete', type=OptionalType(_STR))
     CONSTRUCTOR: Final = AttKey('constructor', type=_NONE)
     DEPENDS: Final = AttKey('depends', type=_ANY)
     DIGEST: Final = AttKey('digest', type=_ANY)
     ELEMENT: Final = AttKey('element', type=_ANY)
-    FORMAT: Final = AttKey('format', type=_FORMAT)
+    FORMAT: Final = AttKey('format', type=FormatType())
     FRESH_GENERATOR: Final = AttKey('freshGenerator', type=_NONE)
     FUNCTION: Final = AttKey('function', type=_NONE)
     FUNCTIONAL: Final = AttKey('functional', type=_NONE)
@@ -334,13 +400,22 @@ class KAtt(KAst, Mapping[AttKey, Any]):
     def to_dict(self) -> dict[str, Any]:
         return {'node': 'KAtt', 'att': {key.name: key.type.to_dict(value) for key, value in self.atts.items()}}
 
+    @classmethod
+    def parse(cls: type[KAtt], d: Mapping[str, str]) -> KAtt:
+        entries: list[AttEntry] = []
+        for k, v in d.items():
+            key = Atts.keys().get(k, AttKey(k, type=_ANY))
+            value = key.type.parse(v)
+            entries.append(key(value))
+        return KAtt(entries=entries)
+
     @property
     def pretty(self) -> str:
         if not self:
             return ''
         att_strs: list[str] = []
         for key, value in self.items():
-            value_str = key.type.pretty(value)
+            value_str = key.type.unparse(value)
             if value_str is None:
                 att_strs.append(key.name)
             else:
