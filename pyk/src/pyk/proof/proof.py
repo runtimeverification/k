@@ -300,9 +300,7 @@ class MultiProof(Proof[None, None]):
     def can_progress(self) -> bool:
         return True
 
-    def commit(self, result: SR) -> None:
-        """Apply the step result of type `SR` to `self`, modifying `self`."""
-        ...
+    def commit(self, result: None) -> None: ...
 
     @classmethod
     def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> Proof:
@@ -311,7 +309,7 @@ class MultiProof(Proof[None, None]):
         _admitted = dct['admitted']
         return MultiProof(id=_id, subproof_ids=_subproof_ids, proof_dir=proof_dir, admitted=_admitted)
 
-    def get_steps(self) -> Iterable[PS]:
+    def get_steps(self) -> Iterable[None]:
         """Return all currently available steps associated with this Proof. Should not modify `self`."""
         return []
 
