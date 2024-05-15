@@ -159,7 +159,7 @@ class CTermSymbolic:
         return kast_simplified, logs
 
     def get_model(self, cterm: CTerm, module_name: str | None = None) -> Subst | None:
-        _LOGGER.info(f'Getting model: {cterm}')
+        _LOGGER.debug(f'Getting model: {cterm}')
         kore = self.kast_to_kore(cterm.kast)
         try:
             result = self._kore_client.get_model(kore, module_name=module_name)
