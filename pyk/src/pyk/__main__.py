@@ -465,16 +465,17 @@ def exec_kompilex(options: KompileXCommandOptions) -> None:
     final_definition = final_definition.let_att(syntax_att)
 
     kast_json = {'format': 'KAST', 'version': KAst.version(), 'term': final_definition.to_dict()}
-    ntf = NamedTemporaryFile('w', prefix='pyk_kompilex_', delete=not options.debug)
-    ntf.write(json.dumps(kast_json, cls=FrozenDictEncoder))
-    ntf.flush()
 
-    options.main_file = ntf.name
-    options.outer_parsed_json = True
-    if options.definition_dir is None:
-        options.definition_dir = Path(f'{definition_file.stem}-kompiled')
+    with NamedTemporaryFile('w', prefix='pyk_kompilex_', delete=not options.debug) as ntf:
+        ntf.write(json.dumps(kast_json, cls=FrozenDictEncoder))
+        ntf.flush()
 
-    exec_kompile(options)
+        options.main_file = ntf.name
+        options.outer_parsed_json = True
+        if options.definition_dir is None:
+            options.definition_dir = Path(f'{definition_file.stem}-kompiled')
+
+        exec_kompile(options)
 
 
 if __name__ == '__main__':
