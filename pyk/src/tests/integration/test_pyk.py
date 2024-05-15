@@ -192,7 +192,7 @@ class TestKompileX:
     TEST_FILES = ('a.k', 'b.k', 'c.k', 'd.k')
     TEST_DATA = [TEST_DATA_DIR / 'k-files' / file for file in TEST_FILES]
 
-    @pytest.mark.parametrize('definition_file', TEST_DATA, ids=[id for id, _ in enumerate(TEST_FILES)])
+    @pytest.mark.parametrize('definition_file', TEST_DATA, ids=TEST_FILES)
     def test_kompilex(self, assume_argv: AssumeArgv, tmp_path: Path, definition_file: Path) -> None:
         # Given
         assume_argv(
