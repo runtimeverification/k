@@ -12,7 +12,6 @@ import time
 from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
-from json import JSONEncoder
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
@@ -83,14 +82,6 @@ class FrozenDict(Mapping[K, V]):
 
 
 EMPTY_FROZEN_DICT: Final[FrozenDict] = FrozenDict()
-
-
-class FrozenDictEncoder(JSONEncoder):
-    def default(self, obj: Any) -> dict:
-        if isinstance(obj, FrozenDict):
-            return obj._dict
-        else:
-            return JSONEncoder.default(self, obj)
 
 
 @final

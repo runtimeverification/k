@@ -42,7 +42,7 @@ from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import FrozenDictEncoder, check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -467,7 +467,7 @@ def exec_kompilex(options: KompileXCommandOptions) -> None:
     kast_json = {'format': 'KAST', 'version': KAst.version(), 'term': final_definition.to_dict()}
 
     with NamedTemporaryFile('w', prefix='pyk_kompilex_', delete=not options.debug) as ntf:
-        ntf.write(json.dumps(kast_json, cls=FrozenDictEncoder))
+        ntf.write(json.dumps(kast_json))
         ntf.flush()
 
         options.main_file = ntf.name

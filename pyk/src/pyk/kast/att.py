@@ -107,6 +107,8 @@ class AnyType(AttType[Any]):
 
     @staticmethod
     def _unfreeze(value: Any) -> Any:
+        if isinstance(value, tuple):
+            return [AnyType._unfreeze(v) for v in value]
         if isinstance(value, FrozenDict):
             return {k: AnyType._unfreeze(v) for (k, v) in value.items()}
         return value
