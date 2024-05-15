@@ -3638,7 +3638,7 @@
         "productionItems": [
           {
             "node": "KRegexTerminal",
-            "regex": "[\\+-]?[0-9]+"
+            "regex": "[\\+\\-]?[0-9]+"
           }
         ],
         "params": [],
@@ -9859,7 +9859,7 @@
         "productionItems": [
           {
             "node": "KRegexTerminal",
-            "regex": "[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?"
+            "regex": "[\\+\\-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?"
           }
         ],
         "params": [],
@@ -9887,7 +9887,7 @@
         "productionItems": [
           {
             "node": "KRegexTerminal",
-            "regex": "([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?"
+            "regex": "([\\+\\-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+\\-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?"
           }
         ],
         "params": [],
@@ -19413,7 +19413,7 @@
         "productionItems": [
           {
             "node": "KRegexTerminal",
-            "regex": "[\\+-]?[0-9]+[pP][0-9]+"
+            "regex": "[\\+\\-]?[0-9]+[pP][0-9]+"
           }
         ],
         "params": [
