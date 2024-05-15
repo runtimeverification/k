@@ -101,7 +101,7 @@ class CTermSymbolic:
         # By construction, this function is to be called with at least two sets of constraints
         assert len(constraints) >= 2
         # Determine intersection between all returned sets of branching constraints
-        flattened_default = tuple(flatten_label('#And', c) for c in constraints)
+        flattened_default = [flatten_label('#And', c) for c in constraints]
         intersection = set.intersection(*(set(cs) for cs in flattened_default))
         # If intersection is empty, there is nothing to be done
         if not intersection:

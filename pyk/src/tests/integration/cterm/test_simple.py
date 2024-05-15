@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
-from pyk.prelude.kbool import BOOL, TRUE
-from pyk.prelude.kint import intToken
+from pyk.kast.inner import KApply, KSequence, KToken, KVariable
+from pyk.prelude.kint import leInt
 from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlTop
+from pyk.prelude.utils import token
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
 from ..utils import K_FILES
@@ -38,62 +38,38 @@ EXECUTE_TEST_DATA: Iterable[tuple[str, int, STATE, int, STATE, list[STATE]]] = (
 
 SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90\xa0\n\xa1\xf1a" ~> .K', '.Map')),)
 
-equals = KLabel(name='#Equals', params=(KSort(name='Bool'), KSort(name='GeneratedTopCell')))
+
+def le_int(n: int, var: str) -> KInner:
+    return mlEqualsTrue(leInt(token(n), KVariable(var)))
+
 
 MINIMIZE_CONSTRAINTS_TEST_DATA: Final = (
     (
         'no-intersection',
-        (
-            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),),
-            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),),
-        ),
+        [[le_int(0, 'X')], [le_int(0, 'Y')]],
         mlTop(),
-        (
-            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),),
-            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),),
-        ),
+        [[le_int(0, 'X')], [le_int(0, 'Y')]],
     ),
     (
         'intersection-not-entailed',
-        (
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),
-            ),
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Z')))]),
-            ),
-        ),
+        [
+            [le_int(0, 'X'), le_int(0, 'Y')],
+            [le_int(0, 'X'), le_int(0, 'Z')],
+        ],
         mlTop(),
-        (
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),
-            ),
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Z')))]),
-            ),
-        ),
+        [[le_int(0, 'X'), le_int(0, 'Y')], [le_int(0, 'X'), le_int(0, 'Z')]],
     ),
     (
         'intersection-entailed',
-        (
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),
-            ),
-            (
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('X')))]),
-                KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Z')))]),
-            ),
-        ),
-        KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(10), KVariable('X')))]),
-        (
-            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Y')))]),),
-            (KApply(label=equals, args=[TRUE, KApply('_<=Int_', args=(intToken(0), KVariable('Z')))]),),
-        ),
+        [
+            [le_int(0, 'X'), le_int(0, 'Y')],
+            [le_int(0, 'X'), le_int(0, 'Z')],
+        ],
+        le_int(10, 'X'),
+        [
+            [le_int(0, 'Y')],
+            [le_int(0, 'Z')],
+        ],
     ),
 )
 
@@ -121,10 +97,6 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
             ),
             (_constraint,),
         )
-
-    @staticmethod
-    def constraint(kprint: KPrint, c: str) -> KInner:
-        return kprint.parse_token(KToken(c, BOOL))
 
     @pytest.mark.parametrize(
         'test_id,depth,pre,expected_depth,expected_post,expected_next_states',

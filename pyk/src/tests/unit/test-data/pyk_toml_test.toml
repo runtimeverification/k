@@ -1,6 +1,6 @@
 [coverage]
 output = "default-file"
-definition = "/tmp"
+definition = "/var/folders/ks/1p8zyp5j7xz_v1krhl4l17tm0000gn/T"
 
 [print]
 input = "kast-json"
