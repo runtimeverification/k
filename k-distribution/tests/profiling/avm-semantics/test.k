@@ -793,7 +793,7 @@ module TEAL-PARSER-SYNTAX
   syntax lexical Alpha = r"[a-zA-Z]"
   syntax lexical Alnum = r"{Alpha}|{Digit}"
   syntax lexical AlnumUbar = r"{Alnum}|_"
-  syntax lexical Special = r"[-!?+<>=/*]"
+  syntax lexical Special = r"[\\-!?+<>=/*]"
   syntax HexToken  ::=
     r"0x{HexDigit}+" [prec(2), token]
   syntax TAddressLiteral  ::=

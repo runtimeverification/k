@@ -32,6 +32,7 @@ import org.kframework.definition.SyntaxPriority;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
+import org.kframework.definition.regex.RegexSyntax;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -329,7 +330,7 @@ public class ToJson {
 
     jsyn.add("node", JsonParser.KSYNTAXLEXICAL);
     jsyn.add("name", syn.name());
-    jsyn.add("regex", syn.regex());
+    jsyn.add("regex", RegexSyntax.K.print(syn.regex()));
     jsyn.add("att", toJson(syn.att()));
 
     return jsyn.build();
@@ -369,7 +370,7 @@ public class ToJson {
       if (!name.isEmpty()) jsonProduction.add("name", name.get());
     } else if (prod instanceof RegexTerminal t) {
       jsonProduction.add("node", JsonParser.KREGEXTERMINAL);
-      jsonProduction.add("regex", t.regex());
+      jsonProduction.add("regex", RegexSyntax.K.print(t.regex()));
     } else if (prod instanceof Terminal t) {
       jsonProduction.add("node", JsonParser.KTERMINAL);
       jsonProduction.add("value", t.value());
