@@ -1354,7 +1354,6 @@ class BoosterServer(KoreServer):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
         bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
-        bug_report.add_file(self._llvm_dt, Path('llvm_definition/dt'))
         llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
