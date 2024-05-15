@@ -430,8 +430,8 @@ class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
         # "LHS equals RHS under these constraints"
         simplified_antecedent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(step.proof.antecedent)
         simplified_consequent, _ = self.kcfg_explore.cterm_symbolic.kast_simplify(step.proof.consequent)
-        _LOGGER.info(f'Simplified antecedent: {self.kcfg_explore.pretty_print(simplified_antecedent)}')
-        _LOGGER.info(f'Simplified consequent: {self.kcfg_explore.pretty_print(simplified_consequent)}')
+        _LOGGER.debug(f'Simplified antecedent: {self.kcfg_explore.pretty_print(simplified_antecedent)}')
+        _LOGGER.debug(f'Simplified consequent: {self.kcfg_explore.pretty_print(simplified_consequent)}')
 
         csubst: CSubst | None = None
 
