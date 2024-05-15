@@ -32,6 +32,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
+import org.kframework.definition.regex.RegexSyntax;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
@@ -220,7 +221,7 @@ public class KSyntax2Bison {
       if (tok instanceof Terminal) {
         val = ((Terminal) tok).value();
       } else {
-        val = ((RegexTerminal) tok).regex();
+        val = RegexSyntax.Flex.print(((RegexTerminal) tok).regex());
       }
       bison.append(
           "%token TOK_" + kind + " " + (kind + 1) + " " + StringUtil.enquoteCString(val) + "\n");
