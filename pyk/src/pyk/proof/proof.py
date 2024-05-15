@@ -175,6 +175,8 @@ class Proof(Generic[PS, SR]):
     @property
     def subproofs(self) -> Iterable[Proof]:
         """Return the subproofs, re-reading from disk the ones that changed"""
+        for subproof_id in self._subproofs.keys():
+            self.fetch_subproof_data(subproof_id)
         return self._subproofs.values()
 
     @property
@@ -285,6 +287,49 @@ class Proof(Generic[PS, SR]):
     def get_steps(self) -> Iterable[PS]:
         """Return all currently available steps associated with this Proof. Should not modify `self`."""
         ...
+
+
+class MultiProof(Proof[None, None]):
+    """Thin concrete Proof class that has no execution logic of its own, but holds subproofs. The intended use
+    case for this is when we run kontrol proofs with setUp functions, to separate the proof into several
+    subproof APRProofs: one for the setUp function and one for the test function for each final configuration
+    of the setUp function.
+    """
+
+    @property
+    def can_progress(self) -> bool:
+        return True
+
+    def commit(self, result: SR) -> None:
+        """Apply the step result of type `SR` to `self`, modifying `self`."""
+        ...
+
+    @classmethod
+    def from_dict(cls: type[Proof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> Proof:
+        _id = dct['id']
+        _subproof_ids = dct['subproof_ids']
+        _admitted = dct['admitted']
+        return MultiProof(id=_id, subproof_ids=_subproof_ids, proof_dir=proof_dir, admitted=_admitted)
+
+    def get_steps(self) -> Iterable[PS]:
+        """Return all currently available steps associated with this Proof. Should not modify `self`."""
+        return []
+
+    @property
+    def own_status(self) -> ProofStatus:
+        return ProofStatus.PASSED
+
+    def write_proof_data(self) -> None:
+        super().write_proof_data()
+        if not self.proof_dir:
+            return
+        ensure_dir_path(self.proof_dir)
+        ensure_dir_path(self.proof_dir / self.id)
+        proof_path = self.proof_dir / self.id / 'proof.json'
+        if not self.up_to_date:
+            proof_json = json.dumps(self.dict)
+            proof_path.write_text(proof_json)
+            _LOGGER.info(f'Updated proof file {self.id}: {proof_path}')
 
 
 class ProofSummary(ABC):
