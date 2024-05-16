@@ -308,7 +308,7 @@ class RefutationProof(ImpliesProof):
         subproof_ids: Iterable[str] = (),
         admitted: bool = False,
     ):
-        antecedent = mlAnd(mlEqualsTrue(c) for c in pre_constraints)
+        antecedent = mlAnd((c if is_top(c) else mlEqualsTrue(c)) for c in pre_constraints)
         consequent = mlEqualsFalse(last_constraint)
         super().__init__(
             id,
