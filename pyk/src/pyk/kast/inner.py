@@ -937,11 +937,11 @@ def flatten_label(label: str, kast: KInner) -> list[KInner]:
     -   Output: Items of cons list.
     """
     flattened_args = []
-    rest_of_args = [kast] # Rest of arguments in reversed order
+    rest_of_args = [kast]  # Rest of arguments in reversed order
     while rest_of_args:
         current_arg = rest_of_args.pop()
         if type(current_arg) is KApply and current_arg.label.name == label:
-            next_args = reversed([arg for arg in current_arg.args])
+            next_args = reversed(list(current_arg.args))
             rest_of_args.extend(next_args)
         else:
             flattened_args.append(current_arg)
