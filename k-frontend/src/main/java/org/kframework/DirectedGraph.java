@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class TopologicalSort {
+public class DirectedGraph {
   /** Topologically sort based on the provided edges, unless a cycle is present. */
-  public static <T> Optional<Stream<T>> tsort(Iterable<Pair<T, T>> edges) {
+  public static <T> Optional<Stream<T>> topologicalSort(Iterable<Pair<T, T>> edges) {
     Map<T, Set<T>> toPred = new HashMap<>();
     for (Pair<T, T> edge : edges) {
       if (!toPred.containsKey(edge.getLeft())) {
@@ -24,10 +24,10 @@ public class TopologicalSort {
       }
       toPred.get(edge.getRight()).add(edge.getLeft());
     }
-    return tsortInternal(toPred, Stream.empty());
+    return topologicalSort(toPred, Stream.empty());
   }
 
-  private static <T> Optional<Stream<T>> tsortInternal(Map<T, Set<T>> toPreds, Stream<T> done) {
+  private static <T> Optional<Stream<T>> topologicalSort(Map<T, Set<T>> toPreds, Stream<T> done) {
     Map<Boolean, List<Map.Entry<T, Set<T>>>> partition =
         toPreds.entrySet().stream()
             .collect(Collectors.partitioningBy((e) -> e.getValue().isEmpty()));
@@ -45,6 +45,6 @@ public class TopologicalSort {
     for (Map.Entry<T, Set<T>> entry : hasPreds.entrySet()) {
       entry.getValue().removeAll(found);
     }
-    return tsortInternal(hasPreds, Stream.concat(done, found.stream()));
+    return topologicalSort(hasPreds, Stream.concat(done, found.stream()));
   }
 }

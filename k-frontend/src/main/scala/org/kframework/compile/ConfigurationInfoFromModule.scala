@@ -14,8 +14,8 @@ import org.kframework.kore.KORE.KApply
 import org.kframework.kore.KORE.KLabel
 import org.kframework.utils.errorsystem.KEMException
 import org.kframework.Collections
+import org.kframework.DirectedGraph._
 import org.kframework.POSet
-import org.kframework.TopologicalSort._
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 import scala.jdk.CollectionConverters._
 
