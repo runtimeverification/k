@@ -157,8 +157,10 @@ public class DefinitionParsing {
     if (!def.getModule(entryPointModule).isDefined()) {
       throw KEMException.criticalError("Module " + entryPointModule + " does not exist.");
     }
-    if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
-    files.resolveTemp(".");
+    if (profileRules) {
+      // create the temp dir ahead of parsing to avoid a race condition
+      files.resolveTemp(".");
+    }
     Stream<Module> modules = Stream.of(def.getModule(mainModule.name()).get());
     modules =
         Stream.concat(modules, stream(def.getModule(mainModule.name()).get().importedModules()));
@@ -253,8 +255,10 @@ public class DefinitionParsing {
     trimmed =
         Kompile.excludeModulesByTag(excludedModuleTags, mainProgramsModule.name()).apply(trimmed);
     sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
-    if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
-    files.resolveTemp(".");
+    if (profileRules) {
+      // create the temp dir ahead of parsing to avoid a race condition
+      files.resolveTemp(".");
+    }
     Definition afterResolvingConfigBubbles =
         resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
     sw.printIntermediate(
@@ -681,9 +685,10 @@ public class DefinitionParsing {
                                       .remove(Att.LOCATION(), Location.class)
                                       .remove(Att.CONTENT_START_LINE(), Integer.class)
                                       .remove(Att.CONTENT_START_COLUMN(), Integer.class);
-                              if (!termAtt.equals(
-                                  bubbleAtt)) // invalidate cache if attributes changed
-                              return Stream.of();
+                              if (!termAtt.equals(bubbleAtt)) {
+                                // invalidate cache if attributes changed
+                                return Stream.of();
+                              }
                               cachedBubbles.getAndIncrement();
                               registerWarnings(parse.warnings());
                               KApply k =
