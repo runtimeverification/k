@@ -69,9 +69,9 @@ public final class RegexSyntax {
       return printChar(chr.codePoint(), reservedCharClassTokens);
     }
     if (cls instanceof RegexBody.CharClass.Range range) {
-      return printChar(range.start().codePoint(), reservedCharClassTokens)
+      return printChar(range.start(), reservedCharClassTokens)
           + "-"
-          + printChar(range.end().codePoint(), reservedCharClassTokens);
+          + printChar(range.end(), reservedCharClassTokens);
     }
     throw new AssertionError("Encountered unknown class " + cls.getClass().getName());
   }

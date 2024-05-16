@@ -251,17 +251,17 @@ public class ParseRegex {
   }
 
   private static RegexBody.CharClass parseCharClass(Scanner input) {
-    var chr1 = new RegexBody.CharClass.Char(parseCharExp(input, true));
+    var chr1 = parseCharExp(input, true);
     if (input.consume('-')) {
       if (input.consume(']')) {
         input.back();
         input.back();
         throw unescapedTokenError('-', input);
       }
-      var chr2 = new RegexBody.CharClass.Char(parseCharExp(input, true));
+      var chr2 = parseCharExp(input, true);
       return new RegexBody.CharClass.Range(chr1, chr2);
     }
-    return chr1;
+    return new RegexBody.CharClass.Char(chr1);
   }
 
   private static int parseCharExp(Scanner input, boolean inCharClass) {
