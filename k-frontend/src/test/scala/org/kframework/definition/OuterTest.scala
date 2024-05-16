@@ -4,11 +4,12 @@ package org.kframework.definition
 
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameter
 import org.junit.runners.Parameterized.Parameters
 import org.junit.Assert
 import org.junit.Test
 import org.kframework.attributes.Att
+import org.kframework.definition.regex.Regex
+import org.kframework.definition.regex.RegexBody
 import org.kframework.kore.ADT.KToken
 import org.kframework.kore.KORE.KLabel
 import org.kframework.kore.KORE.Sort
@@ -311,9 +312,12 @@ class OuterTest {
     val synonym2 = SortSynonym(sortA, sortB)
     val synonym3 = SortSynonym(sortB, sortC)
 
-    val lexical1 = SyntaxLexical("A", "A")
-    val lexical2 = SyntaxLexical("A", "B")
-    val lexical3 = SyntaxLexical("B", "A")
+    val lexical1 =
+      SyntaxLexical("A", new Regex(new RegexBody.Char('A')))
+    val lexical2 =
+      SyntaxLexical("A", new Regex(new RegexBody.Char('B')))
+    val lexical3 =
+      SyntaxLexical("B", new Regex(new RegexBody.Char('A')))
 
     val production1 = Production(immutable.Seq(), sortA, immutable.Seq(), Att.empty)
     val production2 = Production(KLabel("A"), immutable.Seq(), sortA, immutable.Seq(), Att.empty)

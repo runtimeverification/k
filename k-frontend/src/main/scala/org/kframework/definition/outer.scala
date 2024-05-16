@@ -8,6 +8,8 @@ import java.util.Optional
 import javax.annotation.Nonnull
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
+import org.kframework.definition.regex.Regex
+import org.kframework.definition.regex.RegexSyntax
 import org.kframework.definition.Constructors._
 import org.kframework.kore._
 import org.kframework.kore.KORE.Sort
@@ -240,7 +242,7 @@ case class Module(
       .groupBy(p => (p.source.get, p.location.get))
       .map { case (l, ps) => (l, ps) }
 
-  lazy val layouts: immutable.Set[String] =
+  lazy val layouts: immutable.Set[Regex] =
     productionsForSort
       .getOrElse(Sorts.Layout.head, immutable.Set[Production]())
       .collect {
@@ -253,7 +255,8 @@ case class Module(
           )
       }
 
-  lazy val layout: String = "(" + layouts.mkString(")|(") + ")"
+  lazy val flexLayout: String =
+    "(" + layouts.map(l => RegexSyntax.Flex.print(l)).mkString(")|(") + ")"
 
   @transient
   lazy val definedKLabels: immutable.Set[KLabel] =
@@ -763,7 +766,7 @@ object SortSynonym {
     Ordering.by[SortSynonym, (String, String, Att)](s => (s.newSort.name, s.oldSort.name, s.att))
 }
 
-case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty)
+case class SyntaxLexical(name: String, regex: Regex, att: Att = Att.empty)
     extends Sentence
     with SyntaxLexicalToString
     with OuterKORE {
@@ -774,7 +777,9 @@ case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty)
 }
 object SyntaxLexical {
   implicit val ord: Ordering[SyntaxLexical] =
-    Ordering.by[SyntaxLexical, (String, String, Att)](s => (s.name, s.regex, s.att))
+    Ordering.by[SyntaxLexical, (String, String, Att)](s =>
+      (s.name, RegexSyntax.K.print(s.regex), s.att)
+    )
 }
 
 case class Production(
@@ -1022,14 +1027,14 @@ case class NonTerminal(sort: Sort, name: Option[String])
     extends ProductionItem
     with NonTerminalToString
 
-case class RegexTerminal(regex: String) extends TerminalLike with RegexTerminalToString {
-  lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)
+case class RegexTerminal(regex: Regex) extends TerminalLike with RegexTerminalToString {
+  lazy val pattern = new RunAutomaton(new RegExp(RegexSyntax.K.print(regex)).toAutomaton, false)
 
   def compareTo(t: TerminalLike): Int = {
     if (t.isInstanceOf[Terminal]) {
       return 1;
     }
-    regex.compareTo(t.asInstanceOf[RegexTerminal].regex)
+    RegexSyntax.K.print(regex).compareTo(RegexSyntax.K.print(t.asInstanceOf[RegexTerminal].regex))
   }
 }
 

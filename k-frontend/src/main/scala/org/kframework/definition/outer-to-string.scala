@@ -4,6 +4,7 @@ package org.kframework.definition
 import org.kframework.attributes.Att
 import org.kframework.attributes.Location
 import org.kframework.attributes.Source
+import org.kframework.definition.regex.RegexSyntax
 import org.kframework.utils.StringUtil
 import scala.collection.{ IndexedSeq => _, Seq => _, _ }
 
@@ -59,7 +60,9 @@ trait SortSynonymToString {
 trait SyntaxLexicalToString {
   self: SyntaxLexical =>
   override def toString() =
-    "syntax lexical " + name + " = r" + StringUtil.enquoteKString(regex) + att.postfixString
+    "syntax lexical " + name + " = r" + StringUtil.enquoteKString(
+      RegexSyntax.K.print(regex)
+    ) + att.postfixString
 }
 
 trait TerminalToString {
@@ -75,7 +78,7 @@ trait NonTerminalToString {
 trait RegexTerminalToString {
   self: RegexTerminal =>
   override def toString =
-    "r" + StringUtil.enquoteKString(regex)
+    "r" + StringUtil.enquoteKString(RegexSyntax.K.print(regex))
 }
 
 trait SyntaxAssociativityToString {

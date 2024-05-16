@@ -540,78 +540,40 @@ class State:
         return _kore
 
 
-class RewriteResult(ABC):
-    rule_id: str
-
-    @classmethod
-    def from_dict(cls: type[RR], dct: Mapping[str, Any]) -> RR:
-        if dct['tag'] == 'success':
-            return globals()['RewriteSuccess'].from_dict(dct)
-        elif dct['tag'] == 'failure':
-            return globals()['RewriteFailure'].from_dict(dct)
-        else:
-            raise ValueError(f"Expected {dct['tag']} as 'success'/'failure'")
-
-    @abstractmethod
-    def to_dict(self) -> dict[str, Any]: ...
-
-
-@final
-@dataclass(frozen=True)
-class RewriteSuccess(RewriteResult):
-    rule_id: str
-    rewritten_term: Pattern | None
-
-    @classmethod
-    def from_dict(cls: type[RewriteSuccess], dct: Mapping[str, Any]) -> RewriteSuccess:
-        return RewriteSuccess(
-            rule_id=dct['rule-id'],
-            rewritten_term=kore_term(dct['rewritten-term']) if 'rewritten-term' in dct else None,
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        rewritten_term = {'rewritten-term': KoreClient._state(self.rewritten_term)} if self.rewritten_term else {}
-        return {'tag': 'success', 'rule-id': self.rule_id} | rewritten_term
-
-
-@final
-@dataclass(frozen=True)
-class RewriteFailure(RewriteResult):
-    rule_id: str
-    reason: str
-
-    @classmethod
-    def from_dict(cls: type[RewriteFailure], dct: Mapping[str, Any]) -> RewriteFailure:
-        return RewriteFailure(
-            rule_id=dct['rule-id'],
-            reason=dct['reason'],
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
-
-
-class LogOrigin(str, Enum):
-    KORE_RPC = 'kore-rpc'
-    BOOSTER = 'booster'
-    LLVM = 'llvm'
-
-
-class LogEntry(ABC):  # noqa: B024
-    origin: LogOrigin
-    result: RewriteResult
-
+class LogEntry(ABC):
     @classmethod
     def from_dict(cls: type[LE], dct: Mapping[str, Any]) -> LE:
-        if dct['tag'] == 'rewrite':
-            return globals()['LogRewrite'].from_dict(dct)
-        elif dct['tag'] == 'simplification':
-            return globals()['LogSimplification'].from_dict(dct)
-        else:
-            raise ValueError(f"Expected {dct['tag']} as 'rewrite'/'simplification'")
+        match dct['tag']:
+            case 'processing-time':
+                return LogTiming.from_dict(dct)  # type: ignore
+            case 'rewrite':
+                return LogRewrite.from_dict(dct)  # type: ignore
+            case _:
+                raise ValueError(f'Unsupported LogEntry tag: {dct["tag"]!r}')
 
     @abstractmethod
     def to_dict(self) -> dict[str, Any]: ...
+
+
+@final
+@dataclass(frozen=True)
+class LogTiming(LogEntry):
+    class Component(Enum):
+        KORE_RPC = 'kore-rpc'
+        BOOSTER = 'booster'
+        PROXY = 'proxy'
+
+    time: float
+    component: Component | None
+
+    @classmethod
+    def from_dict(cls, dct: Mapping[str, Any]) -> LogTiming:
+        return LogTiming(
+            time=dct['time'], component=LogTiming.Component(dct['component']) if 'component' in dct else None
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'tag': 'processing-time', 'time': self.time, 'component': self.component}
 
 
 @final
@@ -631,29 +593,61 @@ class LogRewrite(LogEntry):
         return {'tag': 'rewrite', 'origin': self.origin.value, 'result': self.result.to_dict()}
 
 
-@final
-@dataclass(frozen=True)
-class LogSimplification(LogEntry):
-    origin: LogOrigin
-    result: RewriteResult
-    original_term: Pattern | None
-    original_term_index: tuple[int, ...] | None
+class LogOrigin(str, Enum):
+    KORE_RPC = 'kore-rpc'
+    BOOSTER = 'booster'
+    LLVM = 'llvm'
+
+
+class RewriteResult(ABC):
+    rule_id: str | None
 
     @classmethod
-    def from_dict(cls: type[LogSimplification], dct: Mapping[str, Any]) -> LogSimplification:
-        return LogSimplification(
-            origin=LogOrigin(dct['origin']),
-            result=RewriteResult.from_dict(dct['result']),
-            original_term=kore_term(dct['original-term']) if 'original-term' in dct else None,
-            original_term_index=None,  # TODO fixme
+    def from_dict(cls: type[RR], dct: Mapping[str, Any]) -> RR:
+        if dct['tag'] == 'success':
+            return globals()['RewriteSuccess'].from_dict(dct)
+        elif dct['tag'] == 'failure':
+            return globals()['RewriteFailure'].from_dict(dct)
+        else:
+            raise ValueError(f"Expected {dct['tag']} as 'success'/'failure'")
+
+    @abstractmethod
+    def to_dict(self) -> dict[str, Any]: ...
+
+
+@final
+@dataclass(frozen=True)
+class RewriteSuccess(RewriteResult):
+    rule_id: str
+    rewritten_term: Pattern | None = None
+
+    @classmethod
+    def from_dict(cls: type[RewriteSuccess], dct: Mapping[str, Any]) -> RewriteSuccess:
+        return RewriteSuccess(
+            rule_id=dct['rule-id'],
+            rewritten_term=kore_term(dct['rewritten-term']) if 'rewritten-term' in dct else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
-        original_term = {'original-term': KoreClient._state(self.original_term)} if self.original_term else {}
-        return {'tag': 'simplification', 'origin': self.origin.value, 'result': self.result.to_dict()} | original_term
+        rewritten_term = {'rewritten-term': KoreClient._state(self.rewritten_term)} if self.rewritten_term else {}
+        return {'tag': 'success', 'rule-id': self.rule_id} | rewritten_term
 
 
-class ExecuteResult(ABC):  # noqa: B024
+@final
+@dataclass(frozen=True)
+class RewriteFailure(RewriteResult):
+    rule_id: str | None
+    reason: str
+
+    @classmethod
+    def from_dict(cls: type[RewriteFailure], dct: Mapping[str, Any]) -> RewriteFailure:
+        return RewriteFailure(rule_id=dct.get('rule-id'), reason=dct['reason'])
+
+    def to_dict(self) -> dict[str, Any]:
+        return {'tag': 'failure', 'rule-id': self.rule_id, 'reason': self.reason}
+
+
+class ExecuteResult(ABC):
     _TYPES: Mapping[StopReason, str] = {
         StopReason.STUCK: 'StuckResult',
         StopReason.DEPTH_BOUND: 'DepthBoundResult',
@@ -878,7 +872,7 @@ class ImpliesResult:
         predicate = dct.get('condition', {}).get('predicate')
         logs = tuple(LogEntry.from_dict(l) for l in dct['logs']) if 'logs' in dct else ()
         return ImpliesResult(
-            valid=dct['satisfiable'],
+            valid=dct['valid'],
             implication=kore_term(dct['implication']),
             substitution=kore_term(substitution) if substitution is not None else None,
             predicate=kore_term(predicate) if predicate is not None else None,
@@ -1004,8 +998,6 @@ class KoreClient(ContextManager['KoreClient']):
         module_name: str | None = None,
         log_successful_rewrites: bool | None = None,
         log_failed_rewrites: bool | None = None,
-        log_successful_simplifications: bool | None = None,
-        log_failed_simplifications: bool | None = None,
         log_timing: bool | None = None,
     ) -> ExecuteResult:
         params = filter_none(
@@ -1020,8 +1012,6 @@ class KoreClient(ContextManager['KoreClient']):
                 'state': self._state(pattern),
                 'log-successful-rewrites': log_successful_rewrites,
                 'log-failed-rewrites': log_failed_rewrites,
-                'log-successful-simplifications': log_successful_simplifications,
-                'log-failed-simplifications': log_failed_simplifications,
                 'log-timing': log_timing,
             }
         )
@@ -1035,16 +1025,14 @@ class KoreClient(ContextManager['KoreClient']):
         consequent: Pattern,
         *,
         module_name: str | None = None,
-        log_successful_simplifications: bool | None = None,
-        log_failed_simplifications: bool | None = None,
+        log_timing: bool | None = None,
     ) -> ImpliesResult:
         params = filter_none(
             {
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
-                'log-successful-simplifications': log_successful_simplifications,
-                'log-failed-simplifications': log_failed_simplifications,
+                'log-timing': log_timing,
             }
         )
 
@@ -1056,15 +1044,13 @@ class KoreClient(ContextManager['KoreClient']):
         pattern: Pattern,
         *,
         module_name: str | None = None,
-        log_successful_simplifications: bool | None = None,
-        log_failed_simplifications: bool | None = None,
+        log_timing: bool | None = None,
     ) -> tuple[Pattern, tuple[LogEntry, ...]]:
         params = filter_none(
             {
                 'state': self._state(pattern),
                 'module': module_name,
-                'log-successful-simplifications': log_successful_simplifications,
-                'log-failed-simplifications': log_failed_simplifications,
+                'log-timing': log_timing,
             }
         )
 
@@ -1293,6 +1279,8 @@ class BoosterServerArgs(KoreServerArgs, total=False):
     fallback_on: Iterable[str | FallbackReason] | None
     interim_simplification: int | None
     no_post_exec_simplify: bool | None
+    log_context: Iterable[str] | None
+    not_log_context: Iterable[str] | None
 
 
 class BoosterServer(KoreServer):
@@ -1304,6 +1292,8 @@ class BoosterServer(KoreServer):
     _fallback_on: list[FallbackReason] | None
     _interim_simplification: int | None
     _no_post_exec_simplify: bool
+    _log_context: list[str]
+    _not_log_context: list[str]
 
     def __init__(self, args: BoosterServerArgs):
         self._llvm_kompiled_dir = Path(args['llvm_kompiled_dir'])
@@ -1328,6 +1318,8 @@ class BoosterServer(KoreServer):
 
         self._interim_simplification = args.get('interim_simplification')
         self._no_post_exec_simplify = bool(args.get('no_post_exec_simplify'))
+        self._log_context = list(args.get('log_context') or [])
+        self._not_log_context = list(args.get('not_log_context') or [])
 
         if not args.get('command'):
             args['command'] = 'kore-rpc-booster'
@@ -1355,12 +1347,13 @@ class BoosterServer(KoreServer):
             res += ['--interim-simplification', str(self._interim_simplification)]
         if self._no_post_exec_simplify:
             res += ['--no-post-exec-simplify']
+        res += [arg for glob in self._log_context for arg in ['--log-context', glob]]
+        res += [arg for glob in self._not_log_context for arg in ['--not-log-context', glob]]
         return res
 
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
         bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
-        bug_report.add_file(self._llvm_dt, Path('llvm_definition/dt'))
         llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
