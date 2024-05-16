@@ -1,12 +1,14 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.definition.regex;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class RegexSyntax {
+public class RegexSyntax {
   private final Set<Integer> reservedTokens;
   private final Set<Integer> reservedCharClassTokens;
 
@@ -89,7 +91,7 @@ public final class RegexSyntax {
     return "(" + printUnionExp(reg) + ")";
   }
 
-  public static String printChar(int codePoint, Set<Integer> reservedTokens) {
+  public String printChar(int codePoint, Set<Integer> reservedTokens) {
     return switch (codePoint) {
       case '\n' -> "\\n";
       case '\r' -> "\\r";
@@ -132,7 +134,18 @@ public final class RegexSyntax {
             .collect(Collectors.toSet());
     public static final Set<Integer> reservedCharClassTokens = K.reservedCharClassTokens;
     private static final RegexSyntax printer =
-        new RegexSyntax(reservedTokens, reservedCharClassTokens);
+        new RegexSyntax(reservedTokens, reservedCharClassTokens) {
+          // Parenthesize non-ASCII codepoints because Flex treats them as a sequence of bytes
+          // rather than a single character
+          @Override
+          public String printChar(int codePoint, Set<Integer> reservedTokens) {
+            String res = super.printChar(codePoint, reservedTokens);
+            if (codePoint > 127) {
+              res = '(' + res + ')';
+            }
+            return res;
+          }
+        };
 
     /** Convert a K lexical identifier to a Flex-compatible one */
     public static String mangleIdentifier(String name) {
@@ -146,9 +159,38 @@ public final class RegexSyntax {
 
     private static final RegexTransformer convert =
         new RegexTransformer() {
+          // Make identifiers Flex-compatible
           @Override
           public RegexBody apply(RegexBody.Named named) {
             return new RegexBody.Named(mangleIdentifier(named.name()));
+          }
+
+          // Factor non-ASCII characters out of character classes into an explicit |,
+          // lest Flex treat each byte as its own character in the class.
+          @Override
+          public RegexBody apply(RegexBody.CharClassExp clsExp) {
+            // non-ASCII is unsupported in negated character classes
+            if (clsExp.negated()) {
+              return super.apply(clsExp);
+            }
+
+            List<RegexBody> factors = new ArrayList<>();
+            List<RegexBody.CharClass> keepIn = new ArrayList<>();
+            for (RegexBody.CharClass cls : clsExp.charClasses()) {
+              if (cls instanceof RegexBody.CharClass.Char chr && chr.codePoint() > 127) {
+                factors.add(new RegexBody.Char(chr.codePoint()));
+              } else {
+                keepIn.add(cls);
+              }
+            }
+            if (!keepIn.isEmpty()) {
+              factors.add(new RegexBody.CharClassExp(false, keepIn));
+            }
+            RegexBody result = factors.get(0);
+            for (RegexBody factor : factors.subList(1, factors.size())) {
+              result = new RegexBody.Union(result, factor);
+            }
+            return result;
           }
         };
 
