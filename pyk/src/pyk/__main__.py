@@ -42,7 +42,7 @@ from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -74,6 +74,8 @@ def main() -> None:
     # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
     sys.setrecursionlimit(10**7)
 
+    logging.basicConfig(format=LOG_FORMAT)
+
     cli_parser = create_argument_parser()
     args = cli_parser.parse_args()
     toml_args = parse_toml_args(args)
@@ -84,7 +86,7 @@ def main() -> None:
 
     options = generate_options(stripped_args)
 
-    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
+    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT, force=True)
 
     executor_name = 'exec_' + args.command.lower().replace('-', '_')
     if executor_name not in globals():

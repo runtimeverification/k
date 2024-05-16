@@ -378,7 +378,11 @@ class ParseOuterOptions(LoggingOptions, KDefinitionOptions):
 
     @staticmethod
     def get_argument_type() -> dict[str, Callable]:
-        return LoggingOptions.get_argument_type() | KDefinitionOptions.get_argument_type() | {'main_file': file_path, 'output_file': FileType('w')}
+        return (
+            LoggingOptions.get_argument_type()
+            | KDefinitionOptions.get_argument_type()
+            | {'main_file': file_path, 'output_file': FileType('w')}
+        )
 
 
 def create_argument_parser() -> ArgumentParser:

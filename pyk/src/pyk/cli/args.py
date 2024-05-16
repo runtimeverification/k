@@ -13,6 +13,7 @@ from .utils import bug_report_arg, dir_path, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from typing import Final
 
     from ..utils import BugReport
 
@@ -118,7 +119,7 @@ class KDefinitionOptions(Options):
                 except ValueError:
                     _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
             args['includes'] = include_paths
-        super(KDefinitionOptions, self).__init__(args)
+        super().__init__(args)
 
     @staticmethod
     def default() -> dict[str, Any]:
