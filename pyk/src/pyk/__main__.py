@@ -418,7 +418,7 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
             _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
         search_paths.append(include_path.resolve())
 
-    main_module_name = getattr(options, 'main_module', definition_file.stem.upper())
+    main_module_name = options.main_module or definition_file.stem.upper()
     try:
         final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
     except Exception as e:

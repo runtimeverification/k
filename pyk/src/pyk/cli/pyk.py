@@ -372,16 +372,13 @@ class RunOptions(LoggingOptions):
         return LoggingOptions.get_argument_type() | {'definition': dir_path}
 
 
-class ParseOuterOptions(LoggingOptions):
+class ParseOuterOptions(LoggingOptions, KDefinitionOptions):
     main_file: Path
-    md_selector: str
-    includes: Iterable[str]
     output_file: IO[Any]
-    main_module: str
 
     @staticmethod
     def get_argument_type() -> dict[str, Callable]:
-        return LoggingOptions.get_argument_type() | {'main_file': dir_path, 'output-file': FileType('w')}
+        return LoggingOptions.get_argument_type() | KDefinitionOptions.get_argument_type() | {'main_file': file_path, 'output_file': FileType('w')}
 
 
 def create_argument_parser() -> ArgumentParser:
@@ -559,21 +556,10 @@ def create_argument_parser() -> ArgumentParser:
     parse_outer_args = pyk_args_command.add_parser(
         'parse-outer',
         help='Parse an outer K definition into JSON',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args, k_cli_args.definition_args, config_args.config_args],
     )
     parse_outer_args.add_argument('main_file', type=file_path, help='File with the K definition')
-    parse_outer_args.add_argument(
-        '--md-selector', default='k', help='Code selector expression to use when reading markdown.'
-    )
     parse_outer_args.add_argument('--output-file', type=FileType('w'), help='Write output to file instead of stdout.')
-    parse_outer_args.add_argument(
-        '-I',
-        type=str,
-        dest='includes',
-        action='append',
-        help='Directories to lookup K definitions in.',
-    )
-    parse_outer_args.add_argument('--main-module', type=str, help='The name of the main module for the definition')
 
     return pyk_args
 
