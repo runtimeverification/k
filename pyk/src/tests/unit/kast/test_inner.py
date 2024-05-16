@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from pyk.kast import KInner
 
-MATCH_TEST_DATA: Final[tuple[tuple[str, KInner, list[KInner]], ...]] = (
+FLATTEN_LABEL_DATA: Final[tuple[tuple[str, KInner, list[KInner]], ...]] = (
     ('a', a, []),
     ('b', a, [a]),
     ('x', x, [x]),
@@ -33,12 +33,10 @@ MATCH_TEST_DATA: Final[tuple[tuple[str, KInner, list[KInner]], ...]] = (
 )
 
 
-@pytest.mark.parametrize('label,kast,flist', MATCH_TEST_DATA, ids=count())
-def test_flatten_label(label: str, kast: KInner, flist: list[KInner]) -> None:
+@pytest.mark.parametrize('label,kast,expected', FLATTEN_LABEL_DATA, ids=count())
+def test_flatten_label(label: str, kast: KInner, expected: list[KInner]) -> None:
     # When
-    flattened = flatten_label(label, kast)
-    print(flattened)
+    actual = flatten_label(label, kast)
 
     # Then
-    assert flattened is not None
-    assert flattened == flist
+    assert actual == expected
