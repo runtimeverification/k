@@ -299,7 +299,7 @@ class MultiProof(Proof[None, None]):
 
     @property
     def can_progress(self) -> bool:
-        return True
+        return False
 
     def commit(self, result: None) -> None: ...
 
