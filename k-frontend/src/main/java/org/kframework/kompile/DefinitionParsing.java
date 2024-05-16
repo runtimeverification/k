@@ -32,6 +32,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.compile.checks.CheckLexicalIdentifiers;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Configuration;
@@ -175,10 +176,13 @@ public class DefinitionParsing {
     def = Definition(def.mainModule(), immutable(modules.collect(Collectors.toSet())), def.att());
 
     def = Kompile.excludeModulesByTag(excludeModules, entryPointModule).apply(def);
-    sw.printIntermediate("Outer parsing [" + def.modules().size() + " modules]");
 
     errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
     caches = loadCaches();
+
+    stream(def.modules()).forEach(m -> CheckLexicalIdentifiers.check(errors, m));
+    throwExceptionIfThereAreErrors();
+    sw.printIntermediate("Outer parsing [" + def.modules().size() + " modules]");
 
     try {
       def = resolveConfigBubbles(def);
@@ -254,6 +258,11 @@ public class DefinitionParsing {
             parsedDefinition.att());
     trimmed =
         Kompile.excludeModulesByTag(excludedModuleTags, mainProgramsModule.name()).apply(trimmed);
+
+    errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
+    stream(trimmed.modules()).forEach(m -> CheckLexicalIdentifiers.check(errors, m));
+    throwExceptionIfThereAreErrors();
+
     sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
     if (profileRules) {
       // create the temp dir ahead of parsing to avoid a race condition
