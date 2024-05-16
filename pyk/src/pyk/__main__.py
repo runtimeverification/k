@@ -307,7 +307,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'syntax_module': options.syntax_module,
         'main_module': options.main_module,
         'md_selector': options.md_selector,
-        'include_dirs': (Path(include) for include in options.includes),
+        'include_dirs': options.includes,
         'emit_json': options.emit_json,
         'coverage': options.coverage,
         'gen_bison_parser': options.gen_bison_parser,
@@ -409,16 +409,9 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
     definition_file = options.main_file.resolve()
-    search_paths = [definition_file.parent]
-    for include in getattr(options, 'includes', []):
-        include_path = Path(include)
-        try:
-            check_dir_path(include_path)
-        except ValueError:
-            _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
-        search_paths.append(include_path.resolve())
-
+    search_paths = [definition_file.parent, *options.includes]
     main_module_name = options.main_module or definition_file.stem.upper()
+
     try:
         final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
     except Exception as e:
@@ -434,16 +427,9 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
 
 def exec_kompilex(options: KompileXCommandOptions) -> None:
     definition_file = Path(options.main_file).resolve()
-    search_paths = [definition_file.parent]
-    for include in getattr(options, 'includes', []):
-        include_path = Path(include)
-        try:
-            check_dir_path(include_path)
-        except ValueError:
-            _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
-        search_paths.append(include_path.resolve())
-
+    search_paths = [definition_file.parent, *options.includes]
     main_module_name = options.main_module or definition_file.stem.upper()
+
     try:
         final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
     except Exception as e:

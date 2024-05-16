@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import sys
 from argparse import ArgumentParser, FileType
 from functools import cached_property
@@ -14,6 +15,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
     from ..utils import BugReport
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class LoggingOptions(Options):
@@ -99,11 +102,23 @@ class DisplayOptions(Options):
 
 
 class KDefinitionOptions(Options):
-    includes: list[str]
+    includes: list[Path]
     main_module: str | None
     syntax_module: str | None
     spec_module: str | None
     md_selector: str
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        if 'includes' in args:
+            include_paths = []
+            for include in args['includes']:
+                try:
+                    include_path = dir_path(include)
+                    include_paths.append(include_path.resolve())
+                except ValueError:
+                    _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
+            args['includes'] = include_paths
+        super(KDefinitionOptions, self).__init__(args)
 
     @staticmethod
     def default() -> dict[str, Any]:
