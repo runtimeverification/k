@@ -1470,10 +1470,10 @@ module WASM-TOKEN-SYNTAX
   syntax WasmStringToken  ::=
     r"\\\"(([^\\\"\\\\])|(\\\\[0-9a-fA-F]{2})|(\\\\t)|(\\\\n)|(\\\\r)|(\\\\\\\")|(\\\\')|(\\\\\\\\)|(\\\\u\\{[0-9a-fA-F]{1,6}\\}))*\\\"" [token]
   syntax IdentifierToken  ::=
-    r"\\$[0-9a-zA-Z!$%&'*+/<>?_`|~=:\\@^.-]+" [token]
+    r"\\$[0-9a-zA-Z!$%&'*+/<>?_`|~=:\\@\\^.\\-]+" [token]
   syntax WasmIntToken  ::=
-    r"[\\+-]?[0-9]+(_[0-9]+)*" [token]
-  | r"[\\+-]?0x[0-9a-fA-F]+(_[0-9a-fA-F]+)*" [token]
+    r"[\\+\\-]?[0-9]+(_[0-9]+)*" [token]
+  | r"[\\+\\-]?0x[0-9a-fA-F]+(_[0-9a-fA-F]+)*" [token]
   syntax #Layout  ::=
     r"\\(;([^;]|(;+([^;\\)])))*;\\)" [token]
   | r";;[^\\n\\r]*" [token]
