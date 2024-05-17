@@ -94,7 +94,7 @@ public record EliminateOrPatterns() {
           var result = new ArrayList<K>(preArgs);
           result.add(arg);
           result.addAll(postArgs);
-          results.add(result);
+          queue.add(result);
         }
       }
     }
@@ -115,7 +115,7 @@ public record EliminateOrPatterns() {
       return pushUp(as);
     }
 
-    return k;
+    return KApply(KLabels.ML_OR, KList(k));
   }
 
   private static List<K> flattenOr(List<K> args) {
