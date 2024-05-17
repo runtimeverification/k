@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import ClassVar  # noqa: TC003
@@ -13,6 +14,7 @@ from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime, generate_hints
+from ..kllvm.hints.prooftrace import kore_header
 from ..kllvm.importer import import_runtime
 from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
@@ -369,3 +371,12 @@ class ProofTraceTest(KompiledTest):
         input_kore_file = kompile._cache_definition(self.HINTS_INPUT_KORE)
         hints_file = generate_hints(definition_dir, input_kore_file)
         return hints_file.read_bytes()
+
+    @pytest.fixture(scope='class')
+    def header(self, definition_dir: Path) -> kore_header:
+        process = subprocess.run(['kore-rich-header', str(definition_dir / 'definition.kore')], stdout=subprocess.PIPE)
+        hdr = process.stdout
+        path = str(definition_dir / 'header.bin')
+        with open(path, 'wb') as f:
+            f.write(hdr)
+        return kore_header(path)
