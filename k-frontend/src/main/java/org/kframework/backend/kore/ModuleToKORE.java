@@ -32,6 +32,7 @@ import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.EliminateOrPatterns;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
@@ -1050,6 +1051,32 @@ public class ModuleToKORE {
   }
 
   private void convertRule(
+      RuleOrClaim rule,
+      int ruleIndex,
+      boolean heatCoolEq,
+      String topCellSortStr,
+      Map<Att.Key, Boolean> consideredAttributes,
+      SetMultimap<KLabel, Rule> functionRules,
+      Map<Integer, String> priorityToPreviousGroup,
+      ListMultimap<Integer, String> priorityToAlias,
+      SentenceType defaultSentenceType,
+      StringBuilder sb) {
+    for (var expanded : EliminateOrPatterns.expand(rule)) {
+      convertRuleWithoutOrs(
+          expanded,
+          ruleIndex,
+          heatCoolEq,
+          topCellSortStr,
+          consideredAttributes,
+          functionRules,
+          priorityToPreviousGroup,
+          priorityToAlias,
+          defaultSentenceType,
+          sb);
+    }
+  }
+
+  private void convertRuleWithoutOrs(
       RuleOrClaim rule,
       int ruleIndex,
       boolean heatCoolEq,
