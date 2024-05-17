@@ -5,6 +5,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NamedTuple, final
 
+from pyk.utils import not_none
+
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
@@ -23,7 +25,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_top, mlEquals
+from ..prelude.ml import is_top, mlAnd, mlEquals
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -94,6 +96,28 @@ class CTermSymbolic:
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
 
+    def minimize_constraints(self, constraints: tuple[KInner, ...], path_condition: KInner) -> tuple[KInner, ...]:
+        """Minimize given branching constraints with respect to a given path condition."""
+        # By construction, this function is to be called with at least two sets of constraints
+        assert len(constraints) >= 2
+        # Determine intersection between all returned sets of branching constraints
+        flattened_default = [flatten_label('#And', c) for c in constraints]
+        intersection = set.intersection(*(set(cs) for cs in flattened_default))
+        # If intersection is empty, there is nothing to be done
+        if not intersection:
+            return constraints
+        # Check if non-empty intersection is entailed by the path condition
+        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+        path_condition_cterm = CTerm(dummy_config, constraints=[path_condition])
+        intersection_cterm = CTerm(dummy_config, constraints=intersection)
+        implication_check = self.implies(path_condition_cterm, intersection_cterm, bind_universally=True)
+        # The intersection is not entailed, there is nothing to be done
+        if implication_check.csubst is None:
+            return constraints
+        # The intersection is entailed and can be filtered out of the branching constraints
+        else:
+            return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
+
     def execute(
         self,
         cterm: CTerm,
@@ -102,6 +126,7 @@ class CTermSymbolic:
         terminal_rules: Iterable[str] | None = None,
         module_name: str | None = None,
     ) -> CTermExecute:
+
         _LOGGER.debug(f'Executing: {cterm}')
         kore = self.kast_to_kore(cterm.kast)
         try:
@@ -123,12 +148,18 @@ class CTermSymbolic:
 
         state = CTerm.from_kast(self.kore_to_kast(response.state.kore))
         resp_next_states = response.next_states or ()
-        next_states = tuple(
-            NextState(
-                CTerm.from_kast(self.kore_to_kast(ns.kore)),
-                self.kore_to_kast(ns.rule_predicate) if ns.rule_predicate is not None else None,
+        branching_constraints = tuple(
+            self.kore_to_kast(not_none(s.rule_predicate)) if s.rule_predicate is not None else None
+            for s in resp_next_states
+        )
+        # Branch constraint minimization makes sense only if there is a proper branching
+        if len(branching_constraints) >= 2 and all(bc is not None for bc in branching_constraints):
+            branching_constraints = self.minimize_constraints(
+                tuple(not_none(bc) for bc in branching_constraints), path_condition=mlAnd(cterm.constraints)
             )
-            for ns in resp_next_states
+        next_states = tuple(
+            NextState(CTerm.from_kast(self.kore_to_kast(ns.kore)), c)
+            for ns, c in zip(resp_next_states, branching_constraints, strict=True)
         )
 
         assert all(not cterm.is_bottom for cterm, _ in next_states)
@@ -159,7 +190,7 @@ class CTermSymbolic:
         return kast_simplified, logs
 
     def get_model(self, cterm: CTerm, module_name: str | None = None) -> Subst | None:
-        _LOGGER.info(f'Getting model: {cterm}')
+        _LOGGER.debug(f'Getting model: {cterm}')
         kore = self.kast_to_kore(cterm.kast)
         try:
             result = self._kore_client.get_model(kore, module_name=module_name)
@@ -271,7 +302,8 @@ class CTermSymbolic:
 
     def assume_defined(self, cterm: CTerm, module_name: str | None = None) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
-        kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.config])
+        cterm_simplified, logs = self.simplify(cterm, module_name=module_name)
+        kast = KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm_simplified.config])
         kast_simplified, logs = self.kast_simplify(kast, module_name=module_name)
         _LOGGER.debug(f'Definedness condition computed: {kast_simplified}')
         return cterm.add_constraint(kast_simplified)

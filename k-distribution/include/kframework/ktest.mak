@@ -1,31 +1,8 @@
-SHELL=/bin/bash
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+include $(MAKEFILE_PATH)/ktest-common.mak
 
 UNAME := $(shell uname)
 
-# path to the current makefile
-MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-# path to binary directory of this distribution
-K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
-# path to the kompile binary of this distribuition
-KOMPILE=${K_BIN}/kompile
-# ditto for krun
-KRUN=${K_BIN}/krun
-# and kdep
-KDEP=${K_BIN}/kdep
-# and kprove
-KPROVE=${K_BIN}/kprove
-# and kast
-KAST=${K_BIN}/kast
-# and kparse
-KPARSE=${K_BIN}/kparse
-# and kserver
-KSERVER=${K_BIN}/kserver
-# and ksearch
-KSEARCH:=$(KRUN) --search-all
-# and kprint
-KPRINT=${K_BIN}/kprint
-# and llvm-krun
-LLVM_KRUN=${K_BIN}/llvm-krun
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in
@@ -58,7 +35,6 @@ KRUN_FLAGS+=--no-exc-wrap
 KRUN_OR_LEGACY=$(KRUN)
 
 CHECK?=| diff -
-REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
 CONSIDER_ERRORS=2>&1
 
 PIPEFAIL?=set -o pipefail;
