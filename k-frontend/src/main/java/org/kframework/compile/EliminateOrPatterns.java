@@ -7,6 +7,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Rule;
@@ -14,14 +16,40 @@ import org.kframework.definition.RuleOrClaim;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
-import org.kframework.kore.KList;
-import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 
 public record EliminateOrPatterns() {
-  public static List<RuleOrClaim> expand(RuleOrClaim rc) {
+  /**
+   * Expand all {@code #Or} patterns in rules to produce an equivalent set of rules, none of which
+   * contain any {@code #Or} patterns.
+   *
+   * <p>This transformation is necessary because backend support for {@code #Or} is inconsistent;
+   * the LLVM backend can pattern-match on {@code #Or} patterns on the left-hand side of rules, but
+   * the Haskell backend cannot internalize such patterns.
+   *
+   * <p>For example, the rule:
+   *
+   * <pre>
+   *     rule foo(a #Or b) => c
+   * </pre>
+   *
+   * <p>Will expand to two rules:
+   *
+   * <pre>
+   *     rule foo(a) => c
+   *     rule foo(b) => c
+   * </pre>
+   *
+   * <p>Note that rules are implicitly transformed into top-level rewrites by this pass; extracting
+   * the correct disjunct rules is severely complicated if we don't put the rules in this form. This
+   * pass must therefore be run right at the end of compilation before generating KORE.
+   *
+   * @param rc A rule possibly containing {@code #Or} patterns to be expanded.
+   * @return A set of disjunct rules that model the behaviour of {@code rc} when combined.
+   */
+  public static Set<RuleOrClaim> expand(RuleOrClaim rc) {
     if (!(rc instanceof Rule rule)) {
-      return Collections.singletonList(rc);
+      return Collections.singleton(rc);
     }
 
     K left = RewriteToTop.toLeft(rule.body());
@@ -36,7 +64,7 @@ public record EliminateOrPatterns() {
                 lhs ->
                     (RuleOrClaim)
                         new Rule(KRewrite(lhs, right), rule.requires(), rule.ensures(), rule.att()))
-            .toList();
+            .collect(Collectors.toSet());
   }
 
   private static boolean isMLOr(K k) {
