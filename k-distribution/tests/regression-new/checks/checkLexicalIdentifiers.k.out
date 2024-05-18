@@ -23,4 +23,14 @@
 	Location(10,17,10,26)
 	10 |	syntax Bad2 ::= r"{Bad1}"
 	   .	                ^~~~~~~~~
-[Error] Compiler: Had 5 parsing errors.
+[Error] Outer Parser: Named lexical syntax cannot contain line anchors.
+	Source(checkLexicalIdentifiers.k)
+	Location(11,1,11,37)
+	11 |	syntax lexical StartAnchor = r"^foo"
+	   .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Named lexical syntax cannot contain line anchors.
+	Source(checkLexicalIdentifiers.k)
+	Location(12,1,12,35)
+	12 |	syntax lexical EndAnchor = r"foo$"
+	   .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 7 parsing errors.

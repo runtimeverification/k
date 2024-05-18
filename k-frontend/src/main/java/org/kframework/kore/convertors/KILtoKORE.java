@@ -139,7 +139,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
   public org.kframework.definition.Sentence apply(SyntaxLexical lexical) {
     return new org.kframework.definition.SyntaxLexical(
-        lexical.name, ParseRegex.parseNamed(lexical.regex, lexical), convertAttributes(lexical));
+        lexical.name, ParseRegex.parse(lexical.regex, lexical), convertAttributes(lexical));
   }
 
   public org.kframework.definition.Bubble apply(StringSentence sentence) {

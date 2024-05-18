@@ -22,9 +22,30 @@ import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.regex.RegexBody;
 import org.kframework.utils.errorsystem.KEMException;
 
-/** Check that all lexical identifiers exist with no circular dependencies. */
+/**
+ * Check that all lexical identifiers exist, have no circular dependencies, and do not contain line
+ * anchors.
+ */
 public class CheckLexicalIdentifiers {
   public static void check(Set<KEMException> errors, Module m) {
+    checkLineAnchors(errors, m);
+    checkNames(errors, m);
+  }
+
+  public static void checkLineAnchors(Set<KEMException> errors, Module m) {
+    stream(m.sortedLocalSentences())
+        .filter(
+            s ->
+                s instanceof SyntaxLexical syn
+                    && (syn.regex().startLine() || syn.regex().endLine()))
+        .forEach(
+            s ->
+                errors.add(
+                    KEMException.outerParserError(
+                        "Named lexical syntax cannot contain line anchors.", s)));
+  }
+
+  public static void checkNames(Set<KEMException> errors, Module m) {
     Map<String, SyntaxLexical> definedNames =
         stream(m.lexicalIdentifiers())
             .map(syn -> Map.entry(syn.name(), syn))
@@ -35,7 +56,7 @@ public class CheckLexicalIdentifiers {
       Set<String> badNames = new LinkedHashSet<>();
       if (s instanceof SyntaxLexical syn) {
         Set<SyntaxLexical> deps = new LinkedHashSet<>();
-        collectNames(syn.regex())
+        collectNames(syn.regex().reg())
             .forEach(
                 n -> {
                   if (definedNames.containsKey(n)) {
