@@ -134,16 +134,34 @@ public final class RegexSyntax {
     private static final RegexSyntax printer =
         new RegexSyntax(reservedTokens, reservedCharClassTokens);
 
+    /** Convert a K lexical identifier to a Flex-compatible one */
+    public static String mangleIdentifier(String name) {
+      // K identifiers match "#?[A-Z][a-zA-Z0-9]*"
+      // Flex identifiers match "[_a-zA-Z][a-zA-Z0-9_\-]*"
+      if (name.startsWith("#")) {
+        return "_Hash_" + name.substring(1);
+      }
+      return name;
+    }
+
+    private static final RegexTransformer convert =
+        new RegexTransformer() {
+          @Override
+          public RegexBody apply(RegexBody.Named named) {
+            return new RegexBody.Named(mangleIdentifier(named.name()));
+          }
+        };
+
     public static String print(Regex reg) {
-      return printer.print(reg);
+      return printer.print(convert.apply(reg));
     }
 
     public static String print(RegexBody reg) {
-      return printer.printUnionExp(reg);
+      return printer.printUnionExp(convert.apply(reg));
     }
 
     public static String print(RegexBody.CharClass cls) {
-      return printer.printCharClass(cls);
+      return printer.printCharClass(convert.apply(cls));
     }
   }
 }
