@@ -28,7 +28,7 @@ import org.kframework.utils.errorsystem.KEMException;
  * Check that all lexical identifiers exist, have no circular dependencies, and do not contain line
  * anchors.
  */
-public class CheckLexicalIdentifiers {
+public class CheckRegex {
   public static void check(Set<KEMException> errors, Module m) {
     checkNames(errors, m);
     stream(m.sortedLocalSentences()).forEach(s -> checkLineAnchors(errors, s));
