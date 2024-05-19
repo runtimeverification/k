@@ -31,7 +31,12 @@ import org.kframework.utils.errorsystem.KEMException;
 public class CheckRegex {
   public static void check(Set<KEMException> errors, Module m) {
     checkNames(errors, m);
-    stream(m.sortedLocalSentences()).forEach(s -> checkLineAnchors(errors, s));
+    stream(m.sortedLocalSentences())
+        .forEach(
+            s -> {
+              checkLineAnchors(errors, s);
+              checkUnicode(errors, s);
+            });
   }
 
   private static Stream<Regex> regexTerminals(Production prod) {
@@ -122,6 +127,81 @@ public class CheckRegex {
     if (s instanceof SyntaxLexical syn && (syn.regex().startLine() || syn.regex().endLine())) {
       errors.add(
           KEMException.outerParserError("Named lexical syntax cannot contain line anchors.", s));
+    }
+  }
+
+  private static void checkUnicode(Set<KEMException> errors, Sentence s) {
+    CollectBadUnicodeRegex collect = new CollectBadUnicodeRegex();
+    if (s instanceof SyntaxLexical syn) {
+      collect.apply(syn.regex());
+    } else if (s instanceof Production prod) {
+      regexTerminals(prod).forEach(collect::apply);
+    }
+    if (!collect.unicodeInNegatedCharClass().isEmpty()) {
+      errors.add(
+          KEMException.outerParserError(
+              "Unsupported non-ASCII characters found in negated character class: "
+                  + collect.unicodeInNegatedCharClass().stream().map(Character::toString).toList(),
+              s));
+    }
+    if (!collect.unicodeInCharClassRange().isEmpty()) {
+      errors.add(
+          KEMException.outerParserError(
+              "Unsupported non-ASCII characters found in character class range: "
+                  + collect.unicodeInCharClassRange().stream().map(Character::toString).toList(),
+              s));
+    }
+  }
+
+  private static class CollectBadUnicodeRegex extends RegexVisitor {
+    private final Set<Integer> badNegated;
+    private final Set<Integer> badRange;
+
+    public CollectBadUnicodeRegex() {
+      this.badNegated = new LinkedHashSet<>();
+      this.badRange = new LinkedHashSet<>();
+    }
+
+    public Set<Integer> unicodeInNegatedCharClass() {
+      return badNegated;
+    }
+
+    public Set<Integer> unicodeInCharClassRange() {
+      return badRange;
+    }
+
+    @Override
+    public void apply(RegexBody.CharClassExp clsExp) {
+      if (!clsExp.negated()) {
+        super.apply(clsExp);
+        return;
+      }
+      badNegated.addAll(
+          clsExp.charClasses().stream()
+              .flatMap(
+                  cls -> {
+                    if (cls instanceof RegexBody.CharClass.Char chr) {
+                      return Stream.of(chr.codePoint());
+                    }
+                    if (cls instanceof RegexBody.CharClass.Range range) {
+                      return Stream.of(range.start(), range.end());
+                    }
+                    throw new AssertionError("Unhandled class: " + cls.getClass());
+                  })
+              .filter(c -> c > 127)
+              .distinct()
+              .toList());
+      super.apply(clsExp);
+    }
+
+    @Override
+    public void apply(RegexBody.CharClass.Range range) {
+      if (range.start() > 127) {
+        badRange.add(range.start());
+      }
+      if (range.end() > 127) {
+        badRange.add(range.end());
+      }
     }
   }
 }
