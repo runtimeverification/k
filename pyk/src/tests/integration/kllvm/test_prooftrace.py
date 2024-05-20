@@ -40,9 +40,10 @@ class TestProofTrace(ProofTraceTest):
         )
     ).text
 
-    def get_pattern_from_ordinal(self, definition_text, ordinal):
+    def get_pattern_from_ordinal(self, definition_text: list[str], ordinal: int) -> str:
         axiom_ordinal = 'ordinal{}("' + str(ordinal) + '")'
         line = next((i + 1 for i, l in enumerate(definition_text) if axiom_ordinal in l), None)
+        assert line is not None
         return definition_text[line - 1].strip()
 
     def test_proof_trace(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
@@ -50,7 +51,7 @@ class TestProofTrace(ProofTraceTest):
         assert definition is not None
 
         definition.preprocess()
-        definition_text = repr(definition).split("\n")
+        definition_text = repr(definition).split('\n')
 
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
