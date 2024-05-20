@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kframework.DirectedGraph;
+import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
@@ -21,6 +22,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.regex.Regex;
 import org.kframework.definition.regex.RegexBody;
+import org.kframework.definition.regex.RegexSyntax;
 import org.kframework.definition.regex.RegexVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -36,6 +38,8 @@ public class CheckRegex {
             s -> {
               checkLineAnchors(errors, s);
               checkUnicode(errors, s);
+              checkCharClassRanges(errors, s);
+              checkNumericRanges(errors, s);
             });
   }
 
@@ -201,6 +205,82 @@ public class CheckRegex {
       }
       if (range.end() > 127) {
         badRange.add(range.end());
+      }
+    }
+  }
+
+  private static void checkCharClassRanges(Set<KEMException> errors, Sentence s) {
+    if (s instanceof SyntaxLexical syn) {
+      CheckCharClassRanges.check(errors, s, syn.regex());
+    } else if (s instanceof Production prod) {
+      regexTerminals(prod).forEach(r -> CheckCharClassRanges.check(errors, s, r));
+    }
+  }
+
+  private static class CheckCharClassRanges extends RegexVisitor {
+    private final Set<KEMException> errors;
+    private final HasLocation loc;
+
+    private CheckCharClassRanges(Set<KEMException> errors, HasLocation loc) {
+      this.errors = errors;
+      this.loc = loc;
+    }
+
+    public static void check(Set<KEMException> errors, HasLocation loc, Regex reg) {
+      new CheckCharClassRanges(errors, loc).apply(reg);
+    }
+
+    @Override
+    public void apply(RegexBody.CharClass.Range range) {
+      if (range.start() > range.end()) {
+        errors.add(
+            KEMException.outerParserError(
+                "Invalid character range '"
+                    + RegexSyntax.K.print(range)
+                    + "'. Start of range U+"
+                    + String.format("%04X", range.start())
+                    + " is greater than end of range U+"
+                    + String.format("%04X", range.end())
+                    + ".",
+                loc));
+      }
+    }
+  }
+
+  private static void checkNumericRanges(Set<KEMException> errors, Sentence s) {
+    if (s instanceof SyntaxLexical syn) {
+      CheckNumericRanges.check(errors, s, syn.regex());
+    } else if (s instanceof Production prod) {
+      regexTerminals(prod).forEach(r -> CheckNumericRanges.check(errors, s, r));
+    }
+  }
+
+  private static class CheckNumericRanges extends RegexVisitor {
+    private final Set<KEMException> errors;
+    private final HasLocation loc;
+
+    private CheckNumericRanges(Set<KEMException> errors, HasLocation loc) {
+      this.errors = errors;
+      this.loc = loc;
+    }
+
+    public static void check(Set<KEMException> errors, HasLocation loc, Regex reg) {
+      new CheckNumericRanges(errors, loc).apply(reg);
+    }
+
+    @Override
+    public void apply(RegexBody.RangeOfTimes range) {
+      if (range.atLeast() > range.atMost()) {
+        errors.add(
+            KEMException.outerParserError(
+                "Invalid numeric range '"
+                    + RegexSyntax.K.print(range)
+                    + "'. Start of range "
+                    + range.atLeast()
+                    + " is greater than end of range "
+                    + range.atMost()
+                    + ".",
+                loc));
       }
     }
   }

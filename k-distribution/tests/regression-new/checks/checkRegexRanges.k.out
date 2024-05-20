@@ -1,0 +1,21 @@
+[Error] Outer Parser: Invalid character range '1-#'. Start of range U+0031 is greater than end of range U+0023.
+	Source(checkRegexRanges.k)
+	Location(3,1,3,33)
+	3 |	syntax lexical Foo = r"a|[1-#]b"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Invalid character range '1-#'. Start of range U+0031 is greater than end of range U+0023.
+	Source(checkRegexRanges.k)
+	Location(4,16,4,27)
+	4 |	syntax Bar ::= r"a|[1-#]b"
+	  .	               ^~~~~~~~~~~
+[Error] Outer Parser: Invalid numeric range '(a|(b|c)){100,1}'. Start of range 100 is greater than end of range 1.
+	Source(checkRegexRanges.k)
+	Location(6,1,6,39)
+	6 |	syntax lexical Baz = r"(a|b|c){100,1}"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Invalid numeric range '(a|(b|c)){100,1}'. Start of range 100 is greater than end of range 1.
+	Source(checkRegexRanges.k)
+	Location(7,16,7,33)
+	7 |	syntax Buz ::= r"(a|b|c){100,1}"
+	  .	               ^~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 4 parsing errors.
