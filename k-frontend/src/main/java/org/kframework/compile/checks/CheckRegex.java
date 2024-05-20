@@ -27,8 +27,16 @@ import org.kframework.definition.regex.RegexVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 
 /**
- * Check that all lexical identifiers exist, have no circular dependencies, and do not contain line
- * anchors.
+ * Check that regular expressions are semantically valid:
+ *
+ * <ul>
+ *   <li>Every referenced identifier has a corresponding declaration
+ *   <li>`syntax lexical` declarations are non-circular
+ *   <li>`syntax lexical` declarations do not contain line anchors
+ *   <li>Non-ASCII characters do not occur in character ranges nor negated character classes
+ *   <li>Character class ranges `[c1-c2]` have codepoint(c1) <= codepoint(c2)
+ *   <li>Numeric ranges `r{n,m}` have n <= m
+ * </ul>
  */
 public class CheckRegex {
   public static void check(Set<KEMException> errors, Module m) {
