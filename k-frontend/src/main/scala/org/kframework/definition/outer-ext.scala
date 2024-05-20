@@ -25,6 +25,11 @@ case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) 
   override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }
 
+object Bubble {
+  implicit val ord: Ordering[Bubble] =
+    Ordering.by[Bubble, (String, String, Att)](s => (s.sentenceType, s.contents, s.att))
+}
+
 case class FlatImport(name: String, isPublic: Boolean, att: Att = Att.empty) extends HasLocation {
   override def location(): Optional[Location] = att.getOptional(Att.LOCATION, classOf[Location])
   override def source(): Optional[Source]     = att.getOptional(Att.SOURCE, classOf[Source])
