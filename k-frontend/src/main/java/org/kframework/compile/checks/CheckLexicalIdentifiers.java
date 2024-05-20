@@ -19,7 +19,9 @@ import org.kframework.definition.Production;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxLexical;
+import org.kframework.definition.regex.Regex;
 import org.kframework.definition.regex.RegexBody;
+import org.kframework.definition.regex.RegexVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 
 /**
@@ -32,7 +34,12 @@ public class CheckLexicalIdentifiers {
     stream(m.sortedLocalSentences()).forEach(s -> checkLineAnchors(errors, s));
   }
 
-  public static void checkNames(Set<KEMException> errors, Module m) {
+  private static Stream<Regex> regexTerminals(Production prod) {
+    return stream(prod.items())
+        .flatMap(i -> i instanceof RegexTerminal term ? Stream.of(term.regex()) : Stream.of());
+  }
+
+  private static void checkNames(Set<KEMException> errors, Module m) {
     Map<String, SyntaxLexical> definedNames =
         stream(m.lexicalIdentifiers())
             .map(syn -> Map.entry(syn.name(), syn))
@@ -43,7 +50,7 @@ public class CheckLexicalIdentifiers {
       Set<String> badNames = new LinkedHashSet<>();
       if (s instanceof SyntaxLexical syn) {
         Set<SyntaxLexical> deps = new LinkedHashSet<>();
-        collectNames(syn.regex().reg())
+        CollectLexicalIdentifiers.collect(syn.regex())
             .forEach(
                 n -> {
                   if (definedNames.containsKey(n)) {
@@ -55,12 +62,8 @@ public class CheckLexicalIdentifiers {
         synDeps.put(syn, deps);
       } else if (s instanceof Production prod) {
         badNames.addAll(
-            stream(prod.items())
-                .flatMap(
-                    i ->
-                        i instanceof RegexTerminal
-                            ? collectNames(((RegexTerminal) i).regex().reg())
-                            : Stream.empty())
+            regexTerminals(prod)
+                .flatMap(r -> CollectLexicalIdentifiers.collect(r).stream())
                 .filter(n -> !definedNames.containsKey(n))
                 .collect(Collectors.toSet()));
       }
@@ -96,40 +99,23 @@ public class CheckLexicalIdentifiers {
   }
 
   // Find all lexical identifiers {Name} in the regex
-  private static Stream<String> collectNames(RegexBody reg) {
-    if (reg instanceof RegexBody.Char
-        || reg instanceof RegexBody.AnyChar
-        || reg instanceof RegexBody.CharClassExp) {
-      return Stream.empty();
+  private static class CollectLexicalIdentifiers extends RegexVisitor {
+    private final Set<String> identifiers;
+
+    private CollectLexicalIdentifiers() {
+      this.identifiers = new LinkedHashSet<>();
     }
-    if (reg instanceof RegexBody.Named named) {
-      return Stream.of(named.name());
+
+    public static Set<String> collect(Regex reg) {
+      CollectLexicalIdentifiers collect = new CollectLexicalIdentifiers();
+      collect.apply(reg);
+      return collect.identifiers;
     }
-    if (reg instanceof RegexBody.Union un) {
-      return Stream.concat(collectNames(un.left()), collectNames(un.right()));
+
+    @Override
+    public void apply(RegexBody.Named named) {
+      identifiers.add(named.name());
     }
-    if (reg instanceof RegexBody.Concat con) {
-      return con.members().stream().flatMap(CheckLexicalIdentifiers::collectNames);
-    }
-    if (reg instanceof RegexBody.ZeroOrMoreTimes star) {
-      return collectNames(star.reg());
-    }
-    if (reg instanceof RegexBody.ZeroOrOneTimes question) {
-      return collectNames(question.reg());
-    }
-    if (reg instanceof RegexBody.OneOrMoreTimes plus) {
-      return collectNames(plus.reg());
-    }
-    if (reg instanceof RegexBody.ExactlyTimes exact) {
-      return collectNames(exact.reg());
-    }
-    if (reg instanceof RegexBody.AtLeastTimes atLeast) {
-      return collectNames(atLeast.reg());
-    }
-    if (reg instanceof RegexBody.RangeOfTimes range) {
-      return collectNames(range.reg());
-    }
-    throw new AssertionError("Unhandled class: " + reg.getClass());
   }
 
   private static void checkLineAnchors(Set<KEMException> errors, Sentence s) {
