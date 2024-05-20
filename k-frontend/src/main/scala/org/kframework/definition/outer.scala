@@ -591,6 +591,7 @@ object Sentence {
       case (c: Context, d: Context)               => Ordering[Context].compare(c, d)
       case (c: Rule, d: Rule)                     => Ordering[Rule].compare(c, d)
       case (c: Claim, d: Claim)                   => Ordering[Claim].compare(c, d)
+      case (c: Bubble, d: Bubble)                 => Ordering[Bubble].compare(c, d)
       case (_: SyntaxSort, _)                     => -1
       case (_, _: SyntaxSort)                     => 1
       case (_: SortSynonym, _)                    => -1
@@ -611,6 +612,8 @@ object Sentence {
       case (_, _: Rule)                           => 1
       case (_: Claim, _)                          => -1
       case (_, _: Claim)                          => 1
+      case (_: Bubble, _)                         => -1
+      case (_, _: Bubble)                         => 1
       case (_, _) =>
         throw KEMException.internalError(
           "Cannot order these sentences:\n" + a.toString() + "\n" + b.toString()
