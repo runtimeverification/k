@@ -108,7 +108,7 @@ public class POSet<T> implements Serializable {
   }
 
   private java.util.List<T> computeSortedElements() {
-    Optional<Stream<T>> topological = TopologicalSort.tsort(directRelations);
+    Optional<Stream<T>> topological = DirectedGraph.topologicalSort(directRelations);
     // We already checked for cycles during construction, so the sort should succeed
     assert topological.isPresent();
     return topological.get().toList();
