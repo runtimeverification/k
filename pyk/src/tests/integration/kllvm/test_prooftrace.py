@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pyk.kllvm.hints.prooftrace as prooftrace
+from pyk.kllvm.parser import parse_definition
 from pyk.kore.prelude import (
     SORT_K_CONFIG_VAR,
     SORT_K_ITEM,
@@ -38,8 +39,19 @@ class TestProofTrace(ProofTraceTest):
             )
         )
     ).text
+    
+    def get_pattern_from_ordinal(self, definition_text, ordinal):
+        axiom_ordinal = 'ordinal{}("' + str(ordinal) + '")'
+        line = next((i+1 for i, l in enumerate(definition_text) if axiom_ordinal in l), None)
+        return definition_text[line-1].strip()
 
-    def test_proof_trace(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_proof_trace(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+        
+        definition.preprocess()
+        definition_text = repr(definition).split("\n")
+        
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -52,12 +64,18 @@ class TestProofTrace(ProofTraceTest):
         # check that the first event is the rewrite a() => b()
         assert pt.trace[0].is_step_event()
         assert isinstance(pt.trace[0].step_event, prooftrace.LLVMRewriteEvent)
-        assert pt.trace[0].step_event.rule_ordinal == 96
+        axiom_ordinal = pt.trace[0].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        assert axiom == axiom_expected
 
         # check that the second event is the rewrite b() => c()
         assert pt.trace[1].is_step_event()
         assert isinstance(pt.trace[1].step_event, prooftrace.LLVMRewriteEvent)
-        assert pt.trace[1].step_event.rule_ordinal == 97
+        axiom_ordinal = pt.trace[1].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        assert axiom == axiom_expected
 
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()

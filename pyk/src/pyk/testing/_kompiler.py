@@ -382,3 +382,10 @@ class ProofTraceTest(KompiledTest):
         from ..kllvm.hints.prooftrace import kore_header
 
         return kore_header(path)
+
+    @pytest.fixture(scope='class')
+    def definition_file(self, definition_dir: Path) -> str:
+        definition_path = definition_dir / 'definition.kore'
+        assert definition_path.is_file()
+        with open(definition_path, 'r') as f:
+            return f.read()
