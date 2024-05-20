@@ -28,21 +28,8 @@ import org.kframework.utils.errorsystem.KEMException;
  */
 public class CheckLexicalIdentifiers {
   public static void check(Set<KEMException> errors, Module m) {
-    checkLineAnchors(errors, m);
     checkNames(errors, m);
-  }
-
-  public static void checkLineAnchors(Set<KEMException> errors, Module m) {
-    stream(m.sortedLocalSentences())
-        .filter(
-            s ->
-                s instanceof SyntaxLexical syn
-                    && (syn.regex().startLine() || syn.regex().endLine()))
-        .forEach(
-            s ->
-                errors.add(
-                    KEMException.outerParserError(
-                        "Named lexical syntax cannot contain line anchors.", s)));
+    stream(m.sortedLocalSentences()).forEach(s -> checkLineAnchors(errors, s));
   }
 
   public static void checkNames(Set<KEMException> errors, Module m) {
@@ -143,5 +130,12 @@ public class CheckLexicalIdentifiers {
       return collectNames(range.reg());
     }
     throw new AssertionError("Unhandled class: " + reg.getClass());
+  }
+
+  private static void checkLineAnchors(Set<KEMException> errors, Sentence s) {
+    if (s instanceof SyntaxLexical syn && (syn.regex().startLine() || syn.regex().endLine())) {
+      errors.add(
+          KEMException.outerParserError("Named lexical syntax cannot contain line anchors.", s));
+    }
   }
 }
