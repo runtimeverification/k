@@ -13,7 +13,6 @@ jobs:
   source-tarball:
     name: 'Create source tarball'
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
