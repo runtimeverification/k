@@ -151,6 +151,7 @@ class Kompile(ABC):
         cwd: Path | None = None,
         check: bool = True,
         bug_report: BugReport | None = None,
+        outer_parsed_json: bool = False,
     ) -> Path:
         check_file_path(abs_or_rel_to(self.base_args.main_file, cwd or Path()))
         for include_dir in self.base_args.include_dirs:
@@ -188,6 +189,9 @@ class Kompile(ABC):
 
         if verbose:
             args += ['--verbose']
+
+        if outer_parsed_json:
+            args += ['--outer-parsed-json']
 
         try:
             proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
@@ -376,6 +380,7 @@ class KompileArgs:
     read_only: bool
     coverage: bool
     bison_lists: bool
+    outer_parsed_json: bool
 
     def __init__(
         self,
@@ -394,6 +399,7 @@ class KompileArgs:
         read_only: bool = False,
         coverage: bool = False,
         bison_lists: bool = False,
+        outer_parsed_json: bool = False,
     ):
         main_file = Path(main_file)
         include_dirs = tuple(sorted(Path(include_dir) for include_dir in include_dirs))
@@ -413,6 +419,7 @@ class KompileArgs:
         object.__setattr__(self, 'read_only', read_only)
         object.__setattr__(self, 'coverage', coverage)
         object.__setattr__(self, 'bison_lists', bison_lists)
+        object.__setattr__(self, 'outer_parsed_json', outer_parsed_json)
 
     def args(self) -> list[str]:
         args = [str(self.main_file)]
@@ -455,6 +462,9 @@ class KompileArgs:
 
         if self.bison_lists:
             args += ['--bison-lists']
+
+        if self.outer_parsed_json:
+            args += ['--outer-parsed-json']
 
         return args
 
