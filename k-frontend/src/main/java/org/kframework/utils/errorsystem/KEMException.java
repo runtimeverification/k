@@ -175,6 +175,16 @@ public class KEMException extends RuntimeException {
     return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, null, null, null);
   }
 
+  public static KEMException outerParserError(String message, HasLocation node) {
+    return create(
+        ExceptionType.ERROR,
+        KExceptionGroup.OUTER_PARSER,
+        message,
+        null,
+        node.location().orElse(null),
+        node.source().orElse(null));
+  }
+
   public static KEMException outerParserError(String message, Source source, Location location) {
     return create(
         ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, null, location, source);
