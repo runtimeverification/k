@@ -16,7 +16,7 @@
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 15;
+          llvm-version = 17;
           llvm-backend-build-type = "Release";
         })
         llvm-backend.overlays.default
