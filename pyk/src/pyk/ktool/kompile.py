@@ -285,6 +285,7 @@ class LLVMKompile(Kompile):
     enable_search: bool
     enable_llvm_debug: bool
     llvm_proof_hint_instrumentation: bool
+    llvm_mutable_bytes: bool
 
     def __init__(
         self,
@@ -298,6 +299,7 @@ class LLVMKompile(Kompile):
         enable_search: bool = False,
         enable_llvm_debug: bool = False,
         llvm_proof_hint_instrumentation: bool = False,
+        llvm_mutable_bytes: bool = False,
     ):
         llvm_kompile_type = LLVMKompileType(llvm_kompile_type) if llvm_kompile_type is not None else None
         llvm_kompile_output = Path(llvm_kompile_output) if llvm_kompile_output is not None else None
@@ -317,6 +319,7 @@ class LLVMKompile(Kompile):
         object.__setattr__(self, 'enable_search', enable_search)
         object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
         object.__setattr__(self, 'llvm_proof_hint_instrumentation', llvm_proof_hint_instrumentation)
+        object.__setattr__(self, 'llvm_mutable_bytes', llvm_mutable_bytes)
 
     @property
     def backend(self) -> Literal[KompileBackend.LLVM]:
@@ -349,6 +352,9 @@ class LLVMKompile(Kompile):
 
         if self.llvm_proof_hint_instrumentation:
             args += ['--llvm-proof-hint-instrumentation']
+
+        if self.llvm_mutable_bytes:
+            args += ['--llvm-mutable-bytes']
 
         return args
 
