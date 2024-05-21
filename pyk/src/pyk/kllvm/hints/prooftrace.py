@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, final
 
 # isort: off
 import pyk.kllvm.load_static  # noqa: F401
-from _kllvm.prooftrace import (  # type: ignore  # noqa: F401
+from _kllvm.prooftrace import (  # type: ignore  # noqa: F401, TC002
+    kore_header,
     llvm_rewrite_event,
     llvm_function_event,
     llvm_hook_event,
@@ -208,5 +209,5 @@ class LLVMRewriteTrace:
         return [LLVMArgument(event) for event in self._rewrite_trace.trace]
 
     @staticmethod
-    def parse(trace: bytes) -> LLVMRewriteTrace:
-        return LLVMRewriteTrace(llvm_rewrite_trace.parse(trace))
+    def parse(trace: bytes, header: kore_header) -> LLVMRewriteTrace:
+        return LLVMRewriteTrace(llvm_rewrite_trace.parse(trace, header))
