@@ -113,10 +113,10 @@ class KDefinitionOptions(Options):
         if 'includes' in args:
             include_paths = []
             for include in args['includes']:
-                try:
-                    include_path = dir_path(include)
+                include_path = Path(include)
+                if include_path.is_dir():
                     include_paths.append(include_path.resolve())
-                except ValueError:
+                else:
                     _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
             args['includes'] = include_paths
         super().__init__(args)
