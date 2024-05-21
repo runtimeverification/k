@@ -2,7 +2,6 @@
 package org.kframework.parser.inner.kernel;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -30,6 +29,7 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
+import org.kframework.definition.regex.RegexSyntax;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.utils.OS;
@@ -148,7 +148,7 @@ public class Scanner implements AutoCloseable {
   public void appendScanner(
       StringBuilder flex, BiConsumer<StringBuilder, TerminalLike> writeAction) {
     if (this.module.allSorts().contains(Sorts.Layout())) {
-      flex.append(this.module.layout() + " ;\n");
+      flex.append(this.module.flexLayout() + " ;\n");
     }
     List<TerminalLike> ordered =
         tokens.keySet().stream()
@@ -159,7 +159,7 @@ public class Scanner implements AutoCloseable {
         flex.append(StringUtil.enquoteCString(t.value()));
       } else {
         RegexTerminal t = (RegexTerminal) key;
-        flex.append(t.regex());
+        flex.append(RegexSyntax.Flex.print(t.regex()));
       }
       writeAction.accept(flex, key);
     }
@@ -190,9 +190,9 @@ public class Scanner implements AutoCloseable {
             + "%option noyywrap\n"
             + "%option yylineno\n");
     for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
-      flex.append(ident.name());
+      flex.append(RegexSyntax.Flex.mangleIdentifier(ident.name()));
       flex.append(" ");
-      flex.append(ident.regex());
+      flex.append(RegexSyntax.Flex.print(ident.regex()));
       flex.append("\n");
     }
     flex.append("%%\n\n");
@@ -206,7 +206,7 @@ public class Scanner implements AutoCloseable {
                       "Productions of sort `#LineMarker` must be exactly one `RegexTerminal`.",
                       prod);
                 }
-                String regex = terminal.regex();
+                String regex = RegexSyntax.Flex.print(terminal.regex());
                 flex.append(regex).append(" line_marker(yytext, yyscanner);\n");
               });
     }
@@ -246,9 +246,9 @@ public class Scanner implements AutoCloseable {
               + "char *buffer;\n"
               + "%}\n\n");
       for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
-        flex.append(ident.name());
+        flex.append(RegexSyntax.Flex.mangleIdentifier(ident.name()));
         flex.append(" ");
-        flex.append(ident.regex());
+        flex.append(RegexSyntax.Flex.print(ident.regex()));
         flex.append("\n");
       }
       flex.append("%%\n\n");
