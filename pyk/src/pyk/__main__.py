@@ -445,11 +445,15 @@ def exec_kompilex(options: KompileXCommandOptions) -> None:
 
     syntax_module_name = options.syntax_module or main_module_name + '-SYNTAX'
     if syntax_module_name not in [m.name for m in final_definition.all_modules]:
-        _LOGGER.warn(
-            f'Could not find main syntax module with name {syntax_module_name} in definition. Use --syntax-module to specify one. Using {main_module_name} as default.'
-        )
+        base_msg = f'Could not find main syntax module with name {syntax_module_name} in definition.'
+        if options.syntax_module:
+            _LOGGER.error(base_msg)
+            exit(1)
+        else:
+            _LOGGER.warn(f'{base_msg} Use --syntax-module to specify one. Using {main_module_name} as default.')
         syntax_module_name = main_module_name
     syntax_att = KAtt.parse({'syntaxModule': main_module_name})
+
     final_definition = final_definition.let_att(syntax_att)
 
     kast_json = {'format': 'KAST', 'version': KAst.version(), 'term': final_definition.to_dict()}
