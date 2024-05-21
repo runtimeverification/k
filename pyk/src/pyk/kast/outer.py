@@ -1201,6 +1201,18 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return self.subsort_table.get(sort, frozenset())
 
     @cached_property
+    def brackets(self) -> FrozenDict[KSort, KProduction]:
+        brackets: dict[KSort, KProduction] = {}
+        for prod in self.productions:
+            if Atts.BRACKET in prod.att:
+                assert not prod.klabel
+                sort = prod.sort
+                if sort in brackets:
+                    raise ValueError(f'Multiple bracket productions for sort: {sort.name}')
+                brackets[sort] = prod
+        return FrozenDict(brackets)
+
+    @cached_property
     def symbols(self) -> FrozenDict[str, KProduction]:
         symbols: dict[str, KProduction] = {}
         for prod in self.productions:
