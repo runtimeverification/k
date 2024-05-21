@@ -28,11 +28,13 @@ jobs:
           CURDIR=$(pwd)
           cd ..
           tar czvf ${tarball} $(basename ${CURDIR})
+          cd -
+          mv ../${tarball} .
       - name: 'Upload tarball artifact'
         uses: actions/upload-artifact@v4
         with:
           name: kframework-src.tar.gz
-          path: ../kframework-src.tar.gz
+          path: kframework-src.tar.gz
           if-no-files-found: error
           retention-days: 1
 
