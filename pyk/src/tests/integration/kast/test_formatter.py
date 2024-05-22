@@ -22,6 +22,14 @@ x, y = (KToken(name, KSort('Id')) for name in ['x', 'y'])
 
 
 TEST_DATA = (
+    (token(1), '1'),
+    (KApply('_+_', token(1), token(2)), '1 + 2'),
+    (KApply('_+_', KApply('_+_', token(1), token(2)), token(3)), '1 + 2 + 3'),
+    (KApply('_+_', token(1), KApply('_+_', token(2), token(3))), '1 + ( 2 + 3 )'),
+    (KApply('_+_', token(1), KApply('_*_', token(2), token(3))), '1 + 2 * 3'),
+    (KApply('_+_', KApply('_*_', token(1), token(2)), token(3)), '1 * 2 + 3'),
+    (KApply('_*_', token(1), KApply('_+_', token(2), token(3))), '1 * ( 2 + 3 )'),
+    (KApply('_*_', KApply('_+_', token(1), token(2)), token(3)), '( 1 + 2 ) * 3'),
     (
         KApply('<k>', KSequence()),
         """

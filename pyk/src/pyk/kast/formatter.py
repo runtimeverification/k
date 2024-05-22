@@ -17,15 +17,19 @@ class Formatter:
     definition: KDefinition
 
     _indent: int
+    _brackets: bool
 
-    def __init__(self, definition: KDefinition, *, indent: int = 0):
+    def __init__(self, definition: KDefinition, *, indent: int = 0, brackets: bool = True):
         self.definition = definition
         self._indent = indent
+        self._brackets = brackets
 
     def __call__(self, term: KInner) -> str:
         return self.format(term)
 
     def format(self, term: KInner) -> str:
+        if self._brackets:
+            term = add_brackets(self.definition, term)
         return ''.join(self._format(term))
 
     def _format(self, term: KInner) -> list[str]:
@@ -48,7 +52,7 @@ class Formatter:
         return [chunk for chunks in intersperse(items, [' ~> ']) for chunk in chunks]
 
     def _format_kapply(self, kapply: KApply) -> list[str]:
-        production = self.definition.symbols[kapply.label.name]
+        production = self.definition.syntax_symbols[kapply.label.name]
         formatt = production.att.get(Atts.FORMAT, production.default_format)
         return [
             chunk
