@@ -270,7 +270,7 @@ jobs:
           k-deb-path: kframework.deb
       - name: 'Run integration tests'
         run: |
-          docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --timeout 300'
+          docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
       - name: 'Tear down Docker'
         if: always()
         run: |
