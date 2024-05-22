@@ -58,6 +58,8 @@ def generate_options(args: dict[str, Any]) -> LoggingOptions:
             return ProveOptions(args)
         case 'kompile':
             return KompileCommandOptions(args)
+        case 'kompilex':
+            return KompileXCommandOptions(args)
         case 'run':
             return RunOptions(args)
         case 'parse-outer':
@@ -89,6 +91,8 @@ def get_option_string_destination(command: str, option_string: str) -> str:
             option_string_destinations = ProveOptions.from_option_string()
         case 'kompile':
             option_string_destinations = KompileCommandOptions.from_option_string()
+        case 'kompilex':
+            option_string_destinations = KompileXCommandOptions.from_option_string()
         case 'run':
             option_string_destinations = RunOptions.from_option_string()
 
@@ -299,6 +303,16 @@ class KompileCommandOptions(LoggingOptions, WarningOptions, KDefinitionOptions, 
         )
 
 
+class KompileXCommandOptions(KompileCommandOptions):
+    pre_parsed_prelude: IO[Any] | None
+
+    @staticmethod
+    def default() -> dict[str, Any]:
+        return {
+            'pre_parsed_prelude': None,
+        }
+
+
 class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     definition_dir: Path | None
     type_inference_mode: TypeInferenceMode | None
@@ -358,16 +372,17 @@ class RunOptions(LoggingOptions):
         return LoggingOptions.get_argument_type() | {'definition': dir_path}
 
 
-class ParseOuterOptions(LoggingOptions):
+class ParseOuterOptions(LoggingOptions, KDefinitionOptions):
     main_file: Path
-    md_selector: str
-    includes: Iterable[str]
     output_file: IO[Any]
-    main_module: str
 
     @staticmethod
     def get_argument_type() -> dict[str, Callable]:
-        return LoggingOptions.get_argument_type() | {'main_file': dir_path, 'output-file': FileType('w')}
+        return (
+            LoggingOptions.get_argument_type()
+            | KDefinitionOptions.get_argument_type()
+            | {'main_file': file_path, 'output_file': FileType('w')}
+        )
 
 
 def create_argument_parser() -> ArgumentParser:
@@ -443,6 +458,25 @@ def create_argument_parser() -> ArgumentParser:
         ],
     )
     kompile_args.add_argument('main_file', type=str, help='File with the specification module.')
+
+    kompilex_args = pyk_args_command.add_parser(
+        'kompilex',
+        help='Kompile the K specification.',
+        parents=[
+            k_cli_args.logging_args,
+            k_cli_args.warning_args,
+            k_cli_args.definition_args,
+            k_cli_args.kompile_args,
+            config_args.config_args,
+        ],
+    )
+    kompilex_args.add_argument('main_file', type=str, help='File with the specification module.')
+    kompilex_args.add_argument(
+        '--pre-parsed-prelude',
+        dest='pre_parsed_prelude',
+        type=FileType('r'),
+        help='File with outer parsed modules from the prelude in JSON',
+    )
 
     run_args = pyk_args_command.add_parser(
         'run',
@@ -526,21 +560,10 @@ def create_argument_parser() -> ArgumentParser:
     parse_outer_args = pyk_args_command.add_parser(
         'parse-outer',
         help='Parse an outer K definition into JSON',
-        parents=[k_cli_args.logging_args, config_args.config_args],
+        parents=[k_cli_args.logging_args, k_cli_args.definition_args, config_args.config_args],
     )
     parse_outer_args.add_argument('main_file', type=file_path, help='File with the K definition')
-    parse_outer_args.add_argument(
-        '--md-selector', default='k', help='Code selector expression to use when reading markdown.'
-    )
     parse_outer_args.add_argument('--output-file', type=FileType('w'), help='Write output to file instead of stdout.')
-    parse_outer_args.add_argument(
-        '-I',
-        type=str,
-        dest='includes',
-        action='append',
-        help='Directories to lookup K definitions in.',
-    )
-    parse_outer_args.add_argument('--main-module', type=str, help='The name of the main module for the definition')
 
     return pyk_args
 
