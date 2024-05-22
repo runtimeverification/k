@@ -151,6 +151,7 @@ class Kompile(ABC):
         cwd: Path | None = None,
         check: bool = True,
         bug_report: BugReport | None = None,
+        outer_parsed_json: bool = False,
     ) -> Path:
         check_file_path(abs_or_rel_to(self.base_args.main_file, cwd or Path()))
         for include_dir in self.base_args.include_dirs:
@@ -188,6 +189,9 @@ class Kompile(ABC):
 
         if verbose:
             args += ['--verbose']
+
+        if outer_parsed_json:
+            args += ['--outer-parsed-json']
 
         try:
             proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
@@ -285,6 +289,7 @@ class LLVMKompile(Kompile):
     enable_search: bool
     enable_llvm_debug: bool
     llvm_proof_hint_instrumentation: bool
+    llvm_mutable_bytes: bool
 
     def __init__(
         self,
@@ -298,6 +303,7 @@ class LLVMKompile(Kompile):
         enable_search: bool = False,
         enable_llvm_debug: bool = False,
         llvm_proof_hint_instrumentation: bool = False,
+        llvm_mutable_bytes: bool = False,
     ):
         llvm_kompile_type = LLVMKompileType(llvm_kompile_type) if llvm_kompile_type is not None else None
         llvm_kompile_output = Path(llvm_kompile_output) if llvm_kompile_output is not None else None
@@ -317,6 +323,7 @@ class LLVMKompile(Kompile):
         object.__setattr__(self, 'enable_search', enable_search)
         object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
         object.__setattr__(self, 'llvm_proof_hint_instrumentation', llvm_proof_hint_instrumentation)
+        object.__setattr__(self, 'llvm_mutable_bytes', llvm_mutable_bytes)
 
     @property
     def backend(self) -> Literal[KompileBackend.LLVM]:
@@ -350,6 +357,9 @@ class LLVMKompile(Kompile):
         if self.llvm_proof_hint_instrumentation:
             args += ['--llvm-proof-hint-instrumentation']
 
+        if self.llvm_mutable_bytes:
+            args += ['--llvm-mutable-bytes']
+
         return args
 
 
@@ -370,6 +380,7 @@ class KompileArgs:
     read_only: bool
     coverage: bool
     bison_lists: bool
+    outer_parsed_json: bool
 
     def __init__(
         self,
@@ -388,6 +399,7 @@ class KompileArgs:
         read_only: bool = False,
         coverage: bool = False,
         bison_lists: bool = False,
+        outer_parsed_json: bool = False,
     ):
         main_file = Path(main_file)
         include_dirs = tuple(sorted(Path(include_dir) for include_dir in include_dirs))
@@ -407,6 +419,7 @@ class KompileArgs:
         object.__setattr__(self, 'read_only', read_only)
         object.__setattr__(self, 'coverage', coverage)
         object.__setattr__(self, 'bison_lists', bison_lists)
+        object.__setattr__(self, 'outer_parsed_json', outer_parsed_json)
 
     def args(self) -> list[str]:
         args = [str(self.main_file)]
@@ -449,6 +462,9 @@ class KompileArgs:
 
         if self.bison_lists:
             args += ['--bison-lists']
+
+        if self.outer_parsed_json:
+            args += ['--outer-parsed-json']
 
         return args
 

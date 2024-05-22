@@ -108,6 +108,8 @@ class AnyType(AttType[Any]):
 
     @staticmethod
     def _unfreeze(value: Any) -> Any:
+        if isinstance(value, tuple):
+            return [AnyType._unfreeze(v) for v in value]
         if isinstance(value, FrozenDict):
             return {k: AnyType._unfreeze(v) for (k, v) in value.items()}
         return value
@@ -339,6 +341,7 @@ class Atts:
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
     STRICT: Final = AttKey('strict', type=_ANY)
     SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
+    SYNTAX_MODULE: Final = AttKey('syntaxModule', type=_STR)
     TERMINALS: Final = AttKey('terminals', type=_STR)
     TOKEN: Final = AttKey('token', type=_NONE)
     TOTAL: Final = AttKey('total', type=_NONE)

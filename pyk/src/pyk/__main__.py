@@ -6,6 +6,7 @@ import sys
 from collections.abc import Iterable
 from contextlib import contextmanager
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 from graphviz import Digraph
@@ -15,6 +16,8 @@ from .cli.utils import LOG_FORMAT, loglevel
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import CTerm
 from .cterm.symbolic import cterm_symbolic
+from .kast import KAst
+from .kast.att import KAtt
 from .kast.inner import KInner
 from .kast.manip import (
     flatten_label,
@@ -24,7 +27,7 @@ from .kast.manip import (
     remove_source_map,
     split_config_and_constraints,
 )
-from .kast.outer import read_kast_definition
+from .kast.outer import KFlatModule, read_kast_definition
 from .kast.pretty import PrettyPrinter
 from .kast.utils import parse_outer
 from .kcfg import KCFGExplore
@@ -39,7 +42,7 @@ from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
 from .proof.show import APRProofNodePrinter, APRProofShow
-from .utils import check_dir_path, check_file_path, ensure_dir_path, exit_with_process_error
+from .utils import check_file_path, ensure_dir_path, exit_with_process_error
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -50,6 +53,7 @@ if TYPE_CHECKING:
         GraphImportsOptions,
         JsonToKoreOptions,
         KompileCommandOptions,
+        KompileXCommandOptions,
         KoreToJsonOptions,
         ParseOuterOptions,
         PrintOptions,
@@ -70,6 +74,8 @@ def main() -> None:
     # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
     sys.setrecursionlimit(10**7)
 
+    logging.basicConfig(format=LOG_FORMAT)
+
     cli_parser = create_argument_parser()
     args = cli_parser.parse_args()
     toml_args = parse_toml_args(args)
@@ -80,7 +86,7 @@ def main() -> None:
 
     options = generate_options(stripped_args)
 
-    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT)
+    logging.basicConfig(level=loglevel(args), format=LOG_FORMAT, force=True)
 
     executor_name = 'exec_' + args.command.lower().replace('-', '_')
     if executor_name not in globals():
@@ -303,12 +309,13 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'syntax_module': options.syntax_module,
         'main_module': options.main_module,
         'md_selector': options.md_selector,
-        'include_dirs': (Path(include) for include in options.includes),
+        'include_dirs': options.includes,
         'emit_json': options.emit_json,
         'coverage': options.coverage,
         'gen_bison_parser': options.gen_bison_parser,
         'gen_glr_bison_parser': options.gen_glr_bison_parser,
         'bison_lists': options.bison_lists,
+        'outer_parsed_json': options.outer_parsed_json,
     }
     if options.backend == KompileBackend.LLVM:
         kompile_dict['ccopts'] = options.ccopts
@@ -404,27 +411,55 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
     definition_file = options.main_file.resolve()
-    search_paths = [definition_file.parent]
-    for include in getattr(options, 'includes', []):
-        include_path = Path(include)
-        try:
-            check_dir_path(include_path)
-        except ValueError:
-            _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
-        search_paths.append(include_path.resolve())
+    search_paths = [definition_file.parent, *options.includes]
+    main_module_name = options.main_module or definition_file.stem.upper()
 
-    main_module_name = getattr(options, 'main_module', definition_file.stem.upper())
-    try:
-        final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
-    except Exception as e:
-        _LOGGER.critical(e)
-        exit(1)
+    final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
 
     result_text = json.dumps(final_definition.to_dict())
     try:
         options.output_file.write(result_text)
     except AttributeError:
         sys.stdout.write(f'{result_text}\n')
+
+
+def exec_kompilex(options: KompileXCommandOptions) -> None:
+    definition_file = Path(options.main_file).resolve()
+    search_paths = [definition_file.parent, *options.includes]
+    main_module_name = options.main_module or definition_file.stem.upper()
+
+    final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
+
+    if options.pre_parsed_prelude:
+        prelude_json = json.loads(options.pre_parsed_prelude.read())
+        prelude_modules = tuple(KFlatModule.from_dict(mod) for mod in prelude_json)
+        final_definition = final_definition.let(all_modules=final_definition.all_modules + prelude_modules)
+
+    syntax_module_name = options.syntax_module or main_module_name + '-SYNTAX'
+    if syntax_module_name not in [m.name for m in final_definition.all_modules]:
+        base_msg = f'Could not find main syntax module with name {syntax_module_name} in definition.'
+        if options.syntax_module:
+            _LOGGER.error(base_msg)
+            exit(1)
+        else:
+            _LOGGER.warn(f'{base_msg} Use --syntax-module to specify one. Using {main_module_name} as default.')
+        syntax_module_name = main_module_name
+    syntax_att = KAtt.parse({'syntaxModule': main_module_name})
+
+    final_definition = final_definition.let_att(syntax_att)
+
+    kast_json = {'format': 'KAST', 'version': KAst.version(), 'term': final_definition.to_dict()}
+
+    with NamedTemporaryFile('w', prefix='pyk_kompilex_', delete=not options.debug) as ntf:
+        ntf.write(json.dumps(kast_json))
+        ntf.flush()
+
+        options.main_file = ntf.name
+        options.outer_parsed_json = True
+        if options.definition_dir is None:
+            options.definition_dir = Path(f'{definition_file.stem}-kompiled')
+
+        exec_kompile(options)
 
 
 if __name__ == '__main__':
