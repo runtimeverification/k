@@ -143,7 +143,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-13
+    runs-on: macos-14
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -208,7 +208,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
@@ -237,7 +237,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-13
+    runs-on: macos-14
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
