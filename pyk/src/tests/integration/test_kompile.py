@@ -7,16 +7,17 @@ import pytest
 from pyk.kast import Atts
 from pyk.kast.inner import KSort
 from pyk.kore.syntax import SortApp
-from pyk.ktool.kompile import KompileBackend, KompileNotFoundError, kompile
+from pyk.ktool.kompile import DefinitionInfo, KompileBackend, KompileNotFoundError, PykBackend, kompile
 from pyk.testing import KompiledTest
 
 from .utils import K_FILES
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pyk.kast.inner import KLabel
     from pyk.kast.outer import KDefinition
     from pyk.kore.kompiled import KompiledKore
-    from pyk.ktool.kompile import DefinitionInfo
 
 
 class TestHaskellKompile(KompiledTest):
@@ -48,6 +49,20 @@ def test_kompile_not_found(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(KompileNotFoundError):
         kompile(k_file, command=[bad_kompile])
+
+
+def test_booster_kompile(tmp_path: Path) -> None:
+    # Given
+    output_dir = tmp_path / 'kompiled'
+    main_file = tmp_path / 'test.k'
+    main_file.write_text('module TEST endmodule')
+
+    # When
+    kompile(main_file, backend=PykBackend.BOOSTER, output_dir=output_dir)
+
+    # Then
+    assert DefinitionInfo(output_dir).backend == KompileBackend.HASKELL
+    assert DefinitionInfo(output_dir / 'llvm-library').backend == KompileBackend.LLVM
 
 
 class TestKLabel(KompiledTest):
