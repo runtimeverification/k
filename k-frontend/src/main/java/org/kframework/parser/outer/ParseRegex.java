@@ -251,17 +251,17 @@ public class ParseRegex {
   }
 
   private static RegexBody.CharClass parseCharClass(Scanner input) {
-    var chr1 = new RegexBody.CharClass.Char(parseCharExp(input, true));
+    var chr1 = parseCharExp(input, true);
     if (input.consume('-')) {
       if (input.consume(']')) {
         input.back();
         input.back();
         throw unescapedTokenError('-', input);
       }
-      var chr2 = new RegexBody.CharClass.Char(parseCharExp(input, true));
+      var chr2 = parseCharExp(input, true);
       return new RegexBody.CharClass.Range(chr1, chr2);
     }
-    return chr1;
+    return new RegexBody.CharClass.Char(chr1);
   }
 
   private static int parseCharExp(Scanner input, boolean inCharClass) {
@@ -292,11 +292,21 @@ public class ParseRegex {
       return result;
     }
     if (input.consume('{')) {
-      StringBuilder identifier = new StringBuilder();
+      StringBuilder identifierBuild = new StringBuilder();
       while (!input.consume('}')) {
-        identifier.append(Character.toString(input.next()));
+        identifierBuild.append(Character.toString(input.next()));
       }
-      return new RegexBody.Named(Outer.parseSort(identifier.toString()).name());
+      String identifier = identifierBuild.toString();
+      if (!identifier.matches("#?[A-Z][a-zA-Z0-9]*")) {
+        input.back();
+        throw parseError(
+            "Lexical identifier {"
+                + identifier
+                + "} is invalid. Identifiers should match the regular expression \"#?[A-Z][a-zA-Z0-9]*\".",
+            input,
+            true);
+      }
+      return new RegexBody.Named(identifier);
     }
     return new RegexBody.Char(parseCharExp(input, false));
   }

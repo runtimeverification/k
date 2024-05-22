@@ -1,11 +1,11 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/b27210141c06c5698201dc3f1fabc90bd09ffe59";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/4c6a57a37dad6658c9e04728bbd9a1aac87274ef";
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
-      url = "github:runtimeverification/llvm-backend/v0.1.12";
+      url = "github:runtimeverification/llvm-backend/v0.1.23";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
@@ -16,7 +16,7 @@
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 15;
+          llvm-version = 17;
           llvm-backend-build-type = "Release";
         })
         llvm-backend.overlays.default
@@ -54,7 +54,7 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-DnY+Zx4fr3iuI24VjlnCVeQCcK6aHYYAEW13aUEzd+I=";
+                mvnHash = "sha256-6rGuU8NFSp3lQVxxPj5WREpNVPneMqPH45DFEmLiH6I=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.13.13"
                   "ant-contrib:ant-contrib:1.0b3"
@@ -114,6 +114,7 @@
             p.kore-rpc
             p.kore-rpc-booster
             p.kore-rpc-client
+            p.booster-dev
           ];
         };
 

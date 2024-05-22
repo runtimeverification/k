@@ -16,7 +16,7 @@ public sealed interface RegexBody extends Serializable {
   sealed interface CharClass extends Serializable {
     record Char(int codePoint) implements CharClass {}
 
-    record Range(CharClass.Char start, CharClass.Char end) implements CharClass {}
+    record Range(int start, int end) implements CharClass {}
   }
 
   record Union(RegexBody left, RegexBody right) implements RegexBody {}

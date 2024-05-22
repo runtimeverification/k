@@ -570,19 +570,19 @@ class KBubble(KSentence):
     """Represents an unparsed chunk of AST in user-defined syntax."""
 
     sentence_type: str
-    content: str
+    contents: str
     att: KAtt
 
-    def __init__(self, sentence_type: str, content: str, att: KAtt = EMPTY_ATT):
+    def __init__(self, sentence_type: str, contents: str, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'sentence_type', sentence_type)
-        object.__setattr__(self, 'content', content)
+        object.__setattr__(self, 'contents', contents)
         object.__setattr__(self, 'att', att)
 
     @classmethod
     def _from_dict(cls: type[KBubble], d: Mapping[str, Any]) -> KBubble:
         return KBubble(
             sentence_type=d['sentenceType'],
-            content=d['content'],
+            contents=d['contents'],
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -590,15 +590,15 @@ class KBubble(KSentence):
         return {
             'node': 'KBubble',
             'sentenceType': self.sentence_type,
-            'content': self.content,
+            'contents': self.contents,
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, sentence_type: str | None = None, content: str | None = None, att: KAtt | None = None) -> KBubble:
+    def let(self, *, sentence_type: str | None = None, contents: str | None = None, att: KAtt | None = None) -> KBubble:
         sentence_type = sentence_type if sentence_type is not None else self.sentence_type
-        content = content if content is not None else self.content
+        contents = contents if contents is not None else self.contents
         att = att if att is not None else self.att
-        return KBubble(sentence_type=sentence_type, content=content, att=att)
+        return KBubble(sentence_type=sentence_type, contents=contents, att=att)
 
     def let_att(self, att: KAtt) -> KBubble:
         return self.let(att=att)

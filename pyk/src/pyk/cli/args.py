@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import sys
 from argparse import ArgumentParser, FileType
 from functools import cached_property
@@ -12,8 +13,11 @@ from .utils import bug_report_arg, dir_path, ensure_dir_path, file_path
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from typing import Final
 
     from ..utils import BugReport
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class LoggingOptions(Options):
@@ -99,11 +103,23 @@ class DisplayOptions(Options):
 
 
 class KDefinitionOptions(Options):
-    includes: list[str]
+    includes: list[Path]
     main_module: str | None
     syntax_module: str | None
     spec_module: str | None
     md_selector: str
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        if 'includes' in args:
+            include_paths = []
+            for include in args['includes']:
+                include_path = Path(include)
+                if include_path.is_dir():
+                    include_paths.append(include_path.resolve())
+                else:
+                    _LOGGER.warning(f"Could not find directory '{include}' passed to -I")
+            args['includes'] = include_paths
+        super().__init__(args)
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -189,6 +205,7 @@ class KompileOptions(Options):
     gen_glr_bison_parser: bool
     bison_lists: bool
     no_exc_wrap: bool
+    outer_parsed_json: bool
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -212,6 +229,7 @@ class KompileOptions(Options):
             'gen_glr_bison_parser': False,
             'bison_lists': False,
             'no_exc_wrap': False,
+            'outer_parsed_json': False,
         }
 
     @staticmethod

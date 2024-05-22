@@ -190,9 +190,9 @@ public class Scanner implements AutoCloseable {
             + "%option noyywrap\n"
             + "%option yylineno\n");
     for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
-      flex.append(ident.name());
+      flex.append(RegexSyntax.Flex.mangleIdentifier(ident.name()));
       flex.append(" ");
-      flex.append(ident.regex());
+      flex.append(RegexSyntax.Flex.print(ident.regex()));
       flex.append("\n");
     }
     flex.append("%%\n\n");
@@ -246,7 +246,7 @@ public class Scanner implements AutoCloseable {
               + "char *buffer;\n"
               + "%}\n\n");
       for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
-        flex.append(ident.name());
+        flex.append(RegexSyntax.Flex.mangleIdentifier(ident.name()));
         flex.append(" ");
         flex.append(RegexSyntax.Flex.print(ident.regex()));
         flex.append("\n");

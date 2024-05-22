@@ -253,7 +253,7 @@ class PrettyPrinter:
         return 'syntax priority ' + priorities_str + ' ' + att_str
 
     def _print_kbubble(self, kbubble: KBubble) -> str:
-        body = '// KBubble(' + kbubble.sentence_type + ', ' + kbubble.content + ')'
+        body = '// KBubble(' + kbubble.sentence_type + ', ' + kbubble.contents + ')'
         att_str = self.print(kbubble.att)
         return body + ' ' + att_str
 

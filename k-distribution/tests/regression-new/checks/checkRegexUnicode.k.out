@@ -1,0 +1,31 @@
+[Error] Outer Parser: Invalid character range '😦-a'. Start of range U+1F626 is greater than end of range U+0061.
+	Source(checkRegexUnicode.k)
+	Location(3,1,3,41)
+	3 |	syntax lexical Foo = r"[^a😊][😦-ab-🙁]"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Unsupported non-ASCII characters found in character class range: [😦, 🙁]
+	Source(checkRegexUnicode.k)
+	Location(3,1,3,41)
+	3 |	syntax lexical Foo = r"[^a😊][😦-ab-🙁]"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Unsupported non-ASCII characters found in negated character class: [😊]
+	Source(checkRegexUnicode.k)
+	Location(3,1,3,41)
+	3 |	syntax lexical Foo = r"[^a😊][😦-ab-🙁]"
+	  .	^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Invalid character range '😦-a'. Start of range U+1F626 is greater than end of range U+0061.
+	Source(checkRegexUnicode.k)
+	Location(4,16,4,43)
+	4 |	syntax Bar ::= r"[^a😊][😦-ab-🙁]" [token]
+	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Unsupported non-ASCII characters found in character class range: [😦, 🙁]
+	Source(checkRegexUnicode.k)
+	Location(4,16,4,43)
+	4 |	syntax Bar ::= r"[^a😊][😦-ab-🙁]" [token]
+	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Outer Parser: Unsupported non-ASCII characters found in negated character class: [😊]
+	Source(checkRegexUnicode.k)
+	Location(4,16,4,43)
+	4 |	syntax Bar ::= r"[^a😊][😦-ab-🙁]" [token]
+	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 6 parsing errors.
