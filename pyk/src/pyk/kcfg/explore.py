@@ -217,6 +217,11 @@ class KCFGExplore:
                         _rule_lines.append('UNKNOWN')
             return _rule_lines
 
+        custom_extend_result = self.kcfg_semantics.custom_step(_cterm)
+        if custom_extend_result is not None:
+            log(f'custom step node: {node_id}')
+            return custom_extend_result
+
         abstract_cterm = self.kcfg_semantics.abstract_node(_cterm)
         if _cterm != abstract_cterm:
             log(f'abstraction node: {node_id}')

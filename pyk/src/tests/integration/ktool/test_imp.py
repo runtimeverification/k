@@ -24,8 +24,8 @@ if TYPE_CHECKING:
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
+    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprove import KProve
-
 _LOGGER: Final = logging.getLogger(__name__)
 
 
@@ -56,6 +56,9 @@ class ImpSemantics(KCFGSemantics):
         if k_cell_1 == k_cell_2 and type(k_cell_1) is KSequence and type(k_cell_1[0]) is KApply:
             return k_cell_1[0].label.name == 'while(_)_'
         return False
+
+    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        return None
 
 
 PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, ProofStatus]] = (
