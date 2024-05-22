@@ -22,18 +22,18 @@ poetry-install:
 
 # Tests
 
-TEST_ARGS ?= --maxfail=1
+TEST_ARGS :=
 
 test: test-all
 
 test-all: poetry-install
-	$(POETRY_RUN) pytest src/tests --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
+	$(POETRY_RUN) pytest src/tests --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
 
 test-unit: poetry-install
-	$(POETRY_RUN) pytest src/tests/unit --verbose $(TEST_ARGS)
+	$(POETRY_RUN) pytest src/tests/unit --maxfail=1 --verbose $(TEST_ARGS)
 
 test-integration: poetry-install
-	$(POETRY_RUN) pytest src/tests/integration --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
+	$(POETRY_RUN) pytest src/tests/integration --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
 
 test-regression-new: poetry-install
 	$(MAKE) -C regression-new
@@ -58,10 +58,10 @@ cov-integration: test-integration
 
 # Profiling
 
-PROF_ARGS ?= --maxfail=1
+PROF_ARGS :=
 
 profile: poetry-install
-	$(POETRY_RUN) pytest src/tests/profiling --verbose --durations=0 --numprocesses=4 --dist=worksteal $(PROF_ARGS)
+	$(POETRY_RUN) pytest src/tests/profiling --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(PROF_ARGS)
 
 
 # Checks and formatting
