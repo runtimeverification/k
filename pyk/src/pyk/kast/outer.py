@@ -1229,6 +1229,13 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return FrozenDict(symbols)
 
     @cached_property
+    def syntax_symbols(self) -> FrozenDict[str, KProduction]:
+        brackets: dict[str, KProduction] = {
+            prod.att[Atts.BRACKET_LABEL]['name']: prod for _, prod in self.brackets.items()
+        }
+        return FrozenDict({**self.symbols, **brackets})
+
+    @cached_property
     def overloads(self) -> FrozenDict[str, frozenset[str]]:
         """Return a mapping from symbols to the sets of symbols that overload them."""
 
