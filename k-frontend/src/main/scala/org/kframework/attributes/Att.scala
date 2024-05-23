@@ -221,7 +221,7 @@ object Att {
   final val BRACKET =
     Key.builtin("bracket", KeyParameter.Forbidden, onlyon[Production], KeyRange.WholePipeline)
   final val CELL =
-    Key.builtin("cell", KeyParameter.Forbidden, onlyon[Production], KeyRange.FrontendOnly)
+    Key.builtin("cell", KeyParameter.Forbidden, onlyon[Production], KeyRange.WholePipeline)
   final val CELL_COLLECTION =
     Key.builtin(
       "cellCollection",
