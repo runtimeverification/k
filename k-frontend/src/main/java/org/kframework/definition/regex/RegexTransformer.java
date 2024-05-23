@@ -1,6 +1,8 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.definition.regex;
 
+import java.util.stream.Stream;
+
 public class RegexTransformer {
   public Regex apply(Regex reg) {
     return new Regex(reg.startLine(), apply(reg.reg()), reg.endLine());
@@ -86,7 +88,12 @@ public class RegexTransformer {
   }
 
   public RegexBody apply(RegexBody.Concat con) {
-    return new RegexBody.Concat(con.members().stream().map(this::apply).toList());
+    return new RegexBody.Concat(
+        con.members().stream()
+            .map(this::apply)
+            .flatMap(
+                m -> m instanceof RegexBody.Concat mCon ? mCon.members().stream() : Stream.of(m))
+            .toList());
   }
 
   public RegexBody apply(RegexBody.ZeroOrMoreTimes star) {
