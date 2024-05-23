@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprove import KProve
+
 _LOGGER: Final = logging.getLogger(__name__)
 
 
