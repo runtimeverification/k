@@ -117,6 +117,6 @@ public class RegexTransformer {
   }
 
   public RegexBody apply(RegexBody.RangeOfTimes range) {
-    return new RegexBody.RangeOfTimes(apply(range.reg()), range.atMost(), range.atMost());
+    return new RegexBody.RangeOfTimes(apply(range.reg()), range.atLeast(), range.atMost());
   }
 }
