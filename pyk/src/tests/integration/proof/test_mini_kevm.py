@@ -227,7 +227,6 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
                 execute_depth=max_depth,
                 cut_point_rules=cut_rules,
             )
-            max_iterations = max_iterations + 1 if type(max_iterations) == int else max_iterations
             prover2.advance_proof(proof2, max_iterations=max_iterations)
 
             kcfg_show = KCFGShow(
@@ -241,4 +240,4 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
             assert proof1.status == proof_status
             assert proof2.status == proof_status
             assert leaf_number(proof1) == expected_leaf_number
-            assert leaf_number(proof2) == expected_leaf_number + 1
+            assert leaf_number(proof2) == expected_leaf_number
