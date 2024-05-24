@@ -3,7 +3,7 @@ module MINI-KEVM-SYNTAX
     imports BYTES-SYNTAX
     imports INT-SYNTAX
 
-    syntax KItem ::= "a" | "b"
+    syntax KItem ::= "a" | "b" | "setId" Int
 
     // Words
 
@@ -49,6 +49,9 @@ module MINI-KEVM
         </accounts>
 
     rule <k> a => b ... </k>
+    rule [setId]:
+          <k> setId X => b ... </k>
+          <id> _ => chop (X) </id>
 
     // Words
 

@@ -32,4 +32,9 @@ module MINI-KEVM-SPEC
      andBool #hashedLocation("Solidity", 4, .IntList)          =/=Int #hashedLocation("Solidity", 2, FROM_ID CALLER_ID)
      andBool #hashedLocation("Solidity", 2, FROM_ID CALLER_ID) =/=Int #hashedLocation("Solidity", 1, FROM_ID)
 
+    claim [custom-step]:
+      <k> setId ACCT_ID => b ... </k>
+      <id> _ => chop(ACCT_ID) </id>
+    requires #rangeUInt(160, ACCT_ID)
+
 endmodule
