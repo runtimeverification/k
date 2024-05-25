@@ -435,6 +435,8 @@ jobs:
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           fetch-depth: 0
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v9
       - name: 'Checkout PL Tutorial code'
         uses: actions/checkout@v4
         with:
@@ -457,6 +459,11 @@ jobs:
           npm run build-sitemap
           cd -
           mv web/public_content ./
+          cd pyk
+          make docs
+          cd -
+          mkdir public_content/pyk
+          cp -r pyk/docs/build/html/* public_content/pyk
           rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
           mv public_content/* ./
           rm -rf public_content
