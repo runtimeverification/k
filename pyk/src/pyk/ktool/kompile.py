@@ -117,20 +117,24 @@ def _booster_kompile(
     cwd: Path | None,
     check: bool,
     # ---
-    kwargs: Mapping[str, Any],
+    kwargs: dict[str, Any],
 ) -> Path:
     llvm_kt = kwargs.get('llvm_kompile_type')
     llvm_kt = LLVMKompileType(llvm_kt) if llvm_kt else None
     if llvm_kt and llvm_kt is not LLVMKompileType.C:
         raise ValueError(f'Unsupported argument value for Booster kompilation: llvm_kompile_type: {llvm_kt.value}')
 
+    llvm_md_selector, haskell_md_selector = _group_md_selector(**kwargs)
+    kwargs.pop('md_selector', None)
     llvm_args, haskell_args = _group_args(kwargs)
 
     llvm_args['backend'] = KompileBackend.LLVM
     llvm_args['llvm_kompile_type'] = LLVMKompileType.C
+    llvm_args['md_selector'] = llvm_md_selector
     llvm_kompile = LLVMKompile.from_dict(llvm_args)
 
     haskell_args['backend'] = KompileBackend.HASKELL
+    haskell_args['md_selector'] = haskell_md_selector
     haskell_kompile = HaskellKompile.from_dict(haskell_args)
 
     main_file = Path(kwargs['main_file'])
@@ -174,6 +178,23 @@ def _booster_kompile(
 
     assert output_dir.is_dir()
     return output_dir
+
+
+def _group_md_selector(
+    *,
+    md_selector: str | None = None,
+    llvm_md_selector: str | None = None,
+    haskell_md_selector: str | None = None,
+    **kwargs: Any,
+) -> tuple[str | None, str | None]:
+    if md_selector:
+        if llvm_md_selector:
+            raise ValueError('Parameter llvm_md_selector should not be passed if md_selector is defined')
+        if haskell_md_selector:
+            raise ValueError('Parameter haskell_md_selector should not be passed if md_selector is defined')
+        return md_selector, md_selector
+
+    return llvm_md_selector, haskell_md_selector
 
 
 def _group_args(args: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
