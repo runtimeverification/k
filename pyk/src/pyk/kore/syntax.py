@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from io import StringIO
 from typing import ClassVar  # noqa: TC003
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING, List, final
 
 from ..dequote import enquoted
 from ..utils import check_type
@@ -2170,6 +2170,7 @@ class Module(Kore, WithAttrs, Iterable[Sentence]):
 class Definition(Kore, WithAttrs, Iterable[Module]):
     modules: tuple[Module, ...]
     attrs: tuple[App, ...]
+    ordinals: dict[int, Axiom]
 
     def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[App] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
@@ -2193,6 +2194,28 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
         for module in self.modules:
             output.write('\n\n')
             module.write(output)
+
+    def get_axiom_by_ordinal(self, ordinal: int) -> Axiom:
+        return self.ordinals[ordinal]
+
+    def compute_ordinals(self) -> Definition:
+        new_modules = []
+        rule_ordinal = 0
+        for module in self.modules:
+            new_sentences: List[Sentence] = []
+            for sentence in module.sentences:
+                if type(sentence) is Axiom:
+                    ordinal_attr = App('ordinal', (), [String(str(rule_ordinal))])
+                    new_sentence = sentence.let_attrs(sentence.attrs + (ordinal_attr,))
+                    new_sentences.append(new_sentence)
+                    self.ordinals[rule_ordinal] = new_sentence
+                    rule_ordinal += 1
+                else:
+                    new_sentences.append(sentence)
+            new_modules.append(module.let(sentences=new_sentences))
+
+        new_definition = self.let(modules=new_modules)
+        return new_definition
 
 
 def kore_term(dct: Mapping[str, Any]) -> Pattern:
