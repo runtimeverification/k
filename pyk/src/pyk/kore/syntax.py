@@ -2194,6 +2194,31 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
             output.write('\n\n')
             module.write(output)
 
+    @cached_property
+    def axioms(self) -> tuple[Axiom, ...]:
+        return tuple(sent for module in self.modules for sent in module if isinstance(sent, Axiom))
+
+    def get_axiom_by_ordinal(self, ordinal: int) -> Axiom:
+        return self.axioms[ordinal]
+
+    def compute_ordinals(self) -> Definition:
+        new_modules = []
+        rule_ordinal = 0
+        for module in self.modules:
+            new_sentences: list[Sentence] = []
+            for sentence in module.sentences:
+                if type(sentence) is Axiom:
+                    ordinal_attr = App('ordinal', (), [String(str(rule_ordinal))])
+                    new_sentence = sentence.let_attrs(sentence.attrs + (ordinal_attr,))
+                    new_sentences.append(new_sentence)
+                    rule_ordinal += 1
+                else:
+                    new_sentences.append(sentence)
+            new_modules.append(module.let(sentences=new_sentences))
+
+        new_definition = self.let(modules=new_modules)
+        return new_definition
+
 
 def kore_term(dct: Mapping[str, Any]) -> Pattern:
     if dct['format'] != 'KORE':
