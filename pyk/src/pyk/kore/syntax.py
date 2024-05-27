@@ -2170,7 +2170,6 @@ class Module(Kore, WithAttrs, Iterable[Sentence]):
 class Definition(Kore, WithAttrs, Iterable[Module]):
     modules: tuple[Module, ...]
     attrs: tuple[App, ...]
-    ordinals: dict[int, Axiom]
 
     def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[App] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
@@ -2195,8 +2194,12 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
             output.write('\n\n')
             module.write(output)
 
+    @cached_property
+    def axioms(self) -> tuple[Axiom, ...]:
+        return tuple(sent for module in self.modules for sent in module if isinstance(sent, Axiom))
+
     def get_axiom_by_ordinal(self, ordinal: int) -> Axiom:
-        return self.ordinals[ordinal]
+        return self.axioms[ordinal]
 
     def compute_ordinals(self) -> Definition:
         new_modules = []
@@ -2208,7 +2211,6 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
                     ordinal_attr = App('ordinal', (), [String(str(rule_ordinal))])
                     new_sentence = sentence.let_attrs(sentence.attrs + (ordinal_attr,))
                     new_sentences.append(new_sentence)
-                    self.ordinals[rule_ordinal] = new_sentence
                     rule_ordinal += 1
                 else:
                     new_sentences.append(sentence)
