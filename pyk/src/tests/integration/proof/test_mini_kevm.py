@@ -64,6 +64,8 @@ CUSTOM_STEP_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | Non
     ),
 )
 
+skip_custom_step = False
+
 
 def leaf_number(proof: APRProof) -> int:
     non_target_leaves = [nd for nd in proof.kcfg.leaves if not proof.is_target(nd.id)]
@@ -88,11 +90,13 @@ class MiniKEVMSemantics(KCFGSemantics):
         return False
 
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        global skip_custom_step
+
         pattern = KSequence(
             [KApply('setId__MINI-KEVM-SYNTAX_KItem_Int', KVariable('###X')), KVariable('###CONTINUATION')]
         )
         subst = pattern.match(c.cell('K_CELL'))
-        if subst is None:
+        if subst is None or skip_custom_step:
             return None
         new_cterm = CTerm.from_kast(
             set_cell(c.kast, 'ID_CELL', KApply('chop(_)_MINI-KEVM-SYNTAX_Int_Int', [subst['###X']]))
@@ -167,8 +171,8 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status,expected_leaf_number',
-        APR_PROVE_TEST_DATA,
-        ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
+        CUSTOM_STEP_TEST_DATA,
+        ids=[test_id for test_id, *_ in CUSTOM_STEP_TEST_DATA],
     )
     def test_custom_step(
         self,
@@ -185,6 +189,9 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
         expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
     ) -> None:
+        global skip_custom_step
+
+        skip_custom_step = False
 
         with tmp_path_factory.mktemp('custom_step_tmp_proofs') as proof_dir:
             claim = single(
@@ -222,6 +229,8 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
             proof2.kcfg.let_node(proof2.init, cterm=new_init_cterm2)
             kcfg_explore.simplify(proof2.kcfg, {})
 
+            skip_custom_step = True
+
             prover2 = APRProver(
                 kcfg_explore=kcfg_explore,
                 execute_depth=max_depth,
@@ -237,6 +246,8 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
 
             cfg_lines2 = kcfg_show.show(proof2.kcfg)
             _LOGGER.info('\n'.join(cfg_lines2))
+
+            assert cfg_lines1 == cfg_lines2
             assert proof1.status == proof_status
             assert proof2.status == proof_status
             assert leaf_number(proof1) == expected_leaf_number
