@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from io import StringIO
 from typing import ClassVar  # noqa: TC003
-from typing import TYPE_CHECKING, List, final
+from typing import TYPE_CHECKING, final
 
 from ..dequote import enquoted
 from ..utils import check_type
@@ -2202,7 +2202,7 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
         new_modules = []
         rule_ordinal = 0
         for module in self.modules:
-            new_sentences: List[Sentence] = []
+            new_sentences: list[Sentence] = []
             for sentence in module.sentences:
                 if type(sentence) is Axiom:
                     ordinal_attr = App('ordinal', (), [String(str(rule_ordinal))])
