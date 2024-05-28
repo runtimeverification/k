@@ -8,6 +8,7 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable
 from pyk.kast.manip import set_cell
+from pyk.kcfg import KCFGExplore
 from pyk.kcfg.kcfg import Step
 from pyk.kcfg.semantics import KCFGSemantics
 from pyk.kcfg.show import KCFGShow
@@ -22,11 +23,11 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
     from typing import Union
 
-    from pytest import TempPathFactory
-
-    from pyk.kcfg import KCFGExplore
+    from pyk.cterm import CTermSymbolic
+    from pyk.kast.outer import KClaim
     from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprove import KProve
+    from pyk.utils import BugReport
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]
 
@@ -79,74 +80,34 @@ class CustomStepSemanticsWithStep(CustomStepSemanticsWithoutStep):
         return None
 
 
+def cterm_template(label: str) -> CTerm:
+    return CTerm(
+        KApply(
+            KLabel('<generatedTop>'),
+            [
+                KApply(
+                    KLabel('<k>'),
+                    [
+                        KSequence((KApply(KLabel(label)))),
+                    ],
+                ),
+                KApply(KLabel('<generatedCounter>'), [KVariable('GENERATEDCOUNTER_CELL', KSort(name='Int'))]),
+            ],
+        ),
+    )
+
+
 CUSTOM_STEP_TEST_DATA_APPLY: Iterable[tuple[str, CTerm, KCFGExtendResult | None]] = (
     (
         'None',
-        CTerm(
-            config=KApply(
-                label=KLabel(name='<generatedTop>', params=()),
-                args=(
-                    KApply(
-                        label=KLabel(name='<k>', params=()),
-                        args=(
-                            KSequence(
-                                items=(KApply(label=KLabel(name='a_CUSTOM-STEP-SYNTAX_Step', params=()), args=()),)
-                            ),
-                        ),
-                    ),
-                    KApply(
-                        label=KLabel(name='<generatedCounter>', params=()),
-                        args=(KVariable(name='GENERATEDCOUNTER_CELL_c84b0b5f', sort=KSort(name='Int')),),
-                    ),
-                ),
-            ),
-            constraints=(),
-        ),
+        cterm_template('a_CUSTOM-STEP-SYNTAX_Step'),
         None,
     ),
     (
         'Step',
-        CTerm(
-            config=KApply(
-                label=KLabel(name='<generatedTop>', params=()),
-                args=(
-                    KApply(
-                        label=KLabel(name='<k>', params=()),
-                        args=(
-                            KSequence(
-                                items=(KApply(label=KLabel(name='c_CUSTOM-STEP-SYNTAX_Step', params=()), args=()),)
-                            ),
-                        ),
-                    ),
-                    KApply(
-                        label=KLabel(name='<generatedCounter>', params=()),
-                        args=(KVariable(name='GENERATEDCOUNTER_CELL_c84b0b5f', sort=KSort(name='Int')),),
-                    ),
-                ),
-            ),
-            constraints=(),
-        ),
+        cterm_template('c_CUSTOM-STEP-SYNTAX_Step'),
         Step(
-            CTerm(
-                config=KApply(
-                    label=KLabel(name='<generatedTop>', params=()),
-                    args=(
-                        KApply(
-                            label=KLabel(name='<k>', params=()),
-                            args=(
-                                KSequence(
-                                    items=(KApply(label=KLabel(name='d_CUSTOM-STEP-SYNTAX_Step', params=()), args=()),)
-                                ),
-                            ),
-                        ),
-                        KApply(
-                            label=KLabel(name='<generatedCounter>', params=()),
-                            args=(KVariable(name='GENERATEDCOUNTER_CELL_c84b0b5f', sort=KSort(name='Int')),),
-                        ),
-                    ),
-                ),
-                constraints=(),
-            ),
+            cterm_template('d_CUSTOM-STEP-SYNTAX_Step'),
             1,
             (),
             ['CUSTOM-STEP.c.d'],
@@ -176,6 +137,17 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
     """
     KOMPILE_MAIN_MODULE = 'CUSTOM-STEP'
 
+    @pytest.fixture
+    def create_kcfg_explore(
+        self,
+        cterm_symbolic: CTermSymbolic,
+        bug_report: BugReport | None,
+    ) -> Callable[[KCFGSemantics], KCFGExplore]:
+        def _create_kcfg_explore(kcfg_semantics: KCFGSemantics) -> KCFGExplore:
+            return KCFGExplore(cterm_symbolic, kcfg_semantics=kcfg_semantics)
+
+        return _create_kcfg_explore
+
     @pytest.mark.parametrize(
         'test_id,cterm,expected',
         CUSTOM_STEP_TEST_DATA_APPLY,
@@ -188,6 +160,39 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         actual = kcfg_semantics.custom_step(cterm)
         # Then
         assert expected == actual
+
+    @staticmethod
+    def _run_proof(
+        kcfg_explore: KCFGExplore,
+        kprove: KProve,
+        claim: KClaim,
+        cut_rules: Iterable[str],
+        proof_dir: Path,
+        max_depth: int | None,
+        max_iterations: int | None,
+        proof_status: ProofStatus,
+    ) -> list[str]:
+        proof = APRProof.from_claim(
+            kprove.definition,
+            claim,
+            subproof_ids=[],
+            logs={},
+            proof_dir=proof_dir,
+        )
+
+        init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
+        proof.kcfg.let_node(proof.init, cterm=init_cterm)
+        kcfg_explore.simplify(proof.kcfg, {})
+        prover = APRProver(
+            kcfg_explore=kcfg_explore,
+            execute_depth=max_depth,
+            cut_point_rules=cut_rules,
+        )
+        prover.advance_proof(proof, max_iterations=max_iterations)
+
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False))
+        assert proof.status == proof_status
+        return kcfg_show.show(proof.kcfg)
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status',
@@ -206,61 +211,22 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         max_depth: int | None,
         cut_rules: Iterable[str],
         proof_status: ProofStatus,
-        tmp_path_factory: TempPathFactory,
+        tmp_path: Path,
     ) -> None:
 
-        proof_dir = tmp_path_factory.mktemp('custom_step_tmp_proofs')
+        proof_dir_a = tmp_path / 'proof_without_custom_step'
+        proof_dir_b = tmp_path / 'proof_with_custom_step'
         claim = single(
             kprove.get_claims(Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}'])
         )
         kcfg_explore_without_step = create_kcfg_explore(CustomStepSemanticsWithoutStep())
         kcfg_explore_with_step = create_kcfg_explore(CustomStepSemanticsWithStep())
 
-        proof_a = APRProof.from_claim(
-            kprove.definition,
-            claim,
-            subproof_ids=[],
-            logs={},
-            proof_dir=proof_dir,
+        cfg_proof_a = self._run_proof(
+            kcfg_explore_without_step, kprove, claim, cut_rules, proof_dir_a, max_depth, max_iterations, proof_status
         )
-        proof_b = APRProof.from_claim(
-            kprove.definition,
-            claim,
-            subproof_ids=[],
-            logs={},
-            proof_dir=proof_dir,
-        )
-        init_cterm_a = kcfg_explore_without_step.cterm_symbolic.assume_defined(proof_a.kcfg.node(proof_a.init).cterm)
-        init_cterm_b = kcfg_explore_with_step.cterm_symbolic.assume_defined(proof_b.kcfg.node(proof_b.init).cterm)
-
-        proof_a.kcfg.let_node(proof_a.init, cterm=init_cterm_a)
-        proof_b.kcfg.let_node(proof_b.init, cterm=init_cterm_b)
-
-        kcfg_explore_without_step.simplify(proof_a.kcfg, {})
-        kcfg_explore_with_step.simplify(proof_b.kcfg, {})
-
-        prover_a = APRProver(
-            kcfg_explore=kcfg_explore_without_step,
-            execute_depth=max_depth,
-            cut_point_rules=cut_rules,
-        )
-        prover_b = APRProver(
-            kcfg_explore=kcfg_explore_with_step,
-            execute_depth=max_depth,
-            cut_point_rules=cut_rules,
+        cfg_proof_b = self._run_proof(
+            kcfg_explore_with_step, kprove, claim, cut_rules, proof_dir_b, max_depth, max_iterations, proof_status
         )
 
-        prover_a.advance_proof(proof_a, max_iterations=max_iterations)
-        prover_b.advance_proof(proof_b, max_iterations=max_iterations)
-
-        kcfg_show_a = KCFGShow(
-            kprove, node_printer=APRProofNodePrinter(proof_a, kprove, full_printer=True, minimize=False)
-        )
-        kcfg_show_b = KCFGShow(
-            kprove, node_printer=APRProofNodePrinter(proof_b, kprove, full_printer=True, minimize=False)
-        )
-        cfg_lines_a = kcfg_show_a.show(proof_a.kcfg)
-        cfg_lines_b = kcfg_show_b.show(proof_b.kcfg)
-
-        assert cfg_lines_a == cfg_lines_b
-        assert proof_a.status == proof_status
+        assert cfg_proof_a == cfg_proof_b

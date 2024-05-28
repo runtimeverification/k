@@ -291,17 +291,6 @@ class CTermSymbolicTest(KoreClientTest):
     ) -> CTermSymbolic:
         return CTermSymbolic(kore_client, definition, kompiled_kore)
 
-    @pytest.fixture
-    def create_kcfg_explore(
-        self,
-        cterm_symbolic: CTermSymbolic,
-        bug_report: BugReport | None,
-    ) -> Callable[[KCFGSemantics], KCFGExplore]:
-        def _create_kcfg_explore(kcfg_semantics: KCFGSemantics) -> KCFGExplore:
-            return KCFGExplore(cterm_symbolic, kcfg_semantics=kcfg_semantics)
-
-        return _create_kcfg_explore
-
 
 class KCFGExploreTest(CTermSymbolicTest):
     @abstractmethod
