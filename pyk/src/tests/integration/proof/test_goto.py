@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
+    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprove import KProve
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -42,6 +43,9 @@ class GotoSemantics(KCFGSemantics):
         if pc_cell_1 == pc_cell_2 and type(k_cell) is KSequence and len(k_cell) > 0 and type(k_cell[0]) is KApply:
             return k_cell[0].label.name == 'jumpi'
         return False
+
+    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        return None
 
 
 APRBMC_PROVE_TEST_DATA: Iterable[

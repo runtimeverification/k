@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
+    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprove import KProve
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]
@@ -61,6 +62,9 @@ class RefuteSemantics(KCFGSemantics):
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         return False
+
+    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        return None
 
 
 REFUTE_NODE_TEST_DATA: Iterable[tuple[str, Iterable[KInner], ProofStatus]] = (
