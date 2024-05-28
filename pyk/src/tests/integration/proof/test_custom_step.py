@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable
+from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kast.manip import set_cell
 from pyk.kcfg import KCFGExplore
 from pyk.kcfg.kcfg import Step
@@ -83,16 +83,9 @@ class CustomStepSemanticsWithStep(CustomStepSemanticsWithoutStep):
 def cterm_template(label: str) -> CTerm:
     return CTerm(
         KApply(
-            KLabel('<generatedTop>'),
-            [
-                KApply(
-                    KLabel('<k>'),
-                    [
-                        KSequence(KApply(KLabel(label))),
-                    ],
-                ),
-                KApply(KLabel('<generatedCounter>'), [KVariable('GENERATEDCOUNTER_CELL', KSort(name='Int'))]),
-            ],
+            '<generatedTop>',
+            KApply('<k>', KSequence(KApply(label))),
+            KApply('<generatedCounter>', KVariable('GENERATEDCOUNTER_CELL', 'Int')),
         ),
     )
 
@@ -161,39 +154,6 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         # Then
         assert expected == actual
 
-    @staticmethod
-    def _run_proof(
-        kcfg_explore: KCFGExplore,
-        kprove: KProve,
-        claim: KClaim,
-        cut_rules: Iterable[str],
-        proof_dir: Path,
-        max_depth: int | None,
-        max_iterations: int | None,
-        proof_status: ProofStatus,
-    ) -> list[str]:
-        proof = APRProof.from_claim(
-            kprove.definition,
-            claim,
-            subproof_ids=[],
-            logs={},
-            proof_dir=proof_dir,
-        )
-
-        init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
-        proof.kcfg.let_node(proof.init, cterm=init_cterm)
-        kcfg_explore.simplify(proof.kcfg, {})
-        prover = APRProver(
-            kcfg_explore=kcfg_explore,
-            execute_depth=max_depth,
-            cut_point_rules=cut_rules,
-        )
-        prover.advance_proof(proof, max_iterations=max_iterations)
-
-        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False))
-        assert proof.status == proof_status
-        return kcfg_show.show(proof.kcfg)
-
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status',
         CUSTOM_STEP_TEST_DATA,
@@ -222,11 +182,43 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         kcfg_explore_without_step = create_kcfg_explore(CustomStepSemanticsWithoutStep())
         kcfg_explore_with_step = create_kcfg_explore(CustomStepSemanticsWithStep())
 
-        cfg_proof_a = self._run_proof(
-            kcfg_explore_without_step, kprove, claim, cut_rules, proof_dir_a, max_depth, max_iterations, proof_status
+        proof_status_a, cfg_proof_a = self._run_proof(
+            kcfg_explore_without_step, kprove, claim, cut_rules, proof_dir_a, max_depth, max_iterations
         )
-        cfg_proof_b = self._run_proof(
-            kcfg_explore_with_step, kprove, claim, cut_rules, proof_dir_b, max_depth, max_iterations, proof_status
+        _, cfg_proof_b = self._run_proof(
+            kcfg_explore_with_step, kprove, claim, cut_rules, proof_dir_b, max_depth, max_iterations
         )
 
+        assert proof_status_a == proof_status
         assert cfg_proof_a == cfg_proof_b
+
+    @staticmethod
+    def _run_proof(
+        kcfg_explore: KCFGExplore,
+        kprove: KProve,
+        claim: KClaim,
+        cut_rules: Iterable[str],
+        proof_dir: Path,
+        max_depth: int | None,
+        max_iterations: int | None,
+    ) -> tuple[ProofStatus, list[str]]:
+
+        proof = APRProof.from_claim(
+            kprove.definition,
+            claim,
+            subproof_ids=[],
+            logs={},
+            proof_dir=proof_dir,
+        )
+        init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
+        proof.kcfg.let_node(proof.init, cterm=init_cterm)
+        kcfg_explore.simplify(proof.kcfg, {})
+        prover = APRProver(
+            kcfg_explore=kcfg_explore,
+            execute_depth=max_depth,
+            cut_point_rules=cut_rules,
+        )
+        prover.advance_proof(proof, max_iterations=max_iterations)
+
+        kcfg_show = KCFGShow(kprove, node_printer=APRProofNodePrinter(proof, kprove, full_printer=True, minimize=False))
+        return proof.status, kcfg_show.show(proof.kcfg)
