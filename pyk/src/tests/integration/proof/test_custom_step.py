@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KSequence
+from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable
 from pyk.kast.manip import set_cell
 from pyk.kcfg.kcfg import Step
 from pyk.kcfg.semantics import KCFGSemantics
@@ -81,11 +81,101 @@ class CustomStepSemanticsWithStep(CustomStepSemanticsWithoutStep):
         return None
 
 
+CUSTOM_STEP_TEST_DATA_APPLY: Iterable[tuple[str, CTerm, KCFGExtendResult | None]] = (
+    (
+        'None',
+        CTerm(
+            config=KApply(
+                label=KLabel(name='<generatedTop>', params=()),
+                args=(
+                    KApply(
+                        label=KLabel(name='<k>', params=()),
+                        args=(
+                            KSequence(
+                                items=(KApply(label=KLabel(name='a_CUSTOM-STEP-SYNTAX_Step', params=()), args=()),)
+                            ),
+                        ),
+                    ),
+                    KApply(
+                        label=KLabel(name='<generatedCounter>', params=()),
+                        args=(KVariable(name='GENERATEDCOUNTER_CELL_c84b0b5f', sort=KSort(name='Int')),),
+                    ),
+                ),
+            ),
+            constraints=(),
+        ),
+        None,
+    ),
+    (
+        'Step',
+        CTerm(
+            config=KApply(
+                label=KLabel(name='<generatedTop>', params=()),
+                args=(
+                    KApply(
+                        label=KLabel(name='<k>', params=()),
+                        args=(
+                            KSequence(
+                                items=(KApply(label=KLabel(name='c_CUSTOM-STEP-SYNTAX_Step', params=()), args=()),)
+                            ),
+                        ),
+                    ),
+                    KApply(
+                        label=KLabel(name='<generatedCounter>', params=()),
+                        args=(KVariable(name='GENERATEDCOUNTER_CELL_c84b0b5f', sort=KSort(name='Int')),),
+                    ),
+                ),
+            ),
+            constraints=(),
+        ),
+        Step(
+            CTerm(
+                config=KApply(
+                    label=KLabel(name='<generatedTop>', params=()),
+                    args=(
+                        KApply(
+                            label=KLabel(name='<k>', params=()),
+                            args=(
+                                KSequence(
+                                    items=(KApply(label=KLabel(name='d_CUSTOM-STEP-SYNTAX_Step', params=()), args=()),)
+                                ),
+                            ),
+                        ),
+                        KApply(
+                            label=KLabel(name='<generatedCounter>', params=()),
+                            args=(KVariable(name='GENERATEDCOUNTER_CELL_c84b0b5f', sort=KSort(name='Int')),),
+                        ),
+                    ),
+                ),
+                constraints=(),
+            ),
+            1,
+            (),
+            ['CUSTOM-STEP.c.d'],
+            cut=True,
+        ),
+    ),
+)
+
+
 class TestCustomStep(KCFGExploreTest, KProveTest):
     KOMPILE_MAIN_FILE = K_FILES / 'custom-step.k'
 
     # Disabled until resolved: https://github.com/runtimeverification/haskell-backend/issues/3761
     DISABLE_LEGACY = True
+
+    @pytest.mark.parametrize(
+        'test_id,c,e',
+        CUSTOM_STEP_TEST_DATA_APPLY,
+        ids=[test_id for test_id, *_ in CUSTOM_STEP_TEST_DATA_APPLY],
+    )
+    def test_custom_step_exec(self, test_id: str, c: CTerm, e: KCFGExtendResult | None) -> None:
+
+        # When
+        kcfg_semantics = CustomStepSemanticsWithStep()
+        result = kcfg_semantics.custom_step(c)
+        # Then
+        assert e == result
 
     @pytest.mark.parametrize(
         'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status',
