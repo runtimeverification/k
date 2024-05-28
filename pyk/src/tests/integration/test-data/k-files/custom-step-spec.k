@@ -1,5 +1,3 @@
-requires "custom-step.k"
-
 module CUSTOM-STEP-SPEC
     imports CUSTOM-STEP
 
