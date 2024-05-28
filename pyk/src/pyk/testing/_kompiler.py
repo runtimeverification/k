@@ -305,6 +305,17 @@ class KCFGExploreTest(CTermSymbolicTest):
         semantics = self.semantics(cterm_symbolic._definition)
         yield KCFGExplore(cterm_symbolic, kcfg_semantics=semantics)
 
+    @pytest.fixture
+    def create_kcfg_explore(
+        self,
+        cterm_symbolic: CTermSymbolic,
+        bug_report: BugReport | None,
+    ) -> Callable[[KCFGSemantics], KCFGExplore]:
+        def _create_kcfg_explore(kcfg_semantics: KCFGSemantics) -> KCFGExplore:
+            return KCFGExplore(cterm_symbolic, kcfg_semantics=kcfg_semantics)
+
+        return _create_kcfg_explore
+
 
 class ParallelTest(KoreServerTest, ABC):
     CLIENT_TIMEOUT: ClassVar = 1000
