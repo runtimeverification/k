@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
+    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprove import KProve
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -34,6 +35,9 @@ class SimpleSemantics(KCFGSemantics):
 
     def same_loop(self, c1: CTerm, c2: CTerm) -> bool:
         return False
+
+    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        return None
 
 
 class TestSimpleProof(KCFGExploreTest, KProveTest):
