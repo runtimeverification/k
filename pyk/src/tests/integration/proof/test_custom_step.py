@@ -88,7 +88,7 @@ def cterm_template(label: str) -> CTerm:
                 KApply(
                     KLabel('<k>'),
                     [
-                        KSequence((KApply(KLabel(label)))),
+                        KSequence(KApply(KLabel(label))),
                     ],
                 ),
                 KApply(KLabel('<generatedCounter>'), [KVariable('GENERATEDCOUNTER_CELL', KSort(name='Int'))]),
