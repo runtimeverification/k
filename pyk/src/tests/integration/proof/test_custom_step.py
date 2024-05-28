@@ -33,9 +33,9 @@ if TYPE_CHECKING:
 
 _LOGGER: Final = logging.getLogger(__name__)
 
-CUSTOM_STEP_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None, Iterable[str], ProofStatus, int]] = (
+CUSTOM_STEP_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None, Iterable[str], ProofStatus]] = (
     (
-        'check-custom-step',
+        'a-to-d',
         K_FILES / 'custom-step-spec.k',
         'CUSTOM-STEP-SPEC',
         'a-to-d',
@@ -43,7 +43,6 @@ CUSTOM_STEP_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | Non
         4,
         ['CUSTOM-STEP.c.d'],
         ProofStatus.PASSED,
-        1,
     ),
 )
 
@@ -89,11 +88,11 @@ class TestCustomStep(KCFGExploreTest, KProveTest):
     DISABLE_LEGACY = True
 
     @pytest.mark.parametrize(
-        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status,expected_leaf_number',
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,cut_rules,proof_status',
         CUSTOM_STEP_TEST_DATA,
         ids=[test_id for test_id, *_ in CUSTOM_STEP_TEST_DATA],
     )
-    def test_custom_step_new(
+    def test_cfg_equality(
         self,
         kprove: KProve,
         create_kcfg_explore: Callable[[KCFGSemantics], KCFGExplore],
@@ -105,10 +104,8 @@ class TestCustomStep(KCFGExploreTest, KProveTest):
         max_depth: int | None,
         cut_rules: Iterable[str],
         proof_status: ProofStatus,
-        expected_leaf_number: int,
         tmp_path_factory: TempPathFactory,
     ) -> None:
-        global skip_custom_step
 
         with tmp_path_factory.mktemp('custom_step_tmp_proofs') as proof_dir:
             claim = single(
