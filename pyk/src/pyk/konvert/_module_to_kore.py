@@ -723,7 +723,6 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         DiscardSymbolAtts(
             [
                 Atts.ASSOC,
-                Atts.CELL,
                 Atts.CELL_FRAGMENT,
                 Atts.CELL_NAME,
                 Atts.CELL_OPT_ABSENT,
