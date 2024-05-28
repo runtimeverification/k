@@ -225,7 +225,7 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
             )
             prover1.advance_proof(proof1, max_iterations=max_iterations)
 
-            new_init_cterm2 = kcfg_explore.cterm_symbolic.assume_defined(proof1.kcfg.node(proof1.init).cterm)
+            new_init_cterm2 = kcfg_explore.cterm_symbolic.assume_defined(proof2.kcfg.node(proof2.init).cterm)
             proof2.kcfg.let_node(proof2.init, cterm=new_init_cterm2)
             kcfg_explore.simplify(proof2.kcfg, {})
 
