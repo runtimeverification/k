@@ -41,6 +41,7 @@ TEST_DATA: Final[tuple[tuple[str, list[Token]], ...]] = (
     ('?Foo', [Token('?Foo', TT.VARIABLE)]),
     ('_Foo', [Token('_Foo', TT.VARIABLE)]),
     ('?_Foo', [Token('?_Foo', TT.VARIABLE)]),
+    ('X:Int', [Token('X', TT.VARIABLE), Token(':', TT.COLON), Token('Int', TT.SORT)]),
     (
         '`_+_`(#token("1", "Int"), X)',
         [

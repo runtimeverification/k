@@ -21,6 +21,7 @@ class TokenType(Enum):
     TOKEN = auto()
     ID = auto()
     VARIABLE = auto()
+    SORT = auto()
     KLABEL = auto()
     STRING = auto()
 
@@ -30,7 +31,13 @@ class Token(NamedTuple):
     type: TokenType
 
 
+class State(Enum):
+    DEFAULT = auto()
+    SORT = auto()
+
+
 def lexer(text: Iterable[str]) -> Iterator[Token]:
+    state = State.DEFAULT
     it = iter(text)
     la = next(it, '')
     while True:
@@ -42,11 +49,12 @@ def lexer(text: Iterable[str]) -> Iterator[Token]:
             return
 
         try:
-            sublexer = _SUBLEXER[la]
+            sublexer = _SUBLEXER[state][la]
         except KeyError:
             raise _unexpected_char(la) from None
 
         token, la = sublexer(la, it)
+        state = _STATE.get(token.type, State.DEFAULT)
         yield token
 
 
@@ -69,6 +77,7 @@ _TOKENS: Final = {
 _DIGIT: Final = set('0123456789')
 _LOWER: Final = set('abcdefghijklmnopqrstuvwxyz')
 _UPPER: Final = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+_ALNUM: Final = set.union(_DIGIT, _LOWER, _UPPER)
 
 
 _UNEXPECTED_EOF: Final = ValueError('Unexpected end of file')
@@ -217,15 +226,34 @@ def _dotk_or_dotklist(la: str, it: Iterator[str]) -> tuple[Token, str]:
     raise _unexpected_char(la)
 
 
-_SUBLEXER: Final[dict[str, SubLexer]] = {
-    '(': _simple(_TOKENS[TokenType.LPAREN]),
-    ')': _simple(_TOKENS[TokenType.RPAREN]),
-    ',': _simple(_TOKENS[TokenType.COMMA]),
-    ':': _simple(_TOKENS[TokenType.COLON]),
-    '"': _delimited('"', TokenType.STRING),
-    '`': _delimited('`', TokenType.KLABEL),
-    '~': _kseq,
-    '.': _dotk_or_dotklist,
-    **{c: _id_or_token for c in {'#'}.union(_LOWER)},
-    **{c: _variable for c in {'?', '_'}.union(_UPPER)},
+def _sort(la: str, it: Iterator[str]) -> tuple[Token, str]:
+    assert la in _UPPER
+    buf = [la]
+    la = next(it, '')
+    while la in _ALNUM:
+        buf.append(la)
+        la = next(it, '')
+    text = ''.join(buf)
+    return Token(text, TokenType.SORT), la
+
+
+_SUBLEXER: Final[dict[State, dict[str, SubLexer]]] = {
+    State.DEFAULT: {
+        '(': _simple(_TOKENS[TokenType.LPAREN]),
+        ')': _simple(_TOKENS[TokenType.RPAREN]),
+        ',': _simple(_TOKENS[TokenType.COMMA]),
+        ':': _simple(_TOKENS[TokenType.COLON]),
+        '"': _delimited('"', TokenType.STRING),
+        '`': _delimited('`', TokenType.KLABEL),
+        '~': _kseq,
+        '.': _dotk_or_dotklist,
+        **{c: _id_or_token for c in {'#'}.union(_LOWER)},
+        **{c: _variable for c in {'?', '_'}.union(_UPPER)},
+    },
+    State.SORT: {c: _sort for c in _UPPER},
+}
+
+
+_STATE: Final[dict[TokenType, State]] = {
+    TokenType.COLON: State.SORT,
 }
