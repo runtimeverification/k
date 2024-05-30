@@ -378,6 +378,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             proof_dir=proof_dir,
             circularity=claim.is_circularity,
             admitted=claim.is_trusted,
+            subproof_ids=claim.dependencies,
             **kwargs,
         )
 
