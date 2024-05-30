@@ -32,7 +32,15 @@ TEST_DATA: Final[tuple[tuple[str, list[Token]], ...]] = (
     ('#token', [Token('#token', TT.TOKEN)]),
     ('fO0', [Token('fO0', TT.ID)]),
     ('_', [Token('_', TT.VARIABLE)]),
-    ('A', [Token('A', TT.VARIABLE)]),
+    ('?_', [Token('?_', TT.VARIABLE)]),
+    ('X', [Token('X', TT.VARIABLE)]),
+    ('?X', [Token('?X', TT.VARIABLE)]),
+    ('_X', [Token('_X', TT.VARIABLE)]),
+    ('?_X', [Token('?_X', TT.VARIABLE)]),
+    ('Foo', [Token('Foo', TT.VARIABLE)]),
+    ('?Foo', [Token('?Foo', TT.VARIABLE)]),
+    ('_Foo', [Token('_Foo', TT.VARIABLE)]),
+    ('?_Foo', [Token('?_Foo', TT.VARIABLE)]),
     (
         '`_+_`(#token("1", "Int"), X)',
         [

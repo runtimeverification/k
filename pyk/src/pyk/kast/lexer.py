@@ -151,13 +151,40 @@ _VARIABLE_CHARS: Final = set.union(_LOWER, _UPPER, _DIGIT, set("'_"))
 
 
 def _variable(la: str, it: Iterator[str]) -> tuple[Token, str]:
-    """_ | [A-Z][a-zA-Z0-9'_]*
+    r"""_ | \?_ | \??_?[A-Z][a-zA-Z0-9'_]*"""
+    assert la == '?' or la == '_' or la in _UPPER
 
-    '_' is handled in a separate function.
-    """
-    assert la in _UPPER
+    # States:
+    # 0: expect '_' or _UPPER
+    # 1: coninue if _UPPER
+    # 2: read while _VARIABLE_CHARS
+    state = {'?': 0, '_': 1}.get(la, 2)
+
     buf = [la]
     la = next(it, '')
+
+    if state == 0:
+        if la == '_':
+            state = 1
+        elif la in _UPPER:
+            state = 2
+        else:
+            raise _unexpected_char(la)
+
+        buf += la
+        la = next(it, '')
+
+    if state == 1:
+        if la in _UPPER:
+            buf += la
+            la = next(it, '')
+            state = 2
+        else:
+            la = next(it, '')
+            text = ''.join(buf)
+            return Token(text, TokenType.VARIABLE), la
+
+    assert state == 2
     while la in _VARIABLE_CHARS:
         buf += la
         la = next(it, '')
@@ -192,11 +219,10 @@ _SUBLEXER: Final[dict[str, SubLexer]] = {
     '(': _simple(_TOKENS[TokenType.LPAREN]),
     ')': _simple(_TOKENS[TokenType.RPAREN]),
     ',': _simple(_TOKENS[TokenType.COMMA]),
-    '_': _simple(Token('_', TokenType.VARIABLE)),
     '"': _delimited('"', TokenType.STRING),
     '`': _delimited('`', TokenType.KLABEL),
     '~': _kseq,
     '.': _dotk_or_dotklist,
     **{c: _id_or_token for c in {'#'}.union(_LOWER)},
-    **{c: _variable for c in _UPPER},
+    **{c: _variable for c in {'?', '_'}.union(_UPPER)},
 }
