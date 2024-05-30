@@ -32,6 +32,7 @@ from .inner import (
     top_down,
 )
 from .kast import kast_term
+from .rewrite import indexed_rewrite
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
@@ -1586,14 +1587,10 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         else:
             raise ValueError(f'Cannot handle initializer for label: {prod_klabel}')
 
-        init_rewrites = [rule.body for rule in self.rules if Atts.INITIALIZER in rule.att]
-        old_init_config: KInner | None = None
-        while init_config != old_init_config:
-            old_init_config = init_config
-            for rew in init_rewrites:
-                assert type(rew) is KRewrite
-                init_config = rew(init_config)
-
+        init_rewrites = [
+            rule.body for rule in self.rules if Atts.INITIALIZER in rule.att and type(rule.body) is KRewrite
+        ]
+        init_config = indexed_rewrite(init_config, init_rewrites)
         init_config = top_down(_remove_config_var_lookups, init_config)
 
         return init_config
