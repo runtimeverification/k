@@ -51,8 +51,12 @@ class KAstParser:
         type_str = ', '.join(typ.name for typ in types)
         return ValueError(f'Unexpected token: {token.text!r}. Expected one of: {type_str}')
 
+    def eof(self) -> bool:
+        return self._la.type is TT.EOF
+
     def k(self) -> KInner:
         if self._la.type is TT.DOTK:
+            self._consume()
             return KSequence()
 
         items = [self.kitem()]

@@ -36,4 +36,5 @@ def test_parser(text: str, expected: KInner) -> None:
     actual = parser.k()
 
     # Then
+    assert parser.eof()
     assert actual == expected
