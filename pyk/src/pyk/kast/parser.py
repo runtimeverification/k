@@ -72,9 +72,12 @@ class KAstParser:
     def kitem(self) -> KInner:
         match self._la.type:
             case TT.VARIABLE:
-                res = KVariable(self._la.text)
-                self._consume()
-                return res
+                name = self._consume()
+                sort: str | None = None
+                if self._la.type is TT.COLON:
+                    self._consume()
+                    sort = self._match(TT.SORT)
+                return KVariable(name, sort)
 
             case TT.TOKEN:
                 self._consume()
