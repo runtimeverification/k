@@ -14,6 +14,7 @@ class TokenType(Enum):
     LPAREN = auto()
     RPAREN = auto()
     COMMA = auto()
+    COLON = auto()
     KSEQ = auto()
     DOTK = auto()
     DOTKLIST = auto()
@@ -56,6 +57,7 @@ _TOKENS: Final = {
         (TokenType.LPAREN, '('),
         (TokenType.RPAREN, ')'),
         (TokenType.COMMA, ','),
+        (TokenType.COLON, ':'),
         (TokenType.KSEQ, '~>'),
         (TokenType.DOTK, '.K'),
         (TokenType.DOTKLIST, '.KList'),
@@ -195,7 +197,7 @@ def _variable(la: str, it: Iterator[str]) -> tuple[Token, str]:
 # For ease of implementation, KDOT and KDOTLIST tokens are read until _SEP
 # This allows LA(1)
 # But e.g. .KA won't be lexed, even though it can be read as [KDOT, VARIABLE]
-_SEP: Final = set(',()`"#.~ \t\r\n').union({''})
+_SEP: Final = set(',:()`"#.~ \t\r\n').union({''})
 
 
 def _dotk_or_dotklist(la: str, it: Iterator[str]) -> tuple[Token, str]:
@@ -219,6 +221,7 @@ _SUBLEXER: Final[dict[str, SubLexer]] = {
     '(': _simple(_TOKENS[TokenType.LPAREN]),
     ')': _simple(_TOKENS[TokenType.RPAREN]),
     ',': _simple(_TOKENS[TokenType.COMMA]),
+    ':': _simple(_TOKENS[TokenType.COLON]),
     '"': _delimited('"', TokenType.STRING),
     '`': _delimited('`', TokenType.KLABEL),
     '~': _kseq,
