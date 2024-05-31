@@ -320,8 +320,8 @@ class KCLIArgs:
     @cached_property
     def logging_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
-        args.add_argument('--verbose', '-v', action='store_true', help='Verbose output.')
-        args.add_argument('--debug', action='store_true', help='Debug output.')
+        args.add_argument('--verbose', '-v', default=None, action='store_true', help='Verbose output.')
+        args.add_argument('--debug', default=None, action='store_true', help='Debug output.')
         return args
 
     @cached_property
@@ -338,6 +338,7 @@ class KCLIArgs:
             '--warnings_to_errors',
             '-w2e',
             dest='warnings_to_errors',
+            default=None,
             action='store_true',
             help='Turn warnings into errors (no effect on pyk, only subcommands).',
         )
@@ -381,6 +382,7 @@ class KCLIArgs:
         args.add_argument(
             '--emit-json',
             dest='emit_json',
+            default=None,
             action='store_true',
             help='Emit JSON definition after compilation.',
         )
@@ -393,18 +395,21 @@ class KCLIArgs:
         args.add_argument(
             '--no-llvm-kompile',
             dest='llvm_kompile',
+            default=None,
             action='store_false',
             help='Do not run llvm-kompile process.',
         )
         args.add_argument(
             '--with-llvm-library',
             dest='llvm_library',
+            default=None,
             action='store_true',
             help='Make kompile generate a dynamic llvm library.',
         )
         args.add_argument(
             '--enable-llvm-debug',
             dest='enable_llvm_debug',
+            default=None,
             action='store_true',
             help='Make kompile generate debug symbols for llvm.',
         )
@@ -413,52 +418,60 @@ class KCLIArgs:
         args.add_argument(
             '--read-only-kompiled-directory',
             dest='read_only',
+            default=None,
             action='store_true',
             help='Generated a kompiled directory that K will not attempt to write to afterwards.',
         )
-        args.add_argument('-O0', dest='o0', action='store_true', help='Optimization level 0.')
-        args.add_argument('-O1', dest='o1', action='store_true', help='Optimization level 1.')
-        args.add_argument('-O2', dest='o2', action='store_true', help='Optimization level 2.')
-        args.add_argument('-O3', dest='o3', action='store_true', help='Optimization level 3.')
+        args.add_argument('-O0', dest='o0', default=None, action='store_true', help='Optimization level 0.')
+        args.add_argument('-O1', dest='o1', default=None, action='store_true', help='Optimization level 1.')
+        args.add_argument('-O2', dest='o2', default=None, action='store_true', help='Optimization level 2.')
+        args.add_argument('-O3', dest='o3', default=None, action='store_true', help='Optimization level 3.')
         args.add_argument(
             '--enable-search',
             dest='enable_search',
+            default=None,
             action='store_true',
             help='Enable search mode on LLVM backend krun.',
         )
         args.add_argument(
             '--coverage',
             dest='coverage',
+            default=None,
             action='store_true',
             help='Enable logging semantic rule coverage measurement.',
         )
         args.add_argument(
             '--gen-bison-parser',
             dest='gen_bison_parser',
+            default=None,
             action='store_true',
             help='Generate standalone Bison parser for program sort.',
         )
         args.add_argument(
             '--gen-glr-bison-parser',
             dest='gen_glr_bison_parser',
+            default=None,
             action='store_true',
             help='Generate standalone GLR Bison parser for program sort.',
         )
         args.add_argument(
             '--bison-lists',
             dest='bison_lists',
+            default=None,
             action='store_true',
             help='Disable List{Sort} parsing to make grammar LR(1) for Bison parser.',
         )
         args.add_argument(
             '--llvm-proof-hint-instrumentation',
             dest='llvm_proof_hint_instrumentation',
+            default=None,
             action='store_true',
             help='Enable proof hint generation in LLVM backend kompilation.',
         )
         args.add_argument(
             '--no-exc-wrap',
             dest='no_exc_wrap',
+            default=None,
             action='store_true',
             help='Do not wrap the output on the CLI.',
         )
@@ -485,8 +498,10 @@ class KCLIArgs:
     @cached_property
     def display_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
-        args.add_argument('--minimize', dest='minimize', action='store_true', help='Minimize output.')
-        args.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize output.')
+        args.add_argument('--minimize', dest='minimize', default=None, action='store_true', help='Minimize output.')
+        args.add_argument(
+            '--no-minimize', dest='minimize', default=None, action='store_false', help='Do not minimize output.'
+        )
         return args
 
     @cached_property
