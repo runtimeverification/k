@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
+    from pyk.kcfg.kcfg import KCFGExtendResult
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
     from pyk.proof import Prover
@@ -72,6 +73,9 @@ class ImpSemantics(KCFGSemantics):
         if k_cell_1 == k_cell_2 and type(k_cell_1) is KSequence and type(k_cell_1[0]) is KApply:
             return k_cell_1[0].label.name == 'while(_)_'
         return False
+
+    def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
+        return None
 
 
 EMPTY_STATES: Final[list[tuple[str, str]]] = []
