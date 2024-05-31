@@ -167,7 +167,7 @@ def _variable(la: str, it: Iterator[str]) -> tuple[Token, str]:
 
     # States:
     # 0: expect '_' or _UPPER
-    # 1: coninue if _UPPER
+    # 1: continue if _UPPER
     # 2: read while _VARIABLE_CHARS
     state = {'?': 0, '_': 1}.get(la, 2)
 
