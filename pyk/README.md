@@ -1,6 +1,6 @@
 # pyk
 
-[API documentation](https://runtimeverification.github.io/pyk/)
+[API documentation](https://kframework.org/pyk/)
 
 
 ## Installation
