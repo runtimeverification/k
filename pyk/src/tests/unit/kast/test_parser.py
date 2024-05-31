@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 TEST_DATA: Final = (
     ('_', KVariable('_')),
     ('X', KVariable('X')),
+    ('X:Int', KVariable('X', 'Int')),
     ('#token("1", "Int")', KToken('1', 'Int')),
     (r'#token("\"foo\"", "String")', KToken('"foo"', 'String')),
     ('.K', KSequence()),
@@ -36,4 +37,5 @@ def test_parser(text: str, expected: KInner) -> None:
     actual = parser.k()
 
     # Then
+    assert parser.eof()
     assert actual == expected

@@ -51,8 +51,12 @@ class KAstParser:
         type_str = ', '.join(typ.name for typ in types)
         return ValueError(f'Unexpected token: {token.text!r}. Expected one of: {type_str}')
 
+    def eof(self) -> bool:
+        return self._la.type is TT.EOF
+
     def k(self) -> KInner:
         if self._la.type is TT.DOTK:
+            self._consume()
             return KSequence()
 
         items = [self.kitem()]
@@ -68,9 +72,12 @@ class KAstParser:
     def kitem(self) -> KInner:
         match self._la.type:
             case TT.VARIABLE:
-                res = KVariable(self._la.text)
-                self._consume()
-                return res
+                name = self._consume()
+                sort: str | None = None
+                if self._la.type is TT.COLON:
+                    self._consume()
+                    sort = self._match(TT.SORT)
+                return KVariable(name, sort)
 
             case TT.TOKEN:
                 self._consume()

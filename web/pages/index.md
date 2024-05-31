@@ -21,7 +21,7 @@ call/cc.
 ## K Tool Download
 
 - Install from the latest [K GitHub Release](https://github.com/runtimeverification/k/releases/latest).
-- Install [pyk](https://github.com/runtimeverification/pyk), K's scripting interface for Python. Check the [API documentation](https://runtimeverification.github.io/pyk/) for a complete reference of supported features.
+- Install [pyk](https://github.com/runtimeverification/k/tree/master/pyk), K's scripting interface for Python. Check the [API documentation](https://kframework.org/pyk/) for a complete reference of supported features.
 - Try our [Editor Support](./editor_support.md) page for links to K syntax highlighting definitions for various popular editors/IDEs. Please feel free to contribute.
 - Build or browse the code [on GitHub](https://github.com/runtimeverification/k), where you can also [report bugs](http://github.com/runtimeverification/k/issues).
 
