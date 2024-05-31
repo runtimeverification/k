@@ -14,12 +14,14 @@ class TokenType(Enum):
     LPAREN = auto()
     RPAREN = auto()
     COMMA = auto()
+    COLON = auto()
     KSEQ = auto()
     DOTK = auto()
     DOTKLIST = auto()
     TOKEN = auto()
     ID = auto()
     VARIABLE = auto()
+    SORT = auto()
     KLABEL = auto()
     STRING = auto()
 
@@ -29,7 +31,13 @@ class Token(NamedTuple):
     type: TokenType
 
 
+class State(Enum):
+    DEFAULT = auto()
+    SORT = auto()
+
+
 def lexer(text: Iterable[str]) -> Iterator[Token]:
+    state = State.DEFAULT
     it = iter(text)
     la = next(it, '')
     while True:
@@ -41,11 +49,12 @@ def lexer(text: Iterable[str]) -> Iterator[Token]:
             return
 
         try:
-            sublexer = _SUBLEXER[la]
+            sublexer = _SUBLEXER[state][la]
         except KeyError:
             raise _unexpected_char(la) from None
 
         token, la = sublexer(la, it)
+        state = _STATE.get(token.type, State.DEFAULT)
         yield token
 
 
@@ -56,6 +65,7 @@ _TOKENS: Final = {
         (TokenType.LPAREN, '('),
         (TokenType.RPAREN, ')'),
         (TokenType.COMMA, ','),
+        (TokenType.COLON, ':'),
         (TokenType.KSEQ, '~>'),
         (TokenType.DOTK, '.K'),
         (TokenType.DOTKLIST, '.KList'),
@@ -67,6 +77,7 @@ _TOKENS: Final = {
 _DIGIT: Final = set('0123456789')
 _LOWER: Final = set('abcdefghijklmnopqrstuvwxyz')
 _UPPER: Final = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+_ALNUM: Final = set.union(_DIGIT, _LOWER, _UPPER)
 
 
 _UNEXPECTED_EOF: Final = ValueError('Unexpected end of file')
@@ -151,13 +162,40 @@ _VARIABLE_CHARS: Final = set.union(_LOWER, _UPPER, _DIGIT, set("'_"))
 
 
 def _variable(la: str, it: Iterator[str]) -> tuple[Token, str]:
-    """_ | [A-Z][a-zA-Z0-9'_]*
+    r"""_ | \?_ | \??_?[A-Z][a-zA-Z0-9'_]*"""
+    assert la == '?' or la == '_' or la in _UPPER
 
-    '_' is handled in a separate function.
-    """
-    assert la in _UPPER
+    # States:
+    # 0: expect '_' or _UPPER
+    # 1: continue if _UPPER
+    # 2: read while _VARIABLE_CHARS
+    state = {'?': 0, '_': 1}.get(la, 2)
+
     buf = [la]
     la = next(it, '')
+
+    if state == 0:
+        if la == '_':
+            state = 1
+        elif la in _UPPER:
+            state = 2
+        else:
+            raise _unexpected_char(la)
+
+        buf += la
+        la = next(it, '')
+
+    if state == 1:
+        if la in _UPPER:
+            buf += la
+            la = next(it, '')
+            state = 2
+        else:
+            la = next(it, '')
+            text = ''.join(buf)
+            return Token(text, TokenType.VARIABLE), la
+
+    assert state == 2
     while la in _VARIABLE_CHARS:
         buf += la
         la = next(it, '')
@@ -168,7 +206,7 @@ def _variable(la: str, it: Iterator[str]) -> tuple[Token, str]:
 # For ease of implementation, KDOT and KDOTLIST tokens are read until _SEP
 # This allows LA(1)
 # But e.g. .KA won't be lexed, even though it can be read as [KDOT, VARIABLE]
-_SEP: Final = set(',()`"#.~ \t\r\n').union({''})
+_SEP: Final = set(',:()`"#.~ \t\r\n').union({''})
 
 
 def _dotk_or_dotklist(la: str, it: Iterator[str]) -> tuple[Token, str]:
@@ -188,15 +226,34 @@ def _dotk_or_dotklist(la: str, it: Iterator[str]) -> tuple[Token, str]:
     raise _unexpected_char(la)
 
 
-_SUBLEXER: Final[dict[str, SubLexer]] = {
-    '(': _simple(_TOKENS[TokenType.LPAREN]),
-    ')': _simple(_TOKENS[TokenType.RPAREN]),
-    ',': _simple(_TOKENS[TokenType.COMMA]),
-    '_': _simple(Token('_', TokenType.VARIABLE)),
-    '"': _delimited('"', TokenType.STRING),
-    '`': _delimited('`', TokenType.KLABEL),
-    '~': _kseq,
-    '.': _dotk_or_dotklist,
-    **{c: _id_or_token for c in {'#'}.union(_LOWER)},
-    **{c: _variable for c in _UPPER},
+def _sort(la: str, it: Iterator[str]) -> tuple[Token, str]:
+    assert la in _UPPER
+    buf = [la]
+    la = next(it, '')
+    while la in _ALNUM:
+        buf.append(la)
+        la = next(it, '')
+    text = ''.join(buf)
+    return Token(text, TokenType.SORT), la
+
+
+_SUBLEXER: Final[dict[State, dict[str, SubLexer]]] = {
+    State.DEFAULT: {
+        '(': _simple(_TOKENS[TokenType.LPAREN]),
+        ')': _simple(_TOKENS[TokenType.RPAREN]),
+        ',': _simple(_TOKENS[TokenType.COMMA]),
+        ':': _simple(_TOKENS[TokenType.COLON]),
+        '"': _delimited('"', TokenType.STRING),
+        '`': _delimited('`', TokenType.KLABEL),
+        '~': _kseq,
+        '.': _dotk_or_dotklist,
+        **{c: _id_or_token for c in {'#'}.union(_LOWER)},
+        **{c: _variable for c in {'?', '_'}.union(_UPPER)},
+    },
+    State.SORT: {c: _sort for c in _UPPER},
+}
+
+
+_STATE: Final[dict[TokenType, State]] = {
+    TokenType.COLON: State.SORT,
 }
