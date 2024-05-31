@@ -1182,14 +1182,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         """Returns the module associated with a given name."""
         return self.all_modules_dict[name]
 
-    def return_sort(self, label: KLabel) -> KSort:
-        """Returns the return sort of a given `KLabel` by looking up the production."""
-        return self.symbols[label.name].sort
-
-    def argument_sorts(self, label: KLabel) -> list[KSort]:
-        """Returns the argument sorts of a given `KLabel` by looking up the production."""
-        return self.symbols[label.name].argument_sorts
-
     @cached_property
     def subsort_table(self) -> FrozenDict[KSort, frozenset[KSort]]:
         """Return a mapping from sorts to all their proper subsorts."""
