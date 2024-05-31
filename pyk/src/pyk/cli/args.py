@@ -211,7 +211,7 @@ class KompileOptions(Options):
     def default() -> dict[str, Any]:
         return {
             'emit_json': True,
-            'llvm_kompile': False,
+            'llvm_kompile': True,
             'llvm_library': False,
             'enable_llvm_debug': False,
             'llvm_kompile_type': None,
