@@ -25,6 +25,7 @@ literal=false
 outputMode=pretty
 statistics=false
 executeToBranch=false
+proofHint=false
 smtPrelude=
 smt=
 smtTimeout=
@@ -152,6 +153,8 @@ $KRUN options:
                            also be used without --search to match the output
                            configuration against a pattern and print the
                            substitution. Not supported on LLVM backend.
+      --proof-hint         Generate proof hint instead of final configuration.
+                           Ignores \`--output\`.
       --save-temps         Do not delete temporary files when $KRUN terminates.
       --search             Search for all possible output states after
                            rewriting. Only supported on symbolic backends.
@@ -324,6 +327,10 @@ do
       else
         error 1 "The option --no-pattern cannot be used with the option --pattern"
       fi
+      ;;
+
+      --proof-hint)
+      proofHint=true
       ;;
 
       --search)
@@ -579,6 +586,10 @@ if [ "$backendName" = "llvm" ]; then
     interpreter_flags+=" --execute-to-branch"
   fi
 
+  if $proofHint; then
+    interpreter_flags+=" --proof-output"
+  fi
+
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   if $search || [ -n "$pattern" ]; then
     if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
@@ -682,6 +693,11 @@ elif [ "$backendName" = "haskell" ] ; then
   fi
 else
   error 1 "Backend $backendName not supported."
+fi
+
+if $proofHint; then
+  output "$outputFile" execute cat "$kore_output"
+  exit ${result}
 fi
 
 # Unparsing
