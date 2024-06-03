@@ -36,7 +36,7 @@ class LLVMRewriteEvent(LLVMStepEvent):
 
     Methods:
         rule_ordinal(self) -> int: Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore definition.
-        substitution(self) -> dict[str, Pattern]): Returns the substitution dictionary used to rewrite the event.
+        substitution(self) -> dict[str, Pattern]): Returns the substitution dictionary used to perform the rewrite represented by this event.
     """
 
     @property
@@ -60,7 +60,7 @@ class LLVMRuleEvent(LLVMRewriteEvent):
         __init__(self, rule_event: llvm_rule_event) -> None: Initializes a new instance of the LLVMRuleEvent class.
         __repr__(self) -> str: Returns a string representation of the LLVMRuleEvent object using the AST printing method.
         rule_ordinal(self) -> int: Returns the axiom ordinal number of the rule event
-        substitution(self) -> dict[str, Pattern]: Returns the substitution dictionary used to rewrite the rule event.
+        substitution(self) -> dict[str, Pattern]: Returns the substitution dictionary used to perform the rewrite represented by this rule event.
     """
 
     _rule_event: llvm_rule_event
@@ -92,7 +92,7 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
         __init__(self, side_condition_event: llvm_side_condition_event) -> None: Initializes a new instance of the LLVMSideConditionEventEnter class.
         __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventEnter object using the AST printing method.
         rule_ordinal (int): Returns the axiom ordinal number associated with the side condition event.
-        substitution (dict[str, Pattern]):  Returns the substitution dictionary used to rewrite the rule event.
+        substitution (dict[str, Pattern]): Returns the substitution dictionary used to perform the rewrite represented by this side condition event.
     """
 
     _side_condition_event: llvm_side_condition_event
@@ -124,7 +124,7 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
         __init__(side_condition_end_event: llvm_side_condition_end_event): Initializes the LLVMSideConditionEventExit instance.
         __repr__(): Returns a string representation of the LLVMSideConditionEventExit instance using the AST printing method.
         rule_ordinal(): Returns the axiom ordinal number associated with the side condition event.
-        check_result(): Returns the boolean result of the evaluation the side condition end event.
+        check_result(): Returns the boolean result of the evaluation of the side condition that corresponds to this event.
     """
 
     _side_condition_end_event: llvm_side_condition_end_event
@@ -229,7 +229,7 @@ class LLVMArgument:
     Represents an LLVM argument.
 
     Attributes:
-        _argument (Argument): The underlying Argument object.
+        _argument (Argument): The underlying Argument object. An argument is a wrapper object containing either a step event or a KORE pattern.
 
     Methods:
         __init__(self, argument: Argument) -> None: Initializes the LLVMArgument object.
@@ -290,7 +290,7 @@ class LLVMRewriteTrace:
         pre_trace(self) -> list[LLVMArgument]: Returns the pre-trace events as a list of LLVMArgument objects.
         initial_config(self) -> LLVMArgument: Returns the initial configuration as an LLVMArgument object.
         trace(self) -> list[LLVMArgument]: Returns the trace events as a list of LLVMArgument objects.
-        parse(trace: bytes, header: kore_header) -> LLVMRewriteTrace: Parses the given proof hints binary file as bytes and header parsed as kore header to create an LLVMRewriteTrace object.
+        parse(trace: bytes, header: kore_header) -> LLVMRewriteTrace: Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace object.
     """
 
     _rewrite_trace: llvm_rewrite_trace
