@@ -392,7 +392,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
-        _rule = _edge.to_rule('BASIC-BLOCK', priority=priority)
+        _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
         assert type(_rule) is KRule
         return _rule
 
