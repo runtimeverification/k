@@ -18,18 +18,16 @@ if TYPE_CHECKING:
     from pyk.kast.outer import KDefinition
 
 
+class FormatterTest(KompiledTest):
+    @pytest.fixture
+    def formatter(self, definition: KDefinition) -> Formatter:
+        return Formatter(definition)
+
+
 x, y = (KToken(name, KSort('Id')) for name in ['x', 'y'])
 
 
-TEST_DATA = (
-    (token(1), '1'),
-    (KApply('_+_', token(1), token(2)), '1 + 2'),
-    (KApply('_+_', KApply('_+_', token(1), token(2)), token(3)), '1 + 2 + 3'),
-    (KApply('_+_', token(1), KApply('_+_', token(2), token(3))), '1 + ( 2 + 3 )'),
-    (KApply('_+_', token(1), KApply('_*_', token(2), token(3))), '1 + 2 * 3'),
-    (KApply('_+_', KApply('_*_', token(1), token(2)), token(3)), '1 * 2 + 3'),
-    (KApply('_*_', token(1), KApply('_+_', token(2), token(3))), '1 * ( 2 + 3 )'),
-    (KApply('_*_', KApply('_+_', token(1), token(2)), token(3)), '( 1 + 2 ) * 3'),
+FORMATTER_TEST_DATA = (
     (
         KApply('<k>', KSequence()),
         """
@@ -97,14 +95,52 @@ TEST_DATA = (
 )
 
 
-class TestFormatter(KompiledTest):
+class TestFormatter(FormatterTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
 
-    @pytest.fixture
-    def formatter(self, definition: KDefinition) -> Formatter:
-        return Formatter(definition)
+    @pytest.mark.parametrize('term,output', FORMATTER_TEST_DATA, ids=count())
+    def test(self, formatter: Formatter, term: KInner, output: str) -> None:
+        # Given
+        expected = textwrap.dedent(output).strip()
 
-    @pytest.mark.parametrize('term,output', TEST_DATA, ids=count())
+        # When
+        actual = formatter(term)
+
+        # Then
+        assert actual == expected
+
+
+BRACKETS_TEST_DATA = (
+    (token(1), '1'),
+    (KApply('_+_', token(1), token(2)), '1 + 2'),
+    (KApply('_+_', KApply('_+_', token(1), token(2)), token(3)), '1 + 2 + 3'),
+    (KApply('_+_', KApply('_-_', token(1), token(2)), token(3)), '1 - 2 + 3'),
+    (KApply('_+_', token(1), KApply('_+_', token(2), token(3))), '1 + ( 2 + 3 )'),
+    (KApply('_+_', token(1), KApply('_*_', token(2), token(3))), '1 + 2 * 3'),
+    (KApply('_+_', KApply('_*_', token(1), token(2)), token(3)), '1 * 2 + 3'),
+    (KApply('_*_', token(1), KApply('_+_', token(2), token(3))), '1 * ( 2 + 3 )'),
+    (KApply('_*_', KApply('_+_', token(1), token(2)), token(3)), '( 1 + 2 ) * 3'),
+    (KApply('sgn(_)', KApply('_+_', token(1), token(2))), 'sgn ( 1 + 2 )'),
+)
+
+
+class TestBrackets(FormatterTest):
+    KOMPILE_DEFINITION = """
+        module BRACKETS
+            imports INT-SYNTAX
+            syntax Exp ::= Int
+                         | sgn ( Exp ) [symbol(sgn(_))]
+                         > Exp "*" Exp [symbol(_*_), left]
+                         | Exp "/" Exp [symbol(_/_), left]
+                         > Exp "+" Exp [symbol(_+_), left]
+                         | Exp "-" Exp [symbol(_-_), left]
+                         > "(" Exp ")" [bracket]
+        endmodule
+    """
+    KOMPILE_MAIN_MODULE = 'BRACKETS'
+    KOMPILE_ARGS = {'syntax_module': KOMPILE_MAIN_MODULE}
+
+    @pytest.mark.parametrize('term,output', BRACKETS_TEST_DATA, ids=count())
     def test(self, formatter: Formatter, term: KInner, output: str) -> None:
         # Given
         expected = textwrap.dedent(output).strip()
