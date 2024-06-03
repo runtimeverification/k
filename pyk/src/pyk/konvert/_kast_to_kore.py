@@ -57,20 +57,14 @@ ML_PATTERN_LABELS: Final = dict(
 )
 
 
-def kast_to_kore(
-    kast_defn: KDefinition,
-    kompiled_kore: KompiledKore,
-    kast: KInner,
-    sort: KSort | None = None,
-) -> Pattern:
-    if sort is None:
-        sort = K
-    kast = kast_defn.add_ksequence_under_k_productions(kast)
-    kast = kast_defn.sort_vars(kast, sort)
-    kast = kast_defn.add_cell_map_items(kast)
-    kast = kast_defn.add_sort_params(kast)
+def kast_to_kore(definition: KDefinition, kast: KInner, sort: KSort | None = None) -> Pattern:
+    sort = sort or K
+    kast = definition.add_ksequence_under_k_productions(kast)
+    kast = definition.sort_vars(kast, sort)
+    kast = definition.add_cell_map_items(kast)
+    kast = definition.add_sort_params(kast)
     kast = _replace_ksequence_by_kapply(kast)
-    kast = _add_sort_injections(kast_defn, kast, sort)
+    kast = _add_sort_injections(definition, kast, sort)
     kore = _kast_to_kore(kast)
     return kore
 
@@ -217,17 +211,17 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     top_level_k_sort = KSort('GeneratedTopCell')
     # The backend does not like rewrite rules without a precondition
     if len(krule_lhs_constraints) > 0:
-        kore_lhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_lhs, sort=top_level_k_sort)
+        kore_lhs0: Pattern = kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort)
     else:
         kore_lhs0 = And(
             top_level_kore_sort,
             (
-                kast_to_kore(kast_defn, kompiled_kore, krule_lhs, sort=top_level_k_sort),
+                kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort),
                 Top(top_level_kore_sort),
             ),
         )
 
-    kore_rhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_rhs, sort=top_level_k_sort)
+    kore_rhs0: Pattern = kast_to_kore(kast_defn, krule_rhs, sort=top_level_k_sort)
 
     kore_lhs = kompiled_kore.add_injections(kore_lhs0, sort=top_level_kore_sort)
     kore_rhs = kompiled_kore.add_injections(kore_rhs0, sort=top_level_kore_sort)

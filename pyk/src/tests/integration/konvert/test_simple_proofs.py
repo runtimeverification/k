@@ -663,7 +663,6 @@ class TestKonvertSimpleProofs(KPrintTest):
     def test_kast_to_kore(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
         kore_text: str,
@@ -673,7 +672,7 @@ class TestKonvertSimpleProofs(KPrintTest):
         kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kore = kast_to_kore(definition, kompiled_kore, kast, sort=sort)
+        actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
         assert actual_kore == kore
@@ -686,7 +685,6 @@ class TestKonvertSimpleProofs(KPrintTest):
     def test_kast_to_kore_frontend_comp(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
         kore_text: str,
@@ -700,7 +698,7 @@ class TestKonvertSimpleProofs(KPrintTest):
         frontend_kore = kprint.kast_to_kore(kast=kast, sort=sort, force_kast=True)
 
         # When
-        actual_kore = kast_to_kore(definition, kompiled_kore, kast, sort=sort)
+        actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
         assert actual_kore == frontend_kore

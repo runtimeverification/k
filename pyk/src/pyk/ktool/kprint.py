@@ -268,7 +268,7 @@ class KPrint:
         if not force_kast:
             try:
                 _LOGGER.info('Invoking kast_to_kore')
-                return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
+                return kast_to_kore(self.definition, kast, sort)
             except ValueError as ve:
                 _LOGGER.warning(ve)
 

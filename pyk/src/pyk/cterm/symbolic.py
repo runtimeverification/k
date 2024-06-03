@@ -91,7 +91,7 @@ class CTermSymbolic:
         self._trace_rewrites = trace_rewrites
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
-        return kast_to_kore(self._definition, self._kompiled_kore, kinner, sort=GENERATED_TOP_CELL)
+        return kast_to_kore(self._definition, kinner, sort=GENERATED_TOP_CELL)
 
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
