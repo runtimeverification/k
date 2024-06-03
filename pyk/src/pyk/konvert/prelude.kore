@@ -1,0 +1,62 @@
+[]
+module BASIC-K
+    sort SortK{} []
+    sort SortKItem{} []
+endmodule
+[]
+module KSEQ
+    import BASIC-K []
+    symbol kseq{}(SortKItem{}, SortK{}) : SortK{} [constructor{}(), functional{}(), injective{}()]
+    symbol dotk{}() : SortK{} [constructor{}(), functional{}(), injective{}()]
+    symbol append{}(SortK{}, SortK{}) : SortK{} [function{}(), functional{}()]
+    axiom {R} \implies{R}(
+        \and{R}(
+            \top{R}(),
+            \and{R}(
+                \in{SortK{}, R}(X0:SortK{}, dotk{}()),
+            \and{R}(
+                \in{SortK{}, R}(X1:SortK{}, TAIL:SortK{}),
+                \top{R}()
+            ))
+        ),
+        \equals{SortK{}, R}(
+            append{}(X0:SortK{}, X1:SortK{}),
+            \and{SortK{}}(
+                TAIL:SortK{},
+                \top{SortK{}}()
+            )
+        )
+    ) []
+    axiom {R} \implies{R}(
+        \and{R}(
+            \top{R}(),
+            \and{R}(
+                \in{SortK{}, R}(X0:SortK{}, kseq{}(K:SortKItem{}, KS:SortK{})),
+            \and{R}(
+                \in{SortK{}, R}(X1:SortK{}, TAIL:SortK{}),
+                \top{R}()
+            ))
+        ),
+        \equals{SortK{}, R}(
+            append{}(X0:SortK{}, X1:SortK{}),
+            \and{SortK{}}(
+                kseq{}(K:SortKItem{}, append{}(KS:SortK{}, TAIL:SortK{})),
+                \top{SortK{}}()
+            )
+        )
+    ) []
+endmodule
+[]
+module INJ
+    symbol inj{From, To}(From) : To [sortInjection{}()]
+    axiom {S1, S2, S3, R} \equals{S3, R}(inj{S2, S3}(inj{S1, S2}(T:S1)), inj{S1, S3}(T:S1)) [simplification{}()]
+endmodule
+[]
+module K
+    import KSEQ []
+    import INJ []
+    alias weakExistsFinally{A}(A) : A where weakExistsFinally{A}(@X:A) := @X:A []
+    alias weakAlwaysFinally{A}(A) : A where weakAlwaysFinally{A}(@X:A) := @X:A []
+    alias allPathGlobally{A}(A) : A where allPathGlobally{A}(@X:A) := @X:A []
+endmodule
+[]

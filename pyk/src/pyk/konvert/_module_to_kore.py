@@ -15,15 +15,19 @@ from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
 from ..kast.outer import (
     KAssoc,
+    KClaim,
     KDefinition,
     KNonTerminal,
     KProduction,
     KRegexTerminal,
     KRule,
+    KRuleLike,
     KSyntaxAssociativity,
     KSyntaxSort,
     KTerminal,
 )
+from ..kore.kompiled import KompiledKore
+from ..kore.parser import KoreParser
 from ..kore.prelude import inj
 from ..kore.syntax import (
     And,
@@ -58,7 +62,7 @@ if TYPE_CHECKING:
     from ..kast import AttEntry, AttKey, KAtt
     from ..kast.inner import KLabel
     from ..kast.outer import KFlatModule, KSentence
-    from ..kore.syntax import Pattern, Sentence, Sort
+    from ..kore.syntax import Definition, Pattern, Sentence, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -95,9 +99,9 @@ BUILTIN_LABELS: Final = {
 
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
-
-    module = simplified_module(definition)
-    defn = KDefinition(module.name, (module,))  # for getting the sort lattice
+    definition = simplified_definition(definition)
+    assert len(definition.modules) == 1
+    module = definition.modules[0]
 
     name = name_to_kore(module.name)
     attrs = atts_to_kore({key: value for key, value in module.att.items() if key != Atts.DIGEST})  # filter digest
@@ -119,20 +123,22 @@ def module_to_kore(definition: KDefinition) -> Module:
     sentences += sort_decls
     sentences += symbol_decls
     sentences += _subsort_axioms(module)
-    sentences += _assoc_axioms(defn)
+    sentences += _assoc_axioms(definition)
     sentences += _idem_axioms(module)
     sentences += _unit_axioms(module)
     sentences += _functional_axioms(module)
     sentences += _no_confusion_axioms(module)
-    sentences += _no_junk_axioms(defn)
-    sentences += _overload_axioms(defn)
+    sentences += _no_junk_axioms(definition)
+    sentences += _overload_axioms(definition)
+
+    # Filter the overload attribute
+    sentences = [sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'overload') for sent in sentences]
+
+    kore_module = Module(name=name, sentences=sentences, attrs=attrs)
+    kompiled_kore = _kompiled_kore_from_module(kore_module)
+    sentences += _rule_axioms(definition, kompiled_kore)
 
     res = Module(name=name, sentences=sentences, attrs=attrs)
-    # Filter the overload attribute
-    res = res.let(
-        sentences=(sent.let_attrs(attr for attr in sent.attrs if attr.symbol != 'overload') for sent in res.sentences)
-    )
-
     return res
 
 
@@ -690,12 +696,87 @@ def _overload_axioms(defn: KDefinition) -> list[Axiom]:
     ]
 
 
+def _kompiled_kore_from_module(module: Module) -> KompiledKore:
+    prelude = _get_prelude()
+    definition = prelude.let(modules=prelude.modules + (module,))
+    return KompiledKore.for_definition(definition)
+
+
+_PRELUDE: Definition | None = None
+
+
+def _get_prelude() -> Definition:
+    global _PRELUDE
+    if _PRELUDE is None:
+        prelude_file = Path(__file__).parent / 'prelude.kore'
+        assert prelude_file.is_file()
+        definition = KoreParser(prelude_file.read_text()).definition()
+        _PRELUDE = definition
+    return _PRELUDE
+
+
+# ------------
+# Rule to KORE
+# ------------
+
+
+def _rule_axioms(definition: KDefinition, kompiled_kore: KompiledKore) -> list[Axiom]:
+    assert len(definition.modules) == 1
+    module = definition.modules[0]
+    # TODO None should be dropped once all cases are covered
+    return [
+        res
+        for sent in module
+        if isinstance(sent, KRuleLike) and (res := _rule_axiom(sent, definition, kompiled_kore)) is not None
+    ]
+
+
+def _rule_axiom(rule_like: KRuleLike, definition: KDefinition, kompiled_kore: KompiledKore) -> Axiom | None:
+    def lhs_production(rule_like: KRuleLike) -> KProduction | None:
+        if not isinstance(rule_like.body, KRewrite):
+            return None
+        body = rule_like.body
+        if not isinstance(body.lhs, KApply):
+            return None
+        lhs = body.lhs
+        return definition.symbols.get(lhs.label.name)
+
+    def is_equation(rule_like: KRuleLike) -> bool:
+        heat_cool_eq = True  # Free parameter in the K Frontend, fixed here for simplicity
+        production = lhs_production(rule_like)
+        if production is not None and Atts.FUNCTION in production.att:
+            return True
+        if any(key in rule_like.att for key in [Atts.ANYWHERE, Atts.SIMPLIFICATION]):
+            return True
+        if heat_cool_eq and any(key in rule_like.att for key in [Atts.COOL, Atts.HEAT]):
+            return True
+        return False
+
+    if is_equation(rule_like):
+        return _equation_axiom(rule_like, definition, kompiled_kore)
+
+    return None
+
+
+def _equation_axiom(rule_like: KRuleLike, definition: KDefinition, kompiled_kore: KompiledKore) -> Axiom | None:
+    if Atts.OWISE in rule_like.att:
+        return None
+    if isinstance(rule_like, KClaim) or Atts.SIMPLIFICATION in rule_like.att:
+        return None
+    assert isinstance(rule_like, KRule)
+    return _simple_equation_axiom(rule_like, definition, kompiled_kore)
+
+
+def _simple_equation_axiom(rule: KRule, definition: KDefinition, kompiled_kore: KompiledKore) -> Axiom | None:
+    return None
+
+
 # ----------------------------------
 # Module to KORE: KAST preprocessing
 # ----------------------------------
 
 
-def simplified_module(definition: KDefinition, module_name: str | None = None) -> KFlatModule:
+def simplified_definition(definition: KDefinition, module_name: str | None = None) -> KDefinition:
     """
     In ModuleToKORE.java, there are some implicit KAST-to-KAST kompilation
     steps hidden in the conversion. In particular, the kompiled KAST definition
@@ -755,8 +836,7 @@ def simplified_module(definition: KDefinition, module_name: str | None = None) -
         AddSymbolAtts(Atts.CONSTRUCTOR(None), _is_constructor),
     )
     definition = reduce(lambda defn, step: step.execute(defn), pipeline, definition)
-    module = definition.modules[0]
-    return module
+    return definition
 
 
 class KompilerPass(ABC):

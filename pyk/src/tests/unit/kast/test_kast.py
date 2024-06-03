@@ -387,3 +387,42 @@ def test_default_format(production: KProduction, format_str: str) -> None:
 
     # Then
     assert actual == expected
+
+
+S, S1, S2, T, U = (KSort(name) for name in ['S', 'S1', 'S2', 'T', 'U'])
+PRODUCTION_APPLY_TEST_DATA: Final = (
+    (
+        KProduction(T, (KTerminal('foo'),), (), KLabel('foo')),
+        KLabel('foo'),
+        KProduction(T, (KTerminal('foo'),), (), KLabel('foo')),
+    ),
+    (
+        KProduction(T, (KNonTerminal(S),), (), KLabel('foo')),
+        KLabel('foo'),
+        KProduction(T, (KNonTerminal(S),), (), KLabel('foo')),
+    ),
+    (
+        KProduction(S, (KTerminal('foo'),), (S,), KLabel('foo', (S,))),
+        KLabel('foo', (T,)),
+        KProduction(T, (KTerminal('foo'),), (), KLabel('foo', (T,))),
+    ),
+    (
+        KProduction(S, (KTerminal('foo'),), (S,), KLabel('foo', (S,))),
+        KLabel('foo', (T,)),
+        KProduction(T, (KTerminal('foo'),), (), KLabel('foo', (T,))),
+    ),
+    (
+        KProduction(S1, (KTerminal('foo'), KNonTerminal(S2), KNonTerminal(S2)), (S1, S2), KLabel('foo', (S1, S2))),
+        KLabel('foo', (T, U)),
+        KProduction(T, (KTerminal('foo'), KNonTerminal(U), KNonTerminal(U)), (), KLabel('foo', (T, U))),
+    ),
+)
+
+
+@pytest.mark.parametrize('production,klabel,expected', PRODUCTION_APPLY_TEST_DATA, ids=count())
+def test_production_apply(production: KProduction, klabel: KLabel, expected: KProduction) -> None:
+    # When
+    actual = production.apply(klabel)
+
+    # Then
+    assert actual == expected
