@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
-from itertools import product, repeat
+from itertools import repeat
 from pathlib import Path
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, NamedTuple, final
@@ -13,17 +13,7 @@ from ..kast import EMPTY_ATT, Atts, KInner
 from ..kast.att import Format
 from ..kast.inner import KApply, KRewrite, KSort
 from ..kast.manip import extract_lhs, extract_rhs
-from ..kast.outer import (
-    KAssoc,
-    KDefinition,
-    KNonTerminal,
-    KProduction,
-    KRegexTerminal,
-    KRule,
-    KSyntaxAssociativity,
-    KSyntaxSort,
-    KTerminal,
-)
+from ..kast.outer import KDefinition, KNonTerminal, KProduction, KRegexTerminal, KRule, KSyntaxSort, KTerminal
 from ..kore.prelude import inj
 from ..kore.syntax import (
     And,
@@ -1280,10 +1270,11 @@ class AddPrioritiesAtts(KompilerPass):
 
 
 @dataclass
-class AddAssocAtts(SingleModulePass):
-    def _transform_module(self, module: KFlatModule) -> KFlatModule:
-        left_assocs = self._assocs(module, KAssoc.LEFT)
-        right_assocs = self._assocs(module, KAssoc.RIGHT)
+class AddAssocAtts(KompilerPass):
+    def execute(self, definition: KDefinition) -> KDefinition:
+        if len(definition.modules) > 1:
+            raise ValueError('Expected a single module')
+        module = definition.modules[0]
 
         def update(production: KProduction) -> KProduction:
             if not production.klabel:
@@ -1292,23 +1283,13 @@ class AddAssocAtts(SingleModulePass):
             if Atts.FORMAT not in production.att:
                 return production
 
-            left = tuple(KApply(tag).to_dict() for tag in sorted(left_assocs.get(production.klabel.name, [])))
-            right = tuple(KApply(tag).to_dict() for tag in sorted(right_assocs.get(production.klabel.name, [])))
+            left = tuple(
+                KApply(tag).to_dict() for tag in sorted(definition.left_assocs.get(production.klabel.name, []))
+            )
+            right = tuple(
+                KApply(tag).to_dict() for tag in sorted(definition.right_assocs.get(production.klabel.name, []))
+            )
             return production.let(att=production.att.update([Atts.LEFT(left), Atts.RIGHT(right)]))
 
-        return module.map_sentences(update, of_type=KProduction)
-
-    @staticmethod
-    def _assocs(module: KFlatModule, assoc: KAssoc) -> dict[str, set[str]]:
-        sents = (
-            sent
-            for sent in module.sentences
-            if isinstance(sent, KSyntaxAssociativity) and sent.assoc in (assoc, KAssoc.NON_ASSOC)
-        )
-        pairs = (pair for sent in sents for pair in product(sent.tags, sent.tags))
-
-        def insert(dct: dict[str, set[str]], *, key: str, value: str) -> dict[str, set[str]]:
-            dct.setdefault(key, set()).add(value)
-            return dct
-
-        return reduce(lambda res, pair: insert(res, key=pair[0], value=pair[1]), pairs, {})
+        module = module.map_sentences(update, of_type=KProduction)
+        return KDefinition(module.name, (module,))

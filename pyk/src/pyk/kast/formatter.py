@@ -9,6 +9,7 @@ from .outer import KNonTerminal, KRegexTerminal, KSequence, KTerminal
 
 if TYPE_CHECKING:
     from . import KInner
+    from .inner import KSort
     from .outer import KDefinition, KProduction
 
 
@@ -16,15 +17,19 @@ class Formatter:
     definition: KDefinition
 
     _indent: int
+    _brackets: bool
 
-    def __init__(self, definition: KDefinition, *, indent: int = 0):
+    def __init__(self, definition: KDefinition, *, indent: int = 0, brackets: bool = True):
         self.definition = definition
         self._indent = indent
+        self._brackets = brackets
 
     def __call__(self, term: KInner) -> str:
         return self.format(term)
 
     def format(self, term: KInner) -> str:
+        if self._brackets:
+            term = add_brackets(self.definition, term)
         return ''.join(self._format(term))
 
     def _format(self, term: KInner) -> list[str]:
@@ -47,7 +52,7 @@ class Formatter:
         return [chunk for chunks in intersperse(items, [' ~> ']) for chunk in chunks]
 
     def _format_kapply(self, kapply: KApply) -> list[str]:
-        production = self.definition.symbols[kapply.label.name]
+        production = self.definition.syntax_symbols[kapply.label.name]
         formatt = production.att.get(Atts.FORMAT, production.default_format)
         return [
             chunk
@@ -104,3 +109,83 @@ class Formatter:
                 raise ValueError(f'Invalid format index escape to regex terminal: {index}: {production}')
             case _:
                 raise AssertionError()
+
+
+def add_brackets(definition: KDefinition, term: KInner) -> KInner:
+    if not isinstance(term, KApply):
+        return term
+    prod = definition.symbols[term.label.name]
+
+    args: list[KInner] = []
+
+    arg_index = -1
+    for index, item in enumerate(prod.items):
+        if not isinstance(item, KNonTerminal):
+            continue
+
+        arg_index += 1
+        arg = term.args[arg_index]
+        arg = add_brackets(definition, arg)
+        arg = _with_bracket(definition, term, arg, item.sort, index)
+        args.append(arg)
+
+    return term.let(args=args)
+
+
+def _with_bracket(definition: KDefinition, parent: KApply, term: KInner, bracket_sort: KSort, index: int) -> KInner:
+    if not _requires_bracket(definition, parent, term, index):
+        return term
+
+    bracket_prod = definition.brackets.get(bracket_sort)
+    if not bracket_prod:
+        return term
+
+    bracket_label = bracket_prod.att[Atts.BRACKET_LABEL]['name']
+    return KApply(bracket_label, term)
+
+
+def _requires_bracket(definition: KDefinition, parent: KApply, term: KInner, index: int) -> bool:
+    if isinstance(term, (KToken, KVariable, KSequence)):
+        return False
+
+    assert isinstance(term, KApply)
+
+    if len(term.args) == 1:
+        return False
+
+    if _between_terminals(definition, parent, index):
+        return False
+
+    if _associativity_wrong(definition, parent, term, index):
+        return True
+
+    if _priority_wrong(definition, parent, term):
+        return True
+
+    return False
+
+
+def _between_terminals(definition: KDefinition, parent: KApply, index: int) -> bool:
+    prod = definition.symbols[parent.label.name]
+    if index in [0, len(prod.items) - 1]:
+        return False
+    return all(isinstance(prod.items[index + offset], KTerminal) for offset in [-1, 1])
+
+
+def _associativity_wrong(definition: KDefinition, parent: KApply, term: KApply, index: int) -> bool:
+    """A left (right) associative symbol cannot appear as the rightmost (leftmost) child of a symbol with equal priority."""
+    parent_label = parent.label.name
+    term_label = term.label.name
+    prod = definition.symbols[parent_label]
+    if index == 0 and term_label in definition.right_assocs.get(parent_label, ()):
+        return True
+    if index == len(prod.items) - 1 and term_label in definition.left_assocs.get(parent_label, ()):
+        return True
+    return False
+
+
+def _priority_wrong(definition: KDefinition, parent: KApply, term: KApply) -> bool:
+    """A symbol with a lesser priority cannot appear as the child of a symbol with greater priority."""
+    parent_label = parent.label.name
+    term_label = term.label.name
+    return term_label in definition.priorities.get(parent_label, ())
