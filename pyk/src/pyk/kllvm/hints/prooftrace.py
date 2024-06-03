@@ -33,19 +33,19 @@ class LLVMStepEvent(ABC):
 class LLVMRewriteEvent(LLVMStepEvent):
     """
     Represents LLVM rewrite event.
-
-    Methods:
-        rule_ordinal(self) -> int: Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore definition.
-        substitution(self) -> dict[str, Pattern]): Returns the substitution dictionary used to perform the rewrite represented by this event.
     """
 
     @property
     @abstractmethod
-    def rule_ordinal(self) -> int: ...
+    def rule_ordinal(self) -> int: 
+        """ Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore definition. """
+        ...
 
     @property
     @abstractmethod
-    def substitution(self) -> dict[str, Pattern]: ...
+    def substitution(self) -> dict[str, Pattern]:
+        """ Returns the substitution dictionary used to perform the rewrite represented by this event. """
+        ...
 
 
 @final
@@ -58,9 +58,8 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 
     Methods:
         __init__(self, rule_event: llvm_rule_event) -> None: Initializes a new instance of the LLVMRuleEvent class.
+
         __repr__(self) -> str: Returns a string representation of the LLVMRuleEvent object using the AST printing method.
-        rule_ordinal(self) -> int: Returns the axiom ordinal number of the rule event
-        substitution(self) -> dict[str, Pattern]: Returns the substitution dictionary used to perform the rewrite represented by this rule event.
     """
 
     _rule_event: llvm_rule_event
@@ -73,10 +72,12 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 
     @property
     def rule_ordinal(self) -> int:
+        """ Returns the axiom ordinal number of the rule event. """
         return self._rule_event.rule_ordinal
 
     @property
     def substitution(self) -> dict[str, Pattern]:
+        """ Returns the substitution dictionary used to perform the rewrite represented by this rule event. """
         return {k: v[0] for k, v in self._rule_event.substitution.items()}
 
 
@@ -90,9 +91,8 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 
     Methods:
         __init__(self, side_condition_event: llvm_side_condition_event) -> None: Initializes a new instance of the LLVMSideConditionEventEnter class.
+
         __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventEnter object using the AST printing method.
-        rule_ordinal (int): Returns the axiom ordinal number associated with the side condition event.
-        substitution (dict[str, Pattern]): Returns the substitution dictionary used to perform the rewrite represented by this side condition event.
     """
 
     _side_condition_event: llvm_side_condition_event
@@ -105,10 +105,12 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 
     @property
     def rule_ordinal(self) -> int:
+        """ Returns the axiom ordinal number associated with the side condition event. """
         return self._side_condition_event.rule_ordinal
 
     @property
     def substitution(self) -> dict[str, Pattern]:
+        """ Returns the substitution dictionary used to perform the rewrite represented by this side condition event. """
         return {k: v[0] for k, v in self._side_condition_event.substitution.items()}
 
 
@@ -121,10 +123,9 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
         _side_condition_end_event (llvm_side_condition_end_event): The underlying side condition end event.
 
     Methods:
-        __init__(side_condition_end_event: llvm_side_condition_end_event): Initializes the LLVMSideConditionEventExit instance.
-        __repr__(): Returns a string representation of the LLVMSideConditionEventExit instance using the AST printing method.
-        rule_ordinal(): Returns the axiom ordinal number associated with the side condition event.
-        check_result(): Returns the boolean result of the evaluation of the side condition that corresponds to this event.
+        __init__(side_condition_end_event: llvm_side_condition_end_event) -> None: Initializes the LLVMSideConditionEventExit instance.
+
+        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventExit instance using the AST printing method.
     """
 
     _side_condition_end_event: llvm_side_condition_end_event
@@ -137,10 +138,12 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
 
     @property
     def rule_ordinal(self) -> int:
+        """ Returns the axiom ordinal number associated with the side condition event. """
         return self._side_condition_end_event.rule_ordinal
 
     @property
     def check_result(self) -> bool:
+        """ Returns the boolean result of the evaluation of the side condition that corresponds to this event. """
         return self._side_condition_end_event.check_result
 
 
@@ -154,10 +157,8 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     Methods:
         __init__(self, function_event: llvm_function_event) -> None: Initializes a new instance of the LLVMFunctionEvent class.
+
         __repr__(self) -> str: Returns a string representation of the LLVMFunctionEvent object using the AST printing method.
-        name(self) -> str: Returns the name of the LLVM function as a KORE Symbol Name.
-        relative_position(self) -> str: Returns the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0)
-        args(self) -> list[LLVMArgument]: Returns a list of LLVMArgument objects representing the arguments of the LLVM function.
     """
 
     _function_event: llvm_function_event
@@ -170,14 +171,17 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     @property
     def name(self) -> str:
+        """ Returns the name of the LLVM function as a KORE Symbol Name. """
         return self._function_event.name
 
     @property
     def relative_position(self) -> str:
+        """ Returns the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0) """
         return self._function_event.relative_position
 
     @property
     def args(self) -> list[LLVMArgument]:
+        """  Returns a list of LLVMArgument objects representing the arguments of the LLVM function. """
         return [LLVMArgument(arg) for arg in self._function_event.args]
 
 
@@ -191,11 +195,8 @@ class LLVMHookEvent(LLVMStepEvent):
 
     Methods:
         __init__(hook_event: llvm_hook_event): Initializes a new instance of the LLVMHookEvent class.
+
         __repr__() -> str: Returns a string representation of the LLVMHookEvent object using the AST printing method.
-        name() -> str: Returns the attribute name of the hook event. Ex.: "INT.add"
-        relative_position() -> str: Returns the relative position of the hook event in the proof trace. Ex.: (0:0:0:0)
-        args() -> list[LLVMArgument]: Returns a list of LLVMArgument objects representing the arguments of the hook event.
-        result() -> Pattern: Returns the result pattern of the hook event evaluation.
     """
 
     _hook_event: llvm_hook_event
@@ -208,18 +209,22 @@ class LLVMHookEvent(LLVMStepEvent):
 
     @property
     def name(self) -> str:
+        """ Returns the attribute name of the hook event. Ex.: "INT.add" """
         return self._hook_event.name
 
     @property
     def relative_position(self) -> str:
+        """ Returns the relative position of the hook event in the proof trace. Ex.: (0:0:0:0) """
         return self._hook_event.relative_position
 
     @property
     def args(self) -> list[LLVMArgument]:
+        """ Returns a list of LLVMArgument objects representing the arguments of the hook event. """
         return [LLVMArgument(arg) for arg in self._hook_event.args]
 
     @property
     def result(self) -> Pattern:
+        """ Returns the result pattern of the hook event evaluation. """
         return self._hook_event.result
 
 
@@ -233,11 +238,8 @@ class LLVMArgument:
 
     Methods:
         __init__(self, argument: Argument) -> None: Initializes the LLVMArgument object.
+
         __repr__(self) -> str: Returns a string representation of the LLVMArgument object using the AST printing method.
-        step_event(self) -> LLVMStepEvent: Returns the LLVMStepEvent associated with the argument if any.
-        kore_pattern(self) -> Pattern: Returns the KORE Pattern associated with the argument if any.
-        is_kore_pattern(self) -> bool: Checks if the argument is a KROE Pattern.
-        is_step_event(self) -> bool: Checks if the argument is a step event.
     """
 
     _argument: Argument
@@ -250,6 +252,7 @@ class LLVMArgument:
 
     @property
     def step_event(self) -> LLVMStepEvent:
+        """  Returns the LLVMStepEvent associated with the argument if any. """
         if isinstance(self._argument.step_event, llvm_rule_event):
             return LLVMRuleEvent(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_side_condition_event):
@@ -265,13 +268,16 @@ class LLVMArgument:
 
     @property
     def kore_pattern(self) -> Pattern:
+        """ Returns the KORE Pattern associated with the argument if any. """
         assert isinstance(self._argument.kore_pattern, Pattern)
         return self._argument.kore_pattern
 
     def is_kore_pattern(self) -> bool:
+        """ Checks if the argument is a KORE Pattern. """
         return self._argument.is_kore_pattern()
 
     def is_step_event(self) -> bool:
+        """ Checks if the argument is a step event. """
         return self._argument.is_step_event()
 
 
