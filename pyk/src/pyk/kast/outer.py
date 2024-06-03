@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from dataclasses import InitVar  # noqa: TC003
 from dataclasses import dataclass
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, reduce
 from itertools import pairwise, product
 from typing import TYPE_CHECKING, final, overload
 
@@ -1201,6 +1201,18 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return self.subsort_table.get(sort, frozenset())
 
     @cached_property
+    def brackets(self) -> FrozenDict[KSort, KProduction]:
+        brackets: dict[KSort, KProduction] = {}
+        for prod in self.productions:
+            if Atts.BRACKET in prod.att:
+                assert not prod.klabel
+                sort = prod.sort
+                if sort in brackets:
+                    raise ValueError(f'Multiple bracket productions for sort: {sort.name}')
+                brackets[sort] = prod
+        return FrozenDict(brackets)
+
+    @cached_property
     def symbols(self) -> FrozenDict[str, KProduction]:
         symbols: dict[str, KProduction] = {}
         for prod in self.productions:
@@ -1215,6 +1227,13 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
                 continue
             symbols[symbol] = prod
         return FrozenDict(symbols)
+
+    @cached_property
+    def syntax_symbols(self) -> FrozenDict[str, KProduction]:
+        brackets: dict[str, KProduction] = {
+            prod.att[Atts.BRACKET_LABEL]['name']: prod for _, prod in self.brackets.items()
+        }
+        return FrozenDict({**self.symbols, **brackets})
 
     @cached_property
     def overloads(self) -> FrozenDict[str, frozenset[str]]:
@@ -1271,6 +1290,29 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             for pair in product(highers, lowers)
         )
         return POSet(relation).image
+
+    @cached_property
+    def left_assocs(self) -> FrozenDict[str, frozenset[str]]:
+        return FrozenDict({key: frozenset(value) for key, value in self._assocs(KAssoc.LEFT).items()})
+
+    @cached_property
+    def right_assocs(self) -> FrozenDict[str, frozenset[str]]:
+        return FrozenDict({key: frozenset(value) for key, value in self._assocs(KAssoc.RIGHT).items()})
+
+    def _assocs(self, assoc: KAssoc) -> dict[str, set[str]]:
+        sents = (
+            sent
+            for module in self.modules
+            for sent in module.sentences
+            if isinstance(sent, KSyntaxAssociativity) and sent.assoc in (assoc, KAssoc.NON_ASSOC)
+        )
+        pairs = (pair for sent in sents for pair in product(sent.tags, sent.tags))
+
+        def insert(dct: dict[str, set[str]], *, key: str, value: str) -> dict[str, set[str]]:
+            dct.setdefault(key, set()).add(value)
+            return dct
+
+        return reduce(lambda res, pair: insert(res, key=pair[0], value=pair[1]), pairs, {})
 
     def sort(self, kast: KInner) -> KSort | None:
         """Computes the sort of a given term using best-effort simple sorting algorithm, returns `None` on algorithm failure."""
