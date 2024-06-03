@@ -211,7 +211,7 @@ class KompileOptions(Options):
     def default() -> dict[str, Any]:
         return {
             'emit_json': True,
-            'llvm_kompile': False,
+            'llvm_kompile': True,
             'llvm_library': False,
             'enable_llvm_debug': False,
             'llvm_kompile_type': None,
@@ -320,8 +320,8 @@ class KCLIArgs:
     @cached_property
     def logging_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
-        args.add_argument('--verbose', '-v', default=False, action='store_true', help='Verbose output.')
-        args.add_argument('--debug', default=False, action='store_true', help='Debug output.')
+        args.add_argument('--verbose', '-v', default=None, action='store_true', help='Verbose output.')
+        args.add_argument('--debug', default=None, action='store_true', help='Debug output.')
         return args
 
     @cached_property
@@ -332,14 +332,13 @@ class KCLIArgs:
             '-w',
             dest='warnings',
             type=Warnings,
-            default=None,
             help='Warnings to print about (no effect on pyk, only subcommands).',
         )
         args.add_argument(
             '--warnings_to_errors',
             '-w2e',
             dest='warnings_to_errors',
-            default=False,
+            default=None,
             action='store_true',
             help='Turn warnings into errors (no effect on pyk, only subcommands).',
         )
@@ -348,7 +347,7 @@ class KCLIArgs:
     @cached_property
     def parallel_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
-        args.add_argument('--workers', '-j', default=1, type=int, help='Number of processes to run in parallel.')
+        args.add_argument('--workers', '-j', type=int, help='Number of processes to run in parallel.')
         return args
 
     @cached_property
@@ -383,35 +382,34 @@ class KCLIArgs:
         args.add_argument(
             '--emit-json',
             dest='emit_json',
-            default=True,
+            default=None,
             action='store_true',
             help='Emit JSON definition after compilation.',
         )
         args.add_argument(
             '-ccopt',
             dest='ccopts',
-            default=[],
             action='append',
             help='Additional arguments to pass to llvm-kompile.',
         )
         args.add_argument(
             '--no-llvm-kompile',
             dest='llvm_kompile',
-            default=True,
+            default=None,
             action='store_false',
             help='Do not run llvm-kompile process.',
         )
         args.add_argument(
             '--with-llvm-library',
             dest='llvm_library',
-            default=False,
+            default=None,
             action='store_true',
             help='Make kompile generate a dynamic llvm library.',
         )
         args.add_argument(
             '--enable-llvm-debug',
             dest='enable_llvm_debug',
-            default=False,
+            default=None,
             action='store_true',
             help='Make kompile generate debug symbols for llvm.',
         )
@@ -420,60 +418,60 @@ class KCLIArgs:
         args.add_argument(
             '--read-only-kompiled-directory',
             dest='read_only',
-            default=False,
+            default=None,
             action='store_true',
             help='Generated a kompiled directory that K will not attempt to write to afterwards.',
         )
-        args.add_argument('-O0', dest='o0', default=False, action='store_true', help='Optimization level 0.')
-        args.add_argument('-O1', dest='o1', default=False, action='store_true', help='Optimization level 1.')
-        args.add_argument('-O2', dest='o2', default=False, action='store_true', help='Optimization level 2.')
-        args.add_argument('-O3', dest='o3', default=False, action='store_true', help='Optimization level 3.')
+        args.add_argument('-O0', dest='o0', default=None, action='store_true', help='Optimization level 0.')
+        args.add_argument('-O1', dest='o1', default=None, action='store_true', help='Optimization level 1.')
+        args.add_argument('-O2', dest='o2', default=None, action='store_true', help='Optimization level 2.')
+        args.add_argument('-O3', dest='o3', default=None, action='store_true', help='Optimization level 3.')
         args.add_argument(
             '--enable-search',
             dest='enable_search',
-            default=False,
+            default=None,
             action='store_true',
             help='Enable search mode on LLVM backend krun.',
         )
         args.add_argument(
             '--coverage',
             dest='coverage',
-            default=False,
+            default=None,
             action='store_true',
             help='Enable logging semantic rule coverage measurement.',
         )
         args.add_argument(
             '--gen-bison-parser',
             dest='gen_bison_parser',
-            default=False,
+            default=None,
             action='store_true',
             help='Generate standalone Bison parser for program sort.',
         )
         args.add_argument(
             '--gen-glr-bison-parser',
             dest='gen_glr_bison_parser',
-            default=False,
+            default=None,
             action='store_true',
             help='Generate standalone GLR Bison parser for program sort.',
         )
         args.add_argument(
             '--bison-lists',
             dest='bison_lists',
-            default=False,
+            default=None,
             action='store_true',
             help='Disable List{Sort} parsing to make grammar LR(1) for Bison parser.',
         )
         args.add_argument(
             '--llvm-proof-hint-instrumentation',
             dest='llvm_proof_hint_instrumentation',
-            default=False,
+            default=None,
             action='store_true',
             help='Enable proof hint generation in LLVM backend kompilation.',
         )
         args.add_argument(
             '--no-exc-wrap',
             dest='no_exc_wrap',
-            default=False,
+            default=None,
             action='store_true',
             help='Do not wrap the output on the CLI.',
         )
@@ -500,15 +498,17 @@ class KCLIArgs:
     @cached_property
     def display_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
-        args.add_argument('--minimize', dest='minimize', default=True, action='store_true', help='Minimize output.')
-        args.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize output.')
+        args.add_argument('--minimize', dest='minimize', default=None, action='store_true', help='Minimize output.')
+        args.add_argument(
+            '--no-minimize', dest='minimize', default=None, action='store_false', help='Do not minimize output.'
+        )
         return args
 
     @cached_property
     def definition_args(self) -> ArgumentParser:
         args = ArgumentParser(add_help=False)
         args.add_argument(
-            '-I', type=str, dest='includes', default=[], action='append', help='Directories to lookup K definitions in.'
+            '-I', type=str, dest='includes', action='append', help='Directories to lookup K definitions in.'
         )
         args.add_argument('--main-module', type=str, help='Name of the main module.')
         args.add_argument('--syntax-module', type=str, help='Name of the syntax module.')
@@ -547,14 +547,12 @@ class KCLIArgs:
         )
         args.add_argument(
             '--save-directory',
-            default=None,
             type=ensure_dir_path,
             help='Directory to save proof artifacts at for reuse.',
         )
         args.add_argument(
             '--temp-directory',
             dest='temp_directory',
-            default=None,
             type=ensure_dir_path,
             help='Directory to save intermediate temporaries to.',
         )
