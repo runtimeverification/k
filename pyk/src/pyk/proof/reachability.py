@@ -382,6 +382,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             **kwargs,
         )
 
+    def as_rules(self, priority: int = 20) -> list[KRule]:
+        _rules = []
+        for _edge in self.kcfg.edges():
+            _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
+            assert type(_rule) is KRule
+            _rules.append(_rule)
+        return _rules
+
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
         _rule = _edge.to_rule('BASIC-BLOCK', priority=priority)
@@ -710,7 +718,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         dependencies_as_rules: list[KRuleLike] = []
         for apr_subproof in [pf for pf in subproofs if isinstance(pf, APRProof)]:
-            dependencies_as_rules.extend(apr_subproof.kcfg.to_rules(priority=20))
+            dependencies_as_rules.extend(apr_subproof.as_rules(priority=20))
             if apr_subproof.admitted and len(apr_subproof.kcfg.predecessors(apr_subproof.target)) == 0:
                 dependencies_as_rules.append(apr_subproof.as_rule(priority=20))
         circularity_rule = proof.as_rule(priority=20)
