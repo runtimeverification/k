@@ -37,14 +37,14 @@ class LLVMRewriteEvent(LLVMStepEvent):
 
     @property
     @abstractmethod
-    def rule_ordinal(self) -> int: 
-        """ Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore definition. """
+    def rule_ordinal(self) -> int:
+        """Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore definition."""
         ...
 
     @property
     @abstractmethod
     def substitution(self) -> dict[str, Pattern]:
-        """ Returns the substitution dictionary used to perform the rewrite represented by this event. """
+        """Returns the substitution dictionary used to perform the rewrite represented by this event."""
         ...
 
 
@@ -72,12 +72,12 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 
     @property
     def rule_ordinal(self) -> int:
-        """ Returns the axiom ordinal number of the rule event. """
+        """Returns the axiom ordinal number of the rule event."""
         return self._rule_event.rule_ordinal
 
     @property
     def substitution(self) -> dict[str, Pattern]:
-        """ Returns the substitution dictionary used to perform the rewrite represented by this rule event. """
+        """Returns the substitution dictionary used to perform the rewrite represented by this rule event."""
         return {k: v[0] for k, v in self._rule_event.substitution.items()}
 
 
@@ -105,12 +105,12 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 
     @property
     def rule_ordinal(self) -> int:
-        """ Returns the axiom ordinal number associated with the side condition event. """
+        """Returns the axiom ordinal number associated with the side condition event."""
         return self._side_condition_event.rule_ordinal
 
     @property
     def substitution(self) -> dict[str, Pattern]:
-        """ Returns the substitution dictionary used to perform the rewrite represented by this side condition event. """
+        """Returns the substitution dictionary used to perform the rewrite represented by this side condition event."""
         return {k: v[0] for k, v in self._side_condition_event.substitution.items()}
 
 
@@ -138,12 +138,12 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
 
     @property
     def rule_ordinal(self) -> int:
-        """ Returns the axiom ordinal number associated with the side condition event. """
+        """Returns the axiom ordinal number associated with the side condition event."""
         return self._side_condition_end_event.rule_ordinal
 
     @property
     def check_result(self) -> bool:
-        """ Returns the boolean result of the evaluation of the side condition that corresponds to this event. """
+        """Returns the boolean result of the evaluation of the side condition that corresponds to this event."""
         return self._side_condition_end_event.check_result
 
 
@@ -171,17 +171,17 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     @property
     def name(self) -> str:
-        """ Returns the name of the LLVM function as a KORE Symbol Name. """
+        """Returns the name of the LLVM function as a KORE Symbol Name."""
         return self._function_event.name
 
     @property
     def relative_position(self) -> str:
-        """ Returns the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0) """
+        """Returns the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0)"""
         return self._function_event.relative_position
 
     @property
     def args(self) -> list[LLVMArgument]:
-        """  Returns a list of LLVMArgument objects representing the arguments of the LLVM function. """
+        """Returns a list of LLVMArgument objects representing the arguments of the LLVM function."""
         return [LLVMArgument(arg) for arg in self._function_event.args]
 
 
@@ -209,22 +209,22 @@ class LLVMHookEvent(LLVMStepEvent):
 
     @property
     def name(self) -> str:
-        """ Returns the attribute name of the hook event. Ex.: "INT.add" """
+        """Returns the attribute name of the hook event. Ex.: "INT.add" """
         return self._hook_event.name
 
     @property
     def relative_position(self) -> str:
-        """ Returns the relative position of the hook event in the proof trace. Ex.: (0:0:0:0) """
+        """Returns the relative position of the hook event in the proof trace. Ex.: (0:0:0:0)"""
         return self._hook_event.relative_position
 
     @property
     def args(self) -> list[LLVMArgument]:
-        """ Returns a list of LLVMArgument objects representing the arguments of the hook event. """
+        """Returns a list of LLVMArgument objects representing the arguments of the hook event."""
         return [LLVMArgument(arg) for arg in self._hook_event.args]
 
     @property
     def result(self) -> Pattern:
-        """ Returns the result pattern of the hook event evaluation. """
+        """Returns the result pattern of the hook event evaluation."""
         return self._hook_event.result
 
 
@@ -252,7 +252,7 @@ class LLVMArgument:
 
     @property
     def step_event(self) -> LLVMStepEvent:
-        """  Returns the LLVMStepEvent associated with the argument if any. """
+        """Returns the LLVMStepEvent associated with the argument if any."""
         if isinstance(self._argument.step_event, llvm_rule_event):
             return LLVMRuleEvent(self._argument.step_event)
         elif isinstance(self._argument.step_event, llvm_side_condition_event):
@@ -268,16 +268,16 @@ class LLVMArgument:
 
     @property
     def kore_pattern(self) -> Pattern:
-        """ Returns the KORE Pattern associated with the argument if any. """
+        """Returns the KORE Pattern associated with the argument if any."""
         assert isinstance(self._argument.kore_pattern, Pattern)
         return self._argument.kore_pattern
 
     def is_kore_pattern(self) -> bool:
-        """ Checks if the argument is a KORE Pattern. """
+        """Checks if the argument is a KORE Pattern."""
         return self._argument.is_kore_pattern()
 
     def is_step_event(self) -> bool:
-        """ Checks if the argument is a step event. """
+        """Checks if the argument is a step event."""
         return self._argument.is_step_event()
 
 
