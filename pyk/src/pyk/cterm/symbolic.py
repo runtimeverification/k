@@ -24,7 +24,7 @@ from ..kore.rpc import (
     UnsatResult,
     kore_server,
 )
-from ..prelude.k import GENERATED_TOP_CELL
+from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
 from ..prelude.ml import is_top, mlAnd, mlEquals
 
 if TYPE_CHECKING:
@@ -233,7 +233,9 @@ class CTermSymbolic:
                 bind_text, bind_label = ('universally', '#Forall')
             _LOGGER.debug(f'Binding variables in consequent {bind_text}: {unbound_consequent}')
             for uc in unbound_consequent:
-                _consequent = KApply(KLabel(bind_label, [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
+                # Setting Sort1 to KItem in #Exists to avoid inferring the type of each uc.
+                # This should not have any effect on the resulting KORE pattern (\exists only has Sort2 as sort variable).
+                _consequent = KApply(KLabel(bind_label, [K_ITEM, GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
         antecedent_kore = self.kast_to_kore(antecedent.kast)
         consequent_kore = self.kast_to_kore(_consequent)
         try:

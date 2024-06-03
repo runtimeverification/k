@@ -110,9 +110,11 @@ def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
             return mlNot(karg, sort=_sort_to_kast(sort))
 
         case Exists(sort, EVar(vname, vsort), _):
-            kvar = KVariable(name=unmunge(vname[3:]), sort=_sort_to_kast(vsort))
+            ksort = _sort_to_kast(sort)
+            kvsort = _sort_to_kast(vsort)
+            kvar = KVariable(name=unmunge(vname[3:]), sort=kvsort)
             (body,) = terms
-            return mlExists(kvar, body, sort=_sort_to_kast(sort))
+            return mlExists(kvar, body, sort1=kvsort, sort2=ksort)
 
         case Equals(op_sort, sort, _, _):
             larg, rarg = terms
