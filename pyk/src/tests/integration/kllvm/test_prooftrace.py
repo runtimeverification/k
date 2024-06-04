@@ -596,6 +596,92 @@ class TestConcurrentCounters(ProofTraceTest):
         axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
 
 
+class Test0Decrement(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module DECREMENT-SYNTAX
+            syntax Nat ::= "0" | s(Nat)
+        endmodule
+
+        module DECREMENT
+            imports DECREMENT-SYNTAX
+            rule [decrement] : s(N:Nat) => N
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'DECREMENT'
+
+    HINTS_INPUT_KORE = """    
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))
+    """
+    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        for i in range(len(hints)):
+            assert len(pt.pre_trace) == 11
+
+        for i in range(len(hints)):
+            # a pair of (rule, config) for each non-functional rewrite step
+            assert len(pt.trace) == 1
+            
+class Test1Decrement(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module DECREMENT-SYNTAX
+            syntax Nat ::= "1" | s(Nat)
+        endmodule
+
+        module DECREMENT
+            imports DECREMENT-SYNTAX
+            rule [decrement] : s(N:Nat) => N
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'DECREMENT'
+
+    HINTS_INPUT_KORE = """    
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl1'Unds'DECREMENT-SYNTAX'Unds'Nat{}())))))
+    """
+
+    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # a pair of (rule, config) for each non-functional rewrite step
+        assert len(pt.trace) == 2
+
+class Test2Decrement(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module DECREMENT-SYNTAX
+            syntax Nat ::= "2" | s(Nat)
+        endmodule
+
+        module DECREMENT
+            imports DECREMENT-SYNTAX
+            rule [decrement] : s(N:Nat) => N
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'DECREMENT'
+
+    HINTS_INPUT_KORE = """    
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl2'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))))
+    """
+
+    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        for i in range(len(hints)):
+            assert len(pt.pre_trace) == 11
+
+        for i in range(len(hints)):
+            # a pair of (rule, config) for each non-functional rewrite step
+            assert len(pt.trace) == 3
 
 class TestPeano(ProofTraceTest):
     KOMPILE_DEFINITION = """
