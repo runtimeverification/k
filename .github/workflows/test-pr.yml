@@ -28,8 +28,8 @@ jobs:
         run: mvn spotless:check --batch-mode -U
 
 
-  pyk-code-quality-checks:
-    name: 'Pyk: Code Quality & Unit Tests'
+  pykframework-code-quality-checks:
+    name: 'pykframework: Code Quality & Unit Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -38,12 +38,12 @@ jobs:
         python-version: ['3.10', '3.11', '3.12']
     defaults:
       run:
-        working-directory: ./pyk
+        working-directory: ./pykframework
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
       - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
+        uses: ./.github/actions/setup-pykframework-env
         with:
           python-version: ${{ matrix.python-version }}
       - name: 'Run code quality checks'
@@ -54,17 +54,17 @@ jobs:
         run: make cov-unit
 
 
-  pyk-build-docs:
-    name: 'Pyk: Documentation'
+  pykframework-build-docs:
+    name: 'pykframework: Documentation'
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./pyk
+        working-directory: ./pykframework
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
       - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
+        uses: ./.github/actions/setup-pykframework-env
       - name: 'Build documentation'
         run: make docs
 
@@ -74,8 +74,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - format-check
-      - pyk-code-quality-checks
-      - pyk-build-docs
+      - pykframework-code-quality-checks
+      - pykframework-build-docs
     steps:
       - run: true
 
@@ -136,15 +136,15 @@ jobs:
           retention-days: 1
 
 
-  pyk-build-on-nix:
+  pykframework-build-on-nix:
     needs: code-quality
-    name: 'Pyk: Nix Build'
+    name: 'pykframework: Nix Build'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13]
     defaults:
       run:
-        working-directory: ./pyk
+        working-directory: ./pykframework
     runs-on: ${{ matrix.os }}
     steps:
       - name: 'Check out code'
@@ -165,8 +165,8 @@ jobs:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
-      - name: 'Build pyk'
-        run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
+      - name: 'Build pykframework'
+        run: GC_DONT_GC=1 nix build --print-build-logs .#pykframework-python310
 
 
   compile-nix-flake:
@@ -224,9 +224,9 @@ jobs:
         run: GC_DONT_GC=1 nix build --print-build-logs .#test
 
 
-  pyk-profile:
+  pykframework-profile:
     needs: test-package-ubuntu-jammy
-    name: 'Pyk: Profiling'
+    name: 'pykframework: Profiling'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
     steps:
@@ -239,21 +239,21 @@ jobs:
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
-          container-name: k-pyk-profile-${{ github.sha }}
+          container-name: k-pykframework-profile-${{ github.sha }}
           k-deb-path: kframework.deb
       - name: 'Run profiling'
         run: |
-          docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
-          docker exec -u user k-pyk-profile-${{ github.sha }} /bin/bash -c 'find /tmp/pytest-of-user/pytest-current/ -type f -name "*.prof" | sort | xargs tail -n +1'
+          docker exec -u user k-pykframework-profile-${{ github.sha }} make profile PROF_ARGS=-n4
+          docker exec -u user k-pykframework-profile-${{ github.sha }} /bin/bash -c 'find /tmp/pytest-of-user/pytest-current/ -type f -name "*.prof" | sort | xargs tail -n +1'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-pyk-profile-${{ github.sha }}
+          docker stop --time=0 k-pykframework-profile-${{ github.sha }}
 
 
-  pyk-integration-tests:
+  pykframework-integration-tests:
     needs: test-package-ubuntu-jammy
-    name: 'Pyk: Integration Tests'
+    name: 'pykframework: Integration Tests'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 30
     steps:
@@ -266,20 +266,20 @@ jobs:
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
-          container-name: k-pyk-integration-${{ github.sha }}
+          container-name: k-pykframework-integration-${{ github.sha }}
           k-deb-path: kframework.deb
       - name: 'Run integration tests'
         run: |
-          docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
+          docker exec -u user k-pykframework-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-pyk-integration-${{ github.sha }}
+          docker stop --time=0 k-pykframework-integration-${{ github.sha }}
 
 
-  pyk-regression-tests:
+  pykframework-regression-tests:
     needs: test-package-ubuntu-jammy
-    name: 'Pyk: Regression Tests'
+    name: 'pykframework: Regression Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -292,15 +292,15 @@ jobs:
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
-          container-name: k-pyk-regression-${{ github.sha }}
+          container-name: k-pykframework-regression-${{ github.sha }}
           k-deb-path: kframework.deb
       - name: 'Run K regression tests'
         run: |
-          docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
+          docker exec -u user k-pykframework-regression-${{ github.sha }} make test-regression-new -j4
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-pyk-regression-${{ github.sha }}
+          docker stop --time=0 k-pykframework-regression-${{ github.sha }}
 
 
   performance-tests:

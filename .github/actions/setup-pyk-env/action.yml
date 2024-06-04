@@ -1,5 +1,5 @@
-name: 'Set Up Pyk Environment'
-description: 'Set up Pyk test environment'
+name: 'Set Up pykframework Environment'
+description: 'Set up pykframework test environment'
 inputs:
   python-version:
     description: 'Python version'
@@ -17,4 +17,4 @@ runs:
       uses: Gr1N/setup-poetry@v9
     - name: 'Install package'
       shell: bash
-      run: poetry -C pyk install
+      run: poetry -C pykframework install

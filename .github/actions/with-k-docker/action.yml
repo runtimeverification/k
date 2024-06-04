@@ -37,5 +37,5 @@ runs:
         --user root              \
         ${TAG}
 
-      docker cp ./pyk/. ${CONTAINER_NAME}:/home/user
+      docker cp ./pykframework/. ${CONTAINER_NAME}:/home/user
       docker exec ${CONTAINER_NAME} chown -R user:user /home/user
