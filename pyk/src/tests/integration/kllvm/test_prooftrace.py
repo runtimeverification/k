@@ -266,3 +266,83 @@ class TestTreeReverse(ProofTraceTest):
         )
         assert k_cell['args'][0]['args'][0]['args'][0]['name'] == "Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree"
         assert k_cell['args'][0]['args'][0]['args'][1]['name'] == "Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree"
+
+class TestNonRecFunction(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+    module NON-REC-FUNCTION-SYNTAX
+        syntax Foo ::= "a"
+                     | bar(Foo)
+                     | baz(Foo)
+                     | id(Foo) [function, total]
+    endmodule
+
+    module NON-REC-FUNCTION
+        imports NON-REC-FUNCTION-SYNTAX
+        rule [id-rule]: id(X:Foo) => X
+        rule [bar-rule]: bar(baz(X:Foo)) => id(id(bar(X)))
+    endmodule
+
+        """
+
+    KOMPILE_MAIN_MODULE = 'NON-REC-FUNCTION'
+
+    HINTS_INPUT_KORE = """
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))))))
+        """
+
+    def test_parse_proof_hint_non_rec_function(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # 2 post-initial-configuration events
+        assert len(pt.trace) == 4
+
+        # Contents of the k cell in the initial configuration
+        kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
+
+        # Rule applied in the single (non-functional) rewrite step
+        rule_event = pt.trace[0].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 3
+
+        # Functional event
+        fun_event = pt.trace[1].step_event
+        assert isinstance(fun_event, prooftrace.LLVMFunctionEvent)
+        assert fun_event.name == "Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}"
+        assert fun_event.relative_position == '0:0:0'
+        assert len(fun_event.args) == 2
+        # Check that arguments are a functional event and simplification rule
+        assert isinstance(fun_event.args[0].step_event, prooftrace.LLVMFunctionEvent)
+        assert fun_event.args[0].step_event.relative_position == '0:0:0:0'
+        assert isinstance(fun_event.args[1].step_event, prooftrace.LLVMRuleEvent)
+
+        # Then rule
+        rule_event = pt.trace[2].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 1
+
+        # Then pattern
+        rule_event = pt.trace[3]
+        assert rule_event.is_kore_pattern()
+        kore_pattern = llvm_to_pattern(rule_event.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
