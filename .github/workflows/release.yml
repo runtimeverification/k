@@ -386,6 +386,7 @@ jobs:
         with:
           packages-dir: pyk/dist
           user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
 
   # release:
   #   name: 'Publish Release'
