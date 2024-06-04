@@ -377,7 +377,7 @@ jobs:
             ${{ runner.os }}-poetry-
       
       - name: Build Pyk
-        working-directory: pyk
+        working-directory: pykframework
         run: |
           make build
 
