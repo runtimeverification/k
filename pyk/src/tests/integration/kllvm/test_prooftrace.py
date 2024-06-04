@@ -15,6 +15,12 @@ from pyk.kore.syntax import App
 from pyk.testing import ProofTraceTest
 
 
+def get_pattern_from_ordinal(definition_text: list[str], ordinal: int) -> str:
+    axiom_ordinal = 'ordinal{}("' + str(ordinal) + '")'
+    line = next((i + 1 for i, l in enumerate(definition_text) if axiom_ordinal in l), None)
+    assert line is not None
+    return definition_text[line - 1].strip()
+
 class TestProofTrace(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module TEST-PROOF-TRACE-SYNTAX
@@ -40,12 +46,6 @@ class TestProofTrace(ProofTraceTest):
         )
     ).text
 
-    def get_pattern_from_ordinal(self, definition_text: list[str], ordinal: int) -> str:
-        axiom_ordinal = 'ordinal{}("' + str(ordinal) + '")'
-        line = next((i + 1 for i, l in enumerate(definition_text) if axiom_ordinal in l), None)
-        assert line is not None
-        return definition_text[line - 1].strip()
-
     def test_proof_trace(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -67,7 +67,7 @@ class TestProofTrace(ProofTraceTest):
         assert isinstance(pt.trace[0].step_event, prooftrace.LLVMRewriteEvent)
         axiom_ordinal = pt.trace[0].step_event.rule_ordinal
         axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
-        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        axiom_expected = get_pattern_from_ordinal(definition_text, axiom_ordinal)
         assert axiom == axiom_expected
 
         # check that the second event is the rewrite b() => c()
@@ -75,7 +75,7 @@ class TestProofTrace(ProofTraceTest):
         assert isinstance(pt.trace[1].step_event, prooftrace.LLVMRewriteEvent)
         axiom_ordinal = pt.trace[1].step_event.rule_ordinal
         axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
-        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        axiom_expected = get_pattern_from_ordinal(definition_text, axiom_ordinal)
         assert axiom == axiom_expected
 
         # check that the third event is a configuration
