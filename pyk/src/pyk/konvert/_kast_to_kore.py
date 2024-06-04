@@ -211,9 +211,9 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     top_level_k_sort = KSort('GeneratedTopCell')
     # The backend does not like rewrite rules without a precondition
     if len(krule_lhs_constraints) > 0:
-        kore_lhs0: Pattern = kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort)
+        kore_lhs: Pattern = kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort)
     else:
-        kore_lhs0 = And(
+        kore_lhs = And(
             top_level_kore_sort,
             (
                 kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort),
@@ -221,10 +221,8 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
             ),
         )
 
-    kore_rhs0: Pattern = kast_to_kore(kast_defn, krule_rhs, sort=top_level_k_sort)
+    kore_rhs: Pattern = kast_to_kore(kast_defn, krule_rhs, sort=top_level_k_sort)
 
-    kore_lhs = kompiled_kore.add_injections(kore_lhs0, sort=top_level_kore_sort)
-    kore_rhs = kompiled_kore.add_injections(kore_rhs0, sort=top_level_kore_sort)
     prio = krule.priority
     attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
     if Atts.LABEL in krule.att:
