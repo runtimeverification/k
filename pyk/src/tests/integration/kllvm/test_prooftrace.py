@@ -139,3 +139,130 @@ class TestSingleRewrite(ProofTraceTest):
         assert k_cell['name'] == 'kseq'
         assert k_cell['args'][0]['args'][0]['name'] == "LblFooB'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo"
         assert k_cell['args'][1]['name'] == 'dotk'
+
+class TestTreeReverse(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module TREE-REVERSE-SYNTAX
+            syntax Tree ::= "a" | "b" | "c" | node(Tree, Tree)
+            syntax Tree ::= reverse(Tree) [function, total]
+            syntax KItem ::= "#Init"
+            syntax KItem ::= "#next"
+        endmodule
+
+        module TREE-REVERSE
+            imports TREE-REVERSE-SYNTAX
+            rule [base-case-a] : reverse(a) => a
+            rule [base-case-b] : reverse(b) => b
+            rule [base-case-c] : reverse(c) => c
+            rule [rec-case] :  reverse(node(T1, T2)) => node(reverse(T2), reverse(T1))
+            rule [init] : <k> #Init => #next </k>
+            rule [next] : <k> #next => reverse(node(a, b)) </k>
+        endmodule
+        """
+        
+    KOMPILE_MAIN_MODULE = 'TREE-REVERSE'
+    
+    HINTS_INPUT_KORE = """
+       LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())))
+       """
+
+    def test_parse_proof_hint_reverse_no_ints(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # 2 post-initial-configuration events
+        assert len(pt.trace) == 9
+
+        # Contents of the k cell in the initial configuration
+        kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['name'] == "Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem"
+
+        # Rule applied in the single (non-functional) rewrite step
+        rule_event = pt.trace[0].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 1
+
+        # Second rewrite
+        rule_event = pt.trace[1].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        assert hasattr(rule_event, 'rule_ordinal')
+        assert hasattr(rule_event, 'substitution')
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 1
+
+        # Function event
+        rule_event = pt.trace[2].step_event
+        assert isinstance(rule_event, prooftrace.LLVMFunctionEvent)
+        assert rule_event.name == "Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}"
+        assert rule_event.relative_position == '0:0:0'
+        # Fun events should not have Kore args unless called with a special flag
+        assert len(rule_event.args) == 0
+
+        # Simplification rule
+        rule_event = pt.trace[3].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 2
+
+        # Function event
+        rule_event = pt.trace[4].step_event
+        assert isinstance(rule_event, prooftrace.LLVMFunctionEvent)
+        assert rule_event.name == "Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}"
+        assert rule_event.relative_position == '0'
+        # Fun events should not have Kore args unless called with a special flag
+        assert len(rule_event.args) == 0
+
+        # Simplification rule
+        rule_event = pt.trace[5].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 1
+
+        # Function event
+        rule_event = pt.trace[6].step_event
+        assert isinstance(rule_event, prooftrace.LLVMFunctionEvent)
+        assert rule_event.name == "Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}"
+        assert rule_event.relative_position == '1'
+        # Fun events should not have Kore args unless called with a special flag
+        assert len(rule_event.args) == 0
+
+        # Simplification rule
+        rule_event = pt.trace[7].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 1
+
+        # Then pattern
+        rule_event = pt.trace[8]
+        assert rule_event.is_kore_pattern()
+        kore_pattern = llvm_to_pattern(rule_event.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert (
+            k_cell['args'][0]['args'][0]['name']
+            == "Lblnode'LParUndsCommUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree'Unds'Tree"
+        )
+        assert k_cell['args'][0]['args'][0]['args'][0]['name'] == "Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree"
+        assert k_cell['args'][0]['args'][0]['args'][1]['name'] == "Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree"
