@@ -10,23 +10,45 @@ inputs:
     required: true
     type: string
     default: kframework.deb
+  os:
+    description: 'OS to setup Docker for.'
+    required: true
+    default: ubuntu
+  distro:
+    description: 'Distribution to setup Docker for.'
+    required: true
+    default: jammy
 runs:
   using: 'composite'
   steps:
   - name: 'Set up Docker'
     shell: bash {0}
+    env:
+      BASE_OS: ${{ inputs.os }}
+      BASE_DISTRO: ${{ inputs.distro }}
+      GH_TOKEN: ${{ github.token }}
     run: |
       set -euxo pipefail
+
+      gh release download                           \
+        --repo runtimeverification/llvm-backend     \
+        --pattern "*${BASE_OS}_${BASE_DISTRO}.deb"  \
+        --output llvm-backend.deb                   \
+        v$(cat deps/llvm-backend_release)
 
       CONTAINER_NAME=${{ inputs.container-name }}
       TAG=runtimeverificationinc/${CONTAINER_NAME}
       DOCKERFILE=${{ github.action_path }}/Dockerfile
       K_DEB_PATH=${{ inputs.k-deb-path }}
+      LLVM_BACKEND_DEB_PATH=llvm-backend.deb
 
       docker build . \
-        --file ${DOCKERFILE}             \
-        --tag ${TAG}                     \
-        --build-arg K_DEB_PATH=${K_DEB_PATH}
+        --file ${DOCKERFILE}                                        \
+        --tag ${TAG}                                                \
+        --build-arg BASE_OS=${BASE_OS}                              \
+        --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
+        --build-arg K_DEB_PATH=${K_DEB_PATH}                        \
+        --build-arg LLVM_BACKEND_DEB_PATH=${LLVM_BACKEND_DEB_PATH}
 
       docker run                 \
         --name ${CONTAINER_NAME} \

@@ -256,7 +256,7 @@ jobs:
 
 
   pyk-profile:
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Profiling'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
@@ -266,12 +266,13 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-profile-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
       - name: 'Run profiling'
         run: |
           docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
@@ -283,7 +284,7 @@ jobs:
 
 
   pyk-integration-tests:
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Integration Tests'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 30
@@ -293,12 +294,13 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-integration-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
       - name: 'Run integration tests'
         run: |
           docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
@@ -309,7 +311,7 @@ jobs:
 
 
   pyk-regression-tests:
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Regression Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -319,12 +321,13 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-regression-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
       - name: 'Run K regression tests'
         run: |
           docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
