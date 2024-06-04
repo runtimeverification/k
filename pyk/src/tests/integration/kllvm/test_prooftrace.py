@@ -597,6 +597,49 @@ class TestConcurrentCounters(ProofTraceTest):
 
 
 
+class TestPeano(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module PEANO-SYNTAX
+            syntax Nat ::= "0"
+                        | s(Nat)        [overload(Nat)]
+            syntax Exp ::= Nat
+            syntax Exp ::= s(Exp)        [overload(Nat), strict]
+            syntax Exp ::= add(Exp, Exp) [seqstrict]
+            syntax Exp ::= mul(Exp, Exp) [seqstrict]
+        endmodule
+
+        module PEANO
+            imports PEANO-SYNTAX
+            syntax KResult ::= Nat
+            rule [add-0] : add(0, M:Nat) => M
+            rule [add-1] : add(s(N:Nat), M:Nat) => s(add(N, M))
+            rule [mul-0] : mul(0, _:Nat) => 0
+            rule [mul-1] : mul(s(N:Nat), M:Nat) => add(M, mul(N, M))
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'PEANO'
+
+    HINTS_INPUT_KORE = """    
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortExp{}, SortKItem{}}(Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(inj{SortNat{}, SortExp{}}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),inj{SortNat{}, SortExp{}}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))
+
+    """
+    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # 461 post-initial-configuration events
+        assert len(pt.trace) == 404
+
 class TestIMP5(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module IMP5-SYNTAX
