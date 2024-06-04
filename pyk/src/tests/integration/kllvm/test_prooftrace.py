@@ -346,3 +346,83 @@ class TestNonRecFunction(ProofTraceTest):
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
         assert k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
+
+class TestDV(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module DV
+            imports DOMAINS
+            syntax Foo ::= foo(Int)
+                         | succ(Foo)
+            rule succ(foo(X:Int)) => foo(X +Int 1)
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'DV'
+    KOMPILE_SYNTAX_MODULE = 'DV'
+
+    HINTS_INPUT_KORE = """
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\\dv{SortInt{}}("5")))))))
+        """
+
+    def test_parse_proof_hint_dv(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # 2 post-initial-configuration events
+        assert len(pt.trace) == 3
+
+        # Contents of the k cell in the initial configuration
+        kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['args'][0]['name'] == "Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo"
+        assert k_cell['args'][0]['args'][0]['args'][0]['name'] == "Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int"
+        assert k_cell['args'][0]['args'][0]['args'][0]['args'][0]['tag'] == 'DV'
+        assert k_cell['args'][0]['args'][0]['args'][0]['args'][0]['value'] == '5'
+
+        # Rule applied in the single (non-functional) rewrite step
+        rule_event = pt.trace[0].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+        assert len(rule_event.substitution) == 3
+
+        # Hook event
+        hook_event = pt.trace[1].step_event
+        assert isinstance(hook_event, prooftrace.LLVMHookEvent)
+        assert hook_event.name == 'INT.add'
+        assert hook_event.relative_position == '0:0:0:0'
+        assert len(hook_event.args) == 3
+
+        fun_event = hook_event.args[0].step_event
+        assert isinstance(fun_event, prooftrace.LLVMFunctionEvent)
+        assert fun_event.name == "Lbl'UndsPlus'Int'Unds'{}"
+        assert fun_event.relative_position == '0:0:0:0'
+        assert len(fun_event.args) == 0
+
+        arg1 = hook_event.args[1]
+        assert arg1.is_kore_pattern()
+
+        arg2 = hook_event.args[2]
+        assert arg2.is_kore_pattern()
+
+        # Then pattern
+        rule_event = pt.trace[2]
+        assert rule_event.is_kore_pattern()
+        kore_pattern = llvm_to_pattern(rule_event.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['args'][0]['name'] == "Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int"
+        assert k_cell['args'][0]['args'][0]['args'][0]['tag'] == 'DV'
+        assert k_cell['args'][0]['args'][0]['args'][0]['value'] == '6'
+

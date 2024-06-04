@@ -100,15 +100,22 @@ class KompiledTest:
     KOMPILE_MAIN_FILE: ClassVar[str | Path | None] = None
     KOMPILE_DEFINITION: ClassVar[str | None] = None
     KOMPILE_MAIN_MODULE: ClassVar[str | None] = None
+    KOMPILE_SYNTAX_MODULE: ClassVar[str | None] = None
     KOMPILE_BACKEND: ClassVar[str | None] = None
     KOMPILE_ARGS: ClassVar[dict[str, Any]] = {}
 
     @pytest.fixture(scope='class')
     def definition_dir(self, kompile: Kompiler) -> Path:
+        if self.KOMPILE_SYNTAX_MODULE is None and self.KOMPILE_MAIN_MODULE is not None:
+            KOMPILE_SYNTAX_MODULE = self.KOMPILE_MAIN_MODULE + '-SYNTAX'
+        elif self.KOMPILE_SYNTAX_MODULE is not None:
+            KOMPILE_SYNTAX_MODULE = self.KOMPILE_SYNTAX_MODULE
+        
         kwargs = dict(self.KOMPILE_ARGS)
         kwargs['main_file'] = self.KOMPILE_MAIN_FILE
         kwargs['definition'] = self.KOMPILE_DEFINITION
         kwargs['main_module'] = self.KOMPILE_MAIN_MODULE
+        kwargs['syntax_module'] = KOMPILE_SYNTAX_MODULE
         kwargs['backend'] = self.KOMPILE_BACKEND
         return kompile(**kwargs)
 
