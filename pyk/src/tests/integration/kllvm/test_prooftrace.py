@@ -22,12 +22,13 @@ def get_pattern_from_ordinal(definition_text: list[str], ordinal: int) -> str:
     assert line is not None
     return definition_text[line - 1].strip()
 
+
 class TestProofTrace(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module TEST-PROOF-TRACE-SYNTAX
           syntax Foo ::= a() | b() | c()
         endmodule
-        
+
         module TEST-PROOF-TRACE
           imports TEST-PROOF-TRACE-SYNTAX
           rule a() => b()
@@ -82,6 +83,7 @@ class TestProofTrace(ProofTraceTest):
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()
 
+
 class TestSingleRewrite(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module SINGLE-REWRITE-SYNTAX
@@ -92,14 +94,15 @@ class TestSingleRewrite(ProofTraceTest):
             imports SINGLE-REWRITE-SYNTAX
             rule [a-to-b]: FooA() => FooB()
         endmodule
-        """
-        
+    """
+
     KOMPILE_MAIN_MODULE = 'SINGLE-REWRITE'
-    
+
     HINTS_INPUT_KORE = """LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()))))"""
 
-
-    def test_parse_proof_hint_single_rewrite(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_single_rewrite(
+        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+    ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
@@ -140,6 +143,7 @@ class TestSingleRewrite(ProofTraceTest):
         assert k_cell['args'][0]['args'][0]['name'] == "LblFooB'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo"
         assert k_cell['args'][1]['name'] == 'dotk'
 
+
 class TestTreeReverse(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module TREE-REVERSE-SYNTAX
@@ -158,15 +162,17 @@ class TestTreeReverse(ProofTraceTest):
             rule [init] : <k> #Init => #next </k>
             rule [next] : <k> #next => reverse(node(a, b)) </k>
         endmodule
-        """
-        
+    """
+
     KOMPILE_MAIN_MODULE = 'TREE-REVERSE'
-    
+
     HINTS_INPUT_KORE = """
        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())))
        """
 
-    def test_parse_proof_hint_reverse_no_ints(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_reverse_no_ints(
+        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+    ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
@@ -255,9 +261,8 @@ class TestTreeReverse(ProofTraceTest):
         assert len(rule_event.substitution) == 1
 
         # Then pattern
-        rule_event = pt.trace[8]
-        assert rule_event.is_kore_pattern()
-        kore_pattern = llvm_to_pattern(rule_event.kore_pattern)
+        assert pt.trace[8].is_kore_pattern()
+        kore_pattern = llvm_to_pattern(pt.trace[8].kore_pattern)
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
         assert (
@@ -267,22 +272,22 @@ class TestTreeReverse(ProofTraceTest):
         assert k_cell['args'][0]['args'][0]['args'][0]['name'] == "Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree"
         assert k_cell['args'][0]['args'][0]['args'][1]['name'] == "Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree"
 
+
 class TestNonRecFunction(ProofTraceTest):
     KOMPILE_DEFINITION = """
-    module NON-REC-FUNCTION-SYNTAX
-        syntax Foo ::= "a"
-                     | bar(Foo)
-                     | baz(Foo)
-                     | id(Foo) [function, total]
-    endmodule
+        module NON-REC-FUNCTION-SYNTAX
+            syntax Foo ::= "a"
+                         | bar(Foo)
+                         | baz(Foo)
+                         | id(Foo) [function, total]
+        endmodule
 
-    module NON-REC-FUNCTION
-        imports NON-REC-FUNCTION-SYNTAX
-        rule [id-rule]: id(X:Foo) => X
-        rule [bar-rule]: bar(baz(X:Foo)) => id(id(bar(X)))
-    endmodule
-
-        """
+        module NON-REC-FUNCTION
+            imports NON-REC-FUNCTION-SYNTAX
+            rule [id-rule]: id(X:Foo) => X
+            rule [bar-rule]: bar(baz(X:Foo)) => id(id(bar(X)))
+        endmodule
+    """
 
     KOMPILE_MAIN_MODULE = 'NON-REC-FUNCTION'
 
@@ -290,7 +295,9 @@ class TestNonRecFunction(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))))))
         """
 
-    def test_parse_proof_hint_non_rec_function(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_non_rec_function(
+        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+    ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
@@ -310,7 +317,9 @@ class TestNonRecFunction(ProofTraceTest):
         kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
-        assert k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
+        assert (
+            k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
+        )
 
         # Rule applied in the single (non-functional) rewrite step
         rule_event = pt.trace[0].step_event
@@ -340,12 +349,14 @@ class TestNonRecFunction(ProofTraceTest):
         assert len(rule_event.substitution) == 1
 
         # Then pattern
-        rule_event = pt.trace[3]
-        assert rule_event.is_kore_pattern()
-        kore_pattern = llvm_to_pattern(rule_event.kore_pattern)
+        assert pt.trace[3].is_kore_pattern()
+        kore_pattern = llvm_to_pattern(pt.trace[3].kore_pattern)
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
-        assert k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
+        assert (
+            k_cell['args'][0]['args'][0]['name'] == "Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo"
+        )
+
 
 class TestDV(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -417,9 +428,8 @@ class TestDV(ProofTraceTest):
         assert arg2.is_kore_pattern()
 
         # Then pattern
-        rule_event = pt.trace[2]
-        assert rule_event.is_kore_pattern()
-        kore_pattern = llvm_to_pattern(rule_event.kore_pattern)
+        assert pt.trace[2].is_kore_pattern()
+        kore_pattern = llvm_to_pattern(pt.trace[2].kore_pattern)
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
         assert k_cell['args'][0]['args'][0]['name'] == "Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int"
@@ -446,11 +456,13 @@ class TestConcurrentCounters(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'CONCURRENT-COUNTERS'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortState{}, SortKItem{}}(Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\\dv{SortInt{}}("4"),\\dv{SortInt{}}("0"))))))
     """
 
-    def test_parse_concurrent_counters(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_concurrent_counters(
+        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+    ) -> None:
         # main purpose of the test is to check the sequence of events in the trace with
         # successful and failed side condition checks
         definition = parse_definition(definition_file)
@@ -479,7 +491,9 @@ class TestConcurrentCounters(ProofTraceTest):
             if event.is_kore_pattern():
                 continue
             elif isinstance(event.step_event, prooftrace.LLVMRuleEvent):
-                assert step in expected_events[prooftrace.LLVMRuleEvent], f'We expect {str(step)} to be of type {type(event).__name__}'
+                assert (
+                    step in expected_events[prooftrace.LLVMRuleEvent]
+                ), f'We expect {str(step)} to be of type {type(event).__name__}'
             elif isinstance(event.step_event, prooftrace.LLVMSideConditionEventEnter):
                 assert (
                     step in expected_events[prooftrace.LLVMSideConditionEventEnter]
@@ -489,7 +503,9 @@ class TestConcurrentCounters(ProofTraceTest):
                     step in expected_events[prooftrace.LLVMSideConditionEventExit]
                 ), f'We expect {str(step)} to be of type {type(event).__name__}'
             elif isinstance(event.step_event, prooftrace.LLVMHookEvent):
-                assert step in expected_events[prooftrace.LLVMHookEvent], f'We expect {str(step)} to be of type {type(event).__name__}'
+                assert (
+                    step in expected_events[prooftrace.LLVMHookEvent]
+                ), f'We expect {str(step)} to be of type {type(event).__name__}'
             else:
                 raise NotImplementedError()
 
@@ -610,21 +626,21 @@ class Test0Decrement(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'DECREMENT'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))
     """
-    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+
+    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
         # 11 initialization events
-        for i in range(len(hints)):
-            assert len(pt.pre_trace) == 11
+        assert len(pt.pre_trace) == 11
 
-        for i in range(len(hints)):
-            # a pair of (rule, config) for each non-functional rewrite step
-            assert len(pt.trace) == 1
-            
+        # a pair of (rule, config) for each non-functional rewrite step
+        assert len(pt.trace) == 1
+
+
 class Test1Decrement(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module DECREMENT-SYNTAX
@@ -639,11 +655,11 @@ class Test1Decrement(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'DECREMENT'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl1'Unds'DECREMENT-SYNTAX'Unds'Nat{}())))))
     """
 
-    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -652,6 +668,7 @@ class Test1Decrement(ProofTraceTest):
 
         # a pair of (rule, config) for each non-functional rewrite step
         assert len(pt.trace) == 2
+
 
 class Test2Decrement(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -667,21 +684,20 @@ class Test2Decrement(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'DECREMENT'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl2'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))))
     """
 
-    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
         # 11 initialization events
-        for i in range(len(hints)):
-            assert len(pt.pre_trace) == 11
+        assert len(pt.pre_trace) == 11
 
-        for i in range(len(hints)):
-            # a pair of (rule, config) for each non-functional rewrite step
-            assert len(pt.trace) == 3
+        # a pair of (rule, config) for each non-functional rewrite step
+        assert len(pt.trace) == 3
+
 
 class TestPeano(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -706,17 +722,12 @@ class TestPeano(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'PEANO'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortExp{}, SortKItem{}}(Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(inj{SortNat{}, SortExp{}}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),inj{SortNat{}, SortExp{}}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))
 
     """
-    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
-        definition = parse_definition(definition_file)
-        assert definition is not None
 
-        definition.preprocess()
-        definition_text = repr(definition).split('\n')
-
+    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.kore_header) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -725,6 +736,7 @@ class TestPeano(ProofTraceTest):
 
         # 461 post-initial-configuration events
         assert len(pt.trace) == 404
+
 
 class TestIMP5(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -815,16 +827,11 @@ class TestIMP5(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'IMP5'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortPgm{}, SortKItem{}}(inj{SortBlock{}, SortPgm{}}(Lbl'LBraRBraUnds'IMP5-SYNTAX'Unds'Block{}())))))
     """
-    def test_parse_proof_hint_imp5(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
-        definition = parse_definition(definition_file)
-        assert definition is not None
 
-        definition.preprocess()
-        definition_text = repr(definition).split('\n')
-
+    def test_parse_proof_hint_imp5(self, hints: bytes, header: prooftrace.kore_header) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -833,6 +840,7 @@ class TestIMP5(ProofTraceTest):
 
         # 2 post-initial-configuration events
         assert len(pt.trace) == 2
+
 
 class TestBuiltInHookEvents(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -850,19 +858,22 @@ class TestBuiltInHookEvents(ProofTraceTest):
 
     KOMPILE_MAIN_MODULE = 'BUILTIN-HOOK-EVENTS'
 
-    HINTS_INPUT_KORE = """    
+    HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool{}(\\dv{SortBool{}}("true"))))))
     """
-    def test_parse_proof_hint_builtin_hook_events(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+
+    def test_parse_proof_hint_builtin_hook_events(
+        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+    ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
-        
+
         definition.preprocess()
         definition_text = repr(definition).split('\n')
-        
+
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
-        
+
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
@@ -874,7 +885,8 @@ class TestBuiltInHookEvents(ProofTraceTest):
         k_cell = kore_pattern.patterns[0].dict['args'][0]
         assert k_cell['name'] == 'kseq'
         assert (
-            k_cell['args'][0]['args'][0]['name'] == "Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool"
+            k_cell['args'][0]['args'][0]['name']
+            == "Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool"
         )
         assert k_cell['args'][1]['name'] == 'dotk'
 
