@@ -353,6 +353,9 @@ jobs:
     environment: production
     needs: [set-release-id, source-tarball]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v5.1.0
         with:
