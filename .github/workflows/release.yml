@@ -126,8 +126,8 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pykframework kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pykframework kompile test.k --backend haskell'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: 'Clean up Docker Container'
         if: always()
@@ -344,8 +344,8 @@ jobs:
             const { owner, repo } = context.repo
             await github.rest.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
-  pykframework-publish:
-    name: 'Publish pykframework'
+  pyk-publish:
+    name: 'Publish pyk'
     runs-on: [self-hosted, linux, flyweight]
     environment: production
     permissions:
@@ -369,16 +369,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/poetry/virtualenvs
-          key: ${{ runner.os }}-poetry-${{ hashFiles('pykframework/pyproject.toml') }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('pyk/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
       
-      - name: Build pykframework
+      - name: Build pyk
         working-directory: pyk
         run: |
           make build
 
-      - name: Publish pykframework to PypI
+      - name: Publish pyk to PypI
         uses: pypa/gh-action-pypi-publish@v1.8.14
         with:
           packages-dir: pyk/dist
@@ -504,11 +504,11 @@ jobs:
           npm run build-sitemap
           cd -
           mv web/public_content ./
-          cd pykframework
+          cd pyk
           make docs
           cd -
-          mkdir public_content/pykframework
-          cp -r pykframework/docs/build/html/* public_content/pykframework
+          mkdir public_content/pyk
+          cp -r pyk/docs/build/html/* public_content/pyk
           rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
           mv public_content/* ./
           rm -rf public_content
