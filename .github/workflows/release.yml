@@ -377,14 +377,14 @@ jobs:
             ${{ runner.os }}-poetry-
       
       - name: Build pykframework
-        working-directory: pykframeworkframework
+        working-directory: pyk
         run: |
           make build
 
       - name: Publish pykframework to PypI
         uses: pypa/gh-action-pypi-publish@v1.8.14
         with:
-          packages-dir: pykframework/dist
+          packages-dir: pyk/dist
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
 
