@@ -9,6 +9,7 @@ description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
 ]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
