@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 
     from ..kast import KInner
     from ..kast.outer import KDefinition
-    from ..kore.kompiled import KompiledKore
     from ..kore.rpc import FallbackReason, LogEntry
     from ..kore.syntax import Pattern
     from ..utils import BugReport
@@ -74,20 +73,17 @@ class CTermSMTError(Exception):
 class CTermSymbolic:
     _kore_client: KoreClient
     _definition: KDefinition
-    _kompiled_kore: KompiledKore
     _trace_rewrites: bool
 
     def __init__(
         self,
         kore_client: KoreClient,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         *,
         trace_rewrites: bool = False,
     ):
         self._kore_client = kore_client
         self._definition = definition
-        self._kompiled_kore = kompiled_kore
         self._trace_rewrites = trace_rewrites
 
     def kast_to_kore(self, kinner: KInner) -> Pattern:
@@ -319,7 +315,6 @@ class CTermSymbolic:
 @contextmanager
 def cterm_symbolic(
     definition: KDefinition,
-    kompiled_kore: KompiledKore,
     definition_dir: Path,
     *,
     id: str | None = None,
@@ -360,7 +355,7 @@ def cterm_symbolic(
             no_post_exec_simplify=no_post_exec_simplify,
         ) as server:
             with KoreClient('localhost', server.port, bug_report=bug_report, bug_report_id=id) as client:
-                yield CTermSymbolic(client, definition, kompiled_kore, trace_rewrites=trace_rewrites)
+                yield CTermSymbolic(client, definition, trace_rewrites=trace_rewrites)
     else:
         if port is None:
             raise ValueError('Missing port with start_server=False')
@@ -376,4 +371,4 @@ def cterm_symbolic(
                 ],
             }
         with KoreClient('localhost', port, bug_report=bug_report, bug_report_id=id, dispatch=dispatch) as client:
-            yield CTermSymbolic(client, definition, kompiled_kore, trace_rewrites=trace_rewrites)
+            yield CTermSymbolic(client, definition, trace_rewrites=trace_rewrites)

@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
     from ..kast import KInner
     from ..kast.outer import KDefinition, KFlatModule, KImport
-    from ..kore.kompiled import KompiledKore
     from ..kore.syntax import Pattern, Sentence, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -198,7 +197,7 @@ def _inject(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
 
 
 # 'krule' should have sorts on variables
-def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KRule) -> Axiom:
+def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     krule_body = krule.body
     krule_lhs_config = extract_lhs(krule_body)
     krule_rhs_config = extract_rhs(krule_body)
@@ -211,17 +210,17 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     top_level_k_sort = KSort('GeneratedTopCell')
     # The backend does not like rewrite rules without a precondition
     if len(krule_lhs_constraints) > 0:
-        kore_lhs: Pattern = kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort)
+        kore_lhs: Pattern = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
     else:
         kore_lhs = And(
             top_level_kore_sort,
             (
-                kast_to_kore(kast_defn, krule_lhs, sort=top_level_k_sort),
+                kast_to_kore(definition, krule_lhs, sort=top_level_k_sort),
                 Top(top_level_kore_sort),
             ),
         )
 
-    kore_rhs: Pattern = kast_to_kore(kast_defn, krule_rhs, sort=top_level_k_sort)
+    kore_rhs: Pattern = kast_to_kore(definition, krule_rhs, sort=top_level_k_sort)
 
     prio = krule.priority
     attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
@@ -240,12 +239,12 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     return axiom
 
 
-def kflatmodule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, kflatmodule: KFlatModule) -> Module:
+def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Module:
     kore_axioms: list[Sentence] = []
     for sent in kflatmodule.sentences:
         if type(sent) is not KRule:
             raise ValueError(f'Cannot convert sentence to Kore: {sent}')
-        kore_axioms.append(krule_to_kore(kast_defn, kompiled_kore, sent))
+        kore_axioms.append(krule_to_kore(definition, sent))
     imports: list[Sentence] = [_kimport_to_kore(kimport) for kimport in kflatmodule.imports]
     return Module(name=kflatmodule.name, sentences=(imports + kore_axioms))
 

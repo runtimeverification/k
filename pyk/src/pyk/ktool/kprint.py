@@ -16,7 +16,6 @@ from ..kast.inner import KInner
 from ..kast.outer import read_kast_definition
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
-from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
 from ..kore.syntax import App, SortApp
 from ..kore.tools import PrintOutput, kore_print
@@ -225,10 +224,6 @@ class KPrint:
     @cached_property
     def definition(self) -> KDefinition:
         return read_kast_definition(self.definition_dir / 'compiled.json')
-
-    @cached_property
-    def kompiled_kore(self) -> KompiledKore:
-        return KompiledKore.load(self.definition_dir)
 
     @property
     def definition_hash(self) -> str:
