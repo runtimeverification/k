@@ -595,3 +595,71 @@ class TestConcurrentCounters(ProofTraceTest):
         axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
         axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
 
+
+
+class TestBuiltInHookEvents(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module BUILTIN-HOOK-EVENTS-SYNTAX
+            imports BOOL-SYNTAX
+            syntax Foo ::= foo(Bool)
+        endmodule
+
+        module BUILTIN-HOOK-EVENTS
+            imports BOOL
+            imports BUILTIN-HOOK-EVENTS-SYNTAX
+            rule foo(B) => notBool notBool B
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'BUILTIN-HOOK-EVENTS'
+
+    HINTS_INPUT_KORE = """    
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool{}(\\dv{SortBool{}}("true"))))))
+    """
+    def test_parse_proof_hint_builtin_hook_events(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+        
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+        
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+        
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # 2 post-initial-configuration events
+        assert len(pt.trace) == 3
+
+        # Contents of the k cell in the initial configuration
+        kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert (
+            k_cell['args'][0]['args'][0]['name'] == "Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool"
+        )
+        assert k_cell['args'][1]['name'] == 'dotk'
+
+        # Rewrite rule
+        assert isinstance(pt.trace[0].step_event, prooftrace.LLVMRuleEvent)
+        rule_ordinal = pt.trace[0].step_event.rule_ordinal
+        repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        # Hook event with a nested event
+        assert isinstance(pt.trace[1].step_event, prooftrace.LLVMHookEvent)
+        assert pt.trace[1].step_event.name == 'BOOL.not'
+        assert pt.trace[1].step_event.relative_position == '0:0:0'
+        assert len(pt.trace[1].step_event.args) == 2
+        arg1 = pt.trace[1].step_event.args[0].step_event
+        arg2 = pt.trace[1].step_event.args[1]
+        assert isinstance(arg1, prooftrace.LLVMHookEvent)
+        assert arg1.name == 'BOOL.not'
+        assert arg1.relative_position == '0:0:0:0'
+        assert len(arg1.args) == 1
+        assert arg1.args[0].is_kore_pattern()
+        assert arg2.is_kore_pattern()
+
+        # Final configuration
+        assert pt.trace[2].is_kore_pattern()
