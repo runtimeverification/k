@@ -426,3 +426,172 @@ class TestDV(ProofTraceTest):
         assert k_cell['args'][0]['args'][0]['args'][0]['tag'] == 'DV'
         assert k_cell['args'][0]['args'][0]['args'][0]['value'] == '6'
 
+
+class TestConcurrentCounters(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module CONCURRENT-COUNTERS-SYNTAX
+            imports INT-SYNTAX
+            syntax State ::= state(Int, Int)
+        endmodule
+
+        module CONCURRENT-COUNTERS
+            imports INT
+            imports CONCURRENT-COUNTERS-SYNTAX
+            rule [count-rule1] : state(M, N) => state((M -Int 1), (N +Int M))
+                requires M >=Int 3 [priority(50)]
+            rule [count-rule2] : state(M, N) => state((M -Int 1), (N -Int 1))
+                requires M >=Int 1 [priority(60)]
+        endmodule
+    """
+
+    KOMPILE_MAIN_MODULE = 'CONCURRENT-COUNTERS'
+
+    HINTS_INPUT_KORE = """    
+        LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortState{}, SortKItem{}}(Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\\dv{SortInt{}}("4"),\\dv{SortInt{}}("0"))))))
+    """
+
+    def test_parse_concurrent_counters(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        # main purpose of the test is to check the sequence of events in the trace with
+        # successful and failed side condition checks
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization events
+        assert len(pt.pre_trace) == 11
+
+        # 2 post-initial-configuration events
+        assert len(pt.trace) == 37
+
+        # Check types
+        expected_events = {
+            prooftrace.LLVMRuleEvent: [3, 9, 18, 27],
+            prooftrace.LLVMSideConditionEventEnter: [0, 6, 12, 15, 21, 24, 30, 33],
+            prooftrace.LLVMSideConditionEventExit: [1, 2, 8, 14, 17, 23, 26, 32, 35],
+            prooftrace.LLVMHookEvent: [1, 4, 5, 7, 10, 11, 13, 16, 19, 20, 22, 25, 28, 29, 31, 34],
+        }
+        for step, event in enumerate(pt.trace):
+            if event.is_kore_pattern():
+                continue
+            elif isinstance(event.step_event, prooftrace.LLVMRuleEvent):
+                assert step in expected_events[prooftrace.LLVMRuleEvent], f'We expect {str(step)} to be of type {type(event).__name__}'
+            elif isinstance(event.step_event, prooftrace.LLVMSideConditionEventEnter):
+                assert (
+                    step in expected_events[prooftrace.LLVMSideConditionEventEnter]
+                ), f'We expect {str(step)} to be of type {type(event).__name__}'
+            elif isinstance(event.step_event, prooftrace.LLVMSideConditionEventExit):
+                assert (
+                    step in expected_events[prooftrace.LLVMSideConditionEventExit]
+                ), f'We expect {str(step)} to be of type {type(event).__name__}'
+            elif isinstance(event.step_event, prooftrace.LLVMHookEvent):
+                assert step in expected_events[prooftrace.LLVMHookEvent], f'We expect {str(step)} to be of type {type(event).__name__}'
+            else:
+                raise NotImplementedError()
+
+        # Check axiom ordinals
+        assert isinstance(pt.trace[0].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[0].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+        assert axiom == axiom_expected
+
+        assert isinstance(pt.trace[2].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[2].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[3].step_event, prooftrace.LLVMRuleEvent)
+        rule_ordinal = pt.trace[3].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[6].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[6].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[8].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[8].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[9].step_event, prooftrace.LLVMRuleEvent)
+        rule_ordinal = pt.trace[9].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[12].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[12].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[14].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[14].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[15].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[15].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[17].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[17].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[18].step_event, prooftrace.LLVMRuleEvent)
+        rule_ordinal = pt.trace[18].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[21].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[21].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[23].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[23].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[24].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[24].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[26].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[26].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[27].step_event, prooftrace.LLVMRuleEvent)
+        rule_ordinal = pt.trace[27].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[30].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[30].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[32].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[32].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[33].step_event, prooftrace.LLVMSideConditionEventEnter)
+        rule_ordinal = pt.trace[33].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
+        assert isinstance(pt.trace[35].step_event, prooftrace.LLVMSideConditionEventExit)
+        rule_ordinal = pt.trace[35].step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_ordinal)
+
