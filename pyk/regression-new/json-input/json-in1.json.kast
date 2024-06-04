@@ -1,1 +1,0 @@
-{"format":"KAST","version":3,"term":{"node":"KApply","label":{"node":"KLabel","name":"#Equals","params":[{"node":"KSort","name":"K"},{"node":"KSort","name":"K"}]},"arity":2,"args":[{"node":"KToken","sort":{"node":"KSort","name":"Int"},"token":"3"},{"node":"KToken","sort":{"node":"KSort","name":"Int"},"token":"4"}]}}

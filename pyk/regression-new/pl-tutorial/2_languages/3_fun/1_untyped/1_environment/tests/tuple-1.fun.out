@@ -1,5 +1,0 @@
-{
-  V:K
-#Equals
-  closure ( .Map , Triple ( x , y , z , .Bottoms ) -> y | .Cases ) ~> .K
-}

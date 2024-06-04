@@ -1,1 +1,0 @@
-decodeBytes("UTF-8", encodeBytes("UTF-8", "issue-1952")) ==String "issue-1952"

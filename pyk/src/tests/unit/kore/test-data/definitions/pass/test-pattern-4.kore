@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-4
-
-  axiom{S}
-    \or{S}(X:S,X:S) []
-
-endmodule []

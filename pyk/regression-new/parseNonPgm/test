@@ -1,6 +1,0 @@
-#!/bin/bash
-export PATH=$PATH:"$(dirname "$0")"/../../../bin
-pgm="$1"
-mode="$2"
-shift; shift; shift; shift; shift
-llvm-krun -c PGM "$pgm" Pgm prettyfile -c MODE "$mode" Mode pretty -p "$@" -d "$(dirname "$0")/test-kompiled"

@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-10
-
-  axiom{S}
-    \equals{S,S}(X:S,X:S) [simplification{}()]
-
-endmodule []

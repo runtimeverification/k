@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-13
-
-  axiom{S}
-    \floor{S,S}(X:S) []
-
-endmodule []

@@ -1,7 +1,0 @@
-[]
-    module Nat
-            sort Nat{}[]
-            symbol zero{}():Nat{}[]
-            symbol succ{}(Nat{}):Nat{}[]
-    endmodule
-    []

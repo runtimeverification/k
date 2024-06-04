@@ -1,5 +1,0 @@
-let x = 1 in
-let x = 2 in
-((callcc (lambda k .
-let x = 3 in
-(k x))) * 10 + x)

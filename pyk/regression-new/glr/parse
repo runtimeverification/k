@@ -1,5 +1,0 @@
-#!/bin/bash
-export PATH=$PATH:"$(dirname "$0")"/../../../../bin
-pgm=$1
-shift
-llvm-krun -c PGM "$pgm" A prettyfile -p "$@" -d "$(dirname "$0")/test-kompiled"

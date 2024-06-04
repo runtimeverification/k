@@ -1,5 +1,0 @@
-[Error] Inner Parser: Parse error: unexpected end of file following token '('.
-	Source(a.kast)
-	Location(1,2,1,2)
-	1 |	(
-	  .	 ^

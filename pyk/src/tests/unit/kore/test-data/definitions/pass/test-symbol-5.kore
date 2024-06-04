@@ -1,7 +1,0 @@
-[]
-
-module TEST-SYMBOL-5
-
-  symbol f{S}(S) : S []
-
-endmodule []

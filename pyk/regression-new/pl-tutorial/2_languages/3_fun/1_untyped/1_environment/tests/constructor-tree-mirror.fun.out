@@ -1,5 +1,0 @@
-{
-  V:K
-#Equals
-  Tree ( Tree ( Tree ( Leaf ( 5 , .Bottoms ) , Leaf ( 4 , .Bottoms ) , .Bottoms ) , Leaf ( 3 , .Bottoms ) , .Bottoms ) , Tree ( Leaf ( 2 , .Bottoms ) , Leaf ( 1 , .Bottoms ) , .Bottoms ) , .Bottoms ) ~> .K
-}

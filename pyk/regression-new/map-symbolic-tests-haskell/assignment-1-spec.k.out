@@ -1,4 +1,0 @@
-<k>
-  assignmentResult ( x |-> 3 ) ~> .K
-</k>
-[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

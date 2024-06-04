@@ -1,9 +1,0 @@
-  #Not ( {
-    _DotVar1
-  #Equals
-    a ~> _Gen0 ~> _DotVar1 ~> .K
-  } )
-#And
-  <k>
-    a ~> _Gen0 ~> _DotVar1 ~> .K
-  </k>

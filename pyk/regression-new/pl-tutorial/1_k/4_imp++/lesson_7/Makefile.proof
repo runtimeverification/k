@@ -1,9 +1,0 @@
-DEF=imp
-DEFDIR=proof
-EXT=imp
-KOMPILE_BACKEND=haskell
-KRUN_FLAGS=--output none
-TESTDIR=tests/proofs
-
-include ../../../../../../include/kframework/ktest.mak
-KPROVE_OR_LEGACY=$(KPROVE)

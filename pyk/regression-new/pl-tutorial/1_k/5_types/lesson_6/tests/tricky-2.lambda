@@ -1,3 +1,0 @@
-lambda x .
-  let f = lambda y . if true then y else x
-  in (lambda x . f 0)

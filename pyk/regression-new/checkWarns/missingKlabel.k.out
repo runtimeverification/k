@@ -1,3 +1,0 @@
-[Error] Compiler: Expected to find exactly one production for KLabel: .MyMap found: 0
-[ERROR] Running process failed with returncode 113:
-    kompile missingKlabel.k --md-selector k --emit-json --backend haskell --output-definition missingKlabel-kompiled --type-inference-mode checked --warnings all --warnings-to-errors --no-exc-wrap

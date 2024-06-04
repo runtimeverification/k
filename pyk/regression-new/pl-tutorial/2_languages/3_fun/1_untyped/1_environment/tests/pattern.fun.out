@@ -1,5 +1,0 @@
-{
-  V:K
-#Equals
-  [ Pair ( 10 , 9 , .Bottoms ) , Pair ( 0 , 1 , .Bottoms ) , Pair ( 0 , 0 , .Bottoms ) , .Bottoms ] ~> .K
-}

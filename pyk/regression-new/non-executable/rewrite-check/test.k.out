@@ -1,6 +1,0 @@
-[Error] Compiler: non-executable attribute is only supported on function rules.
-	Source(test.k)
-	Location(17,8,17,27)
-	17 |	  rule g(X, Y) => X +Int Y [non-executable, priority(1)]
-	   .	       ^~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Had 1 structural errors.

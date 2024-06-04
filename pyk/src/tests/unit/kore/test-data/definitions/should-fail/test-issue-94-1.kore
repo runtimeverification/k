@@ -1,6 +1,0 @@
-[]
-module INJ
-  sort KInt{} []
-  symbol input{}(KInt{}) : KInt{} []
-  axiom{} input{}(\dv{KInt{}}("1"), \dv{KInt{}}("1")) []
-endmodule []

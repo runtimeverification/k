@@ -1,2 +1,0 @@
-lambda x . let f = lambda y . x y
-           in let z = x 0 in f

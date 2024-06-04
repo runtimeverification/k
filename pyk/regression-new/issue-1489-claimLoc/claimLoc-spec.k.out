@@ -1,4 +1,0 @@
-kore-exec: [] Warning (WarnTrivialClaim):
-    Claim proven during initialization: claimLoc-spec.k:6:11-6:32
-    The left-hand side of the claim may be undefined.
-#Top

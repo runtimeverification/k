@@ -1,4 +1,0 @@
-Error:
-  module 'TEST-HOOKS-5':
-  hooked-symbol 'f' declaration (test-hooks-5.kore 8:17):
-    missing hook attribute

@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-15
-
-  axiom{S}
-    \rewrites{S}(X:S,X:S) []
-
-endmodule []

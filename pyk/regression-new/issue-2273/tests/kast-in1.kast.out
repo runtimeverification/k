@@ -1,5 +1,0 @@
-[Error] Inner Parser: Could not find start symbol: Foo provided to kast CLI --sort
-	Source(tests/kast-in1.kast)
-	Location(1,1,1,2)
-	1 |	1
-	  .	^

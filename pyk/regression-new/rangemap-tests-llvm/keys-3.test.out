@@ -1,5 +1,0 @@
-<k>
-  SetItem ( [ 0 , 2 ) )
-  SetItem ( [ 3 , 8 ) )
-  SetItem ( [ 9 , 12 ) ) ~> .K
-</k>

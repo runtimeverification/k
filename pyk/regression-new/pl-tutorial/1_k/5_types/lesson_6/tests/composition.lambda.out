@@ -1,5 +1,0 @@
-{
-  T:Type
-#Equals
-  ( ?Tx1:Type -> ?T3:Type ) -> ( ( ?T3:Type -> ?Te1:Type ) -> ( ?Tx1:Type -> ?Te1:Type ) )
-}

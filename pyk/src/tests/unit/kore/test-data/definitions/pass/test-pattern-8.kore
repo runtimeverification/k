@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-8
-
-  axiom{S}
-    \exists{S}(X:S,X:S) []
-
-endmodule []

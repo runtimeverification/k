@@ -1,9 +1,0 @@
-[]
-
-module TEST-SYMBOL-2
-
-  sort S{} []
-
-  symbol f{}(S{}) : S{} []
-
-endmodule []

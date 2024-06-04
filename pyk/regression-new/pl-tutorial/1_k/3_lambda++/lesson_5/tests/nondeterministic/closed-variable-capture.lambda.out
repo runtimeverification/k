@@ -1,5 +1,0 @@
-{
-  V:K
-#Equals
-  closure ( x |-> 1 , y , x y ) ~> .K
-}

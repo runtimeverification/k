@@ -1,5 +1,0 @@
-{
-  V:K
-#Equals
-  closure ( .Map , Nothing -> 7 | .Cases ) ~> .K
-}

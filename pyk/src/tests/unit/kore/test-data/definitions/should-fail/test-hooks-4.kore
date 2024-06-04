@@ -1,8 +1,0 @@
-[]
-
-module TEST-HOOKS-4
-
-  // Verification failure: missing hook attribute
-  hooked-sort S{} []
-
-endmodule []

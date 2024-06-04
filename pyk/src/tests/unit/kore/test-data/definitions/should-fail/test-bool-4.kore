@@ -1,6 +1,0 @@
-[]
-module BOOL
-    hooked-sort Bool{} [hook{}("BOOL.Bool"), hasDomainValues{}()]
-    alias falseBool{}() : Bool{} where falseBool{}() := \dv{Bool{}}("untrue") []
-endmodule
-[]
