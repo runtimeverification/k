@@ -462,7 +462,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                         claim,
                         logs=logs,
                         proof_dir=proof_dir,
-                        subproof_ids=claims_graph[claim_label],
                     )
                     apr_proof.write_proof_data()
                 apr_proofs.append(apr_proof)
