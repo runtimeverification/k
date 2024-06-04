@@ -3,7 +3,7 @@ run-name: K Framework Release ${{ github.ref_name }}
 on:
   push:
     branches:
-      - feature/pykframework-pypi-publishing
+      - feature/pypi-publishing
   release:
     types:
       - prereleased
