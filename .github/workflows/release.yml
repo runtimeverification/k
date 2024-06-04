@@ -385,6 +385,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.8.14
         with:
           packages-dir: pyk/dist
+          user: __token__
 
   # release:
   #   name: 'Publish Release'
