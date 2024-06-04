@@ -353,6 +353,11 @@ jobs:
     environment: production
     needs: [set-release-id, source-tarball]
     steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: '3.10'
+
       - name: Install Poetry
         uses: Gr1N/setup-poetry@v9
         with:
