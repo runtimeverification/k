@@ -351,6 +351,8 @@ jobs:
     name: 'Publish Pyk'
     runs-on: [self-hosted, linux, flyweight]
     environment: production
+    permissions:
+      id-token: write
     needs: [set-release-id, source-tarball]
     steps:
       - name: Checkout
@@ -383,8 +385,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.8.14
         with:
           packages-dir: pyk/dist
-          user: ${{ secrets.PYPI_USERNAME }}
-          password: ${{ secrets.PYPI_PASSWORD}}
 
   # release:
   #   name: 'Publish Release'
