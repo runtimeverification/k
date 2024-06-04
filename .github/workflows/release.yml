@@ -374,7 +374,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
       
-      - name: Build Pyk Whl
+      - name: Build Pyk
         working-directory: pyk
         run: |
           make build

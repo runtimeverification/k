@@ -375,7 +375,8 @@ For running either program in the debugger, use the main class `org.kframework.m
 
 # Installing Python Support
 
-Python tools for K can be found under [runtimeverification/pyk](https://github.com/runtimeverification/pyk).
+Python tools for K can be found under [runtimeverification/pyk](https://github.com/runtimeverification/k/tree/master/pyk).
+OR on PypI 
 
 # Troubleshooting
 Common build-time error messages:
