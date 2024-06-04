@@ -1,0 +1,8 @@
+[]
+
+module TEST-PATTERN-11
+
+  axiom{S}
+    \in{S,S}(X:S,X:S) []
+
+endmodule []

@@ -1,0 +1,5 @@
+Error:
+  module 'INJ':
+  axiom declaration:
+  symbol or alias 'input' (test-issue-94-1.kore 5:11):
+    Expected 1 operands, but got 2.

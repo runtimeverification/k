@@ -1,0 +1,5 @@
+Error:
+  module 'TEST-EXCEPTION-14':
+  axiom declaration:
+  symbol or alias 'f' (test-exception-14.kore 6:5):
+    Head 'f' not defined.

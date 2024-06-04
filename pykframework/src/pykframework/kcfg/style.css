@@ -1,0 +1,79 @@
+#navigation {
+    dock: left;
+    width: 35%;
+    height: 100%;
+    layout: vertical;
+}
+
+#behavior {
+    height: 1fr;
+    border: solid;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+#behavior:focus {
+    border: solid blue;
+}
+
+#info {
+    width: 100%;
+    height: auto;
+    border: solid;
+    overflow: auto scroll;
+}
+#info:focus {
+    border: solid blue;
+}
+
+#status {
+    width: 100%;
+    height: auto;
+    border: solid;
+    overflow: auto scroll;
+}
+#status:focus {
+    border: solid blue;
+}
+
+#term {
+    width: 100%;
+    height: 15fr;
+    border: solid;
+    overflow: auto scroll;
+}
+#term:focus {
+    border: solid blue;
+}
+
+#constraint {
+    width: 100%;
+    height: 5fr;
+    border: solid;
+    overflow: auto scroll;
+}
+#constraint:focus {
+    border: solid blue;
+}
+
+#custom {
+    width: 100%;
+    height: 15fr;
+    border: solid;
+    overflow: auto scroll;
+}
+#custom:focus {
+    border: solid blue;
+}
+
+.cfg-node {
+    height: auto;
+    width: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+#display {
+    layout: vertical;
+}

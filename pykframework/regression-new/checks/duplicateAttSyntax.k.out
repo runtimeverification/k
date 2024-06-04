@@ -1,0 +1,7 @@
+[Error] Outer Parser: Duplicate attribute: left
+	Source(duplicateAttSyntax.k)
+	Location(4,30,4,34)
+	4 |	  syntax Foo  ::= a() [left, left]
+	  .	                             ^~~~
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateAttSyntax.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateAttSyntax-kompiled --type-inference-mode checked

@@ -1,0 +1,8 @@
+[Error] Compiler: Can't resolve fresh configuration variable not of sort Int
+  while executing phase "Resolve fresh variables in cell initializers"
+	Source(freshConfig.k)
+	Location(15,14,15,16)
+	15 |	  <freshFoo> !_:Foo </freshFoo>
+	   .	             ^~
+[ERROR] Running process failed with returncode 113:
+    kompile freshConfig.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition freshConfig-kompiled --type-inference-mode checked

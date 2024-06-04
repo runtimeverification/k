@@ -1,0 +1,60 @@
+[]
+module LIST
+    sort List{S} []
+    symbol nil{S}() : List{S} [constructor{}(), functional{}()]
+    symbol cons{S}(S, List{S}) : List{S} [constructor{}(), functional{}()]
+    symbol append{S}(List{S}, List{S}) : List{S} [functional{}()]
+    axiom {S, R} \exists{R}(T:List{S}, \equals{List{S}, R}(T:List{S}, nil{S}()))
+    []
+    axiom {S, R} \exists{R}(
+        T:List{S},
+        \equals{List{S}, R}(T:List{S}, cons{S}(X:S, L:List{S}))
+    ) []
+    axiom {S, R} \exists{R}(
+        T:List{S},
+        \equals{List{S}, R}(T:List{S}, append{S}(L1:List{S}, L2:List{S}))
+    ) []
+    axiom {S} \or{List{S}}(
+        nil{S}(),
+        \exists{List{S}}(
+            X:S,
+            \exists{List{S}}(L:List{S}, cons{S}(X:S, L:List{S}))
+        )
+    ) []
+    axiom {S} \not{List{S}}(
+        \and{List{S}}(
+            nil{S}(),
+            \exists{List{S}}(
+                X:S,
+                \exists{List{S}}(L:List{S}, cons{S}(X:S, L:List{S}))
+            )
+        )
+    ) []
+    axiom {S, R} \implies{R}(
+        \and{R}(
+            \top{R}(),
+            \and{R}(\in{List{S}, R}(n:List{S}, nil{S}()), \top{R}())
+        ),
+        \and{R}(
+            \equals{List{S}, R}(append{S}(n:List{S}, L:List{S}), L:List{S}),
+            \top{R}()
+        )
+    ) []
+    axiom {S, R} \implies{R}(
+        \and{R}(
+            \top{R}(),
+            \and{R}(
+                \in{List{S}, R}(XL0:List{S}, cons{S}(X:S, L0:List{S})),
+                \top{R}()
+            )
+        ),
+        \and{R}(
+            \equals{List{S}, R}(
+                append{S}(XL0:List{S}, L:List{S}),
+                cons{S}(X:S, append{S}(L0:List{S}, L:List{S}))
+            ),
+            \top{R}()
+        )
+    ) []
+endmodule
+[]

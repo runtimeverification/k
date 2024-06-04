@@ -1,0 +1,8 @@
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(errorExistential.k)
+	Location(5,11,5,13)
+	5 |	rule 0 => ?I:Int
+	  .	          ^~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile errorExistential.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition errorExistential-kompiled --type-inference-mode checked

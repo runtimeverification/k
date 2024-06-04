@@ -1,0 +1,43 @@
+[Error] Compiler: Claims are not allowed in the definition.
+	Source(existentialCheck.k)
+	Location(15,9,15,29)
+	15 |	  claim <k> ?X:Int => . </k>
+	   .	        ^~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(15,13,15,15)
+	15 |	  claim <k> ?X:Int => . </k>
+	   .	            ^~
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(15,13,15,15)
+	15 |	  claim <k> ?X:Int => . </k>
+	   .	            ^~
+[Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(17,12,17,14)
+	17 |	  rule <k> ?X:Int => . </k>
+	   .	           ^~
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(17,12,17,14)
+	17 |	  rule <k> ?X:Int => . </k>
+	   .	           ^~
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(19,22,19,28)
+	19 |	  rule <k> stateA => ?STATE </k>
+	   .	                     ^~~~~~
+[Error] Compiler: Existential variable ?STATE found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(20,21,20,27)
+	20 |	    requires isDone(?STATE)
+	   .	                    ^~~~~~
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(20,21,20,27)
+	20 |	    requires isDone(?STATE)
+	   .	                    ^~~~~~
+[Error] Compiler: Had 8 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile existentialCheck.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition existentialCheck-kompiled --type-inference-mode checked

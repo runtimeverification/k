@@ -1,0 +1,32 @@
+// This is Dekker's algorithm for mutual exclusion.
+// This program is not meant to be executed, it is meant to be model checked.
+
+bool flag1 = false, flag2 = false, critical1 = false, critical2 = false;
+int turn = 1;
+
+void dekker1() {
+  flag1 = true; turn = 2;
+  while (flag2 && turn==2) { }
+  // Enter critical section
+  critical1 = true;
+  // Critical stuff ...
+  // Leave critical section
+  critical1 = false;
+  flag1 = false;
+}
+
+void dekker2() {
+  flag2 = true; turn = 1;
+  while(flag1 && turn==1) { }
+  // Enter critical section
+  critical2 = true;
+  // Critical stuff ...
+  // Leave critical section
+  critical2 = false;
+  flag2 = false;
+}
+
+void main() {
+  spawn { while(true) { dekker1(); } };
+  spawn { while(true) { dekker2(); } };
+}

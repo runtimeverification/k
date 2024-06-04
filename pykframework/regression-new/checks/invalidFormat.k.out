@@ -1,0 +1,38 @@
+[Error] Compiler: Invalid format attribute: unfinished escape sequence.
+	Source(invalidFormat.k)
+	Location(4,18,4,35)
+	4 |	  syntax Foo ::= "foo" [format(%)]
+	  .	                 ^~~~~~~~~~~~~~~~~
+[Error] Compiler: Invalid colors attribute: expected 2 colors, found 1 colors instead.
+	Source(invalidFormat.k)
+	Location(6,18,6,51)
+	6 |	  syntax Bar ::= "bar" [format(%c), colors(black)]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Invalid format escape sequence '%0'. Expected a number between 1 and 1
+	Source(invalidFormat.k)
+	Location(10,16,10,32)
+	10 |	  syntax A ::= "a" [format(%0)]
+	   .	               ^~~~~~~~~~~~~~~~
+[Error] Compiler: Invalid format escape sequence '%2'. Expected a number between 1 and 1
+	Source(invalidFormat.k)
+	Location(12,16,12,32)
+	12 |	  syntax B ::= "b" [format(%2)]
+	   .	               ^~~~~~~~~~~~~~~~
+[Error] Compiler: Invalid format escape sequence referring to regular expression terminal 'r"c"'.
+	Source(invalidFormat.k)
+	Location(14,16,14,33)
+	14 |	  syntax C ::= r"c" [format(%1)]
+	   .	               ^~~~~~~~~~~~~~~~~
+[Error] Compiler: Expected format attribute on production with regular expression terminal. Did you forget the 'token' attribute?
+	Source(invalidFormat.k)
+	Location(16,16,16,20)
+	16 |	  syntax D ::= r"d"
+	   .	               ^~~~
+[Error] Compiler: Expected format attribute on production with regular expression terminal.
+	Source(invalidFormat.k)
+	Location(18,16,18,24)
+	18 |	  syntax E ::= r"e" "f"
+	   .	               ^~~~~~~~
+[Error] Compiler: Had 7 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile invalidFormat.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition invalidFormat-kompiled --type-inference-mode checked

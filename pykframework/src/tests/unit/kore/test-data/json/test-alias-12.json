@@ -1,0 +1,21 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "Next",
+    "sort": {
+      "tag": "SortVar",
+      "name": "s"
+    },
+    "dest": {
+      "tag": "EVar",
+      "name": "a",
+      "sort": {
+        "tag": "SortVar",
+        "name": "s"
+      }
+    }
+  }
+} 
+]

@@ -1,0 +1,4 @@
+usage: pykframework [-h]
+           {print,rpc-print,rpc-kast,prove-legacy,kompile,run,prove,graph-imports,coverage,kore-to-json,json-to-kore}
+           ...
+pykframework: error: unrecognized arguments: --badflag --extra ---output-definition test-kompiled

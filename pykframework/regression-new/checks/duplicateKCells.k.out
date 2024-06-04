@@ -1,0 +1,27 @@
+[Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
+	Source(duplicateKCells.k)
+	Location(4,19,4,34)
+	4 |	    configuration <k> $PGM:K </k>
+	  .	                  ^~~~~~~~~~~~~~~
+[Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
+	Source(duplicateKCells.k)
+	Location(11,19,11,36)
+	11 |	    configuration <k> $PGM:Int </k>
+	   .	                  ^~~~~~~~~~~~~~~~~
+[Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
+	Source(duplicateKCells.k)
+	Location(13,19,16,23)
+	   .	                  v~~
+	13 |	    configuration <k>
+	   |		...
+	16 |	                  </k>
+	   .	                  ~~~^
+[Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
+	Source(duplicateKCells.k)
+	Location(14,23,14,40)
+	14 |	                      <k> $PGM:Int </k>
+	   .	                      ^~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 4 parsing errors.
+[Error] Compiler: Had 5 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateKCells.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateKCells-kompiled --type-inference-mode checked

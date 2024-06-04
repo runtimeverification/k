@@ -1,0 +1,10 @@
+[]
+
+module TEST-HOOKS-5
+
+  sort S{} []
+
+  // Verification failure: missing hook attribute
+  hooked-symbol f{}() : S{} []
+
+endmodule []

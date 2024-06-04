@@ -1,0 +1,5 @@
+insert(0, 1);
+insert(1, 1);
+update(0, 0);
+remove(1);
+get(0)

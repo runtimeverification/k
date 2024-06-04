@@ -1,0 +1,33 @@
+// Building and traversing a tree.
+// Testing the difference between this.val and val.
+
+class Node {
+  var left, right;
+  method Node(left,right) {
+    this.left = left;
+    this.right = right;
+  }
+  method sum() {
+    return (left.sum() + right.sum());
+  }
+}
+
+class Leaf {
+  var val;
+  method Leaf(val) {
+    this.val = val;
+  }
+  method sum() {
+    return val;
+  }
+}
+
+class Main {
+  method Main() {
+    var o;
+    o = new Node(new Node(new Leaf(3), new Leaf(4)), new Leaf(5));
+    print(o.sum(), "\n");
+  }
+}
+
+// 12

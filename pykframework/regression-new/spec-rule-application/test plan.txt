@@ -1,0 +1,117 @@
+Section I. Main test suite, that doesn't target specific formula simplification scenarios
+==================================================
+
+Part 0. X (in term) = Y (in pattern) matching. Function evaluation for pattern RHS.
+==============
+01. inc(Y) in pattern LHS. Function with no side conditions.
+02. `requires Z ==Int incPos(Y)` - Function in requires, used in RHS. Does not affect matching.
+031. X = Y,   `mid Y => end incPos(Y)` - Function in pattern RHS.
+032. X = Y-1, `mid Y => end incPos(Y)` - Function in pattern RHS.
+033. X+1 = Y, `mid Y => end incPos(Y)` - Function in pattern RHS.
+
+Part 1. X (in term) = Y (in pattern) matching.
+==============
+11. inc(Y) in pattern LHS. Function with no side conditions. Evaluation required for planned matching.
+12. `requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.
+13. `requires Y ==Int incPos(Y) -Int 1` - Function in requires, used in LHS, same var as one matched in LHS.
+14. `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
+15. `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.
+
+Part 2. X+1 (in term) = Y (in pattern) matching.
+==============
+21. `inc(Y)`` in pattern LHS. Function with no side conditions. Evaluation required for planned matching.
+22. `requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.
+23. `requires Y ==Int incPos(Y) -Int 1` - Function in requires, used in LHS, same var as one matched in LHS.
+24. `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
+25. `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.
+
+Part 3. X (in term) = Y-1 (in pattern) matching.
+Not supported by kprove. Adding here just as documentation.
+==============
+32. `requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.
+33. `requires Y ==Int incPos(Y) -Int 1` - Function in requires, used in LHS, same var as one matched in LHS.
+34. `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
+35. `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.
+
+Part 3 fails, because equality X = Y-1 cannot be used to evaluate incPos().
+    - It cannot be used as substitution, because X is a variable in implication LHS and RHS, and you cannot
+        apply a substitution from RHS to both LHS and RHS.
+    - It cannot be used as equality when evaluating side condition of incPos() either,
+        because you cannot use one part of not-yet-proved matching constraint to evaluate another part.
+    - This would pass, if incPos() would be translated to Z3 as smt-lemma.
+
+
+Section II. Testing specific optimizations of ConjunctiveFormula simplification algorithm
+==================================================
+
+Part 4. Substitutions of RHS vars must be preferred over LHS vars.
+==============
+cases var = term:
+    - e.g. if we have to chose between LHSVar = term and RHSVar = term, RHSVar must be preferred.
+41. Unifying equalities
+    RHSVar = term in <k>   , has priority
+    LHSVar = term in <var>
+
+42. Unifying equalities
+    LHSVar = term in <k>   , has priority
+    RHSVar = term in <var>
+
+cases var = var:
+    - e.g. if we have to chose between LHSVar = RHSVar and RHSVar = LHSVar, RHSVar=LHSVar must be preferred.
+43. Unifying equalities
+    LHSVar = RHSVar in <k>.
+        - matching constraint gets proved only for version  RHSVar=LHSVar, not for the opposite.
+    - Already tested in test 14.
+    - Already works. Initially substitution is generated like LHSVar=RHSVar, but then gets reoriented in
+        ConjunctiveFormula.orientSubstitution().
+44. Situation similar to what is found in ERC2.0 high-level contract
+    k  : X matches incPos(Y) -Int 1
+    var: X matches Y - should have priority
+
+45. Inverted situation vs test 45, should pass in old implementation.
+    k  : X matches Y
+    var: X matches incPos(Y) -Int 1
+
+Part 5. Substitutions of the form `var = var` must be preferred over `var = term`
+==============
+    - Cannot find any case that resembles practice, where this would be relevant. Principle above is enough.
+    - Skipping.
+
+Part 6. Term must be always simplified/evaluated under current constraint.
+==============
+61.
+    k:          X1 matches Y1
+    var part 1: X2 matches incPos(Y2)
+    var part 2: X2 - 1 matches Y2 +Int (incPos(Y1) -Int Y1 -Int 1) - Evaluates to Y2. Must be preferred over c2.
+
+62.
+    k:          X1 matches Y1
+    var part 2: X2 - 1 matches Y2 +Int (incPos(Y1) -Int Y1 -Int 1) - Evaluates to Y2. Must be preferred over c2.
+    var part 1: X2 matches incPos(Y2)
+        Same result.
+
+Part 7: Unification (with function evaluation) must be preferred over substitution, after each substituted var.
+==============
+71.
+    k:          X1 matches (Y2 +Int (incPos(Y1) -Int Y1 -Int 1)), will get evaluated to Y2
+            - 2nd substitution to be extracted.
+    var part 1: X1 matches Y1 - first substitution to be extracted
+    var part 2: X1+1 matches incPos(Y2)
+        - RHS can be evaluated only when Y1 is substituted by X1, and Y2 is substituted by X1.
+
+    Test passes with changes for part 6 only, because substitution X1 -> Y2 is inverted by orientSubstitution()
+        It's either not possible or too hard to figure out a test that passes with Part 6 principle but fails with
+            part 7.
+
+
+Part 8. Initial simplification must have access to pattern constraint (e.g. spec rule requires clause),
+            otherwise generated substitutions are sub-optimal.
+==============
+81.
+    k:                X +Int 1 matches Y2 -Int 1
+    var part 1:       X        matches Y1 -Int 1
+    var part 2:       X +Int 1 matches incPos(Y1) -Int 1
+    pattern requires: Y2 == Y1 +Int 1
+
+Test in part 8 already passes in old simplification algorithm, because spec rules are pre-processed in initialization
+    phase and substitutions generated by spec rule constraint are inlined at that phase.

@@ -1,0 +1,12 @@
+# For modularity, un-ignore everything from the K parent .gitignore...
+!*
+
+# ...and reinstate the original pykframework .gitignore.
+/dist/
+/docs/api/
+/docs/build/
+__pycache__/
+.coverage
+
+.kprove*
+*.debug-log

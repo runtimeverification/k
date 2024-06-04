@@ -1,0 +1,6 @@
+let f = lambda x . (
+          (lambda t . lambda x . (t t x))
+          (lambda f . lambda x . (if x <= 1 then 1 else (x * (f f (x + -1)))))
+          x
+        )
+in (f 10)

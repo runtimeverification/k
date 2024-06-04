@@ -1,0 +1,31 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "App",
+    "name": "input",
+    "sorts": [],
+    "args": [
+      {
+        "tag": "DV",
+        "sort": {
+          "tag": "SortApp",
+          "name": "KInt",
+          "args": []
+        },
+        "value": "1"
+      },
+      {
+        "tag": "DV",
+        "sort": {
+          "tag": "SortApp",
+          "name": "KInt",
+          "args": []
+        },
+        "value": "1"
+      }
+    ]
+  }
+} 
+]

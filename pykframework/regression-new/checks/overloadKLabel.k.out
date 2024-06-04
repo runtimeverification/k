@@ -1,0 +1,8 @@
+[Error] Compiler: The attributes `klabel(_)` and `overload(_)` may not occur together.
+	Source(overloadKLabel.k)
+	Location(4,19,4,59)
+	4 |	                | Exp  "." Id [klabel(_._), overload(_._)]
+	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile overloadKLabel.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition overloadKLabel-kompiled --type-inference-mode checked

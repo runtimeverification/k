@@ -1,0 +1,13 @@
+{
+  Result:GeneratedTopCell
+#Equals
+  <generatedTop>
+    <k>
+      bar ( 5 , 1 , 1 ) ~> .K
+    </k>
+    <state>
+      x |-> 5
+      y |-> 1
+    </state>
+  </generatedTop>
+}

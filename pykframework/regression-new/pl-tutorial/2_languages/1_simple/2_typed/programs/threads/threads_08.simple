@@ -1,0 +1,57 @@
+// Program that tests both exceptions and threads.  The threads are not
+// synchronized and indeed manifest into lots of different behaviors.
+
+void main() {
+  spawn {
+    int e;
+    try {
+      try {
+        try {
+          try {
+            int x = 1;
+            print(x);
+            throw ++x;
+          } catch(int e) {
+            print(e);
+            throw ++e;
+          }
+        } catch(int e) {
+          print(e);
+          throw ++e;
+        }
+      } catch(int e) {
+        print(e);
+        throw ++e;
+      }
+    } catch(int e) {
+      print(e);
+    }
+  };
+  spawn {
+    int e;
+    try {
+      try {
+        try {
+          try {
+            int x = 1;
+            print(x);
+            throw ++x;
+          } catch(int e) {
+            print(e);
+            throw ++e;
+          }
+        } catch(int e) {
+          print(e);
+          throw ++e;
+        }
+      } catch(int e) {
+        print(e);
+        throw ++e;
+      }
+    } catch(int e) {
+      print(e);
+    }
+  };
+}
+
+// 221 solutions, each outputing two 1, two 2, two 3, two 4 and two 5

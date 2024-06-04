@@ -1,0 +1,10 @@
+[]
+
+module TEST-ALIAS-5
+
+  symbol g{S}(S) : S []
+
+  alias f{S}(S) : S
+  where f{S}(X:S) := g{S}(X:S)[]
+
+endmodule []
