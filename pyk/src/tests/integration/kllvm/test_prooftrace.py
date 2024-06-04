@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pyk.kllvm.hints.prooftrace as prooftrace
+from pyk.kllvm.convert import llvm_to_pattern
 from pyk.kllvm.parser import parse_definition
 from pyk.kore.prelude import (
     SORT_K_CONFIG_VAR,
@@ -80,3 +81,61 @@ class TestProofTrace(ProofTraceTest):
 
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()
+
+class TestSingleRewrite(ProofTraceTest):
+    KOMPILE_DEFINITION = """
+        module SINGLE-REWRITE-SYNTAX
+            syntax Foo ::= FooA() | FooB()
+        endmodule
+
+        module SINGLE-REWRITE
+            imports SINGLE-REWRITE-SYNTAX
+            rule [a-to-b]: FooA() => FooB()
+        endmodule
+        """
+        
+    KOMPILE_MAIN_MODULE = 'SINGLE-REWRITE'
+    
+    HINTS_INPUT_KORE = """LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()))))"""
+
+
+    def test_parse_proof_hint_single_rewrite(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
+        assert pt is not None
+
+        # 11 initialization event
+        assert len(pt.pre_trace) == 11
+
+        # 2 post-initial-configuration events
+        assert len(pt.trace) == 2
+
+        # Contents of the k cell in the initial configuration
+        kore_pattern = llvm_to_pattern(pt.initial_config.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['args'][0]['name'] == "LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo"
+        assert k_cell['args'][1]['name'] == 'dotk'
+
+        # Rule applied in the single (non-functional) rewrite step
+        rule_event = pt.trace[0].step_event
+        assert isinstance(rule_event, prooftrace.LLVMRuleEvent)
+
+        assert hasattr(rule_event, 'rule_ordinal')
+        axiom = repr(definition.get_axiom_by_ordinal(rule_event.rule_ordinal))
+        axiom_expected = get_pattern_from_ordinal(definition_text, rule_event.rule_ordinal)
+        assert axiom == axiom_expected
+
+        # Contents of the k cell in the final configuration
+        final_config = pt.trace[1]
+        assert final_config.is_kore_pattern()
+        kore_pattern = llvm_to_pattern(final_config.kore_pattern)
+        k_cell = kore_pattern.patterns[0].dict['args'][0]
+        assert k_cell['name'] == 'kseq'
+        assert k_cell['args'][0]['args'][0]['name'] == "LblFooB'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo"
+        assert k_cell['args'][1]['name'] == 'dotk'
