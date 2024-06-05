@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pyk.utils import single
 
 from ..kast.inner import KApply, KLabel, build_assoc, flatten_label
-from .k import GENERATED_TOP_CELL
+from .k import GENERATED_TOP_CELL, K_ITEM
 from .kbool import BOOL, FALSE, TRUE
 
 if TYPE_CHECKING:
@@ -93,8 +93,13 @@ def mlImplies(antecedent: KInner, consequent: KInner, sort: str | KSort = GENERA
     return KLabel('#Implies', sort)(antecedent, consequent)
 
 
-def mlExists(var: KVariable, body: KInner, sort: str | KSort = GENERATED_TOP_CELL) -> KApply:  # noqa: N802
-    return KLabel('#Exists', sort)(var, body)
+def mlExists(  # noqa: N802
+    var: KVariable,
+    body: KInner,
+    sort1: str | KSort = K_ITEM,
+    sort2: str | KSort = GENERATED_TOP_CELL,
+) -> KApply:
+    return KLabel('#Exists', sort1, sort2)(var, body)
 
 
 def mlCeil(  # noqa: N802
