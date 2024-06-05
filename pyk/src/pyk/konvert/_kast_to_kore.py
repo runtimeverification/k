@@ -5,10 +5,10 @@ from functools import reduce
 from typing import TYPE_CHECKING
 
 from ..kast import Atts
-from ..kast.inner import KApply, KSequence, KSort, KToken, KVariable
+from ..kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable, top_down
 from ..kast.manip import bool_to_ml_pred, extract_lhs, extract_rhs, flatten_label
 from ..kast.outer import KRule
-from ..kore.prelude import DOTK, SORT_K
+from ..kore.prelude import SORT_K
 from ..kore.syntax import DV, And, App, Axiom, EVar, Import, MLPattern, MLQuant, Module, Rewrites, SortApp, String, Top
 from ..prelude.bytes import BYTES, pretty_bytes_str
 from ..prelude.k import K
@@ -69,9 +69,41 @@ def kast_to_kore(
     kast = kast_defn.sort_vars(kast, sort)
     kast = kast_defn.add_cell_map_items(kast)
     kast = kast_defn.add_sort_params(kast)
+    kast = _replace_ksequence_by_kapply(kast)
     kore = _kast_to_kore(kast)
     kore = kompiled_kore.add_injections(kore, _ksort_to_kore(sort))
     return kore
+
+
+def _replace_ksequence_by_kapply(term: KInner) -> KInner:
+    dotk = KApply('dotk')
+    kseq = KLabel('kseq')
+
+    def transform(term: KInner) -> KInner:
+        match term:
+            case KSequence(items):
+                return transform_items(items)
+            case _:
+                return term
+
+    def transform_items(items: tuple[KInner, ...]) -> KInner:
+        if not items:
+            return dotk
+
+        unit: KInner
+        args: tuple[KInner, ...]
+
+        last = items[-1]
+        if isinstance(last, KVariable) and last.sort == K:
+            unit = last
+            args = items[:-1]
+        else:
+            unit = dotk
+            args = items
+
+        return reduce(lambda x, y: kseq(y, x), reversed(args), unit)
+
+    return top_down(transform, term)
 
 
 # 'krule' should have sorts on variables
@@ -163,8 +195,6 @@ def _kinner_to_kore(kinner: KInner, patterns: list[Pattern]) -> Pattern:
         case KVariable():
             assert not patterns
             return _kvariable_to_kore(kinner)
-        case KSequence():
-            return _ksequence_to_kore(kinner, patterns)
         case KApply():
             return _kapply_to_kore(kinner, patterns)
         case _:
@@ -194,25 +224,6 @@ def _kvariable_to_kore(kvar: KVariable) -> EVar:
     return EVar('Var' + munge(kvar.name), sort)
 
 
-def _ksequence_to_kore(kseq: KSequence, patterns: list[Pattern]) -> Pattern:
-    if not patterns:
-        return DOTK
-
-    unit: Pattern
-    args: list[Pattern]
-
-    last = patterns[-1]
-    if type(last) is EVar and last.sort == SORT_K:
-        unit = last
-        args = patterns[:-1]
-    else:
-        unit = DOTK
-        args = patterns
-
-    args.reverse()
-    return reduce(lambda x, y: App('kseq', (), (y, x)), args, unit)
-
-
 def _kapply_to_kore(kapply: KApply, patterns: list[Pattern]) -> Pattern:
     if kapply.label.name in ML_QUANT_LABELS:
         return _kapply_to_ml_quant(kapply, patterns)
@@ -240,6 +251,9 @@ def _kapply_to_pattern(kapply: KApply, patterns: list[Pattern]) -> Pattern:
 
 
 def _label_to_kore(label: str) -> str:
+    if label in ['kseq', 'dotk']:  # pseudo-labels introduced during KAST-to-KORE tranformation
+        return label
+
     if label in ML_PATTERN_LABELS:
         return ML_PATTERN_LABELS[label]
 
