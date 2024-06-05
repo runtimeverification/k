@@ -15,6 +15,7 @@ from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime, generate_hints
 from ..kllvm.importer import import_runtime
+from ..kllvm.hints.prooftrace import KoreHeader
 from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
@@ -373,15 +374,13 @@ class ProofTraceTest(KompiledTest):
         return hints_file.read_bytes()
 
     @pytest.fixture(scope='class')
-    def header(self, definition_dir: Path) -> kore_header:
+    def header(self, definition_dir: Path) -> KoreHeader:
         process = subprocess.run(['kore-rich-header', str(definition_dir / 'definition.kore')], stdout=subprocess.PIPE)
         hdr = process.stdout
-        path = str(definition_dir / 'header.bin')
+        path = definition_dir / 'header.bin'
         with open(path, 'wb') as f:
             f.write(hdr)
-        from ..kllvm.hints.prooftrace import kore_header
-
-        return kore_header(path)
+        return KoreHeader.create(path)
 
     @pytest.fixture(scope='class')
     def definition_file(self, definition_dir: Path) -> str:
