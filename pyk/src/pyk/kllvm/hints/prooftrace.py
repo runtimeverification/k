@@ -291,12 +291,8 @@ class LLVMRewriteTrace:
 
     Methods:
         __init__(self, rewrite_trace: llvm_rewrite_trace) -> None: Initializes a new instance of the LLVMRewriteTrace class.
+
         __repr__(self) -> str: Returns a string representation of the LLVMRewriteTrace object using the AST printing method.
-        version(self) -> int: Returns the version of the HINTS formart.
-        pre_trace(self) -> list[LLVMArgument]: Returns the pre-trace events as a list of LLVMArgument objects.
-        initial_config(self) -> LLVMArgument: Returns the initial configuration as an LLVMArgument object.
-        trace(self) -> list[LLVMArgument]: Returns the trace events as a list of LLVMArgument objects.
-        parse(trace: bytes, header: kore_header) -> LLVMRewriteTrace: Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace object.
     """
 
     _rewrite_trace: llvm_rewrite_trace
@@ -309,20 +305,25 @@ class LLVMRewriteTrace:
 
     @property
     def version(self) -> int:
+        """Returns the version of the HINTS formart."""
         return self._rewrite_trace.version
 
     @property
     def pre_trace(self) -> list[LLVMArgument]:
+        """Returns the pre-trace events as a list of LLVMArgument objects."""
         return [LLVMArgument(event) for event in self._rewrite_trace.pre_trace]
 
     @property
     def initial_config(self) -> LLVMArgument:
+        """Returns the initial configuration as an LLVMArgument object."""
         return LLVMArgument(self._rewrite_trace.initial_config)
 
     @property
     def trace(self) -> list[LLVMArgument]:
+        """Returns the trace events as a list of LLVMArgument objects."""
         return [LLVMArgument(event) for event in self._rewrite_trace.trace]
 
     @staticmethod
     def parse(trace: bytes, header: kore_header) -> LLVMRewriteTrace:
+        """Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace object."""
         return LLVMRewriteTrace(llvm_rewrite_trace.parse(trace, header))
