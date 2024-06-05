@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from pyk.kore.rpc import LogEntry
 
 from ..cterm.cterm import remove_useless_constraints
+from ..kast.att import AttEntry, Atts
 from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
@@ -378,12 +379,21 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             proof_dir=proof_dir,
             circularity=claim.is_circularity,
             admitted=claim.is_trusted,
+            subproof_ids=claim.dependencies,
             **kwargs,
         )
 
+    def as_rules(self, priority: int = 20) -> list[KRule]:
+        _rules = []
+        for _edge in self.kcfg.edges():
+            _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
+            assert type(_rule) is KRule
+            _rules.append(_rule)
+        return _rules
+
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
-        _rule = _edge.to_rule('BASIC-BLOCK', priority=priority)
+        _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
         assert type(_rule) is KRule
         return _rule
 
@@ -448,12 +458,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                 else:
                     _LOGGER.info(f'Building APRProof for claim: {claim_label}')
                     claim = claims_by_label[claim_label]
+                    if len(claims_graph[claim_label]) > 0:
+                        claim_att = claim.att.update([AttEntry(Atts.DEPENDS, ','.join(claims_graph[claim_label]))])
+                        claim = claim.let_att(claim_att)
                     apr_proof = APRProof.from_claim(
                         defn,
                         claim,
                         logs=logs,
                         proof_dir=proof_dir,
-                        subproof_ids=claims_graph[claim_label],
                     )
                     apr_proof.write_proof_data()
                 apr_proofs.append(apr_proof)
@@ -709,7 +721,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         dependencies_as_rules: list[KRuleLike] = []
         for apr_subproof in [pf for pf in subproofs if isinstance(pf, APRProof)]:
-            dependencies_as_rules.extend(apr_subproof.kcfg.to_rules(priority=20))
+            dependencies_as_rules.extend(apr_subproof.as_rules(priority=20))
             if apr_subproof.admitted and len(apr_subproof.kcfg.predecessors(apr_subproof.target)) == 0:
                 dependencies_as_rules.append(apr_subproof.as_rule(priority=20))
         circularity_rule = proof.as_rule(priority=20)
