@@ -203,13 +203,7 @@ class TestCustomStep(CTermSymbolicTest, KProveTest):
         max_iterations: int | None,
     ) -> tuple[ProofStatus, list[str]]:
 
-        proof = APRProof.from_claim(
-            kprove.definition,
-            claim,
-            subproof_ids=[],
-            logs={},
-            proof_dir=proof_dir,
-        )
+        proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
         init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
         proof.kcfg.let_node(proof.init, cterm=init_cterm)
         kcfg_explore.simplify(proof.kcfg, {})
