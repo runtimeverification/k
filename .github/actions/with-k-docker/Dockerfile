@@ -10,6 +10,7 @@ RUN    apt-get -y update  \
          graphviz         \
          make             \
          python3.10-dev   \
+         python3.10-venv  \
          /kframework.deb  \
     && apt-get -y clean
 

@@ -107,14 +107,10 @@ pyupgrade: poetry-install
 DOCS_API_DIR   := docs/api
 DOCS_BUILD_DIR := docs/build
 
+.PHONY: docs
+docs:
+	./docs/generate.sh
+
 .PHONY: docs-clean
 docs-clean:
 	rm -rf $(DOCS_API_DIR) $(DOCS_BUILD_DIR)
-
-docs-apidoc: poetry-install
-	$(POETRY_RUN) sphinx-apidoc src/pyk --output $(DOCS_API_DIR) --force --separate --module-first
-
-docs-build-%: docs-apidoc
-	$(POETRY_RUN) sphinx-build -b $* docs $(DOCS_BUILD_DIR)/$*
-
-docs: docs-build-html
