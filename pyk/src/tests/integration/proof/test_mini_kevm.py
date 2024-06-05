@@ -79,13 +79,7 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
                     Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
                 )
             )
-            proof = APRProof.from_claim(
-                kprove.definition,
-                claim,
-                subproof_ids=[],
-                logs={},
-                proof_dir=proof_dir,
-            )
+            proof = APRProof.from_claim(kprove.definition, claim, logs={}, proof_dir=proof_dir)
 
             new_init_cterm = kcfg_explore.cterm_symbolic.assume_defined(proof.kcfg.node(proof.init).cterm)
             proof.kcfg.let_node(proof.init, cterm=new_init_cterm)
