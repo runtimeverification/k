@@ -369,10 +369,8 @@ class TestDV(ProofTraceTest):
     """
 
     KOMPILE_MAIN_MODULE = 'DV'
-    KOMPILE_ARGS = {'llvm_proof_hint_instrumentation': True,
-                    'syntax_module': 'DV'
-                    }
-    
+    KOMPILE_ARGS = {'llvm_proof_hint_instrumentation': True, 'syntax_module': 'DV'}
+
     HINTS_INPUT_KORE = """
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\\dv{SortInt{}}("5")))))))
         """

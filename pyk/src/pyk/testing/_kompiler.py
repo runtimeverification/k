@@ -109,7 +109,7 @@ class KompiledTest:
         kwargs['main_file'] = self.KOMPILE_MAIN_FILE
         kwargs['definition'] = self.KOMPILE_DEFINITION
         kwargs['main_module'] = self.KOMPILE_MAIN_MODULE
-        kwargs['backend'] = self.KOMPILE_BACKEND            
+        kwargs['backend'] = self.KOMPILE_BACKEND
         return kompile(**kwargs)
 
     @pytest.fixture(scope='class')
