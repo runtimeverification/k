@@ -340,17 +340,22 @@ jobs:
   performance-tests:
     name: 'K: Profiling'
     runs-on: [self-hosted, linux, performance]
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     steps:
       - uses: actions/checkout@v4
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-profiling-tests-${{ github.sha }}
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
+          run-container: false
       - name: 'Set up Docker Test Image'
         env:
-          BASE_OS: ubuntu
-          BASE_DISTRO: jammy
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
           BENCHER_PROJECT: k-framework
@@ -359,7 +364,7 @@ jobs:
           set -euxo pipefail
           workspace=$(pwd)
           docker run --name k-profiling-tests-${GITHUB_SHA}                    \
-            --rm -it --detach                                                  \
+            --rm -it --detach --user root                                      \
             -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
             -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
             -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
@@ -374,7 +379,7 @@ jobs:
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
             -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
-            ${BASE_OS}:${BASE_DISTRO}
+            runtimeverificationinc/k-profiling-tests-${GITHUB_SHA}
       - name: 'Install K from Package'
         run: |
           set -euxo pipefail
