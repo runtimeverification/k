@@ -185,7 +185,7 @@ class TestTreeReverse(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # 2 post-initial-configuration events
+        # 9 post-initial-configuration events
         assert len(pt.trace) == 9
 
         # Contents of the k cell in the initial configuration
@@ -310,7 +310,7 @@ class TestNonRecFunction(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # 2 post-initial-configuration events
+        # 4 post-initial-configuration events
         assert len(pt.trace) == 4
 
         # Contents of the k cell in the initial configuration
@@ -388,7 +388,7 @@ class TestDV(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # 2 post-initial-configuration events
+        # 3 post-initial-configuration events
         assert len(pt.trace) == 3
 
         # Contents of the k cell in the initial configuration
@@ -477,7 +477,7 @@ class TestConcurrentCounters(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # 2 post-initial-configuration events
+        # 37 post-initial-configuration events
         assert len(pt.trace) == 37
 
         # Check types
@@ -637,7 +637,7 @@ class Test0Decrement(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # a pair of (rule, config) for each non-functional rewrite step
+        # 1 post-initial-configuration event
         assert len(pt.trace) == 1
 
 
@@ -666,7 +666,7 @@ class Test1Decrement(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # a pair of (rule, config) for each non-functional rewrite step
+        # 2 post-initial-configuration events
         assert len(pt.trace) == 2
 
 
@@ -695,7 +695,7 @@ class Test2Decrement(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # a pair of (rule, config) for each non-functional rewrite step
+        # 3 post-initial-configuration events
         assert len(pt.trace) == 3
 
 
@@ -734,7 +734,7 @@ class TestPeano(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # 461 post-initial-configuration events
+        # 404 post-initial-configuration events
         assert len(pt.trace) == 404
 
 
@@ -877,7 +877,7 @@ class TestBuiltInHookEvents(ProofTraceTest):
         # 11 initialization events
         assert len(pt.pre_trace) == 11
 
-        # 2 post-initial-configuration events
+        # 3 post-initial-configuration events
         assert len(pt.trace) == 3
 
         # Contents of the k cell in the initial configuration
