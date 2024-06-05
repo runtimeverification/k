@@ -153,7 +153,7 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         KSort('Bool'),
         r'\exists{SortBool{}}(VarX : SortBool{}, VarX : SortBool{})',
         KApply(
-            KLabel('#Exists', [KSort('Bool')]),
+            KLabel('#Exists', [KSort('Bool'), KSort('Bool')]),
             [
                 KVariable('X', sort=KSort('Bool')),
                 KVariable('X', sort=KSort('Bool')),
@@ -379,7 +379,7 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
         'ml-exists-var-inference',
         KSort('Foo'),
         r'\exists{SortFoo{}}(VarX : SortBar{}, Lblfoo{}(VarX : SortBar{}))',
-        KApply(KLabel('#Exists', [KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
+        KApply(KLabel('#Exists', [KSort('Bar'), KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
     ),
     (
         'ml-multiple-exists-var-inference',
@@ -392,7 +392,7 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
             KLabel('#And', [KSort('Foo')]),
             [
                 KApply(
-                    KLabel('#Exists', [KSort('Foo')]),
+                    KLabel('#Exists', [KSort('K'), KSort('Foo')]),
                     [
                         KVariable('X'),
                         KApply(
@@ -401,7 +401,9 @@ KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
                         ),
                     ],
                 ),
-                KApply(KLabel('#Exists', [KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
+                KApply(
+                    KLabel('#Exists', [KSort('Bar'), KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]
+                ),
             ],
         ),
     ),

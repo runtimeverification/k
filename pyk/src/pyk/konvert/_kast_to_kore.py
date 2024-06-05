@@ -223,8 +223,9 @@ def _kapply_to_kore(kapply: KApply, patterns: list[Pattern]) -> Pattern:
 def _kapply_to_ml_quant(kapply: KApply, patterns: list[Pattern]) -> MLQuant:
     label = kapply.label
     symbol = ML_QUANT_LABELS[label.name]
-    sorts = tuple(_ksort_to_kore(ksort) for ksort in label.params)
-    return MLQuant.of(symbol, sorts, patterns)
+    _, ksort = label.params
+    sort = _ksort_to_kore(ksort)
+    return MLQuant.of(symbol, (sort,), patterns)
 
 
 def _kapply_to_pattern(kapply: KApply, patterns: list[Pattern]) -> Pattern:
