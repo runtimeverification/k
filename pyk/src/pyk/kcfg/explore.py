@@ -15,8 +15,8 @@ from ..kast.manip import (
 )
 from ..kast.pretty import PrettyPrinter
 from ..kore.rpc import LogRewrite, RewriteSuccess
-from ..prelude.ml import is_top
-from ..utils import not_none, shorten_hashes, single
+from ..prelude.ml import is_top, mlAnd
+from ..utils import not_none, shorten_hashes, single, unique
 from .kcfg import KCFG, Abstract, Branch, NDBranch, Step, Stuck, Vacuous
 from .semantics import DefaultSemantics
 
@@ -262,7 +262,20 @@ class KCFGExplore:
         # Branch
         assert len(next_states) > 1
         if all(branch_constraint for _, branch_constraint in next_states):
-            branches = [not_none(rule_predicate) for _, rule_predicate in next_states]
+            branch_preds = [flatten_label('#And', not_none(rule_predicate)) for _, rule_predicate in next_states]
+            common_preds = list(
+                unique(
+                    pred
+                    for branch_pred in branch_preds
+                    for pred in branch_pred
+                    if all(pred in bp for bp in branch_preds)
+                )
+            )
+            branches = [mlAnd(pred for pred in branch_pred if pred not in common_preds) for branch_pred in branch_preds]
+            if common_preds:
+                log(
+                    f'Common predicates found in branches: {[self.pretty_print(ml_pred_to_bool(cp)) for cp in common_preds]}'
+                )
             constraint_strs = [self.pretty_print(ml_pred_to_bool(bc)) for bc in branches]
             log(f'{len(branches)} branches: {node_id} -> {constraint_strs}')
             return Branch(branches)
