@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pyk.kllvm.hints.prooftrace as prooftrace
 from pyk.kllvm.parser import parse_definition
 from pyk.kore.prelude import (
@@ -13,6 +15,9 @@ from pyk.kore.prelude import (
 )
 from pyk.kore.syntax import App
 from pyk.testing import ProofTraceTest
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class TestProofTrace(ProofTraceTest):
@@ -80,3 +85,26 @@ class TestProofTrace(ProofTraceTest):
 
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()
+
+    def test_streaming_parser_iter(self, header: prooftrace.KoreHeader, hints_file: Path) -> None:
+        # read the hints file and get the iterator for the proof trace
+        it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
+        assert it.version == 11
+
+        # Test that the __iter__ is working
+        list_of_events = list(it)
+
+        # Test length of the list
+        assert len(list_of_events) == 13
+
+        # Test the type of the events
+        for event in list_of_events:
+            if event.type.is_pre_trace:
+                continue
+            elif event.type.is_initial_config:
+                assert event.event.is_kore_pattern()
+            elif event.type.is_trace:
+                if event.event.is_step_event():
+                    assert isinstance(event.event.step_event, prooftrace.LLVMRewriteEvent)
+                else:
+                    assert event.event.is_kore_pattern()
