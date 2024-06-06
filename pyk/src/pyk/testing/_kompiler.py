@@ -379,6 +379,8 @@ class ProofTraceTest(KompiledTest):
         path = definition_dir / 'header.bin'
         with open(path, 'wb') as f:
             f.write(hdr)
+        from ..kllvm.hints.prooftrace import KoreHeader
+
         return KoreHeader.create(path)
 
     @pytest.fixture(scope='class')
