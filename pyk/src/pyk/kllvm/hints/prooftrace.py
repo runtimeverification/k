@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import TYPE_CHECKING, final
+from collections.abc import Generator
 
 # isort: off
 import pyk.kllvm.load_static  # noqa: F401
@@ -16,12 +16,17 @@ from _kllvm.prooftrace import (  # type: ignore  # noqa: F401, TC002
     llvm_side_condition_end_event,
     llvm_side_condition_event,
     llvm_step_event,
+    annotated_llvm_event,
+    llvm_rewrite_trace_iterator,
+    EventType,
 )
 from ..ast import Pattern
 
 # isort: on
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from _kllvm.prooftrace import Argument
 
 
@@ -415,3 +420,53 @@ class LLVMEventAnnotated:
         """Returns the LLVM event as an LLVMArgument object."""
         return LLVMArgument(self._annotated_llvm_event.event)
 
+
+class LLVMRewriteTraceIterator:
+    """
+    Represents an LLVM rewrite trace iterator. This class is used to iterate over the LLVM rewrite trace events in the stream parser.
+
+    Attributes:
+        _rewrite_trace_iterator (llvm_rewrite_trace_iterator): The underlying LLVM rewrite trace iterator object.
+
+    Methods:
+        __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None: Initializes a new instance of the LLVMRewriteTraceIterator class.
+
+        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTraceIterator object using the AST printing method.
+
+        __iter__(self) -> Generator[LLVMEventAnnotated, None, None]: Returns a generator that yields LLVMEventAnnotated objects.
+
+        __next__(self) -> LLVMEventAnnotated: Returns the next LLVMEventAnnotated object in the iterator.
+    """
+
+    _rewrite_trace_iterator: llvm_rewrite_trace_iterator
+
+    def __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None:
+        self._rewrite_trace_iterator = rewrite_trace_iterator
+
+    def __repr__(self) -> str:
+        return self._rewrite_trace_iterator.__repr__()
+
+    def __iter__(self) -> Generator[LLVMEventAnnotated, None, None]:
+        while True:
+            next_exent = self._rewrite_trace_iterator.get_next_event()
+            if next_exent is None:
+                return
+            else:
+                yield LLVMEventAnnotated(next_exent)
+
+    def __next__(self) -> LLVMEventAnnotated:
+        next_event = self._rewrite_trace_iterator.get_next_event()
+        if next_event is not None:
+            return LLVMEventAnnotated(next_event)
+        else:
+            raise StopIteration
+
+    @property
+    def version(self) -> int:
+        """Returns the version of the HINTS format."""
+        return self._rewrite_trace_iterator.version
+
+    @staticmethod
+    def from_file(trace_path: Path, header: KoreHeader) -> LLVMRewriteTraceIterator:
+        """Creates a new LLVMRewriteTraceIterator object from the given trace and header file paths."""
+        return LLVMRewriteTraceIterator(llvm_rewrite_trace_iterator.from_file(str(trace_path), header._kore_header))
