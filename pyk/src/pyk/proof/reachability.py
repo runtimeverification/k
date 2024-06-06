@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final, TypeVar
 
-    from ..kast.outer import KClaim, KDefinition, KFlatModuleList, KRuleLike
+    from ..kast.outer import KClaim, KDefinition, KFlatModuleList
     from ..kcfg import KCFGExplore
     from ..kcfg.explore import KCFGExtendResult
     from ..kcfg.kcfg import CSubst, NodeIdLike
@@ -92,6 +92,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     _exec_time: float
     error_info: Exception | None
     prior_loops_cache: dict[int, tuple[int, ...]]
+    abstract: bool
 
     _checked_for_bounded: set[int]
 
@@ -113,6 +114,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         _exec_time: float = 0,
         error_info: Exception | None = None,
         prior_loops_cache: dict[int, tuple[int, ...]] | None = None,
+        abstract: bool = False,
     ):
         Proof.__init__(self, id, proof_dir=proof_dir, subproof_ids=subproof_ids, admitted=admitted)
         KCFGExploration.__init__(self, kcfg, terminal)
@@ -129,6 +131,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.kcfg._kcfg_store = KCFGStore(self.proof_subdir / 'kcfg') if self.proof_subdir else None
         self._exec_time = _exec_time
         self.error_info = error_info
+        self.abstract = abstract
 
         self._checked_for_bounded = set()
 
@@ -384,6 +387,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         )
 
     def as_rules(self, priority: int = 20) -> list[KRule]:
+        if not self.abstract or (self.admitted and not self.kcfg.predecessors(self.target)):
+            return [self.as_rule(priority=priority)]
         _rules = []
         for _edge in self.kcfg.edges():
             _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
@@ -706,7 +711,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
     def init_proof(self, proof: APRProof) -> None:
-        def _inject_module(module_name: str, import_name: str, sentences: list[KRuleLike]) -> None:
+        def _inject_module(module_name: str, import_name: str, sentences: list[KRule]) -> None:
             _module = KFlatModule(module_name, sentences, [KImport(import_name)])
             _kore_module = kflatmodule_to_kore(self.kcfg_explore.cterm_symbolic._definition, _module)
             self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
@@ -716,12 +721,9 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             if proof.proof_dir is not None
             else []
         )
-
-        dependencies_as_rules: list[KRuleLike] = []
-        for apr_subproof in [pf for pf in subproofs if isinstance(pf, APRProof)]:
-            dependencies_as_rules.extend(apr_subproof.as_rules(priority=20))
-            if apr_subproof.admitted and len(apr_subproof.kcfg.predecessors(apr_subproof.target)) == 0:
-                dependencies_as_rules.append(apr_subproof.as_rule(priority=20))
+        dependencies_as_rules = [
+            rule for subproof in subproofs if isinstance(subproof, APRProof) for rule in subproof.as_rules(priority=20)
+        ]
         circularity_rule = proof.as_rule(priority=20)
 
         _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
