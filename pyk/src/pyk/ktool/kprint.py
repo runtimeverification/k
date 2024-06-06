@@ -16,7 +16,6 @@ from ..kast.inner import KInner
 from ..kast.outer import read_kast_definition
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
-from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
 from ..kore.syntax import App, SortApp
 from ..kore.tools import PrintOutput, kore_print
@@ -226,10 +225,6 @@ class KPrint:
     def definition(self) -> KDefinition:
         return read_kast_definition(self.definition_dir / 'compiled.json')
 
-    @cached_property
-    def kompiled_kore(self) -> KompiledKore:
-        return KompiledKore.load(self.definition_dir)
-
     @property
     def definition_hash(self) -> str:
         return self.definition.hash
@@ -268,7 +263,7 @@ class KPrint:
         if not force_kast:
             try:
                 _LOGGER.info('Invoking kast_to_kore')
-                return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
+                return kast_to_kore(self.definition, kast, sort)
             except ValueError as ve:
                 _LOGGER.warning(ve)
 

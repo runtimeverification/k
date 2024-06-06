@@ -6,7 +6,6 @@ import pytest
 
 from pyk.kast.inner import KApply, KSort, KVariable
 from pyk.konvert import kast_to_kore, kore_to_kast
-from pyk.kore.kompiled import KompiledKore
 from pyk.kore.parser import KoreParser
 from pyk.prelude.kint import INT, intToken
 from pyk.testing import KompiledTest
@@ -14,7 +13,6 @@ from pyk.testing import KompiledTest
 from ..utils import K_FILES
 
 if TYPE_CHECKING:
-    from pathlib import Path
     from typing import Final
 
     from pyk.kast import KInner
@@ -96,10 +94,6 @@ KORE_TO_KAST_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
 class TestKonvertCellMap(KompiledTest):
     KOMPILE_MAIN_FILE = K_FILES / 'cell-map.k'
 
-    @pytest.fixture(scope='class')
-    def kompiled_kore(self, definition_dir: Path) -> KompiledKore:
-        return KompiledKore.load(definition_dir)
-
     @pytest.mark.parametrize(
         'test_id,sort,kore_text,kast',
         KAST_TO_KORE_TEST_DATA,
@@ -108,7 +102,6 @@ class TestKonvertCellMap(KompiledTest):
     def test_kast_to_kore(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
         kore_text: str,
@@ -118,7 +111,7 @@ class TestKonvertCellMap(KompiledTest):
         kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kore = kast_to_kore(definition, kompiled_kore, kast, sort=sort)
+        actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
         assert actual_kore == kore
