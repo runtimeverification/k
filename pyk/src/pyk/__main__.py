@@ -261,7 +261,6 @@ def exec_prove(options: ProveOptions) -> None:
     def explore_context() -> Iterator[KCFGExplore]:
         with cterm_symbolic(
             definition=kprove.definition,
-            kompiled_kore=kprove.kompiled_kore,
             definition_dir=kprove.definition_dir,
         ) as cts:
             yield KCFGExplore(cts)

@@ -73,6 +73,7 @@ let
 
         ln -sf ${haskell-backend}/bin/kore-rpc-booster $out/bin/kore-rpc-booster
         ln -sf ${haskell-backend}/bin/kore-rpc-client $out/bin/kore-rpc-client
+        ln -sf ${haskell-backend}/bin/booster-dev $out/bin/booster-dev
 
         prelude_kore="$out/include/kframework/kore/prelude.kore"
         mkdir -p "$(dirname "$prelude_kore")"
