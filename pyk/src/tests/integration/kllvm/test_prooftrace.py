@@ -118,6 +118,12 @@ class TestProofTrace(ProofTraceTest):
                     assert event.event.is_kore_pattern()
 
     def test_streaming_parser_next(self, header: prooftrace.KoreHeader, hints_file: Path, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+        
         # read the hints file and get the iterator for the proof trace
         it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
         assert it.version == 11
@@ -154,6 +160,7 @@ class TestProofTrace(ProofTraceTest):
         assert event3.type.is_trace
         assert event3.event.is_kore_pattern()
 
+
 class TestSingleRewrite(ProofTraceTest):
     KOMPILE_DEFINITION = """
         module SINGLE-REWRITE-SYNTAX
@@ -171,7 +178,7 @@ class TestSingleRewrite(ProofTraceTest):
     HINTS_INPUT_KORE = """LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()))))"""
 
     def test_parse_proof_hint_single_rewrite(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -241,7 +248,7 @@ class TestTreeReverse(ProofTraceTest):
        """
 
     def test_parse_proof_hint_reverse_no_ints(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -366,7 +373,7 @@ class TestNonRecFunction(ProofTraceTest):
         """
 
     def test_parse_proof_hint_non_rec_function(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -445,7 +452,7 @@ class TestDV(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\\dv{SortInt{}}("5")))))))
         """
 
-    def test_parse_proof_hint_dv(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_dv(self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
@@ -531,7 +538,7 @@ class TestConcurrentCounters(ProofTraceTest):
     """
 
     def test_parse_concurrent_counters(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         # main purpose of the test is to check the sequence of events in the trace with
         # successful and failed side condition checks
@@ -700,7 +707,7 @@ class Test0Decrement(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))
     """
 
-    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -729,7 +736,7 @@ class Test1Decrement(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl1'Unds'DECREMENT-SYNTAX'Unds'Nat{}())))))
     """
 
-    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -758,7 +765,7 @@ class Test2Decrement(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl2'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))))
     """
 
-    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -797,7 +804,7 @@ class TestPeano(ProofTraceTest):
 
     """
 
-    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -901,7 +908,7 @@ class TestIMP5(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortPgm{}, SortKItem{}}(inj{SortBlock{}, SortPgm{}}(Lbl'LBraRBraUnds'IMP5-SYNTAX'Unds'Block{}())))))
     """
 
-    def test_parse_proof_hint_imp5(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_imp5(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -933,7 +940,7 @@ class TestBuiltInHookEvents(ProofTraceTest):
     """
 
     def test_parse_proof_hint_builtin_hook_events(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
