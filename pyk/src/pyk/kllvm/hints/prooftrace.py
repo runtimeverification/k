@@ -388,3 +388,30 @@ class LLVMEventType:
         return self._event_type == EventType.Trace
 
 
+class LLVMEventAnnotated:
+    """
+    Represents an annotated LLVM event. This class is used to wrap an llvm_event and its corresponding event type.
+    This class is used to iterate over the LLVM rewrite trace events.
+
+    Attributes:
+        _annotated_llvm_event (annotated_llvm_event): The underlying annotated LLVM event object.
+
+    Methods:
+        __init__(self, annotated_llvm_event: annotated_llvm_event) -> None: Initializes a new instance of the LLVMEventAnnotated class.
+    """
+
+    _annotated_llvm_event: annotated_llvm_event
+
+    def __init__(self, annotated_llvm_event: annotated_llvm_event) -> None:
+        self._annotated_llvm_event = annotated_llvm_event
+
+    @property
+    def type(self) -> LLVMEventType:
+        """Returns the LLVM event type."""
+        return LLVMEventType(self._annotated_llvm_event.type)
+
+    @property
+    def event(self) -> LLVMArgument:
+        """Returns the LLVM event as an LLVMArgument object."""
+        return LLVMArgument(self._annotated_llvm_event.event)
+
