@@ -46,7 +46,7 @@ class TestProofTrace(ProofTraceTest):
         assert line is not None
         return definition_text[line - 1].strip()
 
-    def test_proof_trace(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_proof_trace(self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
