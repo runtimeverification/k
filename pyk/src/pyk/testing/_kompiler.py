@@ -14,8 +14,8 @@ from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime, generate_hints
-from ..kllvm.importer import import_runtime
 from ..kllvm.hints.prooftrace import KoreHeader
+from ..kllvm.importer import import_runtime
 from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
 from ..kore.rpc import BoosterServer, KoreClient, KoreServer
@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KDefinition
     from ..kcfg.semantics import KCFGSemantics
-    from ..kllvm.hints.prooftrace import kore_header
     from ..kllvm.runtime import Runtime
     from ..ktool.kprint import SymbolTable
     from ..utils import BugReport
@@ -388,3 +387,9 @@ class ProofTraceTest(KompiledTest):
         assert definition_path.is_file()
         with open(definition_path) as f:
             return f.read()
+
+    @pytest.fixture(scope='class')
+    def hints_file(self, definition_dir: Path, kompile: Kompiler) -> Path:
+        input_kore_file = kompile._cache_definition(self.HINTS_INPUT_KORE)
+        hints_file = generate_hints(definition_dir, input_kore_file)
+        return hints_file
