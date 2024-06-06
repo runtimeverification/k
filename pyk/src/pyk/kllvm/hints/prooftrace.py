@@ -334,6 +334,7 @@ class LLVMRewriteTrace:
         """Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace object."""
         return LLVMRewriteTrace(llvm_rewrite_trace.parse(trace, header._kore_header))
 
+
 class KoreHeader:
     """
     Represents the Kore header, a file that contains the version of the Binary KORE used to serialize/deserialize the Proof Trace and all the aditional information needed make this process faster the Proof Trace.
@@ -343,18 +344,13 @@ class KoreHeader:
 
     Methods:
         __init__(self, kore_header: kore_header) -> None: Initializes a new instance of the KoreHeader class.
-
-        __repr__(self) -> str: Returns a string representation of the KoreHeader object using the AST printing method.
     """
-    
+
     _kore_header: kore_header
-    
+
     def __init__(self, kore_header: kore_header) -> None:
         self._kore_header = kore_header
-        
-    def __repr__(self) -> str:
-        return self._kore_header.__repr__()
-    
+
     @staticmethod
     def create(header_path: Path) -> KoreHeader:
         """Creates a new KoreHeader object from the given header file path."""
