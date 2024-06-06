@@ -286,10 +286,9 @@ class CTermSymbolicTest(KoreClientTest):
         self,
         kore_client: KoreClient,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         bug_report: BugReport | None,
     ) -> CTermSymbolic:
-        return CTermSymbolic(kore_client, definition, kompiled_kore)
+        return CTermSymbolic(kore_client, definition)
 
 
 class KCFGExploreTest(CTermSymbolicTest):
@@ -321,11 +320,10 @@ class ParallelTest(KoreServerTest, ABC):
         _kore_server: KoreServer,
         definition: KDefinition,
         bug_report: BugReport | None,
-        kompiled_kore: KompiledKore,
     ) -> Callable[[int, Iterable[str]], APRProver]:
         def _create_prover(max_depth: int, cut_point_rules: Iterable[str]) -> APRProver:
             kore_client = self.create_kore_client(_kore_server, bug_report)
-            ct_symb = CTermSymbolic(kore_client, definition, kompiled_kore)
+            ct_symb = CTermSymbolic(kore_client, definition)
             _kcfg_explore = KCFGExplore(ct_symb, kcfg_semantics=self.semantics(definition))
             return APRProver(kcfg_explore=_kcfg_explore, execute_depth=max_depth, cut_point_rules=cut_point_rules)
 

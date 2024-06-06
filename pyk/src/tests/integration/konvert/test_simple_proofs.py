@@ -8,7 +8,6 @@ from pyk.kast import Atts
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from pyk.kast.outer import KRule
 from pyk.konvert import kast_to_kore, kore_to_kast, krule_to_kore
-from pyk.kore.kompiled import KompiledKore
 from pyk.kore.parser import KoreParser
 from pyk.prelude.bytes import bytesToken
 from pyk.prelude.kbool import BOOL, TRUE
@@ -21,7 +20,6 @@ from pyk.utils import single
 from ..utils import K_FILES, TEST_DATA_DIR
 
 if TYPE_CHECKING:
-    from pathlib import Path
     from typing import Final
 
     from pyk.kast import KInner
@@ -651,10 +649,6 @@ class TestKonvertSimpleProofs(KPrintTest):
     KOMPILE_MAIN_FILE = K_FILES / 'simple-proofs.k'
     KOMPILE_ARGS = {'syntax_module': 'SIMPLE-PROOFS'}
 
-    @pytest.fixture(scope='class')
-    def kompiled_kore(self, definition_dir: Path) -> KompiledKore:
-        return KompiledKore.load(definition_dir)
-
     @pytest.mark.parametrize(
         'test_id,sort,kore_text,kast',
         KAST_TO_KORE_TEST_DATA,
@@ -663,7 +657,6 @@ class TestKonvertSimpleProofs(KPrintTest):
     def test_kast_to_kore(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
         kore_text: str,
@@ -673,7 +666,7 @@ class TestKonvertSimpleProofs(KPrintTest):
         kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kore = kast_to_kore(definition, kompiled_kore, kast, sort=sort)
+        actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
         assert actual_kore == kore
@@ -686,7 +679,6 @@ class TestKonvertSimpleProofs(KPrintTest):
     def test_kast_to_kore_frontend_comp(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
         kore_text: str,
@@ -700,7 +692,7 @@ class TestKonvertSimpleProofs(KPrintTest):
         frontend_kore = kprint.kast_to_kore(kast=kast, sort=sort, force_kast=True)
 
         # When
-        actual_kore = kast_to_kore(definition, kompiled_kore, kast, sort=sort)
+        actual_kore = kast_to_kore(definition, kast, sort=sort)
 
         # Then
         assert actual_kore == frontend_kore
@@ -735,7 +727,6 @@ class TestKonvertSimpleProofs(KPrintTest):
     def test_krule_to_kore(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         rule_id: str,
         kore_text: str,
     ) -> None:
@@ -743,7 +734,7 @@ class TestKonvertSimpleProofs(KPrintTest):
         rule = single(r for r in main_module.rules if Atts.LABEL in r.att and r.att[Atts.LABEL] == rule_id)
 
         # When
-        actual_kore_text = krule_to_kore(definition, kompiled_kore, rule).text
+        actual_kore_text = krule_to_kore(definition, rule).text
 
         # Then
         assert actual_kore_text == kore_text
@@ -756,13 +747,12 @@ class TestKonvertSimpleProofs(KPrintTest):
     def test_explicit_krule_to_kore(
         self,
         definition: KDefinition,
-        kompiled_kore: KompiledKore,
         test_id: str,
         rule: KRule,
         kore_text: str,
     ) -> None:
         # When
-        actual_kore_text = krule_to_kore(definition, kompiled_kore, rule).text
+        actual_kore_text = krule_to_kore(definition, rule).text
 
         # Then
         assert actual_kore_text == kore_text
