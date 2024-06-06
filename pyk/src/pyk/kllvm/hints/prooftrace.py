@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, final
-from collections.abc import Generator
 
 # isort: off
 import pyk.kllvm.load_static  # noqa: F401
@@ -25,6 +24,7 @@ from ..ast import Pattern
 # isort: on
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from pathlib import Path
 
     from _kllvm.prooftrace import Argument
