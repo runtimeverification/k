@@ -4,8 +4,14 @@ set -euxo pipefail
 
 SPHINX_VERSION=7.2.6
 
-DOCS_DIR=$(dirname $0)
-PYK_DIR=$DOCS_DIR/..
+DOCS_DIR=$(realpath $(dirname $0))
+API_DIR=$DOCS_DIR/api
+BUILD_DIR=$DOCS_DIR/build
+
+PYK_DIR=$(realpath $DOCS_DIR/..)
+SRC_DIR=$PYK_DIR/src/pyk
+
+rm -rf $API_DIR $BUILD_DIR
 
 VENV_DIR=$(mktemp -d --suffix -pyk-docs-venv)
 trap 'rm -rf $VENV_DIR' EXIT
@@ -21,5 +27,7 @@ pip install sphinx==$SPHINX_VERSION
 PYTHON_LIB=$(find $VENV_DIR -name 'site-packages' -type d)
 python3 -c "from pyk.kllvm.compiler import compile_kllvm; compile_kllvm('$PYTHON_LIB', verbose=True)"
 
-sphinx-apidoc $PYK_DIR/src/pyk --output $DOCS_DIR/api --force --separate --module-first
-sphinx-build -b html docs $DOCS_DIR/build
+sphinx-apidoc $SRC_DIR --output $API_DIR --force --separate --module-first
+sphinx-build -b html docs $BUILD_DIR
+
+find $BUILD_DIR -depth -name '.*' -exec rm -rf {} \;
