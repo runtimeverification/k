@@ -1182,14 +1182,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         """Returns the module associated with a given name."""
         return self.all_modules_dict[name]
 
-    def return_sort(self, label: KLabel) -> KSort:
-        """Returns the return sort of a given `KLabel` by looking up the production."""
-        return self.symbols[label.name].sort
-
-    def argument_sorts(self, label: KLabel) -> list[KSort]:
-        """Returns the argument sorts of a given `KLabel` by looking up the production."""
-        return self.symbols[label.name].argument_sorts
-
     @cached_property
     def subsort_table(self) -> FrozenDict[KSort, frozenset[KSort]]:
         """Return a mapping from sorts to all their proper subsorts."""
@@ -1328,28 +1320,27 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             case KSequence(_):
                 return KSort('K')
             case KApply(label, _):
-                prod = self.symbols[label.name]
-                if prod.sort not in prod.params:
-                    return prod.sort
-                elif len(prod.params) == len(label.params):
-                    param_dict: dict[KSort, KSort] = {}
-                    for pparam, lparam in zip(prod.params, label.params, strict=True):
-                        if pparam not in param_dict:
-                            param_dict[pparam] = lparam
-                        elif param_dict[pparam] != lparam:
-                            return None
-                    if prod.sort in param_dict and param_dict[prod.sort] not in prod.params:
-                        return param_dict[prod.sort]
-                return None
+                sort, _ = self.resolve_sorts(label)
+                return sort
             case _:
                 return None
 
     def sort_strict(self, kast: KInner) -> KSort:
-        """Computes the sort of a given term using best-effort simple sorting algorithm, dies on algorithm failure."""
+        """Compute the sort of a given term using best-effort simple sorting algorithm, dies on algorithm failure."""
         sort = self.sort(kast)
         if sort is None:
             raise ValueError(f'Could not determine sort of term: {kast}')
         return sort
+
+    def resolve_sorts(self, label: KLabel) -> tuple[KSort, tuple[KSort, ...]]:
+        """Compute the result and argument sorts for a given production based on a `KLabel`."""
+        prod = self.symbols[label.name]
+        sorts = dict(zip(prod.params, label.params, strict=True))
+
+        def resolve(sort: KSort) -> KSort:
+            return sorts.get(sort, sort)
+
+        return resolve(prod.sort), tuple(resolve(sort) for sort in prod.argument_sorts)
 
     def least_common_supersort(self, sort1: KSort, sort2: KSort) -> KSort | None:
         """Computes the lowest-upper-bound of two sorts in the sort lattice using very simple approach, returning `None` on failure (not necessarily meaning there isn't a lub)."""
