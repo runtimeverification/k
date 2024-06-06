@@ -354,3 +354,37 @@ class KoreHeader:
     def create(header_path: Path) -> KoreHeader:
         """Creates a new KoreHeader object from the given header file path."""
         return KoreHeader(kore_header(str(header_path)))
+
+
+class LLVMEventType:
+    """
+    Represents an LLVM event type. This works as a wrapper around the EventType enum. It also provides properties to check the type of the event.
+
+    Attributes:
+        _event_type (EventType): The underlying EventType object.
+
+    Methods:
+        __init__(self, event_type: EventType) -> None: Initializes a new instance of the LLVMEventType class.
+    """
+
+    _event_type: EventType
+
+    def __init__(self, event_type: EventType) -> None:
+        self._event_type = event_type
+
+    @property
+    def is_pre_trace(self) -> bool:
+        """Checks if the event type is a pre-trace event."""
+        return self._event_type == EventType.PreTrace
+
+    @property
+    def is_initial_config(self) -> bool:
+        """Checks if the event type is an initial configuration event."""
+        return self._event_type == EventType.InitialConfig
+
+    @property
+    def is_trace(self) -> bool:
+        """Checks if the event type is a trace event."""
+        return self._event_type == EventType.Trace
+
+
