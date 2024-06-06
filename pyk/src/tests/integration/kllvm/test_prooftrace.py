@@ -108,3 +108,46 @@ class TestProofTrace(ProofTraceTest):
                     assert isinstance(event.event.step_event, prooftrace.LLVMRewriteEvent)
                 else:
                     assert event.event.is_kore_pattern()
+
+    def test_streaming_parser_next(self, header: prooftrace.KoreHeader, hints_file: Path, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        # read the hints file and get the iterator for the proof trace
+        it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
+        assert it.version == 11
+
+        # skip pre-trace events
+        while True:
+            event0 = next(it)
+            if event0 is None or not event0.type.is_pre_trace:
+                break
+
+        # check that the first event is the initial configuration
+        assert event0.type.is_initial_config
+        assert event0.event.is_kore_pattern()
+
+        # check that the first event is the rewrite a() => b()
+        event1 = next(it)
+        assert event1.event.is_step_event()
+        assert isinstance(event1.event.step_event, prooftrace.LLVMRewriteEvent)
+        axiom_ordinal = event1.event.step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        assert axiom == axiom_expected
+
+        # check that the second event is the rewrite b() => c()
+        event2 = next(it)
+        assert event2.event.is_step_event()
+        assert isinstance(event2.event.step_event, prooftrace.LLVMRewriteEvent)
+        axiom_ordinal = event2.event.step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        assert axiom == axiom_expected
+
+        event3 = next(it)
+        assert event3.type.is_trace
+        assert event3.event.is_kore_pattern()
