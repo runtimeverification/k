@@ -342,6 +342,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
         bounded = dct['bounded']
         bmc_depth = dct['bmc_depth'] if 'bmc_depth' in dct else None
+        abstract = dct['abstract'] if 'abstract' in dct else True
 
         return APRProof(
             id,
@@ -357,6 +358,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             proof_dir=proof_dir,
             subproof_ids=subproof_ids,
             node_refutations=node_refutations,
+            abstract=abstract,
         )
 
     @staticmethod
@@ -508,6 +510,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         dct['circularity'] = self.circularity
         logs = {int(k): [l.to_dict() for l in ls] for k, ls in self.logs.items()}
         dct['logs'] = logs
+        dct['abstract'] = self.abstract
         return dct
 
     @property
