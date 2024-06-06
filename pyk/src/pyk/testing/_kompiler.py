@@ -14,7 +14,6 @@ from ..cterm import CTermSymbolic
 from ..kast.outer import read_kast_definition
 from ..kcfg import KCFGExplore
 from ..kllvm.compiler import compile_runtime, generate_hints
-from ..kllvm.hints.prooftrace import KoreHeader
 from ..kllvm.importer import import_runtime
 from ..kore.kompiled import KompiledKore
 from ..kore.pool import KoreServerPool
@@ -34,6 +33,7 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KDefinition
     from ..kcfg.semantics import KCFGSemantics
+    from ..kllvm.hints.prooftrace import KoreHeader
     from ..kllvm.runtime import Runtime
     from ..ktool.kprint import SymbolTable
     from ..utils import BugReport
