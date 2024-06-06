@@ -123,7 +123,7 @@ class TestProofTrace(ProofTraceTest):
 
         definition.preprocess()
         definition_text = repr(definition).split('\n')
-        
+
         # read the hints file and get the iterator for the proof trace
         it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
         assert it.version == 11
@@ -537,9 +537,7 @@ class TestConcurrentCounters(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortState{}, SortKItem{}}(Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\\dv{SortInt{}}("4"),\\dv{SortInt{}}("0"))))))
     """
 
-    def test_parse_concurrent_counters(
-        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
-    ) -> None:
+    def test_parse_concurrent_counters(self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str) -> None:
         # main purpose of the test is to check the sequence of events in the trace with
         # successful and failed side condition checks
         definition = parse_definition(definition_file)
