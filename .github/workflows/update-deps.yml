@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - '_update-deps/runtimeverification/llvm-backend'
-      - '_update-deps/runtimeverification/hs-backend-booster'
+      - '_update-deps/runtimeverification/haskell-backend'
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
@@ -26,15 +26,6 @@ jobs:
           git config --global user.name rv-jenkins
           git config --global user.email devops@runtimeverification.com
 
-      - name: 'Clone booster repo'
-        run: echo "BOOSTER_VERSION=$(cat deps/hs-backend-booster_release)" >> ${GITHUB_ENV}
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
-          repository: runtimeverification/hs-backend-booster
-          ref: ${{ env.BOOSTER_VERSION }}
-          path: deps/hs-backend-booster
-
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v22
         with:
@@ -55,7 +46,7 @@ jobs:
           set -euxo pipefail
           changed=false
 
-          hs_backend_version=$(cat deps/hs-backend-booster/deps/haskell-backend_release)
+          hs_backend_version=$(cat deps/haskell-backend_release)
           cd haskell-backend/src/main/native/haskell-backend
           git checkout ${hs_backend_version}
           cd -
@@ -64,18 +55,17 @@ jobs:
             changed=true
           fi
 
-          booster_version=$(cat deps/hs-backend-booster_release)
-          cd hs-backend-booster/src/main/native/hs-backend-booster
-          git checkout ${booster_version}
+          llvm_backend_version="v$(cat deps/llvm-backend_release)"
+          cd llvm-backend/src/main/native/llvm-backend
+          git checkout ${llvm_backend_version}
           cd -
-          sed -i 's!      url = "github:runtimeverification/hs-backend-booster/[0-9a-f]*";!      url = "github:runtimeverification/hs-backend-booster/'${booster_version}'";!' flake.nix
-          if git add flake.nix hs-backend-booster/src/main/native/hs-backend-booster && git commit -m "flake.nix, hs-backend-booster/src/main/native/hs-backend-booster: update to version ${booster_version}"; then
+          sed -i 's!      url = "github:runtimeverification/llvm-backend/.*";!      url = "github:runtimeverification/llvm-backend/'"${llvm_backend_version}"'";!' flake.nix
+          if git add flake.nix llvm-backend/src/main/native/llvm-backend && git commit -m "flake.nix, llvm-backend/src/main/native/llvm-backend: update to version ${llvm_backend_version}"; then
             changed=true
           fi
 
           nix flake update
-          GC_DONT_GC=1 nix run .#update-from-submodules
-          if git add flake.nix flake.lock && git commit -m 'flake.nix, flake.lock: update'; then
+          if git add flake.lock && git commit -m 'flake.lock: update'; then
             changed=true
           fi
 

@@ -1,0 +1,8 @@
+[]
+
+module TEST-PATTERN-5
+
+  axiom{S}
+    \not{S}(X:S) []
+
+endmodule []

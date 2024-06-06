@@ -1,0 +1,29 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "Iff",
+    "sort": {
+      "tag": "SortVar",
+      "name": "S"
+    },
+    "first": {
+      "tag": "EVar",
+      "name": "X",
+      "sort": {
+        "tag": "SortVar",
+        "name": "S"
+      }
+    },
+    "second": {
+      "tag": "EVar",
+      "name": "X",
+      "sort": {
+        "tag": "SortVar",
+        "name": "S"
+      }
+    }
+  }
+} 
+]

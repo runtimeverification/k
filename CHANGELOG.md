@@ -2,6 +2,48 @@
 copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
+K Framework 7.0.0
+=================
+
+Major Changes
+-------------
+
+- **Important change for all K and Pyk users**. The Pyk library has been
+  reintegrated into K, and is no longer maintained as a standalone project. This
+  means that in K 7, first-class Python tooling is available wherever K is
+  installed. Existing projects using the standalone Pyk library can continue to
+  do so, but will not receive updates in the future.
+
+- The Haskell backend and booster components have been merged and are now
+  developed as a single project.
+
+- Add an explicit `overload(_)` attribute to specify sets of overloaded symbols;
+  this replaces the old `klabel(_)` syntax.
+
+- The outer parser no longer supports `priorities`, `require` and `import`.
+
+Minor Changes
+-------------
+
+- Tooling and version updates for our Java and Scala code.
+
+- Substantial cleanup and auditing of the K frontend's use of attributes when
+  generating KORE definitions.
+
+- Extended compiler warnings for the deprecated `symbol, klabel(_)` attribute
+  combination, as well as for overload sets.
+
+- Clarification and better compiler warnings for cell collection initializers.
+
+- Add `total` attribute to record projection functions that are verifiably
+  total.
+
+- Removed deprecated `--directory` flag.
+
+- Removed deprecated binary format for KAST.
+
+- Removed deprecated `STRATEGY` module.
+
 K Framework 6.3.0
 =================
 

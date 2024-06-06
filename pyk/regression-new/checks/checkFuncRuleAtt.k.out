@@ -1,0 +1,30 @@
+[Error] Compiler: Rule cannot have the following attributes: [macro]
+	Source(checkFuncRuleAtt.k)
+	Location(11,10,11,18)
+	11 |	    rule foo => 0 [macro]
+	   .	         ^~~~~~~~
+[Error] Compiler: Rule cannot have the following attributes: [macro-rec]
+	Source(checkFuncRuleAtt.k)
+	Location(12,10,12,18)
+	12 |	    rule foo => 1 [macro-rec]
+	   .	         ^~~~~~~~
+[Error] Compiler: Rule cannot have the following attributes: [alias]
+	Source(checkFuncRuleAtt.k)
+	Location(13,10,13,18)
+	13 |	    rule foo => 2 [alias]
+	   .	         ^~~~~~~~
+[Error] Compiler: Rule cannot have the following attributes: [alias-rec]
+	Source(checkFuncRuleAtt.k)
+	Location(14,10,14,18)
+	14 |	    rule foo => 3 [alias-rec]
+	   .	         ^~~~~~~~
+[Error] Compiler: Rule cannot have the following attributes: [macro]
+	Source(checkFuncRuleAtt.k)
+	Location(17,10,18,26)
+	   .	         v~~~~~~~~~~~~~
+	17 |	    rule [[ foo => 6 ]]
+	18 |	         <notk> 7 </notk> [macro]
+	   .	         ~~~~~~~~~~~~~~~^
+[Error] Compiler: Had 5 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkFuncRuleAtt.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkFuncRuleAtt-kompiled --type-inference-mode checked

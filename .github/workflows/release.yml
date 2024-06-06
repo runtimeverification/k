@@ -126,6 +126,8 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: 'Clean up Docker Container'
         if: always()
@@ -141,7 +143,7 @@ jobs:
 
   macos-build:
     name: 'Build MacOS Package'
-    runs-on: macos-13
+    runs-on: macos-14
     timeout-minutes: 120
     environment: production
     needs: [set-release-id, source-tarball]
@@ -206,7 +208,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.ventura.bottle*.tar.gz"))
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
@@ -235,7 +237,7 @@ jobs:
 
   macos-test:
     name: 'Test MacOS Package'
-    runs-on: macos-13
+    runs-on: macos-14
     timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
@@ -433,6 +435,12 @@ jobs:
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           fetch-depth: 0
+      - name: 'Install Python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v9
       - name: 'Checkout PL Tutorial code'
         uses: actions/checkout@v4
         with:
@@ -455,9 +463,15 @@ jobs:
           npm run build-sitemap
           cd -
           mv web/public_content ./
+          cd pyk
+          make docs
+          cd -
+          mkdir public_content/pyk
+          cp -r pyk/docs/build/html/* public_content/pyk
           rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
           mv public_content/* ./
           rm -rf public_content
+          touch .nojekyll
       - name: 'Push gh-pages branch'
         working-directory: gh-pages
         run: |

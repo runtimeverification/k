@@ -16,4 +16,11 @@ RUN    apt-get update                                                           
     && apt-get upgrade --yes                                                            \
     && apt-get install --yes --no-install-recommends /kframework_amd64_ubuntu_jammy.deb
 
+COPY pyk /pyk
+RUN pip install poetry        \
+    && cd /pyk                \
+    && make build             \
+    && pip install dist/*.whl \
+    && rm -rf /pyk
+
 RUN rm -rf /kframework_amd64_ubuntu_jammy.deb

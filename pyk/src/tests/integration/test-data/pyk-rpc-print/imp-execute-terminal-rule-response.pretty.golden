@@ -1,0 +1,21 @@
+JSON RPC Response
+id: 1
+Method: execute
+Depth: 290017
+Stop reason: terminal-rule
+Stop rule: IMP.stop
+Number of next states: 0
+State:
+<generatedTop>
+  <T>
+    <k>
+      .K
+    </k>
+    <state>
+      k |-> 10001 sum |-> 50005000
+    </state>
+  </T>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>

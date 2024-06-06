@@ -1,0 +1,35 @@
+rule/*1*/ <a> A        </a>
+          <b> b1 => b2 </b> // end of rule 1
+
+/*
+rule
+  <a> _ => a1 </a>
+  <b> _ => b1 </b> // end of rule 2
+*/
+
+rule/*2*/
+  <a> a1 => a2 </a>
+  <b> B        </b>
+  // end of rule 2
+===
+KW_RULE
+1,1
+rule
+
+BUBBLE
+1,11
+<a> A        </a>
+          <b> b1 => b2 </b>
+
+KW_RULE
+10,1
+rule
+
+BUBBLE
+11,3
+<a> a1 => a2 </a>
+  <b> B        </b>
+
+EOF
+13,18
+

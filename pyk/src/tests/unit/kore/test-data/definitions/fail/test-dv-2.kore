@@ -1,0 +1,5 @@
+[]
+module DV-2
+    axiom {s} \dv{s}(\or{#String{}}("0", "1")) []
+endmodule
+[]

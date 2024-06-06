@@ -1,5 +1,5 @@
 [Error] Compiler: Inconsistent token precedence detected.
-	Source(invalidPrec.k)
-	Location(4,17,4,34)
-	4 |	 syntax Foo ::= r"[0-9]+" [token]
-	  .	                ^~~~~~~~~~~~~~~~~
+	Source(domains.md)
+	Location(1199,18,1199,52)
+	1199 |	  syntax Int ::= r"[0-9]+" [prefer, token, prec(2)]
+	     .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

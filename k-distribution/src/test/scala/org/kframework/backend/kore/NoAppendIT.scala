@@ -4,6 +4,7 @@ package org.kframework.backend.kore
 import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
 import org.junit.Assert._
 import org.junit.Test
+import scala.collection.immutable
 
 class NoAppendIT extends KoreTest {
 
@@ -16,7 +17,7 @@ class NoAppendIT extends KoreTest {
       if (rewrite.isDefined) {
         val lhs = rewrite.get.getLeftHandSide
         for (pat <- lhs)
-          assertFalse(symbols(pat).contains(B.SymbolOrAlias("append", Seq())))
+          assertFalse(symbols(pat).contains(B.SymbolOrAlias("append", immutable.Seq())))
       }
     }
   }

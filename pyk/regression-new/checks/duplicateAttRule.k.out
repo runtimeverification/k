@@ -1,0 +1,7 @@
+[Error] Outer Parser: Duplicate attribute: concrete
+	Source(duplicateAttRule.k)
+	Location(5,29,5,37)
+	5 |	  rule a() => .K [concrete, concrete]
+	  .	                            ^~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile duplicateAttRule.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition duplicateAttRule-kompiled --type-inference-mode checked

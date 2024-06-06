@@ -1,0 +1,7 @@
+[Error] Compiler: Could not find sorts: [Float]
+	Source(noImportFloat.k)
+	Location(4,19,4,31)
+	4 |	   syntax Pgm ::= foo(x:Float) | bar()
+	  .	                  ^~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile noImportFloat.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition noImportFloat-kompiled --type-inference-mode checked

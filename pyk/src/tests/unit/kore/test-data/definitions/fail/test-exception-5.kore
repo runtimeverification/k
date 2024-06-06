@@ -1,0 +1,8 @@
+[]
+
+module TEST-EXCEPTION-5
+
+  axiom{S}
+    -X:S []
+
+endmodule []

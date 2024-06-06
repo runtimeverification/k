@@ -1,0 +1,39 @@
+[]
+module NAT
+    sort Nat{} []
+    symbol zero{}() : Nat{} [constructor{}(), functional{}()]
+    symbol succ{}(Nat{}) : Nat{} [constructor{}(), functional{}()]
+    symbol plus{}(Nat{}, Nat{}) : Nat{} [functional{}()]
+    axiom {S} \exists{S}(T:Nat{}, \equals{Nat{}, S}(T:Nat{}, zero{}())) []
+    axiom {S} \exists{S}(T:Nat{}, \equals{Nat{}, S}(T:Nat{}, succ{}(X:Nat{})))
+    []
+    axiom {S} \exists{S}(
+        T:Nat{},
+        \equals{Nat{}, S}(T:Nat{}, plus{}(X:Nat{}, Y:Nat{}))
+    ) []
+    axiom {} \or{Nat{}}(zero{}(), \exists{Nat{}}(X:Nat{}, succ{}(X:Nat{}))) []
+    axiom {} \not{Nat{}}(
+        \and{Nat{}}(zero{}(), \exists{Nat{}}(X:Nat{}, succ{}(X:Nat{})))
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Nat{}, S}(z:Nat{}, zero{}()), \top{S}())
+        ),
+        \and{S}(\equals{Nat{}, S}(plus{}(X:Nat{}, z:Nat{}), X:Nat{}), \top{S}())
+    ) []
+    axiom {S} \implies{S}(
+        \and{S}(
+            \top{S}(),
+            \and{S}(\in{Nat{}, S}(sY:Nat{}, succ{}(Y:Nat{})), \top{S}())
+        ),
+        \and{S}(
+            \equals{Nat{}, S}(
+                plus{}(X:Nat{}, sY:Nat{}),
+                succ{}(plus{}(X:Nat{}, Y:Nat{}))
+            ),
+            \top{S}()
+        )
+    ) []
+endmodule
+[]

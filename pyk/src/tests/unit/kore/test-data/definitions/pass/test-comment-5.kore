@@ -1,0 +1,12 @@
+[]
+
+module TEST-COMMENT-5
+
+  /* Block comment does not nested.
+     /* /* /*
+  */
+
+  sort Nat{} []
+
+endmodule []
+

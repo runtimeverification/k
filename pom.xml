@@ -9,11 +9,9 @@
   <name>K Framework Tool Parent</name>
 
   <modules>
-    <module>kore</module>
-    <module>kernel</module>
+    <module>k-frontend</module>
     <module>k-distribution</module>
     <module>haskell-backend</module>
-    <module>hs-backend-booster</module>
     <module>llvm-backend</module>
     <module>llvm-backend/src/main/native/llvm-backend/matching</module>
   </modules>
@@ -76,14 +74,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.type>FastBuild</project.build.type>
     <java.version>17</java.version>
-    <scala.majorVersion>2.12</scala.majorVersion>
-    <scala.minorVersion>18</scala.minorVersion>
+    <scala.majorVersion>2.13</scala.majorVersion>
+    <scala.minorVersion>13</scala.minorVersion>
     <scala.version>${scala.majorVersion}.${scala.minorVersion}</scala.version>
     <spotless.version>2.41.1</spotless.version>
     <googleJavaFormat.version>1.18.1</googleJavaFormat.version>
     <scalafmt.version>3.7.17</scalafmt.version>
     <nativeDirs>**/src/main/native/**</nativeDirs>
-    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</spotless.excludes>
+    <spotless.excludes>${nativeDirs},.idea/**,**/com/davekoelle/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**,pyk/**</spotless.excludes>
   </properties>
 
   <dependencies>

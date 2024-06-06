@@ -9,30 +9,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  version-sync:
-    name: 'Version Sync'
-    runs-on: ubuntu-20.04
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
-          # fetch-depth 0 means deep clone the repo
-          fetch-depth: 0
-      - name: 'Update Version'
-        run: |
-          set -x
-          git config user.name devops
-          git config user.email devops@runtimeverification.com
-          ./package/version.sh sub
-          if git add --update && git commit --message "Set Version: $(cat package/version)"; then
-            git push origin HEAD:${GITHUB_HEAD_REF}
-          fi
-
   format-check:
-    name: 'Check code formatting'
+    name: 'Java: Linting'
     runs-on: ubuntu-latest
-    needs: version-sync
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -48,10 +27,63 @@ jobs:
       - name: 'Check code is formatted correctly'
         run: mvn spotless:check --batch-mode -U
 
+
+  pyk-code-quality-checks:
+    name: 'Pyk: Code Quality & Unit Tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    defaults:
+      run:
+        working-directory: ./pyk
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-pyk-env
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Run code quality checks'
+        run: make check
+      - name: 'Run pyupgrade'
+        run: make pyupgrade
+      - name: 'Run unit tests'
+        run: make cov-unit
+
+
+  pyk-build-docs:
+    name: 'Pyk: Documentation'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./pyk
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Set up environment'
+        uses: ./.github/actions/setup-pyk-env
+      - name: 'Build documentation'
+        run: make docs
+
+
+  code-quality:
+    name: 'Code Quality Checks'
+    runs-on: ubuntu-latest
+    needs:
+      - format-check
+      - pyk-code-quality-checks
+      - pyk-build-docs
+    steps:
+      - run: true
+
+
   test-k:
-    name: 'K Tests'
+    name: 'K: Source Build & Test'
     runs-on: [self-hosted, linux, normal]
-    needs: format-check
+    needs: code-quality
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -72,10 +104,11 @@ jobs:
           docker stop --time=0 k-ci-${GITHUB_SHA}
           docker container rm --force k-ci-${GITHUB_SHA} || true
 
+
   test-package-ubuntu-jammy:
-    name: 'K Ubuntu Jammy Package'
+    name: 'K: Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
-    needs: format-check
+    needs: code-quality
     steps:
       - uses: actions/checkout@v4
       - name: 'Build and Test'
@@ -102,8 +135,176 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+
+  pyk-build-on-nix:
+    needs: code-quality
+    name: 'Pyk: Nix Build'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-13]
+    defaults:
+      run:
+        working-directory: ./pyk
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Install Nix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/install-nix-action@v22
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            substituters = http://cache.nixos.org https://hydra.iohk.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+      - name: 'Install Cachix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/cachix-action@v14
+        with:
+          name: k-framework
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          skipPush: true
+      - name: 'Build pyk'
+        run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
+
+
+  compile-nix-flake:
+    needs: code-quality
+    name: 'K: Nix Build & Test'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: [self-hosted, linux, normal]
+          - runner: macos-13
+            os: macos-13
+          - runner: MacM1
+            os: self-macos-12
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Upgrade bash'
+        if: ${{ contains(matrix.os, 'macos') }}
+        run: brew install bash
+      - name: 'Install Nix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/install-nix-action@v22
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            substituters = http://cache.nixos.org https://hydra.iohk.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+      - name: 'Install Cachix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/cachix-action@v14
+        with:
+          name: k-framework
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          skipPush: true
+      - name: 'Build K Framework and push build time dependencies to cachix'
+        env:
+          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
+          GC_DONT_GC: '1'
+        run: |
+          nix --version
+          export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
+          k=$(nix build . --print-build-logs --json | $JQ -r '.[].outputs | to_entries[].value')
+          drv=$(nix-store --query --deriver ${k})
+          nix-store --query --requisites ${drv} | cachix push k-framework
+      - name: 'Smoke test K'
+        run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
+      # These tests take a really long time to run on other platforms, so we
+      # skip them unless we're on the M1 runner.
+      - name: 'Test K'
+        if: ${{ matrix.os == 'self-macos-12' }}
+        run: GC_DONT_GC=1 nix build --print-build-logs .#test
+
+
+  pyk-profile:
+    needs: test-package-ubuntu-jammy
+    name: 'Pyk: Profiling'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 10
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-pyk-profile-${{ github.sha }}
+          k-deb-path: kframework.deb
+      - name: 'Run profiling'
+        run: |
+          docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
+          docker exec -u user k-pyk-profile-${{ github.sha }} /bin/bash -c 'find /tmp/pytest-of-user/pytest-current/ -type f -name "*.prof" | sort | xargs tail -n +1'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-pyk-profile-${{ github.sha }}
+
+
+  pyk-integration-tests:
+    needs: test-package-ubuntu-jammy
+    name: 'Pyk: Integration Tests'
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 30
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-pyk-integration-${{ github.sha }}
+          k-deb-path: kframework.deb
+      - name: 'Run integration tests'
+        run: |
+          docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-pyk-integration-${{ github.sha }}
+
+
+  pyk-regression-tests:
+    needs: test-package-ubuntu-jammy
+    name: 'Pyk: Regression Tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-pyk-regression-${{ github.sha }}
+          k-deb-path: kframework.deb
+      - name: 'Run K regression tests'
+        run: |
+          docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 k-pyk-regression-${{ github.sha }}
+
+
   performance-tests:
-    name: 'Performance Tests'
+    name: 'K: Profiling'
     runs-on: [self-hosted, linux, performance]
     needs: test-package-ubuntu-jammy
     steps:
@@ -153,62 +354,3 @@ jobs:
         run: |
           docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
           docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
-
-  compile-nix-flake:
-    name: 'Nix flake'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: [self-hosted, linux, normal]
-          - runner: macos-13
-            os: macos-13
-          - runner: MacM1
-            os: self-macos-12
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-
-      - name: 'Upgrade bash'
-        if: ${{ contains(matrix.os, 'macos') }}
-        run: brew install bash
-
-      - name: 'Install Nix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v22
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org https://hydra.iohk.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-      
-      - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v14
-        with:
-          name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-          skipPush: true
-
-      - name: 'Build K Framework and push build time dependencies to cachix'
-        env:
-          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
-          GC_DONT_GC: '1'
-        run: |
-          nix --version
-          export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
-          k=$(nix build . --print-build-logs --json | $JQ -r '.[].outputs | to_entries[].value')
-          drv=$(nix-store --query --deriver ${k})
-          nix-store --query --requisites ${drv} | cachix push k-framework
-
-      - name: 'Smoke test K'
-        run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
-
-      # These tests take a really long time to run on other platforms, so we
-      # skip them unless we're on the M1 runner.
-      - name: 'Test K'
-        if: ${{ matrix.os == 'self-macos-12' }}
-        run: GC_DONT_GC=1 nix build --print-build-logs .#test

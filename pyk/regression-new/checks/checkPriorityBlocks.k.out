@@ -1,0 +1,8 @@
+[Error] Inner Parser: Priority filter exception. Cannot use _+__CHECKPRIORITYBLOCKS_Exp_Exp_Exp as an immediate child of [_]_CHECKPRIORITYBLOCKS_Exp_Exp. Consider using parentheses around _+__CHECKPRIORITYBLOCKS_Exp_Exp_Exp
+	Source(checkPriorityBlocks.k)
+	Location(8,9,8,14)
+	8 |	  rule [1 + 2] => .K
+	  .	        ^~~~~
+[Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkPriorityBlocks.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkPriorityBlocks-kompiled --type-inference-mode checked

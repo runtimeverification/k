@@ -1,0 +1,21 @@
+class C {
+  var x = 0;
+  method C() {}
+}
+
+class C2 extends C {
+  var c = (new C()).x + 1;   // new can also be called in field initialization
+
+  method C2() { 
+    var c = (new C()).x + 2;
+    print("Method C2 local c is: ",c,"\n");
+    print("Class C2 field c is: ",this.c,"\n");
+  }
+}
+
+class Main {
+  method Main() {
+    var c = (new C2()).c;
+    print("(new C2()).c is: ",c,"\n");
+  }
+}

@@ -1,0 +1,6 @@
+let f1 = lambda x . x in
+  let f2 = f1 in
+    let f3 = f2 in
+      let f4 = f3 in
+        let f5 = f4 in
+          if (f5 true) then f2 else f3

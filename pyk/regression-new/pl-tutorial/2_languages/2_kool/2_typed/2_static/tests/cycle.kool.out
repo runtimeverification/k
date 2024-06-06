@@ -1,0 +1,11 @@
+  {
+    S:String
+  #Equals
+    "Class \"C1\" is in a cycle!\n"
+  }
+#Or
+  {
+    S:String
+  #Equals
+    "Class \"C2\" is in a cycle!\n"
+  }

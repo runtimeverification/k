@@ -1,0 +1,6 @@
+[]
+module INT
+    hooked-sort Int{} [hook{}("INT.Int"), hasDomainValues{}()]
+    alias abcdInt{}() : Int{} where abcdInt{}() := \dv{Int{}}("abcd") []
+endmodule
+[]

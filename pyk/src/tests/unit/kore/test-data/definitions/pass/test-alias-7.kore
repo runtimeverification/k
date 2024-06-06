@@ -1,0 +1,12 @@
+[]
+
+module TEST-ALIAS-7
+
+  sort Nat{} []
+
+  symbol g{S}(Nat{}) : S []
+
+  alias f{S}(Nat{}) : S
+  where f{S}(N:Nat{}) := g{S}(N:Nat{}) []
+
+endmodule []

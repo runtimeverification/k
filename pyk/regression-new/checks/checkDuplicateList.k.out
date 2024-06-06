@@ -1,0 +1,7 @@
+[Error] Compiler: Sort MyList previously declared as a user list at Source(checkDuplicateList.k) and Location(4,21,4,33)
+	Source(checkDuplicateList.k)
+	Location(9,21,9,33)
+	9 |	  syntax MyList ::= List{Int,""}
+	  .	                    ^~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkDuplicateList.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkDuplicateList-kompiled --type-inference-mode checked

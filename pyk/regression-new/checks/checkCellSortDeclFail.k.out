@@ -1,0 +1,8 @@
+[Error] Compiler: Could not find sorts: [MisTypedCell]
+	Source(checkCellSortDeclFail.k)
+	Location(12,16,12,28)
+	12 |	syntax Pgm ::= MisTypedCell
+	   .	               ^~~~~~~~~~~~
+[Error] Compiler: Had 1 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile checkCellSortDeclFail.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkCellSortDeclFail-kompiled --type-inference-mode checked

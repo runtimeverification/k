@@ -1,6 +1,6 @@
 { src, maven, mvnHash, manualMvnArtifacts, manualMvnSourceArtifacts, clang, stdenv, lib, runCommand
 , makeWrapper, bison, flex, gcc, git, gmp, jdk, jre, jre_minimal, mpfr, ncurses
-, pkg-config, python3, python310, python311, z3, haskell-backend, booster, rpc-client, prelude-kore, llvm-backend
+, pkg-config, python3, python310, python311, z3, haskell-backend, prelude-kore, llvm-backend
 , debugger, version, llvm-kompile-libs, runtimeShell }:
 
 let
@@ -35,7 +35,7 @@ let
       buildOffline = true;
 
       mvnParameters =
-        "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -Dbooster.skip=true -DsecondaryCacheDir=secondary-cache";
+        "-DskipTests -DskipKTest=true -Dllvm.backend.skip=true -Dhaskell.backend.skip=true -DsecondaryCacheDir=secondary-cache";
 
       nativeBuildInputs = [ makeWrapper ];
 
@@ -71,8 +71,8 @@ let
         ln -sf ${haskell-backend}/bin/kore-repl $out/bin/kore-repl
         ln -sf ${haskell-backend}/bin/kore-match-disjunction $out/bin/kore-match-disjunction
 
-        ln -sf ${booster}/bin/* $out/bin/
-        ln -sf ${rpc-client}/bin/* $out/bin/
+        ln -sf ${haskell-backend}/bin/kore-rpc-booster $out/bin/kore-rpc-booster
+        ln -sf ${haskell-backend}/bin/kore-rpc-client $out/bin/kore-rpc-client
 
         prelude_kore="$out/include/kframework/kore/prelude.kore"
         mkdir -p "$(dirname "$prelude_kore")"
