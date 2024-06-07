@@ -50,8 +50,6 @@ jobs:
         include:
           - runner: ubuntu-20.04
             os: ubuntu-20.04
-          - runner: macos-13
-            os: macos-13
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
