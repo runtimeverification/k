@@ -50,6 +50,7 @@ RUN    apt-get update              \
         libsecp256k1-dev           \
         libsqlite3-dev             \
         libssl-dev                 \
+        libunwind-dev              \
         libyaml-dev                \
         libz3-dev                  \
         lld-${LLVM_VERSION}        \
