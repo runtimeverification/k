@@ -54,28 +54,12 @@ jobs:
         run: make cov-unit
 
 
-  pyk-build-docs:
-    name: 'Pyk: Documentation'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./pyk
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Set up environment'
-        uses: ./.github/actions/setup-pyk-env
-      - name: 'Build documentation'
-        run: make docs
-
-
   code-quality:
     name: 'Code Quality Checks'
     runs-on: ubuntu-latest
     needs:
       - format-check
       - pyk-code-quality-checks
-      - pyk-build-docs
     steps:
       - run: true
 
@@ -253,6 +237,29 @@ jobs:
       - name: 'Test K'
         if: ${{ matrix.os == 'self-macos-12' }}
         run: GC_DONT_GC=1 nix build --print-build-logs .#test
+
+
+  pyk-build-docs:
+    name: 'Pyk: Documentation'
+    needs: test-package-ubuntu-jammy
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-pyk-docs-${{ github.sha }}
+          k-deb-path: kframework.deb
+      - name: 'Build documentation'
+        run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
+      - name: 'Tear down Docker'
+        if: always()
+        run: docker stop --time=0 k-pyk-docs-${{ github.sha }}
 
 
   pyk-profile:

@@ -11,7 +11,7 @@ from ..kast.outer import KRule
 from ..kore.prelude import SORT_K
 from ..kore.syntax import DV, And, App, Axiom, EVar, Import, MLPattern, MLQuant, Module, Rewrites, SortApp, String, Top
 from ..prelude.bytes import BYTES, pretty_bytes_str
-from ..prelude.k import K
+from ..prelude.k import K_ITEM, K, inj
 from ..prelude.kbool import TRUE
 from ..prelude.ml import mlAnd
 from ..prelude.string import STRING, pretty_string
@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
     from ..kast import KInner
     from ..kast.outer import KDefinition, KFlatModule, KImport
-    from ..kore.kompiled import KompiledKore
     from ..kore.syntax import Pattern, Sentence, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -57,21 +56,15 @@ ML_PATTERN_LABELS: Final = dict(
 )
 
 
-def kast_to_kore(
-    kast_defn: KDefinition,
-    kompiled_kore: KompiledKore,
-    kast: KInner,
-    sort: KSort | None = None,
-) -> Pattern:
-    if sort is None:
-        sort = K
-    kast = kast_defn.add_ksequence_under_k_productions(kast)
-    kast = kast_defn.sort_vars(kast, sort)
-    kast = kast_defn.add_cell_map_items(kast)
-    kast = kast_defn.add_sort_params(kast)
+def kast_to_kore(definition: KDefinition, kast: KInner, sort: KSort | None = None) -> Pattern:
+    sort = sort or K
+    kast = definition.add_ksequence_under_k_productions(kast)
+    kast = definition.sort_vars(kast, sort)
+    kast = definition.add_cell_map_items(kast)
+    kast = definition.add_sort_params(kast)
     kast = _replace_ksequence_by_kapply(kast)
+    kast = _add_sort_injections(definition, kast, sort)
     kore = _kast_to_kore(kast)
-    kore = kompiled_kore.add_injections(kore, _ksort_to_kore(sort))
     return kore
 
 
@@ -106,8 +99,105 @@ def _replace_ksequence_by_kapply(term: KInner) -> KInner:
     return top_down(transform, term)
 
 
+def _add_sort_injections(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
+    """Add sort injections to a KAST term bottom-up.
+
+    Maintains its own stack for an iterative implementation. Each stack frame consists of:
+    - `term`: the current term
+    - `sort`: the sort the current term must be injected to
+    - `argument_terms`: direct subterms of the current term
+    - `argument_sorts`: the sorts the respective direct subterms must be injected to
+    - `done_terms`: results for direct subterms
+    """
+    stack: list = [term, sort, _argument_terms(definition, term), _argument_sorts(definition, term), []]
+    while True:
+        done_terms = stack[-1]
+        argument_sorts = stack[-2]
+        argument_terms = stack[-3]
+        sort = stack[-4]
+        term = stack[-5]
+
+        idx = len(done_terms) - len(argument_terms)
+        if not idx:
+            stack.pop()
+            stack.pop()
+            stack.pop()
+            stack.pop()
+            stack.pop()
+            term = _let_arguments(term, done_terms)
+            term = _inject(definition, term, sort)
+            if not stack:
+                return term
+            stack[-1].append(term)
+        else:
+            term = argument_terms[idx]
+            stack.append(term)
+            stack.append(argument_sorts[idx])
+            stack.append(_argument_terms(definition, term))
+            stack.append(_argument_sorts(definition, term))
+            stack.append([])
+
+
+def _argument_terms(definition: KDefinition, term: KInner) -> tuple[KInner, ...]:
+    match term:
+        case KApply(KLabel('#Exists' | '#Forall')):  # Special case: ML quantifiers
+            _, term = term.args
+            return (term,)
+        case _:
+            return term.terms
+
+
+def _argument_sorts(definition: KDefinition, term: KInner) -> tuple[KSort, ...]:
+    match term:
+        case KToken() | KVariable():
+            return ()
+        case KSequence(items):
+            return len(items) * (K_ITEM,)
+        case KApply(KLabel(name)):
+            match name:
+                case 'kseq':
+                    return (K_ITEM, K)
+                case 'dotk':
+                    return ()
+                case '#Forall' | '#Exists':
+                    _, argument_sorts = definition.resolve_sorts(term.label)
+                    _, argument_sort = argument_sorts
+                    return (argument_sort,)
+                case _:
+                    _, argument_sorts = definition.resolve_sorts(term.label)
+                    return argument_sorts
+        case _:
+            raise ValueError(f'Unsupported term: {term}')
+
+
+def _let_arguments(term: KInner, args: list[KInner]) -> KInner:
+    match term:
+        case KApply(KLabel('#Exists' | '#Forall')):  # Special case: ML quantifiers
+            args = [term.args[0]] + args
+            return term.let_terms(args)
+        case _:
+            return term.let_terms(args)
+
+
+def _inject(definition: KDefinition, term: KInner, sort: KSort) -> KInner:
+    actual_sort: KSort
+    match term:
+        case KApply(KLabel('kseq' | 'dotk')):  # Special case: pseudo-labels
+            actual_sort = K
+        case _:
+            actual_sort = definition.sort_strict(term)
+
+    if actual_sort == sort:
+        return term
+
+    if actual_sort in definition.subsorts(sort):
+        return inj(from_sort=actual_sort, to_sort=sort, term=term)
+
+    raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}: {term}')
+
+
 # 'krule' should have sorts on variables
-def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KRule) -> Axiom:
+def krule_to_kore(definition: KDefinition, krule: KRule) -> Axiom:
     krule_body = krule.body
     krule_lhs_config = extract_lhs(krule_body)
     krule_rhs_config = extract_rhs(krule_body)
@@ -120,20 +210,18 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     top_level_k_sort = KSort('GeneratedTopCell')
     # The backend does not like rewrite rules without a precondition
     if len(krule_lhs_constraints) > 0:
-        kore_lhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_lhs, sort=top_level_k_sort)
+        kore_lhs: Pattern = kast_to_kore(definition, krule_lhs, sort=top_level_k_sort)
     else:
-        kore_lhs0 = And(
+        kore_lhs = And(
             top_level_kore_sort,
             (
-                kast_to_kore(kast_defn, kompiled_kore, krule_lhs, sort=top_level_k_sort),
+                kast_to_kore(definition, krule_lhs, sort=top_level_k_sort),
                 Top(top_level_kore_sort),
             ),
         )
 
-    kore_rhs0: Pattern = kast_to_kore(kast_defn, kompiled_kore, krule_rhs, sort=top_level_k_sort)
+    kore_rhs: Pattern = kast_to_kore(definition, krule_rhs, sort=top_level_k_sort)
 
-    kore_lhs = kompiled_kore.add_injections(kore_lhs0, sort=top_level_kore_sort)
-    kore_rhs = kompiled_kore.add_injections(kore_rhs0, sort=top_level_kore_sort)
     prio = krule.priority
     attrs = [App(symbol='priority', sorts=(), args=(String(str(prio)),))]
     if Atts.LABEL in krule.att:
@@ -151,12 +239,12 @@ def krule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, krule: KR
     return axiom
 
 
-def kflatmodule_to_kore(kast_defn: KDefinition, kompiled_kore: KompiledKore, kflatmodule: KFlatModule) -> Module:
+def kflatmodule_to_kore(definition: KDefinition, kflatmodule: KFlatModule) -> Module:
     kore_axioms: list[Sentence] = []
     for sent in kflatmodule.sentences:
         if type(sent) is not KRule:
             raise ValueError(f'Cannot convert sentence to Kore: {sent}')
-        kore_axioms.append(krule_to_kore(kast_defn, kompiled_kore, sent))
+        kore_axioms.append(krule_to_kore(definition, sent))
     imports: list[Sentence] = [_kimport_to_kore(kimport) for kimport in kflatmodule.imports]
     return Module(name=kflatmodule.name, sentences=(imports + kore_axioms))
 
@@ -251,7 +339,7 @@ def _kapply_to_pattern(kapply: KApply, patterns: list[Pattern]) -> Pattern:
 
 
 def _label_to_kore(label: str) -> str:
-    if label in ['kseq', 'dotk']:  # pseudo-labels introduced during KAST-to-KORE tranformation
+    if label in ['inj', 'kseq', 'dotk']:  # pseudo-labels introduced during KAST-to-KORE tranformation
         return label
 
     if label in ML_PATTERN_LABELS:

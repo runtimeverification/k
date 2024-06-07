@@ -708,9 +708,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     def init_proof(self, proof: APRProof) -> None:
         def _inject_module(module_name: str, import_name: str, sentences: list[KRuleLike]) -> None:
             _module = KFlatModule(module_name, sentences, [KImport(import_name)])
-            _kore_module = kflatmodule_to_kore(
-                self.kcfg_explore.cterm_symbolic._definition, self.kcfg_explore.cterm_symbolic._kompiled_kore, _module
-            )
+            _kore_module = kflatmodule_to_kore(self.kcfg_explore.cterm_symbolic._definition, _module)
             self.kcfg_explore.cterm_symbolic._kore_client.add_module(_kore_module, name_as_id=True)
 
         subproofs: list[Proof] = (
