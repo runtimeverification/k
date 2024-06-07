@@ -374,7 +374,8 @@ class ProofTraceTest(KompiledTest):
     def header(self, definition_dir: Path) -> KoreHeader:
         process = subprocess.run(['kore-rich-header', str(definition_dir / 'definition.kore')], stdout=subprocess.PIPE)
         hdr = process.stdout
-        path = definition_dir / 'header.bin'
+        header_file_name = definition_dir.name + '.header'
+        path = definition_dir / header_file_name
         with open(path, 'wb') as f:
             f.write(hdr)
         from ..kllvm.hints.prooftrace import KoreHeader
@@ -391,5 +392,6 @@ class ProofTraceTest(KompiledTest):
     @pytest.fixture(scope='class')
     def hints_file(self, definition_dir: Path, kompile: Kompiler) -> Path:
         input_kore_file = kompile._cache_definition(self.HINTS_INPUT_KORE)
-        hints_file = generate_hints(definition_dir, input_kore_file)
+        hints_file_name = definition_dir.name.replace('.k', '.hints')
+        hints_file = generate_hints(definition_dir, input_kore_file, None, hints_file_name)
         return hints_file
