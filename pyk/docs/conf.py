@@ -18,6 +18,7 @@ release = '7.0.41'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
 ]
 templates_path = ['_templates']
 exclude_patterns = []
@@ -25,6 +26,10 @@ exclude_patterns = []
 add_module_names = False
 autodoc_inherit_docstrings = False
 viewcode_line_numbers = True
+
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_include_special_with_doc = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
