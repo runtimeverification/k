@@ -11,7 +11,7 @@ jobs:
 
   set-release-id:
     name: 'Set Release ID'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: 'Get release_id'
         run: echo "release_id=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> ${GITHUB_OUTPUT}
@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: ubuntu-20.04
-            os: ubuntu-20.04
+          - runner: ubuntu-24.04
+            os: ubuntu-24.04
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
@@ -454,7 +454,7 @@ jobs:
 
   gh-pages:
     name: 'GitHub Pages deployment'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: [pyk-build-docs, release]
     steps:
