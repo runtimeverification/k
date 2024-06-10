@@ -44,7 +44,8 @@ class LLVMRewriteEvent(LLVMStepEvent):
     @property
     @abstractmethod
     def rule_ordinal(self) -> int:
-        """Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore definition."""
+        """Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore
+        definition."""
         ...
 
     @property
@@ -90,15 +91,18 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 @final
 class LLVMSideConditionEventEnter(LLVMRewriteEvent):
     """
-    Represents an event that enters a side condition in LLVM rewriting. This event is used to check the side condition of a rule. Mostly used in ensures/requires clauses.
+    Represents an event that enters a side condition in LLVM rewriting. This event is used to check the side condition
+    of a rule. Mostly used in ensures/requires clauses.
 
     Attributes:
         _side_condition_event (llvm_side_condition_event): The underlying side condition event.
 
     Methods:
-        __init__(self, side_condition_event: llvm_side_condition_event) -> None: Initializes a new instance of the LLVMSideConditionEventEnter class.
+        __init__(self, side_condition_event: llvm_side_condition_event) -> None: Initializes a new instance of the
+        LLVMSideConditionEventEnter class.
 
-        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventEnter object using the AST printing method.
+        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventEnter object using the AST
+        printing method.
     """
 
     _side_condition_event: llvm_side_condition_event
@@ -123,15 +127,18 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 @final
 class LLVMSideConditionEventExit(LLVMStepEvent):
     """
-    Represents an LLVM side condition event indicating the exit of a side condition. This event contains the result of the side condition evaluation.
+    Represents an LLVM side condition event indicating the exit of a side condition. This event contains the result of
+    the side condition evaluation.
 
     Attributes:
         _side_condition_end_event (llvm_side_condition_end_event): The underlying side condition end event.
 
     Methods:
-        __init__(side_condition_end_event: llvm_side_condition_end_event) -> None: Initializes the LLVMSideConditionEventExit instance.
+        __init__(side_condition_end_event: llvm_side_condition_end_event) -> None: Initializes the
+        LLVMSideConditionEventExit instance.
 
-        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventExit instance using the AST printing method.
+        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventExit instance using the AST
+        printing method.
     """
 
     _side_condition_end_event: llvm_side_condition_end_event
@@ -162,9 +169,11 @@ class LLVMFunctionEvent(LLVMStepEvent):
         _function_event (llvm_function_event): The underlying LLVM function event object.
 
     Methods:
-        __init__(self, function_event: llvm_function_event) -> None: Initializes a new instance of the LLVMFunctionEvent class.
+        __init__(self, function_event: llvm_function_event) -> None: Initializes a new instance of the LLVMFunctionEvent
+        class.
 
-        __repr__(self) -> str: Returns a string representation of the LLVMFunctionEvent object using the AST printing method.
+        __repr__(self) -> str: Returns a string representation of the LLVMFunctionEvent object using the AST printing
+        method.
     """
 
     _function_event: llvm_function_event
@@ -240,7 +249,8 @@ class LLVMArgument:
     Represents an LLVM argument.
 
     Attributes:
-        _argument (Argument): The underlying Argument object. An argument is a wrapper object containing either a step event or a KORE pattern.
+        _argument (Argument): The underlying Argument object. An argument is a wrapper object containing either a step
+        event or a KORE pattern.
 
     Methods:
         __init__(self, argument: Argument) -> None: Initializes the LLVMArgument object.
@@ -296,9 +306,11 @@ class LLVMRewriteTrace:
         _rewrite_trace (llvm_rewrite_trace): The underlying LLVM rewrite trace object.
 
     Methods:
-        __init__(self, rewrite_trace: llvm_rewrite_trace) -> None: Initializes a new instance of the LLVMRewriteTrace class.
+        __init__(self, rewrite_trace: llvm_rewrite_trace) -> None: Initializes a new instance of the LLVMRewriteTrace
+        class.
 
-        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTrace object using the AST printing method.
+        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTrace object using the AST printing
+        method.
     """
 
     _rewrite_trace: llvm_rewrite_trace
@@ -311,12 +323,12 @@ class LLVMRewriteTrace:
 
     @property
     def version(self) -> int:
-        """Returns the version of the HINTS formart."""
+        """Returns the version of the binary hints format used by this trace."""
         return self._rewrite_trace.version
 
     @property
     def pre_trace(self) -> list[LLVMArgument]:
-        """Returns the pre-trace events as a list of LLVMArgument objects."""
+        """Returns a list of events that occurred before the initial configuration was constructed."""
         return [LLVMArgument(event) for event in self._rewrite_trace.pre_trace]
 
     @property
@@ -326,18 +338,21 @@ class LLVMRewriteTrace:
 
     @property
     def trace(self) -> list[LLVMArgument]:
-        """Returns the trace events as a list of LLVMArgument objects."""
+        """Returns a list of events that occurred after the initial configurarion was constructed until the end of the
+        proof trace when the final configuration is reached."""
         return [LLVMArgument(event) for event in self._rewrite_trace.trace]
 
     @staticmethod
     def parse(trace: bytes, header: KoreHeader) -> LLVMRewriteTrace:
-        """Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace object."""
+        """Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace
+        object."""
         return LLVMRewriteTrace(llvm_rewrite_trace.parse(trace, header._kore_header))
 
 
 class KoreHeader:
     """
-    Represents the Kore header, a file that contains the version of the Binary KORE used to serialize/deserialize the Proof Trace and all the aditional information needed make this process faster the Proof Trace.
+    Represents the Kore header, a file that contains the version of the Binary KORE used to serialize/deserialize the
+    Proof Trace and all the aditional information needed make this process faster the Proof Trace.
 
     Attributes:
         _kore_header (kore_header): The underlying KORE Header object.
@@ -359,7 +374,8 @@ class KoreHeader:
 
 class LLVMEventType:
     """
-    Represents an LLVM event type. This works as a wrapper around the EventType enum. It also provides properties to check the type of the event.
+    Represents an LLVM event type. This works as a wrapper around the EventType enum. It also provides properties to
+    check the type of the event.
 
     Attributes:
         _event_type (EventType): The underlying EventType object.
@@ -398,7 +414,8 @@ class LLVMEventAnnotated:
         _annotated_llvm_event (annotated_llvm_event): The underlying annotated LLVM event object.
 
     Methods:
-        __init__(self, annotated_llvm_event: annotated_llvm_event) -> None: Initializes a new instance of the LLVMEventAnnotated class.
+        __init__(self, annotated_llvm_event: annotated_llvm_event) -> None: Initializes a new instance of the
+        LLVMEventAnnotated class.
     """
 
     _annotated_llvm_event: annotated_llvm_event
@@ -419,17 +436,21 @@ class LLVMEventAnnotated:
 
 class LLVMRewriteTraceIterator:
     """
-    Represents an LLVM rewrite trace iterator. This class is used to iterate over the LLVM rewrite trace events in the stream parser.
+    Represents an LLVM rewrite trace iterator. This class is used to iterate over the LLVM rewrite trace events in the
+    stream parser.
 
     Attributes:
         _rewrite_trace_iterator (llvm_rewrite_trace_iterator): The underlying LLVM rewrite trace iterator object.
 
     Methods:
-        __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None: Initializes a new instance of the LLVMRewriteTraceIterator class.
+        __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None: Initializes a new instance of the
+        LLVMRewriteTraceIterator class.
 
-        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTraceIterator object using the AST printing method.
+        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTraceIterator object using the AST
+        printing method.
 
-        __iter__(self) -> Generator[LLVMEventAnnotated, None, None]: Returns a generator that yields LLVMEventAnnotated objects.
+        __iter__(self) -> Generator[LLVMEventAnnotated, None, None]: Returns a generator that yields LLVMEventAnnotated
+        objects.
 
         __next__(self) -> LLVMEventAnnotated: Returns the next LLVMEventAnnotated object in the iterator.
     """
