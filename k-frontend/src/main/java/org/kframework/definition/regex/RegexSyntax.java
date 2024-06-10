@@ -130,9 +130,11 @@ public class RegexSyntax {
     private Flex() {}
 
     public static final Set<Integer> reservedTokens =
-        Stream.concat(K.reservedTokens.stream(), codePoints('/', '<', '>').stream())
+        Stream.concat(K.reservedTokens.stream(), codePoints('/', '<', '>', ' ').stream())
             .collect(Collectors.toSet());
-    public static final Set<Integer> reservedCharClassTokens = K.reservedCharClassTokens;
+    public static final Set<Integer> reservedCharClassTokens =
+        Stream.concat(K.reservedCharClassTokens.stream(), codePoints(' ').stream())
+            .collect(Collectors.toSet());
     private static final RegexSyntax printer =
         new RegexSyntax(reservedTokens, reservedCharClassTokens) {
           // Parenthesize non-ASCII codepoints because Flex treats them as a sequence of bytes
