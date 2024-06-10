@@ -62,19 +62,24 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 
     Attributes:
         _rule_event (llvm_rule_event): The underlying LLVM rule event.
-
-    Methods:
-        __init__(self, rule_event: llvm_rule_event) -> None: Initializes a new instance of the LLVMRuleEvent class.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMRuleEvent object using the AST printing method.
     """
 
     _rule_event: llvm_rule_event
 
     def __init__(self, rule_event: llvm_rule_event) -> None:
+        """
+        Initializes a new instance of the LLVMRuleEvent class.
+        
+        Args:
+            rule_event (llvm_rule_event): The LLVM rule event object.
+        """
         self._rule_event = rule_event
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            str: a string representation of the LLVMRuleEvent object using the AST printing method.
+        """
         return self._rule_event.__repr__()
 
     @property
@@ -96,21 +101,24 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 
     Attributes:
         _side_condition_event (llvm_side_condition_event): The underlying side condition event.
-
-    Methods:
-        __init__(self, side_condition_event: llvm_side_condition_event) -> None: Initializes a new instance of the
-        LLVMSideConditionEventEnter class.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventEnter object using the AST
-        printing method.
     """
 
     _side_condition_event: llvm_side_condition_event
 
     def __init__(self, side_condition_event: llvm_side_condition_event) -> None:
+        """
+        Initializes a new instance of the LLVMSideConditionEventEnter class.
+        
+        Args:
+            side_condition_event (llvm_side_condition_event): The LLVM side condition event object.
+        """
         self._side_condition_event = side_condition_event
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            str: a string representation of the LLVMSideConditionEventEnter object using the AST printing method.
+        """
         return self._side_condition_event.__repr__()
 
     @property
@@ -132,21 +140,24 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
 
     Attributes:
         _side_condition_end_event (llvm_side_condition_end_event): The underlying side condition end event.
-
-    Methods:
-        __init__(side_condition_end_event: llvm_side_condition_end_event) -> None: Initializes the
-        LLVMSideConditionEventExit instance.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMSideConditionEventExit instance using the AST
-        printing method.
     """
 
     _side_condition_end_event: llvm_side_condition_end_event
 
     def __init__(self, side_condition_end_event: llvm_side_condition_end_event) -> None:
+        """
+        Initializes a new instance of the LLVMSideConditionEventExit class.
+        
+        Args:
+            side_condition_end_event (llvm_side_condition_end_event): The LLVM side condition end event object.
+        """
         self._side_condition_end_event = side_condition_end_event
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            str: a string representation of the LLVMSideConditionEventExit object using the AST printing method.
+        """
         return self._side_condition_end_event.__repr__()
 
     @property
@@ -167,21 +178,24 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     Attributes:
         _function_event (llvm_function_event): The underlying LLVM function event object.
-
-    Methods:
-        __init__(self, function_event: llvm_function_event) -> None: Initializes a new instance of the LLVMFunctionEvent
-        class.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMFunctionEvent object using the AST printing
-        method.
     """
 
     _function_event: llvm_function_event
 
     def __init__(self, function_event: llvm_function_event) -> None:
+        """
+        Initializes a new instance of the LLVMFunctionEvent class.
+        
+        Args:
+            function_event (llvm_function_event): The LLVM function event object.
+        """
         self._function_event = function_event
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            str: a string representation of the LLVMFunctionEvent object using the AST printing method.
+        """
         return self._function_event.__repr__()
 
     @property
@@ -207,19 +221,24 @@ class LLVMHookEvent(LLVMStepEvent):
 
     Attributes:
         _hook_event (llvm_hook_event): The underlying hook event object.
-
-    Methods:
-        __init__(hook_event: llvm_hook_event): Initializes a new instance of the LLVMHookEvent class.
-
-        __repr__() -> str: Returns a string representation of the LLVMHookEvent object using the AST printing method.
     """
 
     _hook_event: llvm_hook_event
 
     def __init__(self, hook_event: llvm_hook_event) -> None:
+        """
+        Initializes a new instance of the LLVMHookEvent class.
+        
+        Args:
+            hook_event (llvm_hook_event): The LLVM hook event object.
+        """
         self._hook_event = hook_event
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            str: a string representation of the LLVMHookEvent object using the AST printing method.
+        """
         return self._hook_event.__repr__()
 
     @property
@@ -251,19 +270,24 @@ class LLVMArgument:
     Attributes:
         _argument (Argument): The underlying Argument object. An argument is a wrapper object containing either a step
         event or a KORE pattern.
-
-    Methods:
-        __init__(self, argument: Argument) -> None: Initializes the LLVMArgument object.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMArgument object using the AST printing method.
     """
 
     _argument: Argument
 
     def __init__(self, argument: Argument) -> None:
+        """
+        Initializes the LLVMArgument object.
+        
+        Args:
+            argument (Argument): The Argument object.
+        """
         self._argument = argument
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            Returns a string representation of the LLVMArgument object using the AST printing method.
+        """
         return self._argument.__repr__()
 
     @property
@@ -304,22 +328,25 @@ class LLVMRewriteTrace:
 
     Attributes:
         _rewrite_trace (llvm_rewrite_trace): The underlying LLVM rewrite trace object.
-
-    Methods:
-        __init__(self, rewrite_trace: llvm_rewrite_trace) -> None: Initializes a new instance of the LLVMRewriteTrace
-        class.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTrace object using the AST printing
-        method.
     """
 
     _rewrite_trace: llvm_rewrite_trace
 
     def __init__(self, rewrite_trace: llvm_rewrite_trace) -> None:
+        """
+        Initializes a new instance of the LLVMRewriteTrace class.
+        
+        Args:
+            rewrite_trace (llvm_rewrite_trace): The LLVM rewrite trace object.
+        """
         self._rewrite_trace = rewrite_trace
 
     def __repr__(self) -> str:
-        return self._rewrite_trace.__repr__()
+            """
+            Returns:
+                str: a string representation of the LLVMRewriteTrace object using the AST printing method.
+            """
+            return self._rewrite_trace.__repr__()
 
     @property
     def version(self) -> int:
@@ -356,14 +383,17 @@ class KoreHeader:
 
     Attributes:
         _kore_header (kore_header): The underlying KORE Header object.
-
-    Methods:
-        __init__(self, kore_header: kore_header) -> None: Initializes a new instance of the KoreHeader class.
     """
 
     _kore_header: kore_header
 
     def __init__(self, kore_header: kore_header) -> None:
+        """
+        Initializes a new instance of the KoreHeader class.
+
+        Args:
+            kore_header (kore_header): The KORE Header object.
+        """
         self._kore_header = kore_header
 
     @staticmethod
@@ -379,14 +409,17 @@ class LLVMEventType:
 
     Attributes:
         _event_type (EventType): The underlying EventType object.
-
-    Methods:
-        __init__(self, event_type: EventType) -> None: Initializes a new instance of the LLVMEventType class.
     """
 
     _event_type: EventType
 
     def __init__(self, event_type: EventType) -> None:
+        """
+        Initializes a new instance of the LLVMEventType class.
+
+        Args:
+            event_type (EventType): The EventType object.
+        """
         self._event_type = event_type
 
     @property
@@ -412,15 +445,16 @@ class LLVMEventAnnotated:
 
     Attributes:
         _annotated_llvm_event (annotated_llvm_event): The underlying annotated LLVM event object.
-
-    Methods:
-        __init__(self, annotated_llvm_event: annotated_llvm_event) -> None: Initializes a new instance of the
-        LLVMEventAnnotated class.
     """
 
     _annotated_llvm_event: annotated_llvm_event
 
     def __init__(self, annotated_llvm_event: annotated_llvm_event) -> None:
+        """ Initializes a new instance of the LLVMEventAnnotated class.
+
+        Args:
+            annotated_llvm_event (annotated_llvm_event): The annotated LLVM event object.
+        """
         self._annotated_llvm_event = annotated_llvm_event
 
     @property
@@ -441,42 +475,59 @@ class LLVMRewriteTraceIterator:
 
     Attributes:
         _rewrite_trace_iterator (llvm_rewrite_trace_iterator): The underlying LLVM rewrite trace iterator object.
-
-    Methods:
-        __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None: Initializes a new instance of the
-        LLVMRewriteTraceIterator class.
-
-        __repr__(self) -> str: Returns a string representation of the LLVMRewriteTraceIterator object using the AST
-        printing method.
-
-        __iter__(self) -> Generator[LLVMEventAnnotated, None, None]: Returns a generator that yields LLVMEventAnnotated
-        objects.
-
-        __next__(self) -> LLVMEventAnnotated: Returns the next LLVMEventAnnotated object in the iterator.
     """
 
     _rewrite_trace_iterator: llvm_rewrite_trace_iterator
 
     def __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None:
+        """
+        Initializes a new instance of the LLVMRewriteTraceIterator class.
+        
+        Args:
+            rewrite_trace_iterator (llvm_rewrite_trace_iterator): The LLVM rewrite trace iterator object.
+        """
         self._rewrite_trace_iterator = rewrite_trace_iterator
 
     def __repr__(self) -> str:
+        """
+        Returns:
+            str: A string representation of the LLVMRewriteTraceIterator object using the AST printing method.
+        """
         return self._rewrite_trace_iterator.__repr__()
 
     def __iter__(self) -> Generator[LLVMEventAnnotated, None, None]:
+        """Yields LLVMEventAnnotated options.
+
+        This method is an iterator that yields LLVMEventAnnotated options.
+        It iterates over the events in the trace and returns the next event as an LLVMEventAnnotated object.
+
+        Yields:
+            LLVMEventAnnotated: The next LLVMEventAnnotated option.
+
+        Raises:
+            None
+        """
         while True:
-            next_exent = self._rewrite_trace_iterator.get_next_event()
-            if next_exent is None:
+            next_event = self._rewrite_trace_iterator.get_next_event()
+            if next_event is None:
                 return
             else:
-                yield LLVMEventAnnotated(next_exent)
+                yield LLVMEventAnnotated(next_event)
 
     def __next__(self) -> LLVMEventAnnotated:
-        next_event = self._rewrite_trace_iterator.get_next_event()
-        if next_event is not None:
-            return LLVMEventAnnotated(next_event)
-        else:
-            raise StopIteration
+            """Yields the next LLVMEventAnnotated object from the iterator.
+
+            Returns:
+                LLVMEventAnnotated: The next LLVMEventAnnotated object.
+
+            Raises:
+                StopIteration: If there are no more events in the iterator.
+            """
+            next_event = self._rewrite_trace_iterator.get_next_event()
+            if next_event is not None:
+                return LLVMEventAnnotated(next_event)
+            else:
+                raise StopIteration
 
     @property
     def version(self) -> int:
