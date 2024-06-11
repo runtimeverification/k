@@ -23,13 +23,13 @@ def parse_outer(
     definition_file: Path,
     main_module: str,
     *,
-    search_paths: Iterable[Path] = (),
+    include_dirs: Iterable[Path] = (),
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> KDefinition:
     parsed_files = slurp_definitions(
         definition_file,
-        search_paths=search_paths,
+        include_dirs=include_dirs,
         md_selector=md_selector,
         include_source=include_source,
     )
@@ -42,11 +42,11 @@ def parse_outer(
 def slurp_definitions(
     main_file: Path,
     *,
-    search_paths: Iterable[Path] = (),
+    include_dirs: Iterable[Path] = (),
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> dict[Path, Definition]:
-    search_paths = list(search_paths)
+    include_dirs = list(include_dirs)
 
     result: dict[Path, Definition] = {}
 
@@ -58,7 +58,7 @@ def slurp_definitions(
             continue
 
         definition = _parse_file(current_file, md_selector, include_source)
-        pending += reversed([_resolve_require(require, current_file, search_paths) for require in definition.requires])
+        pending += reversed([_resolve_require(require, current_file, include_dirs) for require in definition.requires])
 
         result[current_file] = definition
 
@@ -76,9 +76,9 @@ def _parse_file(definition_file: Path, md_selector: str, include_source: bool) -
     return parser.definition()
 
 
-def _resolve_require(require: Require, definition_file: Path, search_paths: list[Path]) -> Path:
-    try_dirs = [definition_file.parent] + search_paths
-    try_files = [include_dir / require.path for include_dir in try_dirs]
+def _resolve_require(require: Require, definition_file: Path, include_dirs: list[Path]) -> Path:
+    try_dirs = [definition_file.parent] + include_dirs
+    try_files = [try_dir / require.path for try_dir in try_dirs]
     for file in try_files:
         if file.is_file():
             return file.resolve()

@@ -415,7 +415,7 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
     final_definition = parse_outer(
         definition_file,
         main_module_name,
-        search_paths=options.includes,
+        include_dirs=options.includes,
         md_selector=options.md_selector,
     )
 
@@ -433,7 +433,7 @@ def exec_kompilex(options: KompileXCommandOptions) -> None:
     final_definition = parse_outer(
         definition_file,
         main_module_name,
-        search_paths=options.includes,
+        include_dirs=options.includes,
         md_selector=options.md_selector,
     )
 
