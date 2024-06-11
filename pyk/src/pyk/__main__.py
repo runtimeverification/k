@@ -413,7 +413,12 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
     search_paths = [definition_file.parent, *options.includes]
     main_module_name = options.main_module or definition_file.stem.upper()
 
-    final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
+    final_definition = parse_outer(
+        definition_file,
+        main_module_name,
+        search_paths=search_paths,
+        md_selector=options.md_selector,
+    )
 
     result_text = json.dumps(final_definition.to_dict())
     try:
@@ -427,7 +432,12 @@ def exec_kompilex(options: KompileXCommandOptions) -> None:
     search_paths = [definition_file.parent, *options.includes]
     main_module_name = options.main_module or definition_file.stem.upper()
 
-    final_definition = parse_outer(definition_file, main_module_name, search_paths, options.md_selector)
+    final_definition = parse_outer(
+        definition_file,
+        main_module_name,
+        search_paths=search_paths,
+        md_selector=options.md_selector,
+    )
 
     if options.pre_parsed_prelude:
         prelude_json = json.loads(options.pre_parsed_prelude.read())

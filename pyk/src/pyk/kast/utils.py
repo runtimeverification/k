@@ -22,6 +22,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 def parse_outer(
     definition_file: Path,
     main_module: str,
+    *,
     search_paths: Iterable[Path] = (),
     md_selector: str = 'k',
     include_source: bool = True,
