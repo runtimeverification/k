@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ._ast_to_kast import _ast_to_kast
@@ -11,7 +12,6 @@ from .outer_syntax import Definition
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from pathlib import Path
     from typing import Final
 
     from .outer_syntax import Require
@@ -23,7 +23,7 @@ def parse_outer(
     definition_file: Path,
     main_module: str,
     *,
-    include_dirs: Iterable[Path] = (),
+    include_dirs: Iterable[str | Path] = (),
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> KDefinition:
@@ -42,11 +42,11 @@ def parse_outer(
 def slurp_definitions(
     main_file: Path,
     *,
-    include_dirs: Iterable[Path] = (),
+    include_dirs: Iterable[str | Path] = (),
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> dict[Path, Definition]:
-    include_dirs = list(include_dirs)
+    _include_dirs = [Path(include_dir) for include_dir in include_dirs]
 
     result: dict[Path, Definition] = {}
 
@@ -58,7 +58,7 @@ def slurp_definitions(
             continue
 
         definition = _parse_file(current_file, md_selector, include_source)
-        pending += reversed([_resolve_require(require, current_file, include_dirs) for require in definition.requires])
+        pending += reversed([_resolve_require(require, current_file, _include_dirs) for require in definition.requires])
 
         result[current_file] = definition
 
