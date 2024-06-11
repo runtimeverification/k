@@ -27,7 +27,13 @@ def parse_outer(
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> KDefinition:
-    modules = _slurp(definition_file, search_paths, [definition_file], md_selector, include_source)
+    modules = _slurp(
+        definition_file,
+        search_paths=search_paths,
+        processed_files=[definition_file],
+        md_selector=md_selector,
+        include_source=include_source,
+    )
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
     assert isinstance(final_definition, KDefinition)
     return final_definition
@@ -35,6 +41,7 @@ def parse_outer(
 
 def _slurp(
     definition_file: Path,
+    *,
     search_paths: Iterable[Path] = (),
     processed_files: list[Path] | None = None,
     md_selector: str = 'k',
@@ -62,5 +69,11 @@ def _slurp(
         required_file = try_files[index]
         if required_file not in processed_files:
             processed_files.append(required_file)
-            result += _slurp(required_file, search_paths, processed_files, md_selector, include_source)
+            result += _slurp(
+                required_file,
+                search_paths=search_paths,
+                processed_files=processed_files,
+                md_selector=md_selector,
+                include_source=include_source,
+            )
     return result
