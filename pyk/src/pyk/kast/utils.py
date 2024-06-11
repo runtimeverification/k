@@ -48,12 +48,7 @@ def _slurp(
     include_source: bool = True,
 ) -> tuple[Module, ...]:
     processed_files = processed_files if processed_files is not None else []
-    _LOGGER.info(f'Reading {definition_file}')
-    text = definition_file.read_text()
-    if definition_file.suffix == '.md':
-        text = select_code_blocks(text, md_selector)
-    parser = OuterParser(text, source=definition_file if include_source else None)
-    definition = parser.definition()
+    definition = _parse_file(definition_file, md_selector, include_source)
     result = definition.modules
     for require in definition.requires:
         required_file = _resolve_require(require, search_paths)
@@ -67,6 +62,17 @@ def _slurp(
                 include_source=include_source,
             )
     return result
+
+
+def _parse_file(definition_file: Path, md_selector: str, include_source: bool) -> Definition:
+    _LOGGER.info(f'Reading {definition_file}')
+
+    text = definition_file.read_text()
+    if definition_file.suffix == '.md':
+        text = select_code_blocks(text, md_selector)
+
+    parser = OuterParser(text, source=definition_file if include_source else None)
+    return parser.definition()
 
 
 def _resolve_require(require: Require, search_paths: Iterable[Path]) -> Path:
