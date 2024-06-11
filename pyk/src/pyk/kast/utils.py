@@ -20,7 +20,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 def parse_outer(
-    definition_file: Path,
+    definition_file: str | Path,
     main_module: str,
     *,
     include_dirs: Iterable[str | Path] = (),
@@ -40,12 +40,13 @@ def parse_outer(
 
 
 def slurp_definitions(
-    main_file: Path,
+    main_file: str | Path,
     *,
     include_dirs: Iterable[str | Path] = (),
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> dict[Path, Definition]:
+    main_file = Path(main_file).resolve()
     _include_dirs = [Path(include_dir) for include_dir in include_dirs]
 
     result: dict[Path, Definition] = {}
