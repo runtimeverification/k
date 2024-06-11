@@ -71,12 +71,7 @@ def _slurp(
 
 def _resolve_require(require: Require, search_paths: Iterable[Path]) -> Path:
     try_files = [include_dir / require.path for include_dir in search_paths]
-    try:
-        # Get the first source file we can find by iterating through search_paths
-        index = [file.exists() for file in try_files].index(True)
-    except ValueError as v:
-        # TODO Include the source location of the requires clause
-        raise FileNotFoundError(
-            f'{require.path} not found\nLookup directories: {[str(path) for path in search_paths]}'
-        ) from v
-    return try_files[index]
+    for file in try_files:
+        if file.exists():
+            return file
+    raise FileNotFoundError(f'{require.path} not found\nLookup directories: {[str(path) for path in search_paths]}')
