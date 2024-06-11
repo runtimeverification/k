@@ -410,13 +410,12 @@ def exec_json_to_kore(options: JsonToKoreOptions) -> None:
 
 def exec_parse_outer(options: ParseOuterOptions) -> None:
     definition_file = options.main_file.resolve()
-    search_paths = [definition_file.parent, *options.includes]
     main_module_name = options.main_module or definition_file.stem.upper()
 
     final_definition = parse_outer(
         definition_file,
         main_module_name,
-        search_paths=search_paths,
+        search_paths=options.includes,
         md_selector=options.md_selector,
     )
 
@@ -429,13 +428,12 @@ def exec_parse_outer(options: ParseOuterOptions) -> None:
 
 def exec_kompilex(options: KompileXCommandOptions) -> None:
     definition_file = Path(options.main_file).resolve()
-    search_paths = [definition_file.parent, *options.includes]
     main_module_name = options.main_module or definition_file.stem.upper()
 
     final_definition = parse_outer(
         definition_file,
         main_module_name,
-        search_paths=search_paths,
+        search_paths=options.includes,
         md_selector=options.md_selector,
     )
 

@@ -30,7 +30,7 @@ def test_parse_outer(test_file: Path) -> None:
     actual = parse_outer(
         test_file,
         main_module,
-        search_paths=(test_file.parent, test_file.parent / 'include'),
+        search_paths=[test_file.parent / 'include'],
         include_source=False,
     )
 

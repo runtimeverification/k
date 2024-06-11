@@ -58,7 +58,7 @@ def slurp_definitions(
             continue
 
         definition = _parse_file(current_file, md_selector, include_source)
-        pending += reversed([_resolve_require(require, search_paths) for require in definition.requires])
+        pending += reversed([_resolve_require(require, current_file, search_paths) for require in definition.requires])
 
         result[current_file] = definition
 
@@ -76,9 +76,10 @@ def _parse_file(definition_file: Path, md_selector: str, include_source: bool) -
     return parser.definition()
 
 
-def _resolve_require(require: Require, search_paths: list[Path]) -> Path:
-    try_files = [include_dir / require.path for include_dir in search_paths]
+def _resolve_require(require: Require, definition_file: Path, search_paths: list[Path]) -> Path:
+    try_dirs = [definition_file.parent] + search_paths
+    try_files = [include_dir / require.path for include_dir in try_dirs]
     for file in try_files:
         if file.is_file():
             return file.resolve()
-    raise FileNotFoundError(f'{require.path} not found. Search paths: {[str(path) for path in search_paths]}')
+    raise FileNotFoundError(f'{require.path} not found. Searched paths: {[str(path) for path in try_dirs]}')
