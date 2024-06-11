@@ -47,21 +47,22 @@ def _slurp(
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> tuple[Module, ...]:
-    processed_files = processed_files if processed_files is not None else []
-    definition = _parse_file(definition_file, md_selector, include_source)
-    result = definition.modules
-    for require in definition.requires:
-        required_file = _resolve_require(require, search_paths)
-        if required_file not in processed_files:
-            processed_files.append(required_file)
-            result += _slurp(
-                required_file,
-                search_paths=search_paths,
-                processed_files=processed_files,
-                md_selector=md_selector,
-                include_source=include_source,
-            )
-    return result
+    pending = [definition_file]
+    done: set[Path] = set()
+    result: list[Module] = []
+
+    while pending:  # DFS
+        definition_file = pending.pop()
+
+        if definition_file in done:
+            continue
+
+        definition = _parse_file(definition_file, md_selector, include_source)
+        pending += reversed([_resolve_require(require, search_paths) for require in definition.requires])
+        done.add(definition_file)
+        result += definition.modules
+
+    return tuple(result)
 
 
 def _parse_file(definition_file: Path, md_selector: str, include_source: bool) -> Definition:
