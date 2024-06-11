@@ -30,7 +30,6 @@ def parse_outer(
     modules = _slurp(
         definition_file,
         search_paths=search_paths,
-        processed_files=[definition_file],
         md_selector=md_selector,
         include_source=include_source,
     )
@@ -43,7 +42,6 @@ def _slurp(
     definition_file: Path,
     *,
     search_paths: Iterable[Path] = (),
-    processed_files: list[Path] | None = None,
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> tuple[Module, ...]:
