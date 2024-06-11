@@ -27,8 +27,7 @@ def parse_outer(
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> KDefinition:
-    search_paths = list(search_paths)
-    parsed_files = _slurp(
+    parsed_files = slurp_definitions(
         definition_file,
         search_paths=search_paths,
         md_selector=md_selector,
@@ -40,27 +39,28 @@ def parse_outer(
     return final_definition
 
 
-def _slurp(
-    definition_file: Path,
+def slurp_definitions(
+    main_file: Path,
     *,
-    search_paths: list[Path],
-    md_selector: str,
-    include_source: bool,
+    search_paths: Iterable[Path] = (),
+    md_selector: str = 'k',
+    include_source: bool = True,
 ) -> dict[Path, Definition]:
+    search_paths = list(search_paths)
+
     result: dict[Path, Definition] = {}
 
-    pending = [definition_file]
-
+    pending = [main_file]
     while pending:  # DFS
-        definition_file = pending.pop()
+        current_file = pending.pop()
 
-        if definition_file in result:
+        if current_file in result:
             continue
 
-        definition = _parse_file(definition_file, md_selector, include_source)
+        definition = _parse_file(current_file, md_selector, include_source)
         pending += reversed([_resolve_require(require, search_paths) for require in definition.requires])
 
-        result[definition_file] = definition
+        result[current_file] = definition
 
     return result
 
