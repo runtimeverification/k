@@ -11,7 +11,7 @@ jobs:
 
   set-release-id:
     name: 'Set Release ID'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: 'Get release_id'
         run: echo "release_id=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> ${GITHUB_OUTPUT}
@@ -48,10 +48,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: ubuntu-20.04
-            os: ubuntu-20.04
-          - runner: macos-13
-            os: macos-13
+          - runner: ubuntu-24.04
+            os: ubuntu-24.04
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
@@ -103,6 +101,13 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
+      - name: 'Upload the package built to the Summary Page'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kframework_amd64_ubuntu_jammy.deb
+          path: kframework_amd64_ubuntu_jammy.deb
+          if-no-files-found: error
+          retention-days: 1
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -415,11 +420,43 @@ jobs:
             https://api.github.com/repos/runtimeverification/devops/dispatches \
             -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'${VERSION}'"}}'
 
+  pyk-build-docs:
+    name: 'Build Pyk Documentation'
+    needs: ubuntu-jammy
+    runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 10
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+      - name: 'Download K package from the Summary Page'
+        uses: actions/download-artifact@v4
+        with:
+          name: kframework_amd64_ubuntu_jammy.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-pyk-docs-${{ github.sha }}
+          k-deb-path: kframework_amd64_ubuntu_jammy.deb
+      - name: 'Build documentation in Docker container'
+        run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
+      - name: 'Copy documentation from Docker container'
+        run: docker cp k-pyk-docs-${{ github.sha }}:/home/user/docs/build pyk-docs
+      - name: 'Upload pyk documentation to the Summary Page'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyk-docs
+          path: pyk-docs
+          if-no-files-found: error
+          retention-days: 1
+      - name: 'Tear down Docker'
+        if: always()
+        run: docker stop --time=0 k-pyk-docs-${{ github.sha }}
+
   gh-pages:
     name: 'GitHub Pages deployment'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
-    needs: [release]
+    needs: [pyk-build-docs, release]
     steps:
       - name: 'Install pandoc/texlive/calibre'
         run: |
@@ -435,12 +472,6 @@ jobs:
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           fetch-depth: 0
-      - name: 'Install Python'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: 'Install Poetry'
-        uses: Gr1N/setup-poetry@v9
       - name: 'Checkout PL Tutorial code'
         uses: actions/checkout@v4
         with:
@@ -463,15 +494,15 @@ jobs:
           npm run build-sitemap
           cd -
           mv web/public_content ./
-          cd pyk
-          make docs
-          cd -
-          mkdir public_content/pyk
-          cp -r pyk/docs/build/html/* public_content/pyk
           rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
           mv public_content/* ./
           rm -rf public_content
           touch .nojekyll
+      - name: 'Download pyk documentation from the Summary Page'
+        uses: actions/download-artifact@v4
+        with:
+          name: pyk-docs
+          path: gh-pages/pyk
       - name: 'Push gh-pages branch'
         working-directory: gh-pages
         run: |
