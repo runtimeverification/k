@@ -27,6 +27,7 @@ def parse_outer(
     md_selector: str = 'k',
     include_source: bool = True,
 ) -> KDefinition:
+    search_paths = list(search_paths)
     modules = _slurp(
         definition_file,
         search_paths=search_paths,
@@ -41,9 +42,9 @@ def parse_outer(
 def _slurp(
     definition_file: Path,
     *,
-    search_paths: Iterable[Path] = (),
-    md_selector: str = 'k',
-    include_source: bool = True,
+    search_paths: list[Path],
+    md_selector: str,
+    include_source: bool,
 ) -> tuple[Module, ...]:
     pending = [definition_file]
     done: set[Path] = set()
@@ -74,7 +75,7 @@ def _parse_file(definition_file: Path, md_selector: str, include_source: bool) -
     return parser.definition()
 
 
-def _resolve_require(require: Require, search_paths: Iterable[Path]) -> Path:
+def _resolve_require(require: Require, search_paths: list[Path]) -> Path:
     try_files = [include_dir / require.path for include_dir in search_paths]
     for file in try_files:
         if file.is_file():
