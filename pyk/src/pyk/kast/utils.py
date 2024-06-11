@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
-    from .outer_syntax import Module, Require
+    from .outer_syntax import Require
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -28,12 +28,13 @@ def parse_outer(
     include_source: bool = True,
 ) -> KDefinition:
     search_paths = list(search_paths)
-    modules = _slurp(
+    parsed_files = _slurp(
         definition_file,
         search_paths=search_paths,
         md_selector=md_selector,
         include_source=include_source,
     )
+    modules = tuple(module for _, definition in parsed_files.items() for module in definition.modules)
     final_definition = _ast_to_kast(Definition(modules), main_module=main_module)
     assert isinstance(final_definition, KDefinition)
     return final_definition
@@ -45,23 +46,23 @@ def _slurp(
     search_paths: list[Path],
     md_selector: str,
     include_source: bool,
-) -> tuple[Module, ...]:
+) -> dict[Path, Definition]:
+    result: dict[Path, Definition] = {}
+
     pending = [definition_file]
-    done: set[Path] = set()
-    result: list[Module] = []
 
     while pending:  # DFS
         definition_file = pending.pop()
 
-        if definition_file in done:
+        if definition_file in result:
             continue
 
         definition = _parse_file(definition_file, md_selector, include_source)
         pending += reversed([_resolve_require(require, search_paths) for require in definition.requires])
-        done.add(definition_file)
-        result += definition.modules
 
-    return tuple(result)
+        result[definition_file] = definition
+
+    return result
 
 
 def _parse_file(definition_file: Path, md_selector: str, include_source: bool) -> Definition:
