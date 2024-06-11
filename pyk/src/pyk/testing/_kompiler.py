@@ -376,7 +376,7 @@ class ProofTraceTest(KompiledTest):
         hdr = process.stdout
         header_file_name = definition_dir.name + '.header'
         path = definition_dir / header_file_name
-        with open(path, 'wb') as f:
+        with path.open('wb') as f:
             f.write(hdr)
         from ..kllvm.hints.prooftrace import KoreHeader
 

@@ -44,8 +44,10 @@ class LLVMRewriteEvent(LLVMStepEvent):
     @property
     @abstractmethod
     def rule_ordinal(self) -> int:
-        """Returns the axiom ordinal number of the rewrite rule. The rule ordinal represents the `nth` axiom in the kore
-        definition."""
+        """Return the axiom ordinal number of the rewrite rule.
+
+        The rule ordinal represents the `nth` axiom in the kore definition.
+        """
         ...
 
     @property
@@ -78,7 +80,7 @@ class LLVMRuleEvent(LLVMRewriteEvent):
     def __repr__(self) -> str:
         """
         Returns:
-            str: a string representation of the LLVMRuleEvent object using the AST printing method.
+            A string representation of the LLVMRuleEvent object using the AST printing method.
         """
         return self._rule_event.__repr__()
 
@@ -96,8 +98,9 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 @final
 class LLVMSideConditionEventEnter(LLVMRewriteEvent):
     """
-    Represents an event that enters a side condition in LLVM rewriting. This event is used to check the side condition
-    of a rule. Mostly used in ensures/requires clauses.
+    Represents an event that enters a side condition in LLVM rewriting.
+
+    This event is used to check the side condition of a rule. Mostly used in ensures/requires clauses.
 
     Attributes:
         _side_condition_event (llvm_side_condition_event): The underlying side condition event.
@@ -135,8 +138,9 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 @final
 class LLVMSideConditionEventExit(LLVMStepEvent):
     """
-    Represents an LLVM side condition event indicating the exit of a side condition. This event contains the result of
-    the side condition evaluation.
+    Represents an LLVM side condition event indicating the exit of a side condition.
+
+    This event contains the result of the side condition evaluation.
 
     Attributes:
         _side_condition_end_event (llvm_side_condition_end_event): The underlying side condition end event.
@@ -404,8 +408,9 @@ class KoreHeader:
 
 class LLVMEventType:
     """
-    Represents an LLVM event type. This works as a wrapper around the EventType enum. It also provides properties to
-    check the type of the event.
+    Represents an LLVM event type. This works as a wrapper around the EventType enum.
+
+    It also provides properties to check the type of the event.
 
     Attributes:
         _event_type (EventType): The underlying EventType object.
@@ -440,7 +445,9 @@ class LLVMEventType:
 
 class LLVMEventAnnotated:
     """
-    Represents an annotated LLVM event. This class is used to wrap an llvm_event and its corresponding event type.
+    Represents an annotated LLVM event.
+
+    This class is used to wrap an llvm_event and its corresponding event type.
     This class is used to iterate over the LLVM rewrite trace events.
 
     Attributes:
@@ -470,8 +477,9 @@ class LLVMEventAnnotated:
 
 class LLVMRewriteTraceIterator:
     """
-    Represents an LLVM rewrite trace iterator. This class is used to iterate over the LLVM rewrite trace events in the
-    stream parser.
+    Represents an LLVM rewrite trace iterator.
+
+    This class is used to iterate over the LLVM rewrite trace events in the stream parser.
 
     Attributes:
         _rewrite_trace_iterator (llvm_rewrite_trace_iterator): The underlying LLVM rewrite trace iterator object.
