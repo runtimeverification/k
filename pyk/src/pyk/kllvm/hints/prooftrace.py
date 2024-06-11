@@ -120,7 +120,7 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
     def __repr__(self) -> str:
         """
         Returns:
-            str: a string representation of the LLVMSideConditionEventEnter object using the AST printing method.
+            A string representation of the LLVMSideConditionEventEnter object using the AST printing method.
         """
         return self._side_condition_event.__repr__()
 
@@ -160,7 +160,7 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
     def __repr__(self) -> str:
         """
         Returns:
-            str: a string representation of the LLVMSideConditionEventExit object using the AST printing method.
+            A string representation of the LLVMSideConditionEventExit object using the AST printing method.
         """
         return self._side_condition_end_event.__repr__()
 
@@ -198,7 +198,7 @@ class LLVMFunctionEvent(LLVMStepEvent):
     def __repr__(self) -> str:
         """
         Returns:
-            str: a string representation of the LLVMFunctionEvent object using the AST printing method.
+            A string representation of the LLVMFunctionEvent object using the AST printing method.
         """
         return self._function_event.__repr__()
 
@@ -241,7 +241,7 @@ class LLVMHookEvent(LLVMStepEvent):
     def __repr__(self) -> str:
         """
         Returns:
-            str: a string representation of the LLVMHookEvent object using the AST printing method.
+            A string representation of the LLVMHookEvent object using the AST printing method.
         """
         return self._hook_event.__repr__()
 
@@ -348,7 +348,7 @@ class LLVMRewriteTrace:
     def __repr__(self) -> str:
         """
         Returns:
-            str: a string representation of the LLVMRewriteTrace object using the AST printing method.
+            A string representation of the LLVMRewriteTrace object using the AST printing method.
         """
         return self._rewrite_trace.__repr__()
 
@@ -499,7 +499,7 @@ class LLVMRewriteTraceIterator:
     def __repr__(self) -> str:
         """
         Returns:
-            str: A string representation of the LLVMRewriteTraceIterator object using the AST printing method.
+            A string representation of the LLVMRewriteTraceIterator object using the AST printing method.
         """
         return self._rewrite_trace_iterator.__repr__()
 
