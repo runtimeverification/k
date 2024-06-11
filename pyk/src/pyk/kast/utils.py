@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
-    from .outer_syntax import Module
+    from .outer_syntax import Module, Require
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -56,17 +56,7 @@ def _slurp(
     definition = parser.definition()
     result = definition.modules
     for require in definition.requires:
-        try_files = [include_dir / require.path for include_dir in search_paths]
-        try:
-            # Get the first source file we can find by iterating through search_paths
-            index = [file.exists() for file in try_files].index(True)
-        except ValueError as v:
-            # TODO Include the source location of the requires clause
-            raise FileNotFoundError(
-                f'{require.path} not found\nLookup directories: {[str(path) for path in search_paths]}'
-            ) from v
-
-        required_file = try_files[index]
+        required_file = _resolve_require(require, search_paths)
         if required_file not in processed_files:
             processed_files.append(required_file)
             result += _slurp(
@@ -77,3 +67,16 @@ def _slurp(
                 include_source=include_source,
             )
     return result
+
+
+def _resolve_require(require: Require, search_paths: Iterable[Path]) -> Path:
+    try_files = [include_dir / require.path for include_dir in search_paths]
+    try:
+        # Get the first source file we can find by iterating through search_paths
+        index = [file.exists() for file in try_files].index(True)
+    except ValueError as v:
+        # TODO Include the source location of the requires clause
+        raise FileNotFoundError(
+            f'{require.path} not found\nLookup directories: {[str(path) for path in search_paths]}'
+        ) from v
+    return try_files[index]
