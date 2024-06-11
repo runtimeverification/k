@@ -92,7 +92,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     _exec_time: float
     error_info: Exception | None
     prior_loops_cache: dict[int, tuple[int, ...]]
-    abstract: bool
 
     _checked_for_bounded: set[int]
 
@@ -114,7 +113,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         _exec_time: float = 0,
         error_info: Exception | None = None,
         prior_loops_cache: dict[int, tuple[int, ...]] | None = None,
-        abstract: bool = False,
     ):
         Proof.__init__(self, id, proof_dir=proof_dir, subproof_ids=subproof_ids, admitted=admitted)
         KCFGExploration.__init__(self, kcfg, terminal)
@@ -131,7 +129,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.kcfg._kcfg_store = KCFGStore(self.proof_subdir / 'kcfg') if self.proof_subdir else None
         self._exec_time = _exec_time
         self.error_info = error_info
-        self.abstract = abstract
 
         self._checked_for_bounded = set()
 
@@ -342,7 +339,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
 
         bounded = dct['bounded']
         bmc_depth = dct['bmc_depth'] if 'bmc_depth' in dct else None
-        abstract = dct['abstract'] if 'abstract' in dct else True
 
         return APRProof(
             id,
@@ -358,7 +354,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             proof_dir=proof_dir,
             subproof_ids=subproof_ids,
             node_refutations=node_refutations,
-            abstract=abstract,
         )
 
     @staticmethod
@@ -388,8 +383,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             **kwargs,
         )
 
-    def as_rules(self, priority: int = 20) -> list[KRule]:
-        if (self.passed and not self.abstract) or (self.admitted and not self.kcfg.predecessors(self.target)):
+    def as_rules(self, priority: int = 20, direct_rule: bool = False) -> list[KRule]:
+        if (self.passed and direct_rule) or (self.admitted and not self.kcfg.predecessors(self.target)):
             return [self.as_rule(priority=priority)]
         _rules = []
         for _edge in self.kcfg.edges():
@@ -510,7 +505,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         dct['circularity'] = self.circularity
         logs = {int(k): [l.to_dict() for l in ls] for k, ls in self.logs.items()}
         dct['logs'] = logs
-        dct['abstract'] = self.abstract
         return dct
 
     @property
@@ -688,6 +682,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     counterexample_info: bool
     always_check_subsumption: bool
     fast_check_subsumption: bool
+    direct_subproof_rules: bool
     kcfg_explore: KCFGExplore
 
     def __init__(
@@ -699,6 +694,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         counterexample_info: bool = False,
         always_check_subsumption: bool = True,
         fast_check_subsumption: bool = False,
+        direct_subproof_rules: bool = False,
     ) -> None:
 
         self.kcfg_explore = kcfg_explore
@@ -709,6 +705,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.counterexample_info = counterexample_info
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
+        self.direct_subproof_rules = direct_subproof_rules
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -725,7 +722,10 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             else []
         )
         dependencies_as_rules = [
-            rule for subproof in subproofs if isinstance(subproof, APRProof) for rule in subproof.as_rules(priority=20)
+            rule
+            for subproof in subproofs
+            if isinstance(subproof, APRProof)
+            for rule in subproof.as_rules(priority=20, direct_rule=self.direct_subproof_rules)
         ]
         circularity_rule = proof.as_rule(priority=20)
 
