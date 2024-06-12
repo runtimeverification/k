@@ -245,7 +245,7 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
