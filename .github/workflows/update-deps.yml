@@ -14,7 +14,7 @@ jobs:
 
   nix-flake-submodule-sync:
     name: 'Nix flake submodule sync'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: 'Check out code, set up Git'
         uses: actions/checkout@v4
