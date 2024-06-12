@@ -484,10 +484,12 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
             still available steps
         """
         iterations = 0
+        _LOGGER.info(f'Initializing proof: {proof.id}')
         self.init_proof(proof)
         while True:
-            steps = proof.get_steps()
-            if len(list(steps)) == 0:
+            steps = list(proof.get_steps())
+            _LOGGER.info(f'Found {len(steps)} next steps for proof: {proof.id}')
+            if len(steps) == 0:
                 break
             for step in steps:
                 if fail_fast and proof.failed:
