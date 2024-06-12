@@ -6,6 +6,7 @@ import os
 import re
 from contextlib import contextmanager
 from enum import Enum
+from functools import partial
 from itertools import chain
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -16,7 +17,7 @@ from ..cterm import CTerm
 from ..kast import Atts, kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_lhs, flatten_label
-from ..kast.outer import KApply, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
+from ..kast.outer import KApply, KClaim, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
 from ..kore.rpc import KoreExecLogFormat
 from ..prelude.ml import is_top
 from ..proof import APRProof, APRProver, EqualityProof, ImpliesProver
@@ -25,12 +26,12 @@ from . import TypeInferenceMode
 from .kprint import KPrint
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Mapping
+    from collections.abc import Callable, Container, Iterable, Iterator, Mapping
     from subprocess import CompletedProcess
     from typing import ContextManager, Final
 
     from ..cli.pyk import ProveOptions
-    from ..kast.outer import KClaim, KRule, KRuleLike
+    from ..kast.outer import KRule, KRuleLike
     from ..kast.pretty import SymbolTable
     from ..kcfg import KCFGExplore
     from ..proof import Proof, Prover
@@ -283,7 +284,69 @@ class KProve(KPrint):
                 type_inference_mode=type_inference_mode,
                 args=['--emit-json-spec', ntf.name],
             )
-            return KFlatModuleList.from_dict(kast_term(json.loads(Path(ntf.name).read_text())))
+            json_data = json.loads(Path(ntf.name).read_text())
+
+        module_list = KFlatModuleList.from_dict(kast_term(json_data))
+        return self._qualify_depends(module_list)
+
+    @staticmethod
+    def _qualify_depends(module_list: KFlatModuleList) -> KFlatModuleList:
+        """Qualify each depends value with the module the claim belongs to.
+
+        Example:
+
+        module THIS-MODULE
+            claim ... [depends(foo,OTHER-MODULE.bar)]
+        endmodule
+
+        becomes
+
+        module THIS-MODULE
+            claim ... [depends(THIS-MODULE.foo,OTHER-MODULE.bar)]
+        endmodule
+        """
+
+        module_names = {module.name for module in module_list.modules}
+        labels = {claim.label for module in module_list.modules for claim in module.claims}
+
+        def qualify_claim_depends(module_name: str, claim: KClaim) -> KClaim:
+            depends = claim.dependencies
+            if not depends:
+                return claim
+
+            qualify = partial(KProve._qualify_claim_label, module_names, labels, module_name)
+            qualified = [qualify(label) for label in depends]
+            return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
+
+        modules: list[KFlatModule] = []
+        for module in module_list.modules:
+            qualify_depends = partial(qualify_claim_depends, module.name)
+            module = module.map_sentences(qualify_depends, of_type=KClaim)
+            modules.append(module)
+
+        return module_list.let(modules=modules)
+
+    @staticmethod
+    def _qualify_claim_label(
+        module_names: Container[str],
+        labels: Container[str],
+        module_name: str,
+        label: str,
+    ) -> str:
+        """Qualify a `label` with `module_name` if not a valid label and not already qualified.
+
+        An unqualified label can be valid if it is a UNIQUE_ID.
+        """
+        if label in labels:
+            return label
+
+        segments = label.split('.')
+        if len(segments) < 2 or segments[0] not in module_names:
+            label = f'{module_name}.{label}'
+            if label in labels:
+                return label
+
+        raise ValueError(f'Claim label not found: {label}')
 
     def get_claims(
         self,
@@ -304,44 +367,27 @@ class KProve(KPrint):
             type_inference_mode=type_inference_mode,
         )
 
-        _module_names = [module.name for module in flat_module_list.modules]
+        claims = {claim.label: claim for module in flat_module_list.modules for claim in module.claims}
 
-        def _get_claim_module(_label: str) -> str | None:
-            if _label.find('.') > 0 and _label.split('.')[0] in _module_names:
-                return _label.split('.')[0]
-            return None
-
-        all_claims = {
-            claim.label: (claim, module.name) for module in flat_module_list.modules for claim in module.claims
-        }
-
-        claim_labels = list(all_claims.keys()) if claim_labels is None else list(claim_labels)
+        claim_labels = list(claims) if claim_labels is None else list(claim_labels)
         exclude_claim_labels = [] if exclude_claim_labels is None else list(exclude_claim_labels)
 
         final_claims: dict[str, KClaim] = {}
         unfound_labels: list[str] = []
-        while len(claim_labels) > 0:
+        while claim_labels:
             claim_label = claim_labels.pop(0)
             if claim_label in final_claims or claim_label in exclude_claim_labels:
                 continue
-            if claim_label not in all_claims:
+            if claim_label not in claims:
                 claim_label = f'{flat_module_list.main_module}.{claim_label}'
-            if claim_label not in all_claims:
+            if claim_label not in claims:
                 unfound_labels.append(claim_label)
                 continue
 
-            _claim, _module_name = all_claims[claim_label]
-            _updated_dependencies: list[str] = []
-            for _dependency_label in _claim.dependencies:
-                if _get_claim_module(_dependency_label) is None:
-                    _dependency_label = f'{_module_name}.{_dependency_label}'
-                _updated_dependencies.append(_dependency_label)
-            if len(_updated_dependencies) > 0:
-                if include_dependencies:
-                    claim_labels.extend(_updated_dependencies)
-                _claim = _claim.let(att=_claim.att.update([Atts.DEPENDS(','.join(_updated_dependencies))]))
-
-            final_claims[claim_label] = _claim
+            claim = claims[claim_label]
+            if include_dependencies:
+                claim_labels.extend(claim.dependencies)
+            final_claims[claim_label] = claim
 
         if len(unfound_labels) > 0:
             raise ValueError(f'Claim labels not found: {unfound_labels}')
