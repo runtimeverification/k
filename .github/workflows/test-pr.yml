@@ -237,7 +237,7 @@ jobs:
 
   pyk-build-docs:
     name: 'Pyk: Documentation'
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     runs-on: [self-hosted, linux, normal]
     steps:
       - name: 'Check out code'
@@ -250,7 +250,7 @@ jobs:
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-docs-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
       - name: 'Build documentation'
         run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
       - name: 'Tear down Docker'
