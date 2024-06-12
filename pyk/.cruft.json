@@ -5,7 +5,7 @@
   "context": {
     "cookiecutter": {
       "project_name": "pyk",
-      "project_slug": "pyk",
+      "project_slug": "kframework",
       "package_name": "pyk",
       "version": "0.1.0",
       "description": "",
