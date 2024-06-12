@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pyk.kllvm.hints.prooftrace as prooftrace
 from pyk.kllvm.convert import llvm_to_pattern
 from pyk.kllvm.parser import parse_definition
@@ -14,6 +16,9 @@ from pyk.kore.prelude import (
 )
 from pyk.kore.syntax import App
 from pyk.testing import ProofTraceTest
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def get_pattern_from_ordinal(definition_text: list[str], ordinal: int) -> str:
@@ -48,7 +53,13 @@ class TestProofTrace(ProofTraceTest):
         )
     ).text
 
-    def test_proof_trace(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def get_pattern_from_ordinal(self, definition_text: list[str], ordinal: int) -> str:
+        axiom_ordinal = 'ordinal{}("' + str(ordinal) + '")'
+        line = next((i + 1 for i, l in enumerate(definition_text) if axiom_ordinal in l), None)
+        assert line is not None
+        return definition_text[line - 1].strip()
+
+    def test_proof_trace(self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
@@ -83,6 +94,72 @@ class TestProofTrace(ProofTraceTest):
         # check that the third event is a configuration
         assert pt.trace[2].is_kore_pattern()
 
+    def test_streaming_parser_iter(self, header: prooftrace.KoreHeader, hints_file: Path) -> None:
+        # read the hints file and get the iterator for the proof trace
+        it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
+        assert it.version == 11
+
+        # Test that the __iter__ is working
+        list_of_events = list(it)
+
+        # Test length of the list
+        assert len(list_of_events) == 13
+
+        # Test the type of the events
+        for event in list_of_events:
+            if event.type.is_pre_trace:
+                continue
+            elif event.type.is_initial_config:
+                assert event.event.is_kore_pattern()
+            elif event.type.is_trace:
+                if event.event.is_step_event():
+                    assert isinstance(event.event.step_event, prooftrace.LLVMRewriteEvent)
+                else:
+                    assert event.event.is_kore_pattern()
+
+    def test_streaming_parser_next(self, header: prooftrace.KoreHeader, hints_file: Path, definition_file: str) -> None:
+        definition = parse_definition(definition_file)
+        assert definition is not None
+
+        definition.preprocess()
+        definition_text = repr(definition).split('\n')
+
+        # read the hints file and get the iterator for the proof trace
+        it = prooftrace.LLVMRewriteTraceIterator.from_file(hints_file, header)
+        assert it.version == 11
+
+        # skip pre-trace events
+        while True:
+            event0 = next(it)
+            if event0 is None or not event0.type.is_pre_trace:
+                break
+
+        # check that the first event is the initial configuration
+        assert event0.type.is_initial_config
+        assert event0.event.is_kore_pattern()
+
+        # check that the first event is the rewrite a() => b()
+        event1 = next(it)
+        assert event1.event.is_step_event()
+        assert isinstance(event1.event.step_event, prooftrace.LLVMRewriteEvent)
+        axiom_ordinal = event1.event.step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        assert axiom == axiom_expected
+
+        # check that the second event is the rewrite b() => c()
+        event2 = next(it)
+        assert event2.event.is_step_event()
+        assert isinstance(event2.event.step_event, prooftrace.LLVMRewriteEvent)
+        axiom_ordinal = event2.event.step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(axiom_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, axiom_ordinal)
+        assert axiom == axiom_expected
+
+        event3 = next(it)
+        assert event3.type.is_trace
+        assert event3.event.is_kore_pattern()
+
 
 class TestSingleRewrite(ProofTraceTest):
     KOMPILE_DEFINITION = """
@@ -101,7 +178,7 @@ class TestSingleRewrite(ProofTraceTest):
     HINTS_INPUT_KORE = """LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()))))"""
 
     def test_parse_proof_hint_single_rewrite(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -171,7 +248,7 @@ class TestTreeReverse(ProofTraceTest):
        """
 
     def test_parse_proof_hint_reverse_no_ints(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -296,7 +373,7 @@ class TestNonRecFunction(ProofTraceTest):
         """
 
     def test_parse_proof_hint_non_rec_function(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
@@ -375,7 +452,7 @@ class TestDV(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortFoo{}, SortKItem{}}(Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\\dv{SortInt{}}("5")))))))
         """
 
-    def test_parse_proof_hint_dv(self, hints: bytes, header: prooftrace.kore_header, definition_file: str) -> None:
+    def test_parse_proof_hint_dv(self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None
 
@@ -460,9 +537,7 @@ class TestConcurrentCounters(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortState{}, SortKItem{}}(Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\\dv{SortInt{}}("4"),\\dv{SortInt{}}("0"))))))
     """
 
-    def test_parse_concurrent_counters(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
-    ) -> None:
+    def test_parse_concurrent_counters(self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str) -> None:
         # main purpose of the test is to check the sequence of events in the trace with
         # successful and failed side condition checks
         definition = parse_definition(definition_file)
@@ -630,7 +705,7 @@ class Test0Decrement(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))
     """
 
-    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_0_decrement(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -659,7 +734,7 @@ class Test1Decrement(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl1'Unds'DECREMENT-SYNTAX'Unds'Nat{}())))))
     """
 
-    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_1_decrement(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -688,7 +763,7 @@ class Test2Decrement(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortNat{}, SortKItem{}}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'DECREMENT-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl2'Unds'DECREMENT-SYNTAX'Unds'Nat{}()))))))
     """
 
-    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_2_decrement(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -727,7 +802,7 @@ class TestPeano(ProofTraceTest):
 
     """
 
-    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_peano(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -831,7 +906,7 @@ class TestIMP5(ProofTraceTest):
         LblinitGeneratedTopCell{}(Lbl'Unds'Map'Unds'{}(Lbl'Stop'Map{}(),Lbl'UndsPipe'-'-GT-Unds'{}(inj{SortKConfigVar{}, SortKItem{}}(\\dv{SortKConfigVar{}}("$PGM")),inj{SortPgm{}, SortKItem{}}(inj{SortBlock{}, SortPgm{}}(Lbl'LBraRBraUnds'IMP5-SYNTAX'Unds'Block{}())))))
     """
 
-    def test_parse_proof_hint_imp5(self, hints: bytes, header: prooftrace.kore_header) -> None:
+    def test_parse_proof_hint_imp5(self, hints: bytes, header: prooftrace.KoreHeader) -> None:
         pt = prooftrace.LLVMRewriteTrace.parse(hints, header)
         assert pt is not None
 
@@ -863,7 +938,7 @@ class TestBuiltInHookEvents(ProofTraceTest):
     """
 
     def test_parse_proof_hint_builtin_hook_events(
-        self, hints: bytes, header: prooftrace.kore_header, definition_file: str
+        self, hints: bytes, header: prooftrace.KoreHeader, definition_file: str
     ) -> None:
         definition = parse_definition(definition_file)
         assert definition is not None

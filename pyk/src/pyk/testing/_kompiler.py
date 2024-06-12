@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
     from ..kast.outer import KDefinition
     from ..kcfg.semantics import KCFGSemantics
-    from ..kllvm.hints.prooftrace import kore_header
+    from ..kllvm.hints.prooftrace import KoreHeader
     from ..kllvm.runtime import Runtime
     from ..ktool.kprint import SymbolTable
     from ..utils import BugReport
@@ -371,15 +371,16 @@ class ProofTraceTest(KompiledTest):
         return hints_file.read_bytes()
 
     @pytest.fixture(scope='class')
-    def header(self, definition_dir: Path) -> kore_header:
+    def header(self, definition_dir: Path) -> KoreHeader:
         process = subprocess.run(['kore-rich-header', str(definition_dir / 'definition.kore')], stdout=subprocess.PIPE)
         hdr = process.stdout
-        path = str(definition_dir / 'header.bin')
-        with open(path, 'wb') as f:
+        header_file_name = definition_dir.name + '.header'
+        path = definition_dir / header_file_name
+        with path.open('wb') as f:
             f.write(hdr)
-        from ..kllvm.hints.prooftrace import kore_header
+        from ..kllvm.hints.prooftrace import KoreHeader
 
-        return kore_header(path)
+        return KoreHeader.create(path)
 
     @pytest.fixture(scope='class')
     def definition_file(self, definition_dir: Path) -> str:
@@ -387,3 +388,10 @@ class ProofTraceTest(KompiledTest):
         assert definition_path.is_file()
         with open(definition_path) as f:
             return f.read()
+
+    @pytest.fixture(scope='class')
+    def hints_file(self, definition_dir: Path, kompile: Kompiler) -> Path:
+        input_kore_file = kompile._cache_definition(self.HINTS_INPUT_KORE)
+        hints_file_name = definition_dir.name.replace('.k', '.hints')
+        hints_file = generate_hints(definition_dir, input_kore_file, None, hints_file_name)
+        return hints_file
