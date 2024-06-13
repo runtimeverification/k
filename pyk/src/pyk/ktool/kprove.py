@@ -325,32 +325,11 @@ class KProve(KPrint):
             type_inference_mode=type_inference_mode,
         )
 
-        # Qualify each input label with the main module name
-        qualify = partial(
-            _qualify_claim_label, claim_index.module_names, claim_index.claims, claim_index.main_module_name
+        return claim_index.as_list(
+            claim_labels=claim_labels,
+            exclude_claim_labels=exclude_claim_labels,
+            include_dependencies=include_dependencies,
         )
-
-        claim_labels = list(claim_index.claims) if claim_labels is None else [qualify(label) for label in claim_labels]
-        exclude_claim_labels = (
-            set() if exclude_claim_labels is None else {qualify(label) for label in exclude_claim_labels}
-        )
-
-        res: list[KClaim] = []
-        done: set[str] = set()
-
-        while claim_labels:
-            label = claim_labels.pop()
-
-            if label in done:
-                continue
-
-            claim = claim_index.claims[label]
-            res.append(claim)
-            done.add(label)
-            if include_dependencies:
-                claim_labels += claim.dependencies
-
-        return res
 
     @contextmanager
     def _tmp_claim_definition(
@@ -560,6 +539,38 @@ class ClaimIndex:
             modules.append(module)
 
         return module_list.let(modules=modules)
+
+    def as_list(
+        self,
+        *,
+        claim_labels: Iterable[str] | None = None,
+        exclude_claim_labels: Iterable[str] | None = None,
+        include_dependencies: bool = True,
+    ) -> list[KClaim]:
+        # Qualify each input label with the main module name
+        qualify = partial(_qualify_claim_label, self.module_names, self.claims, self.main_module_name)
+
+        claim_labels = list(self.claims) if claim_labels is None else [qualify(label) for label in claim_labels]
+        exclude_claim_labels = (
+            set() if exclude_claim_labels is None else {qualify(label) for label in exclude_claim_labels}
+        )
+
+        res: list[KClaim] = []
+        done: set[str] = set()
+
+        while claim_labels:
+            label = claim_labels.pop()
+
+            if label in done:
+                continue
+
+            claim = self.claims[label]
+            res.append(claim)
+            done.add(label)
+            if include_dependencies:
+                claim_labels += claim.dependencies
+
+        return res
 
 
 def _qualify_claim_label(
