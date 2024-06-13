@@ -1,4 +1,18 @@
 #!/bin/bash
+
+set -euxo pipefail
+
+llvm=true
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --frontend)
+      llvm=false
+      shift
+      ;;
+  esac
+done
+
 mkdir -p $DESTDIR$PREFIX/bin
 mkdir -p $DESTDIR$PREFIX/include
 mkdir -p $DESTDIR$PREFIX/lib
@@ -7,4 +21,7 @@ cp -R k-distribution/target/release/k/bin/* $DESTDIR$PREFIX/bin
 cp -R k-distribution/target/release/k/include/* $DESTDIR$PREFIX/include
 cp -R k-distribution/target/release/k/lib/* $DESTDIR$PREFIX/lib
 cp -R k-distribution/target/release/k/share/* $DESTDIR$PREFIX/share
-( cd llvm-backend/target/build && make install )
+
+if [ "$llvm" = "true" ]; then
+  ( cd llvm-backend/target/build && make install )
+fi
