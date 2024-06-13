@@ -326,9 +326,9 @@ class KProve(KPrint):
         )
 
         return claim_index.as_list(
-            claim_labels=claim_labels,
-            exclude_claim_labels=exclude_claim_labels,
-            include_dependencies=include_dependencies,
+            include=claim_labels,
+            exclude=exclude_claim_labels,
+            with_depends=include_dependencies,
         )
 
     @contextmanager
@@ -543,23 +543,19 @@ class ClaimIndex:
     def as_list(
         self,
         *,
-        claim_labels: Iterable[str] | None = None,
-        exclude_claim_labels: Iterable[str] | None = None,
-        include_dependencies: bool = True,
+        include: Iterable[str] | None = None,
+        exclude: Iterable[str] | None = None,
+        with_depends: bool = True,
     ) -> list[KClaim]:
         # Qualify each input label with the main module name
         qualify = partial(_qualify_claim_label, self.module_names, self.claims, self.main_module_name)
 
-        claim_labels = list(self.claims) if claim_labels is None else [qualify(label) for label in claim_labels]
-        exclude_claim_labels = (
-            set() if exclude_claim_labels is None else {qualify(label) for label in exclude_claim_labels}
-        )
-
         res: list[KClaim] = []
-        done: set[str] = set()
 
-        while claim_labels:
-            label = claim_labels.pop()
+        labels = list(self.claims) if include is None else [qualify(label) for label in include]
+        done = set() if exclude is None else {qualify(label) for label in exclude}
+        while labels:
+            label = labels.pop()
 
             if label in done:
                 continue
@@ -567,8 +563,8 @@ class ClaimIndex:
             claim = self.claims[label]
             res.append(claim)
             done.add(label)
-            if include_dependencies:
-                claim_labels += claim.dependencies
+            if with_depends:
+                labels += claim.dependencies
 
         return res
 
