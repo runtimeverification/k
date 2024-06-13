@@ -5,6 +5,7 @@ import logging
 import os
 import re
 from contextlib import contextmanager
+from dataclasses import dataclass
 from enum import Enum
 from functools import partial
 from itertools import chain
@@ -21,7 +22,7 @@ from ..kast.outer import KApply, KClaim, KDefinition, KFlatModule, KFlatModuleLi
 from ..kore.rpc import KoreExecLogFormat
 from ..prelude.ml import is_top
 from ..proof import APRProof, APRProver, EqualityProof, ImpliesProver
-from ..utils import gen_file_timestamp, run_process
+from ..utils import FrozenDict, gen_file_timestamp, run_process
 from . import TypeInferenceMode
 from .kprint import KPrint
 
@@ -348,6 +349,23 @@ class KProve(KPrint):
 
         raise ValueError(f'Claim label not found: {label}')
 
+    def get_claim_index(
+        self,
+        spec_file: Path,
+        spec_module_name: str | None = None,
+        include_dirs: Iterable[Path] = (),
+        md_selector: str | None = None,
+        type_inference_mode: TypeInferenceMode | None = None,
+    ) -> ClaimIndex:
+        module_list = self.get_claim_modules(
+            spec_file=spec_file,
+            spec_module_name=spec_module_name,
+            include_dirs=include_dirs,
+            md_selector=md_selector,
+            type_inference_mode=type_inference_mode,
+        )
+        return ClaimIndex.from_module_list(module_list)
+
     def get_claims(
         self,
         spec_file: Path,
@@ -359,7 +377,7 @@ class KProve(KPrint):
         include_dependencies: bool = True,
         type_inference_mode: TypeInferenceMode | None = None,
     ) -> list[KClaim]:
-        flat_module_list = self.get_claim_modules(
+        claim_index = self.get_claim_index(
             spec_file=spec_file,
             spec_module_name=spec_module_name,
             include_dirs=include_dirs,
@@ -367,13 +385,12 @@ class KProve(KPrint):
             type_inference_mode=type_inference_mode,
         )
 
-        module_names = {module.name for module in flat_module_list.modules}
-        claims = {claim.label: claim for module in flat_module_list.modules for claim in module.claims}
-
         # Qualify each input label with the main module name
-        qualify = partial(self._qualify_claim_label, module_names, claims, flat_module_list.main_module)
+        qualify = partial(
+            self._qualify_claim_label, claim_index.module_names, claim_index.claims, claim_index.main_module_name
+        )
 
-        claim_labels = list(claims) if claim_labels is None else [qualify(label) for label in claim_labels]
+        claim_labels = list(claim_index.claims) if claim_labels is None else [qualify(label) for label in claim_labels]
         exclude_claim_labels = (
             set() if exclude_claim_labels is None else {qualify(label) for label in exclude_claim_labels}
         )
@@ -387,7 +404,7 @@ class KProve(KPrint):
             if label in done:
                 continue
 
-            claim = claims[label]
+            claim = claim_index.claims[label]
             res.append(claim)
             done.add(label)
             if include_dependencies:
@@ -540,3 +557,28 @@ class ProveRpc:
         else:
             _LOGGER.info(f'Proof pending: {proof.id}')
         return proof
+
+
+@dataclass(frozen=True)
+class ClaimIndex:
+    main_module_name: str
+    module_names: frozenset[str]
+    claims: FrozenDict[str, KClaim]
+
+    def __init__(
+        self,
+        main_module_name: str,
+        module_names: Iterable[str],
+        claims: Mapping[str, KClaim],
+    ):
+        object.__setattr__(self, 'main_module_name', main_module_name)
+        object.__setattr__(self, 'module_names', frozenset(module_names))
+        object.__setattr__(self, 'claims', FrozenDict(claims))
+
+    @staticmethod
+    def from_module_list(module_list: KFlatModuleList) -> ClaimIndex:
+        return ClaimIndex(
+            main_module_name=module_list.main_module,
+            module_names=(module.name for module in module_list.modules),
+            claims={claim.label: claim for module in module_list.modules for claim in module.claims},
+        )
