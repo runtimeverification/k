@@ -586,12 +586,18 @@ class ClaimIndex(Mapping[str, KClaim]):
         return len(self.claims)
 
     def __getitem__(self, label: str) -> KClaim:
-        if label in self.claims:
-            return self.claims[label]
         try:
-            return self.claims[f'{self.main_module_name}.{label}']
-        except KeyError as err:
-            raise KeyError(f'Claim not found: {label}') from err
+            label = self.resolve(label)
+        except ValueError:
+            raise KeyError(f'Claim not found: {label}') from None
+        return self.claims[label]
+
+    def resolve(self, label: str) -> str:
+        """Resolve `label` to a valid label in the index, or raise.
+
+        Unqualified labels are qualified with the main module name.
+        """
+        return self._qualify_claim_label(self.claims, self.main_module_name, label)
 
     def as_list(
         self,
@@ -600,11 +606,8 @@ class ClaimIndex(Mapping[str, KClaim]):
         exclude: Iterable[str] | None = None,
         with_depends: bool = True,
     ) -> list[KClaim]:
-        # Qualify each input label with the main module name
-        qualify = partial(self._qualify_claim_label, self.claims, self.main_module_name)
-
-        labels = list(self.claims) if include is None else [qualify(label) for label in include]
-        done = set() if exclude is None else {qualify(label) for label in exclude}
+        labels = list(self.claims) if include is None else [self.resolve(label) for label in include]
+        done = set() if exclude is None else {self.resolve(label) for label in exclude}
 
         res: list[KClaim] = []
 
