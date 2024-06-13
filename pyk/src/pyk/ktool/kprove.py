@@ -489,6 +489,7 @@ class ClaimIndex(Mapping[str, KClaim]):
         main_module_name: str,
         claims: Mapping[str, KClaim],
     ):
+        self._validate(claims)
         object.__setattr__(self, 'main_module_name', main_module_name)
         object.__setattr__(self, 'claims', FrozenDict(claims))
 
@@ -500,6 +501,17 @@ class ClaimIndex(Mapping[str, KClaim]):
             main_module_name=module_list.main_module,
             claims={claim.label: claim for module in module_list.modules for claim in module.claims},
         )
+
+    @staticmethod
+    def _validate(claims: Mapping[str, KClaim]) -> None:
+        for label, claim in claims.items():
+            actual_label = claim.att.get(Atts.LABEL)
+            if actual_label != label:
+                raise ValueError(f'Claim label mismatch, expected: {label}, found: {actual_label}')
+
+            for depend in claim.dependencies:
+                if depend not in claims:
+                    raise ValueError(f'Invalid dependency label: {depend}')
 
     @staticmethod
     def _add_missing_claim_labels(module_list: KFlatModuleList) -> KFlatModuleList:
