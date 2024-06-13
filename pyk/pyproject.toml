@@ -3,12 +3,17 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "pyk"
-version = "7.0.132"
+name = "kframework"
+version = "7.1.0"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
 ]
+readme = "README.md"
+
+[[tool.poetry.packages]]
+include = "pyk"
+from = "src"
 
 [tool.poetry.dependencies]
 python = "^3.10"
