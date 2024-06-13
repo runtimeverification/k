@@ -1,4 +1,4 @@
-APRProof: 608c0f83578e599d10f1a59e9f06742c1879b6ed6351cee2df24aa9dd15f044f
+APRProof: IMPLICIT-SPEC.608c0f83578e599d10f1a59e9f06742c1879b6ed6351cee2df24aa9dd15f044f
     status: ProofStatus.PASSED
     admitted: False
     nodes: 3

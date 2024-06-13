@@ -481,27 +481,46 @@ class ProveRpc:
 @dataclass(frozen=True)
 class ClaimIndex:
     main_module_name: str
-    module_names: frozenset[str]
     claims: FrozenDict[str, KClaim]
 
     def __init__(
         self,
         main_module_name: str,
-        module_names: Iterable[str],
         claims: Mapping[str, KClaim],
     ):
         object.__setattr__(self, 'main_module_name', main_module_name)
-        object.__setattr__(self, 'module_names', frozenset(module_names))
         object.__setattr__(self, 'claims', FrozenDict(claims))
 
     @staticmethod
     def from_module_list(module_list: KFlatModuleList) -> ClaimIndex:
+        module_list = ClaimIndex._add_missing_claim_labels(module_list)
         module_list = ClaimIndex._qualify_depends(module_list)
         return ClaimIndex(
             main_module_name=module_list.main_module,
-            module_names=(module.name for module in module_list.modules),
             claims={claim.label: claim for module in module_list.modules for claim in module.claims},
         )
+
+    @staticmethod
+    def _add_missing_claim_labels(module_list: KFlatModuleList) -> KFlatModuleList:
+        """Put a label attribute to all claims without one.
+
+        This only affects claims that are not labeled in the source file.
+        The label is the UNIQUE_ID of the sentence, qualified with the host module's name.
+        """
+
+        def label_claim(module_name: str, claim: KClaim) -> KClaim:
+            if Atts.LABEL in claim.att:
+                return claim
+            unique_id = claim.att[Atts.UNIQUE_ID]
+            label = f'{module_name}.{unique_id}'
+            return claim.let(att=claim.att.update([Atts.LABEL(label)]))
+
+        modules: list[KFlatModule] = []
+        for module in module_list.modules:
+            add_label = partial(label_claim, module.name)
+            module = module.map_sentences(add_label, of_type=KClaim)
+            modules.append(module)
+        return module_list.let(modules=modules)
 
     @staticmethod
     def _qualify_depends(module_list: KFlatModuleList) -> KFlatModuleList:
@@ -520,7 +539,6 @@ class ClaimIndex:
         endmodule
         """
 
-        module_names = {module.name for module in module_list.modules}
         labels = {claim.label for module in module_list.modules for claim in module.claims}
 
         def qualify_claim_depends(module_name: str, claim: KClaim) -> KClaim:
@@ -528,7 +546,7 @@ class ClaimIndex:
             if not depends:
                 return claim
 
-            qualify = partial(_qualify_claim_label, module_names, labels, module_name)
+            qualify = partial(_qualify_claim_label, labels, module_name)
             qualified = [qualify(label) for label in depends]
             return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
 
@@ -548,7 +566,7 @@ class ClaimIndex:
         with_depends: bool = True,
     ) -> list[KClaim]:
         # Qualify each input label with the main module name
-        qualify = partial(_qualify_claim_label, self.module_names, self.claims, self.main_module_name)
+        qualify = partial(_qualify_claim_label, self.claims, self.main_module_name)
 
         res: list[KClaim] = []
 
@@ -570,22 +588,19 @@ class ClaimIndex:
 
 
 def _qualify_claim_label(
-    module_names: Container[str],
     labels: Container[str],
     module_name: str,
     label: str,
 ) -> str:
     """Qualify a `label` with `module_name` if not a valid label and not already qualified.
 
-    An unqualified label can be valid if it is a UNIQUE_ID.
+    Assumes `labels` are quaified, so `label in labels` iff `label` qualified and valid.
     """
     if label in labels:
         return label
 
-    segments = label.split('.')
-    if len(segments) < 2 or segments[0] not in module_names:
-        label = f'{module_name}.{label}'
-        if label in labels:
-            return label
+    qualified = f'{module_name}.{label}'
+    if qualified in labels:
+        return qualified
 
     raise ValueError(f'Claim label not found: {label}')

@@ -1,4 +1,4 @@
-APRProof: 8b72c409e7e4e821e957233b93c93d850e4c2f79fa4be4a12f32ab064030dce7
+APRProof: TEST-SPEC.8b72c409e7e4e821e957233b93c93d850e4c2f79fa4be4a12f32ab064030dce7
     status: ProofStatus.PASSED
     admitted: False
     nodes: 3

@@ -1,4 +1,4 @@
-APRProof: 5613a1b9b5007ded61e6ed96bbfbb4c8b73242e9c5b20a373d775682af419129
+APRProof: TEST-SPEC.5613a1b9b5007ded61e6ed96bbfbb4c8b73242e9c5b20a373d775682af419129
     status: ProofStatus.PASSED
     admitted: False
     nodes: 5
