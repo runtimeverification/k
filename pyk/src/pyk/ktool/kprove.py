@@ -367,32 +367,33 @@ class KProve(KPrint):
             type_inference_mode=type_inference_mode,
         )
 
+        module_names = {module.name for module in flat_module_list.modules}
         claims = {claim.label: claim for module in flat_module_list.modules for claim in module.claims}
 
-        claim_labels = list(claims) if claim_labels is None else list(claim_labels)
-        exclude_claim_labels = [] if exclude_claim_labels is None else list(exclude_claim_labels)
+        # Qualify each input label with the main module name
+        qualify = partial(self._qualify_claim_label, module_names, claims, flat_module_list.main_module)
 
-        final_claims: dict[str, KClaim] = {}
-        unfound_labels: list[str] = []
+        claim_labels = list(claims) if claim_labels is None else [qualify(label) for label in claim_labels]
+        exclude_claim_labels = (
+            set() if exclude_claim_labels is None else {qualify(label) for label in exclude_claim_labels}
+        )
+
+        res: list[KClaim] = []
+        done: set[str] = set()
+
         while claim_labels:
-            claim_label = claim_labels.pop(0)
-            if claim_label in final_claims or claim_label in exclude_claim_labels:
-                continue
-            if claim_label not in claims:
-                claim_label = f'{flat_module_list.main_module}.{claim_label}'
-            if claim_label not in claims:
-                unfound_labels.append(claim_label)
+            label = claim_labels.pop()
+
+            if label in done:
                 continue
 
-            claim = claims[claim_label]
+            claim = claims[label]
+            res.append(claim)
+            done.add(label)
             if include_dependencies:
-                claim_labels.extend(claim.dependencies)
-            final_claims[claim_label] = claim
+                claim_labels += claim.dependencies
 
-        if len(unfound_labels) > 0:
-            raise ValueError(f'Claim labels not found: {unfound_labels}')
-
-        return list(final_claims.values())
+        return res
 
     @contextmanager
     def _tmp_claim_definition(
