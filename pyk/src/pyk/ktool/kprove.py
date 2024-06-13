@@ -287,45 +287,7 @@ class KProve(KPrint):
             )
             json_data = json.loads(Path(ntf.name).read_text())
 
-        module_list = KFlatModuleList.from_dict(kast_term(json_data))
-        return self._qualify_depends(module_list)
-
-    @staticmethod
-    def _qualify_depends(module_list: KFlatModuleList) -> KFlatModuleList:
-        """Qualify each depends value with the module the claim belongs to.
-
-        Example:
-
-        module THIS-MODULE
-            claim ... [depends(foo,OTHER-MODULE.bar)]
-        endmodule
-
-        becomes
-
-        module THIS-MODULE
-            claim ... [depends(THIS-MODULE.foo,OTHER-MODULE.bar)]
-        endmodule
-        """
-
-        module_names = {module.name for module in module_list.modules}
-        labels = {claim.label for module in module_list.modules for claim in module.claims}
-
-        def qualify_claim_depends(module_name: str, claim: KClaim) -> KClaim:
-            depends = claim.dependencies
-            if not depends:
-                return claim
-
-            qualify = partial(_qualify_claim_label, module_names, labels, module_name)
-            qualified = [qualify(label) for label in depends]
-            return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
-
-        modules: list[KFlatModule] = []
-        for module in module_list.modules:
-            qualify_depends = partial(qualify_claim_depends, module.name)
-            module = module.map_sentences(qualify_depends, of_type=KClaim)
-            modules.append(module)
-
-        return module_list.let(modules=modules)
+        return KFlatModuleList.from_dict(kast_term(json_data))
 
     def get_claim_index(
         self,
@@ -555,11 +517,49 @@ class ClaimIndex:
 
     @staticmethod
     def from_module_list(module_list: KFlatModuleList) -> ClaimIndex:
+        module_list = ClaimIndex._qualify_depends(module_list)
         return ClaimIndex(
             main_module_name=module_list.main_module,
             module_names=(module.name for module in module_list.modules),
             claims={claim.label: claim for module in module_list.modules for claim in module.claims},
         )
+
+    @staticmethod
+    def _qualify_depends(module_list: KFlatModuleList) -> KFlatModuleList:
+        """Qualify each depends value with the module the claim belongs to.
+
+        Example:
+
+        module THIS-MODULE
+            claim ... [depends(foo,OTHER-MODULE.bar)]
+        endmodule
+
+        becomes
+
+        module THIS-MODULE
+            claim ... [depends(THIS-MODULE.foo,OTHER-MODULE.bar)]
+        endmodule
+        """
+
+        module_names = {module.name for module in module_list.modules}
+        labels = {claim.label for module in module_list.modules for claim in module.claims}
+
+        def qualify_claim_depends(module_name: str, claim: KClaim) -> KClaim:
+            depends = claim.dependencies
+            if not depends:
+                return claim
+
+            qualify = partial(_qualify_claim_label, module_names, labels, module_name)
+            qualified = [qualify(label) for label in depends]
+            return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
+
+        modules: list[KFlatModule] = []
+        for module in module_list.modules:
+            qualify_depends = partial(qualify_claim_depends, module.name)
+            module = module.map_sentences(qualify_depends, of_type=KClaim)
+            modules.append(module)
+
+        return module_list.let(modules=modules)
 
 
 def _qualify_claim_label(
