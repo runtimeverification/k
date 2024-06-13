@@ -10,11 +10,6 @@ inputs:
     required: true
     type: string
     default: kframework.deb
-  os:
-    description: 'OS to setup Docker for.'
-    required: true
-    type: string
-    default: ubuntu
   distro:
     description: 'Distribution to setup Docker for.'
     required: true
@@ -31,7 +26,6 @@ runs:
   - name: 'Set up Docker'
     shell: bash {0}
     env:
-      BASE_OS: ${{ inputs.os }}
       BASE_DISTRO: ${{ inputs.distro }}
       GH_TOKEN: ${{ github.token }}
     run: |
@@ -39,7 +33,7 @@ runs:
 
       gh release download                           \
         --repo runtimeverification/llvm-backend     \
-        --pattern "*${BASE_OS}_${BASE_DISTRO}.deb"  \
+        --pattern "*ubuntu_${BASE_DISTRO}.deb"  \
         --output llvm-backend.deb                   \
         v$(cat deps/llvm-backend_release)
 
@@ -52,7 +46,6 @@ runs:
       docker build . \
         --file ${DOCKERFILE}                                        \
         --tag ${TAG}                                                \
-        --build-arg BASE_OS=${BASE_OS}                              \
         --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
         --build-arg K_DEB_PATH=${K_DEB_PATH}                        \
         --build-arg LLVM_BACKEND_DEB_PATH=${LLVM_BACKEND_DEB_PATH}
