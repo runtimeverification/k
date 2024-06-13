@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+pkg="$1" ; shift
+
+cp "${pkg}" kframework-frontend.deb
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get upgrade --yes
+apt-get install --yes ./kframework-frontend.deb
