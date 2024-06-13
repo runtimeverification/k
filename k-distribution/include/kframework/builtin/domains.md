@@ -1386,15 +1386,15 @@ module INT-KORE [symbolic]
   imports private BOOL
   imports INT-COMMON
 
-  rule I1:Int ==K I2:Int => I1 ==Int I2 [simplification]
-  rule {K1 ==Int K2 #Equals true} => {K1 #Equals K2} [simplification]
-  rule {true #Equals K1 ==Int K2} => {K1 #Equals K2} [simplification]
-  rule {K1 ==Int K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
-  rule {false #Equals K1 ==Int K2} => #Not({K1 #Equals K2}) [simplification]
-  rule {K1 =/=Int K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
-  rule {true #Equals K1 =/=Int K2} => #Not({K1 #Equals K2}) [simplification]
-  rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
-  rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
+  rule [eq-k-to-eq-int]     : I1:Int ==K I2:Int            => I1 ==Int I2           [simplification]
+  rule [eq-int-true-left]   : {K1 ==Int K2 #Equals true}   => {K1 #Equals K2}       [simplification]
+  rule [eq-int-true-rigth]  : {true #Equals K1 ==Int K2}   => {K1 #Equals K2}       [simplification]
+  rule [eq-int-false-left]  : {K1 ==Int K2 #Equals false}  => #Not({K1 #Equals K2}) [simplification]
+  rule [eq-int-false-rigth] : {false #Equals K1 ==Int K2}  => #Not({K1 #Equals K2}) [simplification]
+  rule [neq-int-true-left]  : {K1 =/=Int K2 #Equals true}  => #Not({K1 #Equals K2}) [simplification]
+  rule [neq-int-true-right] : {true #Equals K1 =/=Int K2}  => #Not({K1 #Equals K2}) [simplification]
+  rule [neq-int-false-left] : {K1 =/=Int K2 #Equals false} => {K1 #Equals K2}       [simplification]
+  rule [neq-int-false-right]: {false #Equals K1 =/=Int K2} => {K1 #Equals K2}       [simplification]
 
   // Arithmetic Normalization
   rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
