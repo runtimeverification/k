@@ -9,7 +9,7 @@ Major Changes
 -------------
 
 - The Pyk distribution package name has been renamed to `kframework` in
-  preparation for publishing the library to PyPi. The _module name_ remains
+  preparation for publishing the library to PyPI. The _import package_ remains
   `pyk`. Consumers of the library will need to update their `pyproject.toml`
   files to reflect the new name, but should not need to update any code.
 
