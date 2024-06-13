@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from collections.abc import Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
@@ -27,7 +28,7 @@ from . import TypeInferenceMode
 from .kprint import KPrint
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Container, Iterable, Iterator, Mapping
+    from collections.abc import Callable, Container, Iterable, Iterator
     from subprocess import CompletedProcess
     from typing import ContextManager, Final
 
@@ -479,7 +480,7 @@ class ProveRpc:
 
 
 @dataclass(frozen=True)
-class ClaimIndex:
+class ClaimIndex(Mapping[str, KClaim]):
     main_module_name: str
     claims: FrozenDict[str, KClaim]
 
@@ -520,6 +521,7 @@ class ClaimIndex:
             add_label = partial(label_claim, module.name)
             module = module.map_sentences(add_label, of_type=KClaim)
             modules.append(module)
+
         return module_list.let(modules=modules)
 
     @staticmethod
@@ -576,6 +578,20 @@ class ClaimIndex:
             return qualified
 
         raise ValueError(f'Claim label not found: {label}')
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.claims)
+
+    def __len__(self) -> int:
+        return len(self.claims)
+
+    def __getitem__(self, label: str) -> KClaim:
+        if label in self.claims:
+            return self.claims[label]
+        try:
+            return self.claims[f'{self.main_module_name}.{label}']
+        except KeyError as err:
+            raise KeyError(f'Claim not found: {label}') from err
 
     def as_list(
         self,
