@@ -2,6 +2,46 @@
 copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
+K Framework 7.1.0
+=================
+
+Major Changes
+-------------
+
+- The Pyk distribution package name has been renamed to `kframework` in
+  preparation for publishing the library to PyPi. The _module name_ remains
+  `pyk`. Consumers of the library will need to update their `pyproject.toml`
+  files to reflect the new name, but should not need to update any code.
+
+- Updates to the syntax of regular expression terminals (`r"..."`) in K; some
+  previously accepted syntax is no longer valid. This allows us to improve error
+  messages, and will enable more checks in the future.
+
+- K no longer supports macOS running on Intel machines.
+
+Minor Changes
+-------------
+
+- Improved logging when executing symbolically using the Haskell backend; these
+  logs make it easier to track down performance issues in K code.
+
+- SimpleSub-based principled type inference is now enabled by default.
+
+- Pyk now implements a more correct parenthesising unparser; this reduces
+  downstream reliance on symbol table patching when unparsing.
+
+- Eliminated internal sources of flakiness due to undefined iteration order;
+  this makes it easier to write stable tests using K.
+
+- Improvements to K's Nix infrastructure that reduce the size of a K Nix
+  closure, making `kup install` faster.
+
+- CI refactorings to improve K core developer experience.
+
+- Updates to dependency versions.
+
+- General bug fixes, UI and performance improvements.
+
 K Framework 7.0.0
 =================
 
