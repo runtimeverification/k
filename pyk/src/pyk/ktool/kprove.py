@@ -502,7 +502,7 @@ class ClaimIndex:
 
     @staticmethod
     def _add_missing_claim_labels(module_list: KFlatModuleList) -> KFlatModuleList:
-        """Put a label attribute to all claims without one.
+        """Put a label attribute on all claims without one.
 
         This only affects claims that are not labeled in the source file.
         The label is the UNIQUE_ID of the sentence, qualified with the host module's name.
@@ -546,7 +546,7 @@ class ClaimIndex:
             if not depends:
                 return claim
 
-            qualify = partial(_qualify_claim_label, labels, module_name)
+            qualify = partial(ClaimIndex._qualify_claim_label, labels, module_name)
             qualified = [qualify(label) for label in depends]
             return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
 
@@ -558,6 +558,25 @@ class ClaimIndex:
 
         return module_list.let(modules=modules)
 
+    @staticmethod
+    def _qualify_claim_label(
+        labels: Container[str],
+        module_name: str,
+        label: str,
+    ) -> str:
+        """Qualify a `label` with `module_name` if not already qualified.
+
+        Assumes `labels` are qualified, so `label in labels` iff `label` is valid and qualified.
+        """
+        if label in labels:
+            return label
+
+        qualified = f'{module_name}.{label}'
+        if qualified in labels:
+            return qualified
+
+        raise ValueError(f'Claim label not found: {label}')
+
     def as_list(
         self,
         *,
@@ -566,12 +585,13 @@ class ClaimIndex:
         with_depends: bool = True,
     ) -> list[KClaim]:
         # Qualify each input label with the main module name
-        qualify = partial(_qualify_claim_label, self.claims, self.main_module_name)
-
-        res: list[KClaim] = []
+        qualify = partial(self._qualify_claim_label, self.claims, self.main_module_name)
 
         labels = list(self.claims) if include is None else [qualify(label) for label in include]
         done = set() if exclude is None else {qualify(label) for label in exclude}
+
+        res: list[KClaim] = []
+
         while labels:
             label = labels.pop()
 
@@ -585,22 +605,3 @@ class ClaimIndex:
                 labels += claim.dependencies
 
         return res
-
-
-def _qualify_claim_label(
-    labels: Container[str],
-    module_name: str,
-    label: str,
-) -> str:
-    """Qualify a `label` with `module_name` if not a valid label and not already qualified.
-
-    Assumes `labels` are quaified, so `label in labels` iff `label` qualified and valid.
-    """
-    if label in labels:
-        return label
-
-    qualified = f'{module_name}.{label}'
-    if qualified in labels:
-        return qualified
-
-    raise ValueError(f'Claim label not found: {label}')
