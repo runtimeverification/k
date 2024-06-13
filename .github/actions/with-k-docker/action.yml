@@ -22,14 +22,14 @@ inputs:
     default: true
 runs:
   using: 'composite'
+  env:
+    BASE_DISTRO: ${{ inputs.distro }}
+    GH_TOKEN: ${{ github.token }}
+    CONTAINER_NAME: ${{ inputs.container-name }}
+    TAG: runtimeverificationinc/${{ inputs.container-name }}
   steps:
   - name: 'Set up Docker'
     shell: bash {0}
-    env:
-      BASE_DISTRO: ${{ inputs.distro }}
-      GH_TOKEN: ${{ github.token }}
-      CONTAINER_NAME: ${{ inputs.container-name }}
-      TAG: runtimeverificationinc/${{ inputs.container-name }}
     run: |
       set -euxo pipefail
 
