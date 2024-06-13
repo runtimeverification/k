@@ -311,19 +311,20 @@ def llvm_interpret(definition_dir: str | Path, pattern: Pattern, *, depth: int |
     :return: A pattern resulting from the rewrites
     :raises RuntimeError: If the interpreter fails
     """
+    try:
+        res = llvm_interpret_raw(definition_dir, pattern.text, depth)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Interpreter failed with status {err.returncode}: {err.stderr}') from err
 
+    return KoreParser(res.stdout).pattern()
+
+
+def llvm_interpret_raw(definition_dir: str | Path, kore: str, depth: int | None = None) -> CompletedProcess:
     definition_dir = Path(definition_dir)
-    check_dir_path(definition_dir)
-
     interpreter_file = definition_dir / 'interpreter'
     check_file_path(interpreter_file)
 
     depth = depth if depth is not None else -1
     args = [str(interpreter_file), '/dev/stdin', str(depth), '/dev/stdout']
 
-    try:
-        res = run_process(args, input=pattern.text, pipe_stderr=True)
-    except CalledProcessError as err:
-        raise RuntimeError(f'Interpreter failed with status {err.returncode}: {err.stderr}') from err
-
-    return KoreParser(res.stdout).pattern()
+    return run_process(args, input=kore, pipe_stderr=True)
