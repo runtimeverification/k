@@ -50,7 +50,7 @@ jobs:
           cd haskell-backend/src/main/native/haskell-backend
           git checkout ${hs_backend_version}
           cd -
-          sed -i 's!    haskell-backend.url = "github:runtimeverification/haskell-backend/[0-9a-f]*";!    haskell-backend.url = "github:runtimeverification/haskell-backend/'${hs_backend_version}'";!' flake.nix
+          sed -i 's!    haskell-backend.url = "github:runtimeverification/haskell-backend/.*";!    haskell-backend.url = "github:runtimeverification/haskell-backend/'${hs_backend_version}'";!' flake.nix
           if git add flake.nix haskell-backend/src/main/native/haskell-backend && git commit -m "flake.nix, haskell-backend/src/main/native/haskell-backend: update to version ${hs_backend_version}"; then
             changed=true
           fi
