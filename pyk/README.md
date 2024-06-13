@@ -5,21 +5,23 @@
 
 ## Installation
 
-Prerequsites: `python >= 3.10`, `pip >= 20.0.2`, `poetry >= 1.3.2`.
-
 ```bash
-make build
-pip install dist/*.whl
+pip install kframework
 ```
 
 
 ## For Developers
 
-Use `make` to run common tasks (see the [Makefile](Makefile) for a complete list of available targets).
+Prerequsites: `python >= 3.10`, `poetry >= 1.3.2`.
+
+Use `make` to run common tasks
+(see the [Makefile](https://github.com/runtimeverification/k/blob/master/pyk/Makefile)
+for a complete list of available targets).
 
 * `make build`: Build wheel
 * `make check`: Check code style
 * `make format`: Format code
 * `make test-unit`: Run unit tests
+* `make test-integration`: Run integration tests
 
 For interactive use, spawn a shell with `poetry shell` (after `poetry install`), then run an interpreter.
