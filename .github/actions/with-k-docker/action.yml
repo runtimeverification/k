@@ -28,8 +28,6 @@ runs:
     env:
       BASE_DISTRO: ${{ inputs.distro }}
       GH_TOKEN: ${{ github.token }}
-      CONTAINER_NAME: ${{ inputs.container-name }}
-      TAG: runtimeverificationinc/${{ inputs.container-name }}
     run: |
       set -euxo pipefail
 
@@ -39,6 +37,8 @@ runs:
         --output llvm-backend.deb                   \
         v$(cat deps/llvm-backend_release)
 
+      CONTAINER_NAME=${{ inputs.container-name }}
+      TAG=runtimeverificationinc/${CONTAINER_NAME}
       DOCKERFILE=${{ github.action_path }}/Dockerfile
       K_DEB_PATH=${{ inputs.k-deb-path }}
       LLVM_BACKEND_DEB_PATH=llvm-backend.deb
@@ -55,6 +55,9 @@ runs:
     if: ${{ inputs.run-container == 'true' }}
     run: |
       set -euxo pipefail
+
+      CONTAINER_NAME=${{ inputs.container-name }}
+      TAG=runtimeverificationinc/${CONTAINER_NAME}
 
       docker run                 \
         --name ${CONTAINER_NAME} \
