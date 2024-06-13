@@ -315,7 +315,7 @@ class KProve(KPrint):
             if not depends:
                 return claim
 
-            qualify = partial(KProve._qualify_claim_label, module_names, labels, module_name)
+            qualify = partial(_qualify_claim_label, module_names, labels, module_name)
             qualified = [qualify(label) for label in depends]
             return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
 
@@ -326,28 +326,6 @@ class KProve(KPrint):
             modules.append(module)
 
         return module_list.let(modules=modules)
-
-    @staticmethod
-    def _qualify_claim_label(
-        module_names: Container[str],
-        labels: Container[str],
-        module_name: str,
-        label: str,
-    ) -> str:
-        """Qualify a `label` with `module_name` if not a valid label and not already qualified.
-
-        An unqualified label can be valid if it is a UNIQUE_ID.
-        """
-        if label in labels:
-            return label
-
-        segments = label.split('.')
-        if len(segments) < 2 or segments[0] not in module_names:
-            label = f'{module_name}.{label}'
-            if label in labels:
-                return label
-
-        raise ValueError(f'Claim label not found: {label}')
 
     def get_claim_index(
         self,
@@ -387,7 +365,7 @@ class KProve(KPrint):
 
         # Qualify each input label with the main module name
         qualify = partial(
-            self._qualify_claim_label, claim_index.module_names, claim_index.claims, claim_index.main_module_name
+            _qualify_claim_label, claim_index.module_names, claim_index.claims, claim_index.main_module_name
         )
 
         claim_labels = list(claim_index.claims) if claim_labels is None else [qualify(label) for label in claim_labels]
@@ -582,3 +560,25 @@ class ClaimIndex:
             module_names=(module.name for module in module_list.modules),
             claims={claim.label: claim for module in module_list.modules for claim in module.claims},
         )
+
+
+def _qualify_claim_label(
+    module_names: Container[str],
+    labels: Container[str],
+    module_name: str,
+    label: str,
+) -> str:
+    """Qualify a `label` with `module_name` if not a valid label and not already qualified.
+
+    An unqualified label can be valid if it is a UNIQUE_ID.
+    """
+    if label in labels:
+        return label
+
+    segments = label.split('.')
+    if len(segments) < 2 or segments[0] not in module_names:
+        label = f'{module_name}.{label}'
+        if label in labels:
+            return label
+
+    raise ValueError(f'Claim label not found: {label}')
