@@ -3,19 +3,20 @@
 set -euxo pipefail
 
 base_distro="$1" ; shift
+subdir="$1" ; shift
 pkg_name="$1" ; shift
 
 mkdir debian
 
-mv package/debian/changelog debian/changelog
-mv package/debian/copyright debian/copyright
-mv package/debian/kframework-docs.docs debian/kframework-docs.docs
-mv package/debian/source debian/source
+mv package/debian/${subdir}/changelog               debian/changelog
+mv package/debian/${subdir}/copyright               debian/copyright
+mv package/debian/${subdir}/${subdir}-docs.docs     debian/${subdir}-docs.docs
+mv package/debian/${subdir}/source                  debian/source
 
-mv package/debian/compat.${base_distro} debian/compat
-mv package/debian/control.${base_distro} debian/control
-mv package/debian/rules.${base_distro} debian/rules
+mv package/debian/${subdir}/compat.${base_distro}   debian/compat
+mv package/debian/${subdir}/control.${base_distro}  debian/control
+mv package/debian/${subdir}/rules.${base_distro}    debian/rules
 
 dpkg-buildpackage
 
-mv ../kframework_$(cat package/version)_amd64.deb ${pkg_name}
+mv ../${subdir}_$(cat package/version)_amd64.deb ${pkg_name}

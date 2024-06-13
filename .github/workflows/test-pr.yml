@@ -101,7 +101,7 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 15
-          build-package: package/debian/build-package jammy
+          build-package: package/debian/build-package jammy kframework
           test-package: package/debian/test-package
       - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
         if: failure()
@@ -116,6 +116,37 @@ jobs:
         with:
           name: kframework.deb
           path: kframework.deb
+          if-no-files-found: error
+          retention-days: 1
+
+
+  test-frontend-package-ubuntu-jammy:
+    name: 'K: Ubuntu Jammy Frontend Package'
+    runs-on: [self-hosted, linux, normal]
+    needs: code-quality
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
+        with:
+          os: ubuntu
+          distro: jammy
+          llvm: 15
+          build-package: package/debian/build-package jammy kframework-frontend
+          test-package: package/debian/test-frontend-package
+      - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kore-exec.tar.gz
+          path: |
+            **/kore-exec.tar.gz
+      - name: 'On Success, Upload the package built to the Summary Page'
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kframework-frontend.deb
+          path: kframework-frontend.deb
           if-no-files-found: error
           retention-days: 1
 
@@ -206,7 +237,7 @@ jobs:
 
   pyk-build-docs:
     name: 'Pyk: Documentation'
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     runs-on: [self-hosted, linux, normal]
     steps:
       - name: 'Check out code'
@@ -214,12 +245,12 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-docs-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
       - name: 'Build documentation'
         run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
       - name: 'Tear down Docker'
@@ -228,7 +259,7 @@ jobs:
 
 
   pyk-profile:
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Profiling'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 10
@@ -238,12 +269,13 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-profile-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
       - name: 'Run profiling'
         run: |
           docker exec -u user k-pyk-profile-${{ github.sha }} make profile PROF_ARGS=-n4
@@ -255,7 +287,7 @@ jobs:
 
 
   pyk-integration-tests:
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Integration Tests'
     runs-on: [self-hosted, linux, normal]
     timeout-minutes: 30
@@ -265,12 +297,13 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-integration-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
       - name: 'Run integration tests'
         run: |
           docker exec -u user k-pyk-integration-${{ github.sha }} make test-integration TEST_ARGS='-n4 --maxfail=0 --timeout=300'
@@ -281,7 +314,7 @@ jobs:
 
 
   pyk-regression-tests:
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Regression Tests'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -291,12 +324,13 @@ jobs:
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
       - name: 'Set up Docker'
         uses: ./.github/actions/with-k-docker
         with:
           container-name: k-pyk-regression-${{ github.sha }}
-          k-deb-path: kframework.deb
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
       - name: 'Run K regression tests'
         run: |
           docker exec -u user k-pyk-regression-${{ github.sha }} make test-regression-new -j4
@@ -309,17 +343,22 @@ jobs:
   performance-tests:
     name: 'K: Profiling'
     runs-on: [self-hosted, linux, performance]
-    needs: test-package-ubuntu-jammy
+    needs: test-frontend-package-ubuntu-jammy
     steps:
       - uses: actions/checkout@v4
       - name: 'Download K package from the Summary Page'
         uses: actions/download-artifact@v4
         with:
-          name: kframework.deb
+          name: kframework-frontend.deb
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-k-docker
+        with:
+          container-name: k-profiling-tests-${{ github.sha }}
+          k-deb-path: kframework-frontend.deb
+          distro: jammy
+          run-container: false
       - name: 'Set up Docker Test Image'
         env:
-          BASE_OS: ubuntu
-          BASE_DISTRO: jammy
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
           BENCHER_PROJECT: k-framework
@@ -328,7 +367,7 @@ jobs:
           set -euxo pipefail
           workspace=$(pwd)
           docker run --name k-profiling-tests-${GITHUB_SHA}                    \
-            --rm -it --detach                                                  \
+            --rm -it --detach --user root                                      \
             -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
             -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
             -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
@@ -343,7 +382,7 @@ jobs:
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
             -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
-            ${BASE_OS}:${BASE_DISTRO}
+            runtimeverificationinc/k-profiling-tests-${GITHUB_SHA}
       - name: 'Install K from Package'
         run: |
           set -euxo pipefail

@@ -99,7 +99,7 @@ jobs:
           distro: jammy
           llvm: 15
           pkg-name: kframework_amd64_ubuntu_jammy.deb
-          build-package: package/debian/build-package jammy
+          build-package: package/debian/build-package jammy kframework
           test-package: package/debian/test-package
       - name: 'Upload the package built to the Summary Page'
         uses: actions/upload-artifact@v4
