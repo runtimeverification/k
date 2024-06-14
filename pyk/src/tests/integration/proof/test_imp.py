@@ -508,7 +508,7 @@ APR_PROVE_TEST_DATA: Iterable[
         'sum-loop',
         None,
         None,
-        [],  # If we do not include `IMP.while` in this list, we get 4 branches instead of 2
+        [],
         True,
         ProofStatus.PASSED,
         2,
