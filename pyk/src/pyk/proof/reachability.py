@@ -388,7 +388,11 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         )
 
     def as_rules(self, priority: int = 20, direct_rule: bool = False) -> list[KRule]:
-        if (self.passed and direct_rule) or (self.admitted and not self.kcfg.predecessors(self.target)):
+        if (
+            self.circularity
+            or (self.passed and direct_rule)
+            or (self.admitted and not self.kcfg.predecessors(self.target))
+        ):
             return [self.as_rule(priority=priority)]
         _rules = []
         for _edge in self.kcfg.edges():
