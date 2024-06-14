@@ -6,9 +6,17 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
+from hypothesis import Phase, Verbosity, given, settings
+from hypothesis.strategies import builds, fixed_dictionaries, integers
+
 from ..cli.utils import check_dir_path, check_file_path
+from ..kast.inner import KSort
+from ..konvert import _kast_to_kore
 from ..kore.parser import KoreParser
+from ..kore.syntax import EVar
 from ..kore.tools import PrintOutput, kore_print
+from ..prelude.k import inj
+from ..prelude.kint import intToken
 from ..utils import run_process
 from .kprint import KPrint
 
@@ -17,6 +25,8 @@ if TYPE_CHECKING:
     from logging import Logger
     from subprocess import CompletedProcess
     from typing import Final
+
+    from hypothesis.strategies import SearchStrategy
 
     from ..kast.inner import KInner
     from ..kast.outer import KFlatModule
@@ -185,6 +195,61 @@ class KRun(KPrint):
         kore = KoreParser(result.stdout).pattern()
         kast = self.kore_to_kast(kore)
         return (result.returncode, kast)
+
+
+def kintegers(
+    min_value: int | None = None, max_value: int | None = None, with_inj: KSort | None = None
+) -> SearchStrategy[Pattern]:
+    def int_dv(value: int) -> Pattern:
+        res: KInner = intToken(value)
+        if with_inj is not None:
+            res = inj(KSort('Int'), with_inj, res)
+        return _kast_to_kore(res)
+
+    return builds(int_dv, integers(min_value=min_value, max_value=max_value))
+
+
+def fuzz(
+    definition_dir: str | Path,
+    template: Pattern,
+    subst_strategy: dict[EVar, SearchStrategy[Pattern]],
+    check_func: Callable[[Pattern], None] | None = None,
+    check_exit_code: bool = False,
+) -> None:
+    if not ((check_func is not None) ^ check_exit_code):
+        raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
+
+    def test(subst_case: Mapping[EVar, Pattern]) -> None:
+        def sub(p: Pattern) -> Pattern:
+            if p in subst_case.keys():
+                assert isinstance(p, EVar)
+                return subst_case[p]
+            return p
+
+        test_pattern = template.top_down(sub)
+        res = llvm_interpret_raw(definition_dir, test_pattern.text)
+
+        if check_exit_code:
+            if res.returncode != 0:
+                raise RuntimeError('Test failed')
+        else:
+            assert check_func is not None
+            res_pattern = KoreParser(res.stdout).pattern()
+            try:
+                check_func(res_pattern)
+            except Exception as e:
+                raise RuntimeError('Test failed') from e
+
+    strat: SearchStrategy = fixed_dictionaries(subst_strategy)
+
+    given(strat)(
+        settings(
+            deadline=50000,
+            max_examples=50,
+            verbosity=Verbosity.verbose,
+            phases=(Phase.generate, Phase.target, Phase.shrink),
+        )(test)
+    )()
 
 
 def _krun(
