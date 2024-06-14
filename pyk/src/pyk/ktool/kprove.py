@@ -592,7 +592,7 @@ class ClaimIndex(Mapping[str, KClaim]):
         res: list[KClaim] = []
 
         while labels:
-            label = labels.pop()
+            label = labels.pop(0)
 
             if label in done:
                 continue
