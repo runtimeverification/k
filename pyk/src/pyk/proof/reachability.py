@@ -805,7 +805,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
         execute_depth = self.execute_depth
-        if step.circularity and not step.nonzero_depth:
+        if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
             execute_depth = 1
 
         extend_result = self.kcfg_explore.extend_cterm(
