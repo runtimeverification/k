@@ -481,24 +481,24 @@ class ProveRpc:
 
 @dataclass(frozen=True)
 class ClaimIndex(Mapping[str, KClaim]):
-    main_module_name: str
     claims: FrozenDict[str, KClaim]
+    main_module_name: str | None
 
     def __init__(
         self,
-        main_module_name: str,
         claims: Mapping[str, KClaim],
+        main_module_name: str | None = None,
     ):
         self._validate(claims)
-        object.__setattr__(self, 'main_module_name', main_module_name)
         object.__setattr__(self, 'claims', FrozenDict(claims))
+        object.__setattr__(self, 'main_module_name', main_module_name)
 
     @staticmethod
     def from_module_list(module_list: KFlatModuleList) -> ClaimIndex:
-        module_list = ClaimIndex._qualify_depends(module_list)
+        module_list = ClaimIndex._resolve_depends(module_list)
         return ClaimIndex(
-            main_module_name=module_list.main_module,
             claims={claim.label: claim for module in module_list.modules for claim in module.claims},
+            main_module_name=module_list.main_module,
         )
 
     @staticmethod
@@ -512,8 +512,8 @@ class ClaimIndex(Mapping[str, KClaim]):
                     raise ValueError(f'Invalid dependency label: {depend}')
 
     @staticmethod
-    def _qualify_depends(module_list: KFlatModuleList) -> KFlatModuleList:
-        """Qualify each depends value with the module the claim belongs to.
+    def _resolve_depends(module_list: KFlatModuleList) -> KFlatModuleList:
+        """Resolve each depends value relative to the module the claim belongs to.
 
         Example:
 
@@ -530,36 +530,36 @@ class ClaimIndex(Mapping[str, KClaim]):
 
         labels = {claim.label for module in module_list.modules for claim in module.claims}
 
-        def qualify_claim_depends(module_name: str, claim: KClaim) -> KClaim:
+        def resolve_claim_depends(module_name: str, claim: KClaim) -> KClaim:
             depends = claim.dependencies
             if not depends:
                 return claim
 
-            qualify = partial(ClaimIndex._qualify_claim_label, labels, module_name)
-            qualified = [qualify(label) for label in depends]
-            return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(qualified))]))
+            resolve = partial(ClaimIndex._resolve_claim_label, labels, module_name)
+            resolved = [resolve(label) for label in depends]
+            return claim.let(att=claim.att.update([Atts.DEPENDS(','.join(resolved))]))
 
         modules: list[KFlatModule] = []
         for module in module_list.modules:
-            qualify_depends = partial(qualify_claim_depends, module.name)
-            module = module.map_sentences(qualify_depends, of_type=KClaim)
+            resolve_depends = partial(resolve_claim_depends, module.name)
+            module = module.map_sentences(resolve_depends, of_type=KClaim)
             modules.append(module)
 
         return module_list.let(modules=modules)
 
     @staticmethod
-    def _qualify_claim_label(
-        labels: Container[str],
-        module_name: str,
-        label: str,
-    ) -> str:
-        """Qualify a `label` with `module_name` if not already a valid label."""
+    def _resolve_claim_label(labels: Container[str], module_name: str | None, label: str) -> str:
+        """Resolve `label` to a valid label in `labels`, or raise.
+
+        If a `label` is not found and `module_name` is set, the label is tried after qualifying.
+        """
         if label in labels:
             return label
 
-        qualified = f'{module_name}.{label}'
-        if qualified in labels:
-            return qualified
+        if module_name is not None:
+            qualified = f'{module_name}.{label}'
+            if qualified in labels:
+                return qualified
 
         raise ValueError(f'Claim label not found: {label}')
 
@@ -577,11 +577,7 @@ class ClaimIndex(Mapping[str, KClaim]):
         return self.claims[label]
 
     def resolve(self, label: str) -> str:
-        """Resolve `label` to a valid label in the index, or raise.
-
-        Unqualified labels are qualified with the main module name.
-        """
-        return self._qualify_claim_label(self.claims, self.main_module_name, label)
+        return self._resolve_claim_label(self.claims, self.main_module_name, label)
 
     def as_list(
         self,
