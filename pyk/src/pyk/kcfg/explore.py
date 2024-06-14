@@ -67,6 +67,8 @@ class KCFGExplore:
                     sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
                     _rule_lines.append(f'{sent.label}:{sent.source}')
                 else:
+                    if node_log.result.rule_id == 'UNKNOWN':
+                        _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
                     _rule_lines.append(f'{node_log.result.rule_id}:UNKNOWN')
         return _rule_lines
 
