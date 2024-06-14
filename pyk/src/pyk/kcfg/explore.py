@@ -175,7 +175,6 @@ class KCFGExplore:
         new_nodes = []
         curr_node_id = edge.source.id
         while new_depth < orig_depth:
-            _LOGGER.info(f'Taking {section_depth} steps from node {self.id}: {shorten_hashes(curr_node_id)}')
             curr_node_id = self.step(cfg, curr_node_id, logs, depth=section_depth)
             new_nodes.append(curr_node_id)
             new_depth += section_depth
