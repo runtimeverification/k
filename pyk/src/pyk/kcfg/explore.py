@@ -155,7 +155,7 @@ class KCFGExplore:
         logs[new_node.id] = exec_res.logs
         out_edges = cfg.edges(source_id=node.id)
         if len(out_edges) == 0:
-            cfg.create_edge(node.id, new_node.id, depth=depth)
+            cfg.create_edge(node.id, new_node.id, depth=depth, rules=self._extract_rule_labels(exec_res.logs))
         else:
             edge = out_edges[0]
             if depth > edge.depth:
