@@ -70,7 +70,8 @@ class APRProofStep:
     module_name: str
     shortest_path_to_node: tuple[KCFG.Node, ...]
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
-    circularity_active: bool
+    circularity: bool
+    nonzero_depth: bool
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
@@ -177,7 +178,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
-                    circularity_active=self.circularity and nonzero_depth(self, node),
+                    circularity=self.circularity,
+                    nonzero_depth=nonzero_depth(self, node),
                 )
             )
         return steps
@@ -796,13 +798,19 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if is_terminal:
             return terminal_result
 
+        # Ensure that we cut at applications of circularity, so that subsumption into target state will be checked
         cut_rules = list(self.cut_point_rules)
-        if step.circularity_active and self.circularity_rule_id is not None:
+        if step.circularity and step.nonzero_depth and self.circularity_rule_id is not None:
             cut_rules.append(self.circularity_rule_id)
+
+        # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
+        execute_depth = self.execute_depth
+        if step.circularity and not step.nonzero_depth:
+            execute_depth = 1
 
         extend_result = self.kcfg_explore.extend_cterm(
             step.node.cterm,
-            execute_depth=self.execute_depth,
+            execute_depth=execute_depth,
             cut_point_rules=cut_rules,
             terminal_rules=self.terminal_rules,
             module_name=step.module_name,
