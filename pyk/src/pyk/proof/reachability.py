@@ -70,6 +70,7 @@ class APRProofStep:
     module_name: str
     shortest_path_to_node: tuple[KCFG.Node, ...]
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
+    circularity_active: bool
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
@@ -176,6 +177,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
+                    circularity_active=self.circularity and nonzero_depth(self, node),
                 )
             )
         return steps
@@ -684,6 +686,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     fast_check_subsumption: bool
     direct_subproof_rules: bool
     kcfg_explore: KCFGExplore
+    circularity_rule_id: str | None
 
     def __init__(
         self,
@@ -706,6 +709,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
+        self.circularity_rule_id = None
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -728,6 +732,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             for rule in subproof.as_rules(priority=20, direct_rule=self.direct_subproof_rules)
         ]
         circularity_rule = proof.as_rule(priority=20)
+        self.circularity_rule_id = circularity_rule.label
 
         _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
         _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
@@ -791,10 +796,14 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if is_terminal:
             return terminal_result
 
+        cut_rules = list(self.cut_point_rules)
+        if step.circularity_active and self.circularity_rule_id is not None:
+            cut_rules.append(self.circularity_rule_id)
+
         extend_result = self.kcfg_explore.extend_cterm(
             step.node.cterm,
             execute_depth=self.execute_depth,
-            cut_point_rules=self.cut_point_rules,
+            cut_point_rules=cut_rules,
             terminal_rules=self.terminal_rules,
             module_name=step.module_name,
             node_id=step.node.id,
