@@ -8,7 +8,8 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
-from functools import partial
+from functools import cached_property, partial
+from graphlib import TopologicalSorter
 from itertools import chain
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -23,7 +24,7 @@ from ..kast.outer import KApply, KClaim, KDefinition, KFlatModule, KFlatModuleLi
 from ..kore.rpc import KoreExecLogFormat
 from ..prelude.ml import is_top
 from ..proof import APRProof, APRProver, EqualityProof, ImpliesProver
-from ..utils import FrozenDict, gen_file_timestamp, run_process
+from ..utils import FrozenDict, gen_file_timestamp, run_process, unique
 from . import TypeInferenceMode
 from .kprint import KPrint
 
@@ -576,8 +577,16 @@ class ClaimIndex(Mapping[str, KClaim]):
             raise KeyError(f'Claim not found: {label}') from None
         return self.claims[label]
 
+    @cached_property
+    def topological(self) -> tuple[str, ...]:
+        graph = {label: claim.dependencies for label, claim in self.claims.items()}
+        return tuple(TopologicalSorter(graph).static_order())
+
     def resolve(self, label: str) -> str:
         return self._resolve_claim_label(self.claims, self.main_module_name, label)
+
+    def resolve_all(self, labels: Iterable[str]) -> list[str]:
+        return [self.resolve(label) for label in unique(labels)]
 
     def as_list(
         self,
@@ -586,8 +595,8 @@ class ClaimIndex(Mapping[str, KClaim]):
         exclude: Iterable[str] | None = None,
         with_depends: bool = True,
     ) -> list[KClaim]:
-        labels = list(self.claims) if include is None else [self.resolve(label) for label in include]
-        done = set() if exclude is None else {self.resolve(label) for label in exclude}
+        labels = self.resolve_all(include) if include is not None else list(self.claims)
+        done = set(self.resolve_all(exclude)) if exclude is not None else set()
 
         res: list[KClaim] = []
 
