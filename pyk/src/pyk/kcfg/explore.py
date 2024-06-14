@@ -154,8 +154,9 @@ class KCFGExplore:
         _LOGGER.info(f'Found new node at depth {depth} {self.id}: {shorten_hashes((node.id, new_node.id))}')
         logs[new_node.id] = exec_res.logs
         out_edges = cfg.edges(source_id=node.id)
+        rule_logs = self._extract_rule_labels(exec_res.logs)
         if len(out_edges) == 0:
-            cfg.create_edge(node.id, new_node.id, depth=depth, rules=self._extract_rule_labels(exec_res.logs))
+            cfg.create_edge(node.id, new_node.id, depth=depth, rules=rule_logs)
         else:
             edge = out_edges[0]
             if depth > edge.depth:
@@ -163,8 +164,8 @@ class KCFGExplore:
                     f'Step depth {depth} greater than original edge depth {edge.depth} {self.id}: {shorten_hashes((edge.source.id, edge.target.id))}'
                 )
             cfg.remove_edge(edge.source.id, edge.target.id)
-            cfg.create_edge(edge.source.id, new_node.id, depth=depth)
-            cfg.create_edge(new_node.id, edge.target.id, depth=(edge.depth - depth))
+            cfg.create_edge(edge.source.id, new_node.id, depth=depth, rules=rule_logs)
+            cfg.create_edge(new_node.id, edge.target.id, depth=(edge.depth - depth), rules=edge.rules[depth:])
         return new_node.id
 
     def section_edge(
