@@ -327,11 +327,13 @@ class KProve(KPrint):
             type_inference_mode=type_inference_mode,
         )
 
-        return claim_index.as_list(
+        labels = claim_index.labels(
             include=claim_labels,
             exclude=exclude_claim_labels,
             with_depends=include_dependencies,
         )
+
+        return [claim_index[label] for label in labels]
 
     @contextmanager
     def _tmp_claim_definition(
@@ -588,28 +590,28 @@ class ClaimIndex(Mapping[str, KClaim]):
     def resolve_all(self, labels: Iterable[str]) -> list[str]:
         return [self.resolve(label) for label in unique(labels)]
 
-    def as_list(
+    def labels(
         self,
         *,
         include: Iterable[str] | None = None,
         exclude: Iterable[str] | None = None,
         with_depends: bool = True,
-    ) -> list[KClaim]:
-        labels = self.resolve_all(include) if include is not None else list(self.claims)
+    ) -> list[str]:
+        res: list[str] = []
+
+        pending = self.resolve_all(include) if include is not None else list(self.claims)
         done = set(self.resolve_all(exclude)) if exclude is not None else set()
 
-        res: list[KClaim] = []
-
-        while labels:
-            label = labels.pop(0)
+        while pending:
+            label = pending.pop(0)  # BFS
 
             if label in done:
                 continue
 
-            claim = self.claims[label]
-            res.append(claim)
+            res.append(label)
             done.add(label)
+
             if with_depends:
-                labels += claim.dependencies
+                pending += self.claims[label].dependencies
 
         return res
