@@ -1,4 +1,4 @@
-APRProof: EXPLICIT-SPEC.f03f6cb9c96e230b21483ff0bff582e1812fd5e2512fd5c16458bc75bfdd5bbc
+APRProof: f03f6cb9c96e230b21483ff0bff582e1812fd5e2512fd5c16458bc75bfdd5bbc
     status: ProofStatus.PASSED
     admitted: False
     nodes: 3

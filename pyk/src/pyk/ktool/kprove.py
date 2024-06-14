@@ -495,7 +495,6 @@ class ClaimIndex(Mapping[str, KClaim]):
 
     @staticmethod
     def from_module_list(module_list: KFlatModuleList) -> ClaimIndex:
-        module_list = ClaimIndex._add_missing_claim_labels(module_list)
         module_list = ClaimIndex._qualify_depends(module_list)
         return ClaimIndex(
             main_module_name=module_list.main_module,
@@ -505,36 +504,12 @@ class ClaimIndex(Mapping[str, KClaim]):
     @staticmethod
     def _validate(claims: Mapping[str, KClaim]) -> None:
         for label, claim in claims.items():
-            actual_label = claim.att.get(Atts.LABEL)
-            if actual_label != label:
-                raise ValueError(f'Claim label mismatch, expected: {label}, found: {actual_label}')
+            if claim.label != label:
+                raise ValueError(f'Claim label mismatch, expected: {label}, found: {claim.label}')
 
             for depend in claim.dependencies:
                 if depend not in claims:
                     raise ValueError(f'Invalid dependency label: {depend}')
-
-    @staticmethod
-    def _add_missing_claim_labels(module_list: KFlatModuleList) -> KFlatModuleList:
-        """Put a label attribute on all claims without one.
-
-        This only affects claims that are not labeled in the source file.
-        The label is the UNIQUE_ID of the sentence, qualified with the host module's name.
-        """
-
-        def label_claim(module_name: str, claim: KClaim) -> KClaim:
-            if Atts.LABEL in claim.att:
-                return claim
-            unique_id = claim.att[Atts.UNIQUE_ID]
-            label = f'{module_name}.{unique_id}'
-            return claim.let(att=claim.att.update([Atts.LABEL(label)]))
-
-        modules: list[KFlatModule] = []
-        for module in module_list.modules:
-            add_label = partial(label_claim, module.name)
-            module = module.map_sentences(add_label, of_type=KClaim)
-            modules.append(module)
-
-        return module_list.let(modules=modules)
 
     @staticmethod
     def _qualify_depends(module_list: KFlatModuleList) -> KFlatModuleList:
@@ -578,10 +553,7 @@ class ClaimIndex(Mapping[str, KClaim]):
         module_name: str,
         label: str,
     ) -> str:
-        """Qualify a `label` with `module_name` if not already qualified.
-
-        Assumes `labels` are qualified, so `label in labels` iff `label` is valid and qualified.
-        """
+        """Qualify a `label` with `module_name` if not already a valid label."""
         if label in labels:
             return label
 

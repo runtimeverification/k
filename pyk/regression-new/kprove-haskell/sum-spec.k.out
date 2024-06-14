@@ -1,4 +1,4 @@
-APRProof: SUM-SPEC.3b7070ca4603e18d26d032c0fe64dd71ffadc2c63dae9d57315e8e471a371bd3
+APRProof: 3b7070ca4603e18d26d032c0fe64dd71ffadc2c63dae9d57315e8e471a371bd3
     status: ProofStatus.PASSED
     admitted: False
     nodes: 7
