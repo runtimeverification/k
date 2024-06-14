@@ -59,6 +59,18 @@ class KCFGExplore:
     def pretty_print(self, kinner: KInner) -> str:
         return self._pretty_printer.print(kinner)
 
+    def _extract_rule_labels(self, _logs: tuple[LogEntry, ...]) -> list[str]:
+        _rule_lines = []
+        for node_log in _logs:
+            if isinstance(node_log, LogRewrite) and isinstance(node_log.result, RewriteSuccess):
+                if node_log.result.rule_id in self.cterm_symbolic._definition.sentence_by_unique_id:
+                    sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
+                    _rule_lines.append(f'{sent.label}:{sent.source}')
+                else:
+                    _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
+                    _rule_lines.append('UNKNOWN')
+        return _rule_lines
+
     def implication_failure_reason(self, antecedent: CTerm, consequent: CTerm) -> tuple[bool, str]:
         def _is_cell_subst(csubst: KInner) -> bool:
             if type(csubst) is KApply and csubst.label.name == '_==K_':
@@ -204,18 +216,6 @@ class KCFGExplore:
         def log(message: str, *, warning: bool = False) -> None:
             _LOGGER.log(logging.WARNING if warning else logging.INFO, f'Extend result for {self.id}: {message}')
 
-        def extract_rule_labels(_logs: tuple[LogEntry, ...]) -> list[str]:
-            _rule_lines = []
-            for node_log in _logs:
-                if isinstance(node_log, LogRewrite) and isinstance(node_log.result, RewriteSuccess):
-                    if node_log.result.rule_id in self.cterm_symbolic._definition.sentence_by_unique_id:
-                        sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
-                        _rule_lines.append(f'{sent.label}:{sent.source}')
-                    else:
-                        _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
-                        _rule_lines.append('UNKNOWN')
-            return _rule_lines
-
         custom_step_result = self.kcfg_semantics.custom_step(_cterm)
         if custom_step_result is not None:
             log(f'custom step node: {node_id}')
@@ -237,7 +237,7 @@ class KCFGExplore:
         # Basic block
         if depth > 0:
             log(f'basic block at depth {depth}: {node_id}')
-            return Step(cterm, depth, next_node_logs, extract_rule_labels(next_node_logs))
+            return Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs))
 
         # Stuck or vacuous
         if not next_states:
@@ -254,7 +254,7 @@ class KCFGExplore:
                 next_states[0].state,
                 1,
                 next_node_logs,
-                extract_rule_labels(next_node_logs),
+                self._extract_rule_labels(next_node_logs),
                 cut=True,
             )
 
@@ -282,4 +282,4 @@ class KCFGExplore:
             # NDBranch
             log(f'{len(next_states)} non-deterministic branches: {node_id}')
             next_cterms = [cterm for cterm, _ in next_states]
-            return NDBranch(next_cterms, next_node_logs, extract_rule_labels(next_node_logs))
+            return NDBranch(next_cterms, next_node_logs, self._extract_rule_labels(next_node_logs))
