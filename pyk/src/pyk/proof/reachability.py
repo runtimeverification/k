@@ -800,7 +800,7 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         # Ensure that we cut at applications of circularity, so that subsumption into target state will be checked
         cut_rules = list(self.cut_point_rules)
-        if step.circularity and self.circularity_rule_id is not None:
+        if step.circularity and step.nonzero_depth and self.circularity_rule_id is not None:
             cut_rules.append(self.circularity_rule_id)
 
         # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
