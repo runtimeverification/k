@@ -185,18 +185,13 @@ class KSentence(KOuter, WithKAtt):
         """Return a (hopefully) unique label associated with the given `KSentence`.
 
         :return: Unique label for the given sentence, either (in order):
-          - User supplied `label` attribute (or supplied in rule label),
-          - Unique identifier computed and inserted by the frontend, or
-          - Source location for the sentence.
+          - User supplied `label` attribute (or supplied in rule label),or
+          - Unique identifier computed and inserted by the frontend.
         """
-        if Atts.LABEL in self.att:
-            return self.att[Atts.LABEL]
-        elif self.unique_id is not None:
-            return self.unique_id
-        elif self.source is not None:
-            _LOGGER.warning(f'Found a sentence without label or UNIQUE_ID: {self}')
-            return self.source
-        raise ValueError(f'Found sentence without label, UNIQUE_ID, or SOURCE:LOCATION: {self}')
+        label = self.att.get(Atts.LABEL, self.unique_id)
+        if label is None:
+            raise ValueError(f'Found sentence without label or UNIQUE_ID: {self}')
+        return label
 
 
 @final
