@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import cached_property, partial
+from functools import partial
 from graphlib import TopologicalSorter
 from typing import TYPE_CHECKING
 
@@ -115,24 +115,11 @@ class ClaimIndex(Mapping[str, KClaim]):
             raise KeyError(f'Claim not found: {label}') from None
         return self.claims[label]
 
-    @cached_property
-    def topological(self) -> tuple[str, ...]:
-        return tuple(self.ordered(self.claims))
-
     def resolve(self, label: str) -> str:
         return self._resolve_claim_label(self.claims, self.main_module_name, label)
 
     def resolve_all(self, labels: Iterable[str]) -> list[str]:
         return [self.resolve(label) for label in unique(labels)]
-
-    def ordered(self, labels: Iterable[str]) -> list[str]:
-        labels = set(self.resolve_all(labels))
-        graph = {
-            label: [dep for dep in claim.dependencies if dep in labels]
-            for label, claim in self.claims.items()
-            if label in labels
-        }
-        return list(TopologicalSorter(graph).static_order())
 
     def labels(
         self,
@@ -140,11 +127,44 @@ class ClaimIndex(Mapping[str, KClaim]):
         include: Iterable[str] | None = None,
         exclude: Iterable[str] | None = None,
         with_depends: bool = True,
+        ordered: bool = False,
     ) -> list[str]:
+        """Return a list of labels from the index.
+
+        Args:
+            include: Labels to include in the result. If `None`, all labels are included.
+            exclude: Labels to exclude from the result. If `None`, no labels are excluded.
+              Takes precedence over `include`.
+            with_depends: If `True`, the result is transitively closed w.r.t. the dependency relation.
+              Labels in `exclude` are pruned, and their dependencies are not considered on the given path.
+            ordered: If `True`, the result is topologically sorted w.r.t. the dependency relation.
+
+        Returns:
+            A list of labels from the index.
+
+        Raises:
+            ValueError: If an item in `include` or `exclude` cannot be resolved to a valid label.
+        """
+        include = self.resolve_all(include) if include is not None else self.claims
+        exclude = self.resolve_all(exclude) if exclude is not None else []
+
+        labels: list[str]
+
+        if with_depends:
+            labels = self._close_dependencies(labels=include, prune=exclude)
+        else:
+            labels = [label for label in include if label not in set(exclude)]
+
+        if ordered:
+            return self._sort_topologically(labels)
+
+        return labels
+
+    def _close_dependencies(self, labels: Iterable[str], prune: Iterable[str]) -> list[str]:
         res: list[str] = []
 
-        pending = self.resolve_all(include) if include is not None else list(self.claims)
-        done = set(self.resolve_all(exclude)) if exclude is not None else set()
+        pending = list(labels)
+        done = set(prune)
 
         while pending:
             label = pending.pop(0)  # BFS
@@ -153,9 +173,16 @@ class ClaimIndex(Mapping[str, KClaim]):
                 continue
 
             res.append(label)
+            pending += self.claims[label].dependencies
             done.add(label)
 
-            if with_depends:
-                pending += self.claims[label].dependencies
-
         return res
+
+    def _sort_topologically(self, labels: list[str]) -> list[str]:
+        label_set = set(labels)
+        graph = {
+            label: [dep for dep in claim.dependencies if dep in label_set]
+            for label, claim in self.claims.items()
+            if label in labels
+        }
+        return list(TopologicalSorter(graph).static_order())

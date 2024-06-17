@@ -424,8 +424,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         spec_labels: Iterable[str] | None = None,
     ) -> list[APRProof]:
         claim_index = ClaimIndex.from_module_list(spec_modules)
-        spec_labels = claim_index.labels(include=spec_labels, with_depends=True)
-        spec_labels = claim_index.ordered(spec_labels)
+        spec_labels = claim_index.labels(include=spec_labels, with_depends=True, ordered=True)
 
         res: list[APRProof] = []
 
