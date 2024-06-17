@@ -117,14 +117,22 @@ class ClaimIndex(Mapping[str, KClaim]):
 
     @cached_property
     def topological(self) -> tuple[str, ...]:
-        graph = {label: claim.dependencies for label, claim in self.claims.items()}
-        return tuple(TopologicalSorter(graph).static_order())
+        return tuple(self.ordered(self.claims))
 
     def resolve(self, label: str) -> str:
         return self._resolve_claim_label(self.claims, self.main_module_name, label)
 
     def resolve_all(self, labels: Iterable[str]) -> list[str]:
         return [self.resolve(label) for label in unique(labels)]
+
+    def ordered(self, labels: Iterable[str]) -> list[str]:
+        labels = set(self.resolve_all(labels))
+        graph = {
+            label: [dep for dep in claim.dependencies if dep in labels]
+            for label, claim in self.claims.items()
+            if label in labels
+        }
+        return list(TopologicalSorter(graph).static_order())
 
     def labels(
         self,
