@@ -422,7 +422,6 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         logs: dict[int, tuple[LogEntry, ...]],
         proof_dir: Path | None = None,
         spec_labels: Iterable[str] | None = None,
-        **kwargs: Any,
     ) -> list[APRProof]:
         claim_index = ClaimIndex.from_module_list(spec_modules)
         spec_labels = claim_index.labels(include=spec_labels, with_depends=True)
