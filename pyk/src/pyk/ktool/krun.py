@@ -231,15 +231,11 @@ def fuzz(
         res = llvm_interpret_raw(definition_dir, test_pattern.text)
 
         if check_exit_code:
-            if res.returncode != 0:
-                raise RuntimeError('Test failed')
+            assert res.returncode == 0
         else:
             assert check_func is not None
             res_pattern = KoreParser(res.stdout).pattern()
-            try:
-                check_func(res_pattern)
-            except Exception as e:
-                raise RuntimeError('Test failed') from e
+            check_func(res_pattern)
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
 
