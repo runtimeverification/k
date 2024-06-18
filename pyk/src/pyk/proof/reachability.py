@@ -7,8 +7,8 @@ import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from pyk.kore.rpc import LogEntry
-
+from .implies import ProofSummary, Prover, RefutationProof
+from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus
 from ..cterm.cterm import remove_useless_constraints
 from ..kast.att import AttEntry, Atts
 from ..kast.inner import KInner, Subst
@@ -17,10 +17,9 @@ from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
 from ..konvert import kflatmodule_to_kore
+from ..kore.rpc import LogEntry
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
-from .implies import ProofSummary, Prover, RefutationProof
-from .proof import CompositeSummary, FailureInfo, Proof, ProofStatus
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
