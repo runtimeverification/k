@@ -301,7 +301,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     @staticmethod
     def _make_module_name(proof_id: str) -> str:
         return 'M-' + re.sub(
-            r'[\[\]]|[_%().:,]+', lambda match: 'bkt' if match.group(0) in ['[', ']'] else '-', proof_id.upper()
+            r'[\[\]]|[_%().:,@]+', lambda match: 'bkt' if match.group(0) in ['[', ']'] else '-', proof_id.upper()
         )
 
     @staticmethod
