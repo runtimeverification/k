@@ -198,6 +198,10 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         return not self.kcfg.zero_depth_between(self.init, node.id)
 
     @property
+    def rule_id(self) -> str:
+        return f'APRPROOF-{self.id.upper()}'
+
+    @property
     def module_name(self) -> str:
         return self._make_module_name(self.id)
 
@@ -396,14 +400,14 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             return [self.as_rule(priority=priority)]
         _rules = []
         for _edge in self.kcfg.edges():
-            _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
+            _rule = _edge.to_rule(self.rule_id, priority=priority)
             assert type(_rule) is KRule
             _rules.append(_rule)
         return _rules
 
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
-        _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
+        _rule = _edge.to_rule(self.rule_id, priority=priority)
         assert type(_rule) is KRule
         return _rule
 
