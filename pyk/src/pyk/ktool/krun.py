@@ -215,6 +215,7 @@ def fuzz(
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
     check_func: Callable[[Pattern], None] | None = None,
     check_exit_code: bool = False,
+    max_examples: int = 50,
 ) -> None:
     if not ((check_func is not None) ^ check_exit_code):
         raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
@@ -245,7 +246,7 @@ def fuzz(
     given(strat)(
         settings(
             deadline=50000,
-            max_examples=50,
+            max_examples=max_examples,
             verbosity=Verbosity.verbose,
             phases=(Phase.generate, Phase.target, Phase.shrink),
         )(test)
