@@ -72,6 +72,7 @@ class APRProofStep:
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
     circularity: bool
     nonzero_depth: bool
+    circularity_rule_id: str
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
@@ -177,6 +178,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
                     circularity=self.circularity,
                     nonzero_depth=self.nonzero_depth(node),
+                    circularity_rule_id=f'{self.rule_id}-{self.init}-TO-{self.target}',
                 )
             )
         return steps
@@ -696,7 +698,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
     fast_check_subsumption: bool
     direct_subproof_rules: bool
     kcfg_explore: KCFGExplore
-    circularity_rule_id: str | None
 
     def __init__(
         self,
@@ -719,7 +720,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         self.always_check_subsumption = always_check_subsumption
         self.fast_check_subsumption = fast_check_subsumption
         self.direct_subproof_rules = direct_subproof_rules
-        self.circularity_rule_id = None
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
@@ -742,7 +742,6 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
             for rule in subproof.as_rules(priority=20, direct_rule=self.direct_subproof_rules)
         ]
         circularity_rule = proof.as_rule(priority=20)
-        self.circularity_rule_id = circularity_rule.label
 
         _inject_module(proof.dependencies_module_name, self.main_module_name, dependencies_as_rules)
         _inject_module(proof.circularities_module_name, proof.dependencies_module_name, [circularity_rule])
@@ -808,8 +807,8 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
 
         # Ensure that we cut at applications of circularity, so that subsumption into target state will be checked
         cut_rules = list(self.cut_point_rules)
-        if step.circularity and step.nonzero_depth and self.circularity_rule_id is not None:
-            cut_rules.append(self.circularity_rule_id)
+        if step.circularity and step.nonzero_depth:
+            cut_rules.append(step.circularity_rule_id)
 
         # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
         execute_depth = self.execute_depth
