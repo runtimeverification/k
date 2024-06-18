@@ -1,0 +1,64 @@
+default: null
+specializations:
+- - Lbl'-LT-'generatedTop'-GT-'{}
+  - default: null
+    specializations:
+    - - Lbl'-LT-'T'-GT-'{}
+      - default: null
+        specializations:
+        - - Lbl'-LT-'k'-GT-'{}
+          - default: fail
+            specializations:
+            - - kseq{}
+              - default: fail
+                specializations:
+                - - inj{SortStmt{}, SortKItem{}}
+                  - default: fail
+                    specializations:
+                    - - Lblif'LParUndsRParUnds'else'Unds'{}
+                      - default: fail
+                        specializations:
+                        - - inj{SortBool{}, SortBExp{}}
+                          - default: fail
+                            specializations:
+                            - - '1'
+                              - action:
+                                - 534
+                                - - - ['1', '1']
+                                    - STRING.String
+                                  - - ['1', '0', '1']
+                                    - STRING.String
+                                  - - ['1', '0', '0', '0', '1']
+                                    - STRING.String
+                                  - - ['2', '0', '0', '0', '0', '0', '1']
+                                    - STRING.String
+                                  - - ['1', '0', '0', '0', '0', '0', '1']
+                                    - STRING.String
+                              - []
+                            bitwidth: 1
+                            sort: BOOL.Bool
+                            occurrence: ['0', '0', '0', '0', '0', '0', '0', '1']
+                          - [BOOL.Bool]
+                        sort: STRING.String
+                        occurrence: ['0', '0', '0', '0', '0', '0', '1']
+                      - [STRING.String, STRING.String, STRING.String]
+                    sort: STRING.String
+                    occurrence: ['0', '0', '0', '0', '0', '1']
+                  - [STRING.String]
+                - - inj{SortBlock{}, SortKItem{}}
+                  - fail
+                  - [STRING.String]
+                sort: STRING.String
+                occurrence: ['0', '0', '0', '0', '1']
+              - [STRING.String, STRING.String]
+            sort: STRING.String
+            occurrence: ['0', '0', '0', '1']
+          - [STRING.String]
+        sort: STRING.String
+        occurrence: ['0', '0', '1']
+      - [STRING.String, STRING.String]
+    sort: STRING.String
+    occurrence: ['0', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

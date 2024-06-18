@@ -1,0 +1,16 @@
+default: fail
+specializations:
+- - kseq{}
+  - default: fail
+    specializations:
+    - - dotk{}
+      - action:
+        - 664
+        - - - ['0', '1']
+            - STRING.String
+      - []
+    sort: STRING.String
+    occurrence: ['1', '1']
+  - [STRING.String, STRING.String]
+sort: STRING.String
+occurrence: ['1']

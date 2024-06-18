@@ -1,0 +1,915 @@
+module AUTO-CASTS [digest(yeN10EyTfkiQX2DsdIf85Ct5WWWIbDASZRvjSdc89zk=), org.kframework.attributes.Location(Location(377,1,385,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module AUTO-FOLLOW [digest(5VwlXEHlnJrYr5reTC8S4+bzFaAUMq0JsPENdLTjLfo=), org.kframework.attributes.Location(Location(387,1,398,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module BASIC-K [digest(qGPht6f9yLg48Wyknt7x5oMbPcqhSwE4Mn9ypq3hkmo=), org.kframework.attributes.Location(Location(35,1,42,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-BOOL
+  imports ML-SYNTAX
+  syntax KItem [hook(K.KItem), org.kframework.attributes.Location(Location(38,3,38,31)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KItem ::= KConfigVar
+  syntax KConfigVar [org.kframework.attributes.Location(Location(40,3,40,28)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md)), token]
+  syntax K ::= KItem
+endmodule
+
+
+module BOOL [digest(RdEgTFZlwJdEvHFWhkT1TCy32jqjhDpuCuAJMymVXp8=), org.kframework.attributes.Location(Location(1176,1,1179,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BOOL-COMMON
+endmodule
+
+
+module BOOL-COMMON [digest(zxcUzQS8qruXwR/NFWnazglDMB3KHSGvpJGsB2qm0LU=), org.kframework.attributes.Location(Location(1086,1,1160,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BOOL-SYNTAX
+  imports BASIC-K
+  syntax priority notBool_ > _impliesBool_ _orBool_ _xorBool_ _andBool_ _andThenBool_ _orElseBool_ > _==Bool_ _=/=Bool_
+  syntax associativity left _xorBool_
+  syntax associativity left _orElseBool_
+  syntax associativity left _orBool_
+  syntax associativity left _impliesBool_
+  syntax associativity left _andThenBool_
+  syntax associativity left _andBool_
+  syntax associativity left _==Bool_ _=/=Bool_
+  syntax associativity left _==Bool_
+  syntax associativity left _=/=Bool_
+  syntax Bool ::= Bool "xorBool" Bool [function, group(boolOperation), hook(BOOL.xor), klabel(_xorBool_), left, smt-hook(xor), symbol, total]
+  syntax Bool ::= Bool "orElseBool" Bool [function, group(boolOperation), hook(BOOL.orElse), klabel(_orElseBool_), left, smt-hook(or), symbol, total]
+  syntax Bool ::= Bool "orBool" Bool [function, group(boolOperation), hook(BOOL.or), klabel(_orBool_), left, smt-hook(or), symbol, total]
+  syntax Bool ::= Bool "impliesBool" Bool [function, group(boolOperation), hook(BOOL.implies), klabel(_impliesBool_), left, smt-hook(=>), symbol, total]
+  syntax Bool ::= Bool "andThenBool" Bool [function, group(boolOperation), hook(BOOL.andThen), klabel(_andThenBool_), left, smt-hook(and), symbol, total]
+  syntax Bool ::= Bool "andBool" Bool [function, group(boolOperation), hook(BOOL.and), klabel(_andBool_), left, smt-hook(and), symbol, total]
+  syntax Bool ::= Bool "==Bool" Bool [comm, function, hook(BOOL.eq), klabel(_==Bool_), left, smt-hook(=), symbol, total]
+  syntax Bool ::= Bool "=/=Bool" Bool [comm, function, hook(BOOL.ne), klabel(_=/=Bool_), left, smt-hook(distinct), symbol, total]
+  syntax Bool ::= "notBool" Bool [function, group(boolOperation), hook(BOOL.not), klabel(notBool_), smt-hook(not), symbol, total]
+  rule `notBool_`(#token("true","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1127,8,1127,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `notBool_`(#token("false","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1128,8,1128,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_xorBool_`(#token("false","Bool"),#SemanticCastToBool(B))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1140,8,1140,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_xorBool_`(#SemanticCastToBool(B),#token("false","Bool"))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1141,8,1141,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_xorBool_`(#SemanticCastToBool(B),#SemanticCastToBool(B))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1142,8,1142,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orElseBool_`(#token("true","Bool"),#SemanticCastToBool(_))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1149,8,1149,33)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orElseBool_`(#token("false","Bool"),#SemanticCastToBool(K))=>#SemanticCastToBool(K) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1151,8,1151,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orElseBool_`(#SemanticCastToBool(_),#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1150,8,1150,33)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orElseBool_`(#SemanticCastToBool(K),#token("false","Bool"))=>#SemanticCastToBool(K) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1152,8,1152,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orBool_`(#token("true","Bool"),#SemanticCastToBool(_))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1144,8,1144,34)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orBool_`(#token("false","Bool"),#SemanticCastToBool(B))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1146,8,1146,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orBool_`(#SemanticCastToBool(_),#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1145,8,1145,34)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orBool_`(#SemanticCastToBool(B),#token("false","Bool"))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1147,8,1147,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_impliesBool_`(#token("true","Bool"),#SemanticCastToBool(B))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1154,8,1154,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_impliesBool_`(#token("false","Bool"),#SemanticCastToBool(_))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1155,8,1155,40)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_impliesBool_`(#SemanticCastToBool(_),#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1156,8,1156,39)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_impliesBool_`(#SemanticCastToBool(B),#token("false","Bool"))=>`notBool_`(#SemanticCastToBool(B)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1157,8,1157,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andThenBool_`(#token("true","Bool"),#SemanticCastToBool(K))=>#SemanticCastToBool(K) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1135,8,1135,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andThenBool_`(#token("false","Bool"),#SemanticCastToBool(_))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1137,8,1137,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andThenBool_`(#SemanticCastToBool(_),#token("false","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1138,8,1138,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andThenBool_`(#SemanticCastToBool(K),#token("true","Bool"))=>#SemanticCastToBool(K) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1136,8,1136,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andBool_`(#token("true","Bool"),#SemanticCastToBool(B))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1130,8,1130,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andBool_`(#token("false","Bool"),#SemanticCastToBool(_))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1132,8,1132,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andBool_`(#SemanticCastToBool(_),#token("false","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1133,8,1133,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andBool_`(#SemanticCastToBool(B),#token("true","Bool"))=>#SemanticCastToBool(B) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1131,8,1131,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_=/=Bool_`(#SemanticCastToBool(B1),#SemanticCastToBool(B2))=>`notBool_`(`_==Bool_`(#SemanticCastToBool(B1),#SemanticCastToBool(B2))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1159,8,1159,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module BOOL-SYNTAX [digest(NyXw3ZE2lSn4HD166cKlUkGp6gngWYXMYcMitKhJyCA=), org.kframework.attributes.Location(Location(1080,1,1084,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports SORT-BOOL
+  syntax Bool ::= "true" [token]
+  syntax Bool ::= "false" [token]
+endmodule
+
+
+module BUILTIN-ID-TOKENS [digest(/99H3owdhBQOyynByjmemNq1DkW5pJFycvp958aSSUU=), org.kframework.attributes.Location(Location(63,1,66,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax #UpperId ::= r"[A-Z][a-zA-Z0-9]*" [prec(2), token]
+  syntax #LowerId ::= r"[a-z][a-zA-Z0-9]*" [prec(2), token]
+endmodule
+
+
+module BYTES-CONCRETE [concrete, digest(ogFGOsVjDzsUbE54ABXmADoaxJIuDkdMFdVKvoEGt6Q=), org.kframework.attributes.Location(Location(2190,1,2192,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BYTES-HOOKED
+endmodule
+
+
+module BYTES-HOOKED [digest(q7uAuReruo8UDkdRmhSSw+yWRvGnjMELoXDN6urxu88=), org.kframework.attributes.Location(Location(2006,1,2181,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-SYNTAX
+  imports BYTES-SYNTAX
+  syntax associativity right _+Bytes__BYTES-HOOKED_Bytes_Bytes_Bytes
+  syntax String ::= "Bytes2String" "(" Bytes ")" [function, hook(BYTES.bytes2string), total]
+  syntax Signedness ::= "Unsigned" [klabel(unsignedBytes), symbol]
+  syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
+  syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
+  syntax Int ::= "lengthBytes" "(" Bytes ")" [function, hook(BYTES.length), smtlib(lengthBytes), total]
+  syntax Int ::= "Bytes2Int" "(" Bytes "," Endianness "," Signedness ")" [function, hook(BYTES.bytes2int), total]
+  syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
+  syntax Endianness ::= "BE" [klabel(bigEndianBytes), symbol]
+  syntax Bytes ::= Bytes "[" index:Int "<-" value:Int "]" [function, hook(BYTES.update)]
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, hook(BYTES.concat), right, total]
+  syntax Bytes ::= "substrBytes" "(" Bytes "," startIndex:Int "," endIndex:Int ")" [function, hook(BYTES.substr)]
+  syntax Bytes ::= "reverseBytes" "(" Bytes ")" [function, hook(BYTES.reverse), total]
+  syntax Bytes ::= "replaceAtBytes" "(" dest:Bytes "," index:Int "," src:Bytes ")" [function, hook(BYTES.replaceAt)]
+  syntax Bytes ::= "padRightBytes" "(" Bytes "," length:Int "," value:Int ")" [function, hook(BYTES.padRight)]
+  syntax Bytes ::= "padLeftBytes" "(" Bytes "," length:Int "," value:Int ")" [function, hook(BYTES.padLeft)]
+  syntax Bytes ::= "memsetBytes" "(" dest:Bytes "," index:Int "," count:Int "," v:Int ")" [function, hook(BYTES.memset)]
+  syntax Bytes ::= "String2Bytes" "(" String ")" [function, hook(BYTES.string2bytes), total]
+  syntax Bytes ::= "Int2Bytes" "(" length:Int "," Int "," Endianness ")" [function, hook(BYTES.int2bytes), total]
+  syntax Bytes ::= "Int2Bytes" "(" Int "," Endianness "," Signedness ")" [function, klabel(Int2BytesNoLen), total]
+  syntax Bytes ::= ".Bytes" [function, hook(BYTES.empty), total]
+endmodule
+
+
+module BYTES-SYNTAX [digest(f3G0srIOyv5rTWPl6+I/GQRpMbZBm3zx6wbJy8SEApg=), org.kframework.attributes.Location(Location(1983,1,1988,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-SYNTAX
+  syntax Bytes [hook(BYTES.Bytes), org.kframework.attributes.Location(Location(1986,3,1986,35)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Bytes ::= r"b[\"]([ !#-\\[\\]-~]|([\\\\][tnfr\"\\\\]|[\\\\][x][0-9a-fA-F]{2}))*[\"]" [token]
+endmodule
+
+
+module CONFIG-CELLS [digest(MhWYJiW23UdCL1YQ8jwmwNqitL5G7YPC3C9kmHpl1Qs=), org.kframework.attributes.Location(Location(305,1,318,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports RULE-LISTS
+  imports KCELLS
+  syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell), symbol]
+  syntax Cell ::= "<" #CellName "/>" [klabel(#externalCell), symbol]
+  syntax #CellProperty ::= #CellName "=" KString [klabel(#cellProperty), symbol]
+  syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList), symbol]
+  syntax #CellProperties ::= "" [klabel(#cellPropertyListTerminator), symbol]
+  syntax #CellName ::= r"[a-zA-Z][a-zA-Z0-9\\-]*" [prec(1), token]
+  syntax #CellName ::= #UpperId [token]
+  syntax #CellName ::= #LowerId [token]
+endmodule
+
+
+module DEFAULT-LAYOUT [digest(QahWu5S5oYXowXdE9RMniNKGhTL7G1QCIXTkUlDi2m4=), org.kframework.attributes.Location(Location(510,1,514,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax #Layout ::= r"[ \\n\\r\\t]"
+  syntax #Layout ::= r"/\\*([^*]|\\*+[^*/])*\\*+/"
+  syntax #Layout ::= r"//[^\\n\\r]*"
+endmodule
+
+
+module DOMAINS-SYNTAX [digest(Zwy0P2Mp6xwwBxLx79bGaD/CoTNbcy2Rv1d4WVpiofg=), org.kframework.attributes.Location(Location(39,1,45,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports UNSIGNED-INT-SYNTAX
+  imports STRING-SYNTAX
+  imports SORT-K
+  imports ID-SYNTAX
+  imports BOOL-SYNTAX
+endmodule
+
+
+module FLOAT-SYNTAX [digest(I7pNw5ugekHiaPLxDZ6qo61Q597tUbvw0bmjBgr5V4Q=), org.kframework.attributes.Location(Location(1478,1,1483,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Float [hook(FLOAT.Float), org.kframework.attributes.Location(Location(1479,3,1479,35)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Float ::= r"[+\\-]?Infinity([fFdD]|[pP][0-9]+[xX][0-9]+)?" [prec(3), token]
+  syntax Float ::= r"NaN([fFdD]|[pP][0-9]+[xX][0-9]+)?" [prec(3), token]
+  syntax Float ::= r"([+\\-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][+\\-]?[0-9]+)?([fFdD]|[pP][0-9]+[xX][0-9]+)?" [prec(1), token]
+endmodule
+
+
+module ID [digest(9rYq0fCEnOKls3PH9XE8Qaanz14AaDZveKZU+48XsIo=), org.kframework.attributes.Location(Location(2263,1,2265,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports ID-COMMON
+endmodule
+
+
+module ID-COMMON [digest(FiP+WO61+SeCHGGVEM9a2kcGMZIP7rEW0MPLJB9E8Eg=), org.kframework.attributes.Location(Location(2252,1,2261,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING
+  imports ID-SYNTAX
+  syntax String ::= "Id2String" "(" Id ")" [function, hook(STRING.token2string), total]
+  syntax Id ::= "freshId" "(" Int ")" [freshGenerator, function, private, total]
+  syntax Id ::= "String2Id" "(" String ")" [function, hook(STRING.string2token), total]
+  rule `freshId(_)_ID-COMMON_Id_Int`(#SemanticCastToInt(I))=>`String2Id(_)_ID-COMMON_Id_String`(`_+String__STRING-COMMON_String_String_String`(#token("\"_\"","String"),`Int2String(_)_STRING-COMMON_String_Int`(#SemanticCastToInt(I)))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2260,8,2260,62)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module ID-SYNTAX [digest(5CR14G1AFSwvw3G2rVmEOcrklCLhrUgwYGp0/HoDQhQ=), org.kframework.attributes.Location(Location(2248,1,2250,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Id [org.kframework.attributes.Location(Location(2249,3,2249,20)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), token]
+endmodule
+
+
+module ID-SYNTAX-PROGRAM-PARSING [digest(n8ymLzMstM3sQbP9k66N41SCvCymNN/zhI7qZyoQ8vs=), org.kframework.attributes.Location(Location(2241,1,2246,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BUILTIN-ID-TOKENS
+  syntax Id ::= r"[A-Za-z_][A-Za-z0-9_]*" [prec(1), token]
+  syntax Id ::= #UpperId [token]
+  syntax Id ::= #LowerId [token]
+endmodule
+
+
+module IMP [digest(nmfyr8BEKc9rbyaOCuEl6jV8f8UcXzqLds60ram8Wao=), org.kframework.attributes.Location(Location(35,1,87,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k))]
+  imports SET
+  imports MAP
+  imports INT
+  imports IMP-SYNTAX
+  imports BOOL
+  imports BASIC-K
+  syntax TCellFragment ::= "<T>-fragment" KCellOpt StateCellOpt "</T>-fragment" [cellFragment(TCell)]
+  syntax TCell ::= "initTCell" "(" Map ")" [function, initializer]
+  syntax TCell ::= "<T>" KCell StateCell "</T>" [cell, cellName(T), color(yellow), format(%1%i%n%2%n%3%d%n%4), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  syntax StateCellOpt ::= StateCell
+  syntax StateCellOpt ::= "noStateCell" [cellOptAbsent(StateCell)]
+  syntax StateCell ::= "initStateCell" [function, initializer, total]
+  syntax StateCell ::= "<state>" Map "</state>" [cell, cellName(state), color(red), format(%1%i%n%2%d%n%3), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  syntax KResult ::= Int
+  syntax KResult ::= Bool
+  syntax KItem ::= Pgm
+  syntax KItem ::= "Error" "(" Id "," Map ")"
+  syntax KItem ::= "#lookup" "(" Id "," Map ")" [function, total]
+  syntax KCellOpt ::= KCell
+  syntax KCellOpt ::= "noKCell" [cellOptAbsent(KCell)]
+  syntax KCell ::= "initKCell" "(" Map ")" [function, initializer]
+  syntax KCell ::= "<k>" K "</k>" [cell, cellName(k), color(green), format(%1%i%n%2%d%n%3), maincell, org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule initTCell(Init)=>`<T>`(#noDots(.KList),#cells(initKCell(Init),initStateCell(.KList)),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [initializer]
+  rule initStateCell(.KList)=>`<state>`(#noDots(.KList),`.Map`(.KList),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [initializer]
+  rule initKCell(Init)=>`<k>`(#noDots(.KList),#SemanticCastToPgm(`project:Pgm`(`Map:lookup`(Init,#token("$PGM","KConfigVar")))),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [initializer]
+  rule `<k>`(#noDots(.KList),`{}`(.KList)=>.K,#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.block-empty), org.kframework.attributes.Location(Location(72,23,72,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`{_}`(#SemanticCastToStmt(S))=>#SemanticCastToStmt(S),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.block), org.kframework.attributes.Location(Location(71,17,71,39)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`while(_)_`(#SemanticCastToBExp(B),#SemanticCastToBlock(S))=>`if(_)_else_`(#SemanticCastToBExp(B),`{_}`(`__`(#SemanticCastToBlock(S),`while(_)_`(#SemanticCastToBExp(B),#SemanticCastToBlock(S)))),`{}`(.KList)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.while), org.kframework.attributes.Location(Location(81,17,81,75)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`int_;_`(`.List{"_,_"}`(.KList),#SemanticCastToStmt(S))=>#SemanticCastToStmt(S),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.decl-empty), org.kframework.attributes.Location(Location(86,22,86,52)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`if(_)_else_`(#token("true","Bool"),#SemanticCastToBlock(S),#SemanticCastToBlock(_))=>#SemanticCastToBlock(S),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.if-true), org.kframework.attributes.Location(Location(78,19,78,56)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`if(_)_else_`(#token("false","Bool"),#SemanticCastToBlock(_),#SemanticCastToBlock(S))=>#SemanticCastToBlock(S),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.if-false), org.kframework.attributes.Location(Location(79,20,79,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`__`(#SemanticCastToStmt(S1),#SemanticCastToStmt(S2))=>#SemanticCastToStmt(S1)~>#SemanticCastToStmt(S2),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.sequence), org.kframework.attributes.Location(Location(76,20,76,60)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_<_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_<Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(63,8,63,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_<=_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_<=Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(64,8,64,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_/_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_/Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires `_=/=Int_`(#SemanticCastToInt(I2),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(58,8,58,65)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `<k>`(#noDots(.KList),`_-_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_-Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(61,8,61,44)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_+_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_+Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(60,8,60,44)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_*_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_*Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(57,8,57,44)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_&&_`(#token("true","Bool"),#SemanticCastToBExp(B))=>#SemanticCastToBExp(B),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(66,8,66,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_&&_`(#token("false","Bool"),#SemanticCastToBExp(_))=>#token("false","Bool"),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(67,8,67,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<k>`(#noDots(.KList),`_%_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_modInt_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)),#dots(.KList)) requires `_=/=Int_`(#SemanticCastToInt(I2),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(59,8,59,65)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `<k>`(#noDots(.KList),`!_`(#SemanticCastToBool(T))=>`notBool_`(#SemanticCastToBool(T)),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(65,8,65,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `#lookup(_,_)_IMP_KItem_Id_Map`(#SemanticCastToId(X),#SemanticCastToMap(M))=>`Map:lookup`(#SemanticCastToMap(M),#SemanticCastToId(X)) requires `_in_keys(_)_MAP_Bool_KItem_Map`(#SemanticCastToId(X),#SemanticCastToMap(M)) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(54,8,54,51)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `#lookup(_,_)_IMP_KItem_Id_Map`(#SemanticCastToId(X),#SemanticCastToMap(M))=>`Error(_,_)_IMP_KItem_Id_Map`(#SemanticCastToId(X),#SemanticCastToMap(M)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(55,8,55,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), owise]
+  rule #cells(`<k>`(#noDots(.KList),`int_;_`(`_,_`(#SemanticCastToId(X),#SemanticCastToIds(Xs))=>#SemanticCastToIds(Xs),#SemanticCastToStmt(_)),#dots(.KList)),`<state>`(#noDots(.KList),#SemanticCastToMap(STATE)=>`Map:update`(#SemanticCastToMap(STATE),#SemanticCastToId(X),#token("0","Int")),#noDots(.KList))) requires `notBool_`(`Set:in`(#SemanticCastToId(X),`keys(_)_MAP_Set_Map`(#SemanticCastToMap(STATE)))) ensures #token("true","Bool") [label(IMP.decl), org.kframework.attributes.Location(Location(83,16,84,40)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule #cells(`<k>`(#noDots(.KList),`_=_;`(#SemanticCastToId(X),#SemanticCastToInt(I))=>.K,#dots(.KList)),`<state>`(#noDots(.KList),#SemanticCastToMap(STATE)=>`Map:update`(#SemanticCastToMap(STATE),#SemanticCastToId(X),#SemanticCastToInt(I)),#noDots(.KList))) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.assign), org.kframework.attributes.Location(Location(74,18,74,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule #cells(`<k>`(#noDots(.KList),#SemanticCastToId(X)=>`#lookup(_,_)_IMP_KItem_Id_Map`(#SemanticCastToId(X),#SemanticCastToMap(STATE)),#dots(.KList)),`<state>`(#noDots(.KList),#SemanticCastToMap(STATE),#noDots(.KList))) requires #token("true","Bool") ensures #token("true","Bool") [label(IMP.var), org.kframework.attributes.Location(Location(69,15,69,76)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module IMP-SYNTAX [digest(txjI89oek78h+HQ/ruDUOh6u8YUoKOVadiNHDOK6G+w=), org.kframework.attributes.Location(Location(3,1,33,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k))]
+  imports INT-SYNTAX
+  imports ID
+  imports BOOL-SYNTAX
+  syntax priority _=_; while(_)_ if(_)_else_ > __
+  syntax priority _<_ !_ _<=_ > _&&_ (_)_IMP-SYNTAX_BExp_BExp
+  syntax priority _%_ _/_ dumby dumbx _*_ > _+_ (_)_IMP-SYNTAX_AExp_AExp _-_
+  syntax associativity left __
+  syntax associativity left _/_
+  syntax associativity left _-_
+  syntax associativity left _+_
+  syntax associativity left _*_
+  syntax associativity left _&&_
+  syntax associativity left _%_
+  syntax Stmt ::= Stmt Stmt [format(%1%n%2), left, symbol(__)]
+  syntax Stmt ::= Id "=" AExp ";" [color(pink), format(%1 %2 %3%4), strict(2), symbol(_=_;)]
+  syntax Stmt ::= Block
+  syntax Stmt ::= "while" "(" BExp ")" Block [colors(yellow,white,white), format(%1 %2%3%4 %5), symbol(while(_)_)]
+  syntax Stmt ::= "if" "(" BExp ")" Block "else" Block [colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7), strict(1), symbol(if(_)_else_)]
+  syntax Pgm ::= "int" Ids ";" Stmt [colors(yellow,pink), format(%1 %2%3%n%4), symbol(int_;_)]
+  syntax Ids ::= Id "," Ids [format(%1%2 %3), symbol(_,_), userList(*)]
+  syntax Ids ::= ".Ids" [symbol(.List{"_,_"}), userList(*)]
+  syntax Block ::= "{" Stmt "}" [format(%1%i%n%2%d%n%3), symbol({_})]
+  syntax Block ::= "{" "}" [symbol({})]
+  syntax BExp ::= Bool
+  syntax BExp ::= BExp "&&" BExp [color(pink), left, strict(1), symbol(_&&_)]
+  syntax BExp ::= AExp "<=" AExp [color(pink), seqstrict, symbol(_<=_)]
+  syntax BExp ::= AExp "<" AExp [color(pink), seqstrict, symbol(_<_)]
+  syntax BExp ::= "(" BExp ")" [bracket, bracketLabel((_)_IMP-SYNTAX_BExp_BExp)]
+  syntax BExp ::= "!" BExp [color(pink), strict, symbol(!_)]
+  syntax AExp ::= Int
+  syntax AExp ::= Id
+  syntax AExp ::= AExp "/" AExp [color(pink), left, seqstrict, symbol(_/_)]
+  syntax AExp ::= AExp "-" AExp [color(pink), left, seqstrict, symbol(_-_)]
+  syntax AExp ::= AExp "+" AExp [color(pink), left, seqstrict, symbol(_+_)]
+  syntax AExp ::= AExp "*" AExp [color(pink), left, seqstrict, symbol(_*_)]
+  syntax AExp ::= AExp "%" AExp [color(pink), left, seqstrict, symbol(_%_)]
+  syntax AExp ::= "dumby" [symbol(dumby)]
+  syntax AExp ::= "dumbx" [symbol(dumbx)]
+  syntax AExp ::= "(" AExp ")" [bracket, bracketLabel((_)_IMP-SYNTAX_AExp_AExp)]
+endmodule
+
+
+module INT [digest(OGBaMSqI6ew7j9i3tqM2JQmoMYPGAI9BIN6r5yPxjJo=), org.kframework.attributes.Location(Location(1416,1,1443,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports K-EQUAL
+  imports INT-COMMON
+  imports BOOL
+  syntax Int ::= "freshInt" "(" Int ")" [freshGenerator, function, private, total]
+  rule `signExtendBitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(#SemanticCastToInt(I),#SemanticCastToInt(IDX),#SemanticCastToInt(LEN))=>`_-Int_`(`_modInt_`(`_+Int_`(`bitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(#SemanticCastToInt(I),#SemanticCastToInt(IDX),#SemanticCastToInt(LEN)),`_<<Int_`(#token("1","Int"),`_-Int_`(#SemanticCastToInt(LEN),#token("1","Int")))),`_<<Int_`(#token("1","Int"),#SemanticCastToInt(LEN))),`_<<Int_`(#token("1","Int"),`_-Int_`(#SemanticCastToInt(LEN),#token("1","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1425,8,1425,164)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `minInt(_,_)_INT-COMMON_Int_Int_Int`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>#SemanticCastToInt(I2) requires `_>=Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1436,8,1436,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `minInt(_,_)_INT-COMMON_Int_Int_Int`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>#SemanticCastToInt(I1) requires `_<=Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2)) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1435,8,1435,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `freshInt(_)_INT_Int_Int`(#SemanticCastToInt(I))=>#SemanticCastToInt(I) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1442,8,1442,28)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `bitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(#SemanticCastToInt(I),#SemanticCastToInt(IDX),#SemanticCastToInt(LEN))=>`_modInt_`(`_>>Int_`(#SemanticCastToInt(I),#SemanticCastToInt(IDX)),`_<<Int_`(#token("1","Int"),#SemanticCastToInt(LEN))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1423,8,1423,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_modInt_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_%Int_`(`_+Int_`(`_%Int_`(#SemanticCastToInt(I1),`absInt(_)_INT-COMMON_Int_Int`(#SemanticCastToInt(I2))),`absInt(_)_INT-COMMON_Int_Int`(#SemanticCastToInt(I2))),`absInt(_)_INT-COMMON_Int_Int`(#SemanticCastToInt(I2))) requires `_=/=Int_`(#SemanticCastToInt(I2),#token("0","Int")) ensures #token("true","Bool") [concrete, org.kframework.attributes.Location(Location(1430,5,1433,23)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), simplification]
+  rule `_dividesInt__INT-COMMON_Bool_Int_Int`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_==Int_`(`_%Int_`(#SemanticCastToInt(I2),#SemanticCastToInt(I1)),#token("0","Int")) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1439,8,1439,58)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_divInt_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`_/Int_`(`_-Int_`(#SemanticCastToInt(I1),`_modInt_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))),#SemanticCastToInt(I2)) requires `_=/=Int_`(#SemanticCastToInt(I2),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1427,8,1428,23)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `_=/=Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))=>`notBool_`(`_==Int_`(#SemanticCastToInt(I1),#SemanticCastToInt(I2))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1438,8,1438,53)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module INT-COMMON [digest(MFq5U4aABSoUuvJmzFhlSolaV1R97wH924rAZLukPHk=), org.kframework.attributes.Location(Location(1207,1,1350,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports INT-SYNTAX
+  imports BOOL
+  syntax priority ~Int_ > _^Int_ _^%Int__ > _divInt_ _%Int_ _/Int_ _modInt_ _*Int_ > _-Int_ _+Int_ > _<<Int_ _>>Int_ > _&Int_ > _xorInt_ > _|Int_
+  syntax associativity left _|Int_
+  syntax associativity left _xorInt_
+  syntax associativity left _modInt_
+  syntax associativity left _divInt_ _%Int_ _/Int_ _modInt_ _*Int_
+  syntax associativity left _divInt_
+  syntax associativity left _^Int_ _^%Int__
+  syntax associativity left _^Int_
+  syntax associativity left _^%Int__
+  syntax associativity left _>>Int_
+  syntax associativity left _<<Int_ _>>Int_
+  syntax associativity left _<<Int_
+  syntax associativity left _/Int_
+  syntax associativity left _-Int_ _+Int_
+  syntax associativity left _-Int_
+  syntax associativity left _+Int_
+  syntax associativity left _*Int_
+  syntax associativity left _&Int_
+  syntax associativity left _%Int_
+  syntax K ::= "srandInt" "(" Int ")" [function, hook(INT.srand), impure]
+  syntax Int ::= Int "|Int" Int [comm, function, hook(INT.or), klabel(_|Int_), left, smtlib(orInt), symbol, total]
+  syntax Int ::= Int "xorInt" Int [comm, function, hook(INT.xor), klabel(_xorInt_), left, smtlib(xorInt), symbol, total]
+  syntax Int ::= Int "modInt" Int [function, hook(INT.emod), klabel(_modInt_), left, smt-hook(mod), symbol]
+  syntax Int ::= Int "divInt" Int [function, hook(INT.ediv), klabel(_divInt_), left, smt-hook(div), symbol]
+  syntax Int ::= Int "^Int" Int [function, hook(INT.pow), klabel(_^Int_), left, smt-hook(^), symbol]
+  syntax Int ::= Int "^%Int" Int Int [function, hook(INT.powmod), klabel(_^%Int__), left, smt-hook((mod (^ #1 #2) #3)), symbol]
+  syntax Int ::= Int ">>Int" Int [function, hook(INT.shr), klabel(_>>Int_), left, smtlib(shrInt), symbol]
+  syntax Int ::= Int "<<Int" Int [function, hook(INT.shl), klabel(_<<Int_), left, smtlib(shlInt), symbol]
+  syntax Int ::= Int "/Int" Int [function, hook(INT.tdiv), klabel(_/Int_), left, smt-hook(div), symbol]
+  syntax Int ::= Int "-Int" Int [function, hook(INT.sub), klabel(_-Int_), left, smt-hook(-), symbol, total]
+  syntax Int ::= Int "+Int" Int [comm, function, hook(INT.add), klabel(_+Int_), left, smt-hook(+), symbol, total]
+  syntax Int ::= Int "*Int" Int [comm, function, hook(INT.mul), klabel(_*Int_), left, smt-hook(*), symbol, total]
+  syntax Int ::= Int "&Int" Int [comm, function, hook(INT.and), klabel(_&Int_), left, smtlib(andInt), symbol, total]
+  syntax Int ::= Int "%Int" Int [function, hook(INT.tmod), klabel(_%Int_), left, smt-hook(mod), symbol]
+  syntax Int ::= "~Int" Int [function, hook(INT.not), klabel(~Int_), smtlib(notInt), symbol, total]
+  syntax Int ::= "signExtendBitRangeInt" "(" Int "," index:Int "," length:Int ")" [function, hook(INT.signExtendBitRange)]
+  syntax Int ::= "randInt" "(" Int ")" [function, hook(INT.rand), impure]
+  syntax Int ::= "minInt" "(" Int "," Int ")" [function, hook(INT.min), smt-hook((ite (< #1 #2) #1 #2)), total]
+  syntax Int ::= "maxInt" "(" Int "," Int ")" [function, hook(INT.max), smt-hook((ite (< #1 #2) #2 #1)), total]
+  syntax Int ::= "log2Int" "(" Int ")" [function, hook(INT.log2)]
+  syntax Int ::= "bitRangeInt" "(" Int "," index:Int "," length:Int ")" [function, hook(INT.bitRange)]
+  syntax Int ::= "absInt" "(" Int ")" [function, hook(INT.abs), smt-hook((ite (< #1 0) (- 0 #1) #1)), total]
+  syntax Bool ::= Int "dividesInt" Int [function]
+  syntax Bool ::= Int ">Int" Int [function, hook(INT.gt), klabel(_>Int_), smt-hook(>), symbol, total]
+  syntax Bool ::= Int ">=Int" Int [function, hook(INT.ge), klabel(_>=Int_), smt-hook(>=), symbol, total]
+  syntax Bool ::= Int "==Int" Int [comm, function, hook(INT.eq), klabel(_==Int_), smt-hook(=), symbol, total]
+  syntax Bool ::= Int "=/=Int" Int [comm, function, hook(INT.ne), klabel(_=/=Int_), smt-hook(distinct), symbol, total]
+  syntax Bool ::= Int "<Int" Int [function, hook(INT.lt), klabel(_<Int_), smt-hook(<), symbol, total]
+  syntax Bool ::= Int "<=Int" Int [function, hook(INT.le), klabel(_<=Int_), smt-hook(<=), symbol, total]
+endmodule
+
+
+module INT-SYNTAX [digest(CwZhLaq0yZAfgguBqC5BTkSnmlrozkI5GAjpMnwglEw=), org.kframework.attributes.Location(Location(1202,1,1205,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports UNSIGNED-INT-SYNTAX
+  syntax Int ::= r"[+\\-]?[0-9]+" [prec(2), prefer, token]
+endmodule
+
+
+module K [digest(d+pjA1EpVDGS7jSzxraM7uR+IpYqxcIJ6HAfwUxDSwk=), org.kframework.attributes.Location(Location(451,1,481,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-PREDICATES
+  imports REQUIRES-ENSURES
+  imports RECORD-PRODUCTIONS
+  imports KSEQ-SYMBOLIC
+  imports KREWRITE
+  imports K-SORT-LATTICE
+  imports AUTO-FOLLOW
+  imports AUTO-CASTS
+  syntax {Sort} Sort ::= Sort "#as" Sort [klabel(#KAs), symbol]
+  syntax {Sort} Sort ::= "#fun" "(" Sort ")" "(" Sort ")" [klabel(#fun2), prefer, symbol]
+  syntax {Sort1, Sort2} Sort1 ::= "#let" Sort2 "=" Sort2 "#in" Sort1 [klabel(#let), symbol]
+  syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")" [klabel(#fun3), symbol]
+  syntax associativity left _:=K_ _:/=K_
+  syntax Bool ::= K ":=K" K [function, group(equalEqualK), klabel(_:=K_), symbol, total]
+  syntax Bool ::= K ":/=K" K [function, group(notEqualEqualK), klabel(_:/=K_), symbol, total]
+endmodule
+
+
+module K-AMBIGUITIES [digest(jP3kAYm0pRMJKQKVvk3SQ/h8ZrNBN5sE9TxkX6LrDTM=), org.kframework.attributes.Location(Location(546,1,550,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax {Sort} Sort ::= "amb" "(" Sort "," Sort ")" [klabel(amb), symbol]
+endmodule
+
+
+module K-BOTTOM-SORT [digest(1j3v4wDccAtv2EZmq1Z8sNndHbR0uA3DbRg0vI9G9hY=), org.kframework.attributes.Location(Location(366,1,370,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-KBOTT
+  syntax {Sort} Sort ::= KBott
+  syntax KItem ::= KBott
+endmodule
+
+
+module K-EQUAL [digest(RL4qRXvW1t4oZHGmDW48hWTnCBPUBHHtsKyZl9hfu8w=), org.kframework.attributes.Location(Location(2311,1,2321,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports K-EQUAL-SYNTAX
+  imports BOOL
+  rule ite(#SemanticCastToBool(C),#SemanticCastToK(_),#SemanticCastToK(B2))=>#SemanticCastToK(B2) requires `notBool_`(#SemanticCastToBool(C)) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2319,8,2319,67)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule ite(#SemanticCastToBool(C),#SemanticCastToK(B1),#SemanticCastToK(_))=>#SemanticCastToK(B1) requires #SemanticCastToBool(C) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2318,8,2318,59)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `_=/=K_`(#SemanticCastToK(K1),#SemanticCastToK(K2))=>`notBool_`(`_==K_`(#SemanticCastToK(K1),#SemanticCastToK(K2))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2316,8,2316,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module K-EQUAL-SYNTAX [digest(ANQzsoBiemjbE7x4ZTDGnBLkvgO7Svv0JIKz3BqUTiQ=), org.kframework.attributes.Location(Location(2281,1,2293,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BOOL
+  imports BASIC-K
+  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi" [function, hook(KEQUAL.ite), smt-hook(ite), symbol(ite), total]
+  syntax priority _==K_ _:=K_ _=/=K_ _:/=K_ > #Exists weakAlwaysFinally #Ceil notBool_ #AG #Or #Not _xorBool_ _andBool_ _andThenBool_ #And #Forall _impliesBool_ _orBool_ #Equals #Floor weakExistsFinally _orElseBool_ #Implies
+  syntax associativity left _==K_ _=/=K_
+  syntax Bool ::= K "==K" K [comm, function, group(equalEqualK), hook(KEQUAL.eq), klabel(_==K_), smt-hook(=), symbol, total]
+  syntax Bool ::= K "=/=K" K [comm, function, group(notEqualEqualK), hook(KEQUAL.ne), klabel(_=/=K_), smt-hook(distinct), symbol, total]
+endmodule
+
+
+module K-IO [digest(arhLgE/rL4yFzGMdSXuaRjv+1OlSmea+mxLfvJERh3Y=), org.kframework.attributes.Location(Location(2378,1,2668,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING
+  imports LIST
+  imports INT
+  syntax Stream ::= "#parseInput" "(" String "," String ")"
+  syntax Stream ::= "#ostream" "(" Int ")"
+  syntax Stream ::= "#istream" "(" Int ")"
+  syntax Stream ::= "#buffer" "(" K ")"
+  syntax KItem ::= "#systemResult" "(" Int "," String "," String ")" [klabel(#systemResult), symbol]
+  syntax KItem ::= "#system" "(" String ")" [function, hook(IO.system), impure]
+  syntax K ::= "#write" "(" fd:Int "," value:String ")" [function, hook(IO.write), impure]
+  syntax K ::= "#unlock" "(" fd:Int "," endIndex:Int ")" [function, hook(IO.unlock), impure]
+  syntax K ::= "#traceK" "(" value:K ")" [function, hook(IO.traceTerm), impure, klabel(#traceK), returnsUnit, symbol, total]
+  syntax K ::= "#trace" "(" value:KItem ")" [function, hook(IO.traceTerm), impure, klabel(#trace), returnsUnit, symbol, total]
+  syntax K ::= "#shutdownWrite" "(" fd:Int ")" [function, hook(IO.shutdownWrite), impure]
+  syntax K ::= "#seekEnd" "(" fd:Int "," fromEnd:Int ")" [function, hook(IO.seekEnd), impure]
+  syntax K ::= "#seek" "(" fd:Int "," index:Int ")" [function, hook(IO.seek), impure]
+  syntax K ::= "#remove" "(" path:String ")" [function, hook(IO.remove), impure, total]
+  syntax K ::= "#putc" "(" fd:Int "," value:Int ")" [function, hook(IO.putc), impure]
+  syntax K ::= "#logToFile" "(" name:String "," value:String ")" [function, hook(IO.log), impure, klabel(#logToFile), returnsUnit, symbol, total]
+  syntax K ::= "#log" "(" value:String ")" [function, hook(IO.logString), impure, klabel(#log), returnsUnit, symbol, total]
+  syntax K ::= "#lock" "(" fd:Int "," endIndex:Int ")" [function, hook(IO.lock), impure]
+  syntax K ::= "#close" "(" fd:Int ")" [function, hook(IO.close), impure]
+  syntax Int ::= "#time" "(" ")" [function, hook(IO.time), impure]
+  syntax Int ::= "#stdout" [function, total]
+  syntax Int ::= "#stdin" [function, total]
+  syntax Int ::= "#stderr" [function, total]
+  syntax IOString ::= String
+  syntax IOString ::= IOError
+  syntax IOString ::= "#read" "(" fd:Int "," length:Int ")" [function, hook(IO.read), impure]
+  syntax IOInt ::= Int
+  syntax IOInt ::= IOError
+  syntax IOInt ::= "#tell" "(" fd:Int ")" [function, hook(IO.tell), impure]
+  syntax IOInt ::= "#open" "(" path:String "," mode:String ")" [function, hook(IO.open), impure]
+  syntax IOInt ::= "#open" "(" path:String ")" [function]
+  syntax IOInt ::= "#getc" "(" fd:Int ")" [function, hook(IO.getc), impure]
+  syntax IOInt ::= "#accept" "(" fd:Int ")" [function, hook(IO.accept), impure]
+  syntax IOFile ::= IOError
+  syntax IOFile ::= "#tempFile" "(" path:String "," fd:Int ")" [klabel(#tempFile), symbol]
+  syntax IOFile ::= "#mkstemp" "(" template:String ")" [function, hook(IO.mkstemp), impure]
+  syntax IOError ::= "#unknownIOError" "(" errno:Int ")" [klabel(#unknownIOError), symbol]
+  syntax IOError ::= "#EXDEV" [klabel(#EXDEV), symbol]
+  syntax IOError ::= "#EWOULDBLOCK" [klabel(#EWOULDBLOCK), symbol]
+  syntax IOError ::= "#ETOOMANYREFS" [klabel(#ETOOMANYREFS), symbol]
+  syntax IOError ::= "#ETIMEDOUT" [klabel(#ETIMEDOUT), symbol]
+  syntax IOError ::= "#ESRCH" [klabel(#ESRCH), symbol]
+  syntax IOError ::= "#ESPIPE" [klabel(#ESPIPE), symbol]
+  syntax IOError ::= "#ESOCKTNOSUPPORT" [klabel(#ESOCKTNOSUPPORT), symbol]
+  syntax IOError ::= "#ESHUTDOWN" [klabel(#ESHUTDOWN), symbol]
+  syntax IOError ::= "#EROFS" [klabel(#EROFS), symbol]
+  syntax IOError ::= "#ERANGE" [klabel(#ERANGE), symbol]
+  syntax IOError ::= "#EPROTOTYPE" [klabel(#EPROTOTYPE), symbol]
+  syntax IOError ::= "#EPROTONOSUPPORT" [klabel(#EPROTONOSUPPORT), symbol]
+  syntax IOError ::= "#EPIPE" [klabel(#EPIPE), symbol]
+  syntax IOError ::= "#EPFNOSUPPORT" [klabel(#EPFNOSUPPORT), symbol]
+  syntax IOError ::= "#EPERM" [klabel(#EPERM), symbol]
+  syntax IOError ::= "#EOVERFLOW" [klabel(#EOVERFLOW), symbol]
+  syntax IOError ::= "#EOPNOTSUPP" [klabel(#EOPNOTSUPP), symbol]
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol]
+  syntax IOError ::= "#ENXIO" [klabel(#ENXIO), symbol]
+  syntax IOError ::= "#ENOTTY" [klabel(#ENOTTY), symbol]
+  syntax IOError ::= "#ENOTSOCK" [klabel(#ENOTSOCK), symbol]
+  syntax IOError ::= "#ENOTEMPTY" [klabel(#ENOTEMPTY), symbol]
+  syntax IOError ::= "#ENOTDIR" [klabel(#ENOTDIR), symbol]
+  syntax IOError ::= "#ENOTCONN" [klabel(#ENOTCONN), symbol]
+  syntax IOError ::= "#ENOSYS" [klabel(#ENOSYS), symbol]
+  syntax IOError ::= "#ENOSPC" [klabel(#ENOSPC), symbol]
+  syntax IOError ::= "#ENOPROTOOPT" [klabel(#ENOPROTOOPT), symbol]
+  syntax IOError ::= "#ENOMEM" [klabel(#ENOMEM), symbol]
+  syntax IOError ::= "#ENOLCK" [klabel(#ENOLCK), symbol]
+  syntax IOError ::= "#ENOEXEC" [klabel(#ENOEXEC), symbol]
+  syntax IOError ::= "#ENOENT" [klabel(#ENOENT), symbol]
+  syntax IOError ::= "#ENODEV" [klabel(#ENODEV), symbol]
+  syntax IOError ::= "#ENOBUFS" [klabel(#ENOBUFS), symbol]
+  syntax IOError ::= "#ENFILE" [klabel(#ENFILE), symbol]
+  syntax IOError ::= "#ENETUNREACH" [klabel(#ENETUNREACH), symbol]
+  syntax IOError ::= "#ENETRESET" [klabel(#ENETRESET), symbol]
+  syntax IOError ::= "#ENETDOWN" [klabel(#ENETDOWN), symbol]
+  syntax IOError ::= "#ENAMETOOLONG" [klabel(#ENAMETOOLONG), symbol]
+  syntax IOError ::= "#EMSGSIZE" [klabel(#EMSGSIZE), symbol]
+  syntax IOError ::= "#EMLINK" [klabel(#EMLINK), symbol]
+  syntax IOError ::= "#EMFILE" [klabel(#EMFILE), symbol]
+  syntax IOError ::= "#ELOOP" [klabel(#ELOOP), symbol]
+  syntax IOError ::= "#EISDIR" [klabel(#EISDIR), symbol]
+  syntax IOError ::= "#EISCONN" [klabel(#EISCONN), symbol]
+  syntax IOError ::= "#EIO" [klabel(#EIO), symbol]
+  syntax IOError ::= "#EINVAL" [klabel(#EINVAL), symbol]
+  syntax IOError ::= "#EINTR" [klabel(#EINTR), symbol]
+  syntax IOError ::= "#EINPROGRESS" [klabel(#EINPROGRESS), symbol]
+  syntax IOError ::= "#EHOSTUNREACH" [klabel(#EHOSTUNREACH), symbol]
+  syntax IOError ::= "#EHOSTDOWN" [klabel(#EHOSTDOWN), symbol]
+  syntax IOError ::= "#EFBIG" [klabel(#EFBIG), symbol]
+  syntax IOError ::= "#EFAULT" [klabel(#EFAULT), symbol]
+  syntax IOError ::= "#EEXIST" [klabel(#EEXIST), symbol]
+  syntax IOError ::= "#EDOM" [klabel(#EDOM), symbol]
+  syntax IOError ::= "#EDESTADDRREQ" [klabel(#EDESTADDRREQ), symbol]
+  syntax IOError ::= "#EDEADLK" [klabel(#EDEADLK), symbol]
+  syntax IOError ::= "#ECONNRESET" [klabel(#ECONNRESET), symbol]
+  syntax IOError ::= "#ECONNREFUSED" [klabel(#ECONNREFUSED), symbol]
+  syntax IOError ::= "#ECONNABORTED" [klabel(#ECONNABORTED), symbol]
+  syntax IOError ::= "#ECHILD" [klabel(#ECHILD), symbol]
+  syntax IOError ::= "#EBUSY" [klabel(#EBUSY), symbol]
+  syntax IOError ::= "#EBADF" [klabel(#EBADF), symbol]
+  syntax IOError ::= "#EALREADY" [klabel(#EALREADY), symbol]
+  syntax IOError ::= "#EAGAIN" [klabel(#EAGAIN), symbol]
+  syntax IOError ::= "#EAFNOSUPPORT" [klabel(#EAFNOSUPPORT), symbol]
+  syntax IOError ::= "#EADDRNOTAVAIL" [klabel(#EADDRNOTAVAIL), symbol]
+  syntax IOError ::= "#EADDRINUSE" [klabel(#EADDRINUSE), symbol]
+  syntax IOError ::= "#EACCES" [klabel(#EACCES), symbol]
+  syntax IOError ::= "#E2BIG" [klabel(#E2BIG), symbol]
+  rule `#stdout_K-IO_Int`(.KList)=>#token("1","Int") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2583,8,2583,20)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `#stdin_K-IO_Int`(.KList)=>#token("0","Int") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2582,8,2582,19)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `#stderr_K-IO_Int`(.KList)=>#token("2","Int") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2584,8,2584,20)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `#open(_)_K-IO_IOInt_String`(#SemanticCastToString(S))=>`#open(_,_)_K-IO_IOInt_String_String`(#SemanticCastToString(S),#token("\"r+\"","String")) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(2487,8,2487,48)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module K-LOCATIONS [digest(oe55Yn8iHmaC4E/fTVZBonohrCiVLsMuLXlKxVjobUg=), org.kframework.attributes.Location(Location(563,1,570,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports STRING-SYNTAX
+  imports INT-SYNTAX
+  syntax {Sort} Sort ::= "#location" "(" Sort "," String "," Int "," Int "," Int "," Int ")" [format(%3), klabel(#location), symbol]
+endmodule
+
+
+module K-REFLECTION [digest(S/weTDWi8/x95IGZ7fBs9rluZ1qD/aioVDkzDIvFiW4=), org.kframework.attributes.Location(Location(2337,1,2357,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING
+  imports BASIC-K
+  syntax {Sort} String ::= "#unparseKORE" "(" Sort ")" [function, hook(KREFLECTION.printKORE)]
+  syntax String ::= "#sort" "(" K ")" [function, hook(KREFLECTION.sort)]
+  syntax String ::= "#kompiledDirectory" "(" ")" [function, hook(KREFLECTION.kompiledDir)]
+  syntax List ::= "#argv" "(" ")" [function, hook(KREFLECTION.argv)]
+  syntax KItem ::= "getKLabel" "(" K ")" [function, hook(KREFLECTION.getKLabel)]
+  syntax KItem ::= "#fresh" "(" String ")" [function, hook(KREFLECTION.fresh), impure]
+  syntax K ::= "#getenv" "(" String ")" [function, hook(KREFLECTION.getenv), impure]
+  syntax K ::= "#configuration" [function, hook(KREFLECTION.configuration), impure]
+  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
+endmodule
+
+
+module K-SORT-LATTICE [digest(5sfKs0Ytbk1tmGlfzG5UWYrUr7nvc8fDGfC/Quz7OrA=), org.kframework.attributes.Location(Location(372,1,375,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports K-TOP-SORT
+  imports K-BOTTOM-SORT
+endmodule
+
+
+module K-TERM [digest(ZIvdKjAMHjG4TchOZ4P3Ek2WtcquQgwHvyLbM8yJcJo=), org.kframework.attributes.Location(Location(484,1,492,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-PREDICATES
+  imports RECORD-PRODUCTIONS
+  imports KSEQ-SYMBOLIC
+  imports KREWRITE
+  imports K-SORT-LATTICE
+  imports AUTO-FOLLOW
+  imports AUTO-CASTS
+endmodule
+
+
+module K-TOP-SORT [digest(yk8jHTvB7QhXK+dxcMFAjX932Kx/ZMgQaZSTjwBQTew=), org.kframework.attributes.Location(Location(360,1,364,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-KBOTT
+  syntax {Sort} KItem ::= Sort
+  syntax KItem ::= KBott
+endmodule
+
+
+module KAST [digest(foGX1SOK/p+Aw8BWZ0a20spIYxQMhRfY9rQc4RVlj48=), org.kframework.attributes.Location(Location(73,1,91,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-KBOTT
+  imports KSTRING
+  imports BUILTIN-ID-TOKENS
+  imports BASIC-K
+  syntax associativity left #KList
+  syntax KList ::= KList "," KList [assoc, klabel(#KList), left, prefer, symbol, unit(#EmptyKList)]
+  syntax KList ::= K
+  syntax KList ::= ".KList" [klabel(#EmptyKList), symbol]
+  syntax KLabel ::= r"`(\\\\`|(\\\\\\\\|[^`\\\\\\n\\r]))+`" [token]
+  syntax KLabel ::= r"[#a-z][a-zA-Z0-9]*" [prec(1), token]
+  syntax KLabel ::= #LowerId [token]
+  syntax KItem ::= KBott
+  syntax KBott ::= KLabel "(" KList ")" [klabel(#KApply), symbol]
+  syntax KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
+  syntax KBott ::= "#klabel" "(" KLabel ")" [klabel(#WrappedKLabel), symbol]
+endmodule
+
+
+module KCELLS [digest(z/ZHv9Uf1pEdjeUQueCzb+u2Me+rsKktcsMHVKZp0jo=), org.kframework.attributes.Location(Location(235,1,248,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports KAST
+  syntax associativity non-assoc #withConfig [org.kframework.attributes.Location(Location(246,3,246,31)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax associativity left #cells
+  syntax KItem ::= Bag
+  syntax Cell [org.kframework.attributes.Location(Location(238,3,238,14)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax Bag ::= KBott
+  syntax Bag ::= Cell
+  syntax Bag ::= Bag Bag [assoc, klabel(#cells), left, symbol, unit(#cells)]
+  syntax Bag ::= ".Bag" [klabel(#cells), symbol]
+  syntax Bag ::= ".::Bag" [klabel(#cells), symbol]
+  syntax Bag ::= "(" Bag ")" [bracket, bracketLabel((_)_KCELLS_Bag_Bag)]
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag [avoid, klabel(#withConfig), symbol]
+endmodule
+
+
+module KREWRITE [digest(0ZtA19xcYF+jMIsJE6w5pCajjLwgV/s3RGx15GWImBY=), org.kframework.attributes.Location(Location(444,1,448,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+  syntax priority #KRewrite > #withConfig
+  syntax associativity non-assoc #KRewrite [org.kframework.attributes.Location(Location(446,3,446,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module KSEQ [digest(pyR1vNdPgG7hPV+umVRePLUuIgGNgFKScMAkrsElxeY=), org.kframework.attributes.Location(Location(95,1,103,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports KAST
+  imports K-TOP-SORT
+  syntax {Sort} Sort ::= "(" Sort ")" [applyPriority(1), bracket, bracketLabel((_)_KSEQ_Sort_Sort{Sort}), group(defaultBracket)]
+  syntax associativity left #KSequence [org.kframework.attributes.Location(Location(101,3,101,25)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax associativity left #KSequence
+  syntax K ::= K "~>" K [assoc, klabel(#KSequence), left, symbol, unit(#EmptyK)]
+  syntax K ::= ".K" [klabel(#EmptyK), symbol]
+  syntax K ::= "." [deprecated, klabel(#EmptyK), symbol, unparseAvoid]
+endmodule
+
+
+module KSEQ-SYMBOLIC [digest(yJBLLS1rDghySJ8NKJDiyKAGYuBcnD5hHdCy7qbb3uc=), org.kframework.attributes.Location(Location(201,1,211,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports ML-SYNTAX
+  imports KVARIABLE-SYNTAX
+  imports KSEQ
+  syntax KConfigVar ::= r"\\$([A-Z][A-Za-z0-9'_]*)" [token]
+  syntax KBott ::= KConfigVar
+  syntax KBott ::= #KVariable
+  syntax #KVariable ::= r"(!|(\\?|@))?([A-Z][A-Za-z0-9'_]*|(_|_[A-Z][A-Za-z0-9'_]*))" [prec(1), token]
+  syntax #KVariable ::= #UpperId [token]
+endmodule
+
+
+module KSTRING [digest(CZRMkUWit9YS8OyP6FODwAGIFHK2Jsd3MZjHC2ZeXYY=), org.kframework.attributes.Location(Location(58,1,61,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KString ::= r"[\"]([^\"\\n\\r\\\\]|([\\\\][nrtf\"\\\\]|([\\\\][x][0-9a-fA-F]{2}|([\\\\][u][0-9a-fA-F]{4}|[\\\\][U][0-9a-fA-F]{8}))))*[\"]" [token]
+endmodule
+
+
+module KVARIABLE-SYNTAX [digest(nF1oIka7Ca/Xb+XgmNjTORUo746FC642GBlXnX+0XGk=), org.kframework.attributes.Location(Location(196,1,198,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax #KVariable [org.kframework.attributes.Location(Location(197,3,197,20)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module LIST [digest(YaTJmPj95yNzJJZkmQzUcGNKQtljAYMLZSG3Zzu19Sc=), org.kframework.attributes.Location(Location(909,1,1033,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports INT-SYNTAX
+  imports BASIC-K
+  syntax associativity left _List_
+  syntax List [hook(LIST.List), org.kframework.attributes.Location(Location(913,3,913,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax List ::= List List [assoc, element(ListItem), format(%1%n%2), function, hook(LIST.concat), klabel(_List_), left, smtlib(smt_seq_concat), symbol, total, unit(.List)]
+  syntax List ::= List "[" index:Int "<-" value:KItem "]" [function, hook(LIST.update), klabel(List:set)]
+  syntax List ::= "updateList" "(" dest:List "," index:Int "," src:List ")" [function, hook(LIST.updateAll)]
+  syntax List ::= "range" "(" List "," fromFront:Int "," fromBack:Int ")" [function, hook(LIST.range), klabel(List:range), symbol]
+  syntax List ::= "pushList" "(" KItem "," List ")" [function, hook(LIST.push), klabel(pushList), symbol, total]
+  syntax List ::= "makeList" "(" length:Int "," value:KItem ")" [function, hook(LIST.make)]
+  syntax List ::= "fillList" "(" List "," index:Int "," length:Int "," value:KItem ")" [function, hook(LIST.fill)]
+  syntax List ::= "ListItem" "(" KItem ")" [function, hook(LIST.element), klabel(ListItem), smtlib(smt_seq_elem), symbol, total]
+  syntax List ::= ".List" [function, hook(LIST.unit), klabel(.List), smtlib(smt_seq_nil), symbol, total]
+  syntax KItem ::= List "[" Int "]" [function, hook(LIST.get), klabel(List:get), symbol]
+  syntax Int ::= "size" "(" List ")" [function, hook(LIST.size), klabel(sizeList), smtlib(smt_seq_len), total]
+  syntax Bool ::= KItem "in" List [function, hook(LIST.in), klabel(_inList_), total]
+  rule pushList(#SemanticCastToKItem(K),#SemanticCastToList(L1))=>`_List_`(`ListItem`(#SemanticCastToKItem(K)),#SemanticCastToList(L1)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(954,8,954,54)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module MAP [digest(ov1UF+8PqpPw/F1gSvGCV2c7mlX5fDqG7WH/4mSBNXw=), org.kframework.attributes.Location(Location(212,1,404,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports SET
+  imports LIST
+  imports INT-SYNTAX
+  imports BOOL-SYNTAX
+  syntax priority _|->_ > .Map _Map_
+  syntax associativity non-assoc _|->_ [org.kframework.attributes.Location(Location(260,3,260,25)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax associativity left _Map_
+  syntax Set ::= "keys" "(" Map ")" [function, hook(MAP.keys), total]
+  syntax Map [hook(MAP.Map), org.kframework.attributes.Location(Location(218,3,218,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Map ::= Map Map [assoc, comm, element(_|->_), format(%1%n%2), function, hook(MAP.concat), index(0), klabel(_Map_), left, symbol, unit(.Map)]
+  syntax Map ::= Map "[" key:KItem "<-" value:KItem "]" [function, hook(MAP.update), klabel(Map:update), prefer, symbol, total]
+  syntax Map ::= Map "[" KItem "<-" "undef" "]" [function, hook(MAP.remove), klabel(_[_<-undef]), symbol, total]
+  syntax Map ::= Map "-Map" Map [function, hook(MAP.difference), total]
+  syntax Map ::= KItem "|->" KItem [function, hook(MAP.element), injective, klabel(_|->_), symbol, total]
+  syntax Map ::= "updateMap" "(" Map "," Map ")" [function, hook(MAP.updateAll), total]
+  syntax Map ::= "removeAll" "(" Map "," Set ")" [function, hook(MAP.removeAll), total]
+  syntax Map ::= ".Map" [function, hook(MAP.unit), klabel(.Map), symbol, total]
+  syntax List ::= "values" "(" Map ")" [function, hook(MAP.values)]
+  syntax List ::= "keys_list" "(" Map ")" [function, hook(MAP.keys_list)]
+  syntax KItem ::= Map "[" KItem "]" [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem [function, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault), total]
+  syntax KItem ::= "choice" "(" Map ")" [function, hook(MAP.choice), klabel(Map:choice)]
+  syntax Int ::= "size" "(" Map ")" [function, hook(MAP.size), klabel(sizeMap), total]
+  syntax Bool ::= Map "<=Map" Map [function, hook(MAP.inclusion), total]
+  syntax Bool ::= KItem "in_keys" "(" Map ")" [function, hook(MAP.in_keys), total]
+endmodule
+
+
+module MINT-SYNTAX [digest(/pRW1jHKusHxWW6ZIXoWOwy04V8wN2tFy1abSVcfBhk=), org.kframework.attributes.Location(Location(2846,1,2853,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax {Width} MInt{Width} ::= r"[+\\-]?[0-9]+[pP][0-9]+" [hook(MINT.literal), prec(2), token]
+  syntax MInt{Width} [hook(MINT.MInt), org.kframework.attributes.Location(Location(2849,3,2849,47)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+endmodule
+
+
+module ML-SYNTAX [digest(2BWYOckO6QR3U1Ha5LoWj6Z02KP2seh0PIaM53935BY=), not-lr1, org.kframework.attributes.Location(Location(135,1,160,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-K
+  syntax {Sort} Sort ::= Sort "#Or" Sort [assoc, comm, format(%i%1%d%n%2%n%i%3%d), group(mlOp), klabel(#Or), left, mlOp, symbol, unit(#Bottom)]
+  syntax {Sort} Sort ::= Sort "#Implies" Sort [format(%i%1%d%n%2%n%i%3%d), group(mlImplies, mlOp), klabel(#Implies), mlOp, symbol]
+  syntax {Sort} Sort ::= Sort "#And" Sort [assoc, comm, format(%i%1%d%n%2%n%i%3%d), group(mlAnd, mlOp), klabel(#And), left, mlOp, symbol, unit(#Top)]
+  syntax {Sort} Sort ::= "#wEF" "(" Sort ")" [group(mlOp), klabel(weakExistsFinally), mlOp, symbol]
+  syntax {Sort} Sort ::= "#wAF" "(" Sort ")" [group(mlOp), klabel(weakAlwaysFinally), mlOp, symbol]
+  syntax {Sort} Sort ::= "#Top" [group(mlUnary), klabel(#Top), symbol]
+  syntax {Sort} Sort ::= "#Not" "(" Sort ")" [group(mlUnary, mlOp), klabel(#Not), mlOp, symbol]
+  syntax {Sort} Sort ::= "#Bottom" [group(mlUnary), klabel(#Bottom), symbol]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [group(mlOp), klabel(#AG), mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "{" Sort1 "#Equals" Sort1 "}" [comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5), group(mlEquals, mlOp), klabel(#Equals), mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Forall" Sort1 "." Sort2 [group(mlQuantifier, mlOp), klabel(#Forall), mlBinder, mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Floor" "(" Sort1 ")" [group(mlUnary, mlOp), klabel(#Floor), mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [group(mlQuantifier, mlOp), klabel(#Exists), mlBinder, mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [group(mlUnary, mlOp), klabel(#Ceil), mlOp, symbol]
+  syntax priority #Implies > #Forall #Exists
+  syntax priority #Ceil #Floor #Top #Not #Bottom > #Equals > #And
+  syntax priority #And > #Or > #Implies
+  syntax associativity left #Or
+  syntax associativity left #And
+endmodule
+
+
+module PROGRAM-LISTS [digest(ljgenSN1NyiROhfDNTKEEfzs1eFAxTqqqXpUqCXgJ8c=), org.kframework.attributes.Location(Location(400,1,412,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-K
+endmodule
+
+
+module RECORD-PRODUCTIONS [digest(+hjBMZMdjvQLQc9fz9o5jh1bWeelKiYTXhzP5XyMp00=), org.kframework.attributes.Location(Location(421,1,426,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module REQUIRES-ENSURES [digest(9mFX7dRf+oPE7GKZntrP9ZOQ7AtkYrBM40wcpotzHKU=), org.kframework.attributes.Location(Location(340,1,349,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports BASIC-K
+  syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]
+  syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]
+  syntax #RuleContent ::= #RuleBody "requires" Bool "ensures" Bool [klabel(#ruleRequiresEnsures), symbol]
+  syntax #RuleContent ::= #RuleBody "ensures" Bool [klabel(#ruleEnsures), symbol]
+  syntax #RuleBody ::= K
+endmodule
+
+
+module RULE-CELLS [digest(8SgxgAsGzFWzBOfNDPzN0iwH8wcW3YRc13fB9DZkLpE=), org.kframework.attributes.Location(Location(269,1,290,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports RULE-LISTS
+  imports KCELLS
+  syntax Int [org.kframework.attributes.Location(Location(280,3,280,13)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax GeneratedCounterCell ::= "<generatedCounter>" Int "</generatedCounter>" [cell, internal, klabel(<generatedCounter>), symbol]
+  syntax #OptionalDots ::= "..." [klabel(#dots), symbol]
+  syntax #OptionalDots ::= "" [klabel(#noDots), symbol]
+endmodule
+
+
+module RULE-LISTS [digest(IvIn9r6rZWFy5pziEqMyoMOAqhjW7l37VKpCzHVo6Aw=), org.kframework.attributes.Location(Location(414,1,419,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module SET [digest(VvBc7BgavpgPsxr2dwYjC81KnoUgt0igAqeFz5DOFjY=), org.kframework.attributes.Location(Location(696,1,808,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports INT-SYNTAX
+  imports BASIC-K
+  syntax associativity left _|Set__SET_Set_Set_Set
+  syntax associativity left _Set_
+  syntax Set [hook(SET.Set), org.kframework.attributes.Location(Location(700,3,700,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Set ::= Set Set [assoc, comm, element(SetItem), format(%1%n%2), function, hook(SET.concat), idem, klabel(_Set_), left, symbol, unit(.Set)]
+  syntax Set ::= Set "|Set" Set [comm, function, hook(SET.union), left, total]
+  syntax Set ::= Set "-Set" Set [function, hook(SET.difference), klabel(Set:difference), symbol, total]
+  syntax Set ::= "intersectSet" "(" Set "," Set ")" [comm, function, hook(SET.intersection), total]
+  syntax Set ::= "SetItem" "(" KItem ")" [function, hook(SET.element), injective, klabel(SetItem), symbol, total]
+  syntax Set ::= ".Set" [function, hook(SET.unit), klabel(.Set), symbol, total]
+  syntax KItem ::= "choice" "(" Set ")" [function, hook(SET.choice), klabel(Set:choice)]
+  syntax Int ::= "size" "(" Set ")" [function, hook(SET.size), total]
+  syntax Bool ::= Set "<=Set" Set [function, hook(SET.inclusion), total]
+  syntax Bool ::= KItem "in" Set [function, hook(SET.in), klabel(Set:in), symbol, total]
+  rule `_|Set__SET_Set_Set_Set`(#SemanticCastToSet(S1),#SemanticCastToSet(S2))=>`_Set_`(#SemanticCastToSet(S1),`Set:difference`(#SemanticCastToSet(S2),#SemanticCastToSet(S1))) requires #token("true","Bool") ensures #token("true","Bool") [concrete, org.kframework.attributes.Location(Location(749,8,749,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module SORT-BOOL [digest(MOJQzHCYZvfNVc9VnLwmNlWjgceQnEcg7fFrrKnRy1w=), org.kframework.attributes.Location(Location(1076,1,1078,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Bool [hook(BOOL.Bool), org.kframework.attributes.Location(Location(1077,3,1077,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+endmodule
+
+
+module SORT-K [digest(ckybQDoW3lupp9Jaq14Mywas3AdxNTkBtgcsdMM6ZZ8=), org.kframework.attributes.Location(Location(26,1,28,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax K [hook(K.K), org.kframework.attributes.Location(Location(27,3,27,23)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module SORT-KBOTT [digest(mYzTFEZOmAIiUtGzOWmOsUQEQ2s9bU5Q4chLCUpKwZk=), org.kframework.attributes.Location(Location(68,1,71,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-K
+  syntax KBott [org.kframework.attributes.Location(Location(70,3,70,15)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module SORT-PREDICATES [digest(ahFlabySG8V7pf/VZcreS2iQFeHex5iFaSImOctpWh8=), org.kframework.attributes.Location(Location(428,1,433,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module STDIN-STREAM [digest(9XhZUf2LhShCOJ3m6CzPcOXraBJwNjtFmDm/atH3qbY=), org.kframework.attributes.Location(Location(2676,1,2757,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports MAP
+  imports LIST
+  imports K-REFLECTION
+  imports K-IO
+  imports INT
+  imports BOOL
+  syntax StdinCell ::= "initStdinCell" "(" Map ")" [function, initializer]
+  syntax StdinCell ::= "<stdin>" List "</stdin>" [cell, cellName(stdin), format(%1%i%n%2%d%n%3), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule initStdinCell(Init)=>`<stdin>`(#noDots(.KList),`_List_`(`_List_`(`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(`project:String`(`Map:lookup`(Init,#token("$STDIN","KConfigVar")))))),`ListItem`(#SemanticCastToString(`project:String`(`Map:lookup`(Init,#token("$IO","KConfigVar")))))),`ListItem`(`#istream(_)_K-IO_Stream_Int`(`#stdin_K-IO_Int`(.KList)))),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [initializer]
+  rule `<stdin>`(#noDots(.KList),`_List_`(`_List_`(`_List_`(`ListItem`(`#parseInput(_,_)_K-IO_Stream_String_String`(#SemanticCastToString(_),#SemanticCastToString(Delimiters))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(S)=>`_+String__STRING-COMMON_String_String_String`(#SemanticCastToString(S),`chrChar(_)_STRING-COMMON_String_Int`(`project:Int`(`#getc(_)_K-IO_IOInt_Int`(#SemanticCastToInt(N)))))))),`ListItem`(#token("\"on\"","String"))),`ListItem`(`#istream(_)_K-IO_Stream_Int`(#SemanticCastToInt(N)))),#noDots(.KList)) requires `_==Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S),#SemanticCastToString(Delimiters),#token("0","Int")),#token("-1","Int")) ensures #token("true","Bool") [label(STDIN-STREAM.stdinGetc), org.kframework.attributes.Location(Location(2687,8,2693,49)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), priority(200), stream]
+  rule `<stdin>`(#noDots(.KList),`_List_`(`_List_`(`ListItem`(`#parseInput(_,_)_K-IO_Stream_String_String`(#token("\"String\"","String"),#SemanticCastToString(Delimiters)))=>`ListItem`(#SemanticCastToString(S)),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(S)=>#token("\"\"","String")))),#SemanticCastToList(_)),#noDots(.KList)) requires `_=/=Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S),#SemanticCastToString(Delimiters),#token("0","Int")),#token("-1","Int")) ensures #token("true","Bool") [label(STDIN-STREAM.stdinParseString), org.kframework.attributes.Location(Location(2698,8,2703,50)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), stream]
+  rule `<stdin>`(#noDots(.KList),`_List_`(`_List_`(`ListItem`(`#parseInput(_,_)_K-IO_Stream_String_String`(#token("\"Int\"","String"),#SemanticCastToString(Delimiters)))=>`ListItem`(`String2Int(_)_STRING-COMMON_Int_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S),#token("0","Int"),`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S),#SemanticCastToString(Delimiters),#token("0","Int"))))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(S)=>`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S),`_+Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S),#SemanticCastToString(Delimiters),#token("0","Int")),#token("1","Int")),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S)))))),#SemanticCastToList(_)),#noDots(.KList)) requires `_andBool_`(`_=/=Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S),#SemanticCastToString(Delimiters),#token("0","Int")),#token("-1","Int")),`_>Int_`(`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S)),#token("1","Int"))) ensures #token("true","Bool") [label(STDIN-STREAM.stdinParseInt), org.kframework.attributes.Location(Location(2708,8,2715,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), stream]
+  rule `<stdin>`(#noDots(.KList),`_List_`(`_List_`(`ListItem`(`#parseInput(_,_)_K-IO_Stream_String_String`(#SemanticCastToString(Sort),#SemanticCastToString(Delimiters))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(S)=>`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S),#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S)))))),#SemanticCastToList(_)),#noDots(.KList)) requires `_andBool_`(`_andBool_`(`_=/=Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S),#SemanticCastToString(Delimiters),#token("0","Int")),#token("-1","Int")),`_=/=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(Sort),#token("\"String\"","String"))),`_<=Int_`(`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S)),#token("1","Int"))) ensures #token("true","Bool") [label(STDIN-STREAM.stdinTrim), org.kframework.attributes.Location(Location(2719,8,2726,39)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), stream]
+  rule `<stdin>`(#noDots(.KList),`_List_`(`.List`(.KList)=>`ListItem`(`#parseInput(_,_)_K-IO_Stream_String_String`(#SemanticCastToString(?Sort),#SemanticCastToString(?Delimiters))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(_)))),#dots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(STDIN-STREAM.stdinUnblock), org.kframework.attributes.Location(Location(2744,8,2748,16)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module STDOUT-STREAM [digest(X1RssUm6lSuVOg+W8Q32VWCNda9HdxOpcVPaiAzEdLw=), org.kframework.attributes.Location(Location(2759,1,2827,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING
+  imports MAP
+  imports LIST
+  imports K-IO
+  syntax StdoutCell ::= "initStdoutCell" "(" Map ")" [function, initializer]
+  syntax StdoutCell ::= "<stdout>" List "</stdout>" [cell, cellName(stdout), format(%1%i%n%2%d%n%3), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule initStdoutCell(Init)=>`<stdout>`(#noDots(.KList),`_List_`(`_List_`(`ListItem`(`#ostream(_)_K-IO_Stream_Int`(`#stdout_K-IO_Int`(.KList))),`ListItem`(#SemanticCastToString(`project:String`(`Map:lookup`(Init,#token("$IO","KConfigVar")))))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#token("\"\"","String")))),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [initializer]
+  rule `<stdout>`(#noDots(.KList),`_List_`(`_List_`(`_List_`(`_List_`(`ListItem`(`#ostream(_)_K-IO_Stream_Int`(#SemanticCastToInt(_))),`ListItem`(#SemanticCastToKItem(_))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(Buffer)=>`_+String__STRING-COMMON_String_String_String`(#SemanticCastToString(Buffer),`Int2String(_)_STRING-COMMON_String_Int`(#SemanticCastToInt(I)))))),`ListItem`(#SemanticCastToInt(I))=>`.List`(.KList)),#SemanticCastToList(_)),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(STDOUT-STREAM.stdoutBufferInt), org.kframework.attributes.Location(Location(2778,8,2784,17)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(25), stream]
+  rule `<stdout>`(#noDots(.KList),`_List_`(`_List_`(`_List_`(`_List_`(`ListItem`(`#ostream(_)_K-IO_Stream_Int`(#SemanticCastToInt(_))),`ListItem`(#SemanticCastToKItem(_))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(Buffer)=>`_+String__STRING-COMMON_String_String_String`(#SemanticCastToString(Buffer),`Float2String(_)_STRING-COMMON_String_Float`(#SemanticCastToFloat(F)))))),`ListItem`(#SemanticCastToFloat(F))=>`.List`(.KList)),#SemanticCastToList(_)),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(STDOUT-STREAM.stdoutBufferFloat), org.kframework.attributes.Location(Location(2768,8,2774,17)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(25), stream]
+  rule `<stdout>`(#noDots(.KList),`_List_`(`_List_`(`_List_`(`_List_`(`ListItem`(`#ostream(_)_K-IO_Stream_Int`(#SemanticCastToInt(_))),`ListItem`(#SemanticCastToKItem(_))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(Buffer)=>`_+String__STRING-COMMON_String_String_String`(#SemanticCastToString(Buffer),#SemanticCastToString(S))))),`ListItem`(#SemanticCastToString(S))=>`.List`(.KList)),#SemanticCastToList(_)),#noDots(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [label(STDOUT-STREAM.stdoutBufferString), org.kframework.attributes.Location(Location(2788,8,2794,17)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), priority(25), stream]
+  rule `<stdout>`(#noDots(.KList),`_List_`(`_List_`(`_List_`(`ListItem`(`#ostream(_)_K-IO_Stream_Int`(#SemanticCastToInt(N)=>`project:Int`(`#write(_,_)_K-IO_K_Int_String`(#SemanticCastToInt(N),#SemanticCastToString(S))~>#SemanticCastToInt(N)))),`ListItem`(#token("\"on\"","String"))),`ListItem`(`#buffer(_)_K-IO_Stream_K`(#SemanticCastToString(S)=>#token("\"\"","String")))),#SemanticCastToList(_)),#noDots(.KList)) requires `_=/=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S),#token("\"\"","String")) ensures #token("true","Bool") [label(STDOUT-STREAM.stdoutWrite), org.kframework.attributes.Location(Location(2800,8,2806,28)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), priority(30), stream]
+endmodule
+
+
+module STRING [digest(UKzjSiCmMez2OIJwgymX5LrIzKeoAwV+ul5a5DSq0MM=), org.kframework.attributes.Location(Location(1914,1,1917,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-COMMON
+endmodule
+
+
+module STRING-COMMON [digest(bEMLSP+R+UkHDrRp9YJPeLLY3yuVRS7/6jXlha+6IG0=), org.kframework.attributes.Location(Location(1696,1,1904,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-SYNTAX
+  imports K-EQUAL
+  imports INT
+  imports FLOAT-SYNTAX
+  imports BOOL
+  syntax associativity left _+String__STRING-COMMON_String_String_String
+  syntax String ::= String "+String" String [function, hook(STRING.concat), left, total]
+  syntax String ::= "substrString" "(" String "," startIndex:Int "," endIndex:Int ")" [function, hook(STRING.substr), total]
+  syntax String ::= "replaceFirst" "(" haystack:String "," needle:String "," replacement:String ")" [function, hook(STRING.replaceFirst), total]
+  syntax String ::= "replaceAll" "(" haystack:String "," needle:String "," replacement:String ")" [function, hook(STRING.replaceAll), total]
+  syntax String ::= "replace" "(" haystack:String "," needle:String "," replacement:String "," times:Int ")" [function, hook(STRING.replace)]
+  syntax String ::= "newUUID" [function, hook(STRING.uuid), impure]
+  syntax String ::= "directionalityChar" "(" String ")" [function, hook(STRING.directionality)]
+  syntax String ::= "chrChar" "(" Int ")" [function, hook(STRING.chr)]
+  syntax String ::= "categoryChar" "(" String ")" [function, hook(STRING.category)]
+  syntax String ::= "Int2String" "(" Int ")" [function, hook(STRING.int2string), total]
+  syntax String ::= "Float2String" "(" Float "," format:String ")" [function, hook(STRING.floatFormat), klabel(FloatFormat)]
+  syntax String ::= "Float2String" "(" Float ")" [function, hook(STRING.float2string), total]
+  syntax String ::= "Bool2String" "(" Bool ")" [function, total]
+  syntax String ::= "Base2String" "(" Int "," base:Int ")" [function, hook(STRING.base2string)]
+  syntax Int ::= "rfindString" "(" haystack:String "," needle:String "," index:Int ")" [function, hook(STRING.rfind)]
+  syntax Int ::= "rfindChar" "(" haystack:String "," needles:String "," index:Int ")" [function, hook(STRING.rfindChar)]
+  syntax Int ::= "ordChar" "(" String ")" [function, hook(STRING.ord)]
+  syntax Int ::= "lengthString" "(" String ")" [function, hook(STRING.length), total]
+  syntax Int ::= "findString" "(" haystack:String "," needle:String "," index:Int ")" [function, hook(STRING.find)]
+  syntax Int ::= "findChar" "(" haystack:String "," needles:String "," index:Int ")" [function, hook(STRING.findChar)]
+  syntax Int ::= "countAllOccurrences" "(" haystack:String "," needle:String ")" [function, hook(STRING.countAllOccurrences), total]
+  syntax Int ::= "String2Int" "(" String ")" [function, hook(STRING.string2int)]
+  syntax Int ::= "String2Base" "(" String "," base:Int ")" [function, hook(STRING.string2base)]
+  syntax Float ::= "String2Float" "(" String ")" [function, hook(STRING.string2float)]
+  syntax Bool ::= String ">String" String [function, hook(STRING.gt), total]
+  syntax Bool ::= String ">=String" String [function, hook(STRING.ge), total]
+  syntax Bool ::= String "==String" String [comm, function, hook(STRING.eq), total]
+  syntax Bool ::= String "=/=String" String [comm, function, hook(STRING.ne), total]
+  syntax Bool ::= String "<String" String [function, hook(STRING.lt), total]
+  syntax Bool ::= String "<=String" String [function, hook(STRING.le), total]
+  syntax Bool ::= "String2Bool" "(" String ")" [function]
+  rule `rfindChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(_),#token("\"\"","String"),#SemanticCastToInt(_))=>#token("-1","Int") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1879,8,1879,33)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `rfindChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),#SemanticCastToString(S2),#SemanticCastToInt(I))=>`maxInt(_,_)_INT-COMMON_Int_Int_Int`(`rfindString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("0","Int"),#token("1","Int")),#SemanticCastToInt(I)),`rfindChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S2))),#SemanticCastToInt(I))) requires `_=/=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S2),#token("\"\"","String")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1878,8,1878,182)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `replaceFirst(_,_,_)_STRING-COMMON_String_String_String_String`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#SemanticCastToString(_))=>#SemanticCastToString(Source) requires `_<Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1889,8,1890,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `replaceFirst(_,_,_)_STRING-COMMON_String_String_String_String`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#SemanticCastToString(Replacement))=>`_+String__STRING-COMMON_String_String_String`(`_+String__STRING-COMMON_String_String_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(Source),#token("0","Int"),`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int"))),#SemanticCastToString(Replacement)),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(Source),`_+Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int")),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(ToReplace))),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(Source)))) requires `_>=Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1886,8,1888,66)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `replaceAll(_,_,_)_STRING-COMMON_String_String_String_String`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#SemanticCastToString(Replacement))=>`replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#SemanticCastToString(Replacement),`countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1902,8,1902,154)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(_),#SemanticCastToString(_),#SemanticCastToInt(Count))=>#SemanticCastToString(Source) requires `_>=Int_`(#SemanticCastToInt(Count),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1900,8,1901,31)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), owise]
+  rule `replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#SemanticCastToString(Replacement),#SemanticCastToInt(Count))=>`_+String__STRING-COMMON_String_String_String`(`_+String__STRING-COMMON_String_String_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(Source),#token("0","Int"),`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int"))),#SemanticCastToString(Replacement)),`replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(Source),`_+Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int")),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(ToReplace))),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(Source))),#SemanticCastToString(ToReplace),#SemanticCastToString(Replacement),`_-Int_`(#SemanticCastToInt(Count),#token("1","Int")))) requires `_andBool_`(`_>Int_`(#SemanticCastToInt(Count),#token("0","Int")),`_>=Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToReplace),#token("0","Int")),#token("0","Int"))) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1896,8,1899,79)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(_),#token("\"\"","String"),#SemanticCastToInt(_))=>#token("-1","Int") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1877,8,1877,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),#SemanticCastToString(S2),#SemanticCastToInt(I))=>ite(`_==Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("0","Int"),#token("1","Int")),#SemanticCastToInt(I)),#token("-1","Int")),`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S2))),#SemanticCastToInt(I)),ite(`_==Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S2))),#SemanticCastToInt(I)),#token("-1","Int")),`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("0","Int"),#token("1","Int")),#SemanticCastToInt(I)),`minInt(_,_)_INT-COMMON_Int_Int_Int`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("0","Int"),#token("1","Int")),#SemanticCastToInt(I)),`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(S1),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(S2),#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(S2))),#SemanticCastToInt(I))))) requires `_=/=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S2),#token("\"\"","String")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1876,8,1876,431)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(#SemanticCastToString(Source),#SemanticCastToString(ToCount))=>`_+Int_`(#token("1","Int"),`countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(#SemanticCastToString(Source),`_+Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToCount),#token("0","Int")),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(ToCount))),`lengthString(_)_STRING-COMMON_Int_String`(#SemanticCastToString(Source))),#SemanticCastToString(ToCount))) requires `_>=Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToCount),#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1883,8,1884,60)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(#SemanticCastToString(Source),#SemanticCastToString(ToCount))=>#token("0","Int") requires `_<Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(#SemanticCastToString(Source),#SemanticCastToString(ToCount),#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1881,8,1882,59)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `_>String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S1),#SemanticCastToString(S2))=>`_<String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S2),#SemanticCastToString(S1)) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1873,8,1873,52)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_>=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S1),#SemanticCastToString(S2))=>`notBool_`(`_<String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S1),#SemanticCastToString(S2))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1874,8,1874,63)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_=/=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S1),#SemanticCastToString(S2))=>`notBool_`(`_==String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S1),#SemanticCastToString(S2))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1852,8,1852,65)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_<=String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S1),#SemanticCastToString(S2))=>`notBool_`(`_<String__STRING-COMMON_Bool_String_String`(#SemanticCastToString(S2),#SemanticCastToString(S1))) requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1872,8,1872,63)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `String2Bool(_)_STRING-COMMON_Bool_String`(#token("\"true\"","String"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1778,8,1778,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `String2Bool(_)_STRING-COMMON_Bool_String`(#token("\"false\"","String"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1779,8,1779,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `Bool2String(_)_STRING-COMMON_String_Bool`(#token("true","Bool"))=>#token("\"true\"","String") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1772,8,1772,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `Bool2String(_)_STRING-COMMON_String_Bool`(#token("false","Bool"))=>#token("\"false\"","String") requires #token("true","Bool") ensures #token("true","Bool") [org.kframework.attributes.Location(Location(1773,8,1773,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module STRING-SYNTAX [digest(urIvB5SBek3KkeQOK5p+0560jZezWFn42o/trLm4TBY=), org.kframework.attributes.Location(Location(1691,1,1694,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax String [hook(STRING.String), org.kframework.attributes.Location(Location(1692,3,1692,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax String ::= r"[\"]([^\"\\n\\r\\\\]|([\\\\][nrtf\"\\\\]|([\\\\][x][0-9a-fA-F]{2}|([\\\\][u][0-9a-fA-F]{4}|[\\\\][U][0-9a-fA-F]{8}))))*[\"]" [token]
+endmodule
+
+
+module UNSIGNED-INT-SYNTAX [digest(Tfp9QYLXybwhv6hzgwVBLRC+1CgNZVPefQ2srkHIizk=), org.kframework.attributes.Location(Location(1197,1,1200,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Int [hook(INT.Int), org.kframework.attributes.Location(Location(1198,3,1198,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Int ::= r"[0-9]+" [prec(2), prefer, token]
+endmodule

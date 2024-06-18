@@ -1,0 +1,10 @@
+int x, y, a, b, res;
+x = 0;
+y = 0;
+a = x + y;
+b = y + x;
+if ((a <= b) && (b <= a)) {
+    res = 0;
+} else {
+    res = 1;
+}

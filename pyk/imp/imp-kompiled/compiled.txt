@@ -1,0 +1,1301 @@
+module AUTO-CASTS [digest(yeN10EyTfkiQX2DsdIf85Ct5WWWIbDASZRvjSdc89zk=), org.kframework.attributes.Location(Location(377,1,385,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module AUTO-FOLLOW [digest(5VwlXEHlnJrYr5reTC8S4+bzFaAUMq0JsPENdLTjLfo=), org.kframework.attributes.Location(Location(387,1,398,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module BASIC-K [digest(qGPht6f9yLg48Wyknt7x5oMbPcqhSwE4Mn9ypq3hkmo=), org.kframework.attributes.Location(Location(35,1,42,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-BOOL
+  imports ML-SYNTAX
+  syntax KItem [hook(K.KItem), org.kframework.attributes.Location(Location(38,3,38,31)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KItem ::= KConfigVar
+  syntax KConfigVar [org.kframework.attributes.Location(Location(40,3,40,28)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md)), token]
+  syntax K ::= KItem
+  syntax K
+  syntax Bool ::= "isKConfigVar" "(" K ")" [function, predicate(KConfigVar), total]
+  rule isKConfigVar(KConfigVar)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0ef0a00bb321f2c2a62a3239327de70ecb8e907a950cd20034c46b84e040ebcd)]
+  rule isKConfigVar(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f68a616e301c35586f68e97b729ae274278c3ef8fe6634711cfd3e1746bc0bc2), owise]
+endmodule
+
+
+module BOOL [digest(RdEgTFZlwJdEvHFWhkT1TCy32jqjhDpuCuAJMymVXp8=), org.kframework.attributes.Location(Location(1176,1,1179,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BOOL-COMMON
+endmodule
+
+
+module BOOL-COMMON [digest(zxcUzQS8qruXwR/NFWnazglDMB3KHSGvpJGsB2qm0LU=), org.kframework.attributes.Location(Location(1086,1,1160,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BOOL-SYNTAX
+  imports BASIC-K
+  syntax priority notBool_ > _impliesBool_ _orBool_ _xorBool_ _andBool_ _andThenBool_ _orElseBool_ > _==Bool_ _=/=Bool_
+  syntax associativity left _xorBool_
+  syntax associativity left _orElseBool_
+  syntax associativity left _orBool_
+  syntax associativity left _impliesBool_
+  syntax associativity left _andThenBool_
+  syntax associativity left _andBool_
+  syntax associativity left _==Bool_ _=/=Bool_
+  syntax associativity left _==Bool_
+  syntax associativity left _=/=Bool_
+  syntax Bool ::= Bool "xorBool" Bool [function, group(boolOperation), hook(BOOL.xor), klabel(_xorBool_), left, smt-hook(xor), symbol, total]
+  syntax Bool ::= Bool "orElseBool" Bool [function, group(boolOperation), hook(BOOL.orElse), klabel(_orElseBool_), left, smt-hook(or), symbol, total]
+  syntax Bool ::= Bool "orBool" Bool [function, group(boolOperation), hook(BOOL.or), klabel(_orBool_), left, smt-hook(or), symbol, total]
+  syntax Bool ::= Bool "impliesBool" Bool [function, group(boolOperation), hook(BOOL.implies), klabel(_impliesBool_), left, smt-hook(=>), symbol, total]
+  syntax Bool ::= Bool "andThenBool" Bool [function, group(boolOperation), hook(BOOL.andThen), klabel(_andThenBool_), left, smt-hook(and), symbol, total]
+  syntax Bool ::= Bool "andBool" Bool [function, group(boolOperation), hook(BOOL.and), klabel(_andBool_), left, smt-hook(and), symbol, total]
+  syntax Bool ::= Bool "==Bool" Bool [comm, function, hook(BOOL.eq), klabel(_==Bool_), left, smt-hook(=), symbol, total]
+  syntax Bool ::= Bool "=/=Bool" Bool [comm, function, hook(BOOL.ne), klabel(_=/=Bool_), left, smt-hook(distinct), symbol, total]
+  syntax Bool ::= "notBool" Bool [function, group(boolOperation), hook(BOOL.not), klabel(notBool_), smt-hook(not), symbol, total]
+  rule `notBool_`(#token("true","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(53fc758ece1ff16581673016dfacc556cc30fcf6b3c35b586f001d76a1f9336c), org.kframework.attributes.Location(Location(1127,8,1127,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `notBool_`(#token("false","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(17ebc68421572b8ebe609c068fb49cbb6cbbe3246e2142257ad8befdda38f415), org.kframework.attributes.Location(Location(1128,8,1128,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_xorBool_`(B,B)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9a6d91cd75cd777b0d4db536b3e4b20578e74fe650e644b55294da95fd2dba7f), org.kframework.attributes.Location(Location(1142,8,1142,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_xorBool_`(B,#token("false","Bool"))=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(69f518203376930fb76ce51df5dd0c6c81d19f71eba3a1852afa5301d02eb4fa), org.kframework.attributes.Location(Location(1141,8,1141,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_xorBool_`(#token("false","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(73513655c09a595907ab9d26d67e27f01d14a3435743b77000c02d10f35c05bf), org.kframework.attributes.Location(Location(1140,8,1140,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orElseBool_`(_Gen0,#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2459cad4fbb946a5c7f71565601afeeec79f05f41497b1f7ef547578c88f3158), org.kframework.attributes.Location(Location(1150,8,1150,33)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orElseBool_`(K,#token("false","Bool"))=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(13cf42d440f9a7a360a8136ee4b35ae7b99501f515322d214c3b866691f4713b), org.kframework.attributes.Location(Location(1152,8,1152,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orElseBool_`(#token("true","Bool"),_Gen0)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(354bd0860c7f38b59e285c935fd2ea553ebddbabb4973342ad25f0dac6ea7bf6), org.kframework.attributes.Location(Location(1149,8,1149,33)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orElseBool_`(#token("false","Bool"),K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(eb8c85dac19a5951f694b65269c2b17c80d6d126d6a367958e4a5d736a880ecf), org.kframework.attributes.Location(Location(1151,8,1151,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orBool_`(_Gen0,#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(942af273100b5a3c1fb3d0c8cc92b0bf845a7b34444c5a6c35b7d3fe72bef48e), org.kframework.attributes.Location(Location(1145,8,1145,34)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orBool_`(B,#token("false","Bool"))=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a5bb27ab54700cb845d17b12e0b0a4cbd5c8944272bcbe0d15ccc0b44d0049ff), org.kframework.attributes.Location(Location(1147,8,1147,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_orBool_`(#token("true","Bool"),_Gen0)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(71744528cdad83bc729990d3af3b544d27b09630b2615ca707dd2fc6ec93e7c2), org.kframework.attributes.Location(Location(1144,8,1144,34)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_orBool_`(#token("false","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(991a3290bc7b6dca75d676a72a848ec6b2bd2827fb0e9626252aa1507394ca1b), org.kframework.attributes.Location(Location(1146,8,1146,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_impliesBool_`(_Gen0,#token("true","Bool"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2b4994db7b40b72dc09ac8d5d036263b215c37d45f45d764251d8b607a7592ba), org.kframework.attributes.Location(Location(1156,8,1156,39)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_impliesBool_`(B,#token("false","Bool"))=>`notBool_`(B) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(93b8d798abd6d9999e0e733384ad161e9a0bd2f074623a742afdc63964380aba), org.kframework.attributes.Location(Location(1157,8,1157,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_impliesBool_`(#token("true","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(da818c43c21c5fb2cced7e02a74b6b4191d323de2967a671b961ad28550f3c7d), org.kframework.attributes.Location(Location(1154,8,1154,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_impliesBool_`(#token("false","Bool"),_Gen0)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(55bb5c83c9563c712537b95401c0a5c88255fd7cdbd18b2d4358c54aee80660e), org.kframework.attributes.Location(Location(1155,8,1155,40)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andThenBool_`(_Gen0,#token("false","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(198861009d03d8f5220000f16342962720be289ca0d49b12953fb2693e2fea01), org.kframework.attributes.Location(Location(1138,8,1138,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andThenBool_`(K,#token("true","Bool"))=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2cfb33affb9c668d39a4a7267156085e1dbd3584fc7925b1aa9a1672bb9eab9f), org.kframework.attributes.Location(Location(1136,8,1136,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andThenBool_`(#token("true","Bool"),K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(78a3191cbbdec57b0f411f41291076c8124bb0d9b6b57905674b2c6858d78689), org.kframework.attributes.Location(Location(1135,8,1135,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andThenBool_`(#token("false","Bool"),_Gen0)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5b729746be7bf2183d9eff138d97078a7c9489def6d8b2e1495c41ce3954997d), org.kframework.attributes.Location(Location(1137,8,1137,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andBool_`(_Gen0,#token("false","Bool"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fd61c826168aab115cd7f528702e8187ca16195bdcf29f42f33a32c83afebb12), org.kframework.attributes.Location(Location(1133,8,1133,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andBool_`(B,#token("true","Bool"))=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(72139ee1f2b9362a47514de6503329ccf3c27e74e3ebfa0c0fe26321ec13f281), org.kframework.attributes.Location(Location(1131,8,1131,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), simplification]
+  rule `_andBool_`(#token("true","Bool"),B)=>B requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5b9db8dba12010819161cc42dadccd0adf0100a47c21f884ae66c0a3d5483a1f), org.kframework.attributes.Location(Location(1130,8,1130,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_andBool_`(#token("false","Bool"),_Gen0)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(61fbef33b3611f1cc2aaf3b5e8ddec4a0f434c557278c38461c65c8722743497), org.kframework.attributes.Location(Location(1132,8,1132,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_=/=Bool_`(B1,B2)=>`notBool_`(`_==Bool_`(B1,B2)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(31fe72efcfddcd8588a11d9d10c1b1a9f96ae3da46b647d4cb9d1e8b1bd1654f), org.kframework.attributes.Location(Location(1159,8,1159,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module BOOL-SYNTAX [digest(NyXw3ZE2lSn4HD166cKlUkGp6gngWYXMYcMitKhJyCA=), org.kframework.attributes.Location(Location(1080,1,1084,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports SORT-BOOL
+  syntax Bool ::= "true" [token]
+  syntax Bool ::= "false" [token]
+endmodule
+
+
+module BUILTIN-ID-TOKENS [digest(/99H3owdhBQOyynByjmemNq1DkW5pJFycvp958aSSUU=), org.kframework.attributes.Location(Location(63,1,66,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KItem ::= Bool
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  syntax Bool ::= "is#UpperId" "(" K ")" [function, predicate(#UpperId), total]
+  syntax Bool ::= "is#LowerId" "(" K ")" [function, predicate(#LowerId), total]
+  syntax #UpperId ::= r"[A-Z][a-zA-Z0-9]*" [prec(2), token]
+  syntax #LowerId ::= r"[a-z][a-zA-Z0-9]*" [prec(2), token]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+  rule `is#UpperId`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cb3458c54dcb3487cb4d9da15511443641afdaacdc2cbc55ab2f256cfb28a297), owise]
+  rule `is#UpperId`(#UpperId)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(8730d91ff47871b1ebed24f0564cbc44e3ee182c626f7969f8845eda3bd7822d)]
+  rule `is#LowerId`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c3e3902c11610717a0700d4646ce109585e0a10abf1e3253d088c42887b9ad1e), owise]
+  rule `is#LowerId`(#LowerId)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(49f0e69de3837715d7cb6926427906ae68fe696bc8eed6a42d33257b756d959e)]
+endmodule
+
+
+module BYTES-CONCRETE [concrete, digest(ogFGOsVjDzsUbE54ABXmADoaxJIuDkdMFdVKvoEGt6Q=), org.kframework.attributes.Location(Location(2190,1,2192,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BYTES-HOOKED
+endmodule
+
+
+module BYTES-HOOKED [digest(q7uAuReruo8UDkdRmhSSw+yWRvGnjMELoXDN6urxu88=), org.kframework.attributes.Location(Location(2006,1,2181,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-SYNTAX
+  imports BYTES-SYNTAX
+  syntax associativity right _+Bytes__BYTES-HOOKED_Bytes_Bytes_Bytes
+  syntax String ::= "Bytes2String" "(" Bytes ")" [function, hook(BYTES.bytes2string), total]
+  syntax Signedness ::= "project:Signedness" "(" K ")" [function, projection]
+  syntax Signedness ::= "Unsigned" [klabel(unsignedBytes), symbol]
+  syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
+  syntax KItem ::= Signedness
+  syntax KItem ::= Int
+  syntax KItem ::= Endianness
+  syntax K
+  syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
+  syntax Int ::= "project:Int" "(" K ")" [function, projection]
+  syntax Int ::= "lengthBytes" "(" Bytes ")" [function, hook(BYTES.length), smtlib(lengthBytes), total]
+  syntax Int ::= "Bytes2Int" "(" Bytes "," Endianness "," Signedness ")" [function, hook(BYTES.bytes2int), total]
+  syntax Endianness ::= "project:Endianness" "(" K ")" [function, projection]
+  syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
+  syntax Endianness ::= "BE" [klabel(bigEndianBytes), symbol]
+  syntax Bytes ::= Bytes "[" index:Int "<-" value:Int "]" [function, hook(BYTES.update)]
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, hook(BYTES.concat), right, total]
+  syntax Bytes ::= "substrBytes" "(" Bytes "," startIndex:Int "," endIndex:Int ")" [function, hook(BYTES.substr)]
+  syntax Bytes ::= "reverseBytes" "(" Bytes ")" [function, hook(BYTES.reverse), total]
+  syntax Bytes ::= "replaceAtBytes" "(" dest:Bytes "," index:Int "," src:Bytes ")" [function, hook(BYTES.replaceAt)]
+  syntax Bytes ::= "padRightBytes" "(" Bytes "," length:Int "," value:Int ")" [function, hook(BYTES.padRight)]
+  syntax Bytes ::= "padLeftBytes" "(" Bytes "," length:Int "," value:Int ")" [function, hook(BYTES.padLeft)]
+  syntax Bytes ::= "memsetBytes" "(" dest:Bytes "," index:Int "," count:Int "," v:Int ")" [function, hook(BYTES.memset)]
+  syntax Bytes ::= "String2Bytes" "(" String ")" [function, hook(BYTES.string2bytes), total]
+  syntax Bytes ::= "Int2Bytes" "(" length:Int "," Int "," Endianness ")" [function, hook(BYTES.int2bytes), total]
+  syntax Bytes ::= "Int2Bytes" "(" Int "," Endianness "," Signedness ")" [function, klabel(Int2BytesNoLen), total]
+  syntax Bytes ::= ".Bytes" [function, hook(BYTES.empty), total]
+  syntax Bool ::= "isSignedness" "(" K ")" [function, predicate(Signedness), total]
+  syntax Bool ::= "isInt" "(" K ")" [function, predicate(Int), total]
+  syntax Bool ::= "isEndianness" "(" K ")" [function, predicate(Endianness), total]
+  rule isSignedness(Signedness)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(d1de4cb84bd34d2dbc5bcaae03818af056fd81a68d3b9738c7a3f06055d74e93)]
+  rule isSignedness(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fdb4f75eac954bf992f8bef0826d300214e56ed18582ea34e002f78ab98c8a0f), owise]
+  rule isInt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(105572a4ac107eeb518b37c4d6ed3e28732b83afb0ba085d02d339c4fc2140a0), owise]
+  rule isInt(Int)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(92664aa821c8898ff16b4e72ad0bdf363f755c7660d28dcb69c129a2c94bc6b5)]
+  rule isEndianness(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1e0c7b51dfff4f4f81e007d23b825ea5a0aac1580bcc8afdf28a2ab4b982dbe7), owise]
+  rule isEndianness(Endianness)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(046f538ac22bdf3ccf0a2eb4a68371a574a4365990ffba4473d6583c31396757)]
+  rule `project:Signedness`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(829c38fa75d4ab0af8ef1602244b1e03c3ba7cb56ef7ad938953f9b07c83161a), projection]
+  rule `project:Int`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f316b871091516c401f1d2382cc5f66322602b782c7b01e1aeb6c2ddab50e24b), projection]
+  rule `project:Endianness`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dbd19bfafbdcba20fb8bf650b93158c4bed0b9af2a0b7476d20cf061c0be7da3), projection]
+endmodule
+
+
+module BYTES-SYNTAX [digest(f3G0srIOyv5rTWPl6+I/GQRpMbZBm3zx6wbJy8SEApg=), org.kframework.attributes.Location(Location(1983,1,1988,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-SYNTAX
+  syntax KItem ::= Bytes
+  syntax K
+  syntax Bytes [hook(BYTES.Bytes), org.kframework.attributes.Location(Location(1986,3,1986,35)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Bytes ::= r"b[\"]([ !#-\\[\\]-~]|([\\\\][tnfr\"\\\\]|[\\\\][x][0-9a-fA-F]{2}))*[\"]" [token]
+  syntax Bytes ::= "project:Bytes" "(" K ")" [function, projection]
+  syntax Bool ::= "isBytes" "(" K ")" [function, predicate(Bytes), total]
+  rule isBytes(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7b64e4dd7c4feb3f2de6be193043beffb53ede0465701be9cadd48a9abe0e27f), owise]
+  rule isBytes(Bytes)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cf9557048af554522e5d8df98ce08e94bee4e83a204d7d8282e6546ab477e7af)]
+  rule `project:Bytes`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3dd796c6a5f8b672e77ec1deefb73e210491fa6a6b575e55995906d5853e0412), projection]
+endmodule
+
+
+module CONFIG-CELLS [digest(MhWYJiW23UdCL1YQ8jwmwNqitL5G7YPC3C9kmHpl1Qs=), org.kframework.attributes.Location(Location(305,1,318,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports RULE-LISTS
+  imports KCELLS
+  syntax K
+  syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell), symbol]
+  syntax Cell ::= "<" #CellName "/>" [klabel(#externalCell), symbol]
+  syntax Bool ::= "is#CellProperty" "(" K ")" [function, predicate(#CellProperty), total]
+  syntax Bool ::= "is#CellProperties" "(" K ")" [function, predicate(#CellProperties), total]
+  syntax Bool ::= "is#CellName" "(" K ")" [function, predicate(#CellName), total]
+  syntax #CellProperty ::= #CellName "=" KString [klabel(#cellProperty), symbol]
+  syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList), symbol]
+  syntax #CellProperties ::= "" [klabel(#cellPropertyListTerminator), symbol]
+  syntax #CellName ::= r"[a-zA-Z][a-zA-Z0-9\\-]*" [prec(1), token]
+  syntax #CellName ::= #UpperId [token]
+  syntax #CellName ::= #LowerId [token]
+  rule `is#CellProperty`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c59d1b6d76b1abf2dbf41fc9fa23c1d61e31ba153960b1d8e8c5071854940127), owise]
+  rule `is#CellProperty`(#CellProperty)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(29e2c685b75d6b37922ad7b618d990d3fda0c63796dd2649e3bcfdc995ead4ee)]
+  rule `is#CellProperties`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f16c459cbeb55aa6969f251d5f5c73dbf8833fbaededa406f6741644173feda1), owise]
+  rule `is#CellProperties`(#CellProperties)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2549335e097014de7fcca9f822ebb6eb16003be69614007e12d6695f4b3a7ff6)]
+  rule `is#CellName`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a55103f254a76abdcd2dc87d07a11642977f29f27eb248e23dea9bb93f18b679), owise]
+  rule `is#CellName`(#CellName)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3cf91f36a7ba04003398dc365972f466ef60d7f09eae52abebc2e9603271625f)]
+endmodule
+
+
+module DEFAULT-LAYOUT [digest(QahWu5S5oYXowXdE9RMniNKGhTL7G1QCIXTkUlDi2m4=), org.kframework.attributes.Location(Location(510,1,514,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KItem ::= Bool
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  syntax Bool ::= "is#Layout" "(" K ")" [function, predicate(#Layout), total]
+  syntax #Layout ::= r"[ \\n\\r\\t]"
+  syntax #Layout ::= r"/\\*([^*]|\\*+[^*/])*\\*+/"
+  syntax #Layout ::= r"//[^\\n\\r]*"
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+  rule `is#Layout`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9116e93844660d7ddb68beeed183061571106f7331fcc058ab10fa7fc4439069), owise]
+  rule `is#Layout`(#Layout)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(224b32a6ac3761f23591870247572961d49694f7ed53a4954694dc621e5cdb7d)]
+endmodule
+
+
+module DOMAINS-SYNTAX [digest(Zwy0P2Mp6xwwBxLx79bGaD/CoTNbcy2Rv1d4WVpiofg=), org.kframework.attributes.Location(Location(39,1,45,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports UNSIGNED-INT-SYNTAX
+  imports STRING-SYNTAX
+  imports SORT-K
+  imports ID-SYNTAX
+  imports BOOL-SYNTAX
+endmodule
+
+
+module FLOAT-SYNTAX [digest(I7pNw5ugekHiaPLxDZ6qo61Q597tUbvw0bmjBgr5V4Q=), org.kframework.attributes.Location(Location(1478,1,1483,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax KItem ::= Float
+  syntax KItem ::= Bool
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Float [hook(FLOAT.Float), org.kframework.attributes.Location(Location(1479,3,1479,35)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Float ::= r"[+\\-]?Infinity([fFdD]|[pP][0-9]+[xX][0-9]+)?" [prec(3), token]
+  syntax Float ::= r"NaN([fFdD]|[pP][0-9]+[xX][0-9]+)?" [prec(3), token]
+  syntax Float ::= r"([+\\-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][+\\-]?[0-9]+)?([fFdD]|[pP][0-9]+[xX][0-9]+)?" [prec(1), token]
+  syntax Float ::= "project:Float" "(" K ")" [function, projection]
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isFloat" "(" K ")" [function, predicate(Float), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isFloat(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(613283edb3d0af0dfe3d5c3626073b1904f0e254fc0797cd7a4f620cfeb7de62), owise]
+  rule isFloat(Float)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(d74a36c34f45e0bf74d89fdd362f124478ab18934b5786ff4aabfe527643c5f0)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+  rule `project:Float`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ef206f477d884c0b6413273ff35b1206769cdb5a5ceba7b97d9e8e0a7b14e399), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule
+
+
+module ID [digest(9rYq0fCEnOKls3PH9XE8Qaanz14AaDZveKZU+48XsIo=), org.kframework.attributes.Location(Location(2263,1,2265,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports ID-COMMON
+endmodule
+
+
+module ID-COMMON [digest(FiP+WO61+SeCHGGVEM9a2kcGMZIP7rEW0MPLJB9E8Eg=), org.kframework.attributes.Location(Location(2252,1,2261,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING
+  imports ID-SYNTAX
+  syntax String ::= "Id2String" "(" Id ")" [function, hook(STRING.token2string), total]
+  syntax Id ::= "freshId" "(" Int ")" [freshGenerator, function, private, total]
+  syntax Id ::= "String2Id" "(" String ")" [function, hook(STRING.string2token), total]
+  rule `freshId(_)_ID-COMMON_Id_Int`(I)=>`String2Id(_)_ID-COMMON_Id_String`(`_+String__STRING-COMMON_String_String_String`(#token("\"_\"","String"),`Int2String(_)_STRING-COMMON_String_Int`(I))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3965c8e65257ebae926d601fa8ac672d34e4c211d73ba594c571c6bc5960f3de), org.kframework.attributes.Location(Location(2260,8,2260,62)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module ID-SYNTAX [digest(5CR14G1AFSwvw3G2rVmEOcrklCLhrUgwYGp0/HoDQhQ=), org.kframework.attributes.Location(Location(2248,1,2250,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax KItem ::= Id
+  syntax KItem ::= Bool
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Id [org.kframework.attributes.Location(Location(2249,3,2249,20)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), token]
+  syntax Id ::= "project:Id" "(" K ")" [function, projection]
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isId" "(" K ")" [function, predicate(Id), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isId(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f37abe49c9a4ee52b56a492679d7aab25802b3c05860fee32a4a09d72b2a322f), owise]
+  rule isId(Id)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f024b5fa3f428dab8c832862d8a13219a64369be25641326400611b32ae8843d)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+  rule `project:Id`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(afcb3941b7c18d4b91d6ed8981582d58e0dc006425e9889e9891c2a7c2b93554), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule
+
+
+module ID-SYNTAX-PROGRAM-PARSING [digest(n8ymLzMstM3sQbP9k66N41SCvCymNN/zhI7qZyoQ8vs=), org.kframework.attributes.Location(Location(2241,1,2246,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BUILTIN-ID-TOKENS
+  syntax KItem ::= Id
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K
+  syntax Id ::= r"[A-Za-z_][A-Za-z0-9_]*" [prec(1), token]
+  syntax Id ::= #UpperId [token]
+  syntax Id ::= #LowerId [token]
+  syntax Id ::= "project:Id" "(" K ")" [function, projection]
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  syntax Bool ::= "isId" "(" K ")" [function, predicate(Id), total]
+  rule isId(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f37abe49c9a4ee52b56a492679d7aab25802b3c05860fee32a4a09d72b2a322f), owise]
+  rule isId(Id)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f024b5fa3f428dab8c832862d8a13219a64369be25641326400611b32ae8843d)]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+  rule `project:Id`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(afcb3941b7c18d4b91d6ed8981582d58e0dc006425e9889e9891c2a7c2b93554), projection]
+endmodule
+
+
+module IMP [digest(nmfyr8BEKc9rbyaOCuEl6jV8f8UcXzqLds60ram8Wao=), org.kframework.attributes.Location(Location(35,1,87,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k))]
+  imports SET
+  imports MAP
+  imports INT
+  imports IMP-SYNTAX
+  imports BOOL
+  imports BASIC-K
+  syntax TCellOpt ::= TCell
+  syntax TCellOpt ::= "project:TCellOpt" "(" K ")" [function, projection]
+  syntax TCellOpt ::= "noTCell" [cellOptAbsent(TCell)]
+  syntax TCellFragment ::= "project:TCellFragment" "(" K ")" [function, projection]
+  syntax TCellFragment ::= "<T>-fragment" KCellOpt StateCellOpt "</T>-fragment" [cellFragment(TCell)]
+  syntax TCell ::= "project:TCell" "(" K ")" [function, projection]
+  syntax TCell ::= "initTCell" "(" Map ")" [function, initializer]
+  syntax TCell ::= "<T>" KCell StateCell "</T>" [cell, cellName(T), color(yellow), format(%1%i%n%2%n%3%d%n%4), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  syntax StateCellOpt ::= StateCell
+  syntax StateCellOpt ::= "project:StateCellOpt" "(" K ")" [function, projection]
+  syntax StateCellOpt ::= "noStateCell" [cellOptAbsent(StateCell)]
+  syntax StateCell ::= "project:StateCell" "(" K ")" [function, projection]
+  syntax StateCell ::= "initStateCell" [function, initializer, total]
+  syntax StateCell ::= "<state>" Map "</state>" [cell, cellName(state), color(red), format(%1%i%n%2%d%n%3), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  syntax KResult ::= Int
+  syntax KResult ::= Bool
+  syntax KResult ::= "project:KResult" "(" K ")" [function, projection]
+  syntax KItem ::= TCellOpt
+  syntax KItem ::= TCellFragment
+  syntax KItem ::= TCell
+  syntax KItem ::= StateCellOpt
+  syntax KItem ::= StateCell
+  syntax KItem ::= Pgm
+  syntax KItem ::= KResult
+  syntax KItem ::= KCellOpt
+  syntax KItem ::= KCell
+  syntax KItem ::= GeneratedTopCellFragment
+  syntax KItem ::= GeneratedTopCell
+  syntax KItem ::= GeneratedCounterCellOpt
+  syntax KItem ::= GeneratedCounterCell
+  syntax KItem ::= "Error" "(" Id "," Map ")"
+  syntax KItem ::= "#lookup" "(" Id "," Map ")" [function, total]
+  syntax KItem ::= "#freezerif(_)_else_0_" "(" K "," K ")"
+  syntax KItem ::= "#freezer_=_;1_" "(" K ")"
+  syntax KItem ::= "#freezer_<_1_" "(" K ")"
+  syntax KItem ::= "#freezer_<_0_" "(" K ")"
+  syntax KItem ::= "#freezer_<=_1_" "(" K ")"
+  syntax KItem ::= "#freezer_<=_0_" "(" K ")"
+  syntax KItem ::= "#freezer_/_1_" "(" K ")"
+  syntax KItem ::= "#freezer_/_0_" "(" K ")"
+  syntax KItem ::= "#freezer_-_1_" "(" K ")"
+  syntax KItem ::= "#freezer_-_0_" "(" K ")"
+  syntax KItem ::= "#freezer_+_1_" "(" K ")"
+  syntax KItem ::= "#freezer_+_0_" "(" K ")"
+  syntax KItem ::= "#freezer_*_1_" "(" K ")"
+  syntax KItem ::= "#freezer_*_0_" "(" K ")"
+  syntax KItem ::= "#freezer_&&_0_" "(" K ")"
+  syntax KItem ::= "#freezer_%_1_" "(" K ")"
+  syntax KItem ::= "#freezer_%_0_" "(" K ")"
+  syntax KItem ::= "#freezer!_0_" "(" ")"
+  syntax KCellOpt ::= KCell
+  syntax KCellOpt ::= "project:KCellOpt" "(" K ")" [function, projection]
+  syntax KCellOpt ::= "noKCell" [cellOptAbsent(KCell)]
+  syntax KCell ::= "project:KCell" "(" K ")" [function, projection]
+  syntax KCell ::= "initKCell" "(" Map ")" [function, initializer]
+  syntax KCell ::= "<k>" K "</k>" [cell, cellName(k), color(green), format(%1%i%n%2%d%n%3), maincell, org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  syntax K
+  syntax GeneratedTopCellFragment ::= "project:GeneratedTopCellFragment" "(" K ")" [function, projection]
+  syntax GeneratedTopCellFragment ::= "<generatedTop>-fragment" TCellOpt GeneratedCounterCellOpt "</generatedTop>-fragment" [cellFragment(GeneratedTopCell)]
+  syntax GeneratedTopCell ::= "project:GeneratedTopCell" "(" K ")" [function, projection]
+  syntax GeneratedTopCell ::= "initGeneratedTopCell" "(" Map ")" [function, initializer]
+  syntax GeneratedTopCell ::= "<generatedTop>" TCell GeneratedCounterCell "</generatedTop>" [cell, cellName(generatedTop), format(%2)]
+  syntax GeneratedCounterCellOpt ::= GeneratedCounterCell
+  syntax GeneratedCounterCellOpt ::= "project:GeneratedCounterCellOpt" "(" K ")" [function, projection]
+  syntax GeneratedCounterCellOpt ::= "noGeneratedCounterCell" [cellOptAbsent(GeneratedCounterCell)]
+  syntax GeneratedCounterCell ::= "project:GeneratedCounterCell" "(" K ")" [function, projection]
+  syntax GeneratedCounterCell ::= "initGeneratedCounterCell" [function, initializer, total]
+  syntax GeneratedCounterCell ::= "getGeneratedCounterCell" "(" GeneratedTopCell ")" [function]
+  syntax GeneratedCounterCell ::= "<generatedCounter>" Int "</generatedCounter>" [cell, cellName(generatedCounter), format(%1%i%n%2%d%n%3)]
+  syntax Bool ::= "isTCellOpt" "(" K ")" [function, predicate(TCellOpt), total]
+  syntax Bool ::= "isTCellFragment" "(" K ")" [function, predicate(TCellFragment), total]
+  syntax Bool ::= "isTCell" "(" K ")" [function, predicate(TCell), total]
+  syntax Bool ::= "isStateCellOpt" "(" K ")" [function, predicate(StateCellOpt), total]
+  syntax Bool ::= "isStateCell" "(" K ")" [function, predicate(StateCell), total]
+  syntax Bool ::= "isKResult" "(" K ")" [function, predicate(KResult), total]
+  syntax Bool ::= "isKCellOpt" "(" K ")" [function, predicate(KCellOpt), total]
+  syntax Bool ::= "isKCell" "(" K ")" [function, predicate(KCell), total]
+  syntax Bool ::= "isGeneratedTopCellFragment" "(" K ")" [function, predicate(GeneratedTopCellFragment), total]
+  syntax Bool ::= "isGeneratedTopCell" "(" K ")" [function, predicate(GeneratedTopCell), total]
+  syntax Bool ::= "isGeneratedCounterCellOpt" "(" K ")" [function, predicate(GeneratedCounterCellOpt), total]
+  syntax Bool ::= "isGeneratedCounterCell" "(" K ")" [function, predicate(GeneratedCounterCell), total]
+  rule isTCellOpt(TCellOpt)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2d9e2efc934a1108a68dec355c0ce9420ec8c2292a856744f5d9014a10f5888c)]
+  rule isTCellOpt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3a11be25d71bcfe67274e7f5c5091d99dc524b8bc5a8ac8fe6c101e58c1895ca), owise]
+  rule isTCellFragment(TCellFragment)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f1c94b538b3ecdc44697da9f227c0650540c8f233c5dba13f94071522c756c76)]
+  rule isTCellFragment(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(704d5df7c717193a67d91aad6774acb5eb9fe2137515d5204768bf499f92270b), owise]
+  rule isTCell(TCell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0b19c6d63df1e9cd6abc786c6c34fbd1b1f97cae6bf9fdba7b1275a02bd51205)]
+  rule isTCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(550b3cc25922848b7174df3ee5d34bc31b7772daa1579d20e37b3c0d6c7a961d), owise]
+  rule isStateCellOpt(StateCellOpt)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b5285b2b23133d428fcb21af02d523dec10d3660f0f43d59933927d0ee79471e)]
+  rule isStateCellOpt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(02f93e87877a1bfec39c549cdb6aa1dfeb107c88e2ea5ded312498fb690eff61), owise]
+  rule isStateCell(StateCell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(66256807bfe91d1d029a3ae94eafa088f1c65a7a764ca8875a5427f9532df462)]
+  rule isStateCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5b0e69b47868d7006abcecd9821496d91b1cbed0dc497e01577e9ddadc87c627), owise]
+  rule isKResult(KResult)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f4c2469bcff9527515b6d36f16040307917bda61067d10b85fb531e142483bee)]
+  rule isKResult(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(afefecb36598372bc1ba6e5d0b24a00b91796244dc3bd7435e40ca6e9ab33d4b), owise]
+  rule isKCellOpt(KCellOpt)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1516473b1e153a368c273997543a4378ad451e5e828db8e289f4447f7e5228a5)]
+  rule isKCellOpt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9a3f84195242c98b432c7c63a4189f4276cc3189445c5cf37ce08d9a6547b1f7), owise]
+  rule isKCell(KCell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2695222b1238f711f8a356c0a1bc0ac418d7bd78fd3282e7c60882e2631a46df)]
+  rule isKCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(d30be57718b4b3745eaf2e99f875cfec7d5be2ff76bacde8a89bd4ab659d857f), owise]
+  rule isGeneratedTopCellFragment(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(98049f5819962c7ee2b01436957b6cf8460b106979fa2c24f4c606bbf6cb1592), owise]
+  rule isGeneratedTopCellFragment(GeneratedTopCellFragment)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(559f2cdc0ab425bb065cc3174f4a1af4d9ca834f762a814cf3dfbf9a9d7f8271)]
+  rule isGeneratedTopCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ccb9226d9e6c0e476485f098ef162c6c2206ed3af1d8336ea3ae859b86bc4a8b), owise]
+  rule isGeneratedTopCell(GeneratedTopCell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3bcf423225700e329d0533cfd806eb9bab91f9d8de0979c8d8e381fe5d076bb2)]
+  rule isGeneratedCounterCellOpt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(84cfc8e964ec28b1912ffec4e6f5fccfcbad2256a1cba113622d99b11c13afd6), owise]
+  rule isGeneratedCounterCellOpt(GeneratedCounterCellOpt)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a4ff3e170677e099d4b28085658942cb10fcf871aa99abcdf73927596c180f12)]
+  rule isGeneratedCounterCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b0c8eb86594a387398bf96f2dbf773cff29d14b8a45c5f6701f205bf3d2f33ba), owise]
+  rule isGeneratedCounterCell(GeneratedCounterCell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f7b6a3dbee5a80d5eeba727f40009876995660d4052a45fc50c55f88c5fc1a7c)]
+  rule initTCell(Init)=>`<T>`(initKCell(Init),initStateCell(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(082e738743e54caf1b2a3e9be1aa464283ccaca4c3a7d07813904226676400bf), initializer]
+  rule initStateCell(.KList)=>`<state>`(`.Map`(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7293f401e67a4c1a5310b2bb8e08362f66e73646e2067fb5f94bd1eb124e0460), initializer]
+  rule initKCell(Init)=>`<k>`(`project:Pgm`(`Map:lookup`(Init,#token("$PGM","KConfigVar")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2c27c82d95db0d013b27337c5057cdbf7d8d5ae5460c4707579c33ffff961106), initializer]
+  rule initGeneratedTopCell(Init)=>`<generatedTop>`(initTCell(Init),initGeneratedCounterCell(.KList)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(6bc7582a7d8c6574a248b085ad3bdecafbf86539963d4e752be82fb1c857fb28), initializer]
+  rule initGeneratedCounterCell(.KList)=>`<generatedCounter>`(#token("0","Int")) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5de11f6b50c4684c0e05b773f809d756f4ce9c03a4f24e23a9cddaf3fa31f553), initializer]
+  rule getGeneratedCounterCell(`<generatedTop>`(_DotVar0,Cell))=>Cell requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9ef5eb9b9e6bbd7436911fad20615821f61e06e742dd27773001ab0664bd1de3)]
+  rule `project:TCell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(8f26b10396db28857112a7db56ab3ef6b64a5c219427baf3f17e0e1fb39ad1ba), projection]
+  rule `project:TCellOpt`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(d3df5db294a6f5330dba88e63f8fdddee2bee164f110ca7e39e65afc4cfbb85a), projection]
+  rule `project:TCellFragment`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fcf28c9054cbb906b0631404e7190aa02f1fa3a4a09ec0d3024688ee1222c76c), projection]
+  rule `project:StateCell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0573483956a8961d6c85cbcde0f7d23fd94a88f5f11c72a54f63e4975f3744aa), projection]
+  rule `project:StateCellOpt`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(e9c7307bada1aa928bd077216781fb45fe226c28e19ec950318b7cfa9e6ae9be), projection]
+  rule `project:KResult`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(07a916f84d6294528a6d07f273fb778b316d52b4ef8204a1817b105750b2b734), projection]
+  rule `project:KCell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(894c13c4c410f11e35bc3781505aeddde4ff400ddda1daf8b35259dbf0de9a24), projection]
+  rule `project:KCellOpt`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f684dd78d97feadf0cbcb3cbb8892e0842f137c7b29a904cb2f3fc9755b29b30), projection]
+  rule `project:GeneratedTopCell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b0fabd8c7c81fe08ebd569aff59747d357e441ae1fcd05d9d594d57e38e3d55e), projection]
+  rule `project:GeneratedTopCellFragment`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2084fac322aa142a07f881814b8a286bf62d5c6d05777b7aa715ccc534cf9a42), projection]
+  rule `project:GeneratedCounterCell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(63453db9d9aa121b63bb877e2fa4998d399ef82d2a1e4b90f87a32ba55401217), projection]
+  rule `project:GeneratedCounterCellOpt`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9325a900267ae528f7cd09f3b44b825dd9ff344c38d38383c08fa697cc67efca), projection]
+  rule `<generatedTop>`(`<T>`(`<k>`(`int_;_`(`_,_`(X,Xs)=>Xs,_Gen0)~>_DotVar2),`<state>`(STATE=>`Map:update`(STATE,X,#token("0","Int")))),_DotVar0) requires `notBool_`(`Set:in`(X,`keys(_)_MAP_Set_Map`(STATE))) ensures #token("true","Bool") [UNIQUE_ID(0f1d63eaeedf6454ee0e904d7b0febadf50e0efd08dc04dadf3ee9795cecf63a), label(IMP.decl), org.kframework.attributes.Location(Location(83,16,84,40)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(``X=>`#lookup(_,_)_IMP_KItem_Id_Map`(X,STATE)``~>_DotVar2),`<state>`(STATE)),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(e5f96de3966d3d9e9e97f55a7cfc8db87077a3b41c22273d1dce4556673800db), cool-like, label(IMP.var), org.kframework.attributes.Location(Location(69,15,69,76)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezerif(_)_else_0_`(K1,K2)=>`if(_)_else_`(HOLE,K1,K2)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(0881b6229b469dcaa880b5236c8601e43df11c75dbe62589e87d2509c9e2920c), colors(yellow, white, white, yellow), cool, cool-like, format(%1 %2%3%4 %5 %6 %7), label(IMP-SYNTAX.if(_)_else_1-cool), org.kframework.attributes.Location(Location(26,20,27,145)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(1), symbol(if(_)_else_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_=_;1_`(K0)=>`_=_;`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(b527f3b7d41966dc240f4d1ee4a1fa283043a5a0341d7555cbd054bbea6f996f), color(pink), cool, cool-like, format(%1 %2 %3%4), label(IMP-SYNTAX._=_;2-cool), org.kframework.attributes.Location(Location(25,20,25,105)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(2), symbol(_=_;)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_<_1_`(K0)=>`_<_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(a50dcb8d19e8949b2a1246f9373bbea18f2494bf38edd3b0a31c9707be2f0a5c), color(pink), cool, cool-like, label(IMP-SYNTAX._<_2-cool), org.kframework.attributes.Location(Location(17,20,17,84)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_<_0_`(K1)=>`_<_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(1870f71d75de6da1e6760616f3114581ad6e830f1658e103a1a26013daa4cf29), color(pink), cool, cool-like, label(IMP-SYNTAX._<_1-cool), org.kframework.attributes.Location(Location(17,20,17,84)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_<=_1_`(K0)=>`_<=_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(34cdab576b8ef394198e00dd2ede83e90f2dfb70b4fe59a96a93a39fd3493733), color(pink), cool, cool-like, label(IMP-SYNTAX._<=_2-cool), org.kframework.attributes.Location(Location(18,20,18,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<=_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_<=_0_`(K1)=>`_<=_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(7971567fc8d34ab450cd8f21cd441e8d5ced62423b1de2f5e5982be9cc2c1223), color(pink), cool, cool-like, label(IMP-SYNTAX._<=_1-cool), org.kframework.attributes.Location(Location(18,20,18,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<=_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_/_1_`(K0)=>`_/_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(392c2b8e65807b0d8494920db40bc449448a69102afa178ba4806283b4d618fc), color(pink), cool, cool-like, label(IMP-SYNTAX._/_2-cool), left, org.kframework.attributes.Location(Location(11,20,11,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_/_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_/_0_`(K1)=>`_/_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(89a8b0bb49c53221a34e2fc4428044ca84a3c81e1050d6003d2667f7caaf86fc), color(pink), cool, cool-like, label(IMP-SYNTAX._/_1-cool), left, org.kframework.attributes.Location(Location(11,20,11,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_/_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_-_1_`(K0)=>`_-_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(a24acb6c6e853db320a21a90ceaff961ffbbfc9c8d15455f20ec0f2977b53139), color(pink), cool, cool-like, label(IMP-SYNTAX._-_2-cool), left, org.kframework.attributes.Location(Location(14,20,14,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_-_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_-_0_`(K1)=>`_-_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(29bce2b255e568792bb7aa8aeab1621e5f6caff6be2a8076bc7af679a7a94b1b), color(pink), cool, cool-like, label(IMP-SYNTAX._-_1-cool), left, org.kframework.attributes.Location(Location(14,20,14,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_-_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_+_1_`(K0)=>`_+_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(b4bd3d7161075ea70286b161a01b6f7c0ad5c0d5de2c5bf1f32f43dd3fcc76e9), color(pink), cool, cool-like, label(IMP-SYNTAX._+_2-cool), left, org.kframework.attributes.Location(Location(13,20,13,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_+_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_+_0_`(K1)=>`_+_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(1f190c245fc6d0ba66f9e3b01e38296d7686b4d39b00ad0fb589f01d51d09ef6), color(pink), cool, cool-like, label(IMP-SYNTAX._+_1-cool), left, org.kframework.attributes.Location(Location(13,20,13,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_+_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_*_1_`(K0)=>`_*_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(ec11ad1e8ca6418392aa52b52e95ec6ea605df8467bbcf7cf0cef8d705a32fea), color(pink), cool, cool-like, label(IMP-SYNTAX._*_2-cool), left, org.kframework.attributes.Location(Location(10,20,10,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_*_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_*_0_`(K1)=>`_*_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(818ab3a39c4464e202145e59d1cd3051f78e8153e16098a642bde5f343547d5d), color(pink), cool, cool-like, label(IMP-SYNTAX._*_1-cool), left, org.kframework.attributes.Location(Location(10,20,10,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_*_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_&&_0_`(K1)=>`_&&_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(4bda70677ad8764c37fdf7597c169ff1730f3c9a2066c85e13763822d7acfef7), color(pink), cool, cool-like, label(IMP-SYNTAX._&&_1-cool), left, org.kframework.attributes.Location(Location(20,20,20,91)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(1), symbol(_&&_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_%_1_`(K0)=>`_%_`(K0,HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(b3c49d8fd268c49657043686abaf23a362fbc69e5cbdbf535f52ff55860d7134), color(pink), cool, cool-like, label(IMP-SYNTAX._%_2-cool), left, org.kframework.attributes.Location(Location(12,20,12,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_%_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer_%_0_`(K1)=>`_%_`(HOLE,K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(4940e5c589c2e81749dbca1672d1146cd7499602ceb368ac26133ea33f9d1cd7), color(pink), cool, cool-like, label(IMP-SYNTAX._%_1-cool), left, org.kframework.attributes.Location(Location(12,20,12,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_%_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(``HOLE~>`#freezer!_0_`(.KList)=>`!_`(HOLE)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),isKResult(HOLE)) ensures #token("true","Bool") [UNIQUE_ID(3ede399e5d51119801d725ca93df09fd98091c6bf76efe1b220bd25154dac1d2), color(pink), cool, cool-like, label(IMP-SYNTAX.!_1-cool), org.kframework.attributes.Location(Location(19,20,19,80)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict, symbol(!_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `{}`(.KList)=>.K``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3def4d41b48a60465e7b53ae5be667984099be6a94ea4fe68069b69a11599ec8), label(IMP.block-empty), org.kframework.attributes.Location(Location(72,23,72,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `{_}`(S)=>S``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(e5df38c47913a31f272b07c522ef87c14a0faf37e88dbd6c127c76ecba63b1d0), label(IMP.block), org.kframework.attributes.Location(Location(71,17,71,39)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `while(_)_`(B,S)=>`if(_)_else_`(B,`{_}`(`__`(S,`while(_)_`(B,S))),`{}`(.KList))``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(591d75a7bfd9283ac80b157e22b72c1cc10962d2d0792db7cf257393d231e0f9), label(IMP.while), org.kframework.attributes.Location(Location(81,17,81,75)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `int_;_`(`.List{"_,_"}`(.KList),S)=>S``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f68114600b068f53d9cb597a35770c76e7e6708e32333e5d1ace12acb97e96a0), label(IMP.decl-empty), org.kframework.attributes.Location(Location(86,22,86,52)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `if(_)_else_`(HOLE,K1,K2)=>HOLE~>`#freezerif(_)_else_0_`(K1,K2)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(b8523c9b6f5a83ee97e9bb7a594da22871922ff4e3bb2c4ae90a158330b41dd9), colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7), heat, label(IMP-SYNTAX.if(_)_else_1-heat), org.kframework.attributes.Location(Location(26,20,27,145)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(1), symbol(if(_)_else_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `if(_)_else_`(#token("true","Bool"),S,_Gen0)=>S``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(af20bd43f4d7612ba7fa75b8e0349ffcebe64246510a8619b9c56c2973fb068f), label(IMP.if-true), org.kframework.attributes.Location(Location(78,19,78,56)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `if(_)_else_`(#token("false","Bool"),_Gen0,S)=>S``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3e02201d82291b22fa47527a4a289d41d96e17a350806677b66cb65e6ea3e392), label(IMP.if-false), org.kframework.attributes.Location(Location(79,20,79,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `__`(S1,S2)=>S1~>S2``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fccf5d5060dcc569a26ee77544996751c35e68c021ada471a1de2358872d2f5f), label(IMP.sequence), org.kframework.attributes.Location(Location(76,20,76,60)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_=_;`(X,I)=>.K``~>_DotVar2),`<state>`(STATE=>`Map:update`(STATE,X,I))),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(88df198f062467e361db89bbea6d40647f4f4a3adab7e8ecb3c98c0d46101b56), label(IMP.assign), org.kframework.attributes.Location(Location(74,18,74,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_=_;`(K0,HOLE)=>HOLE~>`#freezer_=_;1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(d05ddf0f0025da70852861cff9a4b5fc12938ea42a41abea6d97cff92cd935a5), color(pink), format(%1 %2 %3%4), heat, label(IMP-SYNTAX._=_;2-heat), org.kframework.attributes.Location(Location(25,20,25,105)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(2), symbol(_=_;)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_<_`(K0,HOLE)=>HOLE~>`#freezer_<_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(fef8a112c3b85bbb7d5dc3697cebb78548f5b1fcf9f2e25a560c67488d1edef6), color(pink), heat, label(IMP-SYNTAX._<_2-heat), org.kframework.attributes.Location(Location(17,20,17,84)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_<_`(I1,I2)=>`_<Int_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0bffc3081eb24ffc66be691eff34f0546a394d5ceff7980c62a960f01b457fa0), org.kframework.attributes.Location(Location(63,8,63,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_<_`(HOLE,K1)=>HOLE~>`#freezer_<_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(adf13215b1a0128f1ac11906324519425f97c7406a22b5167f652bf09d5f7072), color(pink), heat, label(IMP-SYNTAX._<_1-heat), org.kframework.attributes.Location(Location(17,20,17,84)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_<=_`(K0,HOLE)=>HOLE~>`#freezer_<=_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(0f2642b78e6fee7ac5f52ffdaad872c680a131aa324b632964d5163a994980c3), color(pink), heat, label(IMP-SYNTAX._<=_2-heat), org.kframework.attributes.Location(Location(18,20,18,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<=_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_<=_`(I1,I2)=>`_<=Int_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(754b6704b2bf8c3175d7672bc8eca955b222354703eb3710d0ab2c1ecd608e3d), org.kframework.attributes.Location(Location(64,8,64,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_<=_`(HOLE,K1)=>HOLE~>`#freezer_<=_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(a8dbef9ebe46183574e7cc6137ddfe142b5f0139156196d524e6c61696808458), color(pink), heat, label(IMP-SYNTAX._<=_1-heat), org.kframework.attributes.Location(Location(18,20,18,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<=_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_/_`(K0,HOLE)=>HOLE~>`#freezer_/_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(69de917268af295fcf5e20ebf141c8274c786d21065059b14624da1ebcd4e300), color(pink), heat, label(IMP-SYNTAX._/_2-heat), left, org.kframework.attributes.Location(Location(11,20,11,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_/_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_/_`(I1,I2)=>`_/Int_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires `_=/=Int_`(I2,#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(db802ffee7024ec48f0111b0c12b2c1d69469fe8dd6d0191cbc14c957cfda162), org.kframework.attributes.Location(Location(58,8,58,65)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_/_`(HOLE,K1)=>HOLE~>`#freezer_/_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(3b1fa24b22c356ef1ab5513123a61304832fd2e8718ddfbc0e139c1888f47abb), color(pink), heat, label(IMP-SYNTAX._/_1-heat), left, org.kframework.attributes.Location(Location(11,20,11,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_/_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_-_`(K0,HOLE)=>HOLE~>`#freezer_-_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(154bf549f4d34aaec9ca5e57bfc9753b7f7dc866147c0bb1d248171a80116a14), color(pink), heat, label(IMP-SYNTAX._-_2-heat), left, org.kframework.attributes.Location(Location(14,20,14,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_-_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_-_`(I1,I2)=>`_-Int_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(e37bbd996b9569aa27d7234e11a4c25698e57d7196299bba79eb82f648577f6e), org.kframework.attributes.Location(Location(61,8,61,44)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_-_`(HOLE,K1)=>HOLE~>`#freezer_-_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(f3b41156f85109f553f79d1e29149324bc226f9a35c617b9d3a2193da13a2a66), color(pink), heat, label(IMP-SYNTAX._-_1-heat), left, org.kframework.attributes.Location(Location(14,20,14,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_-_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_+_`(K0,HOLE)=>HOLE~>`#freezer_+_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(2d23287823a55eb9357211243e0179f1533dcbca444a2b4e967abcea3c286602), color(pink), heat, label(IMP-SYNTAX._+_2-heat), left, org.kframework.attributes.Location(Location(13,20,13,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_+_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_+_`(I1,I2)=>`_+Int_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(d52c1653760b42feca26ec92a239adf93c8792e6bf64171622259a4e37fa9078), org.kframework.attributes.Location(Location(60,8,60,44)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_+_`(HOLE,K1)=>HOLE~>`#freezer_+_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(3886d688791d5a085f5cd794f0e9c3daac70ede56f549dd3b59951fc430073e6), color(pink), heat, label(IMP-SYNTAX._+_1-heat), left, org.kframework.attributes.Location(Location(13,20,13,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_+_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_*_`(K0,HOLE)=>HOLE~>`#freezer_*_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(89184f684514d0feeaf91ab4740e2285b073ae2ca7e1410d5df8a47ddda5e576), color(pink), heat, label(IMP-SYNTAX._*_2-heat), left, org.kframework.attributes.Location(Location(10,20,10,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_*_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_*_`(I1,I2)=>`_*Int_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(344a0a1507666db397d8fa27aa302e5c0324618d3d339708ed3845f83beebb27), org.kframework.attributes.Location(Location(57,8,57,44)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_*_`(HOLE,K1)=>HOLE~>`#freezer_*_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(d82d5f205371ad6e908f9b33d2730607c5fd06b1221a071425347a3f2fbf3662), color(pink), heat, label(IMP-SYNTAX._*_1-heat), left, org.kframework.attributes.Location(Location(10,20,10,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_*_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_&&_`(HOLE,K1)=>HOLE~>`#freezer_&&_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(df7a8178679735af4491f6bfd4e0d51d0216acbc577525e1efe8719e9d73a74b), color(pink), heat, label(IMP-SYNTAX._&&_1-heat), left, org.kframework.attributes.Location(Location(20,20,20,91)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(1), symbol(_&&_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_&&_`(#token("true","Bool"),B)=>B``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9d736fe86b71e0266978a7ed14ef592d4ebc71f0108657bc3320464ca6f6146f), org.kframework.attributes.Location(Location(66,8,66,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_&&_`(#token("false","Bool"),_Gen0)=>#token("false","Bool")``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3e7ff0dac5b880584afb4253e9c41f7769ce04b11d0af81e55b6a4b73c9e728f), org.kframework.attributes.Location(Location(67,8,67,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_%_`(K0,HOLE)=>HOLE~>`#freezer_%_1_`(K0)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(`_andBool_`(isKResult(K0),#token("true","Bool")),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(b8b8ebf9ab6696cb0dd3355f978969027f2593c2fe1dff6cb2f4ea1ed6f7ab72), color(pink), heat, label(IMP-SYNTAX._%_2-heat), left, org.kframework.attributes.Location(Location(12,20,12,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_%_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_%_`(I1,I2)=>`_modInt_`(I1,I2)``~>_DotVar2),_DotVar1),_DotVar0) requires `_=/=Int_`(I2,#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(6632ad9f77be77116fb83550c85f3790d90023bd8288ac6903b528ad5ed9b366), org.kframework.attributes.Location(Location(59,8,59,65)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `_%_`(HOLE,K1)=>HOLE~>`#freezer_%_0_`(K1)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(1d5f76c092432c010119d102c1d3ae7cbd2e7c24ab7c221cc3ad2478d745db34), color(pink), heat, label(IMP-SYNTAX._%_1-heat), left, org.kframework.attributes.Location(Location(12,20,12,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_%_)]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `!_`(T)=>`notBool_`(T)``~>_DotVar2),_DotVar1),_DotVar0) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fbda1bbe034d5478d7d24c66a3d775ffac5f95a0660a12e6064c4a7e856e30a4), org.kframework.attributes.Location(Location(65,8,65,46)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `<generatedTop>`(`<T>`(`<k>`(`` `!_`(HOLE)=>HOLE~>`#freezer!_0_`(.KList)``~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),`notBool_`(isKResult(HOLE))) ensures #token("true","Bool") [UNIQUE_ID(413dbe9abfd7ccc6d99e51aff88382f29a318705b837c2be476ec48cfdb33594), color(pink), heat, label(IMP-SYNTAX.!_1-heat), org.kframework.attributes.Location(Location(19,20,19,80)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict, symbol(!_)]
+  rule `#lookup(_,_)_IMP_KItem_Id_Map`(X,M)=>`Map:lookup`(M,X) requires `_in_keys(_)_MAP_Bool_KItem_Map`(X,M) ensures #token("true","Bool") [UNIQUE_ID(acfc941fa8f69bdd7f8e758125788a048898c9973052cc08d686ff83a8d78d75), org.kframework.attributes.Location(Location(54,8,54,51)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `#lookup(_,_)_IMP_KItem_Id_Map`(X,M)=>`Error(_,_)_IMP_KItem_Id_Map`(X,M) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0e4f65fdf7bbd637c335e65bb291af9216c01a9ba0e1820f9ad0d2a64cef0784), org.kframework.attributes.Location(Location(55,8,55,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]), owise]
+endmodule
+
+
+module IMP-SYNTAX [digest(txjI89oek78h+HQ/ruDUOh6u8YUoKOVadiNHDOK6G+w=), org.kframework.attributes.Location(Location(3,1,33,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k))]
+  imports INT-SYNTAX
+  imports ID
+  imports BOOL-SYNTAX
+  syntax priority _=_; while(_)_ if(_)_else_ > __
+  syntax priority _<_ !_ _<=_ > _&&_ (_)_IMP-SYNTAX_BExp_BExp
+  syntax priority _%_ _/_ dumby dumbx _*_ > _+_ (_)_IMP-SYNTAX_AExp_AExp _-_
+  syntax associativity left __
+  syntax associativity left _/_
+  syntax associativity left _-_
+  syntax associativity left _+_
+  syntax associativity left _*_
+  syntax associativity left _&&_
+  syntax associativity left _%_
+  syntax Stmt ::= Stmt Stmt [format(%1%n%2), left, symbol(__)]
+  syntax Stmt ::= Id "=" AExp ";" [color(pink), format(%1 %2 %3%4), strict(2), symbol(_=_;)]
+  syntax Stmt ::= Block
+  syntax Stmt ::= "while" "(" BExp ")" Block [colors(yellow,white,white), format(%1 %2%3%4 %5), symbol(while(_)_)]
+  syntax Stmt ::= "project:Stmt" "(" K ")" [function, projection]
+  syntax Stmt ::= "if" "(" BExp ")" Block "else" Block [colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7), strict(1), symbol(if(_)_else_)]
+  syntax Pgm ::= "project:Pgm" "(" K ")" [function, projection]
+  syntax Pgm ::= "int" Ids ";" Stmt [colors(yellow,pink), format(%1 %2%3%n%4), symbol(int_;_)]
+  syntax KItem ::= Stmt
+  syntax KItem ::= Pgm
+  syntax KItem ::= Ids
+  syntax KItem ::= Block
+  syntax KItem ::= BExp
+  syntax KItem ::= AExp
+  syntax K
+  syntax Ids ::= Id "," Ids [format(%1%2 %3), symbol(_,_), userList(*)]
+  syntax Ids ::= "project:Ids" "(" K ")" [function, projection]
+  syntax Ids ::= ".Ids" [symbol(.List{"_,_"}), userList(*)]
+  syntax Bool ::= "isStmt" "(" K ")" [function, predicate(Stmt), total]
+  syntax Bool ::= "isPgm" "(" K ")" [function, predicate(Pgm), total]
+  syntax Bool ::= "isIds" "(" K ")" [function, predicate(Ids), total]
+  syntax Bool ::= "isBlock" "(" K ")" [function, predicate(Block), total]
+  syntax Bool ::= "isBExp" "(" K ")" [function, predicate(BExp), total]
+  syntax Bool ::= "isAExp" "(" K ")" [function, predicate(AExp), total]
+  syntax Block ::= "{" Stmt "}" [format(%1%i%n%2%d%n%3), symbol({_})]
+  syntax Block ::= "{" "}" [symbol({})]
+  syntax Block ::= "project:Block" "(" K ")" [function, projection]
+  syntax BExp ::= Bool
+  syntax BExp ::= BExp "&&" BExp [color(pink), left, strict(1), symbol(_&&_)]
+  syntax BExp ::= AExp "<=" AExp [color(pink), seqstrict, symbol(_<=_)]
+  syntax BExp ::= AExp "<" AExp [color(pink), seqstrict, symbol(_<_)]
+  syntax BExp ::= "project:BExp" "(" K ")" [function, projection]
+  syntax BExp ::= "(" BExp ")" [bracket, bracketLabel((_)_IMP-SYNTAX_BExp_BExp)]
+  syntax BExp ::= "!" BExp [color(pink), strict, symbol(!_)]
+  syntax AExp ::= Int
+  syntax AExp ::= Id
+  syntax AExp ::= AExp "/" AExp [color(pink), left, seqstrict, symbol(_/_)]
+  syntax AExp ::= AExp "-" AExp [color(pink), left, seqstrict, symbol(_-_)]
+  syntax AExp ::= AExp "+" AExp [color(pink), left, seqstrict, symbol(_+_)]
+  syntax AExp ::= AExp "*" AExp [color(pink), left, seqstrict, symbol(_*_)]
+  syntax AExp ::= AExp "%" AExp [color(pink), left, seqstrict, symbol(_%_)]
+  syntax AExp ::= "project:AExp" "(" K ")" [function, projection]
+  syntax AExp ::= "dumby" [symbol(dumby)]
+  syntax AExp ::= "dumbx" [symbol(dumbx)]
+  syntax AExp ::= "(" AExp ")" [bracket, bracketLabel((_)_IMP-SYNTAX_AExp_AExp)]
+  rule isStmt(Stmt)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(477089570fa6db8ee9dc9b0dc4c87d68cd3cc0589ba3949a5eb4981db25246df)]
+  rule isStmt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c458a8054966aa2159c80ce75561c1552b43a1862b38e89b3e2679f8bd5c1c0c), owise]
+  rule isPgm(Pgm)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ab1ce0ad25ba45a63671fdb97f4420e1f04f944e98383fcf5e38be330aa4a7d7)]
+  rule isPgm(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(d81e24a5fb48fd63fad83552f4be2f353fc339daa0f1287ac210fda817b975c8), owise]
+  rule isIds(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(65aedfea11aff4f39c34dd525d09fc6d59148ee6676f396b2f545e9536180009), owise]
+  rule isIds(Ids)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(beb91d39851ff93a47efc4b7f23e39352a35ce69aa318452751201526391901b)]
+  rule isBlock(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f5ae65358f70fc346d115c9bbcc527e313ff1b14e7c84213db0b6d782888dded), owise]
+  rule isBlock(Block)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(90826e214774c10052882db34f0b29a8ab1ba03e3a5538878677c25ef57d97d0)]
+  rule isBExp(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(6108cef35e4885bb4047798d850428bfe3c060e630a76f15f1dfc956139ef1d9), owise]
+  rule isBExp(BExp)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b35e915aeeb6d552234ace199c9f7f48de9d1953d03daf7bc434447ab5880695)]
+  rule isAExp(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(906d94042c3f5dd6dbcc2b7ca02d972ed744ab95051dc72228c3a83cceb79a97), owise]
+  rule isAExp(AExp)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(aba35f2456886aedf33fc02f73857590a53341f9d62d824e4ca9e8e4d86dce46)]
+  rule `project:Stmt`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dea7f879e640dc866a6ac853d51a70b1ded2d1fda72c3c4a7fbded3b9e6e2500), projection]
+  rule `project:Pgm`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ddb4777eb97ab87ee0e1ea5bab55f10607991a4f447f275af1037d1b7c18329d), projection]
+  rule `project:Ids`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(616cc1b1e21370edf69fad9b4f6e3daa30b491b2f55827a5efbd41d7c60eaf07), projection]
+  rule `project:Block`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(85169c02924adb02b41be561762138c14d89ae8c9d3181b555ead907c42e2eb9), projection]
+  rule `project:BExp`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(6812dc94301a4c68a967512956ce984e07670a95b1f0379a352994b9d714aa3e), projection]
+  rule `project:AExp`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1d3212770553ced4ba2feeae8400498c709a3b0e65a44fc7ee3829c0a5f6dd8c), projection]
+  context `<generatedTop>`(`<T>`(`<k>`(`if(_)_else_`(HOLE,K1,K2)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7), label(IMP-SYNTAX.if(_)_else_1), org.kframework.attributes.Location(Location(26,20,27,145)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(1), symbol(if(_)_else_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_=_;`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), format(%1 %2 %3%4), label(IMP-SYNTAX._=_;2), org.kframework.attributes.Location(Location(25,20,25,105)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(2), symbol(_=_;)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_<_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._<_2), org.kframework.attributes.Location(Location(17,20,17,84)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_<_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._<_1), org.kframework.attributes.Location(Location(17,20,17,84)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_<=_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._<=_2), org.kframework.attributes.Location(Location(18,20,18,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<=_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_<=_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._<=_1), org.kframework.attributes.Location(Location(18,20,18,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_<=_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_/_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._/_2), left, org.kframework.attributes.Location(Location(11,20,11,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_/_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_/_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._/_1), left, org.kframework.attributes.Location(Location(11,20,11,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_/_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_-_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._-_2), left, org.kframework.attributes.Location(Location(14,20,14,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_-_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_-_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._-_1), left, org.kframework.attributes.Location(Location(14,20,14,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_-_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_+_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._+_2), left, org.kframework.attributes.Location(Location(13,20,13,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_+_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_+_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._+_1), left, org.kframework.attributes.Location(Location(13,20,13,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_+_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_*_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._*_2), left, org.kframework.attributes.Location(Location(10,20,10,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_*_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_*_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._*_1), left, org.kframework.attributes.Location(Location(10,20,10,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_*_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_&&_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._&&_1), left, org.kframework.attributes.Location(Location(20,20,20,91)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict(1), symbol(_&&_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_%_`(K0,HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(isKResult(K0),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._%_2), left, org.kframework.attributes.Location(Location(12,20,12,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_%_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`_%_`(HOLE,K1)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX._%_1), left, org.kframework.attributes.Location(Location(12,20,12,90)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), seqstrict, symbol(_%_)]
+  context `<generatedTop>`(`<T>`(`<k>`(`!_`(HOLE)~>_DotVar2),_DotVar1),_DotVar0) requires `_andBool_`(#token("true","Bool"),#token("true","Bool")) [color(pink), label(IMP-SYNTAX.!_1), org.kframework.attributes.Location(Location(19,20,19,80)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k/pyk/imp/imp.k)), strict, symbol(!_)]
+endmodule
+
+
+module INT [digest(OGBaMSqI6ew7j9i3tqM2JQmoMYPGAI9BIN6r5yPxjJo=), org.kframework.attributes.Location(Location(1416,1,1443,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports K-EQUAL
+  imports INT-COMMON
+  imports BOOL
+  syntax Int ::= "freshInt" "(" Int ")" [freshGenerator, function, private, total]
+  rule `signExtendBitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(I,IDX,LEN)=>`_-Int_`(`_modInt_`(`_+Int_`(`bitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(I,IDX,LEN),`_<<Int_`(#token("1","Int"),`_-Int_`(LEN,#token("1","Int")))),`_<<Int_`(#token("1","Int"),LEN)),`_<<Int_`(#token("1","Int"),`_-Int_`(LEN,#token("1","Int")))) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(3b67f4bf2235fc46fc94b1d10e936100ea3fc4f2dbaa4e4a77593e8385f5004f), org.kframework.attributes.Location(Location(1425,8,1425,164)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `minInt(_,_)_INT-COMMON_Int_Int_Int`(I1,I2)=>I2 requires `_>=Int_`(I1,I2) ensures #token("true","Bool") [UNIQUE_ID(e1effeabf96bb3a3beffd5b679ad5df95c4f8bbf42872b0793331e52a8470fb3), org.kframework.attributes.Location(Location(1436,8,1436,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `minInt(_,_)_INT-COMMON_Int_Int_Int`(I1,I2)=>I1 requires `_<=Int_`(I1,I2) ensures #token("true","Bool") [UNIQUE_ID(fb09b6acc4366cb77203e07c4efe8a9cf304e1bac9fb0664deea05d3eb9a80c6), org.kframework.attributes.Location(Location(1435,8,1435,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `freshInt(_)_INT_Int_Int`(I)=>I requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cf2cb8f038b4bdc4edb1334a3b8ced9cd296a7af43f0a1916e082a4e1aefa08b), org.kframework.attributes.Location(Location(1442,8,1442,28)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `bitRangeInt(_,_,_)_INT-COMMON_Int_Int_Int_Int`(I,IDX,LEN)=>`_modInt_`(`_>>Int_`(I,IDX),`_<<Int_`(#token("1","Int"),LEN)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(147fc15c2ec6c36de1a9c0cad6212b8acd8b224f21c0aeabd36726e9c8a06119), org.kframework.attributes.Location(Location(1423,8,1423,85)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_modInt_`(I1,I2)=>`_%Int_`(`_+Int_`(`_%Int_`(I1,`absInt(_)_INT-COMMON_Int_Int`(I2)),`absInt(_)_INT-COMMON_Int_Int`(I2)),`absInt(_)_INT-COMMON_Int_Int`(I2)) requires `_=/=Int_`(I2,#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(44257f63a99a0583c2d10058edbff90118966e30914b3a637b8315212c681bc4), concrete, org.kframework.attributes.Location(Location(1430,5,1433,23)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), simplification]
+  rule `_dividesInt__INT-COMMON_Bool_Int_Int`(I1,I2)=>`_==Int_`(`_%Int_`(I2,I1),#token("0","Int")) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fd8facae0061fe5bc5c406f7ad2ed5d8d21960bf1118c9b240451253064dadb5), org.kframework.attributes.Location(Location(1439,8,1439,58)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_divInt_`(I1,I2)=>`_/Int_`(`_-Int_`(I1,`_modInt_`(I1,I2)),I2) requires `_=/=Int_`(I2,#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(83dcf9bc8c69f131715bc7a92d06c99b9a2b5f4c4fdafb69e6fdb2f1822712d4), org.kframework.attributes.Location(Location(1427,8,1428,23)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `_=/=Int_`(I1,I2)=>`notBool_`(`_==Int_`(I1,I2)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(4de6e05b11cdbed7ef5cb4c952127924661af4744c1e495370e1c8a962ba7be3), org.kframework.attributes.Location(Location(1438,8,1438,53)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module INT-COMMON [digest(MFq5U4aABSoUuvJmzFhlSolaV1R97wH924rAZLukPHk=), org.kframework.attributes.Location(Location(1207,1,1350,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports INT-SYNTAX
+  imports BOOL
+  syntax priority ~Int_ > _^Int_ _^%Int__ > _divInt_ _%Int_ _/Int_ _modInt_ _*Int_ > _-Int_ _+Int_ > _<<Int_ _>>Int_ > _&Int_ > _xorInt_ > _|Int_
+  syntax associativity left _|Int_
+  syntax associativity left _xorInt_
+  syntax associativity left _modInt_
+  syntax associativity left _divInt_ _%Int_ _/Int_ _modInt_ _*Int_
+  syntax associativity left _divInt_
+  syntax associativity left _^Int_ _^%Int__
+  syntax associativity left _^Int_
+  syntax associativity left _^%Int__
+  syntax associativity left _>>Int_
+  syntax associativity left _<<Int_ _>>Int_
+  syntax associativity left _<<Int_
+  syntax associativity left _/Int_
+  syntax associativity left _-Int_ _+Int_
+  syntax associativity left _-Int_
+  syntax associativity left _+Int_
+  syntax associativity left _*Int_
+  syntax associativity left _&Int_
+  syntax associativity left _%Int_
+  syntax K ::= "srandInt" "(" Int ")" [function, hook(INT.srand), impure]
+  syntax Int ::= Int "|Int" Int [comm, function, hook(INT.or), klabel(_|Int_), left, smtlib(orInt), symbol, total]
+  syntax Int ::= Int "xorInt" Int [comm, function, hook(INT.xor), klabel(_xorInt_), left, smtlib(xorInt), symbol, total]
+  syntax Int ::= Int "modInt" Int [function, hook(INT.emod), klabel(_modInt_), left, smt-hook(mod), symbol]
+  syntax Int ::= Int "divInt" Int [function, hook(INT.ediv), klabel(_divInt_), left, smt-hook(div), symbol]
+  syntax Int ::= Int "^Int" Int [function, hook(INT.pow), klabel(_^Int_), left, smt-hook(^), symbol]
+  syntax Int ::= Int "^%Int" Int Int [function, hook(INT.powmod), klabel(_^%Int__), left, smt-hook((mod (^ #1 #2) #3)), symbol]
+  syntax Int ::= Int ">>Int" Int [function, hook(INT.shr), klabel(_>>Int_), left, smtlib(shrInt), symbol]
+  syntax Int ::= Int "<<Int" Int [function, hook(INT.shl), klabel(_<<Int_), left, smtlib(shlInt), symbol]
+  syntax Int ::= Int "/Int" Int [function, hook(INT.tdiv), klabel(_/Int_), left, smt-hook(div), symbol]
+  syntax Int ::= Int "-Int" Int [function, hook(INT.sub), klabel(_-Int_), left, smt-hook(-), symbol, total]
+  syntax Int ::= Int "+Int" Int [comm, function, hook(INT.add), klabel(_+Int_), left, smt-hook(+), symbol, total]
+  syntax Int ::= Int "*Int" Int [comm, function, hook(INT.mul), klabel(_*Int_), left, smt-hook(*), symbol, total]
+  syntax Int ::= Int "&Int" Int [comm, function, hook(INT.and), klabel(_&Int_), left, smtlib(andInt), symbol, total]
+  syntax Int ::= Int "%Int" Int [function, hook(INT.tmod), klabel(_%Int_), left, smt-hook(mod), symbol]
+  syntax Int ::= "~Int" Int [function, hook(INT.not), klabel(~Int_), smtlib(notInt), symbol, total]
+  syntax Int ::= "signExtendBitRangeInt" "(" Int "," index:Int "," length:Int ")" [function, hook(INT.signExtendBitRange)]
+  syntax Int ::= "randInt" "(" Int ")" [function, hook(INT.rand), impure]
+  syntax Int ::= "minInt" "(" Int "," Int ")" [function, hook(INT.min), smt-hook((ite (< #1 #2) #1 #2)), total]
+  syntax Int ::= "maxInt" "(" Int "," Int ")" [function, hook(INT.max), smt-hook((ite (< #1 #2) #2 #1)), total]
+  syntax Int ::= "log2Int" "(" Int ")" [function, hook(INT.log2)]
+  syntax Int ::= "bitRangeInt" "(" Int "," index:Int "," length:Int ")" [function, hook(INT.bitRange)]
+  syntax Int ::= "absInt" "(" Int ")" [function, hook(INT.abs), smt-hook((ite (< #1 0) (- 0 #1) #1)), total]
+  syntax Bool ::= Int "dividesInt" Int [function]
+  syntax Bool ::= Int ">Int" Int [function, hook(INT.gt), klabel(_>Int_), smt-hook(>), symbol, total]
+  syntax Bool ::= Int ">=Int" Int [function, hook(INT.ge), klabel(_>=Int_), smt-hook(>=), symbol, total]
+  syntax Bool ::= Int "==Int" Int [comm, function, hook(INT.eq), klabel(_==Int_), smt-hook(=), symbol, total]
+  syntax Bool ::= Int "=/=Int" Int [comm, function, hook(INT.ne), klabel(_=/=Int_), smt-hook(distinct), symbol, total]
+  syntax Bool ::= Int "<Int" Int [function, hook(INT.lt), klabel(_<Int_), smt-hook(<), symbol, total]
+  syntax Bool ::= Int "<=Int" Int [function, hook(INT.le), klabel(_<=Int_), smt-hook(<=), symbol, total]
+endmodule
+
+
+module INT-SYNTAX [digest(CwZhLaq0yZAfgguBqC5BTkSnmlrozkI5GAjpMnwglEw=), org.kframework.attributes.Location(Location(1202,1,1205,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports UNSIGNED-INT-SYNTAX
+  syntax Int ::= r"[+\\-]?[0-9]+" [prec(2), prefer, token]
+endmodule
+
+
+module K [digest(d+pjA1EpVDGS7jSzxraM7uR+IpYqxcIJ6HAfwUxDSwk=), org.kframework.attributes.Location(Location(451,1,481,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-PREDICATES
+  imports REQUIRES-ENSURES
+  imports RECORD-PRODUCTIONS
+  imports KSEQ-SYMBOLIC
+  imports KREWRITE
+  imports K-SORT-LATTICE
+  imports AUTO-FOLLOW
+  imports AUTO-CASTS
+  syntax {Sort} Sort ::= Sort "#as" Sort [klabel(#KAs), symbol]
+  syntax {Sort} Sort ::= "#fun" "(" Sort ")" "(" Sort ")" [klabel(#fun2), prefer, symbol]
+  syntax {Sort1, Sort2} Sort1 ::= "#let" Sort2 "=" Sort2 "#in" Sort1 [klabel(#let), symbol]
+  syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")" [klabel(#fun3), symbol]
+  syntax associativity left _:=K_ _:/=K_
+  syntax Bool ::= K ":=K" K [function, group(equalEqualK), klabel(_:=K_), symbol, total]
+  syntax Bool ::= K ":/=K" K [function, group(notEqualEqualK), klabel(_:/=K_), symbol, total]
+endmodule
+
+
+module K-AMBIGUITIES [digest(jP3kAYm0pRMJKQKVvk3SQ/h8ZrNBN5sE9TxkX6LrDTM=), org.kframework.attributes.Location(Location(546,1,550,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax {Sort} Sort ::= "amb" "(" Sort "," Sort ")" [klabel(amb), symbol]
+endmodule
+
+
+module K-BOTTOM-SORT [digest(1j3v4wDccAtv2EZmq1Z8sNndHbR0uA3DbRg0vI9G9hY=), org.kframework.attributes.Location(Location(366,1,370,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-KBOTT
+  syntax {Sort} Sort ::= KBott
+  syntax KItem ::= KBott
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+endmodule
+
+
+module K-EQUAL [digest(RL4qRXvW1t4oZHGmDW48hWTnCBPUBHHtsKyZl9hfu8w=), org.kframework.attributes.Location(Location(2311,1,2321,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports K-EQUAL-SYNTAX
+  imports BOOL
+  rule ite(C,_Gen0,B2)=>B2 requires `notBool_`(C) ensures #token("true","Bool") [UNIQUE_ID(2f3f58a93926913fc5ca147dfd8d3d612508bc8ff67412ef10935df7c09554d5), org.kframework.attributes.Location(Location(2319,8,2319,67)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule ite(C,B1,_Gen0)=>B1 requires C ensures #token("true","Bool") [UNIQUE_ID(1ff8f4d71e4c13084eed473b08740da83c4cc7f1875d340d86dc72124c48b4a0), org.kframework.attributes.Location(Location(2318,8,2318,59)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `_=/=K_`(K1,K2)=>`notBool_`(`_==K_`(K1,K2)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(bccaba7335e4cd77501a0667f2f7b3eb4a2105d5f60d804915dd4b1b08902c0c), org.kframework.attributes.Location(Location(2316,8,2316,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module K-EQUAL-SYNTAX [digest(ANQzsoBiemjbE7x4ZTDGnBLkvgO7Svv0JIKz3BqUTiQ=), org.kframework.attributes.Location(Location(2281,1,2293,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports BOOL
+  imports BASIC-K
+  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi" [function, hook(KEQUAL.ite), smt-hook(ite), symbol(ite), total]
+  syntax priority _==K_ _:=K_ _=/=K_ _:/=K_ > #Exists weakAlwaysFinally #Ceil notBool_ #AG #Or #Not _xorBool_ _andBool_ _andThenBool_ #And #Forall _impliesBool_ _orBool_ #Equals #Floor weakExistsFinally _orElseBool_ #Implies
+  syntax associativity left _==K_ _=/=K_
+  syntax Bool ::= K "==K" K [comm, function, group(equalEqualK), hook(KEQUAL.eq), klabel(_==K_), smt-hook(=), symbol, total]
+  syntax Bool ::= K "=/=K" K [comm, function, group(notEqualEqualK), hook(KEQUAL.ne), klabel(_=/=K_), smt-hook(distinct), symbol, total]
+endmodule
+
+
+module K-LOCATIONS [digest(oe55Yn8iHmaC4E/fTVZBonohrCiVLsMuLXlKxVjobUg=), org.kframework.attributes.Location(Location(563,1,570,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports STRING-SYNTAX
+  imports INT-SYNTAX
+  syntax {Sort} Sort ::= "#location" "(" Sort "," String "," Int "," Int "," Int "," Int ")" [format(%3), klabel(#location), symbol]
+endmodule
+
+
+module K-REFLECTION [digest(S/weTDWi8/x95IGZ7fBs9rluZ1qD/aioVDkzDIvFiW4=), org.kframework.attributes.Location(Location(2337,1,2357,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING
+  imports BASIC-K
+  syntax {Sort} String ::= "#unparseKORE" "(" Sort ")" [function, hook(KREFLECTION.printKORE)]
+  syntax String ::= "#sort" "(" K ")" [function, hook(KREFLECTION.sort)]
+  syntax String ::= "#kompiledDirectory" "(" ")" [function, hook(KREFLECTION.kompiledDir)]
+  syntax List ::= "project:List" "(" K ")" [function, projection]
+  syntax List ::= "#argv" "(" ")" [function, hook(KREFLECTION.argv)]
+  syntax KItem ::= List
+  syntax KItem ::= IOError
+  syntax KItem ::= "getKLabel" "(" K ")" [function, hook(KREFLECTION.getKLabel)]
+  syntax KItem ::= "#fresh" "(" String ")" [function, hook(KREFLECTION.fresh), impure]
+  syntax K ::= "#getenv" "(" String ")" [function, hook(KREFLECTION.getenv), impure]
+  syntax K ::= "#configuration" [function, hook(KREFLECTION.configuration), impure]
+  syntax K
+  syntax IOError ::= "project:IOError" "(" K ")" [function, projection]
+  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
+  syntax Bool ::= "isList" "(" K ")" [function, predicate(List), total]
+  syntax Bool ::= "isIOError" "(" K ")" [function, predicate(IOError), total]
+  rule isList(List)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7d4dddf5bbdb61cfd11fb9be1071be7bd551cf186607cf6f493cfade3221c446)]
+  rule isList(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9a9489adcf0279eca74c012bb1130bb9d30372cfbebc8e4ab4b173656c4d6613), owise]
+  rule isIOError(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c96fa3a271ec5957293f6ff8436703651f7e219c4364d65286dc134a6a6e7dda), owise]
+  rule isIOError(IOError)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(af1461e241b050082a392e02da8a0d27eb78de77d591d7b2a949770399eea7d0)]
+  rule `project:List`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2b75eac5a59779d336e6cf9632bf9ba7d67286f322e753108b34e62f2443efe5), projection]
+  rule `project:IOError`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7ffe32516a0c3941ee4ba99c0f779b50c13a06e7eeb613f97334efb61b50c3aa), projection]
+endmodule
+
+
+module K-SORT-LATTICE [digest(5sfKs0Ytbk1tmGlfzG5UWYrUr7nvc8fDGfC/Quz7OrA=), org.kframework.attributes.Location(Location(372,1,375,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports K-TOP-SORT
+  imports K-BOTTOM-SORT
+endmodule
+
+
+module K-TERM [digest(ZIvdKjAMHjG4TchOZ4P3Ek2WtcquQgwHvyLbM8yJcJo=), org.kframework.attributes.Location(Location(484,1,492,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-PREDICATES
+  imports RECORD-PRODUCTIONS
+  imports KSEQ-SYMBOLIC
+  imports KREWRITE
+  imports K-SORT-LATTICE
+  imports AUTO-FOLLOW
+  imports AUTO-CASTS
+endmodule
+
+
+module K-TOP-SORT [digest(yk8jHTvB7QhXK+dxcMFAjX932Kx/ZMgQaZSTjwBQTew=), org.kframework.attributes.Location(Location(360,1,364,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-KBOTT
+  syntax {Sort} KItem ::= Sort
+  syntax KItem ::= KBott
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+endmodule
+
+
+module KAST [digest(foGX1SOK/p+Aw8BWZ0a20spIYxQMhRfY9rQc4RVlj48=), org.kframework.attributes.Location(Location(73,1,91,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-KBOTT
+  imports KSTRING
+  imports BUILTIN-ID-TOKENS
+  imports BASIC-K
+  syntax associativity left #KList
+  syntax KList ::= KList "," KList [assoc, klabel(#KList), left, prefer, symbol, unit(#EmptyKList)]
+  syntax KList ::= K
+  syntax KList ::= ".KList" [klabel(#EmptyKList), symbol]
+  syntax KLabel ::= r"`(\\\\`|(\\\\\\\\|[^`\\\\\\n\\r]))+`" [token]
+  syntax KLabel ::= r"[#a-z][a-zA-Z0-9]*" [prec(1), token]
+  syntax KLabel ::= #LowerId [token]
+  syntax KItem ::= KBott
+  syntax KBott ::= KLabel "(" KList ")" [klabel(#KApply), symbol]
+  syntax KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
+  syntax KBott ::= "#klabel" "(" KLabel ")" [klabel(#WrappedKLabel), symbol]
+  syntax K
+  syntax Bool ::= "isKList" "(" K ")" [function, predicate(KList), total]
+  syntax Bool ::= "isKLabel" "(" K ")" [function, predicate(KLabel), total]
+  rule isKList(KList)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7798ef3092247523cd97929d867d7a11232545c67fb317851b22cf3cc2c0d087)]
+  rule isKList(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(e2fc166a5d18ad14439e9155643902ebc2146c507db2b50367629581f694623b), owise]
+  rule isKLabel(KLabel)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(08b4d379a3dbf0de7738dce575c00d1d3cf6e6e7139abdd5cdbad776d7f88fb4)]
+  rule isKLabel(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(eda6b629df95c44b7f65608276dc1c3682d3468ac14b27efa2b235f1316f8333), owise]
+endmodule
+
+
+module KCELLS [digest(z/ZHv9Uf1pEdjeUQueCzb+u2Me+rsKktcsMHVKZp0jo=), org.kframework.attributes.Location(Location(235,1,248,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports KAST
+  syntax associativity non-assoc #withConfig [org.kframework.attributes.Location(Location(246,3,246,31)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax associativity left #cells
+  syntax KItem ::= Cell
+  syntax KItem ::= Bag
+  syntax K
+  syntax Cell [org.kframework.attributes.Location(Location(238,3,238,14)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax Cell ::= "project:Cell" "(" K ")" [function, projection]
+  syntax Bool ::= "isCell" "(" K ")" [function, predicate(Cell), total]
+  syntax Bool ::= "isBag" "(" K ")" [function, predicate(Bag), total]
+  syntax Bool ::= "is#RuleBody" "(" K ")" [function, predicate(#RuleBody), total]
+  syntax Bag ::= KBott
+  syntax Bag ::= Cell
+  syntax Bag ::= Bag Bag [assoc, klabel(#cells), left, symbol, unit(#cells)]
+  syntax Bag ::= "project:Bag" "(" K ")" [function, projection]
+  syntax Bag ::= ".Bag" [klabel(#cells), symbol]
+  syntax Bag ::= ".::Bag" [klabel(#cells), symbol]
+  syntax Bag ::= "(" Bag ")" [bracket, bracketLabel((_)_KCELLS_Bag_Bag)]
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag [avoid, klabel(#withConfig), symbol]
+  rule isCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a694892988d07468492e09de74f86a0401ad2b93df25384546311ac89379d615), owise]
+  rule isCell(Cell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(05325bc82e53203b2b1edf19e387eb12a27629aaf547347085bd9b4863dbd54b)]
+  rule isBag(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c9ca79e0b3a9bac67de6cc741df8e1c2cd8550ed49a60b3205bc9ca2141c7041), owise]
+  rule isBag(Bag)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a0102ba23fcd9d0c2eead87eb92d82e6f40454d6ea72e20d28c090abd7f83fd3)]
+  rule `project:Cell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5bab0f160b84c2545224fc7a5653420af7b7e03c6696faca392c14f0b0b66c01), projection]
+  rule `project:Bag`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2ffb154b779bf70774b130cdb53d4e7937ec331f8e25bca4c323a95ca707b5ff), projection]
+  rule `is#RuleBody`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a9553e34292a5e1f7e314e2cd0e47ad573c41de2eb9718d6861f1e626c0470f4), owise]
+  rule `is#RuleBody`(#RuleBody)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(eb57716475d641ee8c5ca9ddffe15f855af2ca81a2d220807e68e18c19e67af4)]
+endmodule
+
+
+module KREWRITE [digest(0ZtA19xcYF+jMIsJE6w5pCajjLwgV/s3RGx15GWImBY=), org.kframework.attributes.Location(Location(444,1,448,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+  syntax priority #KRewrite > #withConfig
+  syntax associativity non-assoc #KRewrite [org.kframework.attributes.Location(Location(446,3,446,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module KSEQ [digest(pyR1vNdPgG7hPV+umVRePLUuIgGNgFKScMAkrsElxeY=), org.kframework.attributes.Location(Location(95,1,103,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports KAST
+  imports K-TOP-SORT
+  syntax {Sort} Sort ::= "(" Sort ")" [applyPriority(1), bracket, bracketLabel((_)_KSEQ_Sort_Sort{Sort}), group(defaultBracket)]
+  syntax associativity left #KSequence [org.kframework.attributes.Location(Location(101,3,101,25)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax associativity left #KSequence
+  syntax K ::= K "~>" K [assoc, klabel(#KSequence), left, symbol, unit(#EmptyK)]
+  syntax K ::= ".K" [klabel(#EmptyK), symbol]
+  syntax K ::= "." [deprecated, klabel(#EmptyK), symbol, unparseAvoid]
+endmodule
+
+
+module KSEQ-SYMBOLIC [digest(yJBLLS1rDghySJ8NKJDiyKAGYuBcnD5hHdCy7qbb3uc=), org.kframework.attributes.Location(Location(201,1,211,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports ML-SYNTAX
+  imports KVARIABLE-SYNTAX
+  imports KSEQ
+  syntax KConfigVar ::= r"\\$([A-Z][A-Za-z0-9'_]*)" [token]
+  syntax KBott ::= KConfigVar
+  syntax KBott ::= #KVariable
+  syntax #KVariable ::= r"(!|(\\?|@))?([A-Z][A-Za-z0-9'_]*|(_|_[A-Z][A-Za-z0-9'_]*))" [prec(1), token]
+  syntax #KVariable ::= #UpperId [token]
+endmodule
+
+
+module KSTRING [digest(CZRMkUWit9YS8OyP6FODwAGIFHK2Jsd3MZjHC2ZeXYY=), org.kframework.attributes.Location(Location(58,1,61,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KString ::= r"[\"]([^\"\\n\\r\\\\]|([\\\\][nrtf\"\\\\]|([\\\\][x][0-9a-fA-F]{2}|([\\\\][u][0-9a-fA-F]{4}|[\\\\][U][0-9a-fA-F]{8}))))*[\"]" [token]
+  syntax KItem ::= Bool
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isKString" "(" K ")" [function, predicate(KString), total]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isKString(KString)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(987f28cb2b124d08cbabde0a7714c85d217dbf3ae55e652864398eadd1068f79)]
+  rule isKString(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(996438e14d2e92b238c16b9dd1272a1c445ef380a6db74d21d7b617e560c3d10), owise]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule
+
+
+module KVARIABLE-SYNTAX [digest(nF1oIka7Ca/Xb+XgmNjTORUo746FC642GBlXnX+0XGk=), org.kframework.attributes.Location(Location(196,1,198,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KItem ::= Bool
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  syntax Bool ::= "is#KVariable" "(" K ")" [function, predicate(#KVariable), total]
+  syntax #KVariable [org.kframework.attributes.Location(Location(197,3,197,20)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+  rule `is#KVariable`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a69f9bc8219347b6c2d405248cc63b91ee1350ebf8952536d78221833a9c457b), owise]
+  rule `is#KVariable`(#KVariable)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(62e0bd07aab19759a49a0c168ed2bf75db0ac010573d108b39908f467f4ba907)]
+endmodule
+
+
+module LANGUAGE-PARSING
+  imports K-TERM
+  imports IMP-SYNTAX
+  imports IMP
+  imports ID-SYNTAX-PROGRAM-PARSING
+endmodule
+
+
+module LIST [digest(YaTJmPj95yNzJJZkmQzUcGNKQtljAYMLZSG3Zzu19Sc=), org.kframework.attributes.Location(Location(909,1,1033,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports INT-SYNTAX
+  imports BASIC-K
+  syntax associativity left _List_
+  syntax List [hook(LIST.List), org.kframework.attributes.Location(Location(913,3,913,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax List ::= List List [assoc, element(ListItem), format(%1%n%2), function, hook(LIST.concat), klabel(_List_), left, smtlib(smt_seq_concat), symbol, total, unit(.List)]
+  syntax List ::= List "[" index:Int "<-" value:KItem "]" [function, hook(LIST.update), klabel(List:set)]
+  syntax List ::= "updateList" "(" dest:List "," index:Int "," src:List ")" [function, hook(LIST.updateAll)]
+  syntax List ::= "range" "(" List "," fromFront:Int "," fromBack:Int ")" [function, hook(LIST.range), klabel(List:range), symbol]
+  syntax List ::= "pushList" "(" KItem "," List ")" [function, hook(LIST.push), klabel(pushList), symbol, total]
+  syntax List ::= "project:List" "(" K ")" [function, projection]
+  syntax List ::= "makeList" "(" length:Int "," value:KItem ")" [function, hook(LIST.make)]
+  syntax List ::= "fillList" "(" List "," index:Int "," length:Int "," value:KItem ")" [function, hook(LIST.fill)]
+  syntax List ::= "ListItem" "(" KItem ")" [function, hook(LIST.element), klabel(ListItem), smtlib(smt_seq_elem), symbol, total]
+  syntax List ::= ".List" [function, hook(LIST.unit), klabel(.List), smtlib(smt_seq_nil), symbol, total]
+  syntax KItem ::= List "[" Int "]" [function, hook(LIST.get), klabel(List:get), symbol]
+  syntax KItem ::= List
+  syntax K
+  syntax Int ::= "size" "(" List ")" [function, hook(LIST.size), klabel(sizeList), smtlib(smt_seq_len), total]
+  syntax Bool ::= KItem "in" List [function, hook(LIST.in), klabel(_inList_), total]
+  syntax Bool ::= "isList" "(" K ")" [function, predicate(List), total]
+  rule pushList(K,L1)=>`_List_`(`ListItem`(K),L1) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f6967050cc4ec32c2d34d52f5577e09120f730420d2c5dc838cba81d04c57adf), org.kframework.attributes.Location(Location(954,8,954,54)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule isList(List)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(7d4dddf5bbdb61cfd11fb9be1071be7bd551cf186607cf6f493cfade3221c446)]
+  rule isList(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9a9489adcf0279eca74c012bb1130bb9d30372cfbebc8e4ab4b173656c4d6613), owise]
+  rule `project:List`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2b75eac5a59779d336e6cf9632bf9ba7d67286f322e753108b34e62f2443efe5), projection]
+endmodule
+
+
+module MAP [digest(ov1UF+8PqpPw/F1gSvGCV2c7mlX5fDqG7WH/4mSBNXw=), org.kframework.attributes.Location(Location(212,1,404,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports SET
+  imports LIST
+  imports INT-SYNTAX
+  imports BOOL-SYNTAX
+  syntax priority _|->_ > .Map _Map_
+  syntax associativity non-assoc _|->_ [org.kframework.attributes.Location(Location(260,3,260,25)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax associativity left _Map_
+  syntax Set ::= "keys" "(" Map ")" [function, hook(MAP.keys), total]
+  syntax Map [hook(MAP.Map), org.kframework.attributes.Location(Location(218,3,218,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Map ::= Map Map [assoc, comm, element(_|->_), format(%1%n%2), function, hook(MAP.concat), index(0), klabel(_Map_), left, symbol, unit(.Map)]
+  syntax Map ::= Map "[" key:KItem "<-" value:KItem "]" [function, hook(MAP.update), klabel(Map:update), prefer, symbol, total]
+  syntax Map ::= Map "[" KItem "<-" "undef" "]" [function, hook(MAP.remove), klabel(_[_<-undef]), symbol, total]
+  syntax Map ::= Map "-Map" Map [function, hook(MAP.difference), total]
+  syntax Map ::= KItem "|->" KItem [function, hook(MAP.element), injective, klabel(_|->_), symbol, total]
+  syntax Map ::= "updateMap" "(" Map "," Map ")" [function, hook(MAP.updateAll), total]
+  syntax Map ::= "removeAll" "(" Map "," Set ")" [function, hook(MAP.removeAll), total]
+  syntax Map ::= "project:Map" "(" K ")" [function, projection]
+  syntax Map ::= ".Map" [function, hook(MAP.unit), klabel(.Map), symbol, total]
+  syntax List ::= "values" "(" Map ")" [function, hook(MAP.values)]
+  syntax List ::= "keys_list" "(" Map ")" [function, hook(MAP.keys_list)]
+  syntax KItem ::= Map "[" KItem "]" [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem [function, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault), total]
+  syntax KItem ::= Map
+  syntax KItem ::= "choice" "(" Map ")" [function, hook(MAP.choice), klabel(Map:choice)]
+  syntax K
+  syntax Int ::= "size" "(" Map ")" [function, hook(MAP.size), klabel(sizeMap), total]
+  syntax Bool ::= Map "<=Map" Map [function, hook(MAP.inclusion), total]
+  syntax Bool ::= KItem "in_keys" "(" Map ")" [function, hook(MAP.in_keys), total]
+  syntax Bool ::= "isMap" "(" K ")" [function, predicate(Map), total]
+  rule isMap(Map)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(4879c0fcf6b7d7f3d6b751e4f460f8dced005a44ae5ff600cffcea784cf58795)]
+  rule isMap(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(6f30a2087d0b19640df005437bc3f4665f41282666a72821b17b16c99ed5afee), owise]
+  rule `project:Map`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(031237d4aae58d86914d6370d37ccd15f4738378ed780333c59cc81b4f7bc598), projection]
+endmodule
+
+
+module MINT-SYNTAX [digest(/pRW1jHKusHxWW6ZIXoWOwy04V8wN2tFy1abSVcfBhk=), org.kframework.attributes.Location(Location(2846,1,2853,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax {Width} MInt{Width} ::= r"[+\\-]?[0-9]+[pP][0-9]+" [hook(MINT.literal), prec(2), token]
+  syntax MInt{Width} [hook(MINT.MInt), org.kframework.attributes.Location(Location(2849,3,2849,47)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+endmodule
+
+
+module ML-SYNTAX [digest(2BWYOckO6QR3U1Ha5LoWj6Z02KP2seh0PIaM53935BY=), not-lr1, org.kframework.attributes.Location(Location(135,1,160,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-K
+  syntax {Sort} Sort ::= Sort "#Or" Sort [assoc, comm, format(%i%1%d%n%2%n%i%3%d), group(mlOp), klabel(#Or), left, mlOp, symbol, unit(#Bottom)]
+  syntax {Sort} Sort ::= Sort "#Implies" Sort [format(%i%1%d%n%2%n%i%3%d), group(mlImplies, mlOp), klabel(#Implies), mlOp, symbol]
+  syntax {Sort} Sort ::= Sort "#And" Sort [assoc, comm, format(%i%1%d%n%2%n%i%3%d), group(mlAnd, mlOp), klabel(#And), left, mlOp, symbol, unit(#Top)]
+  syntax {Sort} Sort ::= "#wEF" "(" Sort ")" [group(mlOp), klabel(weakExistsFinally), mlOp, symbol]
+  syntax {Sort} Sort ::= "#wAF" "(" Sort ")" [group(mlOp), klabel(weakAlwaysFinally), mlOp, symbol]
+  syntax {Sort} Sort ::= "#Top" [group(mlUnary), klabel(#Top), symbol]
+  syntax {Sort} Sort ::= "#Not" "(" Sort ")" [group(mlUnary, mlOp), klabel(#Not), mlOp, symbol]
+  syntax {Sort} Sort ::= "#Bottom" [group(mlUnary), klabel(#Bottom), symbol]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [group(mlOp), klabel(#AG), mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "{" Sort1 "#Equals" Sort1 "}" [comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5), group(mlEquals, mlOp), klabel(#Equals), mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Forall" Sort1 "." Sort2 [group(mlQuantifier, mlOp), klabel(#Forall), mlBinder, mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Floor" "(" Sort1 ")" [group(mlUnary, mlOp), klabel(#Floor), mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [group(mlQuantifier, mlOp), klabel(#Exists), mlBinder, mlOp, symbol]
+  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [group(mlUnary, mlOp), klabel(#Ceil), mlOp, symbol]
+  syntax priority #Implies > #Forall #Exists
+  syntax priority #Ceil #Floor #Top #Not #Bottom > #Equals > #And
+  syntax priority #And > #Or > #Implies
+  syntax associativity left #Or
+  syntax associativity left #And
+endmodule
+
+
+module PROGRAM-LISTS [digest(ljgenSN1NyiROhfDNTKEEfzs1eFAxTqqqXpUqCXgJ8c=), org.kframework.attributes.Location(Location(400,1,412,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-K
+endmodule
+
+
+module RECORD-PRODUCTIONS [digest(+hjBMZMdjvQLQc9fz9o5jh1bWeelKiYTXhzP5XyMp00=), org.kframework.attributes.Location(Location(421,1,426,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module REQUIRES-ENSURES [digest(9mFX7dRf+oPE7GKZntrP9ZOQ7AtkYrBM40wcpotzHKU=), org.kframework.attributes.Location(Location(340,1,349,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports BASIC-K
+  syntax K
+  syntax Bool ::= "is#RuleContent" "(" K ")" [function, predicate(#RuleContent), total]
+  syntax Bool ::= "is#RuleBody" "(" K ")" [function, predicate(#RuleBody), total]
+  syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol]
+  syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]
+  syntax #RuleContent ::= #RuleBody "requires" Bool "ensures" Bool [klabel(#ruleRequiresEnsures), symbol]
+  syntax #RuleContent ::= #RuleBody "ensures" Bool [klabel(#ruleEnsures), symbol]
+  syntax #RuleBody ::= K
+  rule `is#RuleContent`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a4262d84c36f6fd37495d0393dae94d3215ecdbda43d96138c5d2ed377835db7), owise]
+  rule `is#RuleContent`(#RuleContent)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0c946f423b7439da29b25b144d79631b38ea5ab890f68f8677acc101def085b5)]
+  rule `is#RuleBody`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(a9553e34292a5e1f7e314e2cd0e47ad573c41de2eb9718d6861f1e626c0470f4), owise]
+  rule `is#RuleBody`(#RuleBody)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(eb57716475d641ee8c5ca9ddffe15f855af2ca81a2d220807e68e18c19e67af4)]
+endmodule
+
+
+module RULE-CELLS [digest(8SgxgAsGzFWzBOfNDPzN0iwH8wcW3YRc13fB9DZkLpE=), org.kframework.attributes.Location(Location(269,1,290,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports RULE-LISTS
+  imports KCELLS
+  syntax KItem ::= Int
+  syntax KItem ::= GeneratedCounterCell
+  syntax K
+  syntax Int [org.kframework.attributes.Location(Location(280,3,280,13)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax Int ::= "project:Int" "(" K ")" [function, projection]
+  syntax GeneratedCounterCell ::= "project:GeneratedCounterCell" "(" K ")" [function, projection]
+  syntax GeneratedCounterCell ::= "<generatedCounter>" Int "</generatedCounter>" [cell, internal, klabel(<generatedCounter>), symbol]
+  syntax Bool ::= "isInt" "(" K ")" [function, predicate(Int), total]
+  syntax Bool ::= "isGeneratedCounterCell" "(" K ")" [function, predicate(GeneratedCounterCell), total]
+  syntax Bool ::= "is#OptionalDots" "(" K ")" [function, predicate(#OptionalDots), total]
+  syntax #OptionalDots ::= "..." [klabel(#dots), symbol]
+  syntax #OptionalDots ::= "" [klabel(#noDots), symbol]
+  rule isInt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(105572a4ac107eeb518b37c4d6ed3e28732b83afb0ba085d02d339c4fc2140a0), owise]
+  rule isInt(Int)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(92664aa821c8898ff16b4e72ad0bdf363f755c7660d28dcb69c129a2c94bc6b5)]
+  rule isGeneratedCounterCell(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b0c8eb86594a387398bf96f2dbf773cff29d14b8a45c5f6701f205bf3d2f33ba), owise]
+  rule isGeneratedCounterCell(GeneratedCounterCell)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f7b6a3dbee5a80d5eeba727f40009876995660d4052a45fc50c55f88c5fc1a7c)]
+  rule `project:Int`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f316b871091516c401f1d2382cc5f66322602b782c7b01e1aeb6c2ddab50e24b), projection]
+  rule `project:GeneratedCounterCell`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(63453db9d9aa121b63bb877e2fa4998d399ef82d2a1e4b90f87a32ba55401217), projection]
+  rule `is#OptionalDots`(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5e4caab4592f3c68938db4c96917f147d292d603227035808a62c08b5003bd58), owise]
+  rule `is#OptionalDots`(#OptionalDots)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ae479e7ea13e6ca02bb24848a1193cb7526c0bc5cf522a9463c32a27aba2e387)]
+endmodule
+
+
+module RULE-LISTS [digest(IvIn9r6rZWFy5pziEqMyoMOAqhjW7l37VKpCzHVo6Aw=), org.kframework.attributes.Location(Location(414,1,419,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module SET [digest(VvBc7BgavpgPsxr2dwYjC81KnoUgt0igAqeFz5DOFjY=), org.kframework.attributes.Location(Location(696,1,808,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports INT-SYNTAX
+  imports BASIC-K
+  syntax associativity left _|Set__SET_Set_Set_Set
+  syntax associativity left _Set_
+  syntax Set [hook(SET.Set), org.kframework.attributes.Location(Location(700,3,700,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Set ::= Set Set [assoc, comm, element(SetItem), format(%1%n%2), function, hook(SET.concat), idem, klabel(_Set_), left, symbol, unit(.Set)]
+  syntax Set ::= Set "|Set" Set [comm, function, hook(SET.union), left, total]
+  syntax Set ::= Set "-Set" Set [function, hook(SET.difference), klabel(Set:difference), symbol, total]
+  syntax Set ::= "project:Set" "(" K ")" [function, projection]
+  syntax Set ::= "intersectSet" "(" Set "," Set ")" [comm, function, hook(SET.intersection), total]
+  syntax Set ::= "SetItem" "(" KItem ")" [function, hook(SET.element), injective, klabel(SetItem), symbol, total]
+  syntax Set ::= ".Set" [function, hook(SET.unit), klabel(.Set), symbol, total]
+  syntax KItem ::= Set
+  syntax KItem ::= "choice" "(" Set ")" [function, hook(SET.choice), klabel(Set:choice)]
+  syntax K
+  syntax Int ::= "size" "(" Set ")" [function, hook(SET.size), total]
+  syntax Bool ::= Set "<=Set" Set [function, hook(SET.inclusion), total]
+  syntax Bool ::= KItem "in" Set [function, hook(SET.in), klabel(Set:in), symbol, total]
+  syntax Bool ::= "isSet" "(" K ")" [function, predicate(Set), total]
+  rule isSet(Set)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f205bc460bdb728b4c3458643699be30d519db4d8b13e80e2c27082b9e846e80)]
+  rule isSet(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(2b5aadccd9b89faba72816867187d48d279d8c27c8bda1a1b3b0658bd82bb783), owise]
+  rule `project:Set`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0e7f5070c993161786e314f7199d985afebac9e07b5c784f6f623780c60ce9d0), projection]
+  rule `_|Set__SET_Set_Set_Set`(S1,S2)=>`_Set_`(S1,`Set:difference`(S2,S1)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(c384edb8f3875244a593dda6163c3dee1bce5485e4e1848892aebc2bab67d2e9), concrete, org.kframework.attributes.Location(Location(749,8,749,45)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module SORT-BOOL [digest(MOJQzHCYZvfNVc9VnLwmNlWjgceQnEcg7fFrrKnRy1w=), org.kframework.attributes.Location(Location(1076,1,1078,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax KItem ::= Bool
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool [hook(BOOL.Bool), org.kframework.attributes.Location(Location(1077,3,1077,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule
+
+
+module SORT-K [digest(ckybQDoW3lupp9Jaq14Mywas3AdxNTkBtgcsdMM6ZZ8=), org.kframework.attributes.Location(Location(26,1,28,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax KItem ::= Bool
+  syntax K [hook(K.K), org.kframework.attributes.Location(Location(27,3,27,23)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule
+
+
+module SORT-KBOTT [digest(mYzTFEZOmAIiUtGzOWmOsUQEQ2s9bU5Q4chLCUpKwZk=), org.kframework.attributes.Location(Location(68,1,71,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  imports SORT-K
+  syntax KBott [org.kframework.attributes.Location(Location(70,3,70,15)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+  syntax K
+  syntax Bool ::= "isKBott" "(" K ")" [function, predicate(KBott), total]
+  rule isKBott(KBott)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(0430532b28c9e8637bebd9d20a684d86d5aa95588527682c65b16574ca5d16c3)]
+  rule isKBott(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(82eb683129eda94db5e329d4f1bd6c8bbb720029bd7388159f16233f1c289720), owise]
+endmodule
+
+
+module SORT-PREDICATES [digest(ahFlabySG8V7pf/VZcreS2iQFeHex5iFaSImOctpWh8=), org.kframework.attributes.Location(Location(428,1,433,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/kast.md))]
+endmodule
+
+
+module STDIN-STREAM [digest(9XhZUf2LhShCOJ3m6CzPcOXraBJwNjtFmDm/atH3qbY=), org.kframework.attributes.Location(Location(2676,1,2757,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+endmodule
+
+
+module STDOUT-STREAM [digest(X1RssUm6lSuVOg+W8Q32VWCNda9HdxOpcVPaiAzEdLw=), org.kframework.attributes.Location(Location(2759,1,2827,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+endmodule
+
+
+module STRING [digest(UKzjSiCmMez2OIJwgymX5LrIzKeoAwV+ul5a5DSq0MM=), org.kframework.attributes.Location(Location(1914,1,1917,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-COMMON
+endmodule
+
+
+module STRING-COMMON [digest(bEMLSP+R+UkHDrRp9YJPeLLY3yuVRS7/6jXlha+6IG0=), org.kframework.attributes.Location(Location(1696,1,1904,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  imports STRING-SYNTAX
+  imports K-EQUAL
+  imports INT
+  imports FLOAT-SYNTAX
+  imports BOOL
+  syntax associativity left _+String__STRING-COMMON_String_String_String
+  syntax String ::= String "+String" String [function, hook(STRING.concat), left, total]
+  syntax String ::= "substrString" "(" String "," startIndex:Int "," endIndex:Int ")" [function, hook(STRING.substr), total]
+  syntax String ::= "replaceFirst" "(" haystack:String "," needle:String "," replacement:String ")" [function, hook(STRING.replaceFirst), total]
+  syntax String ::= "replaceAll" "(" haystack:String "," needle:String "," replacement:String ")" [function, hook(STRING.replaceAll), total]
+  syntax String ::= "replace" "(" haystack:String "," needle:String "," replacement:String "," times:Int ")" [function, hook(STRING.replace)]
+  syntax String ::= "newUUID" [function, hook(STRING.uuid), impure]
+  syntax String ::= "directionalityChar" "(" String ")" [function, hook(STRING.directionality)]
+  syntax String ::= "chrChar" "(" Int ")" [function, hook(STRING.chr)]
+  syntax String ::= "categoryChar" "(" String ")" [function, hook(STRING.category)]
+  syntax String ::= "Int2String" "(" Int ")" [function, hook(STRING.int2string), total]
+  syntax String ::= "Float2String" "(" Float "," format:String ")" [function, hook(STRING.floatFormat), klabel(FloatFormat)]
+  syntax String ::= "Float2String" "(" Float ")" [function, hook(STRING.float2string), total]
+  syntax String ::= "Bool2String" "(" Bool ")" [function, total]
+  syntax String ::= "Base2String" "(" Int "," base:Int ")" [function, hook(STRING.base2string)]
+  syntax Int ::= "rfindString" "(" haystack:String "," needle:String "," index:Int ")" [function, hook(STRING.rfind)]
+  syntax Int ::= "rfindChar" "(" haystack:String "," needles:String "," index:Int ")" [function, hook(STRING.rfindChar)]
+  syntax Int ::= "ordChar" "(" String ")" [function, hook(STRING.ord)]
+  syntax Int ::= "lengthString" "(" String ")" [function, hook(STRING.length), total]
+  syntax Int ::= "findString" "(" haystack:String "," needle:String "," index:Int ")" [function, hook(STRING.find)]
+  syntax Int ::= "findChar" "(" haystack:String "," needles:String "," index:Int ")" [function, hook(STRING.findChar)]
+  syntax Int ::= "countAllOccurrences" "(" haystack:String "," needle:String ")" [function, hook(STRING.countAllOccurrences), total]
+  syntax Int ::= "String2Int" "(" String ")" [function, hook(STRING.string2int)]
+  syntax Int ::= "String2Base" "(" String "," base:Int ")" [function, hook(STRING.string2base)]
+  syntax Float ::= "String2Float" "(" String ")" [function, hook(STRING.string2float)]
+  syntax Bool ::= String ">String" String [function, hook(STRING.gt), total]
+  syntax Bool ::= String ">=String" String [function, hook(STRING.ge), total]
+  syntax Bool ::= String "==String" String [comm, function, hook(STRING.eq), total]
+  syntax Bool ::= String "=/=String" String [comm, function, hook(STRING.ne), total]
+  syntax Bool ::= String "<String" String [function, hook(STRING.lt), total]
+  syntax Bool ::= String "<=String" String [function, hook(STRING.le), total]
+  syntax Bool ::= "String2Bool" "(" String ")" [function]
+  rule `rfindChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(_Gen0,#token("\"\"","String"),_Gen1)=>#token("-1","Int") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(23b9fa88124c547d94aed32124d1ccd1069732b059f4c8b430ab4617979690f6), org.kframework.attributes.Location(Location(1879,8,1879,33)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `rfindChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,S2,I)=>`maxInt(_,_)_INT-COMMON_Int_Int_Int`(`rfindString(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("0","Int"),#token("1","Int")),I),`rfindChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(S2)),I)) requires `_=/=String__STRING-COMMON_Bool_String_String`(S2,#token("\"\"","String")) ensures #token("true","Bool") [UNIQUE_ID(b7f740050d72a847424b022a9c8217325aba8a154a42831aa3c7a3b0727f3205), org.kframework.attributes.Location(Location(1878,8,1878,182)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `replaceFirst(_,_,_)_STRING-COMMON_String_String_String_String`(Source,ToReplace,_Gen0)=>Source requires `_<Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(8fbd1c8efb9988236eddc95fc2af4a3e74f6ec94d696ee47209543fd0826dd34), org.kframework.attributes.Location(Location(1889,8,1890,57)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `replaceFirst(_,_,_)_STRING-COMMON_String_String_String_String`(Source,ToReplace,Replacement)=>`_+String__STRING-COMMON_String_String_String`(`_+String__STRING-COMMON_String_String_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(Source,#token("0","Int"),`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int"))),Replacement),`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(Source,`_+Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int")),`lengthString(_)_STRING-COMMON_Int_String`(ToReplace)),`lengthString(_)_STRING-COMMON_Int_String`(Source))) requires `_>=Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(e290042e5b5b2f620c0ca1871e708c3713c62b63b283e317bb7568e13968fe0c), org.kframework.attributes.Location(Location(1886,8,1888,66)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `replaceAll(_,_,_)_STRING-COMMON_String_String_String_String`(Source,ToReplace,Replacement)=>`replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(Source,ToReplace,Replacement,`countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(Source,ToReplace)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(262167183c3ec2e214d12bac6e639d7ac1a9f973582e16eca6c1af1da7ecc0a5), org.kframework.attributes.Location(Location(1902,8,1902,154)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(Source,_Gen0,_Gen1,Count)=>Source requires `_>=Int_`(Count,#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(8baee90bc16d350bd96511a574002886bac6fd9d5017c31b773c5064b69c5f79), org.kframework.attributes.Location(Location(1900,8,1901,31)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol]), owise]
+  rule `replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(Source,ToReplace,Replacement,Count)=>`_+String__STRING-COMMON_String_String_String`(`_+String__STRING-COMMON_String_String_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(Source,#token("0","Int"),`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int"))),Replacement),`replace(_,_,_,_)_STRING-COMMON_String_String_String_String_Int`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(Source,`_+Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int")),`lengthString(_)_STRING-COMMON_Int_String`(ToReplace)),`lengthString(_)_STRING-COMMON_Int_String`(Source)),ToReplace,Replacement,`_-Int_`(Count,#token("1","Int")))) requires `_andBool_`(`_>Int_`(Count,#token("0","Int")),`_>=Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToReplace,#token("0","Int")),#token("0","Int"))) ensures #token("true","Bool") [UNIQUE_ID(4d80f4d63262761f305ff16a13c7b187891f796dbdb8f8bc0c2387a37c01cd6d), org.kframework.attributes.Location(Location(1896,8,1899,79)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(_Gen0,#token("\"\"","String"),_Gen1)=>#token("-1","Int") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5a6cf981f0ec2494854cd3e517b0cf645a1c9762c92a14849adfca9a6a553117), org.kframework.attributes.Location(Location(1877,8,1877,32)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,S2,I)=>ite(`_==Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("0","Int"),#token("1","Int")),I),#token("-1","Int")),`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(S2)),I),ite(`_==Int_`(`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(S2)),I),#token("-1","Int")),`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("0","Int"),#token("1","Int")),I),`minInt(_,_)_INT-COMMON_Int_Int_Int`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("0","Int"),#token("1","Int")),I),`findChar(_,_,_)_STRING-COMMON_Int_String_String_Int`(S1,`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(S2,#token("1","Int"),`lengthString(_)_STRING-COMMON_Int_String`(S2)),I)))) requires `_=/=String__STRING-COMMON_Bool_String_String`(S2,#token("\"\"","String")) ensures #token("true","Bool") [UNIQUE_ID(5b5d41706ad496a8165f1ea9c2109ce502796cbe90047732b173b3ad015058e3), org.kframework.attributes.Location(Location(1876,8,1876,431)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(Source,ToCount)=>`_+Int_`(#token("1","Int"),`countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(`substrString(_,_,_)_STRING-COMMON_String_String_Int_Int`(Source,`_+Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToCount,#token("0","Int")),`lengthString(_)_STRING-COMMON_Int_String`(ToCount)),`lengthString(_)_STRING-COMMON_Int_String`(Source)),ToCount)) requires `_>=Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToCount,#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(628cff029a6d79e4c99999c0309f91ab8cb12f0ba549bb3faa850f96304c970e), org.kframework.attributes.Location(Location(1883,8,1884,60)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `countAllOccurrences(_,_)_STRING-COMMON_Int_String_String`(Source,ToCount)=>#token("0","Int") requires `_<Int_`(`findString(_,_,_)_STRING-COMMON_Int_String_String_Int`(Source,ToCount,#token("0","Int")),#token("0","Int")) ensures #token("true","Bool") [UNIQUE_ID(1c726cd81629c2e5f411539a7f9b4d297e8600e5d71a5d235d287e3001f3ec84), org.kframework.attributes.Location(Location(1881,8,1882,59)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody "requires" Bool [klabel(#ruleRequires), symbol])]
+  rule `_>String__STRING-COMMON_Bool_String_String`(S1,S2)=>`_<String__STRING-COMMON_Bool_String_String`(S2,S1) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(8e5353c0a58491f8613ad7a35d0833206c342df0c91773e42485e52f4dad0cd0), org.kframework.attributes.Location(Location(1873,8,1873,52)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_>=String__STRING-COMMON_Bool_String_String`(S1,S2)=>`notBool_`(`_<String__STRING-COMMON_Bool_String_String`(S1,S2)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b376ffb0925555ed27696d73fc8fe43306e2005e4cf6ad819e860958992f9f17), org.kframework.attributes.Location(Location(1874,8,1874,63)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_=/=String__STRING-COMMON_Bool_String_String`(S1,S2)=>`notBool_`(`_==String__STRING-COMMON_Bool_String_String`(S1,S2)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f390a9b650f3de0e3a93773a46e65aae3decdeb2a10906058f204f031681c9b7), org.kframework.attributes.Location(Location(1852,8,1852,65)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `_<=String__STRING-COMMON_Bool_String_String`(S1,S2)=>`notBool_`(`_<String__STRING-COMMON_Bool_String_String`(S2,S1)) requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(9e50fb4dcba1212ee863c170298cb8b555f39fb3b4bcb649f3d1d8e321accc80), org.kframework.attributes.Location(Location(1872,8,1872,63)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `String2Bool(_)_STRING-COMMON_Bool_String`(#token("\"true\"","String"))=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(27a5d1d7872d61f82556a4e44bda13846dde7dc2d9c54304d7858de9a8b9d6b8), org.kframework.attributes.Location(Location(1778,8,1778,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `String2Bool(_)_STRING-COMMON_Bool_String`(#token("\"false\"","String"))=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(b73b5c8e0ae45020f2b9b8170d366691fee01a63763b79653a2075703ec4e835), org.kframework.attributes.Location(Location(1779,8,1779,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `Bool2String(_)_STRING-COMMON_String_Bool`(#token("true","Bool"))=>#token("\"true\"","String") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(365df37345a5a44ac061f8741369c7bd74a49f0f6e7b716be0374806dd1add3d), org.kframework.attributes.Location(Location(1772,8,1772,36)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+  rule `Bool2String(_)_STRING-COMMON_String_Bool`(#token("false","Bool"))=>#token("\"false\"","String") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(cca4780e4e7660055f781b9643f3125234a0f4f08ba76cacf8e5a18fe7fc999f), org.kframework.attributes.Location(Location(1773,8,1773,37)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md)), org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+endmodule
+
+
+module STRING-SYNTAX [digest(urIvB5SBek3KkeQOK5p+0560jZezWFn42o/trLm4TBY=), org.kframework.attributes.Location(Location(1691,1,1694,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax String [hook(STRING.String), org.kframework.attributes.Location(Location(1692,3,1692,38)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax String ::= r"[\"]([^\"\\n\\r\\\\]|([\\\\][nrtf\"\\\\]|([\\\\][x][0-9a-fA-F]{2}|([\\\\][u][0-9a-fA-F]{4}|[\\\\][U][0-9a-fA-F]{8}))))*[\"]" [token]
+  syntax String ::= "project:String" "(" K ")" [function, projection]
+  syntax KItem ::= String
+  syntax KItem ::= Bool
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isString" "(" K ")" [function, predicate(String), total]
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isString(String)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(109ced650ead4a5092ddba090e1b8e181633ed0aa5c5f93bce9f88be215668ef)]
+  rule isString(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(fbe29b27977283e8cb5b35f1b17a6b7b2abc92a7fca608d496b346f7b6918961), owise]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:String`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(e491dad8f644d2344f08cb72af01ade1e6ce9f564010a2de7909b3b6c7e2ae85), projection]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule
+
+
+module UNSIGNED-INT-SYNTAX [digest(Tfp9QYLXybwhv6hzgwVBLRC+1CgNZVPefQ2srkHIizk=), org.kframework.attributes.Location(Location(1197,1,1200,10)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax KItem ::= Int
+  syntax KItem ::= Bool
+  syntax KItem ::= "project:KItem" "(" K ")" [function, projection]
+  syntax K ::= "project:K" "(" K ")" [function, projection]
+  syntax K
+  syntax Int [hook(INT.Int), org.kframework.attributes.Location(Location(1198,3,1198,29)), org.kframework.attributes.Source(Source(/home/gtrepta/runtimeverification/k-builds/v7.0.112/include/kframework/builtin/domains.md))]
+  syntax Int ::= r"[0-9]+" [prec(2), prefer, token]
+  syntax Int ::= "project:Int" "(" K ")" [function, projection]
+  syntax Bool ::= "project:Bool" "(" K ")" [function, projection]
+  syntax Bool ::= "isKItem" "(" K ")" [function, predicate(KItem), total]
+  syntax Bool ::= "isK" "(" K ")" [function, predicate(K), total]
+  syntax Bool ::= "isInt" "(" K ")" [function, predicate(Int), total]
+  syntax Bool ::= "isBool" "(" K ")" [function, predicate(Bool), total]
+  rule isKItem(KItem)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(ed3c25a7dab5e5fbc101589e2fa74ac91aa107f051d22a01378222d08643373c)]
+  rule isKItem(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(83812b6b9e31a764d66d89fd1c7e65b9b162d52c5aebfe99b1536e200a9590c2), owise]
+  rule isK(K)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(16ff77cff0ef50026a8b3f4614b87bda465701918596b7ad2280baffff56f847)]
+  rule isInt(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(105572a4ac107eeb518b37c4d6ed3e28732b83afb0ba085d02d339c4fc2140a0), owise]
+  rule isInt(Int)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(92664aa821c8898ff16b4e72ad0bdf363f755c7660d28dcb69c129a2c94bc6b5)]
+  rule isBool(K)=>#token("false","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(495da551d13b205c8648618471ccfca028707f98eff21e6b11d591515ed6f29a), owise]
+  rule isBool(Bool)=>#token("true","Bool") requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(dadad716b2f6a82fa4b2cc8f903a1b8f1f6e8cfa63f18b72a7cb35110bdcff77)]
+  rule `project:K`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(25b529ddcefd25ef63f99a62040145ef27638e7679ea9202218fe14be98dff3a), projection]
+  rule `project:KItem`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(1242e49c17638c9a66a35e3bb8c237288f7e9aa9a6499101e8cdc55be320cd29), projection]
+  rule `project:Int`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(f316b871091516c401f1d2382cc5f66322602b782c7b01e1aeb6c2ddab50e24b), projection]
+  rule `project:Bool`(K)=>K requires #token("true","Bool") ensures #token("true","Bool") [UNIQUE_ID(5872f0d5b8131216db7bc41e2c3a423e55f4b8581589fcbd1bf93b2ca6862d54), projection]
+endmodule

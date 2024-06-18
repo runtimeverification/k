@@ -1,0 +1,30 @@
+args:
+- - &id001 ['2']
+  - MAP.Map
+- - &id002 ['1']
+  - STRING.String
+next:
+  default: null
+  specializations:
+  - - '1'
+    - action:
+      - 478
+      - - - *id001
+          - MAP.Map
+        - - *id002
+          - STRING.String
+    - []
+  - - '0'
+    - action:
+      - 477
+      - - - *id001
+          - MAP.Map
+        - - *id002
+          - STRING.String
+    - []
+  bitwidth: 1
+  sort: BOOL.Bool
+  occurrence: &id003 [side_condition_478]
+function: side_condition_478
+sort: BOOL.Bool
+occurrence: *id003
