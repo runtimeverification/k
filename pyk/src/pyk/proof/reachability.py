@@ -164,10 +164,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     else:
                         shortest_path.append(succ.source)
 
-            def nonzero_depth(proof: APRProof, node: KCFG.Node) -> bool:
-                return not proof.kcfg.zero_depth_between(proof.init, node.id)
-
-            module_name = self.circularities_module_name if nonzero_depth(self, node) else self.dependencies_module_name
+            module_name = self.circularities_module_name if self.nonzero_depth(node) else self.dependencies_module_name
 
             steps.append(
                 APRProofStep(
@@ -179,7 +176,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     shortest_path_to_node=tuple(shortest_path),
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
                     circularity=self.circularity,
-                    nonzero_depth=nonzero_depth(self, node),
+                    nonzero_depth=self.nonzero_depth(node),
                 )
             )
         return steps
@@ -196,6 +193,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             self.add_bounded(result.node_id)
         else:
             raise ValueError(f'Incorrect result type, expected APRProofResult: {result}')
+
+    def nonzero_depth(self, node: KCFG.Node) -> bool:
+        return not self.kcfg.zero_depth_between(self.init, node.id)
 
     @property
     def module_name(self) -> str:
