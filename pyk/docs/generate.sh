@@ -21,7 +21,7 @@ source $VENV_DIR/bin/activate
 
 pip install --upgrade pip
 pip install --editable $PYK_DIR
-pip install sphinx==$SPHINX_VERSION
+pip install sphinx==$SPHINX_VERSION sphinx_rtd_theme
 
 # Generate and install _kllvm
 PYTHON_LIB=$(find $VENV_DIR -name 'site-packages' -type d)
