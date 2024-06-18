@@ -27,14 +27,17 @@ class HaskellLogEntry(Enum):
 
 
 def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> dict[HaskellLogEntry, dict[str, int]]:
-    """
-    Traverse a one-line log file produced by K's Haskell backend and extract information about:
-    * applied rewrites (DebugAppliedRewriteRules)
-    * applied simplifications (DEBUG_APPLY_EQUATION)
+    """Process a one-line log file produced by K's Haskell backend.
 
-    Note: Haskell backend logs often contain rule applications with empty locations.
-          It seems likely that those are generated projection rules.
-          We report their applications in bulk with UNKNOWN location.
+    Extracts information about:
+
+    - Applied rewrites (DebugAppliedRewriteRules).
+    - Applied simplifications (DEBUG_APPLY_EQUATION).
+
+    Note:
+        Haskell backend logs often contain rule applications with empty locations.
+        It seems likely that those are generated projection rules.
+        We report their applications in bulk with UNKNOWN location.
     """
     rewrites: dict[str, int] = defaultdict(int)
     simplifications: dict[str, int] = defaultdict(int)
@@ -61,7 +64,7 @@ def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> dict[Hask
 
 
 def _parse_haskell_oneline_log(log_entry: str) -> tuple[HaskellLogEntry, str] | None:
-    """Attempt to parse a one-line log string emmitted by K's Haskell backend"""
+    """Attempt to parse a one-line log string emmitted by K's Haskell backend."""
     matches = _HASKELL_LOG_ENTRY_REGEXP.match(log_entry)
     try:
         assert matches
@@ -75,9 +78,7 @@ def _parse_haskell_oneline_log(log_entry: str) -> tuple[HaskellLogEntry, str] | 
 def build_rule_dict(
     definition: KDefinition, *, skip_projections: bool = True, skip_initializers: bool = True
 ) -> dict[str, KRule]:
-    """
-    Traverse the kompiled definition and build a dictionary mapping str(file:location) to KRule
-    """
+    """Traverse the kompiled definition and build a dictionary mapping str(file:location) to KRule."""
     rule_dict: dict[str, KRule] = {}
 
     for rule in definition.rules:

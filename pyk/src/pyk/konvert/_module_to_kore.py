@@ -85,7 +85,6 @@ BUILTIN_LABELS: Final = {
 
 def module_to_kore(definition: KDefinition) -> Module:
     """Convert the main module of a kompiled KAST definition to KORE format."""
-
     module = simplified_module(definition)
     defn = KDefinition(module.name, (module,))  # for getting the sort lattice
 
@@ -686,7 +685,8 @@ def _overload_axioms(defn: KDefinition) -> list[Axiom]:
 
 
 def simplified_module(definition: KDefinition, module_name: str | None = None) -> KFlatModule:
-    """
+    """Perform a series of simplification steps on a module.
+
     In ModuleToKORE.java, there are some implicit KAST-to-KAST kompilation
     steps hidden in the conversion. In particular, the kompiled KAST definition
     (compiled.json) is modular, whereas the kompiled definition

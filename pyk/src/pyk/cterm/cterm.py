@@ -34,8 +34,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, order=True)
 class CTerm:
-    """
-    Represent a symbolic program state, obtained and manipulated using symbolic execution.
+    """Represent a symbolic program state, obtained and manipulated using symbolic execution.
 
     Contains the data:
     - `config`: the _configuration_ (structural component of the state, potentially containing free variabls)
@@ -126,7 +125,7 @@ class CTerm:
 
     @cached_property
     def free_vars(self) -> frozenset[str]:
-        """Return the set of free variable names contained in this `CTerm`"""
+        """Return the set of free variable names contained in this `CTerm`."""
         return frozenset(free_vars(self.kast))
 
     @property
@@ -188,16 +187,19 @@ class CTerm:
     def anti_unify(
         self, other: CTerm, keep_values: bool = False, kdef: KDefinition | None = None
     ) -> tuple[CTerm, CSubst, CSubst]:
-        """Given two `CTerm`, find a more general `CTerm` which can instantiate to both.
+        """Given two `CTerm` instances, find a more general `CTerm` which can instantiate to both.
 
-        :param other: other `CTerm` to consider for finding a more general `CTerm` with this one.
-        :param keep_values: do not discard information about abstracted variables in returned result.
-        :param kdef: optional `KDefinition` to make analysis more precise.
+        Args:
+            other: other `CTerm` to consider for finding a more general `CTerm` with this one.
+            keep_values: do not discard information about abstracted variables in returned result.
+            kdef (optional): `KDefinition` to make analysis more precise.
 
-        :return: tuple `cterm: CTerm, csubst1: CSubst1, csubst2: CSubst2` such that:
-          - `cterm`: more general `CTerm` than either `self` or `other`
-          - `csubst1`: constrained substitution to apply to `cterm` to obtain `self`
-          - `csubst2`: constrained substitution to apply to `cterm` to obtain `other`
+        Returns:
+            A tuple ``(cterm, csubst1, csubst2)`` where
+
+            - ``cterm``: More general `CTerm` than either `self` or `other`.
+            - ``csubst1``: Constrained substitution to apply to `cterm` to obtain `self`.
+            - ``csubst2``: Constrained substitution to apply to `cterm` to obtain `other`.
         """
         new_config, self_subst, other_subst = anti_unify(self.config, other.config, kdef=kdef)
         common_constraints = [constraint for constraint in self.constraints if constraint in other.constraints]
@@ -240,8 +242,11 @@ class CTerm:
     def remove_useless_constraints(self, keep_vars: Iterable[str] = ()) -> CTerm:
         """Return a new `CTerm` with constraints over unbound variables removed.
 
-        :param keep_vars: List of variables to keep constraints for even if unbound in the `CTerm`.
-        :return: A `CTerm` with the constraints over unbound variables removed.
+        Args:
+            keep_vars: List of variables to keep constraints for even if unbound in the `CTerm`.
+
+        Returns:
+            A `CTerm` with the constraints over unbound variables removed.
         """
         initial_vars = free_vars(self.config) | set(keep_vars)
         new_constraints = remove_useless_constraints(self.constraints, initial_vars)
@@ -251,15 +256,20 @@ class CTerm:
 def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) -> tuple[KInner, Subst, Subst]:
     """Return a generalized state over the two input states.
 
-    :param state1: State to generalize over, represented as bare `KInner`.
-       **Assumption** is that this is a bare configuration with no constraints attached.
-    :param state2: State to generalize over, represented as bare `KInner`.
-       **Assumption** is that this is a bare configuration with no constraints attached.
-    :param kdef: Optional `KDefinition` to make the analysis more precise.
-    :return: tuple `state: KInner, subst1: Subst, subst2: Subst` such that:
-      - `state`: a symbolic state represented as `KInner` which is more general than `state1` or `state2`.
-      - `subst1`: a `Subst` which when applied to `state` recovers `state1`.
-      - `subst2`: a `Subst` which when applied to `state` recovers `state2`.
+    Args:
+        state1: State to generalize over, represented as bare `KInner`.
+        state2: State to generalize over, represented as bare `KInner`.
+        kdef (optional): `KDefinition` to make the analysis more precise.
+
+    Note:
+        Both `state1` and `state2` are expected to be bare configurations with no constraints attached.
+
+    Returns:
+        A tuple ``(state, subst1, subst2)`` such that
+
+        - ``state``: A symbolic state represented as `KInner` which is more general than `state1` or `state2`.
+        - ``subst1``: A `Subst` which, when applied to `state`, recovers `state1`.
+        - ``subst2``: A `Subst` which, when applied to `state`, recovers `state2`.
     """
 
     def _rewrites_to_abstractions(_kast: KInner) -> KInner:
@@ -279,8 +289,7 @@ def anti_unify(state1: KInner, state2: KInner, kdef: KDefinition | None = None) 
 
 @dataclass(frozen=True, order=True)
 class CSubst:
-    """
-    Store information about instantiation of a symbolic state (`CTerm`) to a more specific one.
+    """Store information about instantiation of a symbolic state (`CTerm`) to a more specific one.
 
     Contains the data:
     - `subst`: assignment to apply to free variables in the state to achieve more specific one
@@ -333,13 +342,19 @@ def cterm_build_claim(
 ) -> tuple[KClaim, Subst]:
     """Return a `KClaim` between the supplied initial and final states.
 
-    :param claim_id: Label to give the claim.
-    :param init_cterm: State to put on LHS of the rule (constraints interpreted as `requires` clause).
-    :param final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
-    :param keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
-    :return: tuple `claim: KClaim, var_map: Subst`:
-      - `claim`: A `KClaim` with variable naming conventions applied so that it should be parseable by K frontend.
-      - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
+    Args:
+        claim_id: Label to give the claim.
+        init_cterm: State to put on LHS of the rule (constraints interpreted as `requires` clause).
+        final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
+        keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
+
+    Returns:
+        A tuple ``(claim, var_map)`` where
+
+      - ``claim``: A `KClaim` with variable naming conventions applied
+        so that it should be parseable by the K Frontend.
+      - ``var_map``: The variable renamings applied to make the claim parseable by the K Frontend
+        (which can be undone to recover original variables).
     """
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
@@ -355,14 +370,19 @@ def cterm_build_rule(
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
-    :param rule_id: Label to give the rule.
-    :param init_cterm: State to put on LHS of the rule (constraints interpreted as `requires` clause).
-    :param final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
-    :param priority: Rule priority to give to the generated `KRule`.
-    :param keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
-    :return: tuple `claim: KRule, var_map: Subst` such that:
-      - `rule`: A `KRule` with variable naming conventions applied so that it should be parseable by K frontend.
-      - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
+    Args:
+        rule_id: Label to give the rule.
+        init_cterm: State to put on LHS of the rule (constraints interpreted as `requires` clause).
+        final_cterm: State to put on RHS of the rule (constraints interpreted as `ensures` clause).
+        keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
+
+    Returns:
+        A tuple ``(rule, var_map)`` where
+
+      - ``rule``: A `KRule` with variable naming conventions applied
+        so that it should be parseable by the K Frontend.
+      - ``var_map``: The variable renamings applied to make the rule parseable by the K Frontend
+        (which can be undone to recover original variables).
     """
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
