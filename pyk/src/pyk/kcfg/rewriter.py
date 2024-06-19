@@ -1,35 +1,46 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum
+from typing import final
 
 from .kcfg import KCFG, NodeIdLike
 from ..cterm import CTerm, CSubst
 from ..utils import single
 
 
-class Pats(Enum):
+@final
+@dataclass(frozen=True)
+class Pats:
     """
     The matching patterns for the KCFG, starting from a node N.
+
+    Format: source`->`target(`*`)?`|`edge_type
+
+    Examples:
+        - `S->N|edge` : Match an Edge: from node S to node N.
+        - `N->T|edge` : Match an Edge: from node N to node T.
+        - `S->T|edge` : Match an Edge: from node S to node T.
+        - `S->T*|split` : Match an Split: from node S to nodes T*.
     """
 
-    S_EDGE_N: str = 'S->N'
-    """Match an Edge: from node S to node N."""
-    N_EDGE_T: str = 'N->T'
-    """Match an Edge: from node N to node T."""
+    source: tuple[str, bool]
+    target: tuple[str, bool]
+    edge_type: str
 
-    # ----- Rewrite Patterns -----
-    S_EDGE_T: str = 'S->T'
-    """Rewrite an Edge: from node S to node T."""
+    def __init__(self, pattern: str) -> None:
+        # todo: add validity check
+        source_org, tmp = pattern.split('->')
+        target_org, edge_type = tmp.split('|')
+        source, source_star = source_org.split('*')[0], '*' in source_org
+        target, target_star = target_org.split('*')[0], '*' in target_org
+        self.__setattr__('source', (source, source_star))
+        self.__setattr__('target', (target, target_star))
+        self.__setattr__('edge_type', edge_type)
 
-    def edge(self) -> tuple[str, str, str]:
-        """
-        Return the source, target, and edge type of the pattern.
-        """
-        source, tmp = self.value.split('->')
-        tmp = tmp.split('|')
-        if len(tmp) == 1:
-            return source, tmp[0], 'edge'
-        return source, tmp[-1], tmp[1]
+    def __str__(self) -> str:
+        return f"{self.source[0]}{'*' if self.source[1] else ''}->" \
+               f"{self.target[0]}{'*' if self.target[1] else ''}|{self.edge_type}"
 
 
 class KCFGRewriter:
@@ -39,6 +50,10 @@ class KCFGRewriter:
 
     kcfg: KCFG
     """The KCFG to be rewritten."""
+    nodes: dict[str, KCFG.Node]
+    """The nodes of the matched KCFG."""
+    edges: dict[str, KCFG.Successor]
+    """The edges of the matched KCFG."""
 
     def __init__(self, kcfg: KCFG):
         self.kcfg = kcfg
@@ -78,6 +93,7 @@ class KCFGRewriter:
         Input:
               - The node id to start matching.
               - The patterns to match. If None, just return the node.
+        Effect: The KCFGRewriter.nodes and KCFGRewriter.edges will be populated with the matched subgraph.
         Output: The matched subgraph.
         """
         matched = KCFG()
@@ -133,8 +149,14 @@ class KCFGRewriter:
                     if n in match_pattern.value:
                         source_m, target_m, edge_type_m = match_pattern.edge()
                         # todo: S*, T*; cannot find directly like S* | S;  T* | T
-                pass
-
+                        # todo: split ...
+                        if n == source_m:
+                            if edge_type_m == 'edge':
+                                return tuple((node, edge) for edge in old_kcfg.edges(target_id=node))
+                        if n == target_m:
+                            if edge_type_m == 'edge':
+                                return tuple((edge.target, edge) for edge in old_kcfg.edges(target_id=node))
+                raise ValueError(f"Pattern {match_patterns} must contain '{n}' to match the current Node.")
             source = _desugar(source)
             target = _desugar(target)
 

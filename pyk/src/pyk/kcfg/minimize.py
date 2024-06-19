@@ -18,9 +18,9 @@ def minimize_kcfg(kcfg: KCFG) -> None:
     """
     walker = KCFGRewriteWalker([
         LiftEdgeEdge(),
-        LiftSplitSplit(),
-        LiftEdgeSplit(),
-        MergeSplitNodes(),
+        # LiftSplitSplit(),
+        # LiftEdgeSplit(),
+        # MergeSplitNodes(),
     ])
     walker.rewrite(kcfg)
 
@@ -31,27 +31,27 @@ def minimize_kcfg(kcfg: KCFG) -> None:
 #  And I think it's not hard to implement it for KCFG.
 class LiftEdgeEdge(KCFGRewritePattern):
     def match_and_rewrite(self, node: NodeIdLike, rewriter: KCFGRewriter) -> bool:
-        match_pattern = ('S->N', 'N->T',)
-        rewrite_pattern = ('S->T',)
+        match_pattern = ('S->N|edge', 'N->T|edge',)
+        rewrite_pattern = ('S->T|edge',)
         return rewriter.commit(node, match_pattern, rewrite_pattern)
 
 
 class LiftSplitSplit(KCFGRewritePattern):
     def match_and_rewrite(self, node: NodeIdLike, rewriter: KCFGRewriter) -> bool:
-        match_pattern = ('S->|split|N', 'N->|split|T*',)
-        rewrite_pattern = ('S->|split|S*', 'S*->T*',)
+        match_pattern = ('S->N|split', 'N->T*|split',)
+        rewrite_pattern = ('S->S*|split', 'S*->T*|edge',)
         return rewriter.commit(node, match_pattern, rewrite_pattern)
 
 
 class LiftEdgeSplit(KCFGRewritePattern):
     def match_and_rewrite(self, node: NodeIdLike, rewriter: KCFGRewriter) -> bool:
-        match_pattern = ('S->N', 'N->|split|T*',)
-        rewrite_pattern = ('S->|split|S*', 'S*->T*',)
+        match_pattern = ('S->N|edge', 'N->T*|split',)
+        rewrite_pattern = ('S->S*|split', 'S*->T*|edge',)
         return rewriter.commit(node, match_pattern, rewrite_pattern)
 
 
 class MergeSplitNodes(KCFGRewritePattern):
     def match_and_rewrite(self, node: NodeIdLike, rewriter: KCFGRewriter) -> bool:
-        match_pattern = ('N->|split|S*', 'S*->T*',)
-        rewrite_pattern = ('N->T', 'T->|split|T*',)
+        match_pattern = ('N->S*|split', 'S*->T*|edge',)
+        rewrite_pattern = ('N->T|edge', 'T->T*|split',)
         return rewriter.commit(node, match_pattern, rewrite_pattern)
