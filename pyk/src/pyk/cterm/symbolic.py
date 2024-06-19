@@ -408,7 +408,7 @@ class CTermSymbolic:
         ]
 
         # If a conjunct is a simplified version of an identified more general conjunct,
-        # then replace it with the more general construct
+        # then replace it with the more general conjunct
         result = [
             [
                 conjunct if conjunct not in simplified_constraints else simplified_constraints[conjunct]
