@@ -364,7 +364,10 @@ class CTermSymbolic:
             result = {
                 simplified_constraint: constraint
                 for constraint in constraints
-                if (simplified_constraint := simplify_constraint(subst.apply(constraint)))
+                if (substituted_constraint := subst.apply(constraint))
+                and substituted_constraint != constraint
+                and (simplified_constraint := simplify_constraint(substituted_constraint))
+                and simplified_constraint != constraint
             }
             print(f'Substitute and simplify: {time.time() - start_time}')
             return result
