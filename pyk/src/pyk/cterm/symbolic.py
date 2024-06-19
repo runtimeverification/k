@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NamedTuple, final
@@ -330,36 +331,43 @@ class CTermSymbolic:
             if match is not None:
                 # Constraint is of the form `{ true #Equals _ }`,
                 # negation is of the form `{ true #Equals notBool _ }`
-                return mlEqualsTrue(notBool(match['#TERM']))
+                result = mlEqualsTrue(notBool(match['#TERM']))
             else:
                 pattern = mlEqualsFalse(KVariable('#TERM'))
                 match = pattern.match(constraint)
                 if match is not None:
                     # Constraint is of the form `{ false #Equals _ }`,
                     # negation is of the form `{ false #Equals notBool _ }`
-                    return mlEqualsFalse(notBool(match['#TERM']))
+                    result = mlEqualsFalse(notBool(match['#TERM']))
                 else:
                     # Negation is of the form `#Not _`
-                    return mlNot(constraint)
+                    result = mlNot(constraint)
+            return result
 
         def simplify_constraint(constraint: KInner) -> KInner | None:
             """Simplify a given constraint, returning the simplified result if it is not `#Top` or `#Bottom`."""
+            start_time = time.time()
             dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
             cterm = CTerm(dummy_config, constraints=[constraint])
             simplified_cterm = self.simplify(cterm)[0]
-            return (
+            result = (
                 simplified_cterm.constraints[0]
                 if not simplified_cterm.is_bottom and simplified_cterm.constraints
                 else None
             )
+            print(f'Simplify constraint: {time.time() - start_time}')
+            return result
 
-        def substitute_and_simplify_constraints(constraints: list[KInner], subst: Subst) -> dict[KInner, KInner]:
+        def substitute_and_simplify_constraints(constraints: Iterable[KInner], subst: Subst) -> dict[KInner, KInner]:
             """Simplify given constraints using a given substitution, returning the simplification mapping."""
-            return {
+            start_time = time.time()
+            result = {
                 simplified_constraint: constraint
                 for constraint in constraints
                 if (simplified_constraint := simplify_constraint(subst.apply(constraint)))
             }
+            print(f'Substitute and simplify: {time.time() - start_time}')
+            return result
 
         # Collect variables that are instantiated to constants in disjuncts
         # and create the appropriate substitutions
@@ -381,17 +389,29 @@ class CTermSymbolic:
         ]
         # Collect path constraints that have the instantiated variables
         subst_variables = {var for subst in substs for var in subst.keys()}
-        target_constraints_path_condition = [
+        target_constraints_path_condition = {
             constraint for constraint in path_condition if len(free_vars(constraint).intersection(subst_variables)) > 0
-        ]
+        }
+        print(f'Relevant path constraints: {len(target_constraints_path_condition)}')
+        for c in target_constraints_path_condition:
+            print(c)
+        print('============================================================')
         # as well as their simplified negations
         target_constraints_path_condition_negated = [
             simplified_constraint
             for constraint in target_constraints_path_condition
             if (simplified_constraint := simplify_constraint(negate_constraint(constraint)))
         ]
+        print(f'Relevant negated path constraints: {len(target_constraints_path_condition_negated)}')
+        for c in target_constraints_path_condition_negated:
+            print(c)
+        print('============================================================')
         # as well as all constraints from disjuncts in which there are no instantiations
-        target_constraints_dnf = [c for (cs, subst) in zip(dnf, substs, strict=True) for c in cs if len(subst) == 0]
+        target_constraints_dnf = {c for (cs, subst) in zip(dnf, substs, strict=True) for c in cs if len(subst) == 0}
+        print(f'Relevant DNF constraints: {len(target_constraints_dnf)}')
+        for c in target_constraints_dnf:
+            print(c)
+        print('============================================================')
 
         # Simplify using various substitutions:
         # the identified constraints from the path condition
