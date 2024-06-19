@@ -358,7 +358,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Install Python
         uses: actions/setup-python@v5.1.0
         with:
           python-version: '3.10'
@@ -367,7 +367,7 @@ jobs:
         uses: Gr1N/setup-poetry@v9
         with:
           python-version: '3.10'
-    
+
       - name: Setup Caching
         uses: actions/cache@v4
         with:
@@ -375,13 +375,13 @@ jobs:
           key: ${{ runner.os }}-poetry-${{ hashFiles('pyk/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
-      
+
       - name: Build pyk
         working-directory: pyk
         run: |
           make build
 
-      - name: Publish pyk to PypI
+      - name: Publish pyk to PyPI
         uses: pypa/gh-action-pypi-publish@v1.8.14
         with:
           packages-dir: pyk/dist
