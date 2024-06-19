@@ -7,7 +7,7 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.prelude.kint import INT, intToken, leInt, ltInt
-from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlNot, mlTop
+from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
 from pyk.prelude.utils import token
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
@@ -205,11 +205,25 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
         (
             'simple',
             [
-                [mlEqualsTrue(ltInt(int_var('X'), intToken(7))), eq_int('CALLER_ID', 4)],
+                [
+                    mlEqualsTrue(ltInt(int_var('X'), intToken(7))),
+                    mlEqualsTrue(ltInt(int_var('T'), plus_int(int_var('CONTRACT_ID'), intToken(4)))),
+                    eq_int('CALLER_ID', 4),
+                ],
                 [
                     mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
                     ne_int('CALLER_ID', 4),
                 ],
+                [
+                    mlEqualsFalse(ltInt(int_var('T'), plus_int(int_var('CONTRACT_ID'), intToken(4)))),
+                    eq_int('CALLER_ID', 4),
+                ],
+            ],
+            [
+                mlEqualsTrue(ltInt(intToken(0), int_var('X'))),
+                mlEqualsTrue(ltInt(intToken(0), int_var('Y'))),
+                mlEqualsTrue(ltInt(intToken(0), int_var('Z'))),
+                mlEqualsTrue(ltInt(int_var('T'), plus_int(int_var('CALLER_ID'), int_var('CONTRACT_ID')))),
             ],
             [
                 [
@@ -225,11 +239,16 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
     ]
 
     @pytest.mark.parametrize(
-        'test_id,dnf,expected',
+        'test_id,dnf,path_condition,expected',
         NORMALIZE_DNF_TEST_DATA,
         ids=[test_id for test_id, *_ in NORMALIZE_DNF_TEST_DATA],
     )
     def test_normalize_dnf(
-        self, cterm_symbolic: CTermSymbolic, test_id: str, dnf: list[list[KInner]], expected: list[list[KInner]]
+        self,
+        cterm_symbolic: CTermSymbolic,
+        test_id: str,
+        dnf: list[list[KInner]],
+        path_condition: list[KInner],
+        expected: list[list[KInner]],
     ) -> None:
-        assert cterm_symbolic.normalize_dnf(dnf, []) == expected
+        assert cterm_symbolic.normalize_dnf(dnf, path_condition) == expected

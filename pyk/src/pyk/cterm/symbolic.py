@@ -5,11 +5,12 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NamedTuple, final
 
+from pyk.prelude.kbool import notBool
 from pyk.utils import not_none
 
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
-from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
+from ..kast.manip import flatten_label, free_vars, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.rpc import (
@@ -25,7 +26,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
-from ..prelude.ml import is_top, mlAnd, mlEquals
+from ..prelude.ml import is_top, mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlNot
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -312,7 +313,7 @@ class CTermSymbolic:
         return CTermSMTError(pretty_pattern)
 
     def normalize_dnf(self, dnf: list[list[KInner]], path_condition: list[KInner]) -> list[list[KInner]]:
-        """Normalize a given DNF under a given path condition
+        """Normalize a given DNF under a given path condition.
 
         Input:
             - `dnf`: A list of branching conditions, `[ [ c_ij | j = 1 .. n_i ] | i = 1 .. n ]`.
@@ -321,7 +322,47 @@ class CTermSymbolic:
             - `path_condition`: a list of constraints representing the path condition at the time of
                 calculating the remainder.
         """
-        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+
+        def negate_constraint(constraint: KInner) -> KInner:
+            """Negate a given ML constraint."""
+            pattern = mlEqualsTrue(KVariable('#TERM'))
+            match = pattern.match(constraint)
+            if match is not None:
+                # Constraint is of the form `{ true #Equals _ }`,
+                # negation is of the form `{ true #Equals notBool _ }`
+                return mlEqualsTrue(notBool(match['#TERM']))
+            else:
+                pattern = mlEqualsFalse(KVariable('#TERM'))
+                match = pattern.match(constraint)
+                if match is not None:
+                    # Constraint is of the form `{ false #Equals _ }`,
+                    # negation is of the form `{ false #Equals notBool _ }`
+                    return mlEqualsFalse(notBool(match['#TERM']))
+                else:
+                    # Negation is of the form `#Not _`
+                    return mlNot(constraint)
+
+        def simplify_constraint(constraint: KInner) -> KInner | None:
+            """Simplify a given constraint, returning the simplified result if it is not `#Top` or `#Bottom`."""
+            dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+            cterm = CTerm(dummy_config, constraints=[constraint])
+            simplified_cterm = self.simplify(cterm)[0]
+            return (
+                simplified_cterm.constraints[0]
+                if not simplified_cterm.is_bottom and simplified_cterm.constraints
+                else None
+            )
+
+        def substitute_and_simplify_constraints(constraints: list[KInner], subst: Subst) -> dict[KInner, KInner]:
+            """Simplify given constraints using a given substitution, returning the simplification mapping."""
+            return {
+                simplified_constraint: constraint
+                for constraint in constraints
+                if (simplified_constraint := simplify_constraint(subst.apply(constraint)))
+            }
+
+        # Collect variables that are instantiated to constants in disjuncts
+        # and create the appropriate substitutions
         pattern = mlEquals(KVariable('#VAR'), KVariable('#VAL'))
         substs = [
             Subst(
@@ -338,26 +379,58 @@ class CTermSymbolic:
             )
             for conjuncts in dnf
         ]
-        non_simplified_constraints = [c for (cs, subst) in zip(dnf, substs, strict=True) for c in cs if len(subst) == 0]
-        generalization: list[dict[KInner, KInner]] = [
-            {
-                constraints[0]: non_simplified_constraint
-                for non_simplified_constraint in non_simplified_constraints
-                if (cterm := CTerm(dummy_config, constraints=[subst.apply(non_simplified_constraint)]))
-                and (simplified_cterm := self.simplify(cterm)[0])
-                and (constraints := simplified_cterm.constraints)
-                and constraints[0] != non_simplified_constraint
-            }
-            for subst in substs
+        # Collect path constraints that have the instantiated variables
+        subst_variables = {var for subst in substs for var in subst.keys()}
+        target_constraints_path_condition = [
+            constraint for constraint in path_condition if len(free_vars(constraint).intersection(subst_variables)) > 0
         ]
-        revisited_constraints = [
+        # as well as their simplified negations
+        target_constraints_path_condition_negated = [
+            simplified_constraint
+            for constraint in target_constraints_path_condition
+            if (simplified_constraint := simplify_constraint(negate_constraint(constraint)))
+        ]
+        # as well as all constraints from disjuncts in which there are no instantiations
+        target_constraints_dnf = [c for (cs, subst) in zip(dnf, substs, strict=True) for c in cs if len(subst) == 0]
+
+        # Simplify using various substitutions:
+        # the identified constraints from the path condition
+        simplified_constraints_path_condition = [
+            substitute_and_simplify_constraints(target_constraints_path_condition, subst) for subst in substs
+        ]
+        # their negations
+        simplified_constraints_path_condition_negated = [
+            substitute_and_simplify_constraints(target_constraints_path_condition_negated, subst) for subst in substs
+        ]
+        # and the identified constraints from the disjuncts
+        simplified_constraints_dnf = [
+            substitute_and_simplify_constraints(target_constraints_dnf, subst) for subst in substs
+        ]
+
+        # If a conjunct is a simplified version of an identified more general conjunct,
+        # then replace it with the more general construct
+        result = [
             [
-                conjunct if conjunct not in generalized_constraints else generalized_constraints[conjunct]
+                conjunct if conjunct not in simplified_constraints else simplified_constraints[conjunct]
                 for conjunct in conjuncts
             ]
-            for (conjuncts, generalized_constraints) in zip(dnf, generalization, strict=True)
+            for (conjuncts, simplified_constraints) in zip(dnf, simplified_constraints_dnf, strict=True)
         ]
-        return revisited_constraints
+        # If a conjunct is a simplified version of a path condition constraint, then remove it altogether
+        result = [
+            [conjunct for conjunct in conjuncts if conjunct not in simplified_constraints]
+            for (conjuncts, simplified_constraints) in zip(result, simplified_constraints_path_condition, strict=True)
+        ]
+        # If a conjunct is a simplified version of a negated path condition constraint,
+        # then remove its corresponding disjunct altogether
+        result = [
+            conjuncts
+            for (conjuncts, simplified_constraints) in zip(
+                result, simplified_constraints_path_condition_negated, strict=True
+            )
+            if all(conjunct not in simplified_constraints for conjunct in conjuncts)
+        ]
+        return result
 
 
 @contextmanager
