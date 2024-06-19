@@ -21,11 +21,13 @@ module MINI-KEVM-SYNTAX
     syntax Bytes ::= #bufStrict ( Int , Int ) [function]
     syntax Bytes ::= #buf ( Int , Int ) [symbol(buf), function, total, smtlib(buf)]
 
+    // keccak
+
+    syntax Int ::= keccak ( Bytes ) [function, total, no-evaluators, smtlib(keccak)]
+
     // Hashed Locations
 
     syntax IntList ::= List{Int, ""} [symbol(intList), smtlib(intList)]
-
-    syntax Int ::= keccak ( Bytes ) [function, total, no-evaluators, smtlib(keccak)]
 
     syntax Int ::= #hashedLocation( String , Int , IntList ) [function, symbol(hashLoc), smtlib(hashLoc)]
 endmodule
@@ -36,6 +38,7 @@ module MINI-KEVM
     imports BOOL
     imports BYTES
     imports K-EQUAL
+    imports STRING
 
     configuration
         <k> $PGM:KItem </k>
