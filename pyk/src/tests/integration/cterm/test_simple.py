@@ -6,8 +6,8 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
-from pyk.prelude.kint import INT, intToken, leInt, ltInt
-from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsFalse, mlEqualsTrue, mlNot, mlTop
+from pyk.prelude.kint import leInt
+from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlTop
 from pyk.prelude.utils import token
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
@@ -39,24 +39,8 @@ EXECUTE_TEST_DATA: Iterable[tuple[str, int, STATE, int, STATE, list[STATE]]] = (
 SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90\xa0\n\xa1\xf1a" ~> .K', '.Map')),)
 
 
-def int_var(var: str) -> KInner:
-    return KVariable(var, sort=INT)
-
-
 def le_int(n: int, var: str) -> KInner:
     return mlEqualsTrue(leInt(token(n), KVariable(var)))
-
-
-def eq_int(var: str, val: int) -> KInner:
-    return mlEquals(int_var(var), intToken(val), arg_sort=INT)
-
-
-def ne_int(var: str, val: int) -> KInner:
-    return mlNot(eq_int(var, val))
-
-
-def plus_int(a: KInner, b: KInner) -> KInner:
-    return KApply('_+Int_', a, b)
 
 
 MINIMIZE_CONSTRAINTS_TEST_DATA: Final = (
@@ -200,55 +184,3 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
 
         # Then
         assert _minimized_constraints == _expected_minimized_constraints
-
-    NORMALIZE_DNF_TEST_DATA = [
-        (
-            'simple',
-            [
-                [
-                    mlEqualsTrue(ltInt(int_var('X'), intToken(7))),
-                    mlEqualsTrue(ltInt(int_var('T'), plus_int(int_var('CONTRACT_ID'), intToken(4)))),
-                    eq_int('CALLER_ID', 4),
-                ],
-                [
-                    mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
-                    ne_int('CALLER_ID', 4),
-                ],
-                [
-                    mlEqualsFalse(ltInt(int_var('T'), plus_int(int_var('CONTRACT_ID'), intToken(4)))),
-                    eq_int('CALLER_ID', 4),
-                ],
-            ],
-            [
-                mlEqualsTrue(ltInt(intToken(0), int_var('X'))),
-                mlEqualsTrue(ltInt(intToken(0), int_var('Y'))),
-                mlEqualsTrue(ltInt(intToken(0), int_var('Z'))),
-                mlEqualsTrue(ltInt(int_var('T'), plus_int(int_var('CALLER_ID'), int_var('CONTRACT_ID')))),
-            ],
-            [
-                [
-                    mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
-                    eq_int('CALLER_ID', 4),
-                ],
-                [
-                    mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
-                    ne_int('CALLER_ID', 4),
-                ],
-            ],
-        ),
-    ]
-
-    @pytest.mark.parametrize(
-        'test_id,dnf,path_condition,expected',
-        NORMALIZE_DNF_TEST_DATA,
-        ids=[test_id for test_id, *_ in NORMALIZE_DNF_TEST_DATA],
-    )
-    def test_normalize_dnf(
-        self,
-        cterm_symbolic: CTermSymbolic,
-        test_id: str,
-        dnf: list[list[KInner]],
-        path_condition: list[KInner],
-        expected: list[list[KInner]],
-    ) -> None:
-        assert cterm_symbolic.normalize_dnf(dnf, path_condition) == expected

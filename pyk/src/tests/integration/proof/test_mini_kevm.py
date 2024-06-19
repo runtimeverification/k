@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.kast.inner import KApply, KVariable
 from pyk.kcfg.show import KCFGShow
+from pyk.prelude.kint import INT, intToken, leInt, ltInt
+from pyk.prelude.ml import mlEquals, mlEqualsTrue, mlNot
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
@@ -20,12 +23,30 @@ if TYPE_CHECKING:
 
     from pytest import TempPathFactory
 
+    from pyk.cterm.symbolic import CTermSymbolic
+    from pyk.kast.inner import KInner
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprove import KProve
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+
+def int_var(var: str) -> KInner:
+    return KVariable(var, sort=INT)
+
+
+def eq_int(var: str, val: int) -> KInner:
+    return mlEquals(int_var(var), intToken(val), arg_sort=INT)
+
+
+def ne_int(var: str, val: int) -> KInner:
+    return mlNot(eq_int(var, val))
+
+
+def plus_int(a: KInner, b: KInner) -> KInner:
+    return KApply('_+Int_', a, b)
 
 
 APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None, Iterable[str], ProofStatus, int]] = (
@@ -41,6 +62,43 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | None,
         1,
     ),
 )
+
+NORMALIZE_DNF_TEST_DATA = [
+    (
+        'simple',
+        [
+            [
+                mlEqualsTrue(ltInt(int_var('X'), intToken(7))),
+                mlEqualsTrue(ltInt(int_var('T'), plus_int(int_var('CONTRACT_ID'), intToken(4)))),
+                eq_int('CALLER_ID', 4),
+            ],
+            [
+                mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
+                ne_int('CALLER_ID', 4),
+            ],
+            [
+                mlEqualsTrue(leInt(plus_int(int_var('CONTRACT_ID'), intToken(4)), int_var('T'))),
+                eq_int('CALLER_ID', 4),
+            ],
+        ],
+        [
+            mlEqualsTrue(ltInt(intToken(0), int_var('X'))),
+            mlEqualsTrue(ltInt(intToken(0), int_var('Y'))),
+            mlEqualsTrue(ltInt(intToken(0), int_var('Z'))),
+            mlEqualsTrue(ltInt(int_var('T'), plus_int(int_var('CALLER_ID'), int_var('CONTRACT_ID')))),
+        ],
+        [
+            [
+                mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
+                eq_int('CALLER_ID', 4),
+            ],
+            [
+                mlEqualsTrue(ltInt(int_var('X'), plus_int(int_var('CALLER_ID'), intToken(3)))),
+                ne_int('CALLER_ID', 4),
+            ],
+        ],
+    ),
+]
 
 
 def leaf_number(proof: APRProof) -> int:
@@ -100,3 +158,18 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
 
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
+
+    @pytest.mark.parametrize(
+        'test_id,dnf,path_condition,expected',
+        NORMALIZE_DNF_TEST_DATA,
+        ids=[test_id for test_id, *_ in NORMALIZE_DNF_TEST_DATA],
+    )
+    def test_normalize_dnf(
+        self,
+        cterm_symbolic: CTermSymbolic,
+        test_id: str,
+        dnf: list[list[KInner]],
+        path_condition: list[KInner],
+        expected: list[list[KInner]],
+    ) -> None:
+        assert cterm_symbolic.normalize_dnf(dnf, path_condition) == expected

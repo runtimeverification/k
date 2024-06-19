@@ -19,7 +19,7 @@ module MINI-KEVM-SYNTAX
     // Buffers
 
     syntax Bytes ::= #bufStrict ( Int , Int ) [function]
-    syntax Bytes ::= #buf ( Int , Int ) [function, total, smtlib(buf), no-evaluators]
+    syntax Bytes ::= #buf ( Int , Int ) [symbol(buf), function, total, smtlib(buf)]
 
     // Hashed Locations
 
@@ -67,11 +67,21 @@ module MINI-KEVM
     rule #bufStrict(SIZE, DATA) => #buf(SIZE, DATA)
       requires 0 <=Int DATA andBool DATA <Int (2 ^Int (SIZE *Int 8))
 
+    rule #buf(SIZE:Int, X:Int) => padLeftBytes(Int2Bytes(X %Int (2 ^Int (SIZE *Int 8)), BE, Unsigned), SIZE, 0) requires 0 <Int SIZE [concrete]
+    rule #buf(SIZE:Int, _) => b"" requires SIZE <=Int 0 [concrete]
+
     // Hashed Locations
 
     rule #hashedLocation(_LANG, BASE, .IntList      ) => BASE
     rule #hashedLocation( LANG, BASE, OFFSET OFFSETS) => #hashedLocation(LANG, #hashedLocation(LANG, BASE, OFFSET .IntList), OFFSETS) requires OFFSETS =/=K .IntList
 
     rule #hashedLocation("Solidity", BASE, OFFSET .IntList) => keccak(#bufStrict(32, OFFSET) +Bytes #bufStrict(32, BASE))   requires #rangeUInt(256, BASE) andBool #rangeUInt(256, OFFSET) [simplification]
+
+    // Various simplifications
+
+    rule          A  >Int B  => B  <Int A [simplification]
+    rule          A >=Int B  => B <=Int A [simplification]
+    rule notBool (A  <Int B) => B <=Int A [simplification]
+    rule notBool (A <=Int B) => B  <Int A [simplification]
 
 endmodule
