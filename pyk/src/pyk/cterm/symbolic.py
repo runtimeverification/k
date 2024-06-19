@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 from pyk.utils import not_none
 
 from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
+from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
@@ -310,6 +310,54 @@ class CTermSymbolic:
         kast = self.kore_to_kast(err.pattern)
         pretty_pattern = PrettyPrinter(self._definition).print(kast)
         return CTermSMTError(pretty_pattern)
+
+    def normalize_dnf(self, dnf: list[list[KInner]], path_condition: list[KInner]) -> list[list[KInner]]:
+        """Normalize a given DNF under a given path condition
+
+        Input:
+            - `dnf`: A list of branching conditions, `[ [ c_ij | j = 1 .. n_i ] | i = 1 .. n ]`.
+              It is interpreted as a disjunction of conjunction, that is, as
+              `#Or_{i = 1 .. n} ( #And_(j = 1 .. ni) c_ij )`.
+            - `path_condition`: a list of constraints representing the path condition at the time of
+                calculating the remainder.
+        """
+        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+        pattern = mlEquals(KVariable('#VAR'), KVariable('#VAL'))
+        substs = [
+            Subst(
+                {
+                    var.name: val
+                    for conjunct in conjuncts
+                    if (match := pattern.match(conjunct))
+                    and match != None
+                    and (var := match['#VAR'])
+                    and (val := match['#VAL'])
+                    and type(var) == KVariable
+                    and type(val) == KToken
+                }
+            )
+            for conjuncts in dnf
+        ]
+        non_simplified_constraints = [c for (cs, subst) in zip(dnf, substs, strict=True) for c in cs if len(subst) == 0]
+        generalization: list[dict[KInner, KInner]] = [
+            {
+                constraints[0]: non_simplified_constraint
+                for non_simplified_constraint in non_simplified_constraints
+                if (cterm := CTerm(dummy_config, constraints=[subst.apply(non_simplified_constraint)]))
+                and (simplified_cterm := self.simplify(cterm)[0])
+                and (constraints := simplified_cterm.constraints)
+                and constraints[0] != non_simplified_constraint
+            }
+            for subst in substs
+        ]
+        revisited_constraints = [
+            [
+                conjunct if conjunct not in generalized_constraints else generalized_constraints[conjunct]
+                for conjunct in conjuncts
+            ]
+            for (conjuncts, generalized_constraints) in zip(dnf, generalization, strict=True)
+        ]
+        return revisited_constraints
 
 
 @contextmanager
