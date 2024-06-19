@@ -349,7 +349,7 @@ jobs:
 
   pyk-publish:
     name: 'Publish pyk'
-    runs-on: [self-hosted, linux, flyweight]
+    runs-on: ubuntu-latest
     environment: production
     permissions:
       id-token: write
