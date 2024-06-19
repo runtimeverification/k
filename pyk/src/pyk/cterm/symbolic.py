@@ -358,16 +358,18 @@ class CTermSymbolic:
             print(f'Simplify constraint: {time.time() - start_time}')
             return result
 
-        def substitute_and_simplify_constraints(constraints: Iterable[KInner], subst: Subst) -> dict[KInner, KInner]:
+        def substitute_and_simplify_constraints(
+            constraints: Iterable[KInner], subst: Subst, keep: bool = True
+        ) -> dict[KInner, KInner]:
             """Simplify given constraints using a given substitution, returning the simplification mapping."""
             start_time = time.time()
             result = {
                 simplified_constraint: constraint
                 for constraint in constraints
                 if (substituted_constraint := subst.apply(constraint))
-                and substituted_constraint != constraint
+                and (keep or substituted_constraint != constraint)
                 and (simplified_constraint := simplify_constraint(substituted_constraint))
-                and simplified_constraint != constraint
+                and (keep or simplified_constraint != constraint)
             }
             print(f'Substitute and simplify: {time.time() - start_time}')
             return result
@@ -427,7 +429,7 @@ class CTermSymbolic:
         ]
         # and the identified constraints from the disjuncts
         simplified_constraints_dnf = [
-            substitute_and_simplify_constraints(target_constraints_dnf, subst) for subst in substs
+            substitute_and_simplify_constraints(target_constraints_dnf, subst, keep=False) for subst in substs
         ]
 
         # If a conjunct is a simplified version of an identified more general conjunct,
