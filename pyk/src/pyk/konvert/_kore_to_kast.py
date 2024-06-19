@@ -10,7 +10,6 @@ from ..kore.prelude import STRING as KORE_STRING
 from ..kore.syntax import (
     DV,
     And,
-    Or,
     App,
     Assoc,
     Bottom,
@@ -20,12 +19,13 @@ from ..kore.syntax import (
     Exists,
     Implies,
     Not,
+    Or,
     SortApp,
     String,
     Top,
 )
 from ..prelude.bytes import bytesToken_from_str
-from ..prelude.ml import mlAnd, mlOr, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
+from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlOr, mlTop
 from ..prelude.string import stringToken
 from ._utils import unmunge
 
