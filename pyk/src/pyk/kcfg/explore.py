@@ -59,6 +59,19 @@ class KCFGExplore:
     def pretty_print(self, kinner: KInner) -> str:
         return self._pretty_printer.print(kinner)
 
+    def _extract_rule_labels(self, _logs: tuple[LogEntry, ...]) -> list[str]:
+        _rule_lines = []
+        for node_log in _logs:
+            if isinstance(node_log, LogRewrite) and isinstance(node_log.result, RewriteSuccess):
+                if node_log.result.rule_id in self.cterm_symbolic._definition.sentence_by_unique_id:
+                    sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
+                    _rule_lines.append(f'{sent.label}:{sent.source}')
+                else:
+                    if node_log.result.rule_id == 'UNKNOWN':
+                        _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
+                    _rule_lines.append(f'{node_log.result.rule_id}:UNKNOWN')
+        return _rule_lines
+
     def implication_failure_reason(self, antecedent: CTerm, consequent: CTerm) -> tuple[bool, str]:
         def _is_cell_subst(csubst: KInner) -> bool:
             if type(csubst) is KApply and csubst.label.name == '_==K_':
@@ -143,8 +156,9 @@ class KCFGExplore:
         _LOGGER.info(f'Found new node at depth {depth} {self.id}: {shorten_hashes((node.id, new_node.id))}')
         logs[new_node.id] = exec_res.logs
         out_edges = cfg.edges(source_id=node.id)
+        rule_logs = self._extract_rule_labels(exec_res.logs)
         if len(out_edges) == 0:
-            cfg.create_edge(node.id, new_node.id, depth=depth)
+            cfg.create_edge(node.id, new_node.id, depth=depth, rules=rule_logs)
         else:
             edge = out_edges[0]
             if depth > edge.depth:
@@ -152,8 +166,8 @@ class KCFGExplore:
                     f'Step depth {depth} greater than original edge depth {edge.depth} {self.id}: {shorten_hashes((edge.source.id, edge.target.id))}'
                 )
             cfg.remove_edge(edge.source.id, edge.target.id)
-            cfg.create_edge(edge.source.id, new_node.id, depth=depth)
-            cfg.create_edge(new_node.id, edge.target.id, depth=(edge.depth - depth))
+            cfg.create_edge(edge.source.id, new_node.id, depth=depth, rules=rule_logs)
+            cfg.create_edge(new_node.id, edge.target.id, depth=(edge.depth - depth), rules=edge.rules[depth:])
         return new_node.id
 
     def section_edge(
@@ -175,7 +189,6 @@ class KCFGExplore:
         new_nodes = []
         curr_node_id = edge.source.id
         while new_depth < orig_depth:
-            _LOGGER.info(f'Taking {section_depth} steps from node {self.id}: {shorten_hashes(curr_node_id)}')
             curr_node_id = self.step(cfg, curr_node_id, logs, depth=section_depth)
             new_nodes.append(curr_node_id)
             new_depth += section_depth
@@ -205,18 +218,6 @@ class KCFGExplore:
         def log(message: str, *, warning: bool = False) -> None:
             _LOGGER.log(logging.WARNING if warning else logging.INFO, f'Extend result for {self.id}: {message}')
 
-        def extract_rule_labels(_logs: tuple[LogEntry, ...]) -> list[str]:
-            _rule_lines = []
-            for node_log in _logs:
-                if isinstance(node_log, LogRewrite) and isinstance(node_log.result, RewriteSuccess):
-                    if node_log.result.rule_id in self.cterm_symbolic._definition.sentence_by_unique_id:
-                        sent = self.cterm_symbolic._definition.sentence_by_unique_id[node_log.result.rule_id]
-                        _rule_lines.append(f'{sent.label}:{sent.source}')
-                    else:
-                        _LOGGER.warning(f'Unknown unique id attached to rule log entry: {node_log}')
-                        _rule_lines.append('UNKNOWN')
-            return _rule_lines
-
         custom_step_result = self.kcfg_semantics.custom_step(_cterm)
         if custom_step_result is not None:
             log(f'custom step node: {node_id}')
@@ -238,7 +239,7 @@ class KCFGExplore:
         # Basic block
         if depth > 0:
             log(f'basic block at depth {depth}: {node_id}')
-            return Step(cterm, depth, next_node_logs, extract_rule_labels(next_node_logs))
+            return Step(cterm, depth, next_node_logs, self._extract_rule_labels(next_node_logs))
 
         # Stuck or vacuous
         if not next_states:
@@ -255,7 +256,7 @@ class KCFGExplore:
                 next_states[0].state,
                 1,
                 next_node_logs,
-                extract_rule_labels(next_node_logs),
+                self._extract_rule_labels(next_node_logs),
                 cut=True,
             )
 
@@ -283,4 +284,4 @@ class KCFGExplore:
             # NDBranch
             log(f'{len(next_states)} non-deterministic branches: {node_id}')
             next_cterms = [cterm for cterm, _ in next_states]
-            return NDBranch(next_cterms, next_node_logs, extract_rule_labels(next_node_logs))
+            return NDBranch(next_cterms, next_node_logs, self._extract_rule_labels(next_node_logs))
