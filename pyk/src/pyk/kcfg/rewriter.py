@@ -1,110 +1,35 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from enum import Enum
 
 from .kcfg import KCFG, NodeIdLike
 from ..cterm import CTerm, CSubst
+from ..utils import single
 
 
-class MatchedKCFG:
+class Pats(Enum):
     """
-    A matched KCFG subgraph.
-    """
-
-    nodes: set[int] = set()
-    """The node ids in the KCFG to be rewritten."""
-    edges: set[int] = set()
-    """The edge ids in the KCFG to be rewritten."""
-    covers: set[int] = set()
-    """The cover ids in the KCFG to be rewritten."""
-    splits: set[int] = set()
-    """The split ids in the KCFG to be rewritten."""
-    ndbranches: set[int] = set()
-    """The ndbranch ids in the KCFG to be rewritten."""
-
-
-class NewKCFG:
-    """
-    A new KCFG subgraph.
-
-    Motivation: NewKCFG
-    1. is side effect free for the original KCFG until commit rewrite.
-    2. is available to describe edges without nodes.
-    3. is available to describe edges combine the nodes in NewKCFG and KCFG.
-
-    Specifically, if the nodes of the edges are in the NewKCFG, it should be in the type of NewKCFG.Node.
-    Otherwise, it should be the identifier of the node in the KCFG.
+    The matching patterns for the KCFG, starting from a node N.
     """
 
-    class Node:
-        id: int | None
-        node: CTerm
+    S_EDGE_N: str = 'S->N'
+    """Match an Edge: from node S to node N."""
+    N_EDGE_T: str = 'N->T'
+    """Match an Edge: from node N to node T."""
 
-    class Edge:
-        source: NewKCFG.Node | int
-        target: NewKCFG.Node | int
-        depth: int
-        rules: tuple[str, ...]
+    # ----- Rewrite Patterns -----
+    S_EDGE_T: str = 'S->T'
+    """Rewrite an Edge: from node S to node T."""
 
-    class Cover:
-        source: NewKCFG.Node | int
-        target: NewKCFG.Node | int
-        csubst: CSubst
-
-    class Split:
-        source: NewKCFG.Node | int
-        targets: tuple[tuple[NewKCFG.Node | int, CSubst], ...]
-
-    class NDBranch:
-        source: NewKCFG.Node | int
-        targets: tuple[NewKCFG.Node | int, ...]
-        rules: tuple[str, ...]
-
-    _id_count = 0
-    nodes: list[Node] = []
-    """The new nodes to be added to the KCFG."""
-    edges: list[Edge] = []
-    """The new edges to be added to the KCFG."""
-    covers: list[Cover] = []
-    """The new covers to be added to the KCFG."""
-    splits: list[Split] = []
-    """The new splits to be added to the KCFG."""
-    ndbranches: list[NDBranch] = []
-    """The new ndbranches to be added to the KCFG."""
-
-    def create_node(self, node: CTerm) -> NewKCFG.Node:
-        node = NewKCFG.Node()
-        node.id = self._id_count
-        node.node = node
-        self._id_count += 1
-        return node
-
-    def push_edge(self, source: NewKCFG.Node | int, target: NewKCFG.Node | int, depth: int, rules: tuple[str, ...]):
-        edge = NewKCFG.Edge()
-        edge.source = source
-        edge.target = target
-        edge.depth = depth
-        edge.rules = rules
-        self.edges.append(edge)
-
-    def push_cover(self, source: NewKCFG.Node | int, target: NewKCFG.Node | int, csubst: CSubst):
-        cover = NewKCFG.Cover()
-        cover.source = source
-        cover.target = target
-        cover.csubst = csubst
-        self.covers.append(cover)
-
-    def push_split(self, source: NewKCFG.Node | int, targets: tuple[tuple[NewKCFG.Node | int, CSubst], ...]):
-        split = NewKCFG.Split()
-        split.source = source
-        split.targets = targets
-        self.splits.append(split)
-
-    def push_ndbranch(self, source: NewKCFG.Node | int, targets: tuple[NewKCFG.Node | int, ...], rules: tuple[str, ...]):
-        ndbranch = NewKCFG.NDBranch()
-        ndbranch.source = source
-        ndbranch._targets = targets
-        ndbranch.rules = rules
-        self.ndbranches.append(ndbranch)
+    def edge(self) -> tuple[str, str, str]:
+        """
+        Return the source, target, and edge type of the pattern.
+        """
+        source, tmp = self.value.split('->')
+        tmp = tmp.split('|')
+        if len(tmp) == 1:
+            return source, tmp[0], 'edge'
+        return source, tmp[-1], tmp[1]
 
 
 class KCFGRewriter:
@@ -117,6 +42,104 @@ class KCFGRewriter:
 
     def __init__(self, kcfg: KCFG):
         self.kcfg = kcfg
+
+    def commit(
+            self,
+            node: NodeIdLike,
+            match_pattern: tuple[Pats | str, ...],
+            rewrite_pattern: tuple[Pats | str, ...]
+    ) -> bool:
+        """
+        Match a subgraph of KCFG, and rewrite it.
+
+        Input:
+                - The node id to start matching. ( N )
+                - The patterns to match. in the form of (A->N, N->B)
+                - The patterns to rewrite. in the form of (A->B)
+        Effect: The KCFG will be rewritten according to the rewrite patterns.
+                Match the match_pattern and rewrite it to the rewrite_pattern.
+        Output: True if the KCFG was mutated.
+        """
+        old_kcfg = self.match(node, match_pattern)
+        if not old_kcfg:
+            return False
+        new_kcfg = self.create(node, rewrite_pattern, match_pattern, old_kcfg)
+        self.replace(old_kcfg, new_kcfg)
+        return True
+
+    def match(
+            self,
+            node: NodeIdLike,
+            patterns: tuple[Pats | str, ...] | None = None
+    ) -> KCFG | None:
+        """
+        Match a subgraph of KCFG.
+
+        Input:
+              - The node id to start matching.
+              - The patterns to match. If None, just return the node.
+        Output: The matched subgraph.
+        """
+        matched = KCFG()
+        is_matched = False
+        matched._node_id = self.kcfg._node_id
+        matched.add_node(self.kcfg.get_node(node))
+        if not patterns:
+            return matched
+        patterns = tuple(Pats(p) if isinstance(p, str) else p for p in patterns)
+        for pattern in patterns:
+            if pattern == Pats.S_EDGE_N:
+                edge = single(self.kcfg.edges(target_id=node))
+                matched._edges[edge.source.id] = edge
+                matched.add_node(edge.source)
+                is_matched = True
+                continue
+            if pattern == Pats.N_EDGE_T:
+                edge = single(self.kcfg.edges(source_id=node))
+                matched._edges[node] = edge
+                matched.add_node(edge.target)
+                is_matched = True
+                continue
+            if 'N' not in pattern.value:
+                raise ValueError(f"Pattern {pattern} must contain 'N' to match the current Node.")
+            raise NotImplementedError(f"Pattern {pattern} is not implemented.")
+        if not is_matched:
+            return None
+        return matched
+
+    def create(
+            self,
+            node: NodeIdLike,
+            rewrite_patterns: tuple[Pats | str, ...],
+            match_patterns: tuple[Pats | str, ...],
+            old_kcfg: KCFG
+    ) -> KCFG:
+        """
+        Create a new KCFG by rewriting the matched subgraph.
+
+        Input:
+              - The node id to start creating.
+              - The patterns to rewrite / create.
+              - The matched subgraph.
+        Output: The new KCFG.
+        """
+        new_kcfg = KCFG()
+        for pattern in rewrite_patterns:
+            # parse / desugar the source and target of the pattern
+            source, target, edge_type = pattern.edge()
+
+            def _desugar(n: str) -> tuple[tuple(KCFG.Node, KCFG.Edge), ...]:
+                for match_pattern in match_patterns:
+                    if n in match_pattern.value:
+                        source_m, target_m, edge_type_m = match_pattern.edge()
+                        # todo: S*, T*; cannot find directly like S* | S;  T* | T
+                pass
+
+            source = _desugar(source)
+            target = _desugar(target)
+
+
+        return new_kcfg
 
     # todo: move it to kcfg.py, maybe as a argument of remove_node
     def remove_node_safe(self, node_id: int) -> bool:
@@ -135,50 +158,49 @@ class KCFGRewriter:
         self.kcfg._deleted_nodes.add(node.id)
         return True
 
-    def replace_sub_kcfg(self, old_kcfg: MatchedKCFG, new_kcfg: NewKCFG):
+    def _commit(self, old_kcfg: KCFG, new_kcfg: KCFG):
         """
         Replace the old_kcfg with the new_kcfg in the KCFG.
 
         Input: The old_kcfg to be replaced, and the new_kcfg to replace it.
         Effect: The old_kcfg will be replaced with the new_kcfg in the KCFG.
         """
-        # Delete the old_kcfg
-        for edge_id in old_kcfg.edges:
-            self.kcfg._edges.pop(edge_id)
-        for cover_id in old_kcfg.covers:
-            self.kcfg._covers.pop(cover_id)
-        for split_id in old_kcfg.splits:
-            self.kcfg._splits.pop(split_id)
-        for ndbranch_id in old_kcfg.ndbranches:
-            self.kcfg._ndbranches.pop(ndbranch_id)
-        for node_id in old_kcfg.nodes:
-            self.remove_node_safe(node_id)
-        # Add the new_kcfg
-        for idx, node in enumerate(new_kcfg.nodes):
-            kcfg_node = self.kcfg.create_node(node.node)
-            new_kcfg.nodes[idx].id = kcfg_node.id
-        for edge in new_kcfg.edges:
-            source = edge.source.id if isinstance(edge.source, NewKCFG.Node) else edge.source
-            target = edge.target.id if isinstance(edge.target, NewKCFG.Node) else edge.target
-            self.kcfg.create_edge(source, target, edge.depth, edge.rules)
-        for cover in new_kcfg.covers:
-            source = cover.source.id if isinstance(cover.source, NewKCFG.Node) else cover.source
-            target = cover.target.id if isinstance(cover.target, NewKCFG.Node) else cover.target
-            self.kcfg.create_cover(source, target, cover.csubst)
-        for split in new_kcfg.splits:
-            source = split.source.id if isinstance(split.source, NewKCFG.Node) else split.source
-            targets = [(target.id if isinstance(target, NewKCFG.Node) else target, csubst) for target, csubst in split.targets]
-            self.kcfg.create_split(source, targets)
-        for ndbranch in new_kcfg.ndbranches:
-            source = ndbranch.source.id if isinstance(ndbranch.source, NewKCFG.Node) else ndbranch.source
-            targets = [target.id if isinstance(target, NewKCFG.Node) else target for target in ndbranch.targets]
-            self.kcfg.create_ndbranch(source, targets, ndbranch.rules)
+
+        def update_elements(old_elements, new_elements, storage):
+            for elem_id in old_elements:
+                if elem_id not in new_elements:
+                    storage.pop(elem_id, None)
+                else:
+                    new_elements.pop(elem_id, None)
+            storage.update(new_elements)
+
+        # Update edges, covers, splits, and ndbranches
+        update_elements(old_kcfg._edges, new_kcfg._edges, self.kcfg._edges)
+        update_elements(old_kcfg._covers, new_kcfg._covers, self.kcfg._covers)
+        update_elements(old_kcfg._splits, new_kcfg._splits, self.kcfg._splits)
+        update_elements(old_kcfg._ndbranches, new_kcfg._ndbranches, self.kcfg._ndbranches)
+
+        # Update nodes
+        for node_id in old_kcfg._nodes:
+            if node_id not in new_kcfg._nodes:
+                self.remove_node_safe(node_id)
+            else:
+                new_kcfg._nodes.pop(node_id)
+        for node_id, node in new_kcfg._nodes.items():
+            if not self.kcfg.get_node(node_id):
+                self.kcfg.add_node(node)
+
+        # Update node_id if necessary;
+        # make sure the create_node will not create a node with the same id
+        if new_kcfg._node_id > self.kcfg._node_id:
+            self.kcfg._node_id = new_kcfg._node_id
 
 
 class KCFGRewritePattern(ABC):
     """
-    A rewrite pattern matching on a KCFG.
+    A side-effect free rewrite pattern matching on a KCFG.
     """
+
     # todo: benefit and priority
 
     @abstractmethod
@@ -249,6 +271,3 @@ class KCFGRewriteWalker:
                 if rewriter.kcfg.get_node(node):
                     was_modified |= pattern.match_and_rewrite(node, rewriter)
         return was_modified
-
-
-
