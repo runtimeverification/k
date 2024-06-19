@@ -112,16 +112,20 @@ EXECUTE_TEST_DATA: Final[tuple[tuple[str, int, Mapping[str, Any], ExecuteResult]
                     term=term(3),
                     rule_id='ae0c978867ef4cc5cbfbadf7be2ff55e30e59465697ceaffa1d9fd5343a21fc6',
                     rule_substitution={
-                        EVar('GCC', SORT_GENERATED_COUNTER_CELL): EVar("Var'Unds'DotVar0", SORT_GENERATED_COUNTER_CELL),
-                        EVar('K', SORT_K): EVar("Var'Unds'DotVar1", SORT_K),
+                        EVar('GCC', SORT_GENERATED_COUNTER_CELL): EVar(
+                            "RuleVar'Unds'DotVar0", SORT_GENERATED_COUNTER_CELL
+                        ),
+                        EVar('K', SORT_K): EVar("RuleVar'Unds'DotVar1", SORT_K),
                     },
                 ),
                 State(
                     term=term(4),
                     rule_id='37a544ff4b6da9b4fb839f86d2ad51b770bcaf3dd578b716c38cf0da33458374',
                     rule_substitution={
-                        EVar('GCC', SORT_GENERATED_COUNTER_CELL): EVar("Var'Unds'DotVar0", SORT_GENERATED_COUNTER_CELL),
-                        EVar('K', SORT_K): EVar("Var'Unds'DotVar1", SORT_K),
+                        EVar('GCC', SORT_GENERATED_COUNTER_CELL): EVar(
+                            "RuleVar'Unds'DotVar0", SORT_GENERATED_COUNTER_CELL
+                        ),
+                        EVar('K', SORT_K): EVar("RuleVar'Unds'DotVar1", SORT_K),
                     },
                 ),
             ),
