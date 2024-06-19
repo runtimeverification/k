@@ -519,7 +519,7 @@ class State:
         for conjunct in manip.conjuncts(pattern):
             key, value = extract_entry(conjunct)
             if key in res:
-                raise ValueError(f'Duplicate substitution entry key: {key.text}')
+                raise ValueError(f'Duplicate substitution entry key: {key.text} -> {[res[key].text, value.text]}')
             res[key] = value
         return res
 
