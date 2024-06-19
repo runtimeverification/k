@@ -9,7 +9,7 @@ import pytest
 from pyk.kast.inner import KSort
 from pyk.kore.parser import KoreParser
 from pyk.kore.syntax import App, EVar, SortApp
-from pyk.ktool.krun import fuzz, kintegers
+from pyk.ktool.kfuzz import fuzz, kintegers
 from pyk.testing import KompiledTest
 
 from ..utils import K_FILES, TEST_DATA_DIR
