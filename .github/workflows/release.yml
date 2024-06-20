@@ -218,7 +218,6 @@ jobs:
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
           echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
-          echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
 
       - name: Upload bottle
         uses: actions/upload-artifact@v4
@@ -238,7 +237,6 @@ jobs:
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
       bottle_path_remote: ${{ steps.build.outputs.path_remote }}
-      version: ${{ steps.build.outputs.version }}
 
   macos-test:
     name: 'Test MacOS Package'
@@ -353,7 +351,7 @@ jobs:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
     environment: production
-    needs: [cachix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, set-release-id]
+    needs: [cachix-release, macos-test, source-tarball, ubuntu-jammy, set-release-id]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -407,16 +405,19 @@ jobs:
             await github.rest.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
 
   notify-dependents:
+    name: 'Notify Dependents'
     runs-on: ubuntu-latest
     needs: release
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: 'Update dependents'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-          VERSION: ${{ needs.macos-build.outputs.version }}
         run: |
           set -x
-          version=v"${VERSION}"
+          VERSION=$(cat package/version)
           curl --fail                                                          \
             -X POST                                                            \
             -H "Accept: application/vnd.github+json"                           \
