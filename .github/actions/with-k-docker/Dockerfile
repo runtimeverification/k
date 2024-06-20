@@ -18,7 +18,7 @@ RUN    apt-get -y update    \
          python3.10-venv    \
          /kframework.deb
 
-RUN if [[ "${INSTALL_BACKEND_DEBS}" == "true" ]]; then \
+RUN if [ "${INSTALL_BACKEND_DEBS}" = "true" ]; then \
       apt-get -y install /llvm-backend.deb; \
     fi
 
