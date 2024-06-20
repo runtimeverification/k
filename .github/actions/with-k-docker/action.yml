@@ -40,7 +40,7 @@ runs:
       gh release download                           \
         --repo runtimeverification/llvm-backend     \
         --pattern "*ubuntu_${BASE_DISTRO}.deb"      \
-        --output "${LLVM_BACKEND_DEB_PATH}          \
+        --output "${LLVM_BACKEND_DEB_PATH}"         \
         v$(cat deps/llvm-backend_release)
 
       CONTAINER_NAME=${{ inputs.container-name }}
