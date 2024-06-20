@@ -41,14 +41,14 @@ class TestImpFuzz(KompiledTest):
         else:
             raise RuntimeError('Unexpected use of fixture template_config')
 
-    @pytest.fixture
-    def substs(self) -> dict[EVar, SearchStrategy[Pattern]]:
+    @staticmethod
+    def substs() -> dict[EVar, SearchStrategy[Pattern]]:
         var_x = EVar(name='VarX', sort=SortApp('SortInt'))
         var_y = EVar(name='VarY', sort=SortApp('SortInt'))
         return {var_x: kintegers(with_inj=KSort('AExp')), var_y: kintegers(with_inj=KSort('AExp'))}
 
-    @pytest.fixture
-    def check_func(self) -> Callable[[Pattern], None]:
+    @staticmethod
+    def check() -> Callable[[Pattern], None]:
 
         lbl = "Lbl'UndsPipe'-'-GT-Unds'"
 
@@ -68,17 +68,13 @@ class TestImpFuzz(KompiledTest):
         self,
         definition_dir: Path,
         template_config: Pattern,
-        substs: dict[EVar, SearchStrategy[Pattern]],
-        check_func: Callable[[Pattern], None],
     ) -> None:
-        fuzz(definition_dir, template_config, substs, check_func)
+        fuzz(definition_dir, template_config, self.substs(), self.check())
 
     def test_fuzz_fail(
         self,
         definition_dir: Path,
         template_config: Pattern,
-        substs: dict[EVar, SearchStrategy[Pattern]],
-        check_func: Callable[[Pattern], None],
     ) -> None:
         with pytest.raises(AssertionError):
-            fuzz(definition_dir, template_config, substs, check_func)
+            fuzz(definition_dir, template_config, self.substs(), self.check())
