@@ -461,7 +461,7 @@ jobs:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    needs: [pyk-build-docs, notify-dependents]
+    needs: [pyk-build-docs, release]
     steps:
       - name: 'Install pandoc/texlive/calibre'
         run: |
