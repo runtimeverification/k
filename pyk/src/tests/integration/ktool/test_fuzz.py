@@ -1,25 +1,26 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kast.inner import KSort
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import App, EVar, SortApp
+from pyk.kore.prelude import inj, top_cell_initializer
+from pyk.kore.syntax import DV, App, EVar, SortApp, String
 from pyk.ktool.kfuzz import fuzz, kintegers
+from pyk.ktool.kprint import _kast
 from pyk.testing import KompiledTest
 
 from ..utils import K_FILES, TEST_DATA_DIR
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
     from typing import Final
 
     from hypothesis.strategies import SearchStrategy
-    from pytest import FixtureRequest
 
     from pyk.kore.syntax import Pattern
 
@@ -27,25 +28,17 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 FUZZ_FILES: Path = TEST_DATA_DIR / 'fuzzing'
 
+VAR_X = EVar(name='VarX', sort=SortApp('SortInt'))
+VAR_Y = EVar(name='VarY', sort=SortApp('SortInt'))
+
 
 class TestImpFuzz(KompiledTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
     KOMPILE_BACKEND = 'llvm'
 
-    @pytest.fixture
-    def template_config(self, request: FixtureRequest) -> Pattern:
-        if request.function.__name__ == 'test_fuzz':
-            return KoreParser(Path(FUZZ_FILES / 'imp_comm_config.kore').read_text()).pattern()
-        elif request.function.__name__ == 'test_fuzz_fail':
-            return KoreParser(Path(FUZZ_FILES / 'imp_lte_config.kore').read_text()).pattern()
-        else:
-            raise RuntimeError('Unexpected use of fixture template_config')
-
     @staticmethod
     def substs() -> dict[EVar, SearchStrategy[Pattern]]:
-        var_x = EVar(name='VarX', sort=SortApp('SortInt'))
-        var_y = EVar(name='VarY', sort=SortApp('SortInt'))
-        return {var_x: kintegers(with_inj=KSort('AExp')), var_y: kintegers(with_inj=KSort('AExp'))}
+        return {VAR_X: kintegers(with_inj=KSort('AExp')), VAR_Y: kintegers(with_inj=KSort('AExp'))}
 
     @staticmethod
     def check() -> Callable[[Pattern], None]:
@@ -64,17 +57,70 @@ class TestImpFuzz(KompiledTest):
 
         return lambda pattern: pattern.args[0].args[1].args[0].pattern.top_down(checkres)  # type: ignore[attr-defined]
 
+    @staticmethod
+    def setup_program(definition_dir: Path, text: str) -> Pattern:
+        kore_text = _kast(definition_dir=definition_dir, input='program', output='kore', expression=text).stdout
+
+        program_pattern = KoreParser(kore_text).pattern()
+
+        def replace_var_ids(p: Pattern) -> Pattern:
+            match p:
+                case App('inj', _, (DV(_, String('varx')),)):
+                    return VAR_X
+                case App('inj', _, (DV(_, String('vary')),)):
+                    return VAR_Y
+            return p
+
+        program_pattern = program_pattern.top_down(replace_var_ids)
+        init_pattern = top_cell_initializer(
+            {
+                '$PGM': inj(SortApp('SortPgm'), SortApp('SortKItem'), program_pattern),
+            }
+        )
+
+        return init_pattern
+
     def test_fuzz(
         self,
         definition_dir: Path,
-        template_config: Pattern,
     ) -> None:
-        fuzz(definition_dir, template_config, self.substs(), self.check())
+        # Given
+        program_text = """
+            // Checks the commutativity of addition
+            int x, y, a, b, res;
+            x = varx;
+            y = vary;
+            a = x + y;
+            b = y + x;
+            if ((a <= b) && (b <= a)) { // a == b
+                res = 0;
+            } else {
+                res = 1;
+            }
+            """
+
+        init_pattern = self.setup_program(definition_dir, program_text)
+
+        fuzz(definition_dir, init_pattern, self.substs(), self.check())
 
     def test_fuzz_fail(
         self,
         definition_dir: Path,
-        template_config: Pattern,
     ) -> None:
+        # Given
+        program_text = """
+            // Checks that x <= y
+            int x, y, res;
+            x = varx;
+            y = vary;
+            if (x <= y) {
+                res = 0;
+            } else {
+                res = 1;
+            }
+            """
+
+        init_pattern = self.setup_program(definition_dir, program_text)
+
         with pytest.raises(AssertionError):
-            fuzz(definition_dir, template_config, self.substs(), self.check())
+            fuzz(definition_dir, init_pattern, self.substs(), self.check())
