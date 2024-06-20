@@ -405,6 +405,11 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             await github.rest.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
+
+  notify-dependents:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
       - name: 'Update dependents'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
