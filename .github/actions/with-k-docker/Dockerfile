@@ -19,7 +19,7 @@ RUN    apt-get -y update    \
          /kframework.deb
 
 RUN if [[ "${INSTALL_BACKEND_DEBS}" == "true" ]]; then \
-      apt-get -y install /llvm-backend.deb \
+      apt-get -y install /llvm-backend.deb; \
     fi
 
 RUN apt-get -y clean
