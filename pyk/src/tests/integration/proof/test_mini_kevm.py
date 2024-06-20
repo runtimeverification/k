@@ -172,4 +172,4 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
         path_condition: list[KInner],
         expected: list[list[KInner]],
     ) -> None:
-        assert cterm_symbolic.normalize_dnf(dnf, path_condition) == []
+        assert cterm_symbolic.normalize_dnf(dnf, path_condition) == expected
