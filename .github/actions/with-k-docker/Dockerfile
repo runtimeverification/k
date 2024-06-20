@@ -3,6 +3,7 @@ ARG BASE_DISTRO
 FROM ubuntu:${BASE_DISTRO}
 
 ARG K_DEB_PATH
+ARG INSTALL_BACKEND_DEBS
 ARG LLVM_BACKEND_DEB_PATH
 
 COPY ${K_DEB_PATH} /kframework.deb
@@ -15,9 +16,13 @@ RUN    apt-get -y update    \
          make               \
          python3.10-dev     \
          python3.10-venv    \
-         /llvm-backend.deb  \
-         /kframework.deb    \
-    && apt-get -y clean
+         /kframework.deb
+
+RUN if [[ "${INSTALL_BACKEND_DEBS}" == "true" ]]; then \
+      apt-get -y install /llvm-backend.deb \
+    fi
+
+RUN apt-get -y clean
 
 RUN rm /llvm-backend.deb
 RUN rm /kframework.deb
