@@ -37,16 +37,17 @@ runs:
     run: |
       set -euxo pipefail
 
+      CONTAINER_NAME=${{ inputs.container-name }}
+      TAG=runtimeverificationinc/${CONTAINER_NAME}
+      DOCKERFILE=${{ github.action_path }}/Dockerfile
+      K_DEB_PATH=${{ inputs.k-deb-path }}
+      LLVM_BACKEND_DEB_PATH=llvm-backend.deb
+
       gh release download                           \
         --repo runtimeverification/llvm-backend     \
         --pattern "*ubuntu_${BASE_DISTRO}.deb"      \
         --output "${LLVM_BACKEND_DEB_PATH}"         \
         v$(cat deps/llvm-backend_release)
-
-      CONTAINER_NAME=${{ inputs.container-name }}
-      TAG=runtimeverificationinc/${CONTAINER_NAME}
-      DOCKERFILE=${{ github.action_path }}/Dockerfile
-      K_DEB_PATH=${{ inputs.k-deb-path }}
 
       docker build . \
         --file ${DOCKERFILE}                                        \
