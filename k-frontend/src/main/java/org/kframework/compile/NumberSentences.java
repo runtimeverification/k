@@ -33,7 +33,7 @@ public class NumberSentences {
         preservedAtts.stream()
             .filter(att -> s.att().contains(att))
             .map(att -> Att.empty().add(att, s.att().get(att)))
-            .reduce(Att.empty(), (acc, elem) -> acc.addAll(elem));
+            .reduce(Att.empty(), Att::addAll);
 
     String id = ruleHash(s.withAtt(a));
     return s.withAtt(s.att().add(Att.UNIQUE_ID(), id));
