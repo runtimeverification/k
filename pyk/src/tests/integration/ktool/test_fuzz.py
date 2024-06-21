@@ -8,7 +8,7 @@ import pytest
 from pyk.kast.inner import KSort
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import inj, top_cell_initializer
-from pyk.kore.syntax import DV, App, EVar, SortApp, String
+from pyk.kore.syntax import DV, App, Assoc, EVar, SortApp, String
 from pyk.ktool.kfuzz import fuzz, kintegers
 from pyk.ktool.kprint import _kast
 from pyk.testing import KompiledTest
@@ -42,20 +42,23 @@ class TestImpFuzz(KompiledTest):
 
     @staticmethod
     def check() -> Callable[[Pattern], None]:
-
-        lbl = "Lbl'UndsPipe'-'-GT-Unds'"
-
         def checkres(p: Pattern) -> Pattern:
-            if isinstance(p, App):
-                if p.symbol == lbl:
-                    left = p.args[0]
-                    right = p.args[1]
-                    if left.args[0].value.value == 'res':  # type: ignore[attr-defined]
-                        val = int(right.args[0].value.value)  # type: ignore[attr-defined]
-                        assert val == 0
+            match p:
+                case Assoc():
+                    symbol = p.symbol()
+                    args = (arg.top_down(checkres) for arg in p.app.args)
+                    return p.of(symbol, patterns=(p.app.let(args=args),))
+                case App("Lbl'UndsPipe'-'-GT-Unds'", args=(key, val)):
+                    match key, val:
+                        case (
+                            App('inj', args=(DV(value=String('res')),)),
+                            App('inj', args=(DV(value=String(resval)),)),
+                        ):
+                            assert resval == '0'
+
             return p
 
-        return lambda pattern: pattern.args[0].args[1].args[0].pattern.top_down(checkres)  # type: ignore[attr-defined]
+        return lambda pattern: (None, pattern.top_down(checkres))[0]
 
     @staticmethod
     def setup_program(definition_dir: Path, text: str) -> Pattern:
