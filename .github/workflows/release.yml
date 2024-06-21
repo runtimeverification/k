@@ -347,37 +347,6 @@ jobs:
             const { owner, repo } = context.repo
             await github.rest.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
-  pyk-publish:
-    name: 'Publish pyk'
-    runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      id-token: write
-    needs: [set-release-id, source-tarball]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Poetry
-        uses: Gr1N/setup-poetry@v9
-
-      - name: Build pyk
-        working-directory: pyk
-        run: |
-          make build
-
-      - name: Publish pyk to PyPI
-        uses: pypa/gh-action-pypi-publish@v1
-        with:
-          packages-dir: pyk/dist
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-
   release:
     name: 'Publish Release'
     runs-on: [self-hosted, linux, normal]
@@ -434,6 +403,37 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             await github.rest.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
+
+  pyk-publish:
+    name: 'Publish pyk'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+    needs: [set-release-id, source-tarball]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        uses: Gr1N/setup-poetry@v9
+
+      - name: Build pyk
+        working-directory: pyk
+        run: |
+          make build
+
+      - name: Publish pyk to PyPI
+        uses: pypa/gh-action-pypi-publish@v1
+        with:
+          packages-dir: pyk/dist
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
 
   notify-dependents:
     name: 'Notify Dependents'
