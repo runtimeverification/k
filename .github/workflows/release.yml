@@ -429,7 +429,7 @@ jobs:
           make build
 
       - name: Publish pyk to PyPI
-        uses: pypa/gh-action-pypi-publish@v1
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: pyk/dist
           user: __token__
