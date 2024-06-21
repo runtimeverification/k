@@ -214,6 +214,35 @@ class CTermSymbolic:
         else:
             raise AssertionError('Received an invalid response from get-model endpoint')
 
+    def kast_get_model(self, kast: KInner, module_name: str | None = None) -> Subst | None:
+        # TODO harmonize with the get_model method above,
+        # i.e. factor-out a `kore -> Subst` function.
+        _LOGGER.debug(f'Getting model: {kast}')
+        kore = self.kast_to_kore(kast)
+        try:
+            result = self._kore_client.get_model(kore, module_name=module_name)
+        except SmtSolverError as err:
+            raise self._smt_solver_error(err) from err
+
+        if type(result) is UnknownResult:
+            _LOGGER.debug('Result is Unknown')
+            return None
+        elif type(result) is UnsatResult:
+            _LOGGER.debug('Result is UNSAT')
+            return None
+        elif type(result) is SatResult:
+            _LOGGER.debug('Result is SAT')
+            if not result.model:
+                return Subst({})
+            model_subst = self.kore_to_kast(result.model)
+            try:
+                return Subst.from_pred(model_subst)
+            except ValueError as err:
+                raise AssertionError(f'Received a non-substitution from get-model endpoint: {model_subst}') from err
+
+        else:
+            raise AssertionError('Received an invalid response from get-model endpoint')
+
     def implies(
         self,
         antecedent: CTerm,
