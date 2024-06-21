@@ -63,7 +63,6 @@ def kompile(
     verbose: bool = False,
     cwd: Path | None = None,
     check: bool = True,
-    ignore_warnings: Iterable[str] | None = None,
     # ---
     **kwargs: Any,
 ) -> Path:
@@ -84,7 +83,6 @@ def kompile(
             cwd=cwd,
             check=check,
             kwargs=kwargs,
-            ignore_warnings=ignore_warnings,
         )
 
     kwargs['backend'] = KompileBackend(pyk_backend.value) if pyk_backend else None
@@ -102,7 +100,6 @@ def kompile(
         verbose=verbose,
         cwd=cwd,
         check=check,
-        ignore_warnings=ignore_warnings,
     )
 
 
@@ -119,7 +116,6 @@ def _booster_kompile(
     verbose: bool,
     cwd: Path | None,
     check: bool,
-    ignore_warnings: Iterable[str] | None,
     # ---
     kwargs: Mapping[str, Any],
 ) -> Path:
@@ -154,7 +150,6 @@ def _booster_kompile(
             verbose=verbose,
             cwd=cwd,
             check=check,
-            ignore_warnings=ignore_warnings,
         )
 
     def kompile_haskell() -> None:
@@ -170,7 +165,6 @@ def _booster_kompile(
             verbose=verbose,
             cwd=cwd,
             check=check,
-            ignore_warnings=ignore_warnings,
         )
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -285,7 +279,6 @@ class Kompile(ABC):
         check: bool = True,
         bug_report: BugReport | None = None,
         outer_parsed_json: bool = False,
-        ignore_warnings: Iterable[str] | None = None,
     ) -> Path:
         check_file_path(abs_or_rel_to(self.base_args.main_file, cwd or Path()))
         for include_dir in self.base_args.include_dirs:
@@ -326,9 +319,6 @@ class Kompile(ABC):
 
         if outer_parsed_json:
             args += ['--outer-parsed-json']
-
-        if ignore_warnings:
-            args += ['-Wno', ', '.join(ignore_warnings)]
 
         try:
             proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
@@ -611,8 +601,7 @@ class KompileArgs:
             args += ['--outer-parsed-json']
 
         if self.ignore_warnings:
-            warns = ','.join(self.ignore_warnings)
-            args += ['-Wno', warns]
+            args += ['-Wno', ','.join(self.ignore_warnings)]
 
         return args
 
