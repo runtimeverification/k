@@ -9,6 +9,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pyk-publish:
+    name: 'Publish pyk'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        uses: Gr1N/setup-poetry@v9
+
+      - name: Build pyk
+        working-directory: pyk
+        run: |
+          make build
+
+      - name: Publish pyk to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: pyk/dist
+          user: foo
+          password: bar
+
   format-check:
     name: 'Java: Linting'
     runs-on: ubuntu-latest
