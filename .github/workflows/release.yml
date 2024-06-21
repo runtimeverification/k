@@ -443,6 +443,7 @@ jobs:
         with:
           container-name: k-pyk-docs-${{ github.sha }}
           k-deb-path: kframework_amd64_ubuntu_jammy.deb
+          install-backend-debs: false
       - name: 'Build documentation in Docker container'
         run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
       - name: 'Copy documentation from Docker container'

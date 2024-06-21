@@ -258,30 +258,6 @@ jobs:
         run: docker stop --time=0 k-pyk-docs-${{ github.sha }}
 
 
-  pyk-build-docs-test:
-    name: 'Pyk: Documentation (TEST)'
-    needs: test-package-ubuntu-jammy
-    runs-on: [self-hosted, linux, normal]
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v4
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v4
-        with:
-          name: kframework.deb
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-k-docker
-        with:
-          container-name: k-pyk-docs-${{ github.sha }}
-          k-deb-path: kframework.deb
-          install-backend-debs: false
-      - name: 'Build documentation'
-        run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
-      - name: 'Tear down Docker'
-        if: always()
-        run: docker stop --time=0 k-pyk-docs-${{ github.sha }}
-
-
   pyk-profile:
     needs: test-frontend-package-ubuntu-jammy
     name: 'Pyk: Profiling'
