@@ -611,8 +611,8 @@ class KompileArgs:
             args += ['--outer-parsed-json']
 
         if self.ignore_warnings:
-            for warn in self.ignore_warnings:
-                args += ['-Wno', warn]
+            warns = ','.join(self.ignore_warnings)
+            args += ['-Wno', warns]
 
         return args
 
