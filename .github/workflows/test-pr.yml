@@ -81,12 +81,12 @@ jobs:
           distro: jammy
           llvm: 15
       - name: 'Build and Test K'
-        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify -Dspotless.check.skip=true --batch-mode -U'
+        run: docker exec -t "k-ci-${GITHUB_SHA}" /bin/bash -c 'mvn verify -Dspotless.check.skip=true --batch-mode -U'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-ci-${GITHUB_SHA}
-          docker container rm --force k-ci-${GITHUB_SHA} || true
+          docker stop --time=0 "k-ci-${GITHUB_SHA}"
+          docker container rm --force "k-ci-${GITHUB_SHA}" || true
 
 
   test-package-ubuntu-jammy:
@@ -222,10 +222,11 @@ jobs:
           GC_DONT_GC: '1'
         run: |
           nix --version
-          export JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
+          JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
+          export JQ
           k=$(nix build . --print-build-logs --json | $JQ -r '.[].outputs | to_entries[].value')
-          drv=$(nix-store --query --deriver ${k})
-          nix-store --query --requisites ${drv} | cachix push k-framework
+          drv=$(nix-store --query --deriver "$k")
+          nix-store --query --requisites "$drv" | cachix push k-framework
       - name: 'Smoke test K'
         run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
       # These tests take a really long time to run on other platforms, so we
@@ -366,33 +367,33 @@ jobs:
         run: |
           set -euxo pipefail
           workspace=$(pwd)
-          docker run --name k-profiling-tests-${GITHUB_SHA}                    \
+          docker run --name "k-profiling-tests-${GITHUB_SHA}"                  \
             --rm -it --detach --user root                                      \
-            -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
-            -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
-            -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
-            -e GITHUB_HEAD_REF=$GITHUB_HEAD_REF                                \
-            -e GITHUB_BASE_REF=$GITHUB_BASE_REF                                \
-            -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
+            -e BENCHER_API_TOKEN="$BENCHER_API_TOKEN"                          \
+            -e BENCHER_PROJECT="$BENCHER_PROJECT"                              \
+            -e BENCHER_ADAPTER="$BENCHER_ADAPTER"                              \
+            -e GITHUB_HEAD_REF="$GITHUB_HEAD_REF"                              \
+            -e GITHUB_BASE_REF="$GITHUB_BASE_REF"                              \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN"                                    \
             -e GITHUB_ACTIONS=true                                             \
-            -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
-            -e GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH                            \
-            -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
-            -e GITHUB_REF=$GITHUB_REF                                          \
+            -e GITHUB_EVENT_NAME="$GITHUB_EVENT_NAME"                          \
+            -e GITHUB_EVENT_PATH="$GITHUB_EVENT_PATH"                          \
+            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY"                          \
+            -e GITHUB_REF="$GITHUB_REF"                                        \
             --workdir /opt/workspace                                           \
             -v "${workspace}:/opt/workspace"                                   \
             -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
-            runtimeverificationinc/k-profiling-tests-${GITHUB_SHA}
+            "runtimeverificationinc/k-profiling-tests-${GITHUB_SHA}"
       - name: 'Install K from Package'
         run: |
           set -euxo pipefail
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
+          docker exec -t "k-profiling-tests-${GITHUB_SHA}" /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
       - name: 'Profiling Performance Tests'
         run: |
           set -euxo pipefail
-          docker exec -t k-profiling-tests-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/tests/profiling && make'
+          docker exec -t "k-profiling-tests-${GITHUB_SHA}" /bin/bash -c 'cd k-distribution/tests/profiling && make'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-profiling-tests-${GITHUB_SHA}
-          docker container rm --force k-profiling-tests-${GITHUB_SHA} || true
+          docker stop --time=0 "k-profiling-tests-${GITHUB_SHA}"
+          docker container rm --force "k-profiling-tests-${GITHUB_SHA}" || true
