@@ -70,12 +70,18 @@ class APRProofStep:
     module_name: str
     shortest_path_to_node: tuple[KCFG.Node, ...]
     prior_loops_cache: FrozenDict[int, tuple[int, ...]] = field(compare=False)
+    circularity: bool
+    nonzero_depth: bool
+    circularity_rule_id: str
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
-    """APRProof and APRProver implement all-path reachability logic,
+    """Represent an all-path reachability proof.
+
+    APRProof and APRProver implement all-path reachability logic,
     as introduced by A. Stefanescu and others in their paper 'All-Path Reachability Logic':
     https://doi.org/10.23638/LMCS-15(2:5)2019
+
     Note that reachability logic formula `phi =>A psi` has *not* the same meaning
     as CTL/CTL*'s `phi -> AF psi`, since reachability logic ignores infinite traces.
     This implementation extends the above with bounded model checking, allowing the user
@@ -162,10 +168,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     else:
                         shortest_path.append(succ.source)
 
-            def nonzero_depth(proof: APRProof, node: KCFG.Node) -> bool:
-                return not proof.kcfg.zero_depth_between(proof.init, node.id)
-
-            module_name = self.circularities_module_name if nonzero_depth(self, node) else self.dependencies_module_name
+            module_name = self.circularities_module_name if self.nonzero_depth(node) else self.dependencies_module_name
 
             steps.append(
                 APRProofStep(
@@ -176,6 +179,9 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
                     target=self.kcfg.node(self.target),
                     shortest_path_to_node=tuple(shortest_path),
                     prior_loops_cache=FrozenDict(self.prior_loops_cache),
+                    circularity=self.circularity,
+                    nonzero_depth=self.nonzero_depth(node),
+                    circularity_rule_id=f'{self.rule_id}-{self.init}-TO-{self.target}',
                 )
             )
         return steps
@@ -192,6 +198,13 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             self.add_bounded(result.node_id)
         else:
             raise ValueError(f'Incorrect result type, expected APRProofResult: {result}')
+
+    def nonzero_depth(self, node: KCFG.Node) -> bool:
+        return not self.kcfg.zero_depth_between(self.init, node.id)
+
+    @property
+    def rule_id(self) -> str:
+        return f'APRPROOF-{self.id.upper()}'
 
     @property
     def module_name(self) -> str:
@@ -384,18 +397,22 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         )
 
     def as_rules(self, priority: int = 20, direct_rule: bool = False) -> list[KRule]:
-        if (self.passed and direct_rule) or (self.admitted and not self.kcfg.predecessors(self.target)):
+        if (
+            self.circularity
+            or (self.passed and direct_rule)
+            or (self.admitted and not self.kcfg.predecessors(self.target))
+        ):
             return [self.as_rule(priority=priority)]
         _rules = []
         for _edge in self.kcfg.edges():
-            _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
+            _rule = _edge.to_rule(self.rule_id, priority=priority)
             assert type(_rule) is KRule
             _rules.append(_rule)
         return _rules
 
     def as_rule(self, priority: int = 20) -> KRule:
         _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
-        _rule = _edge.to_rule(f'APRPROOF-{self.id.upper()}-BASIC-BLOCK', priority=priority)
+        _rule = _edge.to_rule(self.rule_id, priority=priority)
         assert type(_rule) is KRule
         return _rule
 
@@ -791,10 +808,20 @@ class APRProver(Prover[APRProof, APRProofStep, APRProofResult]):
         if is_terminal:
             return terminal_result
 
+        # Ensure that we cut at applications of circularity, so that subsumption into target state will be checked
+        cut_rules = list(self.cut_point_rules)
+        if step.circularity and step.nonzero_depth:
+            cut_rules.append(step.circularity_rule_id)
+
+        # Ensure that we record progress ASAP for circularities, so the circularity rule will be included for execution as soon as possible
+        execute_depth = self.execute_depth
+        if step.circularity and not step.nonzero_depth and (execute_depth is None or execute_depth > 1):
+            execute_depth = 1
+
         extend_result = self.kcfg_explore.extend_cterm(
             step.node.cterm,
-            execute_depth=self.execute_depth,
-            cut_point_rules=self.cut_point_rules,
+            execute_depth=execute_depth,
+            cut_point_rules=cut_rules,
             terminal_rules=self.terminal_rules,
             module_name=step.module_name,
             node_id=step.node.id,

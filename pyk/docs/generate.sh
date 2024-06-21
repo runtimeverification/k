@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-SPHINX_VERSION=7.2.6
+SPHINX_VERSION=7.3.7
 
 DOCS_DIR=$(realpath $(dirname $0))
 API_DIR=$DOCS_DIR/api

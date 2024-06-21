@@ -336,8 +336,11 @@ def split_config_from(configuration: KInner) -> tuple[KInner, dict[str, KInner]]
 def collapse_dots(kast: KInner) -> KInner:
     """Given a configuration with structural frames `...`, minimize the structural frames needed.
 
-    -   Input: a configuration, potentially with structural frames.
-    -   Output: the same configuration, with the amount of structural framing minimized.
+    Args:
+        kast: A configuration, potentially with structural frames.
+
+    Returns:
+        The same configuration, with the amount of structural framing minimized.
     """
 
     def _collapse_dots(_kast: KInner) -> KInner:
@@ -397,10 +400,13 @@ def push_down_rewrites(kast: KInner) -> KInner:
 
 
 def inline_cell_maps(kast: KInner) -> KInner:
-    """Ensure that cell map collections are printed nicely, not as Maps."
+    """Ensure that cell map collections are printed nicely, not as Maps.
 
-    -   Input: kast term.
-    -   Output: kast term with cell maps inlined.
+    Args:
+        kast: A KAST term.
+
+    Returns:
+        The KAST term with cell maps inlined.
     """
 
     def _inline_cell_maps(_kast: KInner) -> KInner:
@@ -416,8 +422,11 @@ def inline_cell_maps(kast: KInner) -> KInner:
 def remove_semantic_casts(kast: KInner) -> KInner:
     """Remove injected `#SemanticCast*` nodes in AST.
 
-    -   Input: kast (possibly) containing automatically injected `#SemanticCast*` KApply nodes.
-    -   Output: kast without the `#SemanticCast*` nodes.
+    Args:
+        kast: A term (possibly) containing automatically injected `#SemanticCast*` KApply nodes.
+
+    Returns:
+        The term without the `#SemanticCast*` nodes.
     """
 
     def _remove_semtnaic_casts(_kast: KInner) -> KInner:
@@ -431,8 +440,12 @@ def remove_semantic_casts(kast: KInner) -> KInner:
 def useless_vars_to_dots(kast: KInner, keep_vars: Iterable[str] = ()) -> KInner:
     """Structurally abstract away useless variables.
 
-    -   Input: kast term, and a requires clause and ensures clause.
-    -   Output: kast term with the useless vars structurally abstracted.
+    Args:
+        kast: A term.
+        keep_vars: Iterable of variables to keep.
+
+    Returns:
+        The term with the useless varables structurally abstracted.
     """
     num_occs = count_vars(kast) + Counter(keep_vars)
 
@@ -453,8 +466,12 @@ def useless_vars_to_dots(kast: KInner, keep_vars: Iterable[str] = ()) -> KInner:
 def labels_to_dots(kast: KInner, labels: Collection[str]) -> KInner:
     """Abstract specific labels for printing.
 
-    -   Input: kast term, and list of labels to abstract.
-    -   Output: kast term with those labels abstracted.
+    Args:
+        kast: A term.
+        labels: List of labels to abstract.
+
+    Returns
+        The term with `labels` abstracted.
     """
 
     def _labels_to_dots(k: KInner) -> KInner:
@@ -500,13 +517,16 @@ def minimize_term(
 ) -> KInner:
     """Minimize a K term for pretty-printing.
 
-    -   Input: kast term, and optionally requires and ensures clauses with constraints.
-    -   Output: kast term minimized.
-        -   Variables only used once will be removed.
-        -   Unused cells will be abstracted.
-        -   Attempt to remove useless conditions.
-    """
+    - Variables only used once will be removed.
+    - Unused cells will be abstracted.
+    - Useless conditions will be attempted to be removed.
 
+    Args:
+        kast: A term.
+
+    Returns:
+        The term, minimized.
+    """
     term = inline_cell_maps(term)
     term = remove_semantic_casts(term)
     term = useless_vars_to_dots(term, keep_vars=keep_vars)
@@ -524,11 +544,15 @@ def minimize_term(
 def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
     """Minimize a K rule or claim for pretty-printing.
 
-    -   Input: kast representing a K rule or claim.
-    -   Output: kast with the rule or claim minimized:
-        -   Variables only used once will be removed.
-        -   Unused cells will be abstracted.
-        -   Attempt to remove useless side-conditions.
+    - Variables only used once will be removed.
+    - Unused cells will be abstracted.
+    - Useless side-conditions will be attempted to be removed.
+
+    Args:
+        rule: A K rule or claim.
+
+    Returns:
+        The rule or claim, minimized.
     """
     body = rule.body
     requires = rule.requires
@@ -562,8 +586,11 @@ def remove_attrs(term: KInner) -> KInner:
 def remove_generated_cells(term: KInner) -> KInner:
     """Remove <generatedTop> and <generatedCounter> from a configuration.
 
-    -   Input: Constrained term.
-    -   Output: Constrained term with those cells removed.
+    Args:
+        term: A term.
+
+    Returns:
+        The term with those cells removed.
     """
     rewrite = KRewrite(KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG'))
     return rewrite(term)
@@ -661,11 +688,15 @@ def normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
 
 
 def remove_useless_constraints(constraints: Iterable[KInner], initial_vars: Iterable[str]) -> list[KInner]:
-    """Given a list of constraints and a list of variables, return an updated list with only constraints that depend on these variables (directly or indirectly).
+    """Remove constraints that do not depend on a given iterable of variables (directly or indirectly).
 
-    :param constraints: Original list of constraints to remove from.
-    :param initial_vars: Initial list of variables to keep constraints for.
-    :return: A list of constraints with only those constraints that contain the initial variables or variables that depend on those through other constraints in the list.
+    Args:
+        constraints: Iterable of constraints to filter.
+        initial_vars: Initial iterable of variables to keep constraints for.
+
+    Returns:
+        A list of constraints with only those constraints that contain the initial variables,
+        or variables that depend on those through other constraints in the list.
     """
     used_vars = list(initial_vars)
     prev_len_used_vars = 0
@@ -692,15 +723,21 @@ def build_claim(
 ) -> tuple[KClaim, Subst]:
     """Return a `KClaim` between the supplied initial and final states.
 
-    :param claim_id: Label to give the claim.
-    :param init_config: State to put on LHS of the rule.
-    :param final_config: State to put on RHS of the rule.
-    :param init_constraints: Constraints to use as `requires` clause.
-    :param final_constraints: Constraints to use as `ensures` clause.
-    :param keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
-    :return: tuple `claim: KClaim, var_map: Subst`:
-      - `claim`: A `KClaim` with variable naming conventions applied so that it should be parseable by K frontend.
-      - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
+    Args:
+        claim_id: Label to give the claim.
+        init_config: State to put on LHS of the rule.
+        final_config: State to put on RHS of the rule.
+        init_constraints: Constraints to use as `requires` clause.
+        final_constraints: Constraints to use as `ensures` clause.
+        keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
+
+    Returns:
+        A tuple ``(claim, var_map)`` where
+
+        - ``claim``: A `KClaim` with variable naming conventions applied
+          so that it should be parseable by the K Frontend.
+        - ``var_map``: The variable renamings applied to make the claim parseable by the K Frontend
+          (which can be undone to recover the original variables).
     """
     rule, var_map = build_rule(
         claim_id, init_config, final_config, init_constraints, final_constraints, keep_vars=keep_vars
@@ -720,16 +757,21 @@ def build_rule(
 ) -> tuple[KRule, Subst]:
     """Return a `KRule` between the supplied initial and final states.
 
-    :param rule_id: Label to give the rule.
-    :param init_config: State to put on LHS of the rule.
-    :param final_config: State to put on RHS of the rule.
-    :param init_constraints: Constraints to use as `requires` clause.
-    :param final_constraints: Constraints to use as `ensures` clause.
-    :param priority: Rule priority to give to the generated `KRule`.
-    :param keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
-    :return: tuple `claim: KRule, var_map: Subst` such that:
-      - `rule`: A `KRule` with variable naming conventions applied so that it should be parseable by K frontend.
-      - `var_map`: The variable renamings that happened to make the claim parseable by K frontend (which can be undone to recover original variables).
+    Args:
+        rule_id: Label to give the rule.
+        init_config: State to put on LHS of the rule.
+        final_config: State to put on RHS of the rule.
+        init_constraints: Constraints to use as `requires` clause.
+        final_constraints: Constraints to use as `ensures` clause.
+        keep_vars: Variables to leave in the side-conditions even if not bound in the configuration.
+
+    Returns:
+        A tuple ``(rule, var_map)`` where
+
+        - ``rule``: A `KRule` with variable naming conventions applied
+          so that it should be parseable by the K Frontend.
+        - ``var_map``: The variable renamings applied to make the rule parseable by the K Frontend
+          (which can be undone to recover the original variables).
     """
     init_constraints = [normalize_ml_pred(c) for c in init_constraints]
     final_constraints = [normalize_ml_pred(c) for c in final_constraints]
@@ -785,17 +827,17 @@ def replace_rewrites_with_implies(kast: KInner) -> KInner:
 
 
 def no_cell_rewrite_to_dots(term: KInner) -> KInner:
-    """
-    Transforms a given term by replacing the contents of each cell with dots if the LHS and RHS are the same.
+    """Transform a given term by replacing the contents of each cell with dots if the LHS and RHS are the same.
 
-    This function recursively traverses the cells in a term. When it finds a cell whose left-hand side (LHS) is identical to its right-hand side (RHS),
+    This function recursively traverses the cells in a term.
+    When it finds a cell whose left-hand side (LHS) is identical to its right-hand side (RHS),
     it replaces the cell's contents with a predefined DOTS.
 
-    Parameters:
-    - term (KInner): The term to be transformed.
+    Args:
+        term: The term to be transformed.
 
     Returns:
-    - KInner: The transformed term, where specific cell contents have been replaced with dots.
+        The transformed term, where specific cell contents have been replaced with dots.
     """
 
     def _no_cell_rewrite_to_dots(_term: KInner) -> KInner:
