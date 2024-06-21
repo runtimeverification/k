@@ -410,7 +410,7 @@ jobs:
     environment: production
     permissions:
       id-token: write
-    needs: [set-release-id, source-tarball]
+    needs: release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -438,7 +438,7 @@ jobs:
   notify-dependents:
     name: 'Notify Dependents'
     runs-on: ubuntu-latest
-    needs: release
+    needs: pyk-publish
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -494,7 +494,7 @@ jobs:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    needs: [pyk-build-docs, release]
+    needs: [pyk-build-docs, pyk-publish]
     steps:
       - name: 'Install pandoc/texlive/calibre'
         run: |
