@@ -1,11 +1,11 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/v0.1.10";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/v0.1.14";
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
-      url = "github:runtimeverification/llvm-backend/v0.1.49";
+      url = "github:runtimeverification/llvm-backend/v0.1.50";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
@@ -54,7 +54,7 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-6rGuU8NFSp3lQVxxPj5WREpNVPneMqPH45DFEmLiH6I=";
+                mvnHash = "sha256-HkAwMZq2vvrnEgT1Ksoxb5YnQ8+CMQdB2Sd/nR0OttU=";
                 manualMvnArtifacts = [
                   "org.scala-lang:scala-compiler:2.13.13"
                   "ant-contrib:ant-contrib:1.0b3"
