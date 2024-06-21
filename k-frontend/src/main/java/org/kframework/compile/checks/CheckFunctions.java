@@ -1,8 +1,10 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import java.util.List;
 import java.util.Set;
 import org.kframework.attributes.Att;
+import org.kframework.compile.IncompleteCellUtils;
 import org.kframework.compile.RewriteAwareVisitor;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -78,6 +80,22 @@ public record CheckFunctions(Set<KEMException> errors, Module m) {
         if (hook.equals("MAP.element")) {
           apply(k.items().get(1));
           return;
+        }
+        if (attributes.contains(Att.CELL())
+            && attributes.getOptional(Att.MULTIPLICITY()).orElse("").equals("*")) {
+          String type = attributes.getOptional(Att.TYPE()).orElse("");
+          switch (type) {
+            case "Set":
+              return;
+            case "Map":
+              List<K> children = IncompleteCellUtils.flattenCells(k.items().get(1));
+              for (int i = 1; i < children.size(); i++) {
+                apply(children.get(i));
+              }
+              return;
+            default:
+              break;
+          }
         }
         super.apply(k);
       }
