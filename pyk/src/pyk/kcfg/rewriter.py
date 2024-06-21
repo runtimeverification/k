@@ -86,8 +86,8 @@ class KCFGRewriter:
         old_kcfg = self.match(node, match_pattern)
         if not old_kcfg:
             return False
-        new_kcfg = self.create(node, rewrite_pattern)
-        self.replace(old_kcfg, new_kcfg)
+        new_kcfg = self.create(rewrite_pattern)
+        self.replace(old_kcfg, new_kcfg)  # todo: not implemented yet
         return True
 
     def match(
@@ -172,61 +172,92 @@ class KCFGRewriter:
                 self._edges[str(pattern)] = tuple(target_edge)
         return self._get_matched()
 
-    def _get_matched(self) -> KCFG:
+    def _get_matched(
+            self,
+            nodes: dict[str, tuple[KCFG.Node, ...]] = None,
+            edges: dict[str, tuple[KCFG.Successor, ...]] = None
+    ) -> KCFG:
         matched = KCFG()
+        nodes_tmp = nodes if nodes else self._nodes
+        edges_tmp = edges if edges else self._edges
         matched._node_id = self.kcfg._node_id
-        for nodes in self._nodes.values():
-            for node in nodes:
+        for ns in nodes_tmp.values():
+            for node in ns:
                 matched.add_node(node)
-        for edges in self._edges.values():
-            for edge in edges:
+                matched._node_id = max(matched._node_id, node.id)
+        for es in edges_tmp.values():
+            for edge in es:
                 matched.add_successor(edge)
         return matched
 
     def create(
             self,
-            node: NodeIdLike,
             rewrite_patterns: tuple[str, ...],
     ) -> KCFG:
         """
         Create a new KCFG by rewriting the matched subgraph.
 
-        Input:
-              - The node id to start creating.
-              - The patterns to rewrite / create.
-              - The matched subgraph.
+        Input: The patterns to rewrite / create.
         Output: The new KCFG.
         """
+        # initialization
         nodes: dict[str, tuple[KCFG.Node, ...]] = {}
         edges: dict[str, tuple[KCFG.Successor, ...]] = {}
         patterns = [Pats(p) for p in rewrite_patterns]
         for pattern in patterns:
-            sources = self._nodes.get(pattern.source)
-            targets = self._nodes.get(pattern.target)
+            # todo: we just support patterns that we need for minimization. We should support more patterns if needed.
+            source = self._nodes.get(pattern.source)
+            target = self._nodes.get(pattern.target)
+            if not source or not target:
+                raise NotImplementedError(f"Pattern {pattern} is not supported.")
+            match pattern.edge_type:
+                case 'edge':
+                    if pattern.is_multi_source and pattern.is_multi_target:
+                        raise NotImplementedError(f"Pattern {pattern} is not supported.")
+                    elif not pattern.is_multi_source and not pattern.is_multi_target:
+                        assert len(source) == 1 and len(target) == 1, \
+                            (f"source and target should be single node for {pattern}, "
+                             f"but found {len(source)} and {len(target)}")
+                        source_node = source[0]
+                        target_node = target[0]
+                        depth, rules = self.merge_paths(source_node.id, target_node.id)
+                        edges[str(pattern)] = (KCFG.Edge(
+                            source_node,
+                            target_node,
+                            depth,
+                            tuple(rules)
+                        ),)
+                    else:
+                        raise ValueError(f"Pattern {pattern} is illegal for Edge.")
+                case _:
+                    # todo: not implemented yet
+                    raise NotImplementedError(f"Pattern {pattern} is not supported.")
+        return self._get_matched(nodes, edges)
 
-        new_kcfg = KCFG()
-        for pattern in rewrite_patterns:
-            # parse / desugar the source and target of the pattern
-            source, target, edge_type = pattern.edge()
+    def merge_paths(self, source: int, target: int) -> tuple[int, tuple[str, ...]]:
+        """
+        Merge the paths from source to target.
 
-            def _desugar(n: str) -> tuple[tuple(KCFG.Node, KCFG.Edge), ...]:
-                for match_pattern in match_patterns:
-                    if n in match_pattern.value:
-                        source_m, target_m, edge_type_m = match_pattern.edge()
-                        # todo: S*, T*; cannot find directly like S* | S;  T* | T
-                        # todo: split ...
-                        if n == source_m:
-                            if edge_type_m == 'edge':
-                                return tuple((node, edge) for edge in old_kcfg.edges(target_id=node))
-                        if n == target_m:
-                            if edge_type_m == 'edge':
-                                return tuple((edge.target, edge) for edge in old_kcfg.edges(target_id=node))
-                raise ValueError(f"Pattern {match_patterns} must contain '{n}' to match the current Node.")
-            source = _desugar(source)
-            target = _desugar(target)
-
-
-        return new_kcfg
+        Input: The identifiers of source and target nodes.
+        Output: The depth and the rules of the merged paths.
+        """
+        successors = self.kcfg.shortest_path_between(source, target)
+        depth = 0
+        rules = []
+        for succ in successors:
+            match succ:
+                case KCFG.Edge(_, _, d, r):
+                    depth += d
+                    rules.extend(r)
+                case KCFG.NDBranch(_, t, r):
+                    # 匹配到target在t中的位置，然后取r的相同位置
+                    target_node = self.kcfg.get_node(target)
+                    idx = t.index(target_node)
+                    depth += 1
+                    rules.append(r[idx])
+                case _:
+                    continue
+        return depth, tuple(rules)
 
     # todo: move it to kcfg.py, maybe as a argument of remove_node
     def remove_node_safe(self, node_id: int) -> bool:
