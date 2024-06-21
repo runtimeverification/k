@@ -24,7 +24,10 @@ if TYPE_CHECKING:
 
 
 def kintegers(
-    min_value: int | None = None, max_value: int | None = None, with_inj: KSort | None = None
+    *,
+    min_value: int | None = None,
+    max_value: int | None = None,
+    with_inj: KSort | None = None,
 ) -> SearchStrategy[Pattern]:
     """
     Args:
