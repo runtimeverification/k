@@ -1,0 +1,6 @@
+[Error] Compiler: Illegal function symbol bar()_CELLCOLLECTIONFUNCTIONLHS_Int on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
+	Source(cellCollectionFunctionLHS.k)
+	Location(17,56,17,61)
+	17 |	  rule <k> foo => 0 </k> <cell> <addr> 0 </addr> <baz> bar() </baz> </cell>
+	   .	                                                       ^~~~~
+[Error] Compiler: Had 1 structural errors.
