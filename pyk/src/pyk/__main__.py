@@ -218,9 +218,9 @@ def exec_rpc_print(options: RPCPrintOptions) -> None:
 
 
 def exec_rpc_kast(options: RPCKastOptions) -> None:
-    """
-    Convert an 'execute' JSON RPC response to a new 'execute' or 'simplify' request,
-    copying parameters from a reference request.
+    """Convert an 'execute' JSON RPC response to a new 'execute' or 'simplify' request.
+
+    Copies parameters from a reference request.
     """
     reference_request = json.loads(options.reference_request_file.read())
     input_dict = json.loads(options.response_file.read())

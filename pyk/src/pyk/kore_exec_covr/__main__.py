@@ -20,14 +20,16 @@ _LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
 
 
 def do_analyze(definition_dir: Path, input_file: Path) -> None:
-    """
-    Inputs:
-       * definition compiled with "kompile --backend haskell --emit-json"
-       * Log file produced with "KORE_EXEC_OPTS='--log-format oneline --log-entries DebugAppliedRewriteRules,DebugApplyEquation'"
+    """Analyze log file.
 
-    Outputs:
-       * human-readable report of applied rewrite and simplification rules,
-         with labels (if declared) and locations
+    Args:
+        definition_dir: Definition kompiled with ``kompile --backend haskell --emit-json``.
+        input_file: Log file produced with
+          ``KORE_EXEC_OPTS='--log-format oneline --log-entries DebugAppliedRewriteRules,DebugApplyEquation'``.
+
+    Returns:
+        Human-readable report of applied rewrite and simplification rules,
+        with labels (if declared) and locations.
     """
     definition = read_kast_definition(definition_dir / 'compiled.json')
 

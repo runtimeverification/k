@@ -519,18 +519,20 @@ class ClaimIndex(Mapping[str, KClaim]):
         """Resolve each depends value relative to the module the claim belongs to.
 
         Example:
+            ```
+            module THIS-MODULE
+                claim ... [depends(foo,OTHER-MODULE.bar)]
+            endmodule
+            ```
 
-        module THIS-MODULE
-            claim ... [depends(foo,OTHER-MODULE.bar)]
-        endmodule
+            becomes
 
-        becomes
-
-        module THIS-MODULE
-            claim ... [depends(THIS-MODULE.foo,OTHER-MODULE.bar)]
-        endmodule
+            ```
+            module THIS-MODULE
+                claim ... [depends(THIS-MODULE.foo,OTHER-MODULE.bar)]
+            endmodule
+            ```
         """
-
         labels = {claim.label for module in module_list.modules for claim in module.claims}
 
         def resolve_claim_depends(module_name: str, claim: KClaim) -> KClaim:
