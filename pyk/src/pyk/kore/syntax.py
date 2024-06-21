@@ -1625,8 +1625,8 @@ class Assoc(MLSyntaxSugar):
         return ()
 
     @property
-    def patterns(self) -> tuple[()]:
-        return ()
+    def patterns(self) -> tuple[Pattern, ...]:
+        return self.app.args
 
     @property
     def ctor_patterns(self) -> tuple[App]:
@@ -1651,8 +1651,7 @@ class LeftAssoc(Assoc):
         return LeftAssoc(app=app)
 
     def let_patterns(self, patterns: Iterable[Pattern]) -> LeftAssoc:
-        () = patterns
-        return self
+        return self.let(app=self.app.let(args=patterns))
 
     @property
     def pattern(self) -> Pattern:
@@ -1707,8 +1706,7 @@ class RightAssoc(Assoc):
         return RightAssoc(app=app)
 
     def let_patterns(self, patterns: Iterable[Pattern]) -> RightAssoc:
-        () = patterns
-        return self
+        return self.let(app=self.app.let(args=patterns))
 
     @property
     def pattern(self) -> Pattern:
