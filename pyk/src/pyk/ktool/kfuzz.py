@@ -43,7 +43,7 @@ def fuzz(
     check_exit_code: bool = False,
     max_examples: int = 50,
 ) -> None:
-    if not ((check_func is not None) ^ check_exit_code):
+    if bool(check_func) == check_exit_code:
         raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
 
     def test(subst_case: Mapping[EVar, Pattern]) -> None:
@@ -52,7 +52,7 @@ def fuzz(
                 symbol = p.symbol()
                 args = (arg.top_down(sub) for arg in p.app.args)
                 return p.of(symbol, patterns=(p.app.let(args=args),))
-            if p in subst_case.keys():
+            if p in subst_case:
                 assert isinstance(p, EVar)
                 return subst_case[p]
             return p
@@ -63,7 +63,7 @@ def fuzz(
         if check_exit_code:
             assert res.returncode == 0
         else:
-            assert check_func is not None
+            assert check_func
             res_pattern = KoreParser(res.stdout).pattern()
             check_func(res_pattern)
 
