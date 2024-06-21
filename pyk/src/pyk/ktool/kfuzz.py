@@ -26,6 +26,16 @@ if TYPE_CHECKING:
 def kintegers(
     min_value: int | None = None, max_value: int | None = None, with_inj: KSort | None = None
 ) -> SearchStrategy[Pattern]:
+    """
+    Args:
+        min_value: Minimum value for the generated integers
+        max_value: Maximum value for the generated integers
+        with_inj: Return the integer as an injection into this sort
+
+    Returns:
+        A strategy which generates integer domain values.
+    """
+
     def int_dv(value: int) -> Pattern:
         res: KInner = intToken(value)
         if with_inj is not None:
@@ -43,6 +53,18 @@ def fuzz(
     check_exit_code: bool = False,
     max_examples: int = 50,
 ) -> None:
+    """Use this to fuzz a property test with concrete execution over a K term.
+    Args:
+        definition_dir: The location of the K definition to run the interpreter for
+        template: The term which will be sent to the interpreter after randomizing inputs. It should contain at least one variable which will be substituted for a value.
+        subst_strategy: Should have each variable in the template term mapped to a strategy for generating values for it.
+        check_func: Will be called on the kore output from the interpreter. Should throw an AssertionError if it determines that the output indicates a test failure. A RuntimeError will be thrown if check_exit_code is True.
+        check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func. An exit code of 0 indicates a passing test. A RuntimeError will be thrown if this is True and check_func is also supplied.
+        max_examples: The number of test cases to run.
+
+    Raises:
+        RuntimeError: If check_func exists and check_exit_code is set, or check_func doesn't exist and check_exit_code is cleared
+    """
     if bool(check_func) == check_exit_code:
         raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
 
