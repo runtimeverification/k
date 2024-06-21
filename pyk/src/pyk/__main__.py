@@ -347,7 +347,6 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             warnings=options.warnings,
             warnings_to_errors=options.warnings_to_errors,
             no_exc_wrap=options.no_exc_wrap,
-            ignore_warnings=options.ignore_warnings,
         )
     except RuntimeError as err:
         _, _, _, _, cpe = err.args
