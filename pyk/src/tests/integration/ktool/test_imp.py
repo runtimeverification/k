@@ -10,7 +10,7 @@ import pytest
 from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kcfg.semantics import KCFGSemantics
-from pyk.ktool.kprove import ProveRpc
+from pyk.ktool.prove_rpc import ProveRpc
 from pyk.proof import ProofStatus
 from pyk.testing import KCFGExploreTest, KProveTest
 from pyk.utils import single
