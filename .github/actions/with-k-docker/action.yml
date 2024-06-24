@@ -54,7 +54,7 @@ runs:
         --repo runtimeverification/haskell-backend  \
         --pattern "*ubuntu_${BASE_DISTRO}.deb"      \
         --output "${HASKELL_BACKEND_DEB_PATH}"      \
-        v$(cat deps/haskell-backend_release)
+        $(cat deps/haskell-backend_release)
 
       docker build . \
         --file ${DOCKERFILE}                                        \
