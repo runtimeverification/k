@@ -30,8 +30,7 @@ def kintegers(
     max_value: int | None = None,
     with_inj: KSort | None = None,
 ) -> SearchStrategy[Pattern]:
-    """
-    Return a search strategy for K integers.
+    """Return a search strategy for K integers.
 
     Args:
         min_value: Minimum value for the generated integers
@@ -59,8 +58,7 @@ def fuzz(
     check_exit_code: bool = False,
     max_examples: int = 50,
 ) -> None:
-    """
-    Fuzz a property test with concrete execution over a K term.
+    """Fuzz a property test with concrete execution over a K term.
 
     Args:
         definition_dir: The location of the K definition to run the interpreter for.
