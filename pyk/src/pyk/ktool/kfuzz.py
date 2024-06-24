@@ -16,6 +16,7 @@ from .krun import llvm_interpret_raw
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
     from pathlib import Path
+    from typing import Any
 
     from hypothesis.strategies import SearchStrategy
 
@@ -52,7 +53,7 @@ def fuzz(
     definition_dir: str | Path,
     template: Pattern,
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
-    check_func: Callable[[Pattern], None] | None = None,
+    check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
     max_examples: int = 50,
 ) -> None:

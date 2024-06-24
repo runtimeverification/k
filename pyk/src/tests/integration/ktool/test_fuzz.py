@@ -16,7 +16,6 @@ from pyk.testing import KompiledTest
 from ..utils import K_FILES, TEST_DATA_DIR
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from pathlib import Path
     from typing import Final
 
@@ -41,12 +40,12 @@ class TestImpFuzz(KompiledTest):
         return {VAR_X: kintegers(with_inj=KSort('AExp')), VAR_Y: kintegers(with_inj=KSort('AExp'))}
 
     @staticmethod
-    def check() -> Callable[[Pattern], None]:
-        def checkres(p: Pattern) -> Pattern:
+    def check(p: Pattern) -> None:
+        def check_inner(p: Pattern) -> Pattern:
             match p:
                 case Assoc():
                     symbol = p.symbol()
-                    args = (arg.top_down(checkres) for arg in p.app.args)
+                    args = (arg.top_down(check_inner) for arg in p.app.args)
                     return p.of(symbol, patterns=(p.app.let(args=args),))
                 case App("Lbl'UndsPipe'-'-GT-Unds'", args=(key, val)):
                     match key, val:
@@ -58,7 +57,7 @@ class TestImpFuzz(KompiledTest):
 
             return p
 
-        return lambda pattern: (None, pattern.top_down(checkres))[0]
+        p.top_down(check_inner)
 
     @staticmethod
     def setup_program(definition_dir: Path, text: str) -> Pattern:
@@ -104,7 +103,8 @@ class TestImpFuzz(KompiledTest):
 
         init_pattern = self.setup_program(definition_dir, program_text)
 
-        fuzz(definition_dir, init_pattern, self.substs(), self.check())
+        # Then
+        fuzz(definition_dir, init_pattern, self.substs(), self.check)
 
     def test_fuzz_fail(
         self,
@@ -125,5 +125,6 @@ class TestImpFuzz(KompiledTest):
 
         init_pattern = self.setup_program(definition_dir, program_text)
 
+        # Then
         with pytest.raises(AssertionError):
-            fuzz(definition_dir, init_pattern, self.substs(), self.check())
+            fuzz(definition_dir, init_pattern, self.substs(), self.check)
