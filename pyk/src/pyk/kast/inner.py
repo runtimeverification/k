@@ -198,11 +198,13 @@ class KInner(KAst):
 
     @abstractmethod
     def match(self, term: KInner) -> Subst | None:
-        """
-        Perform syntactic pattern matching and return the substitution.
+        """Perform syntactic pattern matching and return the substitution.
 
-        :param term: Term to match.
-        :return: Substitution instantiating self to the term.
+        Args:
+            term: Term to match.
+
+        Returns:
+            A substitution instantiating `self` to `term` if one exists, ``None`` otherwise.
         """
         ...
 
@@ -530,11 +532,13 @@ class KRewrite(KInner):
         return None
 
     def apply_top(self, term: KInner) -> KInner:
-        """
-        Rewrite a given term at the top
+        """Rewrite a given term at the top.
 
-        :param term: Term to rewrite.
-        :return: The term with the rewrite applied once at the top.
+        Args:
+            term: Term to rewrite.
+
+        Returns:
+            The term with the rewrite applied once at the top.
         """
         subst = self.lhs.match(term)
         if subst is not None:
@@ -542,11 +546,13 @@ class KRewrite(KInner):
         return term
 
     def apply(self, term: KInner) -> KInner:
-        """
-        Attempt rewriting once at every position in a term bottom-up.
+        """Attempt rewriting once at every position in a term bottom-up.
 
-        :param term: Term to rewrite.
-        :return: The term with rewrites applied at every node once starting from the bottom.
+        Args:
+            term: Term to rewrite.
+
+        Returns:
+            The term with rewrites applied at every node once starting from the bottom.
         """
         return bottom_up(self.apply_top, term)
 
@@ -776,12 +782,14 @@ class Subst(Mapping[str, KInner]):
 
 
 def bottom_up_with_summary(f: Callable[[KInner, list[A]], tuple[KInner, A]], kinner: KInner) -> tuple[KInner, A]:
-    """
-    Traverse a term from the bottom moving upward, potentially both transforming it and collecting information about it.
+    """Traverse a term from the bottom moving upward, collecting information about it.
 
-    :param f: Function to apply at each AST node to transform it and collect summary.
-    :param kinner: KInner to apply this transformation to.
-    :return: A tuple of the transformed term and the summarized results.
+    Args:
+        f: Function to apply at each AST node to transform it and collect summary.
+        kinner: Term to apply this transformation to.
+
+    Returns:
+        A tuple of the transformed term and the summarized results.
     """
     stack: list = [kinner, [], []]
     while True:
@@ -806,12 +814,14 @@ def bottom_up_with_summary(f: Callable[[KInner, list[A]], tuple[KInner, A]], kin
 
 # TODO make method of KInner
 def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
-    """
-    Traverse a term from the bottom moving upward, updating it using a given transformation.
+    """Transform a term from the bottom moving upward.
 
-    :param f: Transformation to apply at each node in the term.
-    :param kinner: Original term to transform.
-    :return: The transformed term.
+    Args:
+        f: Function to apply to each node in the term.
+        kinner: Original term to transform.
+
+    Returns:
+        The transformed term.
     """
     stack: list = [kinner, []]
     while True:
@@ -832,12 +842,14 @@ def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
 
 # TODO make method of KInner
 def top_down(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
-    """
-    Traverse a term from the top moving downward, updating it using a given transformation.
+    """Transform a term from the top moving downward.
 
-    :param f: Transformation to apply at each node in the term.
-    :param kinner: Original term to transform.
-    :return: The transformed term.
+    Args:
+        f: Function to apply to each node in the term.
+        kinner: Original term to transform.
+
+    Returns:
+        The transformed term.
     """
     stack: list = [f(kinner), []]
     while True:
@@ -858,11 +870,13 @@ def top_down(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
 
 # TODO: make method of KInner
 def var_occurrences(term: KInner) -> dict[str, list[KVariable]]:
-    """
-    Collect the list of occurrences of each variable in a given term.
+    """Collect the list of occurrences of each variable in a given term.
 
-    :param term: Term to collect variables from.
-    :return: Dictionary with keys a variable names and value as list of all occurrences of that variable.
+    Args:
+        term: Term to collect variables from.
+
+    Returns:
+        A dictionary with variable names as keys and the list of all occurrences of the variable as values.
     """
     _var_occurrences: dict[str, list[KVariable]] = {}
 
@@ -879,10 +893,11 @@ def var_occurrences(term: KInner) -> dict[str, list[KVariable]]:
 
 # TODO replace by method that does not reconstruct the AST
 def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
-    """
-    Collect information about a given term when traversing it bottom up using a side-effect function.
+    """Collect information about a given term traversing it bottom-up using a function with side effects.
 
-    :param callback: Function supplied by user which has side-effect of collecting desired information at each AST node.
+    Args:
+        callback: Function with the side effect of collecting desired information at each AST node.
+        kinner: The term to traverse.
     """
 
     def f(kinner: KInner) -> KInner:
@@ -893,13 +908,15 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
 
 
 def build_assoc(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KInner:
-    """
-    Build an associative list.
+    """Build an associative list.
 
-    :param unit: The empty variant of the given list type.
-    :param label: The associative list join operator.
-    :param terms: List (potentially empty) of terms to join in an associative list.
-    :return: The list of terms joined using the supplied label, or the unit element in the case of no terms.
+    Args:
+        unit: The empty variant of the given list type.
+        label: The associative list join operator.
+        terms: List (potentially empty) of terms to join in an associative list.
+
+    Returns:
+        The list of terms joined using the supplied label, or the unit element in the case of no terms.
     """
     _label = label if type(label) is KLabel else KLabel(label)
     res: KInner | None = None
@@ -914,13 +931,15 @@ def build_assoc(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> K
 
 
 def build_cons(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KInner:
-    """
-    Build a cons list.
+    """Build a cons list.
 
-    :param unit: The empty variant of the given list type.
-    :param label: The associative list join operator.
-    :param terms: List (potentially empty) of terms to join in an associative list.
-    :return: The list of terms joined using the supplied label, terminated with the unit element.
+    Args:
+        unit: The empty variant of the given list type.
+        label: The associative list join operator.
+        terms: List (potentially empty) of terms to join in an associative list.
+
+    Returns:
+        The list of terms joined using the supplied label, terminated with the unit element.
     """
     it = iter(terms)
     try:
@@ -933,8 +952,12 @@ def build_cons(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KI
 def flatten_label(label: str, kast: KInner) -> list[KInner]:
     """Given a cons list, return a flat Python list of the elements.
 
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
+    Args:
+        label: The cons operator.
+        kast: The cons list to flatten.
+
+    Returns:
+        Items of cons list.
     """
     flattened_args = []
     rest_of_args = [kast]  # Rest of arguments in reversed order

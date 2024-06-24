@@ -293,11 +293,11 @@ class KProduction(KSentence):
 
     @cached_property
     def is_prefix(self) -> bool:
-        """
-        The production is of the form `t* "(" (n ("," n)*)? ")"`.
+        """The production is of the form ``t* "(" (n ("," n)*)? ")"``.
 
-        Here, `t` is a terminal other than `"("`, `","` or `")"`, and `n` a non-terminal.
-        Example: `Int ::= "mul" "(" Int "," Int ")"`
+        Here, ``t`` is a terminal other than ``"("``, ``","`` or ``")"``, and ``n`` a non-terminal.
+
+        Example: ``syntax Int ::= "mul" "(" Int "," Int ")"``
         """
 
         def encode(item: KProductionItem) -> str:
@@ -319,7 +319,7 @@ class KProduction(KSentence):
 
     @cached_property
     def is_record(self) -> bool:
-        """The production is prefix with labelled nonterminals"""
+        """The production is prefix with labelled nonterminals."""
         return bool(self.is_prefix and self.non_terminals and all(item.name is not None for item in self.non_terminals))
 
     @property
@@ -1156,7 +1156,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return unique_id_map
 
     def production_for_cell_sort(self, sort: KSort) -> KProduction:
-        """Returns the production for a given cell-declaration syntax from the cell's declared sort."""
+        """Return the production for a given cell-declaration syntax from the cell's declared sort."""
         # Typical cell production has 3 productions:
         #     syntax KCell ::= "project:KCell" "(" K ")" [function, projection]
         #     syntax KCell ::= "initKCell" "(" Map ")" [function, initializer, noThread]
@@ -1174,7 +1174,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             raise ValueError(f'Expected a single cell production for sort {sort}') from err
 
     def module(self, name: str) -> KFlatModule:
-        """Returns the module associated with a given name."""
+        """Return the module associated with a given name."""
         return self.all_modules_dict[name]
 
     @cached_property
@@ -1302,7 +1302,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return reduce(lambda res, pair: insert(res, key=pair[0], value=pair[1]), pairs, {})
 
     def sort(self, kast: KInner) -> KSort | None:
-        """Computes the sort of a given term using best-effort simple sorting algorithm, returns `None` on algorithm failure."""
+        """Compute the sort of a given term using best-effort simple sorting algorithm, returns `None` on algorithm failure."""
         match kast:
             case KToken(_, sort) | KVariable(_, sort):
                 return sort
@@ -1338,7 +1338,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return resolve(prod.sort), tuple(resolve(sort) for sort in prod.argument_sorts)
 
     def least_common_supersort(self, sort1: KSort, sort2: KSort) -> KSort | None:
-        """Computes the lowest-upper-bound of two sorts in the sort lattice using very simple approach, returning `None` on failure (not necessarily meaning there isn't a lub)."""
+        """Compute the lowest-upper-bound of two sorts in the sort lattice using very simple approach, returning `None` on failure (not necessarily meaning there isn't a lub)."""
         if sort1 == sort2:
             return sort1
         if sort1 in self.subsorts(sort2):
@@ -1350,7 +1350,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return None
 
     def greatest_common_subsort(self, sort1: KSort, sort2: KSort) -> KSort | None:
-        """Computes the greatest-lower-bound of two sorts in the sort lattice using very simple approach, returning `None` on failure (not necessarily meaning there isn't a glb)."""
+        """Compute the greatest-lower-bound of two sorts in the sort lattice using very simple approach, returning `None` on failure (not necessarily meaning there isn't a glb)."""
         if sort1 == sort2:
             return sort1
         if sort1 in self.subsorts(sort2):
@@ -1382,7 +1382,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def sort_vars(self, kast: KInner, sort: KSort | None = None) -> KInner:
         """Return the original term with all the variables having there sorts added or specialized, failing if recieving conflicting sorts for a given variable."""
-
         if type(kast) is KVariable and kast.sort is None and sort is not None:
             return kast.let(sort=sort)
 
@@ -1487,7 +1486,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def add_cell_map_items(self, kast: KInner) -> KInner:
         """Wrap cell-map items in the syntactical wrapper that the frontend generates for them (see `KDefinition.remove_cell_map_items`)."""
-
         # example:
         # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
         # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
@@ -1508,7 +1506,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def remove_cell_map_items(self, kast: KInner) -> KInner:
         """Remove cell-map syntactical wrapper items that the frontend generates (see `KDefinition.add_cell_map_items`)."""
-
         # example:
         # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
         # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
@@ -1533,7 +1530,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def empty_config(self, sort: KSort) -> KInner:
         """Given a cell-sort, compute an "empty" configuration for it (all the constructor structure of the configuration in place, but variables in cell positions)."""
-
         if sort not in self._empty_config:
             self._empty_config[sort] = self._compute_empty_config(sort)
         return self._empty_config[sort]
@@ -1581,7 +1577,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
     def init_config(self, sort: KSort) -> KInner:
         """Return an initialized configuration as the user declares it in the semantics, complete with configuration variables in place."""
-
         if sort not in self._init_config:
             self._init_config[sort] = self._compute_init_config(sort)
         return self._init_config[sort]

@@ -40,6 +40,7 @@ flake8-type-checking = "*"
 isort = "*"
 mypy = "*"
 pep8-naming = "*"
+pydocstyle = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
@@ -58,6 +59,11 @@ kore-exec-covr = "pyk.kore_exec_covr.__main__:main"
 
 [tool.poetry.plugins.pytest11]
 pytest-pyk = "pyk.testing.plugin"
+
+[tool.pydocstyle]
+convention = "google"
+add-select = "D204,D401,D404"
+add-ignore = "D1"
 
 [tool.isort]
 profile = "black"

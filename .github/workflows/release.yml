@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: 'Get release_id'
-        run: echo "release_id=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> ${GITHUB_OUTPUT}
+        run: echo "release_id=$(jq --raw-output '.release.id' "$GITHUB_EVENT_PATH")" >> "${GITHUB_OUTPUT}"
         id: release
     outputs:
       release_id: ${{ steps.release.outputs.release_id }}
@@ -35,13 +35,14 @@ jobs:
           set -x
           version=$(cat package/version)
           tarball=kframework-${version}-src.tar.gz
+          # shellcheck disable=SC2038
           find . -name .git | xargs rm -r
           CURDIR=$(pwd)
           cd ..
-          tar czvf ${tarball} $(basename ${CURDIR})
-          mv ${tarball} ${CURDIR}/
-          cd ${CURDIR}
-          gh release upload --repo runtimeverification/k --clobber v${version} ${tarball}
+          tar czvf "${tarball}" "$(basename "${CURDIR}")"
+          mv "${tarball}" "${CURDIR}/"
+          cd "${CURDIR}"
+          gh release upload --repo runtimeverification/k --clobber "v${version}" "${tarball}"
 
   cachix-release:
     name: 'k-framework-binary cachix release'
@@ -114,8 +115,8 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
-          gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
+          cp kframework_amd64_ubuntu_jammy.deb "kframework_${version}_amd64_ubuntu_jammy.deb"
+          gh release upload --repo runtimeverification/k --clobber "v${version}" "kframework_${version}_amd64_ubuntu_jammy.deb"
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -125,19 +126,19 @@ jobs:
           set -euxo pipefail
           version=$(cat package/version)
           version_tag=ubuntu-jammy-${version}
-          docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
-          docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag ${DOCKERHUB_REPO}:${version_tag}
-          docker run --name k-package-docker-test-jammy-${GITHUB_SHA} --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && pyk kompile test.k --backend haskell'
-          docker image push ${DOCKERHUB_REPO}:${version_tag}
+          docker login --username rvdockerhub --password "${DOCKERHUB_PASSWORD}"
+          docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag "${DOCKERHUB_REPO}:${version_tag}"
+          docker run --name "k-package-docker-test-jammy-${GITHUB_SHA}" --rm -it --detach "${DOCKERHUB_REPO}:${version_tag}"
+          docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && pyk kompile test.k --backend llvm'
+          docker exec -t "k-package-docker-test-jammy-${GITHUB_SHA}" bash -c 'cd ~ && pyk kompile test.k --backend haskell'
+          docker image push "${DOCKERHUB_REPO}:${version_tag}"
       - name: 'Clean up Docker Container'
         if: always()
         run: |
-          docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
+          docker stop --time=0 "k-package-docker-test-jammy-${GITHUB_SHA}"
       - name: On Failure, Upload the kore-exec.tar.gz file to the Summary Page
         if: failure()
         uses: actions/upload-artifact@v4
@@ -193,7 +194,9 @@ jobs:
           # https://github.com/actions/runner-images/issues/6459
           # https://github.com/actions/runner-images/issues/6507
           # https://github.com/actions/runner-images/issues/2322
-          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
+
+          # shellcheck disable=SC2162
+          brew list -1 | grep python | while read formula; do brew unlink "$formula"; brew link --overwrite "$formula"; done
 
       - name: Build brew bottle
         id: build
@@ -209,15 +212,16 @@ jobs:
           ROOT_URL='https://github.com/runtimeverification/k/releases/download'
           wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
           cd homebrew-k
-          ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
-          git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
-          ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
+          ../kframework/package/macos/brew-update-to-local "${PACKAGE}" "${VERSION}"
+          git commit "Formula/$PACKAGE.rb" -m "Update ${PACKAGE} to ${VERSION}: part 1"
+          ../kframework/package/macos/brew-build-and-update-to-local-bottle "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz"))
-          BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
-          ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
-          echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
-          echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          LOCAL_BOTTLE_NAME=$(basename "$(find . -name "kframework--${VERSION}.arm64_sonoma.bottle*.tar.gz")")
+          # shellcheck disable=2001
+          BOTTLE_NAME=$(echo "${LOCAL_BOTTLE_NAME#./}" | sed 's!kframework--!kframework-!')
+          ../kframework/package/macos/brew-update-to-final "${PACKAGE}" "${VERSION}" "${ROOT_URL}"
+          echo "path=${LOCAL_BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "path_remote=${BOTTLE_NAME}" >> "${GITHUB_OUTPUT}"
 
       - name: Upload bottle
         uses: actions/upload-artifact@v4
@@ -279,7 +283,9 @@ jobs:
           # https://github.com/actions/runner-images/issues/6459
           # https://github.com/actions/runner-images/issues/6507
           # https://github.com/actions/runner-images/issues/2322
-          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
+
+          # shellcheck disable=SC2162
+          brew list -1 | grep python | while read formula; do brew unlink "$formula"; brew link --overwrite "$formula"; done
 
       - name: 'Test brew bottle'
         id: test
@@ -324,8 +330,8 @@ jobs:
         run: |
           set -x
           version=$(cat k-homebrew-checkout/package/version)
-          mv homebrew-k-old/${BOTTLE_NAME} homebrew-k-old/${REMOTE_BOTTLE_NAME}
-          gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${REMOTE_BOTTLE_NAME}
+          mv "homebrew-k-old/${BOTTLE_NAME}" "homebrew-k-old/${REMOTE_BOTTLE_NAME}"
+          gh release upload --repo runtimeverification/k --clobber "v${version}" "homebrew-k-old/${REMOTE_BOTTLE_NAME}"
 
       - run: |
           git config --global user.name rv-jenkins
@@ -385,16 +391,16 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.CLOUDREPO_PASSWORD }}
         run: |
           cat ~/.m2/settings.xml
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mkdir -p /home/github-runner/.m2'
-          docker cp ~/.m2/settings.xml k-release-ci-${GITHUB_SHA}:/tmp/settings.xml
-          docker exec -t k-release-ci-${GITHUB_SHA} bash -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
-          docker exec -e MAVEN_USERNAME -e MAVEN_PASSWORD -t k-release-ci-${GITHUB_SHA} bash -c "mvn --batch-mode deploy"
+          docker exec -t "k-release-ci-${GITHUB_SHA}" bash -c 'mkdir -p /home/github-runner/.m2'
+          docker cp ~/.m2/settings.xml "k-release-ci-${GITHUB_SHA}:/tmp/settings.xml"
+          docker exec -t "k-release-ci-${GITHUB_SHA} bash" -c 'mv /tmp/settings.xml /home/github-runner/.m2/settings.xml'
+          docker exec -e MAVEN_USERNAME -e MAVEN_PASSWORD -t "k-release-ci-${GITHUB_SHA}" bash -c "mvn --batch-mode deploy"
 
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-release-ci-${GITHUB_SHA}
-          docker container rm --force k-release-ci-${GITHUB_SHA} || true
+          docker stop --time=0 "k-release-ci-${GITHUB_SHA}"
+          docker container rm --force "k-release-ci-${GITHUB_SHA}" || true
 
       - name: Publish release
         uses: actions/github-script@v7
@@ -404,10 +410,41 @@ jobs:
             const { owner, repo } = context.repo
             await github.rest.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
 
+  pyk-publish:
+    name: 'Publish pyk'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+    needs: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Poetry
+        uses: Gr1N/setup-poetry@v9
+
+      - name: Build pyk
+        working-directory: pyk
+        run: |
+          make build
+
+      - name: Publish pyk to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: pyk/dist
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+
   notify-dependents:
     name: 'Notify Dependents'
     runs-on: ubuntu-latest
-    needs: release
+    needs: pyk-publish
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -424,7 +461,7 @@ jobs:
             -H "Authorization: Bearer ${GITHUB_TOKEN}"                         \
             -H "X-GitHub-Api-Version: 2022-11-28"                              \
             https://api.github.com/repos/runtimeverification/devops/dispatches \
-            -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'${VERSION}'"}}'
+            -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'"${VERSION}"'"}}'
 
   pyk-build-docs:
     name: 'Build Pyk Documentation'
@@ -443,6 +480,7 @@ jobs:
         with:
           container-name: k-pyk-docs-${{ github.sha }}
           k-deb-path: kframework_amd64_ubuntu_jammy.deb
+          install-backend-debs: false
       - name: 'Build documentation in Docker container'
         run: docker exec -u user k-pyk-docs-${{ github.sha }} make docs
       - name: 'Copy documentation from Docker container'
@@ -462,7 +500,7 @@ jobs:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    needs: [pyk-build-docs, release]
+    needs: [pyk-build-docs, pyk-publish]
     steps:
       - name: 'Install pandoc/texlive/calibre'
         run: |
@@ -500,6 +538,7 @@ jobs:
           npm run build-sitemap
           cd -
           mv web/public_content ./
+          # shellcheck disable=SC2046
           rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
           mv public_content/* ./
           rm -rf public_content
