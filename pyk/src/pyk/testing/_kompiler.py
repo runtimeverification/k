@@ -78,6 +78,7 @@ class Kompiler:
                 output_dir=output_dir,
                 type_inference_mode=TypeInferenceMode.CHECKED,
                 warnings_to_errors=True,
+                ignore_warnings=(),
             )
 
         return self._cache[kompile]
