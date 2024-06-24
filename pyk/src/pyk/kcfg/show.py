@@ -123,7 +123,6 @@ class KCFGShow:
         The identifier tells you whether that segment is for a given node, edge, or just pretty spacing ('unknown').
         This is useful for applications which want to pretty print in chunks, so that they can know which printed region corresponds to each node/edge.
         """
-
         processed_nodes: list[KCFG.Node] = []
         ret_lines: list[tuple[str, list[str]]] = []
 

@@ -76,9 +76,12 @@ class APRProofStep:
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
-    """APRProof and APRProver implement all-path reachability logic,
+    """Represent an all-path reachability proof.
+
+    APRProof and APRProver implement all-path reachability logic,
     as introduced by A. Stefanescu and others in their paper 'All-Path Reachability Logic':
     https://doi.org/10.23638/LMCS-15(2:5)2019
+
     Note that reachability logic formula `phi =>A psi` has *not* the same meaning
     as CTL/CTL*'s `phi -> AF psi`, since reachability logic ignores infinite traces.
     This implementation extends the above with bounded model checking, allowing the user

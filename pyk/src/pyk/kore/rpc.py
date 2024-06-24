@@ -1220,7 +1220,7 @@ class KoreServer(ContextManager['KoreServer']):
         return res
 
     def _extra_args(self) -> list[str]:
-        """Command line arguments that are intended to be included in the bug report"""
+        """Command line arguments that are intended to be included in the bug report."""
         smt_server_args = []
         if self._smt_timeout:
             smt_server_args += ['--smt-timeout', str(self._smt_timeout)]
