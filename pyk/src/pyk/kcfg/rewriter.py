@@ -41,11 +41,11 @@ class Pats:
         target, edge_type = tmp.split('|')
         source_star = source.endswith('*')
         target_star = target.endswith('*')
-        self.__setattr__('source', source)
-        self.__setattr__('is_multi_source', source_star)
-        self.__setattr__('target', target)
-        self.__setattr__('is_multi_target', target_star)
-        self.__setattr__('edge_type', edge_type)
+        object.__setattr__(self, 'source', source)
+        object.__setattr__(self, 'is_multi_source', source_star)
+        object.__setattr__(self, 'target', target)
+        object.__setattr__(self, 'is_multi_target', target_star)
+        object.__setattr__(self, 'edge_type', edge_type)
 
     def __str__(self) -> str:
         return f"{self.source}->{self.target}|{self.edge_type}"
@@ -65,6 +65,8 @@ class KCFGRewriter:
 
     def __init__(self, kcfg: KCFG):
         self.kcfg = kcfg
+        self._nodes = {}
+        self._edges = {}
 
     def commit(
             self,
@@ -129,7 +131,7 @@ class KCFGRewriter:
             pattern = patterns.pop(0)
             source = self._nodes.get(pattern.source)
             target = self._nodes.get(pattern.target)
-            if not source or not target:
+            if not source and not target:
                 # if greater than the max loop, raise an error.
                 if loop_count > max_loop:
                     raise ValueError(f"Patterns {patterns} cannot be matched started from current Node `N`.")
@@ -138,6 +140,8 @@ class KCFGRewriter:
             # match the pattern
             source_edge = set()
             target_edge = set()
+            source = source if source else []
+            target = target if target else []
             for src in source:
                 tmp = getattr(self.kcfg, f"{pattern.edge_type}s")(source_id=src.id)
                 if len(tmp) > 0:
@@ -159,15 +163,15 @@ class KCFGRewriter:
                 for edge in source_edge:
                     if isinstance(edge, KCFG.MultiEdge):
                         for target in edge.targets:
-                            node_tmp.append(self.kcfg.get_node(target))
+                            node_tmp.append(target)
                     else:
-                        node_tmp.append(self.kcfg.get_node(edge.target))
+                        node_tmp.append(edge.target)
                 self._nodes[pattern.target] = tuple(node_tmp)
                 self._edges[str(pattern)] = tuple(source_edge)
             if len(target_edge) > 0:
                 node_tmp = []
                 for edge in target_edge:
-                    node_tmp.append(self.kcfg.get_node(edge.source))
+                    node_tmp.append(edge.source)
                 self._nodes[pattern.source] = tuple(node_tmp)
                 self._edges[str(pattern)] = tuple(target_edge)
         return self._get_matched()
@@ -227,6 +231,8 @@ class KCFGRewriter:
                             depth,
                             tuple(rules)
                         ),)
+                        nodes[pattern.source] = (source_node,)
+                        nodes[pattern.target] = (target_node,)
                     else:
                         raise ValueError(f"Pattern {pattern} is illegal for Edge.")
                 case _:
@@ -276,7 +282,7 @@ class KCFGRewriter:
         self.kcfg._deleted_nodes.add(node.id)
         return True
 
-    def _commit(self, old_kcfg: KCFG, new_kcfg: KCFG):
+    def replace(self, old_kcfg: KCFG, new_kcfg: KCFG):
         """
         Replace the old_kcfg with the new_kcfg in the KCFG.
 
@@ -288,8 +294,6 @@ class KCFGRewriter:
             for elem_id in old_elements:
                 if elem_id not in new_elements:
                     storage.pop(elem_id, None)
-                else:
-                    new_elements.pop(elem_id, None)
             storage.update(new_elements)
 
         # Update edges, covers, splits, and ndbranches
