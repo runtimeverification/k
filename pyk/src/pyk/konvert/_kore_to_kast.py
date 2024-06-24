@@ -7,9 +7,25 @@ from ..kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
 from ..kore.prelude import BYTES as KORE_BYTES
 from ..kore.prelude import LBL_ITE
 from ..kore.prelude import STRING as KORE_STRING
-from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, SortApp, String, Top
+from ..kore.syntax import (
+    DV,
+    And,
+    App,
+    Assoc,
+    Bottom,
+    Ceil,
+    Equals,
+    EVar,
+    Exists,
+    Implies,
+    Not,
+    Or,
+    SortApp,
+    String,
+    Top,
+)
 from ..prelude.bytes import bytesToken_from_str
-from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
+from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlOr, mlTop
 from ..prelude.string import stringToken
 from ._utils import unmunge
 
@@ -100,6 +116,9 @@ def _pattern_to_kast(pattern: Pattern, terms: list[KInner]) -> KInner:
 
         case And(sort, _):
             return mlAnd(terms, sort=_sort_to_kast(sort))
+
+        case Or(sort, _):
+            return mlOr(terms, sort=_sort_to_kast(sort))
 
         case Implies(sort, _, _):
             larg, rarg = terms
