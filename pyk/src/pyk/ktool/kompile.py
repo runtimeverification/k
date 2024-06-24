@@ -57,6 +57,7 @@ def kompile(
     type_inference_mode: str | TypeInferenceMode | None = None,
     warnings: str | Warnings | None = None,
     warnings_to_errors: bool = False,
+    ignore_warnings: Iterable[str] = (),
     no_exc_wrap: bool = False,
     # ---
     debug: bool = False,
@@ -77,6 +78,7 @@ def kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -95,6 +97,7 @@ def kompile(
         type_inference_mode=type_inference_mode,
         warnings=warnings,
         warnings_to_errors=warnings_to_errors,
+        ignore_warnings=ignore_warnings,
         no_exc_wrap=no_exc_wrap,
         debug=debug,
         verbose=verbose,
@@ -110,6 +113,7 @@ def _booster_kompile(
     type_inference_mode: str | TypeInferenceMode | None,
     warnings: str | Warnings | None,
     warnings_to_errors: bool,
+    ignore_warnings: Iterable[str],
     no_exc_wrap: bool,
     # ---
     debug: bool,
@@ -145,6 +149,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -160,6 +165,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -272,6 +278,7 @@ class Kompile(ABC):
         type_inference_mode: str | TypeInferenceMode | None = None,
         warnings: str | Warnings | None = None,
         warnings_to_errors: bool = False,
+        ignore_warnings: Iterable[str] = (),
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
@@ -279,7 +286,6 @@ class Kompile(ABC):
         check: bool = True,
         bug_report: BugReport | None = None,
         outer_parsed_json: bool = False,
-        ignore_warnings: Iterable[str] | None = None,
     ) -> Path:
         check_file_path(abs_or_rel_to(self.base_args.main_file, cwd or Path()))
         for include_dir in self.base_args.include_dirs:
