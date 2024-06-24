@@ -315,7 +315,6 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         'gen_glr_bison_parser': options.gen_glr_bison_parser,
         'bison_lists': options.bison_lists,
         'outer_parsed_json': options.outer_parsed_json,
-        'ignore_warnings': options.ignore_warnings,
     }
     if options.backend == KompileBackend.LLVM:
         kompile_dict['ccopts'] = options.ccopts
@@ -346,6 +345,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             type_inference_mode=options.type_inference_mode,
             warnings=options.warnings,
             warnings_to_errors=options.warnings_to_errors,
+            ignore_warnings=options.ignore_warnings,
             no_exc_wrap=options.no_exc_wrap,
         )
     except RuntimeError as err:
