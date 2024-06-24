@@ -19,8 +19,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
-    from hypothesis.strategies import SearchStrategy
-
     from pyk.kore.syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -34,10 +32,7 @@ VAR_Y = EVar(name='VarY', sort=SortApp('SortInt'))
 class TestImpFuzz(KompiledTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
     KOMPILE_BACKEND = 'llvm'
-
-    @staticmethod
-    def substs() -> dict[EVar, SearchStrategy[Pattern]]:
-        return {VAR_X: kintegers(with_inj=KSort('AExp')), VAR_Y: kintegers(with_inj=KSort('AExp'))}
+    SUBSTS = {VAR_X: kintegers(with_inj=KSort('AExp')), VAR_Y: kintegers(with_inj=KSort('AExp'))}
 
     @staticmethod
     def check(p: Pattern) -> None:
@@ -104,7 +99,7 @@ class TestImpFuzz(KompiledTest):
         init_pattern = self.setup_program(definition_dir, program_text)
 
         # Then
-        fuzz(definition_dir, init_pattern, self.substs(), self.check)
+        fuzz(definition_dir, init_pattern, self.SUBSTS, self.check)
 
     def test_fuzz_fail(
         self,
@@ -127,4 +122,4 @@ class TestImpFuzz(KompiledTest):
 
         # Then
         with pytest.raises(AssertionError):
-            fuzz(definition_dir, init_pattern, self.substs(), self.check)
+            fuzz(definition_dir, init_pattern, self.SUBSTS, self.check)
