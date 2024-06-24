@@ -145,7 +145,10 @@ _ID_CHARS: Final = set.union(_LOWER, _UPPER, _DIGIT)
 
 
 def _id_or_token(la: str, it: Iterator[str]) -> tuple[Token, str]:
-    """[#a-z](a-zA-Z0-9)*"""
+    """Match an ID or token.
+
+    Corresponds to regex: [#a-z](a-zA-Z0-9)*
+    """
     assert la == '#' or la in _LOWER
     buf = [la]
     la = next(it, '')
@@ -162,7 +165,10 @@ _VARIABLE_CHARS: Final = set.union(_LOWER, _UPPER, _DIGIT, set("'_"))
 
 
 def _variable(la: str, it: Iterator[str]) -> tuple[Token, str]:
-    r"""_ | \?_ | \??_?[A-Z][a-zA-Z0-9'_]*"""
+    r"""Match a variable.
+
+    Corresponds to regex: _ | \?_ | \??_?[A-Z][a-zA-Z0-9'_]*
+    """
     assert la == '?' or la == '_' or la in _UPPER
 
     # States:

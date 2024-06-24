@@ -78,8 +78,12 @@ class PrettyPrinter:
 
     def print(self, kast: KAst) -> str:
         """Print out KAST terms/outer syntax.
-        -   Input: KAST term.
-        -   Output: Best-effort string representation of KAST term.
+
+        Args:
+            kast: KAST term to print.
+
+        Returns:
+            Best-effort string representation of KAST term.
         """
         _LOGGER.debug(f'Unparsing: {kast}')
         if type(kast) is KAtt:
@@ -321,8 +325,11 @@ class PrettyPrinter:
     def _print_kast_bool(self, kast: KAst) -> str:
         """Print out KAST requires/ensures clause.
 
-        -   Input: KAST Bool for requires/ensures clause.
-        -   Output: Best-effort string representation of KAST term.
+        Args:
+            kast: KAST Bool for requires/ensures clause.
+
+        Returns:
+            Best-effort string representation of KAST term.
         """
         _LOGGER.debug(f'_print_kast_bool: {kast}')
         if type(kast) is KApply and kast.label.name in ['_andBool_', '_orBool_']:
@@ -356,8 +363,11 @@ def build_symbol_table(
 ) -> SymbolTable:
     """Build the unparsing symbol table given a JSON encoded definition.
 
-    -   Input: JSON encoded K definition.
-    -   Return: Python dictionary mapping klabels to automatically generated unparsers.
+    Args:
+        definition: JSON encoded K definition.
+
+    Returns:
+        Python dictionary mapping klabels to automatically generated unparsers.
     """
     symbol_table = {}
     all_modules = list(definition.all_modules) + ([] if extra_modules is None else list(extra_modules))

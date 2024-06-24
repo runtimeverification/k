@@ -31,15 +31,11 @@ if TYPE_CHECKING:
 
 
 class LLVMStepEvent(ABC):
-    """
-    Abstract base class representing an LLVM step event.
-    """
+    """Abstract base class representing an LLVM step event."""
 
 
 class LLVMRewriteEvent(LLVMStepEvent):
-    """
-    Represents LLVM rewrite event.
-    """
+    """Represents LLVM rewrite event."""
 
     @property
     @abstractmethod
@@ -59,8 +55,7 @@ class LLVMRewriteEvent(LLVMStepEvent):
 
 @final
 class LLVMRuleEvent(LLVMRewriteEvent):
-    """
-    Represents an LLVM rule event.
+    """Represents an LLVM rule event.
 
     Attributes:
         _rule_event (llvm_rule_event): The underlying LLVM rule event.
@@ -69,8 +64,7 @@ class LLVMRuleEvent(LLVMRewriteEvent):
     _rule_event: llvm_rule_event
 
     def __init__(self, rule_event: llvm_rule_event) -> None:
-        """
-        Initializes a new instance of the LLVMRuleEvent class.
+        """Initialize a new instance of the LLVMRuleEvent class.
 
         Args:
             rule_event (llvm_rule_event): The LLVM rule event object.
@@ -78,7 +72,8 @@ class LLVMRuleEvent(LLVMRewriteEvent):
         self._rule_event = rule_event
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMRuleEvent object using the AST printing method.
         """
@@ -97,8 +92,7 @@ class LLVMRuleEvent(LLVMRewriteEvent):
 
 @final
 class LLVMSideConditionEventEnter(LLVMRewriteEvent):
-    """
-    Represents an event that enters a side condition in LLVM rewriting.
+    """Represents an event that enters a side condition in LLVM rewriting.
 
     This event is used to check the side condition of a rule. Mostly used in ensures/requires clauses.
 
@@ -109,8 +103,7 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
     _side_condition_event: llvm_side_condition_event
 
     def __init__(self, side_condition_event: llvm_side_condition_event) -> None:
-        """
-        Initializes a new instance of the LLVMSideConditionEventEnter class.
+        """Initialize a new instance of the LLVMSideConditionEventEnter class.
 
         Args:
             side_condition_event (llvm_side_condition_event): The LLVM side condition event object.
@@ -118,7 +111,8 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
         self._side_condition_event = side_condition_event
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMSideConditionEventEnter object using the AST printing method.
         """
@@ -137,8 +131,7 @@ class LLVMSideConditionEventEnter(LLVMRewriteEvent):
 
 @final
 class LLVMSideConditionEventExit(LLVMStepEvent):
-    """
-    Represents an LLVM side condition event indicating the exit of a side condition.
+    """Represents an LLVM side condition event indicating the exit of a side condition.
 
     This event contains the result of the side condition evaluation.
 
@@ -149,8 +142,7 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
     _side_condition_end_event: llvm_side_condition_end_event
 
     def __init__(self, side_condition_end_event: llvm_side_condition_end_event) -> None:
-        """
-        Initializes a new instance of the LLVMSideConditionEventExit class.
+        """Initialize a new instance of the LLVMSideConditionEventExit class.
 
         Args:
             side_condition_end_event (llvm_side_condition_end_event): The LLVM side condition end event object.
@@ -158,7 +150,8 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
         self._side_condition_end_event = side_condition_end_event
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMSideConditionEventExit object using the AST printing method.
         """
@@ -166,19 +159,18 @@ class LLVMSideConditionEventExit(LLVMStepEvent):
 
     @property
     def rule_ordinal(self) -> int:
-        """Returns the axiom ordinal number associated with the side condition event."""
+        """Return the axiom ordinal number associated with the side condition event."""
         return self._side_condition_end_event.rule_ordinal
 
     @property
     def check_result(self) -> bool:
-        """Returns the boolean result of the evaluation of the side condition that corresponds to this event."""
+        """Return the boolean result of the evaluation of the side condition that corresponds to this event."""
         return self._side_condition_end_event.check_result
 
 
 @final
 class LLVMFunctionEvent(LLVMStepEvent):
-    """
-    Represents an LLVM function event in a proof trace.
+    """Represent an LLVM function event in a proof trace.
 
     Attributes:
         _function_event (llvm_function_event): The underlying LLVM function event object.
@@ -187,8 +179,7 @@ class LLVMFunctionEvent(LLVMStepEvent):
     _function_event: llvm_function_event
 
     def __init__(self, function_event: llvm_function_event) -> None:
-        """
-        Initializes a new instance of the LLVMFunctionEvent class.
+        """Initialize a new instance of the LLVMFunctionEvent class.
 
         Args:
             function_event (llvm_function_event): The LLVM function event object.
@@ -196,7 +187,8 @@ class LLVMFunctionEvent(LLVMStepEvent):
         self._function_event = function_event
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMFunctionEvent object using the AST printing method.
         """
@@ -204,24 +196,23 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     @property
     def name(self) -> str:
-        """Returns the name of the LLVM function as a KORE Symbol Name."""
+        """Return the name of the LLVM function as a KORE Symbol Name."""
         return self._function_event.name
 
     @property
     def relative_position(self) -> str:
-        """Returns the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0)"""
+        """Return the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0)."""
         return self._function_event.relative_position
 
     @property
     def args(self) -> list[LLVMArgument]:
-        """Returns a list of LLVMArgument objects representing the arguments of the LLVM function."""
+        """Return a list of LLVMArgument objects representing the arguments of the LLVM function."""
         return [LLVMArgument(arg) for arg in self._function_event.args]
 
 
 @final
 class LLVMHookEvent(LLVMStepEvent):
-    """
-    Represents a hook event in LLVM execution.
+    """Represents a hook event in LLVM execution.
 
     Attributes:
         _hook_event (llvm_hook_event): The underlying hook event object.
@@ -230,8 +221,7 @@ class LLVMHookEvent(LLVMStepEvent):
     _hook_event: llvm_hook_event
 
     def __init__(self, hook_event: llvm_hook_event) -> None:
-        """
-        Initializes a new instance of the LLVMHookEvent class.
+        """Initialize a new instance of the LLVMHookEvent class.
 
         Args:
             hook_event (llvm_hook_event): The LLVM hook event object.
@@ -239,7 +229,8 @@ class LLVMHookEvent(LLVMStepEvent):
         self._hook_event = hook_event
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMHookEvent object using the AST printing method.
         """
@@ -247,29 +238,28 @@ class LLVMHookEvent(LLVMStepEvent):
 
     @property
     def name(self) -> str:
-        """Returns the attribute name of the hook event. Ex.: "INT.add" """
+        """Return the attribute name of the hook event. Ex.: "INT.add"."""
         return self._hook_event.name
 
     @property
     def relative_position(self) -> str:
-        """Returns the relative position of the hook event in the proof trace. Ex.: (0:0:0:0)"""
+        """Return the relative position of the hook event in the proof trace. Ex.: (0:0:0:0)."""
         return self._hook_event.relative_position
 
     @property
     def args(self) -> list[LLVMArgument]:
-        """Returns a list of LLVMArgument objects representing the arguments of the hook event."""
+        """Return a list of LLVMArgument objects representing the arguments of the hook event."""
         return [LLVMArgument(arg) for arg in self._hook_event.args]
 
     @property
     def result(self) -> Pattern:
-        """Returns the result pattern of the hook event evaluation."""
+        """Return the result pattern of the hook event evaluation."""
         return self._hook_event.result
 
 
 @final
 class LLVMArgument:
-    """
-    Represents an LLVM argument.
+    """Represents an LLVM argument.
 
     Attributes:
         _argument (Argument): The underlying Argument object. An argument is a wrapper object containing either a step
@@ -279,8 +269,7 @@ class LLVMArgument:
     _argument: Argument
 
     def __init__(self, argument: Argument) -> None:
-        """
-        Initializes the LLVMArgument object.
+        """Initialize the LLVMArgument object.
 
         Args:
             argument (Argument): The Argument object.
@@ -288,7 +277,8 @@ class LLVMArgument:
         self._argument = argument
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             Returns a string representation of the LLVMArgument object using the AST printing method.
         """
@@ -312,23 +302,22 @@ class LLVMArgument:
 
     @property
     def kore_pattern(self) -> Pattern:
-        """Returns the KORE Pattern associated with the argument if any."""
+        """Return the KORE Pattern associated with the argument if any."""
         assert isinstance(self._argument.kore_pattern, Pattern)
         return self._argument.kore_pattern
 
     def is_kore_pattern(self) -> bool:
-        """Checks if the argument is a KORE Pattern."""
+        """Check if the argument is a KORE Pattern."""
         return self._argument.is_kore_pattern()
 
     def is_step_event(self) -> bool:
-        """Checks if the argument is a step event."""
+        """Check if the argument is a step event."""
         return self._argument.is_step_event()
 
 
 @final
 class LLVMRewriteTrace:
-    """
-    Represents an LLVM rewrite trace.
+    """Represents an LLVM rewrite trace.
 
     Attributes:
         _rewrite_trace (llvm_rewrite_trace): The underlying LLVM rewrite trace object.
@@ -337,8 +326,7 @@ class LLVMRewriteTrace:
     _rewrite_trace: llvm_rewrite_trace
 
     def __init__(self, rewrite_trace: llvm_rewrite_trace) -> None:
-        """
-        Initializes a new instance of the LLVMRewriteTrace class.
+        """Initialize a new instance of the LLVMRewriteTrace class.
 
         Args:
             rewrite_trace (llvm_rewrite_trace): The LLVM rewrite trace object.
@@ -346,7 +334,8 @@ class LLVMRewriteTrace:
         self._rewrite_trace = rewrite_trace
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMRewriteTrace object using the AST printing method.
         """
@@ -369,20 +358,23 @@ class LLVMRewriteTrace:
 
     @property
     def trace(self) -> list[LLVMArgument]:
-        """Returns a list of events that occurred after the initial configurarion was constructed until the end of the
-        proof trace when the final configuration is reached."""
+        """Returns the trace.
+
+        The trace is the list of events that occurred after the initial configurarion was constructed until the end of the
+        proof trace when the final configuration is reached.
+        """
         return [LLVMArgument(event) for event in self._rewrite_trace.trace]
 
     @staticmethod
     def parse(trace: bytes, header: KoreHeader) -> LLVMRewriteTrace:
-        """Parses the given proof hints byte string using the given kore_header object to create an LLVMRewriteTrace
-        object."""
+        """Parse the given proof hints byte string using the given kore_header object."""
         return LLVMRewriteTrace(llvm_rewrite_trace.parse(trace, header._kore_header))
 
 
 class KoreHeader:
-    """
-    Represents the Kore header, a file that contains the version of the Binary KORE used to serialize/deserialize the
+    """Represents the Kore header.
+
+    The Kore header is a file that contains the version of the Binary KORE used to serialize/deserialize the
     Proof Trace and all the aditional information needed make this process faster the Proof Trace.
 
     Attributes:
@@ -392,8 +384,7 @@ class KoreHeader:
     _kore_header: kore_header
 
     def __init__(self, kore_header: kore_header) -> None:
-        """
-        Initializes a new instance of the KoreHeader class.
+        """Initialize a new instance of the KoreHeader class.
 
         Args:
             kore_header (kore_header): The KORE Header object.
@@ -402,14 +393,14 @@ class KoreHeader:
 
     @staticmethod
     def create(header_path: Path) -> KoreHeader:
-        """Creates a new KoreHeader object from the given header file path."""
+        """Create a new KoreHeader object from the given header file path."""
         return KoreHeader(kore_header(str(header_path)))
 
 
 class LLVMEventType:
-    """
-    Represents an LLVM event type. This works as a wrapper around the EventType enum.
+    """Represents an LLVM event type.
 
+    This works as a wrapper around the EventType enum.
     It also provides properties to check the type of the event.
 
     Attributes:
@@ -419,8 +410,7 @@ class LLVMEventType:
     _event_type: EventType
 
     def __init__(self, event_type: EventType) -> None:
-        """
-        Initializes a new instance of the LLVMEventType class.
+        """Initialize a new instance of the LLVMEventType class.
 
         Args:
             event_type (EventType): The EventType object.
@@ -444,8 +434,7 @@ class LLVMEventType:
 
 
 class LLVMEventAnnotated:
-    """
-    Represents an annotated LLVM event.
+    """Represents an annotated LLVM event.
 
     This class is used to wrap an llvm_event and its corresponding event type.
     This class is used to iterate over the LLVM rewrite trace events.
@@ -457,7 +446,7 @@ class LLVMEventAnnotated:
     _annotated_llvm_event: annotated_llvm_event
 
     def __init__(self, annotated_llvm_event: annotated_llvm_event) -> None:
-        """Initializes a new instance of the LLVMEventAnnotated class.
+        """Initialize a new instance of the LLVMEventAnnotated class.
 
         Args:
             annotated_llvm_event (annotated_llvm_event): The annotated LLVM event object.
@@ -476,8 +465,7 @@ class LLVMEventAnnotated:
 
 
 class LLVMRewriteTraceIterator:
-    """
-    Represents an LLVM rewrite trace iterator.
+    """Represents an LLVM rewrite trace iterator.
 
     This class is used to iterate over the LLVM rewrite trace events in the stream parser.
 
@@ -488,8 +476,7 @@ class LLVMRewriteTraceIterator:
     _rewrite_trace_iterator: llvm_rewrite_trace_iterator
 
     def __init__(self, rewrite_trace_iterator: llvm_rewrite_trace_iterator) -> None:
-        """
-        Initializes a new instance of the LLVMRewriteTraceIterator class.
+        """Initialize a new instance of the LLVMRewriteTraceIterator class.
 
         Args:
             rewrite_trace_iterator (llvm_rewrite_trace_iterator): The LLVM rewrite trace iterator object.
@@ -497,23 +484,21 @@ class LLVMRewriteTraceIterator:
         self._rewrite_trace_iterator = rewrite_trace_iterator
 
     def __repr__(self) -> str:
-        """
+        """Return a string representation of the object.
+
         Returns:
             A string representation of the LLVMRewriteTraceIterator object using the AST printing method.
         """
         return self._rewrite_trace_iterator.__repr__()
 
     def __iter__(self) -> Generator[LLVMEventAnnotated, None, None]:
-        """Yields LLVMEventAnnotated options.
+        """Yield LLVMEventAnnotated options.
 
         This method is an iterator that yields LLVMEventAnnotated options.
         It iterates over the events in the trace and returns the next event as an LLVMEventAnnotated object.
 
         Yields:
             LLVMEventAnnotated: The next LLVMEventAnnotated option.
-
-        Raises:
-            None
         """
         while True:
             next_event = self._rewrite_trace_iterator.get_next_event()
@@ -523,7 +508,7 @@ class LLVMRewriteTraceIterator:
                 yield LLVMEventAnnotated(next_event)
 
     def __next__(self) -> LLVMEventAnnotated:
-        """Yields the next LLVMEventAnnotated object from the iterator.
+        """Yield the next LLVMEventAnnotated object from the iterator.
 
         Returns:
             LLVMEventAnnotated: The next LLVMEventAnnotated object.
@@ -539,10 +524,10 @@ class LLVMRewriteTraceIterator:
 
     @property
     def version(self) -> int:
-        """Returns the version of the HINTS format."""
+        """Return the version of the HINTS format."""
         return self._rewrite_trace_iterator.version
 
     @staticmethod
     def from_file(trace_path: Path, header: KoreHeader) -> LLVMRewriteTraceIterator:
-        """Creates a new LLVMRewriteTraceIterator object from the given trace and header file paths."""
+        """Create a new LLVMRewriteTraceIterator object from the given trace and header file paths."""
         return LLVMRewriteTraceIterator(llvm_rewrite_trace_iterator.from_file(str(trace_path), header._kore_header))
