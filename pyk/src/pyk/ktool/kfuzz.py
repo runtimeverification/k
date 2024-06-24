@@ -31,6 +31,8 @@ def kintegers(
     with_inj: KSort | None = None,
 ) -> SearchStrategy[Pattern]:
     """
+    Return a search strategy for K integers.
+
     Args:
         min_value: Minimum value for the generated integers
         max_value: Maximum value for the generated integers
@@ -57,17 +59,23 @@ def fuzz(
     check_exit_code: bool = False,
     max_examples: int = 50,
 ) -> None:
-    """Use this to fuzz a property test with concrete execution over a K term.
+    """
+    Fuzz a property test with concrete execution over a K term.
+
     Args:
-        definition_dir: The location of the K definition to run the interpreter for
+        definition_dir: The location of the K definition to run the interpreter for.
         template: The term which will be sent to the interpreter after randomizing inputs. It should contain at least one variable which will be substituted for a value.
         subst_strategy: Should have each variable in the template term mapped to a strategy for generating values for it.
-        check_func: Will be called on the kore output from the interpreter. Should throw an AssertionError if it determines that the output indicates a test failure. A RuntimeError will be thrown if check_exit_code is True.
-        check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func. An exit code of 0 indicates a passing test. A RuntimeError will be thrown if this is True and check_func is also supplied.
+        check_func: Will be called on the kore output from the interpreter.
+          Should throw an AssertionError if it determines that the output indicates a test failure.
+          A RuntimeError will be thrown if this is passed as an argument and check_exit_code is True.
+        check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func.
+          An exit code of 0 indicates a passing test.
+          A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
         max_examples: The number of test cases to run.
 
     Raises:
-        RuntimeError: If check_func exists and check_exit_code is set, or check_func doesn't exist and check_exit_code is cleared
+        RuntimeError: If check_func exists and check_exit_code is set, or check_func doesn't exist and check_exit_code is cleared.
     """
     if bool(check_func) == check_exit_code:
         raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
