@@ -561,9 +561,9 @@ class MLPattern(Pattern):
 
     @property
     def ctor_patterns(self) -> tuple[Pattern, ...]:
-        """
-        Patterns used to construct the term with `of`.
-        Except for `Assoc`, `DV`, `MLFixpoint` and `MLQuant` it coincides with `patterns`.
+        """Return patterns used to construct the term with `of`.
+
+        Except for `Assoc`, `DV`, `MLFixpoint` and `MLQuant` this coincides with `patterns`.
         """
         return self.patterns
 

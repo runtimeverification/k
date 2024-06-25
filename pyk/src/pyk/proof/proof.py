@@ -34,10 +34,12 @@ class ProofStatus(Enum):
 
 
 class Proof(Generic[PS, SR]):
-    """Abstract representation of a proof that can be executed in one or more discrete steps
+    """Abstract representation of a proof that can be executed in one or more discrete steps.
 
-    :param PS: Proof step: data required to perform a step of the proof.
-    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+    Generic type variables:
+
+    - PS: Proof step: data required to perform a step of the proof.
+    - SR: Step result: data produced by executing a PS with ``Prover.step_proof`` used to update the `Proof`.
     """
 
     _PROOF_TYPES: Final = {'APRProof', 'EqualityProof', 'RefutationProof'}
@@ -115,9 +117,7 @@ class Proof(Generic[PS, SR]):
 
     @property
     def up_to_date(self) -> bool:
-        """
-        Check that the proof's representation on disk is up-to-date.
-        """
+        """Check that the proof's representation on disk is up-to-date."""
         if self.proof_dir is None:
             raise ValueError(f'Cannot check if proof {self.id} with no proof_dir is up-to-date')
         proof_path = self.proof_dir / f'{hash_str(id)}.json'
@@ -151,8 +151,7 @@ class Proof(Generic[PS, SR]):
     def fetch_subproof(
         self, proof_id: str, force_reread: bool = False, uptodate_check_method: str = 'timestamp'
     ) -> Proof:
-        """Get a subproof, re-reading from disk if it's not up-to-date"""
-
+        """Get a subproof, re-reading from disk if it's not up-to-date."""
         if self.proof_dir is not None and (force_reread or not self._subproofs[proof_id].up_to_date):
             updated_subproof = Proof.read_proof(proof_id, self.proof_dir)
             self._subproofs[proof_id] = updated_subproof
@@ -163,8 +162,7 @@ class Proof(Generic[PS, SR]):
     def fetch_subproof_data(
         self, proof_id: str, force_reread: bool = False, uptodate_check_method: str = 'timestamp'
     ) -> Proof:
-        """Get a subproof, re-reading from disk if it's not up-to-date"""
-
+        """Get a subproof, re-reading from disk if it's not up-to-date."""
         if self.proof_dir is not None and (force_reread or not self._subproofs[proof_id].up_to_date):
             updated_subproof = Proof.read_proof_data(self.proof_dir, proof_id)
             self._subproofs[proof_id] = updated_subproof
@@ -174,7 +172,7 @@ class Proof(Generic[PS, SR]):
 
     @property
     def subproofs(self) -> Iterable[Proof]:
-        """Return the subproofs, re-reading from disk the ones that changed"""
+        """Return the subproofs, re-reading from disk the ones that changed."""
         return self._subproofs.values()
 
     @property
@@ -324,22 +322,27 @@ def parallel_advance_proof(
     fail_fast: bool = False,
     max_workers: int = 1,
 ) -> None:
-    """Advance proof with multithreaded strategy: `Prover.step_proof()` to a worker thread pool for each step
-    as available, and `Proof.commit()` results as they become available, and get new steps with
-    `Proof.get_steps()` and submit to thread pool.
+    """Advance proof with multithreaded strategy.
 
-    :param P: Type of proof to be advanced in parallel
-    :param PS: Proof step: data required to perform a step of the proof.
-    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+    `Prover.step_proof()` to a worker thread pool for each step as available,
+    and `Proof.commit()` results as they become available,
+    and get new steps with `Proof.get_steps()` and submit to thread pool.
 
-    :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
-        data to be written during `parallel_advance_proof`, to avoid race conditions.
-    :param max_iterations: Maximum number of steps to take
-    :param fail_fast: If the proof is failing after finishing a step, halt execution even if there are
-        still available steps
-    :param max_workers: Maximum number of worker threads the pool can spawn
+    Generic type variables:
+
+    - P: Type of proof to be advanced in parallel.
+    - PS: Proof step: data required to perform a step of the proof.
+    - SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`.
+
+    Args:
+        proof: The proof to advance.
+        create_prover: Function which creates a new `Prover`. These provers must not reference any shared
+          data to be written during `parallel_advance_proof`, to avoid race conditions.
+        max_iterations: Maximum number of steps to take.
+        fail_fast: If the proof is failing after finishing a step,
+          halt execution even if there are still available steps.
+        max_workers: Maximum number of worker threads the pool can spawn.
     """
-
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
     iterations = 0
@@ -385,14 +388,11 @@ def parallel_advance_proof(
 class _ProverPool(ContextManager['_ProverPool'], Generic[P, PS, SR]):
     """Wrapper for `ThreadPoolExecutor` which spawns one `Prover` for each worker thread.
 
-    :param P: Type of proof to be advanced in parallel
-    :param PS: Proof step: data required to perform a step of the proof.
-    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+    Generic type variables:
 
-    :param create_prover: Function which creates a new `Prover`. These provers must not reference any shared
-        data to be written during `parallel_advance_proof`, to avoid race conditions.
-    :param max_workers: Maximum number of worker threads the pool can spawn
-
+    - P: Type of proof to be advanced in parallel.
+    - PS: Proof step: data required to perform a step of the proof.
+    - SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`.
     """
 
     _create_prover: Callable[[], Prover[P, PS, SR]]
@@ -406,6 +406,13 @@ class _ProverPool(ContextManager['_ProverPool'], Generic[P, PS, SR]):
         *,
         max_workers: int | None = None,
     ) -> None:
+        """Initialize an instance.
+
+        Args:
+            create_prover: Function which creates a new `Prover`. These provers must not reference any shared
+              data to be written during `parallel_advance_proof`, to avoid race conditions.
+            max_workers (optional): Maximum number of worker threads the pool can spawn.
+        """
         self._create_prover = create_prover
         self._provers = {}
         self._executor = ThreadPoolExecutor(max_workers)
@@ -443,10 +450,13 @@ class _ProverPool(ContextManager['_ProverPool'], Generic[P, PS, SR]):
 
 
 class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
-    """Abstract class which advances `Proof`s with `init_proof()` and `step_proof()`
-    :param P: Type of proof this `Prover` operates on
-    :param PS: Proof step: data required to perform a step of the proof.
-    :param SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`
+    """Abstract class which advances `Proof`s with `init_proof()` and `step_proof()`.
+
+    Generic type variables:
+
+    - P: Type of proof this `Prover` operates on.
+    - PS: Proof step: data required to perform a step of the proof.
+    - SR: Step result: data produced by executing a PS with `Prover.step_proof` used to update the `Proof`.
     """
 
     def __enter__(self) -> Prover[P, PS, SR]:
@@ -463,25 +473,32 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
 
     @abstractmethod
     def step_proof(self, step: PS) -> Iterable[SR]:
-        """Do the work associated with a `PS`, a proof step. Should not modify a `Proof` or `self`, but may read
-        from `self` as long as those fields are not being modified during `step_proof()`, `get_steps()`, and
-        `commit()`.
+        """Do the work associated with a `PS`, a proof step.
+
+        Should not modify a `Proof` or `self`, but may read from `self` as long as
+        those fields are not being modified during `step_proof()`, `get_steps()`, and `commit()`.
         """
         ...
 
     @abstractmethod
     def init_proof(self, proof: P) -> None:
-        """Perform any initialization steps needed at the beginning of proof execution. For example,  for
-        `APRProver`, upload circularity and depends module of the proof to the KoreServer via `add_module`.
+        """Perform any initialization steps needed at the beginning of proof execution.
+
+        For example, for `APRProver`, upload circularity and depends module of the proof
+        to the `KoreServer` via `add_module`.
         """
         ...
 
     def advance_proof(self, proof: P, max_iterations: int | None = None, fail_fast: bool = False) -> None:
-        """Advance proof by a simple loop of `Proof.get_steps()` -> `Prover.step_proof()` -> `Proof.commit()`
+        """Advance a proof.
 
-        :param max_iterations: Maximum number of steps to take
-        :param fail_fast: If the proof is failing after finishing a step, halt execution even if there are
-            still available steps
+        Performs loop `Proof.get_steps()` -> `Prover.step_proof()` -> `Proof.commit()`.
+
+        Args:
+            proof: proof to advance.
+            max_iterations (optional): Maximum number of steps to take.
+            fail_fast: If the proof is failing after finishing a step,
+              halt execution even if there are still available steps.
         """
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')

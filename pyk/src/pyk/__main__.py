@@ -36,8 +36,9 @@ from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
-from .ktool.kprove import KProve, ProveRpc
+from .ktool.kprove import KProve
 from .ktool.krun import KRun
+from .ktool.prove_rpc import ProveRpc
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
@@ -218,9 +219,9 @@ def exec_rpc_print(options: RPCPrintOptions) -> None:
 
 
 def exec_rpc_kast(options: RPCKastOptions) -> None:
-    """
-    Convert an 'execute' JSON RPC response to a new 'execute' or 'simplify' request,
-    copying parameters from a reference request.
+    """Convert an 'execute' JSON RPC response to a new 'execute' or 'simplify' request.
+
+    Copies parameters from a reference request.
     """
     reference_request = json.loads(options.reference_request_file.read())
     input_dict = json.loads(options.response_file.read())

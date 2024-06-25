@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import graphlib
 import json
 import logging
 import re
@@ -10,13 +9,13 @@ from typing import TYPE_CHECKING
 from pyk.kore.rpc import LogEntry
 
 from ..cterm.cterm import remove_useless_constraints
-from ..kast.att import AttEntry, Atts
 from ..kast.inner import KInner, Subst
 from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
 from ..konvert import kflatmodule_to_kore
+from ..ktool.claim_index import ClaimIndex
 from ..prelude.ml import mlAnd, mlTop
 from ..utils import FrozenDict, ensure_dir_path, hash_str, shorten_hashes, single
 from .implies import ProofSummary, Prover, RefutationProof
@@ -76,9 +75,12 @@ class APRProofStep:
 
 
 class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
-    """APRProof and APRProver implement all-path reachability logic,
+    """Represent an all-path reachability proof.
+
+    APRProof and APRProver implement all-path reachability logic,
     as introduced by A. Stefanescu and others in their paper 'All-Path Reachability Logic':
     https://doi.org/10.23638/LMCS-15(2:5)2019
+
     Note that reachability logic formula `phi =>A psi` has *not* the same meaning
     as CTL/CTL*'s `phi -> AF psi`, since reachability logic ignores infinite traces.
     This implementation extends the above with bounded model checking, allowing the user
@@ -420,74 +422,28 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         logs: dict[int, tuple[LogEntry, ...]],
         proof_dir: Path | None = None,
         spec_labels: Iterable[str] | None = None,
-        **kwargs: Any,
     ) -> list[APRProof]:
-        claims_by_label = {claim.label: claim for module in spec_modules.modules for claim in module.claims}
-        if spec_labels is None:
-            spec_labels = list(claims_by_label.keys())
-        _spec_labels = []
-        for spec_label in spec_labels:
-            if spec_label in claims_by_label:
-                _spec_labels.append(spec_label)
-            elif f'{spec_modules.main_module}.{spec_label}' in claims_by_label:
-                _spec_labels.append(f'{spec_modules.main_module}.{spec_label}')
+        claim_index = ClaimIndex.from_module_list(spec_modules)
+        spec_labels = claim_index.labels(include=spec_labels, with_depends=True, ordered=True)
+
+        res: list[APRProof] = []
+
+        for label in spec_labels:
+            if proof_dir is not None and Proof.proof_data_exists(label, proof_dir):
+                apr_proof = APRProof.read_proof_data(proof_dir, label)
             else:
-                raise ValueError(
-                    f'Could not find specification label: {spec_label} or {spec_modules.main_module}.{spec_label}'
+                _LOGGER.info(f'Building APRProof for claim: {label}')
+                claim = claim_index[label]
+                apr_proof = APRProof.from_claim(
+                    defn,
+                    claim,
+                    logs=logs,
+                    proof_dir=proof_dir,
                 )
-        spec_labels = _spec_labels
+                apr_proof.write_proof_data()
+            res.append(apr_proof)
 
-        claims_graph: dict[str, list[str]] = {}
-        unfound_dependencies = []
-        for module in spec_modules.modules:
-            for claim in module.claims:
-                claims_graph[claim.label] = []
-                for dependency in claim.dependencies:
-                    if dependency in claims_by_label:
-                        claims_graph[claim.label].append(dependency)
-                    elif f'{module.name}.{dependency}' in claims_by_label:
-                        claims_graph[claim.label].append(f'{module.name}.{dependency}')
-                    else:
-                        unfound_dependencies.append((claim.label, module.name, dependency))
-        if unfound_dependencies:
-            unfound_dependency_list = [
-                f'Could not find dependency for claim {label}: {dependency} or {module_name}.{dependency}'
-                for label, module_name, dependency in unfound_dependencies
-            ]
-            unfound_dependency_message = '\n - ' + '\n - '.join(unfound_dependency_list)
-            raise ValueError(f'Could not find dependencies:{unfound_dependency_message}')
-
-        claims_subgraph: dict[str, list[str]] = {}
-        remaining_claims = spec_labels
-        while len(remaining_claims) > 0:
-            claim_label = remaining_claims.pop()
-            claims_subgraph[claim_label] = claims_graph[claim_label]
-            remaining_claims.extend(claims_graph[claim_label])
-
-        topological_sorter = graphlib.TopologicalSorter(claims_subgraph)
-        topological_sorter.prepare()
-        apr_proofs: list[APRProof] = []
-        while topological_sorter.is_active():
-            for claim_label in topological_sorter.get_ready():
-                if proof_dir is not None and Proof.proof_data_exists(claim_label, proof_dir):
-                    apr_proof = APRProof.read_proof_data(proof_dir, claim_label)
-                else:
-                    _LOGGER.info(f'Building APRProof for claim: {claim_label}')
-                    claim = claims_by_label[claim_label]
-                    if len(claims_graph[claim_label]) > 0:
-                        claim_att = claim.att.update([AttEntry(Atts.DEPENDS, ','.join(claims_graph[claim_label]))])
-                        claim = claim.let_att(claim_att)
-                    apr_proof = APRProof.from_claim(
-                        defn,
-                        claim,
-                        logs=logs,
-                        proof_dir=proof_dir,
-                    )
-                    apr_proof.write_proof_data()
-                apr_proofs.append(apr_proof)
-                topological_sorter.done(claim_label)
-
-        return apr_proofs
+        return res
 
     def path_constraints(self, final_node_id: NodeIdLike) -> KInner:
         path = self.shortest_path_to(final_node_id)

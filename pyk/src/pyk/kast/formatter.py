@@ -173,7 +173,10 @@ def _between_terminals(definition: KDefinition, parent: KApply, index: int) -> b
 
 
 def _associativity_wrong(definition: KDefinition, parent: KApply, term: KApply, index: int) -> bool:
-    """A left (right) associative symbol cannot appear as the rightmost (leftmost) child of a symbol with equal priority."""
+    """Return whether `term` can appear as the `index`-th child of `parent` according to associativity rules.
+
+    A left (right) associative symbol cannot appear as the rightmost (leftmost) child of a symbol with equal priority.
+    """
     parent_label = parent.label.name
     term_label = term.label.name
     prod = definition.symbols[parent_label]
@@ -185,7 +188,10 @@ def _associativity_wrong(definition: KDefinition, parent: KApply, term: KApply, 
 
 
 def _priority_wrong(definition: KDefinition, parent: KApply, term: KApply) -> bool:
-    """A symbol with a lesser priority cannot appear as the child of a symbol with greater priority."""
+    """Return whether `term` can appear as a child of `parent` according to priority rules.
+
+    A symbol with a lesser priority cannot appear as the child of a symbol with greater priority.
+    """
     parent_label = parent.label.name
     term_label = term.label.name
     return term_label in definition.priorities.get(parent_label, ())

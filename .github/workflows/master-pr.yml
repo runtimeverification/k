@@ -25,8 +25,8 @@ jobs:
         run: |
           set -x
           pull_number=$(jq --raw-output .pull_request.number "${GITHUB_EVENT_PATH}")
-          curl -X PATCH                                                             \
-            -H "Accept: application/vnd.github+json"                                \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}"                              \
-            https://api.github.com/repos/runtimeverification/k/pulls/${pull_number} \
+          curl -X PATCH                                                               \
+            -H "Accept: application/vnd.github+json"                                  \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"                                \
+            "https://api.github.com/repos/runtimeverification/k/pulls/${pull_number}" \
             -d '{"base":"develop"}'

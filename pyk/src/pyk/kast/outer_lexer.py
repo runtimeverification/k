@@ -191,7 +191,7 @@ _BUBBLY_STATES: Final = {State.BUBBLE, State.CONTEXT}
 
 
 class LocationIterator(Iterator[str]):
-    """A string iterator which tracks the line and column information of the characters in the string"""
+    """A string iterator which tracks the line and column information of the characters in the string."""
 
     _line: int
     _col: int
@@ -215,7 +215,7 @@ class LocationIterator(Iterator[str]):
 
     @property
     def loc(self) -> Loc:
-        """Returns the line,column of the last character returned by the iterator
+        """Return the ``(line, column)`` of the last character returned by the iterator.
 
         If no character has been returned yet, it will be the location that this
         iterator was initialized with. The default is (1,0), which is the only
@@ -523,8 +523,10 @@ _MODNAME_KEYWORDS: Final = {'private', 'public'}
 
 
 def _modname(la: str, it: LocationIterator) -> tuple[Token, str]:
-    r"""[a-zA-Z]\w*(-\w+)*"""
+    r"""Match a module name.
 
+    Corresponds to regex: [a-zA-Z]\w*(-\w+)*
+    """
     la = _skip_ws_and_comments(la, it)
 
     consumed = []
@@ -888,18 +890,21 @@ def _attr_content(la: str, it: Iterator[str]) -> tuple[str, str]:
 
 
 def _maybe_comment(la: str, it: Iterator[str]) -> tuple[bool, list[str], str]:
-    """
-    Attempt to consume a line or block comment from the iterator.
-    Expects la to be '/'.
+    """Attempt to consume a line or block comment from the iterator.
 
-    :param la: The current lookahead.
-    :param it: The iterator.
-    :return: A tuple `(success, consumed, la)` where
-      * `success` indicates whether `consumed` is a comment
-      * `consumed` is the list of consumed characters
-      * `la` is the current lookahead
-    """
+    Expects la to be ``'/'``.
 
+    Args:
+        la: The current lookahead.
+        it: The iterator.
+
+    Returns:
+        A tuple ``(success, consumed, la)`` where
+
+        - ``success``: Indicates whether `consumed` is a comment.
+        - ``consumed``: The list of consumed characters.
+        - ``la``: The current lookahead.
+    """
     assert la == '/'
     consumed = [la]  # ['/']
 
