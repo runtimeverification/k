@@ -6,6 +6,7 @@ from ..kore.syntax import (
     ML_SYMBOLS,
     AliasDecl,
     App,
+    Assoc,
     Axiom,
     Claim,
     Definition,
@@ -110,6 +111,8 @@ def pattern_to_llvm(pattern: Pattern) -> kllvm.Pattern:
             return kllvm.VariablePattern(name, sort_to_llvm(sort))
         case App(symbol, sorts, args):
             return _composite_pattern(symbol, sorts, args)
+        case Assoc():
+            return _composite_pattern(pattern.symbol(), pattern.sorts, pattern.ctor_patterns)
         case MLPattern():
             return _composite_pattern(pattern.symbol(), pattern.sorts, pattern.ctor_patterns)
         case _:
@@ -206,6 +209,8 @@ def llvm_to_pattern(pattern: kllvm.Pattern) -> Pattern:
             symbol, sorts, patterns = _unpack_composite_pattern(pattern)
             if symbol in ML_SYMBOLS:
                 return MLPattern.of(symbol, sorts, patterns)
+            elif symbol in [r'\left-assoc', r'\right-assoc']:
+                return Assoc.of(symbol, sorts, patterns)
             else:
                 return App(symbol, sorts, patterns)
         case _:

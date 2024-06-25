@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     WS = TypeVar('WS', bound='WithSort')
     WA = TypeVar('WA', bound='WithAttrs')
     ML = TypeVar('ML', bound='MLPattern')
+    AS = TypeVar('AS', bound='Assoc')
 
 
 @final
@@ -563,7 +564,7 @@ class MLPattern(Pattern):
     def ctor_patterns(self) -> tuple[Pattern, ...]:
         """Return patterns used to construct the term with `of`.
 
-        Except for `Assoc`, `DV`, `MLFixpoint` and `MLQuant` this coincides with `patterns`.
+        Except for `DV`, `MLFixpoint` and `MLQuant` this coincides with `patterns`.
         """
         return self.patterns
 
@@ -1609,8 +1610,29 @@ class DV(MLPattern, WithSort):
         return {'tag': 'DV', 'sort': self.sort.dict, 'value': self.value.value}
 
 
-class Assoc(MLPattern):
+class Assoc(Pattern):
     app: App
+
+    @classmethod
+    @abstractmethod
+    def symbol(cls) -> str: ...
+
+    @classmethod
+    def of(cls: type[AS], symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()) -> AS:
+        actual_cls = {r'\left-assoc': LeftAssoc, r'\right-assoc': RightAssoc}.get(symbol)
+
+        if not actual_cls:
+            raise ValueError(f'Invalid Assoc symbol: {symbol}')
+
+        if not issubclass(actual_cls, cls):
+            raise ValueError(f'Expected {cls.__name__} symbol, found: {symbol}')
+
+        return actual_cls.of(symbol, sorts, patterns)  # type: ignore
+
+    @classmethod
+    def _check_symbol(cls, symbol: str) -> None:
+        if symbol != cls.symbol():
+            raise ValueError(f'Expected "symbol" value: {cls.symbol()}, got: {symbol}')
 
     @property
     @abstractmethod
@@ -1635,6 +1657,14 @@ class Assoc(MLPattern):
             'sorts': [sort.dict for sort in self.app.sorts],
             'argss': dicts,
         }
+
+    def write(self, output: IO[str]) -> None:
+        output.write(self.symbol())
+        output.write('{')
+        _write_sep_by_comma(self.sorts, output)
+        output.write('}(')
+        _write_sep_by_comma(self.ctor_patterns, output)
+        output.write(')')
 
 
 @final
@@ -1768,8 +1798,6 @@ ML_SYMBOLS: Final = {
     r'\next': Next,
     r'\rewrites': Rewrites,
     r'\dv': DV,
-    r'\left-assoc': LeftAssoc,
-    r'\right-assoc': RightAssoc,
 }
 
 
