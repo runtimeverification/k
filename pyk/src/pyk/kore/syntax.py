@@ -1609,11 +1609,7 @@ class DV(MLPattern, WithSort):
         return {'tag': 'DV', 'sort': self.sort.dict, 'value': self.value.value}
 
 
-class MLSyntaxSugar(MLPattern): ...
-
-
-# TODO AppAssoc, OrAssoc
-class Assoc(MLSyntaxSugar):
+class Assoc(MLPattern):
     app: App
 
     @property
