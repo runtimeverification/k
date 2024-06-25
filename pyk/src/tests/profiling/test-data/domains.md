@@ -1257,8 +1257,8 @@ You can:
 You can compute the minimum and maximum `minInt` and `maxInt` of two integers.
 
 ```k
-  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, total, smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
-               | "maxInt" "(" Int "," Int ")"   [function, total, smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
+  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, total, symbol(minInt), smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
+               | "maxInt" "(" Int "," Int ")"   [function, total, symbol(maxInt), smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
 ```
 
 ### Absolute value
@@ -1266,7 +1266,7 @@ You can compute the minimum and maximum `minInt` and `maxInt` of two integers.
 You can compute the absolute value `absInt` of an integer.
 
 ```k
-  syntax Int ::= absInt ( Int )                 [function, total, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
+  syntax Int ::= absInt ( Int )                 [function, total, symbol(absInt), smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
 ```
 
 ### Log base 2
