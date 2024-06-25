@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
-from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process
+from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, hash_str, run_process
 from . import manip
 from .prelude import SORT_GENERATED_TOP_CELL
 from .syntax import And, Equals, EVar, kore_term
@@ -69,7 +69,7 @@ class Transport(ContextManager['Transport'], ABC):
     def close(self) -> None: ...
 
     @abstractmethod
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]: ...
+    def command(self, bug_report_id: str, uid: str, bug_report_request: str) -> list[str]: ...
 
     @abstractmethod
     def description(self) -> str: ...
@@ -117,7 +117,7 @@ class SingleSocketTransport(Transport):
         self._file.close()
         self._sock.close()
 
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]:
+    def command(self, bug_report_id: str, uid: str, bug_report_request: str) -> list[str]:
         return [
             'cat',
             bug_report_request,
@@ -127,7 +127,7 @@ class SingleSocketTransport(Transport):
             self._host,
             str(self._port),
             '>',
-            f'rpc_{bug_report_id}/{old_id:03}_actual.json',
+            f'rpc_{bug_report_id}/{uid:03}_actual.json',
         ]
 
     def request(self, req: str) -> str:
@@ -154,7 +154,7 @@ class HttpTransport(Transport):
     def close(self) -> None:
         pass
 
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]:
+    def command(self, bug_report_id: str, uid: str, bug_report_request: str) -> list[str]:
         return [
             'curl',
             '-X',
@@ -165,7 +165,7 @@ class HttpTransport(Transport):
             '@' + bug_report_request,
             'http://' + self._host + ':' + str(self._port),
             '>',
-            f'rpc_{bug_report_id}/{old_id:03}_actual.json',
+            f'rpc_{bug_report_id}/{uid:03}_actual.json',
         ]
 
     def request(self, req: str) -> str:
@@ -291,23 +291,24 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
-        old_id = self._req_id
+        # Generate unique ID regardless of different clients, repeated requests from the same client, etc.
+        uid = hash_str((method, params, id(self), self._req_id))
         self._req_id += 1
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
-            'id': old_id,
+            'id': uid,
             'method': method,
             'params': params,
         }
 
         server_addr = self._transport.description()
-        _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
+        _LOGGER.info(f'Sending request to {server_addr}: {uid} - {method}')
         req = json.dumps(payload)
         if self._bug_report:
-            bug_report_request = f'rpc_{self._bug_report_id}/{old_id:03}_request.json'
+            bug_report_request = f'rpc_{self._bug_report_id}/{uid:03}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._transport.command(self._bug_report_id, old_id, bug_report_request))
+            self._bug_report.add_command(self._transport.command(self._bug_report_id, uid, bug_report_request))
 
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         resp = self._transport.request(req)
@@ -316,23 +317,23 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
-            bug_report_response = f'rpc_{self._bug_report_id}/{old_id:03}_response.json'
+            bug_report_response = f'rpc_{self._bug_report_id}/{uid:03}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
             self._bug_report.add_command(
                 [
                     'diff',
                     '-b',
                     '-s',
-                    f'rpc_{self._bug_report_id}/{old_id:03}_actual.json',
-                    f'rpc_{self._bug_report_id}/{old_id:03}_response.json',
+                    f'rpc_{self._bug_report_id}/{uid:03}_actual.json',
+                    f'rpc_{self._bug_report_id}/{uid:03}_response.json',
                 ]
             )
 
         data = json.loads(resp)
         self._check(data)
-        assert data['id'] == old_id
+        assert data['id'] == uid
 
-        _LOGGER.info(f'Received response from {server_addr}: {old_id} - {method}')
+        _LOGGER.info(f'Received response from {server_addr}: {uid} - {method}')
         return data['result']
 
     @staticmethod
