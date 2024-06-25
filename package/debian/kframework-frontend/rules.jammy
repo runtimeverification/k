@@ -23,7 +23,7 @@ export PREFIX
 	dh $@ 
 
 override_dh_auto_build:
-	mvn --batch-mode package -DskipTests -Dllvm.backend.skip
+	mvn --batch-mode package -DskipTests -Dllvm.backend.skip -Dhaskell.backend.skip
 
 override_dh_auto_install:
 	package/package --frontend

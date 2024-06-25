@@ -5,9 +5,11 @@ FROM ubuntu:${BASE_DISTRO}
 ARG K_DEB_PATH
 ARG INSTALL_BACKEND_DEBS
 ARG LLVM_BACKEND_DEB_PATH
+ARG HASKELL_BACKEND_DEB_PATH
 
 COPY ${K_DEB_PATH} /kframework.deb
 COPY ${LLVM_BACKEND_DEB_PATH} /llvm-backend.deb
+COPY ${HASKELL_BACKEND_DEB_PATH} /haskell-backend.deb
 
 RUN    apt-get -y update    \
     && apt-get -y install   \
@@ -19,7 +21,7 @@ RUN    apt-get -y update    \
          /kframework.deb
 
 RUN if [ "${INSTALL_BACKEND_DEBS}" = "true" ]; then \
-      apt-get -y install /llvm-backend.deb; \
+      apt-get -y install /llvm-backend.deb /haskell-backend.deb; \
     fi
 
 RUN apt-get -y clean
