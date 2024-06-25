@@ -563,10 +563,6 @@ class Assoc(Pattern):
     def pattern(self) -> Pattern: ...
 
     @property
-    def sorts(self) -> tuple[()]:
-        return ()
-
-    @property
     def patterns(self) -> tuple[()]:
         return ()
 
@@ -581,7 +577,6 @@ class Assoc(Pattern):
     def write(self, output: IO[str]) -> None:
         output.write(self.symbol())
         output.write('{')
-        _write_sep_by_comma(self.sorts, output)
         output.write('}(')
         self.app.write(output)
         output.write(')')
