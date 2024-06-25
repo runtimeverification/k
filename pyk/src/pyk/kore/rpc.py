@@ -292,7 +292,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         # Generate unique ID regardless of different clients, repeated requests from the same client, etc.
-        uid = hash_str((method, params, id(self), self._req_id))
+        uid = hash_str((id(self), self._req_id))
         self._req_id += 1
 
         payload = {
