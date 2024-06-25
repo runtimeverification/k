@@ -36,8 +36,9 @@ from .kore.rpc import ExecuteResult, StopReason
 from .kore.syntax import Pattern, kore_term
 from .ktool.kompile import Kompile, KompileBackend
 from .ktool.kprint import KPrint
-from .ktool.kprove import KProve, ProveRpc
+from .ktool.kprove import KProve
 from .ktool.krun import KRun
+from .ktool.prove_rpc import ProveRpc
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 from .proof.reachability import APRFailureInfo, APRProof
