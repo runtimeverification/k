@@ -112,7 +112,7 @@ def pattern_to_llvm(pattern: Pattern) -> kllvm.Pattern:
         case App(symbol, sorts, args):
             return _composite_pattern(symbol, sorts, args)
         case Assoc():
-            return _composite_pattern(pattern.symbol(), pattern.sorts, pattern.ctor_patterns)
+            return _composite_pattern(pattern.symbol(), pattern.sorts, [pattern.app])
         case MLPattern():
             return _composite_pattern(pattern.symbol(), pattern.sorts, pattern.ctor_patterns)
         case _:

@@ -570,10 +570,6 @@ class Assoc(Pattern):
     def patterns(self) -> tuple[()]:
         return ()
 
-    @property
-    def ctor_patterns(self) -> tuple[App]:
-        return (self.app,)
-
     def _dict(self, dicts: list) -> dict[str, Any]:
         return {
             'tag': self._tag(),
@@ -587,7 +583,7 @@ class Assoc(Pattern):
         output.write('{')
         _write_sep_by_comma(self.sorts, output)
         output.write('}(')
-        _write_sep_by_comma(self.ctor_patterns, output)
+        self.app.write(output)
         output.write(')')
 
 
