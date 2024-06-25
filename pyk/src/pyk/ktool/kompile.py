@@ -58,6 +58,7 @@ def kompile(
     type_inference_mode: str | TypeInferenceMode | None = None,
     warnings: str | Warnings | None = None,
     warnings_to_errors: bool = False,
+    ignore_warnings: Iterable[str] = (),
     no_exc_wrap: bool = False,
     # ---
     debug: bool = False,
@@ -78,6 +79,7 @@ def kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -96,6 +98,7 @@ def kompile(
         type_inference_mode=type_inference_mode,
         warnings=warnings,
         warnings_to_errors=warnings_to_errors,
+        ignore_warnings=ignore_warnings,
         no_exc_wrap=no_exc_wrap,
         debug=debug,
         verbose=verbose,
@@ -111,6 +114,7 @@ def _booster_kompile(
     type_inference_mode: str | TypeInferenceMode | None,
     warnings: str | Warnings | None,
     warnings_to_errors: bool,
+    ignore_warnings: Iterable[str],
     no_exc_wrap: bool,
     # ---
     debug: bool,
@@ -146,6 +150,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -161,6 +166,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -273,6 +279,7 @@ class Kompile(ABC):
         type_inference_mode: str | TypeInferenceMode | None = None,
         warnings: str | Warnings | None = None,
         warnings_to_errors: bool = False,
+        ignore_warnings: Iterable[str] = (),
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
@@ -320,6 +327,9 @@ class Kompile(ABC):
 
         if outer_parsed_json:
             args += ['--outer-parsed-json']
+
+        if ignore_warnings:
+            args += ['-Wno', ','.join(ignore_warnings)]
 
         try:
             proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
