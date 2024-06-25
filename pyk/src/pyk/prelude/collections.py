@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 SET: Final = KSort('Set')
 LIST: Final = KSort('List')
 MAP: Final = KSort('Map')
+RANGEMAP: Final = KSort('RangeMap')
 BAG: Final = KSort('Bag')
 
 
@@ -51,3 +52,16 @@ def map_item(k: KInner, v: KInner) -> KInner:
 def map_of(ks: dict[KInner, KInner] | Iterable[tuple[KInner, KInner]]) -> KInner:
     ks = dict(ks)
     return build_assoc(map_empty(), KLabel('_Map_'), (map_item(k, v) for k, v in ks.items()))
+
+
+def rangemap_empty() -> KInner:
+    return KApply('.RangeMap')
+
+
+def rangemap_item(k: tuple[KInner, KInner], v: KInner) -> KInner:
+    return KApply('_r|->_', [KApply('RangeMap:Range', k), v])
+
+
+def rangemap_of(ks: dict[tuple[KInner, KInner], KInner] | Iterable[tuple[tuple[KInner, KInner], KInner]]) -> KInner:
+    ks_dict: dict[tuple[KInner, KInner], KInner] = dict(ks)
+    return build_assoc(rangemap_empty(), KLabel('_RangeMap_'), (rangemap_item(k, v) for k, v in ks_dict.items()))
