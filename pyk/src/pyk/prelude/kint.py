@@ -171,8 +171,8 @@ def modInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
     r"""Instantiate the KAST term ```_%Int_`(i1, i2)``.
 
     Args:
-        i1: The dividend operand.
-        i2: The divisor operand.
+        i1: The dividend.
+        i2: The divisor.
 
     Returns:
         The KAST term ```_%Int_`(i1, i2)``.
@@ -184,8 +184,8 @@ def euclidDivInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
     r"""Instantiate the KAST term ```_divInt_`(i1, i2)``.
 
     Args:
-        i1: The dividend operand.
-        i2: The divisor operand.
+        i1: The dividend.
+        i2: The divisor.
 
     Returns:
         The KAST term ```_divInt_`(i1, i2)``.
@@ -197,8 +197,8 @@ def euclidModInt(i1: KInner, i2: KInner) -> KApply:  # noqa: N802
     r"""Instantiate the KAST term ```_modInt_`(i1, i2)``.
 
     Args:
-        i1: The dividend operand.
-        i2: The divisor operand.
+        i1: The dividend.
+        i2: The divisor.
 
     Returns:
         The KAST term ```_modInt_`(i1, i2)``.
