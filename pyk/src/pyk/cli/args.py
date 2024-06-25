@@ -206,6 +206,7 @@ class KompileOptions(Options):
     bison_lists: bool
     no_exc_wrap: bool
     outer_parsed_json: bool
+    ignore_warnings: list[str]
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -230,6 +231,7 @@ class KompileOptions(Options):
             'bison_lists': False,
             'no_exc_wrap': False,
             'outer_parsed_json': False,
+            'ignore_warnings': [],
         }
 
     @staticmethod
@@ -474,6 +476,9 @@ class KCLIArgs:
             default=None,
             action='store_true',
             help='Do not wrap the output on the CLI.',
+        )
+        args.add_argument(
+            '--ignore-warnings', '-Wno', dest='ignore_warnings', action='append', help='Ignore provided warnings'
         )
         return args
 
