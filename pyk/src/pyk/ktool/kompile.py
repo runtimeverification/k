@@ -20,6 +20,7 @@ from . import TypeInferenceMode
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
+    from fractions import Fraction
     from typing import Any, Final, Literal
 
     from ..utils import BugReport
@@ -57,6 +58,7 @@ def kompile(
     type_inference_mode: str | TypeInferenceMode | None = None,
     warnings: str | Warnings | None = None,
     warnings_to_errors: bool = False,
+    ignore_warnings: Iterable[str] = (),
     no_exc_wrap: bool = False,
     # ---
     debug: bool = False,
@@ -77,6 +79,7 @@ def kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -95,6 +98,7 @@ def kompile(
         type_inference_mode=type_inference_mode,
         warnings=warnings,
         warnings_to_errors=warnings_to_errors,
+        ignore_warnings=ignore_warnings,
         no_exc_wrap=no_exc_wrap,
         debug=debug,
         verbose=verbose,
@@ -110,6 +114,7 @@ def _booster_kompile(
     type_inference_mode: str | TypeInferenceMode | None,
     warnings: str | Warnings | None,
     warnings_to_errors: bool,
+    ignore_warnings: Iterable[str],
     no_exc_wrap: bool,
     # ---
     debug: bool,
@@ -145,6 +150,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -160,6 +166,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -272,6 +279,7 @@ class Kompile(ABC):
         type_inference_mode: str | TypeInferenceMode | None = None,
         warnings: str | Warnings | None = None,
         warnings_to_errors: bool = False,
+        ignore_warnings: Iterable[str] = (),
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
@@ -319,6 +327,9 @@ class Kompile(ABC):
 
         if outer_parsed_json:
             args += ['--outer-parsed-json']
+
+        if ignore_warnings:
+            args += ['-Wno', ','.join(ignore_warnings)]
 
         try:
             proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
@@ -421,6 +432,8 @@ class LLVMKompile(Kompile):
     enable_llvm_debug: bool
     llvm_proof_hint_instrumentation: bool
     llvm_mutable_bytes: bool
+    iterated_threshold: Fraction | None
+    heuristic: str | None
 
     def __init__(
         self,
@@ -435,6 +448,8 @@ class LLVMKompile(Kompile):
         enable_llvm_debug: bool = False,
         llvm_proof_hint_instrumentation: bool = False,
         llvm_mutable_bytes: bool = False,
+        iterated_threshold: Fraction | None = None,
+        heuristic: str | None = None,
     ):
         llvm_kompile_type = LLVMKompileType(llvm_kompile_type) if llvm_kompile_type is not None else None
         llvm_kompile_output = Path(llvm_kompile_output) if llvm_kompile_output is not None else None
@@ -455,6 +470,8 @@ class LLVMKompile(Kompile):
         object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
         object.__setattr__(self, 'llvm_proof_hint_instrumentation', llvm_proof_hint_instrumentation)
         object.__setattr__(self, 'llvm_mutable_bytes', llvm_mutable_bytes)
+        object.__setattr__(self, 'iterated_threshold', iterated_threshold)
+        object.__setattr__(self, 'heuristic', heuristic)
 
     @property
     def backend(self) -> Literal[KompileBackend.LLVM]:
@@ -490,6 +507,12 @@ class LLVMKompile(Kompile):
 
         if self.llvm_mutable_bytes:
             args += ['--llvm-mutable-bytes']
+
+        if self.iterated_threshold:
+            args += ['--iterated-threshold', str(self.iterated_threshold)]
+
+        if self.heuristic:
+            args += ['--heuristic', self.heuristic]
 
         return args
 

@@ -48,16 +48,16 @@ jobs:
 
           hs_backend_version=$(cat deps/haskell-backend_release)
           cd haskell-backend/src/main/native/haskell-backend
-          git checkout ${hs_backend_version}
+          git checkout "${hs_backend_version}"
           cd -
-          sed -i 's!    haskell-backend.url = "github:runtimeverification/haskell-backend/.*";!    haskell-backend.url = "github:runtimeverification/haskell-backend/'${hs_backend_version}'";!' flake.nix
+          sed -i 's!    haskell-backend.url = "github:runtimeverification/haskell-backend/.*";!    haskell-backend.url = "github:runtimeverification/haskell-backend/'"${hs_backend_version}"'";!' flake.nix
           if git add flake.nix haskell-backend/src/main/native/haskell-backend && git commit -m "flake.nix, haskell-backend/src/main/native/haskell-backend: update to version ${hs_backend_version}"; then
             changed=true
           fi
 
           llvm_backend_version="v$(cat deps/llvm-backend_release)"
           cd llvm-backend/src/main/native/llvm-backend
-          git checkout ${llvm_backend_version}
+          git checkout "${llvm_backend_version}"
           cd -
           sed -i 's!      url = "github:runtimeverification/llvm-backend/.*";!      url = "github:runtimeverification/llvm-backend/'"${llvm_backend_version}"'";!' flake.nix
           if git add flake.nix llvm-backend/src/main/native/llvm-backend && git commit -m "flake.nix, llvm-backend/src/main/native/llvm-backend: update to version ${llvm_backend_version}"; then
