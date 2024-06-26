@@ -431,6 +431,7 @@ class LLVMKompile(Kompile):
     enable_search: bool
     enable_llvm_debug: bool
     llvm_proof_hint_instrumentation: bool
+    llvm_proof_hint_debugging: bool
     llvm_mutable_bytes: bool
     iterated_threshold: Fraction | None
     heuristic: str | None
@@ -447,6 +448,7 @@ class LLVMKompile(Kompile):
         enable_search: bool = False,
         enable_llvm_debug: bool = False,
         llvm_proof_hint_instrumentation: bool = False,
+        llvm_proof_hint_debugging: bool = False,
         llvm_mutable_bytes: bool = False,
         iterated_threshold: Fraction | None = None,
         heuristic: str | None = None,
@@ -469,6 +471,7 @@ class LLVMKompile(Kompile):
         object.__setattr__(self, 'enable_search', enable_search)
         object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
         object.__setattr__(self, 'llvm_proof_hint_instrumentation', llvm_proof_hint_instrumentation)
+        object.__setattr__(self, 'llvm_proof_hint_debugging', llvm_proof_hint_debugging)
         object.__setattr__(self, 'llvm_mutable_bytes', llvm_mutable_bytes)
         object.__setattr__(self, 'iterated_threshold', iterated_threshold)
         object.__setattr__(self, 'heuristic', heuristic)
@@ -504,6 +507,9 @@ class LLVMKompile(Kompile):
 
         if self.llvm_proof_hint_instrumentation:
             args += ['--llvm-proof-hint-instrumentation']
+
+        if self.llvm_proof_hint_debugging:
+            args += ['--llvm-proof-hint-debugging']
 
         if self.llvm_mutable_bytes:
             args += ['--llvm-mutable-bytes']
