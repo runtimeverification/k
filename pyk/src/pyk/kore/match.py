@@ -86,12 +86,6 @@ def match_map(pattern: Pattern, *, cell: str | None = None) -> tuple[tuple[Patte
     return tuple(entries)
 
 
-def _match_range(pattern: Pattern) -> tuple[Pattern, Pattern]:
-    range_symbol = "LblRangeMap'Coln'Range"
-    range = match_app(pattern, range_symbol)
-    return (range.args[0], range.args[1])
-
-
 def match_rangemap(pattern: Pattern) -> tuple[tuple[tuple[Pattern, Pattern], Pattern], ...]:
     stop_symbol = "Lbl'Stop'RangeMap"
     cons_symbol = "Lbl'Unds'RangeMap'Unds'"
@@ -106,6 +100,12 @@ def match_rangemap(pattern: Pattern) -> tuple[tuple[tuple[Pattern, Pattern], Pat
     items = (match_app(arg, item_symbol) for arg in cons.args)
     entries = ((_match_range(item.args[0]), item.args[1]) for item in items)
     return tuple(entries)
+
+
+def _match_range(pattern: Pattern) -> tuple[Pattern, Pattern]:
+    range_symbol = "LblRangeMap'Coln'Range"
+    range = match_app(pattern, range_symbol)
+    return (range.args[0], range.args[1])
 
 
 def kore_bool(pattern: Pattern) -> bool:
