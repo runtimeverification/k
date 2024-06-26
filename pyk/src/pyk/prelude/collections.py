@@ -59,7 +59,7 @@ def rangemap_empty() -> KInner:
 
 
 def rangemap_item(k: tuple[KInner, KInner], v: KInner) -> KInner:
-    return KApply('_r|->_', [KApply('RangeMap:Range', k), v])
+    return KApply('_r|->_', (KApply('RangeMap:Range', k), v))
 
 
 def rangemap_of(ks: dict[tuple[KInner, KInner], KInner] | Iterable[tuple[tuple[KInner, KInner], KInner]]) -> KInner:
