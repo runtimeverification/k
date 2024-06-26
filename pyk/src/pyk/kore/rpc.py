@@ -280,10 +280,6 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._req_id = 1
         self._bug_report = bug_report
         self._bug_report_id = bug_report_id
-        from traceback import format_stack
-
-        print(self.client_id)
-        print('\n'.join(format_stack()))
 
     @property
     def client_id(self) -> str:
