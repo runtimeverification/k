@@ -131,8 +131,12 @@ public class LLVMBackend extends KoreBackend {
       args.add(files.resolveKompiled("dt").getCanonicalPath());
       args.add(type);
 
-      if (options.enableProofHints) {
-        args.add("--proof-hint-instrumentation");
+      if (options.enableProofHints || options.enableProofHintDebugging) {
+        if (options.enableProofHintDebugging) {
+          args.add("--proof-hint-instrumentation-slow");
+        } else {
+          args.add("--proof-hint-instrumentation");
+        }
       }
 
       if (options.llvmMutableBytes) {

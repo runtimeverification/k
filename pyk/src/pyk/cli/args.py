@@ -193,6 +193,7 @@ class KompileOptions(Options):
     llvm_kompile_type: LLVMKompileType | None
     llvm_kompile_output: Path | None
     llvm_proof_hint_instrumentation: bool
+    llvm_proof_hint_debugging: bool
     read_only: bool
     o0: bool
     o1: bool
@@ -218,6 +219,7 @@ class KompileOptions(Options):
             'llvm_kompile_type': None,
             'llvm_kompile_output': None,
             'llvm_proof_hint_instrumentation': False,
+            'llvm_proof_hint_debugging': False,
             'read_only': False,
             'o0': False,
             'o1': False,
@@ -470,6 +472,14 @@ class KCLIArgs:
             action='store_true',
             help='Enable proof hint generation in LLVM backend kompilation.',
         )
+        args.add_argument(
+            '--llvm-proof-hint-debugging',
+            dest='llvm_proof_hint_debugging',
+            default=None,
+            action='store_true',
+            help='Enable additional proof hint debugging information in LLVM backend kompilation.',
+        )
+
         args.add_argument(
             '--no-exc-wrap',
             dest='no_exc_wrap',
