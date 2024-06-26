@@ -346,6 +346,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             type_inference_mode=options.type_inference_mode,
             warnings=options.warnings,
             warnings_to_errors=options.warnings_to_errors,
+            ignore_warnings=options.ignore_warnings,
             no_exc_wrap=options.no_exc_wrap,
         )
     except RuntimeError as err:
