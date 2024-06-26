@@ -1,17 +1,22 @@
+"""
+Status: [create(), merge_paths(), get_or_create_node] In Progress
+        [match()] may have some bugs for `N->T|split` pattern.
+"""
+
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 from typing import final
 
 from .kcfg import KCFG, NodeIdLike
-from ..cterm import CTerm, CSubst
+from ..cterm import CTerm
 from ..utils import single
 
 
 @final
 @dataclass(frozen=True)
-class Pats:
+class Pat:
     """
     The matching patterns for the KCFG, starting from a node N.
 
@@ -62,11 +67,13 @@ class KCFGRewriter:
     """The nodes of the matched KCFG."""
     _edges: dict[str, tuple[KCFG.Successor, ...]]
     """The edges of the matched KCFG."""
+    _node_id: int
 
     def __init__(self, kcfg: KCFG):
         self.kcfg = kcfg
         self._nodes = {}
         self._edges = {}
+        self._node_id = kcfg._node_id
 
     def commit(
             self,
@@ -120,7 +127,7 @@ class KCFGRewriter:
         if not patterns:
             return self._get_matched()
         # parse the patterns
-        patterns = [Pats(p) for p in patterns]
+        patterns = [Pat(p) for p in patterns]
         # match the patterns
         loop_count = -1
         # the worst case is that only one pattern is matched in each loop
@@ -194,10 +201,7 @@ class KCFGRewriter:
                 matched.add_successor(edge)
         return matched
 
-    def create(
-            self,
-            rewrite_patterns: tuple[str, ...],
-    ) -> KCFG:
+    def create(self, rewrite_patterns: tuple[str, ...],) -> KCFG:
         """
         Create a new KCFG by rewriting the matched subgraph.
 
@@ -207,16 +211,18 @@ class KCFGRewriter:
         # initialization
         nodes: dict[str, tuple[KCFG.Node, ...]] = {}
         edges: dict[str, tuple[KCFG.Successor, ...]] = {}
-        patterns = [Pats(p) for p in rewrite_patterns]
+        patterns = tuple(Pat(p) for p in rewrite_patterns)
         for pattern in patterns:
             # todo: we just support patterns that we need for minimization. We should support more patterns if needed.
+            source = self.get_or_create_node(pattern.source, patterns)
             source = self._nodes.get(pattern.source)
             target = self._nodes.get(pattern.target)
             if not source or not target:
                 raise NotImplementedError(f"Pattern {pattern} is not supported.")
-            match pattern.edge_type:
+            match pattern.edge_type:  # todo: transfer it into a function, like `create_edge` or `create_successor`
                 case 'edge':
                     if pattern.is_multi_source and pattern.is_multi_target:
+
                         raise NotImplementedError(f"Pattern {pattern} is not supported.")
                     elif not pattern.is_multi_source and not pattern.is_multi_target:
                         assert len(source) == 1 and len(target) == 1, \
@@ -264,6 +270,65 @@ class KCFGRewriter:
                 case _:
                     continue
         return depth, tuple(rules)
+
+    def get_or_create_node(
+            self,
+            node_name: str,
+            rewrite_patterns: tuple[Pat, ...]
+    ) -> tuple[KCFG.Node, ...]:
+        """
+        Get a node from self._nodes, or create a new node if it does not exist.
+
+        Input: The node pattern name.
+        Output: The node.
+        """
+        def _create_node(content: CTerm) -> KCFG.Node:
+            self._node_id += 1
+            new_node = KCFG.Node(self._node_id, content)
+            return new_node
+
+        node = self._nodes.get(node_name)
+        if not node:
+            if node_name.endswith('*'):  # node_name = S*
+                s_name = node_name[:-2]
+                s = single(self._nodes.get(s_name))
+                assert s, f"Node {s_name} should exist."
+                # is below necessary?
+                assert Pat(f"{s_name}->{node_name}|split") in rewrite_patterns, \
+                    f"Pattern {s_name}->{node_name}|split should exist in rewrite patterns."
+                # discover the constraints of the new node
+                # Now, discover the constraints via 'S*->T*|edge' in rewrite pattern; and 'N->T*|split' in match pattern
+                # todo: add more discovery methods when needed
+                pattern = single(p for p in rewrite_patterns if p.source == node_name)
+                assert pattern.target.endswith('*') and pattern.edge_type == 'edge', \
+                    f"Pattern {pattern} is not supported for discovering constraints for {node}"
+                # endswith '->T*|split' in match pattern
+                match_edge = single(self._edges.get(e_id)
+                                    for e_id in self._edges.keys() if e_id.endswith(f"->{pattern.target}|split"))
+                assert len(match_edge) == 1, f"Match edge for {pattern} should be unique."
+                match_edge = match_edge[0]
+                assert isinstance(match_edge, KCFG.Split), f"Match edge for {pattern} should be Split."
+                t_i, t_substs = list(match_edge.splits.keys()), list(match_edge.splits.values())
+                # Ensure split can be lifted soundly (i.e., that it does not introduce fresh variables)
+                assert (
+                        len(match_edge.source_vars.difference(s.free_vars)) == 0
+                        and len(match_edge.target_vars.difference(match_edge.source_vars)) == 0
+                )
+                # Create CTerms corresponding to the new targets of the split
+                new_cterms = [
+                    CTerm(s.cterm.config, s.cterm.constraints + csubst.constraints) for csubst in
+                    t_substs
+                ]
+                node = tuple(_create_node(cterm) for cterm in new_cterms)
+            else:
+                s_name = node_name + '*'
+                s = self._nodes.get(s_name)
+                assert s, f"Node {s_name} should exist."
+                # is below necessary?
+                assert Pat(f"{node_name}->{s_name}|split") in rewrite_patterns, \
+                    f"Pattern {node_name}->{s_name}|split should exist in rewrite patterns."
+                raise NotImplementedError("Not implemented yet.")  # todo: when implementing MergeSplitNodes
+        return tuple(node)
 
     # todo: move it to kcfg.py, maybe as a argument of remove_node
     def remove_node_safe(self, node_id: int) -> bool:

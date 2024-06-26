@@ -1,3 +1,7 @@
+"""
+Status: [LiftEdgeSplit, LiftSplitSplit, MergeSplitNodes] In Progress
+"""
+
 from .rewriter import KCFGRewriter, KCFGRewritePattern, NodeIdLike, KCFGRewriteWalker
 from .kcfg import KCFG
 
@@ -36,16 +40,16 @@ class LiftEdgeEdge(KCFGRewritePattern):
         return rewriter.commit(node, match_pattern, rewrite_pattern)
 
 
-class LiftSplitSplit(KCFGRewritePattern):
+class LiftEdgeSplit(KCFGRewritePattern):
     def match_and_rewrite(self, node: NodeIdLike, rewriter: KCFGRewriter) -> bool:
-        match_pattern = ('S->N|split', 'N->T*|split',)
+        match_pattern = ('S->N|edge', 'N->T*|split',)
         rewrite_pattern = ('S->S*|split', 'S*->T*|edge',)
         return rewriter.commit(node, match_pattern, rewrite_pattern)
 
 
-class LiftEdgeSplit(KCFGRewritePattern):
+class LiftSplitSplit(KCFGRewritePattern):
     def match_and_rewrite(self, node: NodeIdLike, rewriter: KCFGRewriter) -> bool:
-        match_pattern = ('S->N|edge', 'N->T*|split',)
+        match_pattern = ('S->N|split', 'N->T*|split',)
         rewrite_pattern = ('S->S*|split', 'S*->T*|edge',)
         return rewriter.commit(node, match_pattern, rewrite_pattern)
 
