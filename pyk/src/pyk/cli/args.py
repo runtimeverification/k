@@ -193,6 +193,7 @@ class KompileOptions(Options):
     llvm_kompile_type: LLVMKompileType | None
     llvm_kompile_output: Path | None
     llvm_proof_hint_instrumentation: bool
+    llvm_proof_hint_debugging: bool
     read_only: bool
     o0: bool
     o1: bool
@@ -206,6 +207,7 @@ class KompileOptions(Options):
     bison_lists: bool
     no_exc_wrap: bool
     outer_parsed_json: bool
+    ignore_warnings: list[str]
 
     @staticmethod
     def default() -> dict[str, Any]:
@@ -217,6 +219,7 @@ class KompileOptions(Options):
             'llvm_kompile_type': None,
             'llvm_kompile_output': None,
             'llvm_proof_hint_instrumentation': False,
+            'llvm_proof_hint_debugging': False,
             'read_only': False,
             'o0': False,
             'o1': False,
@@ -230,6 +233,7 @@ class KompileOptions(Options):
             'bison_lists': False,
             'no_exc_wrap': False,
             'outer_parsed_json': False,
+            'ignore_warnings': [],
         }
 
     @staticmethod
@@ -469,11 +473,22 @@ class KCLIArgs:
             help='Enable proof hint generation in LLVM backend kompilation.',
         )
         args.add_argument(
+            '--llvm-proof-hint-debugging',
+            dest='llvm_proof_hint_debugging',
+            default=None,
+            action='store_true',
+            help='Enable additional proof hint debugging information in LLVM backend kompilation.',
+        )
+
+        args.add_argument(
             '--no-exc-wrap',
             dest='no_exc_wrap',
             default=None,
             action='store_true',
             help='Do not wrap the output on the CLI.',
+        )
+        args.add_argument(
+            '--ignore-warnings', '-Wno', dest='ignore_warnings', action='append', help='Ignore provided warnings'
         )
         return args
 

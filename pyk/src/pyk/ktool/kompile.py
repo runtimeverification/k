@@ -58,6 +58,7 @@ def kompile(
     type_inference_mode: str | TypeInferenceMode | None = None,
     warnings: str | Warnings | None = None,
     warnings_to_errors: bool = False,
+    ignore_warnings: Iterable[str] = (),
     no_exc_wrap: bool = False,
     # ---
     debug: bool = False,
@@ -78,6 +79,7 @@ def kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -96,6 +98,7 @@ def kompile(
         type_inference_mode=type_inference_mode,
         warnings=warnings,
         warnings_to_errors=warnings_to_errors,
+        ignore_warnings=ignore_warnings,
         no_exc_wrap=no_exc_wrap,
         debug=debug,
         verbose=verbose,
@@ -111,6 +114,7 @@ def _booster_kompile(
     type_inference_mode: str | TypeInferenceMode | None,
     warnings: str | Warnings | None,
     warnings_to_errors: bool,
+    ignore_warnings: Iterable[str],
     no_exc_wrap: bool,
     # ---
     debug: bool,
@@ -146,6 +150,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -161,6 +166,7 @@ def _booster_kompile(
             type_inference_mode=type_inference_mode,
             warnings=warnings,
             warnings_to_errors=warnings_to_errors,
+            ignore_warnings=ignore_warnings,
             no_exc_wrap=no_exc_wrap,
             debug=debug,
             verbose=verbose,
@@ -273,6 +279,7 @@ class Kompile(ABC):
         type_inference_mode: str | TypeInferenceMode | None = None,
         warnings: str | Warnings | None = None,
         warnings_to_errors: bool = False,
+        ignore_warnings: Iterable[str] = (),
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
@@ -320,6 +327,9 @@ class Kompile(ABC):
 
         if outer_parsed_json:
             args += ['--outer-parsed-json']
+
+        if ignore_warnings:
+            args += ['-Wno', ','.join(ignore_warnings)]
 
         try:
             proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
@@ -421,6 +431,7 @@ class LLVMKompile(Kompile):
     enable_search: bool
     enable_llvm_debug: bool
     llvm_proof_hint_instrumentation: bool
+    llvm_proof_hint_debugging: bool
     llvm_mutable_bytes: bool
     iterated_threshold: Fraction | None
     heuristic: str | None
@@ -437,6 +448,7 @@ class LLVMKompile(Kompile):
         enable_search: bool = False,
         enable_llvm_debug: bool = False,
         llvm_proof_hint_instrumentation: bool = False,
+        llvm_proof_hint_debugging: bool = False,
         llvm_mutable_bytes: bool = False,
         iterated_threshold: Fraction | None = None,
         heuristic: str | None = None,
@@ -459,6 +471,7 @@ class LLVMKompile(Kompile):
         object.__setattr__(self, 'enable_search', enable_search)
         object.__setattr__(self, 'enable_llvm_debug', enable_llvm_debug)
         object.__setattr__(self, 'llvm_proof_hint_instrumentation', llvm_proof_hint_instrumentation)
+        object.__setattr__(self, 'llvm_proof_hint_debugging', llvm_proof_hint_debugging)
         object.__setattr__(self, 'llvm_mutable_bytes', llvm_mutable_bytes)
         object.__setattr__(self, 'iterated_threshold', iterated_threshold)
         object.__setattr__(self, 'heuristic', heuristic)
@@ -494,6 +507,9 @@ class LLVMKompile(Kompile):
 
         if self.llvm_proof_hint_instrumentation:
             args += ['--llvm-proof-hint-instrumentation']
+
+        if self.llvm_proof_hint_debugging:
+            args += ['--llvm-proof-hint-debugging']
 
         if self.llvm_mutable_bytes:
             args += ['--llvm-mutable-bytes']

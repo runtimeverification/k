@@ -323,6 +323,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         kompile_dict['llvm_kompile_type'] = options.llvm_kompile_type
         kompile_dict['llvm_kompile_output'] = options.llvm_kompile_output
         kompile_dict['llvm_proof_hint_instrumentation'] = options.llvm_proof_hint_instrumentation
+        kompile_dict['llvm_proof_hint_debugging'] = options.llvm_proof_hint_debugging
     elif len(options.ccopts) > 0:
         raise ValueError(f'Option `-ccopt` requires `--backend llvm`, not: --backend {options.backend.value}')
     elif options.enable_search:
@@ -339,6 +340,10 @@ def exec_kompile(options: KompileCommandOptions) -> None:
         raise ValueError(
             f'Option `--llvm-proof-hint-intrumentation` requires `--backend llvm`, not: --backend {options.backend.value}'
         )
+    elif options.llvm_proof_hint_debugging:
+        raise ValueError(
+            f'Option `--llvm-proof-hint-debugging` requires `--backend llvm`, not: --backend {options.backend.value}'
+        )
 
     try:
         Kompile.from_dict(kompile_dict)(
@@ -346,6 +351,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             type_inference_mode=options.type_inference_mode,
             warnings=options.warnings,
             warnings_to_errors=options.warnings_to_errors,
+            ignore_warnings=options.ignore_warnings,
             no_exc_wrap=options.no_exc_wrap,
         )
     except RuntimeError as err:
