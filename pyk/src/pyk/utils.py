@@ -484,7 +484,7 @@ def run_process_2(
 
     start_time = time.time()
 
-    res = subprocess_run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr, text=True)
+    res = subprocess_run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr)
 
     delta_time = time.time() - start_time
     logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
@@ -507,7 +507,7 @@ def subprocess_run(*popenargs, input=None, capture_output=False, check=False, **
         kwargs['stdout'] = PIPE
         kwargs['stderr'] = PIPE
 
-    with Popen(*popenargs, **kwargs) as process:
+    with Popen(*popenargs, text=True, **kwargs) as process:
         try:
             stdout, stderr = process.communicate(input)
         except BaseException:
