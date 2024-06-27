@@ -492,7 +492,7 @@ def run_process_2(
 
     start_time = time.time()
 
-    res = subprocess.run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr, text=True)
+    res = subprocess_run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr, text=True)
 
     delta_time = time.time() - start_time
     logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
