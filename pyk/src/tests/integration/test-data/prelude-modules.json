@@ -3463,7 +3463,7 @@
         "node": "KProduction",
         "klabel": {
           "node": "KLabel",
-          "name": "Rangemap:Range",
+          "name": "RangeMap:Range",
           "params": []
         },
         "productionItems": [
@@ -3502,7 +3502,7 @@
         "att": {
           "node": "KAtt",
           "att": {
-            "klabel": "Rangemap:Range",
+            "klabel": "RangeMap:Range",
             "symbol": "",
             "org.kframework.attributes.Location": [
               491,
