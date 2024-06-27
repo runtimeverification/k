@@ -56,6 +56,42 @@ class JsonRpcError(Exception):
 
 
 class Transport(ContextManager['Transport'], ABC):
+    _bug_report: BugReport | None
+    _bug_report_id: str | None
+
+    def __init__(self, bug_report_id: str | None = None, bug_report: BugReport | None = None) -> None:
+        self._bug_report_id = bug_report_id
+        self._bug_report = bug_report
+
+    def request_with_bug_report(self, req: str, request_id: int) -> str:
+        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
+        req_name = f'{base_name}/{self._client_id}/{request_id:03}'
+        if self._bug_report:
+            bug_report_request = f'{req_name}_request.json'
+            self._bug_report.add_file_contents(req, Path(bug_report_request))
+            self._bug_report.add_command(self.command(req_name, bug_report_request))
+
+        server_addr = self.description()
+        _LOGGER.debug(f'Sending request to {server_addr}: {req}')
+        resp = self.request(req)
+        if not resp:
+            raise RuntimeError('Empty response received')
+        _LOGGER.debug(f'Received response from {server_addr}: {resp}')
+
+        if self._bug_report:
+            bug_report_response = f'{req_name}_response.json'
+            self._bug_report.add_file_contents(resp, Path(bug_report_response))
+            self._bug_report.add_command(
+                [
+                    'diff',
+                    '-b',
+                    '-s',
+                    f'{req_name}_actual.json',
+                    f'{req_name}_response.json',
+                ]
+            )
+        return resp
+
     @abstractmethod
     def request(self, req: str) -> str: ...
 
@@ -74,6 +110,10 @@ class Transport(ContextManager['Transport'], ABC):
     @abstractmethod
     def description(self) -> str: ...
 
+    @property
+    def _client_id(self) -> str:
+        return str(id(self))
+
 
 class TransportType(Enum):
     SINGLE_SOCKET = auto()
@@ -87,7 +127,8 @@ class SingleSocketTransport(Transport):
     _sock: socket.socket
     _file: TextIO
 
-    def __init__(self, host: str, port: int, *, timeout: int | None = None):
+    def __init__(self, host: str, port: int, *, timeout: int | None = None, **kwargs: Any):
+        super().__init__(**kwargs)
         self._host = host
         self._port = port
         self._sock = self._create_connection(host, port, timeout)
@@ -146,7 +187,8 @@ class HttpTransport(Transport):
     _port: int
     _timeout: int | None
 
-    def __init__(self, host: str, port: int, *, timeout: int | None = None):
+    def __init__(self, host: str, port: int, *, timeout: int | None = None, **kwargs: Any):
+        super().__init__(**kwargs)
         self._host = host
         self._port = port
         self._timeout = timeout
@@ -258,8 +300,6 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     _transport: Transport
     _req_id: int
-    _bug_report: BugReport | None
-    _bug_report_id: str | None
 
     def __init__(
         self,
@@ -272,18 +312,16 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
         if transport is TransportType.SINGLE_SOCKET:
-            self._transport = SingleSocketTransport(host, port, timeout=timeout)
+            self._transport = SingleSocketTransport(
+                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+            )
         elif transport is TransportType.HTTP:
-            self._transport = HttpTransport(host, port, timeout=timeout)
+            self._transport = HttpTransport(
+                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+            )
         else:
             raise AssertionError()
         self._req_id = 1
-        self._bug_report = bug_report
-        self._bug_report_id = bug_report_id
-
-    @property
-    def client_id(self) -> str:
-        return str(id(self))
 
     def __enter__(self) -> JsonRpcClient:
         return self
@@ -308,31 +346,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         server_addr = self._transport.description()
         _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
-        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
-        req_name = f'{base_name}/{self.client_id}/{old_id:03}'
-        if self._bug_report:
-            bug_report_request = f'{req_name}_request.json'
-            self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._transport.command(req_name, bug_report_request))
-
-        _LOGGER.debug(f'Sending request to {server_addr}: {req}')
-        resp = self._transport.request(req)
-        if not resp:
-            raise RuntimeError('Empty response received')
-        _LOGGER.debug(f'Received response from {server_addr}: {resp}')
-
-        if self._bug_report:
-            bug_report_response = f'{req_name}_response.json'
-            self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_command(
-                [
-                    'diff',
-                    '-b',
-                    '-s',
-                    f'{req_name}_actual.json',
-                    f'{req_name}_response.json',
-                ]
-            )
+        resp = self._transport.request_with_bug_report(req, old_id)
 
         data = json.loads(resp)
         self._check(data)
