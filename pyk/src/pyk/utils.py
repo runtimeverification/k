@@ -46,7 +46,7 @@ ROOT: Final = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
 try:
-    import msvcrt
+    import msvcrt  # noqa: F401
 except ModuleNotFoundError:
     _mswindows = False
 else:
@@ -503,7 +503,7 @@ def run_process_2(
     return res
 
 
-def subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, check=False, **kwargs):
+def subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, check=False, **kwargs):  # type: ignore [no-untyped-def]
     if input is not None:
         if kwargs.get('stdin') is not None:
             raise ValueError('stdin and input arguments may not both be used.')
@@ -532,7 +532,7 @@ def subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, c
                 # far into the TimeoutExpired exception.
                 process.wait()
             raise
-        except:  # Including KeyboardInterrupt, communicate handled that.
+        except BaseException:  # Including KeyboardInterrupt, communicate handled that.
             process.kill()
             # We don't call process.wait() as .__exit__ does that for us.
             raise
