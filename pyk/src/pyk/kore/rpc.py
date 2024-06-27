@@ -63,7 +63,7 @@ class Transport(ContextManager['Transport'], ABC):
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
 
-    def request(self, req: str, request_id: int) -> str:
+    def request(self, req: str, request_id: int, method_name: str) -> str:
         base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
         req_name = f'{base_name}/{str(id(self))}/{request_id:03}'
         if self._bug_report:
@@ -71,9 +71,11 @@ class Transport(ContextManager['Transport'], ABC):
             self._bug_report.add_file_contents(req, Path(bug_report_request))
             self._bug_report.add_command(self._command(req_name, bug_report_request))
 
-        server_addr = self.description()
+        server_addr = self._description()
+        _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         resp = self._request(req)
+        _LOGGER.info(f'Received response from {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
@@ -96,6 +98,9 @@ class Transport(ContextManager['Transport'], ABC):
     @abstractmethod
     def _request(self, req: str) -> str: ...
 
+    @abstractmethod
+    def _description(self) -> str: ...
+
     def __enter__(self) -> Transport:
         return self
 
@@ -104,9 +109,6 @@ class Transport(ContextManager['Transport'], ABC):
 
     @abstractmethod
     def close(self) -> None: ...
-
-    @abstractmethod
-    def description(self) -> str: ...
 
 
 class TransportType(Enum):
@@ -167,11 +169,11 @@ class SingleSocketTransport(Transport):
 
     def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
-        server_addr = self.description()
+        server_addr = self._description()
         _LOGGER.debug(f'Waiting for response from {server_addr}...')
         return self._file.readline().rstrip()
 
-    def description(self) -> str:
+    def _description(self) -> str:
         return f'{self._host}:{self._port}'
 
 
@@ -207,14 +209,14 @@ class HttpTransport(Transport):
     def _request(self, req: str) -> str:
         connection = http.client.HTTPConnection(self._host, self._port, timeout=self._timeout)
         connection.request('POST', '/', body=req, headers={'Content-Type': 'application/json'})
-        server_addr = self.description()
+        server_addr = self._description()
         _LOGGER.debug(f'Waiting for response from {server_addr}...')
         response = connection.getresponse()
         if response.status != 200:
             raise JsonRpcError('Internal server error', -32603)
         return response.read().decode()
 
-    def description(self) -> str:
+    def _description(self) -> str:
         return f'{self._host}:{self._port}'
 
 
@@ -337,10 +339,8 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
             'params': params,
         }
 
-        server_addr = self._transport.description()
-        _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
-        resp = self._transport.request(req, old_id)
+        resp = self._transport.request(req, old_id, method)
         if not resp:
             raise RuntimeError('Empty response received')
 
@@ -348,7 +348,6 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._check(data)
         assert data['id'] == old_id
 
-        _LOGGER.info(f'Received response from {server_addr}: {old_id} - {method}')
         return data['result']
 
     @staticmethod
