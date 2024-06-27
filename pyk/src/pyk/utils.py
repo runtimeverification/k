@@ -13,7 +13,7 @@ from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, TimeoutExpired
+from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 
@@ -495,7 +495,7 @@ def run_process_2(
     return res
 
 
-def subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, check=False, **kwargs):  # type: ignore [no-untyped-def]
+def subprocess_run(*popenargs, input=None, capture_output=False, check=False, **kwargs):  # type: ignore [no-untyped-def]
     if input is not None:
         if kwargs.get('stdin') is not None:
             raise ValueError('stdin and input arguments may not both be used.')
@@ -509,11 +509,7 @@ def subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, c
 
     with Popen(*popenargs, **kwargs) as process:
         try:
-            stdout, stderr = process.communicate(input, timeout=timeout)
-        except TimeoutExpired:
-            process.kill()
-            process.wait()
-            raise
+            stdout, stderr = process.communicate(input)
         except BaseException:
             process.kill()
             raise
