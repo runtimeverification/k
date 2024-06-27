@@ -45,14 +45,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 ROOT: Final = Path(os.path.dirname(os.path.abspath(__file__)))
 
 
-try:
-    import msvcrt  # noqa: F401
-except ModuleNotFoundError:
-    _mswindows = False
-else:
-    _mswindows = True
-
-
 # Based on: https://stackoverflow.com/a/2704866
 # Perhaps one day: https://peps.python.org/pep-0603/
 class FrozenDict(Mapping[K, V]):
@@ -518,23 +510,12 @@ def subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, c
     with Popen(*popenargs, **kwargs) as process:
         try:
             stdout, stderr = process.communicate(input, timeout=timeout)
-        except TimeoutExpired as exc:
+        except TimeoutExpired:
             process.kill()
-            if _mswindows:
-                # Windows accumulates the output in a single blocking
-                # read() call run on child threads, with the timeout
-                # being done in a join() on those threads.  communicate()
-                # _after_ kill() is required to collect that and add it
-                # to the exception.
-                exc.stdout, exc.stderr = process.communicate()
-            else:
-                # POSIX _communicate already populated the output so
-                # far into the TimeoutExpired exception.
-                process.wait()
+            process.wait()
             raise
-        except BaseException:  # Including KeyboardInterrupt, communicate handled that.
+        except BaseException:
             process.kill()
-            # We don't call process.wait() as .__exit__ does that for us.
             raise
         retcode = process.poll()
         if check and retcode:
