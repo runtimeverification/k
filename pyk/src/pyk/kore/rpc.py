@@ -60,6 +60,8 @@ class Transport(ContextManager['Transport'], ABC):
     _bug_report_id: str | None
 
     def __init__(self, bug_report_id: str | None = None, bug_report: BugReport | None = None) -> None:
+        if (bug_report_id is None and bug_report is not None) or (bug_report_id is not None and bug_report is None):
+            raise ValueError('bug_report and bug_report_id must be passed together.')
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
 
@@ -123,8 +125,16 @@ class SingleSocketTransport(Transport):
     _sock: socket.socket
     _file: TextIO
 
-    def __init__(self, host: str, port: int, *, timeout: int | None = None, **kwargs: Any):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        *,
+        timeout: int | None = None,
+        bug_report_id: str | None = None,
+        bug_report: BugReport | None = None,
+    ):
+        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._sock = self._create_connection(host, port, timeout)
@@ -183,8 +193,16 @@ class HttpTransport(Transport):
     _port: int
     _timeout: int | None
 
-    def __init__(self, host: str, port: int, *, timeout: int | None = None, **kwargs: Any):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        *,
+        timeout: int | None = None,
+        bug_report_id: str | None = None,
+        bug_report: BugReport | None = None,
+    ):
+        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._timeout = timeout
