@@ -69,13 +69,11 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self.command(req_name, bug_report_request))
+            self._bug_report.add_command(self._command(req_name, bug_report_request))
 
         server_addr = self.description()
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         resp = self.request(req)
-        if not resp:
-            raise RuntimeError('Empty response received')
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
@@ -105,7 +103,7 @@ class Transport(ContextManager['Transport'], ABC):
     def close(self) -> None: ...
 
     @abstractmethod
-    def command(self, req_name: str, bug_report_request: str) -> list[str]: ...
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]: ...
 
     @abstractmethod
     def description(self) -> str: ...
@@ -158,7 +156,7 @@ class SingleSocketTransport(Transport):
         self._file.close()
         self._sock.close()
 
-    def command(self, req_name: str, bug_report_request: str) -> list[str]:
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
         return [
             'cat',
             bug_report_request,
@@ -196,7 +194,7 @@ class HttpTransport(Transport):
     def close(self) -> None:
         pass
 
-    def command(self, req_name: str, bug_report_request: str) -> list[str]:
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
         return [
             'curl',
             '-X',
@@ -347,6 +345,8 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
         resp = self._transport.request_with_bug_report(req, old_id)
+        if not resp:
+            raise RuntimeError('Empty response received')
 
         data = json.loads(resp)
         self._check(data)
