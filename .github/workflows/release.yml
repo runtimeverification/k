@@ -440,7 +440,16 @@ jobs:
           packages-dir: pyk/dist
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
-
+      - name: Wait for PyPi to publish Pyk
+        run: |
+          while true; do
+            VERSION=$(cat package/version)
+            if curl --fail --silent --location --head "https://pypi.org/project/kframework/$VERSION"; then
+              break
+            fi
+            sleep 10
+          done
+  
   notify-dependents:
     name: 'Notify Dependents'
     runs-on: ubuntu-latest
