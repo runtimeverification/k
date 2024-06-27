@@ -1,0 +1,25 @@
+<generatedTop>
+  <k>
+    <cell>
+      <num>
+        0
+      </num>
+      <data>
+        0
+      </data>
+    </cell> <cell>
+      <num>
+        1
+      </num>
+      <data>
+        1
+      </data>
+    </cell> ~> .K
+  </k>
+  <cells>
+    .CellCellMap
+  </cells>
+  <generatedCounter>
+    0
+  </generatedCounter>
+</generatedTop>
