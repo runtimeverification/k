@@ -19,7 +19,7 @@ from ..kast.manip import flatten_label
 from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
 from ..kore.rpc import KoreExecLogFormat
 from ..prelude.ml import is_top
-from ..utils import gen_file_timestamp, run_process
+from ..utils import gen_file_timestamp, run_process_2
 from . import TypeInferenceMode
 from .claim_index import ClaimIndex
 from .kprint import KPrint
@@ -98,7 +98,7 @@ def _kprove(
 
     try:
         run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
-        return run_process(run_args, logger=_LOGGER, env=env, check=check)
+        return run_process_2(run_args, logger=_LOGGER, env=env, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr, err

@@ -7,7 +7,7 @@ from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, final
 
 from ..cli.utils import check_dir_path, check_file_path
-from ..utils import run_process
+from ..utils import run_process_2
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -71,7 +71,7 @@ class KVersion:
 
 def k_version() -> KVersion:
     try:
-        proc_res = run_process(['kompile', '--version'], pipe_stderr=True)
+        proc_res = run_process_2(['kompile', '--version'], pipe_stderr=True)
     except FileNotFoundError as err:
         raise RuntimeError('K is not installed') from err
 

@@ -19,7 +19,7 @@ from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.parser import KoreParser
 from ..kore.syntax import App, SortApp
 from ..kore.tools import PrintOutput, kore_print
-from ..utils import run_process
+from ..utils import run_process_2
 from .kompile import DefinitionInfo
 
 if TYPE_CHECKING:
@@ -108,7 +108,7 @@ def _kast(
     )
 
     try:
-        return run_process(args, logger=_LOGGER, check=check)
+        return run_process_2(args, logger=_LOGGER, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kast exited with code {err.returncode} for: {file}', err.stdout, err.stderr

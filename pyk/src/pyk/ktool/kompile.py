@@ -15,7 +15,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, final
 
-from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process, single
+from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process_2, single
 from . import TypeInferenceMode
 
 if TYPE_CHECKING:
@@ -332,7 +332,7 @@ class Kompile(ABC):
             args += ['-Wno', ','.join(ignore_warnings)]
 
         try:
-            proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
+            proc_res = run_process_2(args, logger=_LOGGER, cwd=cwd, check=check)
         except CalledProcessError as err:
             raise RuntimeError(
                 f'Command kompile exited with code {err.returncode} for: {self.base_args.main_file}',

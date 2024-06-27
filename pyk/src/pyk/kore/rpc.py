@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
-from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process
+from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process_2
 from . import manip
 from .prelude import SORT_GENERATED_TOP_CELL
 from .syntax import And, Equals, EVar, kore_term
@@ -1281,7 +1281,7 @@ class KoreServer(ContextManager['KoreServer']):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         prog_name = self._command[0]
         bug_report.add_file(self._definition_file, Path('definition.kore'))
-        version_info = run_process((prog_name, '--version'), pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        version_info = run_process_2((prog_name, '--version'), pipe_stderr=True, logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(version_info, Path('server_version.txt'))
         server_instance = {
             'exe': prog_name,
@@ -1387,7 +1387,7 @@ class BoosterServer(KoreServer):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
         bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
-        llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        llvm_version = run_process_2('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
 
