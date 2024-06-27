@@ -63,9 +63,9 @@ class Transport(ContextManager['Transport'], ABC):
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
 
-    def request_with_bug_report(self, req: str, request_id: int) -> str:
+    def request(self, req: str, request_id: int) -> str:
         base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
-        req_name = f'{base_name}/{self._client_id}/{request_id:03}'
+        req_name = f'{base_name}/{str(id(self))}/{request_id:03}'
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
@@ -73,7 +73,7 @@ class Transport(ContextManager['Transport'], ABC):
 
         server_addr = self.description()
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
-        resp = self.request(req)
+        resp = self._request(req)
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
@@ -91,7 +91,10 @@ class Transport(ContextManager['Transport'], ABC):
         return resp
 
     @abstractmethod
-    def request(self, req: str) -> str: ...
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]: ...
+
+    @abstractmethod
+    def _request(self, req: str) -> str: ...
 
     def __enter__(self) -> Transport:
         return self
@@ -103,14 +106,7 @@ class Transport(ContextManager['Transport'], ABC):
     def close(self) -> None: ...
 
     @abstractmethod
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]: ...
-
-    @abstractmethod
     def description(self) -> str: ...
-
-    @property
-    def _client_id(self) -> str:
-        return str(id(self))
 
 
 class TransportType(Enum):
@@ -169,7 +165,7 @@ class SingleSocketTransport(Transport):
             f'{req_name}_actual.json',
         ]
 
-    def request(self, req: str) -> str:
+    def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
         server_addr = self.description()
         _LOGGER.debug(f'Waiting for response from {server_addr}...')
@@ -208,7 +204,7 @@ class HttpTransport(Transport):
             f'{req_name}_actual.json',
         ]
 
-    def request(self, req: str) -> str:
+    def _request(self, req: str) -> str:
         connection = http.client.HTTPConnection(self._host, self._port, timeout=self._timeout)
         connection.request('POST', '/', body=req, headers={'Content-Type': 'application/json'})
         server_addr = self.description()
@@ -344,7 +340,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         server_addr = self._transport.description()
         _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
-        resp = self._transport.request_with_bug_report(req, old_id)
+        resp = self._transport.request(req, old_id)
         if not resp:
             raise RuntimeError('Empty response received')
 

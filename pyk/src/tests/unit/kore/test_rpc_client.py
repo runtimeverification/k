@@ -25,7 +25,7 @@ class MockTransport:
         self.mock = mock
 
     def assume_response(self, response: str) -> None:
-        self.mock.request_with_bug_report.return_value = response
+        self.mock.request.return_value = response
 
 
 @pytest.fixture
