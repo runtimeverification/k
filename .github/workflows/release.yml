@@ -445,7 +445,7 @@ jobs:
         run: |
           while true; do
             VERSION=$(cat package/version)
-            if curl --fail --silent --location --head https://pypi.org/project/kframework/$VERSION; then
+            if curl --fail --silent --location --head "https://pypi.org/project/kframework/$VERSION"; then
               break
             fi
             sleep 10
