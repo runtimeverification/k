@@ -4,7 +4,7 @@ module RANGEMAP
   imports private LIST
   imports private SET
 
-  syntax Range ::= "[" KItem "," KItem ")"    [klabel(Rangemap:Range), symbol]
+  syntax Range ::= "[" KItem "," KItem ")"    [klabel(RangeMap:Range), symbol]
 
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
   syntax RangeMap ::= RangeMap RangeMap                        [left, function, hook(RANGEMAP.concat), klabel(_RangeMap_), symbol, assoc, comm, unit(.RangeMap), element(_r|->_), index(0), format(%1%n%2)]
@@ -133,7 +133,7 @@ LPAREN
 
 ATTR_CONTENT
 7,55
-Rangemap:Range
+RangeMap:Range
 
 RPAREN
 7,69
