@@ -456,9 +456,9 @@ def run_process(
 def run_process_2(
     args: str | Iterable[str],
     *,
+    pipe_stdout: bool,
     check: bool = True,
     input: str | None = None,
-    pipe_stdout: bool = True,
     pipe_stderr: bool = False,
     cwd: str | Path | None = None,
     env: Mapping[str, str] | None = None,

@@ -71,7 +71,7 @@ class KVersion:
 
 def k_version() -> KVersion:
     try:
-        proc_res = run_process_2(['kompile', '--version'], pipe_stderr=True)
+        proc_res = run_process_2(['kompile', '--version'], pipe_stdout=True, pipe_stderr=True)
     except FileNotFoundError as err:
         raise RuntimeError('K is not installed') from err
 

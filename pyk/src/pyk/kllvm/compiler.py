@@ -37,7 +37,7 @@ def compile_kllvm(target_dir: str | Path, *, verbose: bool = False) -> Path:
         args += ['--verbose']
 
     _LOGGER.info(f'Compiling pythonast extension: {module_file.name}')
-    run_process_2(args, logger=_LOGGER)
+    run_process_2(args, pipe_stdout=True, logger=_LOGGER)
 
     assert module_file.is_file()
     return module_file
@@ -87,7 +87,7 @@ def compile_runtime(
         args += ccopts
 
     _LOGGER.info(f'Compiling python extension: {module_file.name}')
-    run_process_2(args, logger=_LOGGER)
+    run_process_2(args, pipe_stdout=True, logger=_LOGGER)
 
     assert module_file.is_file()
     return module_file
@@ -123,7 +123,7 @@ def generate_hints(
 
     args = [str(interpreter), str(input_kore_file), '-1', str(hints_file), '--proof-output']
     _LOGGER.info(f'Generating hints: {hints_file.name}')
-    run_process_2(args, logger=_LOGGER)
+    run_process_2(args, pipe_stdout=True, logger=_LOGGER)
 
     assert hints_file.is_file()
 

@@ -108,7 +108,7 @@ def _kast(
     )
 
     try:
-        return run_process_2(args, logger=_LOGGER, check=check)
+        return run_process_2(args, pipe_stdout=True, logger=_LOGGER, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kast exited with code {err.returncode} for: {file}', err.stdout, err.stderr

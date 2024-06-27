@@ -98,7 +98,7 @@ def _kprove(
 
     try:
         run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
-        return run_process_2(run_args, logger=_LOGGER, env=env, check=check)
+        return run_process_2(run_args, pipe_stdout=True, logger=_LOGGER, env=env, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr, err
