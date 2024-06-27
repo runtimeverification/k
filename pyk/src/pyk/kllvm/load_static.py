@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 def get_kllvm() -> Path:
     args = ['llvm-kompile', '--bindings-path']
-    proc = run_process_2(args, pipe_stdout=True)
+    proc = run_process_2(args, pipe_stdout=True, pipe_stderr=False)
     bindings_dir = Path(proc.stdout.rstrip()).resolve()
     kllvm_dir = bindings_dir / 'kllvm'
     return kllvm_dir
