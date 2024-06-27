@@ -19,4 +19,7 @@
   <cells>
     .CellCellMap
   </cells>
+  <generatedCounter>
+    0
+  </generatedCounter>
 </generatedTop>
