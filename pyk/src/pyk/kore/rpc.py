@@ -65,7 +65,7 @@ class Transport(ContextManager['Transport'], ABC):
 
     def request(self, req: str, request_id: int, method_name: str) -> str:
         base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
-        req_name = f'{base_name}/{str(id(self))}/{request_id:03}'
+        req_name = f'{base_name}/{id(self)}/{request_id:03}'
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
