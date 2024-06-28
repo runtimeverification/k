@@ -99,8 +99,7 @@ def _fuzz(
 
     def test(subst_case: Mapping[EVar, Pattern]) -> None:
         def sub(p: Pattern) -> Pattern:
-            if p in subst_case:
-                assert isinstance(p, EVar)
+            if isinstance(p, EVar) and p in subst_case:
                 return subst_case[p]
             elif isinstance(p, Assoc):
                 symbol = p.symbol()
