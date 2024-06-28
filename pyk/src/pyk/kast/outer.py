@@ -859,7 +859,16 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
     def _is_function(prod: KProduction) -> bool:
         def is_not_actually_function(label: str) -> bool:
             is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
-            is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
+            is_builtin_data_constructor = label in {
+                '_Set_',
+                '_List_',
+                '_Map_',
+                '_RangeMap_',
+                'SetItem',
+                'ListItem',
+                '_|->_',
+                '_r|->_',
+            }
             return is_cell_map_constructor or is_builtin_data_constructor
 
         return (Atts.FUNCTION in prod.att or Atts.FUNCTIONAL in prod.att) and not (
