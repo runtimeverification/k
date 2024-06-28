@@ -252,6 +252,24 @@ def map_pattern(*args: tuple[Pattern, Pattern], cell: str | None = None) -> Patt
     return LeftAssoc(App(cons_symbol, args=(App(item_symbol, args=arg) for arg in args)))
 
 
+STOP_RANGEMAP: Final = App("Lbl'Stop'RangeMap")
+LBL_RANGEMAP: Final = SymbolId("Lbl'Unds'RangeMap'Unds'")
+LBL_RANGEMAP_ITEM: Final = SymbolId("Lbl'Unds'r'Pipe'-'-GT-Unds'")
+LBL_RANGEMAP_RANGE: Final = SymbolId("LblRangeMap'Coln'Range")
+
+
+def rangemap_pattern(*args: tuple[tuple[Pattern, Pattern], Pattern]) -> Pattern:
+    if not args:
+        return STOP_RANGEMAP
+
+    return LeftAssoc(
+        App(
+            LBL_RANGEMAP,
+            args=(App(LBL_RANGEMAP_ITEM, args=(App(LBL_RANGEMAP_RANGE, args=arg[0]), arg[1])) for arg in args),
+        )
+    )
+
+
 # ----
 # JSON
 # ----

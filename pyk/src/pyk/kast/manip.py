@@ -84,7 +84,9 @@ def sort_assoc_label(label: str, kast: KInner) -> KInner:
 
 def sort_ac_collections(kast: KInner) -> KInner:
     def _sort_ac_collections(_kast: KInner) -> KInner:
-        if type(_kast) is KApply and (_kast.label.name in {'_Set_', '_Map_'} or _kast.label.name.endswith('CellMap_')):
+        if type(_kast) is KApply and (
+            _kast.label.name in {'_Set_', '_Map_', '_RangeMap_'} or _kast.label.name.endswith('CellMap_')
+        ):
             return sort_assoc_label(_kast.label.name, _kast)
         return _kast
 
