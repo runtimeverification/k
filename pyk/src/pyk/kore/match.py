@@ -86,6 +86,28 @@ def match_map(pattern: Pattern, *, cell: str | None = None) -> tuple[tuple[Patte
     return tuple(entries)
 
 
+def match_rangemap(pattern: Pattern) -> tuple[tuple[tuple[Pattern, Pattern], Pattern], ...]:
+    stop_symbol = "Lbl'Stop'RangeMap"
+    cons_symbol = "Lbl'Unds'RangeMap'Unds'"
+    item_symbol = "Lbl'Unds'r'Pipe'-'-GT-Unds'"
+
+    if type(pattern) is App:
+        match_app(pattern, stop_symbol)
+        return ()
+
+    assoc = match_left_assoc(pattern)
+    cons = match_app(assoc.app, cons_symbol)
+    items = (match_app(arg, item_symbol) for arg in cons.args)
+    entries = ((_match_range(item.args[0]), item.args[1]) for item in items)
+    return tuple(entries)
+
+
+def _match_range(pattern: Pattern) -> tuple[Pattern, Pattern]:
+    range_symbol = "LblRangeMap'Coln'Range"
+    range = match_app(pattern, range_symbol)
+    return (range.args[0], range.args[1])
+
+
 def kore_bool(pattern: Pattern) -> bool:
     dv = match_dv(pattern, BOOL)
     match dv.value.value:
@@ -249,6 +271,16 @@ def kore_map_of(
 ) -> Callable[[Pattern], tuple[tuple[K, V], ...]]:
     def res(pattern: Pattern) -> tuple[tuple[K, V], ...]:
         return tuple((key(k), value(v)) for k, v in match_map(pattern, cell=cell))
+
+    return res
+
+
+def kore_rangemap_of(
+    key: Callable[[Pattern], K],
+    value: Callable[[Pattern], V],
+) -> Callable[[Pattern], tuple[tuple[tuple[K, K], V], ...]]:
+    def res(pattern: Pattern) -> tuple[tuple[tuple[K, K], V], ...]:
+        return tuple(((key(k[0]), key(k[1])), value(v)) for k, v in match_rangemap(pattern))
 
     return res
 
