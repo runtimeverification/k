@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 
 REC_LIMIT = 10**7
 
+
 class KFuzz:
     definition_dir: Path
 
@@ -79,7 +80,7 @@ def _fuzz(
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
-    max_examples: int = 50,
+    **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
 
@@ -93,7 +94,10 @@ def _fuzz(
         check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func.
           An exit code of 0 indicates a passing test.
           A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
-        max_examples: The number of test cases to run.
+        hypothesis_args: Keyword arguments that will be passed as settings for the hypothesis test. Defaults:
+          deadline: 5000
+          phases: (Phase.explicit, Phase.reuse, Phase.generate)
+
 
     Raises:
         RuntimeError: If check_func exists and check_exit_code is set, or check_func doesn't exist and check_exit_code is cleared.
@@ -131,11 +135,8 @@ def _fuzz(
     # Suppress warnings from hypothesis about changing the recursion limit
     warnings.filterwarnings('ignore', message='The recursion limit', category=HypothesisWarning, append=True)
 
-    given(strat)(
-        settings(
-            deadline=50000,
-            max_examples=max_examples,
-            verbosity=Verbosity.verbose,
-            phases=(Phase.generate, Phase.target, Phase.shrink),
-        )(test)
-    )()
+    # Default settings for hypothesis
+    hypothesis_args.setdefault('deadline', 5000)
+    hypothesis_args.setdefault('phases', (Phase.explicit, Phase.reuse, Phase.generate))
+
+    given(strat)(settings(**hypothesis_args)(test))()
