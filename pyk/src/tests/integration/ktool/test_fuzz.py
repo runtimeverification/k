@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KSort
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import inj, top_cell_initializer
 from pyk.kore.syntax import DV, App, Assoc, EVar, SortApp, String
@@ -84,6 +83,7 @@ class TestImpFuzz(KompiledTest):
     def test_fuzz(
         self,
         definition_dir: Path,
+        kfuzz: KFuzz,
     ) -> None:
         # Given
         program_text = """
@@ -108,6 +108,7 @@ class TestImpFuzz(KompiledTest):
     def test_fuzz_fail(
         self,
         definition_dir: Path,
+        kfuzz: KFuzz,
     ) -> None:
         # Given
         program_text = """
