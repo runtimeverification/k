@@ -27,6 +27,8 @@ REC_LIMIT = 10**7
 
 
 class KFuzz:
+    """Interface for fuzzing over property tests in K."""
+
     definition_dir: Path
 
     def __init__(self, definition_dir: Path) -> None:
