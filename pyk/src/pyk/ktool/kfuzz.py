@@ -10,7 +10,7 @@ from hypothesis.strategies import fixed_dictionaries, integers
 
 from ..kore.parser import KoreParser
 from ..kore.prelude import inj
-from ..kore.syntax import DV, Assoc, EVar, SortApp, String
+from ..kore.syntax import DV, EVar, SortApp, String
 from .krun import llvm_interpret_raw
 
 if TYPE_CHECKING:
@@ -115,10 +115,6 @@ def _fuzz(
         def sub(p: Pattern) -> Pattern:
             if isinstance(p, EVar) and p in subst_case:
                 return subst_case[p]
-            elif isinstance(p, Assoc):
-                symbol = p.symbol()
-                args = (arg.top_down(sub) for arg in p.app.args)
-                return p.of(symbol, patterns=(p.app.let(args=args),))
             else:
                 return p
 

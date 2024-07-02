@@ -7,7 +7,7 @@ import pytest
 
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import inj, top_cell_initializer
-from pyk.kore.syntax import DV, App, Assoc, EVar, SortApp, String
+from pyk.kore.syntax import DV, App, EVar, SortApp, String
 from pyk.ktool.kfuzz import KFuzz, kintegers
 from pyk.ktool.kprint import _kast
 from pyk.testing import KompiledTest
@@ -41,10 +41,6 @@ class TestImpFuzz(KompiledTest):
     def check(p: Pattern) -> None:
         def check_inner(p: Pattern) -> Pattern:
             match p:
-                case Assoc():
-                    symbol = p.symbol()
-                    args = (arg.top_down(check_inner) for arg in p.app.args)
-                    return p.of(symbol, patterns=(p.app.let(args=args),))
                 case App("Lbl'UndsPipe'-'-GT-Unds'", args=(key, val)):
                     match key, val:
                         case (
