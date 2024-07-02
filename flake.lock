@@ -36,8 +36,7 @@
     "haskell-backend": {
       "inputs": {
         "nixpkgs": [
-          "haskell-backend",
-          "rv-utils",
+          "llvm-backend",
           "nixpkgs"
         ],
         "rv-utils": [
