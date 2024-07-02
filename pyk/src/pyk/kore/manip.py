@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .syntax import And, Assoc, EVar, MLQuant, Top
+from .syntax import And, EVar, MLQuant, Top
 
 if TYPE_CHECKING:
     from collections.abc import Collection
@@ -27,9 +27,6 @@ def free_occs(pattern: Pattern, *, bound_vars: Collection[str] = ()) -> dict[str
                 occurrences[pattern.name].append(pattern)
             else:
                 occurrences[pattern.name] = [pattern]
-
-        elif isinstance(pattern, Assoc):
-            collect(pattern.app, bound_vars)
 
         elif isinstance(pattern, MLQuant):
             new_bound_vars = {pattern.var.name}.union(bound_vars)
