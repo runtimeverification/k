@@ -5,9 +5,9 @@ module CONTEXT
   syntax KResult ::= Int
 
   syntax A ::= "a" | Int
-             | foo( A, A ) [seqstrict, klabel(foo)]
+             | foo( A, A ) [seqstrict, symbol(foo)]
              | bar( A, A )
-             | baz( A, A ) [strict(2), klabel(baz)]
+             | baz( A, A ) [strict(2), symbol(baz)]
 
   context [bar1]: bar( HOLE,    _ )
   context [bar2]: bar(    _, HOLE )

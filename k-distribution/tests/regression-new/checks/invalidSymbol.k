@@ -1,10 +1,10 @@
 // Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 module INVALIDSYMBOL
 
-syntax Foo ::= foo() [klabel(#KToken), symbol]
+syntax Foo ::= foo() [symbol(#KToken)]
 
-syntax Bar ::= bar() [klabel(foo), symbol]
-syntax Baz ::= baz() [klabel(foo), symbol]
+syntax Bar ::= bar() [symbol(foo)]
+syntax Baz ::= baz() [symbol(foo)]
 
 syntax Exp ::= Val
 syntax Val ::= "val"

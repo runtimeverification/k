@@ -4,17 +4,17 @@ module TEST
     imports INT
 
     syntax Exp ::= Int | Bool
-                 | pair(Int, Int) [klabel(pair), symbol]
+                 | pair(Int, Int) [symbol(pair)]
 
-    syntax KItem ::= "#assume" Exp [klabel(assume), symbol]
+    syntax KItem ::= "#assume" Exp [symbol(assume)]
     rule #assume true => .K
     rule #assume false => #Bottom
 
-    syntax KItem ::= "#assert" Exp  [klabel(assert), symbol]
+    syntax KItem ::= "#assert" Exp  [symbol(assert)]
                    | "#fail"
     rule #assert true => .K
     rule #assert false => #fail
 
 // Uninterpreted functions
-    syntax Int ::= i(Int, Int)   [function, total, no-evaluators, smtlib(fi), klabel(i)]
+    syntax Int ::= i(Int, Int)   [function, total, no-evaluators, smtlib(fi), symbol(i)]
 endmodule

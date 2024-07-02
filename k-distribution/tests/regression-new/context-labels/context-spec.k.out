@@ -7,7 +7,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
               Lbl'-LT-'k'-GT-'{}(
                   kseq{}(
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          Lblfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
+                          Lblfoo{}(
                               Lbla'Unds'CONTEXT'Unds'A{}(),
                               Lbla'Unds'CONTEXT'Unds'A{}()
                           )
@@ -37,7 +37,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                           Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
                       kseq{}(
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A0'Unds'{}(
+                          Lbl'Hash'freezerfoo0'Unds'{}(
                               kseq{}(
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
                                       Lbla'Unds'CONTEXT'Unds'A{}()
@@ -71,7 +71,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                           \dv{SortInt{}}("0")
                       ),
                       kseq{}(
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A0'Unds'{}(
+                          Lbl'Hash'freezerfoo0'Unds'{}(
                               kseq{}(
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
                                       Lbla'Unds'CONTEXT'Unds'A{}()
@@ -102,7 +102,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
               Lbl'-LT-'k'-GT-'{}(
                   kseq{}(
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          Lblfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
+                          Lblfoo{}(
                               /* Inj: */ inj{SortInt{}, SortA{}}(
                                   \dv{SortInt{}}("0")
                               ),
@@ -134,7 +134,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                           Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
                       kseq{}(
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerfoo1'Unds'{}(
                               kseq{}(
                                   /* Inj: */ inj{SortInt{}, SortKItem{}}(
                                       \dv{SortInt{}}("0")
@@ -168,7 +168,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                           \dv{SortInt{}}("0")
                       ),
                       kseq{}(
-                          Lbl'Hash'freezerfoo'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerfoo1'Unds'{}(
                               kseq{}(
                                   /* Inj: */ inj{SortInt{}, SortKItem{}}(
                                       \dv{SortInt{}}("0")
@@ -391,7 +391,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
               Lbl'-LT-'k'-GT-'{}(
                   kseq{}(
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          Lblbaz'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
+                          Lblbaz{}(
                               Lbla'Unds'CONTEXT'Unds'A{}(),
                               Lbla'Unds'CONTEXT'Unds'A{}()
                           )
@@ -421,7 +421,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                           Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
                       kseq{}(
-                          Lbl'Hash'freezerbaz'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerbaz1'Unds'{}(
                               kseq{}(
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
                                       Lbla'Unds'CONTEXT'Unds'A{}()
@@ -455,7 +455,7 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
                           \dv{SortInt{}}("0")
                       ),
                       kseq{}(
-                          Lbl'Hash'freezerbaz'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
+                          Lbl'Hash'freezerbaz1'Unds'{}(
                               kseq{}(
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
                                       Lbla'Unds'CONTEXT'Unds'A{}()

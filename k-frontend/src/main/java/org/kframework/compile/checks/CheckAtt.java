@@ -343,21 +343,64 @@ public class CheckAtt {
   }
 
   private void checkSymbolKLabel(Production prod) {
-    if (prod.att().contains(Att.SYMBOL()) && prod.att().contains(Att.KLABEL())) {
-      if (!prod.att().get(Att.SYMBOL()).isEmpty()) {
+    if (!prod.att().contains(Att.KLABEL())) {
+      return;
+    }
+
+    var kLabelValue = prod.att().get(Att.KLABEL());
+
+    if (prod.att().contains(Att.SYMBOL())) {
+      if (prod.att().get(Att.SYMBOL()).isEmpty()) {
+        var message =
+            "The zero-argument form of `symbol` is deprecated. Replace `klabel("
+                + kLabelValue
+                + "), symbol` by `symbol("
+                + kLabelValue
+                + ")`.";
+
+        kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors, message, prod);
+      } else {
         errors.add(
             KEMException.compilerError(
                 "The 1-argument form of the `symbol(_)` attribute cannot be combined with `klabel(_)`.",
                 prod));
+      }
+    } else {
+      var overloadProds = m.overloads().elements();
+
+      if (overloadProds.contains(prod)) {
+        var message =
+            "Attribute `klabel("
+                + kLabelValue
+                + ") is deprecated, but marks an overload. Add `overload("
+                + kLabelValue
+                + ")`.";
+
+        kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors, message, prod);
+      } else {
+        var message =
+            "Attribute `klabel(_)` is deprecated. Either remove `klabel("
+                + kLabelValue
+                + ")`, or replace it by `symbol("
+                + kLabelValue
+                + ")`.";
+
+        kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors, message, prod);
       }
     }
   }
 
   private void checkKLabelOverload(Production prod) {
     if (prod.att().contains(Att.KLABEL()) && prod.att().contains(Att.OVERLOAD())) {
-      errors.add(
-          KEMException.compilerError(
-              "The attributes `klabel(_)` and `overload(_)` may not occur together.", prod));
+      var klabelKey = prod.att().get(Att.KLABEL());
+      var msg =
+          "The attributes `klabel` and `overload` may not occur together. Either remove `klabel("
+              + klabelKey
+              + ")`, or replace it by `symbol("
+              + klabelKey
+              + ")`";
+
+      errors.add(KEMException.compilerError(msg, prod));
     }
   }
 

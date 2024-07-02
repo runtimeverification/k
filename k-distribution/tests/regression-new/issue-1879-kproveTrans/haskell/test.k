@@ -17,7 +17,7 @@ module TEST
     syntax Step ::= Int
  // -------------------
 
-    syntax FInt ::= FInt ( value: Int , one: Int ) [klabel(FInt), symbol]
+    syntax FInt ::= FInt ( value: Int , one: Int ) [symbol(FInt)]
  // ---------------------------------------------------------------------
 
     syntax FInt ::= "0FInt" "(" Int ")" [macro]

@@ -7,10 +7,10 @@ module MISSINGKLABEL
   imports BASIC-K
 
   syntax MyMap ::= KItem "M|->" KItem
-      [ function, total, hook(MAP.element), klabel(_M|->_), symbol, injective, unused]
+      [ function, total, hook(MAP.element), symbol(_M|->_), injective, unused]
 
   syntax MyMap ::= MyMap MyMap
-      [ left, function, hook(MAP.concat), klabel(_MyMap_), symbol, assoc, comm
+      [ left, function, hook(MAP.concat), symbol(_MyMap_), assoc, comm
       , unit(.MyMap), element(_M|->_), index(0), format(%1%n%2), unused
       ]
 

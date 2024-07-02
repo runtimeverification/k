@@ -5,7 +5,7 @@ module TEST
 
     configuration <k> $PGM:Pgm </k>
 
-    syntax FInt ::= FInt ( value: Int , one: Int ) [klabel(FInt), symbol]
+    syntax FInt ::= FInt ( value: Int , one: Int ) [symbol(FInt)]
  // ---------------------------------------------------------------------
 
     syntax Wad = FInt

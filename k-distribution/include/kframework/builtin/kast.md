@@ -76,9 +76,9 @@ module KAST
   imports KSTRING
   imports BUILTIN-ID-TOKENS
 
-  syntax KBott ::= "#token" "(" KString "," KString ")"  [klabel(#KToken), symbol]
-                 | "#klabel" "(" KLabel ")"              [klabel(#WrappedKLabel), symbol]
-                 | KLabel "(" KList ")"                  [klabel(#KApply), symbol]
+  syntax KBott ::= "#token" "(" KString "," KString ")"  [symbol(#KToken)]
+                 | "#klabel" "(" KLabel ")"              [symbol(#WrappedKLabel)]
+                 | KLabel "(" KList ")"                  [symbol(#KApply)]
   syntax KItem ::= KBott
 
   syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\n\\r])+`" [token]
@@ -86,8 +86,8 @@ module KAST
                   | r"[#a-z][a-zA-Z0-9]*"               [token, prec(1)]
 
   syntax KList ::= K
-                 | ".KList"          [klabel(#EmptyKList), symbol]
-                 | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), symbol, prefer]
+                 | ".KList"          [symbol(#EmptyKList)]
+                 | KList "," KList   [symbol(#KList), left, assoc, unit(#EmptyKList), prefer]
 endmodule
 
 
@@ -95,9 +95,9 @@ endmodule
 module KSEQ
   imports KAST
   imports K-TOP-SORT
-  syntax K ::= ".K"      [klabel(#EmptyK), symbol]
-             | "."       [klabel(#EmptyK), symbol, deprecated, unparseAvoid]
-  syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
+  syntax K ::= ".K"      [symbol(#EmptyK)]
+             | "."       [symbol(#EmptyK), deprecated, unparseAvoid]
+  syntax K ::= K "~>" K  [symbol(#KSequence), left, assoc, unit(#EmptyK)]
   syntax left #KSequence
   syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, group(defaultBracket), applyPriority(1)]
 endmodule
@@ -135,28 +135,28 @@ The correspondance between K symbols and KORE symbols is as follows:
 module ML-SYNTAX [not-lr1]
   imports SORT-K
 
-  syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, group(mlUnary)]
-                       | "#Bottom" [klabel(#Bottom), symbol, group(mlUnary)]
-                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, group(mlUnary, mlOp)]
+  syntax {Sort} Sort ::= "#Top" [symbol(#Top), group(mlUnary)]
+                       | "#Bottom" [symbol(#Bottom), group(mlUnary)]
+                       | "#Not" "(" Sort ")" [symbol(#Not), mlOp, group(mlUnary, mlOp)]
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, group(mlUnary, mlOp)]
-                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, group(mlUnary, mlOp)]
-                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, group(mlEquals, mlOp), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [symbol(#Ceil), mlOp, group(mlUnary, mlOp)]
+                                | "#Floor" "(" Sort1 ")" [symbol(#Floor), mlOp, group(mlUnary, mlOp)]
+                                | "{" Sort1 "#Equals" Sort1 "}" [symbol(#Equals), mlOp, group(mlEquals, mlOp), comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
 
   syntax priority mlUnary > mlEquals > mlAnd
 
-  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, group(mlAnd, mlOp), format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, group(mlOp), format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, group(mlImplies, mlOp), format(%i%1%d%n%2%n%i%3%d)]
+  syntax {Sort} Sort ::= Sort "#And" Sort [symbol(#And), assoc, left, comm, unit(#Top), mlOp, group(mlAnd, mlOp), format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Or" Sort [symbol(#Or), assoc, left, comm, unit(#Bottom), mlOp, group(mlOp), format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Implies" Sort [symbol(#Implies), mlOp, group(mlImplies, mlOp), format(%i%1%d%n%2%n%i%3%d)]
 
   syntax priority mlImplies > mlQuantifier
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
-                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, group(mlQuantifier, mlOp)]
+  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [symbol(#Exists), mlOp, mlBinder, group(mlQuantifier, mlOp)]
+                                | "#Forall" Sort1 "." Sort2 [symbol(#Forall), mlOp, mlBinder, group(mlQuantifier, mlOp)]
 
-  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp, group(mlOp)]
-                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, group(mlOp)]
-                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp, group(mlOp)]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [symbol(#AG), mlOp, group(mlOp)]
+                       | "#wEF" "(" Sort ")" [symbol(weakExistsFinally), mlOp, group(mlOp)]
+                       | "#wAF" "(" Sort ")" [symbol(weakAlwaysFinally), mlOp, group(mlOp)]
 endmodule
 ```
 
@@ -236,13 +236,13 @@ module KCELLS
   imports KAST
 
   syntax Cell
-  syntax Bag ::= Bag Bag  [left, assoc, klabel(#cells), symbol, unit(#cells)]
-               | ".Bag"   [klabel(#cells), symbol]
-               | ".::Bag" [klabel(#cells), symbol]
+  syntax Bag ::= Bag Bag  [left, assoc, symbol(#cells), unit(#cells)]
+               | ".Bag"   [symbol(#cells)]
+               | ".::Bag" [symbol(#cells)]
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
   syntax KItem ::= Bag
-  syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [klabel(#withConfig), symbol, avoid]
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [symbol(#withConfig), avoid]
   syntax non-assoc #withConfig
   syntax Bag ::= KBott
 endmodule
@@ -272,10 +272,10 @@ module RULE-CELLS
   // if this module is imported, the parser automatically
   // generates, for all productions that have the attribute 'cell' or 'maincell',
   // a production like below:
-  //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [klabel(<top>)]
+  //syntax Cell ::= "<top>" #OptionalDots K #OptionalDots "</top>" [symbol(<top>)]
 
-  syntax #OptionalDots ::= "..." [klabel(#dots), symbol]
-                         | ""    [klabel(#noDots), symbol]
+  syntax #OptionalDots ::= "..." [symbol(#dots)]
+                         | ""    [symbol(#noDots)]
 
   syntax Int
   // this production will be added by the compiler to help handle bang variables,
@@ -286,7 +286,7 @@ module RULE-CELLS
   // this production will "vanish" after parsing finishes and not be picked up
   // by the compiler, which is the behavior we want in this case since an actual
   // production will be generated by the compiler later on.
-  syntax GeneratedCounterCell ::= "<generatedCounter>" Int "</generatedCounter>" [cell, klabel(<generatedCounter>), symbol, internal]
+  syntax GeneratedCounterCell ::= "<generatedCounter>" Int "</generatedCounter>" [cell, symbol(<generatedCounter>), internal]
 endmodule
 ```
 
@@ -309,12 +309,12 @@ module CONFIG-CELLS
                      | #LowerId            [token]
                      | #UpperId            [token]
 
-  syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell), symbol]
-  syntax Cell ::= "<" #CellName "/>" [klabel(#externalCell), symbol]
+  syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [symbol(#configCell)]
+  syntax Cell ::= "<" #CellName "/>" [symbol(#externalCell)]
 
-  syntax #CellProperties ::= #CellProperty #CellProperties [klabel(#cellPropertyList), symbol]
-                           | ""                            [klabel(#cellPropertyListTerminator), symbol]
-  syntax #CellProperty ::= #CellName "=" KString           [klabel(#cellProperty), symbol]
+  syntax #CellProperties ::= #CellProperty #CellProperties [symbol(#cellPropertyList)]
+                           | ""                            [symbol(#cellPropertyListTerminator)]
+  syntax #CellProperty ::= #CellName "=" KString           [symbol(#cellProperty)]
 endmodule
 ```
 
@@ -342,10 +342,10 @@ module REQUIRES-ENSURES
 
   syntax #RuleBody ::= K
 
-  syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
-                        | #RuleBody "requires" Bool                 [klabel("#ruleRequires"), symbol]
-                        | #RuleBody "ensures"  Bool                 [klabel("#ruleEnsures"), symbol]
-                        | #RuleBody "requires" Bool "ensures" Bool  [klabel("#ruleRequiresEnsures"), symbol]
+  syntax #RuleContent ::= #RuleBody                                 [symbol("#ruleNoConditions")]
+                        | #RuleBody "requires" Bool                 [symbol("#ruleRequires")]
+                        | #RuleBody "ensures"  Bool                 [symbol("#ruleEnsures")]
+                        | #RuleBody "requires" Bool "ensures" Bool  [symbol("#ruleRequiresEnsures")]
 endmodule
 ```
 
@@ -401,12 +401,12 @@ module PROGRAM-LISTS
   imports SORT-K
   // if this module is imported, the parser automatically
   // replaces the default productions for lists:
-  // Es ::= E "," Es [userList("*"), klabel('_,_)]
-  //      | ".Es"    [userList("*"), klabel('.Es)]
+  // Es ::= E "," Es [userList("*"), symbol('_,_)]
+  //      | ".Es"    [userList("*"), symbol('.Es)]
   // into a series of productions more suitable for programs:
-  // Es#Terminator ::= ""      [klabel('.Es)]
-  // Ne#Es ::= E "," Ne#Es     [klabel('_,_)]
-  //         | E Es#Terminator [klabel('_,_)]
+  // Es#Terminator ::= ""      [symbol('.Es)]
+  // Ne#Es ::= E "," Ne#Es     [symbol('_,_)]
+  //         | E Es#Terminator [symbol('_,_)]
   // Es ::= Ne#Es
   //      | Es#Terminator      // if the list is *
 endmodule
@@ -442,7 +442,7 @@ documentation.
 
 ```k
 module KREWRITE
-  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+  syntax {Sort} Sort ::= Sort "=>" Sort [symbol(#KRewrite)]
   syntax non-assoc #KRewrite
   syntax priority #KRewrite > #withConfig
 endmodule
@@ -458,13 +458,13 @@ module K
   imports AUTO-FOLLOW
   imports KREWRITE
 
-  syntax {Sort} Sort ::= Sort "#as" Sort [klabel(#KAs), symbol]
+  syntax {Sort} Sort ::= Sort "#as" Sort [symbol(#KAs)]
   // functions that preserve sorts and can therefore have inner rewrites
-  syntax {Sort} Sort ::= "#fun" "(" Sort ")" "(" Sort ")" [klabel(#fun2), symbol, prefer]
+  syntax {Sort} Sort ::= "#fun" "(" Sort ")" "(" Sort ")" [symbol(#fun2), prefer]
   // functions that do not preserve sort and therefore cannot have inner rewrites
-  syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")" [klabel(#fun3), symbol]
+  syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")" [symbol(#fun3)]
 
-  syntax {Sort1, Sort2} Sort1 ::= "#let" Sort2 "=" Sort2 "#in" Sort1 [klabel(#let), symbol]
+  syntax {Sort1, Sort2} Sort1 ::= "#let" Sort2 "=" Sort2 "#in" Sort1 [symbol(#let)]
 
   /*@ Set membership over terms. In addition to equality over
       concrete patterns, K also supports computing equality
@@ -476,8 +476,8 @@ module K
       change in the future).*/
 
   syntax Bool ::= left:
-                  K ":=K" K           [function, total, klabel(_:=K_), symbol, group(equalEqualK)]
-                | K ":/=K" K          [function, total, klabel(_:/=K_), symbol, group(notEqualEqualK)]
+                  K ":=K" K           [function, total, symbol(_:=K_), group(equalEqualK)]
+                | K ":/=K" K          [function, total, symbol(_:/=K_), group(notEqualEqualK)]
 endmodule
 
 // To be used to parse terms in full K
@@ -545,7 +545,7 @@ regular K rules to disambiguate as necessary.
 ```k
 module K-AMBIGUITIES
 
-  syntax {Sort} Sort ::= amb(Sort, Sort) [klabel(amb), symbol]
+  syntax {Sort} Sort ::= amb(Sort, Sort) [symbol(amb)]
 
 endmodule
 ```
@@ -565,7 +565,7 @@ module K-LOCATIONS
   imports INT-SYNTAX
 
   // filename, startLine, startCol, endLine, endCol
-  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [klabel(#location), symbol, format(%3)]
+  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [symbol(#location), format(%3)]
 
 endmodule
 ```
