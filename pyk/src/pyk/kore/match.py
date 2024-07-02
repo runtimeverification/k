@@ -25,15 +25,15 @@ def match_dv(pattern: Pattern, sort: Sort | None = None) -> DV:
     return dv
 
 
-def match_symbol(app: App, symbol: str) -> None:
-    if app.symbol != symbol:
-        raise ValueError(f'Expected symbol {symbol}, found: {app.symbol}')
+def match_symbol(actual: str, expected: str) -> None:
+    if actual != expected:
+        raise ValueError(f'Expected symbol {expected}, found: {actual}')
 
 
 def match_app(pattern: Pattern, symbol: str | None = None) -> App:
     app = check_type(pattern, App)
     if symbol is not None:
-        match_symbol(app, symbol)
+        match_symbol(app.symbol, symbol)
     return app
 
 
@@ -41,8 +41,11 @@ def match_inj(pattern: Pattern) -> App:
     return match_app(pattern, 'inj')
 
 
-def match_left_assoc(pattern: Pattern) -> LeftAssoc:
-    return check_type(pattern, LeftAssoc)
+def match_left_assoc(pattern: Pattern, symbol: str | None = None) -> LeftAssoc:
+    assoc = check_type(pattern, LeftAssoc)
+    if symbol is not None:
+        match_symbol(assoc.symbol, symbol)
+    return assoc
 
 
 def match_list(pattern: Pattern) -> tuple[Pattern, ...]:
@@ -50,9 +53,8 @@ def match_list(pattern: Pattern) -> tuple[Pattern, ...]:
         match_app(pattern, "Lbl'Stop'List")
         return ()
 
-    assoc = match_left_assoc(pattern)
-    cons = match_app(assoc.app, "Lbl'Unds'List'Unds'")
-    items = (match_app(arg, 'LblListItem') for arg in cons.args)
+    assoc = match_left_assoc(pattern, "Lbl'Unds'List'Unds'")
+    items = (match_app(arg, 'LblListItem') for arg in assoc.args)
     elems = (item.args[0] for item in items)
     return tuple(elems)
 
@@ -62,9 +64,8 @@ def match_set(pattern: Pattern) -> tuple[Pattern, ...]:
         match_app(pattern, "Lbl'Stop'Set")
         return ()
 
-    assoc = match_left_assoc(pattern)
-    cons = match_app(assoc.app, "Lbl'Unds'Set'Unds'")
-    items = (match_app(arg, 'LblSetItem') for arg in cons.args)
+    assoc = match_left_assoc(pattern, "Lbl'Unds'Set'Unds'")
+    items = (match_app(arg, 'LblSetItem') for arg in assoc.args)
     elems = (item.args[0] for item in items)
     return tuple(elems)
 
@@ -79,9 +80,8 @@ def match_map(pattern: Pattern, *, cell: str | None = None) -> tuple[tuple[Patte
         match_app(pattern, stop_symbol)
         return ()
 
-    assoc = match_left_assoc(pattern)
-    cons = match_app(assoc.app, cons_symbol)
-    items = (match_app(arg, item_symbol) for arg in cons.args)
+    assoc = match_left_assoc(pattern, cons_symbol)
+    items = (match_app(arg, item_symbol) for arg in assoc.args)
     entries = ((item.args[0], item.args[1]) for item in items)
     return tuple(entries)
 
