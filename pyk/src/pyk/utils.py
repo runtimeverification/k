@@ -495,15 +495,9 @@ def run_process_2(
     return res
 
 
-def _subprocess_run(*popenargs, input=None, capture_output=False, check=False, **kwargs):  # type: ignore [no-untyped-def]
+def _subprocess_run(*popenargs, input=None, check=False, **kwargs):  # type: ignore [no-untyped-def]
     if input is not None:
         kwargs['stdin'] = PIPE
-
-    if capture_output:
-        if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
-            raise ValueError('stdout and stderr arguments may not be used ' 'with capture_output.')
-        kwargs['stdout'] = PIPE
-        kwargs['stderr'] = PIPE
 
     with Popen(*popenargs, text=True, **kwargs) as process:
         try:
