@@ -3,31 +3,23 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */
                           Lblfoo{}(
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}(),
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                              Lbla'Unds'CONTEXT'Unds'A{}(),
+                              Lbla'Unds'CONTEXT'Unds'A{}()
                           )
                       ),
-                      /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                      Var'Unds'DotVar1:SortK{}
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -38,42 +30,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                          Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerfoo0'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */
                                       Lbla'Unds'CONTEXT'Unds'A{}()
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -84,42 +64,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                          \dv{SortInt{}}("0")
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerfoo0'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */
                                       Lbla'Unds'CONTEXT'Unds'A{}()
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -130,34 +98,25 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */
                           Lblfoo{}(
-                              /* T Fn D Sfa Cli */
                               /* Inj: */ inj{SortInt{}, SortA{}}(
-                                  /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                                  \dv{SortInt{}}("0")
                               ),
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                              Lbla'Unds'CONTEXT'Unds'A{}()
                           )
                       ),
-                      /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                      Var'Unds'DotVar1:SortK{}
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -168,41 +127,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                          Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerfoo1'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                                      \dv{SortInt{}}("0")
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -213,41 +161,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                          \dv{SortInt{}}("0")
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerfoo1'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                                      \dv{SortInt{}}("0")
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -258,31 +195,23 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */
                           Lblbar'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}(),
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                              Lbla'Unds'CONTEXT'Unds'A{}(),
+                              Lbla'Unds'CONTEXT'Unds'A{}()
                           )
                       ),
-                      /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                      Var'Unds'DotVar1:SortK{}
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -293,42 +222,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                          Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerbar'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A0'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */
                                       Lbla'Unds'CONTEXT'Unds'A{}()
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -339,42 +256,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                          \dv{SortInt{}}("0")
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerbar'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A0'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */
                                       Lbla'Unds'CONTEXT'Unds'A{}()
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -385,34 +290,25 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */
                           Lblbar'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A{}(
-                              /* T Fn D Sfa Cli */
                               /* Inj: */ inj{SortInt{}, SortA{}}(
-                                  /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                                  \dv{SortInt{}}("0")
                               ),
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                              Lbla'Unds'CONTEXT'Unds'A{}()
                           )
                       ),
-                      /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                      Var'Unds'DotVar1:SortK{}
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -423,41 +319,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                          Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerbar'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                                      \dv{SortInt{}}("0")
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -468,41 +353,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                          \dv{SortInt{}}("0")
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerbar'LParUndsCommUndsRParUnds'CONTEXT'Unds'A'Unds'A'Unds'A1'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                                      \dv{SortInt{}}("0")
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -513,31 +387,23 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */
                           Lblbaz{}(
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}(),
-                              /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                              Lbla'Unds'CONTEXT'Unds'A{}(),
+                              Lbla'Unds'CONTEXT'Unds'A{}()
                           )
                       ),
-                      /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                      Var'Unds'DotVar1:SortK{}
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -548,42 +414,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortA{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ Lbla'Unds'CONTEXT'Unds'A{}()
+                          Lbla'Unds'CONTEXT'Unds'A{}()
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerbaz1'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */
                                       Lbla'Unds'CONTEXT'Unds'A{}()
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))
@@ -594,42 +448,30 @@ kore-repl:  Debug (DebugAppliedLabeledRewriteRule):
     on configuration:
       \and{SortGeneratedTopCell{}}(
           /* term: */
-          /* T Fn D Sfa */
           Lbl'-LT-'generatedTop'-GT-'{}(
-              /* T Fn D Sfa */
               Lbl'-LT-'k'-GT-'{}(
-                  /* T Fn D Sfa */
                   kseq{}(
-                      /* T Fn D Sfa Cli */
                       /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                          /* T Fn D Sfa Cl */ \dv{SortInt{}}("0")
+                          \dv{SortInt{}}("0")
                       ),
-                      /* T Fn D Sfa */
                       kseq{}(
-                          /* T Fn D Sfa Cl */
                           Lbl'Hash'freezerbaz1'Unds'{}(
-                              /* T Fn D Sfa Cl */
                               kseq{}(
-                                  /* T Fn D Sfa Cli */
                                   /* Inj: */ inj{SortA{}, SortKItem{}}(
-                                      /* T Fn D Sfa Cl */
                                       Lbla'Unds'CONTEXT'Unds'A{}()
                                   ),
-                                  /* T Fn D Sfa Cl */ dotk{}()
+                                  dotk{}()
                               )
                           ),
-                          /* T Fn D Sfa */ Var'Unds'DotVar1:SortK{}
+                          Var'Unds'DotVar1:SortK{}
                       )
                   )
               ),
-              /* T Fn D Sfa */
-              Lbl'-LT-'generatedCounter'-GT-'{}(
-                  /* T Fn D Sfa */ Var'Unds'Gen0:SortInt{}
-              )
+              Lbl'-LT-'generatedCounter'-GT-'{}(Var'Unds'Gen0:SortInt{})
           ),
       \and{SortGeneratedTopCell{}}(
           /* predicate: */
-          /* D Sfa */ \top{SortGeneratedTopCell{}}(),
+          \top{SortGeneratedTopCell{}}(),
           /* substitution: */
           \top{SortGeneratedTopCell{}}()
       ))

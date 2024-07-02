@@ -1,0 +1,7 @@
+let fix = lambda f . (
+            (lambda x . (f (lambda y . (x x y))))
+            (lambda x . (f (lambda y . (x x y))))
+          )
+in let f = fix (lambda f . lambda x .
+                  (if x <= 1 then 1 else (x * (f (x + -1)))))
+   in (f 10)

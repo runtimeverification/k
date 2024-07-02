@@ -1,0 +1,7 @@
+[Error] Compiler: User-defined parametric sorts are currently unsupported: Foo{S}
+	Source(checkParametricSort.k)
+	Location(7,1,7,18)
+	7 |	syntax {S} Foo{S}
+	  .	^~~~~~~~~~~~~~~~~
+[ERROR] Running process failed with returncode 113:
+    kompile checkParametricSort.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition checkParametricSort-kompiled --type-inference-mode checked

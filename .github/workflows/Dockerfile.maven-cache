@@ -23,9 +23,7 @@ ADD pom.xml                                                    /home/$USER/.tmp-
 ADD llvm-backend/pom.xml                                       /home/$USER/.tmp-maven/llvm-backend/
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/$USER/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    /home/$USER/.tmp-maven/haskell-backend/
-ADD hs-backend-booster/pom.xml                                 /home/$USER/.tmp-maven/hs-backend-booster/
-ADD kernel/pom.xml                                             /home/$USER/.tmp-maven/kernel/
+ADD k-frontend/pom.xml                                         /home/$USER/.tmp-maven/k-frontend/
 ADD k-distribution/pom.xml                                     /home/$USER/.tmp-maven/k-distribution/
-ADD kore/pom.xml                                               /home/$USER/.tmp-maven/kore/
 
 RUN cd /home/$USER/.tmp-maven && mvn --batch-mode dependency:go-offline

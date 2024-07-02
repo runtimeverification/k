@@ -1,0 +1,8 @@
+[]
+module TEST-ALIAS-11
+
+  alias f{s}(s, s) : s
+  where f{s}(a : s, b : s) := \rewrites{s}(a : s, b : s) []
+
+endmodule
+[]

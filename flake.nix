@@ -1,28 +1,22 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/e7ba3c7e5626d3b2dd61318e91704fd6bf47228e";
-    booster-backend = {
-      url = "github:runtimeverification/hs-backend-booster/2672c0071c9759dc270ddd2ece82d0cfd365da0d";
-      inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-      inputs.haskell-backend.follows = "haskell-backend";
-      inputs.stacklock2nix.follows = "haskell-backend/stacklock2nix";
-    };
+    haskell-backend.url = "github:runtimeverification/haskell-backend/v0.1.25";
     nixpkgs.follows = "llvm-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     llvm-backend = {
-      url = "github:runtimeverification/llvm-backend";
+      url = "github:runtimeverification/llvm-backend/v0.1.52";
       inputs.utils.follows = "flake-utils";
     };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , booster-backend, llvm-backend }:
+    , llvm-backend }:
     let
       allOverlays = [
         (_: _: {
-          llvm-version = 15;
+          llvm-version = 17;
           llvm-backend-build-type = "Release";
         })
         llvm-backend.overlays.default
@@ -42,7 +36,6 @@
                   "nix/"
                   "*.nix"
                   "haskell-backend/src/main/native/haskell-backend/*"
-                  "hs-backend-booster/src/main/native/hs-backend-booster/*"
                   "llvm-backend/src/main/native/llvm-backend/*"
                   "k-distribution/tests/regression-new"
                 ] ./.);
@@ -61,23 +54,21 @@
 
             k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
-                mvnHash = "sha256-8IJqbI5QFXTqR6QzMgsYG+STlXI93SzQkN+Xps10Zik=";
+                mvnHash = "sha256-HkAwMZq2vvrnEgT1Ksoxb5YnQ8+CMQdB2Sd/nR0OttU=";
                 manualMvnArtifacts = [
-                  "org.scala-lang:scala-compiler:2.12.18"
+                  "org.scala-lang:scala-compiler:2.13.13"
                   "ant-contrib:ant-contrib:1.0b3"
                   "org.apache.ant:ant-nodeps:1.8.1"
                   "org.apache.maven.wagon:wagon-provider-api:1.0-alpha-6"
+                  "org.checkerframework:checker-qual:3.33.0"
+                  "com.google.errorprone:error_prone_annotations:2.18.0"
                 ];
                 manualMvnSourceArtifacts = [
-                  "org.scala-sbt:compiler-bridge_2.12:1.8.0"
+                  "org.scala-sbt:compiler-bridge_2.13:1.8.0"
                 ];
                 inherit (final) maven;
                 inherit (prev) llvm-backend;
                 clang = prev."clang_${toString final.llvm-version}";
-                booster =
-                  booster-backend.packages.${prev.system}.kore-rpc-booster;
-                rpc-client =
-                  booster-backend.packages.${prev.system}.kore-rpc-client;
                 haskell-backend = haskell-backend-bins;
                 inherit (haskell-backend) prelude-kore;
                 inherit src;
@@ -121,6 +112,9 @@
             p.kore-parser
             p.kore-repl
             p.kore-rpc
+            p.kore-rpc-booster
+            p.kore-rpc-client
+            p.booster-dev
           ];
         };
 
@@ -139,14 +133,8 @@
           };
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
-            inherit llvm-backend haskell-backend booster-backend;
+            inherit llvm-backend haskell-backend;
           };
-
-          update-from-submodules =
-            rv-utils.lib.update-from-submodules pkgs ./flake.lock {
-              llvm-backend.submodule =
-                "llvm-backend/src/main/native/llvm-backend";
-            };
 
           smoke-test = with pkgs;
             stdenv.mkDerivation {

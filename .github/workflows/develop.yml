@@ -11,7 +11,7 @@ jobs:
 
   version-bump:
     name: 'Version Bump'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
           git checkout -B master origin/master
           old_develop="$(git merge-base origin/develop origin/master)"
           new_develop="$(git rev-parse origin/develop)"
-          if git diff --exit-code ${old_develop} ${new_develop} -- package/version; then
+          if git diff --exit-code "${old_develop}" "${new_develop}" -- package/version; then
             git merge --no-edit origin/develop
             ./package/version.sh bump
           else
@@ -55,41 +55,41 @@ jobs:
         run: |
           set -euxo pipefail
           workspace=$(pwd)
-          docker run --name k-posting-profiling-tests-${GITHUB_SHA}            \
-            --rm -it --detach                                                  \
-            -e BENCHER_API_TOKEN=$BENCHER_API_TOKEN                            \
-            -e BENCHER_PROJECT=$BENCHER_PROJECT                                \
-            -e BENCHER_ADAPTER=$BENCHER_ADAPTER                                \
-            -e GITHUB_HEAD_REF=$GITHUB_HEAD_REF                                \
-            -e GITHUB_BASE_REF=$GITHUB_BASE_REF                                \
-            -e GITHUB_TOKEN=$GITHUB_TOKEN                                      \
-            -e GITHUB_ACTIONS=true                                             \
-            -e GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME                            \
-            -e GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH                            \
-            -e GITHUB_REPOSITORY=$GITHUB_REPOSITORY                            \
-            -e GITHUB_REF=$GITHUB_REF                                          \
-            -e GITHUB_SHA=${GITHUB_SHA}                                        \
-            --workdir /opt/workspace                                           \
-            -v "${workspace}:/opt/workspace"                                   \
-            -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
-            ${BASE_OS}:${BASE_DISTRO}
+          docker run --name "k-posting-profiling-tests-${GITHUB_SHA}" \
+            --rm -it --detach                                         \
+            -e BENCHER_API_TOKEN="$BENCHER_API_TOKEN"                 \
+            -e BENCHER_PROJECT="$BENCHER_PROJECT"                     \
+            -e BENCHER_ADAPTER="$BENCHER_ADAPTER"                     \
+            -e GITHUB_HEAD_REF="$GITHUB_HEAD_REF"                     \
+            -e GITHUB_BASE_REF="$GITHUB_BASE_REF"                     \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN"                           \
+            -e GITHUB_ACTIONS=true                                    \
+            -e GITHUB_EVENT_NAME="$GITHUB_EVENT_NAME"                 \
+            -e GITHUB_EVENT_PATH="$GITHUB_EVENT_PATH"                 \
+            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY"                 \
+            -e GITHUB_REF="$GITHUB_REF"                               \
+            -e GITHUB_SHA="$GITHUB_SHA"                               \
+            --workdir /opt/workspace                                  \
+            -v "${workspace}:/opt/workspace"                          \
+            -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"            \
+            "${BASE_OS}:${BASE_DISTRO}"
       - name: 'Setting up dependencies'
         run: |
           set -euxo pipefail
-          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh SKIP_K_BUILD'
+          docker exec -t "k-posting-profiling-tests-${GITHUB_SHA}" /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh SKIP_K_BUILD'
       - name: 'Getting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py ${GITHUB_SHA}'
+          docker exec -t "k-posting-profiling-tests-${GITHUB_SHA}" /bin/bash -c './k-distribution/tests/profiling/post_results_to_develop.py "${GITHUB_SHA}"'
       - name: 'Posting Performance Tests Results'
         run: |
           set -euxo pipefail
-          docker exec -t k-posting-profiling-tests-${GITHUB_SHA} /bin/bash -c 'bencher run            \
+          docker exec -t "k-posting-profiling-tests-${GITHUB_SHA}" /bin/bash -c 'bencher run            \
             --if-branch "develop" --else-if-branch "master"                    \
             --file .profiling-results.json --err --ci-only-on-alert            \
             --github-actions "${GITHUB_TOKEN}" "echo Exporting report"'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-posting-profiling-tests-${GITHUB_SHA}
-          docker container rm --force k-posting-profiling-tests-${GITHUB_SHA} || true
+          docker stop --time=0 "k-posting-profiling-tests-${GITHUB_SHA}"
+          docker container rm --force "k-posting-profiling-tests-${GITHUB_SHA}" || true

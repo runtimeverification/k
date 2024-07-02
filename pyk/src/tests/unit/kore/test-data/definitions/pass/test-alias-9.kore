@@ -1,0 +1,12 @@
+[]
+
+module TEST-ALIAS-9
+  sort Nat{} []
+
+  symbol plus{}(Nat{},Nat{}) : Nat{} []
+
+  alias twice{}(Nat{}) : Nat{}
+  where twice{}(X:Nat{})
+    := plus{}(X:Nat{}, X:Nat{}) []
+
+endmodule []

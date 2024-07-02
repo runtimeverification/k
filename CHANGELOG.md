@@ -2,6 +2,88 @@
 copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 ---
 
+K Framework 7.1.0
+=================
+
+Major Changes
+-------------
+
+- The Pyk distribution package name has been renamed to `kframework` in
+  preparation for publishing the library to PyPI. The _import package_ remains
+  `pyk`. Consumers of the library will need to update their `pyproject.toml`
+  files to reflect the new name, but should not need to update any code.
+
+- Updates to the syntax of regular expression terminals (`r"..."`) in K; some
+  previously accepted syntax is no longer valid. This allows us to improve error
+  messages, and will enable more checks in the future.
+
+- K no longer supports macOS running on Intel machines.
+
+Minor Changes
+-------------
+
+- Improved logging when executing symbolically using the Haskell backend; these
+  logs make it easier to track down performance issues in K code.
+
+- SimpleSub-based principled type inference is now enabled by default.
+
+- Pyk now implements a more correct parenthesising unparser; this reduces
+  downstream reliance on symbol table patching when unparsing.
+
+- Eliminated internal sources of flakiness due to undefined iteration order;
+  this makes it easier to write stable tests using K.
+
+- Improvements to K's Nix infrastructure that reduce the size of a K Nix
+  closure, making `kup install` faster.
+
+- CI refactorings to improve K core developer experience.
+
+- Updates to dependency versions.
+
+- General bug fixes, UI and performance improvements.
+
+K Framework 7.0.0
+=================
+
+Major Changes
+-------------
+
+- **Important change for all K and Pyk users**. The Pyk library has been
+  reintegrated into K, and is no longer maintained as a standalone project. This
+  means that in K 7, first-class Python tooling is available wherever K is
+  installed. Existing projects using the standalone Pyk library can continue to
+  do so, but will not receive updates in the future.
+
+- The Haskell backend and booster components have been merged and are now
+  developed as a single project.
+
+- Add an explicit `overload(_)` attribute to specify sets of overloaded symbols;
+  this replaces the old `klabel(_)` syntax.
+
+- The outer parser no longer supports `priorities`, `require` and `import`.
+
+Minor Changes
+-------------
+
+- Tooling and version updates for our Java and Scala code.
+
+- Substantial cleanup and auditing of the K frontend's use of attributes when
+  generating KORE definitions.
+
+- Extended compiler warnings for the deprecated `symbol, klabel(_)` attribute
+  combination, as well as for overload sets.
+
+- Clarification and better compiler warnings for cell collection initializers.
+
+- Add `total` attribute to record projection functions that are verifiably
+  total.
+
+- Removed deprecated `--directory` flag.
+
+- Removed deprecated binary format for KAST.
+
+- Removed deprecated `STRATEGY` module.
+
 K Framework 6.3.0
 =================
 

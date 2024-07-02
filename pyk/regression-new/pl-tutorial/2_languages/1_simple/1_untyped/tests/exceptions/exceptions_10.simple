@@ -1,0 +1,13 @@
+var x;
+
+function main() {
+  x = 5;
+  try {
+    throw 3;
+    print(x);       // should not print this
+  } catch(y) {
+    print(y,"\n");  // should print this
+  }
+}
+
+// 3

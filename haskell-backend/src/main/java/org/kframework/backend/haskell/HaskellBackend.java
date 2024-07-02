@@ -14,6 +14,7 @@ import org.kframework.compile.Backend;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -50,7 +51,7 @@ public class HaskellBackend extends KoreBackend {
     sw.printIntermediate("  Print definition.kore");
     ProcessBuilder pb = files.getProcessBuilder();
     List<String> args = new ArrayList<>();
-    if (haskellKompileOptions.noHaskellBinary) {
+    if (haskellKompileOptions.noHaskellBinary || OS.current().equals(OS.OSX)) {
       args.add("kore-parser");
       args.add("--no-print-definition");
       args.add("definition.kore");
@@ -58,7 +59,7 @@ public class HaskellBackend extends KoreBackend {
       args.add(haskellKompileOptions.haskellBackendCommand);
       args.add("definition.kore");
       args.add("--module");
-      args.add(kompileOptions.mainModule(files));
+      args.add(kompileOptions.mainModule(files).name());
       args.add("--output");
       args.add("haskellDefinition.bin");
       args.add("--serialize");

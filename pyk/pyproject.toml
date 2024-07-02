@@ -1,0 +1,93 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "kframework"
+version = "7.1.0"
+description = ""
+authors = [
+    "Runtime Verification, Inc. <contact@runtimeverification.com>",
+]
+readme = "README.md"
+
+[[tool.poetry.packages]]
+include = "pyk"
+from = "src"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+cmd2 = "^2.4.2"
+coloredlogs = "^15.0.1"
+filelock = "^3.9.0"
+graphviz = "^0.20.1"
+hypothesis = "^6.103.1"
+psutil = "5.9.5"
+pybind11 = "^2.10.3"
+pytest = "*"
+textual = "^0.27.0"
+tomli = "^2.0.1"
+xdg-base-dirs = "^6.0.1"
+
+[tool.poetry.group.dev.dependencies]
+autoflake = "*"
+black = "*"
+flake8 = "*"
+flake8-bugbear = "*"
+flake8-comprehensions = "*"
+flake8-quotes = "*"
+flake8-type-checking = "*"
+isort = "*"
+mypy = "*"
+pep8-naming = "*"
+pydocstyle = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-timeout = "*"
+pytest-xdist = "*"
+pyupgrade = "*"
+types-psutil = "^5.9.5.10"
+
+[tool.poetry.scripts]
+pyk = "pyk.__main__:main"
+pyk-covr = "pyk.kcovr:main"
+kbuild = "pyk.kbuild.__main__:main"
+kdist = "pyk.kdist.__main__:main"
+krepl = "pyk.krepl.__main__:main"
+kore-exec-covr = "pyk.kore_exec_covr.__main__:main"
+
+[tool.poetry.plugins.pytest11]
+pytest-pyk = "pyk.testing.plugin"
+
+[tool.pydocstyle]
+convention = "google"
+add-select = "D204,D401,D404"
+add-ignore = "D1"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.autoflake]
+recursive = true
+expand-star-imports = true
+remove-all-unused-imports = true
+ignore-init-module-imports = true
+remove-duplicate-keys = true
+remove-unused-variables = true
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+
+[tool.mypy]
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "graphviz"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "coloredlogs"
+ignore_missing_imports = true

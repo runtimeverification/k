@@ -1,0 +1,18 @@
+[Error] Compiler: Sort X was declared as a token. Productions of this sort can only contain [function] or [token] labels.
+	Source(tokenCheck.k)
+	Location(12,16,12,22)
+	12 |	  syntax X ::= fail()
+	   .	               ^~~~~~
+[Error] Compiler: Sort Y was declared as a token. Productions of this sort can only contain [function] or [token] labels.
+	Source(tokenCheck.k)
+	Location(15,16,15,17)
+	15 |	  syntax Y ::= Z
+	   .	               ^
+[Error] Compiler: Sort Id was declared as a token. Productions of this sort can only contain [function] or [token] labels.
+	Source(tokenCheck.k)
+	Location(21,17,21,24)
+	21 |	  syntax Id ::= Foo(Id)
+	   .	                ^~~~~~~
+[Error] Compiler: Had 3 structural errors.
+[ERROR] Running process failed with returncode 113:
+    kompile tokenCheck.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition tokenCheck-kompiled --type-inference-mode checked

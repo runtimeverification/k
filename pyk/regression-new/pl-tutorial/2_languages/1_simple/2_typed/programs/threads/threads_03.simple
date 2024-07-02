@@ -1,0 +1,11 @@
+// This is a poorly synchronized program, which has lots of behaviors.
+
+void main() {
+  int x = 5;
+  spawn {x=x+2;};
+  spawn {x=x*2;};
+  spawn {x=11;};
+  spawn {print(x,"\n");};
+}
+
+// The search option of krun finds 42 solutions in total!

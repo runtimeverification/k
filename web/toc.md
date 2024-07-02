@@ -17,6 +17,7 @@ output:
 
 - [Homepage](/web/pages/index.md)
 - [Install K](https://github.com/runtimeverification/k/releases/latest)
+- [Pyk Documentation](https://kframework.org/pyk)
 - [K Tutorial](/k-distribution/k-tutorial/README.md)
   - [Section 1: Basic K Concepts](/k-distribution/k-tutorial/1_basic/README.md)
     - [Lesson 1.1: Setting up a K Environment](/k-distribution/k-tutorial/1_basic/01_installing/README.md)

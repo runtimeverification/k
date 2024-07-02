@@ -1,0 +1,11 @@
+// equality with normalization
+
+ 4 /Rat  6  ==Rat  2 /Rat 3 ;
+-4 /Rat  6  ==Rat -2 /Rat 3 ;
+ 4 /Rat -6  ==Rat -2 /Rat 3 ;
+-4 /Rat -6  ==Rat  2 /Rat 3 ;
+
+ 1071 /Rat  462 ==Rat -51 /Rat -22 ;
+ 1071 /Rat -462 ==Rat -51 /Rat  22 ;
+-1071 /Rat  462 ==Rat  51 /Rat -22 ;
+-1071 /Rat -462 ==Rat  51 /Rat  22 ;

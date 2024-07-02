@@ -1,0 +1,13 @@
+[Error] Inner Parser: Parse error: unexpected token '[' following token '['.
+	Source(nestedFunctionContext.k)
+	Location(15,8,15,9)
+	15 |	rule [[[[foo(0) => 1]]
+	   .	       ^
+[Error] Inner Parser: Parse error: unexpected token '<baz>' following token '1'.
+	Source(nestedFunctionContext.k)
+	Location(20,6,20,11)
+	20 |	     <baz> [[foo(0)]] <baz> .K </baz> </baz>
+	   .	     ^~~~~
+[Error] Compiler: Had 2 parsing errors.
+[ERROR] Running process failed with returncode 113:
+    kompile nestedFunctionContext.k --md-selector k --emit-json --warnings none --no-exc-wrap --backend llvm --output-definition nestedFunctionContext-kompiled --type-inference-mode checked

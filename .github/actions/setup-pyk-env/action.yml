@@ -1,0 +1,20 @@
+name: 'Set Up Pyk Environment'
+description: 'Set up Pyk test environment'
+inputs:
+  python-version:
+    description: 'Python version'
+    required: true
+    type: string
+    default: '3.10'
+runs:
+  using: "composite"
+  steps:
+    - name: 'Install Python'
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: 'Install Poetry'
+      uses: Gr1N/setup-poetry@v9
+    - name: 'Install package'
+      shell: bash
+      run: poetry -C pyk install

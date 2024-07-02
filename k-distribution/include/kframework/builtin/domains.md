@@ -488,7 +488,7 @@ module RANGEMAP
 ### Range, bounded inclusively below and exclusively above.
 
 ```k
-  syntax Range ::= "[" KItem "," KItem ")"    [symbol(Rangemap:Range)]
+  syntax Range ::= "[" KItem "," KItem ")"    [symbol(RangeMap:Range)]
 
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
 ```
@@ -1201,7 +1201,7 @@ endmodule
 
 module INT-SYNTAX
   imports UNSIGNED-INT-SYNTAX
-  syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token, prec(2)]
+  syntax Int ::= r"[\\+\\-]?[0-9]+" [prefer, token, prec(2)]
 endmodule
 
 module INT-COMMON
@@ -1386,15 +1386,15 @@ module INT-KORE [symbolic]
   imports private BOOL
   imports INT-COMMON
 
-  rule I1:Int ==K I2:Int => I1 ==Int I2 [simplification]
-  rule {K1 ==Int K2 #Equals true} => {K1 #Equals K2} [simplification]
-  rule {true #Equals K1 ==Int K2} => {K1 #Equals K2} [simplification]
-  rule {K1 ==Int K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
-  rule {false #Equals K1 ==Int K2} => #Not({K1 #Equals K2}) [simplification]
-  rule {K1 =/=Int K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
-  rule {true #Equals K1 =/=Int K2} => #Not({K1 #Equals K2}) [simplification]
-  rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
-  rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
+  rule [eq-k-to-eq-int]     : I1:Int ==K I2:Int            => I1 ==Int I2           [simplification]
+  rule [eq-int-true-left]   : {K1 ==Int K2 #Equals true}   => {K1 #Equals K2}       [simplification]
+  rule [eq-int-true-rigth]  : {true #Equals K1 ==Int K2}   => {K1 #Equals K2}       [simplification]
+  rule [eq-int-false-left]  : {K1 ==Int K2 #Equals false}  => #Not({K1 #Equals K2}) [simplification]
+  rule [eq-int-false-rigth] : {false #Equals K1 ==Int K2}  => #Not({K1 #Equals K2}) [simplification]
+  rule [neq-int-true-left]  : {K1 =/=Int K2 #Equals true}  => #Not({K1 #Equals K2}) [simplification]
+  rule [neq-int-true-right] : {true #Equals K1 =/=Int K2}  => #Not({K1 #Equals K2}) [simplification]
+  rule [neq-int-false-left] : {K1 =/=Int K2 #Equals false} => {K1 #Equals K2}       [simplification]
+  rule [neq-int-false-right]: {false #Equals K1 =/=Int K2} => {K1 #Equals K2}       [simplification]
 
   // Arithmetic Normalization
   rule I +Int B => B +Int I          [concrete(I), symbolic(B), simplification(51)]
@@ -1477,8 +1477,8 @@ is equal to the IEEE `binary32` format, and `p53x11` is equal to the IEEE
 ```k
 module FLOAT-SYNTAX
   syntax Float [hook(FLOAT.Float)]
-  syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(1)]
-  syntax Float ::= r"[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(3)]
+  syntax Float ::= r"([\\+\\-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+\\-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(1)]
+  syntax Float ::= r"[\\+\\-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(3)]
   syntax Float ::= r"NaN([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(3)]
 endmodule
 
@@ -1984,7 +1984,7 @@ module BYTES-SYNTAX
   imports private STRING-SYNTAX
 
   syntax Bytes [hook(BYTES.Bytes)]
-  syntax Bytes ::= r"b[\\\"](([\\x20\\x21\\x23-\\x5B\\x5D-\\x7E])|([\\\\][tnfr\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2}))*[\\\"]"      [token]
+  syntax Bytes ::= r"b[\\\"](([ !#-\\[\\]-~])|([\\\\][tnfr\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2}))*[\\\"]"      [token]
 endmodule
 ```
 
@@ -2240,7 +2240,7 @@ Provided are the following pieces of functionality:
 ```k
 module ID-SYNTAX-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
-  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
+  syntax Id ::= r"[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
               | #LowerId                                             [token]
               | #UpperId                                             [token]
 endmodule
@@ -2849,7 +2849,7 @@ module MINT-SYNTAX
   syntax {Width} MInt{Width} [hook(MINT.MInt)]
 
   /*@ Machine integer of bit width and value. */
-  syntax {Width} MInt{Width} ::= r"[\\+-]?[0-9]+[pP][0-9]+" [token, prec(2), hook(MINT.literal)]
+  syntax {Width} MInt{Width} ::= r"[\\+\\-]?[0-9]+[pP][0-9]+" [token, prec(2), hook(MINT.literal)]
 endmodule
 
 module MINT
