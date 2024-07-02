@@ -18,7 +18,6 @@ from pyk.kore.syntax import (
     Iff,
     Implies,
     In,
-    LeftAssoc,
     MLPattern,
     Mu,
     Next,
@@ -26,7 +25,6 @@ from pyk.kore.syntax import (
     Nu,
     Or,
     Rewrites,
-    RightAssoc,
     SortApp,
     String,
     SVar,
@@ -71,8 +69,6 @@ ML_PATTERN_OF_TEST_DATA: Final = (
     ('next', r'\next', (s,), (x,), Next(s, x)),
     ('rewrites', r'\rewrites', (s,), (x, y), Rewrites(s, x, y)),
     ('dv', r'\dv', (s,), (val,), DV(s, val)),
-    ('left-assoc', r'\left-assoc', (), (app,), LeftAssoc(app)),
-    ('right-assoc', r'\right-assoc', (), (app,), RightAssoc(app)),
 )
 
 
