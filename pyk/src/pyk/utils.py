@@ -497,8 +497,6 @@ def run_process_2(
 
 def _subprocess_run(*popenargs, input=None, capture_output=False, check=False, **kwargs):  # type: ignore [no-untyped-def]
     if input is not None:
-        if kwargs.get('stdin') is not None:
-            raise ValueError('stdin and input arguments may not both be used.')
         kwargs['stdin'] = PIPE
 
     if capture_output:
