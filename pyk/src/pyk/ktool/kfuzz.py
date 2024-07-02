@@ -8,7 +8,7 @@ from hypothesis.strategies import builds, fixed_dictionaries, integers
 from ..kast.inner import KSort
 from ..konvert import _kast_to_kore
 from ..kore.parser import KoreParser
-from ..kore.syntax import Assoc, EVar
+from ..kore.syntax import EVar
 from ..prelude.k import inj
 from ..prelude.kint import intToken
 from .krun import llvm_interpret_raw
@@ -80,10 +80,6 @@ def fuzz(
 
     def test(subst_case: Mapping[EVar, Pattern]) -> None:
         def sub(p: Pattern) -> Pattern:
-            if isinstance(p, Assoc):
-                symbol = p.symbol()
-                args = (arg.top_down(sub) for arg in p.app.args)
-                return p.of(symbol, patterns=(p.app.let(args=args),))
             if p in subst_case:
                 assert isinstance(p, EVar)
                 return subst_case[p]
