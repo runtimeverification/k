@@ -308,6 +308,10 @@ class CSubst:
         """Return an iterator with the head being the `subst` and the tail being the `constraints`."""
         return chain([self.subst], self.constraints)
 
+    def __and__(self, other: CSubst):
+        """Return a new `CSubst` with the subst and constraints of both `CSubst` instances combined."""
+        return CSubst(self.subst.union(other.subst), unique(chain(self.constraints, other.constraints)))
+
     def to_dict(self) -> dict[str, Any]:
         """Serialize `CSubst` to dictionary representation."""
         return {
