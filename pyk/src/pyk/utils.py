@@ -13,7 +13,7 @@ from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen
+from subprocess import CalledProcessError, CompletedProcess, Popen
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 
@@ -495,20 +495,34 @@ def run_process_2(
     return res
 
 
-def _subprocess_run(*popenargs, input=None, check=False, **kwargs):  # type: ignore [no-untyped-def]
-    if input is not None:
-        kwargs['stdin'] = PIPE
+def _subprocess_run(
+    *popenargs: Any,
+    input: str | None = None,
+    stdout: int | None = None,
+    stderr: int | None = None,
+    env: Mapping[str, str] | None = None,
+    cwd: Path | None = None,
+    check: bool = False,
+) -> CompletedProcess:
+    kwargs: dict[str, Any] = {
+        'stdin': subprocess.PIPE if input is not None else None,
+        'stdout': stdout,
+        'stderr': stderr,
+        'env': env,
+        'cwd': cwd,
+    }
 
     with Popen(*popenargs, text=True, **kwargs) as process:
         try:
-            stdout, stderr = process.communicate(input)
+            _stdout, _stderr = process.communicate(input)
         except BaseException:
             process.kill()
             raise
         retcode = process.poll()
         if check and retcode:
-            raise CalledProcessError(retcode, process.args, output=stdout, stderr=stderr)
-    return CompletedProcess(process.args, retcode, stdout, stderr)
+            raise CalledProcessError(retcode, process.args, output=_stdout, stderr=_stderr)
+    assert retcode is not None
+    return CompletedProcess(process.args, retcode, _stdout, _stderr)
 
 
 def exit_with_process_error(err: CalledProcessError) -> None:
