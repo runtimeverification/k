@@ -484,7 +484,7 @@ def run_process_2(
 
     start_time = time.time()
 
-    res = subprocess_run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr)
+    res = _subprocess_run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr)
 
     delta_time = time.time() - start_time
     logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
@@ -495,7 +495,7 @@ def run_process_2(
     return res
 
 
-def subprocess_run(*popenargs, input=None, capture_output=False, check=False, **kwargs):  # type: ignore [no-untyped-def]
+def _subprocess_run(*popenargs, input=None, capture_output=False, check=False, **kwargs):  # type: ignore [no-untyped-def]
     if input is not None:
         if kwargs.get('stdin') is not None:
             raise ValueError('stdin and input arguments may not both be used.')
