@@ -15,10 +15,11 @@ from pyk.kore.match import (
     kore_int,
     kore_list_of,
     kore_map_of,
+    kore_rangemap_of,
     kore_set_of,
     kore_str,
 )
-from pyk.kore.prelude import dv, list_pattern, map_pattern, set_pattern
+from pyk.kore.prelude import dv, list_pattern, map_pattern, rangemap_pattern, set_pattern
 from pyk.kore.syntax import App
 
 if TYPE_CHECKING:
@@ -81,6 +82,12 @@ EXTRACT_TEST_DATA = (
         map_pattern((dv(0), dv('a')), (dv(1), dv('b')), (dv(2), dv('c')), cell='ACell'),
         kore_map_of(kore_int, kore_str, cell='ACell'),
         ((0, 'a'), (1, 'b'), (2, 'c')),
+    ),
+    (rangemap_pattern(), kore_rangemap_of(kore_int, kore_str), ()),
+    (
+        rangemap_pattern(((dv(0), dv(1)), dv('a')), ((dv(2), dv(3)), dv('b'))),
+        kore_rangemap_of(kore_int, kore_str),
+        (((0, 1), 'a'), ((2, 3), 'b')),
     ),
     (
         a(),
