@@ -515,56 +515,68 @@ def _subprocess_run(
         'cwd': cwd,
     }
 
-    with Popen(args, text=True, **kwargs) as process:
+    with Popen(args, text=True, **kwargs) as popen:
+        log_prefix = f'[PID={popen.pid}]'
+
         command = shlex.join(args)
-        logger.info(f'Running: {command}')
+        logger.info(f'{log_prefix}[exec] {command}')
         start_time = time.time()
 
         try:
             returncode, stdout, stderr = _subprocess_communicate(
-                process,
+                popen,
                 input=input,
+                logger=logger,
                 write_stdout=write_stdout,
                 write_stderr=write_stderr,
             )
         except BaseException:
-            process.kill()
+            popen.kill()
             delta_time = time.time() - start_time
-            logger.info(f'An exception occurred in {delta_time:.3f}s: {command}')
+            logger.info(f'{log_prefix}[fail] time={delta_time:.3f}s')
             raise
 
     delta_time = time.time() - start_time
-    logger.info(f'Completed in {delta_time:.3f}s with status {returncode}: {command}')
+    logger.info(f'{log_prefix}[done] status={returncode} time={delta_time:.3f}s')
 
-    return CompletedProcess(process.args, returncode, stdout, stderr)
+    return CompletedProcess(popen.args, returncode, stdout, stderr)
 
 
 def _subprocess_communicate(
     popen: Popen,
     *,
     input: str | None,
+    logger: Logger,
     write_stdout: bool,
     write_stderr: bool,
 ) -> tuple[int, str, str]:
     assert popen.stdout is not None
     assert popen.stderr is not None
 
-    def readerthread(input_fh: IO[str], buffer: list[str], output_fh: IO[str] | None) -> None:
+    def readerthread(
+        input_fh: IO[str],
+        buffer: list[str],
+        log_prefix: str,
+        output_fh: IO[str] | None,
+    ) -> None:
         for line in input_fh:
             buffer.append(line)
+            logger.info(f'{log_prefix} {line.rstrip()}')
             if output_fh:
                 output_fh.write(line)
         input_fh.close()
 
     stdout_buff: list[str] = []
+    stdout_prefix = f'[PID={popen.pid}][stdo]'
     stdout_fh = sys.stdout if write_stdout else None
-    stdout_thread = threading.Thread(target=readerthread, args=(popen.stdout, stdout_buff, stdout_fh))
+    stdout_thread = threading.Thread(target=readerthread, args=(popen.stdout, stdout_buff, stdout_prefix, stdout_fh))
     stdout_thread.daemon = True
     stdout_thread.start()
 
     stderr_buff: list[str] = []
+    stderr_prefix = f'[PID={popen.pid}][stde]'
     stderr_fh = sys.stderr if write_stderr else None
-    stderr_thread = threading.Thread(target=readerthread, args=(popen.stderr, stderr_buff, stderr_fh))
+    stderr_thread = threading.Thread(target=readerthread, args=(popen.stderr, stderr_buff, stderr_prefix, stderr_fh))
     stderr_thread.daemon = True
     stderr_thread.start()
 
