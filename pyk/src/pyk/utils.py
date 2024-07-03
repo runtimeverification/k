@@ -466,25 +466,20 @@ def run_process_2(
     env: Mapping[str, str] | None = None,
     logger: Logger | None = None,
 ) -> CompletedProcess:
+    if type(args) is str:
+        args = (args,)
+    else:
+        args = tuple(args)
+
     if cwd is not None:
         cwd = Path(cwd)
         check_dir_path(cwd)
-
-    if type(args) is str:
-        command = args
-    else:
-        args = tuple(args)
-        command = shlex.join(args)
 
     if not logger:
         logger = _LOGGER
 
     write_stdout = not pipe_stdout
     write_stderr = not pipe_stderr
-
-    logger.info(f'Running: {command}')
-
-    start_time = time.time()
 
     res = _subprocess_run(
         args,
@@ -493,10 +488,8 @@ def run_process_2(
         write_stderr=write_stderr,
         cwd=cwd,
         env=env,
+        logger=logger,
     )
-
-    delta_time = time.time() - start_time
-    logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
 
     if check:
         res.check_returncode()
@@ -505,12 +498,14 @@ def run_process_2(
 
 
 def _subprocess_run(
-    *popenargs: Any,
-    input: str | None = None,
-    write_stdout: bool = False,
-    write_stderr: bool = False,
-    env: Mapping[str, str] | None = None,
-    cwd: Path | None = None,
+    args: tuple[Any, ...],
+    *,
+    input: str | None,
+    write_stdout: bool,
+    write_stderr: bool,
+    env: Mapping[str, str] | None,
+    cwd: Path | None,
+    logger: Logger,
 ) -> CompletedProcess:
     kwargs: dict[str, Any] = {
         'stdin': subprocess.PIPE if input is not None else None,
@@ -520,7 +515,11 @@ def _subprocess_run(
         'cwd': cwd,
     }
 
-    with Popen(*popenargs, text=True, **kwargs) as process:
+    with Popen(args, text=True, **kwargs) as process:
+        command = shlex.join(args)
+        logger.info(f'Running: {command}')
+        start_time = time.time()
+
         try:
             returncode, stdout, stderr = _subprocess_communicate(
                 process,
@@ -530,7 +529,12 @@ def _subprocess_run(
             )
         except BaseException:
             process.kill()
+            delta_time = time.time() - start_time
+            logger.info(f'An exception occurred in {delta_time:.3f}s: {command}')
             raise
+
+    delta_time = time.time() - start_time
+    logger.info(f'Completed in {delta_time:.3f}s with status {returncode}: {command}')
 
     return CompletedProcess(process.args, returncode, stdout, stderr)
 
