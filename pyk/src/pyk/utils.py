@@ -8,6 +8,7 @@ import string
 import subprocess
 import sys
 import tarfile
+import threading
 import time
 from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
@@ -20,7 +21,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
     from logging import Logger
-    from typing import Any, Final
+    from typing import IO, Any, Final
 
     P1 = TypeVar('P1')
     P2 = TypeVar('P2')
@@ -477,14 +478,21 @@ def run_process_2(
     if not logger:
         logger = _LOGGER
 
-    stdout = subprocess.PIPE if pipe_stdout else None
-    stderr = subprocess.PIPE if pipe_stderr else None
+    write_stdout = not pipe_stdout
+    write_stderr = not pipe_stderr
 
     logger.info(f'Running: {command}')
 
     start_time = time.time()
 
-    res = _subprocess_run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr)
+    res = _subprocess_run(
+        args,
+        input=input,
+        write_stdout=write_stdout,
+        write_stderr=write_stderr,
+        cwd=cwd,
+        env=env,
+    )
 
     delta_time = time.time() - start_time
     logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
@@ -498,31 +506,84 @@ def run_process_2(
 def _subprocess_run(
     *popenargs: Any,
     input: str | None = None,
-    stdout: int | None = None,
-    stderr: int | None = None,
+    write_stdout: bool = False,
+    write_stderr: bool = False,
     env: Mapping[str, str] | None = None,
     cwd: Path | None = None,
     check: bool = False,
 ) -> CompletedProcess:
     kwargs: dict[str, Any] = {
         'stdin': subprocess.PIPE if input is not None else None,
-        'stdout': stdout,
-        'stderr': stderr,
+        'stdout': subprocess.PIPE,
+        'stderr': subprocess.PIPE,
         'env': env,
         'cwd': cwd,
     }
 
     with Popen(*popenargs, text=True, **kwargs) as process:
         try:
-            _stdout, _stderr = process.communicate(input)
+            returncode, stdout, stderr = _subprocess_communicate(
+                process,
+                input=input,
+                write_stdout=write_stdout,
+                write_stderr=write_stderr,
+            )
         except BaseException:
             process.kill()
             raise
-        retcode = process.poll()
-        if check and retcode:
-            raise CalledProcessError(retcode, process.args, output=_stdout, stderr=_stderr)
-    assert retcode is not None
-    return CompletedProcess(process.args, retcode, _stdout, _stderr)
+
+    if check and returncode:
+        raise CalledProcessError(returncode, process.args, output=stdout, stderr=stderr)
+
+    return CompletedProcess(process.args, returncode, stdout, stderr)
+
+
+def _subprocess_communicate(
+    popen: Popen,
+    *,
+    input: str | None,
+    write_stdout: bool,
+    write_stderr: bool,
+) -> tuple[int, str, str]:
+    assert popen.stdout is not None
+    assert popen.stderr is not None
+
+    def readerthread(input_fh: IO[str], buffer: list[str], output_fh: IO[str] | None) -> None:
+        for line in input_fh:
+            buffer.append(line)
+            if output_fh:
+                output_fh.write(line)
+        input_fh.close()
+
+    stdout_buff: list[str] = []
+    stdout_fh = sys.stdout if write_stdout else None
+    stdout_thread = threading.Thread(target=readerthread, args=(popen.stdout, stdout_buff, stdout_fh))
+    stdout_thread.daemon = True
+    stdout_thread.start()
+
+    stderr_buff: list[str] = []
+    stderr_fh = sys.stderr if write_stderr else None
+    stderr_thread = threading.Thread(target=readerthread, args=(popen.stderr, stderr_buff, stderr_fh))
+    stderr_thread.daemon = True
+    stderr_thread.start()
+
+    if input is not None:
+        assert popen.stdin is not None
+        # Note: popen.stdin.write does not work for llvm_interpret_raw
+        popen._stdin_write(input)  # type: ignore [attr-defined]
+
+    stdout_thread.join()
+    stderr_thread.join()
+
+    # Should be closed in readerthread at this point
+    # popen.stdout.close()
+    # popen.stderr.close()
+
+    returncode = popen.wait()
+    stdout = ''.join(stdout_buff)
+    stderr = ''.join(stderr_buff)
+
+    return returncode, stdout, stderr
 
 
 def exit_with_process_error(err: CalledProcessError) -> None:
