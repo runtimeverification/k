@@ -332,7 +332,7 @@ class Kompile(ABC):
             args += ['-Wno', ','.join(ignore_warnings)]
 
         try:
-            proc_res = run_process_2(args, pipe_stdout=True, pipe_stderr=False, logger=_LOGGER, cwd=cwd, check=check)
+            proc_res = run_process_2(args, write_stderr=True, logger=_LOGGER, cwd=cwd, check=check)
         except CalledProcessError as err:
             raise RuntimeError(
                 f'Command kompile exited with code {err.returncode} for: {self.base_args.main_file}',

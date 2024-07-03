@@ -79,5 +79,5 @@ def _kore_print(
     if color is not None:
         args += ['--color', 'on' if color else 'off']
 
-    run_res = run_process_2(args, input=input, pipe_stdout=True, pipe_stderr=False)
+    run_res = run_process_2(args, input=input)
     return run_res.stdout.strip()

@@ -458,13 +458,13 @@ def run_process(
 def run_process_2(
     args: str | Iterable[str],
     *,
-    pipe_stdout: bool,
-    pipe_stderr: bool,
-    check: bool = True,
     input: str | None = None,
+    write_stdout: bool = False,
+    write_stderr: bool = False,
     cwd: str | Path | None = None,
     env: Mapping[str, str] | None = None,
     logger: Logger | None = None,
+    check: bool = True,
 ) -> CompletedProcess:
     if type(args) is str:
         args = (args,)
@@ -477,9 +477,6 @@ def run_process_2(
 
     if not logger:
         logger = _LOGGER
-
-    write_stdout = not pipe_stdout
-    write_stderr = not pipe_stderr
 
     res = _subprocess_run(
         args,
