@@ -504,15 +504,15 @@ def _subprocess_run(
     cwd: Path | None,
     logger: Logger,
 ) -> CompletedProcess:
-    kwargs: dict[str, Any] = {
-        'stdin': subprocess.PIPE if input is not None else None,
-        'stdout': subprocess.PIPE,
-        'stderr': subprocess.PIPE,
-        'env': env,
-        'cwd': cwd,
-    }
-
-    with Popen(args, text=True, **kwargs) as popen:
+    with Popen(
+        args,
+        stdin=subprocess.PIPE if input is not None else None,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+        cwd=cwd,
+        text=True,
+    ) as popen:
         log_prefix = f'[PID={popen.pid}]'
 
         command = shlex.join(args)
@@ -543,9 +543,9 @@ def _subprocess_communicate(
     popen: Popen,
     *,
     input: str | None,
-    logger: Logger,
     write_stdout: bool,
     write_stderr: bool,
+    logger: Logger,
 ) -> tuple[int, str, str]:
     assert popen.stdout is not None
     assert popen.stderr is not None
@@ -585,7 +585,7 @@ def _subprocess_communicate(
     stdout_thread.join()
     stderr_thread.join()
 
-    # Should be closed in readerthread at this point
+    # Should be closed by readerthread at this point
     # popen.stdout.close()
     # popen.stderr.close()
 
