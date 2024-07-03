@@ -14,13 +14,14 @@ from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from subprocess import CalledProcessError, CompletedProcess, Popen
+from subprocess import CompletedProcess, Popen
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
     from logging import Logger
+    from subprocess import CalledProcessError
     from typing import IO, Any, Final
 
     P1 = TypeVar('P1')
@@ -510,7 +511,6 @@ def _subprocess_run(
     write_stderr: bool = False,
     env: Mapping[str, str] | None = None,
     cwd: Path | None = None,
-    check: bool = False,
 ) -> CompletedProcess:
     kwargs: dict[str, Any] = {
         'stdin': subprocess.PIPE if input is not None else None,
@@ -531,9 +531,6 @@ def _subprocess_run(
         except BaseException:
             process.kill()
             raise
-
-    if check and returncode:
-        raise CalledProcessError(returncode, process.args, output=stdout, stderr=stderr)
 
     return CompletedProcess(process.args, returncode, stdout, stderr)
 
