@@ -33,15 +33,25 @@ class KFuzz:
         template: Pattern,
         subst_strategy: dict[EVar, SearchStrategy[Pattern]],
         check_func: Callable[[Pattern], Any],
+        **hypothesis_args: Any,
     ) -> None:
-        _fuzz(self.definition_dir, template, subst_strategy, check_func=check_func)
+        """Fuzz over a property test using check_func to check for a passing test.
+
+        See :any:`fuzz` for info on the parameters.
+        """
+        fuzz(self.definition_dir, template, subst_strategy, check_func=check_func)
 
     def fuzz_with_exit_code(
         self,
         template: Pattern,
         subst_strategy: dict[EVar, SearchStrategy[Pattern]],
+        **hypothesis_args: Any,
     ) -> None:
-        _fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True)
+        """Fuzz over a property test using the exit code from the interpreter to check for a passing test.
+
+        See :any:`fuzz` for info on the parameters.
+        """
+        fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True)
 
 
 def kintegers(
@@ -70,7 +80,7 @@ def kintegers(
     return integers(min_value=min_value, max_value=max_value).map(int_dv)
 
 
-def _fuzz(
+def fuzz(
     definition_dir: str | Path,
     template: Pattern,
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
@@ -91,7 +101,9 @@ def _fuzz(
           An exit code of 0 indicates a passing test.
           A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
         hypothesis_args: Keyword arguments that will be passed as settings for the hypothesis test. Defaults:
+
           deadline: 5000
+
           phases: (Phase.explicit, Phase.reuse, Phase.generate)
 
 
