@@ -24,7 +24,9 @@ from ..kast.manip import (
     sort_ac_collections,
 )
 from ..kast.outer import KFlatModule
+from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import andBool
+from ..prelude.ml import mlTop
 from ..utils import ensure_dir_path, not_none, single
 from itertools import chain
 
@@ -935,15 +937,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                     rules: Iterable[str] | Iterable[Iterable[str]] = (),
                     csubst: Iterable[CSubst] | None = None,
                     ) -> Edge:
-        if depth <= 0:
-            raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {depth}')
-        source = self.node(source_id)
-        target = self.node(target_id)
         if isinstance(depth, int):
             depth = [depth]
+        for d in depth:
+            if d <= 0:
+                raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {d}')
+        source = self.node(source_id)
+        target = self.node(target_id)
         if rules == ():
             rules = [[] for _ in depth]
-        if type(rules) is Iterable[str]:
+        if all(isinstance(rule, str) for rule in rules):
             rules = [rules]
         if csubst is None:
             csubst = [CSubst(Subst({})) for _ in depth]
@@ -1308,10 +1311,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             merged_cterm = cterms_to_merge[0]
             for cterm in cterms_to_merge[1:]:
                 merged_cterm, _, _ = cterm.anti_unify(merged_cterm)
-            merged_node = self.create_node(merged_cterm)
             # get csubst for |Split|-> A_x or A_y or ... or A_z
             split_source_cterm = self.get_node(split_source).cterm
             csubst = split_source_cterm.match_with_constraint(merged_cterm)
+            if (csubst.subst.minimize() == Subst({}) and csubst.constraint == mlTop(GENERATED_TOP_CELL)
+                    and csubst.apply(split_source_cterm) == merged_cterm):
+                return split_source, csubst
+            merged_node = self.create_node(merged_cterm)
             return merged_node.id, csubst
 
         def _create_merged_then_split(nodes_to_merge_a: tuple[NodeIdLike, ...], nodes_to_merge_b: tuple[NodeIdLike, ...]) -> tuple[NodeIdLike, tuple[CSubst, ...], tuple[tuple[int, tuple[str, ...], CSubst], ...]]:
@@ -1326,18 +1332,26 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             cterms_to_merge = [self.get_node(node).cterm for node in nodes_to_merge_b]
             # get B_x or B_y or ... or B_z
             merged_cterm, csubst0, csubst1 = cterms_to_merge[0].anti_unify(cterms_to_merge[1])
+
             # get the subts for |Split|-> B_x, B_y, ..., B_z
+            def _add_constraints(cs: CSubst, ct: CTerm) -> CSubst:
+                for constraint in ct.constraints:
+                    cs = cs.add_constraint(constraint)
+                return cs
+            csubst0 = _add_constraints(csubst0, cterms_to_merge[0])
+            csubst1 = _add_constraints(csubst1, cterms_to_merge[1])
             csubsts = [csubst0, csubst1]
             for cterm in cterms_to_merge[2:]:
                 merged_cterm, csubst, _ = cterm.anti_unify(merged_cterm)
+                csubst = _add_constraints(csubst, cterm)
                 csubsts.append(csubst)
             merged_node = self.create_node(merged_cterm)
             # get the edges' info for A -|Edge|-> merged(B_i) -|Split|-> B_i
             edges_info = []
             for a_id, b_id in zip(nodes_to_merge_a, nodes_to_merge_b):
                 edge = single(self.edges(source_id=a_id, target_id=b_id))
-                for depth, rules, csubst0, csubst1 in zip(edge.info, csubsts):
-                    edges_info.append((depth, rules, csubst0 & csubst1))
+                for info, csubst1 in zip(edge.info, csubsts):
+                    edges_info.append((info[0], info[1], info[2] & csubst1))
             return merged_node.id, tuple(csubsts), tuple(edges_info)
 
         def _merge_nodes(s: KCFGSemantics) -> bool:
@@ -1346,14 +1360,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             splits_to_merge: list[KCFG.Split] = []  # A -|Split|-> A_1, A_2, ..., A_n
             edges_to_merge: list[list[KCFG.Edge]] = []  # A_i -|Edge|-> B_i
             for split in self.splits():
-                edges = [single(self.edges(source_id=a_i.id)) for a_i in split.targets]
+                edges = [single(self.edges(source_id=a_i)) for a_i in split.target_ids if self.edges(source_id=a_i)]
                 if len(edges) > 2:
                     splits_to_merge.append(split)
                     edges_to_merge.append(edges)
             # rewrite: if s.is_mergeable(B_i) then A -|Edge|-> merged(B_i) -|Split|-> B_i else unchanged
             for index, edges in enumerate(edges_to_merge):
                 # construct adjacency list between mergeable edges
-                mergeable_pairs:list[list[NodeIdLike]] = []
+                mergeable_pairs: list[list[NodeIdLike]] = []
                 for idx, edge in enumerate(edges):
                     if idx + 1 < len(edges):
                         for e in edges[idx + 1:]:
@@ -1386,23 +1400,24 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                     # construct the `A_x or A_y or ... or A_z` nodes and subts for |Split|-> A_x or A_y or ... or A_z
                     merged_a_groups.append(_create_split_then_merged(a, tuple(mergeable_a_i_s)))
                     # construct the `B_x or B_y or ... or B_z` nodes and subts for |Split|-> B_x, B_y, ..., B_z
-                    merged_b_groups.append(_create_merged_then_split(tuple(mergeable_b_i_s)))
+                    merged_b_groups.append(_create_merged_then_split(tuple(mergeable_a_i_s), tuple(mergeable_b_i_s)))
                 # safely delete the nodes in the maximal cliques:
                 # save the Edge information before removing the node
-                edge_info: dict[NodeIdLike, tuple[int, tuple[str, ...]]] = {}  # b_i: (depth, rules)
                 for mergeable_a_i in set(chain.from_iterable(mergeable_a_i_s_group)):
                     b_i = single(self.edges(source_id=mergeable_a_i)).target.id
                     self.remove_node_safely(mergeable_a_i, {'Split': (a,)}, {'Edge': (b_i,)})
                 # if only one `A_x or A_y or ... or A_z` and `A_x or A_y or ... or A_z = A`,
                 # then A -|Edge|-> B_x or B_y or ... or B_z
                 # else A -|Split|-> A_x or A_y or ... or A_z -|Edge|-> B_x or B_y or ... or B_z
-                if len(merged_a_groups) == 1 and self.get_node(merged_a_groups[0][0]).cterm == self.get_node(a).cterm:
-                    self.create_edge(a, merged_b_groups[0][0], merged_b_groups[0][2][0], merged_b_groups[0][2][1], merged_b_groups[0][2][2])
+                if len(merged_a_groups) == 1 and merged_a_groups[0][0] == a:
+                    depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b_groups[0][2]])
+                    self.create_edge(a, merged_b_groups[0][0], depth, rules, csubst)
                 else:
                     split = single(self.splits(source_id=a))
                     for merged_a, merged_b in zip(merged_a_groups, merged_b_groups):
                         split.add_target(merged_a[0], merged_a[1])
-                        self.create_edge(merged_a[0], merged_b[0], merged_b[2][0], merged_b[2][1], merged_b[2][2])
+                        depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b[2]])
+                        self.create_edge(merged_a[0], merged_b[0], depth, rules, csubst)
                     self._splits[a] = split  # todo: is there anything wrong if I don't change the _deleted and _created?
                 # B_x or B_y or ... or B_z -|Split|-> B_x, B_y, ..., B_z
                 for merged_b, mergeable_b_i_s in zip(merged_b_groups, mergeable_b_i_s_group):

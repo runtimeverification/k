@@ -52,6 +52,18 @@ MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
 )
 
 
+def test_cterm_match_with_constraint() -> None:
+    # Given
+    merged_cterm = {'config': {'args': [{'name': 'X', 'node': 'KVariable'}], 'arity': 1, 'label': {'name': '<top>', 'node': 'KLabel', 'params': []}, 'node': 'KApply', 'variable': False}, 'constraints': []}
+    merged_cterm = CTerm.from_dict(merged_cterm)
+    original_cterm = {'config': {'node': 'KApply', 'label': {'node': 'KLabel', 'name': '<top>', 'params': []}, 'args': [{'node': 'KVariable', 'name': 'X'}], 'arity': 1, 'variable': False}, 'constraints': [{'node': 'KApply', 'label': {'node': 'KLabel', 'name': '#Equals', 'params': [{'node': 'KSort', 'name': 'Bool'}, {'node': 'KSort', 'name': 'GeneratedTopCell'}]}, 'args': [{'node': 'KToken', 'token': 'true', 'sort': {'node': 'KSort', 'name': 'Bool'}}, {'node': 'KApply', 'label': {'node': 'KLabel', 'name': '_>=Int_', 'params': []}, 'args': [{'node': 'KVariable', 'name': 'X'}, {'node': 'KToken', 'token': '5', 'sort': {'node': 'KSort', 'name': 'Int'}}], 'arity': 2, 'variable': False}], 'arity': 2, 'variable': False}]}
+    original_cterm = CTerm.from_dict(original_cterm)
+    # When
+    csubst = merged_cterm.match_with_constraint(original_cterm)
+    # Then
+    assert csubst.apply(merged_cterm) == original_cterm
+
+
 @pytest.mark.parametrize('term,pattern', MATCH_TEST_DATA, ids=count())
 def test_cterm_match_and_subst(term: KInner, pattern: KInner) -> None:
     # When
