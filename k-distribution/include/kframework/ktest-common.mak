@@ -28,5 +28,4 @@ LLVM_KRUN=${K_BIN}/llvm-krun
 # and kdep
 KDEP=${K_BIN}/kdep
 # command to strip paths from test outputs
-# REMOVE_PATHS=| sed 's!\('`pwd`'\|'${BUILTIN_DIR}'\|/nix/store/.\+/include/kframework/builtin\)/\(\./\)\{0,2\}!!g'
-REMOVE_PATHS=| sed 's!\('`pwd`'\)/\(\./\)\{0,2\}!!g' | sed 's!\('${BUILTIN_DIR}'\)/\(\./\)\{0,2\}!!g' | sed 's!\('/nix/store/.\+/include/kframework/builtin'\)/\(\./\)\{0,2\}!!g'
+REMOVE_PATHS=| sed 's!\('`pwd`'\)/\(\./\)\{0,2\}!!g' | sed 's!\('${BUILTIN_DIR}'\)/\(\./\)\{0,2\}!!g' | sed 's!\('/nix/store/..*/include/kframework/builtin'\)/\(\./\)\{0,2\}!!g'
