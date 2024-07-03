@@ -550,28 +550,30 @@ def _subprocess_communicate(
     assert popen.stdout is not None
     assert popen.stderr is not None
 
+    log_prefix = f'[PID={popen.pid}]'
+
     def readerthread(
         input_fh: IO[str],
         buffer: list[str],
-        log_prefix: str,
+        stream_prefix: str,
         output_fh: IO[str] | None,
     ) -> None:
         for line in input_fh:
             buffer.append(line)
-            logger.info(f'{log_prefix} {line.rstrip()}')
+            logger.info(f'{log_prefix}{stream_prefix} {line.rstrip()}')
             if output_fh:
                 output_fh.write(line)
         input_fh.close()
 
     stdout_buff: list[str] = []
-    stdout_prefix = f'[PID={popen.pid}][stdo]'
+    stdout_prefix = '[stdo]'
     stdout_fh = sys.stdout if write_stdout else None
     stdout_thread = threading.Thread(target=readerthread, args=(popen.stdout, stdout_buff, stdout_prefix, stdout_fh))
     stdout_thread.daemon = True
     stdout_thread.start()
 
     stderr_buff: list[str] = []
-    stderr_prefix = f'[PID={popen.pid}][stde]'
+    stderr_prefix = '[stde]'
     stderr_fh = sys.stderr if write_stderr else None
     stderr_thread = threading.Thread(target=readerthread, args=(popen.stderr, stderr_buff, stderr_prefix, stderr_fh))
     stderr_thread.daemon = True
@@ -579,6 +581,8 @@ def _subprocess_communicate(
 
     if input is not None:
         assert popen.stdin is not None
+        for line in input.split('\n'):
+            logger.info(f'{log_prefix}[stdi] {line}')
         # Note: popen.stdin.write does not work for llvm_interpret_raw
         popen._stdin_write(input)  # type: ignore [attr-defined]
 
