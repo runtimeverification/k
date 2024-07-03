@@ -881,7 +881,7 @@ class AddCollectionAtts(SingleModulePass):
             att=syntax_sort.att.update(
                 [
                     # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
-                    Atts.CONCAT(KApply(concat_att[Atts.KLABEL]).to_dict()),
+                    Atts.CONCAT(KApply(concat_att[Atts.SYMBOL]).to_dict()),
                     # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
                     Atts.ELEMENT(concat_att[Atts.ELEMENT]),
                     Atts.UNIT(concat_att[Atts.UNIT]),
