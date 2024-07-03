@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import sys
-import warnings
 from typing import TYPE_CHECKING
 
 from hypothesis import Phase, given, settings
-from hypothesis.errors import HypothesisWarning
 from hypothesis.strategies import fixed_dictionaries, integers
 
 from ..kore.parser import KoreParser
@@ -21,9 +18,6 @@ if TYPE_CHECKING:
     from hypothesis.strategies import SearchStrategy
 
     from ..kore.syntax import Pattern
-
-
-REC_LIMIT = 10**7
 
 
 class KFuzz:
@@ -108,10 +102,6 @@ def _fuzz(
         raise RuntimeError('Must pass one of check_func or check_exit_code, and not both!')
 
     def test(subst_case: Mapping[EVar, Pattern]) -> None:
-        if sys.getrecursionlimit() < REC_LIMIT:
-            # Reset the recursion limit, hypothesis changes it.
-            sys.setrecursionlimit(REC_LIMIT)
-
         def sub(p: Pattern) -> Pattern:
             if isinstance(p, EVar) and p in subst_case:
                 return subst_case[p]
@@ -129,9 +119,6 @@ def _fuzz(
             check_func(res_pattern)
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
-
-    # Suppress warnings from hypothesis about changing the recursion limit
-    warnings.filterwarnings('ignore', message='The recursion limit', category=HypothesisWarning, append=True)
 
     # Default settings for hypothesis
     hypothesis_args.setdefault('deadline', 5000)
