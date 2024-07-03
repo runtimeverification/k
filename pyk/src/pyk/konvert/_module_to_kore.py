@@ -877,11 +877,16 @@ class AddCollectionAtts(SingleModulePass):
         assert syntax_sort.sort in concat_atts
         concat_att = concat_atts[syntax_sort.sort]
 
+        # Workaround until zero-argument symbol is removed, rather than
+        # deprecated.
+        symbol = concat_att[Atts.SYMBOL]
+        assert symbol is not None
+
         return syntax_sort.let(
             att=syntax_sort.att.update(
                 [
                     # TODO Here, the attriubte is stored as dict, but ultimately we should parse known attributes in KAtt.from_dict
-                    Atts.CONCAT(KApply(concat_att[Atts.SYMBOL]).to_dict()),
+                    Atts.CONCAT(KApply(symbol).to_dict()),
                     # TODO Here, we keep the format from the frontend so that the attributes on SyntaxSort and Production are of the same type.
                     Atts.ELEMENT(concat_att[Atts.ELEMENT]),
                     Atts.UNIT(concat_att[Atts.UNIT]),
