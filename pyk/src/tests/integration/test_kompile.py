@@ -65,21 +65,19 @@ def test_booster_kompile(tmp_path: Path) -> None:
     assert DefinitionInfo(output_dir / 'llvm-library').backend == KompileBackend.LLVM
 
 
-class TestKLabel(KompiledTest):
+class TestSymbol(KompiledTest):
     KOMPILE_DEFINITION = """
-        module KLABEL
+        module SYMBOL
             syntax Foo ::= "foo" [symbol(foo)]
-                         | "bar" [klabel(bar), symbol]
-                         | "baz" [klabel(baz)]
                          | "qux"
         endmodule
     """
-    KOMPILE_MAIN_MODULE = 'KLABEL'
-    KOMPILE_ARGS = {'syntax_module': 'KLABEL'}
+    KOMPILE_MAIN_MODULE = 'SYMBOL'
+    KOMPILE_ARGS = {'syntax_module': 'SYMBOL'}
 
     def test(self, definition: KDefinition) -> None:
         # Given
-        module = definition.module('KLABEL')
+        module = definition.module('SYMBOL')
 
         def klabel_defined_at_line(line: int) -> KLabel:
             (prod,) = (prod for prod in module.productions if prod.att.get(Atts.LOCATION, [None])[0] == line)
@@ -88,15 +86,11 @@ class TestKLabel(KompiledTest):
             return res
 
         foo = klabel_defined_at_line(2)
-        bar = klabel_defined_at_line(3)
-        baz = klabel_defined_at_line(4)
-        qux = klabel_defined_at_line(5)
+        qux = klabel_defined_at_line(3)
 
         # Then
         assert foo.name == 'foo'
-        assert bar.name == 'bar'
-        assert baz.name == 'baz_KLABEL_Foo'
-        assert qux.name == 'qux_KLABEL_Foo'
+        assert qux.name == 'qux_SYMBOL_Foo'
 
 
 class TestSubsortSymbol(KompiledTest):

@@ -1,11 +1,11 @@
-[Error] Compiler: Symbol #KToken is not unique. Previously defined as: syntax KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
+[Error] Compiler: Symbol #KToken is not unique. Previously defined as: syntax KBott ::= "#token" "(" KString "," KString ")" [symbol(#KToken)]
 	Source(invalidSymbol.k)
-	Location(4,16,4,47)
-	4 |	syntax Foo ::= foo() [klabel(#KToken), symbol]
-	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Symbol foo is not unique. Previously defined as: syntax Bar ::= "bar" "(" ")" [klabel(foo), symbol]
+	Location(4,16,4,39)
+	4 |	syntax Foo ::= foo() [symbol(#KToken)]
+	  .	               ^~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Symbol foo is not unique. Previously defined as: syntax Bar ::= "bar" "(" ")" [symbol(foo)]
 	Source(invalidSymbol.k)
-	Location(7,16,7,43)
-	7 |	syntax Baz ::= baz() [klabel(foo), symbol]
-	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+	Location(7,16,7,35)
+	7 |	syntax Baz ::= baz() [symbol(foo)]
+	  .	               ^~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
