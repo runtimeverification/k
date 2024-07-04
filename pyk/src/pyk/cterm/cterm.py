@@ -310,6 +310,7 @@ class CSubst:
 
     def __and__(self, other: CSubst):
         """Return a new `CSubst` with the subst and constraints of both `CSubst` instances combined."""
+        # todo: minimize the constraints, like x > 0 and x > 1 should be x > 1
         return CSubst(self.subst.union(other.subst), unique(chain(self.constraints, other.constraints)))
 
     def to_dict(self) -> dict[str, Any]:

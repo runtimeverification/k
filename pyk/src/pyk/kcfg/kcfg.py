@@ -26,7 +26,7 @@ from ..kast.manip import (
 from ..kast.outer import KFlatModule
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import andBool
-from ..prelude.ml import mlTop
+from ..prelude.ml import mlTop, mlAnd, mlOr
 from ..utils import ensure_dir_path, not_none, single
 from itertools import chain
 
@@ -1307,16 +1307,23 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return the `A_x or A_y or ... or A_z` node and subts for |Split|-> A_x or A_y or ... or A_z
             """
             # get A_x or A_y or ... or A_z
+            split = single(self.splits(source_id=split_source))
+            if all(target_id in nodes_to_merge for target_id in split.target_ids):
+                return split_source, CSubst(Subst({}))
             cterms_to_merge = [self.get_node(node).cterm for node in nodes_to_merge]
             merged_cterm = cterms_to_merge[0]
+            constraint = mlAnd(merged_cterm.constraints)
             for cterm in cterms_to_merge[1:]:
-                merged_cterm, _, _ = cterm.anti_unify(merged_cterm)
+                merged_cterm, csubst0, csubst1 = cterm.anti_unify(merged_cterm)
+                # todo: after anti_unify saves the constraints, I should delete the code here.
+                # merged_cterm.constraints OR cterm.constraints
+                constraint_tmp = mlAnd(cterm.constraints)
+                constraint = mlOr([csubst1.subst.apply(constraint), csubst0.subst.apply(constraint_tmp)])
+            merged_cterm.add_constraint(constraint)  # todo: delete after correct anti_unify
             # get csubst for |Split|-> A_x or A_y or ... or A_z
             split_source_cterm = self.get_node(split_source).cterm
             csubst = split_source_cterm.match_with_constraint(merged_cterm)
-            if (csubst.subst.minimize() == Subst({}) and csubst.constraint == mlTop(GENERATED_TOP_CELL)
-                    and csubst.apply(split_source_cterm) == merged_cterm):
-                return split_source, csubst
+            csubst = csubst.add_constraint(constraint)  # todo: delete after correct match_with_constraint
             merged_node = self.create_node(merged_cterm)
             return merged_node.id, csubst
 
@@ -1348,10 +1355,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             merged_node = self.create_node(merged_cterm)
             # get the edges' info for A -|Edge|-> merged(B_i) -|Split|-> B_i
             edges_info = []
+            idx = 0
             for a_id, b_id in zip(nodes_to_merge_a, nodes_to_merge_b):
                 edge = single(self.edges(source_id=a_id, target_id=b_id))
-                for info, csubst1 in zip(edge.info, csubsts):
-                    edges_info.append((info[0], info[1], info[2] & csubst1))
+                for depth, rules, csubst in edge.info:
+                    edges_info.append((depth, rules, csubst & csubsts[idx]))
+                idx += 1
             return merged_node.id, tuple(csubsts), tuple(edges_info)
 
         def _merge_nodes(s: KCFGSemantics) -> bool:
@@ -1413,9 +1422,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                     depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b_groups[0][2]])
                     self.create_edge(a, merged_b_groups[0][0], depth, rules, csubst)
                 else:
-                    split = single(self.splits(source_id=a))
+                    split = self.splits(source_id=a)
+                    if not split:
+                        split = KCFG.Split(self.get_node(a), [])
+                    else:
+                        split = single(split)
                     for merged_a, merged_b in zip(merged_a_groups, merged_b_groups):
-                        split.add_target(merged_a[0], merged_a[1])
+                        split.add_target(self.get_node(merged_a[0]), merged_a[1])
                         depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b[2]])
                         self.create_edge(merged_a[0], merged_b[0], depth, rules, csubst)
                     self._splits[a] = split  # todo: is there anything wrong if I don't change the _deleted and _created?
