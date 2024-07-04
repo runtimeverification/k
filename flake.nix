@@ -8,20 +8,33 @@
       url = "github:runtimeverification/llvm-backend/v0.1.52";
       inputs.utils.follows = "flake-utils";
     };
+    poetry2nix = {
+      url =
+        "github:nix-community/poetry2nix/626111646fe236cb1ddc8191a48c75e072a82b7c";
+      inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
+    };
     rv-utils.url = "github:runtimeverification/rv-nix-tools";
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , llvm-backend }:
+    , llvm-backend, poetry2nix }:
     let
       allOverlays = [
         (_: _: {
           llvm-version = 17;
           llvm-backend-build-type = "Release";
         })
+
         llvm-backend.overlays.default
+
         haskell-backend.overlays.z3
         haskell-backend.overlays.integration-tests
+
+        (import ./nix/pyk-overlay.nix {
+          inherit poetry2nix;
+          projectDir = ./pyk;
+        })
+
         (final: prev:
           let
             k-version =
@@ -132,7 +145,7 @@
           pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
-          inherit (pkgs) k;
+          inherit (pkgs) k pyk pyk-python310 pyk-python311;
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
