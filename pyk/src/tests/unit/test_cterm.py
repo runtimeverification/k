@@ -10,7 +10,7 @@ from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kint import INT, intToken
+from pyk.prelude.kint import INT, intToken, geInt
 from pyk.prelude.ml import mlAnd, mlEqualsTrue
 
 from .utils import a, b, c, f, g, h, k, x, y, z
@@ -51,6 +51,19 @@ MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
     (f(a, g(b, h(c))), f(x, y)),
 )
 
+
+def test_cterm_match_with_constraint() -> None:
+    # Given
+    merged_cterm = _as_cterm(KVariable('X'))
+    original_cterm = _as_cterm(KVariable('X'))
+    x_ge_0 = mlEqualsTrue(geInt(KVariable('X'), intToken(0)))
+    original_cterm = original_cterm.add_constraint(x_ge_0)
+
+    # When
+    csubst = merged_cterm.match_with_constraint(original_cterm)
+
+    # Then
+    assert csubst.apply(merged_cterm) == original_cterm
 
 @pytest.mark.parametrize('term,pattern', MATCH_TEST_DATA, ids=count())
 def test_cterm_match_and_subst(term: KInner, pattern: KInner) -> None:
