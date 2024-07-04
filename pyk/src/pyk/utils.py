@@ -506,7 +506,7 @@ def _subprocess_run(
 ) -> CompletedProcess:
     with Popen(
         args,
-        stdin=subprocess.PIPE if input is not None else None,
+        stdin=subprocess.PIPE if input is not None else subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=env,
