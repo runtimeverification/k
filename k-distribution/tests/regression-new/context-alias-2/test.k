@@ -8,7 +8,7 @@ module TEST
                | Id "=" Int
                | Id
                | Int
-               | l(Exp) [klabel(l), symbol] | m(Exp) [klabel(m), symbol] | r(Exp) [klabel(r), symbol]
+               | l(Exp) [symbol(l)] | m(Exp) [symbol(m)] | r(Exp) [symbol(r)]
   syntax KResult ::= Int
 
   context alias [left]: HERE [context(l)]

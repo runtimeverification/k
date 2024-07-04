@@ -76,7 +76,7 @@ module IELE-COMMON
   syntax IeleName  ::=
     IeleNameToken
   syntax IeleName  ::=
-    StringIeleName [avoid, function, klabel(StringIeleName), symbol]
+    StringIeleName [avoid, function, symbol(StringIeleName)]
   syntax GlobalName  ::=
     "@" IeleName
   syntax LocalName  ::=
@@ -307,7 +307,7 @@ module IELE-COMMON
   syntax ContractDeclaration  ::=
     "external" "contract" IeleName
   syntax GlobalDefinition  ::=
-    GlobalName "=" IntConstant [klabel(globalDefinition)]
+    GlobalName "=" IntConstant [symbol(globalDefinition)]
   syntax FunctionSignature  ::=
     GlobalName "(" FunctionParameters ")"
   syntax FunctionParameters  ::=
