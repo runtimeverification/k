@@ -1216,13 +1216,17 @@ class KoreServer(ContextManager['KoreServer']):
         new_env['GHCRTS'] = f'-N{self._haskell_threads}'
 
         _LOGGER.info(f'Starting KoreServer: {" ".join(cli_args)}')
-        self._proc = Popen(cli_args, env=new_env)
+        self._proc = self._create_proc(cli_args, new_env)
         pid = self._proc.pid
         host, port = self._get_host_and_port(pid)
         if self._port:
             assert port == self._port
         self._info = KoreServerInfo(pid=pid, host=host, port=port)
         _LOGGER.info(f'KoreServer started: {self.host}:{self.port}, pid={self.pid}')
+
+    @staticmethod
+    def _create_proc(args: list[str], env: dict[str, str]) -> Popen:
+        return Popen(args, env=env)
 
     def close(self) -> None:
         _LOGGER.info(f'Stopping KoreServer: {self.host}:{self.port}, pid={self.pid}')
