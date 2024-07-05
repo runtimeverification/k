@@ -9,8 +9,9 @@ from pyk.cterm import CTerm, cterm_build_claim, cterm_build_rule
 from pyk.kast import Atts, KAtt
 from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.outer import KClaim
+from pyk.kore.prelude import generated_top
 from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.kint import INT, intToken
+from pyk.prelude.kint import INT, intToken, geInt
 from pyk.prelude.ml import mlAnd, mlEqualsTrue
 
 from .utils import a, b, c, f, g, h, k, x, y, z
@@ -50,6 +51,24 @@ MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
     (f(g(h(x))), f(x)),
     (f(a, g(b, h(c))), f(x, y)),
 )
+
+
+def test_cterm_anti_unify() -> None:
+    # Given
+    term1 = _as_cterm(x).add_constraint(mlEqualsTrue(geInt(x, intToken(0))))
+    term2 = _as_cterm(y).add_constraint(mlEqualsTrue(geInt(y, intToken(5))))
+    # todo: more cells & @pytest.mark.parametrize
+
+    # When
+    anti_unified_term, subst1, subst2 = term1.anti_unify(term2)
+
+    # Then
+    # functional checks
+    assert subst1.apply(anti_unified_term).to_dict() == term1.to_dict()
+    assert subst2.apply(anti_unified_term).to_dict() == term2.to_dict()
+    # todo: constraint checks
+    #  1. common constraint should be in the anti-unified term
+    #  2. disjoint constraints should be in the respective substitutions
 
 
 @pytest.mark.parametrize('term,pattern', MATCH_TEST_DATA, ids=count())
