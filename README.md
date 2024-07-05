@@ -91,6 +91,7 @@ sudo apt-get install    \
     libjemalloc-dev     \
     libmpfr-dev         \
     libsecp256k1-dev    \
+    libunwind-dev       \
     libyaml-dev         \
     libz3-dev           \
     lld-15              \
