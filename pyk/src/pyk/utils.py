@@ -516,7 +516,9 @@ def _subprocess_run(
         log_prefix = f'[PID={popen.pid}]'
 
         command = shlex.join(args)
-        logger.info(f'{log_prefix}[exec] {command}')
+        for line in command.split('\n'):
+            logger.info(f'{log_prefix}[exec] {line}')
+
         start_time = time.time()
 
         try:
