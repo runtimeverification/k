@@ -66,8 +66,8 @@ def do_analyze(definition_dir: Path, input_file: Path) -> None:
     print('=================================')
     for location_str, hits in applied_simplifications.items():
         rule_label_str = ''
-        if location_str in rule_dict and Atts.KLABEL in rule_dict[location_str].att:
-            rule_label_str = f'[{rule_dict[location_str].att[Atts.LABEL]}]'
+        if location_str in rule_dict and Atts.SYMBOL in rule_dict[location_str].att:
+            rule_label_str = f'[{rule_dict[location_str].att[Atts.SYMBOL]}]'
         if hits > 0:
             print(f'    {hits} applications of rule {rule_label_str} defined at {location_str}')
     total_simplifications = sum([v for v in applied_simplifications.values() if v > 0])
