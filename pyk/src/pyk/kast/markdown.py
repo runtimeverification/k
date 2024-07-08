@@ -40,7 +40,7 @@ def code_blocks(text: str) -> Iterator[CodeBlock]:
 
 def parse_tags(text: str) -> set[str]:
     def check_tag(tag: str) -> None:
-        if not (tag and all(c.isalnum() or c == '_' for c in tag)):
+        if not (tag and all(c.isalnum() or c in '_-' for c in tag)):
             raise ValueError(f'Invalid tag: {tag!r}')
 
     if not text:
