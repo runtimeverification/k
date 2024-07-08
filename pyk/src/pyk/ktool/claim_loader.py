@@ -68,7 +68,13 @@ class ClaimLoader:
 
     @staticmethod
     def _digest(spec_file: Path, *, include_dirs: Iterable[Path], md_selector: str | None) -> str:
-        definitions = slurp_definitions(spec_file, include_dirs=include_dirs, md_selector=md_selector)
+        from .utils import K_DISTRIBUTION
+
+        definitions = slurp_definitions(
+            spec_file,
+            include_dirs=list(include_dirs) + ([K_DISTRIBUTION.builtin_dir] if K_DISTRIBUTION else []),
+            md_selector=md_selector,
+        )
         definitions = {key: definitions[key] for key in sorted(definitions)}
         return hash_str(definitions)
 
