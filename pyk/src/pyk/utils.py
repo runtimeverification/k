@@ -689,7 +689,7 @@ class BugReport:
             self.add_file(Path(ntf.name), arcname)
 
     def add_request(self, req_name: str) -> None:
-        self.add_file_contents(req_name, Path(f'sequence/{self._command_id}'))
+        self.add_file_contents(req_name, Path(f'sequence/{self._command_id:03}'))
         self._command_id += 1
 
     def add_command(self, args: Iterable[str]) -> None:
