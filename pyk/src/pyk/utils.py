@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import logging
 import os
 import shlex
@@ -666,14 +665,12 @@ class BugReport:
     _command_id: int
     _defn_id: int
     _file_remap: dict[str, str]
-    _requests_sequence: dict[int, str]
 
     def __init__(self, bug_report: Path) -> None:
         self._bug_report = bug_report.with_suffix('.tar')
         self._command_id = 0
         self._defn_id = 0
         self._file_remap = {}
-        self._requests_sequence = {}
         if self._bug_report.exists():
             _LOGGER.warning(f'Bug report exists, removing: {self._bug_report}')
             self._bug_report.unlink()
@@ -692,9 +689,8 @@ class BugReport:
             self.add_file(Path(ntf.name), arcname)
 
     def add_request_command(self, req_name: str, args: Iterable[str]) -> None:
-        self._requests_sequence[self._command_id] = req_name
-        self.add_file_contents(json.dumps(self._requests_sequence), Path('requests_sequence.json'))
-        self.add_command(args)
+        self.add_file_contents(req_name, Path(f'sequence/{self._command_id}'))
+        self._command_id += 1
 
     def add_command(self, args: Iterable[str]) -> None:
         def _remap_arg(_a: str) -> str:
