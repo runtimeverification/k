@@ -6,6 +6,7 @@ import sys
 from collections.abc import Iterable
 from contextlib import contextmanager
 from pathlib import Path
+from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
@@ -270,9 +271,8 @@ def exec_prove(options: ProveOptions) -> None:
 
     try:
         proofs = prove_rpc.prove_rpc(options=options)
-    except RuntimeError as err:
-        _, _, _, cpe = err.args
-        exit_with_process_error(cpe)
+    except CalledProcessError as err:
+        exit_with_process_error(err)
     for proof in sorted(proofs, key=lambda p: p.id):
         print('\n'.join(proof.summary.lines))
         if proof.failed and options.failure_info:
@@ -354,9 +354,8 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             ignore_warnings=options.ignore_warnings,
             no_exc_wrap=options.no_exc_wrap,
         )
-    except RuntimeError as err:
-        _, _, _, _, cpe = err.args
-        exit_with_process_error(cpe)
+    except CalledProcessError as err:
+        exit_with_process_error(err)
 
 
 def exec_run(options: RunOptions) -> None:

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from dataclasses import dataclass
 from functools import cached_property
+from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 from cmd2 import Cmd, with_argparser, with_category
@@ -76,7 +77,7 @@ class KInterpreter(Interpreter[KState]):
                 output=KRunOutput.KORE,
                 depth=0,
             )
-        except RuntimeError as err:
+        except CalledProcessError as err:
             raise ReplError('Failed to load program') from err
 
         pattern = KoreParser(proc_res.stdout).pattern()

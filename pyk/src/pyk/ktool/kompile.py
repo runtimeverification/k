@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, final
 
 from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process_2, single
@@ -331,16 +330,7 @@ class Kompile(ABC):
         if ignore_warnings:
             args += ['-Wno', ','.join(ignore_warnings)]
 
-        try:
-            proc_res = run_process_2(args, write_stderr=True, logger=_LOGGER, cwd=cwd, check=check)
-        except CalledProcessError as err:
-            raise RuntimeError(
-                f'Command kompile exited with code {err.returncode} for: {self.base_args.main_file}',
-                err.stdout,
-                err.stderr,
-                err.returncode,
-                err,
-            ) from err
+        proc_res = run_process_2(args, write_stderr=True, logger=_LOGGER, cwd=cwd, check=check)
 
         if bug_report and proc_res.stdout:
             bug_report.add_file_contents(proc_res.stdout.rstrip(), Path('kompile.log'))

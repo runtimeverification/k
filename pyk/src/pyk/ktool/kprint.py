@@ -6,7 +6,6 @@ from contextlib import contextmanager
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
@@ -107,12 +106,7 @@ def _kast(
         gen_glr_parser=gen_glr_parser,
     )
 
-    try:
-        return run_process_2(args, write_stderr=True, logger=_LOGGER, check=check)
-    except CalledProcessError as err:
-        raise RuntimeError(
-            f'Command kast exited with code {err.returncode} for: {file}', err.stdout, err.stderr
-        ) from err
+    return run_process_2(args, write_stderr=True, logger=_LOGGER, check=check)
 
 
 def gen_glr_parser(
