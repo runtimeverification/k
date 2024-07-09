@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
-from ..utils import run_process
+from ..utils import run_process_2
 
 if TYPE_CHECKING:
     from .syntax import Pattern
@@ -79,5 +79,5 @@ def _kore_print(
     if color is not None:
         args += ['--color', 'on' if color else 'off']
 
-    run_res = run_process(args, input=input)
+    run_res = run_process_2(args, input=input)
     return run_res.stdout.strip()
