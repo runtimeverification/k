@@ -565,6 +565,7 @@ def _subprocess_communicate(
             logger.info(f'{log_prefix}{stream_prefix} {line.rstrip()}')
             if output_fh:
                 output_fh.write(line)
+                output_fh.flush()
         input_fh.close()
 
     stdout_buff: list[str] = []
