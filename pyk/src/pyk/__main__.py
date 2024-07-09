@@ -353,6 +353,7 @@ def exec_kompile(options: KompileCommandOptions) -> None:
             warnings_to_errors=options.warnings_to_errors,
             ignore_warnings=options.ignore_warnings,
             no_exc_wrap=options.no_exc_wrap,
+            tool_mode=True,
         )
     except CalledProcessError as err:
         exit_with_process_error(err)

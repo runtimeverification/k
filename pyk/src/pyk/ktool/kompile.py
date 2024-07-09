@@ -282,8 +282,10 @@ class Kompile(ABC):
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
+        # ---
         cwd: Path | None = None,
         check: bool = True,
+        tool_mode: bool = False,
         bug_report: BugReport | None = None,
         outer_parsed_json: bool = False,
     ) -> Path:
@@ -330,7 +332,14 @@ class Kompile(ABC):
         if ignore_warnings:
             args += ['-Wno', ','.join(ignore_warnings)]
 
-        proc_res = run_process_2(args, write_stderr=True, logger=_LOGGER, cwd=cwd, check=check)
+        proc_res = run_process_2(
+            args,
+            write_stdout=tool_mode,
+            write_stderr=tool_mode,
+            logger=_LOGGER,
+            cwd=cwd,
+            check=check,
+        )
 
         if bug_report and proc_res.stdout:
             bug_report.add_file_contents(proc_res.stdout.rstrip(), Path('kompile.log'))

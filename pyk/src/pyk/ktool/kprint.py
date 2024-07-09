@@ -106,7 +106,7 @@ def _kast(
         gen_glr_parser=gen_glr_parser,
     )
 
-    return run_process_2(args, write_stderr=True, logger=_LOGGER, check=check)
+    return run_process_2(args, logger=_LOGGER, check=check)
 
 
 def gen_glr_parser(

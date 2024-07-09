@@ -97,7 +97,7 @@ def _kprove(
 
     run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
 
-    return run_process_2(run_args, write_stderr=True, logger=_LOGGER, env=env, check=check)
+    return run_process_2(run_args, logger=_LOGGER, env=env, check=check)
 
 
 def _build_arg_list(
