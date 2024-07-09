@@ -342,11 +342,8 @@ class Kompile(ABC):
                 err,
             ) from err
 
-        if proc_res.stdout:
-            out = proc_res.stdout.rstrip()
-            print(out)
-            if bug_report:
-                bug_report.add_file_contents(out, Path('kompile.log'))
+        if bug_report and proc_res.stdout:
+            bug_report.add_file_contents(proc_res.stdout.rstrip(), Path('kompile.log'))
 
         definition_dir = output_dir if output_dir else _default_output_dir(self.base_args.main_file)
         assert definition_dir.is_dir()
