@@ -17,9 +17,9 @@ PRETTY_TEST_DATA: Final = (
     ('empty', (), ''),
     ('nullary', (Atts.FUNCTION(None),), '[function]'),
     ('two-nullaries', (Atts.FUNCTION(None), Atts.TOTAL(None)), '[function, total]'),
-    ('opt-none', (Atts.SYMBOL(None),), '[symbol]'),
-    ('opt-some-empty-str', (Atts.SYMBOL(''),), '[symbol("")]'),
-    ('opt-some-nonempty-str', (Atts.SYMBOL('foo'),), '[symbol("foo")]'),
+    ('opt-none', (Atts.CONCRETE(None),), '[concrete]'),
+    ('opt-some-empty-str', (Atts.CONCRETE(''),), '[concrete("")]'),
+    ('opt-some-nonempty-str', (Atts.CONCRETE('foo'),), '[concrete("foo")]'),
     ('multiple', (Atts.SYMBOL('foo'), Atts.FUNCTION(None), Atts.TOTAL(None)), '[symbol("foo"), function, total]'),
 )
 
