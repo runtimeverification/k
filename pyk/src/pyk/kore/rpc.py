@@ -12,7 +12,8 @@ from datetime import datetime, timedelta
 from enum import Enum, auto
 from pathlib import Path
 from signal import SIGINT
-from subprocess import Popen
+from subprocess import DEVNULL, PIPE, Popen
+from threading import Thread
 from time import sleep
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
@@ -26,7 +27,7 @@ from .syntax import And, Equals, EVar, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
-    from typing import Any, Final, TextIO, TypeVar
+    from typing import IO, Any, Final, TypeVar
 
     from typing_extensions import Required
 
@@ -71,7 +72,7 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._command(req_name, bug_report_request))
+            self._bug_report.add_request(f'{req_name}_request.json')
 
         server_addr = self._description()
         _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
@@ -83,15 +84,7 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_response = f'{req_name}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_command(
-                [
-                    'diff',
-                    '-b',
-                    '-s',
-                    f'{req_name}_actual.json',
-                    f'{req_name}_response.json',
-                ]
-            )
+            self._bug_report.add_request(f'{req_name}_response.json')
         return resp
 
     @abstractmethod
@@ -123,7 +116,7 @@ class SingleSocketTransport(Transport):
     _host: str
     _port: int
     _sock: socket.socket
-    _file: TextIO
+    _file: IO[str]
 
     def __init__(
         self,
@@ -1137,6 +1130,8 @@ class KoreServerInfo(NamedTuple):
 
 class KoreServer(ContextManager['KoreServer']):
     _proc: Popen
+    _stdout_reader: Thread
+    _stderr_reader: Thread
     _info: KoreServerInfo
 
     _kompiled_dir: Path
@@ -1216,13 +1211,31 @@ class KoreServer(ContextManager['KoreServer']):
         new_env['GHCRTS'] = f'-N{self._haskell_threads}'
 
         _LOGGER.info(f'Starting KoreServer: {" ".join(cli_args)}')
-        self._proc = Popen(cli_args, env=new_env)
+        self._proc, self._stdout_reader, self._stderr_reader = self._create_proc(cli_args, new_env)
         pid = self._proc.pid
         host, port = self._get_host_and_port(pid)
         if self._port:
             assert port == self._port
         self._info = KoreServerInfo(pid=pid, host=host, port=port)
         _LOGGER.info(f'KoreServer started: {self.host}:{self.port}, pid={self.pid}')
+
+    @staticmethod
+    def _create_proc(args: list[str], env: dict[str, str]) -> tuple[Popen, Thread, Thread]:
+        popen = Popen(args, env=env, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
+
+        def reader(fh: IO[str], prefix: str) -> None:
+            for line in fh:
+                _LOGGER.info(f'[PID={popen.pid}][{prefix}] {line.rstrip()}')
+
+        stdout_reader = Thread(target=reader, args=(popen.stdout, 'stdo'))
+        stdout_reader.daemon = True
+        stdout_reader.start()
+
+        stderr_reader = Thread(target=reader, args=(popen.stderr, 'stde'))
+        stderr_reader.daemon = True
+        stderr_reader.start()
+
+        return popen, stdout_reader, stderr_reader
 
     def close(self) -> None:
         _LOGGER.info(f'Stopping KoreServer: {self.host}:{self.port}, pid={self.pid}')
@@ -1231,6 +1244,8 @@ class KoreServer(ContextManager['KoreServer']):
         else:
             self._proc.terminate()
         self._proc.wait()
+        self._stdout_reader.join()
+        self._stderr_reader.join()
         _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
 
     def _validate(self) -> None:
