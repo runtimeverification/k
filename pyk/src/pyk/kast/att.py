@@ -319,7 +319,6 @@ class Atts:
     INDEX: Final = AttKey('index', type=_INT)
     INITIALIZER: Final = AttKey('initializer', type=_NONE)
     INJECTIVE: Final = AttKey('injective', type=_NONE)
-    KLABEL: Final = AttKey('klabel', type=_ANY)
     LABEL: Final = AttKey('label', type=_ANY)
     LEFT: Final = AttKey('left', type=_ANY)  # LEFT and LEFT_INTERNAL on the Frontend
     LOCATION: Final = AttKey('org.kframework.attributes.Location', type=_LOCATION)
@@ -341,7 +340,7 @@ class Atts:
     SORT: Final = AttKey('org.kframework.kore.Sort', type=_ANY)
     SOURCE: Final = AttKey('org.kframework.attributes.Source', type=_PATH)
     STRICT: Final = AttKey('strict', type=_ANY)
-    SYMBOL: Final = AttKey('symbol', type=OptionalType(_STR))
+    SYMBOL: Final = AttKey('symbol', type=_STR)
     SYNTAX_MODULE: Final = AttKey('syntaxModule', type=_STR)
     TERMINALS: Final = AttKey('terminals', type=_STR)
     TOKEN: Final = AttKey('token', type=_NONE)
