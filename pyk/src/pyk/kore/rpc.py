@@ -71,7 +71,7 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._command(req_name, bug_report_request))
+            self._bug_report.add_request(f'{req_name}_request.json')
 
         server_addr = self._description()
         _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
@@ -83,15 +83,7 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_response = f'{req_name}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_command(
-                [
-                    'diff',
-                    '-b',
-                    '-s',
-                    f'{req_name}_actual.json',
-                    f'{req_name}_response.json',
-                ]
-            )
+            self._bug_report.add_request(f'{req_name}_response.json')
         return resp
 
     @abstractmethod
