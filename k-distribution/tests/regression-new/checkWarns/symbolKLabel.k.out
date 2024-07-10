@@ -1,0 +1,21 @@
+[Error] Compiler: The zero-argument form of `symbol` is deprecated. Replace `klabel(foo), symbol` by `symbol(foo)`.
+	Source(symbolKLabel.k)
+	Location(5,18,5,53)
+	5 |	  syntax Foo ::= "foo" [klabel(foo), symbol, unused]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Attribute `klabel(_)` is deprecated. Either remove `klabel(foo)`, or replace it by `symbol(foo)`.
+	Source(symbolKLabel.k)
+	Location(9,20,9,47)
+	9 |	    syntax Foo ::= "foo" [klabel(foo), unused]
+	  .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Attribute `klabel(foo) is deprecated, but marks an overload. Add `overload(foo)`.
+	Source(symbolKLabel.k)
+	Location(14,20,14,51)
+	14 |	    syntax Foo ::= "foo" Foo [klabel(foo), unused]
+	   .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Attribute `klabel(foo) is deprecated, but marks an overload. Add `overload(foo)`.
+	Source(symbolKLabel.k)
+	Location(15,20,15,51)
+	15 |	    syntax Bar ::= "foo" Bar [klabel(foo), unused]
+	   .	                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 4 structural errors.

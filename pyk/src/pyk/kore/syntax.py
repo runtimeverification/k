@@ -275,7 +275,7 @@ class Pattern(Kore):
     def dict(self) -> dict[str, Any]:
         stack: list = [
             self,
-            self.app.args if isinstance(self, Assoc) else self.patterns,
+            self.patterns,
             [],
         ]
 
@@ -295,7 +295,7 @@ class Pattern(Kore):
             else:
                 pattern = patterns[idx]
                 stack.append(pattern)
-                stack.append(pattern.app.args if isinstance(pattern, Assoc) else pattern.patterns)
+                stack.append(pattern.patterns)
                 stack.append([])
 
     @property
@@ -533,6 +533,158 @@ class App(Pattern):
         output.write(')')
 
 
+class Assoc(Pattern):
+    symbol: str
+    sorts: tuple[Sort, ...]
+    args: tuple[Pattern, ...]
+
+    @classmethod
+    @abstractmethod
+    def kore_symbol(cls) -> str: ...
+
+    @property
+    @abstractmethod
+    def pattern(self) -> Pattern: ...
+
+    @property
+    def patterns(self) -> tuple[Pattern, ...]:
+        return self.args
+
+    @cached_property
+    def app(self) -> App:
+        return App(symbol=self.symbol, sorts=self.sorts, args=self.args)
+
+    def _dict(self, dicts: list) -> dict[str, Any]:
+        return {
+            'tag': self._tag(),
+            'symbol': self.symbol,
+            'sorts': [sort.dict for sort in self.sorts],
+            'argss': dicts,
+        }
+
+    def write(self, output: IO[str]) -> None:
+        output.write(self.kore_symbol())
+        output.write('{}(')
+        self.app.write(output)
+        output.write(')')
+
+
+@final
+@dataclass(frozen=True)
+class LeftAssoc(Assoc):
+    symbol: str
+    sorts: tuple[Sort, ...]
+    args: tuple[Pattern, ...]
+
+    def __init__(self, symbol: str | SymbolId, sorts: Iterable[Sort] = (), args: Iterable[Pattern] = ()):
+        if isinstance(symbol, str):
+            symbol = SymbolId(symbol)
+
+        args = tuple(args)
+        if not args:
+            raise ValueError("Expected non-empty iterable for 'args'")
+
+        object.__setattr__(self, 'symbol', symbol.value)
+        object.__setattr__(self, 'sorts', tuple(sorts))
+        object.__setattr__(self, 'args', args)
+
+    def let(
+        self,
+        *,
+        symbol: str | SymbolId | None = None,
+        sorts: Iterable | None = None,
+        args: Iterable | None = None,
+    ) -> LeftAssoc:
+        symbol = symbol if symbol is not None else self.symbol
+        sorts = sorts if sorts is not None else self.sorts
+        args = args if args is not None else self.args
+        return LeftAssoc(symbol=symbol, sorts=sorts, args=args)
+
+    def let_patterns(self, patterns: Iterable[Pattern]) -> LeftAssoc:
+        return self.let(args=patterns)
+
+    @property
+    def pattern(self) -> Pattern:
+        res = self.args[0]
+        for arg in self.args[1:]:
+            res = App(self.symbol, self.sorts, (res, arg))
+        return res
+
+    @classmethod
+    def _tag(cls) -> str:
+        return 'LeftAssoc'
+
+    @classmethod
+    def kore_symbol(cls) -> str:
+        return '\\left-assoc'
+
+    @classmethod
+    def _from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> LeftAssoc:
+        return LeftAssoc(
+            symbol=dct['symbol'],
+            sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
+            args=patterns,
+        )
+
+
+@final
+@dataclass(frozen=True)
+class RightAssoc(Assoc):
+    symbol: str
+    sorts: tuple[Sort, ...]
+    args: tuple[Pattern, ...]
+
+    def __init__(self, symbol: str | SymbolId, sorts: Iterable[Sort] = (), args: Iterable[Pattern] = ()):
+        if isinstance(symbol, str):
+            symbol = SymbolId(symbol)
+
+        args = tuple(args)
+        if not args:
+            raise ValueError("Expected non-empty iterable for 'args'")
+
+        object.__setattr__(self, 'symbol', symbol.value)
+        object.__setattr__(self, 'sorts', tuple(sorts))
+        object.__setattr__(self, 'args', args)
+
+    def let(
+        self,
+        *,
+        symbol: str | SymbolId | None = None,
+        sorts: Iterable | None = None,
+        args: Iterable | None = None,
+    ) -> RightAssoc:
+        symbol = symbol if symbol is not None else self.symbol
+        sorts = sorts if sorts is not None else self.sorts
+        args = args if args is not None else self.args
+        return RightAssoc(symbol=symbol, sorts=sorts, args=args)
+
+    def let_patterns(self, patterns: Iterable[Pattern]) -> RightAssoc:
+        return self.let(args=patterns)
+
+    @property
+    def pattern(self) -> Pattern:
+        res = self.args[-1]
+        for arg in reversed(self.args[:-1]):
+            res = App(self.symbol, (), (arg, res))
+        return res
+
+    @classmethod
+    def _tag(cls) -> str:
+        return 'RightAssoc'
+
+    @classmethod
+    def kore_symbol(cls) -> str:
+        return '\\right-assoc'
+
+    @classmethod
+    def _from_dict(cls: type[RightAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> RightAssoc:
+        return RightAssoc(
+            symbol=dct['symbol'],
+            sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
+            args=patterns,
+        )
+
+
 class MLPattern(Pattern):
     @classmethod
     @abstractmethod
@@ -563,7 +715,7 @@ class MLPattern(Pattern):
     def ctor_patterns(self) -> tuple[Pattern, ...]:
         """Return patterns used to construct the term with `of`.
 
-        Except for `Assoc`, `DV`, `MLFixpoint` and `MLQuant` this coincides with `patterns`.
+        Except for `DV`, `MLFixpoint` and `MLQuant` this coincides with `patterns`.
         """
         return self.patterns
 
@@ -1609,150 +1761,6 @@ class DV(MLPattern, WithSort):
         return {'tag': 'DV', 'sort': self.sort.dict, 'value': self.value.value}
 
 
-class MLSyntaxSugar(MLPattern): ...
-
-
-# TODO AppAssoc, OrAssoc
-class Assoc(MLSyntaxSugar):
-    app: App
-
-    @property
-    @abstractmethod
-    def pattern(self) -> Pattern: ...
-
-    @property
-    def sorts(self) -> tuple[()]:
-        return ()
-
-    @property
-    def patterns(self) -> tuple[()]:
-        return ()
-
-    @property
-    def ctor_patterns(self) -> tuple[App]:
-        return (self.app,)
-
-    def _dict(self, dicts: list) -> dict[str, Any]:
-        return {
-            'tag': self._tag(),
-            'symbol': self.app.symbol,
-            'sorts': [sort.dict for sort in self.app.sorts],
-            'argss': dicts,
-        }
-
-
-@final
-@dataclass(frozen=True)
-class LeftAssoc(Assoc):
-    app: App
-
-    def let(self, *, app: App | None = None) -> LeftAssoc:
-        app = app if app is not None else self.app
-        return LeftAssoc(app=app)
-
-    def let_patterns(self, patterns: Iterable[Pattern]) -> LeftAssoc:
-        () = patterns
-        return self
-
-    @property
-    def pattern(self) -> Pattern:
-        if len(self.app.sorts) > 0:
-            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
-        if len(self.app.args) == 0:
-            raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.app.args[0]
-        for a in self.app.args[1:]:
-            ret = App(self.app.symbol, (), (ret, a))
-        return ret
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'LeftAssoc'
-
-    @classmethod
-    def symbol(cls) -> str:
-        return '\\left-assoc'
-
-    @classmethod
-    def of(
-        cls: type[LeftAssoc],
-        symbol: str,
-        sorts: Iterable[Sort] = (),
-        patterns: Iterable[Pattern] = (),
-    ) -> LeftAssoc:
-        cls._check_symbol(symbol)
-        () = sorts
-        (app,) = patterns
-        app = check_type(app, App)
-        return LeftAssoc(app=app)
-
-    @classmethod
-    def _from_dict(cls: type[LeftAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> LeftAssoc:
-        return LeftAssoc(
-            app=App(
-                symbol=dct['symbol'],
-                sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
-                args=patterns,
-            ),
-        )
-
-
-@final
-@dataclass(frozen=True)
-class RightAssoc(Assoc):
-    app: App
-
-    def let(self, *, app: App | None = None) -> RightAssoc:
-        app = app if app is not None else self.app
-        return RightAssoc(app=app)
-
-    def let_patterns(self, patterns: Iterable[Pattern]) -> RightAssoc:
-        () = patterns
-        return self
-
-    @property
-    def pattern(self) -> Pattern:
-        if len(self.app.sorts) > 0:
-            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
-        if len(self.app.args) == 0:
-            raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.app.args[-1]
-        for a in reversed(self.app.args[:-1]):
-            ret = App(self.app.symbol, (), (a, ret))
-        return ret
-
-    @classmethod
-    def _tag(cls) -> str:
-        return 'RightAssoc'
-
-    @classmethod
-    def symbol(cls) -> str:
-        return '\\right-assoc'
-
-    @classmethod
-    def of(
-        cls: type[RightAssoc],
-        symbol: str,
-        sorts: Iterable[Sort] = (),
-        patterns: Iterable[Pattern] = (),
-    ) -> RightAssoc:
-        cls._check_symbol(symbol)
-        () = sorts
-        (app,) = patterns
-        app = check_type(app, App)
-        return RightAssoc(app=app)
-
-    @classmethod
-    def _from_dict(cls: type[RightAssoc], dct: Mapping[str, Any], patterns: list[Pattern]) -> RightAssoc:
-        return RightAssoc(
-            app=App(
-                symbol=dct['symbol'],
-                sorts=tuple(Sort.from_dict(sort) for sort in dct['sorts']),
-                args=patterns,
-            ),
-        )
-
-
 ML_SYMBOLS: Final = {
     r'\top': Top,
     r'\bottom': Bottom,
@@ -1772,8 +1780,6 @@ ML_SYMBOLS: Final = {
     r'\next': Next,
     r'\rewrites': Rewrites,
     r'\dv': DV,
-    r'\left-assoc': LeftAssoc,
-    r'\right-assoc': RightAssoc,
 }
 
 

@@ -217,8 +217,6 @@ class PrettyPrinter:
         return self.print(knonterminal.sort)
 
     def _print_kproduction(self, kproduction: KProduction) -> str:
-        if Atts.KLABEL not in kproduction.att and kproduction.klabel:
-            kproduction = kproduction.update_atts([Atts.KLABEL(kproduction.klabel.name)])
         syntax_str = 'syntax ' + self.print(kproduction.sort)
         if kproduction.items:
             syntax_str += ' ::= ' + ' '.join([self._print_kouter(pi) for pi in kproduction.items])
@@ -378,8 +376,8 @@ def build_symbol_table(
             unparser = unparser_for_production(prod)
 
             symbol_table[label] = unparser
-            if Atts.SYMBOL in prod.att and Atts.KLABEL in prod.att:
-                symbol_table[prod.att[Atts.KLABEL]] = unparser
+            if Atts.SYMBOL in prod.att:
+                symbol_table[prod.att[Atts.SYMBOL]] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2
