@@ -468,7 +468,6 @@ public class DefinitionParsing {
                                 s instanceof Bubble
                                     && ((Bubble) s).sentenceType().equals(configuration))
                         .map(b -> (Bubble) b)
-                        .parallel()
                         .flatMap(
                             b ->
                                 parseBubble(parser, cache.cache(), b)
@@ -623,7 +622,6 @@ public class DefinitionParsing {
 
       Set<Sentence> parsedSet =
           stream(module.localSentences())
-              .parallel()
               .filter(s -> s instanceof Bubble)
               .map(b -> (Bubble) b)
               .flatMap(
