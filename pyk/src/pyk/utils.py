@@ -8,19 +8,21 @@ import string
 import subprocess
 import sys
 import tarfile
+import threading
 import time
 from collections.abc import Hashable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from subprocess import CompletedProcess, Popen
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
     from logging import Logger
-    from subprocess import CalledProcessError, CompletedProcess
-    from typing import Any, Final
+    from subprocess import CalledProcessError
+    from typing import IO, Any, Final
 
     P1 = TypeVar('P1')
     P2 = TypeVar('P2')
@@ -453,6 +455,154 @@ def run_process(
     return res
 
 
+def run_process_2(
+    args: str | Iterable[str],
+    *,
+    input: str | None = None,
+    write_stdout: bool = False,
+    write_stderr: bool = False,
+    cwd: str | Path | None = None,
+    env: Mapping[str, str] | None = None,
+    logger: Logger | None = None,
+    check: bool = True,
+) -> CompletedProcess:
+    if type(args) is str:
+        args = (args,)
+    else:
+        args = tuple(args)
+
+    if cwd is not None:
+        cwd = Path(cwd)
+        check_dir_path(cwd)
+
+    if not logger:
+        logger = _LOGGER
+
+    res = _subprocess_run(
+        args,
+        input=input,
+        write_stdout=write_stdout,
+        write_stderr=write_stderr,
+        cwd=cwd,
+        env=env,
+        logger=logger,
+    )
+
+    if check:
+        res.check_returncode()
+
+    return res
+
+
+def _subprocess_run(
+    args: tuple[Any, ...],
+    *,
+    input: str | None,
+    write_stdout: bool,
+    write_stderr: bool,
+    env: Mapping[str, str] | None,
+    cwd: Path | None,
+    logger: Logger,
+) -> CompletedProcess:
+    with Popen(
+        args,
+        stdin=subprocess.PIPE if input is not None else subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+        cwd=cwd,
+        text=True,
+    ) as popen:
+        log_prefix = f'[PID={popen.pid}]'
+
+        command = shlex.join(args)
+        for line in command.split('\n'):
+            logger.info(f'{log_prefix}[exec] {line}')
+
+        start_time = time.time()
+
+        try:
+            returncode, stdout, stderr = _subprocess_communicate(
+                popen,
+                input=input,
+                logger=logger,
+                write_stdout=write_stdout,
+                write_stderr=write_stderr,
+            )
+        except BaseException:
+            popen.kill()
+            delta_time = time.time() - start_time
+            logger.info(f'{log_prefix}[fail] time={delta_time:.3f}s')
+            raise
+
+    delta_time = time.time() - start_time
+    logger.info(f'{log_prefix}[done] status={returncode} time={delta_time:.3f}s')
+
+    return CompletedProcess(popen.args, returncode, stdout, stderr)
+
+
+def _subprocess_communicate(
+    popen: Popen,
+    *,
+    input: str | None,
+    write_stdout: bool,
+    write_stderr: bool,
+    logger: Logger,
+) -> tuple[int, str, str]:
+    assert popen.stdout is not None
+    assert popen.stderr is not None
+
+    log_prefix = f'[PID={popen.pid}]'
+
+    def readerthread(
+        input_fh: IO[str],
+        buffer: list[str],
+        stream_prefix: str,
+        output_fh: IO[str] | None,
+    ) -> None:
+        for line in input_fh:
+            buffer.append(line)
+            logger.info(f'{log_prefix}{stream_prefix} {line.rstrip()}')
+            if output_fh:
+                output_fh.write(line)
+                output_fh.flush()
+        input_fh.close()
+
+    stdout_buff: list[str] = []
+    stdout_prefix = '[stdo]'
+    stdout_fh = sys.stdout if write_stdout else None
+    stdout_thread = threading.Thread(target=readerthread, args=(popen.stdout, stdout_buff, stdout_prefix, stdout_fh))
+    stdout_thread.daemon = True
+    stdout_thread.start()
+
+    stderr_buff: list[str] = []
+    stderr_prefix = '[stde]'
+    stderr_fh = sys.stderr if write_stderr else None
+    stderr_thread = threading.Thread(target=readerthread, args=(popen.stderr, stderr_buff, stderr_prefix, stderr_fh))
+    stderr_thread.daemon = True
+    stderr_thread.start()
+
+    if input is not None:
+        assert popen.stdin is not None
+        for line in input.split('\n'):
+            logger.info(f'{log_prefix}[stdi] {line}')
+        # Note: popen.stdin.write does not work for llvm_interpret_raw
+        popen._stdin_write(input)  # type: ignore [attr-defined]
+
+    stdout_thread.join()
+    stderr_thread.join()
+
+    # Should be closed by readerthread at this point
+    # popen.stdout.close()
+    # popen.stderr.close()
+
+    returncode = popen.wait()
+    stdout = ''.join(stdout_buff)
+    stderr = ''.join(stderr_buff)
+
+    return returncode, stdout, stderr
+
+
 def exit_with_process_error(err: CalledProcessError) -> None:
     sys.stderr.write(f'[ERROR] Running process failed with returncode {err.returncode}:\n    {shlex.join(err.cmd)}\n')
     sys.stderr.flush()
@@ -537,6 +687,10 @@ class BugReport:
             ntf.write(input)
             ntf.flush()
             self.add_file(Path(ntf.name), arcname)
+
+    def add_request(self, req_name: str) -> None:
+        self.add_file_contents(req_name, Path(f'sequence/{self._command_id:03}'))
+        self._command_id += 1
 
     def add_command(self, args: Iterable[str]) -> None:
         def _remap_arg(_a: str) -> str:
