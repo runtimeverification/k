@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
-from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process
+from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process_2
 from . import manip
 from .prelude import SORT_GENERATED_TOP_CELL
 from .syntax import And, Equals, EVar, kore_term
@@ -71,7 +71,7 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._command(req_name, bug_report_request))
+            self._bug_report.add_request(f'{req_name}_request.json')
 
         server_addr = self._description()
         _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
@@ -83,15 +83,7 @@ class Transport(ContextManager['Transport'], ABC):
         if self._bug_report:
             bug_report_response = f'{req_name}_response.json'
             self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_command(
-                [
-                    'diff',
-                    '-b',
-                    '-s',
-                    f'{req_name}_actual.json',
-                    f'{req_name}_response.json',
-                ]
-            )
+            self._bug_report.add_request(f'{req_name}_response.json')
         return resp
 
     @abstractmethod
@@ -1281,7 +1273,7 @@ class KoreServer(ContextManager['KoreServer']):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         prog_name = self._command[0]
         bug_report.add_file(self._definition_file, Path('definition.kore'))
-        version_info = run_process((prog_name, '--version'), pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        version_info = run_process_2((prog_name, '--version'), logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(version_info, Path('server_version.txt'))
         server_instance = {
             'exe': prog_name,
@@ -1387,7 +1379,7 @@ class BoosterServer(KoreServer):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
         bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
-        llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        llvm_version = run_process_2('llvm-backend-version', logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
 

@@ -45,10 +45,10 @@ then
 elif [ $# -lt 4 ];
 then
     fail "ERROR: Not enough arguments!"
-elif [ ! -f $1 ];
+elif [ ! -f "$1" ];
 then
     fail "ERROR: <definition.kore> not a file!"
-elif [ ! -d $3 ];
+elif ! mkdir -p "$3";
 then
     fail "ERROR: <output dir> not a directory!"
 fi
