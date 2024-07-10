@@ -8,22 +8,36 @@
       inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
     };
 
+    poetry2nix = {
+      url =
+        "github:nix-community/poetry2nix/626111646fe236cb1ddc8191a48c75e072a82b7c";
+      inputs.nixpkgs.follows = "llvm-backend/nixpkgs";
+    };
+
     nixpkgs.follows = "llvm-backend/nixpkgs";
     rv-utils.follows = "llvm-backend/rv-utils";
     flake-utils.follows = "llvm-backend/utils";
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , llvm-backend }:
+    , llvm-backend, poetry2nix }:
     let
       allOverlays = [
         (_: _: {
           llvm-version = 17;
           llvm-backend-build-type = "Release";
         })
+
         llvm-backend.overlays.default
+
         haskell-backend.overlays.z3
         haskell-backend.overlays.integration-tests
+
+        (import ./nix/pyk-overlay.nix {
+          inherit poetry2nix;
+          projectDir = ./pyk;
+        })
+
         (final: prev:
           let
             k-version =
@@ -54,7 +68,22 @@
             # this version of maven from nixpkgs 23.11. we can remove this version of maven once our nixpkgs catches up
             maven = prev.callPackage ./nix/maven.nix { };
 
-            k-framework = { haskell-backend-bins, llvm-kompile-libs }:
+            haskell-backend-bins = prev.symlinkJoin {
+              name = "kore-${haskell-backend.sourceInfo.shortRev or "local"}";
+              paths = let p = haskell-backend.packages.${prev.system};
+              in [
+                p.kore-exec
+                p.kore-match-disjunction
+                p.kore-parser
+                p.kore-repl
+                p.kore-rpc
+                p.kore-rpc-booster
+                p.kore-rpc-client
+                p.booster-dev
+              ];
+            };
+
+            mk-k-framework = { haskell-backend-bins, llvm-kompile-libs }:
               prev.callPackage ./nix/k.nix {
                 mvnHash = "sha256-HkAwMZq2vvrnEgT1Ksoxb5YnQ8+CMQdB2Sd/nR0OttU=";
                 manualMvnArtifacts = [
@@ -83,6 +112,15 @@
                 version = "${k-version}-${self.rev or "dirty"}";
                 inherit llvm-kompile-libs;
               };
+
+            k = final.mk-k-framework {
+              inherit (final) haskell-backend-bins;
+              llvm-kompile-libs = with prev; {
+                procps = [ "-I${procps}/include" "-L${procps}/lib" ];
+                openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
+                secp256k1 = [ "-I${secp256k1}/include" "-L${secp256k1}/lib" ];
+              };
+            };
           })
       ];
     in flake-utils.lib.eachSystem [
@@ -105,34 +143,12 @@
               ++ allOverlays;
           };
 
-        haskell-backend-bins = pkgs.symlinkJoin {
-          name = "kore-${haskell-backend.sourceInfo.shortRev or "local"}";
-          paths = let p = haskell-backend.packages.${system};
-          in [
-            p.kore-exec
-            p.kore-match-disjunction
-            p.kore-parser
-            p.kore-repl
-            p.kore-rpc
-            p.kore-rpc-booster
-            p.kore-rpc-client
-            p.booster-dev
-          ];
-        };
-
       in rec {
         k-version =
           pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
 
         packages = rec {
-          k = pkgs.k-framework {
-            inherit haskell-backend-bins;
-            llvm-kompile-libs = with pkgs; {
-              procps = [ "-I${procps}/include" "-L${procps}/lib" ];
-              openssl = [ "-I${openssl.dev}/include" "-L${openssl.out}/lib" ];
-              secp256k1 = [ "-I${secp256k1}/include" "-L${secp256k1}/lib" ];
-            };
-          };
+          inherit (pkgs) k pyk pyk-python310 pyk-python311;
 
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
@@ -195,7 +211,7 @@
         };
         defaultPackage = packages.k;
         devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework {
-          inherit haskell-backend-bins;
+          inherit (pkgs) haskell-backend-bins;
           llvm-kompile-libs = { };
         });
       }) // {
@@ -203,6 +219,5 @@
         overlays.z3 = haskell-backend.overlays.z3;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
-
       };
 }
