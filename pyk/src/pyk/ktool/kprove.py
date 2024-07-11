@@ -8,7 +8,6 @@ from contextlib import contextmanager
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from ..cli.utils import check_dir_path, check_file_path
@@ -96,13 +95,9 @@ def _kprove(
         dry_run=dry_run,
     )
 
-    try:
-        run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
-        return run_process_2(run_args, write_stderr=True, logger=_LOGGER, env=env, check=check)
-    except CalledProcessError as err:
-        raise RuntimeError(
-            f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr, err
-        ) from err
+    run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
+
+    return run_process_2(run_args, logger=_LOGGER, env=env, check=check)
 
 
 def _build_arg_list(

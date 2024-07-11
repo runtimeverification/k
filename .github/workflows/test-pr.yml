@@ -157,9 +157,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-14]
-    defaults:
-      run:
-        working-directory: ./pyk
     runs-on: ${{ matrix.os }}
     steps:
       - name: 'Check out code'
@@ -178,8 +175,10 @@ jobs:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
-      - name: 'Build pyk'
+      - name: 'Build original pyk flake'
         run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
+      - name: 'Build pyk provided by K'
+        run: GC_DONT_GC=1 nix build --print-build-logs ./pyk#pyk-python310
 
 
   compile-nix-flake:
