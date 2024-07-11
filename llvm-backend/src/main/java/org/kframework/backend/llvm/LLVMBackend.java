@@ -143,9 +143,6 @@ public class LLVMBackend extends KoreBackend {
         args.add("--mutable-bytes");
       }
 
-      // Arguments after this point are passed on to Clang.
-      args.add("--");
-
       if (options.debug) {
         args.add("-g");
         args.add("-O1");
@@ -170,6 +167,9 @@ public class LLVMBackend extends KoreBackend {
         if (kompileOptions.optimize3)
           args.add("-O2"); // clang -O3 does not make the llvm backend any faster
       }
+
+      // Arguments after this point are passed on to Clang.
+      args.add("--");
 
       args.addAll(options.ccopts);
 
