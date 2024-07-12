@@ -464,6 +464,7 @@ def run_process_2(
     cwd: str | Path | None = None,
     env: Mapping[str, str] | None = None,
     logger: Logger | None = None,
+    loglevel: int | None = None,
     check: bool = True,
 ) -> CompletedProcess:
     if type(args) is str:
@@ -478,6 +479,9 @@ def run_process_2(
     if not logger:
         logger = _LOGGER
 
+    if loglevel is None:
+        loglevel = logging.INFO
+
     res = _subprocess_run(
         args,
         input=input,
@@ -486,6 +490,7 @@ def run_process_2(
         cwd=cwd,
         env=env,
         logger=logger,
+        loglevel=loglevel,
     )
 
     if check:
@@ -503,6 +508,7 @@ def _subprocess_run(
     env: Mapping[str, str] | None,
     cwd: Path | None,
     logger: Logger,
+    loglevel: int,
 ) -> CompletedProcess:
     with Popen(
         args,
@@ -517,7 +523,7 @@ def _subprocess_run(
 
         command = shlex.join(args)
         for line in command.split('\n'):
-            logger.info(f'{log_prefix}[exec] {line}')
+            logger.log(loglevel, f'{log_prefix}[exec] {line}')
 
         start_time = time.time()
 
@@ -525,18 +531,19 @@ def _subprocess_run(
             returncode, stdout, stderr = _subprocess_communicate(
                 popen,
                 input=input,
-                logger=logger,
                 write_stdout=write_stdout,
                 write_stderr=write_stderr,
+                logger=logger,
+                loglevel=loglevel,
             )
         except BaseException:
             popen.kill()
             delta_time = time.time() - start_time
-            logger.info(f'{log_prefix}[fail] time={delta_time:.3f}s')
+            logger.log(loglevel, f'{log_prefix}[fail] time={delta_time:.3f}s')
             raise
 
     delta_time = time.time() - start_time
-    logger.info(f'{log_prefix}[done] status={returncode} time={delta_time:.3f}s')
+    logger.log(loglevel, f'{log_prefix}[done] status={returncode} time={delta_time:.3f}s')
 
     return CompletedProcess(popen.args, returncode, stdout, stderr)
 
@@ -548,6 +555,7 @@ def _subprocess_communicate(
     write_stdout: bool,
     write_stderr: bool,
     logger: Logger,
+    loglevel: int,
 ) -> tuple[int, str, str]:
     assert popen.stdout is not None
     assert popen.stderr is not None
@@ -562,7 +570,7 @@ def _subprocess_communicate(
     ) -> None:
         for line in input_fh:
             buffer.append(line)
-            logger.info(f'{log_prefix}{stream_prefix} {line.rstrip()}')
+            logger.log(loglevel, f'{log_prefix}{stream_prefix} {line.rstrip()}')
             if output_fh:
                 output_fh.write(line)
                 output_fh.flush()
@@ -585,7 +593,7 @@ def _subprocess_communicate(
     if input is not None:
         assert popen.stdin is not None
         for line in input.split('\n'):
-            logger.info(f'{log_prefix}[stdi] {line}')
+            logger.log(loglevel, f'{log_prefix}[stdi] {line}')
         # Note: popen.stdin.write does not work for llvm_interpret_raw
         popen._stdin_write(input)  # type: ignore [attr-defined]
 
@@ -649,11 +657,6 @@ def ensure_dir_path(path: str | Path) -> Path:
     return path
 
 
-# Implementation because of outdated Python versions: https://github.com/python/cpython/blob/1de4395f62bb140563761ef5cbdf46accef3c550/Lib/pathlib.py#L554
-def is_relative_to(_self: Path, other: Path) -> bool:
-    return _self == other or other in _self.parents
-
-
 def abs_or_rel_to(path: Path, base: Path) -> Path:
     if path.is_absolute():
         return path
@@ -699,7 +702,7 @@ class BugReport:
             _a_path = Path(_a)
             for _f in self._file_remap:
                 _f_path = Path(_f)
-                if is_relative_to(_a_path, _f_path):
+                if _a_path.is_relative_to(_f_path):
                     return str(Path(self._file_remap[_f]) / _a_path.relative_to(_f_path))
             return _a
 
