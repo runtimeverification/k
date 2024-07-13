@@ -622,6 +622,7 @@ class LogRewrite(LogEntry):
 class LogOrigin(str, Enum):
     KORE_RPC = 'kore-rpc'
     BOOSTER = 'booster'
+    PROXY = 'proxy'
     LLVM = 'llvm'
 
 
