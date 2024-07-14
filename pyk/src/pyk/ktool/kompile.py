@@ -12,10 +12,9 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, final
 
-from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process, single
+from ..utils import abs_or_rel_to, check_dir_path, check_file_path, run_process_2, single
 from . import TypeInferenceMode
 
 if TYPE_CHECKING:
@@ -283,8 +282,10 @@ class Kompile(ABC):
         no_exc_wrap: bool = False,
         debug: bool = False,
         verbose: bool = False,
+        # ---
         cwd: Path | None = None,
         check: bool = True,
+        tool_mode: bool = False,
         bug_report: BugReport | None = None,
         outer_parsed_json: bool = False,
     ) -> Path:
@@ -331,22 +332,17 @@ class Kompile(ABC):
         if ignore_warnings:
             args += ['-Wno', ','.join(ignore_warnings)]
 
-        try:
-            proc_res = run_process(args, logger=_LOGGER, cwd=cwd, check=check)
-        except CalledProcessError as err:
-            raise RuntimeError(
-                f'Command kompile exited with code {err.returncode} for: {self.base_args.main_file}',
-                err.stdout,
-                err.stderr,
-                err.returncode,
-                err,
-            ) from err
+        proc_res = run_process_2(
+            args,
+            write_stdout=tool_mode,
+            write_stderr=tool_mode,
+            logger=_LOGGER,
+            cwd=cwd,
+            check=check,
+        )
 
-        if proc_res.stdout:
-            out = proc_res.stdout.rstrip()
-            print(out)
-            if bug_report:
-                bug_report.add_file_contents(out, Path('kompile.log'))
+        if bug_report and proc_res.stdout:
+            bug_report.add_file_contents(proc_res.stdout.rstrip(), Path('kompile.log'))
 
         definition_dir = output_dir if output_dir else _default_output_dir(self.base_args.main_file)
         assert definition_dir.is_dir()
