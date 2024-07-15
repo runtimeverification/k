@@ -339,4 +339,4 @@ def llvm_interpret_raw(definition_dir: str | Path, kore: str, depth: int | None 
     depth = depth if depth is not None else -1
     args = [str(interpreter_file), '/dev/stdin', str(depth), '/dev/stdout']
 
-    return run_process_2(args, input=kore)
+    return run_process_2(args, input=kore, logger=_LOGGER, loglevel=logging.DEBUG)
