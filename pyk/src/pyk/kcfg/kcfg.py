@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 from itertools import chain
 from threading import RLock
-from typing import TYPE_CHECKING, Final, Union, cast, final
+from typing import TYPE_CHECKING, Final, Union, cast, final, List
 
 from networkx import Graph, find_cliques
 

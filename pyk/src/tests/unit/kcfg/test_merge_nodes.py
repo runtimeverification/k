@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from typing import Iterable, Any, TYPE_CHECKING
 
 from networkx import Graph, find_cliques
 
+from pyk.cterm import CSubst
 from pyk.kast.inner import KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
@@ -11,7 +14,7 @@ from pyk.utils import single
 from tests.unit.test_kcfg import node_dicts, x_config, split_dicts, x_subst, propagate_split_constraints
 
 if TYPE_CHECKING:
-    from pyk.cterm import CTerm, CSubst
+    from pyk.cterm import CTerm
 
 
 class TestSemantics(DefaultSemantics):
