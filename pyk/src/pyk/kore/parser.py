@@ -405,7 +405,7 @@ class KoreParser:
         self._match(TokenType.LPAREN)
         app = self.app()
         self._match(TokenType.RPAREN)
-        return cls(app)  # type: ignore
+        return cls(app.symbol, app.sorts, app.args)  # type: ignore
 
     def left_assoc(self) -> LeftAssoc:
         return self._assoc(TokenType.ML_LEFT_ASSOC, LeftAssoc)

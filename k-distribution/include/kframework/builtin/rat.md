@@ -32,13 +32,13 @@ You can:
 
 ```k
   syntax Rat ::= left:
-                 Rat "^Rat" Int [function, total, klabel(_^Rat_), symbol, smtlib(ratpow), hook(RAT.pow)]
+                 Rat "^Rat" Int [function, total, symbol(_^Rat_),  smtlib(ratpow), hook(RAT.pow)]
                > left:
-                 Rat "*Rat" Rat [function, total, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
-               | Rat "/Rat" Rat [function,             klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
+                 Rat "*Rat" Rat [function, total, symbol(_*Rat_),  left, smtlib(ratmul), hook(RAT.mul)]
+               | Rat "/Rat" Rat [function,             symbol(_/Rat_),  left, smtlib(ratdiv), hook(RAT.div)]
                > left:
-                 Rat "+Rat" Rat [function, total, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
-               | Rat "-Rat" Rat [function, total, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
+                 Rat "+Rat" Rat [function, total, symbol(_+Rat_),  left, smtlib(ratadd), hook(RAT.add)]
+               | Rat "-Rat" Rat [function, total, symbol(_-Rat_),  left, smtlib(ratsub), hook(RAT.sub)]
 ```
 
 Comparison
@@ -49,12 +49,12 @@ one of less than, less than or equalto, greater than, or greater than or equal
 to the other:
 
 ```k
-  syntax Bool ::= Rat  "==Rat" Rat [function, total, klabel(_==Rat_),  symbol, smtlib(rateq), hook(RAT.eq)]
-                | Rat "=/=Rat" Rat [function, total, klabel(_=/=Rat_), symbol, smtlib(ratne), hook(RAT.ne)]
-                | Rat   ">Rat" Rat [function, total, klabel(_>Rat_),   symbol, smtlib(ratgt), hook(RAT.gt)]
-                | Rat  ">=Rat" Rat [function, total, klabel(_>=Rat_),  symbol, smtlib(ratge), hook(RAT.ge)]
-                | Rat   "<Rat" Rat [function, total, klabel(_<Rat_),   symbol, smtlib(ratlt), hook(RAT.lt)]
-                | Rat  "<=Rat" Rat [function, total, klabel(_<=Rat_),  symbol, smtlib(ratle), hook(RAT.le)]
+  syntax Bool ::= Rat  "==Rat" Rat [function, total, symbol(_==Rat_),  smtlib(rateq), hook(RAT.eq)]
+                | Rat "=/=Rat" Rat [function, total, symbol(_=/=Rat_), smtlib(ratne), hook(RAT.ne)]
+                | Rat   ">Rat" Rat [function, total, symbol(_>Rat_),   smtlib(ratgt), hook(RAT.gt)]
+                | Rat  ">=Rat" Rat [function, total, symbol(_>=Rat_),  smtlib(ratge), hook(RAT.ge)]
+                | Rat   "<Rat" Rat [function, total, symbol(_<Rat_),   smtlib(ratlt), hook(RAT.lt)]
+                | Rat  "<=Rat" Rat [function, total, symbol(_<=Rat_),  smtlib(ratle), hook(RAT.le)]
 ```
 
 Min/Max
@@ -63,8 +63,8 @@ Min/Max
 You can compute the minimum and maximum of two rational numbers:
 
 ```k
-  syntax Rat ::= minRat(Rat, Rat) [function, total, klabel(minRat), symbol, smtlib(ratmin), hook(RAT.min)]
-               | maxRat(Rat, Rat) [function, total, klabel(maxRat), symbol, smtlib(ratmax), hook(RAT.max)]
+  syntax Rat ::= minRat(Rat, Rat) [function, total, symbol(minRat), smtlib(ratmin), hook(RAT.min)]
+               | maxRat(Rat, Rat) [function, total, symbol(maxRat), smtlib(ratmax), hook(RAT.max)]
 ```
 
 Conversion to Floating Point

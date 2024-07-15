@@ -186,12 +186,10 @@ def kseq(kitems: Iterable[Pattern], *, dotvar: EVar | None = None) -> Pattern:
     if len(args) == 1:
         return tail
 
-    app = App(KSEQ, (), args)
-
     if len(args) == 2:
-        return app
+        return App(KSEQ, (), args)
 
-    return RightAssoc(app)
+    return RightAssoc(KSEQ, (), args)
 
 
 def k_config_var(var: str) -> DV:
@@ -224,7 +222,7 @@ LBL_LIST_ITEM: Final = SymbolId('LblListItem')
 def list_pattern(*args: Pattern) -> Pattern:
     if not args:
         return STOP_LIST
-    return LeftAssoc(App(LBL_LIST, args=(App(LBL_LIST_ITEM, args=(arg,)) for arg in args)))
+    return LeftAssoc(LBL_LIST, args=(App(LBL_LIST_ITEM, args=(arg,)) for arg in args))
 
 
 STOP_SET: Final = App("Lbl'Stop'Set")
@@ -235,7 +233,7 @@ LBL_SET_ITEM: Final = SymbolId('LblSetItem')
 def set_pattern(*args: Pattern) -> Pattern:
     if not args:
         return STOP_SET
-    return LeftAssoc(App(LBL_SET, args=(App(LBL_SET_ITEM, args=(arg,)) for arg in args)))
+    return LeftAssoc(LBL_SET, args=(App(LBL_SET_ITEM, args=(arg,)) for arg in args))
 
 
 STOP_MAP: Final = App("Lbl'Stop'Map")
@@ -249,7 +247,23 @@ def map_pattern(*args: tuple[Pattern, Pattern], cell: str | None = None) -> Patt
 
     cons_symbol = SymbolId(f"Lbl'Unds'{cell}Map'Unds'") if cell else LBL_MAP
     item_symbol = SymbolId(f'Lbl{cell}MapItem') if cell else LBL_MAP_ITEM
-    return LeftAssoc(App(cons_symbol, args=(App(item_symbol, args=arg) for arg in args)))
+    return LeftAssoc(cons_symbol, args=(App(item_symbol, args=arg) for arg in args))
+
+
+STOP_RANGEMAP: Final = App("Lbl'Stop'RangeMap")
+LBL_RANGEMAP: Final = SymbolId("Lbl'Unds'RangeMap'Unds'")
+LBL_RANGEMAP_ITEM: Final = SymbolId("Lbl'Unds'r'Pipe'-'-GT-Unds'")
+LBL_RANGEMAP_RANGE: Final = SymbolId("LblRangeMap'Coln'Range")
+
+
+def rangemap_pattern(*args: tuple[tuple[Pattern, Pattern], Pattern]) -> Pattern:
+    if not args:
+        return STOP_RANGEMAP
+
+    return LeftAssoc(
+        LBL_RANGEMAP,
+        args=(App(LBL_RANGEMAP_ITEM, args=(App(LBL_RANGEMAP_RANGE, args=arg[0]), arg[1])) for arg in args),
+    )
 
 
 # ----
@@ -288,7 +302,7 @@ def json_object(pattern: Pattern) -> App:
 
 
 def jsons(patterns: Iterable[Pattern]) -> RightAssoc:
-    return RightAssoc(App(LBL_JSONS, (), chain(patterns, (STOP_JSONS,))))
+    return RightAssoc(LBL_JSONS, (), chain(patterns, (STOP_JSONS,)))
 
 
 def json_key(key: str) -> App:
@@ -352,10 +366,10 @@ def kore_to_json(pattern: Pattern) -> Any:
 def _iter_json_list(app: App) -> Iterator[Pattern]:
     from . import match as km
 
-    km.match_symbol(app, LBL_JSON_LIST.value)
+    km.match_app(app, LBL_JSON_LIST.value)
     curr = km.match_app(app.args[0])
     while curr.symbol != STOP_JSONS.symbol:
-        km.match_symbol(curr, LBL_JSONS.value)
+        km.match_app(curr, LBL_JSONS.value)
         yield curr.args[0]
         curr = km.match_app(curr.args[1])
 
@@ -363,10 +377,10 @@ def _iter_json_list(app: App) -> Iterator[Pattern]:
 def _iter_json_object(app: App) -> Iterator[tuple[str, Pattern]]:
     from . import match as km
 
-    km.match_symbol(app, LBL_JSON_OBJECT.value)
+    km.match_app(app, LBL_JSON_OBJECT.value)
     curr = km.match_app(app.args[0])
     while curr.symbol != STOP_JSONS.symbol:
-        km.match_symbol(curr, LBL_JSONS.value)
+        km.match_app(curr, LBL_JSONS.value)
         entry = km.match_app(curr.args[0], LBL_JSON_ENTRY.value)
         key = km.kore_str(km.inj(entry.args[0]))
         value = entry.args[1]

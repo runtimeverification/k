@@ -12,21 +12,22 @@ from datetime import datetime, timedelta
 from enum import Enum, auto
 from pathlib import Path
 from signal import SIGINT
-from subprocess import Popen
+from subprocess import DEVNULL, PIPE, Popen
+from threading import Thread
 from time import sleep
 from typing import ClassVar  # noqa: TC003
 from typing import TYPE_CHECKING, ContextManager, NamedTuple, TypedDict, final
 
 from psutil import Process
 
-from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process
+from ..utils import FrozenDict, check_dir_path, check_file_path, filter_none, run_process_2
 from . import manip
 from .prelude import SORT_GENERATED_TOP_CELL
 from .syntax import And, Equals, EVar, kore_term
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
-    from typing import Any, Final, TextIO, TypeVar
+    from typing import IO, Any, Final, TypeVar
 
     from typing_extensions import Required
 
@@ -56,8 +57,44 @@ class JsonRpcError(Exception):
 
 
 class Transport(ContextManager['Transport'], ABC):
+    _bug_report: BugReport | None
+    _bug_report_id: str | None
+
+    def __init__(self, bug_report_id: str | None = None, bug_report: BugReport | None = None) -> None:
+        if (bug_report_id is None and bug_report is not None) or (bug_report_id is not None and bug_report is None):
+            raise ValueError('bug_report and bug_report_id must be passed together.')
+        self._bug_report_id = bug_report_id
+        self._bug_report = bug_report
+
+    def request(self, req: str, request_id: int, method_name: str) -> str:
+        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
+        req_name = f'{base_name}/{id(self)}/{request_id:03}'
+        if self._bug_report:
+            bug_report_request = f'{req_name}_request.json'
+            self._bug_report.add_file_contents(req, Path(bug_report_request))
+            self._bug_report.add_request(f'{req_name}_request.json')
+
+        server_addr = self._description()
+        _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
+        _LOGGER.debug(f'Sending request to {server_addr}: {req}')
+        resp = self._request(req)
+        _LOGGER.info(f'Received response from {server_addr}: {request_id} - {method_name}')
+        _LOGGER.debug(f'Received response from {server_addr}: {resp}')
+
+        if self._bug_report:
+            bug_report_response = f'{req_name}_response.json'
+            self._bug_report.add_file_contents(resp, Path(bug_report_response))
+            self._bug_report.add_request(f'{req_name}_response.json')
+        return resp
+
     @abstractmethod
-    def request(self, req: str) -> str: ...
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]: ...
+
+    @abstractmethod
+    def _request(self, req: str) -> str: ...
+
+    @abstractmethod
+    def _description(self) -> str: ...
 
     def __enter__(self) -> Transport:
         return self
@@ -67,12 +104,6 @@ class Transport(ContextManager['Transport'], ABC):
 
     @abstractmethod
     def close(self) -> None: ...
-
-    @abstractmethod
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]: ...
-
-    @abstractmethod
-    def description(self) -> str: ...
 
 
 class TransportType(Enum):
@@ -85,9 +116,18 @@ class SingleSocketTransport(Transport):
     _host: str
     _port: int
     _sock: socket.socket
-    _file: TextIO
+    _file: IO[str]
 
-    def __init__(self, host: str, port: int, *, timeout: int | None = None):
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        *,
+        timeout: int | None = None,
+        bug_report_id: str | None = None,
+        bug_report: BugReport | None = None,
+    ):
+        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._sock = self._create_connection(host, port, timeout)
@@ -117,7 +157,7 @@ class SingleSocketTransport(Transport):
         self._file.close()
         self._sock.close()
 
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]:
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
         return [
             'cat',
             bug_report_request,
@@ -127,16 +167,16 @@ class SingleSocketTransport(Transport):
             self._host,
             str(self._port),
             '>',
-            f'rpc_{bug_report_id}/{old_id:03}_actual.json',
+            f'{req_name}_actual.json',
         ]
 
-    def request(self, req: str) -> str:
+    def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
-        server_addr = self.description()
+        server_addr = self._description()
         _LOGGER.debug(f'Waiting for response from {server_addr}...')
         return self._file.readline().rstrip()
 
-    def description(self) -> str:
+    def _description(self) -> str:
         return f'{self._host}:{self._port}'
 
 
@@ -146,7 +186,16 @@ class HttpTransport(Transport):
     _port: int
     _timeout: int | None
 
-    def __init__(self, host: str, port: int, *, timeout: int | None = None):
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        *,
+        timeout: int | None = None,
+        bug_report_id: str | None = None,
+        bug_report: BugReport | None = None,
+    ):
+        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._timeout = timeout
@@ -154,7 +203,7 @@ class HttpTransport(Transport):
     def close(self) -> None:
         pass
 
-    def command(self, bug_report_id: str, old_id: int, bug_report_request: str) -> list[str]:
+    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
         return [
             'curl',
             '-X',
@@ -165,20 +214,20 @@ class HttpTransport(Transport):
             '@' + bug_report_request,
             'http://' + self._host + ':' + str(self._port),
             '>',
-            f'rpc_{bug_report_id}/{old_id:03}_actual.json',
+            f'{req_name}_actual.json',
         ]
 
-    def request(self, req: str) -> str:
+    def _request(self, req: str) -> str:
         connection = http.client.HTTPConnection(self._host, self._port, timeout=self._timeout)
         connection.request('POST', '/', body=req, headers={'Content-Type': 'application/json'})
-        server_addr = self.description()
+        server_addr = self._description()
         _LOGGER.debug(f'Waiting for response from {server_addr}...')
         response = connection.getresponse()
         if response.status != 200:
             raise JsonRpcError('Internal server error', -32603)
         return response.read().decode()
 
-    def description(self) -> str:
+    def _description(self) -> str:
         return f'{self._host}:{self._port}'
 
 
@@ -258,8 +307,6 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     _transport: Transport
     _req_id: int
-    _bug_report: BugReport | None
-    _bug_report_id: str
 
     def __init__(
         self,
@@ -272,14 +319,16 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
         if transport is TransportType.SINGLE_SOCKET:
-            self._transport = SingleSocketTransport(host, port, timeout=timeout)
+            self._transport = SingleSocketTransport(
+                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+            )
         elif transport is TransportType.HTTP:
-            self._transport = HttpTransport(host, port, timeout=timeout)
+            self._transport = HttpTransport(
+                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+            )
         else:
             raise AssertionError()
         self._req_id = 1
-        self._bug_report = bug_report
-        self._bug_report_id = bug_report_id if bug_report_id is not None else str(id(self))
 
     def __enter__(self) -> JsonRpcClient:
         return self
@@ -301,38 +350,15 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
             'params': params,
         }
 
-        server_addr = self._transport.description()
-        _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
-        if self._bug_report:
-            bug_report_request = f'rpc_{self._bug_report_id}/{old_id:03}_request.json'
-            self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_command(self._transport.command(self._bug_report_id, old_id, bug_report_request))
-
-        _LOGGER.debug(f'Sending request to {server_addr}: {req}')
-        resp = self._transport.request(req)
+        resp = self._transport.request(req, old_id, method)
         if not resp:
             raise RuntimeError('Empty response received')
-        _LOGGER.debug(f'Received response from {server_addr}: {resp}')
-
-        if self._bug_report:
-            bug_report_response = f'rpc_{self._bug_report_id}/{old_id:03}_response.json'
-            self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_command(
-                [
-                    'diff',
-                    '-b',
-                    '-s',
-                    f'rpc_{self._bug_report_id}/{old_id:03}_actual.json',
-                    f'rpc_{self._bug_report_id}/{old_id:03}_response.json',
-                ]
-            )
 
         data = json.loads(resp)
         self._check(data)
         assert data['id'] == old_id
 
-        _LOGGER.info(f'Received response from {server_addr}: {old_id} - {method}')
         return data['result']
 
     @staticmethod
@@ -596,6 +622,7 @@ class LogRewrite(LogEntry):
 class LogOrigin(str, Enum):
     KORE_RPC = 'kore-rpc'
     BOOSTER = 'booster'
+    PROXY = 'proxy'
     LLVM = 'llvm'
 
 
@@ -1104,6 +1131,8 @@ class KoreServerInfo(NamedTuple):
 
 class KoreServer(ContextManager['KoreServer']):
     _proc: Popen
+    _stdout_reader: Thread
+    _stderr_reader: Thread
     _info: KoreServerInfo
 
     _kompiled_dir: Path
@@ -1183,13 +1212,31 @@ class KoreServer(ContextManager['KoreServer']):
         new_env['GHCRTS'] = f'-N{self._haskell_threads}'
 
         _LOGGER.info(f'Starting KoreServer: {" ".join(cli_args)}')
-        self._proc = Popen(cli_args, env=new_env)
+        self._proc, self._stdout_reader, self._stderr_reader = self._create_proc(cli_args, new_env)
         pid = self._proc.pid
         host, port = self._get_host_and_port(pid)
         if self._port:
             assert port == self._port
         self._info = KoreServerInfo(pid=pid, host=host, port=port)
         _LOGGER.info(f'KoreServer started: {self.host}:{self.port}, pid={self.pid}')
+
+    @staticmethod
+    def _create_proc(args: list[str], env: dict[str, str]) -> tuple[Popen, Thread, Thread]:
+        popen = Popen(args, env=env, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
+
+        def reader(fh: IO[str], prefix: str) -> None:
+            for line in fh:
+                _LOGGER.info(f'[PID={popen.pid}][{prefix}] {line.rstrip()}')
+
+        stdout_reader = Thread(target=reader, args=(popen.stdout, 'stdo'))
+        stdout_reader.daemon = True
+        stdout_reader.start()
+
+        stderr_reader = Thread(target=reader, args=(popen.stderr, 'stde'))
+        stderr_reader.daemon = True
+        stderr_reader.start()
+
+        return popen, stdout_reader, stderr_reader
 
     def close(self) -> None:
         _LOGGER.info(f'Stopping KoreServer: {self.host}:{self.port}, pid={self.pid}')
@@ -1198,6 +1245,8 @@ class KoreServer(ContextManager['KoreServer']):
         else:
             self._proc.terminate()
         self._proc.wait()
+        self._stdout_reader.join()
+        self._stderr_reader.join()
         _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
 
     def _validate(self) -> None:
@@ -1248,7 +1297,7 @@ class KoreServer(ContextManager['KoreServer']):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         prog_name = self._command[0]
         bug_report.add_file(self._definition_file, Path('definition.kore'))
-        version_info = run_process((prog_name, '--version'), pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        version_info = run_process_2((prog_name, '--version'), logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(version_info, Path('server_version.txt'))
         server_instance = {
             'exe': prog_name,
@@ -1354,7 +1403,7 @@ class BoosterServer(KoreServer):
     def _populate_bug_report(self, bug_report: BugReport) -> None:
         super()._populate_bug_report(bug_report)
         bug_report.add_file(self._llvm_definition, Path('llvm_definition/definition.kore'))
-        llvm_version = run_process('llvm-backend-version', pipe_stderr=True, logger=_LOGGER).stdout.strip()
+        llvm_version = run_process_2('llvm-backend-version', logger=_LOGGER).stdout.strip()
         bug_report.add_file_contents(llvm_version, Path('llvm_version.txt'))
 
 

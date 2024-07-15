@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from ..cli.utils import check_dir_path, check_file_path
 from ..kore.parser import KoreParser
 from ..kore.tools import PrintOutput, kore_print
-from ..utils import run_process
+from ..utils import run_process, run_process_2
 from .kprint import KPrint
 
 if TYPE_CHECKING:
@@ -246,12 +246,7 @@ def _krun(
         else:
             bug_report.add_command(args)
 
-    try:
-        return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, exec_process=debugger)
-    except CalledProcessError as err:
-        raise RuntimeError(
-            f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
-        ) from err
+    return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, exec_process=debugger)
 
 
 def _build_arg_list(
@@ -344,4 +339,4 @@ def llvm_interpret_raw(definition_dir: str | Path, kore: str, depth: int | None 
     depth = depth if depth is not None else -1
     args = [str(interpreter_file), '/dev/stdin', str(depth), '/dev/stdout']
 
-    return run_process(args, input=kore, pipe_stderr=True)
+    return run_process_2(args, input=kore, logger=_LOGGER, loglevel=logging.DEBUG)

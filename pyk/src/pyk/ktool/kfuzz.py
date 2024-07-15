@@ -2,15 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from hypothesis import Phase, Verbosity, given, settings
-from hypothesis.strategies import builds, fixed_dictionaries, integers
+from hypothesis import Phase, given, settings
+from hypothesis.strategies import fixed_dictionaries, integers
 
-from ..kast.inner import KSort
-from ..konvert import _kast_to_kore
 from ..kore.parser import KoreParser
-from ..kore.syntax import Assoc, EVar
-from ..prelude.k import inj
-from ..prelude.kint import intToken
+from ..kore.prelude import inj
+from ..kore.syntax import DV, EVar, SortApp, String
 from .krun import llvm_interpret_raw
 
 if TYPE_CHECKING:
@@ -20,15 +17,48 @@ if TYPE_CHECKING:
 
     from hypothesis.strategies import SearchStrategy
 
-    from ..kast.inner import KInner
     from ..kore.syntax import Pattern
+
+
+class KFuzz:
+    """Interface for fuzzing over property tests in K."""
+
+    definition_dir: Path
+
+    def __init__(self, definition_dir: Path) -> None:
+        self.definition_dir = definition_dir
+
+    def fuzz_with_check(
+        self,
+        template: Pattern,
+        subst_strategy: dict[EVar, SearchStrategy[Pattern]],
+        check_func: Callable[[Pattern], Any],
+        **hypothesis_args: Any,
+    ) -> None:
+        """Fuzz over a property test using check_func to check for a passing test.
+
+        See :any:`fuzz` for info on the parameters.
+        """
+        fuzz(self.definition_dir, template, subst_strategy, check_func=check_func)
+
+    def fuzz_with_exit_code(
+        self,
+        template: Pattern,
+        subst_strategy: dict[EVar, SearchStrategy[Pattern]],
+        **hypothesis_args: Any,
+    ) -> None:
+        """Fuzz over a property test using the exit code from the interpreter to check for a passing test.
+
+        See :any:`fuzz` for info on the parameters.
+        """
+        fuzz(self.definition_dir, template, subst_strategy, check_exit_code=True)
 
 
 def kintegers(
     *,
     min_value: int | None = None,
     max_value: int | None = None,
-    with_inj: KSort | None = None,
+    with_inj: str | None = None,
 ) -> SearchStrategy[Pattern]:
     """Return a search strategy for K integers.
 
@@ -42,12 +72,12 @@ def kintegers(
     """
 
     def int_dv(value: int) -> Pattern:
-        res: KInner = intToken(value)
+        res: Pattern = DV(SortApp('SortInt'), value=String(str(value)))
         if with_inj is not None:
-            res = inj(KSort('Int'), with_inj, res)
-        return _kast_to_kore(res)
+            res = inj(SortApp('SortInt'), SortApp(f'Sort{with_inj}'), res)
+        return res
 
-    return builds(int_dv, integers(min_value=min_value, max_value=max_value))
+    return integers(min_value=min_value, max_value=max_value).map(int_dv)
 
 
 def fuzz(
@@ -56,7 +86,7 @@ def fuzz(
     subst_strategy: dict[EVar, SearchStrategy[Pattern]],
     check_func: Callable[[Pattern], Any] | None = None,
     check_exit_code: bool = False,
-    max_examples: int = 50,
+    **hypothesis_args: Any,
 ) -> None:
     """Fuzz a property test with concrete execution over a K term.
 
@@ -70,7 +100,12 @@ def fuzz(
         check_exit_code: Check the exit code of the interpreter for a test failure instead of using check_func.
           An exit code of 0 indicates a passing test.
           A RuntimeError will be thrown if this is True and check_func is also passed as an argument.
-        max_examples: The number of test cases to run.
+        hypothesis_args: Keyword arguments that will be passed as settings for the hypothesis test. Defaults:
+
+          deadline: 5000
+
+          phases: (Phase.explicit, Phase.reuse, Phase.generate)
+
 
     Raises:
         RuntimeError: If check_func exists and check_exit_code is set, or check_func doesn't exist and check_exit_code is cleared.
@@ -80,14 +115,10 @@ def fuzz(
 
     def test(subst_case: Mapping[EVar, Pattern]) -> None:
         def sub(p: Pattern) -> Pattern:
-            if isinstance(p, Assoc):
-                symbol = p.symbol()
-                args = (arg.top_down(sub) for arg in p.app.args)
-                return p.of(symbol, patterns=(p.app.let(args=args),))
-            if p in subst_case:
-                assert isinstance(p, EVar)
+            if isinstance(p, EVar) and p in subst_case:
                 return subst_case[p]
-            return p
+            else:
+                return p
 
         test_pattern = template.top_down(sub)
         res = llvm_interpret_raw(definition_dir, test_pattern.text)
@@ -101,11 +132,8 @@ def fuzz(
 
     strat: SearchStrategy = fixed_dictionaries(subst_strategy)
 
-    given(strat)(
-        settings(
-            deadline=50000,
-            max_examples=max_examples,
-            verbosity=Verbosity.verbose,
-            phases=(Phase.generate, Phase.target, Phase.shrink),
-        )(test)
-    )()
+    # Default settings for hypothesis
+    hypothesis_args.setdefault('deadline', 5000)
+    hypothesis_args.setdefault('phases', (Phase.explicit, Phase.reuse, Phase.generate))
+
+    given(strat)(settings(**hypothesis_args)(test))()

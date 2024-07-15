@@ -25,15 +25,15 @@ def match_dv(pattern: Pattern, sort: Sort | None = None) -> DV:
     return dv
 
 
-def match_symbol(app: App, symbol: str) -> None:
-    if app.symbol != symbol:
-        raise ValueError(f'Expected symbol {symbol}, found: {app.symbol}')
+def match_symbol(actual: str, expected: str) -> None:
+    if actual != expected:
+        raise ValueError(f'Expected symbol {expected}, found: {actual}')
 
 
 def match_app(pattern: Pattern, symbol: str | None = None) -> App:
     app = check_type(pattern, App)
     if symbol is not None:
-        match_symbol(app, symbol)
+        match_symbol(app.symbol, symbol)
     return app
 
 
@@ -41,8 +41,11 @@ def match_inj(pattern: Pattern) -> App:
     return match_app(pattern, 'inj')
 
 
-def match_left_assoc(pattern: Pattern) -> LeftAssoc:
-    return check_type(pattern, LeftAssoc)
+def match_left_assoc(pattern: Pattern, symbol: str | None = None) -> LeftAssoc:
+    assoc = check_type(pattern, LeftAssoc)
+    if symbol is not None:
+        match_symbol(assoc.symbol, symbol)
+    return assoc
 
 
 def match_list(pattern: Pattern) -> tuple[Pattern, ...]:
@@ -50,9 +53,8 @@ def match_list(pattern: Pattern) -> tuple[Pattern, ...]:
         match_app(pattern, "Lbl'Stop'List")
         return ()
 
-    assoc = match_left_assoc(pattern)
-    cons = match_app(assoc.app, "Lbl'Unds'List'Unds'")
-    items = (match_app(arg, 'LblListItem') for arg in cons.args)
+    assoc = match_left_assoc(pattern, "Lbl'Unds'List'Unds'")
+    items = (match_app(arg, 'LblListItem') for arg in assoc.args)
     elems = (item.args[0] for item in items)
     return tuple(elems)
 
@@ -62,9 +64,8 @@ def match_set(pattern: Pattern) -> tuple[Pattern, ...]:
         match_app(pattern, "Lbl'Stop'Set")
         return ()
 
-    assoc = match_left_assoc(pattern)
-    cons = match_app(assoc.app, "Lbl'Unds'Set'Unds'")
-    items = (match_app(arg, 'LblSetItem') for arg in cons.args)
+    assoc = match_left_assoc(pattern, "Lbl'Unds'Set'Unds'")
+    items = (match_app(arg, 'LblSetItem') for arg in assoc.args)
     elems = (item.args[0] for item in items)
     return tuple(elems)
 
@@ -79,11 +80,32 @@ def match_map(pattern: Pattern, *, cell: str | None = None) -> tuple[tuple[Patte
         match_app(pattern, stop_symbol)
         return ()
 
+    assoc = match_left_assoc(pattern, cons_symbol)
+    items = (match_app(arg, item_symbol) for arg in assoc.args)
+    entries = ((item.args[0], item.args[1]) for item in items)
+    return tuple(entries)
+
+
+def match_rangemap(pattern: Pattern) -> tuple[tuple[tuple[Pattern, Pattern], Pattern], ...]:
+    stop_symbol = "Lbl'Stop'RangeMap"
+    cons_symbol = "Lbl'Unds'RangeMap'Unds'"
+    item_symbol = "Lbl'Unds'r'Pipe'-'-GT-Unds'"
+
+    if type(pattern) is App:
+        match_app(pattern, stop_symbol)
+        return ()
+
     assoc = match_left_assoc(pattern)
     cons = match_app(assoc.app, cons_symbol)
     items = (match_app(arg, item_symbol) for arg in cons.args)
-    entries = ((item.args[0], item.args[1]) for item in items)
+    entries = ((_match_range(item.args[0]), item.args[1]) for item in items)
     return tuple(entries)
+
+
+def _match_range(pattern: Pattern) -> tuple[Pattern, Pattern]:
+    range_symbol = "LblRangeMap'Coln'Range"
+    range = match_app(pattern, range_symbol)
+    return (range.args[0], range.args[1])
 
 
 def kore_bool(pattern: Pattern) -> bool:
@@ -249,6 +271,16 @@ def kore_map_of(
 ) -> Callable[[Pattern], tuple[tuple[K, V], ...]]:
     def res(pattern: Pattern) -> tuple[tuple[K, V], ...]:
         return tuple((key(k), value(v)) for k, v in match_map(pattern, cell=cell))
+
+    return res
+
+
+def kore_rangemap_of(
+    key: Callable[[Pattern], K],
+    value: Callable[[Pattern], V],
+) -> Callable[[Pattern], tuple[tuple[tuple[K, K], V], ...]]:
+    def res(pattern: Pattern) -> tuple[tuple[tuple[K, K], V], ...]:
+        return tuple(((key(k[0]), key(k[1])), value(v)) for k, v in match_rangemap(pattern))
 
     return res
 

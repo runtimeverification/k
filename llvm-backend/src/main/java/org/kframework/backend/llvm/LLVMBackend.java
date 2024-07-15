@@ -131,16 +131,17 @@ public class LLVMBackend extends KoreBackend {
       args.add(files.resolveKompiled("dt").getCanonicalPath());
       args.add(type);
 
-      if (options.enableProofHints) {
-        args.add("--proof-hint-instrumentation");
+      if (options.enableProofHints || options.enableProofHintDebugging) {
+        if (options.enableProofHintDebugging) {
+          args.add("--proof-hint-instrumentation-slow");
+        } else {
+          args.add("--proof-hint-instrumentation");
+        }
       }
 
       if (options.llvmMutableBytes) {
         args.add("--mutable-bytes");
       }
-
-      // Arguments after this point are passed on to Clang.
-      args.add("--");
 
       if (options.debug) {
         args.add("-g");
@@ -166,6 +167,9 @@ public class LLVMBackend extends KoreBackend {
         if (kompileOptions.optimize3)
           args.add("-O2"); // clang -O3 does not make the llvm backend any faster
       }
+
+      // Arguments after this point are passed on to Clang.
+      args.add("--");
 
       args.addAll(options.ccopts);
 

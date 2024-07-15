@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KSort
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import inj, top_cell_initializer
-from pyk.kore.syntax import DV, App, Assoc, EVar, SortApp, String
-from pyk.ktool.kfuzz import fuzz, kintegers
+from pyk.kore.syntax import DV, App, EVar, SortApp, String
+from pyk.ktool.kfuzz import KFuzz, kintegers
 from pyk.ktool.kprint import _kast
 from pyk.testing import KompiledTest
 
@@ -32,16 +31,16 @@ VAR_Y = EVar(name='VarY', sort=SortApp('SortInt'))
 class TestImpFuzz(KompiledTest):
     KOMPILE_MAIN_FILE = K_FILES / 'imp.k'
     KOMPILE_BACKEND = 'llvm'
-    SUBSTS = {VAR_X: kintegers(with_inj=KSort('AExp')), VAR_Y: kintegers(with_inj=KSort('AExp'))}
+    SUBSTS = {VAR_X: kintegers(with_inj='AExp'), VAR_Y: kintegers(with_inj='AExp')}
+
+    @pytest.fixture
+    def kfuzz(self, definition_dir: Path) -> KFuzz:
+        return KFuzz(definition_dir)
 
     @staticmethod
     def check(p: Pattern) -> None:
         def check_inner(p: Pattern) -> Pattern:
             match p:
-                case Assoc():
-                    symbol = p.symbol()
-                    args = (arg.top_down(check_inner) for arg in p.app.args)
-                    return p.of(symbol, patterns=(p.app.let(args=args),))
                 case App("Lbl'UndsPipe'-'-GT-Unds'", args=(key, val)):
                     match key, val:
                         case (
@@ -80,6 +79,7 @@ class TestImpFuzz(KompiledTest):
     def test_fuzz(
         self,
         definition_dir: Path,
+        kfuzz: KFuzz,
     ) -> None:
         # Given
         program_text = """
@@ -99,11 +99,12 @@ class TestImpFuzz(KompiledTest):
         init_pattern = self.setup_program(definition_dir, program_text)
 
         # Then
-        fuzz(definition_dir, init_pattern, self.SUBSTS, self.check)
+        kfuzz.fuzz_with_check(init_pattern, self.SUBSTS, self.check)
 
     def test_fuzz_fail(
         self,
         definition_dir: Path,
+        kfuzz: KFuzz,
     ) -> None:
         # Given
         program_text = """
@@ -122,4 +123,4 @@ class TestImpFuzz(KompiledTest):
 
         # Then
         with pytest.raises(AssertionError):
-            fuzz(definition_dir, init_pattern, self.SUBSTS, self.check)
+            kfuzz.fuzz_with_check(init_pattern, self.SUBSTS, self.check)

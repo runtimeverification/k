@@ -92,7 +92,7 @@ You can create a new `Array` with a new value for a key in O(log(N)) time, or
 effectively constant.
 
 ```k
-  syntax Array ::= Array "[" key: Int "<-" value: KItem "]" [function, klabel(_[_<-_]), symbol]
+  syntax Array ::= Array "[" key: Int "<-" value: KItem "]" [function, symbol(_[_<-_])]
 ```
 
 ### Array reset
@@ -237,7 +237,7 @@ other words, one unbound variable is linear, two is quadratic, three is cubic,
 etc.
 
 ```k
-  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), symbol, assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
+  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), symbol(_Map_), assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
 ```
 
 ### Map unit
@@ -245,7 +245,7 @@ etc.
 The map with zero elements is represented by `.Map`.
 
 ```k
-  syntax Map ::= ".Map"                         [function, total, hook(MAP.unit), klabel(.Map), symbol]
+  syntax Map ::= ".Map"                         [function, total, hook(MAP.unit), symbol(.Map)]
 ```
 
 ### Map elements
@@ -254,7 +254,7 @@ An element of a `Map` is constructed via the `|->` operator. The key is on the
 left and the value is on the right.
 
 ```k
-  syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), klabel(_|->_), symbol, injective]
+  syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), symbol(_|->_), injective]
 
   syntax priority _|->_ > _Map_ .Map
   syntax non-assoc _|->_
@@ -268,7 +268,7 @@ time is effectively constant. The value is `#False` if the key is not in the
 map (in particular, this will yield an exception during concrete execution).
 
 ```k
-  syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
+  syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), symbol(Map:lookup)]
 ```
 
 ### Map lookup with default
@@ -278,7 +278,7 @@ total function that assigns a specific default value if the key is not present
 in the map. This operation is also O(log(N)), or effectively constant.
 
 ```k
-  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, total, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, total, hook(MAP.lookupOrDefault), symbol(Map:lookupOrDefault)]
 ```
 
 ### Map update
@@ -287,7 +287,7 @@ You can insert a key/value pair into a map in O(log(N)) time, or effectively
 constant.
 
 ```k
-  syntax Map ::= Map "[" key: KItem "<-" value: KItem "]"           [function, total, klabel(Map:update), symbol, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" key: KItem "<-" value: KItem "]"           [function, total, symbol(Map:update), hook(MAP.update), prefer]
 ```
 
 ### Map delete
@@ -296,7 +296,7 @@ You can remove a key/value pair from a map via its key in O(log(N)) time, or
 effectively constant.
 
 ```k
-  syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, total, hook(MAP.remove), klabel(_[_<-undef]), symbol]
+  syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, total, hook(MAP.remove), symbol(_[_<-undef])]
 ```
 
 ### Map difference
@@ -370,7 +370,7 @@ You can get a `List` of all the values in a map in O(N) time.
 You can get the number of key/value pairs in a map in O(1) time.
 
 ```k
-  syntax Int ::= size(Map)                      [function, total, hook(MAP.size), klabel(sizeMap)]
+  syntax Int ::= size(Map)                      [function, total, hook(MAP.size), symbol(sizeMap)]
 ```
 
 ### Map inclusion
@@ -390,7 +390,7 @@ will always be returned for the same map, but no guarantee is given that two
 different maps will return the same element, even if they are similar.
 
 ```k
-  syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
+  syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), symbol(Map:choice)]
 ```
 
 ### Implementation of Maps
@@ -488,7 +488,7 @@ module RANGEMAP
 ### Range, bounded inclusively below and exclusively above.
 
 ```k
-  syntax Range ::= "[" KItem "," KItem ")"    [klabel(Rangemap:Range), symbol]
+  syntax Range ::= "[" KItem "," KItem ")"    [symbol(RangeMap:Range)]
 
   syntax RangeMap [hook(RANGEMAP.RangeMap)]
 ```
@@ -505,7 +505,7 @@ thrown during concrete execution. This operation is O(N*log(M)) (where N is
 the size of the smaller map and M is the size of the larger map).
 
 ```k
-  syntax RangeMap ::= RangeMap RangeMap                        [left, function, hook(RANGEMAP.concat), klabel(_RangeMap_), symbol, assoc, comm, unit(.RangeMap), element(_r|->_), index(0), format(%1%n%2)]
+  syntax RangeMap ::= RangeMap RangeMap                        [left, function, hook(RANGEMAP.concat), symbol(_RangeMap_), assoc, comm, unit(.RangeMap), element(_r|->_), index(0), format(%1%n%2)]
 ```
 
 ### Range map unit
@@ -513,7 +513,7 @@ the size of the smaller map and M is the size of the larger map).
 The `RangeMap` with zero elements is represented by `.RangeMap`.
 
 ```k
-  syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol]
+  syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), symbol(.RangeMap)]
 ```
 
 ### Range map elements
@@ -522,7 +522,7 @@ An element of a `RangeMap` is constructed via the `r|->` operator. The range
 of keys is on the left, and the value is on the right.
 
 ```k
-  syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, injective]
+  syntax RangeMap ::= Range "r|->" KItem                      [function, hook(RANGEMAP.elementRng), symbol(_r|->_), injective]
 
   syntax priority _r|->_ > _RangeMap_ .RangeMap
   syntax non-assoc _r|->_
@@ -535,7 +535,7 @@ time (where N is the size of the `RangeMap`). This will yield an exception
 during concrete execution if the key is not in the range map.
 
 ```k
-  syntax KItem ::= RangeMap "[" KItem "]"                    [function, hook(RANGEMAP.lookup), klabel(RangeMap:lookup), symbol]
+  syntax KItem ::= RangeMap "[" KItem "]"                    [function, hook(RANGEMAP.lookup), symbol(RangeMap:lookup)]
 ```
 
 ### Range map lookup with default
@@ -546,7 +546,7 @@ in the `RangeMap`. This operation is also O(log(N)) (where N is the size of
 the range map).
 
 ```k
-  syntax KItem ::= RangeMap "[" KItem "]" "orDefault" KItem      [function, total, hook(RANGEMAP.lookupOrDefault), klabel(RangeMap:lookupOrDefault)]
+  syntax KItem ::= RangeMap "[" KItem "]" "orDefault" KItem      [function, total, hook(RANGEMAP.lookupOrDefault), symbol(RangeMap:lookupOrDefault)]
 ```
 
 ### Range map lookup for range of key
@@ -556,7 +556,7 @@ O(log(N)) time (where N is the size of the `RangeMap`). This will yield an
 exception during concrete execution if the key is not in the range map.
 
 ```k
-  syntax Range ::= "find_range" "(" RangeMap "," KItem ")"                    [function, hook(RANGEMAP.find_range), klabel(RangeMap:find_range)]
+  syntax Range ::= "find_range" "(" RangeMap "," KItem ")"                    [function, hook(RANGEMAP.find_range), symbol(RangeMap:find_range)]
 ```
 
 ### Range map update
@@ -566,7 +566,7 @@ is the size of the `RangeMap`). Any ranges adjacent to or overlapping with the
 range to be inserted will be updated accordingly.
 
 ```k
-  syntax RangeMap ::= RangeMap "[" keyRange: Range "<-" value: KItem "]"           [function, klabel(RangeMap:update), symbol, hook(RANGEMAP.updateRng), prefer]
+  syntax RangeMap ::= RangeMap "[" keyRange: Range "<-" value: KItem "]"           [function, symbol(RangeMap:update), hook(RANGEMAP.updateRng), prefer]
 ```
 
 ### Range map delete
@@ -576,7 +576,7 @@ is the size of the `RangeMap`). If all or any part of the range is present in
 the range map, it will be removed.
 
 ```k
-  syntax RangeMap ::= RangeMap "[" Range "<-" "undef" "]"     [function, hook(RANGEMAP.removeRng), klabel(_r[_<-undef]), symbol]
+  syntax RangeMap ::= RangeMap "[" Range "<-" "undef" "]"     [function, hook(RANGEMAP.removeRng), symbol(_r[_<-undef])]
 ```
 
 ### Range map difference
@@ -657,7 +657,7 @@ size of the `RangeMap`).
 You can get the number of range/value pairs in a `RangeMap` in O(1) time.
 
 ```k
-  syntax Int ::= size(RangeMap)                      [function, total, hook(RANGEMAP.size), klabel(sizeRangeMap)]
+  syntax Int ::= size(RangeMap)                      [function, total, hook(RANGEMAP.size), symbol(sizeRangeMap)]
 ```
 
 ### Range map inclusion
@@ -679,7 +679,7 @@ that two different range maps will return the same element, even if they are
 similar.
 
 ```k
-  syntax KItem ::= choice(RangeMap)                      [function, hook(RANGEMAP.choice), klabel(RangeMap:choice)]
+  syntax KItem ::= choice(RangeMap)                      [function, hook(RANGEMAP.choice), symbol(RangeMap:choice)]
 endmodule
 ```
 
@@ -718,7 +718,7 @@ number of unbound keys being mached. In other words, one unbound variable is
 linear, two is quadratic, three is cubic, etc.
 
 ```k
-  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
+  syntax Set ::= Set Set                  [left, function, hook(SET.concat), symbol(_Set_), assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
 ```
 
 ### Set unit
@@ -726,7 +726,7 @@ linear, two is quadratic, three is cubic, etc.
 The set with zero elements is represented by `.Set`.
 
 ```k
-  syntax Set ::= ".Set"                   [function, total, hook(SET.unit), klabel(.Set), symbol]
+  syntax Set ::= ".Set"                   [function, total, hook(SET.unit), symbol(.Set)]
 ```
 
 ### Set elements
@@ -734,7 +734,7 @@ The set with zero elements is represented by `.Set`.
 An element of a `Set` is constructed via the `SetItem` operator.
 
 ```k
-  syntax Set ::= SetItem(KItem)               [function, total, hook(SET.element), klabel(SetItem), symbol, injective]
+  syntax Set ::= SetItem(KItem)               [function, total, hook(SET.element), symbol(SetItem), injective]
 ```
 
 ### Set union
@@ -766,7 +766,7 @@ N is the size of the second set), or effectively linear. This is the set of
 elements in the first set that are not present in the second set.
 
 ```k
-  syntax Set ::= Set "-Set" Set           [function, total, hook(SET.difference), klabel(Set:difference), symbol]
+  syntax Set ::= Set "-Set" Set           [function, total, hook(SET.difference), symbol(Set:difference)]
 ```
 
 ### Set membership
@@ -774,7 +774,7 @@ elements in the first set that are not present in the second set.
 You can compute whether an element is a member of a set in O(1) time.
 
 ```k
-  syntax Bool ::= KItem "in" Set              [function, total, hook(SET.in), klabel(Set:in), symbol]
+  syntax Bool ::= KItem "in" Set              [function, total, hook(SET.in), symbol(Set:in)]
 ```
 
 ### Set inclusion
@@ -801,7 +801,7 @@ element will always be returned for the same set, but no guarantee is given
 that two different sets will return the same element, even if they are similar.
 
 ```k
-  syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+  syntax KItem ::= choice(Set)                [function, hook(SET.choice), symbol(Set:choice)]
 ```
 
 ```k
@@ -926,7 +926,7 @@ side, it is O(N), where N is the number of elements matched on the front and
 back of the list.
 
 ```k
-  syntax List ::= List List               [left, function, total, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
+  syntax List ::= List List               [left, function, total, hook(LIST.concat), symbol(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
 ```
 
 ### List unit
@@ -934,7 +934,7 @@ back of the list.
 The list with zero elements is represented by `.List`.
 
 ```k
-  syntax List ::= ".List"                 [function, total, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil)]
+  syntax List ::= ".List"                 [function, total, hook(LIST.unit), symbol(.List), smtlib(smt_seq_nil)]
 ```
 
 ### List elements
@@ -942,7 +942,7 @@ The list with zero elements is represented by `.List`.
 An element of a `List` is constucted via the `ListItem` operator.
 
 ```k
-  syntax List ::= ListItem(KItem)             [function, total, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(KItem)             [function, total, hook(LIST.element), symbol(ListItem), smtlib(smt_seq_elem)]
 ```
 
 ### List prepend
@@ -950,7 +950,7 @@ An element of a `List` is constucted via the `ListItem` operator.
 An element can be added to the front of a `List` using the `pushList` operator.
 
 ```k
-  syntax List ::= pushList(KItem, List)       [function, total, hook(LIST.push), klabel(pushList), symbol]
+  syntax List ::= pushList(KItem, List)       [function, total, hook(LIST.push), symbol(pushList)]
   rule pushList(K::KItem, L1::List) => ListItem(K) L1
 ```
 
@@ -962,7 +962,7 @@ list, and negative indices are -1-indexed from the end of the list. In other
 words, 0 is the first element and -1 is the last element.
 
 ```k
-  syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
+  syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), symbol(List:get)]
 ```
 
 ### List update
@@ -971,7 +971,7 @@ You can create a new `List` with a new value at a particular index in
 O(log(N)) time, or effectively constant.
 
 ```k
-  syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), klabel(List:set)]
+  syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), symbol(List:set)]
 ```
 
 ### List of identical elements
@@ -1009,7 +1009,7 @@ of the list and `fromBack` elements from the back of the list in
 O((fromFront+fromBack)*log(N)) time, or effectively linear.
 
 ```k
-  syntax List ::= range(List, fromFront: Int, fromBack: Int)   [function, hook(LIST.range), klabel(List:range), symbol]
+  syntax List ::= range(List, fromFront: Int, fromBack: Int)   [function, hook(LIST.range), symbol(List:range)]
 ```
 
 ### List membership
@@ -1018,7 +1018,7 @@ You can compute whether an element is in a list in O(N) time. For repeated
 comparisons, it is much better to first convert to a set using `List2Set`.
 
 ```k
-  syntax Bool ::= KItem "in" List             [function, total, hook(LIST.in), klabel(_inList_)]
+  syntax Bool ::= KItem "in" List             [function, total, hook(LIST.in), symbol(_inList_)]
 ```
 
 ### List size
@@ -1026,7 +1026,7 @@ comparisons, it is much better to first convert to a set using `List2Set`.
 You can get the number of elements of a list in O(1) time.
 
 ```k
-  syntax Int ::= size(List)               [function, total, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
+  syntax Int ::= size(List)               [function, total, hook(LIST.size), symbol(sizeList), smtlib(smt_seq_len)]
 ```
 
 ```k
@@ -1106,16 +1106,16 @@ and `orBool` may be short-circuited in concrete backends, but in symbolic
 backends, both arguments will be evaluated.
 
 ```k
-  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), group(boolOperation), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), group(boolOperation), hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), group(boolOperation), hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), group(boolOperation), hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), group(boolOperation), hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, total, symbol(notBool_), smt-hook(not), group(boolOperation), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, total, symbol(_andBool_), left, smt-hook(and), group(boolOperation), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, total, symbol(_andThenBool_), left, smt-hook(and), group(boolOperation), hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, total, symbol(_xorBool_), left, smt-hook(xor), group(boolOperation), hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, total, symbol(_orBool_), left, smt-hook(or), group(boolOperation), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, total, symbol(_orElseBool_), left, smt-hook(or), group(boolOperation), hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, total, symbol(_impliesBool_), left, smt-hook(=>), group(boolOperation), hook(BOOL.implies)]
                 > left:
-                  Bool "==Bool" Bool      [function, total, klabel(_==Bool_), symbol, left, comm, smt-hook(=), hook(BOOL.eq)]
-                | Bool "=/=Bool" Bool     [function, total, klabel(_=/=Bool_), symbol, left, comm, smt-hook(distinct), hook(BOOL.ne)]
+                  Bool "==Bool" Bool      [function, total, symbol(_==Bool_), left, comm, smt-hook(=), hook(BOOL.eq)]
+                | Bool "=/=Bool" Bool     [function, total, symbol(_=/=Bool_), left, comm, smt-hook(distinct), hook(BOOL.ne)]
 ```
 
 ### Implementation of Booleans
@@ -1234,31 +1234,31 @@ You can:
 * Compute the bitwise inclusive-or of two integers in twos-complement.
 
 ```k
-  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, total, hook(INT.not), smtlib(notInt)]
+  syntax Int ::= "~Int" Int                     [function, symbol(~Int_), total, hook(INT.not), smtlib(notInt)]
                > left:
-                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
+                 Int "^Int" Int                 [function, symbol(_^Int_), left, smt-hook(^), hook(INT.pow)]
+               | Int "^%Int" Int Int            [function, symbol(_^%Int__), left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, total, klabel(_*Int_), symbol, left, comm, smt-hook(*), hook(INT.mul)]
+                 Int "*Int" Int                 [function, total, symbol(_*Int_), left, comm, smt-hook(*), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division, which rounds towards 0 */
-               | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), hook(INT.tmod)]
+               | Int "/Int" Int                 [function, symbol(_/Int_), left, smt-hook(div), hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, symbol(_%Int_), left, smt-hook(mod), hook(INT.tmod)]
                /* divInt and modInt implement e-division according to the Euclidean division theorem, therefore the remainder is always positive */
-               | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
-               | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
+               | Int "divInt" Int               [function, symbol(_divInt_), left, smt-hook(div), hook(INT.ediv)]
+               | Int "modInt" Int               [function, symbol(_modInt_), left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, total, klabel(_+Int_), symbol, left, comm, smt-hook(+), hook(INT.add)]
-               | Int "-Int" Int                 [function, total, klabel(_-Int_), symbol, left, smt-hook(-), hook(INT.sub)]
+                 Int "+Int" Int                 [function, total, symbol(_+Int_), left, comm, smt-hook(+), hook(INT.add)]
+               | Int "-Int" Int                 [function, total, symbol(_-Int_), left, smt-hook(-), hook(INT.sub)]
                > left:
-                 Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, hook(INT.shr), smtlib(shrInt)]
-               | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, hook(INT.shl), smtlib(shlInt)]
+                 Int ">>Int" Int                [function, symbol(_>>Int_), left, hook(INT.shr), smtlib(shrInt)]
+               | Int "<<Int" Int                [function, symbol(_<<Int_), left, hook(INT.shl), smtlib(shlInt)]
                > left:
-                 Int "&Int" Int                 [function, total, klabel(_&Int_), symbol, left, comm, hook(INT.and), smtlib(andInt)]
+                 Int "&Int" Int                 [function, total, symbol(_&Int_), left, comm, hook(INT.and), smtlib(andInt)]
                > left:
-                 Int "xorInt" Int               [function, total, klabel(_xorInt_), symbol, left, comm, hook(INT.xor), smtlib(xorInt)]
+                 Int "xorInt" Int               [function, total, symbol(_xorInt_), left, comm, hook(INT.xor), smtlib(xorInt)]
                > left:
-                 Int "|Int" Int                 [function, total, klabel(_|Int_), symbol, left, comm, hook(INT.or), smtlib(orInt)]
+                 Int "|Int" Int                 [function, total, symbol(_|Int_), left, comm, hook(INT.or), smtlib(orInt)]
 ```
 
 ### Integer minimum and maximum
@@ -1310,12 +1310,12 @@ You can compute whether two integers are less than or equal to, less than,
 greater than or equal to, greater than, equal, or unequal to another integer.
 
 ```k
-  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, smt-hook(<=), hook(INT.le)]
-                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, smt-hook(<), hook(INT.lt)]
-                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, smt-hook(>=), hook(INT.ge)]
-                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, smt-hook(>), hook(INT.gt)]
-                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, comm, smt-hook(=), hook(INT.eq)]
-                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, comm, smt-hook(distinct), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, total, symbol(_<=Int_), smt-hook(<=), hook(INT.le)]
+                | Int "<Int" Int          [function, total, symbol(_<Int_), smt-hook(<), hook(INT.lt)]
+                | Int ">=Int" Int         [function, total, symbol(_>=Int_), smt-hook(>=), hook(INT.ge)]
+                | Int ">Int" Int          [function, total, symbol(_>Int_), smt-hook(>), hook(INT.gt)]
+                | Int "==Int" Int         [function, total, symbol(_==Int_), comm, smt-hook(=), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, total, symbol(_=/=Int_), comm, smt-hook(distinct), hook(INT.ne)]
 ```
 
 ### Divides
@@ -1627,7 +1627,7 @@ IEEE 754 arithmetic. `0.0 ==Float -0.0` is also true.
                 | Float "<Float" Float        [function, smt-hook(fp.lt), hook(FLOAT.lt)]
                 | Float ">=Float" Float       [function, smt-hook(fp.geq), hook(FLOAT.ge)]
                 | Float ">Float" Float        [function, smt-hook(fg.gt), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, comm, smt-hook(fp.eq), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "==Float" Float       [function, comm, smt-hook(fp.eq), hook(FLOAT.eq), symbol(_==Float_)]
                 | Float "=/=Float" Float      [function, comm, smt-hook((not (fp.eq #1 #2)))]
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
@@ -1796,7 +1796,7 @@ implement floating-point numbers.
 
 ```k
   syntax String ::= Float2String ( Float )              [function, total, hook(STRING.float2string)]
-  syntax String ::= Float2String ( Float , format: String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
+  syntax String ::= Float2String ( Float , format: String )     [function, symbol(FloatFormat), hook(STRING.floatFormat)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
 ```
 
@@ -2024,8 +2024,8 @@ endian (ie, least significant byte first) or big endian (ie, most significant
 byte first).
 
 ```k
-  syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
-                      | "BE" [klabel(bigEndianBytes), symbol]
+  syntax Endianness ::= "LE" [symbol(littleEndianBytes)]
+                      | "BE" [symbol(bigEndianBytes)]
 ```
 
 ### Signedness
@@ -2034,8 +2034,8 @@ When converting to/from an integer, byte arrays can be treated as either signed
 or unsigned.
 
 ```k
-  syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
-                      | "Unsigned" [klabel(unsignedBytes), symbol]
+  syntax Signedness ::= "Signed" [symbol(signedBytes)]
+                      | "Unsigned" [symbol(unsignedBytes)]
 ```
 
 ### Integer and Bytes conversion
@@ -2065,7 +2065,7 @@ to the nearest byte.
 ```k
   syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, total, hook(BYTES.bytes2int)]
   syntax Bytes ::= Int2Bytes(length: Int, Int, Endianness) [function, total, hook(BYTES.int2bytes)]
-                 | Int2Bytes(Int, Endianness, Signedness) [function, total, klabel(Int2BytesNoLen)]
+                 | Int2Bytes(Int, Endianness, Signedness) [function, total, symbol(Int2BytesNoLen)]
 ```
 
 ### String and Bytes conversion
@@ -2283,8 +2283,8 @@ module K-EQUAL-SYNTAX
   imports private BASIC-K
 
   syntax Bool ::= left:
-                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, group(equalEqualK)]
-                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, group(notEqualEqualK)]
+                  K "==K" K           [function, total, comm, smt-hook(=), hook(KEQUAL.eq), symbol(_==K_), group(equalEqualK)]
+                | K "=/=K" K          [function, total, comm, smt-hook(distinct), hook(KEQUAL.ne), symbol(_=/=K_), group(notEqualEqualK)]
 
   syntax priority equalEqualK notEqualEqualK > boolOperation mlOp
 
@@ -2341,7 +2341,7 @@ module K-REFLECTION
   syntax K ::= "#configuration" [function, impure, hook(KREFLECTION.configuration)]
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
-  syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
+  syntax KItem ::= getsymbol(K)  [function, hook(KREFLECTION.getKLabel)]
 
   syntax K ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
 
@@ -2352,7 +2352,7 @@ module K-REFLECTION
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
   syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
-  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
+  syntax IOError ::= "#noParse" "(" String ")" [symbol(#noParse)]
 
 endmodule
 ```
@@ -2389,76 +2389,76 @@ a library function. If the `errno` returned is not one of the below errnos
 known to K, `#unknownIOError` is returned along with the integer errno value.
 
 ```k
-  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] 
-                   | #unknownIOError(errno: Int) [klabel(#unknownIOError), symbol]
-                   | "#E2BIG" [klabel(#E2BIG), symbol]
-                   | "#EACCES" [klabel(#EACCES), symbol]
-                   | "#EAGAIN" [klabel(#EAGAIN), symbol]
-                   | "#EBADF" [klabel(#EBADF), symbol]
-                   | "#EBUSY" [klabel(#EBUSY), symbol]
-                   | "#ECHILD" [klabel(#ECHILD), symbol]
-                   | "#EDEADLK" [klabel(#EDEADLK), symbol]
-                   | "#EDOM" [klabel(#EDOM), symbol]
-                   | "#EEXIST" [klabel(#EEXIST), symbol]
-                   | "#EFAULT" [klabel(#EFAULT), symbol]
-                   | "#EFBIG" [klabel(#EFBIG), symbol]
-                   | "#EINTR" [klabel(#EINTR), symbol]
-                   | "#EINVAL" [klabel(#EINVAL), symbol]
-                   | "#EIO" [klabel(#EIO), symbol]
-                   | "#EISDIR" [klabel(#EISDIR), symbol]
-                   | "#EMFILE" [klabel(#EMFILE), symbol]
-                   | "#EMLINK" [klabel(#EMLINK), symbol]
-                   | "#ENAMETOOLONG" [klabel(#ENAMETOOLONG), symbol]
-                   | "#ENFILE" [klabel(#ENFILE), symbol]
-                   | "#ENODEV" [klabel(#ENODEV), symbol]
-                   | "#ENOENT" [klabel(#ENOENT), symbol]
-                   | "#ENOEXEC" [klabel(#ENOEXEC), symbol]
-                   | "#ENOLCK" [klabel(#ENOLCK), symbol]
-                   | "#ENOMEM" [klabel(#ENOMEM), symbol]
-                   | "#ENOSPC" [klabel(#ENOSPC), symbol]
-                   | "#ENOSYS" [klabel(#ENOSYS), symbol]
-                   | "#ENOTDIR" [klabel(#ENOTDIR), symbol]
-                   | "#ENOTEMPTY" [klabel(#ENOTEMPTY), symbol]
-                   | "#ENOTTY" [klabel(#ENOTTY), symbol]
-                   | "#ENXIO" [klabel(#ENXIO), symbol]
-                   | "#EPERM" [klabel(#EPERM), symbol]
-                   | "#EPIPE" [klabel(#EPIPE), symbol]
-                   | "#ERANGE" [klabel(#ERANGE), symbol]
-                   | "#EROFS" [klabel(#EROFS), symbol]
-                   | "#ESPIPE" [klabel(#ESPIPE), symbol]
-                   | "#ESRCH" [klabel(#ESRCH), symbol]
-                   | "#EXDEV" [klabel(#EXDEV), symbol]
-                   | "#EWOULDBLOCK" [klabel(#EWOULDBLOCK), symbol]
-                   | "#EINPROGRESS" [klabel(#EINPROGRESS), symbol]
-                   | "#EALREADY" [klabel(#EALREADY), symbol]
-                   | "#ENOTSOCK" [klabel(#ENOTSOCK), symbol]
-                   | "#EDESTADDRREQ" [klabel(#EDESTADDRREQ), symbol]
-                   | "#EMSGSIZE" [klabel(#EMSGSIZE), symbol]
-                   | "#EPROTOTYPE" [klabel(#EPROTOTYPE), symbol]
-                   | "#ENOPROTOOPT" [klabel(#ENOPROTOOPT), symbol]
-                   | "#EPROTONOSUPPORT" [klabel(#EPROTONOSUPPORT), symbol]
-                   | "#ESOCKTNOSUPPORT" [klabel(#ESOCKTNOSUPPORT), symbol]
-                   | "#EOPNOTSUPP" [klabel(#EOPNOTSUPP), symbol]
-                   | "#EPFNOSUPPORT" [klabel(#EPFNOSUPPORT), symbol]
-                   | "#EAFNOSUPPORT" [klabel(#EAFNOSUPPORT), symbol]
-                   | "#EADDRINUSE" [klabel(#EADDRINUSE), symbol]
-                   | "#EADDRNOTAVAIL" [klabel(#EADDRNOTAVAIL), symbol]
-                   | "#ENETDOWN" [klabel(#ENETDOWN), symbol]
-                   | "#ENETUNREACH" [klabel(#ENETUNREACH), symbol]
-                   | "#ENETRESET" [klabel(#ENETRESET), symbol]
-                   | "#ECONNABORTED" [klabel(#ECONNABORTED), symbol]
-                   | "#ECONNRESET" [klabel(#ECONNRESET), symbol]
-                   | "#ENOBUFS" [klabel(#ENOBUFS), symbol]
-                   | "#EISCONN" [klabel(#EISCONN), symbol]
-                   | "#ENOTCONN" [klabel(#ENOTCONN), symbol]
-                   | "#ESHUTDOWN" [klabel(#ESHUTDOWN), symbol]
-                   | "#ETOOMANYREFS" [klabel(#ETOOMANYREFS), symbol]
-                   | "#ETIMEDOUT" [klabel(#ETIMEDOUT), symbol]
-                   | "#ECONNREFUSED" [klabel(#ECONNREFUSED), symbol]
-                   | "#EHOSTDOWN" [klabel(#EHOSTDOWN), symbol]
-                   | "#EHOSTUNREACH" [klabel(#EHOSTUNREACH), symbol]
-                   | "#ELOOP" [klabel(#ELOOP), symbol]
-                   | "#EOVERFLOW" [klabel(#EOVERFLOW), symbol]
+  syntax IOError ::= "#EOF" [symbol(#EOF)]
+                   | #unknownIOError(errno: Int) [symbol(#unknownIOError)]
+                   | "#E2BIG" [symbol(#E2BIG)]
+                   | "#EACCES" [symbol(#EACCES)]
+                   | "#EAGAIN" [symbol(#EAGAIN)]
+                   | "#EBADF" [symbol(#EBADF)]
+                   | "#EBUSY" [symbol(#EBUSY)]
+                   | "#ECHILD" [symbol(#ECHILD)]
+                   | "#EDEADLK" [symbol(#EDEADLK)]
+                   | "#EDOM" [symbol(#EDOM)]
+                   | "#EEXIST" [symbol(#EEXIST)]
+                   | "#EFAULT" [symbol(#EFAULT)]
+                   | "#EFBIG" [symbol(#EFBIG)]
+                   | "#EINTR" [symbol(#EINTR)]
+                   | "#EINVAL" [symbol(#EINVAL)]
+                   | "#EIO" [symbol(#EIO)]
+                   | "#EISDIR" [symbol(#EISDIR)]
+                   | "#EMFILE" [symbol(#EMFILE)]
+                   | "#EMLINK" [symbol(#EMLINK)]
+                   | "#ENAMETOOLONG" [symbol(#ENAMETOOLONG)]
+                   | "#ENFILE" [symbol(#ENFILE)]
+                   | "#ENODEV" [symbol(#ENODEV)]
+                   | "#ENOENT" [symbol(#ENOENT)]
+                   | "#ENOEXEC" [symbol(#ENOEXEC)]
+                   | "#ENOLCK" [symbol(#ENOLCK)]
+                   | "#ENOMEM" [symbol(#ENOMEM)]
+                   | "#ENOSPC" [symbol(#ENOSPC)]
+                   | "#ENOSYS" [symbol(#ENOSYS)]
+                   | "#ENOTDIR" [symbol(#ENOTDIR)]
+                   | "#ENOTEMPTY" [symbol(#ENOTEMPTY)]
+                   | "#ENOTTY" [symbol(#ENOTTY)]
+                   | "#ENXIO" [symbol(#ENXIO)]
+                   | "#EPERM" [symbol(#EPERM)]
+                   | "#EPIPE" [symbol(#EPIPE)]
+                   | "#ERANGE" [symbol(#ERANGE)]
+                   | "#EROFS" [symbol(#EROFS)]
+                   | "#ESPIPE" [symbol(#ESPIPE)]
+                   | "#ESRCH" [symbol(#ESRCH)]
+                   | "#EXDEV" [symbol(#EXDEV)]
+                   | "#EWOULDBLOCK" [symbol(#EWOULDBLOCK)]
+                   | "#EINPROGRESS" [symbol(#EINPROGRESS)]
+                   | "#EALREADY" [symbol(#EALREADY)]
+                   | "#ENOTSOCK" [symbol(#ENOTSOCK)]
+                   | "#EDESTADDRREQ" [symbol(#EDESTADDRREQ)]
+                   | "#EMSGSIZE" [symbol(#EMSGSIZE)]
+                   | "#EPROTOTYPE" [symbol(#EPROTOTYPE)]
+                   | "#ENOPROTOOPT" [symbol(#ENOPROTOOPT)]
+                   | "#EPROTONOSUPPORT" [symbol(#EPROTONOSUPPORT)]
+                   | "#ESOCKTNOSUPPORT" [symbol(#ESOCKTNOSUPPORT)]
+                   | "#EOPNOTSUPP" [symbol(#EOPNOTSUPP)]
+                   | "#EPFNOSUPPORT" [symbol(#EPFNOSUPPORT)]
+                   | "#EAFNOSUPPORT" [symbol(#EAFNOSUPPORT)]
+                   | "#EADDRINUSE" [symbol(#EADDRINUSE)]
+                   | "#EADDRNOTAVAIL" [symbol(#EADDRNOTAVAIL)]
+                   | "#ENETDOWN" [symbol(#ENETDOWN)]
+                   | "#ENETUNREACH" [symbol(#ENETUNREACH)]
+                   | "#ENETRESET" [symbol(#ENETRESET)]
+                   | "#ECONNABORTED" [symbol(#ECONNABORTED)]
+                   | "#ECONNRESET" [symbol(#ECONNRESET)]
+                   | "#ENOBUFS" [symbol(#ENOBUFS)]
+                   | "#EISCONN" [symbol(#EISCONN)]
+                   | "#ENOTCONN" [symbol(#ENOTCONN)]
+                   | "#ESHUTDOWN" [symbol(#ESHUTDOWN)]
+                   | "#ETOOMANYREFS" [symbol(#ETOOMANYREFS)]
+                   | "#ETIMEDOUT" [symbol(#ETIMEDOUT)]
+                   | "#ECONNREFUSED" [symbol(#ECONNREFUSED)]
+                   | "#EHOSTDOWN" [symbol(#EHOSTDOWN)]
+                   | "#EHOSTUNREACH" [symbol(#EHOSTUNREACH)]
+                   | "#ELOOP" [symbol(#ELOOP)]
+                   | "#EOVERFLOW" [symbol(#EOVERFLOW)]
 ```
 
 ### I/O result sorts
@@ -2594,7 +2594,7 @@ reason about in K should not be implemented via the `#system` operator.
 
 ```k
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
-                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [symbol(#systemResult)]
 ```
 
 ### Temporary files
@@ -2606,7 +2606,7 @@ For more info on the argument to `#mkstemp`, see `man mkstemp`.
 ```k
   syntax IOFile ::= #mkstemp(template: String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
-                  | "#tempFile" "(" path: String "," fd: Int ")" [klabel(#tempFile), symbol]
+                  | "#tempFile" "(" path: String "," fd: Int ")" [symbol(#tempFile)]
 ```
 
 ### Deleting a file
@@ -2627,7 +2627,7 @@ containing `name` in its name. The file is only flushed to disk when rewriting
 finishes.
 
 ```k
-  syntax K ::= #logToFile(name: String, value: String) [function, total, hook(IO.log), impure, returnsUnit, klabel(#logToFile), symbol]
+  syntax K ::= #logToFile(name: String, value: String) [function, total, hook(IO.log), impure, returnsUnit, symbol(#logToFile)]
 ```
 
 Strings can also be logged via the logging mechanisms available to the backend.
@@ -2636,7 +2636,7 @@ Haskell backend, a log message of type InfoUserLog is created with the
 specified text.
 
 ```k
-  syntax K ::= #log(value: String) [function, total, hook(IO.logString), impure, returnsUnit, klabel(#log), symbol]
+  syntax K ::= #log(value: String) [function, total, hook(IO.logString), impure, returnsUnit, symbol(#log)]
 ```
 
 Terms can also be logged to standard error in _surface syntax_, rather than as
@@ -2647,8 +2647,8 @@ logged, which requires re-parsing the underlying K definition. Subsequent calls
 do not incur this overhead again; the definition is cached.
 
 ```k
-  syntax K ::= #trace(value: KItem) [function, total, hook(IO.traceTerm), impure, returnsUnit, klabel(#trace), symbol]
-             | #traceK(value: K)    [function, total, hook(IO.traceTerm), impure, returnsUnit, klabel(#traceK), symbol]
+  syntax K ::= #trace(value: KItem) [function, total, hook(IO.traceTerm), impure, returnsUnit, symbol(#trace)]
+             | #traceK(value: K)    [function, total, hook(IO.traceTerm), impure, returnsUnit, symbol(#traceK)]
 ```
 
 ### Implementation of high-level I/O streams in K

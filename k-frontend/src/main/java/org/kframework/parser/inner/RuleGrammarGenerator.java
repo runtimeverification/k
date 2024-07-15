@@ -547,9 +547,6 @@ public record RuleGrammarGenerator(Definition baseK) {
           Stream.concat(prods.stream(), stream(mod.sentences()))
               .flatMap(
                   s -> {
-                    if (s instanceof Production && s.att().contains(Att.CELL_COLLECTION())) {
-                      return Stream.empty();
-                    }
                     if (s instanceof Production p && (s.att().contains(Att.CELL()))) {
                       // assuming that productions tagged with 'cell' start and end with terminals,
                       // and only have non-terminals in the middle
