@@ -1,8 +1,7 @@
-from typing import Iterable, Any
+from typing import Iterable, Any, TYPE_CHECKING
 
 from networkx import Graph, find_cliques
 
-from pyk.cterm import CTerm, CSubst
 from pyk.kast.inner import KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
@@ -10,6 +9,9 @@ from pyk.prelude.kint import intToken, geInt, ltInt
 from pyk.prelude.ml import mlEqualsTrue, mlAnd, mlOr
 from pyk.utils import single
 from tests.unit.test_kcfg import node_dicts, x_config, split_dicts, x_subst, propagate_split_constraints
+
+if TYPE_CHECKING:
+    from pyk.cterm import CTerm, CSubst
 
 
 class TestSemantics(DefaultSemantics):
@@ -170,7 +172,7 @@ def merge_node_test_kcfg_complex_expected(cfg: KCFG) -> None:
             assert end_split[8] == x_subst().add_constraint(x_lt_3).add_constraint(x_ge_0)
             assert end_split[9] == x_subst().add_constraint(x_lt_0)
         else:
-            assert False, constraints
+            AssertionError(f'Unexpected constraints: {constraints}')
 
 
 def test_merge_node() -> None:

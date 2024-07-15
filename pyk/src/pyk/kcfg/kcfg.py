@@ -6,12 +6,13 @@ from abc import ABC, abstractmethod
 from collections.abc import Container
 from dataclasses import dataclass, field
 from functools import reduce
+from itertools import chain
 from threading import RLock
-from typing import TYPE_CHECKING, Final, List, Union, cast, final
+from typing import TYPE_CHECKING, Final, Union, cast, final
 
-from .semantics import KCFGSemantics
+from networkx import Graph, find_cliques
+
 from ..cterm import CSubst, CTerm, cterm_build_claim, cterm_build_rule
-from ..cterm.cterm import anti_unify
 from ..kast import EMPTY_ATT
 from ..kast.inner import KApply, Subst
 from ..kast.manip import (
@@ -24,13 +25,9 @@ from ..kast.manip import (
     sort_ac_collections,
 )
 from ..kast.outer import KFlatModule
-from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.kbool import andBool
-from ..prelude.ml import mlTop, mlAnd, mlOr
+from ..prelude.ml import mlAnd, mlOr
 from ..utils import ensure_dir_path, not_none, single
-from itertools import chain
-
-from networkx import Graph, find_cliques
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping, MutableMapping
@@ -39,6 +36,8 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pyk.kore.rpc import LogEntry
+
+    from .semantics import KCFGSemantics
 
     from ..kast import KAtt
     from ..kast.inner import KInner
@@ -419,7 +418,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         @property
         def edges(self) -> tuple[KCFG.Edge, ...]:
-            return tuple(KCFG.Edge(self.source, target, ((1, rule, ),)) for target, rule in zip(self.targets, self.rules))
+            return tuple(KCFG.Edge(self.source, target, ((1, (str(rule),),  CSubst()),))
+                         for target, rule in zip(self.targets, self.rules, strict=True))
 
         def replace_source(self, node: KCFG.Node) -> KCFG.NDBranch:
             assert node.id == self.source.id
@@ -952,7 +952,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             csubst = [CSubst(Subst({})) for _ in depth]
         assert len(depth) == len(rules), f'Inconsistent depth and rules: {depth} -> {rules}'
         assert len(depth) == len(csubst), f'Inconsistent depth and csubst: {depth} -> {csubst}'
-        edge = KCFG.Edge(source, target, tuple(zip(depth, rules, csubst)))
+        edge = KCFG.Edge(source, target, tuple(zip(depth, rules, csubst, strict=True)))
         self.add_successor(edge)
         return edge
 
@@ -1356,7 +1356,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             # get the edges' info for A -|Edge|-> merged(B_i) -|Split|-> B_i
             edges_info = []
             idx = 0
-            for a_id, b_id in zip(nodes_to_merge_a, nodes_to_merge_b):
+            for a_id, b_id in zip(nodes_to_merge_a, nodes_to_merge_b, strict=True):
                 edge = single(self.edges(source_id=a_id, target_id=b_id))
                 for depth, rules, csubst in edge.info:
                     edges_info.append((depth, rules, csubst & csubsts[idx]))
@@ -1419,7 +1419,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 # then A -|Edge|-> B_x or B_y or ... or B_z
                 # else A -|Split|-> A_x or A_y or ... or A_z -|Edge|-> B_x or B_y or ... or B_z
                 if len(merged_a_groups) == 1 and merged_a_groups[0][0] == a:
-                    depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b_groups[0][2]])
+                    depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b_groups[0][2]], strict=True)
                     self.create_edge(a, merged_b_groups[0][0], depth, rules, csubst)
                 else:
                     split = self.splits(source_id=a)
@@ -1427,14 +1427,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                         split = KCFG.Split(self.get_node(a), [])
                     else:
                         split = single(split)
-                    for merged_a, merged_b in zip(merged_a_groups, merged_b_groups):
+                    for merged_a, merged_b in zip(merged_a_groups, merged_b_groups, strict=True):
                         split = split.add_target(self.get_node(merged_a[0]), merged_a[1])
-                        depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b[2]])
+                        depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b[2]],strict=True)
                         self.create_edge(merged_a[0], merged_b[0], depth, rules, csubst)
                     self._splits[a] = split  # todo: is there anything wrong if I don't change the _deleted and _created?
                 # B_x or B_y or ... or B_z -|Split|-> B_x, B_y, ..., B_z
-                for merged_b, mergeable_b_i_s in zip(merged_b_groups, mergeable_b_i_s_group):
-                    self.create_split(merged_b[0], zip(mergeable_b_i_s, merged_b[1]))
+                for merged_b, mergeable_b_i_s in zip(merged_b_groups, mergeable_b_i_s_group, strict=True):
+                    self.create_split(merged_b[0], zip(mergeable_b_i_s, merged_b[1], strict=True))
             return _is_merged
 
         is_merged = True
