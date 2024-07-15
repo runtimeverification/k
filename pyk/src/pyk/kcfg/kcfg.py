@@ -1428,7 +1428,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                     else:
                         split = single(split)
                     for merged_a, merged_b in zip(merged_a_groups, merged_b_groups):
-                        split.add_target(self.get_node(merged_a[0]), merged_a[1])
+                        split = split.add_target(self.get_node(merged_a[0]), merged_a[1])
                         depth, rules, csubst = zip(*[(info[0], info[1], info[2]) for info in merged_b[2]])
                         self.create_edge(merged_a[0], merged_b[0], depth, rules, csubst)
                     self._splits[a] = split  # todo: is there anything wrong if I don't change the _deleted and _created?

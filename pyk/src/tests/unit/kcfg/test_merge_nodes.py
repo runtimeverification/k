@@ -7,7 +7,7 @@ from pyk.kast.inner import KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
 from pyk.prelude.kint import intToken, geInt, ltInt
-from pyk.prelude.ml import mlEqualsTrue, mlAnd
+from pyk.prelude.ml import mlEqualsTrue, mlAnd, mlOr
 from pyk.utils import single
 from tests.unit.test_kcfg import node_dicts, x_config, split_dicts, x_subst, propagate_split_constraints
 
@@ -17,19 +17,21 @@ class TestSemantics(DefaultSemantics):
         return True
 
 
-x_ge_5 = mlEqualsTrue(geInt(KVariable('X'), intToken(5)))
 x_lt_5_ge_3 = mlAnd([mlEqualsTrue(geInt(KVariable('X'), intToken(3))), mlEqualsTrue(ltInt(KVariable('X'), intToken(5)))])
 x_ge_3_lt_5 = mlAnd([mlEqualsTrue(ltInt(KVariable('X'), intToken(5))), mlEqualsTrue(geInt(KVariable('X'), intToken(3)))])
 x_lt_3_ge_0 = mlAnd([mlEqualsTrue(geInt(KVariable('X'), intToken(0))), mlEqualsTrue(ltInt(KVariable('X'), intToken(3)))])
 x_ge_0_lt_3 = mlAnd([mlEqualsTrue(ltInt(KVariable('X'), intToken(3))), mlEqualsTrue(geInt(KVariable('X'), intToken(0)))])
-x_lt_0 = mlEqualsTrue(ltInt(KVariable('X'), intToken(0)))
-
 x_lt_5_ge_4 = mlAnd([mlEqualsTrue(geInt(KVariable('X'), intToken(4))), mlEqualsTrue(ltInt(KVariable('X'), intToken(5)))])
 x_lt_4_ge_3 = mlAnd([mlEqualsTrue(geInt(KVariable('X'), intToken(3))), mlEqualsTrue(ltInt(KVariable('X'), intToken(4)))])
 
+x_lt_0 = mlEqualsTrue(ltInt(KVariable('X'), intToken(0)))
 x_ge_0 = mlEqualsTrue(geInt(KVariable('X'), intToken(0)))
+x_ge_5 = mlEqualsTrue(geInt(KVariable('X'), intToken(5)))
 x_lt_5 = mlEqualsTrue(ltInt(KVariable('X'), intToken(5)))
+x_lt_3 = mlEqualsTrue(ltInt(KVariable('X'), intToken(3)))
 x_ge_3 = mlEqualsTrue(geInt(KVariable('X'), intToken(3)))
+x_lt_4 = mlEqualsTrue(ltInt(KVariable('X'), intToken(4)))
+x_ge_4 = mlEqualsTrue(geInt(KVariable('X'), intToken(4)))
 
 
 class TestSemanticsComplex(DefaultSemantics):
@@ -148,33 +150,34 @@ def merge_node_test_kcfg_complex_expected(cfg: KCFG) -> None:
     for split_node_id in splits:
         constraints = single(splits[split_node_id].constraints)
         edge = single(cfg.edges(source_id=split_node_id))
-        if constraints == x_ge_0:
-            assert (5, ('r1',), x_ge_5) in edge.info
-            assert (10, ('r2', 'r3'), x_lt_5_ge_4) in edge.info
-            assert (15, ('r4',), x_lt_4_ge_3) in edge.info
-            assert (20, ('r5',), x_lt_3_ge_0) in edge.info
-            end_split = single(cfg.splits(source_id=edge.target)).splits
-            assert end_split[6] == (x_ge_5,)
-            assert end_split[7] == (x_lt_5_ge_3,)
-            assert end_split[8] == (x_lt_3_ge_0,)
-        elif constraints == x_lt_5:
-            assert (10, ('r2', 'r3'), x_lt_5_ge_4) in edge.info
-            assert (15, ('r4',), x_lt_4_ge_3) in edge.info
-            assert (20, ('r5',), x_lt_3_ge_0) in edge.info
-            assert (25, ('r6',), x_lt_0) in edge.info
-            end_split = single(cfg.splits(source_id=edge.target)).splits
-            assert end_split[7] == (x_lt_5_ge_3,)
-            assert end_split[8] == (x_lt_3_ge_0,)
-            assert end_split[9] == (x_lt_0,)
+        if constraints == mlOr([mlOr([x_ge_3_lt_5, x_ge_0_lt_3]), x_ge_5]):
+            assert (5, ('r1',), x_subst().add_constraint(x_ge_5)) in edge.info
+            assert (10, ('r2', 'r3'), x_subst().add_constraint(x_ge_4).add_constraint(x_lt_5).add_constraint(x_ge_3)) in edge.info
+            assert (15, ('r4',), x_subst().add_constraint(x_ge_3).add_constraint(x_lt_4).add_constraint(x_lt_5)) in edge.info
+            assert (20, ('r5',), x_subst().add_constraint(x_lt_3).add_constraint(x_ge_0)) in edge.info
+            end_split = single(cfg.splits(source_id=edge.target.id)).splits
+            assert end_split[6] == x_subst().add_constraint(x_ge_5)
+            assert end_split[7] == x_subst().add_constraint(x_lt_5).add_constraint(x_ge_3)
+            assert end_split[8] == x_subst().add_constraint(x_lt_3).add_constraint(x_ge_0)
+        elif constraints == mlOr([mlOr([x_ge_3_lt_5, x_ge_0_lt_3]), x_lt_0]):
+            # constraints == x_lt_5
+            assert (10, ('r2', 'r3'), x_subst().add_constraint(x_ge_4).add_constraint(x_lt_5).add_constraint(x_ge_3)) in edge.info
+            assert (15, ('r4',), x_subst().add_constraint(x_ge_3).add_constraint(x_lt_4).add_constraint(x_lt_5)) in edge.info
+            assert (20, ('r5',), x_subst().add_constraint(x_lt_3).add_constraint(x_ge_0)) in edge.info
+            assert (25, ('r6',), x_subst().add_constraint(x_lt_0)) in edge.info
+            end_split = single(cfg.splits(source_id=edge.target.id)).splits
+            assert end_split[7] == x_subst().add_constraint(x_lt_5).add_constraint(x_ge_3)
+            assert end_split[8] == x_subst().add_constraint(x_lt_3).add_constraint(x_ge_0)
+            assert end_split[9] == x_subst().add_constraint(x_lt_0)
         else:
             assert False, constraints
 
 
 def test_merge_node() -> None:
-    # simple_semantics = TestSemantics()
-    # original_cfg = merge_node_test_kcfg()
-    # original_cfg.merge_nodes(simple_semantics)
-    # assert original_cfg.to_dict() == merge_node_test_kcfg_simple_expected().to_dict()
+    simple_semantics = TestSemantics()
+    original_cfg = merge_node_test_kcfg()
+    original_cfg.merge_nodes(simple_semantics)
+    assert original_cfg.to_dict() == merge_node_test_kcfg_simple_expected().to_dict()
 
     # for complex heuristics
     complex_semantics = TestSemanticsComplex()
