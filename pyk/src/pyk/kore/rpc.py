@@ -341,7 +341,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
         old_id = self._req_id
-        req_id = f'{id(self)}_{old_id:03}'
+        req_id = f'{id(self)}-{old_id:03}'
         self._req_id += 1
 
         payload = {
