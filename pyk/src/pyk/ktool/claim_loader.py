@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import TYPE_CHECKING, NamedTuple
 
 from ..kast.outer import KFlatModuleList
@@ -11,11 +12,14 @@ from .claim_index import ClaimIndex
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from pathlib import Path
-    from typing import Any
+    from typing import Any, Final
 
     from ..kast.outer import KClaim
     from . import TypeInferenceMode
     from .kprove import KProve
+
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class ClaimLoader:
@@ -50,16 +54,21 @@ class ClaimLoader:
             include_dependencies (optional): If ``True``, claim dependencies are transitively included.
             type_inference_mode (optional): Type inference mode.
         """
+        _LOGGER.info(f'Loading spec file: {spec_file}')
+
         digest = self._digest(spec_file, include_dirs=include_dirs, md_selector=md_selector)
+        _LOGGER.info(f'Calculated digest: {digest}')
 
         claim_file = spec_file.with_suffix('.json')
 
         cache_hit = False
         if claim_file.exists():
+            _LOGGER.info(f'Loading claim file: {claim_file}')
             module_list, loaded_digest = _ClaimModuleList.from_dict(json.loads(claim_file.read_text()))
             cache_hit = digest == loaded_digest
 
         if not cache_hit:
+            _LOGGER.info('Generating claim modules')
             module_list = self._kprove.get_claim_modules(
                 spec_file=spec_file,
                 spec_module_name=spec_module_name,
@@ -68,6 +77,7 @@ class ClaimLoader:
                 type_inference_mode=type_inference_mode,
             )
             claim_module_list = _ClaimModuleList(module_list=module_list, digest=digest)
+            _LOGGER.info(f'Writing claim file: {claim_file}')
             claim_file.write_text(json.dumps(claim_module_list.to_dict()))
 
         claim_index = ClaimIndex.from_module_list(module_list)
