@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 
 class ClaimLoader:
+    """Load and cache spec files as JSON."""
+
     _kprove: KProve
 
     def __init__(self, kprove: KProve):
@@ -36,6 +38,18 @@ class ClaimLoader:
         include_dependencies: bool = True,
         type_inference_mode: TypeInferenceMode | None = None,
     ) -> list[KClaim]:
+        """Attempt to load a spec from JSON, write file on cache miss.
+
+        Args:
+            spec_file: Spec file to load.
+            spec_module_name (optional): Spec module to load.
+            include_dirs (optional): Includes.
+            md_selector (optional): Selector expression for Markdown tags.
+            claim_labels (optional): Claim labels to include in the result.
+            exclude_claim_labels (optional): Claim labels to exclude from the result.
+            include_dependencies (optional): If ``True``, claim dependencies are transitively included.
+            type_inference_mode (optional): Type inference mode.
+        """
         digest = self._digest(spec_file, include_dirs=include_dirs, md_selector=md_selector)
 
         claim_file = spec_file.with_suffix('.json')
