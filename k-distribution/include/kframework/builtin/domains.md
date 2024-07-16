@@ -2211,12 +2211,12 @@ module BYTES
   imports private INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
-    requires I >Int 0
+    requires I >Int 0 [preserves-definedness]
   rule Int2Bytes(0, _::Endianness, _) => .Bytes
   rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
-    requires I >Int 0
+    requires I >Int 0 [preserves-definedness]
   rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
-    requires I <Int -1
+    requires I <Int -1 [preserves-definedness]
   rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 endmodule
 ```
