@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Iterable, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Iterable
 
 from pyk.cterm import CSubst
 from pyk.kast.inner import KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.kcfg.semantics import DefaultSemantics
-from pyk.prelude.kint import intToken, geInt, ltInt
-from pyk.prelude.ml import mlEqualsTrue, mlAnd, mlOr
+from pyk.prelude.kint import geInt, intToken, ltInt
+from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlOr
 from pyk.utils import single
-from ..test_kcfg import node_dicts, x_config, split_dicts, x_subst, propagate_split_constraints
+
+from ..test_kcfg import node_dicts, propagate_split_constraints, split_dicts, x_config, x_subst
 
 if TYPE_CHECKING:
     from pyk.cterm import CTerm

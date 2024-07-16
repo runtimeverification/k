@@ -23,13 +23,14 @@ from ..utils import K_FILES
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Union
-    from pyk.kcfg.semantics import KCFGSemantics
+
     from pytest import TempPathFactory
 
     from pyk.kast.inner import KInner
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
 
     STATE = Union[tuple[str, str], tuple[str, str, str]]

@@ -27,7 +27,6 @@ from ..utils import K_FILES
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
     from typing import Final
-    from pyk.kcfg.semantics import KCFGSemantics
 
     from pytest import TempPathFactory
 
@@ -35,6 +34,7 @@ if TYPE_CHECKING:
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprint import KPrint, SymbolTable
     from pyk.ktool.kprove import KProve
     from pyk.proof import Prover

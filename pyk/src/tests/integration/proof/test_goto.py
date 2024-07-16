@@ -20,11 +20,11 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
-    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore
     from pyk.kcfg.kcfg import KCFGExtendResult
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
 
 _LOGGER: Final = logging.getLogger(__name__)

@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 from itertools import chain
 from threading import RLock
-from typing import TYPE_CHECKING, Final, Union, cast, final, List
+from typing import TYPE_CHECKING, Final, List, Union, cast, final
 
 from networkx import Graph, find_cliques
 
@@ -37,11 +37,10 @@ if TYPE_CHECKING:
 
     from pyk.kore.rpc import LogEntry
 
-    from .semantics import KCFGSemantics
-
     from ..kast import KAtt
     from ..kast.inner import KInner
     from ..kast.outer import KClaim, KDefinition, KImport, KRuleLike
+    from .semantics import KCFGSemantics
 
 
 NodeIdLike = int | str

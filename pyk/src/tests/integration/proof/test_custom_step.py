@@ -23,10 +23,10 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
     from typing import Union
 
-    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.cterm import CTermSymbolic
     from pyk.kast.outer import KClaim
     from pyk.kcfg.kcfg import KCFGExtendResult
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.ktool.kprove import KProve
     from pyk.utils import BugReport
 
