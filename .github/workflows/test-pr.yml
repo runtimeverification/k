@@ -166,14 +166,12 @@ jobs:
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://hydra.iohk.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v14
         with:
           name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
       - name: 'Build original pyk flake'
         run: GC_DONT_GC=1 nix build --print-build-logs .#pyk-python310
@@ -204,7 +202,6 @@ jobs:
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://hydra.iohk.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
       - name: 'Install Cachix'
@@ -212,11 +209,9 @@ jobs:
         uses: cachix/cachix-action@v14
         with:
           name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
       - name: 'Build K Framework and push build time dependencies to cachix'
         env:
-          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
           GC_DONT_GC: '1'
         run: |
@@ -338,61 +333,3 @@ jobs:
         if: always()
         run: |
           docker stop --time=0 k-pyk-regression-${{ github.sha }}
-
-
-  performance-tests:
-    name: 'K: Profiling'
-    runs-on: [self-hosted, linux, performance]
-    needs: test-frontend-package-ubuntu-jammy
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'Download K package from the Summary Page'
-        uses: actions/download-artifact@v4
-        with:
-          name: kframework-frontend.deb
-      - name: 'Set up Docker'
-        uses: ./.github/actions/with-k-docker
-        with:
-          container-name: k-profiling-tests-${{ github.sha }}
-          k-deb-path: kframework-frontend.deb
-          distro: jammy
-          run-container: false
-      - name: 'Set up Docker Test Image'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
-          BENCHER_PROJECT: k-framework
-          BENCHER_ADAPTER: json
-        run: |
-          set -euxo pipefail
-          workspace=$(pwd)
-          docker run --name "k-profiling-tests-${GITHUB_SHA}"                  \
-            --rm -it --detach --user root                                      \
-            -e BENCHER_API_TOKEN="$BENCHER_API_TOKEN"                          \
-            -e BENCHER_PROJECT="$BENCHER_PROJECT"                              \
-            -e BENCHER_ADAPTER="$BENCHER_ADAPTER"                              \
-            -e GITHUB_HEAD_REF="$GITHUB_HEAD_REF"                              \
-            -e GITHUB_BASE_REF="$GITHUB_BASE_REF"                              \
-            -e GITHUB_TOKEN="$GITHUB_TOKEN"                                    \
-            -e GITHUB_ACTIONS=true                                             \
-            -e GITHUB_EVENT_NAME="$GITHUB_EVENT_NAME"                          \
-            -e GITHUB_EVENT_PATH="$GITHUB_EVENT_PATH"                          \
-            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY"                          \
-            -e GITHUB_REF="$GITHUB_REF"                                        \
-            --workdir /opt/workspace                                           \
-            -v "${workspace}:/opt/workspace"                                   \
-            -v "${GITHUB_EVENT_PATH}:${GITHUB_EVENT_PATH}"                     \
-            "runtimeverificationinc/k-profiling-tests-${GITHUB_SHA}"
-      - name: 'Install K from Package'
-        run: |
-          set -euxo pipefail
-          docker exec -t "k-profiling-tests-${GITHUB_SHA}" /bin/bash -c './k-distribution/tests/profiling/setup_profiling.sh'
-      - name: 'Profiling Performance Tests'
-        run: |
-          set -euxo pipefail
-          docker exec -t "k-profiling-tests-${GITHUB_SHA}" /bin/bash -c 'cd k-distribution/tests/profiling && make'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop --time=0 "k-profiling-tests-${GITHUB_SHA}"
-          docker container rm --force "k-profiling-tests-${GITHUB_SHA}" || true
