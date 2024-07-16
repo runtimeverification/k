@@ -10,7 +10,7 @@ import pytest
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import minimize_term, sort_ac_collections
-from pyk.kcfg.semantics import KCFGSemantics
+from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.prelude.kbool import FALSE, andBool, orBool
 from pyk.prelude.kint import intToken
@@ -46,7 +46,7 @@ def proof_dir(tmp_path_factory: TempPathFactory) -> Path:
     return tmp_path_factory.mktemp('proofs')
 
 
-class ImpSemantics(KCFGSemantics):
+class ImpSemantics(DefaultSemantics):
     definition: KDefinition | None
 
     def __init__(self, definition: KDefinition | None = None):

@@ -10,7 +10,7 @@ from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kast.manip import set_cell
 from pyk.kcfg import KCFGExplore
 from pyk.kcfg.kcfg import Step
-from pyk.kcfg.semantics import KCFGSemantics
+from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -46,7 +46,7 @@ CUSTOM_STEP_TEST_DATA: Iterable[tuple[str, Path, str, str, int | None, int | Non
 )
 
 
-class CustomStepSemanticsWithoutStep(KCFGSemantics):
+class CustomStepSemanticsWithoutStep(DefaultSemantics):
     def is_terminal(self, c: CTerm) -> bool:
         k_cell = c.cell('K_CELL')
         if (

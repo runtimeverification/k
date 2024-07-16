@@ -9,7 +9,7 @@ import pytest
 
 from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
-from pyk.kcfg.semantics import KCFGSemantics
+from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
 from pyk.ktool.prove_rpc import ProveRpc
 from pyk.proof import ProofStatus
 from pyk.testing import KCFGExploreTest, KProveTest
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-class ImpSemantics(KCFGSemantics):
+class ImpSemantics(DefaultSemantics):
     definition: KDefinition | None
 
     def __init__(self, definition: KDefinition | None = None):

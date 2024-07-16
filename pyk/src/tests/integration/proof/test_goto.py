@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KApply, KSequence
-from pyk.kcfg.semantics import KCFGSemantics
+from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-class GotoSemantics(KCFGSemantics):
+class GotoSemantics(DefaultSemantics):
     def is_terminal(self, c: CTerm) -> bool:
         return False
 

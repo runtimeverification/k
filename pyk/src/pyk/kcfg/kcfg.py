@@ -553,7 +553,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         elif type(_path[0]) is KCFG.NDBranch:
             return 1 + KCFG.path_length(_path[1:])
         elif type(_path[0]) is KCFG.Edge:
-            edge = cast(KCFG.Edge, _path[0])
+            edge = cast('KCFG.Edge', _path[0])
             return edge.max_depth() + KCFG.path_length(_path[1:])
         raise ValueError(f'Cannot handle Successor type: {type(_path[0])}')
 
