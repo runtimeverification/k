@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Iterable, Any, TYPE_CHECKING
 
-from networkx import Graph, find_cliques
-
 from pyk.cterm import CSubst
 from pyk.kast.inner import KVariable, Subst
 from pyk.kcfg import KCFG

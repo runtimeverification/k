@@ -9,7 +9,7 @@ import pytest
 
 from pyk.cli.pyk import ProveOptions
 from pyk.kast.inner import KApply, KSequence, KVariable
-from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
+from pyk.kcfg.semantics import DefaultSemantics
 from pyk.ktool.prove_rpc import ProveRpc
 from pyk.proof import ProofStatus
 from pyk.testing import KCFGExploreTest, KProveTest
@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore

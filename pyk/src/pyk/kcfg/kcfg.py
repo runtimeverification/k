@@ -960,7 +960,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             rules = cast('Iterable[str]', rules)
             res_rules = [tuple(rules)]
         else:
-            res_rules = list(tuple(rule) for rule in rules)
+            res_rules = [tuple(rule) for rule in rules]
         if csubst is None:
             csubst = [CSubst(Subst({})) for _ in depth]
         edge = KCFG.Edge(source, target, tuple(zip(depth, tuple(res_rules), csubst, strict=True)))

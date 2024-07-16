@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KApply, KSequence
-from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
+from pyk.kcfg.semantics import DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Final
 
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.cterm import CTerm
     from pyk.kast.outer import KDefinition
     from pyk.kcfg import KCFGExplore

@@ -11,7 +11,7 @@ from pyk.kast.inner import KApply, KRewrite, KSequence, KToken, KVariable
 from pyk.kast.manip import free_vars
 from pyk.kast.outer import KClaim
 from pyk.kcfg import KCFG
-from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
+from pyk.kcfg.semantics import DefaultSemantics
 from pyk.prelude.kint import gtInt, intToken, leInt
 from pyk.prelude.ml import is_top, mlEqualsTrue
 from pyk.proof import APRProof, APRProver, ImpliesProver, ProofStatus, RefutationProof
@@ -23,7 +23,7 @@ from ..utils import K_FILES
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Union
-
+    from pyk.kcfg.semantics import KCFGSemantics
     from pytest import TempPathFactory
 
     from pyk.kast.inner import KInner

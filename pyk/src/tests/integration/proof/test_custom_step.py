@@ -10,7 +10,7 @@ from pyk.kast.inner import KApply, KSequence, KVariable
 from pyk.kast.manip import set_cell
 from pyk.kcfg import KCFGExplore
 from pyk.kcfg.kcfg import Step
-from pyk.kcfg.semantics import KCFGSemantics, DefaultSemantics
+from pyk.kcfg.semantics import DefaultSemantics
 from pyk.kcfg.show import KCFGShow
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
     from typing import Union
 
+    from pyk.kcfg.semantics import KCFGSemantics
     from pyk.cterm import CTermSymbolic
     from pyk.kast.outer import KClaim
     from pyk.kcfg.kcfg import KCFGExtendResult
