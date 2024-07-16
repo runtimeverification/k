@@ -42,8 +42,8 @@ class ClaimLoader:
 
         cache_hit = False
         if claim_file.exists():
-            module_list, _digest = _ClaimModuleList.from_dict(json.loads(claim_file.read_text()))
-            cache_hit = digest == _digest
+            module_list, loaded_digest = _ClaimModuleList.from_dict(json.loads(claim_file.read_text()))
+            cache_hit = digest == loaded_digest
 
         if not cache_hit:
             module_list = self._kprove.get_claim_modules(
