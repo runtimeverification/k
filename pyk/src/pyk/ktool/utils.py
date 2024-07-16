@@ -13,14 +13,22 @@ if TYPE_CHECKING:
 @final
 @dataclass(frozen=True)
 class KDistribution:
+    """Represent the path to the K distribution.
+
+    Attributes:
+        path: Path to the K distribution.
+    """
+
     path: Path
 
     @property
     def builtin_dir(self) -> Path:
+        """The path to the `builtin` directory."""
         return self.path / 'include/kframework/builtin'
 
     @staticmethod
     def create() -> KDistribution | None:
+        """Instantiate the class based on the path to the `kompile` binary."""
         kompile_bin = KDistribution._which_kompile()
         if kompile_bin is None:
             return None
