@@ -553,7 +553,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         elif type(_path[0]) is KCFG.NDBranch:
             return 1 + KCFG.path_length(_path[1:])
         elif type(_path[0]) is KCFG.Edge:
-            return _path[0].longest_depth() + KCFG.path_length(_path[1:])
+            edge = cast(KCFG.Edge, _path[0])
+            return edge.max_depth() + KCFG.path_length(_path[1:])
         raise ValueError(f'Cannot handle Successor type: {type(_path[0])}')
 
     def extend(
@@ -735,8 +736,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     def remove_node_safely(
             self,
             node_id: NodeIdLike,
-            predecessors: dict[str, tuple[NodeIdLike, ...]] = None,
-            successors: dict[str, tuple[NodeIdLike, ...]] = None,
+            predecessors: dict[str, tuple[NodeIdLike, ...]] | None = None,
+            successors: dict[str, tuple[NodeIdLike, ...]] | None = None,
     ) -> None:
         """
         successor_type: Edge, Cover, Split, NDBranch
@@ -783,16 +784,19 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         # remove all the successors whose target is this node and source is in successors
         if 'Edge' in predecessors:
             for source_id in predecessors['Edge']:
+                source_id = self._resolve(source_id)
                 edge = self._edges.get(source_id)
                 if edge and edge.target.id == node_id:
                     self._edges.pop(source_id)
         if 'Cover' in predecessors:
             for source_id in predecessors['Cover']:
+                source_id = self._resolve(source_id)
                 cover = self._covers.get(source_id)
                 if cover and cover.target.id == node_id:
                     self._covers.pop(source_id)
         if 'Split' in predecessors:
             for source_id in predecessors['Split']:
+                source_id = self._resolve(source_id)
                 split = self._splits.get(source_id)
                 if split:
                     split = split.discard_targets((node_id,))
@@ -802,6 +806,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                         self._splits[source_id] = split
         if 'NDBranch' in predecessors:
             for source_id in predecessors['NDBranch']:
+                source_id = self._resolve(source_id)
                 ndbranch = self._ndbranches.get(source_id)
                 if ndbranch:
                     ndbranch = ndbranch.discard_targets((node_id,))
@@ -944,15 +949,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
                 raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {d}')
         source = self.node(source_id)
         target = self.node(target_id)
+        res_rules: Iterable[Iterable[str]]
         if rules == ():
-            rules = [[] for _ in depth]
-        if all(isinstance(rule, str) for rule in rules):
-            rules = [rules]
+            res_rules = [[] for _ in depth]
+        elif all(isinstance(rule, str) for rule in rules):
+            res_rules = list(rules)
+        else:
+            res_rules = rules
         if csubst is None:
             csubst = [CSubst(Subst({})) for _ in depth]
-        assert len(depth) == len(rules), f'Inconsistent depth and rules: {depth} -> {rules}'
-        assert len(depth) == len(csubst), f'Inconsistent depth and csubst: {depth} -> {csubst}'
-        edge = KCFG.Edge(source, target, tuple(zip(depth, rules, csubst, strict=True)))
+        edge = KCFG.Edge(source, target, tuple(zip(depth, res_rules, csubst, strict=True)))
         self.add_successor(edge)
         return edge
 

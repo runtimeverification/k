@@ -11,7 +11,7 @@ from pyk.kcfg.semantics import DefaultSemantics
 from pyk.prelude.kint import intToken, geInt, ltInt
 from pyk.prelude.ml import mlEqualsTrue, mlAnd, mlOr
 from pyk.utils import single
-from tests.unit.test_kcfg import node_dicts, x_config, split_dicts, x_subst, propagate_split_constraints
+from ..test_kcfg import node_dicts, x_config, split_dicts, x_subst, propagate_split_constraints
 
 if TYPE_CHECKING:
     from pyk.cterm import CTerm
