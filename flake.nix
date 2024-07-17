@@ -210,7 +210,7 @@
             };
         };
         defaultPackage = packages.k;
-        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.k-framework {
+        devShells.kore-integration-tests = pkgs.kore-tests (pkgs.mk-k-framework {
           inherit (pkgs) haskell-backend-bins;
           llvm-kompile-libs = { };
         });
