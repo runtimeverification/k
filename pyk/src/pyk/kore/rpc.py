@@ -318,16 +318,17 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         bug_report_id: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
-        if transport is TransportType.SINGLE_SOCKET:
-            self._transport = SingleSocketTransport(
-                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
-            )
-        elif transport is TransportType.HTTP:
-            self._transport = HttpTransport(
-                host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
-            )
-        else:
-            raise AssertionError()
+        match transport:
+            case TransportType.SINGLE_SOCKET:
+                self._transport = SingleSocketTransport(
+                    host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+                )
+            case TransportType.HTTP:
+                self._transport = HttpTransport(
+                    host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+                )
+            case _:
+                raise AssertionError()
         self._req_id = 1
 
     def __enter__(self) -> JsonRpcClient:
