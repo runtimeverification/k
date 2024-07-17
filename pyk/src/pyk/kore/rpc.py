@@ -57,14 +57,6 @@ class JsonRpcError(Exception):
 
 
 class Transport(ContextManager['Transport'], ABC):
-    _bug_report: BugReport | None
-    _bug_report_id: str | None
-
-    def __init__(self, bug_report_id: str | None = None, bug_report: BugReport | None = None) -> None:
-        if (bug_report_id is None and bug_report is not None) or (bug_report_id is not None and bug_report is None):
-            raise ValueError('bug_report and bug_report_id must be passed together.')
-        self._bug_report_id = bug_report_id
-        self._bug_report = bug_report
 
     def request(self, req: str, request_id: str, method_name: str) -> str:
         server_addr = self._description()
@@ -109,10 +101,7 @@ class SingleSocketTransport(Transport):
         port: int,
         *,
         timeout: int | None = None,
-        bug_report_id: str | None = None,
-        bug_report: BugReport | None = None,
     ):
-        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._sock = self._create_connection(host, port, timeout)
@@ -164,10 +153,7 @@ class HttpTransport(Transport):
         port: int,
         *,
         timeout: int | None = None,
-        bug_report_id: str | None = None,
-        bug_report: BugReport | None = None,
     ):
-        super().__init__(bug_report_id, bug_report)
         self._host = host
         self._port = port
         self._timeout = timeout
@@ -282,45 +268,18 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         if (bug_report is None) != (bug_report_id is None):
             raise ValueError('bug_report and bug_report_id must be passed together.')
 
-        self._transport = self._create_transport(
-            transport,
-            host=host,
-            port=port,
-            timeout=timeout,
-            bug_report=bug_report,
-            bug_report_id=bug_report_id,
-        )
+        self._transport = self._create_transport(transport, host=host, port=port, timeout=timeout)
         self._req_id = 1
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
 
     @staticmethod
-    def _create_transport(
-        transport: TransportType,
-        *,
-        host: str,
-        port: int,
-        timeout: int | None,
-        bug_report: BugReport | None,
-        bug_report_id: str | None,
-    ) -> Transport:
+    def _create_transport(transport: TransportType, *, host: str, port: int, timeout: int | None) -> Transport:
         match transport:
             case TransportType.SINGLE_SOCKET:
-                return SingleSocketTransport(
-                    host,
-                    port,
-                    timeout=timeout,
-                    bug_report=bug_report,
-                    bug_report_id=bug_report_id,
-                )
+                return SingleSocketTransport(host, port, timeout=timeout)
             case TransportType.HTTP:
-                return HttpTransport(
-                    host,
-                    port,
-                    timeout=timeout,
-                    bug_report=bug_report,
-                    bug_report_id=bug_report_id,
-                )
+                return HttpTransport(host, port, timeout=timeout)
             case _:
                 raise AssertionError()
 
