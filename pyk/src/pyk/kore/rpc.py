@@ -318,18 +318,45 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         bug_report_id: str | None = None,
         transport: TransportType = TransportType.SINGLE_SOCKET,
     ):
+        self._transport = self._create_transport(
+            transport,
+            host=host,
+            port=port,
+            timeout=timeout,
+            bug_report=bug_report,
+            bug_report_id=bug_report_id,
+        )
+        self._req_id = 1
+
+    @staticmethod
+    def _create_transport(
+        transport: TransportType,
+        *,
+        host: str,
+        port: int,
+        timeout: int | None,
+        bug_report: BugReport | None,
+        bug_report_id: str | None,
+    ) -> Transport:
         match transport:
             case TransportType.SINGLE_SOCKET:
-                self._transport = SingleSocketTransport(
-                    host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+                return SingleSocketTransport(
+                    host,
+                    port,
+                    timeout=timeout,
+                    bug_report=bug_report,
+                    bug_report_id=bug_report_id,
                 )
             case TransportType.HTTP:
-                self._transport = HttpTransport(
-                    host, port, timeout=timeout, bug_report=bug_report, bug_report_id=bug_report_id
+                return HttpTransport(
+                    host,
+                    port,
+                    timeout=timeout,
+                    bug_report=bug_report,
+                    bug_report_id=bug_report_id,
                 )
             case _:
                 raise AssertionError()
-        self._req_id = 1
 
     def __enter__(self) -> JsonRpcClient:
         return self
