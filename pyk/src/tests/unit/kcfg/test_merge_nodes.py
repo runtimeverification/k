@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-from collections.abc import Iterable
 
 from pyk.cterm import CSubst
 from pyk.kast.inner import KVariable, Subst
@@ -14,6 +13,8 @@ from pyk.utils import single
 from ..test_kcfg import node_dicts, propagate_split_constraints, split_dicts, x_config, x_subst
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from pyk.cterm import CTerm
 
 
