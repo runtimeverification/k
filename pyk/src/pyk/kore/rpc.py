@@ -88,9 +88,6 @@ class Transport(ContextManager['Transport'], ABC):
         return resp
 
     @abstractmethod
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]: ...
-
-    @abstractmethod
     def _request(self, req: str) -> str: ...
 
     @abstractmethod
@@ -157,19 +154,6 @@ class SingleSocketTransport(Transport):
         self._file.close()
         self._sock.close()
 
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
-        return [
-            'cat',
-            bug_report_request,
-            '|',
-            'nc',
-            '-Nv',
-            self._host,
-            str(self._port),
-            '>',
-            f'{req_name}_actual.json',
-        ]
-
     def _request(self, req: str) -> str:
         self._sock.sendall(req.encode())
         server_addr = self._description()
@@ -202,20 +186,6 @@ class HttpTransport(Transport):
 
     def close(self) -> None:
         pass
-
-    def _command(self, req_name: str, bug_report_request: str) -> list[str]:
-        return [
-            'curl',
-            '-X',
-            'POST',
-            '-H',
-            'Content-Type: application/json',
-            '-d',
-            '@' + bug_report_request,
-            'http://' + self._host + ':' + str(self._port),
-            '>',
-            f'{req_name}_actual.json',
-        ]
 
     def _request(self, req: str) -> str:
         connection = http.client.HTTPConnection(self._host, self._port, timeout=self._timeout)
