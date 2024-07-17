@@ -43,11 +43,12 @@ def slurp_definitions(
     main_file: str | Path,
     *,
     include_dirs: Iterable[str | Path] = (),
-    md_selector: str = 'k',
+    md_selector: str | None = None,
     include_source: bool = True,
 ) -> dict[Path, Definition]:
     main_file = Path(main_file).resolve()
     _include_dirs = [Path(include_dir) for include_dir in include_dirs]
+    md_selector = md_selector or 'k'
 
     result: dict[Path, Definition] = {}
 
