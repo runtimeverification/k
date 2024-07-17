@@ -288,6 +288,26 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         def max_depth(self) -> int:
             return max([depth for depth, _, _ in self.info])
 
+        def merge_info(self, other: KCFG.Edge) -> tuple[tuple[int, tuple[str, ...], CSubst], ...]:
+            result_info = []
+            self_info = list(self.info)
+            other_info = list(other.info)
+            while self_info:
+                depth, rules, csubst = self_info.pop(0)
+                idx = len(other_info) - 1
+                while idx >= 0:
+                    other_depth, other_rules, other_csubst = other_info[idx]
+                    if csubst == other_csubst:
+                        depth = depth + other_depth
+                        rules = rules + other_rules
+                        other_info.pop(idx)
+                        break
+                    idx -= 1
+                result_info.append((depth, rules, csubst))
+            while other_info:
+                result_info.append(other_info.pop(0))
+            return tuple(result_info)
+
     @final
     @dataclass(frozen=True)
     class Cover(EdgeLike):
@@ -1105,10 +1125,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         # Obtain edges `A -> B`, `B -> C`
         a_to_b = single(self.edges(target_id=b_id))
         b_to_c = single(self.edges(source_id=b_id))
+        merged_info = a_to_b.merge_info(b_to_c)
+        depths, rules, csubsts = zip(*merged_info, strict=True)
         # Remove the node `B`, effectively removing the entire initial structure
         self.remove_node(b_id)
         # Create edge `A -> C`
-        self.create_edge(a_to_b.source.id, b_to_c.target.id, a_to_b.depth + b_to_c.depth, a_to_b.rules + b_to_c.rules)
+        self.create_edge(a_to_b.source.id, b_to_c.target.id, depths, rules, csubsts)
 
     def lift_edges(self) -> bool:
         """Perform all possible edge lifts across the KCFG.

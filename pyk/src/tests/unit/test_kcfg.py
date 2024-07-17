@@ -102,7 +102,11 @@ def node_dicts(n: int, start: int = 1, auto_cond: bool = False, config: KInner |
 
 def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
     def _make_edge_dict(i: int, j: int, depth: int = 1, rules: tuple[str, ...] = ()) -> dict[str, Any]:
-        return {'source': i, 'target': j, 'depth': depth, 'rules': list(rules)}
+        return {
+            'source': i,
+            'target': j,
+            'info': [{'depth': depth, 'rules': list(rules), 'csubst': CSubst().to_dict()}],
+        }
 
     return [_make_edge_dict(*edge) for edge in edges]
 
@@ -476,7 +480,7 @@ def contains_edge(cfg: KCFG, source: NodeIdLike, target: NodeIdLike, depth: int,
     edges = cfg.edges(source_id=source, target_id=target)
     if edges:
         edge = single(edges)
-        return edge.depth == depth and edge.rules == rules
+        return edge.depth == depth and edge.rules == (rules,)
     return False
 
 
