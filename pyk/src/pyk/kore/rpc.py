@@ -67,24 +67,12 @@ class Transport(ContextManager['Transport'], ABC):
         self._bug_report = bug_report
 
     def request(self, req: str, request_id: str, method_name: str) -> str:
-        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
-        req_name = f'{base_name}/{id(self)}/{request_id}'
-        if self._bug_report:
-            bug_report_request = f'{req_name}_request.json'
-            self._bug_report.add_file_contents(req, Path(bug_report_request))
-            self._bug_report.add_request(f'{req_name}_request.json')
-
         server_addr = self._description()
         _LOGGER.info(f'Sending request to {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         resp = self._request(req)
         _LOGGER.info(f'Received response from {server_addr}: {request_id} - {method_name}')
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
-
-        if self._bug_report:
-            bug_report_response = f'{req_name}_response.json'
-            self._bug_report.add_file_contents(resp, Path(bug_report_response))
-            self._bug_report.add_request(f'{req_name}_response.json')
         return resp
 
     @abstractmethod
@@ -357,9 +345,22 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         }
 
         req = json.dumps(payload)
+
+        base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
+        req_name = f'{base_name}/{id(self)}/{req_id}'
+        if self._bug_report:
+            bug_report_request = f'{req_name}_request.json'
+            self._bug_report.add_file_contents(req, Path(bug_report_request))
+            self._bug_report.add_request(f'{req_name}_request.json')
+
         resp = self._transport.request(req, req_id, method)
         if not resp:
             raise RuntimeError('Empty response received')
+
+        if self._bug_report:
+            bug_report_response = f'{req_name}_response.json'
+            self._bug_report.add_file_contents(resp, Path(bug_report_response))
+            self._bug_report.add_request(f'{req_name}_response.json')
 
         data = json.loads(resp)
         self._check(data)
