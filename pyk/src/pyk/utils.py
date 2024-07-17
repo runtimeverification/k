@@ -340,7 +340,7 @@ def is_hexstring(x: str) -> bool:
 # Hashes
 
 
-def hash_str(x: Any) -> str:
+def hash_str(x: object) -> str:
     hash = hashlib.sha256()
     hash.update(str(x).encode('utf-8'))
     return str(hash.hexdigest())
