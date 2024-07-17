@@ -67,12 +67,6 @@ class Transport(ContextManager['Transport'], ABC):
         _LOGGER.debug(f'Received response from {server_addr}: {resp}')
         return resp
 
-    @abstractmethod
-    def _request(self, req: str) -> str: ...
-
-    @abstractmethod
-    def _description(self) -> str: ...
-
     def __enter__(self) -> Transport:
         return self
 
@@ -81,6 +75,12 @@ class Transport(ContextManager['Transport'], ABC):
 
     @abstractmethod
     def close(self) -> None: ...
+
+    @abstractmethod
+    def _request(self, req: str) -> str: ...
+
+    @abstractmethod
+    def _description(self) -> str: ...
 
 
 class TransportType(Enum):
