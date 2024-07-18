@@ -135,12 +135,11 @@ class KRun(KPrint):
             debugger=debugger,
             proof_hint=proof_hint,
         )
-        
+
         if proof_hint:
             # Print the binary proof hint to stdout regardless of the output option
             write(1, result.stdout)
             return
-        
 
         if output != KRunOutput.NONE:
             output_kore = KoreParser(result.stdout).pattern()
