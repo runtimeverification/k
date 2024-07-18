@@ -1426,7 +1426,6 @@ class TestImpProof(KCFGExploreTest, KProveTest):
             'VALUE_CELL: 0 #Implies .K'
         )
 
-
         def config_with_map_entry(kprint: KPrint, k: str, state: str, constraint: KInner | None = None) -> CTerm:
             k_parsed = kprint.parse_token(KToken(k, 'Pgm'), as_rule=True)
             state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
@@ -1438,8 +1437,9 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                         (
                             KApply('<k>', KSequence(k_parsed)),
                             KApply('<state>', state_parsed),
-                            KApply('<cellMap>', 
-                                [KApply('<entry>', [KApply('<key>', [intToken(0)]), KApply('<value>', [intToken(0)])])]
+                            KApply(
+                                '<cellMap>',
+                                [KApply('<entry>', [KApply('<key>', [intToken(0)]), KApply('<value>', [intToken(0)])])],
                             ),
                         ),
                     ),

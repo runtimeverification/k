@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 from pyk.utils import not_none
 
 from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst, KToken
+from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
