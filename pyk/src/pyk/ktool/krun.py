@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
+from os import write
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
@@ -74,6 +75,7 @@ class KRun(KPrint):
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
         debugger: bool = False,
+        proof_hint: bool = False,
     ) -> CompletedProcess:
         with self._temp_file() as ntf:
             pgm.write(ntf)
@@ -97,6 +99,7 @@ class KRun(KPrint):
                 check=False,
                 pipe_stderr=pipe_stderr,
                 debugger=debugger,
+                proof_hint=proof_hint,
             )
 
     def run(
@@ -115,6 +118,7 @@ class KRun(KPrint):
         pipe_stderr: bool = True,
         bug_report: BugReport | None = None,
         debugger: bool = False,
+        proof_hint: bool = False,
     ) -> None:
         result = self.run_process(
             pgm,
@@ -129,7 +133,14 @@ class KRun(KPrint):
             pipe_stderr=pipe_stderr,
             bug_report=bug_report,
             debugger=debugger,
+            proof_hint=proof_hint,
         )
+        
+        if proof_hint:
+            # Print the binary proof hint to stdout regardless of the output option
+            write(1, result.stdout)
+            return
+        
 
         if output != KRunOutput.NONE:
             output_kore = KoreParser(result.stdout).pattern()
@@ -208,6 +219,7 @@ def _krun(
     logger: Logger | None = None,
     bug_report: BugReport | None = None,
     debugger: bool = False,
+    proof_hint: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -236,6 +248,7 @@ def _krun(
         search_final=search_final,
         no_pattern=no_pattern,
         debugger=debugger,
+        proof_hint=proof_hint,
     )
 
     if bug_report is not None:
@@ -265,6 +278,7 @@ def _build_arg_list(
     search_final: bool,
     no_pattern: bool,
     debugger: bool,
+    proof_hint: bool = False,
 ) -> list[str]:
     args = [command]
     if input_file:
@@ -293,6 +307,8 @@ def _build_arg_list(
         args += ['--no-pattern']
     if debugger:
         args += ['--debugger']
+    if proof_hint:
+        args += ['--proof-hint']
     return args
 
 
