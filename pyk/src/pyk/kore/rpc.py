@@ -66,9 +66,9 @@ class Transport(ContextManager['Transport'], ABC):
         self._bug_report_id = bug_report_id
         self._bug_report = bug_report
 
-    def request(self, req: str, request_id: int, method_name: str) -> str:
+    def request(self, req: str, request_id: str, method_name: str) -> str:
         base_name = self._bug_report_id if self._bug_report_id is not None else 'kore_rpc'
-        req_name = f'{base_name}/{id(self)}/{request_id:03}'
+        req_name = f'{base_name}/{id(self)}/{request_id}'
         if self._bug_report:
             bug_report_request = f'{req_name}_request.json'
             self._bug_report.add_file_contents(req, Path(bug_report_request))
@@ -340,24 +340,24 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._transport.close()
 
     def request(self, method: str, **params: Any) -> dict[str, Any]:
-        old_id = self._req_id
+        req_id = f'{id(self)}-{self._req_id:03}'
         self._req_id += 1
 
         payload = {
             'jsonrpc': self._JSON_RPC_VERSION,
-            'id': old_id,
+            'id': req_id,
             'method': method,
             'params': params,
         }
 
         req = json.dumps(payload)
-        resp = self._transport.request(req, old_id, method)
+        resp = self._transport.request(req, req_id, method)
         if not resp:
             raise RuntimeError('Empty response received')
 
         data = json.loads(resp)
         self._check(data)
-        assert data['id'] == old_id
+        assert data['id'] == req_id
 
         return data['result']
 
