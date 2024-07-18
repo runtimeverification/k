@@ -750,6 +750,7 @@ class TestImpProof(KCFGExploreTest, KProveTest):
                     (
                         KApply('<k>', KSequence(k_parsed)),
                         KApply('<state>', state_parsed),
+                        KApply('<cellMap>', [KApply('.EntryCellMap')]),
                     ),
                 ),
                 KVariable('GENERATED_COUNTER_CELL'),
@@ -1402,6 +1403,54 @@ class TestImpProof(KCFGExploreTest, KProveTest):
         expected: str,
     ) -> None:
         antecedent_term = self.config(kprove, *antecedent)
+        consequent_term = self.config(kprove, *consequent)
+
+        passed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
+
+        assert not passed
+        assert actual == expected
+
+    def test_implication_failure_reason_cell_mismatch(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprove: KProve,
+    ) -> None:
+
+        antecedent = ('int $n ; $n = 0 ;', '.Map')
+        consequent = ('int $n ; $n = 1 ;', '.Map')
+        expected = (
+            'Matching failed.\n'
+            'The following cells failed matching individually (antecedent #Implies consequent):\n'
+            'K_CELL: int $n , .Ids ; $n = 0 ; #Implies int $n , .Ids ; $n = 1 ;\n'
+            'KEY_CELL: 0 #Implies .K\n'
+            'VALUE_CELL: 0 #Implies .K'
+        )
+
+
+        def config_with_map_entry(kprint: KPrint, k: str, state: str, constraint: KInner | None = None) -> CTerm:
+            k_parsed = kprint.parse_token(KToken(k, 'Pgm'), as_rule=True)
+            state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
+            _config = CTerm(
+                KApply(
+                    '<generatedTop>',
+                    KApply(
+                        '<T>',
+                        (
+                            KApply('<k>', KSequence(k_parsed)),
+                            KApply('<state>', state_parsed),
+                            KApply('<cellMap>', 
+                                [KApply('<entry>', [KApply('<key>', [intToken(0)]), KApply('<value>', [intToken(0)])])]
+                            ),
+                        ),
+                    ),
+                    KVariable('GENERATED_COUNTER_CELL'),
+                ),
+            )
+            if constraint is not None:
+                _config = _config.add_constraint(constraint)
+            return _config
+
+        antecedent_term = config_with_map_entry(kprove, *antecedent)
         consequent_term = self.config(kprove, *consequent)
 
         passed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
