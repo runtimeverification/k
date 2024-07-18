@@ -48,12 +48,6 @@ module IMP
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
-                  <cellMap>
-                    <entry multiplicity="*" type="Map">
-                      <key> .K </key>
-                      <value> .K </value>
-                    </entry>
-                  </cellMap>
                 </T>
 
   rule #lookup(X, M) => M[X] requires X in_keys(M)
