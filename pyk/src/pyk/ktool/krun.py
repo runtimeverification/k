@@ -258,7 +258,14 @@ def _krun(
         else:
             bug_report.add_command(args)
 
-    return run_process(args, check=check, pipe_stderr=pipe_stderr, pipe_stdout=not proof_hint, logger=logger or _LOGGER, exec_process=debugger)
+    return run_process(
+        args,
+        check=check,
+        pipe_stderr=pipe_stderr,
+        pipe_stdout=not proof_hint,
+        logger=logger or _LOGGER,
+        exec_process=debugger,
+    )
 
 
 def _build_arg_list(
