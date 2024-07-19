@@ -379,10 +379,13 @@ class OuterParser:
             value: str
             if self._la.type == TokenType.LPAREN:
                 self._consume()
-                if self._la.type is TokenType.ATTR_CONTENT:
-                    value = self._consume()
-                else:
-                    value = _dequote_string(self._match(TokenType.STRING))
+                match self._la.type:
+                    case TokenType.ATTR_CONTENT:
+                        value = self._consume()
+                    case TokenType.STRING:
+                        value = _dequote_string(self._consume())
+                    case _:
+                        value = ''
                 self._match(TokenType.RPAREN)
             else:
                 value = ''
