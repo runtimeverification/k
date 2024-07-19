@@ -59,7 +59,7 @@ jobs:
           cd llvm-backend/src/main/native/llvm-backend
           git checkout "${llvm_backend_version}"
           cd -
-          sed -i 's!      url = "github:runtimeverification/llvm-backend/.*";!      url = "github:runtimeverification/llvm-backend/'"${llvm_backend_version}"'";!' flake.nix
+          sed -i 's!    llvm-backend.url = "github:runtimeverification/llvm-backend/.*";!    llvm-backend.url = "github:runtimeverification/llvm-backend/'"${llvm_backend_version}"'";!' flake.nix
           if git add flake.nix llvm-backend/src/main/native/llvm-backend && git commit -m "flake.nix, llvm-backend/src/main/native/llvm-backend: update to version ${llvm_backend_version}"; then
             changed=true
           fi
