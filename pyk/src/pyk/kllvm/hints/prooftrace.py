@@ -201,7 +201,7 @@ class LLVMFunctionEvent(LLVMStepEvent):
 
     @property
     def relative_position(self) -> str:
-        """Return the relative position of the LLVM function event in the proof trace. Ex.: (0:0:0:0)."""
+        """Return the relative position of the LLVM function event in the proof trace."""
         return self._function_event.relative_position
 
     @property
@@ -243,7 +243,7 @@ class LLVMHookEvent(LLVMStepEvent):
 
     @property
     def relative_position(self) -> str:
-        """Return the relative position of the hook event in the proof trace. Ex.: (0:0:0:0)."""
+        """Return the relative position of the hook event in the proof trace."""
         return self._hook_event.relative_position
 
     @property
