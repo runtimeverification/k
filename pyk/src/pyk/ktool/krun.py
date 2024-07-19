@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from os import write
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
@@ -136,11 +135,7 @@ class KRun(KPrint):
             proof_hint=proof_hint,
         )
 
-        if proof_hint:
-            # We didn't pipe the result to stdout, so it was already printed 
-            return
-
-        if output != KRunOutput.NONE:
+        if not proof_hint and output != KRunOutput.NONE:
             output_kore = KoreParser(result.stdout).pattern()
             match output:
                 case KRunOutput.JSON:
@@ -214,6 +209,7 @@ def _krun(
     # ---
     check: bool = True,
     pipe_stderr: bool = True,
+    pipe_stdout: bool = True,
     logger: Logger | None = None,
     bug_report: BugReport | None = None,
     debugger: bool = False,
@@ -257,11 +253,14 @@ def _krun(
         else:
             bug_report.add_command(args)
 
+    if proof_hint and pipe_stdout:
+        raise ValueError('Cannot pipe stdout when using proof hints')
+
     return run_process(
         args,
         check=check,
         pipe_stderr=pipe_stderr,
-        pipe_stdout=not proof_hint,
+        pipe_stdout=not proof_hint and pipe_stdout,
         logger=logger or _LOGGER,
         exec_process=debugger,
     )
