@@ -137,8 +137,7 @@ class KRun(KPrint):
         )
 
         if proof_hint:
-            # Print the binary proof hint to stdout regardless of the output option
-            write(1, result.stdout)
+            # We didn't pipe the result to stdout, so it was already printed 
             return
 
         if output != KRunOutput.NONE:
