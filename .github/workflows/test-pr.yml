@@ -124,10 +124,11 @@ jobs:
 
       - name: 'Build and Test K'
         run: |
-          export PATH="$(brew --prefix bison)/bin:$PATH"
-          export PATH="$(brew --prefix flex)/bin:$PATH"
-          export PATH="$(brew --prefix llvm)/bin:$PATH"
-          export PATH="$(brew --prefix openjdk)/bin:$PATH"
+          PATH="$(brew --prefix bison)/bin:$PATH"
+          PATH="$(brew --prefix flex)/bin:$PATH"
+          PATH="$(brew --prefix llvm)/bin:$PATH"
+          PATH="$(brew --prefix openjdk)/bin:$PATH"
+          export PATH
           mvn verify -Dspotless.check.skip=true --batch-mode -U
 
 
