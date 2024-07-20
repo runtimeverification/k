@@ -123,7 +123,12 @@ jobs:
               z3
 
       - name: 'Build and Test K'
-        run: mvn verify -Dspotless.check.skip=true --batch-mode -U
+        run: |
+          export PATH="$(brew --prefix bison)/bin:$PATH"
+          export PATH="$(brew --prefix flex)/bin:$PATH"
+          export PATH="$(brew --prefix llvm)/bin:$PATH"
+          export PATH="$(brew --prefix openjdk)/bin:$PATH"
+          mvn verify -Dspotless.check.skip=true --batch-mode -U
 
 
   test-package-ubuntu-jammy:
