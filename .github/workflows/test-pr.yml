@@ -247,17 +247,6 @@ jobs:
         with:
           name: k-framework
           skipPush: true
-      - name: 'Build K Framework and push build time dependencies to cachix'
-        env:
-          NIX_PATH: 'nixpkgs=http://nixos.org/channels/nixos-22.05/nixexprs.tar.xz'
-          GC_DONT_GC: '1'
-        run: |
-          nix --version
-          JQ=$(nix-build '<nixpkgs>' -A jq --no-link)/bin/jq
-          export JQ
-          k=$(nix build . --print-build-logs --json | $JQ -r '.[].outputs | to_entries[].value')
-          drv=$(nix-store --query --deriver "$k")
-          nix-store --query --requisites "$drv" | cachix push k-framework
       - name: 'Smoke test K'
         run: GC_DONT_GC=1 nix build --print-build-logs .#smoke-test
       # These tests take a really long time to run on other platforms, so we
