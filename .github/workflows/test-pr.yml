@@ -88,6 +88,43 @@ jobs:
           docker stop --time=0 "k-ci-${GITHUB_SHA}"
           docker container rm --force "k-ci-${GITHUB_SHA}" || true
 
+  test-k-macos:
+    name: 'K: macOS Source Build & Test'
+    runs-on: macos-14
+    needs: code-quality
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: 'Install dependencies'
+        run: |
+          brew install    \
+              bison       \
+              boost       \
+              cmake       \
+              flex        \
+              fmt         \
+              gcc         \
+              gmp         \
+              openjdk     \
+              jemalloc    \
+              libyaml     \
+              llvm        \
+              make        \
+              maven       \
+              mpfr        \
+              pkg-config  \
+              python      \
+              secp256k1   \
+              stack       \
+              zlib        \
+              z3
+
+      - name: 'Build and Test K'
+        run: mvn verify -Dspotless.check.skip=true --batch-mode -U
+
 
   test-package-ubuntu-jammy:
     name: 'K: Ubuntu Jammy Package'
