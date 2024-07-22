@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, NamedTuple, final
 from pyk.utils import not_none
 
 from ..cterm import CSubst, CTerm
-from ..kast.inner import KApply, KLabel, KRewrite, KVariable, Subst
+from ..kast.inner import KApply, KLabel, KRewrite, KToken, KVariable, Subst
 from ..kast.manip import flatten_label, is_spurious_constraint, sort_ac_collections
 from ..kast.pretty import PrettyPrinter
 from ..konvert import kast_to_kore, kore_to_kast
@@ -259,14 +259,18 @@ class CTermSymbolic:
                     curr_cell_match = Subst({})
                     for cell in antecedent.cells:
                         antecedent_cell = sort_ac_collections(antecedent.cell(cell))
-                        consequent_cell = sort_ac_collections(consequent.cell(cell))
-                        cell_match = consequent_cell.match(antecedent_cell)
-                        if cell_match is not None:
-                            _curr_cell_match = curr_cell_match.union(cell_match)
-                            if _curr_cell_match is not None:
-                                curr_cell_match = _curr_cell_match
-                                continue
-                        failing_cells.append((cell, KRewrite(antecedent_cell, consequent_cell)))
+
+                        if cell not in consequent.cells:
+                            failing_cells.append((cell, KRewrite(antecedent_cell, KToken('.K', sort='KItem'))))
+                        else:
+                            consequent_cell = sort_ac_collections(consequent.cell(cell))
+                            cell_match = consequent_cell.match(antecedent_cell)
+                            if cell_match is not None:
+                                _curr_cell_match = curr_cell_match.union(cell_match)
+                                if _curr_cell_match is not None:
+                                    curr_cell_match = _curr_cell_match
+                                    continue
+                            failing_cells.append((cell, KRewrite(antecedent_cell, consequent_cell)))
                 else:
                     consequent_constraints = list(
                         filter(
