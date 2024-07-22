@@ -139,6 +139,9 @@ jobs:
           PATH="$(brew --prefix openjdk)/bin:$PATH"
           export PATH
           mvn package -DskipTests
+          gmake --directory k-distribution/tests/regression-new \
+                --output-sync                                   \
+                --jobs "$(nproc)"
 
 
   test-package-ubuntu-jammy:
