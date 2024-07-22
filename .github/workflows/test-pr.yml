@@ -112,6 +112,7 @@ jobs:
               gmp         \
               openjdk     \
               jemalloc    \
+              libffi      \
               libyaml     \
               llvm        \
               make        \
