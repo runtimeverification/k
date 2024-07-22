@@ -105,6 +105,7 @@ jobs:
               bison       \
               boost       \
               cmake       \
+              coreutils   \
               flex        \
               fmt         \
               gcc         \
@@ -122,6 +123,12 @@ jobs:
               stack       \
               zlib        \
               z3
+
+      - name: 'Haskell Stack cache'
+        uses: actions/cache@v4
+        with:
+          path: ~/.stack
+          key: stack-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('haskell-backend/src/main/native/haskell-backend/stack.yaml') }}
 
       - name: 'Build and Test K'
         run: |
