@@ -34,6 +34,11 @@ class KCFGSemantics(ABC):
 
     """Implement a custom semantic step."""
 
+    @abstractmethod
+    def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool: ...
+
+
+
 
 class DefaultSemantics(KCFGSemantics):
     def is_terminal(self, c: CTerm) -> bool:
@@ -50,3 +55,6 @@ class DefaultSemantics(KCFGSemantics):
 
     def custom_step(self, c: CTerm) -> KCFGExtendResult | None:
         return None
+
+    def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
+        return False
