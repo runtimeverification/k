@@ -14,6 +14,7 @@ from ..kast.manip import flatten_label, free_vars, ml_pred_to_bool
 from ..kast.outer import KFlatModule, KImport, KRule
 from ..kcfg import KCFG, KCFGStore
 from ..kcfg.exploration import KCFGExploration
+from ..kcfg.kcfg import CSubst
 from ..konvert import kflatmodule_to_kore
 from ..ktool.claim_index import ClaimIndex
 from ..prelude.ml import mlAnd, mlTop
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from ..kast.outer import KClaim, KDefinition, KFlatModuleList
     from ..kcfg import KCFGExplore
     from ..kcfg.explore import KCFGExtendResult
-    from ..kcfg.kcfg import CSubst, NodeIdLike
+    from ..kcfg.kcfg import NodeIdLike
 
     T = TypeVar('T', bound='Proof')
 
@@ -410,7 +411,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         return _rules
 
     def as_rule(self, priority: int = 20) -> KRule:
-        _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), depth=0, rules=())
+        _edge = KCFG.Edge(self.kcfg.node(self.init), self.kcfg.node(self.target), (0,), (), (CSubst(),))
         _rule = _edge.to_rule(self.rule_id, priority=priority)
         assert type(_rule) is KRule
         return _rule

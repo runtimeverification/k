@@ -207,20 +207,36 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
     class Edge(EdgeLike):
         source: KCFG.Node
         target: KCFG.Node
-        depth: int
-        rules: tuple[str, ...]
+        depths: tuple[int, ...]
+        rules_list: tuple[tuple[str, ...], ...]
+        csubsts: tuple[CSubst, ...]
+
+        @property
+        def depth(self) -> int:
+            return max(self.depths)
+
+        @property
+        def rules(self) -> tuple[str, ...]:
+            return single(self.rules_list)
 
         def to_dict(self) -> dict[str, Any]:
             return {
                 'source': self.source.id,
                 'target': self.target.id,
-                'depth': self.depth,
-                'rules': list(self.rules),
+                'depths': list(self.depths),
+                'rules_list': [list(rules) for rules in self.rules_list],
+                'csubsts': [csubst.to_dict() for csubst in self.csubsts],
             }
 
         @staticmethod
         def from_dict(dct: dict[str, Any], nodes: Mapping[int, KCFG.Node]) -> KCFG.Edge:
-            return KCFG.Edge(nodes[dct['source']], nodes[dct['target']], dct['depth'], tuple(dct['rules']))
+            return KCFG.Edge(
+                nodes[dct['source']],
+                nodes[dct['target']],
+                tuple(dct['depths']),
+                tuple(tuple(rules) for rules in dct['rules_list']),
+                tuple(CSubst.from_dict(csubst) for csubst in dct['csubsts']),
+            )
 
         def to_rule(self, label: str, claim: bool = False, priority: int | None = None) -> KRuleLike:
             def is_ceil_condition(kast: KInner) -> bool:
@@ -243,11 +259,31 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         def replace_source(self, node: KCFG.Node) -> KCFG.Edge:
             assert node.id == self.source.id
-            return KCFG.Edge(node, self.target, self.depth, self.rules)
+            return KCFG.Edge(node, self.target, self.depths, self.rules_list, self.csubsts)
 
         def replace_target(self, node: KCFG.Node) -> KCFG.Edge:
             assert node.id == self.target.id
-            return KCFG.Edge(self.source, node, self.depth, self.rules)
+            return KCFG.Edge(self.source, node, self.depths, self.rules_list, self.csubsts)
+
+        def merged_info(self, other: KCFG.Edge) -> tuple[tuple[int, tuple[str, ...], CSubst], ...]:
+            result_info = []
+            self_info = list(zip(self.depths, self.rules_list, self.csubsts, strict=True))
+            other_info = list(zip(other.depths, other.rules_list, other.csubsts, strict=True))
+            while self_info:
+                depth, rules, csubst = self_info.pop(0)
+                idx = len(other_info) - 1
+                while idx >= 0:
+                    other_depth, other_rules, other_csubst = other_info[idx]
+                    if csubst == other_csubst:
+                        depth = depth + other_depth
+                        rules = rules + other_rules
+                        other_info.pop(idx)
+                        break
+                    idx -= 1
+                result_info.append((depth, rules, csubst))
+            while other_info:
+                result_info.append(other_info.pop(0))
+            return tuple(result_info)
 
     @final
     @dataclass(frozen=True)
@@ -375,7 +411,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
 
         @property
         def edges(self) -> tuple[KCFG.Edge, ...]:
-            return tuple(KCFG.Edge(self.source, target, 1, ()) for target in self.targets)
+            return tuple(KCFG.Edge(self.source, target, (1,), (), (CSubst(),)) for target in self.targets)
 
         def replace_source(self, node: KCFG.Node) -> KCFG.NDBranch:
             assert node.id == self.source.id
@@ -798,12 +834,32 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
             return edge == other
         return False
 
-    def create_edge(self, source_id: NodeIdLike, target_id: NodeIdLike, depth: int, rules: Iterable[str] = ()) -> Edge:
-        if depth <= 0:
-            raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {depth}')
+    def create_edge(
+        self,
+        source_id: NodeIdLike,
+        target_id: NodeIdLike,
+        depth: int | Iterable[int],
+        rules: Iterable[str] | Iterable[Iterable[str]] = (),
+        csubsts: Iterable[CSubst] = (),
+    ) -> Edge:
+        if isinstance(depth, int):
+            depth = (depth,)
+        for d in depth:
+            if d <= 0:
+                raise ValueError(f'Cannot build KCFG Edge with non-positive depth: {d}')
         source = self.node(source_id)
         target = self.node(target_id)
-        edge = KCFG.Edge(source, target, depth, tuple(rules))
+        rules_list: list[tuple[str, ...]]
+        if rules == ():
+            rules_list = [() for _ in depth]
+        elif all(isinstance(rule, str) for rule in rules):
+            rules = cast('Iterable[str]', rules)
+            rules_list = [tuple(rules)]
+        else:
+            rules_list = [tuple(rule) for rule in rules]
+        if csubsts == ():
+            csubsts = [CSubst() for _ in depth]
+        edge = KCFG.Edge(source, target, tuple(depth), tuple(rules_list), tuple(csubsts))
         self.add_successor(edge)
         return edge
 
@@ -941,10 +997,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Successor']]):
         # Obtain edges `A -> B`, `B -> C`
         a_to_b = single(self.edges(target_id=b_id))
         b_to_c = single(self.edges(source_id=b_id))
+        edge_info = a_to_b.merged_info(b_to_c)
+        depths, rules_list, csubsts = zip(*edge_info, strict=True)
         # Remove the node `B`, effectively removing the entire initial structure
         self.remove_node(b_id)
         # Create edge `A -> C`
-        self.create_edge(a_to_b.source.id, b_to_c.target.id, a_to_b.depth + b_to_c.depth, a_to_b.rules + b_to_c.rules)
+        self.create_edge(a_to_b.source.id, b_to_c.target.id, depths, rules_list, csubsts)
 
     def lift_edges(self) -> bool:
         """Perform all possible edge lifts across the KCFG.
