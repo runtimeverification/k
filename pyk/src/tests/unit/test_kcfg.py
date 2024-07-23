@@ -74,7 +74,7 @@ def node(i: int, auto_cond: bool = False, config: KInner | None = None) -> KCFG.
 
 
 def edge(i: int, j: int) -> KCFG.Edge:
-    return KCFG.Edge(node(i), node(j), 1, ())
+    return KCFG.Edge(node(i), node(j), (1,), (), (CSubst(),))
 
 
 def cover(i: int, j: int) -> KCFG.Cover:
