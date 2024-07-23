@@ -56,7 +56,7 @@ for details about supported configurations and system setup.
 ## Contents
 
 1.  [Prerequisite Install Guide](#prerequisite-install-guide)
-2.  [Build and Install Guide](#build-and-install-guide)
+2.  [Build and Install Guide]
 3.  [IDE Setup](#ide-setup)
 4.  [Running the Test Suite](#running-the-test-suite)
 5.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
@@ -72,69 +72,13 @@ must first be installed.
 
 ## The Short Version
 
-On Ubuntu Linux 22.04 (Jammy):
+Regardless of system, unless you cloned with `--recusrive` you will first
+have to run `git submodule update --init --recursive`.
 
-```shell
-git submodule update --init --recursive
-sudo apt-get install    \
-    bison               \
-    build-essential     \
-    clang-15            \
-    cmake               \
-    curl                \
-    flex                \
-    g++                 \
-    gcc                 \
-    libboost-test-dev   \
-    libfmt-dev          \
-    libgmp-dev          \
-    libjemalloc-dev     \
-    libmpfr-dev         \
-    libsecp256k1-dev    \
-    libunwind-dev       \
-    libyaml-dev         \
-    libz3-dev           \
-    lld-15              \
-    llvm-15-tools       \
-    m4                  \
-    maven               \
-    openjdk-17-jdk      \
-    pkg-config          \
-    python3             \
-    python3-dev         \
-    z3                  \
-    zlib1g-dev
-curl -sSL https://get.haskellstack.org/ | sh
-```
-
-If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
-
-On macOS using [Homebrew](https://brew.sh/):
-
-```shell
-git submodule update --init --recursive
-brew install    \
-    bison       \
-    boost       \
-    cmake       \
-    flex        \
-    fmt         \
-    gcc         \
-    gmp         \
-    openjdk     \
-    jemalloc    \
-    libyaml     \
-    llvm        \
-    make        \
-    maven       \
-    mpfr        \
-    pkg-config  \
-    python      \
-    secp256k1   \
-    stack       \
-    zlib        \
-    z3
-```
+You then need the build and runtime dependencies. If you are on a
+Debian-based system (including Ubuntu) or MacOS with [Homebrew] installed,
+you can run `./install-build-deps` and continue directly to the
+[Build and Install Guide].
 
 ## The Long Version
 
@@ -451,3 +395,10 @@ of artifacts, you can run `mvn dependency:purge-local-repository`.
 If tests fail but you want to run the build anyway to see what happens, you can use `mvn package -DskipTests`.
 
 If you still cannot build, please contact a K developer.
+
+
+
+<!-------------------------------------------------------------------->
+[Build and Install Guide]: #build-and-install-guide
+
+[Homebrew]: https://brew.sh/
