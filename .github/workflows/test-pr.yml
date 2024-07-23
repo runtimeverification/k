@@ -131,6 +131,12 @@ jobs:
           path: ~/.stack
           key: stack-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('haskell-backend/src/main/native/haskell-backend/stack.yaml') }}
 
+      - name: 'Maven cache'
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pom.xml') }}
+
       - name: 'Build and Test K'
         run: |
           PATH="$(brew --prefix bison)/bin:$PATH"
