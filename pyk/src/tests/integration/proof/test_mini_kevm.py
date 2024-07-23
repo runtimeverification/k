@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pyk.cterm import CTerm
+from pyk.kast.inner import KApply, KVariable
 from pyk.kcfg.show import KCFGShow
+from pyk.prelude.kint import intToken
 from pyk.proof import APRProof, APRProver, ProofStatus
 from pyk.proof.show import APRProofNodePrinter
 from pyk.testing import KCFGExploreTest, KProveTest
@@ -100,3 +103,63 @@ class TestMiniKEVM(KCFGExploreTest, KProveTest):
 
             assert proof.status == proof_status
             assert leaf_number(proof) == expected_leaf_number
+
+    def test_implication_failure_reason_cell_mismatch(
+        self,
+        kcfg_explore: KCFGExplore,
+        kprove: KProve,
+    ) -> None:
+
+        expected = (
+            'Matching failed.\n'
+            'The following cells failed matching individually (antecedent #Implies consequent):\n'
+            'ACCTID_CELL: 0 #Implies .K\n'
+            'STORAGE_CELL: .Map #Implies .K\n'
+            'ORIGSTORAGE_CELL: .Map #Implies .K'
+        )
+
+        antecedent_term = CTerm(
+            KApply(
+                '<generatedTop>',
+                [
+                    KApply('<k>', [intToken(0)]),
+                    KApply('<id>', [intToken(0)]),
+                    KApply(
+                        '<accounts>',
+                        [
+                            KApply(
+                                '<account>',
+                                [
+                                    KApply('<acctID>', [intToken(0)]),
+                                    KApply('<storage>', [KApply('.Map')]),
+                                    KApply('<origStorage>', [KApply('.Map')]),
+                                ],
+                            )
+                        ],
+                    ),
+                    KVariable('GENERATED_COUNTER_CELL'),
+                ],
+            ),
+        )
+
+        consequent_term = CTerm(
+            KApply(
+                '<generatedTop>',
+                [
+                    KApply('<k>', [intToken(0)]),
+                    KApply('<id>', [intToken(0)]),
+                    KApply(
+                        '<accounts>',
+                        [
+                            KApply('.AccountCellMap'),
+                        ],
+                    ),
+                    KVariable('GENERATED_COUNTER_CELL'),
+                ],
+            ),
+        )
+
+        passed, actual = kcfg_explore.implication_failure_reason(antecedent_term, consequent_term)
+
+        assert not passed
+        assert actual == expected
