@@ -681,7 +681,7 @@ class BugReport:
     def add_file(self, finput: Path, arcname: Path) -> None:
         if str(finput) not in self._file_remap:
             self._file_remap[str(finput)] = str(arcname)
-            with tarfile.open(self._bug_report, 'a') as tar:
+            with tarfile.open(self._bug_report, 'a', format=tarfile.GNU_FORMAT) as tar:
                 tar.add(finput, arcname=arcname)
                 _LOGGER.info(f'Added file to bug report {self._bug_report}:{arcname}: {finput}')
 
