@@ -35,7 +35,9 @@ class KCFGSemantics(ABC):
     """Implement a custom semantic step."""
 
     @abstractmethod
-    def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool: ...
+    def is_mergeable(self, c1: CTerm, c2: CTerm) -> bool:
+        """Mergability, as an equivalence relation, must be transitive, commutative, and reflexive, thus partitioning the nodes."""
+        ...
 
 
 

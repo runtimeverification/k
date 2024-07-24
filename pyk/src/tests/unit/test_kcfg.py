@@ -74,7 +74,7 @@ def node(i: int, auto_cond: bool = False, config: KInner | None = None) -> KCFG.
 
 
 def edge(i: int, j: int) -> KCFG.Edge:
-    return KCFG.Edge(node(i), node(j), (1,), (), (CSubst(),))
+    return KCFG.Edge(node(i), node(j), (1,), ((),), (CSubst(),))
 
 
 def cover(i: int, j: int) -> KCFG.Cover:
@@ -102,7 +102,13 @@ def node_dicts(n: int, start: int = 1, auto_cond: bool = False, config: KInner |
 
 def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
     def _make_edge_dict(i: int, j: int, depth: int = 1, rules: tuple[str, ...] = ()) -> dict[str, Any]:
-        return {'source': i, 'target': j, 'depth': depth, 'rules': list(rules)}
+        return {
+            'source': i,
+            'target': j,
+            'depths': [depth],
+            'rules_list': [list(rules)],
+            'csubsts': [CSubst().to_dict()],
+        }
 
     return [_make_edge_dict(*edge) for edge in edges]
 
