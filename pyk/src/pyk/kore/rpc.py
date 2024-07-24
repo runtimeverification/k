@@ -264,7 +264,7 @@ class JsonRpcClientFacade(ContextManager['JsonRpcClientFacade']):
                 if (host, port) in client_cache:
                     self._update_clients(method, client_cache[(host, port)])
                 else:
-                    new_id = None if bug_report_id is None else bug_report_id + '_' + str(transport)[:8]
+                    new_id = None if bug_report_id is None else bug_report_id + '_' + str(transport)
                     new_client = JsonRpcClient(
                         host, port, timeout=timeout, bug_report=bug_report, bug_report_id=new_id, transport=transport
                     )
