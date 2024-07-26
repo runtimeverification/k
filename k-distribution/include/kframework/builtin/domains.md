@@ -2217,7 +2217,9 @@ module BYTES
   rule Int2Bytes(I::Int, E::Endianness, Signed  ) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
     requires I >Int 0 [preserves-definedness]
   rule Int2Bytes(I::Int, E::Endianness, Signed  ) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
-    requires I <Int 0 [preserves-definedness]
+    requires I <Int -1 [preserves-definedness]
+  rule Int2Bytes(I::Int, E::Endianness, Signed  ) => Int2Bytes(1, -1, E)
+    requires I ==Int -1 [preserves-definedness]
 endmodule
 ```
 
