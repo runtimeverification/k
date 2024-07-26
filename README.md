@@ -72,7 +72,7 @@ must first be installed.
 
 ## The Short Version
 
-Regardless of system, unless you cloned with `--recusrive` you will first
+Regardless of system, unless you cloned with `--recursive` you will first
 have to run `git submodule update --init --recursive`.
 
 You then need the build and runtime dependencies. If you are on a
