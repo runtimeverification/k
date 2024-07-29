@@ -18,8 +18,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Final
 
-    from rich.progress import Progress, TaskID
-
     T = TypeVar('T', bound='Proof')
 
 P = TypeVar('P', bound='Proof')
@@ -327,8 +325,7 @@ def parallel_advance_proof(
     max_iterations: int | None = None,
     fail_fast: bool = False,
     max_workers: int = 1,
-    progress: Progress | None = None,
-    task_id: TaskID | None = None,
+    callback: Callable[[P], None] = (lambda x: None),
 ) -> None:
     """Advance proof with multithreaded strategy.
 
@@ -350,8 +347,7 @@ def parallel_advance_proof(
         fail_fast: If the proof is failing after finishing a step,
           halt execution even if there are still available steps.
         max_workers: Maximum number of worker threads the pool can spawn.
-        progress: rich.progress.Progress bar to send updates to during proof loop. Must contain `summary` field.
-        task_id: Task ID for progress bar updates.
+        callback: Callable to run in between each completed step, useful for getting real-time information about the proof.
     """
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
@@ -381,8 +377,7 @@ def parallel_advance_proof(
                 for result in proof_results:
                     proof.commit(result)
                 proof.write_proof_data()
-                if progress is not None and task_id is not None:
-                    progress.update(task_id, summary=proof.one_line_summary)
+                callback(proof)
                 iterations += 1
                 if max_iterations is not None and max_iterations <= iterations:
                     break
@@ -506,8 +501,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         proof: P,
         max_iterations: int | None = None,
         fail_fast: bool = False,
-        progress: Progress | None = None,
-        task_id: TaskID | None = None,
+        callback: Callable[[P], None] = (lambda x: None),
     ) -> None:
         """Advance a proof.
 
@@ -518,8 +512,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
             max_iterations (optional): Maximum number of steps to take.
             fail_fast: If the proof is failing after finishing a step,
               halt execution even if there are still available steps.
-            progress: rich.progress.Progress bar to send updates to during proof loop. Must contain `summary` field.
-            task_id: Task ID for progress bar updates.
+            callback: Callable to run in between each completed step, useful for getting real-time information about the proof.
         """
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')
@@ -541,7 +534,6 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
                 for result in results:
                     proof.commit(result)
                 proof.write_proof_data()
-                if progress is not None and task_id is not None:
-                    progress.update(task_id, summary=proof.one_line_summary)
+                callback(proof)
         if proof.failed:
             proof.failure_info = self.failure_info(proof)
