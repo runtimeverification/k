@@ -281,7 +281,7 @@ class Proof(Generic[PS, SR]):
 
     @property
     def one_line_summary(self) -> str:
-        return f'{self.status.name}'
+        return self.status.name
 
     @abstractmethod
     def get_steps(self) -> Iterable[PS]:
