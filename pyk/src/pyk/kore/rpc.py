@@ -1060,6 +1060,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'consequent': self._state(consequent),
                 'module': module_name,
                 'log-timing': log_timing,
+                'assume-defined': True,
             }
         )
 
