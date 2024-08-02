@@ -75,13 +75,10 @@ class KCFGStore:
     def write_cfg_data(
         self, kcfg: KCFG, dct: dict[str, Any], deleted_nodes: Iterable[int] = (), created_nodes: Iterable[int] = ()
     ) -> None:
-        #          node_dict = {node_dct['id']: node_dct for node_dct in dct['nodes']}
         vacuous_nodes = [
-            node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.VACUOUS.value in kcfg._nodes[node_id].attrs
+            node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.VACUOUS in kcfg._nodes[node_id].attrs
         ]
-        stuck_nodes = [
-            node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.STUCK.value in kcfg._nodes[node_id].attrs
-        ]
+        stuck_nodes = [node_id for node_id in kcfg._nodes.keys() if KCFGNodeAttr.STUCK in kcfg._nodes[node_id].attrs]
         dct['vacuous'] = vacuous_nodes
         dct['stuck'] = stuck_nodes
         for node_id in deleted_nodes:
