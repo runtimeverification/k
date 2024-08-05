@@ -502,6 +502,21 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             ]
         )
 
+    @property
+    def one_line_summary(self) -> str:
+        nodes = len(self.kcfg.nodes)
+        pending = len(self.pending)
+        failing = len(self.failing)
+        branches = len(self.kcfg.ndbranches()) + len(self.kcfg.splits())
+        vacuous = len(self.kcfg.vacuous)
+        terminal = len(self.terminal)
+        stuck = len(self.kcfg.stuck)
+        passed = len([cover for cover in self.kcfg.covers() if cover.target.id == self.target])
+        return (
+            super().one_line_summary
+            + f'|{nodes} nodes|{pending} pending|{passed} passed|{failing} failing|{branches} branches|{vacuous} vacuous|{terminal} terminal|{stuck} stuck'
+        )
+
     def get_refutation_id(self, node_id: int) -> str:
         return f'{self.id}.node-infeasible-{node_id}'
 
