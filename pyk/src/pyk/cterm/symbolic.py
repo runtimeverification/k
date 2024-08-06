@@ -103,13 +103,13 @@ class CTermSymbolic:
         if not intersection:
             return constraints
         # Check if non-empty intersection is entailed by the path condition
-        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
-        path_condition_cterm = CTerm(dummy_config, constraints=[path_condition])
-        intersection_cterm = CTerm(dummy_config, constraints=intersection)
-        implication_check = self.implies(path_condition_cterm, intersection_cterm, bind_universally=True)
-        # The intersection is not entailed, there is nothing to be done
-        if implication_check.csubst is None:
-            return constraints
+        # dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
+        # path_condition_cterm = CTerm(dummy_config, constraints=[path_condition])
+        # intersection_cterm = CTerm(dummy_config, constraints=intersection)
+        # implication_check = self.implies(path_condition_cterm, intersection_cterm, bind_universally=True)
+        # # The intersection is not entailed, there is nothing to be done
+        # if implication_check.csubst is None:
+        #     return constraints
         # The intersection is entailed and can be filtered out of the branching constraints
         else:
             return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
@@ -132,7 +132,7 @@ class CTermSymbolic:
                 cut_point_rules=cut_point_rules,
                 terminal_rules=terminal_rules,
                 module_name=module_name,
-                log_successful_rewrites=True,
+                log_successful_rewrites=False,
                 log_failed_rewrites=self._trace_rewrites,
             )
         except SmtSolverError as err:

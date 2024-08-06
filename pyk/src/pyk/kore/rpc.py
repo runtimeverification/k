@@ -1033,6 +1033,7 @@ class KoreClient(ContextManager['KoreClient']):
                 'antecedent': self._state(antecedent),
                 'consequent': self._state(consequent),
                 'module': module_name,
+                'assume-defined': True,
             }
         )
 
