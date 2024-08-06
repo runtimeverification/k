@@ -326,6 +326,7 @@ def parallel_advance_proof(
     fail_fast: bool = False,
     max_workers: int = 1,
     callback: Callable[[P], None] = (lambda x: None),
+    maintenance_rate: int = 1,
 ) -> None:
     """Advance proof with multithreaded strategy.
 
@@ -348,6 +349,7 @@ def parallel_advance_proof(
           halt execution even if there are still available steps.
         max_workers: Maximum number of worker threads the pool can spawn.
         callback: Callable to run during proof maintenance, useful for getting real-time information about the proof.
+        maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
     """
     pending: set[Future[Any]] = set()
     explored: set[PS] = set()
@@ -377,7 +379,7 @@ def parallel_advance_proof(
                 for result in proof_results:
                     proof.commit(result)
                 iterations += 1
-                if iterations % max_workers == 0:
+                if iterations % maintenance_rate == 0:
                     proof.write_proof_data()
                     callback(proof)
                 if max_iterations is not None and max_iterations <= iterations:
