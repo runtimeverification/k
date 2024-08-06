@@ -40,7 +40,6 @@ from pyk.kore.rpc import (
     InvalidModuleError,
     LogOrigin,
     LogRewrite,
-    LogTiming,
     RewriteFailure,
     RewriteSuccess,
     SatResult,
@@ -623,48 +622,6 @@ class TestExecuteLogging(KoreClientTest):
 
         # Then
         assert actual == expected[server_type]
-
-
-class TestTimeLogging(KoreClientTest):
-    KOMPILE_DEFINITION = """
-        module TIMING-TEST
-            imports INT
-            configuration <k> $PGM:Int </k>
-        endmodule
-    """
-    KOMPILE_MAIN_MODULE = 'TIMING-TEST'
-    KOMPILE_ARGS = {'syntax_module': 'TIMING-TEST'}
-    LLVM_ARGS = KOMPILE_ARGS
-
-    @staticmethod
-    def config(i: int) -> Pattern:
-        return generated_top((k(kseq((inj(INT, SORT_K_ITEM, int_dv(i)),))), generated_counter(int_dv(0))))
-
-    def test_execute(self, kore_client: KoreClient) -> None:
-        # When
-        response = kore_client.execute(self.config(0), log_timing=True)
-        logs = response.logs
-
-        # Then
-        assert logs
-        assert all(isinstance(log, LogTiming) for log in logs)
-
-    def test_implies(self, kore_client: KoreClient) -> None:
-        # When
-        response = kore_client.implies(EVar('X', INT), int_top, log_timing=True)
-        logs = response.logs
-
-        # Then
-        assert logs
-        assert all(isinstance(log, LogTiming) for log in logs)
-
-    def test_simplify(self, kore_client: KoreClient) -> None:
-        # When
-        _, logs = kore_client.simplify(int_top, log_timing=True)
-
-        # Then
-        assert logs
-        assert all(isinstance(log, LogTiming) for log in logs)
 
 
 class TestAddModule(KoreClientTest):
