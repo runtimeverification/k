@@ -505,6 +505,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
         max_iterations: int | None = None,
         fail_fast: bool = False,
         callback: Callable[[P], None] = (lambda x: None),
+        maintenance_rate: int = 1,
     ) -> None:
         """Advance a proof.
 
@@ -516,6 +517,7 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
             fail_fast: If the proof is failing after finishing a step,
               halt execution even if there are still available steps.
             callback: Callable to run in between each completed step, useful for getting real-time information about the proof.
+            maintenance_rate: Number of iterations between proof maintenance (writing to disk and executing callback).
         """
         iterations = 0
         _LOGGER.info(f'Initializing proof: {proof.id}')
@@ -536,7 +538,9 @@ class Prover(ContextManager['Prover'], Generic[P, PS, SR]):
                 results = self.step_proof(step)
                 for result in results:
                     proof.commit(result)
-                proof.write_proof_data()
-                callback(proof)
+                if iterations % maintenance_rate == 0:
+                    proof.write_proof_data()
+                    callback(proof)
+
         if proof.failed:
             proof.failure_info = self.failure_info(proof)
