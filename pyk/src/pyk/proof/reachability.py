@@ -97,6 +97,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
     _exec_time: float
     error_info: Exception | None
     prior_loops_cache: dict[int, tuple[int, ...]]
+    variable_names_mapping: dict[str, str] | None
 
     _checked_for_bounded: set[int]
 
@@ -118,6 +119,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         _exec_time: float = 0,
         error_info: Exception | None = None,
         prior_loops_cache: dict[int, tuple[int, ...]] | None = None,
+        variable_names_mapping: dict[str, str] | None = None,
     ):
         Proof.__init__(self, id, proof_dir=proof_dir, subproof_ids=subproof_ids, admitted=admitted)
         KCFGExploration.__init__(self, kcfg, terminal)
@@ -134,6 +136,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         self.kcfg._kcfg_store = KCFGStore(self.proof_subdir / 'kcfg') if self.proof_subdir else None
         self._exec_time = _exec_time
         self.error_info = error_info
+        self.variable_names_mapping = variable_names_mapping
 
         self._checked_for_bounded = set()
 
@@ -537,6 +540,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         terminal = proof_dict['terminal']
         logs = {int(k): tuple(LogEntry.from_dict(l) for l in ls) for k, ls in proof_dict['logs'].items()}
         subproof_ids = proof_dict['subproof_ids']
+        variable_names_mapping = proof_dict.get('variable_names_mapping', None)
         node_refutations = {
             kcfg._resolve(int(node_id)): proof_id for node_id, proof_id in proof_dict['node_refutations'].items()
         }
@@ -559,6 +563,7 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             node_refutations=node_refutations,
             prior_loops_cache=prior_loops_cache,
             _exec_time=exec_time,
+            variable_names_mapping=variable_names_mapping,
         )
 
     def write_proof_data(self) -> None:
@@ -590,6 +595,8 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
             dct['bmc_depth'] = self.bmc_depth
 
         dct['loops_cache'] = self.prior_loops_cache
+
+        dct['variable_names_mapping'] = self.variable_names_mapping
 
         proof_json.write_text(json.dumps(dct))
         _LOGGER.info(f'Wrote proof data for {self.id}: {proof_json}')
@@ -868,7 +875,11 @@ class APRFailureInfo(FailureInfo):
         )
 
     @staticmethod
-    def from_proof(proof: APRProof, kcfg_explore: KCFGExplore, counterexample_info: bool = False) -> APRFailureInfo:
+    def from_proof(
+        proof: APRProof,
+        kcfg_explore: KCFGExplore,
+        counterexample_info: bool = False,
+    ) -> APRFailureInfo:
         target = proof.kcfg.node(proof.target)
         pending_nodes = {node.id for node in proof.pending}
         failing_nodes = {node.id for node in proof.failing}
@@ -889,7 +900,12 @@ class APRFailureInfo(FailureInfo):
                     for var, term in model_subst.to_dict().items():
                         term_kast = KInner.from_dict(term)
                         term_pretty = kcfg_explore.pretty_print(term_kast)
-                        model.append((var, term_pretty))
+                        var_name = (
+                            proof.variable_names_mapping.get(var, var)
+                            if proof.variable_names_mapping is not None
+                            else var
+                        )
+                        model.append((var_name, term_pretty))
                     models[node.id] = model
         return APRFailureInfo(
             failing_nodes=failing_nodes,
