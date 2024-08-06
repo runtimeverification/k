@@ -512,9 +512,10 @@ class APRProof(Proof[APRProofStep, APRProofResult], KCFGExploration):
         terminal = len(self.terminal)
         stuck = len(self.kcfg.stuck)
         passed = len([cover for cover in self.kcfg.covers() if cover.target.id == self.target])
+        refuted = len(self.node_refutations)
         return (
             super().one_line_summary
-            + f'|{nodes} nodes|{pending} pending|{passed} passed|{failing} failing|{branches} branches|{vacuous} vacuous|{terminal} terminal|{stuck} stuck'
+            + f'|{nodes} nodes|{pending} pending|{passed} passed|{failing} failing|{branches} branches|{vacuous} vacuous|{terminal} terminal|{stuck} stuck|{refuted} refuted'
         )
 
     def get_refutation_id(self, node_id: int) -> str:
