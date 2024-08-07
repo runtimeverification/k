@@ -177,7 +177,7 @@ IMPLIES_TEST_DATA: Final = (
     (
         int_bottom,
         int_top,
-        {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
+        {'antecedent': kore(int_bottom), 'consequent': kore(int_top), 'assume-defined': False},
         {'valid': True, 'implication': kore(int_top)},
         ImpliesResult(True, int_top, None, None, ()),
     ),
