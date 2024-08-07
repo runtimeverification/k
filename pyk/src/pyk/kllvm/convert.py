@@ -108,7 +108,7 @@ def sentence_to_llvm(sentence: Sentence) -> kllvm.Declaration:
 def pattern_to_llvm(pattern: Pattern) -> kllvm.Pattern:
     match pattern:
         case String(value):
-            return kllvm.StringPattern(value)
+            return kllvm.StringPattern(value.encode('latin-1'))
         case VarPattern(name, sort):
             return kllvm.VariablePattern(name, sort_to_llvm(sort))
         case App(symbol, sorts, args):
@@ -201,7 +201,7 @@ def llvm_to_sentence(decl: kllvm.Declaration) -> Sentence:
 def llvm_to_pattern(pattern: kllvm.Pattern) -> Pattern:
     match pattern:
         case kllvm.StringPattern():  # type: ignore
-            return String(pattern.contents)
+            return String(pattern.contents.decode('latin-1'))
         case kllvm.VariablePattern():  # type: ignore
             if pattern.name and pattern.name[0] == '@':
                 return SVar(pattern.name, llvm_to_sort(pattern.sort))
