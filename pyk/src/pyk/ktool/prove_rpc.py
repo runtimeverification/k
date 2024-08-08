@@ -48,6 +48,7 @@ class ProveRpc:
         return [
             self._prove_claim_rpc(
                 claim,
+                assume_defined=options.assume_defined,
                 max_depth=options.max_depth,
                 save_directory=options.save_directory,
                 max_iterations=options.max_iterations,
@@ -58,6 +59,7 @@ class ProveRpc:
     def _prove_claim_rpc(
         self,
         claim: KClaim,
+        assume_defined: bool,
         max_depth: int | None = None,
         save_directory: Path | None = None,
         max_iterations: int | None = None,
@@ -85,10 +87,10 @@ class ProveRpc:
             with self._explore_context() as kcfg_explore:
                 if is_functional_claim:
                     assert type(proof) is EqualityProof
-                    prover = ImpliesProver(proof, kcfg_explore)
+                    prover = ImpliesProver(proof, kcfg_explore, assume_defined=assume_defined)
                 else:
                     assert type(proof) is APRProof
-                    prover = APRProver(kcfg_explore, execute_depth=max_depth)
+                    prover = APRProver(kcfg_explore, execute_depth=max_depth, assume_defined=assume_defined)
                 prover.advance_proof(proof, max_iterations=max_iterations)
 
         if proof.passed:

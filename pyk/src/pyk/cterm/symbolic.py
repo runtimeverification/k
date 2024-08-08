@@ -25,7 +25,7 @@ from ..kore.rpc import (
     kore_server,
 )
 from ..prelude.k import GENERATED_TOP_CELL, K_ITEM
-from ..prelude.ml import is_top, mlAnd, mlEquals
+from ..prelude.ml import is_top, mlEquals
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -92,28 +92,6 @@ class CTermSymbolic:
     def kore_to_kast(self, pattern: Pattern) -> KInner:
         return kore_to_kast(self._definition, pattern)
 
-    def minimize_constraints(self, constraints: tuple[KInner, ...], path_condition: KInner) -> tuple[KInner, ...]:
-        """Minimize given branching constraints with respect to a given path condition."""
-        # By construction, this function is to be called with at least two sets of constraints
-        assert len(constraints) >= 2
-        # Determine intersection between all returned sets of branching constraints
-        flattened_default = [flatten_label('#And', c) for c in constraints]
-        intersection = set.intersection(*(set(cs) for cs in flattened_default))
-        # If intersection is empty, there is nothing to be done
-        if not intersection:
-            return constraints
-        # Check if non-empty intersection is entailed by the path condition
-        dummy_config = self._definition.empty_config(sort=GENERATED_TOP_CELL)
-        path_condition_cterm = CTerm(dummy_config, constraints=[path_condition])
-        intersection_cterm = CTerm(dummy_config, constraints=intersection)
-        implication_check = self.implies(path_condition_cterm, intersection_cterm, bind_universally=True)
-        # The intersection is not entailed, there is nothing to be done
-        if implication_check.csubst is None:
-            return constraints
-        # The intersection is entailed and can be filtered out of the branching constraints
-        else:
-            return tuple(mlAnd(c for c in cs if c not in intersection) for cs in flattened_default)
-
     def execute(
         self,
         cterm: CTerm,
@@ -148,11 +126,6 @@ class CTermSymbolic:
             self.kore_to_kast(not_none(s.rule_predicate)) if s.rule_predicate is not None else None
             for s in resp_next_states
         )
-        # Branch constraint minimization makes sense only if there is a proper branching
-        if len(branching_constraints) >= 2 and all(bc is not None for bc in branching_constraints):
-            branching_constraints = self.minimize_constraints(
-                tuple(not_none(bc) for bc in branching_constraints), path_condition=mlAnd(cterm.constraints)
-            )
         next_states = tuple(
             NextState(CTerm.from_kast(self.kore_to_kast(ns.kore)), c)
             for ns, c in zip(resp_next_states, branching_constraints, strict=True)
@@ -219,6 +192,7 @@ class CTermSymbolic:
         bind_universally: bool = False,
         failure_reason: bool = False,
         module_name: str | None = None,
+        assume_defined: bool = False,
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
@@ -235,7 +209,9 @@ class CTermSymbolic:
         antecedent_kore = self.kast_to_kore(antecedent.kast)
         consequent_kore = self.kast_to_kore(_consequent)
         try:
-            result = self._kore_client.implies(antecedent_kore, consequent_kore, module_name=module_name)
+            result = self._kore_client.implies(
+                antecedent_kore, consequent_kore, module_name=module_name, assume_defined=assume_defined
+            )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
 
@@ -253,6 +229,7 @@ class CTermSymbolic:
                     bind_universally=bind_universally,
                     failure_reason=False,
                     module_name=module_name,
+                    assume_defined=assume_defined,
                 )
                 config_match = _config_match.csubst
                 if config_match is None:

@@ -7,7 +7,7 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.prelude.kint import leInt
-from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlEqualsTrue, mlTop
 from pyk.prelude.utils import token
 from pyk.testing import CTermSymbolicTest, KPrintTest
 
@@ -41,37 +41,6 @@ SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90
 
 def le_int(n: int, var: str) -> KInner:
     return mlEqualsTrue(leInt(token(n), KVariable(var)))
-
-
-MINIMIZE_CONSTRAINTS_TEST_DATA: Final = (
-    (
-        'no-intersection',
-        [[le_int(0, 'X')], [le_int(0, 'Y')]],
-        mlTop(),
-        [[le_int(0, 'X')], [le_int(0, 'Y')]],
-    ),
-    (
-        'intersection-not-entailed',
-        [
-            [le_int(0, 'X'), le_int(0, 'Y')],
-            [le_int(0, 'X'), le_int(0, 'Z')],
-        ],
-        mlTop(),
-        [[le_int(0, 'X'), le_int(0, 'Y')], [le_int(0, 'X'), le_int(0, 'Z')]],
-    ),
-    (
-        'intersection-entailed',
-        [
-            [le_int(0, 'X'), le_int(0, 'Y')],
-            [le_int(0, 'X'), le_int(0, 'Z')],
-        ],
-        le_int(10, 'X'),
-        [
-            [le_int(0, 'Y')],
-            [le_int(0, 'Z')],
-        ],
-    ),
-)
 
 
 class TestSimpleProof(CTermSymbolicTest, KPrintTest):
@@ -161,26 +130,3 @@ class TestSimpleProof(CTermSymbolicTest, KPrintTest):
         # Then
         assert actual_k == expected_k
         assert actual_state == expected_state
-
-    @pytest.mark.parametrize(
-        'test_id,constraints,pc,expected_minimized_constraints',
-        MINIMIZE_CONSTRAINTS_TEST_DATA,
-        ids=[test_id for test_id, *_ in MINIMIZE_CONSTRAINTS_TEST_DATA],
-    )
-    def test_minimize_constraints(
-        self,
-        cterm_symbolic: CTermSymbolic,
-        test_id: str,
-        constraints: Iterable[Iterable[KInner]],
-        pc: KInner,
-        expected_minimized_constraints: Iterable[Iterable[KInner]],
-    ) -> None:
-        # Given
-        _constraints = tuple(mlAnd(cs) for cs in constraints)
-        _expected_minimized_constraints = tuple(mlAnd(cs) for cs in expected_minimized_constraints)
-
-        # When
-        _minimized_constraints = cterm_symbolic.minimize_constraints(_constraints, pc)
-
-        # Then
-        assert _minimized_constraints == _expected_minimized_constraints
