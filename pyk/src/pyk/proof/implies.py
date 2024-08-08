@@ -410,15 +410,15 @@ class RefutationSummary(ProofSummary):
 class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
     proof: ImpliesProof
     kcfg_explore: KCFGExplore
-    booster_implies: bool
+    assume_defined: bool
 
     def close(self) -> None:
         self.kcfg_explore.cterm_symbolic._kore_client.close()
 
-    def __init__(self, proof: ImpliesProof, kcfg_explore: KCFGExplore, booster_implies: bool = False):
+    def __init__(self, proof: ImpliesProof, kcfg_explore: KCFGExplore, assume_defined: bool = False):
         self.kcfg_explore = kcfg_explore
         self.proof = proof
-        self.booster_implies = booster_implies
+        self.assume_defined = assume_defined
 
     def step_proof(self, step: ImpliesProofStep) -> list[ImpliesProofResult]:
         proof_type = type(step.proof).__name__
@@ -452,7 +452,7 @@ class ImpliesProver(Prover[ImpliesProof, ImpliesProofStep, ImpliesProofResult]):
                 antecedent=CTerm(config=dummy_config, constraints=[simplified_antecedent]),
                 consequent=CTerm(config=dummy_config, constraints=[simplified_consequent]),
                 bind_universally=step.proof.bind_universally,
-                booster_implies=self.booster_implies,
+                assume_defined=self.assume_defined,
             )
             result = _result.csubst
             if result is not None:

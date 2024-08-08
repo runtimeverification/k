@@ -320,7 +320,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
     kore_rpc_command: str | Iterable[str] | None
     max_depth: int | None
     max_iterations: int | None
-    booster_implies: bool
+    assume_defined: bool
     show_kcfg: bool
 
     @staticmethod
@@ -332,7 +332,7 @@ class ProveOptions(LoggingOptions, SpecOptions, SaveDirOptions):
             'kore_rpc_command': None,
             'max_depth': None,
             'max_iterations': None,
-            'booster_implies': False,
+            'assume_defined': False,
             'show_kcfg': False,
         }
 

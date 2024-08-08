@@ -73,7 +73,7 @@ class KCFGExplore:
         return _rule_lines
 
     def implication_failure_reason(
-        self, antecedent: CTerm, consequent: CTerm, booster_implies: bool = False
+        self, antecedent: CTerm, consequent: CTerm, assume_defined: bool = False
     ) -> tuple[bool, str]:
         def _is_cell_subst(csubst: KInner) -> bool:
             if type(csubst) is KApply and csubst.label.name == '_==K_':
@@ -94,7 +94,7 @@ class KCFGExplore:
             return False
 
         cterm_implies = self.cterm_symbolic.implies(
-            antecedent, consequent, failure_reason=True, booster_implies=booster_implies
+            antecedent, consequent, failure_reason=True, assume_defined=assume_defined
         )
         if cterm_implies.csubst is not None:
             return (True, '')

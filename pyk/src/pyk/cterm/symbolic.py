@@ -192,7 +192,7 @@ class CTermSymbolic:
         bind_universally: bool = False,
         failure_reason: bool = False,
         module_name: str | None = None,
-        booster_implies: bool = False,
+        assume_defined: bool = False,
     ) -> CTermImplies:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
@@ -210,7 +210,7 @@ class CTermSymbolic:
         consequent_kore = self.kast_to_kore(_consequent)
         try:
             result = self._kore_client.implies(
-                antecedent_kore, consequent_kore, module_name=module_name, booster_implies=booster_implies
+                antecedent_kore, consequent_kore, module_name=module_name, assume_defined=assume_defined
             )
         except SmtSolverError as err:
             raise self._smt_solver_error(err) from err
@@ -229,7 +229,7 @@ class CTermSymbolic:
                     bind_universally=bind_universally,
                     failure_reason=False,
                     module_name=module_name,
-                    booster_implies=booster_implies,
+                    assume_defined=assume_defined,
                 )
                 config_match = _config_match.csubst
                 if config_match is None:
