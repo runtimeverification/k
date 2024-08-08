@@ -429,15 +429,6 @@ public record RuleGrammarGenerator(Definition baseK) {
         stream(mod.allSorts())
             .filter(s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
             .toList();
-    for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
-      for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
-        // syntax MInt{K} ::= MInt{6}
-        Production p1 =
-            Production(
-                Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att.empty());
-        prods.add(p1);
-      }
-    }
     for (Production p : iterable(mod.productions())) {
       if (p.params().nonEmpty()) {
         if (p.params().contains(p.sort())) { // case 1
@@ -634,6 +625,17 @@ public record RuleGrammarGenerator(Definition baseK) {
     }
 
     disambProds = new HashSet<>(parseProds);
+
+    for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
+      for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
+        // syntax MInt{K} ::= MInt{6}
+        Production p1 =
+            Production(
+                Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att.empty());
+        parseProds.add(p1);
+      }
+    }
+
     if (mod.importedModuleNames().contains(PROGRAM_LISTS)) {
       Set<Sentence> prods3 = new HashSet<>();
       // if no start symbol has been defined in the configuration, then use K
