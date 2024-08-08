@@ -1229,7 +1229,7 @@ class KoreServer(ContextManager['KoreServer']):
 
         def _check_none_or_nonnegative(n: int | None, param_name: str) -> None:
             if n is not None and n < 0:
-                raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
+                raise ValueError(f'Expected non-negative integer for: {param_name}, got: {n}')
 
         check_dir_path(self._kompiled_dir)
         check_file_path(self._definition_file)
