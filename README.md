@@ -104,6 +104,7 @@ The following dependencies are needed either at build time or runtime:
 *   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 *   [python](https://www.python.org)
 *   [stack](https://docs.haskellstack.org/en/stable/README/)
+*   [xxd](https://github.com/vim/vim/blob/master/runtime/doc/xxd.man)
 *   [zlib](https://www.zlib.net/)
 *   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also
     needed and packaged separately) Note that you need version 4.12.1 of Z3,

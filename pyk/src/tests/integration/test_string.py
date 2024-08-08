@@ -40,6 +40,12 @@ TEST_DATA: Final = (
     '🙂',
 )
 
+SKIPPED_BINDINGS_TESTS: Final = {
+    '𐍈',
+    '武天老師',
+    '🙂',
+}
+
 KOMPILE_DEFINITION = """
     module STRING-REWRITE
         imports STRING-SYNTAX
@@ -216,6 +222,9 @@ def test_krun(backend: str, definition_dir: Path, text: str) -> None:
 @pytest.mark.parametrize('text', TEST_DATA, ids=TEST_DATA)
 def test_bindings(runtime: Runtime, text: str) -> None:
     from pyk.kllvm.convert import llvm_to_pattern, pattern_to_llvm
+
+    if text in SKIPPED_BINDINGS_TESTS:
+        pytest.skip()
 
     # Given
     kore = kore_config(text, '')

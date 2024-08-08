@@ -50,7 +50,7 @@ def test_string() -> None:
 
     # Then
     assert str(pattern) == '"abc"'
-    assert pattern.contents == 'abc'
+    assert pattern.contents.decode('latin-1') == 'abc'
 
 
 def test_variable() -> None:
